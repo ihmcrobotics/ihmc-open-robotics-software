@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics;
+package us.ihmc.rdx.ui.affordances;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -20,10 +20,12 @@ import us.ihmc.log.LogTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiInputText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.graphics.RDXInteractableBox;
+import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.interactable.RDXInteractableDummyHand;
+import us.ihmc.rdx.ui.interactable.RDXInteractableObjectBuilder;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspaceFile;
@@ -32,17 +34,17 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import java.nio.file.Path;
 import java.util.*;
 
-public class RDXBoxAffordanceDemo
+public class RDXAffordanceEditorUI
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private RigidBodyTransform handTransformToWorld = new RigidBodyTransform();
+   private RigidBodyTransform objectToWorld = new RigidBodyTransform();
    private final PoseReferenceFrame affordanceFrame = new PoseReferenceFrame("affordanceFrame", ReferenceFrame.getWorldFrame());
+   private RDXInteractableObjectBuilder objectBuilder;
 
-   private RDXEnvironmentBuilder environmentBuilder;
-   private final PoseReferenceFrame objectFrame = new PoseReferenceFrame("objectFrame", ReferenceFrame.getWorldFrame());
+   private RDXInteractableBox object;
 
 
-   private RDXInteractableBox interactableBox;
    private RDXInteractableBox dummyHand;
    private RDXInteractableDummyHand interactableHand;
 
@@ -76,7 +78,7 @@ public class RDXBoxAffordanceDemo
    private final ImGuiInputText textInput = new ImGuiInputText("Add custom affordance");
    private int colorIndex = 0;
 
-   public RDXBoxAffordanceDemo()
+   public RDXAffordanceEditorUI()
    {
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -85,10 +87,9 @@ public class RDXBoxAffordanceDemo
          {
             baseUI.create();
             baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
+            objectBuilder = new RDXInteractableObjectBuilder(baseUI);
+            baseUI.getImGuiPanelManager().addPanel(objectBuilder.getWindowName(), objectBuilder::renderImGuiWidgets);
 
-            environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
-            environmentBuilder.create();
-            baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
 
             // create the manager for the desired arm setpoints
             Box3D box3D = new Box3D();
@@ -96,9 +97,7 @@ public class RDXBoxAffordanceDemo
             Vector3D dimensions = new Vector3D(1, 1, 1);
             box3D.set(boxPose, dimensions);
 
-            interactableBox = new RDXInteractableBox(baseUI, box3D, "box");
-            interactableBox.setColor(Color.ORANGE);
-            baseUI.getPrimaryScene().addRenderableProvider(interactableBox);
+            object = new RDXInteractableBox(baseUI, new Box3D(0.1,0.1,0.1),"box");
 
             Box3D dummyBox = new Box3D();
             FramePose3D dummyPose = new FramePose3D();
@@ -117,18 +116,18 @@ public class RDXBoxAffordanceDemo
             pressPoseGraphic = new RDXReferenceFrameGraphic(0.3, Color.BLACK);
 
             baseUI.getPrimaryScene().addRenderableProvider(interactableHand);
-            baseUI.getPrimaryScene().addRenderableProvider(RDXBoxAffordanceDemo.this::getRenderables);
-            baseUI.getImGuiPanelManager().addPanel("Affordance Develop Panel", RDXBoxAffordanceDemo.this::renderImGuiWidgets);
+            baseUI.getPrimaryScene().addRenderableProvider(objectBuilder.getSelectedObject());
+            baseUI.getPrimaryScene().addRenderableProvider(RDXAffordanceEditorUI.this::getRenderables);
+            baseUI.getImGuiPanelManager().addPanel("Affordance Develop Panel", RDXAffordanceEditorUI.this::renderImGuiWidgets);
          }
 
          @Override
          public void render()
          {
             dummyHand.update();
-            interactableBox.update();
+            object.update();
             updateFramePosesWRTBox();
 
-            environmentBuilder.update();
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
          }
@@ -136,14 +135,13 @@ public class RDXBoxAffordanceDemo
          @Override
          public void dispose() {
             baseUI.dispose();
-            environmentBuilder.destroy();
          }
       });
    }
 
    public void updateFramePosesWRTBox()
    {
-      FramePose3D boxPose = new FramePose3D(interactableBox.getPose3DGizmo().getPose());
+      FramePose3D boxPose = new FramePose3D(object.getPose3DGizmo().getPose());
       affordanceFrame.setPoseAndUpdate(boxPose);
       affordanceFrame.update();
       // grab
@@ -170,7 +168,7 @@ public class RDXBoxAffordanceDemo
          loadAllFromJSON("box");
          initialized = true;
 
-         FramePose3D boxPose = new FramePose3D(interactableBox.getPose3DGizmo().getPose());
+         FramePose3D boxPose = new FramePose3D(object.getPose3DGizmo().getPose());
          boxPose.changeFrame(ReferenceFrame.getWorldFrame());
          affordanceFrame.setPoseAndUpdate(boxPose);
 
@@ -182,7 +180,7 @@ public class RDXBoxAffordanceDemo
       }
 
       if (ImGui.button(labels.get("Record grasp point w.r.t box"))) {
-         FramePose3D boxPose = new FramePose3D(interactableBox.getPose3DGizmo().getPose());
+         FramePose3D boxPose = new FramePose3D(object.getPose3DGizmo().getPose());
          boxPose.changeFrame(ReferenceFrame.getWorldFrame());
          affordanceFrame.setPoseAndUpdate(boxPose);
 
@@ -196,7 +194,7 @@ public class RDXBoxAffordanceDemo
       ImGui.separator();
 
       if (ImGui.button("Record press point w.r.t box")) {
-         FramePose3D boxPose = new FramePose3D(interactableBox.getPose3DGizmo().getPose());
+         FramePose3D boxPose = new FramePose3D(object.getPose3DGizmo().getPose());
          boxPose.changeFrame(ReferenceFrame.getWorldFrame());
          affordanceFrame.setPoseAndUpdate(boxPose);
 
@@ -212,7 +210,7 @@ public class RDXBoxAffordanceDemo
       if (ImGui.button(labels.get("Grasp Point")))
       {
          // read from json
-         loadFromJSON(interactableBox.getPose3DGizmo().getPose(), "box", "pre-graspingPoint");
+         loadFromJSON(object.getPose3DGizmo().getPose(), "box", "pre-graspingPoint");
          // move hand to grasp point
          dummyHand.getPose3DGizmo().getTransformToParent().set(graspPose);
       }
@@ -220,7 +218,7 @@ public class RDXBoxAffordanceDemo
       if (ImGui.button(labels.get("Press Point")))
       {
          // read from json
-         loadFromJSON(interactableBox.getPose3DGizmo().getPose(), "box", "pressPoint");
+         loadFromJSON(object.getPose3DGizmo().getPose(), "box", "pressPoint");
          // move hand to grasp point
          dummyHand.getPose3DGizmo().getTransformToParent().set(pressPose);
       }
@@ -255,7 +253,7 @@ public class RDXBoxAffordanceDemo
             }
          }
 
-         FramePose3D boxPose = new FramePose3D(interactableBox.getPose3DGizmo().getPose());
+         FramePose3D boxPose = new FramePose3D(object.getPose3DGizmo().getPose());
          boxPose.changeFrame(ReferenceFrame.getWorldFrame());
          affordanceFrame.setPoseAndUpdate(boxPose);
          FramePose3D handPoseInBoxFrame = new FramePose3D(dummyHand.getPose3DGizmo().getPose());
@@ -310,6 +308,9 @@ public class RDXBoxAffordanceDemo
       {
          pressPoseGraphic.getRenderables(renderables, pool);
       }
+
+      if (object != null)
+         object.getRenderables(renderables, pool);
 
       for (RDXReferenceFrameGraphic graphic : customPoseGraphics)
       {
@@ -477,6 +478,6 @@ public class RDXBoxAffordanceDemo
 
    public static void main(String[] args)
    {
-      new RDXBoxAffordanceDemo();
+      new RDXAffordanceEditorUI();
    }
 }
