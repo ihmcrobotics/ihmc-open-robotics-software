@@ -11,6 +11,18 @@ package mission_control_msgs.msg.dds;
 public class SystemServiceStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType<mission_control_msgs.msg.dds.SystemServiceStatusMessage>
 {
    public static final java.lang.String name = "mission_control_msgs::msg::dds_::SystemServiceStatusMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "8858b12874e0b37682535fbc8a03bd9530373d35169a3b991bbb66ac3494820b";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
@@ -42,6 +54,8 @@ public class SystemServiceStatusMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (25000000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -61,6 +75,9 @@ public class SystemServiceStatusMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getStatus().length() + 1;
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getLogData().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -79,6 +96,8 @@ public class SystemServiceStatusMessagePubSubType implements us.ihmc.pubsub.Topi
       cdr.write_type_d(data.getStatus());else
           throw new RuntimeException("status field exceeds the maximum length");
 
+      cdr.write_type_7(data.getRefresh());
+
       if(data.getLogData().size() <= 25000000)
       cdr.write_type_e(data.getLogData());else
           throw new RuntimeException("log_data field exceeds the maximum length");
@@ -89,6 +108,8 @@ public class SystemServiceStatusMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       cdr.read_type_d(data.getServiceName());	
       cdr.read_type_d(data.getStatus());	
+      data.setRefresh(cdr.read_type_7());
+      	
       cdr.read_type_e(data.getLogData());	
 
    }
@@ -98,6 +119,7 @@ public class SystemServiceStatusMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       ser.write_type_d("service_name", data.getServiceName());
       ser.write_type_d("status", data.getStatus());
+      ser.write_type_7("refresh", data.getRefresh());
       ser.write_type_e("log_data", data.getLogData());
    }
 
@@ -106,6 +128,7 @@ public class SystemServiceStatusMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       ser.read_type_d("service_name", data.getServiceName());
       ser.read_type_d("status", data.getStatus());
+      data.setRefresh(ser.read_type_7("refresh"));
       ser.read_type_e("log_data", data.getLogData());
    }
 

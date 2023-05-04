@@ -9,7 +9,4 @@ string hostname
 # Generated in ihmc-high-level-behaviors/src/mission-control/java/us/ihmc/missionControl/MissionControlDaemon.java
 string instance_id
 
-# Epoch time in milliseconds of the system
-int64 epoch_time_ms
-
 

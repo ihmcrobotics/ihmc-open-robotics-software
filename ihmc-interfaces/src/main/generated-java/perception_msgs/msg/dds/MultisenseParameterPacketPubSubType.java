@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class MultisenseParameterPacketPubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.MultisenseParameterPacket>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::MultisenseParameterPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "827c38ab60c8962138107ac445664ded247d81ede6df6050154d13b51162c4ee";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

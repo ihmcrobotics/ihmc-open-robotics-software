@@ -11,14 +11,13 @@ import us.ihmc.tools.processManagement.ProcessTools;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
 public class SystemdServiceMonitor implements Consumer<List<String>>
 {
-   private static final int MAX_LOG_LINE_MESSAGE_LENGTH = 5;
+   public static final int MAX_LOG_LINE_MESSAGE_LENGTH = 10;
 
    private final String serviceName;
    private final ROS2Node ros2Node;
@@ -40,6 +39,11 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
       reader.start();
    }
 
+   public JournalCtlReader getReader()
+   {
+      return reader;
+   }
+
    public void start()
    {
       ProcessTools.execSimpleCommandSafe("sudo systemctl start " + serviceName);
@@ -57,15 +61,15 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
 
    public void kill()
    {
-      ProcessTools.execSimpleCommandSafe("sudo systemctl kill " + serviceName);
+      ProcessTools.execSimpleCommandSafe("sudo systemctl kill -s SIGKILL " + serviceName);
    }
 
    public void publishStatus()
    {
-      publishStatus(Lists.newArrayList());
+      publishStatus(Lists.newArrayList(), false);
    }
 
-   private void publishStatus(List<String> logLines)
+   public void publishStatus(List<String> logLines, boolean isARefresh)
    {
       if (logLines.size() > MAX_LOG_LINE_MESSAGE_LENGTH)
       {
@@ -76,6 +80,7 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
       SystemServiceStatusMessage message = new SystemServiceStatusMessage();
 
       message.setServiceName(serviceName);
+      message.setRefresh(isARefresh);
 
       String status = MissionControlTools.getServiceStatus(serviceName);
       message.setStatus(status);
@@ -102,23 +107,7 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
    @Override
    public void accept(List<String> logLines)
    {
-      for (List<String> logLinesSplit : splitLogLines(logLines, MAX_LOG_LINE_MESSAGE_LENGTH))
-         publishStatus(logLinesSplit);
-   }
-
-   /**
-    * Split a string list (of log lines) into multiple lists of max size maxListSize
-    */
-   private static List<List<String>> splitLogLines(List<String> logLines, int maxListSize)
-   {
-      List<List<String>> splitEntries = new ArrayList<>();
-      for (int i = 0; i < logLines.size(); i = i + maxListSize)
-      {
-         if (i + maxListSize < logLines.size())
-            splitEntries.add(logLines.subList(i, i + maxListSize));
-         else
-            splitEntries.add(logLines.subList(i, logLines.size()));
-      }
-      return splitEntries;
+      for (List<String> logLinesSplit : MissionControlTools.splitLogLines(logLines, MAX_LOG_LINE_MESSAGE_LENGTH))
+         publishStatus(logLinesSplit, false);
    }
 }

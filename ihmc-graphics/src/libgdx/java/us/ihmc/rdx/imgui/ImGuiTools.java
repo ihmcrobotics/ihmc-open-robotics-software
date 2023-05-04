@@ -58,6 +58,9 @@ public class ImGuiTools
    private static int rightArrowKey;
    private static ImFontAtlas fontAtlas;
 
+   public static int RED = Color.RED.toIntBits();
+   public static int GREEN = Color.GREEN.toIntBits();
+
    public static long createContext()
    {
       return ImGui.createContext().ptr;

@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.HandLoadBearingMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::HandLoadBearingMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "64ab5a3ec40279cd64d5ab8bf789a9e974205965daf778fb5391fd00bca54dfb";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

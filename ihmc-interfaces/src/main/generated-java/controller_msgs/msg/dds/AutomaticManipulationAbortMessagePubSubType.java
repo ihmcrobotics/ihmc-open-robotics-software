@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class AutomaticManipulationAbortMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.AutomaticManipulationAbortMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::AutomaticManipulationAbortMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "64fee1886d3f2e1bc048105af0e6e256eb88eb0d372d33e469e65edb656d37bb";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

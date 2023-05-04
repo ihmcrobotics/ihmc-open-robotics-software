@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class StepConstraintMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.StepConstraintMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::StepConstraintMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "cfa98f55cdb4e73e0d89aa49547a2c717cf4a7d5bea141acb6ebe7dcb2d02771";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

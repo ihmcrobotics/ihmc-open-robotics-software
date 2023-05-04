@@ -11,6 +11,18 @@ package atlas_msgs.msg.dds;
 public class AtlasLowLevelControlModeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<atlas_msgs.msg.dds.AtlasLowLevelControlModeMessage>
 {
    public static final java.lang.String name = "atlas_msgs::msg::dds_::AtlasLowLevelControlModeMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "6af844017477affde7140e9f6a124b7ff8d13801b54abef4a082e3c9c82e7c89";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
