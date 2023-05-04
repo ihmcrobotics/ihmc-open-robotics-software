@@ -15,7 +15,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.Throttler;
@@ -104,7 +103,7 @@ public class BehaviorActionSequence
    private final WaitDurationActionMessage waitDurationActionMessage = new WaitDurationActionMessage();
    private final WalkActionMessage walkActionMessage = new WalkActionMessage();
 
-   public BehaviorActionSequence(DRCRobotModel robotModel, ROS2ControllerHelper ros2, PredefinedSceneNodeLibrary predefinedSceneNodeLibrary)
+   public BehaviorActionSequence(DRCRobotModel robotModel, ROS2ControllerHelper ros2, ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.robotModel = robotModel;
       this.ros2 = ros2;
