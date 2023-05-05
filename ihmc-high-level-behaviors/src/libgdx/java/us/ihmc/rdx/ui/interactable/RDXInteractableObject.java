@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -23,7 +22,7 @@ public class RDXInteractableObject implements RenderableProvider
    private ModelInstance modelInstance;
    private RigidBodyTransform objectTransform = new RigidBodyTransform();
    private final ReferenceFrame objectFrame;
-   private final RDXPose3DGizmo pose3DGizmo = new RDXPose3DGizmo();
+   private RDXPose3DGizmo pose3DGizmo = new RDXPose3DGizmo();
 
    public RDXInteractableObject(RDXBaseUI baseUI)
    {
@@ -32,7 +31,7 @@ public class RDXInteractableObject implements RenderableProvider
       pose3DGizmo.create(baseUI.getPrimary3DPanel());
       pose3DGizmo.getTransformToParent().getTranslation().set(objectTransform.getTranslation());
       pose3DGizmo.getTransformToParent().getRotation().set(objectTransform.getRotation());
-      pose3DGizmo.update();
+      pose3DGizmo.setShowGraphics(false);
 
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(pose3DGizmo::calculate3DViewPick);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(pose3DGizmo::process3DViewInput);
@@ -45,11 +44,13 @@ public class RDXInteractableObject implements RenderableProvider
    {
       ModelData objectModel = RDXModelLoader.loadModelData(modelFileName);
       this.modelInstance = new RDXModelInstance(new Model(objectModel));
+      pose3DGizmo.setShowGraphics(true);
    }
 
    public void clear()
    {
       modelInstance = null;
+      pose3DGizmo.setShowGraphics(false);
    }
 
    public void update(ImGui3DViewInput input)
@@ -65,15 +66,14 @@ public class RDXInteractableObject implements RenderableProvider
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       if (modelInstance != null)
+      {
          modelInstance.getRenderables(renderables, pool);
-
-      if (pose3DGizmo != null)
-         pose3DGizmo.getRenderables(renderables, pool);
+      }
    }
 
    public RigidBodyTransform getTransformToWorld()
    {
-      return pose3DGizmo.getTransformToWorld();
+      return objectTransform;
    }
 
    public ModelInstance getModelInstance()

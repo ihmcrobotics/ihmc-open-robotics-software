@@ -121,6 +121,7 @@ public class RDXPose3DGizmo implements RenderableProvider
    private ImGuiInputDoubleForRotations yawImGuiInput;
    private ImGuiInputDoubleForRotations pitchImGuiInput;
    private ImGuiInputDoubleForRotations rollImGuiInput;
+   private final ImBoolean showGraphics = new ImBoolean(true);
 
    public RDXPose3DGizmo()
    {
@@ -209,23 +210,26 @@ public class RDXPose3DGizmo implements RenderableProvider
 
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      boolean isWindowHovered = ImGui.isWindowHovered();
-      ImGuiMouseDragData manipulationDragData = input.getMouseDragData(ImGuiMouseButton.Left);
-
-      // Here we are trying to avoid unecessary computation in collision calculation by filtering out
-      // some common scenarios where we don't need to calculate the pick, which can be expensive
-      if (isWindowHovered && (!manipulationDragData.isDragging() || manipulationDragData.getDragJustStarted()))
+      if(isShowingGraphics())
       {
-         // This part is happening when the user could presumably start a drag
-         // on this gizmo at any time
+         boolean isWindowHovered = ImGui.isWindowHovered();
+         ImGuiMouseDragData manipulationDragData = input.getMouseDragData(ImGuiMouseButton.Left);
 
-         Line3DReadOnly pickRay = input.getPickRayInWorld();
-         determineCurrentSelectionFromPickRay(pickRay);
-
-         if (closestCollisionSelection != null)
+         // Here we are trying to avoid unecessary computation in collision calculation by filtering out
+         // some common scenarios where we don't need to calculate the pick, which can be expensive
+         if (isWindowHovered && (!manipulationDragData.isDragging() || manipulationDragData.getDragJustStarted()))
          {
-            pickResult.setDistanceToCamera(closestCollisionDistance);
-            input.addPickResult(pickResult);
+            // This part is happening when the user could presumably start a drag
+            // on this gizmo at any time
+
+            Line3DReadOnly pickRay = input.getPickRayInWorld();
+            determineCurrentSelectionFromPickRay(pickRay);
+
+            if (closestCollisionSelection != null)
+            {
+               pickResult.setDistanceToCamera(closestCollisionDistance);
+               input.addPickResult(pickResult);
+            }
          }
       }
    }
@@ -521,6 +525,7 @@ public class RDXPose3DGizmo implements RenderableProvider
 
    public void renderImGuiTuner()
    {
+      ImGui.checkbox("Show gizmo: ", showGraphics);
       ImGui.text("Parent frame: " + parentReferenceFrame.getName());
 
       ImGui.text("Translation adjustment frame:");
@@ -806,11 +811,24 @@ public class RDXPose3DGizmo implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (Axis3D axis : Axis3D.values)
+      if (showGraphics.get())
       {
-         arrowModels[axis.ordinal()].getOrCreateModelInstance().getRenderables(renderables, pool);
-         torusModels[axis.ordinal()].getOrCreateModelInstance().getRenderables(renderables, pool);
+         for (Axis3D axis : Axis3D.values)
+         {
+            arrowModels[axis.ordinal()].getOrCreateModelInstance().getRenderables(renderables, pool);
+            torusModels[axis.ordinal()].getOrCreateModelInstance().getRenderables(renderables, pool);
+         }
       }
+   }
+
+   public void setShowGraphics(boolean graphics)
+   {
+      showGraphics.set(graphics);
+   }
+
+   public boolean isShowingGraphics()
+   {
+      return showGraphics.get();
    }
 
    public FramePose3DReadOnly getPose()
