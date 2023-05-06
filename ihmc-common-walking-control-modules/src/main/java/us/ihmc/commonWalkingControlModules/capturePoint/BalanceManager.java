@@ -16,6 +16,7 @@ import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.CaptureRegionStepAdjustmentController;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.ErrorBasedStepAdjustmentController;
@@ -117,11 +118,13 @@ public class BalanceManager implements SCS2YoGraphicHolder
    private final YoFramePoint3D yoDesiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", worldFrame, registry);
    private final YoFrameVector3D yoDesiredCoMVelocity = new YoFrameVector3D("desiredCoMVelocity", worldFrame, registry);
    private final YoFramePoint2D yoFinalDesiredICP = new YoFramePoint2D("finalDesiredICP", worldFrame, registry);
+   private final YoFramePoint2D yoFinalDesiredCoP = new YoFramePoint2D("finalDesiredCoP", worldFrame, registry);
    private final YoFramePoint3D yoFinalDesiredCoM = new YoFramePoint3D("finalDesiredCoM", worldFrame, registry);
    private final YoFrameVector3D yoFinalDesiredCoMVelocity = new YoFrameVector3D("finalDesiredCoMVelocity", worldFrame, registry);
    private final YoFrameVector3D yoFinalDesiredCoMAcceleration = new YoFrameVector3D("finalDesiredCoMAcceleration", worldFrame, registry);
 
    private final TimeAdjustmentCalculator timeAdjustmentCalculator = new TimeAdjustmentCalculator();
+   private final ICPControllerParameters.FeedbackAlphaCalculator feedbackAlphaCalculator;
 
    private final YoDouble swingSpeedUpForStepAdjustment = new YoDouble("swingSpeedUpForStepAdjustment", registry);
 
@@ -255,6 +258,9 @@ public class BalanceManager implements SCS2YoGraphicHolder
                                                             SettableContactStateProvider::new,
                                                             registry,
                                                             yoGraphicsListRegistry);
+
+      walkingControllerParameters.getICPControllerParameters().createFeedbackAlphaCalculator(registry, null);
+      feedbackAlphaCalculator = walkingControllerParameters.getICPControllerParameters().getFeedbackAlphaCalculator();
 
       icpErrorThresholdToAdjustTime.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
 
@@ -393,6 +399,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       }
       yoDesiredCapturePoint.setToNaN();
       yoFinalDesiredICP.setToNaN();
+      yoFinalDesiredCoP.setToNaN();
       yoPerfectCMP.setToNaN();
       yoPerfectCoP.setToNaN();
       yoPerfectCoPVelocity.setToNaN();
@@ -439,7 +446,16 @@ public class BalanceManager implements SCS2YoGraphicHolder
       if (stepConstraintRegionHandler != null && stepConstraintRegionHandler.hasNewStepConstraintRegion())
          stepAdjustmentController.setStepConstraintRegions(stepConstraintRegionHandler.pollHasNewStepConstraintRegions());
 
-      stepAdjustmentController.compute(yoTime.getDoubleValue(), desiredCapturePoint, capturePoint2d, omega0);
+      double feedbackAlpha = Double.NaN;
+      if (feedbackAlphaCalculator != null)
+      {
+         double currentFeedbackAlpha = feedbackAlphaCalculator.computeAlpha(desiredCapturePoint, bipedSupportPolygons.getSupportPolygonInWorld());
+         double finalFeedbackAlpha = feedbackAlphaCalculator.computeAlpha(yoFinalDesiredICP, bipedSupportPolygons.getSupportPolygonInWorld());
+         feedbackAlpha = 0.5 * (currentFeedbackAlpha + finalFeedbackAlpha);
+      }
+
+      perfectCMP2d.setIncludingFrame(yoPerfectCMP);
+      stepAdjustmentController.compute(yoTime.getDoubleValue(), desiredCapturePoint, capturePoint2d, omega0, perfectCMP2d, yoFinalDesiredCoP, feedbackAlpha);
       boolean footstepWasAdjusted = stepAdjustmentController.wasFootstepAdjusted();
       footstep.setPose(stepAdjustmentController.getFootstepSolution());
 
@@ -647,6 +663,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
       comTrajectoryPlanner.compute(contactStateManager.getCurrentStateDuration());
       yoFinalDesiredICP.set(comTrajectoryPlanner.getDesiredDCMPosition());
+      yoFinalDesiredCoP.set(comTrajectoryPlanner.getDesiredECMPPosition()); // TODO replace with CoP
 
       comTrajectoryPlanner.compute(contactStateManager.getTotalStateDuration());
 
@@ -659,6 +676,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       if (footstepTimings.isEmpty())
       {
          yoFinalDesiredICP.setToNaN();
+         yoFinalDesiredCoP.setToNaN();
          yoFinalDesiredCoM.setToNaN();
          yoFinalDesiredCoMVelocity.setToNaN();
          yoFinalDesiredCoMAcceleration.setToNaN();
@@ -819,6 +837,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
    public void initialize()
    {
       yoFinalDesiredICP.setToNaN();
+      yoFinalDesiredCoP.setToNaN();
       yoFinalDesiredCoM.setToNaN();
       yoFinalDesiredCoMVelocity.setToNaN();
       yoFinalDesiredCoMAcceleration.setToNaN();

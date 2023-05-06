@@ -25,9 +25,12 @@ public interface StepAdjustmentController extends SCS2YoGraphicHolder
    void initialize(double initialTime, RobotSide supportSide);
 
    void compute(double currentTime,
-                       FramePoint2DReadOnly desiredICP,
-                       FramePoint2DReadOnly currentICP,
-                       double omega0);
+                FramePoint2DReadOnly desiredICP,
+                FramePoint2DReadOnly currentICP,
+                double omega0,
+                FramePoint2DReadOnly desiredCoP,
+                FramePoint2DReadOnly finalDesiredCoP,
+                double feedbackAlpha);
 
    FramePose3DReadOnly getFootstepSolution();
 

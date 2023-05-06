@@ -225,7 +225,13 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    }
 
    @Override
-   public void compute(double currentTime, FramePoint2DReadOnly desiredICP, FramePoint2DReadOnly currentICP, double omega0)
+   public void compute(double currentTime,
+                       FramePoint2DReadOnly desiredICP,
+                       FramePoint2DReadOnly currentICP,
+                       double omega0,
+                       FramePoint2DReadOnly desiredCoP,
+                       FramePoint2DReadOnly finalDesiredCoP,
+                       double finalFeedbackAlpha)
    {
       if (!isInSwing.getBooleanValue())
          return;
