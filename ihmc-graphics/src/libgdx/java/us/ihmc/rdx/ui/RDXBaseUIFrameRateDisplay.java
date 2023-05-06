@@ -13,21 +13,25 @@ import us.ihmc.tools.time.FrequencyCalculator;
 public class RDXBaseUIFrameRateDisplay
 {
 
-   private final FrequencyCalculator fpsCalculator = new FrequencyCalculator();
+   private static final int HISTORY = 100;
+   private final FrequencyCalculator latestFPSCalculator = new FrequencyCalculator(1);
+   private final FrequencyCalculator averagedFPSCalculator = new FrequencyCalculator(HISTORY);
    private final Throttler throttler = new Throttler().setFrequency(1.0);
-   private final ImGuiMovingPlot plot = new ImGuiMovingPlot("###frameRateDisplay", 100, 100, (int) ImGuiTools.TAB_BAR_HEIGHT);
+   private final ImGuiMovingPlot plot = new ImGuiMovingPlot("###frameRateDisplay", HISTORY, 100, (int) ImGuiTools.TAB_BAR_HEIGHT);
+
    private String fpsString = "0 Hz";
 
    public void render()
    {
-      fpsCalculator.ping();
+      latestFPSCalculator.ping();
+      averagedFPSCalculator.ping();
 
-      plot.setNextValue((float) fpsCalculator.getFrequency());
+      plot.setNextValue((float) latestFPSCalculator.getFrequency());
       plot.calculate("", true);
 
       if (throttler.run())
       {
-         fpsString = String.valueOf((int) fpsCalculator.getFrequency());
+         fpsString = String.valueOf((int) averagedFPSCalculator.getFrequency());
          while (fpsString.length() < 3)
          {
             fpsString = " " + fpsString;
