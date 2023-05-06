@@ -47,7 +47,7 @@ public class RDXInteractableObjectBuilder extends ImGuiPanel
          }
          ImGui.separator();
       }
-      if (isAnyObjectSelected() && (ImGui.button("Delete object") || ImGui.isKeyReleased(ImGuiTools.getDeleteKey())))
+      if (isAnyObjectSelected() && (ImGui.button("Delete object")))
       {
          selectedObject.clear();
          selectedObjectName = "";

@@ -1,20 +1,20 @@
 {
   "pregraspPoint" : {
-    "referenceFrame" : "affordanceFrame, originPose = Pose 3D: position = (-1.000,  0.000,  0.000 ), orientation = ( 0.000,  0.000,  0.000,  1.000 ), World",
-    "x" : 0.998897676851195,
-    "y" : 1.7666091960909052,
-    "z" : 0.7771005045395976,
+    "referenceFrame" : "affordanceFrame, originPose = Pose 3D: position = ( 0.000,  0.000,  0.000 ), orientation = ( 0.000,  0.000,  0.000,  1.000 ), World",
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
     "roll" : 0.0,
-    "pitch" : -0.0,
-    "yaw" : -3.138702636427979
+    "pitch" : 0.0,
+    "yaw" : 0.0
   },
   "graspPoint" : {
-    "referenceFrame" : "affordanceFrame, originPose = Pose 3D: position = (-1.000,  0.000,  0.000 ), orientation = ( 0.000,  0.000,  0.000,  1.000 ), World",
-    "x" : 1.001745605043106,
-    "y" : 0.7811755105143743,
-    "z" : 0.7771005045395976,
+    "referenceFrame" : "affordanceFrame, originPose = Pose 3D: position = ( 0.000,  0.000,  0.000 ), orientation = ( 0.000,  0.000,  0.000,  1.000 ), World",
+    "x" : 0.0,
+    "y" : 0.0,
+    "z" : 0.0,
     "roll" : 0.0,
-    "pitch" : -0.0,
-    "yaw" : -3.138702636427979
+    "pitch" : 0.0,
+    "yaw" : 0.0
   }
 }
