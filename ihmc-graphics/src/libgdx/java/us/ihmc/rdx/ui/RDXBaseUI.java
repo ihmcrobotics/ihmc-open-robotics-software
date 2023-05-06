@@ -97,7 +97,7 @@ public class RDXBaseUI
    private String configurationExtraPath;
    private final HybridResourceDirectory configurationBaseDirectory;
    private HybridFile libGDXSettingsFile;
-   private final FrequencyCalculator fpsCalculator = new FrequencyCalculator();
+   private final RDXBaseUIFrameRateDisplay frameRateDisplay = new RDXBaseUIFrameRateDisplay();
    private final Stopwatch runTime = new Stopwatch().start();
    private String statusText = ""; // TODO: Add status at bottom of window
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -389,16 +389,13 @@ public class RDXBaseUI
          ImGui.endMenu();
       }
 
-      ImGui.sameLine(ImGui.getWindowSizeX() - 220.0f);
-      fpsCalculator.ping();
-      String fpsString = String.valueOf((int) fpsCalculator.getFrequency());
-      while (fpsString.length() < 3)
-      {
-         fpsString = " " + fpsString;
-      }
-      ImGui.text(fpsString + " Hz");
+      // Currently we manually tune this value when we change the stuff in the status area
+      float menuBarStatusWidth = 320.0f;
+      ImGui.sameLine(ImGui.getWindowSizeX() - menuBarStatusWidth);
+      frameRateDisplay.render();
       ImGui.text(FormattingTools.getFormattedDecimal2D(runTime.totalElapsed()) + " s");
-      ImGui.sameLine(ImGui.getWindowSizeX() - 100.0f);
+      float enoughWidthForVRButton = 100.0f; // Currently we manually tune this value
+      ImGui.sameLine(ImGui.getWindowSizeX() - enoughWidthForVRButton);
       vrManager.renderImGuiEnableWidget();
       ImGui.endMainMenuBar();
    }
