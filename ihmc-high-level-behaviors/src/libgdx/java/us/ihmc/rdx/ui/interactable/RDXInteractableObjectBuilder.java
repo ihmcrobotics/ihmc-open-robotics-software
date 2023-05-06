@@ -1,20 +1,14 @@
 package us.ihmc.rdx.ui.interactable;
 
 import imgui.internal.ImGui;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.euclid.shape.primitives.Box3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RDXInteractableObjectBuilder extends ImGuiPanel
 {
@@ -22,8 +16,8 @@ public class RDXInteractableObjectBuilder extends ImGuiPanel
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private PredefinedSceneNodeLibrary predefinedSceneNodeLibrary;
    private RDXInteractableObject selectedObject;
-   private final String selectedObjectName = new String();
-   private final HashMap<String, String> nameModelMap = new HashMap<>();
+   private String selectedObjectName;
+   private final SortedMap<String, String> nameModelMap = new TreeMap<>();
 
    public RDXInteractableObjectBuilder(RDXBaseUI baseUI)
    {
@@ -40,21 +34,23 @@ public class RDXInteractableObjectBuilder extends ImGuiPanel
 
    public void renderImGuiWidgets()
    {
-      ImGui.text("Selected: " + (selectedObject == null ? "" : (selectedObjectName)));
+      ImGui.text("Selected: " + (!isAnyObjectSelected() ? "" : (selectedObjectName)));
 
       for (Map.Entry<String, String> entryNameModel : nameModelMap.entrySet())
       {
          if (ImGui.button(labels.get(entryNameModel.getKey())))
          {
-            if (selectedObject.getModelInstance() != null)
+            if (isAnyObjectSelected())
                selectedObject.clear();
             selectedObject.load(entryNameModel.getValue());
+            selectedObjectName = entryNameModel.getKey();
          }
          ImGui.separator();
       }
-      if (selectedObject != null && (ImGui.button("Delete object") || ImGui.isKeyReleased(ImGuiTools.getDeleteKey())))
+      if (isAnyObjectSelected() && (ImGui.button("Delete object") || ImGui.isKeyReleased(ImGuiTools.getDeleteKey())))
       {
          selectedObject.clear();
+         selectedObjectName = "";
       }
    }
 
@@ -67,4 +63,10 @@ public class RDXInteractableObjectBuilder extends ImGuiPanel
    {
       return selectedObject;
    }
+
+   public boolean isAnyObjectSelected()
+   {
+      return selectedObject.getModelInstance() != null;
+   }
+
 }
