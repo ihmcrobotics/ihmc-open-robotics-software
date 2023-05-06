@@ -18,6 +18,9 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -25,13 +28,21 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintMessageConverter;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
+import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.TerrainObjectDefinitionTools;
+import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.PlanarRegionEnvironmentInterface;
+import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationToolkit.controllers.PushRobotControllerSCS2;
+import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
+import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -62,7 +73,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       double gapWidth = 0.10;
       double sideGapWidth = 0.04;
 
-      GapPlanarRegionEnvironment environment = new GapPlanarRegionEnvironment(platform1Length, platform2Length, 0.75, gapWidth, sideGapWidth);
+      NewGapPlanarRegionEnvironment environment = new NewGapPlanarRegionEnvironment(platform1Length, platform2Length, 0.5, gapWidth, sideGapWidth);
 
       DRCRobotModel robotModel = getRobotModel();
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
@@ -163,6 +174,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
    public void testSidePush()
    {
       setupTest();
+      simulationTestHelper.setKeepSCSUp(true);
 
       double totalMass = getRobotModel().createFullRobotModel().getTotalMass();
       StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.LEFT);
@@ -225,26 +237,75 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   private class GapPlanarRegionEnvironment extends PlanarRegionEnvironmentInterface
+
+   private static class NewGapPlanarRegionEnvironment implements CommonAvatarEnvironmentInterface
    {
-      public GapPlanarRegionEnvironment(double platform1Length, double platform2Length, double platformWidth, double forwardGapSize, double sideGapSize)
+      private final RigidBodyTransformGenerator transformGenerator = new RigidBodyTransformGenerator();
+      private final TerrainObjectDefinition terrainObjectDefinition ;
+      private final CombinedTerrainObject3D combinedTerrainObject;
+      private final PlanarRegionsList planarRegionsList;
+      private int id = 0;
+
+      public NewGapPlanarRegionEnvironment(double platform1Length, double platform2Length, double platformWidth, double forwardGapSize, double sideGapSize)
       {
-         generator.translate(0.0, 0.0, -0.0);
-         generator.addRectangle(platform1Length, platformWidth);
-         //         generator.addCubeReferencedAtBottomMiddle(platform1Length, platformWidth, 0.01); // ground
+         double platformHeight = 0.2;
+         transformGenerator.translate(0.0, 0.0, 0.01);
+         combinedTerrainObject = new CombinedTerrainObject3D("gapEnvironment");
+         planarRegionsList = new PlanarRegionsList();
+
+         addBox(platform1Length, platformWidth, platformHeight);
 
          double platform2Center = 0.5 * (platform1Length + platform2Length) + forwardGapSize;
-         generator.translate(0.5 * (platform1Length + platform2Length) + forwardGapSize, 0.0, 0.0);
-         generator.addRectangle(platform2Length, platformWidth);
-         //         generator.addCubeReferencedAtBottomMiddle(platform2Length, platformWidth, 0.01); // ground
+         transformGenerator.translate(0.5 * (platform1Length + platform2Length) + forwardGapSize, 0.0, 0.0);
+         addBox(platform2Length, platformWidth, platformHeight);
 
          double sideWidth = 0.18;
          double sideLength = platform1Length + platform2Length + forwardGapSize;
          double distanceToCenter = 0.5 * sideLength - 0.5 * platform1Length;
-         generator.translate(-platform2Center + distanceToCenter, 0.5 * platformWidth + sideGapSize + 0.5 * sideWidth, 0.0);
-         generator.addRectangle(sideLength, sideWidth);
-         //         generator.addCubeReferencedAtBottomMiddle(sideLength, sideWidth, 0.01); // ground
-         addPlanarRegionsToTerrain(YoAppearance.Grey());
+         transformGenerator.translate(-platform2Center + distanceToCenter, 0.5 * platformWidth + sideGapSize + 0.5 * sideWidth, 0.0);
+         addBox(sideLength, sideWidth, platformHeight);
+
+         terrainObjectDefinition = TerrainObjectDefinitionTools.toTerrainObjectDefinition(this);
+      }
+
+      void addBox(double length, double width, double height)
+      {
+         RigidBodyTransform boxCenter = transformGenerator.getRigidBodyTransformCopy();
+         boxCenter.appendTranslation(0.0, 0.0, -0.5 * height);
+
+         RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(boxCenter, length, width, height), YoAppearance.DarkGray());
+         combinedTerrainObject.addTerrainObject(newBox);
+
+         addPolygon(createRectanglePolygon(length, width));
+      }
+
+      private static ConvexPolygon2D createRectanglePolygon(double lengthX, double widthY)
+      {
+         ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
+         convexPolygon.addVertex(lengthX / 2.0, widthY / 2.0);
+         convexPolygon.addVertex(-lengthX / 2.0, widthY / 2.0);
+         convexPolygon.addVertex(-lengthX / 2.0, -widthY / 2.0);
+         convexPolygon.addVertex(lengthX / 2.0, -widthY / 2.0);
+         convexPolygon.update();
+         return convexPolygon;
+      }
+
+      private void addPolygon(ConvexPolygon2D polygon)
+      {
+         PlanarRegion planarRegion = new PlanarRegion(transformGenerator.getRigidBodyTransformCopy(), polygon);
+         planarRegion.setRegionId(id++);
+         planarRegionsList.addPlanarRegion(planarRegion);
+      }
+
+      @Override
+      public TerrainObject3D getTerrainObject3D()
+      {
+         return combinedTerrainObject;
+      }
+
+      public PlanarRegionsList getPlanarRegionsList()
+      {
+         return planarRegionsList;
       }
    }
 
