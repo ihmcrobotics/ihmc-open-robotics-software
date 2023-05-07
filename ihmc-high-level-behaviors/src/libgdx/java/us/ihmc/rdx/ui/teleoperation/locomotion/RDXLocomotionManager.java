@@ -13,6 +13,8 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -67,7 +69,9 @@ public class RDXLocomotionManager
    private final RDXWalkingLowLevelMessenger walkingLowLevelMessenger;
    private boolean robotIsWalking = false;
    private boolean spaceBarPressed = false;
-   private boolean robotWalkingIsPaused = false;
+
+   private RobotSide lastRobotSideOnCurrentPlan = RobotSide.LEFT;
+   private FramePoint3DReadOnly lastFootstepOnCurrentPlan;
 
    public RDXLocomotionManager(DRCRobotModel robotModel,
                                CommunicationHelper communicationHelper,
@@ -190,6 +194,7 @@ public class RDXLocomotionManager
 
       if (interactableFootstepPlan.getNumberOfFootsteps() > 0)
       {
+         robotIsWalking = false;
          footstepPlanning.setReadyToWalk(false);
          footstepsSentToControllerGraphic.clear();
       }
@@ -204,8 +209,6 @@ public class RDXLocomotionManager
 
    public void renderImGuiWidgets()
    {
-
-
       ImGui.text("Options during walking: ");
       ImGui.sameLine();
       walkingLowLevelMessenger.renderImGuiWidgets();
@@ -245,7 +248,6 @@ public class RDXLocomotionManager
       interactableFootstepPlan.renderImGuiWidgets();
       ImGui.checkbox(labels.get("Show footstep related graphics"), showGraphics);
 
-
       if (ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
       {
          if (!spaceBarPressed)
@@ -255,27 +257,46 @@ public class RDXLocomotionManager
             if (!robotIsWalking && interactableFootstepPlan.getNumberOfFootsteps() > 0)
             {
                LogTools.info("Walking started");
+               lastRobotSideOnCurrentPlan = interactableFootstepPlan.getLastFootstep().getFootstepSide();
+               lastFootstepOnCurrentPlan = interactableFootstepPlan.getLastFootstep().getFootPose().getPosition();
                interactableFootstepPlan.walkFromSteps();
                robotIsWalking = true;
-               robotWalkingIsPaused = false;
+               walkingLowLevelMessenger.setRobotPausedWalking(false);
             }
-            else if (!robotWalkingIsPaused)
+            else if (walkingLowLevelMessenger.getRobotPausedWalking())
             {
-               LogTools.info("Pause Walking");
-               walkingLowLevelMessenger.sendPauseWalkingRequest();
-               robotWalkingIsPaused = true;
+               walkingLowLevelMessenger.sendContinueWalkingRequest();
             }
             else
             {
-               LogTools.info("Continue Walking");
-               walkingLowLevelMessenger.sendContinueWalkingRequest();
-               robotWalkingIsPaused = false;
+               walkingLowLevelMessenger.sendPauseWalkingRequest();
             }
          }
       }
       else
       {
          spaceBarPressed = false;
+      }
+
+      isRobotStillWalking();
+   }
+
+   public void isRobotStillWalking()
+   {
+      if (robotIsWalking)
+      {
+         FramePoint3D robotFootPosition = new FramePoint3D();
+         robotFootPosition.setX(syncedRobot.getReferenceFrames().getSoleFrame(lastRobotSideOnCurrentPlan).getTransformToRoot().getTranslation().getX());
+         robotFootPosition.setY(syncedRobot.getReferenceFrames().getSoleFrame(lastRobotSideOnCurrentPlan).getTransformToRoot().getTranslation().getY());
+         robotFootPosition.setZ(syncedRobot.getReferenceFrames().getSoleFrame(lastRobotSideOnCurrentPlan).getTransformToRoot().getTranslation().getZ());
+
+         if (robotFootPosition.epsilonEquals(lastFootstepOnCurrentPlan, 0.01))
+         {
+            //TODO Move walking check to RDXInteractableFootstepPlan and add safety checking
+            System.out.println("Stopped walking, we have reached the end of the footstep plan!");
+            robotIsWalking = false;
+            walkingLowLevelMessenger.setRobotPausedWalking(false);
+         }
       }
    }
 
