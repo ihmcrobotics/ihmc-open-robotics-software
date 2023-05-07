@@ -29,7 +29,7 @@ public class RDXSCS2BulletPhysicsDoorDemo
             SimulationSession simulationSession = new SimulationSession(BulletPhysicsEngine::new);
 
             DoorDefinition doorDefinition = new DoorDefinition();
-            doorDefinition.getDoorPanelDefinition().setAddFiducials(false);
+            doorDefinition.getDoorPanelDefinition().setAddArUcoMarkers(false);
             doorDefinition.build();
             doorDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(0.1, 0.1, 0.1), new Point3D(0.0, 0.0, 0.5));
             doorDefinition.getInitialHingeState().setEffort(15.0);

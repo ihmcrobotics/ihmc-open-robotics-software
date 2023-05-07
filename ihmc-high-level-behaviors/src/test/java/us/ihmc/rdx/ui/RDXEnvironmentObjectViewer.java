@@ -24,7 +24,7 @@ public class RDXEnvironmentObjectViewer
             baseUI.getPrimaryScene().getSceneLevelsToRender().add(RDXSceneLevel.GROUND_TRUTH);
 
             // Swap out this string to load different models
-            Model model = RDXModelLoader.load("environmentObjects/ousterSensor/Ouster.g3dj");
+            Model model = RDXModelLoader.load("environmentObjects/door/doorPanel/DoorPanelFiducials.g3dj");
             baseUI.getPrimaryScene().addModelInstance(new ModelInstance(model));
          }
 
