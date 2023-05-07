@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.teleoperation.locomotion;
 import imgui.ImGui;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 
 public class RDXWalkingLowLevelMessenger
@@ -10,6 +11,8 @@ public class RDXWalkingLowLevelMessenger
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    private final RobotLowLevelMessenger robotLowLevelMessenger;
+
+   public boolean robotPausedWalking = false;
 
    public RDXWalkingLowLevelMessenger(CommunicationHelper communicationHelper)
    {
@@ -35,13 +38,27 @@ public class RDXWalkingLowLevelMessenger
       }
    }
 
+   public boolean getRobotPausedWalking()
+   {
+      return robotPausedWalking;
+   }
+
+   public void setRobotPausedWalking(boolean newValue)
+   {
+      robotPausedWalking = newValue;
+   }
+
    public void sendPauseWalkingRequest()
    {
+      LogTools.info("Pause Walking");
       robotLowLevelMessenger.sendPauseWalkingRequest();
+      robotPausedWalking = true;
    }
 
    public void sendContinueWalkingRequest()
    {
+      LogTools.info("Continue Walking");
       robotLowLevelMessenger.sendContinueWalkingRequest();
+      robotPausedWalking = false;
    }
 }
