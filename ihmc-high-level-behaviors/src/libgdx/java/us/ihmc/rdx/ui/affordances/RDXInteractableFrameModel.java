@@ -26,6 +26,7 @@ import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
@@ -179,6 +180,11 @@ public class RDXInteractableFrameModel
    public void setExtendedContextMenu(Runnable runnable)
    {
       this.extendedContextMenu = runnable;
+   }
+
+   public RDXPose3DGizmo getPose3DGizmo()
+   {
+      return selectablePose3DGizmo.getPoseGizmo();
    }
 
    public boolean isSelected()

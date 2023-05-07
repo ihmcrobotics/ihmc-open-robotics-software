@@ -7,7 +7,11 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import imgui.ImFont;
+import imgui.ImFontAtlas;
 import imgui.ImGui;
+import imgui.ImVec2;
+import imgui.flag.ImGuiCol;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -41,9 +45,11 @@ public class RDXAffordanceEditorUI
    private final PoseReferenceFrame affordanceFrame = new PoseReferenceFrame("affordanceFrame", ReferenceFrame.getWorldFrame());
    // initial and grasp pose
    private FramePose3D initialPose = new FramePose3D();
+   private boolean isInitialPoseSet = false;
    private RDXReferenceFrameGraphic initialPoseGraphic;
    private final PoseReferenceFrame initialFrame = new PoseReferenceFrame("initialFrame", affordanceFrame);
    private FramePose3D graspPose = new FramePose3D();
+   private boolean isGraspPoseSet = false;
    private RDXReferenceFrameGraphic graspPoseGraphic;
    private final PoseReferenceFrame graspFrame = new PoseReferenceFrame("graspFrame", affordanceFrame);
    // pre-grasp poses
@@ -88,6 +94,7 @@ public class RDXAffordanceEditorUI
 
             interactableHand = new RDXInteractableDummyHand(baseUI.getPrimary3DPanel(), handTransformToWorld);
             baseUI.getPrimaryScene().addRenderableProvider(interactableHand);
+            baseUI.getImGuiPanelManager().addPanel(interactableHand.getPose3DGizmo().createTunerPanel("hand"));
             baseUI.getPrimaryScene().addRenderableProvider(objectBuilder.getSelectedObject());
             baseUI.getPrimaryScene().addRenderableProvider(RDXAffordanceEditorUI.this::getRenderables);
             baseUI.getImGuiPanelManager().addPanel("Affordance Panel", RDXAffordanceEditorUI.this::renderImGuiWidgets);
@@ -138,12 +145,36 @@ public class RDXAffordanceEditorUI
 
    public void renderImGuiWidgets()
    {
-      if ((ImGui.button(labels.get("Set initial pre-grasp frame")) || (ImGui.isKeyReleased(ImGuiTools.getSpaceKey()) && true)))
+      ImGui.text("PRE-GRASP MENU");
+      ImGui.text("Initial Frame: ");
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("SET")) || (ImGui.isKeyReleased(ImGuiTools.getSpaceKey()) && true))
       {
+         isInitialPoseSet = true;
          initialFrame.setPoseAndUpdate(handPose);
       }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("DELETE")) || (ImGui.isKeyReleased(ImGuiTools.getDeleteKey()) && true))
+      {
+         isInitialPoseSet = false;
+      }
+      ImGui.sameLine();
+      ImGui.text("|");
+      ImGui.sameLine();
+      if(isInitialPoseSet)
+         ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 1.0f, 0.0f, 1.0f);
+      else
+         ImGui.pushStyleColor(ImGuiCol.Button, 1.0f, 0.0f, 0.0f, 1.0f);
+      if (ImGui.button(labels.get("TELEPORT")))
+      {
+         if(isInitialPoseSet)
+            handTransformToWorld.set(initialPose);  // move hand to pregrasp point
+      }
+      ImGui.popStyleColor();
 
-      if (ImGui.button(labels.get("Add pre-grasp frame")))
+      ImGui.text("Other Frames: ");
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("ADD")))
       {
          preGraspIndex++;
          PoseReferenceFrame frame = new PoseReferenceFrame(preGraspIndex + "Frame", affordanceFrame);
@@ -155,28 +186,53 @@ public class RDXAffordanceEditorUI
          preGraspPoseGraphics.add(new RDXReferenceFrameGraphic(0.1, preGraspColors.get(preGraspColorIndex % preGraspColors.size())));
          preGraspColorIndex++;
       }
-
-      if (ImGui.button("Set grasp frame"))
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("CLEAR ALL")))
       {
-         graspFrame.setPoseAndUpdate(handPose);
+         preGraspIndices.clear();
+         preGraspFrames.clear();
+         preGraspPoses.clear();
+         preGraspPoseGraphics.clear();
+         preGraspColorIndex = 0;
       }
-
-      if (ImGui.button(labels.get("Initial pre-grasp frame")))
-         handTransformToWorld.set(initialPose);  // move hand to pregrasp point
-
       if (preGraspIndices.size() > 0)
       {
-         ImGui.text("Registered pre-grasp frames");
          for (int i = 0; i < preGraspIndices.size(); ++i)
          {
+            if (i % 5 != 0)
+               ImGui.sameLine();
             if (ImGui.button(labels.get(preGraspIndices.get(i).toString())))
             {
                // move hand to selected frame
                FramePose3D selectedPose = preGraspPoses.get(i);
                handTransformToWorld.set(selectedPose);
             }
+            ImGui.sameLine();
+            // handle the delete button click event here...
+            String xButtonLabel = "X_" + i;
+            if (ImGui.button(labels.get("X") + "##" + xButtonLabel, 15, 15))
+            {
+               preGraspFrames.remove(i);
+               preGraspPoses.remove(i);
+               preGraspPoseGraphics.remove(i);
+               preGraspIndices.remove(i);
+            }
          }
       }
+      else
+      {
+         preGraspColorIndex = 0;
+         preGraspIndex = 0;
+      }
+
+      ImGui.separator();
+
+      if (ImGui.button("Set grasp frame"))
+      {
+         graspFrame.setPoseAndUpdate(handPose);
+      }
+
+
 
       if (ImGui.button(labels.get("Grasp frame")))
          handTransformToWorld.set(graspPose); // move hand to grasp point
@@ -192,25 +248,17 @@ public class RDXAffordanceEditorUI
       {
          loadAllFromJSON("box");
       }
-
-      if (ImGui.button(labels.get("Clear custom affordances")))
-      {
-         preGraspIndices.clear();
-         preGraspFrames.clear();
-         preGraspPoses.clear();
-         preGraspPoseGraphics.clear();
-         preGraspColorIndex = 0;
-         saveToJSON();
-      }
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      initialPoseGraphic.getRenderables(renderables, pool);
-      graspPoseGraphic.getRenderables(renderables, pool);
-      for (RDXReferenceFrameGraphic customPoseGraphic : preGraspPoseGraphics)
+      if (isInitialPoseSet)
+         initialPoseGraphic.getRenderables(renderables, pool);
+      if (isGraspPoseSet)
+         graspPoseGraphic.getRenderables(renderables, pool);
+      for (RDXReferenceFrameGraphic preGraspPoseGraphic : preGraspPoseGraphics)
       {
-         customPoseGraphic.getRenderables(renderables, pool);
+         preGraspPoseGraphic.getRenderables(renderables, pool);
       }
    }
 
