@@ -14,6 +14,8 @@ import toolbox_msgs.msg.dds.*;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.pubsub.Domain;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -415,7 +417,6 @@ public class ROS2Tools
    private static final RTPSCommunicationFactory FACTORY = new RTPSCommunicationFactory();
    private static final int DOMAIN_ID = FACTORY.getDomainId();
    private static final InetAddress ADDRESS_RESTRICTION = FACTORY.getAddressRestriction();
-   private static final ROS2Distro ROS2_DISTRO = ROS2Distro.fromEnvironment();
 
    /**
     * Creates a ROS2 node that shares the same implementation as a real-time node <b>but that should
@@ -475,9 +476,10 @@ public class ROS2Tools
                                                          String nodeName,
                                                          ExceptionHandler exceptionHandler)
    {
+      Domain domain = DomainFactory.getDomain(pubSubImplementation);
       try
       {
-         return new RealtimeROS2Node(pubSubImplementation, ROS2_DISTRO, periodicThreadSchedulerFactory, nodeName, NAMESPACE, DOMAIN_ID, ADDRESS_RESTRICTION);
+         return new RealtimeROS2Node(domain, periodicThreadSchedulerFactory, nodeName, NAMESPACE, DOMAIN_ID, ADDRESS_RESTRICTION);
       }
       catch (IOException e)
       {
@@ -503,9 +505,10 @@ public class ROS2Tools
 
    public static ROS2Node createROS2Node(PubSubImplementation pubSubImplementation, String nodeName, ExceptionHandler exceptionHandler)
    {
+      Domain domain = DomainFactory.getDomain(pubSubImplementation);
       try
       {
-         return new ROS2Node(pubSubImplementation, ROS2_DISTRO, nodeName, NAMESPACE, DOMAIN_ID, ADDRESS_RESTRICTION);
+         return new ROS2Node(domain, nodeName, NAMESPACE, DOMAIN_ID, ADDRESS_RESTRICTION);
       }
       catch (IOException e)
       {
@@ -653,7 +656,7 @@ public class ROS2Tools
       try
       {
          TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         realtimeROS2Node.createCallbackSubscription(topicDataType, topicName, newMessageListener, qosProfile);
+         realtimeROS2Node.createSubscription(topicDataType, newMessageListener, topicName, qosProfile);
       }
       catch (IOException e)
       {
