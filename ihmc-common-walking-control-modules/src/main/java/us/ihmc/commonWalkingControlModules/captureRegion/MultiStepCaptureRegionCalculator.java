@@ -54,7 +54,7 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
    private final BooleanProvider useCrossOverSteps;
 
    private final StepAdjustmentReachabilityConstraint reachabilityConstraint;
-
+   private final SideDependentList<? extends ReferenceFrame> soleFrames;
    final FrameVector2D vertexExtrusionVector = new FrameVector2D();
    final FramePoint2D extrudedFirstVertex = new FramePoint2D();
    final FramePoint2D extrudedSecondVertex = new FramePoint2D();
@@ -63,18 +63,21 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
 
    private MultiStepCaptureRegionVisualizer visualizer = null;
 
-   public MultiStepCaptureRegionCalculator(StepAdjustmentReachabilityConstraint reachabilityConstraint,
+   public MultiStepCaptureRegionCalculator(SideDependentList<? extends ReferenceFrame> soleFrames,
+                                           StepAdjustmentReachabilityConstraint reachabilityConstraint,
                                            BooleanProvider useCrossOverSteps,
                                            YoRegistry parentRegistry)
    {
-      this(reachabilityConstraint, useCrossOverSteps, parentRegistry, null);
+      this(soleFrames, reachabilityConstraint, useCrossOverSteps, parentRegistry, null);
    }
 
-   public MultiStepCaptureRegionCalculator(StepAdjustmentReachabilityConstraint reachabilityConstraint,
+   public MultiStepCaptureRegionCalculator(SideDependentList<? extends ReferenceFrame> soleFrames,
+                                           StepAdjustmentReachabilityConstraint reachabilityConstraint,
                                            BooleanProvider useCrossOverSteps,
                                            YoRegistry parentRegistry,
                                            YoGraphicsListRegistry graphicsListRegistry)
    {
+      this.soleFrames = soleFrames;
       this.reachabilityConstraint = reachabilityConstraint;
       this.useCrossOverSteps = useCrossOverSteps;
 
@@ -110,8 +113,8 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
     */
    public void compute(RobotSide currentStanceSide, FrameConvexPolygon2DReadOnly oneStepCaptureRegion, double stepDuration, double omega, int stepsInQueue)
    {
-      multiStepRegion.clear(oneStepCaptureRegion.getReferenceFrame());
-      vertexExtrusionVector.setReferenceFrame(oneStepCaptureRegion.getReferenceFrame());
+      multiStepRegion.clear(soleFrames.get(currentStanceSide));
+      vertexExtrusionVector.setReferenceFrame(soleFrames.get(currentStanceSide));
 
       stepsConsideringForRecovery.set(Math.min(stepsInQueue, maxStepsToConsider.getValue()));
       this.stepsInQueue.set(stepsInQueue);
@@ -149,10 +152,14 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
          polygon.update();
       }
 
+      extrudedFirstVertex.setReferenceFrame(soleFrames.get(currentStanceSide));
+      extrudedSecondVertex.setReferenceFrame(soleFrames.get(currentStanceSide));
+
       for (int i = 0; i < oneStepCaptureRegion.getNumberOfVertices(); i++)
       {
          // compute the current edge of the capture region, which will then be extruded in a certain direction.
          edgeToExtrude.setIncludingFrame(oneStepCaptureRegion.getVertex(i), oneStepCaptureRegion.getNextVertex(i));
+         edgeToExtrude.changeFrame(soleFrames.get(currentStanceSide));
 
          // compute how much additional capturability you get along that edge by considering how additional steps can be taken. These also consider the
          // reachability constraints of the robot during that expansion.
@@ -164,10 +171,10 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
                                         oppositeSupportMultiplier);
 
          // extrude that edge
-         extrudedFirstVertex.setIncludingFrame(oneStepCaptureRegion.getVertex(i));
+         extrudedFirstVertex.setMatchingFrame(oneStepCaptureRegion.getVertex(i));
          extrudedFirstVertex.add(vertexExtrusionVector);
 
-         extrudedSecondVertex.setIncludingFrame(oneStepCaptureRegion.getNextVertex(i));
+         extrudedSecondVertex.setMatchingFrame(oneStepCaptureRegion.getNextVertex(i));
          extrudedSecondVertex.add(vertexExtrusionVector);
 
          if (visualizer != null)
@@ -198,8 +205,8 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
                                                double oppositeSupportMultiplier)
    {
 
-      bestStepDirectionForStanceSide.setReferenceFrame(edgeToExtrude.getReferenceFrame());
-      bestStepDirectionForSwingSide.setReferenceFrame(edgeToExtrude.getReferenceFrame());
+      bestStepDirectionForStanceSide.setReferenceFrame(soleFrames.get(currentStanceSide));
+      bestStepDirectionForSwingSide.setReferenceFrame(soleFrames.get(currentStanceSide));
 
       // Compute the step for each side that would best help recover from additiional error in that direction.
       getDirectionOfFurthestReachableStepFromEdge(initialReachabilityRegions.get(currentStanceSide), edgeToExtrude, bestStepDirectionForStanceSide);

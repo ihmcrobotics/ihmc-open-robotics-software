@@ -226,7 +226,8 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                                    registry,
                                                                    yoGraphicsListRegistry);
       oneStepSafetyHeuristics = new CaptureRegionSafetyHeuristics(lengthLimit, registry, null);
-      multiStepCaptureRegionCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraintHandler,
+      multiStepCaptureRegionCalculator = new MultiStepCaptureRegionCalculator(soleZUpFrames,
+                                                                              reachabilityConstraintHandler,
                                                                               allowCrossOverSteps,
                                                                               registry,
                                                                               yoGraphicsListRegistry);
