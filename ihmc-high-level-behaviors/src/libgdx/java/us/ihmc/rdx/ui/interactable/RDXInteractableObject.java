@@ -90,4 +90,9 @@ public class RDXInteractableObject implements RenderableProvider
    {
       return objectFrame;
    }
+
+   public void resetPose()
+   {
+      pose3DGizmo.getTransformToParent().setToZero();
+   }
 }

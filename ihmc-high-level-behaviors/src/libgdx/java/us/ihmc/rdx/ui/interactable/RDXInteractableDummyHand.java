@@ -10,6 +10,7 @@ import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelInstance;
@@ -60,6 +61,7 @@ public class RDXInteractableDummyHand implements RenderableProvider
    private final RigidBodyTransform[] fingersTransforms;
    private final ReferenceFrame[] fingersFrames;
    private final BoxRayIntersection boxRayIntersection = new BoxRayIntersection();
+   private HandConfiguration handConfiguration;
 
    public RDXInteractableDummyHand(RDX3DPanel panel3D, RigidBodyTransform transformToParentToModify)
    {
@@ -94,12 +96,14 @@ public class RDXInteractableDummyHand implements RenderableProvider
    {
       for (int i = 0; i < NUMBER_OF_FINGERS; i++)
          fingersTransforms[i].set(FINGERS_TO_PALM_CLOSE[i]);
+      handConfiguration = HandConfiguration.CLOSE;
    }
 
    public void openGripper()
    {
       for (int i = 0; i < NUMBER_OF_FINGERS; i++)
          fingersTransforms[i].set(FINGERS_TO_PALM_OPEN[i]);
+      handConfiguration = HandConfiguration.OPEN;
    }
 
    public void setGripperToNeutral()
@@ -162,6 +166,11 @@ public class RDXInteractableDummyHand implements RenderableProvider
    {
       for (int i = 0; i < NUMBER_OF_FINGERS; i++)
          fingersModelInstances[i].getRenderables(renderables, pool);
+   }
+
+   public HandConfiguration getConfiguration()
+   {
+      return handConfiguration;
    }
 }
 

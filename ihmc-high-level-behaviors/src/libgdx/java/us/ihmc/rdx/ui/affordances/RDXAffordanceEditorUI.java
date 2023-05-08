@@ -17,6 +17,9 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -44,20 +47,23 @@ public class RDXAffordanceEditorUI
    private RDXInteractableObjectBuilder objectBuilder;
    private RigidBodyTransform objectToWorld = new RigidBodyTransform();
    private final PoseReferenceFrame affordanceFrame = new PoseReferenceFrame("affordanceFrame", ReferenceFrame.getWorldFrame());
-   // initial and grasp pose
+   // initial pose
    private FramePose3D initialPose = new FramePose3D();
    private boolean isInitialPoseSet = false;
    private RDXReferenceFrameGraphic initialPoseGraphic;
    private final PoseReferenceFrame initialFrame = new PoseReferenceFrame("initialFrame", affordanceFrame);
+   private HandConfiguration initialHandConfiguration;
+   // grasp pose
    private FramePose3D graspPose = new FramePose3D();
    private boolean isGraspPoseSet = false;
    private RDXReferenceFrameGraphic graspPoseGraphic;
    private final PoseReferenceFrame graspFrame = new PoseReferenceFrame("graspFrame", affordanceFrame);
    private final float[] gripperClosure = new float[1];
+   private HandConfiguration graspHandConfiguration;
    // pre-grasp poses
-   private ArrayList<FramePose3D> preGraspPoses = new ArrayList<>();
-   private ArrayList<PoseReferenceFrame> preGraspFrames = new ArrayList<>();
-   private ArrayList<RDXReferenceFrameGraphic> preGraspPoseGraphics = new ArrayList<>();
+   private final ArrayList<FramePose3D> preGraspPoses = new ArrayList<>();
+   private final ArrayList<PoseReferenceFrame> preGraspFrames = new ArrayList<>();
+   private final ArrayList<RDXReferenceFrameGraphic> preGraspPoseGraphics = new ArrayList<>();
    private final ArrayList<Color> preGraspColors = new ArrayList<>(Arrays.asList(new Color(0xFFE4B5FF),
                                                                                  new Color(0xFF8C00FF),
                                                                                  new Color(0xFFDAB9FF),
@@ -66,10 +72,11 @@ public class RDXAffordanceEditorUI
    private final ArrayList<Integer> preGraspIndices = new ArrayList<>();
    private int preGraspIndex = 0;
    private int preGraspColorIndex = 0;
+   private final ArrayList<HandConfiguration> preGraspHandConfigurations = new ArrayList<>();
    // post-grasp poses
-   private ArrayList<FramePose3D> postGraspPoses = new ArrayList<>();
-   private ArrayList<PoseReferenceFrame> postGraspFrames = new ArrayList<>();
-   private ArrayList<RDXReferenceFrameGraphic> postGraspPoseGraphics = new ArrayList<>();
+   private final ArrayList<FramePose3D> postGraspPoses = new ArrayList<>();
+   private final ArrayList<PoseReferenceFrame> postGraspFrames = new ArrayList<>();
+   private final ArrayList<RDXReferenceFrameGraphic> postGraspPoseGraphics = new ArrayList<>();
    private final ArrayList<Color> postGraspColors = new ArrayList<>(Arrays.asList(new Color(0xD8BFD8FF),
                                                                                   new Color(0xBA55D3FF),
                                                                                   new Color(0x9932CCFF),
@@ -78,6 +85,7 @@ public class RDXAffordanceEditorUI
    private final ArrayList<Integer> postGraspIndices = new ArrayList<>();
    private int postGraspIndex = 0;
    private int postGraspColorIndex = 0;
+   private final ArrayList<HandConfiguration> postGraspHandConfigurations = new ArrayList<>();
 
    private final WorkspaceResourceDirectory configurationsDirectory = new WorkspaceResourceDirectory(getClass(), "/boxAffordance");
 
@@ -96,6 +104,7 @@ public class RDXAffordanceEditorUI
             initialPoseGraphic = new RDXReferenceFrameGraphic(0.1, Color.WHITE);
             graspPoseGraphic = new RDXReferenceFrameGraphic(0.1, Color.BLACK);
 
+            handTransformToWorld.getTranslation().set(-0.5, 0, 0);
             interactableHand = new RDXInteractableDummyHand(baseUI.getPrimary3DPanel(), handTransformToWorld);
             baseUI.getPrimaryScene().addRenderableProvider(interactableHand);
             baseUI.getImGuiPanelManager().addPanel(interactableHand.getPose3DGizmo().createTunerPanel("hand"));
@@ -124,7 +133,8 @@ public class RDXAffordanceEditorUI
    {
       if (objectBuilder.isAnyObjectSelected())
       {
-         FramePose3D objectPose = new FramePose3D(objectBuilder.getSelectedObject().getPose3DGizmo().getPose());
+         FramePose3D objectPose = new FramePose3D(objectBuilder.getSelectedObject().getObjectFrame());
+         objectPose.changeFrame(ReferenceFrame.getWorldFrame());
          affordanceFrame.setPoseAndUpdate(objectPose);
       }
       handPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -158,6 +168,21 @@ public class RDXAffordanceEditorUI
 
    public void renderImGuiWidgets()
    {
+      ImGui.text("HAND MENU");
+      ImGui.text("Hand configuration: ");
+      if (ImGui.button(labels.get("OPEN")))
+         interactableHand.openGripper();
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("CLOSE")))
+         interactableHand.closeGripper();
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("NEUTRAL")))
+         interactableHand.setGripperToNeutral();
+      if (ImGui.sliderFloat("SET CLOSURE",
+                            gripperClosure, interactableHand.getMinGripperClosure(), interactableHand.getMaxGripperClosure()))
+         interactableHand.setGripperClosure(gripperClosure[0]);
+      ImGui.separator();
+
       ImGui.text("PRE-GRASP MENU");
       ImGui.text("Initial Frame: ");
       ImGui.sameLine();
@@ -170,6 +195,7 @@ public class RDXAffordanceEditorUI
       if (ImGui.button(labels.get("DELETE") + "##initial"))
       {
          isInitialPoseSet = false;
+         initialHandConfiguration = null;
       }
       ImGui.sameLine();
       ImGui.text("|");
@@ -184,6 +210,10 @@ public class RDXAffordanceEditorUI
             handTransformToWorld.set(initialPose);  // move hand to pregrasp point
       }
       ImGui.popStyleColor();
+      if (ImGui.button(labels.get("SET HAND CONFIGURATION") + "##initial"))
+      {
+         initialHandConfiguration = interactableHand.getConfiguration();
+      }
 
       ImGui.text("Other Frames: ");
       ImGui.sameLine();
@@ -267,18 +297,6 @@ public class RDXAffordanceEditorUI
             handTransformToWorld.set(graspPose); // move hand to grasp point
       }
       ImGui.popStyleColor();
-      ImGui.text("Hand configuration: ");
-      if (ImGui.button(labels.get("OPEN")))
-         interactableHand.openGripper();
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("CLOSE")))
-         interactableHand.closeGripper();
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("NEUTRAL")))
-         interactableHand.setGripperToNeutral();
-      if (ImGui.sliderFloat("SET CLOSURE",
-                            gripperClosure, interactableHand.getMinGripperClosure(), interactableHand.getMaxGripperClosure()))
-         interactableHand.setGripperClosure(gripperClosure[0]);
       ImGui.separator();
 
       ImGui.text("POST-GRASP MENU");
@@ -338,6 +356,25 @@ public class RDXAffordanceEditorUI
       }
       ImGui.separator();
 
+      if (ImGui.button("RESET"))
+      {
+         handTransformToWorld.setToZero();
+         handTransformToWorld.getTranslation().set(-0.5, 0, 0);
+         interactableHand.setGripperToNeutral();
+         objectBuilder.getSelectedObject().resetPose();
+         isInitialPoseSet = false;
+         isGraspPoseSet = false;
+         preGraspIndices.clear();
+         preGraspFrames.clear();
+         preGraspPoses.clear();
+         preGraspPoseGraphics.clear();
+         preGraspColorIndex = 0;
+         postGraspIndices.clear();
+         postGraspFrames.clear();
+         postGraspPoses.clear();
+         postGraspPoseGraphics.clear();
+         postGraspColorIndex = 0;
+      }
       if (ImGui.button("Save to json"))
       {
          saveToJSON();
