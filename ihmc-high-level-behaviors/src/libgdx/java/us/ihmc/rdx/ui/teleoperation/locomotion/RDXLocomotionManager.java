@@ -71,7 +71,6 @@ public class RDXLocomotionManager
    private final RDXWalkingLowLevelMessenger walkingLowLevelMessenger;
    private boolean robotIsWalking = false;
    private boolean spaceBarPressed = false;
-
    private RobotSide lastRobotSideOnCurrentPlan = RobotSide.LEFT;
    private FramePoint3DReadOnly lastFootstepOnCurrentPlan;
 
@@ -88,7 +87,6 @@ public class RDXLocomotionManager
       walkingParameters.load();
 
       walkingLowLevelMessenger = new RDXWalkingLowLevelMessenger(communicationHelper);
-
 
       footstepPlanning = new RDXFootstepPlanning(robotModel, walkingParameters, syncedRobot);
 
@@ -213,7 +211,7 @@ public class RDXLocomotionManager
 
    public void renderImGuiWidgets()
    {
-      ImGui.text("Options during walking: ");
+      ImGui.text("Walking Options:");
       ImGui.sameLine();
       walkingLowLevelMessenger.renderImGuiWidgets();
       areFootstepsAdjustableCheckbox.render();
@@ -298,7 +296,7 @@ public class RDXLocomotionManager
          if (robotFootPosition.epsilonEquals(lastFootstepOnCurrentPlan, 0.01))
          {
             //TODO Move walking check to RDXInteractableFootstepPlan and add safety checking
-            System.out.println("Stopped walking, we have reached the end of the footstep plan!");
+            System.out.println("Goal reached, walking stopped!");
             robotIsWalking = false;
             walkingLowLevelMessenger.setRobotPausedWalking(false);
          }
