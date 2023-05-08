@@ -453,7 +453,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    {
       RobotSide supportSide = upcomingFootstepSide.getEnumValue().getOppositeSide();
       FixedFrameConvexPolygon2DBasics shrunkSupport = allowableAreasForCoP.get(supportSide);
-      FrameConvexPolygon2DReadOnly supportPolygon = bipedSupportPolygons.getFootPolygonInSoleFrame(supportSide);
+      FrameConvexPolygon2DReadOnly supportPolygon = bipedSupportPolygons.getFootPolygonInSoleZUpFrame(supportSide);
       finalInFoot.setMatchingFrame(desiredCoP);
       finalInFoot.changeFrame(shrunkSupport.getReferenceFrame());
 
@@ -466,31 +466,62 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       }
       else
       {
-         shrunkSupport.setMatchingFrame(supportPolygon, false);
+         shrunkSupport.set(supportPolygon);
          if (!Double.isNaN(finalFeedbackAlpha))
             shrunkSupport.scale(finalInFoot, 1.0 - finalFeedbackAlpha);
 
          for (int i = 0; i < shrunkSupport.getNumberOfVertices(); i++)
          {
-            FixedFramePoint2DBasics point = shrunkSupport.getVertexUnsafe(i);
-            if (point.getX() > 0.0)
-               point.setX(Math.max(point.getX() - supportDistanceFromFront.getValue(), 0.0));
-            else
-               point.setX(Math.min(point.getX() + supportDistanceFromBack.getValue(), 0.0));
-
-            if (supportSide == RobotSide.LEFT)
+            FixedFramePoint2DBasics shrunkPoint = shrunkSupport.getVertexUnsafe(i);
+            FramePoint2DReadOnly supportPoint = supportPolygon.getVertexUnsafe(i);
+            if (supportPoint.getX() > 0.0)
             {
-               if (point.getY() > 0)
-                  point.setY(Math.max(point.getY() - supportDistanceFromOutside.getValue(), 0.0));
-               else
-                  point.setY(Math.min(point.getY() + supportDistanceFromInside.getValue(), 0.0));
+               // This point is towards the toe
+               double maxToeX = Math.max(supportPoint.getX() - supportDistanceFromFront.getValue(), finalInFoot.getX());
+               if (maxToeX < shrunkPoint.getX())
+                  shrunkPoint.setX(maxToeX);
             }
             else
             {
-               if (point.getY() > 0)
-                  point.setY(Math.max(point.getY() - supportDistanceFromInside.getValue(), 0.0));
+               // This point is towards the heel
+               double minHeelX = Math.min(supportPoint.getX() + supportDistanceFromBack.getValue(), finalInFoot.getX());
+               if (minHeelX > shrunkPoint.getX())
+                  shrunkPoint.setX(minHeelX);
+            }
+
+            if (supportSide == RobotSide.LEFT)
+            {
+               if (supportPoint.getY() > 0)
+               {
+                  // This point is towards the outside
+                  double maxOutsideY = Math.max(supportPoint.getY() - supportDistanceFromOutside.getValue(), finalInFoot.getY());
+                  if (maxOutsideY < shrunkPoint.getY())
+                     shrunkPoint.setY(maxOutsideY);
+               }
                else
-                  point.setY(Math.min(point.getY() + supportDistanceFromOutside.getValue(), 0.0));
+               {
+                  // This point is towards the inside
+                  double minInsideY = Math.min(supportPoint.getY() + supportDistanceFromInside.getValue(), finalInFoot.getY());
+                  if (minInsideY > shrunkPoint.getY())
+                     shrunkPoint.setY(minInsideY);
+               }
+            }
+            else
+            {
+               if (supportPoint.getY() > 0)
+               {
+                  // This point is towards the inside
+                  double maxInsideY = Math.max(supportPoint.getY() - supportDistanceFromInside.getValue(), finalInFoot.getY());
+                  if (maxInsideY < shrunkPoint.getY())
+                     shrunkPoint.setY(maxInsideY);
+               }
+               else
+               {
+                  // This point is towards the outside
+                  double minOutsideY = Math.min(supportPoint.getY() + supportDistanceFromOutside.getValue(), finalInFoot.getY());
+                  if (minOutsideY > shrunkPoint.getY())
+                     shrunkPoint.setY(minOutsideY);
+               }
             }
          }
 
