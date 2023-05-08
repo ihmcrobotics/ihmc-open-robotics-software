@@ -66,14 +66,14 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       return 0.3;
    }
 
-   public void setupTest()
+   public void setupTest(double platformWidth)
    {
       double platform1Length = 0.7;
       double platform2Length = 1.0;
       double gapWidth = 0.10;
       double sideGapWidth = 0.04;
 
-      NewGapPlanarRegionEnvironment environment = new NewGapPlanarRegionEnvironment(platform1Length, platform2Length, 0.5, gapWidth, sideGapWidth);
+      NewGapPlanarRegionEnvironment environment = new NewGapPlanarRegionEnvironment(platform1Length, platform2Length, platformWidth, gapWidth, sideGapWidth);
 
       DRCRobotModel robotModel = getRobotModel();
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
@@ -133,7 +133,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
    @Test
    public void testNoPush()
    {
-      setupTest();
+      setupTest(0.5);
 
       double simulationTime = (swingTime + transferTime) * 4 + 1.0;
       assertTrue(simulationTestHelper.simulateNow(simulationTime));
@@ -147,7 +147,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
    @Test
    public void testForwardPush()
    {
-      setupTest();
+      setupTest(0.75);
 
       simulationTestHelper.simulateNow(1.0);
       double totalMass = getRobotModel().createFullRobotModel().getTotalMass();
@@ -173,8 +173,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
    @Test
    public void testSidePush()
    {
-      setupTest();
-      simulationTestHelper.setKeepSCSUp(true);
+      setupTest(0.5);
 
       double totalMass = getRobotModel().createFullRobotModel().getTotalMass();
       StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.LEFT);
