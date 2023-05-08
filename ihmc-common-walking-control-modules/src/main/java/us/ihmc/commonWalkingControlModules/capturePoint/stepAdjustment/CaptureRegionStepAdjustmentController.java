@@ -165,7 +165,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    }
 
    @Override
-   public void setFootstepAfterTheCurrentOne(SimpleFootstep nextFootstep, FootstepTiming nextFootstepTiming)
+   public void setFootstepQueueInformation(int numberOfStepsInQueue, double subsequentStepDuration)
    {
    }
 
@@ -227,9 +227,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
                        FramePoint2DReadOnly desiredICP,
                        FramePoint2DReadOnly currentICP,
                        double omega0,
-                       int numberOfFootstepsInQueue,
-                       FramePoint2DReadOnly desiredCoP,
-                       FramePoint2DReadOnly finalDesiredCoP,
+                       FramePoint2DReadOnly copToShrinkAbout,
                        double finalFeedbackAlpha)
    {
       if (!isInSwing.getBooleanValue())

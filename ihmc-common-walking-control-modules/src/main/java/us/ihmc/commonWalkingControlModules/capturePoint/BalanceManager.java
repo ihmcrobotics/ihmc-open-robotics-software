@@ -42,7 +42,9 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHan
 import us.ihmc.commonWalkingControlModules.messageHandlers.StepConstraintRegionHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -119,6 +121,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
    private final YoFrameVector3D yoDesiredCoMVelocity = new YoFrameVector3D("desiredCoMVelocity", worldFrame, registry);
    private final YoFramePoint2D yoFinalDesiredICP = new YoFramePoint2D("finalDesiredICP", worldFrame, registry);
    private final YoFramePoint2D yoFinalDesiredCoP = new YoFramePoint2D("finalDesiredCoP", worldFrame, registry);
+   private final YoFramePoint2D yoEquivalentRemainingCoP = new YoFramePoint2D("equivalentRemainingCoP", worldFrame, registry);
    private final YoFramePoint3D yoFinalDesiredCoM = new YoFramePoint3D("finalDesiredCoM", worldFrame, registry);
    private final YoFrameVector3D yoFinalDesiredCoMVelocity = new YoFrameVector3D("finalDesiredCoMVelocity", worldFrame, registry);
    private final YoFrameVector3D yoFinalDesiredCoMAcceleration = new YoFrameVector3D("finalDesiredCoMAcceleration", worldFrame, registry);
@@ -210,8 +213,6 @@ public class BalanceManager implements SCS2YoGraphicHolder
    private RobotSide supportSide;
    private final FixedFramePoint2DBasics desiredCMP = new FramePoint2D();
    private final SimpleFootstep currentFootstep = new SimpleFootstep();
-   private final SimpleFootstep nextFootstep = new SimpleFootstep();
-   private final FootstepTiming nextFootstepTiming = new FootstepTiming();
    private final SideDependentList<PlaneContactStateCommand> contactStateCommands = new SideDependentList<>(new PlaneContactStateCommand(),
                                                                                                             new PlaneContactStateCommand());
    private final SideDependentList<? extends ReferenceFrame> soleFrames;
@@ -449,9 +450,34 @@ public class BalanceManager implements SCS2YoGraphicHolder
       double feedbackAlpha = Double.NaN;
       if (feedbackAlphaCalculator != null)
       {
-         double currentFeedbackAlpha = feedbackAlphaCalculator.computeAlpha(desiredCapturePoint, bipedSupportPolygons.getSupportPolygonInWorld());
          double finalFeedbackAlpha = feedbackAlphaCalculator.computeAlpha(yoFinalDesiredICP, bipedSupportPolygons.getSupportPolygonInWorld());
-         feedbackAlpha = 0.5 * (currentFeedbackAlpha + finalFeedbackAlpha);
+         if (getAdjustedTimeRemainingInCurrentSupportSequence() > 1e-5)
+         {
+            double currentFeedbackAlpha = feedbackAlphaCalculator.computeAlpha(desiredCapturePoint, bipedSupportPolygons.getSupportPolygonInWorld());
+            double exponential = Math.exp(omega0 * getAdjustedTimeRemainingInCurrentSupportSequence());
+
+            yoEquivalentRemainingCoP.scaleAdd(-exponential, desiredCapturePoint, yoFinalDesiredICP);
+            yoEquivalentRemainingCoP.scale(1.0 / (1.0 - exponential));
+
+            // clamp it to be between the end points
+            clampBetweenTwoPoints(yoEquivalentRemainingCoP, perfectCMP2d, yoFinalDesiredCoP);
+
+            if (perfectCMP2d.distanceSquared(yoFinalDesiredCoP) > 1e-3)
+            {
+               double alphaRemaining = EuclidGeometryTools.percentageAlongLineSegment2D(yoEquivalentRemainingCoP, perfectCMP2d, yoFinalDesiredCoP);
+               feedbackAlpha = InterpolationTools.linearInterpolate(currentFeedbackAlpha, finalFeedbackAlpha, alphaRemaining);
+            }
+            else
+            {
+               feedbackAlpha = 0.5 * (currentFeedbackAlpha + finalFeedbackAlpha);
+            }
+            feedbackAlpha = MathTools.clamp(feedbackAlpha, 0.0, 1.0);
+         }
+         else
+         {
+            yoEquivalentRemainingCoP.set(yoFinalDesiredCoP);
+            feedbackAlpha = finalFeedbackAlpha;
+         }
       }
 
       perfectCMP2d.setIncludingFrame(yoPerfectCMP);
@@ -459,14 +485,24 @@ public class BalanceManager implements SCS2YoGraphicHolder
                                        desiredCapturePoint,
                                        capturePoint2d,
                                        omega0,
-                                       footsteps.size(),
-                                       perfectCMP2d,
-                                       yoFinalDesiredCoP,
+                                       yoEquivalentRemainingCoP,
                                        feedbackAlpha);
       boolean footstepWasAdjusted = stepAdjustmentController.wasFootstepAdjusted();
       footstep.setPose(stepAdjustmentController.getFootstepSolution());
 
       return footstepWasAdjusted;
+   }
+
+   private static void clampBetweenTwoPoints(FixedFramePoint2DBasics pointToClamp, FramePoint2DReadOnly pointA, FramePoint2DReadOnly pointB)
+   {
+      double minX = Math.min(pointA.getX(), pointB.getX());
+      double maxX = Math.max(pointA.getX(), pointB.getX());
+
+      double minY = Math.min(pointA.getY(), pointB.getY());
+      double maxY = Math.max(pointA.getY(), pointB.getY());
+
+      pointToClamp.setX(MathTools.clamp(pointToClamp.getX(), minX, maxX));
+      pointToClamp.setY(MathTools.clamp(pointToClamp.getY(), minY, maxY));
    }
 
    public void clearICPPlan()
@@ -878,9 +914,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       stepAdjustmentController.reset();
       if (footsteps.size() > 1 && footstepTimings.size() > 1)
       {
-         nextFootstep.set(footsteps.get(1));
-         nextFootstepTiming.set(footstepTimings.get(1));
-         stepAdjustmentController.setFootstepAfterTheCurrentOne(nextFootstep, nextFootstepTiming);
+         stepAdjustmentController.setFootstepQueueInformation(footsteps.size(), footstepTimings.get(1).getStepTime());
       }
       stepAdjustmentController.setFootstepToAdjust(currentFootstep, swingTime);
       stepAdjustmentController.initialize(yoTime.getDoubleValue(), supportSide);
