@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class AbortWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.AbortWalkingMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::AbortWalkingMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "654c39e4787ae4359dec5d73cae22411af530f915fb9364587e5506606957253";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

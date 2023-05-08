@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class CenterOfMassTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.CenterOfMassTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::CenterOfMassTrajectoryMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "97e37ee12ab68ba5198a281360ebcd9414be279a1d39574ef79e04ea5daeec69";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

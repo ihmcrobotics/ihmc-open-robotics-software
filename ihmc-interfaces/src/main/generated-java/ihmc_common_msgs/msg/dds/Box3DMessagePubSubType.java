@@ -11,6 +11,18 @@ package ihmc_common_msgs.msg.dds;
 public class Box3DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.Box3DMessage>
 {
    public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::Box3DMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "3a32893f5cd589724d43946b6cb793d3a683535bdd7286cf5f12e3b95c2c03fb";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

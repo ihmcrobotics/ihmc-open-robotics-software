@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class FramePlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.FramePlanarRegionsListMessage>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::FramePlanarRegionsListMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "ed941904fc58fd7646c5fdd9c141595ec114a7003b5d42d3da1b8998f249c3c4";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

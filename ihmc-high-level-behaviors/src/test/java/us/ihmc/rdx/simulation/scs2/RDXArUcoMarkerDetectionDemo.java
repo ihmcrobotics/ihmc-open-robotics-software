@@ -83,7 +83,8 @@ public class RDXArUcoMarkerDetectionDemo
                   ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
                   markersToTrack.add(new OpenCVArUcoMarker(0, 0.2032));
                   markersToTrack.add(new OpenCVArUcoMarker(1, 0.2032));
-                  arUcoMarkerDetectionUI.create(arUcoMarkerDetection, markersToTrack, sensorPoseGizmo.getGizmoFrame());
+                  arUcoMarkerDetectionUI.create(arUcoMarkerDetection);
+                  arUcoMarkerDetectionUI.setupForRenderingDetectedPosesIn3D(markersToTrack, sensorPoseGizmo.getGizmoFrame());
                   baseUI.getImGuiPanelManager().addPanel(arUcoMarkerDetectionUI.getMainPanel());
                   baseUI.getPrimaryScene().addRenderableProvider(arUcoMarkerDetectionUI::getRenderables, RDXSceneLevel.VIRTUAL);
 
@@ -95,7 +96,8 @@ public class RDXArUcoMarkerDetectionDemo
                   testImageArUcoMarkerDetection.setSourceImageForDetection(testRGB888ColorImage);
                   testImageArUcoMarkerDetection.setCameraInstrinsics(cameraSensor.getDepthCameraIntrinsics());
                   testImageArUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI(" Test");
-                  testImageArUcoMarkerDetectionUI.create(testImageArUcoMarkerDetection, new ArrayList<>(), sensorPoseGizmo.getGizmoFrame());
+                  testImageArUcoMarkerDetectionUI.create(testImageArUcoMarkerDetection);
+                  testImageArUcoMarkerDetectionUI.setupForRenderingDetectedPosesIn3D(new ArrayList<>(), sensorPoseGizmo.getGizmoFrame());
                   ImGuiPanel testUIPanel = new ImGuiPanel("Test image detection", this::renderTestUIImGuiWidgets);
                   testUIPanel.addChild(testImageArUcoMarkerDetectionUI.getMarkerImagePanel());
                   baseUI.getImGuiPanelManager().addPanel(testUIPanel);
