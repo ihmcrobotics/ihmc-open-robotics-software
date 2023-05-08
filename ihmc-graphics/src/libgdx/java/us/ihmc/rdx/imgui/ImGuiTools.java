@@ -47,7 +47,6 @@ public class ImGuiTools
    private static ImFont nodeFont;
 
    private static boolean userKeysHaveBeenMapped = false;
-   private static int tabKey;
    private static int spaceKey;
    private static int deleteKey;
    private static int escapeKey;
@@ -451,7 +450,6 @@ public class ImGuiTools
 
    private static void initializeUserMappedKeys()
    {
-      tabKey = ImGui.getKeyIndex(ImGuiKey.Tab);
       spaceKey = ImGui.getKeyIndex(ImGuiKey.Space);
       deleteKey = ImGui.getKeyIndex(ImGuiKey.Delete);
       escapeKey = ImGui.getKeyIndex(ImGuiKey.Escape);
@@ -460,13 +458,6 @@ public class ImGuiTools
       downArrowKey = ImGui.getKeyIndex(ImGuiKey.DownArrow);
       leftArrowKey = ImGui.getKeyIndex(ImGuiKey.LeftArrow);
       rightArrowKey = ImGui.getKeyIndex(ImGuiKey.RightArrow);
-   }
-
-   public static int getTabKey()
-   {
-      if (!userKeysHaveBeenMapped)
-         initializeUserMappedKeys();
-      return tabKey;
    }
 
    public static int getSpaceKey()
