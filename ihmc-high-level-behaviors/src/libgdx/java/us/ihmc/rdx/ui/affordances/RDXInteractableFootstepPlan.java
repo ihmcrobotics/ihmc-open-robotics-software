@@ -274,7 +274,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    {
       if (getRobotIsWalking())
       {
-         System.out.println("WALKINGSFASFASDFA");
          if ((walkingStatusMessage != null) && (walkingStatusMessage.getWalkingStatus() == WalkingStatus.COMPLETED.toByte()))
          {
             LogTools.info("Goal reached, walking stopped!");
