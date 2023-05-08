@@ -56,7 +56,6 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    private final YoBoolean footstepIsAdjustable = new YoBoolean(yoNamePrefix + "FootstepIsAdjustable", registry);
 
    private final YoDouble swingDuration = new YoDouble(yoNamePrefix + "SwingDuration", registry);
-   private final YoDouble nextTransferDuration = new YoDouble(yoNamePrefix + "NextTransferDuration", registry);
 
    private final YoFramePose3D upcomingFootstep = new YoFramePose3D(yoNamePrefix + "UpcomingFootstepPose", worldFrame, registry);
    private final YoEnum<RobotSide> upcomingFootstepSide = new YoEnum<>(yoNamePrefix + "UpcomingFootstepSide", registry, RobotSide.class);
@@ -171,7 +170,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    }
 
    @Override
-   public void setFootstepToAdjust(SimpleFootstep footstep, double swingDuration, double nextTransferDuration)
+   public void setFootstepToAdjust(SimpleFootstep footstep, double swingDuration)
    {
       FramePose3DReadOnly footstepPose = footstep.getSoleFramePose();
       footstepPose.checkReferenceFrameMatch(worldFrame);
@@ -192,7 +191,6 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
 
          footstepIsAdjustable.set(footstep.getIsAdjustable());
          useStepAdjustment.set(allowStepAdjustment.getValue() && footstepIsAdjustable.getBooleanValue());
-         this.nextTransferDuration.set(nextTransferDuration);
       }
       else
       {
@@ -229,6 +227,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
                        FramePoint2DReadOnly desiredICP,
                        FramePoint2DReadOnly currentICP,
                        double omega0,
+                       int numberOfFootstepsInQueue,
                        FramePoint2DReadOnly desiredCoP,
                        FramePoint2DReadOnly finalDesiredCoP,
                        double finalFeedbackAlpha)

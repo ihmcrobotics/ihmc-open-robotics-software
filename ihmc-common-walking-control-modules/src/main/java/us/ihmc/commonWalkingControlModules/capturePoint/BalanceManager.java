@@ -455,7 +455,14 @@ public class BalanceManager implements SCS2YoGraphicHolder
       }
 
       perfectCMP2d.setIncludingFrame(yoPerfectCMP);
-      stepAdjustmentController.compute(yoTime.getDoubleValue(), desiredCapturePoint, capturePoint2d, omega0, perfectCMP2d, yoFinalDesiredCoP, feedbackAlpha);
+      stepAdjustmentController.compute(yoTime.getDoubleValue(),
+                                       desiredCapturePoint,
+                                       capturePoint2d,
+                                       omega0,
+                                       footsteps.size(),
+                                       perfectCMP2d,
+                                       yoFinalDesiredCoP,
+                                       feedbackAlpha);
       boolean footstepWasAdjusted = stepAdjustmentController.wasFootstepAdjusted();
       footstep.setPose(stepAdjustmentController.getFootstepSolution());
 
@@ -875,7 +882,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
          nextFootstepTiming.set(footstepTimings.get(1));
          stepAdjustmentController.setFootstepAfterTheCurrentOne(nextFootstep, nextFootstepTiming);
       }
-      stepAdjustmentController.setFootstepToAdjust(currentFootstep, swingTime, nextFootstepTiming.getTransferTime());
+      stepAdjustmentController.setFootstepToAdjust(currentFootstep, swingTime);
       stepAdjustmentController.initialize(yoTime.getDoubleValue(), supportSide);
 
       contactStateManager.initializeForSingleSupport(transferTime, swingTime);
