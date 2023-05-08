@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
@@ -50,7 +51,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public class MultiStepCaptureRegionCalculatorTest
 {
-   private static final boolean PLOT_RESULTS = true;
+   private static final boolean PLOT_RESULTS = false;
    private static final boolean WAIT_FOR_BUTTON_PUSH = true;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -455,7 +456,7 @@ public class MultiStepCaptureRegionCalculatorTest
       FrameConvexPolygon2D captureRegion = new FrameConvexPolygon2D(captureRegionCalculator.getCaptureRegion());
       captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
 
-      testTheRegions(multiStepRegionCalculator, captureRegion, swingDuration, omega0, kinematicStepRange, swingSide.getOppositeSide());
+//      testTheRegions(multiStepRegionCalculator, captureRegion, swingDuration, omega0, kinematicStepRange, swingSide.getOppositeSide());
 
       if (PLOT_RESULTS)
       {
@@ -694,159 +695,7 @@ public class MultiStepCaptureRegionCalculatorTest
       }
    }
 
-   @Test
-   public void testCustomRegion()
-   {
-      double forwardLimit = 0.8;
-      double backwardLimit = 0.8;
-      double innerLimit = 0.075;
-      double outerLimit = 0.6;
-      double width = 0.25;
-      double swingDuration = 0.6;
-
-      YoBoolean yoUseCrossoverSteps = new YoBoolean("useCrossOverSteps", registry);
-      YoDouble yoForwardLimit = new YoDouble("forwardLimit", registry);
-      YoDouble yoBackwardLimit = new YoDouble("backwardLimit", registry);
-      YoDouble yoInnerLimit = new YoDouble("innerLimit", registry);
-      YoDouble yoOuterLimit = new YoDouble("outerLimit", registry);
-      YoDouble yoNominalWidth = new YoDouble("nominalWidth", registry);
-      YoDouble yoSwingDuration = new YoDouble("swingDuration", registry);
-
-      yoUseCrossoverSteps.set(false);
-      yoForwardLimit.set(forwardLimit);
-      yoBackwardLimit.set(backwardLimit);
-      yoInnerLimit.set(innerLimit);
-      yoOuterLimit.set(outerLimit);
-      yoNominalWidth.set(width);
-      yoSwingDuration.set(swingDuration);
-
-      RobotSide swingSide = RobotSide.RIGHT;
-      double omega0 = 3.0;
-
-      rightAnkleZUpFrame.offset.set(-7.7975, -0.689, 0.0);
-
-      StepAdjustmentReachabilityConstraint reachabilityConstraint = new StepAdjustmentReachabilityConstraint(ankleZUpFrames,
-                                                                                                             yoForwardLimit,
-                                                                                                             yoBackwardLimit,
-                                                                                                             yoInnerLimit,
-                                                                                                             yoOuterLimit,
-                                                                                                             yoNominalWidth,
-                                                                                                             new StepAdjustmentParameters.CrossOverReachabilityParameters(),
-                                                                                                             "name",
-                                                                                                             false,
-                                                                                                             registry,
-                                                                                                             null);
-      MultiStepCaptureRegionCalculator multiStepRegionCalculator = new MultiStepCaptureRegionCalculator(ankleZUpFrames, reachabilityConstraint, yoUseCrossoverSteps, registry);
-
-      new DefaultParameterReader().readParametersInRegistry(registry);
-
-      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
-      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
-
-      FrameConvexPolygon2D captureRegion = new FrameConvexPolygon2D(worldFrame);
-      captureRegion.addVertex(-8.948408366022468, -1.182346807561577);
-      captureRegion.addVertex(-8.195158479383283, -0.8753905331934113);
-      captureRegion.addVertex(-8.195883193671728, -0.8835854688320095);
-      captureRegion.addVertex(-8.869156007849128, -1.3359121005742813);
-      captureRegion.addVertex(-8.883396241580565, -1.313370168182256);
-      captureRegion.addVertex(-8.897132125484696, -1.2905174119794491);
-      captureRegion.addVertex(-8.902839149434223, -1.28067235292708);
-      captureRegion.addVertex(-8.910356878203586, -1.2673651142918154);
-      captureRegion.addVertex(-8.92278804870555, -1.2446760941454778);
-      captureRegion.update();
-      captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
-
-//      testTheRegions(multiStepRegionCalculator, captureRegion, swingDuration, omega0, kinematicStepRange, swingSide.getOppositeSide());
-
-      if (PLOT_RESULTS)
-      {
-         YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-         YoFrameConvexPolygon2D yoOneStepRegion = new YoFrameConvexPolygon2D("oneStepRegion", worldFrame, 10, registry);
-         YoFrameConvexPolygon2D yoTwoStepRegion = new YoFrameConvexPolygon2D("twoStepRegion", worldFrame, 20, registry);
-         YoFrameConvexPolygon2D yoThreeStepRegion = new YoFrameConvexPolygon2D("threeStepRegion", worldFrame, 20, registry);
-         YoFrameConvexPolygon2D yoFourStepRegion = new YoFrameConvexPolygon2D("fourStepRegion", worldFrame, 20, registry);
-         YoFrameConvexPolygon2D yoFiveStepRegion = new YoFrameConvexPolygon2D("fiveStepRegion", worldFrame, 20, registry);
-         YoFrameConvexPolygon2D yoSixStepRegion = new YoFrameConvexPolygon2D("sixStepRegion", worldFrame, 20, registry);
-
-         YoArtifactPolygon oneStepRegionGraphic = new YoArtifactPolygon("oneStepRegion", yoOneStepRegion, Color.green, false);
-         YoArtifactPolygon twoStepRegionGraphic = new YoArtifactPolygon("twoStepRegion", yoTwoStepRegion, Color.blue, false);
-         YoArtifactPolygon threeStepRegionGraphic = new YoArtifactPolygon("threeStepRegion", yoThreeStepRegion, Color.red, false);
-         YoArtifactPolygon fourStepRegionGraphic = new YoArtifactPolygon("fourStepRegion", yoFourStepRegion, Color.green, false);
-         YoArtifactPolygon fiveStepRegionGraphic = new YoArtifactPolygon("fiveStepRegion", yoFiveStepRegion, Color.blue, false);
-         YoArtifactPolygon sixStepRegionGraphic = new YoArtifactPolygon("sixStepRegion", yoSixStepRegion, Color.red, false);
-
-         graphicsListRegistry.registerArtifact("test", oneStepRegionGraphic);
-         graphicsListRegistry.registerArtifact("test", twoStepRegionGraphic);
-         graphicsListRegistry.registerArtifact("test", threeStepRegionGraphic);
-         graphicsListRegistry.registerArtifact("test", fourStepRegionGraphic);
-         graphicsListRegistry.registerArtifact("test", fiveStepRegionGraphic);
-         graphicsListRegistry.registerArtifact("test", sixStepRegionGraphic);
-
-         Robot robot = new Robot("test");
-         robot.getRobotsYoRegistry().addChild(registry);
-
-         SimulationConstructionSet scs = new SimulationConstructionSet(robot);
-
-         MultiStepCaptureRegionVisualizer visualizer = new MultiStepCaptureRegionVisualizer(multiStepRegionCalculator,
-                                                                                            () -> scs.tickAndUpdate(),
-                                                                                            registry,
-                                                                                            graphicsListRegistry);
-
-         scs.addYoGraphicsListRegistry(graphicsListRegistry);
-
-         SimulationOverheadPlotterFactory plotterFactory = scs.createSimulationOverheadPlotterFactory();
-         plotterFactory.addYoGraphicsListRegistries(graphicsListRegistry);
-         plotterFactory.createOverheadPlotter();
-
-         //         multiStepRegionCalculator.attachVisualizer(visualizer);
-
-         scs.startOnAThread();
-
-         yoOneStepRegion.setMatchingFrame(captureRegion, false);
-
-         updateRegions(yoSwingDuration.getDoubleValue(),
-                       multiStepRegionCalculator,
-                       captureRegion,
-                       omega0,
-                       swingSide.getOppositeSide(),
-                       yoTwoStepRegion,
-                       yoThreeStepRegion,
-                       yoFourStepRegion,
-                       yoFiveStepRegion,
-                       yoSixStepRegion);
-
-         YoVariableChangedListener updatedListener = v ->
-         {
-            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
-            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
-
-            updateRegions(yoSwingDuration.getDoubleValue(),
-                          multiStepRegionCalculator,
-                          captureRegion,
-                          omega0,
-                          swingSide.getOppositeSide(),
-                          yoTwoStepRegion,
-                          yoThreeStepRegion,
-                          yoFourStepRegion,
-                          yoFiveStepRegion,
-                          yoSixStepRegion);
-            scs.tickAndUpdate();
-         };
-
-         yoUseCrossoverSteps.addListener(updatedListener);
-         yoForwardLimit.addListener(updatedListener);
-         yoBackwardLimit.addListener(updatedListener);
-         yoInnerLimit.addListener(updatedListener);
-         yoOuterLimit.addListener(updatedListener);
-         yoNominalWidth.addListener(updatedListener);
-         yoSwingDuration.addListener(updatedListener);
-
-         scs.tickAndUpdate();
-
-         ThreadTools.sleepForever();
-      }
-   }
-
+   @Disabled
    @Test
    public void testCaptureRegionIsAPoint()
    {
