@@ -234,6 +234,8 @@ public class RDXLocomotionManager
 
       interactableFootstepPlan.renderImGuiWidgets();
       ImGui.checkbox(labels.get("Show footstep related graphics"), showGraphics);
+
+      interactableFootstepPlan.isRobotWalking();
    }
 
    public void updateWalkPathControlRing()

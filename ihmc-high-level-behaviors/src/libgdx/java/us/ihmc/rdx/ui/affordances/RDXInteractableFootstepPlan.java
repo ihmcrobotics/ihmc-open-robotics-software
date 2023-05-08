@@ -15,6 +15,8 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
@@ -22,6 +24,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -59,6 +62,10 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
    private int previousPlanLength;
    private boolean wasPlanUpdated = false;
+
+   private boolean robotIsWalking = false;
+   private RobotSide lastRobotSideOnCurrentPlan = RobotSide.LEFT;
+   private FramePoint3DReadOnly lastFootstepOnCurrentPlan;
 
    public void create(RDXBaseUI baseUI,
                       CommunicationHelper communicationHelper,
@@ -217,7 +224,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
    public void update()
    {
-
       // Update footsteps in the list, and the one being placed
       for (int i = 0; i < footsteps.size(); i++)
       {
@@ -265,8 +271,39 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       selectedFootstep = null;
    }
 
+   public void isRobotWalking()
+   {
+      if (getRobotIsWalking())
+      {
+         FramePoint3D robotFootPosition = new FramePoint3D();
+         robotFootPosition.setX(syncedRobot.getReferenceFrames().getSoleFrame(lastRobotSideOnCurrentPlan).getTransformToRoot().getTranslation().getX());
+         robotFootPosition.setY(syncedRobot.getReferenceFrames().getSoleFrame(lastRobotSideOnCurrentPlan).getTransformToRoot().getTranslation().getY());
+         robotFootPosition.setZ(syncedRobot.getReferenceFrames().getSoleFrame(lastRobotSideOnCurrentPlan).getTransformToRoot().getTranslation().getZ());
+
+         if (robotFootPosition.epsilonEquals(lastFootstepOnCurrentPlan, 0.01))
+         {
+            LogTools.info("Goal reached, walking stopped!");
+            setRobotIsWalking(false);
+         }
+      }
+   }
+
+   public boolean getRobotIsWalking()
+   {
+      return robotIsWalking;
+   }
+
+   public void setRobotIsWalking(boolean newValue)
+   {
+      robotIsWalking = newValue;
+   }
+
    public void walkFromSteps()
    {
+      // Saves the location of the last footstep that was planned to see if the robot's foot is in the location, if it's not, we must be walking
+      lastRobotSideOnCurrentPlan = getLastFootstep().getFootstepSide();
+      lastFootstepOnCurrentPlan = getLastFootstep().getFootPose().getPosition();
+
       FootstepDataListMessage messageList = new FootstepDataListMessage();
       for (RDXInteractableFootstep step : footsteps)
       {
@@ -299,6 +336,9 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
          stepChecker.setSwingStepPose(footsteps.get(size - 2).getFootPose());
          stepChecker.setSwingSide(footsteps.get(size - 2).getFootstepSide());
       }
+
+      setRobotIsWalking(true);
+
       stepChecker.clear(footsteps);
       clear();
    }
@@ -308,6 +348,31 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       RDXInteractableFootstep nextFootstep = footsteps.add();
       nextFootstep.reset();
       return nextFootstep;
+   }
+
+   public RDXInteractableFootstep getLastFootstep()
+   {
+      if (footsteps.size() > 0)
+      {
+         return footsteps.get(footsteps.size() - 1);
+      }
+      return null;
+   }
+
+   /**
+    * Gets the transform either from the footstep list, or from the synced robot.
+    * Never gets the transform from the footstep currently being placed.
+    */
+   public RigidBodyTransformReadOnly getLastFootstepTransform(RobotSide robotSide)
+   {
+      if (footsteps.size() > 0)
+      {
+         return getLastFootstep().getFootPose();
+      }
+      else
+      {
+         return syncedRobot.getReferenceFrames().getSoleFrame(robotSide).getTransformToWorldFrame();
+      }
    }
 
    public int getNumberOfFootsteps()
@@ -328,31 +393,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       {
          footsteps.remove(footsteps.size() - 1);
       }
-   }
-
-   /**
-    * Gets the transform either from the footstep list, or from the synced robot.
-    * Never gets the transform from the footstep currently being placed.
-    */
-   public RigidBodyTransformReadOnly getLastFootstepTransform(RobotSide robotSide)
-   {
-      if (footsteps.size() > 0)
-      {
-         return getLastFootstep().getFootPose();
-      }
-      else
-      {
-         return syncedRobot.getReferenceFrames().getSoleFrame(robotSide).getTransformToWorldFrame();
-      }
-   }
-
-   public RDXInteractableFootstep getLastFootstep()
-   {
-      if (footsteps.size() > 0)
-      {
-         return footsteps.get(footsteps.size() - 1);
-      }
-      return null;
    }
 
    private RDXInteractableFootstep newPlannedFootstep()
