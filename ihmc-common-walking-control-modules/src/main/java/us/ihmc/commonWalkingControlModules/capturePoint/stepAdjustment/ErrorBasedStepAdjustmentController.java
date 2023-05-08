@@ -71,7 +71,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final DoubleProvider minICPErrorForStepAdjustment;
    private final BooleanProvider allowCrossOverSteps;
 
-   private SimpleFootstep nextFootstep;
    private FootstepTiming nextFootstepTiming;
 
    private final YoBoolean useStepAdjustment = new YoBoolean(yoNamePrefix + "UseStepAdjustment", registry);
@@ -81,7 +80,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
    private final YoDouble finalFeedbackAlpha = new YoDouble(yoNamePrefix + "FinalFeedbackAlpha", registry);
    private final YoDouble swingDuration = new YoDouble(yoNamePrefix + "SwingDuration", registry);
-   private final YoDouble nextTransferDuration = new YoDouble(yoNamePrefix + "NextTransferDuration", registry);
    private final YoInteger controlTicksIntoStep = new YoInteger(yoNamePrefix + "TicksIntoStep", registry);
 
    private final YoFramePose3D upcomingFootstep = new YoFramePose3D(yoNamePrefix + "UpcomingFootstepPose", worldFrame, registry);
@@ -288,19 +286,17 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       multiStepCaptureRegionCalculator.reset();
       environmentConstraintProvider.reset();
       controlTicksIntoStep.set(0);
-      nextFootstep = null;
       nextFootstepTiming = null;
    }
 
    @Override
    public void setFootstepAfterTheCurrentOne(SimpleFootstep nextFootstep, FootstepTiming nextFootstepTiming)
    {
-      this.nextFootstep = nextFootstep;
       this.nextFootstepTiming = nextFootstepTiming;
    }
 
    @Override
-   public void setFootstepToAdjust(SimpleFootstep footstep, double swingDuration, double nextTransferDuration)
+   public void setFootstepToAdjust(SimpleFootstep footstep, double swingDuration)
    {
       FramePose3DReadOnly footstepPose = footstep.getSoleFramePose();
       footstepPose.checkReferenceFrameMatch(worldFrame);
@@ -322,7 +318,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
          footstepIsAdjustable.set(footstep.getIsAdjustable());
          shouldCheckForReachability.set(footstep.getShouldCheckReachability());
          useStepAdjustment.set(allowStepAdjustment.getValue() && footstepIsAdjustable.getBooleanValue());
-         this.nextTransferDuration.set(nextTransferDuration);
       }
       else
       {
@@ -362,6 +357,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                        FramePoint2DReadOnly desiredICP,
                        FramePoint2DReadOnly currentICP,
                        double omega0,
+                       int numberOfFootstepsInQueue,
                        FramePoint2DReadOnly desiredCoP,
                        FramePoint2DReadOnly finalDesiredCoP,
                        double finalFeedbackAlpha)
@@ -394,7 +390,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                singleStepRegion,
                                                nextFootstepTiming == null ? Double.NaN : nextFootstepTiming.getStepTime(),
                                                omega0,
-                                               nextFootstep == null ? 1 : 2); // fixme hardcoded.
+                                               numberOfFootstepsInQueue); // fixme hardcoded.
 
       if (!useStepAdjustment.getBooleanValue())
       {
