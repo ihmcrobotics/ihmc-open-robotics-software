@@ -50,14 +50,14 @@ public class RDXWalkingLowLevelMessenger
 
    public void sendPauseWalkingRequest()
    {
-      LogTools.info("Pause Walking");
+      LogTools.info("Walking Paused");
       robotLowLevelMessenger.sendPauseWalkingRequest();
       robotPausedWalking = true;
    }
 
    public void sendContinueWalkingRequest()
    {
-      LogTools.info("Continue Walking");
+      LogTools.info("Walking resumed");
       robotLowLevelMessenger.sendContinueWalkingRequest();
       robotPausedWalking = false;
    }
