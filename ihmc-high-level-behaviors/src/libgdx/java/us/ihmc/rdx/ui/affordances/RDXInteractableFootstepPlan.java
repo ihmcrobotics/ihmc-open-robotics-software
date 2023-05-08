@@ -64,7 +64,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    private boolean wasPlanUpdated = false;
 
    private boolean robotIsWalking = false;
-//   private final AtomicReference<WalkingStatusMessage> walkingStatus = new AtomicReference<>();
    private WalkingStatusMessage walkingStatusMessage;
 
    public void create(RDXBaseUI baseUI,
