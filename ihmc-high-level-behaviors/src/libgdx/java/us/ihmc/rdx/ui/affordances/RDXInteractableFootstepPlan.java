@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import imgui.ImGui;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
@@ -15,8 +16,6 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
@@ -24,6 +23,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -64,8 +64,8 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    private boolean wasPlanUpdated = false;
 
    private boolean robotIsWalking = false;
-   private RobotSide lastRobotSideOnCurrentPlan = null;
-   private FramePoint3DReadOnly lastFootstepOnCurrentPlan;
+//   private final AtomicReference<WalkingStatusMessage> walkingStatus = new AtomicReference<>();
+   private WalkingStatusMessage walkingStatusMessage;
 
    public void create(RDXBaseUI baseUI,
                       CommunicationHelper communicationHelper,
@@ -271,19 +271,16 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       selectedFootstep = null;
    }
 
-   public void isRobotWalking()
+   public void updateRobotIsWalking()
    {
       if (getRobotIsWalking())
       {
-         FramePoint3D robotFootPosition = new FramePoint3D();
-         robotFootPosition.setX(syncedRobot.getReferenceFrames().getSoleFrame(lastRobotSideOnCurrentPlan).getTransformToRoot().getTranslation().getX());
-         robotFootPosition.setY(syncedRobot.getReferenceFrames().getSoleFrame(lastRobotSideOnCurrentPlan).getTransformToRoot().getTranslation().getY());
-         robotFootPosition.setZ(syncedRobot.getReferenceFrames().getSoleFrame(lastRobotSideOnCurrentPlan).getTransformToRoot().getTranslation().getZ());
-
-         if (robotFootPosition.epsilonEquals(lastFootstepOnCurrentPlan, 0.01))
+         System.out.println("WALKINGSFASFASDFA");
+         if ((walkingStatusMessage != null) && (walkingStatusMessage.getWalkingStatus() == WalkingStatus.COMPLETED.toByte()))
          {
             LogTools.info("Goal reached, walking stopped!");
             setRobotIsWalking(false);
+            walkingStatusMessage = null;
          }
       }
    }
@@ -300,10 +297,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
    public void walkFromSteps()
    {
-      // Saves the location of the last footstep that was planned to see if the robot's foot is in the location, if it's not, we must be walking
-      lastRobotSideOnCurrentPlan = getLastFootstep().getFootstepSide();
-      lastFootstepOnCurrentPlan = getLastFootstep().getFootPose().getPosition();
-
       FootstepDataListMessage messageList = new FootstepDataListMessage();
       for (RDXInteractableFootstep step : footsteps)
       {
@@ -409,5 +402,10 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    public void destroy()
    {
       swingPlanningModule.destroy();
+   }
+
+   public void setWalkingStatusMessage(WalkingStatusMessage walkingStatusMessage)
+   {
+      this.walkingStatusMessage = walkingStatusMessage;
    }
 }
