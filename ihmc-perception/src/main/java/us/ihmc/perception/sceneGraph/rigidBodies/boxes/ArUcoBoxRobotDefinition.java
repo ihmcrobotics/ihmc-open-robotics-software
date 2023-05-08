@@ -14,18 +14,22 @@ import us.ihmc.scs2.definition.robot.SixDoFJointDefinition;
 import us.ihmc.scs2.definition.state.SixDoFJointState;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 
-public class BoxWithFiducial3RobotDefinition extends RobotDefinition
+/**
+ * This is a box with an ArUco marker ID 2 on it, as specified in
+ * {@link RigidBodySceneObjectDefinitions}.
+ */
+public class ArUcoBoxRobotDefinition extends RobotDefinition
 {
    private SixDoFJointState initialSixDoFState;
 
-   public BoxWithFiducial3RobotDefinition()
+   public ArUcoBoxRobotDefinition()
    {
       super("boxWithFiducial");
 
       RigidBodyDefinition elevator = new RigidBodyDefinition("boxRootBody");
       SixDoFJointDefinition floatingJoint = new SixDoFJointDefinition("boxRootJoint");
 
-      double size = 0.35;
+      double size = RigidBodySceneObjectDefinitions.BOX_SIZE;
       RigidBodyDefinition box = new RigidBodyDefinition("Box");
       VisualDefinition modelVisualDefinition = new VisualDefinition();
       ModelFileGeometryDefinition geometryDefinition = new ModelFileGeometryDefinition(RigidBodySceneObjectDefinitions.BOX_VISUAL_MODEL_FILE_PATH);
