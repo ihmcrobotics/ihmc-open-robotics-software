@@ -23,6 +23,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.ui.ImGuiStoredPropertySetBooleanWidget;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetDoubleWidget;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -46,6 +47,7 @@ public class RDXLocomotionManager
    private final CommunicationHelper communicationHelper;
    private final RDXLocomotionParameters walkingParameters;
    private final ImGuiStoredPropertySetTuner walkingParametersTuner = new ImGuiStoredPropertySetTuner("Walking Parameters");
+   private ImGuiStoredPropertySetBooleanWidget areFootstepsAdjustableCheckbox;
    private ImGuiStoredPropertySetDoubleWidget swingTimeSlider;
    private ImGuiStoredPropertySetDoubleWidget transferTimeSlider;
    private ImGuiStoredPropertySetDoubleWidget turnAggressivenessSlider;
@@ -114,6 +116,8 @@ public class RDXLocomotionManager
       this.baseUI = baseUI;
 
       walkingParametersTuner.create(walkingParameters);
+
+      areFootstepsAdjustableCheckbox = walkingParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.areFootstepsAdjustable);
       swingTimeSlider = walkingParametersTuner.createDoubleSlider(RDXLocomotionParameters.swingTime, 0.3, 1.5);
       transferTimeSlider = walkingParametersTuner.createDoubleSlider(RDXLocomotionParameters.transferTime, 0.3, 1.5);
       turnAggressivenessSlider = walkingParametersTuner.createDoubleSlider(RDXLocomotionParameters.turnAggressiveness, 0.0, 10.0);
@@ -212,6 +216,7 @@ public class RDXLocomotionManager
       ImGui.text("Options during walking: ");
       ImGui.sameLine();
       walkingLowLevelMessenger.renderImGuiWidgets();
+      areFootstepsAdjustableCheckbox.render();
       swingTimeSlider.render();
       transferTimeSlider.render();
       turnAggressivenessSlider.render();
