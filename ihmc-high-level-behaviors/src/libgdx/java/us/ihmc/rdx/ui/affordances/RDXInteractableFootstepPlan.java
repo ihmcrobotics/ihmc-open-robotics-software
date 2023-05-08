@@ -64,7 +64,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    private boolean wasPlanUpdated = false;
 
    private boolean robotIsWalking = false;
-   private RobotSide lastRobotSideOnCurrentPlan = RobotSide.LEFT;
+   private RobotSide lastRobotSideOnCurrentPlan = null;
    private FramePoint3DReadOnly lastFootstepOnCurrentPlan;
 
    public void create(RDXBaseUI baseUI,
