@@ -71,8 +71,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final DoubleProvider minICPErrorForStepAdjustment;
    private final BooleanProvider allowCrossOverSteps;
 
-   private FootstepTiming nextFootstepTiming;
-
    private final YoBoolean useStepAdjustment = new YoBoolean(yoNamePrefix + "UseStepAdjustment", registry);
    private final YoBoolean footstepIsAdjustable = new YoBoolean(yoNamePrefix + "FootstepIsAdjustable", registry);
    private final YoBoolean shouldCheckForReachability = new YoBoolean(yoNamePrefix + "ShouldCheckForReachability", registry);
@@ -80,7 +78,10 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
    private final YoDouble finalFeedbackAlpha = new YoDouble(yoNamePrefix + "FinalFeedbackAlpha", registry);
    private final YoDouble swingDuration = new YoDouble(yoNamePrefix + "SwingDuration", registry);
+
    private final YoInteger controlTicksIntoStep = new YoInteger(yoNamePrefix + "TicksIntoStep", registry);
+   private final YoInteger stepsInQueue = new YoInteger(yoNamePrefix + "StepsInQueue", registry);
+   private final YoDouble subsequentStepDuration = new YoDouble(yoNamePrefix + "SubsequentStepDuration", registry);
 
    private final YoFramePose3D upcomingFootstep = new YoFramePose3D(yoNamePrefix + "UpcomingFootstepPose", worldFrame, registry);
    private final YoEnum<RobotSide> upcomingFootstepSide = new YoEnum<>(yoNamePrefix + "UpcomingFootstepSide", registry, RobotSide.class);
@@ -286,14 +287,17 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       multiStepCaptureRegionCalculator.reset();
       environmentConstraintProvider.reset();
       controlTicksIntoStep.set(0);
-      nextFootstepTiming = null;
+      this.stepsInQueue.set(0);
+      this.subsequentStepDuration.set(Double.NaN);
    }
 
    @Override
-   public void setFootstepAfterTheCurrentOne(SimpleFootstep nextFootstep, FootstepTiming nextFootstepTiming)
+   public void setFootstepQueueInformation(int numberOfStepsInQueue, double subsequentStepDuration)
    {
-      this.nextFootstepTiming = nextFootstepTiming;
+      stepsInQueue.set(numberOfStepsInQueue);
+      this.subsequentStepDuration.set(subsequentStepDuration);
    }
+
 
    @Override
    public void setFootstepToAdjust(SimpleFootstep footstep, double swingDuration)
@@ -357,9 +361,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                        FramePoint2DReadOnly desiredICP,
                        FramePoint2DReadOnly currentICP,
                        double omega0,
-                       int numberOfFootstepsInQueue,
-                       FramePoint2DReadOnly desiredCoP,
-                       FramePoint2DReadOnly finalDesiredCoP,
+                       FramePoint2DReadOnly copToShrinkAbout,
                        double finalFeedbackAlpha)
    {
       this.finalFeedbackAlpha.set(finalFeedbackAlpha);
@@ -376,7 +378,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       if (timeRemainingInState.getValue() < minimumTimeForStepAdjustment.getValue())
          return;
 
-      computeLimitedAreaForCoP(desiredCoP, finalDesiredCoP, finalFeedbackAlpha);
+      computeLimitedAreaForCoP(copToShrinkAbout, finalFeedbackAlpha);
       RobotSide swingSide = upcomingFootstepSide.getEnumValue();
       RobotSide stanceSide = swingSide.getOppositeSide();
       captureRegionCalculator.calculateCaptureRegion(swingSide, Math.max(timeRemainingInState.getDoubleValue(), 0.0), currentICP, omega0, allowableAreaForCoP);
@@ -388,9 +390,9 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
             oneStepSafetyHeuristics.getCaptureRegionWithSafetyMargin();
       multiStepCaptureRegionCalculator.compute(stanceSide,
                                                singleStepRegion,
-                                               nextFootstepTiming == null ? Double.NaN : nextFootstepTiming.getStepTime(),
+                                               stepsInQueue.getIntegerValue() < 2 ? Double.NaN : subsequentStepDuration.getDoubleValue(),
                                                omega0,
-                                               numberOfFootstepsInQueue); // fixme hardcoded.
+                                               stepsInQueue.getIntegerValue());
 
       if (!useStepAdjustment.getBooleanValue())
       {
@@ -447,22 +449,13 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
    private final FramePoint2D finalInFoot = new FramePoint2D();
 
-   private void computeLimitedAreaForCoP(FramePoint2DReadOnly desiredCoP, FramePoint2DReadOnly finalDesiredCoP,
-                                         FramePoint2DReadOnly desiredICP, FramePoint2DReadOnly finalDesiredICP,
-                                         double finalFeedbackAlpha,
-                                         double omega)
+   private void computeLimitedAreaForCoP(FramePoint2DReadOnly desiredCoP, double finalFeedbackAlpha)
    {
       RobotSide supportSide = upcomingFootstepSide.getEnumValue().getOppositeSide();
       FixedFrameConvexPolygon2DBasics shrunkSupport = allowableAreasForCoP.get(supportSide);
       FrameConvexPolygon2DReadOnly supportPolygon = bipedSupportPolygons.getFootPolygonInSoleFrame(supportSide);
-      finalInFoot.setReferenceFrame(desiredCoP.getReferenceFrame());
-      finalInFoot.interpolate(desiredCoP, finalDesiredCoP, 0.5);
-
-      double exp = Math.exp(m, timeRemainingInState.getDoubleValue())
-      finalInFoot.scaleAdd();
-
+      finalInFoot.setMatchingFrame(desiredCoP);
       finalInFoot.changeFrame(shrunkSupport.getReferenceFrame());
-
 
       if (!Double.isNaN(finalFeedbackAlpha) && finalFeedbackAlpha >= 1.0 - 1e-5)
       {
