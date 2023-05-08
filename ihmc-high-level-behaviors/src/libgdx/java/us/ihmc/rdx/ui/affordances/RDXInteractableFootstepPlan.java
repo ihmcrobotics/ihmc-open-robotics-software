@@ -271,7 +271,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       selectedFootstep = null;
    }
 
-   public void updateRobotIsWalking()
+   public boolean getAndUpdateRobotIsWalking()
    {
       if (getRobotIsWalking())
       {
@@ -283,6 +283,8 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
             walkingStatusMessage = null;
          }
       }
+
+      return getRobotIsWalking();
    }
 
    public boolean getRobotIsWalking()

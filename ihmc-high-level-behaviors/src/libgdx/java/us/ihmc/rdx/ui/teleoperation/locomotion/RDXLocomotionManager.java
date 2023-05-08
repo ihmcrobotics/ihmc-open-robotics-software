@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -89,6 +90,8 @@ public class RDXLocomotionManager
          footstepPlanning.setHeightMapData(heightMap);
          interactableFootstepPlan.setHeightMapMessage(heightMap);
       });
+
+      ros2Helper.subscribeToControllerViaCallback(WalkingStatusMessage.class, interactableFootstepPlan::setWalkingStatusMessage);
 
       footstepsSentToControllerGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       communicationHelper.subscribeToControllerViaCallback(FootstepDataListMessage.class,
@@ -235,7 +238,7 @@ public class RDXLocomotionManager
       interactableFootstepPlan.renderImGuiWidgets();
       ImGui.checkbox(labels.get("Show footstep related graphics"), showGraphics);
 
-      interactableFootstepPlan.isRobotWalking();
+      interactableFootstepPlan.getAndUpdateRobotIsWalking();
    }
 
    public void updateWalkPathControlRing()
