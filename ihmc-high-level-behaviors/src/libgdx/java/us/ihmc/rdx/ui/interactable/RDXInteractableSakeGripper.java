@@ -35,24 +35,34 @@ public class RDXInteractableSakeGripper implements RenderableProvider
       FINGERS_TO_PALM_OPEN[1].getTranslation().set(0.11, 0.03, 0.0);
    }
 
-   private static final RigidBodyTransform[] FINGERS_TO_PALM_NEUTRAL = new RigidBodyTransform[] {new RigidBodyTransform(), new RigidBodyTransform()};
+   private static final RigidBodyTransform[] FINGERS_TO_PALM_HALF_CLOSE = new RigidBodyTransform[] {new RigidBodyTransform(), new RigidBodyTransform()};
    static
    {
-      EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_NEUTRAL[0].getRotation(), 0.0, 0.0, 0.0);
-      FINGERS_TO_PALM_NEUTRAL[0].getTranslation().set(0.11, -0.03, 0.0);
+      EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_HALF_CLOSE[0].getRotation(), -13.0, 0.0, 0.0);
+      FINGERS_TO_PALM_HALF_CLOSE[0].getTranslation().set(0.11, -0.03, 0.0);
 
-      EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_NEUTRAL[1].getRotation(), 0.0, 0.0, 180.0);
-      FINGERS_TO_PALM_NEUTRAL[1].getTranslation().set(0.11, 0.03, 0.0);
+      EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_HALF_CLOSE[1].getRotation(), 13.0, 0.0, 180.0);
+      FINGERS_TO_PALM_HALF_CLOSE[1].getTranslation().set(0.11, 0.03, 0.0);
    }
 
    private static final RigidBodyTransform[] FINGERS_TO_PALM_CLOSE = new RigidBodyTransform[] {new RigidBodyTransform(), new RigidBodyTransform()};
    static
    {
-      EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_CLOSE[0].getRotation(), 15.0, 0.0, 0.0);
+      EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_CLOSE[0].getRotation(), 12.5, 0.0, 0.0);
       FINGERS_TO_PALM_CLOSE[0].getTranslation().set(0.11, -0.03, 0.0);
 
-      EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_CLOSE[1].getRotation(), -15.0, 0.0, 180.0);
+      EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_CLOSE[1].getRotation(), -12.5, 0.0, 180.0);
       FINGERS_TO_PALM_CLOSE[1].getTranslation().set(0.11, 0.03, 0.0);
+   }
+
+   private static final RigidBodyTransform[] FINGERS_TO_PALM_CRUSH = new RigidBodyTransform[] {new RigidBodyTransform(), new RigidBodyTransform()};
+   static
+   {
+      EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_CRUSH[0].getRotation(), 16.0, 0.0, 0.0);
+      FINGERS_TO_PALM_CRUSH[0].getTranslation().set(0.11, -0.03, 0.0);
+
+      EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_CRUSH[1].getRotation(), -16.0, 0.0, 180.0);
+      FINGERS_TO_PALM_CRUSH[1].getTranslation().set(0.11, 0.03, 0.0);
    }
 
    private final RDXInteractableFrameModel interactableHandFrameModel = new RDXInteractableFrameModel();
@@ -76,9 +86,10 @@ public class RDXInteractableSakeGripper implements RenderableProvider
       this.fingersTransforms = new RigidBodyTransform[NUMBER_OF_FINGERS];
       for (int i = 0; i < NUMBER_OF_FINGERS; i++)
       {
-         fingersTransforms[i] = new RigidBodyTransform(FINGERS_TO_PALM_NEUTRAL[i]);
+         fingersTransforms[i] = new RigidBodyTransform(FINGERS_TO_PALM_CLOSE[i]);
          fingersFrames[i] = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(referenceFrameHand, fingersTransforms[i]);
       }
+      handConfiguration = HandConfiguration.CLOSE;
 
       panel3D.addImGui3DViewInputProcessor(this::updateFingers);
    }
@@ -90,6 +101,13 @@ public class RDXInteractableSakeGripper implements RenderableProvider
          fingersFrames[i].update();
          LibGDXTools.toLibGDX(fingersFrames[i].getTransformToRoot(), fingersModelInstances[i].transform);
       }
+   }
+
+   public void crushGripper()
+   {
+      for (int i = 0; i < NUMBER_OF_FINGERS; i++)
+         fingersTransforms[i].set(FINGERS_TO_PALM_CRUSH[i]);
+      handConfiguration = HandConfiguration.CRUSH;
    }
 
    public void closeGripper()
@@ -106,10 +124,11 @@ public class RDXInteractableSakeGripper implements RenderableProvider
       handConfiguration = HandConfiguration.OPEN;
    }
 
-   public void setGripperToNeutral()
+   public void setGripperToHalfClose()
    {
       for (int i = 0; i < NUMBER_OF_FINGERS; i++)
-         fingersTransforms[i].set(FINGERS_TO_PALM_NEUTRAL[i]);
+         fingersTransforms[i].set(FINGERS_TO_PALM_HALF_CLOSE[i]);
+      handConfiguration = HandConfiguration.HALF_CLOSE;
    }
 
    public void setGripperClosure(double closure)
@@ -122,6 +141,20 @@ public class RDXInteractableSakeGripper implements RenderableProvider
                                                     -closure,
                                                     fingersTransforms[1].getRotation().getPitch(),
                                                     fingersTransforms[1].getRotation().getRoll());
+   }
+
+   public void setGripperToConfiguration(HandConfiguration configuration)
+   {
+      switch (configuration)
+      {
+         case OPEN -> openGripper();
+         case HALF_CLOSE -> setGripperToHalfClose();
+         case CLOSE -> closeGripper();
+         case CRUSH -> crushGripper();
+         default ->
+         {
+         }
+      }
    }
 
    private double calculateClosestCollision(Line3DReadOnly mousePickRay)
@@ -149,7 +182,7 @@ public class RDXInteractableSakeGripper implements RenderableProvider
 
    public float getMaxGripperClosure()
    {
-      return (float) Math.toDegrees(FINGERS_TO_PALM_CLOSE[0].getRotation().getYaw());
+      return (float) Math.toDegrees(FINGERS_TO_PALM_CRUSH[0].getRotation().getYaw());
    }
 
    public float getGripperClosure()

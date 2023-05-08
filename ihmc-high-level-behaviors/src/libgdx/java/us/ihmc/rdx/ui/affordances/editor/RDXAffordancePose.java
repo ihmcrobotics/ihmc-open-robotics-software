@@ -56,14 +56,12 @@ public class RDXAffordancePose
          frame.setPoseAndUpdate(handPose);
       }
       ImGui.sameLine();
-      if (ImGui.button(labels.get("DELETE") + "##" + id))
+      if (ImGui.button(labels.get("CLEAR") + "##" + id))
       {
          isPoseSet = false;
          handConfiguration = null;
       }
-      ImGui.sameLine();
-      ImGui.text("|");
-      ImGui.sameLine();
+
       if (isPoseSet)
          ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 1.0f, 0.0f, 1.0f);
       else
@@ -72,9 +70,14 @@ public class RDXAffordancePose
       {
          if (isPoseSet)
             handTransformToWorld.set(pose);  // move hand to pregrasp point
+         if (handConfiguration != null)
+            interactableHand.setGripperToConfiguration(handConfiguration);
       }
       ImGui.popStyleColor();
-      if (ImGui.button(labels.get("SET HAND CONFIGURATION") + "##" + id))
+
+      ImGui.text("Hand Configuration: " + (handConfiguration == null ? "" : handConfiguration.toString()));
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("SET") + "##hand" + id))
       {
          handConfiguration = interactableHand.getConfiguration();
       }
@@ -83,6 +86,7 @@ public class RDXAffordancePose
    public void reset()
    {
       isPoseSet = false;
+      handConfiguration = null;
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

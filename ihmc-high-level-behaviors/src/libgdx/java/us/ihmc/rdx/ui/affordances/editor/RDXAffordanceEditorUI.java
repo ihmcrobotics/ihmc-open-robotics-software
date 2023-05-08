@@ -40,7 +40,6 @@ public class RDXAffordanceEditorUI
    private final PoseReferenceFrame affordanceFrame = new PoseReferenceFrame("affordanceFrame", ReferenceFrame.getWorldFrame());
    private final float[] gripperClosure = new float[1];
    // affordance poses
-   private RDXAffordancePose initialPose;
    private RDXAffordancePose graspPose;
    private RDXAffordancePoses preGraspPoses;
    private RDXAffordancePoses postGraspPoses;
@@ -61,7 +60,6 @@ public class RDXAffordanceEditorUI
             handTransformToWorld.getTranslation().set(-0.5, 0, 0);
             interactableHand = new RDXInteractableSakeGripper(baseUI.getPrimary3DPanel(), handTransformToWorld);
 
-            initialPose = new RDXAffordancePose(interactableHand, handTransformToWorld, handPose, affordanceFrame, Color.WHITE);
             graspPose = new RDXAffordancePose(interactableHand, handTransformToWorld, handPose, affordanceFrame, Color.BLACK);
             preGraspPoses = new RDXAffordancePoses(interactableHand,
                                                    handTransformToWorld,
@@ -117,7 +115,6 @@ public class RDXAffordanceEditorUI
       handPose.set(handTransformToWorld);
       handPose.changeFrame(affordanceFrame);
 
-      initialPose.update();
       graspPose.update();
       preGraspPoses.update();
       postGraspPoses.update();
@@ -132,20 +129,20 @@ public class RDXAffordanceEditorUI
       if (ImGui.button(labels.get("OPEN")))
          interactableHand.openGripper();
       ImGui.sameLine();
+      if (ImGui.button(labels.get("HALF_CLOSE")))
+         interactableHand.setGripperToHalfClose();
+      ImGui.sameLine();
       if (ImGui.button(labels.get("CLOSE")))
          interactableHand.closeGripper();
       ImGui.sameLine();
-      if (ImGui.button(labels.get("NEUTRAL")))
-         interactableHand.setGripperToNeutral();
+      if (ImGui.button(labels.get("CRUSH")))
+         interactableHand.crushGripper();
       if (ImGui.sliderFloat("SET CLOSURE", gripperClosure, interactableHand.getMinGripperClosure(), interactableHand.getMaxGripperClosure()))
          interactableHand.setGripperClosure(gripperClosure[0]);
       ImGui.separator();
 
       ImGui.text("PRE-GRASP MENU");
-      ImGui.text("Initial Frame: ");
-      ImGui.sameLine();
-      initialPose.renderImGuiWidgets(labels, "initial");
-      ImGui.text("Other Frames: ");
+      ImGui.text("Pre-grasp Frames: ");
       ImGui.sameLine();
       preGraspPoses.renderImGuiWidgets(labels, "pregrasp");
       ImGui.separator();
@@ -166,9 +163,8 @@ public class RDXAffordanceEditorUI
       {
          handTransformToWorld.setToZero();
          handTransformToWorld.getTranslation().set(-0.5, 0, 0);
-         interactableHand.setGripperToNeutral();
+         interactableHand.closeGripper();
          objectBuilder.getSelectedObject().resetPose();
-         initialPose.reset();
          graspPose.reset();
          preGraspPoses.reset();
          postGraspPoses.reset();
@@ -186,7 +182,6 @@ public class RDXAffordanceEditorUI
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      initialPose.getRenderables(renderables, pool);
       graspPose.getRenderables(renderables, pool);
       preGraspPoses.getRenderables(renderables, pool);
       postGraspPoses.getRenderables(renderables, pool);
