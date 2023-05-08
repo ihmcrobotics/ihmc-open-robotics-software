@@ -88,7 +88,7 @@ fun us.ihmc.build.IHMCDependenciesExtension.apiCommonBytedecoNatives()
    apiBytedecoNatives("opencl", "3.0-", "-20221104.001125-5")
    apiBytedecoNatives("librealsense2", "2.50.0-", "-20221104.001736-8")
    apiBytedecoNatives("spinnaker", "3.0.0.118-", "-20230218.091411-11")
-   apiBytedecoNatives("ffmpeg", "5.1.2-", "-20230120.070542-158")
+   apiBytedecoNatives("ffmpeg", "6.0-", "-20230506.025210-104")
    apiBytedecoNatives("hdf5", "1.12.2-", "-20221104.003540-9")
 }
 
