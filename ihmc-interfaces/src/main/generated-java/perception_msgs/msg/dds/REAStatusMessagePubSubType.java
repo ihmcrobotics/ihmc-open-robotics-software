@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class REAStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.REAStatusMessage>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::REAStatusMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "8e1522d422aa9e514732d86c45f9f018d12575c41d6e954f4d57d6b5c2c2329c";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

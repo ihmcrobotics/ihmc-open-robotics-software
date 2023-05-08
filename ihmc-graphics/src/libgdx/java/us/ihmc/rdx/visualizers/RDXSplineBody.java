@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.Material;
@@ -38,6 +39,15 @@ public class RDXSplineBody implements RenderableProvider
       Texture paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
       material.set(TextureAttribute.createDiffuse(paletteTexture));
       material.set(ColorAttribute.createDiffuse(new com.badlogic.gdx.graphics.Color(0.7f, 0.7f, 0.7f, 1.0f)));
+   }
+
+   public RDXSplineBody(float lineWidth, float opacity)
+   {
+      this.lineWidth = lineWidth;
+      Texture paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
+      material.set(TextureAttribute.createDiffuse(paletteTexture));
+      material.set(ColorAttribute.createDiffuse(new com.badlogic.gdx.graphics.Color(0.7f, 0.7f, 0.7f, 1.0f)));
+      material.set(new BlendingAttribute(true, GL41.GL_SRC_ALPHA, GL41.GL_ONE_MINUS_SRC_ALPHA, opacity));
    }
 
    public void setColor(Color color)

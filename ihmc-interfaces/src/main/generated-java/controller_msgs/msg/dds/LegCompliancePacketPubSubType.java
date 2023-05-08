@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class LegCompliancePacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.LegCompliancePacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::LegCompliancePacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "228595c6baaa30a2b416a5a565bba47aea63a63cc82fec7be7940483c283b4bb";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

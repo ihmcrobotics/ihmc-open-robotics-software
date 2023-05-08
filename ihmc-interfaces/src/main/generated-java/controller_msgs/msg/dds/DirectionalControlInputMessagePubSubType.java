@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class DirectionalControlInputMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.DirectionalControlInputMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::DirectionalControlInputMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "f1a322021c64a69824923d45e5e0f51a4d18e6e8b7c2cefcab47905f5a4a0400";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

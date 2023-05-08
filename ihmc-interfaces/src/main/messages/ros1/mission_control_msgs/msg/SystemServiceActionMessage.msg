@@ -1,7 +1,9 @@
 
+# The name of the systemd service
 string service_name
 
-# systemd_action valid values: [start, stop, restart, kill]
+# The action to perform in the systemctl command
+# Valid values: [start, stop, restart, kill]
 string systemd_action
 
 

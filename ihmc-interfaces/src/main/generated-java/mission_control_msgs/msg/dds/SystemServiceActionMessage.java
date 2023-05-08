@@ -8,9 +8,13 @@ import us.ihmc.pubsub.TopicDataType;
 
 public class SystemServiceActionMessage extends Packet<SystemServiceActionMessage> implements Settable<SystemServiceActionMessage>, EpsilonComparable<SystemServiceActionMessage>
 {
+   /**
+            * The name of the systemd service
+            */
    public java.lang.StringBuilder service_name_;
    /**
-            * systemd_action valid values: [start, stop, restart, kill]
+            * The action to perform in the systemctl command
+            * Valid values: [start, stop, restart, kill]
             */
    public java.lang.StringBuilder systemd_action_;
 
@@ -36,23 +40,33 @@ public class SystemServiceActionMessage extends Packet<SystemServiceActionMessag
 
    }
 
+   /**
+            * The name of the systemd service
+            */
    public void setServiceName(java.lang.String service_name)
    {
       service_name_.setLength(0);
       service_name_.append(service_name);
    }
 
+   /**
+            * The name of the systemd service
+            */
    public java.lang.String getServiceNameAsString()
    {
       return getServiceName().toString();
    }
+   /**
+            * The name of the systemd service
+            */
    public java.lang.StringBuilder getServiceName()
    {
       return service_name_;
    }
 
    /**
-            * systemd_action valid values: [start, stop, restart, kill]
+            * The action to perform in the systemctl command
+            * Valid values: [start, stop, restart, kill]
             */
    public void setSystemdAction(java.lang.String systemd_action)
    {
@@ -61,14 +75,16 @@ public class SystemServiceActionMessage extends Packet<SystemServiceActionMessag
    }
 
    /**
-            * systemd_action valid values: [start, stop, restart, kill]
+            * The action to perform in the systemctl command
+            * Valid values: [start, stop, restart, kill]
             */
    public java.lang.String getSystemdActionAsString()
    {
       return getSystemdAction().toString();
    }
    /**
-            * systemd_action valid values: [start, stop, restart, kill]
+            * The action to perform in the systemctl command
+            * Valid values: [start, stop, restart, kill]
             */
    public java.lang.StringBuilder getSystemdAction()
    {

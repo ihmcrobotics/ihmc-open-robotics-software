@@ -4,25 +4,23 @@ import imgui.ImGui;
 import imgui.extension.texteditor.TextEditor;
 import imgui.extension.texteditor.TextEditorLanguageDefinition;
 import imgui.type.ImBoolean;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.tools.processManagement.ProcessTools;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class ImGuiConsoleArea
 {
-   private final ServiceLogFile logFile;
    private final TextEditor textEditor = new TextEditor();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean autoScroll = new ImBoolean(true);
+   private final List<String> buffer = new ArrayList<>();
+   private long lastFlush = 0L;
 
-   public ImGuiConsoleArea(ServiceLogFile logFile)
+   public ImGuiConsoleArea()
    {
-      this.logFile = logFile;
-
       int[] palette = new int[] {0xffffffff,   // Default
                                  0xffd69c56,   // Keyword
                                  0xff00ff00,   // Number
@@ -64,44 +62,15 @@ public class ImGuiConsoleArea
 
       ImGui.sameLine();
 
-      if (ImGui.button("Clear log"))
+      if (ImGui.button("Refresh log"))
       {
-         if (logFile.exists())
-         {
-            textEditor.setText("");
-            try
-            {
-               logFile.delete();
-               logFile.createNewFile();
-            }
-            catch (IOException e)
-            {
-               LogTools.warn("Unable to delete service log file", e);
-            }
-         }
+         textEditor.setText("");
       }
 
-      ImGui.sameLine();
-
-      if (ImGui.button("Open log directory"))
+      if (System.currentTimeMillis() - lastFlush > 2000)
       {
-         String os = System.getProperty("os.name").toLowerCase();
-
-         new Thread(() ->
-         {
-            if (os.contains("linux"))
-            {
-               ProcessTools.execSimpleCommandSafe("xdg-open " + logFile.getParentFile().getAbsolutePath());
-            }
-            else if (os.contains("windows"))
-            {
-               ProcessTools.execSimpleCommandSafe("explorer.exe " + logFile.getParentFile().getAbsolutePath());
-            }
-            else if (os.contains("mac"))
-            {
-               // TODO:
-            }
-         }).start();
+         flushBuffer();
+         lastFlush = System.currentTimeMillis();
       }
 
       if (autoScroll.get())
@@ -116,18 +85,42 @@ public class ImGuiConsoleArea
       ImGui.popFont();
    }
 
-   public void acceptLine(String newText)
+   public void flushBuffer()
    {
-      int previousCursorLine = textEditor.getCursorPositionLine();
-      int previousCursorColumn = textEditor.getCursorPositionColumn();
-      int lastLineIndex = textEditor.getTotalLines() - 1;
-      int endOfLastLineColumn = textEditor.getTextLines()[lastLineIndex].length();
-      boolean isAutoScroll = previousCursorLine == lastLineIndex && previousCursorColumn == endOfLastLineColumn;
-      textEditor.setCursorPosition(lastLineIndex, endOfLastLineColumn);
-      textEditor.setReadOnly(false);
-      textEditor.insertText(newText + "\n");
-      textEditor.setReadOnly(true);
-      if (!isAutoScroll)
-         textEditor.setCursorPosition(previousCursorLine, previousCursorColumn);
+      if (buffer.isEmpty())
+         return;
+
+      String[] previousLines = textEditor.getTextLines();
+      String[] newLines = buffer.toArray(new String[0]);
+      String[] lines = new String[previousLines.length + buffer.size()];
+
+      System.arraycopy(previousLines, 0, lines, 0, previousLines.length);
+      System.arraycopy(newLines, 0, lines, previousLines.length, newLines.length);
+
+      textEditor.setTextLines(lines);
+
+      buffer.clear();
+   }
+
+   public void acceptLine(String newText, boolean buffer)
+   {
+      if (buffer)
+      {
+         this.buffer.add(newText);
+      }
+      else
+      {
+         int previousCursorLine = textEditor.getCursorPositionLine();
+         int previousCursorColumn = textEditor.getCursorPositionColumn();
+         int lastLineIndex = textEditor.getTotalLines() - 1;
+         int endOfLastLineColumn = textEditor.getTextLines()[lastLineIndex].length();
+         boolean isAutoScroll = previousCursorLine == lastLineIndex && previousCursorColumn == endOfLastLineColumn;
+         textEditor.setCursorPosition(lastLineIndex, endOfLastLineColumn);
+         textEditor.setReadOnly(false);
+         textEditor.insertText(newText + "\n");
+         textEditor.setReadOnly(true);
+         if (!isAutoScroll)
+            textEditor.setCursorPosition(previousCursorLine, previousCursorColumn);
+      }
    }
 }

@@ -83,10 +83,10 @@ public class KinematicsStreamingToolboxParameters
       defaultConfiguration.setEnableRightHandTaskspace(true);
       defaultConfiguration.setEnableChestTaskspace(true);
       defaultConfiguration.setEnablePelvisTaskspace(true);
-      defaultConfiguration.setLeftHandTrajectoryFrameId(ReferenceFrame.getWorldFrame().hashCode());
-      defaultConfiguration.setRightHandTrajectoryFrameId(ReferenceFrame.getWorldFrame().hashCode());
-      defaultConfiguration.setChestTrajectoryFrameId(ReferenceFrame.getWorldFrame().hashCode());
-      defaultConfiguration.setPelvisTrajectoryFrameId(ReferenceFrame.getWorldFrame().hashCode());
+      defaultConfiguration.setLeftHandTrajectoryFrameId(ReferenceFrame.getWorldFrame().getFrameNameHashCode());
+      defaultConfiguration.setRightHandTrajectoryFrameId(ReferenceFrame.getWorldFrame().getFrameNameHashCode());
+      defaultConfiguration.setChestTrajectoryFrameId(ReferenceFrame.getWorldFrame().getFrameNameHashCode());
+      defaultConfiguration.setPelvisTrajectoryFrameId(ReferenceFrame.getWorldFrame().getFrameNameHashCode());
    }
 
    public double getCenterOfMassSafeMargin()
