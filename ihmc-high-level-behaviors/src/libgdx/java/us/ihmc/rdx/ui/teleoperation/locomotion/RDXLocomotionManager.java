@@ -251,6 +251,12 @@ public class RDXLocomotionManager
       interactableFootstepPlan.renderImGuiWidgets();
       ImGui.checkbox(labels.get("Show footstep related graphics"), showGraphics);
 
+      isSpaceBarPressed();
+      isRobotStillWalking();
+   }
+
+   public void isSpaceBarPressed()
+   {
       if (ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
       {
          if (!spaceBarPressed)
@@ -280,8 +286,6 @@ public class RDXLocomotionManager
       {
          spaceBarPressed = false;
       }
-
-      isRobotStillWalking();
    }
 
    public void isRobotStillWalking()
@@ -296,7 +300,7 @@ public class RDXLocomotionManager
          if (robotFootPosition.epsilonEquals(lastFootstepOnCurrentPlan, 0.01))
          {
             //TODO Move walking check to RDXInteractableFootstepPlan and add safety checking
-            System.out.println("Goal reached, walking stopped!");
+            LogTools.info("Goal reached, walking stopped!");
             robotIsWalking = false;
             walkingLowLevelMessenger.setRobotPausedWalking(false);
          }
