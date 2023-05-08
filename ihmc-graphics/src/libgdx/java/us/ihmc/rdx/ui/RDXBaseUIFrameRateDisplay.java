@@ -21,13 +21,16 @@ public class RDXBaseUIFrameRateDisplay
 
    private String fpsString = "0 Hz";
 
-   public void render()
+   public void renderPlot()
+   {
+      plot.setNextValue((float) latestFPSCalculator.getFrequency());
+      plot.calculate("", true);
+   }
+
+   public void renderHz()
    {
       latestFPSCalculator.ping();
       averagedFPSCalculator.ping();
-
-      plot.setNextValue((float) latestFPSCalculator.getFrequency());
-      plot.calculate("", true);
 
       if (throttler.run())
       {
