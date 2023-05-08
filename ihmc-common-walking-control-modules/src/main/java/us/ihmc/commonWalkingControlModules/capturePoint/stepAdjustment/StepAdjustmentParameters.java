@@ -53,7 +53,7 @@ public abstract class StepAdjustmentParameters
     */
    public double getCoPDistanceFromFrontOfFoot()
    {
-      return 0.0;
+      return 0.02;
    }
 
    /**
@@ -61,7 +61,7 @@ public abstract class StepAdjustmentParameters
     */
    public double getCoPDistanceFromBackOfFoot()
    {
-      return 0.0;
+      return 0.05;
    }
 
    /**
@@ -69,7 +69,7 @@ public abstract class StepAdjustmentParameters
     */
    public double getCoPDistanceFromInsideOfFoot()
    {
-      return 0.0;
+      return 0.02;
    }
 
    /**
@@ -77,7 +77,7 @@ public abstract class StepAdjustmentParameters
     */
    public double getCoPDistanceFromOutsideOfFoot()
    {
-      return 0.0;
+      return 0.03;
    }
 
    /**
