@@ -26,16 +26,22 @@ public class RDXAffordancePose
    public final RDXInteractableSakeGripper interactableHand;
    private final FramePose3D handPose;
    private final RigidBodyTransform handTransformToWorld;
+   private RDXActiveAffordanceMenu[] activeMenu;
+   private final RDXActiveAffordanceMenu menu;
+   public boolean changedColor = false;
 
    public RDXAffordancePose(RDXInteractableSakeGripper interactableHand,
                             RigidBodyTransform handTransformToWorld,
                             FramePose3D handPose,
                             PoseReferenceFrame affordanceFrame,
+                            RDXActiveAffordanceMenu[] activeMenu,
                             Color color)
    {
       this.interactableHand = interactableHand;
       this.handPose = handPose;
       this.handTransformToWorld = handTransformToWorld;
+      this.activeMenu = activeMenu;
+      this.menu = activeMenu[0];
       this.affordanceFrame = affordanceFrame;
       frame = new PoseReferenceFrame("handFrame", affordanceFrame);
       frameGraphic = new RDXReferenceFrameGraphic(0.1, color);
@@ -63,21 +69,30 @@ public class RDXAffordancePose
       }
 
       if (isPoseSet)
-         ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 1.0f, 0.0f, 1.0f);
-      else
-         ImGui.pushStyleColor(ImGuiCol.Button, 1.0f, 0.0f, 0.0f, 1.0f);
-      if (ImGui.button(labels.get("TELEPORT") + "##" + id))
       {
-         if (isPoseSet)
-            handTransformToWorld.set(pose);  // move hand to pregrasp point
-         if (handConfiguration != null)
-            interactableHand.setGripperToConfiguration(handConfiguration);
+         if(activeMenu[0].equals(this.menu))
+         {
+            changedColor = true;
+            ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 1.0f, 0.0f, 1.0f);
+         }
+         if (ImGui.button(labels.get("Grasp Frame") + "##" + id))
+         {
+            activeMenu[0] = this.menu;
+            if (isPoseSet)
+               handTransformToWorld.set(pose);  // move hand to pregrasp point
+            if (handConfiguration != null)
+               interactableHand.setGripperToConfiguration(handConfiguration);
+         }
+         if (changedColor)
+         {
+            ImGui.popStyleColor();
+            changedColor = false;
+         }
       }
-      ImGui.popStyleColor();
 
       ImGui.text("Hand Configuration: " + (handConfiguration == null ? "" : handConfiguration.toString()));
       ImGui.sameLine();
-      if (ImGui.button(labels.get("SET") + "##hand" + id))
+      if (ImGui.button(labels.get("SET") + "##hand" + id) && activeMenu[0].equals(this.menu))
       {
          handConfiguration = interactableHand.getConfiguration();
       }

@@ -43,6 +43,7 @@ public class RDXAffordanceEditorUI
    private RDXAffordancePose graspPose;
    private RDXAffordancePoses preGraspPoses;
    private RDXAffordancePoses postGraspPoses;
+   private RDXActiveAffordanceMenu[] activeMenu;
    private final WorkspaceResourceDirectory configurationsDirectory = new WorkspaceResourceDirectory(getClass(), "/boxAffordance");
 
    public RDXAffordanceEditorUI()
@@ -60,25 +61,31 @@ public class RDXAffordanceEditorUI
             handTransformToWorld.getTranslation().set(-0.5, 0, 0);
             interactableHand = new RDXInteractableSakeGripper(baseUI.getPrimary3DPanel(), handTransformToWorld);
 
-            graspPose = new RDXAffordancePose(interactableHand, handTransformToWorld, handPose, affordanceFrame, Color.BLACK);
+            activeMenu = new RDXActiveAffordanceMenu[1];
+            activeMenu[0] = RDXActiveAffordanceMenu.GRASP;
+            graspPose = new RDXAffordancePose(interactableHand, handTransformToWorld, handPose, affordanceFrame, activeMenu, Color.BLACK);
+            activeMenu[0] = RDXActiveAffordanceMenu.PRE_GRASP;
             preGraspPoses = new RDXAffordancePoses(interactableHand,
                                                    handTransformToWorld,
                                                    handPose,
                                                    affordanceFrame,
+                                                   activeMenu,
                                                    new ArrayList<>(Arrays.asList(new Color(0xFFE4B5FF),
                                                                                  new Color(0xFF8C00FF),
                                                                                  new Color(0xFFDAB9FF),
                                                                                  new Color(0xFF6600FF),
                                                                                  new Color(0xFFA07AFF))));
+            activeMenu[0] = RDXActiveAffordanceMenu.POST_GRASP;
             postGraspPoses = new RDXAffordancePoses(interactableHand,
-                                                   handTransformToWorld,
-                                                   handPose,
-                                                   affordanceFrame,
-                                                   new ArrayList<>(Arrays.asList(new Color(0xD8BFD8FF),
-                                                                                 new Color(0xBA55D3FF),
-                                                                                 new Color(0x9932CCFF),
-                                                                                 new Color(0x8A2BE2FF),
-                                                                                 new Color(0x4B0082FF))));
+                                                    handTransformToWorld,
+                                                    handPose,
+                                                    affordanceFrame,
+                                                    activeMenu,
+                                                    new ArrayList<>(Arrays.asList(new Color(0xD8BFD8FF),
+                                                                                  new Color(0xBA55D3FF),
+                                                                                  new Color(0x9932CCFF),
+                                                                                  new Color(0x8A2BE2FF),
+                                                                                  new Color(0x4B0082FF))));
 
             baseUI.getPrimaryScene().addRenderableProvider(interactableHand);
             baseUI.getImGuiPanelManager().addPanel(interactableHand.getPose3DGizmo().createTunerPanel("hand"));

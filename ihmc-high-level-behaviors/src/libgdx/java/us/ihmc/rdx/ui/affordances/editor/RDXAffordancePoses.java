@@ -15,7 +15,6 @@ import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
-import java.awt.*;
 import java.util.ArrayList;
 
 public class RDXAffordancePoses
@@ -35,17 +34,22 @@ public class RDXAffordancePoses
    private int selectedIndex = -1;
    private final RigidBodyTransform handTransformToWorld;
    boolean changedColor = false;
+   private RDXActiveAffordanceMenu[] activeMenu;
+   private final RDXActiveAffordanceMenu menu;
 
    public RDXAffordancePoses(RDXInteractableSakeGripper interactableHand,
                              RigidBodyTransform handTransformToWorld,
                              FramePose3D handPose,
                              PoseReferenceFrame affordanceFrame,
+                             RDXActiveAffordanceMenu[] activeMenu,
                              ArrayList<Color> colors)
    {
       this.interactableHand = interactableHand;
       this.handPose = handPose;
       this.handTransformToWorld = handTransformToWorld;
       this.affordanceFrame = affordanceFrame;
+      this.activeMenu = activeMenu;
+      this.menu = activeMenu[0];
       this.colors = colors;
    }
 
@@ -63,6 +67,7 @@ public class RDXAffordancePoses
    {
       if (ImGui.button(labels.get("ADD") + "##" + id))
       {
+         activeMenu[0] = this.menu;
          index++;
          PoseReferenceFrame frame = new PoseReferenceFrame(index + "Frame", affordanceFrame);
          frame.setPoseAndUpdate(handPose);
@@ -77,7 +82,7 @@ public class RDXAffordancePoses
          selectedIndex = poseIndices.size() - 1;
       }
       ImGui.sameLine();
-      if (ImGui.button(labels.get("SET") + "##" + id))
+      if (ImGui.button(labels.get("SET") + "##" + id) && activeMenu[0].equals(this.menu))
       {
          frames.get(selectedIndex).setPoseAndUpdate(handPose);
          poses.set(selectedIndex, handPose);
@@ -100,13 +105,14 @@ public class RDXAffordancePoses
          {
             if (i % 5 != 0)
                ImGui.sameLine();
-            if (selectedIndex == i)
+            if (selectedIndex == i && activeMenu[0].equals(this.menu))
             {
                ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 1.0f, 0.0f, 1.0f);
                changedColor = true;
             }
             if (ImGui.button(labels.get(poseIndices.get(i).toString()) + "##" + id))
             {
+               activeMenu[0] = this.menu;
                // move hand to selected frame
                handTransformToWorld.set(poses.get(i));
                selectedIndex = i;
@@ -125,6 +131,7 @@ public class RDXAffordancePoses
             }
             ImGui.sameLine();
             // handle the delete button click event here...
+            ImGui.pushStyleColor(ImGuiCol.Button, 1.0f, 1.0f, 1.0f, 1.0f);
             if (ImGui.button(labels.get("X") + "##" + id + i, 15, 15))
             {
                frames.remove(i);
@@ -135,6 +142,7 @@ public class RDXAffordancePoses
                selectedFrameConfiguration = null;
                selectedIndex = -1;
             }
+            ImGui.popStyleColor();
          }
       }
       else
@@ -145,7 +153,7 @@ public class RDXAffordancePoses
 
       ImGui.text("Hand Configuration: " + (selectedFrameConfiguration == null ? "" : selectedFrameConfiguration.toString()));
       ImGui.sameLine();
-      if (ImGui.button(labels.get("SET") + "##hand" + id))
+      if (ImGui.button(labels.get("SET") + "##hand" + id) && activeMenu[0].equals(this.menu))
       {
          if (selectedIndex >= 0)
          {
