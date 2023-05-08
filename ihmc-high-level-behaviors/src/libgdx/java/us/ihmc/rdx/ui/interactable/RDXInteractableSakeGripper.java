@@ -22,7 +22,7 @@ import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
-public class RDXInteractableDummyHand implements RenderableProvider
+public class RDXInteractableSakeGripper implements RenderableProvider
 {
    private static final int NUMBER_OF_FINGERS = 2;
    private static final RigidBodyTransform[] FINGERS_TO_PALM_OPEN = new RigidBodyTransform[] {new RigidBodyTransform(), new RigidBodyTransform()};
@@ -63,7 +63,7 @@ public class RDXInteractableDummyHand implements RenderableProvider
    private final BoxRayIntersection boxRayIntersection = new BoxRayIntersection();
    private HandConfiguration handConfiguration;
 
-   public RDXInteractableDummyHand(RDX3DPanel panel3D, RigidBodyTransform transformToParentToModify)
+   public RDXInteractableSakeGripper(RDX3DPanel panel3D, RigidBodyTransform transformToParentToModify)
    {
       this.referenceFrameHand = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                                        transformToParentToModify);
