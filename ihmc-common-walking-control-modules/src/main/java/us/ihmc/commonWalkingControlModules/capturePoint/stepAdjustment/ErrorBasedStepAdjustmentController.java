@@ -447,14 +447,22 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
    private final FramePoint2D finalInFoot = new FramePoint2D();
 
-   private void computeLimitedAreaForCoP(FramePoint2DReadOnly desiredCoP, FramePoint2DReadOnly finalDesiredCoP, double finalFeedbackAlpha)
+   private void computeLimitedAreaForCoP(FramePoint2DReadOnly desiredCoP, FramePoint2DReadOnly finalDesiredCoP,
+                                         FramePoint2DReadOnly desiredICP, FramePoint2DReadOnly finalDesiredICP,
+                                         double finalFeedbackAlpha,
+                                         double omega)
    {
       RobotSide supportSide = upcomingFootstepSide.getEnumValue().getOppositeSide();
       FixedFrameConvexPolygon2DBasics shrunkSupport = allowableAreasForCoP.get(supportSide);
       FrameConvexPolygon2DReadOnly supportPolygon = bipedSupportPolygons.getFootPolygonInSoleFrame(supportSide);
       finalInFoot.setReferenceFrame(desiredCoP.getReferenceFrame());
       finalInFoot.interpolate(desiredCoP, finalDesiredCoP, 0.5);
+
+      double exp = Math.exp(m, timeRemainingInState.getDoubleValue())
+      finalInFoot.scaleAdd();
+
       finalInFoot.changeFrame(shrunkSupport.getReferenceFrame());
+
 
       if (!Double.isNaN(finalFeedbackAlpha) && finalFeedbackAlpha >= 1.0 - 1e-5)
       {
