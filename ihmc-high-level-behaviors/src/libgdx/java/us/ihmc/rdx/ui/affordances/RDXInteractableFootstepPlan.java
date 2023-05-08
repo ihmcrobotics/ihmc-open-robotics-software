@@ -167,7 +167,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
          ImGuiTools.previousWidgetTooltip("Keybind: Space");
          ImGui.sameLine();
       }
-      if (ImGui.button(labels.get("Delete Last")) || ImGui.isKeyPressed(ImGuiTools.getTabKey()))
+      if (ImGui.button(labels.get("Delete Last")) || ImGui.isKeyPressed(ImGuiTools.getDeleteKey()))
       {
          removeLastStep();
       }
