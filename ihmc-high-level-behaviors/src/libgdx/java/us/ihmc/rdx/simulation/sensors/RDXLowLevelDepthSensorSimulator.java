@@ -28,7 +28,7 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.rdx.simulation.DepthSensorShaderProvider;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.visualizers.RDXFrustumVisualizer;
+import us.ihmc.rdx.visualizers.RDXFrustumGraphic;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
@@ -79,7 +79,7 @@ public class RDXLowLevelDepthSensorSimulator
 
    private RDXBytedecoImagePanel depthPanel;
    private RDXImagePanel colorPanel;
-   private RDXFrustumVisualizer frustumVisualizer;
+   private RDXFrustumGraphic frustumVisualizer;
 
    private OpenCLManager openCLManager;
    private _cl_kernel openCLKernel;
@@ -172,7 +172,7 @@ public class RDXLowLevelDepthSensorSimulator
       colorPanel = new RDXImagePanel(colorWindowName, RDXImagePanel.FLIP_Y);
       colorPanel.setTexture(frameBuffer.getColorTexture());
 
-      frustumVisualizer = new RDXFrustumVisualizer();
+      frustumVisualizer = new RDXFrustumGraphic();
    }
 
    private void calculateFocalLength()

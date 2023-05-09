@@ -26,8 +26,8 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -52,7 +52,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    private RDXFootstepChecker stepChecker;
    private RDXSwingPlanningModule swingPlanningModule;
    private SideDependentList<ConvexPolygon2D> defaultPolygons;
-   private RDXTeleoperationParameters teleoperationParameters;
+   private RDXLocomotionParameters locomotionParameters;
 
    private final AtomicReference<HeightMapMessage> heightMapReference = new AtomicReference<>();
    private final AtomicReference<PlanarRegionsListMessage> planarRegionsListMessageReference = new AtomicReference<>();
@@ -65,12 +65,12 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    public void create(RDXBaseUI baseUI,
                       CommunicationHelper communicationHelper,
                       ROS2SyncedRobotModel syncedRobot,
-                      RDXTeleoperationParameters teleoperationParameters,
+                      RDXLocomotionParameters locomotionParameters,
                       FootstepPlannerParametersReadOnly footstepPlannerParameters)
    {
       this.baseUI = baseUI;
       this.communicationHelper = communicationHelper;
-      this.teleoperationParameters = teleoperationParameters;
+      this.locomotionParameters = locomotionParameters;
       this.syncedRobot = syncedRobot;
 
       defaultPolygons = FootstepPlanningModuleLauncher.createFootPolygons(communicationHelper.getRobotModel());
@@ -106,11 +106,15 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
       planarRegionsListReference.set(planarRegionsList);
+      if (swingPlanningModule != null)
+         swingPlanningModule.setPlanarRegionList(planarRegionsList);
    }
 
    public void setHeightMapMessage(HeightMapMessage heightMapMessage)
    {
       heightMapReference.set(heightMapMessage);
+      if (swingPlanningModule != null)
+         swingPlanningModule.setHeightMapData(heightMapMessage);
    }
 
    public void setSwingPlannerParameters(SwingPlannerParametersReadOnly swingPlannarParameters)
@@ -160,7 +164,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    {
       ImGui.text("Footstep plan:");
       ImGui.sameLine();
-      if (getFootsteps().size() > 0)
+      if (footsteps.size() > 0)
       {
          // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
          if (ImGui.button(labels.get("Walk")) || ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
@@ -235,7 +239,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       previousPlanLength = footsteps.size();
 
       stepChecker.update(footsteps);
-      if (wasPlanUpdated && teleoperationParameters.getReplanSwingTrajectoryOnChange() && !swingPlanningModule.getIsCurrentlyPlanning())
+      if (wasPlanUpdated && locomotionParameters.getReplanSwingTrajectoryOnChange() && !swingPlanningModule.getIsCurrentlyPlanning())
       {
          PlanarRegionsListMessage planarRegionsListMessage = planarRegionsListMessageReference.getAndSet(null);
          PlanarRegionsList planarRegionsList = planarRegionsListReference.getAndSet(null);
@@ -248,9 +252,11 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
             swingPlanningModule.setHeightMapData(heightMapMessage);
          SwingPlannerParametersReadOnly swingPlannerParameters = swingPlannerParametersReference.getAndSet(null);
          if (swingPlannerParameters != null)
+         {
             swingPlanningModule.setSwingPlannerParameters(swingPlannerParameters);
+            swingPlanningModule.updateAysnc(footsteps, SwingPlannerType.MULTI_WAYPOINT_POSITION);
+         }
 
-         swingPlanningModule.updateAysnc(footsteps, SwingPlannerType.MULTI_WAYPOINT_POSITION);
          wasPlanUpdated = false;
       }
    }
@@ -281,8 +287,9 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       messageList.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
       messageList.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       messageList.setOffsetFootstepsHeightWithExecutionError(true);
-      messageList.setDefaultSwingDuration(teleoperationParameters.getSwingTime());
-      messageList.setDefaultTransferDuration(teleoperationParameters.getTransferTime());
+      messageList.setDefaultSwingDuration(locomotionParameters.getSwingTime());
+      messageList.setDefaultTransferDuration(locomotionParameters.getTransferTime());
+      messageList.setAreFootstepsAdjustable(locomotionParameters.getAreFootstepsAdjustable());
 
       communicationHelper.publishToController(messageList);
 
@@ -304,6 +311,18 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       }
       stepChecker.clear(footsteps);
       clear();
+   }
+
+   public RDXInteractableFootstep getNextFootstep()
+   {
+      RDXInteractableFootstep nextFootstep = footsteps.add();
+      nextFootstep.reset();
+      return nextFootstep;
+   }
+
+   public int getNumberOfFootsteps()
+   {
+      return footsteps.size();
    }
 
    public RecyclingArrayList<RDXInteractableFootstep> getFootsteps()

@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class SteppableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.SteppableRegionMessage>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::SteppableRegionMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "feb836b9c7f46e0c5bb1e578a90fa3e50d7a161955033eb2ac5be21edbb06758";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

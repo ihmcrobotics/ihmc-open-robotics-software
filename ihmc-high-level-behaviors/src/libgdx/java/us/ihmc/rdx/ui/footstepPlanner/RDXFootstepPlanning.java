@@ -25,8 +25,8 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.log.LogTools;
-import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -55,13 +55,14 @@ public class RDXFootstepPlanning
    private final AtomicReference<AStarBodyPathPlannerParametersReadOnly> bodyPathPlannerParametersReference = new AtomicReference<>();
    private final AtomicReference<SwingPlannerParametersReadOnly> swingFootPlannerParametersReference = new AtomicReference<>();
    private final AtomicReference<FootstepPlannerOutput> outputReference = new AtomicReference<>();
-   private final RDXTeleoperationParameters teleoperationParameters;
+
+   private final RDXLocomotionParameters locomotionParameters;
 
    private final AtomicBoolean hasNewPlanAvailable = new AtomicBoolean(false);
 
-   public RDXFootstepPlanning(DRCRobotModel robotModel, RDXTeleoperationParameters teleoperationParameters, ROS2SyncedRobotModel syncedRobot)
+   public RDXFootstepPlanning(DRCRobotModel robotModel, RDXLocomotionParameters locomotionParameters, ROS2SyncedRobotModel syncedRobot)
    {
-      this.teleoperationParameters = teleoperationParameters;
+      this.locomotionParameters = locomotionParameters;
       this.syncedRobot = syncedRobot;
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
       request = new FootstepPlannerRequest();
@@ -153,7 +154,7 @@ public class RDXFootstepPlanning
          assumeFlatGround = false;
       }
 
-      request.setPlanBodyPath(teleoperationParameters.getPlanWithBodyPath());
+      request.setPlanBodyPath(locomotionParameters.getPlanWithBodyPath());
       // TODO: Set start footholds!!
       //      request.setPlanarRegionsList(...);
       request.setAssumeFlatGround(assumeFlatGround);

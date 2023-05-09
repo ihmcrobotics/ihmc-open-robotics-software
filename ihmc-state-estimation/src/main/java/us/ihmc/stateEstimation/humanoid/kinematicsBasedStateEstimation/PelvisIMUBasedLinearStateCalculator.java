@@ -126,7 +126,7 @@ public class PelvisIMUBasedLinearStateCalculator implements SCS2YoGraphicHolder
       return useAccelerometerForEstimation.getValue() && imuProcessedOutput != null;
    }
 
-   private void updateLinearAccelerationMeasurement()
+   public void updateLinearAccelerationMeasurement()
    {
       if (!isEstimationEnabled())
          return;
@@ -150,8 +150,6 @@ public class PelvisIMUBasedLinearStateCalculator implements SCS2YoGraphicHolder
 
    public void estimateRootJointLinearVelocity(FrameVector3DReadOnly estimatedRootJointAngularVelocity, FixedFrameVector3DBasics rootJointVelocityToUpdate)
    {
-      updateLinearAccelerationMeasurement();
-
       twist.setToZero(rootJointFrame, rootJointBaseFrame, measurementFrame);
       twist.getLinearPart().setMatchingFrame(previousMeasurementFrameLinearVelocity);
       twist.getLinearPart().scaleAdd(estimatorDT, yoLinearAccelerationMeasurement, twist.getLinearPart());
@@ -181,7 +179,6 @@ public class PelvisIMUBasedLinearStateCalculator implements SCS2YoGraphicHolder
       twist.changeFrame(rootJointFrame);
       linearVelocity.setIncludingFrame(twist.getLinearPart());
       linearVelocity.changeFrame(worldFrame);
-      rootJointPositionToUpdate.scaleAdd(estimatorDT, linearVelocity, previousRootJointPosition);
 
       // Update debug variables
       if (resetRootJointPositionIMUOnly.getValue())
@@ -190,6 +187,9 @@ public class PelvisIMUBasedLinearStateCalculator implements SCS2YoGraphicHolder
          rootJointPositionIMUOnly.set(previousRootJointPosition);
       }
       rootJointPositionIMUOnly.scaleAdd(estimatorDT, rootJointLinearVelocityIMUOnly, rootJointPositionIMUOnly);
+
+      // Updating last in case rootJointPositionToUpdate == previousRootJointPosition
+      rootJointPositionToUpdate.scaleAdd(estimatorDT, linearVelocity, previousRootJointPosition);
    }
 
    /**

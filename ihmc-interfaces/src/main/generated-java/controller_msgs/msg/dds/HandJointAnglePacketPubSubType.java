@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class HandJointAnglePacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.HandJointAnglePacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::HandJointAnglePacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "b843cc260e12d058f3306bb21a6cf59ff0f29705c92bee9dea8564e7ce3eb019";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

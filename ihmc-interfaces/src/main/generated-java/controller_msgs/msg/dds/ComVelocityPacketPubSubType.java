@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class ComVelocityPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ComVelocityPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::ComVelocityPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "50114ecb1ea7e8d76e55e8161b6a7e4b127c65a29920e62f65acd0267eed9ab8";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

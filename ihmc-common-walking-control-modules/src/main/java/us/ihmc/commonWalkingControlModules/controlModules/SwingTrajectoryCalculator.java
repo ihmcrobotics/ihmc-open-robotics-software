@@ -345,6 +345,9 @@ public class SwingTrajectoryCalculator
    {
       swingHeight.set(footstep.getSwingHeight());
 
+      if (lastFootstepPosition.containsNaN())
+         saveCurrentPositionAsLastFootstepPosition();
+
       if (checkStepUpOrDown(finalPosition))
          activeTrajectoryType.set(TrajectoryType.OBSTACLE_CLEARANCE);
 

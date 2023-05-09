@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.PrepareForLocomotionMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::PrepareForLocomotionMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "5e95c2de3ab382c3289dd3e993e64ffcafd8cf6f9f40ba2f2617617105d6206e";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

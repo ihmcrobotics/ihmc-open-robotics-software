@@ -293,11 +293,11 @@ public class RealsenseColorAndDepthPublisher
       */
 
       // L515: [F1121365, F0245563], D455: [215122254074]
-      String realsenseSerialNumber = System.getProperty("l515.serial.number", "213522252883");
+      String realsenseSerialNumber = System.getProperty("d455.serial.number", "213522252883");
       RealsenseColorAndDepthPublisher realsensePublisher = new RealsenseColorAndDepthPublisher(realsenseSerialNumber,
                                                                                                RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
-                                                                                               PerceptionAPI.L515_DEPTH_IMAGE,
-                                                                                               PerceptionAPI.L515_COLOR_IMAGE,
+                                                                                               PerceptionAPI.D455_DEPTH_IMAGE,
+                                                                                               PerceptionAPI.D455_COLOR_IMAGE,
                                                                                                ReferenceFrame::getWorldFrame);
       realsensePublisher.run();
       ThreadTools.sleepForever();

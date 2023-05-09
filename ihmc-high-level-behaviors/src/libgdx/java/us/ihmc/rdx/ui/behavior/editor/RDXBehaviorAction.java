@@ -3,32 +3,82 @@ package us.ihmc.rdx.ui.behavior.editor;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.type.ImBoolean;
+import us.ihmc.behaviors.sequence.BehaviorActionData;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 
-public interface RDXBehaviorAction
+/**
+ * The UI representation of a robot behavior action. It provides a base
+ * template for implementing an interactable action.
+ */
+public abstract class RDXBehaviorAction
 {
-   public void update();
+   private String nameForDisplay = "";
+   private final ImBoolean selected = new ImBoolean();
+   private final ImBoolean expanded = new ImBoolean(true);
 
-   public void calculate3DViewPick(ImGui3DViewInput input);
+   public RDXBehaviorAction()
+   {
 
-   public void process3DViewInput(ImGui3DViewInput input);
+   }
 
-   public void renderImGuiWidgets();
+   public RDXBehaviorAction(String nameForDisplay)
+   {
+      this.nameForDisplay = nameForDisplay;
+   }
 
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool);
+   public void update()
+   {
 
-   public void saveToFile(ObjectNode jsonNode);
+   }
 
-   public void loadFromFile(JsonNode jsonNode);
+   public void updateAfterLoading()
+   {
 
-   public void performAction();
+   }
 
-   public void destroy();
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
 
-   public ImBoolean getSelected();
+   }
 
-   public String getNameForDisplay();
+   public void process3DViewInput(ImGui3DViewInput input)
+   {
+
+   }
+
+   public final void renderImGuiWidgets()
+   {
+      if (expanded.get())
+      {
+         renderImGuiSettingWidgets();
+      }
+   }
+
+   public void renderImGuiSettingWidgets()
+   {
+
+   }
+
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+
+   }
+
+   public abstract BehaviorActionData getActionData();
+
+   public ImBoolean getSelected()
+   {
+      return selected;
+   }
+
+   public ImBoolean getExpanded()
+   {
+      return expanded;
+   }
+
+   public String getNameForDisplay()
+   {
+      return nameForDisplay;
+   }
 }

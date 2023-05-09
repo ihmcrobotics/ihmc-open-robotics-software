@@ -11,6 +11,18 @@ package ihmc_common_msgs.msg.dds;
 public class WeightMatrix3DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.WeightMatrix3DMessage>
 {
    public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::WeightMatrix3DMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "d5d065f6548b9270d683f9e67028763de09ec51c3bf4d9a13bdcba301459fe8c";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

@@ -1,31 +1,15 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-
-import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.LinearMomentumRateCostCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.QPObjectiveCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerBoundCalculator;
 import us.ihmc.commonWalkingControlModules.visualizer.BasisVectorVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
@@ -34,23 +18,27 @@ import us.ihmc.convexOptimization.quadraticProgram.NativeActiveSetQPSolverWithIn
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.KinematicLoopFunction;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
-import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsQPSolver.QPInputDomain.*;
 
 public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHolder
 {
@@ -68,6 +56,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    private final NativeQPInputTypeB directMotionQPInput;
    private final NativeQPInputTypeA motionQPInput;
    private final NativeQPInputTypeA rhoQPInput;
+   private final NativeQPInputTypeA motionAndRhoQPInput;
    private final NativeQPVariableSubstitution motionQPVariableSubstitution;
    private final MotionQPInputCalculator motionQPInputCalculator;
    private final WholeBodyControllerBoundCalculator boundCalculator;
@@ -77,6 +66,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    private final List<KinematicLoopFunction> kinematicLoopFunctions;
    private final int numberOfDoFs;
    private final int rhoSize;
+   private final boolean hasFloatingBase;
 
    private final OneDoFJointBasics[] oneDoFJoints;
    private final DMatrixRMaj qDDotMinMatrix, qDDotMaxMatrix;
@@ -100,6 +90,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    private final ExecutionTimer optimizationTimer = new ExecutionTimer("InvDynOptimizationTimer", registry);
 
    private final ArrayList<QPObjectiveCommand> nullspaceQPObjectiveCommands = new ArrayList<>();
+   private final ArrayList<RigidBodyReadOnly> rigidBodiesWithCoPCommands = new ArrayList<>();
 
    public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoRegistry parentRegistry)
    {
@@ -141,6 +132,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       motionQPInput = new NativeQPInputTypeA(numberOfDoFs);
       directMotionQPInput = new NativeQPInputTypeB(numberOfDoFs);
       rhoQPInput = new NativeQPInputTypeA(rhoSize);
+      motionAndRhoQPInput = new NativeQPInputTypeA(numberOfDoFs + rhoSize);
       motionQPVariableSubstitution = new NativeQPVariableSubstitution();
       externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, toolbox.getTotalRobotMass(), contactablePlaneBodies);
 
@@ -167,7 +159,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
       momentumModuleSolution = new MomentumModuleSolution();
 
-      boolean hasFloatingBase = toolbox.getRootJoint() != null;
+      hasFloatingBase = toolbox.getRootJoint() != null;
       NativeActiveSetQPSolverWithInactiveVariablesInterface activeSetQPSolver = optimizationSettings.getActiveSetQPSolver();
       double dt = toolbox.getControlDT();
       qpSolver = new InverseDynamicsQPSolver(activeSetQPSolver, numberOfDoFs, rhoSize, hasFloatingBase, dt, registry);
@@ -188,7 +180,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       qpSolver.reset();
       externalWrenchHandler.reset();
       motionQPInputCalculator.initialize();
-      inactiveJointIndices.clear();
+      inactiveJointIndices.reset();
    }
 
    public void resetCustomBounds()
@@ -205,7 +197,8 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    public boolean compute()
    {
       optimizationTimer.startMeasurement();
-      wrenchMatrixCalculator.computeMatrices();
+      wrenchMatrixCalculator.collectRigidBodiesWithCoPCommands(rigidBodiesWithCoPCommands);
+      wrenchMatrixCalculator.computeMatrices(rigidBodiesWithCoPCommands);
       if (VISUALIZE_RHO_BASIS_VECTORS)
          basisVectorVisualizer.visualize(wrenchMatrixCalculator.getBasisVectors(), wrenchMatrixCalculator.getBasisVectorsOrigin());
       qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getRhoWeightMatrix());
@@ -242,8 +235,15 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
       for (int i = 0; i < kinematicLoopFunctions.size(); i++)
       {
-         motionQPInputCalculator.convertKinematicLoopFunction(kinematicLoopFunctions.get(i), motionQPVariableSubstitution);
-         qpSolver.addAccelerationSubstitution(motionQPVariableSubstitution);
+         List<? extends OneDoFJointReadOnly> loopJoints = kinematicLoopFunctions.get(i).getLoopJoints();
+         
+         // Check if the kinematic loop has joints. If no joints are returned, do not add a substitution
+         if(loopJoints != null && !loopJoints.isEmpty())
+         {
+            motionQPInputCalculator.convertKinematicLoopFunction(kinematicLoopFunctions.get(i), motionQPVariableSubstitution);
+            qpSolver.addAccelerationSubstitution(motionQPVariableSubstitution);
+         }
+         
       }
 
       qpSolver.setMaxNumberOfIterations(maximumNumberOfIterations.getIntegerValue());
@@ -335,38 +335,38 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    {
       boolean success = motionQPInputCalculator.computePrivilegedJointAccelerations(motionQPInput);
       if (success)
-         qpSolver.addMotionInput(motionQPInput);
+         qpSolver.addQPInput(motionQPInput, MOTION);
    }
 
    private void setupRhoTasks()
    {
       DMatrixRMaj rhoPrevious = wrenchMatrixCalculator.getRhoPreviousMatrix();
       DMatrixRMaj rhoRateWeight = wrenchMatrixCalculator.getRhoRateWeightMatrix();
-      qpSolver.addRhoTask(rhoPrevious, rhoRateWeight);
+      qpSolver.addIdentityJacobianTask(rhoPrevious, rhoRateWeight, RHO);
 
       rhoQPInput.getTaskWeightMatrix().set(wrenchMatrixCalculator.getCoPRegularizationWeight());
       rhoQPInput.getTaskJacobian().set(wrenchMatrixCalculator.getCoPRegularizationJacobian());
       rhoQPInput.getTaskObjective().set(wrenchMatrixCalculator.getCoPRegularizationObjective());
       rhoQPInput.setUseWeightScalar(false);
-      qpSolver.addRhoInput(rhoQPInput);
+      qpSolver.addQPInput(rhoQPInput, RHO);
 
       rhoQPInput.getTaskWeightMatrix().set(wrenchMatrixCalculator.getCoPRateRegularizationWeight());
       rhoQPInput.getTaskJacobian().set(wrenchMatrixCalculator.getCoPRateRegularizationJacobian());
       rhoQPInput.getTaskObjective().set(wrenchMatrixCalculator.getCoPRateRegularizationObjective());
       rhoQPInput.setUseWeightScalar(false);
-      qpSolver.addRhoInput(rhoQPInput);
+      qpSolver.addQPInput(rhoQPInput, RHO);
 
       // The wrench matrix calculator holds on to the command until all inverse dynamics commands are received since the
       // contact state may yet change and the rho Jacobians need to be computed for these inputs.
       // see also wrenchMatrixCalculator#submitWrenchCommand()
       while (wrenchMatrixCalculator.getContactWrenchInput(rhoQPInput))
       {
-         qpSolver.addRhoInput(rhoQPInput);
+         qpSolver.addQPInput(rhoQPInput, RHO);
       }
 
-      while (wrenchMatrixCalculator.getCenterOfPressureInput(rhoQPInput))
+      while (wrenchMatrixCalculator.getNextCenterOfPressureInput(rhoQPInput))
       {
-         qpSolver.addRhoInput(rhoQPInput);
+         qpSolver.addQPInput(rhoQPInput, RHO);
       }
    }
 
@@ -382,8 +382,8 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
    public void setupTorqueMinimizationCommand()
    {
-      qpSolver.addTorqueMinimizationObjective(dynamicsMatrixCalculator.getTorqueMinimizationAccelerationJacobian(),
-                                              dynamicsMatrixCalculator.getTorqueMinimizationRhoJacobian(),
+      qpSolver.addTorqueMinimizationObjective(dynamicsMatrixCalculator.getBodyMassMatrix(),
+                                              dynamicsMatrixCalculator.getBodyContactForceJacobianTranspose(),
                                               dynamicsMatrixCalculator.getTorqueMinimizationObjective());
    }
 
@@ -403,14 +403,14 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    {
       boolean success = motionQPInputCalculator.convertQPObjectiveCommand(command, motionQPInput);
       if (success)
-         qpSolver.addMotionInput(motionQPInput);
+         qpSolver.addQPInput(motionQPInput, MOTION);
    }
 
    public void submitSpatialAccelerationCommand(SpatialAccelerationCommand command)
    {
       boolean success = motionQPInputCalculator.convertSpatialAccelerationCommand(command, motionQPInput);
       if (success)
-         qpSolver.addMotionInput(motionQPInput);
+         qpSolver.addQPInput(motionQPInput, MOTION);
    }
 
    public void submitJointspaceAccelerationCommand(JointspaceAccelerationCommand command)
@@ -419,7 +419,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       {
          boolean success = motionQPInputCalculator.convertJointspaceAccelerationCommand(command, motionQPInput);
          if (success)
-            qpSolver.addMotionInput(motionQPInput);
+            qpSolver.addQPInput(motionQPInput, MOTION);
       }
       else
       {
@@ -440,18 +440,30 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       }
    }
 
+   public void submitJointTorqueCommand(JointTorqueCommand command)
+   {
+      boolean success = motionQPInputCalculator.convertJointTorqueCommand(command,
+                                                                          hasFloatingBase,
+                                                                          motionAndRhoQPInput,
+                                                                          dynamicsMatrixCalculator.getBodyMassMatrix(),
+                                                                          dynamicsMatrixCalculator.getBodyContactForceJacobianTranspose(),
+                                                                          dynamicsMatrixCalculator.getBodyGravityCoriolisMatrix());
+      if (success)
+         qpSolver.addQPInput(motionAndRhoQPInput, MOTION_AND_RHO);
+   }
+
    public void submitMomentumRateCommand(MomentumRateCommand command)
    {
       boolean success = motionQPInputCalculator.convertMomentumRateCommand(command, motionQPInput);
       if (success)
-         qpSolver.addMotionInput(motionQPInput);
+         qpSolver.addQPInput(motionQPInput, MOTION);
    }
 
    public void submitLinearMomentumRateCostCommand(LinearMomentumRateCostCommand command)
    {
       boolean success = motionQPInputCalculator.convertLinearMomentumRateCostCommand(command, directMotionQPInput);
       if (success)
-         qpSolver.addMotionInput(directMotionQPInput);
+         qpSolver.addQPInput(directMotionQPInput, MOTION);
    }
 
    public void submitPrivilegedConfigurationCommand(PrivilegedConfigurationCommand command)
