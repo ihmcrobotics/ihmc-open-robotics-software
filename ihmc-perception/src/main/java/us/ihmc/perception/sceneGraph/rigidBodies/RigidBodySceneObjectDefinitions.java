@@ -28,6 +28,7 @@ public class RigidBodySceneObjectDefinitions
 
    // TODO: Get soup can model from Arghya
    public static final int CAN_OF_SOUP_MARKER_ID = 3;
+   public static final double CAN_OF_SOUP_MARKER_SIZE = 0.2032;
    public static final double CAN_OF_SOUP_RADIUS = 0.0329375;
    public static final double CAN_OF_SOUP_HEIGHT = 0.082388;
    public static final String CAN_OF_SOUP_VISUAL_MODEL_FILE_PATH = "environmentObjects/canOfSoup/CanOfSoup.g3dj";
@@ -35,6 +36,12 @@ public class RigidBodySceneObjectDefinitions
    static
    {
       CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addZ(CAN_OF_SOUP_HEIGHT / 2.0);
+   }
+   public static final RigidBodyTransform MARKER_TO_CAN_OF_SOUP_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      EuclidCoreMissingTools.setYawPitchRollDegrees(MARKER_TO_CAN_OF_SOUP_TRANSFORM.getRotation(), 0.0, -90.0, 0.0);
+      MARKER_TO_CAN_OF_SOUP_TRANSFORM.getTranslation().set(0.0, -0.5, 0.0);
    }
 
    public static ArUcoDetectableNode createBox()
@@ -55,8 +62,8 @@ public class RigidBodySceneObjectDefinitions
    {
       return new ArUcoDetectableNode("CanOfSoup",
                                      CAN_OF_SOUP_MARKER_ID,
-                                     MARKER_WIDTH,
-                                     new RigidBodyTransform(),
+                                     CAN_OF_SOUP_MARKER_SIZE,
+                                     MARKER_TO_CAN_OF_SOUP_TRANSFORM,
                                      CAN_OF_SOUP_VISUAL_MODEL_FILE_PATH,
                                      CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
    }
