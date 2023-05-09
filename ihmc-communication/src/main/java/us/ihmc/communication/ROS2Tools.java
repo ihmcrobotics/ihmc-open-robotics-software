@@ -1,6 +1,5 @@
 package us.ihmc.communication;
 
-import com.eprosima.xmlschemas.fastrtps_profiles.HistoryQosKindType;
 import com.eprosima.xmlschemas.fastrtps_profiles.ReliabilityQosKindType;
 import controller_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
@@ -13,10 +12,8 @@ import std_msgs.msg.dds.Float64;
 import toolbox_msgs.msg.dds.*;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.*;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
@@ -26,7 +23,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class ROS2Tools
 {
@@ -109,8 +105,6 @@ public class ROS2Tools
    public static final ROS2Topic<Float64> BOX_MASS = IHMC_ROOT.withSuffix("box_mass").withType(Float64.class);
 
    public static final ROS2Topic<SystemAvailableMessage> SYSTEM_AVAILABLE = IHMC_ROOT.withModule("mission_control").withType(SystemAvailableMessage.class);
-
-   public static final Function<String, String> NAMED_BY_TYPE = typeName -> typeName;
 
    public final static ExceptionHandler RUNTIME_EXCEPTION = e ->
    {

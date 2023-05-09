@@ -6,22 +6,9 @@ import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import perception_msgs.msg.dds.*;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
-import toolbox_msgs.msg.dds.*;
-import us.ihmc.commons.exception.ExceptionHandler;
-import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.*;
-import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
-import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
-import us.ihmc.util.PeriodicThreadSchedulerFactory;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class PerceptionAPI
 {
@@ -187,8 +174,6 @@ public class PerceptionAPI
    public static final ROS2Topic<Empty> PUBLISH_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("publish_height_map").withType(Empty.class);
 
    public static final ROS2Topic<ArUcoMarkerPoses> ARUCO_MARKER_POSES = PERCEPTION_MODULE.withType(ArUcoMarkerPoses.class).withSuffix("aruco_marker_poses");
-
-   public static final Function<String, String> NAMED_BY_TYPE = typeName -> typeName;
 
    public static ROS2Topic<DoorLocationPacket> getDoorLocationTopic(String robotName)
    {
