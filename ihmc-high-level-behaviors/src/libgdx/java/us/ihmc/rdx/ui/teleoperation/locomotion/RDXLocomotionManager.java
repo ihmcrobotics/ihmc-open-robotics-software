@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.WalkingStatusMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -13,6 +12,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
@@ -64,6 +64,7 @@ public class RDXLocomotionManager
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean showGraphics = new ImBoolean(true);
    private boolean isPlacingFootstep = false;
+   private ControllerStatusTracker controllerStatusTracker;
 
    public RDXLocomotionManager(DRCRobotModel robotModel,
                                CommunicationHelper communicationHelper,
@@ -91,7 +92,7 @@ public class RDXLocomotionManager
          interactableFootstepPlan.setHeightMapMessage(heightMap);
       });
 
-      ros2Helper.subscribeToControllerViaCallback(WalkingStatusMessage.class, interactableFootstepPlan::setWalkingStatusMessage);
+      controllerStatusTracker = new ControllerStatusTracker(null, ros2Helper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
 
       footstepsSentToControllerGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       communicationHelper.subscribeToControllerViaCallback(FootstepDataListMessage.class,
@@ -237,8 +238,6 @@ public class RDXLocomotionManager
 
       interactableFootstepPlan.renderImGuiWidgets();
       ImGui.checkbox(labels.get("Show footstep related graphics"), showGraphics);
-
-      interactableFootstepPlan.getAndUpdateRobotIsWalking();
    }
 
    public void updateWalkPathControlRing()

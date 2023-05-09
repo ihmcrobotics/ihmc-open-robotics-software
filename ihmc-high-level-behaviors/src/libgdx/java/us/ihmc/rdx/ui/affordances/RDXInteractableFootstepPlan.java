@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.WalkingStatusMessage;
 import imgui.ImGui;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
@@ -23,8 +22,6 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -62,9 +59,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
    private int previousPlanLength;
    private boolean wasPlanUpdated = false;
-
-   private boolean robotIsWalking = false;
-   private WalkingStatusMessage walkingStatusMessage;
 
    public void create(RDXBaseUI baseUI,
                       CommunicationHelper communicationHelper,
@@ -270,31 +264,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       selectedFootstep = null;
    }
 
-   public boolean getAndUpdateRobotIsWalking()
-   {
-      if (getRobotIsWalking())
-      {
-         if ((walkingStatusMessage != null) && (walkingStatusMessage.getWalkingStatus() == WalkingStatus.COMPLETED.toByte()))
-         {
-            LogTools.info("Goal reached, walking stopped!");
-            setRobotIsWalking(false);
-            walkingStatusMessage = null;
-         }
-      }
-
-      return getRobotIsWalking();
-   }
-
-   public boolean getRobotIsWalking()
-   {
-      return robotIsWalking;
-   }
-
-   public void setRobotIsWalking(boolean newValue)
-   {
-      robotIsWalking = newValue;
-   }
-
    public void walkFromSteps()
    {
       FootstepDataListMessage messageList = new FootstepDataListMessage();
@@ -329,8 +298,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
          stepChecker.setSwingStepPose(footsteps.get(size - 2).getFootPose());
          stepChecker.setSwingSide(footsteps.get(size - 2).getFootstepSide());
       }
-
-      setRobotIsWalking(true);
 
       stepChecker.clear(footsteps);
       clear();
@@ -402,10 +369,5 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    public void destroy()
    {
       swingPlanningModule.destroy();
-   }
-
-   public void setWalkingStatusMessage(WalkingStatusMessage walkingStatusMessage)
-   {
-      this.walkingStatusMessage = walkingStatusMessage;
    }
 }
