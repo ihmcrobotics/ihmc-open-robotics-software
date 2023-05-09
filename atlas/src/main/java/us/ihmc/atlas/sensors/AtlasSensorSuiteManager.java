@@ -170,7 +170,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       if (enableStereoVisionPointCloudPublisher)
       {
-         multisenseStereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, ROS2Tools.MULTISENSE_STEREO_POINT_CLOUD);
+         multisenseStereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, PerceptionAPI.MULTISENSE_STEREO_POINT_CLOUD);
          multisenseStereoVisionPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
          AvatarRobotPointCloudParameters multisenseStereoParameters = sensorInformation.getPointCloudParameters(AtlasSensorInformation.MULTISENSE_STEREO_ID);
          multisenseStereoVisionPointCloudPublisher.receiveStereoPointCloudFromROS1(multisenseStereoParameters.getRosTopic(), rosMainNode);

@@ -59,7 +59,7 @@ public class AtlasZED2ROS1ToREABridge
                      lidarScanMessage.getLidarPosition().set(ousterPose.getPosition());
                      lidarScanMessage.getLidarOrientation().set(ousterPose.getOrientation());
                      lidarScanMessage.setSensorPoseConfidence(1.0);
-                     ros2Helper.publish(ROS2Tools.MULTISENSE_LIDAR_SCAN, lidarScanMessage);
+                     ros2Helper.publish(PerceptionAPI.MULTISENSE_LIDAR_SCAN, lidarScanMessage);
                   }
                });
             }

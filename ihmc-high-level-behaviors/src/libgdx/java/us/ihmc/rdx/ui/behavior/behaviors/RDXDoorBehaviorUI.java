@@ -13,6 +13,7 @@ import us.ihmc.behaviors.door.DoorType;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -118,7 +119,7 @@ public class RDXDoorBehaviorUI extends RDXBehaviorUIInterface
       ImGui.sameLine();
       if (ImGui.button(labels.get("Resend latest door location")))
       {
-         helper.publish(ROS2Tools::getDoorLocationTopic,
+         helper.publish(PerceptionAPI::getDoorLocationTopic,
                         HumanoidMessageTools.createDoorLocationPacket(detectedDoorPose.get().getRight(), detectedDoorPose.get().getLeft().toByte()));
       }
       ImGui.text("Behavior types:");

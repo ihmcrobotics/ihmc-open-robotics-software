@@ -113,7 +113,7 @@ public class SCSLidarAndCameraSimulator
       // required for timestamp
       ROS2Input<RobotConfigurationData> robotConfigurationData = new ROS2Input<>(ros2Node,
                                                                                  ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()));
-      IHMCROS2Publisher<VideoPacket> scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, ROS2Tools.VIDEO);
+      IHMCROS2Publisher<VideoPacket> scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, PerceptionAPI.VIDEO);
       CameraConfiguration cameraConfiguration = new CameraConfiguration(videoCameraMountName);
       cameraConfiguration.setCameraMount(videoCameraMountName);
       scs.setupCamera(cameraConfiguration);

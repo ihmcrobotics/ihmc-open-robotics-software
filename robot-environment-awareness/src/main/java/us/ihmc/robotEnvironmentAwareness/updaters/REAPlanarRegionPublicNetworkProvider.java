@@ -17,6 +17,7 @@ import perception_msgs.msg.dds.RequestPlanarRegionsListMessage;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
@@ -53,7 +54,7 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
 
    public REAPlanarRegionPublicNetworkProvider(ROS2Topic outputTopic, ROS2Topic lidarOutputTopic, ROS2Topic stereoOutputTopic, ROS2Topic depthOutputTopic)
    {
-      this(ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), outputTopic, lidarOutputTopic, stereoOutputTopic,
+      this(ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, PerceptionAPI.REA_NODE_NAME), outputTopic, lidarOutputTopic, stereoOutputTopic,
            depthOutputTopic);
    }
 
@@ -216,7 +217,7 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
    @Override
    public void stop()
    {
-      if (ros2Node.getName().equals(ROS2Tools.REA_NODE_NAME))
+      if (ros2Node.getName().equals(PerceptionAPI.REA_NODE_NAME))
          ((ROS2Node) ros2Node).destroy();
    }
 }
