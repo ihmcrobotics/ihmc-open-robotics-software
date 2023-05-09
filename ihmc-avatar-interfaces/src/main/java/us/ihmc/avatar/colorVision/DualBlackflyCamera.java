@@ -16,6 +16,7 @@ import std_msgs.msg.dds.Float64;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
@@ -142,7 +143,7 @@ public class DualBlackflyCamera
                                                                               DualBlackflyComms.OUSTER_FISHEYE_COLORING_INTRINSICS,
                                                                               ousterFisheyeColoringIntrinsics);
 
-            ROS2Topic<ImageMessage> imageTopic = ROS2Tools.BLACKFLY_FISHEYE_COLOR_IMAGE.get(side);
+            ROS2Topic<ImageMessage> imageTopic = PerceptionAPI.BLACKFLY_FISHEYE_COLOR_IMAGE.get(side);
             LogTools.info("Publishing ROS 2 color images: {}", imageTopic);
             ros2ImagePublisher = ROS2Tools.createPublisher(realtimeROS2Node, imageTopic, ROS2QosProfile.BEST_EFFORT());
          }
