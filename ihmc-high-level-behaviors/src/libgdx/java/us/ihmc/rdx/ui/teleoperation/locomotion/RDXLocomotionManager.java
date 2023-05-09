@@ -64,7 +64,7 @@ public class RDXLocomotionManager
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean showGraphics = new ImBoolean(true);
    private boolean isPlacingFootstep = false;
-   private ControllerStatusTracker controllerStatusTracker;
+   private final ControllerStatusTracker controllerStatusTracker;
 
    public RDXLocomotionManager(DRCRobotModel robotModel,
                                CommunicationHelper communicationHelper,
