@@ -1,31 +1,17 @@
 package us.ihmc.behaviors.tools.interfaces;
 
-import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.message.ParameterizedMessage;
-import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.log.LogTools;
 import us.ihmc.log.LogToolsWriteOnly;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.function.Supplier;
 
 /**
- * Useful so when we have modules delivering messages, we can also send those messages
- * out via Messager so a feed can be displayed to the operator.
+ * Needed so we can have a default regular implementation of {@link LogToolsWriteOnly}.
  */
-public class StatusLogger implements LogToolsWriteOnly
+public class LogToolsLogger implements LogToolsWriteOnly
 {
-   private final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("ss:SSS");
-
-   private final UIPublisher uiPublisher;
-
-   public StatusLogger(UIPublisher uiPublisher)
-   {
-      this.uiPublisher = uiPublisher;
-   }
-
    public void log(Level level, Object message) { logIfEnabled(level, message); }
    public void log(Level level, int additionalStackTraceHeight, Object message) { logIfEnabled(level, additionalStackTraceHeight, message); }
    public void log(Level level, Supplier<?> msgSupplier) { logIfEnabled(level, msgSupplier); }
@@ -140,6 +126,6 @@ public class StatusLogger implements LogToolsWriteOnly
 
    private void publishToUI(Level level, String  message)
    {
-      uiPublisher.publishToUI(BehaviorModule.API.StatusLog, MutablePair.of(level.intLevel(), LocalDateTime.now().format(dateFormat) + " " + message));
+      LogTools.log(level, message);
    }
 }
