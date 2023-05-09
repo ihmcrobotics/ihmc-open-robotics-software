@@ -40,7 +40,7 @@ mainDependencies {
    api("org.ddogleg:ddogleg:0.18")
 
    api("us.ihmc:euclid:0.20.0")
-   api("us.ihmc:simulation-construction-set:0.23.3")
+   api("us.ihmc:simulation-construction-set:0.23.4")
    api("us.ihmc:ihmc-native-library-loader:2.0.2")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-communication:source")
@@ -88,7 +88,7 @@ fun us.ihmc.build.IHMCDependenciesExtension.apiCommonBytedecoNatives()
    apiBytedecoNatives("opencl", "3.0-", "-20221104.001125-5")
    apiBytedecoNatives("librealsense2", "2.50.0-", "-20221104.001736-8")
    apiBytedecoNatives("spinnaker", "3.0.0.118-", "-20230218.091411-11")
-   apiBytedecoNatives("ffmpeg", "5.1.2-", "-20230120.070542-158")
+   apiBytedecoNatives("ffmpeg", "6.0-", "-20230506.025210-104")
    apiBytedecoNatives("hdf5", "1.12.2-", "-20221104.003540-9")
 }
 
@@ -121,7 +121,7 @@ testDependencies {
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:simulation-construction-set:0.23.3")
+   api("us.ihmc:simulation-construction-set:0.23.4")
 
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")

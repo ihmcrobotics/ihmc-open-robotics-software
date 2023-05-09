@@ -846,6 +846,19 @@ public class CrossRobotCommandRandomTools
       next.setJointTorqueWeight(random.nextDouble());
       next.setJointVelocityLimitMode(nextElementIn(random, ActivationState.values()));
       next.setComputeJointTorques(nextElementIn(random, ActivationState.values()));
+
+      List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
+      int numberOfJointsToDeactivate = Math.max(random.nextInt(allJoints.size()), 1);
+
+      for (int jointIndex = 0; jointIndex < numberOfJointsToDeactivate; jointIndex++)
+         next.deactivateJoint(allJoints.remove(random.nextInt(allJoints.size())));
+
+      allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
+      int numberOfJointsToActivate = Math.max(random.nextInt(allJoints.size()), 1);
+
+      for (int jointIndex = 0; jointIndex < numberOfJointsToActivate; jointIndex++)
+         next.activateJoint(allJoints.remove(random.nextInt(allJoints.size())));
+
       return next;
    }
 
