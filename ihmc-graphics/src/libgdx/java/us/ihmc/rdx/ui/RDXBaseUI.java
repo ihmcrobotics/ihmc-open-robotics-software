@@ -125,6 +125,9 @@ public class RDXBaseUI
       this(0, null);
    }
 
+   /**
+    * @param windowTitle Title cased "My Window Title"; no symbols allowed
+    */
    public RDXBaseUI(String windowTitle)
    {
       this(0, windowTitle);
@@ -135,6 +138,7 @@ public class RDXBaseUI
     *
     * @param additionalStackHeightForFindingCaller This is if you have something that sets up a RDXBaseUI for another class.
     *                                              We want the highest level calling class to be the one used for loading resources.
+    * @param windowTitle Title cased "My Window Title"; no symbols allowed
     */
    /* package private*/ RDXBaseUI(int additionalStackHeightForFindingCaller, String windowTitle)
    {
