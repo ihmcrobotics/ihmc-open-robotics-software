@@ -3,6 +3,7 @@ package us.ihmc.rdx.simulation.scs2;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorDefinition;
+import us.ihmc.rdx.simulation.environment.object.objects.CanOfSoupDefinition;
 import us.ihmc.rdx.simulation.environment.object.objects.TableDefinition;
 
 /**
@@ -54,6 +55,17 @@ public class SimulationSceneObjects
          tableDefinition.build();
          tableDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(0.0, 0.0, 0.0), new Point3D(-1.0, 2.0, 0.86));
          return tableDefinition;
+      }, robot -> {});
+   }
+
+   public static RestartableSCS2SessionRobot canOfSoupOnTable()
+   {
+      return new RestartableSCS2SessionRobot(() ->
+      {
+         CanOfSoupDefinition canOfSoupDefinition = new CanOfSoupDefinition();
+         canOfSoupDefinition.build();
+         canOfSoupDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(0.0, 0.0, 0.0), new Point3D(0.5, 2.2, 0.9));
+         return canOfSoupDefinition;
       }, robot -> {});
    }
 }
