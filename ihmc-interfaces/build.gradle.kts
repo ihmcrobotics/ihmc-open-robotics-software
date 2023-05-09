@@ -60,7 +60,8 @@ val msg_packages = listOf("ihmc_common_msgs",
                           "perception_msgs",
                           "behavior_msgs",
                           "exoskeleton_msgs",
-                          "atlas_msgs")
+                          "atlas_msgs",
+                          "test_msgs")
 
 tasks.create("generateMessages") {
    doFirst {
