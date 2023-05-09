@@ -37,11 +37,12 @@ public class RigidBodySceneObjectDefinitions
    {
       CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addZ(CAN_OF_SOUP_HEIGHT / 2.0);
    }
+   public static final double MARKER_TO_CAN_OF_SOUP_X = 0.5;
    public static final RigidBodyTransform MARKER_TO_CAN_OF_SOUP_TRANSFORM = new RigidBodyTransform();
    static
    {
       EuclidCoreMissingTools.setYawPitchRollDegrees(MARKER_TO_CAN_OF_SOUP_TRANSFORM.getRotation(), 0.0, -90.0, 0.0);
-      MARKER_TO_CAN_OF_SOUP_TRANSFORM.getTranslation().set(0.0, -0.5, 0.0);
+      MARKER_TO_CAN_OF_SOUP_TRANSFORM.getTranslation().set(0.0, -MARKER_TO_CAN_OF_SOUP_X, 0.0);
    }
 
    public static ArUcoDetectableNode createBox()

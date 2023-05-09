@@ -3,6 +3,7 @@ package us.ihmc.rdx.simulation.scs2;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorDefinition;
+import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
 import us.ihmc.rdx.simulation.environment.object.objects.CanOfSoupDefinition;
 import us.ihmc.rdx.simulation.environment.object.objects.TableDefinition;
 
@@ -16,6 +17,12 @@ import us.ihmc.rdx.simulation.environment.object.objects.TableDefinition;
  */
 public class SimulationSceneObjects
 {
+   public static final double SPACE_TO_ALLOW_IT_TO_FALL_ONTO_SURFACE = 0.01;
+   public static final double TABLE_X = -1.0;
+   public static final double TABLE_Y = 2.0;
+   public static final double TABLE_Z = TableDefinition.TABLE_LEG_LENGTH + SPACE_TO_ALLOW_IT_TO_FALL_ONTO_SURFACE;
+   public static final double TABLE_SURFACE_Z = TableDefinition.TABLE_LEG_LENGTH + TableDefinition.TABLE_THICKNESS;
+
    public static RestartableSCS2SessionRobot pushDoor()
    {
       return new RestartableSCS2SessionRobot(() ->
@@ -53,7 +60,7 @@ public class SimulationSceneObjects
          TableDefinition tableDefinition = new TableDefinition();
          tableDefinition.setAddArUcoMarkers(true);
          tableDefinition.build();
-         tableDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(0.0, 0.0, 0.0), new Point3D(-1.0, 2.0, 0.86));
+         tableDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(0.0, 0.0, 0.0), new Point3D(TABLE_X, TABLE_Y, TABLE_Z));
          return tableDefinition;
       }, robot -> {});
    }
@@ -64,7 +71,10 @@ public class SimulationSceneObjects
       {
          CanOfSoupDefinition canOfSoupDefinition = new CanOfSoupDefinition();
          canOfSoupDefinition.build();
-         canOfSoupDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(0.0, 0.0, 0.0), new Point3D(0.5, 2.2, 0.9));
+         canOfSoupDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(0.0, 0.0, 0.0),
+            new Point3D(TABLE_X + TableDefinition.TABLE_ARUCO_MARKER_FROM_LEFT_EDGE + RigidBodySceneObjectDefinitions.MARKER_TO_CAN_OF_SOUP_X,
+                        TABLE_Y + TableDefinition.TABLE_ARUCO_MARKER_FROM_FRONT_EDGE,
+                        TABLE_SURFACE_Z + SPACE_TO_ALLOW_IT_TO_FALL_ONTO_SURFACE));
          return canOfSoupDefinition;
       }, robot -> {});
    }
