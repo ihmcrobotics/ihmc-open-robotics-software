@@ -16,6 +16,7 @@ import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
 import us.ihmc.behaviors.tools.behaviorTree.FallbackNode;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ros2.ROS2HeartbeatMonitor;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -38,6 +39,13 @@ import java.util.function.Supplier;
 import static us.ihmc.behaviors.BehaviorModule.API.BehaviorTreeStatus;
 import static us.ihmc.behaviors.BehaviorModule.API.StatusLog;
 
+/**
+ * This is the UI for interacting with a remotely running behavior tree.
+ * TODO:
+ *   - Remove Kryo to simplify connection management -- use exclusively ROS 2
+ *   - Somehow rework the ImNodes area, it takes a lot of space. Perhaps showing the
+ *     nodes as normal panels as an option would be good.
+ */
 public class RDXBehaviorUIManager
 {
    private final ImString behaviorModuleHost = new ImString("localhost", 100);
@@ -55,7 +63,9 @@ public class RDXBehaviorUIManager
    private final ImBoolean imEnabled = new ImBoolean(false);
    private final YoBooleanClientHelper yoEnabled;
    private final RDXBehaviorUIRegistry behaviorRegistry;
-   private RDXBehaviorUIInterface rootBehaviorUI;
+   private final RDXBehaviorUIInterface rootBehaviorUI;
+   /** For knowing when the robot's behavior module is running. */
+   private final ROS2HeartbeatMonitor heartbeatMonitor;
 
    public RDXBehaviorUIManager(ROS2Node ros2Node,
                                Supplier<? extends DRCRobotModel> robotModelSupplier,
@@ -64,6 +74,7 @@ public class RDXBehaviorUIManager
    {
       this.behaviorRegistry = behaviorRegistry;
       helper = new BehaviorHelper("Behaviors panel", robotModelSupplier.get(), ros2Node, enableROS1);
+      heartbeatMonitor = new ROS2HeartbeatMonitor(helper, BehaviorModule.API.HEARTBEAT);
       messagerManagerWidget = new ImGuiMessagerManagerWidget(helper.getMessagerHelper(),
                                                              behaviorModuleHost::get,
                                                              NetworkPorts.BEHAVIOR_MODULE_MESSAGER_PORT.getPort());
@@ -237,5 +248,10 @@ public class RDXBehaviorUIManager
    public ImGuiPanel getPanel()
    {
       return treeViewPanel;
+   }
+
+   public ROS2HeartbeatMonitor getHeartbeatMonitor()
+   {
+      return heartbeatMonitor;
    }
 }

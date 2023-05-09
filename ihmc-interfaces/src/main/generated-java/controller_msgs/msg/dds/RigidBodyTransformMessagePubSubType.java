@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class RigidBodyTransformMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.RigidBodyTransformMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::RigidBodyTransformMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "bd08e6337f536060366ddff8d50f7fd33049638241aa0921121043aabe4b0b49";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

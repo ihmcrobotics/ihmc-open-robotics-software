@@ -48,7 +48,7 @@ public class LocalizationAndMappingProcess
    private ROS2Helper ros2Helper;
    private PlanarRegionMap planarRegionMap;
    private IHMCROS2Publisher<PlanarRegionsListMessage> controllerRegionsPublisher;
-   private IHMCROS2Publisher<PlanarRegionsListMessage> slamOutputRegionsPublisher;
+   private final IHMCROS2Publisher<PlanarRegionsListMessage> slamOutputRegionsPublisher;
 
    private final AtomicReference<FramePlanarRegionsListMessage> latestIncomingRegions = new AtomicReference<>(null);
    private final AtomicReference<PlanarRegionsList> latestPlanarRegionsForPublishing = new AtomicReference<>(null);

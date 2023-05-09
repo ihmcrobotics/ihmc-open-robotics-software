@@ -1,24 +1,13 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import java.util.List;
-
 import org.ejml.MatrixDimensionException;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.LinearMomentumRateCostCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.QPObjectiveCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.LinearMomentumConvexConstraint2DCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.InverseKinematicsQPSolver;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.euclid.Axis3D;
@@ -35,17 +24,8 @@ import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.algorithms.MultiBodyGravityGradientCalculator;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.KinematicLoopFunction;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.spatial.Momentum;
-import us.ihmc.mecano.spatial.SpatialAcceleration;
-import us.ihmc.mecano.spatial.SpatialForce;
-import us.ihmc.mecano.spatial.SpatialVector;
-import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.spatial.*;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -53,6 +33,8 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.List;
 
 public class MotionQPInputCalculator
 {
@@ -1074,7 +1056,7 @@ public class MotionQPInputCalculator
 
    /**
     * Converts a {@link JointspaceVelocityCommand} into a {@link QPInputTypeA}.
-    * 
+    *
     * @return true if the command was successfully converted.
     */
    public boolean convertJointspaceVelocityCommand(JointspaceVelocityCommand commandToConvert, QPInputTypeA qpInputToPack)
@@ -1110,6 +1092,68 @@ public class MotionQPInputCalculator
       }
 
       recordTaskJacobian(qpInputToPack.taskJacobian);
+      return true;
+   }
+
+   /**
+    * Sets up an objective for matching a desired set of joint torques. <br>
+    * Given a desired torque vector tau_d, this task is: <br>
+    *
+    * [M (-J^T beta)] [q_dd^T rho^T]^T = tau_d - (Cq_d + G)  <br>
+    *
+    * @param jointTorqueCommand desired joint torque command to convert
+    * @param hasFloatingBase whether the robot has a floating base, used for indexing the mass matrix
+    * @param qpInputToPack the result of the conversion.
+    * @param bodyMassMatrix, M in the above equation
+    * @param bodyContactForceJacobianTranspose, J^T beta in the above equation
+    * @param bodyGravityCoriolisMatrix, {Cq_d + G} in the above equation
+    */
+   public boolean convertJointTorqueCommand(JointTorqueCommand jointTorqueCommand,
+                                            boolean hasFloatingBase,
+                                            NativeQPInputTypeA qpInputToPack,
+                                            DMatrixRMaj bodyMassMatrix,
+                                            DMatrixRMaj bodyContactForceJacobianTranspose,
+                                            DMatrixRMaj bodyGravityCoriolisMatrix)
+   {
+      int taskSize = MultiBodySystemTools.computeDegreesOfFreedom(jointTorqueCommand.getJoints());
+
+      if (taskSize == 0)
+         return false;
+
+      qpInputToPack.reshape(taskSize);
+      qpInputToPack.setUseWeightScalar(false);
+      qpInputToPack.setConstraintType(jointTorqueCommand.isHardConstraint() ? ConstraintType.EQUALITY : ConstraintType.OBJECTIVE);
+      qpInputToPack.taskJacobian.zero();
+      qpInputToPack.taskObjective.zero();
+      qpInputToPack.taskWeightMatrix.zero();
+
+      int row = 0;
+      for (int jointIndex = 0; jointIndex < jointTorqueCommand.getNumberOfJoints(); jointIndex++)
+      {
+         JointBasics joint = jointTorqueCommand.getJoints().get(jointIndex);
+         DMatrixRMaj desiredTorque = jointTorqueCommand.getDesiredTorque(jointIndex);
+         int[] jointIndices = jointIndexHandler.getJointIndices(joint);
+
+         for (int dof = 0; dof < joint.getDegreesOfFreedom(); dof++)
+         {
+            int bodyDofIndex = jointIndices[dof] - (hasFloatingBase ? 6 : 0);
+            double weight = jointTorqueCommand.getWeight(jointIndex);
+
+            // Pack the corresponding row of body mass matrix M
+            qpInputToPack.taskJacobian.insert(bodyMassMatrix, bodyDofIndex, bodyDofIndex + 1, 0, numberOfDoFs, row, 0);
+
+            // Pack the corresponding row of contact jacobian {J^T beta}
+            int rhoSize = bodyContactForceJacobianTranspose.getNumCols();
+            if (rhoSize > 0)
+               qpInputToPack.taskJacobian.insert(bodyContactForceJacobianTranspose, bodyDofIndex, bodyDofIndex + 1, 0, rhoSize, row, numberOfDoFs);
+
+            // Pack the corresponding row of the objective, {tau_d - Cq_d - G}
+            qpInputToPack.taskObjective.set(row, 0, desiredTorque.get(dof, 0) - bodyGravityCoriolisMatrix.get(bodyDofIndex, 0));
+            qpInputToPack.taskWeightMatrix.set(row, row, weight);
+            row++;
+         }
+      }
+
       return true;
    }
 

@@ -193,9 +193,12 @@ public class WholeBodyControllerBoundCalculator
       double jointLimitLower = jointLowerLimits.get(index, 0);
       double jointLimitUpper = jointUpperLimits.get(index, 0);
 
-      double limitMargin = romMarginFractions[index].getDoubleValue() * (jointLimitUpper - jointLimitLower);
-      jointLimitUpper -= limitMargin;
-      jointLimitLower += limitMargin;
+      if(!Double.isInfinite(jointLimitUpper) && !Double.isInfinite(jointLimitLower))
+      {
+         double limitMargin = romMarginFractions[index].getDoubleValue() * (jointLimitUpper - jointLimitLower);
+         jointLimitUpper -= limitMargin;
+         jointLimitLower += limitMargin;
+      }
 
       double velocityLimitLower;
       double velocityLimitUpper;
@@ -262,9 +265,13 @@ public class WholeBodyControllerBoundCalculator
       double jointLimitLower = jointLowerLimits.get(index, 0);
       double jointLimitUpper = jointUpperLimits.get(index, 0);
 
-      double limitMargin = romMarginFractions[index].getDoubleValue() * (jointLimitUpper - jointLimitLower);
-      jointLimitUpper -= limitMargin;
-      jointLimitLower += limitMargin;
+
+      if(!Double.isInfinite(jointLimitUpper) && !Double.isInfinite(jointLimitLower))
+      {
+         double limitMargin = romMarginFractions[index].getDoubleValue() * (jointLimitUpper - jointLimitLower);
+         jointLimitUpper -= limitMargin;
+         jointLimitLower += limitMargin;
+      }
 
       double qDDotMin = Double.NEGATIVE_INFINITY;
       double qDDotMax = Double.POSITIVE_INFINITY;
@@ -315,9 +322,12 @@ public class WholeBodyControllerBoundCalculator
       double jointLimitLower = jointLowerLimits.get(index, 0);
       double jointLimitUpper = jointUpperLimits.get(index, 0);
 
-      double limitMargin = romMarginFractions[index].getDoubleValue() * (jointLimitUpper - jointLimitLower);
-      jointLimitUpper -= limitMargin;
-      jointLimitLower += limitMargin;
+      if(!Double.isInfinite(jointLimitUpper) && !Double.isInfinite(jointLimitLower))
+      {
+         double limitMargin = romMarginFractions[index].getDoubleValue() * (jointLimitUpper - jointLimitLower);
+         jointLimitUpper -= limitMargin;
+         jointLimitLower += limitMargin;
+      }
 
       double velocityLimitLower;
       double velocityLimitUpper;

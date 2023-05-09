@@ -1,0 +1,35 @@
+{
+  "title" : "ArUco marker information",
+  "Marker ID" : {
+    "type" : "Integer",
+    "description" : "ArUco marker ID in the ArUco dictionary"
+  },
+  "Marker size" : {
+    "type" : "Double",
+    "description" : "ArUco marker side length size of the black outer part"
+  },
+  "Marker X translation to parent" : {
+    "type" : "Double",
+    "description" : "ArUco marker origin X translation to parent"
+  },
+  "Marker Y translation to parent" : {
+    "type" : "Double",
+    "description" : "ArUco marker origin Y translation to parent"
+  },
+  "Marker Z translation to parent" : {
+    "type" : "Double",
+    "description" : "ArUco marker origin Z translation to parent"
+  },
+  "Marker yaw rotation to parent degrees" : {
+    "type" : "Double",
+    "description" : "ArUco marker origin yaw rotation to parent (in degrees)"
+  },
+  "Marker pitch rotation to parent degrees" : {
+    "type" : "Double",
+    "description" : "ArUco marker origin pitch rotation to parent (in degrees)"
+  },
+  "Marker roll rotation to parent degrees" : {
+    "type" : "Double",
+    "description" : "ArUco marker origin roll rotation to parent (in degrees)"
+  }
+}

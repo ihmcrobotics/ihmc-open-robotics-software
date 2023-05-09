@@ -3,16 +3,11 @@ package us.ihmc.behaviors.sharedControl;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.OpenCVArUcoMarker;
-import us.ihmc.perception.objects.ArUcoMarkerObject;
-import us.ihmc.perception.objects.ArUcoMarkerObjectsInfo;
 import us.ihmc.promp.ProMPUtil;
 import us.ihmc.rdx.ui.tools.TrajectoryRecordReplay;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,12 +22,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ProMPAssistantObjectFrameTest
 {
-   private ReferenceFrame objectFrame;
-
    @Test
    public void ProMPTrajectoryGenerationObjectFrameTest() throws IOException
    {
-      createObjectFrameFromAruco();
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      transformToWorld.getTranslation().set(1.073, -0.146, 1.016);
+      transformToWorld.getRotation().setQuaternion(-0.002, 1.000, 0.001, 0.003);
+      ReferenceFrame objectFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(), transformToWorld);
+
       // learn/load ProMPs
       // Check ProMPAssistant.json if you want to change parameters (e.g, task to learn, body parts to consider in the motion)
       ProMPAssistant proMPAssistant = new ProMPAssistant();
@@ -112,32 +109,5 @@ public class ProMPAssistantObjectFrameTest
       LogTools.info("Test completed successfully!");
       LogTools.info("You can visualize the ProMPs plots by running the file {}/1Dplots_ProMPAssistantTest.py", etcDirectory);
       LogTools.info("You can use file {}/{} as a replay file in Kinematics Streaming Mode", etcDirectory, recordFile);
-   }
-
-   private void createObjectFrameFromAruco()
-   {
-      ArUcoMarkerObjectsInfo arucosInfo = new ArUcoMarkerObjectsInfo();
-      arucosInfo.load();
-      ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
-      ArUcoMarkerObject objectWithArUco;
-      // add markers with their respective info
-      for (int id : arucosInfo.getIds())
-         markersToTrack.add(new OpenCVArUcoMarker(id, arucosInfo.getMarkerSize(id)));
-      // get a marker
-      OpenCVArUcoMarker marker = markersToTrack.get(0);
-      int objectId = marker.getId();
-      // get object with attached aruco marker
-      objectWithArUco = new ArUcoMarkerObject(objectId, arucosInfo);
-      // get marker pose in world frame, in reality this would be detected by camera
-      FramePose3DBasics markerPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                     new Point3D(1.073, -0.146, 1.016),
-                                                     new Quaternion(-0.002, 1.000, 0.001, 0.003));
-      RigidBodyTransform markerTransformToWorld = new RigidBodyTransform(objectWithArUco.getMarkerTransformToWorld());
-      // create from this pose, the associated transform stored in objectWithArUco
-      markerPose.get(markerTransformToWorld);
-      objectWithArUco.updateFrame(); // update frame of the object
-      objectWithArUco.updateMarkerPose(markerPose); // compute object pose from marker pose
-
-      objectFrame = objectWithArUco.getObjectFrame();
    }
 }

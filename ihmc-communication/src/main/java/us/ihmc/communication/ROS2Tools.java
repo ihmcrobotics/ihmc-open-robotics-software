@@ -1,9 +1,12 @@
 package us.ihmc.communication;
 
+import com.eprosima.xmlschemas.fastrtps_profiles.HistoryQosKindType;
+import com.eprosima.xmlschemas.fastrtps_profiles.ReliabilityQosKindType;
 import controller_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
+import mission_control_msgs.msg.dds.*;
 import perception_msgs.msg.dds.*;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
@@ -21,6 +24,7 @@ import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -77,6 +81,9 @@ public class ROS2Tools
 
    public static final ROS2Topic<?> BEHAVIOR_MODULE = IHMC_ROOT.withModule(BEHAVIOR_MODULE_NAME);
 
+   public static final ROS2Topic<Empty> KINEMATICS_SIMULATION_HEARTBEAT
+         = IHMC_ROOT.withModule("kinematics_simulation").withOutput().withSuffix("heartbeat").withType(Empty.class);
+
    public static final ROS2Topic<TextToSpeechPacket> TEXT_STATUS = IHMC_ROOT.withTypeName(TextToSpeechPacket.class);
 
    private static final ROS2Topic<RigidBodyTransformMessage> TRANSFORM_TUNING_BASE_TOPIC = IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class)
@@ -100,6 +107,8 @@ public class ROS2Tools
    private static final ROS2Topic<HandJointAnglePacket> HAND_JOINT_ANGLES = HUMANOID_CONTROLLER.withOutput().withTypeName(HandJointAnglePacket.class);
 
    public static final ROS2Topic<Float64> BOX_MASS = IHMC_ROOT.withSuffix("box_mass").withType(Float64.class);
+
+   public static final ROS2Topic<SystemAvailableMessage> SYSTEM_AVAILABLE = IHMC_ROOT.withModule("mission_control").withType(SystemAvailableMessage.class);
 
    public static final Function<String, String> NAMED_BY_TYPE = typeName -> typeName;
 
@@ -191,6 +200,57 @@ public class ROS2Tools
    public static ROS2Topic<DoorParameterPacket> getDoorParameterTopic()
    {
       return typeNamedTopic(DoorParameterPacket.class, ROS2Tools.IHMC_ROOT);
+   }
+
+   /**
+    * Get system resource usage topic for Mission Control
+    * @param instanceId of the Mission Control Daemon
+    * @return the ROS2Topic the daemon will use for system resource usage messages
+    */
+   public static ROS2Topic<SystemResourceUsageMessage> getSystemResourceUsageTopic(UUID instanceId)
+   {
+      String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
+      return typeNamedTopic(SystemResourceUsageMessage.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
+   }
+
+   /**
+    * Get system service status topic for Mission Control
+    * @param instanceId of the Mission Control Daemon
+    * @return the ROS2Topic the daemon will use for system service status messages
+    */
+   public static ROS2Topic<SystemServiceStatusMessage> getSystemServiceStatusTopic(UUID instanceId)
+   {
+      String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
+      return typeNamedTopic(SystemServiceStatusMessage.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
+   }
+
+   public static ROS2Topic<SystemServiceActionMessage> getSystemServiceActionTopic(UUID instanceId)
+   {
+      String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
+      return typeNamedTopic(SystemServiceActionMessage.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
+   }
+
+   public static ROS2Topic<Empty> getSystemRebootTopic(UUID instanceId)
+   {
+      String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
+      return typeNamedTopic(Empty.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
+   }
+
+   public static ROS2Topic<SystemServiceLogRefreshMessage> getSystemServiceLogRefreshTopic(UUID instanceId)
+   {
+      String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
+      return typeNamedTopic(SystemServiceLogRefreshMessage.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
+   }
+
+   /**
+    * Get the system service status QOS profile for Mission Control
+    * @return the ROS2QosProfile with history
+    */
+   public static ROS2QosProfile getSystemServiceStatusQosProfile()
+   {
+      ROS2QosProfile profile = new ROS2QosProfile();
+      profile.setReliability(ReliabilityQosKindType.RELIABLE);
+      return profile;
    }
 
    public final static String NAMESPACE = "/us/ihmc"; // ? no idea what this does

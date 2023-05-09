@@ -4,7 +4,8 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.lwjgl.openvr.InputDigitalActionData;
-import perception_msgs.msg.dds.DetectedObjectMessage;
+import perception_msgs.msg.dds.DetectableSceneNodeMessage;
+import perception_msgs.msg.dds.DetectableSceneNodesMessage;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
@@ -15,7 +16,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.ArUcoObjectsPerceptionManager;
+import us.ihmc.perception.sceneGraph.SceneGraphAPI;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
@@ -37,7 +38,7 @@ public class KinematicsRecordReplay
    private final List<List<Pose3DReadOnly>> framesToRecordHistory = new ArrayList<>();
    private int partId = 0; // identifier of current frame, used to now what body part among numberOfParts we are currently handling
    private final ROS2PublishSubscribeAPI ros2;
-   private final IHMCROS2Input<DetectedObjectMessage> objectDetectorSubscription;
+   private final IHMCROS2Input<DetectableSceneNodesMessage> detectableSceneObjectsSubscription;
    private boolean objectLocked = false;
    private ReferenceFrame objectFrame;
 
@@ -50,7 +51,7 @@ public class KinematicsRecordReplay
       for (int n = 0; n < numberOfParts; n++)
          framesToRecordHistory.add(new ArrayList<>());
 
-      objectDetectorSubscription = ros2.subscribe(ArUcoObjectsPerceptionManager.DETECTED_OBJECT);
+      detectableSceneObjectsSubscription = ros2.subscribe(SceneGraphAPI.DETECTABLE_SCENE_NODES);
    }
 
    public void processRecordReplayInput(InputDigitalActionData triggerButton)
@@ -59,11 +60,12 @@ public class KinematicsRecordReplay
       if (enabledKinematicsStreaming.get() && enablerRecording.get() && triggerButton.bChanged() && !triggerButton.bState())
       {
          isRecording = !isRecording;
-         if (objectDetectorSubscription.getMessageNotification().poll() && !objectLocked)
+         if (detectableSceneObjectsSubscription.getMessageNotification().poll() && !objectLocked)
          {
-            DetectedObjectMessage detectedObjectMessage = objectDetectorSubscription.getMessageNotification().read();
+            DetectableSceneNodesMessage detectableSceneNodeMessage = detectableSceneObjectsSubscription.getMessageNotification().read();
+            DetectableSceneNodeMessage selectedObject = null; // TODO: Search for desired object
             RigidBodyTransform objectTransformToWorld = new RigidBodyTransform();
-            MessageTools.toEuclid(detectedObjectMessage.getTransformToWorld(), objectTransformToWorld);
+            MessageTools.toEuclid(selectedObject.getTransformToWorld(), objectTransformToWorld);
             ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                    objectTransformToWorld);
             objectLocked = true;

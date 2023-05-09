@@ -243,4 +243,10 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       group.addChild(poseController.getSCS2YoGraphics());
       return group;
    }
+
+   @Override
+   public boolean isLoadBearing()
+   {
+      return false;
+   }
 }

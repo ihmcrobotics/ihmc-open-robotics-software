@@ -31,11 +31,11 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.gizmo.RDXPathControlRingGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
-import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.PathTypeStepParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnStraightTurnFootstepGenerator;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -53,7 +53,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    private boolean newlyModified = false;
    private boolean mouseRingPickSelected;
    private RDX3DPanel panel3D;
-   private RDXTeleoperationParameters teleoperationParameters;
+   private RDXLocomotionParameters locomotionParameters;
    private MovingReferenceFrame midFeetZUpFrame;
    private ResettableExceptionHandlingExecutorService footstepPlanningThread;
    private FootstepPlannerParametersBasics footstepPlannerParameters;
@@ -90,10 +90,10 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    public void create(RDX3DPanel panel3D,
                       DRCRobotModel robotModel,
                       ROS2SyncedRobotModel syncedRobot,
-                      RDXTeleoperationParameters teleoperationParameters)
+                      RDXLocomotionParameters locomotionParameters)
    {
       this.panel3D = panel3D;
-      this.teleoperationParameters = teleoperationParameters;
+      this.locomotionParameters = locomotionParameters;
       footstepPlannerGoalGizmo.create(panel3D.getCamera3D());
       panel3D.addImGuiOverlayAddition(this::renderTooltips);
       midFeetZUpFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
@@ -468,9 +468,9 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    {
       return switch (walkPathType)
       {
-         case STRAIGHT -> teleoperationParameters.getStraightStepWidth();
-         case LEFT_SHUFFLE, RIGHT_SHUFFLE -> teleoperationParameters.getShuffleStepWidth();
-         case REVERSE -> teleoperationParameters.getReverseStepWidth();
+         case STRAIGHT -> locomotionParameters.getStraightStepWidth();
+         case LEFT_SHUFFLE, RIGHT_SHUFFLE -> locomotionParameters.getShuffleStepWidth();
+         case REVERSE -> locomotionParameters.getReverseStepWidth();
       };
    }
 
@@ -479,9 +479,9 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    {
       return switch (walkPathType)
       {
-         case STRAIGHT -> teleoperationParameters.getFootstepLengthMultiplier() * teleoperationParameters.getStraightStepLength();
-         case LEFT_SHUFFLE, RIGHT_SHUFFLE -> teleoperationParameters.getFootstepLengthMultiplier() * teleoperationParameters.getShuffleStepLength();
-         case REVERSE -> teleoperationParameters.getFootstepLengthMultiplier() * teleoperationParameters.getReverseStepLength();
+         case STRAIGHT -> locomotionParameters.getFootstepLengthMultiplier() * locomotionParameters.getStraightStepLength();
+         case LEFT_SHUFFLE, RIGHT_SHUFFLE -> locomotionParameters.getFootstepLengthMultiplier() * locomotionParameters.getShuffleStepLength();
+         case REVERSE -> locomotionParameters.getFootstepLengthMultiplier() * locomotionParameters.getReverseStepLength();
       };
    }
 
@@ -491,14 +491,14 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       double minimumHipOpeningAngle = Math.toRadians(10.0);
       double hipOpeningAngle = EuclidCoreTools.interpolate(minimumHipOpeningAngle,
                                                            steppingParameters.getMaxAngleTurnOutwards(),
-                                                           teleoperationParameters.getTurnAggressiveness());
+                                                           locomotionParameters.getTurnAggressiveness());
       return hipOpeningAngle;
    }
 
    @Override
    public double getTurningCloseStepAngle()
    {
-      double hipClosingAngle = -teleoperationParameters.getTurnAggressiveness() * steppingParameters.getMaxAngleTurnInwards();
+      double hipClosingAngle = -locomotionParameters.getTurnAggressiveness() * steppingParameters.getMaxAngleTurnInwards();
       return hipClosingAngle;
    }
 
