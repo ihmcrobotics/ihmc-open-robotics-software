@@ -22,7 +22,6 @@ public class RDXAffordanceFrame
    private final RDXReferenceFrameGraphic frameGraphic;
    private final PoseReferenceFrame poseFrame;
    private HandConfiguration handConfiguration;
-   public final PoseReferenceFrame affordanceFrame;
    public final RDXInteractableSakeGripper interactableHand;
    private final FramePose3D handPose;
    private final RigidBodyTransform handTransformToWorld;
@@ -46,7 +45,6 @@ public class RDXAffordanceFrame
       this.objectTransformToWorld = objectTransformToWorld;
       this.activeMenu = activeMenu;
       this.menu = activeMenu[0];
-      this.affordanceFrame = affordanceFrame;
       poseFrame = new PoseReferenceFrame("handFrame", affordanceFrame);
       frameGraphic = new RDXReferenceFrameGraphic(0.1, color);
    }
@@ -65,11 +63,13 @@ public class RDXAffordanceFrame
          isPoseSet = true;
          poseFrame.setPoseAndUpdate(handPose);
          objectTransformOfFrame.set(objectTransformToWorld);
+         activeMenu[0] = this.menu;
       }
       ImGui.sameLine();
       if (ImGui.button(labels.get("CLEAR") + "##" + labelId))
       {
          reset();
+         activeMenu[0] = RDXActiveAffordanceMenu.NONE;
       }
 
       if (isPoseSet)

@@ -1,6 +1,8 @@
 package us.ihmc.rdx.ui.interactable;
 
 import imgui.internal.ImGui;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
 import us.ihmc.rdx.imgui.ImGuiPanel;
@@ -12,7 +14,7 @@ import java.util.*;
 
 public class RDXInteractableObjectBuilder extends ImGuiPanel
 {
-   private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(RDXInteractableObjectBuilder.class, "Objects");
+   private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(RDXInteractableObjectBuilder.class, "Object Panel");
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private PredefinedSceneNodeLibrary predefinedSceneNodeLibrary;
    private RDXInteractableObject selectedObject;
@@ -26,7 +28,7 @@ public class RDXInteractableObjectBuilder extends ImGuiPanel
 
       selectedObject = new RDXInteractableObject(baseUI);
       predefinedSceneNodeLibrary = PredefinedSceneNodeLibrary.defaultObjects();
-      //TODO change this to detectable when library is updated
+      //TODO change this to detectable when node library is updated
       List<ArUcoDetectableNode> availableObjects = predefinedSceneNodeLibrary.getArUcoDetectableNodes();
       for (var object : availableObjects)
          nameModelMap.put(object.getName(), object.getVisualModelFilePath());
@@ -35,7 +37,7 @@ public class RDXInteractableObjectBuilder extends ImGuiPanel
    public void renderImGuiWidgets()
    {
       ImGui.text("Selected: " + (!isAnyObjectSelected() ? "" : (selectedObjectName)));
-
+      ImGui.text("Select object: ");
       for (Map.Entry<String, String> entryNameModel : nameModelMap.entrySet())
       {
          if (ImGui.button(labels.get(entryNameModel.getKey())))
@@ -47,10 +49,15 @@ public class RDXInteractableObjectBuilder extends ImGuiPanel
          }
          ImGui.separator();
       }
-      if (isAnyObjectSelected() && (ImGui.button("Delete object")))
+      if (isAnyObjectSelected() && (ImGui.button(labels.get("SET INITIAL POSE") + "##object")))
+      {
+         selectedObject.setInitialPose();
+      }
+      if (isAnyObjectSelected() && (ImGui.button(labels.get("DELETE") + "##object")))
       {
          selectedObject.clear();
          selectedObjectName = "";
+         selectedObject.resetPose();
       }
    }
 
@@ -68,5 +75,4 @@ public class RDXInteractableObjectBuilder extends ImGuiPanel
    {
       return selectedObject.getModelInstance() != null;
    }
-
 }

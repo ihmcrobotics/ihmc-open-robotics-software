@@ -205,5 +205,10 @@ public class RDXInteractableSakeGripper implements RenderableProvider
    {
       return handConfiguration;
    }
+
+   public ReferenceFrame getReferenceFrameHand()
+   {
+      return referenceFrameHand;
+   }
 }
 

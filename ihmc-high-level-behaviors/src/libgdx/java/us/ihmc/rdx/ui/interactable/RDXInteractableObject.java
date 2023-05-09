@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -21,6 +22,7 @@ public class RDXInteractableObject implements RenderableProvider
 {
    private ModelInstance modelInstance;
    private RigidBodyTransform objectTransform = new RigidBodyTransform();
+   private final FramePose3D initialObjectPose = new FramePose3D();
    private final ReferenceFrame objectFrame;
    private RDXPose3DGizmo pose3DGizmo = new RDXPose3DGizmo(ReferenceFrame.getWorldFrame(), objectTransform);
 
@@ -85,6 +87,16 @@ public class RDXInteractableObject implements RenderableProvider
    public ReferenceFrame getObjectFrame()
    {
       return objectFrame;
+   }
+
+   public void setInitialPose()
+   {
+      initialObjectPose.set(pose3DGizmo.getTransformToParent());
+   }
+
+   public void resetToInitialPose()
+   {
+      pose3DGizmo.getTransformToParent().set(initialObjectPose);
    }
 
    public void resetPose()

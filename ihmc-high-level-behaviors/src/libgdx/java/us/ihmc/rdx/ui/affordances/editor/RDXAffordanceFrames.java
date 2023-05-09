@@ -101,6 +101,7 @@ public class RDXAffordanceFrames
       if (ImGui.button(labels.get("CLEAR ALL") + "##" + lableId))
       {
          reset();
+         activeMenu[0] = RDXActiveAffordanceMenu.NONE;
       }
       if (poseIndices.size() > 0)
       {
@@ -148,6 +149,7 @@ public class RDXAffordanceFrames
                handConfigurations.remove(i);
                selectedFrameConfiguration = null;
                selectedIndex = -1;
+               activeMenu[0] = RDXActiveAffordanceMenu.NONE;
             }
             ImGui.popStyleColor();
          }
