@@ -13,6 +13,7 @@ import us.ihmc.rdx.imgui.ImGuiEnumPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
@@ -36,7 +37,7 @@ public class RDXPredefinedRigidBodySceneNode
    private boolean showing = false;
    private final RDXModelInstance modelInstance;
    private final FramePose3D nodePose = new FramePose3D();
-   private final RigidBodyTransform nodeToWorldTransform = new RigidBodyTransform();
+   private final RigidBodyTransform visualModelToWorldTransform = new RigidBodyTransform();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiEnumPlot currentlyDetectedPlot;
 
@@ -61,9 +62,10 @@ public class RDXPredefinedRigidBodySceneNode
       referenceFrameGraphic.setToReferenceFrame(sceneNode.getNodeFrame());
 
       nodePose.setToZero(sceneNode.getNodeFrame());
+      nodePose.set(sceneNode.getVisualModelToNodeFrameTransform());
       nodePose.changeFrame(ReferenceFrame.getWorldFrame());
-      nodePose.get(nodeToWorldTransform);
-      modelInstance.setTransformToWorldFrame(nodeToWorldTransform);
+      nodePose.get(visualModelToWorldTransform);
+      modelInstance.setTransformToWorldFrame(visualModelToWorldTransform);
    }
 
    public void renderImGuiWidgets()
