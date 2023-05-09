@@ -15,57 +15,61 @@ import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
-public class RDXAffordancePose
+public class RDXAffordanceFrame
 {
    private FramePose3D pose = new FramePose3D();
    private boolean isPoseSet = false;
    private final RDXReferenceFrameGraphic frameGraphic;
-   private final PoseReferenceFrame frame;
+   private final PoseReferenceFrame poseFrame;
    private HandConfiguration handConfiguration;
    public final PoseReferenceFrame affordanceFrame;
    public final RDXInteractableSakeGripper interactableHand;
    private final FramePose3D handPose;
    private final RigidBodyTransform handTransformToWorld;
+   private final RigidBodyTransform objectTransformToWorld;
+   private final RigidBodyTransform objectTransformOfFrame = new RigidBodyTransform();
    private RDXActiveAffordanceMenu[] activeMenu;
    private final RDXActiveAffordanceMenu menu;
    public boolean changedColor = false;
 
-   public RDXAffordancePose(RDXInteractableSakeGripper interactableHand,
-                            RigidBodyTransform handTransformToWorld,
-                            FramePose3D handPose,
-                            PoseReferenceFrame affordanceFrame,
-                            RDXActiveAffordanceMenu[] activeMenu,
-                            Color color)
+   public RDXAffordanceFrame(RDXInteractableSakeGripper interactableHand,
+                             RigidBodyTransform handTransformToWorld,
+                             FramePose3D handPose,
+                             RigidBodyTransform objectTransformToWorld,
+                             PoseReferenceFrame affordanceFrame,
+                             RDXActiveAffordanceMenu[] activeMenu,
+                             Color color)
    {
       this.interactableHand = interactableHand;
       this.handPose = handPose;
       this.handTransformToWorld = handTransformToWorld;
+      this.objectTransformToWorld = objectTransformToWorld;
       this.activeMenu = activeMenu;
       this.menu = activeMenu[0];
       this.affordanceFrame = affordanceFrame;
-      frame = new PoseReferenceFrame("handFrame", affordanceFrame);
+      poseFrame = new PoseReferenceFrame("handFrame", affordanceFrame);
       frameGraphic = new RDXReferenceFrameGraphic(0.1, color);
    }
 
    public void update()
    {
-      pose = new FramePose3D(frame);
+      pose = new FramePose3D(poseFrame);
       pose.changeFrame(ReferenceFrame.getWorldFrame());
       frameGraphic.updateFromFramePose(pose);
    }
 
-   public void renderImGuiWidgets(ImGuiUniqueLabelMap labels, String id)
+   public void renderImGuiWidgets(ImGuiUniqueLabelMap labels, String labelId)
    {
-      if (ImGui.button(labels.get("SET") + "##" + id))
+      if (ImGui.button(labels.get("SET") + "##" + labelId))
       {
          isPoseSet = true;
-         frame.setPoseAndUpdate(handPose);
+         poseFrame.setPoseAndUpdate(handPose);
+         objectTransformOfFrame.set(objectTransformToWorld);
       }
       ImGui.sameLine();
-      if (ImGui.button(labels.get("CLEAR") + "##" + id))
+      if (ImGui.button(labels.get("CLEAR") + "##" + labelId))
       {
-         isPoseSet = false;
-         handConfiguration = null;
+         reset();
       }
 
       if (isPoseSet)
@@ -75,13 +79,17 @@ public class RDXAffordancePose
             changedColor = true;
             ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 1.0f, 0.0f, 1.0f);
          }
-         if (ImGui.button(labels.get("Grasp Frame") + "##" + id))
+         if (ImGui.button(labels.get("Grasp Frame") + "##" + labelId))
          {
             activeMenu[0] = this.menu;
             if (isPoseSet)
-               handTransformToWorld.set(pose);  // move hand to pregrasp point
+            {
+               handTransformToWorld.set(pose);  // move hand to grasp point
+               objectTransformToWorld.set(objectTransformOfFrame);
+            }
             if (handConfiguration != null)
                interactableHand.setGripperToConfiguration(handConfiguration);
+
          }
          if (changedColor)
          {
@@ -92,7 +100,7 @@ public class RDXAffordancePose
 
       ImGui.text("Hand Configuration: " + (handConfiguration == null ? "" : handConfiguration.toString()));
       ImGui.sameLine();
-      if (ImGui.button(labels.get("SET") + "##hand" + id) && activeMenu[0].equals(this.menu))
+      if (ImGui.button(labels.get("SET") + "##hand" + labelId) && activeMenu[0].equals(this.menu))
       {
          handConfiguration = interactableHand.getConfiguration();
       }
@@ -102,6 +110,7 @@ public class RDXAffordancePose
    {
       isPoseSet = false;
       handConfiguration = null;
+      objectTransformOfFrame.setToZero();
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -110,9 +119,9 @@ public class RDXAffordancePose
          frameGraphic.getRenderables(renderables, pool);
    }
 
-   public PoseReferenceFrame getFrame()
+   public PoseReferenceFrame getPoseFrame()
    {
-      return frame;
+      return poseFrame;
    }
 
    public FramePose3D getPose()

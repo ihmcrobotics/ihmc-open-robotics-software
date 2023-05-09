@@ -12,7 +12,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -40,9 +39,12 @@ public class RDXAffordanceEditorUI
    private final PoseReferenceFrame affordanceFrame = new PoseReferenceFrame("affordanceFrame", ReferenceFrame.getWorldFrame());
    private final float[] gripperClosure = new float[1];
    // affordance poses
-   private RDXAffordancePose graspPose;
-   private RDXAffordancePoses preGraspPoses;
-   private RDXAffordancePoses postGraspPoses;
+   private RDXAffordanceFrame graspPose;
+   private RDXAffordanceFrames preGraspPoses;
+   private RDXAffordanceFrames postGraspPoses;
+
+   private final FramePose3D previousObjectPose = new FramePose3D();
+   public boolean objectLocked = false;
    private RDXActiveAffordanceMenu[] activeMenu;
    private final WorkspaceResourceDirectory configurationsDirectory = new WorkspaceResourceDirectory(getClass(), "/boxAffordance");
 
@@ -63,29 +65,37 @@ public class RDXAffordanceEditorUI
 
             activeMenu = new RDXActiveAffordanceMenu[1];
             activeMenu[0] = RDXActiveAffordanceMenu.GRASP;
-            graspPose = new RDXAffordancePose(interactableHand, handTransformToWorld, handPose, affordanceFrame, activeMenu, Color.BLACK);
+            graspPose = new RDXAffordanceFrame(interactableHand,
+                                               handTransformToWorld,
+                                               handPose,
+                                               objectBuilder.getSelectedObject().getTransformToWorld(),
+                                               affordanceFrame,
+                                               activeMenu,
+                                               Color.BLACK);
             activeMenu[0] = RDXActiveAffordanceMenu.PRE_GRASP;
-            preGraspPoses = new RDXAffordancePoses(interactableHand,
-                                                   handTransformToWorld,
-                                                   handPose,
-                                                   affordanceFrame,
-                                                   activeMenu,
-                                                   new ArrayList<>(Arrays.asList(new Color(0xFFE4B5FF),
-                                                                                 new Color(0xFF8C00FF),
-                                                                                 new Color(0xFFDAB9FF),
-                                                                                 new Color(0xFF6600FF),
-                                                                                 new Color(0xFFA07AFF))));
-            activeMenu[0] = RDXActiveAffordanceMenu.POST_GRASP;
-            postGraspPoses = new RDXAffordancePoses(interactableHand,
+            preGraspPoses = new RDXAffordanceFrames(interactableHand,
                                                     handTransformToWorld,
                                                     handPose,
+                                                    objectBuilder.getSelectedObject().getTransformToWorld(),
                                                     affordanceFrame,
                                                     activeMenu,
-                                                    new ArrayList<>(Arrays.asList(new Color(0xD8BFD8FF),
-                                                                                  new Color(0xBA55D3FF),
-                                                                                  new Color(0x9932CCFF),
-                                                                                  new Color(0x8A2BE2FF),
-                                                                                  new Color(0x4B0082FF))));
+                                                    new ArrayList<>(Arrays.asList(new Color(0xFFE4B5FF),
+                                                                                  new Color(0xFF8C00FF),
+                                                                                  new Color(0xFFDAB9FF),
+                                                                                  new Color(0xFF6600FF),
+                                                                                  new Color(0xFFA07AFF))));
+            activeMenu[0] = RDXActiveAffordanceMenu.POST_GRASP;
+            postGraspPoses = new RDXAffordanceFrames(interactableHand,
+                                                     handTransformToWorld,
+                                                     handPose,
+                                                     objectBuilder.getSelectedObject().getTransformToWorld(),
+                                                     affordanceFrame,
+                                                     activeMenu,
+                                                     new ArrayList<>(Arrays.asList(new Color(0xD8BFD8FF),
+                                                                                   new Color(0xBA55D3FF),
+                                                                                   new Color(0x9932CCFF),
+                                                                                   new Color(0x8A2BE2FF),
+                                                                                   new Color(0x4B0082FF))));
 
             baseUI.getPrimaryScene().addRenderableProvider(interactableHand);
             baseUI.getImGuiPanelManager().addPanel(interactableHand.getPose3DGizmo().createTunerPanel("hand"));
@@ -116,7 +126,25 @@ public class RDXAffordanceEditorUI
       {
          FramePose3D objectPose = new FramePose3D(objectBuilder.getSelectedObject().getObjectFrame());
          objectPose.changeFrame(ReferenceFrame.getWorldFrame());
-         affordanceFrame.setPoseAndUpdate(objectPose);
+         // when editing post grasp poses, we want to move the object frame and not move the previously set frames
+         if (activeMenu[0] == RDXActiveAffordanceMenu.POST_GRASP)
+         {
+            if (!objectLocked)
+            {
+               previousObjectPose.set(objectPose);
+               objectLocked = true;
+            }
+            // check how the object has been moved and update handTransformToWorld which updates the hand pose
+            RigidBodyTransform objectPoseChange = new RigidBodyTransform(previousObjectPose);
+            objectPoseChange.multiplyInvertThis(objectPose);
+            handTransformToWorld.appendTranslation(objectPoseChange.getTranslation());
+            handTransformToWorld.appendOrientation(objectPoseChange.getRotation());
+            previousObjectPose.set(objectPose);
+         }
+         else
+         {
+            objectLocked = false;
+         }
       }
       handPose.changeFrame(ReferenceFrame.getWorldFrame());
       handPose.set(handTransformToWorld);

@@ -22,12 +22,13 @@ public class RDXInteractableObject implements RenderableProvider
    private ModelInstance modelInstance;
    private RigidBodyTransform objectTransform = new RigidBodyTransform();
    private final ReferenceFrame objectFrame;
-   private RDXPose3DGizmo pose3DGizmo = new RDXPose3DGizmo();
+   private RDXPose3DGizmo pose3DGizmo = new RDXPose3DGizmo(ReferenceFrame.getWorldFrame(), objectTransform);
 
    public RDXInteractableObject(RDXBaseUI baseUI)
    {
       this.objectFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), objectTransform);
 
+      pose3DGizmo.setParentFrame(ReferenceFrame.getWorldFrame());
       pose3DGizmo.create(baseUI.getPrimary3DPanel());
       pose3DGizmo.getTransformToParent().getTranslation().set(objectTransform.getTranslation());
       pose3DGizmo.getTransformToParent().getRotation().set(objectTransform.getRotation());
@@ -79,11 +80,6 @@ public class RDXInteractableObject implements RenderableProvider
    public ModelInstance getModelInstance()
    {
       return modelInstance;
-   }
-
-   public RDXPose3DGizmo getPose3DGizmo()
-   {
-      return pose3DGizmo;
    }
 
    public ReferenceFrame getObjectFrame()
