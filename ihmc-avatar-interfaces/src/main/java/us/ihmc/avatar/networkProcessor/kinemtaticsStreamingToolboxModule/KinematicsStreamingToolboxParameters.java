@@ -27,6 +27,11 @@ public class KinematicsStreamingToolboxParameters
    private double defaultAngularRateLimit;
    private double outputJointVelocityScale;
 
+   private boolean minimizeAngularMomentum;
+   private boolean minimizeLinearMomentum;
+   private double angularMomentumWeight;
+   private double linearMomentumWeight;
+
    private double defaultStreamingBlendingDuration;
 
    private double inputPoseLPFBreakFrequency;
@@ -64,6 +69,11 @@ public class KinematicsStreamingToolboxParameters
       defaultLinearRateLimit = 1.5;
       defaultAngularRateLimit = 10.0;
       outputJointVelocityScale = 0.75;
+
+      minimizeAngularMomentum = true;
+      minimizeLinearMomentum = false;
+      angularMomentumWeight = 0.125;
+      linearMomentumWeight = 0.0;
 
       defaultStreamingBlendingDuration = 2.0;
 
@@ -162,6 +172,26 @@ public class KinematicsStreamingToolboxParameters
    public double getOutputJointVelocityScale()
    {
       return outputJointVelocityScale;
+   }
+
+   public boolean isMinimizeAngularMomentum()
+   {
+      return minimizeAngularMomentum;
+   }
+
+   public boolean isMinimizeLinearMomentum()
+   {
+      return minimizeLinearMomentum;
+   }
+
+   public double getAngularMomentumWeight()
+   {
+      return angularMomentumWeight;
+   }
+
+   public double getLinearMomentumWeight()
+   {
+      return linearMomentumWeight;
    }
 
    public double getDefaultStreamingBlendingDuration()
@@ -267,6 +297,26 @@ public class KinematicsStreamingToolboxParameters
    public void setOutputJointVelocityScale(double outputJointVelocityScale)
    {
       this.outputJointVelocityScale = outputJointVelocityScale;
+   }
+
+   public void setMinimizeAngularMomentum(boolean minimizeAngularMomentum)
+   {
+      this.minimizeAngularMomentum = minimizeAngularMomentum;
+   }
+
+   public void setMinimizeLinearMomentum(boolean minimizeLinearMomentum)
+   {
+      this.minimizeLinearMomentum = minimizeLinearMomentum;
+   }
+
+   public void setAngularMomentumWeight(double angularMomentumWeight)
+   {
+      this.angularMomentumWeight = angularMomentumWeight;
+   }
+
+   public void setLinearMomentumWeight(double linearMomentumWeight)
+   {
+      this.linearMomentumWeight = linearMomentumWeight;
    }
 
    public void setDefaultStreamingBlendingDuration(double defaultStreamingBlendingDuration)
