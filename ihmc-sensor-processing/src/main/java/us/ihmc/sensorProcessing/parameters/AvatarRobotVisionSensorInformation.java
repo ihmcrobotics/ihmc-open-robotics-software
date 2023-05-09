@@ -5,8 +5,6 @@ package us.ihmc.sensorProcessing.parameters;
  */
 public interface AvatarRobotVisionSensorInformation
 {
-   public String[] getSensorFramesToTrack();
-
    public AvatarRobotCameraParameters[] getCameraParameters();
 
    public AvatarRobotLidarParameters[] getLidarParameters();
