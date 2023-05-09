@@ -20,17 +20,6 @@ public class RDXGlobalVisualizersPanel extends ImGuiPanel implements RDXRenderab
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private boolean created = false;
 
-   /**
-    * Constructor should be removed and the RDXGlobalVisualizersPanel() constructor should be the only one
-    * No longer supporting the ROS 1 button in the UI
-    * @param enableROS1 uses to be a boolean to enable ROS 1 but support was removed from RDX
-    */
-   @Deprecated
-   public RDXGlobalVisualizersPanel(boolean enableROS1)
-   {
-      this();
-   }
-
    public RDXGlobalVisualizersPanel()
    {
       super(WINDOW_NAME);
