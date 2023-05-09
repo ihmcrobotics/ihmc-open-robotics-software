@@ -143,6 +143,8 @@ public class HumanoidKinematicsSimulation implements RobotController
    private YoVariableServer yoVariableServer = null;
    private IntraprocessYoVariableLogger intraprocessYoVariableLogger;
    private PerfectSimulatedOutputWriter outputWriter;
+   private JointDesiredOutputListReadOnly jointDesiredOutputList;
+   private HumanoidFloatingRootJointRobot floatingRootJointRobot;
 
    public static HumanoidKinematicsSimulation create(DRCRobotModel robotModel, HumanoidKinematicsSimulationParameters kinematicsSimulationParameters)
    {
@@ -307,6 +309,9 @@ public class HumanoidKinematicsSimulation implements RobotController
                                                    managerFactory.createFeedbackControlTemplate(),
                                                    new JointDesiredOutputList(controllerToolbox.getControlledOneDoFJoints()),
                                                    walkingParentRegistry);
+      
+      jointDesiredOutputList = controllerCore.getOutputForLowLevelController();
+      
       walkingController.setControllerCoreOutput(controllerCore.getOutputForHighLevelController());
 
       linearMomentumRateControlModule = new LinearMomentumRateControlModule(centerOfMassStateProvider,
@@ -372,7 +377,7 @@ public class HumanoidKinematicsSimulation implements RobotController
             }
          });
          robotDefinition.setName("KinematicSimulation");
-         HumanoidFloatingRootJointRobot floatingRootJointRobot = new HumanoidFloatingRootJointRobot(robotDefinition, robotModel.getJointMap(), false, false);
+         floatingRootJointRobot = new HumanoidFloatingRootJointRobot(robotDefinition, robotModel.getJointMap(), false, false);
          
          floatingRootJointRobot.setDynamic(false);
          outputWriter = new PerfectSimulatedOutputWriter(floatingRootJointRobot, fullRobotModel, controllerCore.getOutputForLowLevelController());
@@ -658,5 +663,15 @@ public class HumanoidKinematicsSimulation implements RobotController
    public YoRegistry getYoRegistry()
    {
       return registry;
+   }
+
+   public JointDesiredOutputListReadOnly getJointDesiredOutputList()
+   {
+      return jointDesiredOutputList;
+   }
+
+   public HumanoidFloatingRootJointRobot getSimulationRobot()
+   {
+      return floatingRootJointRobot;
    }
 }
