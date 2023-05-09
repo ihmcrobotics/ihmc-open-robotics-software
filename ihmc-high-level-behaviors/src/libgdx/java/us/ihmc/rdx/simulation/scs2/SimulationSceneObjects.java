@@ -50,6 +50,7 @@ public class SimulationSceneObjects
       return new RestartableSCS2SessionRobot(() ->
       {
          TableDefinition tableDefinition = new TableDefinition();
+         tableDefinition.setAddArUcoMarkers(true);
          tableDefinition.build();
          tableDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(0.0, 0.0, 0.0), new Point3D(-1.0, 2.0, 0.86));
          return tableDefinition;

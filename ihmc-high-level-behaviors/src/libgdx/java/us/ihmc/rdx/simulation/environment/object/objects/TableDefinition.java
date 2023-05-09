@@ -21,10 +21,16 @@ import us.ihmc.scs2.definition.visual.VisualDefinition;
 public class TableDefinition  extends RobotDefinition
 {
    private SixDoFJointState initialSixDoFState;
+   private boolean addArUcoMarkers = false;
 
    public TableDefinition()
    {
       super("table");
+   }
+
+   public void setAddArUcoMarkers(boolean addFiducials)
+   {
+      this.addArUcoMarkers = addFiducials;
    }
 
    public void build()
@@ -47,6 +53,14 @@ public class TableDefinition  extends RobotDefinition
       modelVisualDefinition.setGeometryDefinition(geometryDefinition);
       modelVisualDefinition.setMaterialDefinition(materialDefinition);
       tableSurface.addVisualDefinition(modelVisualDefinition);
+
+      if (addArUcoMarkers)
+      {
+         VisualDefinition arUcoMarkerModelVisualDefinition = new VisualDefinition();
+         ModelFileGeometryDefinition fiducialGeometryDefinition = new ModelFileGeometryDefinition("environmentObjects/table/TableArUcoMarker.g3dj");
+         arUcoMarkerModelVisualDefinition.setGeometryDefinition(fiducialGeometryDefinition);
+         tableSurface.addVisualDefinition(arUcoMarkerModelVisualDefinition);
+      }
 
       CollisionShapeDefinition collisionShapeDefinition = new CollisionShapeDefinition(new Box3DDefinition(sizeX, sizeY, sizeZ));
       collisionShapeDefinition.getOriginPose().getTranslation().set(sizeX / 2.0, sizeY / 2.0, sizeZ / 2.0);
