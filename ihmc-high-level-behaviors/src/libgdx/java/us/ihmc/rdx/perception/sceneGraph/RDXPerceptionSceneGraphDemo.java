@@ -1,5 +1,6 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.OpenCVArUcoMarkerDetection;
@@ -78,7 +79,7 @@ public class RDXPerceptionSceneGraphDemo
 
             RDXROS2ArUcoMarkerPosesVisualizer arUcoMarkerPosesVisualizer = new RDXROS2ArUcoMarkerPosesVisualizer("ArUco Marker Poses",
                                                                                                                  ros2Helper,
-                                                                                                                 ROS2Tools.ARUCO_MARKER_POSES);
+                                                                                                                 PerceptionAPI.ARUCO_MARKER_POSES);
             arUcoMarkerPosesVisualizer.setActive(true);
             globalVisualizersUI.addVisualizer(arUcoMarkerPosesVisualizer);
 

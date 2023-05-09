@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import perception_msgs.msg.dds.DoorLocationPacket;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -45,7 +46,7 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
       super(robotName, ThreadName, ros2Node);
       textToSpeechPublisher = createPublisher(TextToSpeechPacket.class, ROS2Tools.IHMC_ROOT);
 
-      createSubscriber(DoorLocationPacket.class, ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput(), doorLocationLatest::set);
+      createSubscriber(DoorLocationPacket.class, PerceptionAPI.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput(), doorLocationLatest::set);
 
       initialize();
    }

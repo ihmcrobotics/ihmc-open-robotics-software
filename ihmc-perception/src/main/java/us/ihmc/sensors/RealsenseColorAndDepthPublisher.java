@@ -9,6 +9,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -292,11 +293,11 @@ public class RealsenseColorAndDepthPublisher
       */
 
       // L515: [F1121365, F0245563], D455: [215122254074]
-      String l515SerialNumber = System.getProperty("l515.serial.number", "F1121365");
-      RealsenseColorAndDepthPublisher realsensePublisher = new RealsenseColorAndDepthPublisher(l515SerialNumber,
-                                                                                               RealsenseConfiguration.L515_COLOR_720P_DEPTH_768P_30HZ,
-                                                                                               ROS2Tools.L515_DEPTH_IMAGE,
-                                                                                               ROS2Tools.L515_COLOR_IMAGE,
+      String realsenseSerialNumber = System.getProperty("d455.serial.number", "213522252883");
+      RealsenseColorAndDepthPublisher realsensePublisher = new RealsenseColorAndDepthPublisher(realsenseSerialNumber,
+                                                                                               RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
+                                                                                               PerceptionAPI.D455_DEPTH_IMAGE,
+                                                                                               PerceptionAPI.D455_COLOR_IMAGE,
                                                                                                ReferenceFrame::getWorldFrame);
       realsensePublisher.run();
       ThreadTools.sleepForever();
