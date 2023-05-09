@@ -208,7 +208,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    {
       StereoVisionPointCloudPublisher publisher = new StereoVisionPointCloudPublisher(fullRobotModelFactory,
                                                                                       ros2Node,
-                                                                                      ROS2Tools.MULTISENSE_STEREO_POINT_CLOUD,
+                                                                                      PerceptionAPI.MULTISENSE_STEREO_POINT_CLOUD,
                                                                                       ROS2QosProfile.BEST_EFFORT());
       publisher.setROSClockCalculator(rosClockCalculator);
       publisher.setCustomStereoVisionTransformer(createCustomStereoTransformCalculator());

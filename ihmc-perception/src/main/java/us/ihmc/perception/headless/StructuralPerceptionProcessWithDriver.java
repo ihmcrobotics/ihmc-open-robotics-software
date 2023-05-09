@@ -9,6 +9,7 @@ import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
@@ -203,9 +204,9 @@ public class StructuralPerceptionProcessWithDriver
 
    public static void main(String[] args)
    {
-      new StructuralPerceptionProcessWithDriver(ROS2Tools.OUSTER_DEPTH_IMAGE,
-                                                ROS2Tools.PERSPECTIVE_RAPID_REGIONS,
-                                                ROS2Tools.PERSPECTIVE_RAPID_REGIONS_WITH_POSE,
+      new StructuralPerceptionProcessWithDriver(PerceptionAPI.OUSTER_DEPTH_IMAGE,
+                                                PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
+                                                PerceptionAPI.PERSPECTIVE_RAPID_REGIONS_WITH_POSE,
                                                 ReferenceFrame::getWorldFrame);
    }
 }

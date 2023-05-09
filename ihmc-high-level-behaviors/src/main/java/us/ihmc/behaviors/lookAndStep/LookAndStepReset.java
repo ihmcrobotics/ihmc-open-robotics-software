@@ -79,7 +79,7 @@ public class LookAndStepReset
       // REAStateRequestMessage clearMessage = new REAStateRequestMessage();
       // clearMessage.setRequestClear(true);
       // statusLogger.info("Requesting clear REA");
-      // helper.publish(ROS2Tools.REA_STATE_REQUEST, clearMessage);
+      // helper.publish(PerceptionAPI.REA_STATE_REQUEST, clearMessage);
 
       lookAndStep.helper.publish(PlanarRegionsForUI, new PlanarRegionsList());
       lookAndStep.helper.publish(BodyPathPlanForUI, new ArrayList<>());
