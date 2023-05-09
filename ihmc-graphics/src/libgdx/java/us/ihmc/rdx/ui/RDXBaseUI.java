@@ -30,7 +30,6 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.vr.RDXVRManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.*;
-import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -97,11 +96,12 @@ public class RDXBaseUI
    private String configurationExtraPath;
    private final HybridResourceDirectory configurationBaseDirectory;
    private HybridFile libGDXSettingsFile;
-   private final FrequencyCalculator fpsCalculator = new FrequencyCalculator();
+   private final RDXBaseUIFrameRateDisplay frameRateDisplay = new RDXBaseUIFrameRateDisplay();
    private final Stopwatch runTime = new Stopwatch().start();
    private String statusText = ""; // TODO: Add status at bottom of window
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImInt foregroundFPS = new ImInt(240);
+   private final ImBoolean frameRateDisplayCheckbox = new ImBoolean(false);
    private final ImBoolean vsync = new ImBoolean(false);
    private final ImBoolean shadows = new ImBoolean(false);
    private final ImBoolean middleClickOrbit = new ImBoolean(false);
@@ -305,11 +305,8 @@ public class RDXBaseUI
       }
       if (ImGui.beginMenu("Settings"))
       {
-         ImGui.pushItemWidth(80.0f);
-         if (ImGuiTools.volatileInputInt(labels.get("Foreground FPS Limit"), foregroundFPS, 1))
-         {
-            Gdx.graphics.setForegroundFPS(foregroundFPS.get());
-         }
+         ImGui.checkbox(labels.get("Frame rate plot"), frameRateDisplayCheckbox);
+
          if (ImGui.checkbox(labels.get("Vsync"), vsync))
          {
             Gdx.graphics.setVSync(vsync.get());
@@ -318,6 +315,12 @@ public class RDXBaseUI
          {
             primaryScene.setShadowsEnabled(shadows.get());
          }
+         ImGui.pushItemWidth(80.0f);
+         if (ImGuiTools.volatileInputInt(labels.get("Foreground FPS Limit"), foregroundFPS, 1))
+         {
+            Gdx.graphics.setForegroundFPS(foregroundFPS.get());
+         }
+
          if (ImGuiTools.volatileInputInt(labels.get("libGDX log level"), libGDXLogLevel, 1))
          {
             Gdx.app.setLogLevel(libGDXLogLevel.get());
@@ -389,16 +392,24 @@ public class RDXBaseUI
          ImGui.endMenu();
       }
 
-      ImGui.sameLine(ImGui.getWindowSizeX() - 220.0f);
-      fpsCalculator.ping();
-      String fpsString = String.valueOf((int) fpsCalculator.getFrequency());
-      while (fpsString.length() < 3)
+      if (frameRateDisplayCheckbox.get())
       {
-         fpsString = " " + fpsString;
+         // Currently we manually tune this value when we change the stuff in the status area
+         float menuBarStatusWidth = 320.0f;
+         ImGui.sameLine(ImGui.getWindowSizeX() - menuBarStatusWidth);
+         frameRateDisplay.renderPlot();
       }
-      ImGui.text(fpsString + " Hz");
+      else
+      {
+         float menuBarStatusWidth = 212.0f;
+         ImGui.sameLine(ImGui.getWindowSizeX() - menuBarStatusWidth);
+      }
+
+      frameRateDisplay.renderHz();
+
       ImGui.text(FormattingTools.getFormattedDecimal2D(runTime.totalElapsed()) + " s");
-      ImGui.sameLine(ImGui.getWindowSizeX() - 100.0f);
+      float enoughWidthForVRButton = 100.0f; // Currently we manually tune this value
+      ImGui.sameLine(ImGui.getWindowSizeX() - enoughWidthForVRButton);
       vrManager.renderImGuiEnableWidget();
       ImGui.endMainMenuBar();
    }
