@@ -11,10 +11,7 @@ import javafx.stage.Stage;
 import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-<<<<<<< HEAD
-=======
 import us.ihmc.commons.MathTools;
->>>>>>> feature/perception-api
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
