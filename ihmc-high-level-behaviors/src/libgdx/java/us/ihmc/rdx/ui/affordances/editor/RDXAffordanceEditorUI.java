@@ -44,7 +44,6 @@ public class RDXAffordanceEditorUI
    private RDXAffordanceFrames preGraspPoses;
    private RDXAffordanceFrames postGraspPoses;
 
-   private final FramePose3D previousObjectPose = new FramePose3D();
    public boolean affordancePoseLocked = false;
    private boolean handLocked = false;
    private PoseReferenceFrame handLockedFrame;
@@ -127,15 +126,14 @@ public class RDXAffordanceEditorUI
    {
       if (objectBuilder.isAnyObjectSelected())
       {
-         FramePose3D objectPose = new FramePose3D(objectBuilder.getSelectedObject().getObjectFrame());
-         objectPose.changeFrame(ReferenceFrame.getWorldFrame());
+         FramePose3D objectPose = new FramePose3D(ReferenceFrame.getWorldFrame(), objectBuilder.getSelectedObject().getTransformToWorld());
          // when editing post grasp poses, we want to move the object frame and the hand together
          if (activeMenu[0] == RDXActiveAffordanceMenu.POST_GRASP && handLocked)
          {
             // used to update the hand pose according to object pose in post-grasping once fixed contact with object
             if (!affordancePoseLocked)
             {
-               previousObjectPose.set(objectPose);
+               objectFrame.setPoseAndUpdate(objectPose);
                handLockedFrame = new PoseReferenceFrame("handFrame", objectFrame);
                handPose.changeFrame(objectFrame);
                handLockedFrame.setPoseAndUpdate(handPose);
