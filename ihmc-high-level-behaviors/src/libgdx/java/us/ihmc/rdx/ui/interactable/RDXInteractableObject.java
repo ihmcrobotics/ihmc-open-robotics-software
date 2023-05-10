@@ -79,6 +79,11 @@ public class RDXInteractableObject implements RenderableProvider
       return objectTransform;
    }
 
+   public FramePose3D getInitialObjectPose()
+   {
+      return initialObjectPose;
+   }
+
    public ModelInstance getModelInstance()
    {
       return modelInstance;

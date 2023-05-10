@@ -18,7 +18,7 @@ public class RDXInteractableObjectBuilder extends ImGuiPanel
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private PredefinedSceneNodeLibrary predefinedSceneNodeLibrary;
    private RDXInteractableObject selectedObject;
-   private String selectedObjectName;
+   private String selectedObjectName = "";
    private final SortedMap<String, String> nameModelMap = new TreeMap<>();
 
    public RDXInteractableObjectBuilder(RDXBaseUI baseUI)
@@ -55,10 +55,15 @@ public class RDXInteractableObjectBuilder extends ImGuiPanel
       }
       if (isAnyObjectSelected() && (ImGui.button(labels.get("DELETE") + "##object")))
       {
-         selectedObject.clear();
-         selectedObjectName = "";
-         selectedObject.resetPose();
+         reset();
       }
+   }
+
+   public void reset()
+   {
+      selectedObject.clear();
+      selectedObjectName = "";
+      selectedObject.resetPose();
    }
 
    public String getWindowName()
@@ -74,5 +79,10 @@ public class RDXInteractableObjectBuilder extends ImGuiPanel
    public boolean isAnyObjectSelected()
    {
       return selectedObject.getModelInstance() != null;
+   }
+
+   public String getSelectedObjectName()
+   {
+      return selectedObjectName;
    }
 }

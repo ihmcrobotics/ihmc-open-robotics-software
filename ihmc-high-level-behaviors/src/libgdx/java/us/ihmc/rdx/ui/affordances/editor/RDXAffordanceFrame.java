@@ -113,15 +113,29 @@ public class RDXAffordanceFrame
       objectTransformOfFrame.setToZero();
    }
 
+   public boolean isSet()
+   {
+      return isPoseSet;
+   }
+
+   public void setFrame(PoseReferenceFrame frame)
+   {
+      poseFrame.setPoseAndUpdate(frame);
+      pose = new FramePose3D(poseFrame);
+      pose.changeFrame(ReferenceFrame.getWorldFrame());
+      isPoseSet = true;
+      frameGraphic.updateFromFramePose(pose);
+   }
+
+   public void setHandConfiguration(HandConfiguration configuration)
+   {
+      handConfiguration = configuration;
+   }
+
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       if (isPoseSet)
          frameGraphic.getRenderables(renderables, pool);
-   }
-
-   public PoseReferenceFrame getPoseFrame()
-   {
-      return poseFrame;
    }
 
    public FramePose3D getPose()
@@ -132,5 +146,10 @@ public class RDXAffordanceFrame
    public HandConfiguration getHandConfiguration()
    {
       return handConfiguration;
+   }
+
+   public RigidBodyTransform getObjectTransform()
+   {
+      return objectTransformOfFrame;
    }
 }

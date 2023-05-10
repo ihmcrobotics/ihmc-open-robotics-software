@@ -15,6 +15,7 @@ public class RigidBodySceneObjectDefinitions
    public static final int BOX_MARKER_ID = 2;
    public static final double BOX_MARKER_WIDTH = 0.210101;
    // The box is a cube
+   public static final double BOX_SIZE = 0.35;
    public static final double BOX_MARKER_FROM_BOTTOM_Z = 0.047298;
    public static final double BOX_MARKER_FROM_RIGHT_Y = 0.047298;
    public static final RigidBodyTransform BOX_TRANSFORM_TO_MARKER = new RigidBodyTransform();

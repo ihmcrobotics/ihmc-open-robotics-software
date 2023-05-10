@@ -172,6 +172,14 @@ public class RDXAffordanceFrames
       }
    }
 
+   public void setHandConfiguration(HandConfiguration configuration)
+   {
+      for (int i = 0; i < poseFrames.size(); i++)
+      {
+         handConfigurations.add(configuration);
+      }
+   }
+
    public void reset()
    {
       poseIndices.clear();
@@ -191,5 +199,20 @@ public class RDXAffordanceFrames
       {
          frameGraphic.getRenderables(renderables, pool);
       }
+   }
+
+   public ArrayList<FramePose3D> getPoses()
+   {
+      return poses;
+   }
+
+   public ArrayList<HandConfiguration> getHandConfigurations()
+   {
+      return handConfigurations;
+   }
+
+   public ArrayList<RigidBodyTransform> getObjectTransforms()
+   {
+      return objectTransforms;
    }
 }
