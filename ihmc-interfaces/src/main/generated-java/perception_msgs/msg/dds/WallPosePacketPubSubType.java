@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class WallPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.WallPosePacket>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::WallPosePacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "47ac5b25b1f47e235ce7c9817775bca66b4fbacff2555e308e710980225d67e4";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

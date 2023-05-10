@@ -1,6 +1,7 @@
 package us.ihmc.robotics.referenceFrames;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 
 import java.util.function.Consumer;
@@ -8,11 +9,18 @@ import java.util.function.Consumer;
 public class ModifiableReferenceFrame
 {
    private final RigidBodyTransform transformToParent = new RigidBodyTransform();
+   private final String frameName;
    private ReferenceFrame referenceFrame;
 
    public ModifiableReferenceFrame(ReferenceFrame parentFrame)
    {
-      referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentFrame, transformToParent);
+      this(ReferenceFrameMissingTools.computeFrameName(), parentFrame);
+   }
+
+   public ModifiableReferenceFrame(String frameName, ReferenceFrame parentFrame)
+   {
+      this.frameName = frameName;
+      referenceFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(frameName, parentFrame, transformToParent);
    }
 
    public void update(Consumer<RigidBodyTransform> transformToParentConsumer)
@@ -28,7 +36,7 @@ public class ModifiableReferenceFrame
     */
    public void changeParentFrame(ReferenceFrame parentFrame)
    {
-      referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentFrame, transformToParent);
+      referenceFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(frameName, parentFrame, transformToParent);
    }
 
    public RigidBodyTransform getTransformToParent()

@@ -7,7 +7,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
@@ -17,6 +19,19 @@ public class JournalCtlReader
    private final Consumer<List<String>> logConsumer;
    private final ConcurrentLinkedQueue<String> logLineQueue = new ConcurrentLinkedQueue<>();
    private final PausablePeriodicThread readerThread = new PausablePeriodicThread("journalctl-processor", 0.2, true, this::processOutput);
+   /**
+    * Used for refreshes
+    */
+   private final Queue<String> logHistory = new LinkedList<>()
+   {
+      @Override
+      public boolean add(String o) {
+         boolean added = super.add(o);
+         while (added && size() > 1000)
+            super.remove();
+         return added;
+      }
+   };
 
    private volatile boolean running = false;
 
@@ -26,11 +41,16 @@ public class JournalCtlReader
       this.logConsumer = logConsumer;
    }
 
+   public Queue<String> getLogHistory()
+   {
+      return logHistory;
+   }
+
    public void start()
    {
       ThreadTools.startAsDaemon(() ->
       {
-         ProcessBuilder processBuilder = new ProcessBuilder("sudo", "journalctl", "--since", "1 hour ago", "-ef", "-u", serviceName);
+         ProcessBuilder processBuilder = new ProcessBuilder("sudo", "journalctl", "-n", "1000", "-ef", "-u", serviceName);
 
          try
          {
@@ -66,7 +86,9 @@ public class JournalCtlReader
          List<String> linesToSend = new ArrayList<>();
          while (!logLineQueue.isEmpty())
          {
+            String line = logLineQueue.poll();
             linesToSend.add(logLineQueue.poll());
+            logHistory.add(line);
          }
 
          logConsumer.accept(linesToSend);

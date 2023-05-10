@@ -11,6 +11,18 @@ package ihmc_common_msgs.msg.dds;
 public class InstantMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.InstantMessage>
 {
    public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::InstantMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "0078a3cb392fa1f63923b9d292ab68b2e9d8be5db4c12938be6183875c9b7ada";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

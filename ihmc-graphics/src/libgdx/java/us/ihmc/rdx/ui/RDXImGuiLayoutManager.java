@@ -214,8 +214,8 @@ public class RDXImGuiLayoutManager
       }
       if (!success && configurationLocation.isVersionControl())
       {
-         LogTools.error("Layout configuration file(s) not found. If you just created this layout, "
-                         + "try building in the IDE to copy the resources to a classpath directory.");
+         LogTools.warn("Layout configuration file(s) not found. If you just created this layout, "
+                        + "try building in the IDE to copy the resources to a classpath directory.");
       }
    }
 

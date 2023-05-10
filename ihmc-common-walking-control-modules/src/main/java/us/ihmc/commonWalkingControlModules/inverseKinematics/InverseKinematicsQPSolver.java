@@ -37,9 +37,12 @@ public class InverseKinematicsQPSolver
    private final DMatrixRMaj solverInput_lb;
    private final DMatrixRMaj solverInput_ub;
 
+   private final DMatrixRMaj solverInput_activeIndices;
+
    private final DMatrixRMaj solverOutput;
    private final DMatrixRMaj desiredJointVelocities;
 
+   private final YoInteger numberOfActiveVariables = new YoInteger("numberOfActiveVariables", registry);
    private final YoInteger numberOfIterations = new YoInteger("numberOfIterations", registry);
    private final YoInteger numberOfEqualityConstraints = new YoInteger("numberOfEqualityConstraints", registry);
    private final YoInteger numberOfInequalityConstraints = new YoInteger("numberOfInequalityConstraints", registry);
@@ -67,6 +70,9 @@ public class InverseKinematicsQPSolver
       solverInput_f = new DMatrixRMaj(numberOfDoFs, 1);
       solverInput_lb = new DMatrixRMaj(numberOfDoFs, 1);
       solverInput_ub = new DMatrixRMaj(numberOfDoFs, 1);
+
+      solverInput_activeIndices = new DMatrixRMaj(numberOfDoFs, 1);
+      CommonOps_DDRM.fill(solverInput_activeIndices, 1.0);
 
       solverInput_Aeq = new DMatrixRMaj(0, numberOfDoFs);
       solverInput_beq = new DMatrixRMaj(0, 1);
@@ -125,6 +131,8 @@ public class InverseKinematicsQPSolver
 
       solverInput_Ain.reshape(0, numberOfDoFs);
       solverInput_bin.reshape(0, 1);
+
+      CommonOps_DDRM.fill(solverInput_activeIndices, 1.0);
 
       if (!firstCall.getBooleanValue())
          addJointAccelerationRegularization();
@@ -269,9 +277,12 @@ public class InverseKinematicsQPSolver
       {
          for (int i = 0; i < inactiveIndices.size(); i++)
          {
-            qpSolver.setVariableInactive(inactiveIndices.get(i));
+            solverInput_activeIndices.set(inactiveIndices.get(i), 0, 0.0);
          }
       }
+
+      numberOfActiveVariables.set((int) CommonOps_DDRM.elementSum(solverInput_activeIndices));
+      qpSolver.setActiveVariables(solverInput_activeIndices);
 
       numberOfIterations.set(qpSolver.solve(solverOutput));
       removeSubstitution(); // This needs to be done right after solving.
@@ -328,5 +339,10 @@ public class InverseKinematicsQPSolver
    public void setMaxJointVelocities(DMatrixRMaj qDotMax)
    {
       solverInput_ub.set(qDotMax);
+   }
+
+   public void setActiveDoF(int dofIndex, boolean active)
+   {
+      solverInput_activeIndices.set(dofIndex, 0, active ? 1.0 : 0.0);
    }
 }

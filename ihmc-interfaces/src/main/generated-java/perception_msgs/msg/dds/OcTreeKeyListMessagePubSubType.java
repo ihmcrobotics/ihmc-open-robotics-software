@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class OcTreeKeyListMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.OcTreeKeyListMessage>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::OcTreeKeyListMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "6d44ede3a6991ff0bc677b3768f44463248de9a717062e7418c435dc21657a64";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class PlanarRegionSegmentationParametersMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.PlanarRegionSegmentationParametersMessage>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::PlanarRegionSegmentationParametersMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "5ce97ae4316da0f036400f92f6a10c9f2034b7db1c4c59fa46dedc796b6d9a7e";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

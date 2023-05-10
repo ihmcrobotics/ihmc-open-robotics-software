@@ -302,7 +302,7 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
                                     .set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(0.0, null, gravityComp));
          handWrenchTrajectoryMessage.getWrenchTrajectory().getWrenchTrajectoryPoints().add()
                                     .set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(1000.0, null, gravityComp));
-         handWrenchTrajectoryMessage.getWrenchTrajectory().getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
+         handWrenchTrajectoryMessage.getWrenchTrajectory().getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.getFrameNameHashCode());
          simulationTestHelper.publishToController(handWrenchTrajectoryMessage);
       }
 

@@ -22,7 +22,7 @@ public abstract class SceneNode
    public SceneNode(String name, ReferenceFrame parentFrame)
    {
       this.name = name;
-      this.nodeFrame = new ModifiableReferenceFrame(parentFrame);
+      this.nodeFrame = new ModifiableReferenceFrame(name, parentFrame);
    }
 
    public String getName()

@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.javafx.graphics.BodyPathPlanGraphic;
 import us.ihmc.behaviors.javafx.tools.JavaFXRemoteRobotVisualizer;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -48,7 +49,7 @@ public class RobotAndMapViewer
          view3dFactory.addWorldCoordinateSystem(0.3);
          view3dFactory.addDefaultLighting();
 
-         view3dFactory.addNodeToView(new JavaFXLivePlanarRegionsGraphic(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, false));
+         view3dFactory.addNodeToView(new JavaFXLivePlanarRegionsGraphic(ros2Node, PerceptionAPI.LIDAR_REA_REGIONS, false));
 //         view3dFactory.addNodeToView(new JavaFXLivePlanarRegionsGraphic(ros2Node, ROS2Tools.REA, false));
          view3dFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 
