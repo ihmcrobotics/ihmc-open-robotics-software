@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -71,11 +70,6 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
-import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.definition.visual.ColorDefinition;
-import us.ihmc.scs2.definition.visual.MaterialDefinition;
-import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
@@ -90,9 +84,6 @@ import us.ihmc.sensorProcessing.sensorProcessors.FloatingJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationToolkit.outputWriters.PerfectSimulatedOutputWriter;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -101,7 +92,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class HumanoidKinematicsSimulation implements RobotController
+public class HumanoidKinematicsSimulation
 {
    private static final double GRAVITY_Z = 9.81;
    private static final double LIDAR_SPINDLE_SPEED = 2.5;
@@ -142,9 +133,7 @@ public class HumanoidKinematicsSimulation implements RobotController
    private InverseDynamicsCommandList inverseDynamicsContactHolderCommandList = new InverseDynamicsCommandList();
    private YoVariableServer yoVariableServer = null;
    private IntraprocessYoVariableLogger intraprocessYoVariableLogger;
-   private PerfectSimulatedOutputWriter outputWriter;
    private JointDesiredOutputListReadOnly jointDesiredOutputList;
-   private HumanoidFloatingRootJointRobot floatingRootJointRobot;
 
    public static HumanoidKinematicsSimulation create(DRCRobotModel robotModel, HumanoidKinematicsSimulationParameters kinematicsSimulationParameters)
    {
@@ -355,43 +344,13 @@ public class HumanoidKinematicsSimulation implements RobotController
       walkingOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, this::processFootstepStatus);
       walkingOutputManager.attachStatusMessageListener(WalkingStatusMessage.class, this::processWalkingStatus);
 
-      SimulationConstructionSet scs = kinematicsSimulationParameters.getScs();
-      if(scs != null)
+      if(kinematicsSimulationParameters.isPeriodicThreadEnabled())
       {
-         RobotDefinition robotDefinition = robotModel.getRobotDefinition();
-         robotDefinition.forEachRigidBodyDefinition(new Consumer<RigidBodyDefinition>()
-         {
-            
-            @Override
-            public void accept(RigidBodyDefinition t)
-            {
-               t.getVisualDefinitions().forEach(new Consumer<VisualDefinition>()
-               {
-                  @Override
-                  public void accept(VisualDefinition t)
-                  {
-                     MaterialDefinition matDef = new MaterialDefinition(ColorDefinition.rgba(new int[] {80, 220, 100, 128}));
-                     t.setMaterialDefinition(matDef);
-                  }
-               });
-            }
-         });
-         robotDefinition.setName("KinematicSimulation");
-         floatingRootJointRobot = new HumanoidFloatingRootJointRobot(robotDefinition, robotModel.getJointMap(), false, false);
-         
-         floatingRootJointRobot.setDynamic(false);
-         outputWriter = new PerfectSimulatedOutputWriter(floatingRootJointRobot, fullRobotModel, controllerCore.getOutputForLowLevelController());
-         
-         floatingRootJointRobot.setController(this, (int) (robotModel.getControllerDT() / robotModel.getSimulateDT()));
-         scs.addRobot(floatingRootJointRobot);
-         controlThread = null;
-         
-         initialize();
+         controlThread = new PausablePeriodicThread(getClass().getSimpleName(), kinematicsSimulationParameters.getUpdatePeriod(), 5, this::controllerTick);
       }
       else
-         
       {
-         controlThread = new PausablePeriodicThread(getClass().getSimpleName(), kinematicsSimulationParameters.getUpdatePeriod(), 5, this::doControl);
+         controlThread = null;
       }
    }
 
@@ -454,18 +413,16 @@ public class HumanoidKinematicsSimulation implements RobotController
 
    public void setRunning(boolean running)
    {
-      if(controlThread != null)
+      if (running && !controlThread.isRunning())
       {
-         if (running && !controlThread.isRunning())
-         {
-            initialize();
-            controlThread.start();
-         }
-         else if (!running && controlThread.isRunning())
-         {
-            controlThread.stop();
-            heartbeat.setAlive(false);
-         }
+         initialize();
+         controlThread.start();
+         heartbeat.setAlive(true);
+      }
+      else if (!running && controlThread.isRunning())
+      {
+         controlThread.stop();
+         heartbeat.setAlive(false);
       }
    }
 
@@ -491,35 +448,22 @@ public class HumanoidKinematicsSimulation implements RobotController
       monotonicTimer.start();
    }
 
-   public void doControl()
+   public void controllerTick()
    {
-      try
+      updateTimer.reset();
+
+      doControl();
+
+      robotConfigurationDataPublisher.write();
+
+      if (kinematicsSimulationParameters.runNoFasterThanMaxRealtimeRate())
       {
-         updateTimer.reset();
-         
-         update();
-         
-         if(outputWriter != null)
-         {
-            outputWriter.updateRobotConfigurationBasedOnFullRobotModel();
-            outputWriter.write();
-         }
-         
-         robotConfigurationDataPublisher.write();
-         
-         if (controlThread != null && kinematicsSimulationParameters.runNoFasterThanMaxRealtimeRate())
-         {
-            while (updateTimer.totalElapsed() < kinematicsSimulationParameters.getDt() / kinematicsSimulationParameters.getMaxRealtimeRate())
-               ThreadTools.sleep(1);
-         }
-      }
-      catch (Exception e) 
-      {
-         System.out.println(e);
+         while (updateTimer.totalElapsed() < kinematicsSimulationParameters.getDt() / kinematicsSimulationParameters.getMaxRealtimeRate())
+            ThreadTools.sleep(1);
       }
    }
 
-   public void update()
+   public void doControl()
    {
       yoTime.add(kinematicsSimulationParameters.getDt());
       fullRobotModel.updateFrames();
@@ -659,19 +603,8 @@ public class HumanoidKinematicsSimulation implements RobotController
       return fullRobotModel;
    }
 
-   @Override
-   public YoRegistry getYoRegistry()
-   {
-      return registry;
-   }
-
    public JointDesiredOutputListReadOnly getJointDesiredOutputList()
    {
       return jointDesiredOutputList;
-   }
-
-   public HumanoidFloatingRootJointRobot getSimulationRobot()
-   {
-      return floatingRootJointRobot;
    }
 }

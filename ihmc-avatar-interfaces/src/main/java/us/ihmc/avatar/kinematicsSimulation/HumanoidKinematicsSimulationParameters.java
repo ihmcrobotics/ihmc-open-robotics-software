@@ -1,11 +1,11 @@
 package us.ihmc.avatar.kinematicsSimulation;
 
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.UnitConversions;
 
 public class HumanoidKinematicsSimulationParameters
 {
+   private boolean createPeriodicThread = true;
    private boolean createYoVariableServer = false;
    private boolean logToFile = false;
    private PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
@@ -17,8 +17,6 @@ public class HumanoidKinematicsSimulationParameters
    private double dt = UnitConversions.hertzToSeconds(70);
    private boolean runNoFasterThanMaxRealtimeRate = true;
    private double maxRealtimeRate = 2.0;
-   
-   private SimulationConstructionSet scs;
 
    public double getInitialGroundHeight()
    {
@@ -129,16 +127,14 @@ public class HumanoidKinematicsSimulationParameters
    {
       return maxRealtimeRate;
    }
-   
-   public void useSCS1ToManageThreadAndPreview(SimulationConstructionSet scs)
+
+   public boolean isPeriodicThreadEnabled()
    {
-      this.scs = scs;
+      return createPeriodicThread;
    }
 
-   public SimulationConstructionSet getScs()
+   public void setEnablePeriodicThread(boolean createPeriodicThread)
    {
-      return scs;
+      this.createPeriodicThread = createPeriodicThread;
    }
-
-   
 }
