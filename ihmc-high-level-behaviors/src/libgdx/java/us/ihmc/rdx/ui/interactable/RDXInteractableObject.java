@@ -79,7 +79,7 @@ public class RDXInteractableObject implements RenderableProvider
       return objectTransform;
    }
 
-   public FramePose3D getInitialObjectPose()
+   public FramePose3D getInitialPose()
    {
       return initialObjectPose;
    }
@@ -89,14 +89,14 @@ public class RDXInteractableObject implements RenderableProvider
       return modelInstance;
    }
 
-   public ReferenceFrame getObjectFrame()
-   {
-      return objectFrame;
-   }
-
    public void setInitialPose()
    {
       initialObjectPose.set(pose3DGizmo.getTransformToParent());
+   }
+
+   public void setInitialPose(RigidBodyTransform transformToWorld)
+   {
+      initialObjectPose.set(transformToWorld);
    }
 
    public void resetToInitialPose()

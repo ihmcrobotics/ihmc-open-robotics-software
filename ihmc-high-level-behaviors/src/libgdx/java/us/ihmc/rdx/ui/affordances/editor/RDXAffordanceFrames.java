@@ -180,6 +180,11 @@ public class RDXAffordanceFrames
       }
    }
 
+   public void addObjectTransform(RigidBodyTransform transformToAdd)
+   {
+      objectTransforms.add(transformToAdd);
+   }
+
    public void reset()
    {
       poseIndices.clear();

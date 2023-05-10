@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImGui;
@@ -12,7 +13,6 @@ import imgui.flag.ImGuiCol;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiInputText;
@@ -22,7 +22,6 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObjectBuilder;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.*;
 
 import java.util.*;
@@ -319,15 +318,16 @@ public class RDXAffordanceEditorUI
 
       WorkspaceResourceFile extraInfoFile = new WorkspaceResourceFile(configurationsDirectory, fileName + "Extra.json");
       if (extraInfoFile.isFileAccessAvailable())
+
       {
          JSONFileTools.save(extraInfoFile, root ->
          {
             root.put("name", fileName);
             root.put("object", objectBuilder.getSelectedObjectName());
-            JSONTools.toJSON(root, new RigidBodyTransform(objectBuilder.getSelectedObject().getInitialObjectPose()));
+            JSONTools.toJSON(root, new RigidBodyTransform(objectBuilder.getSelectedObject().getInitialPose()));
             ArrayNode framesArrayNode = root.putArray("frames");
             var preGraspObjectTransforms = preGraspFrames.getObjectTransforms();
-            root.put("#preGraspFrames", preGraspObjectTransforms.size());
+            root.put("numberPreGraspFrames", preGraspObjectTransforms.size());
             for (int i=0; i<preGraspObjectTransforms.size(); i++)
             {
                ObjectNode frameArray = framesArrayNode.addObject();
@@ -339,7 +339,7 @@ public class RDXAffordanceEditorUI
                JSONTools.toJSON(frameArray, graspFrame.getObjectTransform());
             }
             var postGraspObjectTransforms = postGraspFrames.getObjectTransforms();
-            root.put("#postGraspFrames", postGraspObjectTransforms.size());
+            root.put("numberPostGraspFrames", postGraspObjectTransforms.size());
             for (int i=0; i<postGraspObjectTransforms.size(); i++)
             {
                ObjectNode frameArray = framesArrayNode.addObject();
@@ -356,6 +356,36 @@ public class RDXAffordanceEditorUI
 
    public void loadFromFile(String fileName)
    {
+      WorkspaceResourceFile extraFile = new WorkspaceResourceFile(configurationsDirectory, fileName + "Extra.json");
+      LogTools.info("Loading from {}", extraFile.getClasspathResource().toString());
+      final int[] preGraspFramesSize = new int[1];
+      final int[] postGraspFramesSize = new int[1];
+      JSONFileTools.load(extraFile.getClasspathResourceAsStream(), jsonNode ->
+      {
+         objectBuilder.loadObject(jsonNode.get("object").asText());
+         RigidBodyTransform initialTransform = new RigidBodyTransform();
+         JSONTools.toEuclid(jsonNode, initialTransform);
+         objectBuilder.getSelectedObject().setInitialPose(initialTransform);
+         preGraspFramesSize[0] = jsonNode.get("numberPreGraspFrames").asInt();
+         postGraspFramesSize[0] = jsonNode.get("numberPostGraspFrames").asInt();
+         JsonNode framesArrayNode = jsonNode.get("frames");
+         for (int i = 0; i < preGraspFramesSize[0]; i++)
+         {
+            RigidBodyTransform preGraspObjectTransform = new RigidBodyTransform();
+            JSONTools.toEuclid(framesArrayNode, preGraspObjectTransform);
+            preGraspFrames.addObjectTransform(preGraspObjectTransform);
+         }
+         RigidBodyTransform graspObjectTransform = new RigidBodyTransform();
+         JSONTools.toEuclid(framesArrayNode, graspObjectTransform);
+         graspFrame.setObjectTransform(graspObjectTransform);
+         for (int i = 0; i < postGraspFramesSize[0]; i++)
+         {
+            RigidBodyTransform postGraspObjectTransform = new RigidBodyTransform();
+            JSONTools.toEuclid(framesArrayNode, postGraspObjectTransform);
+            postGraspFrames.addObjectTransform(postGraspObjectTransform);
+         }
+      });
+
       WorkspaceResourceFile file = new WorkspaceResourceFile(configurationsDirectory, fileName + ".json");
       LogTools.info("Loading from {}", file.getClasspathResource().toString());
       JSONFileTools.load(file.getClasspathResourceAsStream(), jsonNode ->

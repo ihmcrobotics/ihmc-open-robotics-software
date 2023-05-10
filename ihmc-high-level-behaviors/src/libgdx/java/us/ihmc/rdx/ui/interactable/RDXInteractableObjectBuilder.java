@@ -1,8 +1,6 @@
 package us.ihmc.rdx.ui.interactable;
 
 import imgui.internal.ImGui;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
 import us.ihmc.rdx.imgui.ImGuiPanel;
@@ -69,6 +67,12 @@ public class RDXInteractableObjectBuilder extends ImGuiPanel
    public String getWindowName()
    {
       return WINDOW_NAME;
+   }
+
+   public void loadObject(String objectName)
+   {
+      selectedObject.load(nameModelMap.get(objectName));
+      selectedObjectName = objectName;
    }
 
    public RDXInteractableObject getSelectedObject()

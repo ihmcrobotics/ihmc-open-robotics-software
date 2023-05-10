@@ -132,6 +132,11 @@ public class RDXAffordanceFrame
       handConfiguration = configuration;
    }
 
+   public void setObjectTransform(RigidBodyTransform transform)
+   {
+      objectTransformOfFrame.set(transform);
+   }
+
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       if (isPoseSet)
