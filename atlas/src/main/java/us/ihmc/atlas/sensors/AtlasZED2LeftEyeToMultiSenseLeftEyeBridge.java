@@ -16,6 +16,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.codecs.yuv.JPEGEncoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -144,7 +145,7 @@ public class AtlasZED2LeftEyeToMultiSenseLeftEyeBridge
                         message.setVideoSource(VideoPacket.VIDEO_SOURCE_MULTISENSE_LEFT_EYE);
                         message.getIntrinsicParameters().set(HumanoidMessageTools.toIntrinsicParametersMessage(depthCameraIntrinsics));
 
-                        ros2Helper.publish(ROS2Tools.VIDEO, message);
+                        ros2Helper.publish(PerceptionAPI.VIDEO, message);
                      }
                      catch (Exception e)
                      {

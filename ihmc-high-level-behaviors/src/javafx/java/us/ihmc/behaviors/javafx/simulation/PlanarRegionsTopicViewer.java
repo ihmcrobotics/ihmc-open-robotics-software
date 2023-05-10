@@ -2,6 +2,7 @@ package us.ihmc.behaviors.javafx.simulation;
 
 import javafx.stage.Stage;
 import us.ihmc.behaviors.javafx.graphics.live.JavaFXLivePlanarRegionsGraphic;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
@@ -23,7 +24,7 @@ public class PlanarRegionsTopicViewer extends ApplicationNoModule
       view3dFactory.addWorldCoordinateSystem(0.3);
       view3dFactory.addDefaultLighting();
 
-      JavaFXLivePlanarRegionsGraphic regionsGraphic = new JavaFXLivePlanarRegionsGraphic(ros2Node, ROS2Tools.MAPSENSE_REGIONS, false);
+      JavaFXLivePlanarRegionsGraphic regionsGraphic = new JavaFXLivePlanarRegionsGraphic(ros2Node, PerceptionAPI.MAPSENSE_REGIONS, false);
       view3dFactory.addNodeToView(regionsGraphic);
 
       primaryStage.setTitle(getClass().getSimpleName());
