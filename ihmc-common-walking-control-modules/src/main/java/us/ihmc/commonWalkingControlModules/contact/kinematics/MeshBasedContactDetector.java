@@ -4,11 +4,12 @@ import controller_msgs.msg.dds.MultiContactBalanceStatus;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.physics.Collidable;
-import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -41,19 +42,14 @@ public class MeshBasedContactDetector
    private final MultiContactBalanceStatus previousMultiContactBalanceStatus = new MultiContactBalanceStatus();
    private final MultiContactBalanceStatus multiContactBalanceStatus = new MultiContactBalanceStatus();
 
-   public MeshBasedContactDetector(RigidBodyBasics rootBody,
-                                   RobotCollisionModel collisionModel)
+   public MeshBasedContactDetector(List<Collidable> robotCollidables)
    {
-      this(rootBody, collisionModel, null, null);
+      this(robotCollidables, null, null);
    }
 
-   public MeshBasedContactDetector(RigidBodyBasics rootBody,
-                                   RobotCollisionModel collisionModel,
-                                   YoGraphicsListRegistry graphicsListRegistry,
-                                   YoRegistry parentRegistry)
+   public MeshBasedContactDetector(List<Collidable> robotCollidables, YoGraphicsListRegistry graphicsListRegistry, YoRegistry parentRegistry)
    {
       contactThreshold.set(0.03);
-      List<Collidable> robotCollidables = collisionModel.getRobotCollidables(rootBody);
       Map<RigidBodyBasics, List<Collidable>> allCollidableMap = robotCollidables.stream().collect(Collectors.groupingBy(Collidable::getRigidBody));
 
       for (RigidBodyBasics rigidBody : allCollidableMap.keySet())

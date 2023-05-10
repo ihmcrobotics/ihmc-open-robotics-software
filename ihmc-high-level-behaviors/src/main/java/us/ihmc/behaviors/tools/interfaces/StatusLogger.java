@@ -11,6 +11,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.function.Supplier;
 
+/**
+ * Useful so when we have modules delivering messages, we can also send those messages
+ * out via Messager so a feed can be displayed to the operator.
+ */
 public class StatusLogger implements LogToolsWriteOnly
 {
    private final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("ss:SSS");

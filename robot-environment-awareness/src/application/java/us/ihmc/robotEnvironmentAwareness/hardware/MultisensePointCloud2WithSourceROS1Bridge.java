@@ -8,6 +8,7 @@ import perception_msgs.msg.dds.LidarScanMessage;
 import geometry_msgs.Point;
 import scan_to_cloud.PointCloud2WithSource;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -36,7 +37,7 @@ public class MultisensePointCloud2WithSourceROS1Bridge extends AbstractRosTopicS
       rosMainNode.attachSubscriber(MultisenseInformation.getLidarScanTopicName(), this);
       rosMainNode.execute();
 
-      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN);
+      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.MULTISENSE_LIDAR_SCAN);
    }
 
    @Override
