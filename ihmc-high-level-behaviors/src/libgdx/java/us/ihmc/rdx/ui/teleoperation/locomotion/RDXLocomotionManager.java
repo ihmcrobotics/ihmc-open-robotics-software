@@ -12,10 +12,8 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -53,7 +51,6 @@ public class RDXLocomotionManager
    private ImGuiStoredPropertySetDoubleWidget transferTimeSlider;
    private ImGuiStoredPropertySetDoubleWidget turnAggressivenessSlider;
 
-
    private final RDXFootstepPlanGraphic footstepsSentToControllerGraphic;
    private final RDXBodyPathPlanGraphic bodyPathPlanGraphic = new RDXBodyPathPlanGraphic();
 
@@ -70,19 +67,20 @@ public class RDXLocomotionManager
    private boolean isPlacingFootstep = false;
 
    private final RDXWalkingLowLevelMessenger walkingLowLevelMessenger;
-   private boolean robotIsWalking = false;
    private boolean spaceBarPressed = false;
-   private RobotSide lastRobotSideOnCurrentPlan = RobotSide.LEFT;
-   private FramePoint3DReadOnly lastFootstepOnCurrentPlan;
+
+   private final ControllerStatusTracker controllerStatusTracker;
 
    public RDXLocomotionManager(DRCRobotModel robotModel,
                                CommunicationHelper communicationHelper,
                                ROS2SyncedRobotModel syncedRobot,
-                               ROS2ControllerHelper ros2Helper)
+                               ROS2ControllerHelper ros2Helper,
+                               ControllerStatusTracker controllerStatusTracker)
    {
       this.communicationHelper = communicationHelper;
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
+      this.controllerStatusTracker = controllerStatusTracker;
 
       walkingParameters = new RDXLocomotionParameters(robotModel.getSimpleRobotName());
       walkingParameters.load();
@@ -197,7 +195,6 @@ public class RDXLocomotionManager
 
       if (interactableFootstepPlan.getNumberOfFootsteps() > 0)
       {
-         robotIsWalking = false;
          footstepPlanning.setReadyToWalk(false);
          footstepsSentToControllerGraphic.clear();
       }
@@ -252,25 +249,16 @@ public class RDXLocomotionManager
       interactableFootstepPlan.renderImGuiWidgets();
       ImGui.checkbox(labels.get("Show footstep related graphics"), showGraphics);
 
-      isSpaceBarPressed();
-      isRobotStillWalking();
-   }
-
-   public void isSpaceBarPressed()
-   {
       if (ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
       {
          if (!spaceBarPressed)
          {
             spaceBarPressed = true;
 
-            if (!robotIsWalking && interactableFootstepPlan.getNumberOfFootsteps() > 0)
+            if (!controllerStatusTracker.isWalking() && interactableFootstepPlan.getNumberOfFootsteps() > 0)
             {
                LogTools.info("Walking started");
-               lastRobotSideOnCurrentPlan = interactableFootstepPlan.getLastFootstep().getFootstepSide();
-               lastFootstepOnCurrentPlan = interactableFootstepPlan.getLastFootstep().getFootPose().getPosition();
                interactableFootstepPlan.walkFromSteps();
-               robotIsWalking = true;
                walkingLowLevelMessenger.setRobotPausedWalking(false);
             }
             else if (walkingLowLevelMessenger.getRobotPausedWalking())
@@ -287,24 +275,11 @@ public class RDXLocomotionManager
       {
          spaceBarPressed = false;
       }
-   }
 
-   public void isRobotStillWalking()
-   {
-      if (robotIsWalking)
+      if (!controllerStatusTracker.isWalking())
       {
-         FramePoint3D robotFootPosition = new FramePoint3D();
-         robotFootPosition.setX(syncedRobot.getReferenceFrames().getSoleFrame(lastRobotSideOnCurrentPlan).getTransformToRoot().getTranslation().getX());
-         robotFootPosition.setY(syncedRobot.getReferenceFrames().getSoleFrame(lastRobotSideOnCurrentPlan).getTransformToRoot().getTranslation().getY());
-         robotFootPosition.setZ(syncedRobot.getReferenceFrames().getSoleFrame(lastRobotSideOnCurrentPlan).getTransformToRoot().getTranslation().getZ());
-
-         if (robotFootPosition.epsilonEquals(lastFootstepOnCurrentPlan, 0.01))
-         {
-            //TODO Move walking check to RDXInteractableFootstepPlan and add safety checking
-            LogTools.info("Goal reached, walking stopped!");
-            robotIsWalking = false;
-            walkingLowLevelMessenger.setRobotPausedWalking(false);
-         }
+         LogTools.info("Goal reached, walking stopped!");
+         walkingLowLevelMessenger.setRobotPausedWalking(false);
       }
    }
 

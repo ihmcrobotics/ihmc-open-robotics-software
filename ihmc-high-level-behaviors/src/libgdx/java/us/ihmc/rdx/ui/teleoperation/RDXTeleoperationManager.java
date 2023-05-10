@@ -13,6 +13,8 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
@@ -100,6 +102,9 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final boolean interactablesAvailable;
    private ImGuiStoredPropertySetDoubleWidget trajectoryTimeSlider;
 
+   private final ControllerStatusTracker controllerStatusTracker;
+   private final LogToolsLogger logToolsLogger = new LogToolsLogger();
+
    public RDXTeleoperationManager(String robotRepoName,
                                   String robotSubsequentPathToResourceFolder,
                                   CommunicationHelper communicationHelper)
@@ -154,7 +159,9 @@ public class RDXTeleoperationManager extends ImGuiPanel
          footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, "Teleoperation Panel Controller Spy"));
       });
 
-      locomotionManager = new RDXLocomotionManager(robotModel, communicationHelper, syncedRobot, ros2Helper);
+      controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2Helper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
+
+      locomotionManager = new RDXLocomotionManager(robotModel, communicationHelper, syncedRobot, ros2Helper, controllerStatusTracker);
 
       interactablesAvailable = robotSelfCollisionModel != null;
       if (interactablesAvailable)
