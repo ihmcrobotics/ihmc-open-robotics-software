@@ -5,6 +5,7 @@ import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -15,12 +16,25 @@ import java.util.List;
  */
 public class ReferenceFrameLibrary
 {
+   private final HashSet<String> frameNames = new HashSet<>();
    private final ArrayList<ReferenceFrame> referenceFrames = new ArrayList<>();
    private String[] referenceFrameNames;
 
+   public void addAll(List<ReferenceFrame> referenceFrames)
+   {
+      for (ReferenceFrame referenceFrame : referenceFrames)
+      {
+         add(referenceFrame);
+      }
+   }
+
    public void add(ReferenceFrame referenceFrame)
    {
-      referenceFrames.add(referenceFrame);
+      if (!frameNames.contains(referenceFrame.getName()))
+      {
+         frameNames.add(referenceFrame.getName());
+         referenceFrames.add(referenceFrame);
+      }
    }
 
    public void build()

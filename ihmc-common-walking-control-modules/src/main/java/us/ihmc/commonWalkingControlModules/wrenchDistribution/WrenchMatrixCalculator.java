@@ -29,6 +29,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -61,6 +62,8 @@ public class WrenchMatrixCalculator
    @Deprecated
    private final YoFrameVector2D copRateHighWeight = new YoFrameVector2D("copRateHighWeight", null, registry);
 
+   private final CoPObjectiveCalculator copObjectiveCalculator = new CoPObjectiveCalculator();
+
    private final DMatrixRMaj rhoJacobianMatrix;
    private final DMatrixRMaj copJacobianMatrix;
    private final DMatrixRMaj rhoPreviousMatrix;
@@ -91,8 +94,6 @@ public class WrenchMatrixCalculator
 
    private final DMatrixRMaj bodyWrenchJacobian = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj fullWrenchJacobian = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj fzRow = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj singleCopRow = new DMatrixRMaj(0, 0);
    private final FrameVector2D weight = new FrameVector2D();
 
    public WrenchMatrixCalculator(WholeBodyControlCoreToolbox toolbox, YoRegistry parentRegistry)
@@ -131,8 +132,6 @@ public class WrenchMatrixCalculator
       copRateRegularizationWeight = new DMatrixRMaj(copTaskSize, copTaskSize);
 
       fullWrenchJacobian.reshape(Wrench.SIZE, rhoSize);
-      fzRow.reshape(1, rhoSize);
-      singleCopRow.reshape(1, rhoSize);
 
       if (contactablePlaneBodies.size() > nContactableBodies)
          throw new RuntimeException("Unexpected number of contactable plane bodies: " + contactablePlaneBodies.size());
@@ -214,8 +213,20 @@ public class WrenchMatrixCalculator
       centerOfPressureCommands.add().set(command);
    }
 
-   // FIXME The formulation of the objective should be unified with PlaneContactStateToWrenchMatrixHelper.computeCopObjectiveJacobian(...)
-   public boolean getCenterOfPressureInput(NativeQPInputTypeA inputToPack)
+   public void collectRigidBodiesWithCoPCommands(List<RigidBodyReadOnly> rigidBodies)
+   {
+      rigidBodies.clear();
+
+      for (int i = 0; i < centerOfPressureCommands.size(); i++)
+      {
+         CenterOfPressureCommand command = centerOfPressureCommands.get(i);
+         RigidBodyBasics rigidBody = command.getContactingRigidBody();
+         if (rigidBody != null)
+            rigidBodies.add(rigidBody);
+      }
+   }
+
+   public boolean getNextCenterOfPressureInput(NativeQPInputTypeA inputToPack)
    {
       int commands = centerOfPressureCommands.size();
       if (commands <= 0)
@@ -250,20 +261,11 @@ public class WrenchMatrixCalculator
       inputToPack.reshape(2);
       inputToPack.setConstraintType(command.getConstraintType());
 
-      int fzIndex = 5;
-      CommonOps_DDRM.extractRow(fullWrenchJacobian, fzIndex, fzRow);
-
-      // [x_cop * J_fz + J_ty] * rho == 0
-      int tauYIndex = 1;
-      CommonOps_DDRM.extractRow(fullWrenchJacobian, tauYIndex, singleCopRow);
-      CommonOps_DDRM.add(desiredCoP.getX(), fzRow, 1.0, singleCopRow, singleCopRow);
-      inputToPack.getTaskJacobian().insert(singleCopRow, 0, 0);
-
-      // [y_cop * J_fz - J_tx] * rho == 0
-      int tauXIndex = 0;
-      CommonOps_DDRM.extractRow(fullWrenchJacobian, tauXIndex, singleCopRow);
-      CommonOps_DDRM.add(desiredCoP.getY(), fzRow, -1.0, singleCopRow, singleCopRow);
-      inputToPack.getTaskJacobian().insert(singleCopRow, 1, 0);
+      copObjectiveCalculator.computeTask(fullWrenchJacobian,
+                                         desiredCoP,
+                                         rhoSize,
+                                         inputToPack.getTaskJacobian(),
+                                         inputToPack.getTaskObjective());
 
       inputToPack.getTaskObjective().zero();
       inputToPack.getTaskWeightMatrix().zero();
@@ -370,7 +372,7 @@ public class WrenchMatrixCalculator
    private final Vector2D tempDeisredCoPWeight = new Vector2D();
    private final Vector2D tempCoPRateWeight = new Vector2D();
 
-   public void computeMatrices()
+   public void computeMatrices(List<RigidBodyReadOnly> rigidBodiesWithCoPCommands)
    {
       double rhoWeight = this.rhoWeight.getDoubleValue();
       double rhoRateWeight;
@@ -404,12 +406,15 @@ public class WrenchMatrixCalculator
          CommonOps_DDRM.insert(helper.getRhoWeight(), rhoWeightMatrix, rhoStartIndex, rhoStartIndex);
          CommonOps_DDRM.insert(helper.getRhoRateWeight(), rhoRateWeightMatrix, rhoStartIndex, rhoStartIndex);
 
-         CommonOps_DDRM.insert(helper.getCoPRegularizationJacobian(), copRegularizationJacobian, copStartIndex, rhoStartIndex);
-         CommonOps_DDRM.insert(helper.getCoPRegularizationObjective(), copRegularizationObjective, copStartIndex, 0);
+         if (rigidBodiesWithCoPCommands == null || !rigidBodiesWithCoPCommands.contains(rigidBody))
+         {
+            CommonOps_DDRM.insert(helper.getCoPRegularizationJacobian(), copRegularizationJacobian, copStartIndex, rhoStartIndex);
+            CommonOps_DDRM.insert(helper.getCoPRegularizationObjective(), copRegularizationObjective, copStartIndex, 0);
+            CommonOps_DDRM.insert(helper.getCoPRegularizationWeight(), copRegularizationWeight, copStartIndex, copStartIndex);
+         }
+
          CommonOps_DDRM.insert(helper.getCoPRateRegularizationJacobian(), copRateRegularizationJacobian, copStartIndex, rhoStartIndex);
          CommonOps_DDRM.insert(helper.getCoPRateRegularizationObjective(), copRateRegularizationObjective, copStartIndex, 0);
-
-         CommonOps_DDRM.insert(helper.getCoPRegularizationWeight(), copRegularizationWeight, copStartIndex, copStartIndex);
          CommonOps_DDRM.insert(helper.getCoPRateRegularizationWeight(), copRateRegularizationWeight, copStartIndex, copStartIndex);
 
          rhoStartIndex += helper.getRhoSize();
@@ -566,5 +571,10 @@ public class WrenchMatrixCalculator
    public int getCopTaskSize()
    {
       return copTaskSize;
+   }
+
+   public PlaneContactStateToWrenchMatrixHelper getPlaneContactStateToWrenchMatrixHelper(RigidBodyBasics rigidBody)
+   {
+      return planeContactStateToWrenchMatrixHelpers.get(rigidBody);
    }
 }

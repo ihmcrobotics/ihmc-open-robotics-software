@@ -17,7 +17,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.visualizers.RDXLineMeshModel;
+import us.ihmc.rdx.visualizers.RDXLineGraphic;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.IHMCCommonPaths;
@@ -39,8 +39,8 @@ public class RDXPlanarRegionMappingDemo
 
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
 
-   private final RDXLineMeshModel mocapGraphic = new RDXLineMeshModel(0.02f, Color.YELLOW);
-   private final RDXLineMeshModel rootJointGraphic = new RDXLineMeshModel(0.02f, Color.RED);
+   private final RDXLineGraphic mocapGraphic = new RDXLineGraphic(0.02f, Color.YELLOW);
+   private final RDXLineGraphic rootJointGraphic = new RDXLineGraphic(0.02f, Color.RED);
 
    // 20230207_214209_PerceptionLogFixed.hdf5 -> Ouster_Indoor_Urban
    // L515_CinderBlocks_PerceptionLog.hdf5 -> L515_CinderBlocks
@@ -56,7 +56,7 @@ public class RDXPlanarRegionMappingDemo
    private final FramePose3D framePreviousPose = new FramePose3D(ReferenceFrame.getWorldFrame());
 
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private RDXLineMeshModel keyframeTrajectoryGraphic = new RDXLineMeshModel(0.02f, Color.WHITE);
+   private RDXLineGraphic keyframeTrajectoryGraphic = new RDXLineGraphic(0.02f, Color.WHITE);
 
    private boolean graphicsInitialized = false;
 

@@ -13,15 +13,18 @@ import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.rdx.imgui.*;
+import us.ihmc.rdx.imgui.ImGuiEnumPlot;
+import us.ihmc.rdx.imgui.ImGuiLabelMap;
+import us.ihmc.rdx.imgui.ImGuiMovingPlot;
+import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXBallAndArrowPosePlacement;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIDefinition;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIInterface;
@@ -74,7 +77,7 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
       helper.subscribeViaCallback(State, state -> currentState = state);
       helper.subscribeViaCallback(LifecycleState, state -> currentLifecycleState = state);
       helper.subscribeViaCallback(TimeLeftInPause, timeLeftInPause -> this.timeLeftInPause = timeLeftInPause);
-      helper.subscribeViaCallback(ROS2Tools.BIPEDAL_SUPPORT_REGIONS, regions ->
+      helper.subscribeViaCallback(PerceptionAPI.BIPEDAL_SUPPORT_REGIONS, regions ->
       {
          if (regions.getConvexPolygonsSize().size() > 0 && regions.getConvexPolygonsSize().get(0) > 0)
          {
@@ -193,7 +196,7 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
    {
       BipedalSupportPlanarRegionParametersMessage supportRegionParametersMessage = new BipedalSupportPlanarRegionParametersMessage();
       supportRegionParametersMessage.setEnable(false);
-      helper.publish(ROS2Tools::getBipedalSupportRegionParametersTopic, supportRegionParametersMessage);
+      helper.publish(PerceptionAPI::getBipedalSupportRegionParametersTopic, supportRegionParametersMessage);
    }
 
    @Override

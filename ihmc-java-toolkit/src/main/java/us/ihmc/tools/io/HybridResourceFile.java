@@ -43,7 +43,9 @@ public class HybridResourceFile extends HybridFile
          }
          else
          {
-            LogTools.error(1, "Input stream is null"); // Print caller info to help identify issues
+            // We return success so the caller can decide when to throw errors
+            // because it may be normal for this to be null.
+            LogTools.debug(1, "Input stream is null"); // Print caller info to help identify issues
          }
       }
       catch (IOException ioException)

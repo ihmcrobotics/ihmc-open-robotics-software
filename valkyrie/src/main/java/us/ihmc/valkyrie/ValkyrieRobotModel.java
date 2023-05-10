@@ -108,6 +108,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private WallTimeBasedROSClockCalculator rosClockCalculator;
    private RobotInitialSetup<HumanoidFloatingRootJointRobot> valkyrieInitialSetup;
    private StepReachabilityData stepReachabilityData;
+   private RobotCollisionModel kinematicsCollisionModel;
 
    private SimulationLowLevelControllerFactory simulationLowLevelControllerFactory;
 
@@ -415,6 +416,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
+   public FullHumanoidRobotModel createFullRobotModel(boolean enforceUniqueReferenceFrames)
+   {
+      return new FullHumanoidRobotModelWrapper(getRobotDefinition(), getJointMap(), enforceUniqueReferenceFrames);
+   }
+
+   @Override
    public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes, boolean enableJointDamping)
    {
       boolean enableTorqueVelocityLimits = false;
@@ -664,6 +671,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.simulationLowLevelControllerFactory = simulationLowLevelControllerFactory;
    }
 
+   public void setHumanoidRobotKinematicsCollisionModel(RobotCollisionModel kinematicsCollisionModel)
+   {
+      this.kinematicsCollisionModel = kinematicsCollisionModel;
+   }
+
    @Override
    public WalkingControllerParameters getWalkingControllerParameters()
    {
@@ -691,7 +703,9 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public RobotCollisionModel getHumanoidRobotKinematicsCollisionModel()
    {
-      return new ValkyrieKinematicsCollisionModel(getJointMap());
+      if (kinematicsCollisionModel == null)
+         kinematicsCollisionModel = new ValkyrieKinematicsCollisionModel(getJointMap());
+      return kinematicsCollisionModel;
    }
 
    @Override

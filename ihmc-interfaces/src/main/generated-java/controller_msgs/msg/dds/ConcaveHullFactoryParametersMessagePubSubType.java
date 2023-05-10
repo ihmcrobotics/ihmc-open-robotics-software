@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class ConcaveHullFactoryParametersMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ConcaveHullFactoryParametersMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::ConcaveHullFactoryParametersMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "2cc65b3d4fc5c0a5d19a50a8180bd8ac1c789b9825ebc88233b8733f0825ba15";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

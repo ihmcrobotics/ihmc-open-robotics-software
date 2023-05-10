@@ -11,6 +11,18 @@ package ihmc_common_msgs.msg.dds;
 public class TextToSpeechPacketPubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.TextToSpeechPacket>
 {
    public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::TextToSpeechPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "30fa7fbdd72b7528c57ffc704d020f7b284f6c2a770df29c3b7f9de5b854428a";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

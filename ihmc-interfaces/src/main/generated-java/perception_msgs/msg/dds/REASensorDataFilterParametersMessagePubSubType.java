@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class REASensorDataFilterParametersMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.REASensorDataFilterParametersMessage>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::REASensorDataFilterParametersMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "1494ab71a41c6d56c7c166b2eabf1979f614fa46efb3702ef989ac218db71395";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

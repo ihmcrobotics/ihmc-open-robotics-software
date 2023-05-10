@@ -16,12 +16,13 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_objdetect.RefineParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.matrix.LinearTransform3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.thread.SwapReference;
 import us.ihmc.tools.thread.Throttler;
@@ -173,27 +174,72 @@ public class OpenCVArUcoMarkerDetection
       rgb8ImageForDetection.getBytedecoOpenCVMat().copyTo(imageToPack.getBytedecoOpenCVMat());
    }
 
-   public boolean isDetected(OpenCVArUcoMarker marker)
+   /**
+    * Must be synchronized externally over {@link #getSyncObject()}.
+    * @return if the marker is currently detected
+    */
+   public boolean isDetected(int markerID)
    {
-      return detectionSwapReference.getForThreadTwo().getMarkerIDToCornersIndexMap().containsKey(marker.getId());
+      return detectionSwapReference.getForThreadTwo().getMarkerIDToCornersIndexMap().containsKey(markerID);
    }
 
-   public FramePose3DBasics getPose(OpenCVArUcoMarker marker)
+   /**
+    * Get the pose of an ArUco marker. Use with {@link #isDetected} to make sure
+    * the ID is currently detected first.
+    * Must be synchronized externally over {@link #getSyncObject()}.
+    */
+   public void getPose(int markerID, double markerSize, ReferenceFrame desiredFrame, RigidBodyTransform transformToDesiredFrameToPack)
    {
-      updateMarkerPose(marker);
+      updateMarkerPose(markerID, markerSize);
+      markerPose.setIncludingFrame(sensorFrame, euclidPosition, euclidLinearTransform.getAsQuaternion());
+      markerPose.changeFrame(desiredFrame);
+      markerPose.get(transformToDesiredFrameToPack);
+   }
+
+   /**
+    * Get the pose of an ArUco marker. Use with {@link #isDetected} to make sure
+    * the ID is currently detected first.
+    * Must be synchronized externally over {@link #getSyncObject()}.
+    */
+   public void getPose(int markerID, double markerSize, ReferenceFrame desiredFrame, Point3D translationToPack, Quaternion orientationToPack)
+   {
+      updateMarkerPose(markerID, markerSize);
+      markerPose.setIncludingFrame(sensorFrame, euclidPosition, euclidLinearTransform.getAsQuaternion());
+      markerPose.changeFrame(desiredFrame);
+      markerPose.get(orientationToPack, translationToPack);
+   }
+
+   /**
+    * Get the pose of an ArUco marker. Use with {@link #isDetected} to make sure
+    * the ID is currently detected first.
+    * Must be synchronized externally over {@link #getSyncObject()}.
+    */
+   public Pose3DReadOnly getPoseInSensorFrame(int markerID, double markerSize)
+   {
+      updateMarkerPose(markerID, markerSize);
       markerPose.setIncludingFrame(sensorFrame, euclidPosition, euclidLinearTransform.getAsQuaternion());
       return markerPose;
    }
 
-   public void getPose(OpenCVArUcoMarker marker, Pose3DBasics poseToPack)
+   /**
+    * Get the pose of an ArUco marker. Use with {@link #isDetected} to make sure
+    * the ID is currently detected first.
+    * Must be synchronized externally over {@link #getSyncObject()}.
+    */
+   public void getPose(int markerID, double markerSize, Pose3DBasics poseToPack)
    {
-      updateMarkerPose(marker);
+      updateMarkerPose(markerID, markerSize);
       poseToPack.set(euclidPosition, euclidLinearTransform.getAsQuaternion());
    }
 
-   public void getPose(OpenCVArUcoMarker marker, RigidBodyTransform transformToSensor)
+   /**
+    * Get the pose of an ArUco marker. Use with {@link #isDetected} to make sure
+    * the ID is currently detected first.
+    * Must be synchronized externally over {@link #getSyncObject()}.
+    */
+   public void getPose(int markerID, double markerSize, RigidBodyTransform transformToSensor)
    {
-      updateMarkerPose(marker);
+      updateMarkerPose(markerID, markerSize);
       transformToSensor.set(euclidLinearTransform.getAsQuaternion(), euclidPosition);
    }
 
@@ -201,7 +247,7 @@ public class OpenCVArUcoMarkerDetection
     * Estimates the pose of the single marker ID.
     * Multiple markers of the same ID is not supported.
     */
-   private void updateMarkerPose(OpenCVArUcoMarker marker)
+   private void updateMarkerPose(int markerID, double markerSize)
    {
       if (enabled)
       {
@@ -212,17 +258,14 @@ public class OpenCVArUcoMarkerDetection
           * Third corner is bottom right of marker.
           * Fourth corner is bottom left of marker.
           */
-         BytedecoOpenCVTools.putFloat3(objectPointsDataPointer, 0, 0.0f, (float) -marker.getSideLength(), (float) marker.getSideLength());
-         BytedecoOpenCVTools.putFloat3(objectPointsDataPointer, 1, 0.0f, 0.0f, (float) marker.getSideLength());
+         BytedecoOpenCVTools.putFloat3(objectPointsDataPointer, 0, 0.0f, (float) -markerSize, (float) markerSize);
+         BytedecoOpenCVTools.putFloat3(objectPointsDataPointer, 1, 0.0f, 0.0f, (float) markerSize);
          BytedecoOpenCVTools.putFloat3(objectPointsDataPointer, 2, 0.0f, 0.0f, 0.0f);
-         BytedecoOpenCVTools.putFloat3(objectPointsDataPointer, 3, 0.0f, (float) -marker.getSideLength(), 0.0f);
+         BytedecoOpenCVTools.putFloat3(objectPointsDataPointer, 3, 0.0f, (float) -markerSize, 0.0f);
 
-         synchronized (detectionSwapReference)
-         {
-            OpenCVArUcoMakerDetectionSwapData data = detectionSwapReference.getForThreadTwo();
-            Mat markerCorners = data.getCorners().get(data.getMarkerIDToCornersIndexMap().get(marker.getId()));
-            opencv_calib3d.solvePnP(objectPoints, markerCorners, cameraMatrix, distortionCoefficients, rotationVector, translationVector);
-         }
+         OpenCVArUcoMakerDetectionSwapData data = detectionSwapReference.getForThreadTwo();
+         Mat markerCorners = data.getCorners().get(data.getMarkerIDToCornersIndexMap().get(markerID));
+         opencv_calib3d.solvePnP(objectPoints, markerCorners, cameraMatrix, distortionCoefficients, rotationVector, translationVector);
 
          // Couldn't figure out why we had to apply these transforms here and below, but it works.
          double rx = rotationVector.ptr(0).getDouble();
@@ -274,12 +317,13 @@ public class OpenCVArUcoMarkerDetection
       opencv_objdetect.drawDetectedMarkers(imageForDrawing, rejectedImagePoints);
    }
 
-   public void forEachDetectedID(Consumer<Integer> idConsumer)
+   /**
+    * Get the list of detected IDs for this update.
+    * Synchronize with {@link #getSyncObject()}.
+    */
+   public TIntArrayList getDetectedIDs()
    {
-      for (int i = 0; i < detectedIDs.size(); i++)
-      {
-         idConsumer.accept(detectedIDs.get(i));
-      }
+      return detectedIDs;
    }
 
    public void destroy()
@@ -326,7 +370,7 @@ public class OpenCVArUcoMarkerDetection
     * <pre>
     *    synchronized (arUcoMarkerDetection.getSyncObject())
     *    {
-    *       arUcoMarkerDetection.getIds()
+    *       arUcoMarkerDetection.getIDsMat()
     *       arUcoMarkerDetection.updateMarkerPose(...)
     *       ...
     *    }
@@ -337,7 +381,8 @@ public class OpenCVArUcoMarkerDetection
       return detectionSwapReference;
    }
 
-   public Mat getIds()
+   /** Detected IDs in raw form. Unless needed, use {@link #getDetectedIDs()} instead. */
+   public Mat getIDsMat()
    {
       return detectionSwapReference.getForThreadTwo().getIds();
    }

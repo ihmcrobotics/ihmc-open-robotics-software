@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class ObjectWeightPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ObjectWeightPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::ObjectWeightPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "7371465eccf7f19fff6be69ea128a1720e3a5278e2fba047445997a8ebf973f9";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

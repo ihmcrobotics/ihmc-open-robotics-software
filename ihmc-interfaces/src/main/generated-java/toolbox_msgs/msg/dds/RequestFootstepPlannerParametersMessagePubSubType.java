@@ -11,6 +11,18 @@ package toolbox_msgs.msg.dds;
 public class RequestFootstepPlannerParametersMessagePubSubType implements us.ihmc.pubsub.TopicDataType<toolbox_msgs.msg.dds.RequestFootstepPlannerParametersMessage>
 {
    public static final java.lang.String name = "toolbox_msgs::msg::dds_::RequestFootstepPlannerParametersMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "b962fdfbf72afc95e08bf528829c32fd5123e5eef2b764bdb904a54b05bf0bbb";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

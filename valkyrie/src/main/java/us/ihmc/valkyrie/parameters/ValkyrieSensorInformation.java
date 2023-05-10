@@ -17,7 +17,6 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotPointCloudParameters;
-import us.ihmc.sensorProcessing.parameters.AvatarRobotSensorParameters;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 
 public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
@@ -320,28 +319,6 @@ public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
    public AvatarRobotPointCloudParameters getPointCloudParameters(int sensorId)
    {
       return pointCloudParamaters[sensorId];
-   }
-
-   private void sensorFramesToTrack(AvatarRobotSensorParameters[] sensorParams, ArrayList<String> holder)
-   {
-      for (int i = 0; i < sensorParams.length; i++)
-      {
-         if (sensorParams[i].getPoseFrameForSdf() != null)
-         {
-            holder.add(sensorParams[i].getPoseFrameForSdf());
-         }
-      }
-   }
-
-   @Override
-   public String[] getSensorFramesToTrack()
-   {
-      ArrayList<String> sensorFramesToTrack = new ArrayList<>();
-      sensorFramesToTrack(cameraParamaters, sensorFramesToTrack);
-      sensorFramesToTrack(lidarParamaters, sensorFramesToTrack);
-      String[] sensorFramesToTrackAsPrimitive = new String[sensorFramesToTrack.size()];
-      sensorFramesToTrack.toArray(sensorFramesToTrackAsPrimitive);
-      return sensorFramesToTrackAsPrimitive;
    }
 
    @Override

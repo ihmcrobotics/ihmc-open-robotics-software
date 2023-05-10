@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build")
    id("us.ihmc.ihmc-ci") version "7.7"
-   id("us.ihmc.ihmc-cd") version "1.23"
+   id("us.ihmc.ihmc-cd") version "1.24"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
@@ -24,7 +24,7 @@ mainDependencies {
 
 javafxDependencies {
    api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.2")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.3")
    api("us.ihmc:ihmc-graphics-javafx:source")
    api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
    api("us.ihmc:ihmc-path-planning-visualizers:source")
@@ -34,10 +34,11 @@ javafxDependencies {
 missionControlDependencies {
    api("us.ihmc:ihmc-commons:0.32.0")
    api("us.ihmc:log-tools:0.6.3")
-   api("us.ihmc:ihmc-ros2-library:0.22.2")
+   api("us.ihmc:ihmc-ros2-library:0.22.4")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-interfaces:source")
+   api("us.ihmc:ihmc-communication:source")
 }
 
 libgdxDependencies {
@@ -48,8 +49,8 @@ libgdxDependencies {
    api("us.ihmc:ihmc-perception-javacv:source")
    api("us.ihmc:ihmc-perception-bytedeco:source")
    api("us.ihmc:ihmc-graphics-libgdx:source")
-   api("us.ihmc:scs2-definition:17-0.14.1")
-   api("us.ihmc:mecano-graphviz:17-0.12.1")
+   api("us.ihmc:scs2-definition:17-0.14.3")
+   api("us.ihmc:mecano-graphviz:17-0.12.3")
    api("com.badlogicgames.gdx-controllers:gdx-controllers-core:2.2.1")
    api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.1")
    api("com.badlogicgames.gdx:gdx-bullet:1.11.0")
@@ -64,14 +65,14 @@ testDependencies {
    api("us.ihmc:ihmc-path-planning-test:source")
    api("org.cartesiantheatrics:bag-reader-java:0.0.1")
    api("com.github.stephengold:Libbulletjme:12.6.0")
-   api("us.ihmc:scs2-examples:17-0.14.0")
-   api("us.ihmc:scs2-bullet-simulation-test:17-0.14.1")
+   api("us.ihmc:scs2-examples:17-0.14.3")
+   api("us.ihmc:scs2-bullet-simulation-test:17-0.14.3")
    api("us.ihmc:example-simulations:source")
 }
 
 app.entrypoint(ihmc.sourceSetProject("mission-control"),
-        "MissionControlService",
-        "us.ihmc.missionControl.MissionControlService",
+        "MissionControlDaemon",
+        "us.ihmc.missionControl.MissionControlDaemon",
         listOf("-Dlog4j2.configurationFile=log4j2NoColor.yml"))
 app.entrypoint(ihmc.sourceSetProject("mission-control"),
         "ExampleMissionControlApplication1",
@@ -91,7 +92,12 @@ tasks.create("deploy") {
 
    doLast {
       remote.session(hostname, username) {
+         // Delete mission-control-2 if it's still around
          exec("sudo systemctl stop mission-control-2")
+         exec("sudo systemctl disable mission-control-2")
+         exec("sudo rm -rf /etc/systemd/system/mission-control-2.service");
+
+         exec("sudo systemctl stop mission-control-3")
 
          exec("mkdir -p /home/$username/.ihmc/mission-control")
          exec("sudo mkdir -p /opt/ihmc/mission-control")
@@ -105,8 +111,8 @@ tasks.create("deploy") {
          exec("sudo mv /home/$username/.ihmc/mission-control/lib /opt/ihmc/mission-control/.")
          exec("find /opt/ihmc/mission-control/bin -type f -exec chmod +x {} \\;")
 
-         exec("echo \"${createMissionControlServiceFile(username)}\" > ~/mission-control-2.service")
-         exec("sudo mv ~/mission-control-2.service /etc/systemd/system/.")
+         exec("echo \"${createMissionControlServiceFile(username)}\" > ~/mission-control-3.service")
+         exec("sudo mv ~/mission-control-3.service /etc/systemd/system/.")
 
          exec("echo \"${createExampleApplication1File(username)}\" > ~/mission-control-application-1.service")
          exec("sudo mv ~/mission-control-application-1.service /etc/systemd/system/.")
@@ -116,7 +122,9 @@ tasks.create("deploy") {
 
          exec("sudo systemctl daemon-reload")
 
-         exec("sudo systemctl start mission-control-2")
+         // Start mission control on boot and start it now
+         exec("sudo systemctl enable mission-control-3")
+         exec("sudo systemctl start mission-control-3")
       }
    }
 }
@@ -125,7 +133,7 @@ fun createMissionControlServiceFile(username: String): String
 {
    return """
       [Unit]
-      Description=Mission Control 2 Service
+      Description=Mission Control 3 Service
       Wants=network-online.target
       After=network-online.target
    
@@ -133,7 +141,7 @@ fun createMissionControlServiceFile(username: String): String
       User=$username
       AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN
       Restart=always
-      ExecStart=/opt/ihmc/mission-control/bin/MissionControlService
+      ExecStart=/opt/ihmc/mission-control/bin/MissionControlDaemon
    
       [Install]
       WantedBy=multi-user.target

@@ -257,6 +257,11 @@ public class FeetManager implements SCS2YoGraphicHolder
       return footControlModules.get(robotSide).getCurrentConstraintType();
    }
 
+   public AbstractFootControlState getCurrentControlState(RobotSide robotSide)
+   {
+      return footControlModules.get(robotSide).getCurrentControlState();
+   }
+
    public void adjustSwingTrajectory(RobotSide swingSide, Footstep adjustedFootstep, double swingTime)
    {
       adjustSwingTrajectory(swingSide, adjustedFootstep, null, null, swingTime);
@@ -473,8 +478,6 @@ public class FeetManager implements SCS2YoGraphicHolder
     * </p>
     * <ol>
     * <li>doToeOffIfPossibleInDoubleSupport</li>
-    * <li>desiredECMP location being within the support polygon account for toe-off, if
-    * {@link ToeOffParameters#checkECMPLocationToTriggerToeOff()} is true.</li>
     * <li>desiredICP location being within the leading foot base of support.</li>
     * <li>currentICP location being within the leading foot base of support.</li>
     * <li>needToSwitchToToeOffForAnkleLimit</li>
@@ -516,8 +519,6 @@ public class FeetManager implements SCS2YoGraphicHolder
     * </p>
     * <ol>
     * <li>doToeOffIfPossibleInDoubleSupport</li>
-    * <li>desiredECMP location being within the support polygon account for toe-off, if
-    * {@link ToeOffParameters#checkECMPLocationToTriggerToeOff()} is true.</li>
     * <li>desiredICP location being within the leading foot base of support.</li>
     * <li>currentICP location being within the leading foot base of support.</li>
     * <li>needToSwitchToToeOffForAnkleLimit</li>

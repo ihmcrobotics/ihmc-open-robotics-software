@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class UIPositionCheckerPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.UIPositionCheckerPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::UIPositionCheckerPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "032aae24b8572463dd74a74ffd00073a8857f780e4d1ffb297f994e485a68aa5";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

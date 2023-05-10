@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class RequestWristForceSensorCalibrationPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::RequestWristForceSensorCalibrationPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "2feef8deed04c4a92b5dd05f59afe3ed17e69fc18c185b702bed2e359f1724ab";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

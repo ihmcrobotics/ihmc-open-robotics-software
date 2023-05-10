@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class DirectionalControlConfigurationMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.DirectionalControlConfigurationMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::DirectionalControlConfigurationMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "88b92c2beb2a2cb7357ed5e1a46ce5f32b187ff01d86c84cf7f43d3d8c72b8bf";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

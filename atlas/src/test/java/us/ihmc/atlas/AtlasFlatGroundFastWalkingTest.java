@@ -104,12 +104,6 @@ public class AtlasFlatGroundFastWalkingTest extends AvatarFlatGroundFastWalkingT
                      {
                         return true;
                      }
-
-                     @Override
-                     public double getICPProximityForToeOff()
-                     {
-                        return 0.02;
-                     }
                   };
                }
             };

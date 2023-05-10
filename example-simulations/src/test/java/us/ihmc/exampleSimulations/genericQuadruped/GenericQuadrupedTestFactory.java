@@ -110,7 +110,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters = new GenericQuadrupedPrivilegedConfigurationParameters();
       QuadrupedFallDetectionParameters fallDetectionParameters = new GenericQuadrupedFallDetectionParameters();
 
-      fullRobotModel = modelFactory.createFullRobotModel();
+      fullRobotModel = modelFactory.createFullRobotModel(false);
       RobotDefinition robotDefinition = modelFactory.getRobotDefinition();
       initialPositionParameters.offsetInitialConfiguration(initialOffset.get());
       QuadrupedSimulationFactory.setRobotDefinitionInitialJointStates(initialPositionParameters, modelFactory.getQuadrupedJointNames(), modelFactory::getSDFNameForJointName, robotDefinition);

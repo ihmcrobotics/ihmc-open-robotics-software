@@ -24,8 +24,8 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
-import us.ihmc.rdx.ui.missionControl.RestartableMissionControlProcess;
-import us.ihmc.rdx.ui.missionControl.processes.RestartableJavaProcess;
+import us.ihmc.rdx.ui.processes.RestartableProcess;
+import us.ihmc.rdx.ui.processes.RestartableJavaProcess;
 import us.ihmc.rdx.ui.tools.KinematicsRecordReplay;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.rdx.vr.RDXVRContext;
@@ -437,9 +437,10 @@ public class RDXVRKinematicsStreamingMode
          if (sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive())
          {
             sharedControlAssistant.getGhostPreviewGraphic().getRenderables(renderables, pool, sceneLevels);
-            var splineGraphics = sharedControlAssistant.getSplinePreviewGraphic();
-            for (var spline : splineGraphics.keySet())
-               splineGraphics.get(spline).getRenderables(renderables, pool);
+            for (var spline : sharedControlAssistant.getSplinePreviewGraphic().entrySet())
+               spline.getValue().getRenderables(renderables, pool);
+            for (var stdDeviationRegion : sharedControlAssistant.getStdDeviationGraphic().entrySet())
+               stdDeviationRegion.getValue().getRenderables(renderables, pool);
          }
       }
       if (showReferenceFrameGraphics.get())
@@ -481,7 +482,7 @@ public class RDXVRKinematicsStreamingMode
       return handConfigurations[rightIndex % handConfigurations.length];
    }
 
-   public RestartableMissionControlProcess getKinematicsStreamingToolboxProcess()
+   public RestartableProcess getKinematicsStreamingToolboxProcess()
    {
       return kinematicsStreamingToolboxProcess;
    }
