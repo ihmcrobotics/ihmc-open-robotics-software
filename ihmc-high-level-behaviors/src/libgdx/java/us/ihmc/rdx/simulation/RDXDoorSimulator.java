@@ -5,6 +5,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
@@ -43,7 +44,7 @@ public class RDXDoorSimulator
    {
       if (door != null)
       {
-         helper.publish(ROS2Tools::getDoorLocationTopic,
+         helper.publish(PerceptionAPI::getDoorLocationTopic,
                         HumanoidMessageTools.createDoorLocationPacket(new RigidBodyTransform(door.getObjectTransform()), DoorLocationPacket.PUSH_HANDLE_RIGHT));
       }
    }

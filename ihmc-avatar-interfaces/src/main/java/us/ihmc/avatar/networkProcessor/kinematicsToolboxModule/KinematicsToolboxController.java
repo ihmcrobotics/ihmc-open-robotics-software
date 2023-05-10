@@ -346,11 +346,18 @@ public class KinematicsToolboxController extends ToolboxController
     */
    private final YoBoolean minimizeAngularMomentum = new YoBoolean("minimizeAngularMomentum", registry);
    /**
+    * When {@code true}, the solver will add an objective to minimize the overall linear momentum
+    * generated. This is not recommended when using this toolbox as an IK solver as it'll increase the
+    * number of iterations before converging.
+    */
+   private final YoBoolean minimizeLinearMomentum = new YoBoolean("minimizeLinearMomentum", registry);
+   /**
     * The weight to be used for minimizing the angular momentum, around 0.1 seems good for a robot that
     * is about 130kg.
     */
    private final YoDouble angularMomentumWeight = new YoDouble("angularMomentumWeight", registry);
-   private final MomentumCommand angularMomentumCommand = new MomentumCommand();
+   private final YoDouble linearMomentumWeight = new YoDouble("linearMomentumWeight", registry);
+   private final MomentumCommand momentumCommand = new MomentumCommand();
 
    /**
     * @param commandInputManager     the message/command barrier used by this controller. Submit
@@ -428,7 +435,6 @@ public class KinematicsToolboxController extends ToolboxController
 
       minimizeAngularMomentum.set(false);
       angularMomentumWeight.set(0.125);
-      angularMomentumCommand.setSelectionMatrixForAngularControl();
 
       enableSelfCollisionAvoidance.set(true);
       enableStaticCollisionAvoidance.set(true);
@@ -797,10 +803,16 @@ public class KinematicsToolboxController extends ToolboxController
       allFeedbackControlCommands.clear();
       allFeedbackControlCommands.addCommandList(feedbackControlCommandBuffer);
 
-      if (minimizeAngularMomentum.getValue())
+      if (minimizeAngularMomentum.getValue() || minimizeLinearMomentum.getValue())
       {
-         angularMomentumCommand.setWeight(angularMomentumWeight.getValue());
-         inverseKinematicsCommandBuffer.addMomentumCommand().set(angularMomentumCommand);
+         momentumCommand.setWeight(angularMomentumWeight.getValue(), linearMomentumWeight.getValue());
+         if (!minimizeAngularMomentum.getValue())
+            momentumCommand.setSelectionMatrixForLinearControl();
+         else if (!minimizeLinearMomentum.getValue())
+            momentumCommand.setSelectionMatrixForAngularControl();
+         else
+            momentumCommand.setSelectionMatrixToIdentity();
+         inverseKinematicsCommandBuffer.addMomentumCommand().set(momentumCommand);
       }
 
       /*
@@ -1501,7 +1513,7 @@ public class KinematicsToolboxController extends ToolboxController
    public boolean isUserControllingCenterOfMass()
    {
       return !userFBCommands.getCenterOfMassFeedbackControlCommandBuffer().isEmpty()
-            || !previousUserFBCommands.getCenterOfMassFeedbackControlCommandBuffer().isEmpty();
+             || !previousUserFBCommands.getCenterOfMassFeedbackControlCommandBuffer().isEmpty();
    }
 
    public boolean isUserProvidingSupportPolygon()
@@ -1569,9 +1581,36 @@ public class KinematicsToolboxController extends ToolboxController
       preserveUserCommandHistory.set(value);
    }
 
+   public void minimizeMomentum(boolean enableAngular, boolean enableLinear)
+   {
+      minimizeAngularMomentum(enableAngular);
+      minimizeLinearMomentum(enableLinear);
+   }
+
    public void minimizeAngularMomentum(boolean enable)
    {
       minimizeAngularMomentum.set(enable);
+   }
+
+   public void minimizeLinearMomentum(boolean enable)
+   {
+      minimizeLinearMomentum.set(enable);
+   }
+
+   public void setMomentumWeight(double angularWeight, double linearWeight)
+   {
+      setAngularMomentumWeight(angularWeight);
+      setLinearMomentumWeight(linearWeight);
+   }
+
+   public void setAngularMomentumWeight(double weight)
+   {
+      angularMomentumWeight.set(weight);
+   }
+
+   public void setLinearMomentumWeight(double weight)
+   {
+      linearMomentumWeight.set(weight);
    }
 
    public void setEnableSelfCollisionAvoidance(boolean enableSelfCollisionAvoidance)

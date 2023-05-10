@@ -9,6 +9,7 @@ import perception_msgs.msg.dds.DoorLocationPacket;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -79,7 +80,7 @@ public class ObjectDetectorToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getOutputTopic(String robotName)
    {
-      return ROS2Tools.OBJECT_DETECTOR_TOOLBOX_OUTPUT.withRobot(robotName);
+      return PerceptionAPI.OBJECT_DETECTOR_TOOLBOX_OUTPUT.withRobot(robotName);
    }
 
    @Override
@@ -90,6 +91,6 @@ public class ObjectDetectorToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getInputTopic(String robotName)
    {
-      return ROS2Tools.OBJECT_DETECTOR_TOOLBOX_INPUT.withRobot(robotName);
+      return PerceptionAPI.OBJECT_DETECTOR_TOOLBOX_INPUT.withRobot(robotName);
    }
 }

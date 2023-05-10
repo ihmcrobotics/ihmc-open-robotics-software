@@ -6,10 +6,10 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
+import us.ihmc.log.LogToolsWriteOnly;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.tools.Timer;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.ros2.ROS2NodeInterface;
@@ -30,7 +30,7 @@ public class ControllerStatusTracker
    private static final double CAPTURABILITY_BASED_STATUS_EXPIRATION_TIME = 0.25;
 
    private final WalkingFootstepTracker footstepTracker;
-   private final StatusLogger statusLogger;
+   private final LogToolsWriteOnly statusLogger;
    private volatile HighLevelControllerName latestKnownState;
    private final Vector3D lastPlanOffset = new Vector3D();
    private final Timer capturabilityBasedStatusTimer = new Timer();
@@ -41,7 +41,7 @@ public class ControllerStatusTracker
    private final ArrayList<Runnable> notWalkingStateAnymoreCallbacks = new ArrayList<>();
    private final Throttler notWalkingStateAnymoreCallbackThrottler = new Throttler();
 
-   public ControllerStatusTracker(StatusLogger statusLogger, ROS2NodeInterface ros2Node, String robotName)
+   public ControllerStatusTracker(LogToolsWriteOnly statusLogger, ROS2NodeInterface ros2Node, String robotName)
    {
       this.statusLogger = statusLogger;
       footstepTracker = new WalkingFootstepTracker(ros2Node, robotName);
