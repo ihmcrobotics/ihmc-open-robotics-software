@@ -18,17 +18,9 @@ public interface HumanoidJointNameMap extends LeggedJointNameMap<RobotSide>
 
    RigidBodyTransform getHandControlFrameToWristTransform(RobotSide robotSide);
 
-   default RigidBodyTransform getSoleToParentFrameTransform(RobotSide robotSide)
-   {
-      return getSoleToAnkleFrameTransform(robotSide);
-   }
-
    String getPelvisName();
 
    String getChestName();
-
-   @Deprecated
-   RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide robotSide);
 
    @Override
    default RobotSide[] getRobotSegments()
