@@ -130,6 +130,8 @@ public class BalanceManager implements SCS2YoGraphicHolder
    private final ICPControllerParameters.FeedbackAlphaCalculator feedbackAlphaCalculator;
 
    private final YoDouble swingSpeedUpForStepAdjustment = new YoDouble("swingSpeedUpForStepAdjustment", registry);
+   private final YoDouble currentFeedbackAlpha = new YoDouble("currentFeedbackAlpha", registry);
+   private final YoDouble finalFeedbackAlpha = new YoDouble("finalFeedbackAlpha", registry);
 
    /** CoP position according to the ICP planner */
    private final YoFramePoint3D yoPerfectCoP = new YoFramePoint3D("perfectCoP", worldFrame, registry);
@@ -447,15 +449,20 @@ public class BalanceManager implements SCS2YoGraphicHolder
       if (stepConstraintRegionHandler != null && stepConstraintRegionHandler.hasNewStepConstraintRegion())
          stepAdjustmentController.setStepConstraintRegions(stepConstraintRegionHandler.pollHasNewStepConstraintRegions());
 
+      // compute the amount to scale the support polygon, and the point to scale it about.
       double feedbackAlpha = Double.NaN;
       if (feedbackAlphaCalculator != null)
       {
-         double finalFeedbackAlpha = feedbackAlphaCalculator.computeAlpha(yoFinalDesiredICP, bipedSupportPolygons.getSupportPolygonInWorld());
+         this.finalFeedbackAlpha.set(feedbackAlphaCalculator.computeAlpha(yoFinalDesiredICP, bipedSupportPolygons.getSupportPolygonInWorld()));
+         this.currentFeedbackAlpha.set(feedbackAlphaCalculator.computeAlpha(capturePoint2d, bipedSupportPolygons.getSupportPolygonInWorld()));
+         double maxAlpha = Math.max(currentFeedbackAlpha.getDoubleValue(), finalFeedbackAlpha.getDoubleValue());
+
          if (getAdjustedTimeRemainingInCurrentSupportSequence() > 1e-5)
          {
-            double currentFeedbackAlpha = feedbackAlphaCalculator.computeAlpha(desiredCapturePoint, bipedSupportPolygons.getSupportPolygonInWorld());
-            double exponential = Math.exp(omega0 * getAdjustedTimeRemainingInCurrentSupportSequence());
+            // get the feedback alpha that will be encountered at the end of swing.
 
+            // Compute the CoP that is equivalent to having a constant COP for the duration of the support phase.
+            double exponential = Math.exp(omega0 * getAdjustedTimeRemainingInCurrentSupportSequence());
             yoEquivalentRemainingCoP.scaleAdd(-exponential, desiredCapturePoint, yoFinalDesiredICP);
             yoEquivalentRemainingCoP.scale(1.0 / (1.0 - exponential));
 
@@ -464,29 +471,31 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
             if (perfectCMP2d.distanceSquared(yoFinalDesiredCoP) > 1e-3)
             {
+               // if the CMP isn't at the end of the trajectory, figure out how far through the trajectory you are.
                double alphaRemaining = EuclidGeometryTools.percentageAlongLineSegment2D(yoEquivalentRemainingCoP, perfectCMP2d, yoFinalDesiredCoP);
-               feedbackAlpha = InterpolationTools.linearInterpolate(currentFeedbackAlpha, finalFeedbackAlpha, alphaRemaining);
+               // Use this value to figure out what kind of support polygon scaling to do.
+               feedbackAlpha = InterpolationTools.linearInterpolate(currentFeedbackAlpha.getDoubleValue(), maxAlpha, alphaRemaining);
             }
             else
             {
-               feedbackAlpha = 0.5 * (currentFeedbackAlpha + finalFeedbackAlpha);
+               feedbackAlpha = 0.5 * (currentFeedbackAlpha.getDoubleValue() + maxAlpha);
             }
             feedbackAlpha = MathTools.clamp(feedbackAlpha, 0.0, 1.0);
          }
          else
          {
             yoEquivalentRemainingCoP.set(yoFinalDesiredCoP);
-            feedbackAlpha = finalFeedbackAlpha;
+            feedbackAlpha = maxAlpha;
          }
       }
 
-      perfectCMP2d.setIncludingFrame(yoPerfectCMP);
+      // use 1.0 - feedback alpha, because 0.0 feedback alpha does nothing, while 1.0 should allow no feedback.
       stepAdjustmentController.compute(yoTime.getDoubleValue(),
                                        desiredCapturePoint,
                                        capturePoint2d,
                                        omega0,
                                        yoEquivalentRemainingCoP,
-                                       feedbackAlpha);
+                                       1.0 - feedbackAlpha);
       boolean footstepWasAdjusted = stepAdjustmentController.wasFootstepAdjusted();
       footstep.setPose(stepAdjustmentController.getFootstepSolution());
 
