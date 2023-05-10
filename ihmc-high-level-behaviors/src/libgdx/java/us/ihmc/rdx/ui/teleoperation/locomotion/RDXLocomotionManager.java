@@ -68,6 +68,8 @@ public class RDXLocomotionManager
 
    private final RDXWalkingLowLevelMessenger walkingLowLevelMessenger;
    private boolean spaceBarPressed = false;
+   boolean wasWalking = false;
+
 
    private final ControllerStatusTracker controllerStatusTracker;
 
@@ -195,6 +197,7 @@ public class RDXLocomotionManager
 
       if (interactableFootstepPlan.getNumberOfFootsteps() > 0)
       {
+         wasWalking = false;
          footstepPlanning.setReadyToWalk(false);
          footstepsSentToControllerGraphic.clear();
       }
@@ -255,8 +258,9 @@ public class RDXLocomotionManager
          {
             spaceBarPressed = true;
 
-            if (!controllerStatusTracker.isWalking() && interactableFootstepPlan.getNumberOfFootsteps() > 0)
+            if (!wasWalking && interactableFootstepPlan.getNumberOfFootsteps() > 0)
             {
+               wasWalking = true;
                LogTools.info("Walking started");
                interactableFootstepPlan.walkFromSteps();
                walkingLowLevelMessenger.setRobotPausedWalking(false);
@@ -276,8 +280,9 @@ public class RDXLocomotionManager
          spaceBarPressed = false;
       }
 
-      if (!controllerStatusTracker.isWalking())
+      if (wasWalking && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() == 0)
       {
+         wasWalking = false;
          LogTools.info("Goal reached, walking stopped!");
          walkingLowLevelMessenger.setRobotPausedWalking(false);
       }
