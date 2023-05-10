@@ -80,7 +80,7 @@ public class RDXLocomotionManager
       footstepPlanning = new RDXFootstepPlanning(robotModel, walkingParameters, syncedRobot);
 
       // TODO remove ros from this module, and have it call from the higher level.
-      ros2Helper.subscribeViaCallback(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, regions ->
+      ros2Helper.subscribeViaCallback(PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS, regions ->
       {
          footstepPlanning.setPlanarRegionsListMessage(regions);
          interactableFootstepPlan.setPlanarRegionsListMessage(regions);
