@@ -365,7 +365,7 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
    }
 
    @Override
-   public RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide robotSide)
+   public RigidBodyTransform getSoleToParentFrameTransform(RobotSide robotSide)
    {
       return physicalProperties.getSoleToAnkleFrameTransform(robotSide);
    }
