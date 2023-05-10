@@ -36,8 +36,6 @@ public interface HumanoidJointNameMap extends LeggedJointNameMap<RobotSide>
 
    String getNameOfJointBeforeChest();
 
-   SideDependentList<String> getNameOfJointBeforeThighs();
-
    SideDependentList<String> getNameOfJointBeforeHands();
 
    String[] getOrderedJointNames();
