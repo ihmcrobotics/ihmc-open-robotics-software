@@ -29,7 +29,7 @@ public interface StepAdjustmentController extends SCS2YoGraphicHolder
                 FramePoint2DReadOnly currentICP,
                 double omega0,
                 FramePoint2DReadOnly copToShrinkAbout,
-                double feedbackAlpha);
+                double percentageToShrinkPolygon);
 
    FramePose3DReadOnly getFootstepSolution();
 

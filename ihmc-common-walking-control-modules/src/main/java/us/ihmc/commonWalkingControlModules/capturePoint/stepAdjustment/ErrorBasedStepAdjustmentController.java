@@ -28,11 +28,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
-import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -76,7 +74,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final YoBoolean shouldCheckForReachability = new YoBoolean(yoNamePrefix + "ShouldCheckForReachability", registry);
    private final YoBoolean hasPlanarRegionBeenAssigned = new YoBoolean(yoNamePrefix + "HasPlanarRegionBeenAssigned", registry);
 
-   private final YoDouble finalFeedbackAlpha = new YoDouble(yoNamePrefix + "FinalFeedbackAlpha", registry);
+   private final YoDouble percentageToShrinkPolygon = new YoDouble(yoNamePrefix + "PercentageToShrinkPolygon", registry);
    private final YoDouble swingDuration = new YoDouble(yoNamePrefix + "SwingDuration", registry);
 
    private final YoInteger controlTicksIntoStep = new YoInteger(yoNamePrefix + "TicksIntoStep", registry);
@@ -363,9 +361,9 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                        FramePoint2DReadOnly currentICP,
                        double omega0,
                        FramePoint2DReadOnly copToShrinkAbout,
-                       double finalFeedbackAlpha)
+                       double percentageToShrinkPolygon)
    {
-      this.finalFeedbackAlpha.set(finalFeedbackAlpha);
+      this.percentageToShrinkPolygon.set(percentageToShrinkPolygon);
 
       if (!isInSwing.getBooleanValue())
          return;
@@ -379,7 +377,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       if (timeRemainingInState.getValue() < minimumTimeForStepAdjustment.getValue())
          return;
 
-      computeLimitedAreaForCoP(copToShrinkAbout, finalFeedbackAlpha);
+      computeLimitedAreaForCoP(copToShrinkAbout, percentageToShrinkPolygon);
       RobotSide swingSide = upcomingFootstepSide.getEnumValue();
       RobotSide stanceSide = swingSide.getOppositeSide();
       captureRegionCalculator.calculateCaptureRegion(swingSide, Math.max(timeRemainingInState.getDoubleValue(), 0.0), currentICP, omega0, allowableAreaForCoP);
@@ -450,15 +448,15 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
    private final FramePoint2D finalInFoot = new FramePoint2D();
 
-   private void computeLimitedAreaForCoP(FramePoint2DReadOnly desiredCoP, double finalFeedbackAlpha)
+   private void computeLimitedAreaForCoP(FramePoint2DReadOnly copToShrinkAbout, double percentageToShrinkPolygon)
    {
       RobotSide supportSide = upcomingFootstepSide.getEnumValue().getOppositeSide();
       FixedFrameConvexPolygon2DBasics shrunkSupport = allowableAreasForCoP.get(supportSide);
       FrameConvexPolygon2DReadOnly supportPolygon = bipedSupportPolygons.getFootPolygonInSoleZUpFrame(supportSide);
-      finalInFoot.setMatchingFrame(desiredCoP);
+      finalInFoot.setMatchingFrame(copToShrinkAbout);
       finalInFoot.changeFrame(shrunkSupport.getReferenceFrame());
 
-      if (!Double.isNaN(finalFeedbackAlpha) && finalFeedbackAlpha >= 1.0 - 1e-5)
+      if (!Double.isNaN(percentageToShrinkPolygon) && percentageToShrinkPolygon <= 1e-5)
       {
          shrunkSupport.clear();
          shrunkSupport.addVertex(finalInFoot);
@@ -468,8 +466,8 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       else
       {
          shrunkSupport.set(supportPolygon);
-         if (!Double.isNaN(finalFeedbackAlpha))
-            shrunkSupport.scale(finalInFoot, 1.0 - finalFeedbackAlpha);
+         if (!Double.isNaN(percentageToShrinkPolygon))
+            shrunkSupport.scale(finalInFoot, percentageToShrinkPolygon);
 
          for (int i = 0; i < shrunkSupport.getNumberOfVertices(); i++)
          {

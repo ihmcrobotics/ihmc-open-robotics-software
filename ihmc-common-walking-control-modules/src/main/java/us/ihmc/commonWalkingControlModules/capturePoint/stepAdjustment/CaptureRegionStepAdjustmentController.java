@@ -228,7 +228,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
                        FramePoint2DReadOnly currentICP,
                        double omega0,
                        FramePoint2DReadOnly copToShrinkAbout,
-                       double finalFeedbackAlpha)
+                       double percentageToShrinkPolygon)
    {
       if (!isInSwing.getBooleanValue())
          return;
