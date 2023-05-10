@@ -17,7 +17,7 @@ public class ArUcoDetectableNode extends PredefinedRigidBodySceneNode
 {
    private final int markerID;
    private final double markerSize;
-   private final ModifiableReferenceFrame markerFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
+   private final ModifiableReferenceFrame markerFrame;
 
    /**
     * Give the marker info directly from code.
@@ -34,6 +34,7 @@ public class ArUcoDetectableNode extends PredefinedRigidBodySceneNode
    {
       super(name, visualModelFilePath, visualModelToNodeFrameTransform);
 
+      markerFrame = new ModifiableReferenceFrame(name + "MarkerFrame", ReferenceFrame.getWorldFrame());
       changeParentFrame(markerFrame.getReferenceFrame());
 
       this.markerID = markerID;
@@ -49,6 +50,7 @@ public class ArUcoDetectableNode extends PredefinedRigidBodySceneNode
    {
       super(name, visualModelFilePath, visualModelToNodeFrameTransform);
 
+      markerFrame = new ModifiableReferenceFrame(name + "MarkerFrame", ReferenceFrame.getWorldFrame());
       changeParentFrame(markerFrame.getReferenceFrame());
 
       ArUcoMarker arUcoMarker = new ArUcoMarker(name);

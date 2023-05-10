@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class StopAllTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.StopAllTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::StopAllTrajectoryMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "0294c1f4b8ba684815dd33e43210414c5e6613b7cba92138d93c532d1117dd28";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

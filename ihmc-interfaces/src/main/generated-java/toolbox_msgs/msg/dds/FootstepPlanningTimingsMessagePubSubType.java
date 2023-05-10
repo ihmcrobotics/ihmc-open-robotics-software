@@ -11,6 +11,18 @@ package toolbox_msgs.msg.dds;
 public class FootstepPlanningTimingsMessagePubSubType implements us.ihmc.pubsub.TopicDataType<toolbox_msgs.msg.dds.FootstepPlanningTimingsMessage>
 {
    public static final java.lang.String name = "toolbox_msgs::msg::dds_::FootstepPlanningTimingsMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "8ab1a56e78d3db7ae3998396b5cf673a3ed442819359039402fb6bb4a2694603";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

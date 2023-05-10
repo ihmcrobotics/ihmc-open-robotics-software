@@ -57,4 +57,33 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    {
       return get(mahalanobisScale);
    }
+
+   /**
+    * This is the variance added to all past measurements when a cell is translated
+    */
+   default double getVarianceAddedWhenTranslating()
+   {
+      return get(varianceAddedWhenTranslating);
+   }
+
+   /**
+    * This is the measurement variance when the robot is standing
+    */
+   default double getSensorVarianceWhenStanding()
+   {
+      return get(sensorVarianceWhenStanding);
+   }
+
+   /**
+    * This is the measurement variance when the robot is moving
+    */
+   default double getSensorVarianceWhenMoving()
+   {
+      return get(sensorVarianceWhenMoving);
+   }
+
+   default boolean getEstimateHeightWithKalmanFilter()
+   {
+      return get(estimateHeightWithKalmanFilter);
+   }
 }

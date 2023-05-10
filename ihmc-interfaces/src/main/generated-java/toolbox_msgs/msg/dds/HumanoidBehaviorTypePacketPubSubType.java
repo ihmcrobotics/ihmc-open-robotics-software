@@ -11,6 +11,18 @@ package toolbox_msgs.msg.dds;
 public class HumanoidBehaviorTypePacketPubSubType implements us.ihmc.pubsub.TopicDataType<toolbox_msgs.msg.dds.HumanoidBehaviorTypePacket>
 {
    public static final java.lang.String name = "toolbox_msgs::msg::dds_::HumanoidBehaviorTypePacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "8e3f4b71a414e7910774543d4f0a64536b7dedcb926ab422d478815982a1ea44";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

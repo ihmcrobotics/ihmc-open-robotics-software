@@ -146,7 +146,6 @@ public class KSTTools
       ikCommandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel, ikController.getDesiredReferenceFrames()));
 
       ikController.setPreserveUserCommandHistory(false);
-      ikController.minimizeAngularMomentum(true);
 
       streamingMessageFactory = new KSTStreamingMessageFactory(fullRobotModelFactory);
       trajectoryMessageFactory = new KinematicsToolboxOutputConverter(fullRobotModelFactory);

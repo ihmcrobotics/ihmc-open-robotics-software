@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class ArmDesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ArmDesiredAccelerationsMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::ArmDesiredAccelerationsMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "1251fccc687c49d3029a3c38d838fb9789dad924e5f2da10a36cf079e6b2eef5";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

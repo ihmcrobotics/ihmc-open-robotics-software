@@ -11,6 +11,18 @@ package toolbox_msgs.msg.dds;
 public class WaypointBasedTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<toolbox_msgs.msg.dds.WaypointBasedTrajectoryMessage>
 {
    public static final java.lang.String name = "toolbox_msgs::msg::dds_::WaypointBasedTrajectoryMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "5e35bf5bdcefd118c7804803b7ff756b0ea5146cf20ad2b51ad3aa9978a5a9fa";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

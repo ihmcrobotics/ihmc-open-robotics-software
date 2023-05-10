@@ -10,6 +10,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -63,7 +64,7 @@ public class AtlasRealsenseSLAMRemoteUILauncher
          defaultContactPoints.put(side, contactPointParameters.getControllerFootGroundContactPoints().get(side));
       }
 
-      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, ROS2Tools.REA_NODE_NAME);
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, PerceptionAPI.REA_NODE_NAME);
 
       slamMessager = KryoMessager.createClient(SLAMModuleAPI.API,
                                                "poweredge",

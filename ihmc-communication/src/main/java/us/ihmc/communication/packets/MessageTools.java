@@ -754,7 +754,7 @@ public class MessageTools
       if (referenceFrame == null)
          return EuclidHashCodeTools.NULL_HASHCODE;
       else
-         return referenceFrame.hashCode();
+         return referenceFrame.getFrameNameHashCode();
    }
 
    /**
