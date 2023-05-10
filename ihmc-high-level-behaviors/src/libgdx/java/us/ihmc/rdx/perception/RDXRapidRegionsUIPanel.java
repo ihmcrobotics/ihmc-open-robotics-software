@@ -149,7 +149,7 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
 
       synchronized (planarRegionsGraphic)
       {
-         if(render3DPlanarRegions.get())
+         if (render3DPlanarRegions.get())
          {
             planarRegionsGraphic.generateMeshes(regionsToRender);
             planarRegionsGraphic.update();
