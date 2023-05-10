@@ -11,6 +11,18 @@ package mission_control_msgs.msg.dds;
 public class SystemAvailableMessagePubSubType implements us.ihmc.pubsub.TopicDataType<mission_control_msgs.msg.dds.SystemAvailableMessage>
 {
    public static final java.lang.String name = "mission_control_msgs::msg::dds_::SystemAvailableMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "525e41fd8a9e08cc6e69249e8f354ae678209397367f8a2ae6c33de2c13cf06f";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
@@ -42,8 +54,6 @@ public class SystemAvailableMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
 
       return current_alignment - initial_alignment;
    }
@@ -61,9 +71,6 @@ public class SystemAvailableMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getInstanceId().length() + 1;
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
 
       return current_alignment - initial_alignment;
    }
@@ -78,16 +85,12 @@ public class SystemAvailableMessagePubSubType implements us.ihmc.pubsub.TopicDat
       cdr.write_type_d(data.getInstanceId());else
           throw new RuntimeException("instance_id field exceeds the maximum length");
 
-      cdr.write_type_11(data.getEpochTimeMs());
-
    }
 
    public static void read(mission_control_msgs.msg.dds.SystemAvailableMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.read_type_d(data.getHostname());	
       cdr.read_type_d(data.getInstanceId());	
-      data.setEpochTimeMs(cdr.read_type_11());
-      	
 
    }
 
@@ -96,7 +99,6 @@ public class SystemAvailableMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       ser.write_type_d("hostname", data.getHostname());
       ser.write_type_d("instance_id", data.getInstanceId());
-      ser.write_type_11("epoch_time_ms", data.getEpochTimeMs());
    }
 
    @Override
@@ -104,7 +106,6 @@ public class SystemAvailableMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       ser.read_type_d("hostname", data.getHostname());
       ser.read_type_d("instance_id", data.getInstanceId());
-      data.setEpochTimeMs(ser.read_type_11("epoch_time_ms"));
    }
 
    public static void staticCopy(mission_control_msgs.msg.dds.SystemAvailableMessage src, mission_control_msgs.msg.dds.SystemAvailableMessage dest)

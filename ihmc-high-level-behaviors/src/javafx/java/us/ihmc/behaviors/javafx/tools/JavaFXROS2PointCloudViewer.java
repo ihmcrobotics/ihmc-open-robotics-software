@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.javafx.tools;
 
 import javafx.stage.Stage;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.behaviors.javafx.graphics.live.LiveStereoVisionPointCloudGraphic;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
@@ -28,7 +29,7 @@ public class JavaFXROS2PointCloudViewer
       view3dFactory.addWorldCoordinateSystem(0.3);
       view3dFactory.addDefaultLighting();
 
-      pointCloudGraphic = new LiveStereoVisionPointCloudGraphic(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN);
+      pointCloudGraphic = new LiveStereoVisionPointCloudGraphic(ros2Node, PerceptionAPI.MULTISENSE_LIDAR_SCAN);
       view3dFactory.addNodeToView(pointCloudGraphic);
 
       primaryStage.setScene(view3dFactory.getScene());

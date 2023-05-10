@@ -17,6 +17,7 @@ import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSu
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.communication.packets.MessageTools;
@@ -217,7 +218,7 @@ public class DirectRobotUI
       pumpPSI.getSelectionModel().select(1);
       pumpPSI.valueProperty().addListener((ChangeListener) -> sendPumpPSI());
 
-      reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, ROS2Tools.REA_STATE_REQUEST);
+      reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, PerceptionAPI.REA_STATE_REQUEST);
       clearSLAMPublisher = ROS2Tools.createPublisher(ros2Node, SLAMModuleAPI.CLEAR);
 
       supportRegionScale.setValueFactory(new DoubleSpinnerValueFactory(0.0, 10.0, BipedalSupportPlanarRegionPublisher.defaultScaleFactor, 0.1));

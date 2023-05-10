@@ -3,6 +3,7 @@ package us.ihmc.perception;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ArUcoMarkerPoses;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -40,7 +41,7 @@ public class OpenCVArUcoMarkerROS2Publisher
       {
          synchronized (arUcoMarkerDetection.getSyncObject())
          {
-            Mat ids = arUcoMarkerDetection.getIds();
+            Mat ids = arUcoMarkerDetection.getIDsMat();
             arUcoMarkerPoses.getMarkerId().clear();
             arUcoMarkerPoses.getOrientation().clear();
             arUcoMarkerPoses.getPosition().clear();
@@ -60,8 +61,7 @@ public class OpenCVArUcoMarkerROS2Publisher
                                                arUcoMarkerPoses.getOrientation().add());
                }
             }
-
-            ros2.publish(ROS2Tools.ARUCO_MARKER_POSES, arUcoMarkerPoses);
+            ros2.publish(PerceptionAPI.ARUCO_MARKER_POSES, arUcoMarkerPoses);
          }
       }
    }

@@ -15,6 +15,9 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 
+/**
+ * A table for putting things on for manipulation tasks.
+ */
 public class TableDefinition  extends RobotDefinition
 {
    private SixDoFJointState initialSixDoFState;

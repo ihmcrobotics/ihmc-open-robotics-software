@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class ValkyrieHandFingerTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::ValkyrieHandFingerTrajectoryMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "ad3f9ef88b49f7ebba15930c09ad055c06da19062adc0b56f04cce7584e71010";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

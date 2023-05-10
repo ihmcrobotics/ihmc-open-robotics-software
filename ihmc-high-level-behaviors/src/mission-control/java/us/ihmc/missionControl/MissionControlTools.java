@@ -110,4 +110,20 @@ public final class MissionControlTools
          return lines[2].trim();
       }
    }
+
+   /**
+    * Split a string list (of log lines) into multiple lists of max size maxListSize
+    */
+   public static List<List<String>> splitLogLines(List<String> logLines, int maxListSize)
+   {
+      List<List<String>> splitEntries = new ArrayList<>();
+      for (int i = 0; i < logLines.size(); i = i + maxListSize)
+      {
+         if (i + maxListSize < logLines.size())
+            splitEntries.add(logLines.subList(i, i + maxListSize));
+         else
+            splitEntries.add(logLines.subList(i, logLines.size()));
+      }
+      return splitEntries;
+   }
 }

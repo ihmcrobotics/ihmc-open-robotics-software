@@ -76,7 +76,7 @@ public class DoorSceneNodeDefinitions
                                      DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
                                      PUSH_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
    }
-
+   
    public static ArUcoDetectableNode createPushDoorLeverHandle()
    {
       return new ArUcoDetectableNode("PushDoorLeverHandle",

@@ -8,7 +8,6 @@ import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.utilities.ros.ROS1Helper;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -19,23 +18,11 @@ public class RDXGlobalVisualizersPanel extends ImGuiPanel implements RDXRenderab
 
    private final ArrayList<RDXVisualizer> visualizers = new ArrayList<>();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ROS1Helper ros1Helper;
    private boolean created = false;
 
    public RDXGlobalVisualizersPanel()
    {
-      this(new ROS1Helper("global_visualizers"));
-   }
-
-   public RDXGlobalVisualizersPanel(boolean enableROS1)
-   {
-      this(enableROS1 ? new ROS1Helper("global_visualizers") : null);
-   }
-
-   public RDXGlobalVisualizersPanel(ROS1Helper ros1Helper)
-   {
       super(WINDOW_NAME);
-      this.ros1Helper = ros1Helper;
       setRenderMethod(this::renderImGuiWidgets);
    }
 
@@ -62,10 +49,6 @@ public class RDXGlobalVisualizersPanel extends ImGuiPanel implements RDXRenderab
    {
       for (RDXVisualizer visualizer : visualizers)
       {
-         if (visualizer instanceof RDXROS1VisualizerInterface && ros1Helper != null)
-         {
-            ((RDXROS1VisualizerInterface) visualizer).updateSubscribers(ros1Helper);
-         }
          if (visualizer.getPanel() != null)
             visualizer.getPanel().getIsShowing().set(visualizer.isActive());
          if (visualizer.isActive())
@@ -77,10 +60,6 @@ public class RDXGlobalVisualizersPanel extends ImGuiPanel implements RDXRenderab
 
    public void renderImGuiWidgets()
    {
-      if (ros1Helper != null && ImGui.button(labels.get("Reconnect ROS 1 Node")))
-      {
-         ros1Helper.reconnectEverything();
-      }
       for (RDXVisualizer visualizer : visualizers)
       {
          visualizer.renderImGuiWidgets();
@@ -106,7 +85,5 @@ public class RDXGlobalVisualizersPanel extends ImGuiPanel implements RDXRenderab
       {
          visualizer.destroy();
       }
-      if (ros1Helper != null)
-         ros1Helper.destroy();
    }
 }

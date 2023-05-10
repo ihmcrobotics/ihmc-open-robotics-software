@@ -4,6 +4,7 @@ import geometry_msgs.Point;
 import map_sense.RawGPUPlanarRegion;
 import map_sense.RawGPUPlanarRegionList;
 import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ScanPointFilter;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -61,10 +62,10 @@ public class GPUPlanarRegionUpdater
    public void attachROS2Tuner(ROS2NodeInterface ros2Node)
    {
       new IHMCROS2Callback<>(ros2Node,
-                             ROS2Tools.CONCAVE_HULL_FACTORY_PARAMETERS,
+                             PerceptionAPI.CONCAVE_HULL_FACTORY_PARAMETERS,
                              parameters -> concaveHullFactoryParameters.setFromColonCommaString(parameters.getParameters().toString()));
       new IHMCROS2Callback<>(ros2Node,
-                             ROS2Tools.POLYGONIZER_PARAMETERS,
+                             PerceptionAPI.POLYGONIZER_PARAMETERS,
                              parameters -> polygonizerParameters.setFromColonCommaString(parameters.getParameters().toString()));
    }
 
