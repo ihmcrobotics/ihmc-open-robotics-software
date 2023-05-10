@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import org.lwjgl.openvr.InputDigitalActionData;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.imgui.RDXSingleContext3DSituatedImGuiPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -41,7 +42,7 @@ public class RDXVROnlyPointCloudWithImGuiPanelDemo
 
             fusedPointCloud = new RDXROS2PointCloudVisualizer("Fused Point Cloud",
                                                               ros2Node,
-                                                              ROS2Tools.MULTISENSE_LIDAR_SCAN);
+                                                              PerceptionAPI.MULTISENSE_LIDAR_SCAN);
             fusedPointCloud.setSubscribed(true);
             fusedPointCloud.create();
             fusedPointCloud.setActive(true);

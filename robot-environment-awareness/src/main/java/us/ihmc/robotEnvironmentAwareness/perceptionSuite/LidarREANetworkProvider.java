@@ -2,6 +2,7 @@ package us.ihmc.robotEnvironmentAwareness.perceptionSuite;
 
 import perception_msgs.msg.dds.*;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
@@ -39,7 +40,7 @@ public class LidarREANetworkProvider implements REANetworkProvider
 
    public LidarREANetworkProvider(ROS2Topic outputTopic, ROS2Topic lidarOutputTopic)
    {
-      this(ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), outputTopic, lidarOutputTopic);
+      this(ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, PerceptionAPI.REA_NODE_NAME), outputTopic, lidarOutputTopic);
    }
 
    public LidarREANetworkProvider(ROS2Node ros2Node, ROS2Topic outputTopic, ROS2Topic lidarOutputTopic)

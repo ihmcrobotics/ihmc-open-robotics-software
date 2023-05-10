@@ -8,6 +8,7 @@ import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.commons.Conversions;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorInterface;
@@ -240,7 +241,7 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
 
       BipedalSupportPlanarRegionParametersMessage supportRegionParametersMessage = new BipedalSupportPlanarRegionParametersMessage();
       supportRegionParametersMessage.setEnable(false);
-      helper.publish(ROS2Tools::getBipedalSupportRegionParametersTopic, supportRegionParametersMessage);
+      helper.publish(PerceptionAPI::getBipedalSupportRegionParametersTopic, supportRegionParametersMessage);
    }
 
    private void update()

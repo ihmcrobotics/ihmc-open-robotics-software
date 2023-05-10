@@ -37,8 +37,8 @@ import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 
 public class ValkyrieModelFileLoadingDemo
 {
-   private static final boolean SHOW_COORDINATES_AT_JOINT_ORIGIN = true;
-   private static final boolean SHOW_KINEMATICS_COLLISIONS = false;
+   private static final boolean SHOW_COORDINATES_AT_JOINT_ORIGIN = false;
+   private static final boolean SHOW_KINEMATICS_COLLISIONS = true;
    private static final boolean SHOW_SIM_COLLISIONS = false;
 
    private SimulationConstructionSet2 scs;

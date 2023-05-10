@@ -17,6 +17,7 @@ import us.ihmc.behaviors.tools.yo.YoVariableClientPublishSubscribeAPI;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
@@ -216,7 +217,7 @@ public class BehaviorHelper extends CommunicationHelper implements MessagerPubli
 
    public void subscribeToDoorLocationViaCallback(Consumer<DoorLocationPacket> callback)
    {
-      subscribeViaCallback(ROS2Tools.getDoorLocationTopic(getRobotModel().getSimpleRobotName()), callback);
+      subscribeViaCallback(PerceptionAPI.getDoorLocationTopic(getRobotModel().getSimpleRobotName()), callback);
    }
 
    public MessagerHelper getMessagerHelper()
