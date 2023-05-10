@@ -118,7 +118,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final DoubleParameter supportDistanceFromOutside;
 
    private final SideDependentList<FixedFrameConvexPolygon2DBasics> allowableAreasForCoP = new SideDependentList<>();
-   private final YoFrameConvexPolygon2D allowableAreaForCoP = new YoFrameConvexPolygon2D(yoNamePrefix + "ALlowableAreaForCoP", worldFrame, 4, registry);
+   private final YoFrameConvexPolygon2D allowableAreaForCoP = new YoFrameConvexPolygon2D(yoNamePrefix + "AllowableAreaForCoP", worldFrame, 4, registry);
 
    private final StepAdjustmentReachabilityConstraint reachabilityConstraintHandler;
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
@@ -724,15 +724,15 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(reachabilityConstraintHandler.getSCS2YoGraphics());
       group.addChild(environmentConstraintProvider.getSCS2YoGraphics());
-      group.addChild(captureRegionCalculator.getSCS2YoGraphics());
-      group.addChild(oneStepSafetyHeuristics.getSCS2YoGraphics());
+//      group.addChild(captureRegionCalculator.getSCS2YoGraphics());
+//      group.addChild(oneStepSafetyHeuristics.getSCS2YoGraphics());
       group.addChild(multiStepCaptureRegionCalculator.getSCS2YoGraphics());
       group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D(yoNamePrefix + "FootstepSolution",
                                                                     footstepSolution.getPosition(),
                                                                     0.01,
                                                                     ColorDefinitions.DarkRed(),
                                                                     DefaultPoint2DGraphic.CIRCLE));
-         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D("Allowable Area for CoP", allowableAreaForCoP, ColorDefinitions.Red()));
+//      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D("Allowable Area for CoP", allowableAreaForCoP, ColorDefinitions.Red()));
 
       group.setVisible(VISUALIZE);
       return group;
