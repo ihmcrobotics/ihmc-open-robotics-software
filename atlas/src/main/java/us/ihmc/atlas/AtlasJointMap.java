@@ -368,7 +368,7 @@ public class AtlasJointMap implements HumanoidJointNameMap
    }
 
    @Override
-   public RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide robotSide)
+   public RigidBodyTransform getSoleToParentFrameTransform(RobotSide robotSide)
    {
       return atlasPhysicalProperties.getSoleToAnkleFrameTransforms().get(robotSide);
    }

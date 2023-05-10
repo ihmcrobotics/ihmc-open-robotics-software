@@ -321,12 +321,6 @@ public class CentroidProjectionToeOffCalculatorTest
                }
 
                @Override
-               public boolean checkECMPLocationToTriggerToeOff()
-               {
-                  return false;
-               }
-
-               @Override
                public double getMinStepLengthForToeOff()
                {
                   return 0;
@@ -391,12 +385,6 @@ public class CentroidProjectionToeOffCalculatorTest
 
          @Override
          public boolean doToeOffIfPossibleInSingleSupport()
-         {
-            return false;
-         }
-
-         @Override
-         public boolean checkECMPLocationToTriggerToeOff()
          {
             return false;
          }

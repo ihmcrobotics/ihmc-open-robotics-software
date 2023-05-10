@@ -844,13 +844,6 @@ public class SwingOverPlanarRegionsTest
 
          /** {@inheritDoc} */
          @Override
-         public double getSwingFootVelocityAdjustmentDamping()
-         {
-            return 0.8;
-         }
-
-         /** {@inheritDoc} */
-         @Override
          public boolean addOrientationMidpointForObstacleClearance()
          {
             return false;
