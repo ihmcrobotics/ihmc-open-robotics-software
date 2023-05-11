@@ -24,6 +24,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObjectBuilder;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.*;
 
 import java.util.*;
@@ -32,6 +33,8 @@ public class RDXAffordanceEditorUI
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private RobotSide side = RobotSide.RIGHT;
+
    private RDXInteractableSakeGripper interactableHand;
    private final RigidBodyTransform handTransformToWorld = new RigidBodyTransform();
    private final FramePose3D handPose = new FramePose3D(ReferenceFrame.getWorldFrame(), handTransformToWorld);
@@ -168,6 +171,21 @@ public class RDXAffordanceEditorUI
    public void renderImGuiWidgets()
    {
       ImGui.text("HAND MENU");
+      if (ImGui.radioButton(labels.get("RIGHT"), side == RobotSide.RIGHT))
+      {
+         side = RobotSide.RIGHT;
+      }
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("LEFT"), side == RobotSide.LEFT))
+      {
+         side = RobotSide.LEFT;
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("ADD") + "##side"))
+         ;
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("REMOVE") + "##side"))
+         ; //TODO add double hand logic with side dependent list
       ImGui.text("Hand configuration: ");
       if (ImGui.button(labels.get("OPEN")))
          interactableHand.openGripper();
@@ -262,8 +280,7 @@ public class RDXAffordanceEditorUI
                ObjectNode actionNode = actionsArrayNode.addObject();
                actionNode.put("type", "RDXHandPoseAction");
                actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
-               //TODO side-> Robot Side add radio button for inserting and editing right or left hand
-               actionNode.put("side", "right");
+               actionNode.put("side", side.getLowerCaseName());
                //TODO fix trajectory duration to a good cm/s velocity
                actionNode.put("trajectoryDuration", 1);
                RigidBodyTransform transformToParent = new RigidBodyTransform(preGraspPoses.get(i));
@@ -273,7 +290,7 @@ public class RDXAffordanceEditorUI
                {
                   ObjectNode extraActionNode = actionsArrayNode.addObject();
                   extraActionNode.put("type", "RDXHandConfigurationAction");
-                  extraActionNode.put("side", "right");
+                  extraActionNode.put("side", side.getLowerCaseName());
                   extraActionNode.put("grip", preGraspHandConfigurations.get(i).toString());
                }
             }
@@ -282,7 +299,7 @@ public class RDXAffordanceEditorUI
                ObjectNode actionNode = actionsArrayNode.addObject();
                actionNode.put("type", "RDXHandPoseAction");
                actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
-               actionNode.put("side", "right");
+               actionNode.put("side", side.getLowerCaseName());
                actionNode.put("trajectoryDuration", 1);
                RigidBodyTransform transformToParent = new RigidBodyTransform(graspFrame.getPose());
                JSONTools.toJSON(actionNode, transformToParent);
@@ -290,7 +307,7 @@ public class RDXAffordanceEditorUI
                {
                   ObjectNode extraActionNode = actionsArrayNode.addObject();
                   extraActionNode.put("type", "RDXHandConfigurationAction");
-                  extraActionNode.put("side", "right");
+                  extraActionNode.put("side", side.getLowerCaseName());
                   extraActionNode.put("grip", graspFrame.getHandConfiguration().toString());
                }
             }
@@ -302,7 +319,7 @@ public class RDXAffordanceEditorUI
                ObjectNode actionNode = actionsArrayNode.addObject();
                actionNode.put("type", "RDXHandPoseAction");
                actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
-               actionNode.put("side", "right");
+               actionNode.put("side", side.getLowerCaseName());
                actionNode.put("trajectoryDuration", 1);
                RigidBodyTransform transformToParent = new RigidBodyTransform(postGraspPoses.get(i));
                JSONTools.toJSON(actionNode, transformToParent);
@@ -311,7 +328,7 @@ public class RDXAffordanceEditorUI
                {
                   ObjectNode extraActionNode = actionsArrayNode.addObject();
                   extraActionNode.put("type", "RDXHandConfigurationAction");
-                  extraActionNode.put("side", "right");
+                  extraActionNode.put("side", side.getLowerCaseName());
                   extraActionNode.put("grip", postGraspHandConfigurations.get(i).toString());
                }
             }
@@ -427,7 +444,6 @@ public class RDXAffordanceEditorUI
                if (actionType.equals("RDXHandPoseAction"))
                {
                   //                  side = RobotSide.getSideFromString(jsonNode.get("side").asText());
-                  //                  trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
                   RigidBodyTransform frameTransform = new RigidBodyTransform();
                   JSONTools.toEuclid(actionNode, frameTransform);
                   if (preGraspFrames.getNumberOfFrames() < preGraspFramesSize[0])

@@ -108,5 +108,6 @@ public class RDXInteractableObject implements RenderableProvider
    public void resetPose()
    {
       pose3DGizmo.getTransformToParent().setToZero();
+      initialObjectPose.setToZero();
    }
 }
