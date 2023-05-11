@@ -16,6 +16,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.codecs.yuv.JPEGEncoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;

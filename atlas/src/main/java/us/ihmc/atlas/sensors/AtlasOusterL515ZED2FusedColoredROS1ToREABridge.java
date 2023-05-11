@@ -10,6 +10,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.ihmcPerception.depthData.PointCloudData;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.communication.ROS2Tools;

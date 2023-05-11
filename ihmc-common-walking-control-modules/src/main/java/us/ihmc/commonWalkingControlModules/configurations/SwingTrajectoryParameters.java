@@ -82,18 +82,6 @@ public abstract class SwingTrajectoryParameters
    }
 
    /**
-    * Returns a ratio to multiply the swing foot velocity adjustment when the swing trajectory is
-    * modified online. 0.0 will eliminate any velocity adjustment. 1.0 will make it try to move to the
-    * new trajectory in 1 dt.
-    * 
-    * @return damping ratio (0.0 to 1.0)
-    */
-   public double getSwingFootVelocityAdjustmentDamping()
-   {
-      return 0.0;
-   }
-
-   /**
     * Returns the percent of the step length which will be used to determine the swing waypoints.
     */
    public double[] getSwingWaypointProportions()

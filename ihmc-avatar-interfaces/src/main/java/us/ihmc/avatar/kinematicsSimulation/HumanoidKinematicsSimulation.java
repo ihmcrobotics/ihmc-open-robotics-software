@@ -133,6 +133,7 @@ public class HumanoidKinematicsSimulation
    private InverseDynamicsCommandList inverseDynamicsContactHolderCommandList = new InverseDynamicsCommandList();
    private YoVariableServer yoVariableServer = null;
    private IntraprocessYoVariableLogger intraprocessYoVariableLogger;
+   private JointDesiredOutputListReadOnly jointDesiredOutputList;
 
    public static HumanoidKinematicsSimulation create(DRCRobotModel robotModel, HumanoidKinematicsSimulationParameters kinematicsSimulationParameters)
    {
@@ -297,6 +298,9 @@ public class HumanoidKinematicsSimulation
                                                    managerFactory.createFeedbackControlTemplate(),
                                                    new JointDesiredOutputList(controllerToolbox.getControlledOneDoFJoints()),
                                                    walkingParentRegistry);
+      
+      jointDesiredOutputList = controllerCore.getOutputForLowLevelController();
+      
       walkingController.setControllerCoreOutput(controllerCore.getOutputForHighLevelController());
 
       linearMomentumRateControlModule = new LinearMomentumRateControlModule(centerOfMassStateProvider,
@@ -334,12 +338,20 @@ public class HumanoidKinematicsSimulation
          yoVariableServer = new YoVariableServer(getClass().getSimpleName(), robotModel.getLogModelProvider(), new DataServerSettings(false), 0.01);
          yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), yoGraphicsListRegistry);
          yoVariableServer.start();
+         System.out.println("YoVariableServer Started");
       }
 
       walkingOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, this::processFootstepStatus);
       walkingOutputManager.attachStatusMessageListener(WalkingStatusMessage.class, this::processWalkingStatus);
 
-      controlThread = new PausablePeriodicThread(getClass().getSimpleName(), kinematicsSimulationParameters.getUpdatePeriod(), 5, this::controllerTick);
+      if(kinematicsSimulationParameters.isPeriodicThreadEnabled())
+      {
+         controlThread = new PausablePeriodicThread(getClass().getSimpleName(), kinematicsSimulationParameters.getUpdatePeriod(), 5, this::controllerTick);
+      }
+      else
+      {
+         controlThread = null;
+      }
    }
 
    public RobotConfigurationDataPublisher createRobotConfigurationDataPublisher(String robotName)
@@ -401,6 +413,11 @@ public class HumanoidKinematicsSimulation
 
    public void setRunning(boolean running)
    {
+      if(controlThread == null)
+      {
+         return;
+      }
+      
       if (running && !controlThread.isRunning())
       {
          initialize();
@@ -451,7 +468,7 @@ public class HumanoidKinematicsSimulation
       }
    }
 
-   private void doControl()
+   public void doControl()
    {
       yoTime.add(kinematicsSimulationParameters.getDt());
       fullRobotModel.updateFrames();
@@ -496,6 +513,7 @@ public class HumanoidKinematicsSimulation
       {
          JointDesiredOutputReadOnly jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
          joint.setQdd(jointDesiredOutput.getDesiredAcceleration());
+         joint.setTau(jointDesiredOutput.getDesiredTorque());
       }
 
       integrator.setIntegrationDT(kinematicsSimulationParameters.getDt());
@@ -588,5 +606,15 @@ public class HumanoidKinematicsSimulation
    public FullHumanoidRobotModel getFullRobotModel()
    {
       return fullRobotModel;
+   }
+
+   public JointDesiredOutputListReadOnly getJointDesiredOutputList()
+   {
+      return jointDesiredOutputList;
+   }
+
+   public YoRegistry getYoRegistry()
+   {
+      return registry;
    }
 }
