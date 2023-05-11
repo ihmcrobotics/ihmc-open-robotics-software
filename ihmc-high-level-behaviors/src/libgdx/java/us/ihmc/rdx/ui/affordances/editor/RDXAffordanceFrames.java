@@ -72,21 +72,9 @@ public class RDXAffordanceFrames
       if (ImGui.button(labels.get("ADD") + "##" + lableId))
       {
          activeMenu[0] = this.menu;
-         index++;
-         PoseReferenceFrame frame = new PoseReferenceFrame(index + "Frame", affordanceFrame);
-         frame.setPoseAndUpdate(handPose);
-
-         poseIndices.add(index);
-         poses.add(handPose);
-         poseFrames.add(frame);
-         frameGraphics.add(new RDXReferenceFrameGraphic(0.1, colors.get(colorIndex % colors.size())));
-         colorIndex++;
-         // no hand configuration is set right when you add a new frame
-         selectedFrameConfiguration = null;
+         addFrame(handPose);
          // add an empty spot for the hand configuration
          handConfigurations.add(null);
-         // add a spot for the object transform associated with this frame
-         objectTransforms.add(new RigidBodyTransform(objectTransformToWorld));
          // select the frame you've just added
          selectedIndex = poseIndices.size() - 1;
       }
@@ -147,6 +135,7 @@ public class RDXAffordanceFrames
                frameGraphics.remove(i);
                poseIndices.remove(i);
                handConfigurations.remove(i);
+               objectTransforms.remove(i);
                selectedFrameConfiguration = null;
                selectedIndex = -1;
                activeMenu[0] = RDXActiveAffordanceMenu.NONE;
@@ -172,17 +161,31 @@ public class RDXAffordanceFrames
       }
    }
 
-   public void setHandConfiguration(HandConfiguration configuration)
+   public void addFrame(FramePose3D pose)
    {
-      for (int i = 0; i < poseFrames.size(); i++)
-      {
-         handConfigurations.add(configuration);
-      }
+      index++;
+      PoseReferenceFrame frame = new PoseReferenceFrame(index + "Frame", affordanceFrame);
+      frame.setPoseAndUpdate(pose);
+
+      poseIndices.add(index);
+      poses.add(pose);
+      poseFrames.add(frame);
+      frameGraphics.add(new RDXReferenceFrameGraphic(0.1, colors.get(colorIndex % colors.size())));
+      colorIndex++;
+      // no hand configuration is set right when you add a new frame
+      selectedFrameConfiguration = null;
+      // add a spot for the object transform associated with this frame
+      objectTransforms.add(new RigidBodyTransform(objectTransformToWorld));
    }
 
-   public void addObjectTransform(RigidBodyTransform transformToAdd)
+   public void addObjectTransform(RigidBodyTransform transform)
    {
-      objectTransforms.add(transformToAdd);
+      objectTransforms.add(transform);
+   }
+
+   public void addHandConfiguration(HandConfiguration configuration)
+   {
+         handConfigurations.add(configuration);
    }
 
    public void reset()
@@ -196,6 +199,7 @@ public class RDXAffordanceFrames
       objectTransforms.clear();
       selectedFrameConfiguration = null;
       selectedIndex = -1;
+      index = 0;
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -204,6 +208,11 @@ public class RDXAffordanceFrames
       {
          frameGraphic.getRenderables(renderables, pool);
       }
+   }
+
+   public int getNumberOfFrames()
+   {
+      return poseFrames.size();
    }
 
    public ArrayList<FramePose3D> getPoses()

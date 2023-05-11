@@ -2,7 +2,7 @@
   "name" : "door",
   "actions" : [ {
     "type" : "RDXHandPoseAction",
-    "parentFrame" : "PullDoorLeverHandle",
+    "parentFrame" : "",
     "side" : "right",
     "trajectoryDuration" : 1,
     "x" : -0.5,
@@ -18,13 +18,17 @@
     "m21" : 0.0,
     "m22" : 1.0
   }, {
+    "type" : "RDXHandConfigurationAction",
+    "side" : "right",
+    "grip" : "OPEN"
+  }, {
     "type" : "RDXHandPoseAction",
-    "parentFrame" : "PullDoorLeverHandle",
+    "parentFrame" : "",
     "side" : "right",
     "trajectoryDuration" : 1,
-    "x" : -0.23698581869218177,
-    "y" : -2.220446049250313E-16,
-    "z" : 2.0436256183681638E-19,
+    "x" : -0.5,
+    "y" : 0.0,
+    "z" : 0.0,
     "m00" : 1.0,
     "m01" : 0.0,
     "m02" : 0.0,
@@ -37,40 +41,6 @@
   }, {
     "type" : "RDXHandConfigurationAction",
     "side" : "right",
-    "grip" : "HALF_CLOSE"
-  }, {
-    "type" : "RDXHandPoseAction",
-    "parentFrame" : "PullDoorLeverHandle",
-    "side" : "right",
-    "trajectoryDuration" : 1,
-    "x" : -0.23698581869218238,
-    "y" : -0.15518651860269317,
-    "z" : -5.567423003271171E-20,
-    "m00" : 1.0,
-    "m01" : 0.0,
-    "m02" : 0.0,
-    "m10" : 0.0,
-    "m11" : 1.0,
-    "m12" : 0.0,
-    "m20" : 0.0,
-    "m21" : 0.0,
-    "m22" : 1.0
-  }, {
-    "type" : "RDXHandPoseAction",
-    "parentFrame" : "PullDoorLeverHandle",
-    "side" : "right",
-    "trajectoryDuration" : 1,
-    "x" : -0.23698581869218294,
-    "y" : -0.24590759734231182,
-    "z" : 0.0,
-    "m00" : 1.0,
-    "m01" : 0.0,
-    "m02" : 0.0,
-    "m10" : 0.0,
-    "m11" : 1.0,
-    "m12" : 0.0,
-    "m20" : 0.0,
-    "m21" : 0.0,
-    "m22" : 1.0
+    "grip" : "CRUSH"
   } ]
 }

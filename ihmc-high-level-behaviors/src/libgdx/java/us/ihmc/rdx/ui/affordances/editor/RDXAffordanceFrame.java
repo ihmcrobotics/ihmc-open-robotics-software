@@ -118,9 +118,9 @@ public class RDXAffordanceFrame
       return isPoseSet;
    }
 
-   public void setFrame(PoseReferenceFrame frame)
+   public void setFrame(FramePose3D poseReference)
    {
-      poseFrame.setPoseAndUpdate(frame);
+      poseFrame.setPoseAndUpdate(poseReference);
       pose = new FramePose3D(poseFrame);
       pose.changeFrame(ReferenceFrame.getWorldFrame());
       isPoseSet = true;

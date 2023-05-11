@@ -97,6 +97,7 @@ public class RDXInteractableObject implements RenderableProvider
    public void setInitialPose(RigidBodyTransform transformToWorld)
    {
       initialObjectPose.set(transformToWorld);
+      pose3DGizmo.getTransformToParent().set(initialObjectPose);
    }
 
    public void resetToInitialPose()
