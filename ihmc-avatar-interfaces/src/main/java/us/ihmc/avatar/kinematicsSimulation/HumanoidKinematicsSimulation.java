@@ -413,6 +413,11 @@ public class HumanoidKinematicsSimulation
 
    public void setRunning(boolean running)
    {
+      if(controlThread == null)
+      {
+         return;
+      }
+      
       if (running && !controlThread.isRunning())
       {
          initialize();
