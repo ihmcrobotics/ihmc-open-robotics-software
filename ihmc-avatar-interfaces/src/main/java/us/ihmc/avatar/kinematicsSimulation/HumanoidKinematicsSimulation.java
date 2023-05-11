@@ -607,4 +607,9 @@ public class HumanoidKinematicsSimulation
    {
       return jointDesiredOutputList;
    }
+
+   public YoRegistry getYoRegistry()
+   {
+      return registry;
+   }
 }
