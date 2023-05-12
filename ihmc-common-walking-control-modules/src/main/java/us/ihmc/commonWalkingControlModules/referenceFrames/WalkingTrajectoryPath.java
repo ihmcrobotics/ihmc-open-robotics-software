@@ -68,7 +68,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
  */
 public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
 {
-   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE = true;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final String WALKING_TRAJECTORY_PATH_FRAME_NAME = "walkingTrajectoryPathFrame";
@@ -97,7 +97,9 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
    private final YoFramePoint3D currentPosition = new YoFramePoint3D(namePrefix + "CurrentPosition", worldFrame, registry);
    private final YoDouble currentYaw = new YoDouble(namePrefix + "CurrentYaw", registry);
    private final YoFrameVector3D currentLinearVelocity = new YoFrameVector3D(namePrefix + "CurrentLinearVelocity", worldFrame, registry);
+   private final YoFrameVector3D currentLinearAcceleration = new YoFrameVector3D(namePrefix + "CurrentLinearAcceleration", worldFrame, registry);
    private final YoDouble currentYawRate = new YoDouble(namePrefix + "CurrentYawRate", registry);
+   private final YoDouble currentYawAcceleration = new YoDouble(namePrefix + "CurrentYawAcceleration", registry);
 
    private final YoFrameVector3D initialLinearVelocity = new YoFrameVector3D(namePrefix + "InitialLinearVelocity", worldFrame, registry);
    private final YoDouble initialYawRate = new YoDouble(namePrefix + "InitialYawRate", registry);
@@ -332,16 +334,20 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
          WaypointData firstWaypoint = waypoints.getFirst();
          currentPosition.set(firstWaypoint.position);
          currentLinearVelocity.set(initialLinearVelocity);
+         currentLinearAcceleration.setToZero();
          currentYaw.set(AngleTools.trimAngleMinusPiToPi(firstWaypoint.getYaw()));
          currentYawRate.set(initialYawRate.getValue());
+         currentYawAcceleration.set(0.0);
       }
       else
       {
          trajectoryManager.initialize(initialLinearVelocity, initialYawRate.getValue(), waypoints, isLastWaypointOpen.getValue());
          trajectoryManager.computePosition(currentTime, currentPosition);
          trajectoryManager.computeLinearVelocity(currentTime, currentLinearVelocity);
+         trajectoryManager.computeLinearVelocity(currentTime, currentLinearAcceleration);
          currentYaw.set(AngleTools.trimAngleMinusPiToPi(trajectoryManager.computeYaw(currentTime)));
          currentYawRate.set(trajectoryManager.computeYawRate(currentTime));
+         currentYawAcceleration.set(trajectoryManager.computeYawAcceleration(currentTime));
       }
 
       walkingTrajectoryPathFrame.update();
@@ -607,11 +613,6 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
          positionToPack.setZ(linearSolvers[2].computePosition(time / totalDuration, linearSolutions[2]));
       }
 
-      public double computeYaw(double time)
-      {
-         return yawSolver.computePosition(time / totalDuration, yawSolution);
-      }
-
       public void computeLinearVelocity(double time, Tuple3DBasics velocityToPack)
       {
          velocityToPack.setX(linearSolvers[0].computeVelocity(time / totalDuration, linearSolutions[0]));
@@ -620,9 +621,27 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
          velocityToPack.scale(1.0 / totalDuration);
       }
 
+      public void computeLinearAcceleration(double time, Tuple3DBasics accelerationToPack)
+      {
+         accelerationToPack.setX(linearSolvers[0].computeAcceleration(time / totalDuration, linearSolutions[0]));
+         accelerationToPack.setY(linearSolvers[1].computeAcceleration(time / totalDuration, linearSolutions[1]));
+         accelerationToPack.setZ(linearSolvers[2].computeAcceleration(time / totalDuration, linearSolutions[2]));
+         accelerationToPack.scale(1.0 / (totalDuration * totalDuration));
+      }
+
+      public double computeYaw(double time)
+      {
+         return yawSolver.computePosition(time / totalDuration, yawSolution);
+      }
+
       public double computeYawRate(double time)
       {
          return yawSolver.computeVelocity(time / totalDuration, yawSolution) / totalDuration;
+      }
+
+      public double computeYawAcceleration(double time)
+      {
+         return yawSolver.computeAcceleration(time / totalDuration, yawSolution) / (totalDuration * totalDuration);
       }
    }
 
@@ -650,9 +669,9 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
          return null;
 
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
-      group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D("CurrentZUp", currentPosition, currentZUpViz, 0.25, ColorDefinitions.Blue()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D("CurrentZUp", currentPosition, currentZUpViz, 0.5, ColorDefinitions.Blue()));
       group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D("CurrentHeading", currentPosition, currentHeadingViz, 0.35, ColorDefinitions.Blue()));
-      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPointcloud3D("walkingPath", trajectoryPositionViz.getPositions(), 0.005, ColorDefinitions.Red()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPointcloud3D("walkingPath", trajectoryPositionViz.getPositions(), 0.01, ColorDefinitions.Red()));
       return group;
    }
 }
