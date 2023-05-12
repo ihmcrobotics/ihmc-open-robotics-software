@@ -34,7 +34,7 @@ javafxDependencies {
 missionControlDependencies {
    api("us.ihmc:ihmc-commons:0.32.0")
    api("us.ihmc:log-tools:0.6.3")
-   api("us.ihmc:ihmc-ros2-library:0.22.4")
+   api("us.ihmc:ihmc-ros2-library:0.22.6")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-interfaces:source")
