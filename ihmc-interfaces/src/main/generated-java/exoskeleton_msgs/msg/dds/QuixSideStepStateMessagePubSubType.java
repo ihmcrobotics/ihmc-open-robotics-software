@@ -11,6 +11,18 @@ package exoskeleton_msgs.msg.dds;
 public class QuixSideStepStateMessagePubSubType implements us.ihmc.pubsub.TopicDataType<exoskeleton_msgs.msg.dds.QuixSideStepStateMessage>
 {
    public static final java.lang.String name = "exoskeleton_msgs::msg::dds_::QuixSideStepStateMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "686212cd22ea9e85db1a460a9c834c1a9148403cb604114cadfa51fe6e612020";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

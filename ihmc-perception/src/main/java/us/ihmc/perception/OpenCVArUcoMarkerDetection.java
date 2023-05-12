@@ -317,12 +317,13 @@ public class OpenCVArUcoMarkerDetection
       opencv_objdetect.drawDetectedMarkers(imageForDrawing, rejectedImagePoints);
    }
 
-   public void forEachDetectedID(Consumer<Integer> idConsumer)
+   /**
+    * Get the list of detected IDs for this update.
+    * Synchronize with {@link #getSyncObject()}.
+    */
+   public TIntArrayList getDetectedIDs()
    {
-      for (int i = 0; i < detectedIDs.size(); i++)
-      {
-         idConsumer.accept(detectedIDs.get(i));
-      }
+      return detectedIDs;
    }
 
    public void destroy()
@@ -369,7 +370,7 @@ public class OpenCVArUcoMarkerDetection
     * <pre>
     *    synchronized (arUcoMarkerDetection.getSyncObject())
     *    {
-    *       arUcoMarkerDetection.getIds()
+    *       arUcoMarkerDetection.getIDsMat()
     *       arUcoMarkerDetection.updateMarkerPose(...)
     *       ...
     *    }
@@ -380,7 +381,8 @@ public class OpenCVArUcoMarkerDetection
       return detectionSwapReference;
    }
 
-   public Mat getIds()
+   /** Detected IDs in raw form. Unless needed, use {@link #getDetectedIDs()} instead. */
+   public Mat getIDsMat()
    {
       return detectionSwapReference.getForThreadTwo().getIds();
    }

@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutorService;
 
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -26,7 +27,7 @@ public class JavaFXLivePlanarRegionsGraphic extends PlanarRegionsGraphic
 
    public JavaFXLivePlanarRegionsGraphic(ROS2Node ros2Node, boolean initializeToFlatGround)
    {
-      this(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, initializeToFlatGround);
+      this(ros2Node, PerceptionAPI.LIDAR_REA_REGIONS, initializeToFlatGround);
    }
 
    public JavaFXLivePlanarRegionsGraphic(ROS2Node ros2Node, ROS2Topic<PlanarRegionsListMessage> topic, boolean initializeToFlatGround)

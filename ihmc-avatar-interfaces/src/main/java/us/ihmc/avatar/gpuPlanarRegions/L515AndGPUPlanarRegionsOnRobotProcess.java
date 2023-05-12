@@ -15,6 +15,7 @@ import sensor_msgs.Image;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
@@ -126,10 +127,10 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
 
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_videopub");
 
-      ROS2Topic<BigVideoPacket> depthTopic = ROS2Tools.L515_DEPTH_LARGE;
+      ROS2Topic<BigVideoPacket> depthTopic = PerceptionAPI.L515_DEPTH_LARGE;
       LogTools.info("Publishing ROS 2 depth video: {}", depthTopic);
       ros2DepthVideoPublisher = ROS2Tools.createPublisher(realtimeROS2Node, depthTopic, ROS2QosProfile.BEST_EFFORT());
-      ROS2Topic<BigVideoPacket> debugExtractionTopic = ROS2Tools.L515_DEBUG_EXTRACTION;
+      ROS2Topic<BigVideoPacket> debugExtractionTopic = PerceptionAPI.L515_DEBUG_EXTRACTION;
       LogTools.info("Publishing ROS 2 debug extraction video: {}", debugExtractionTopic);
       ros2DebugExtractionVideoPublisher = ROS2Tools.createPublisher(realtimeROS2Node, debugExtractionTopic, ROS2QosProfile.BEST_EFFORT());
       controllerRegionsPublisher = ROS2Tools.createPublisher(realtimeROS2Node, StepGeneratorAPIDefinition.getTopic(PlanarRegionsListMessage.class, robotModel.getSimpleRobotName()));
@@ -310,7 +311,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
 
             PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
             MessageTools.toMessage(now, planarRegionsListMessage.getLastUpdated());
-            ros2Helper.publish(ROS2Tools.PERSPECTIVE_RAPID_REGIONS, planarRegionsListMessage);
+            ros2Helper.publish(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, planarRegionsListMessage);
             controllerRegionsPublisher.publish(planarRegionsListMessage);
 
             int depthFrameDataSize = l515.getDepthFrameDataSize();

@@ -10,6 +10,7 @@ import org.bytedeco.javacpp.LongPointer;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.CommunicationMode;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -281,7 +282,7 @@ public class PerceptionDataLogger
       if (channels.get(PerceptionLoggerConstants.D435_COLOR_NAME).isEnabled())
       {
          byteArrays.put(PerceptionLoggerConstants.D435_COLOR_NAME, new byte[PerceptionLoggerConstants.FLOAT_BUFFER_SIZE]);
-         var d435VideoSubscription = ros2Helper.subscribe(ROS2Tools.D435_COLOR_IMAGE);
+         var d435VideoSubscription = ros2Helper.subscribe(PerceptionAPI.D435_COLOR_IMAGE);
          d435VideoSubscription.addCallback(this::logColorD435);
          runnablesToStopLogging.addLast(d435VideoSubscription::destroy);
       }
@@ -290,7 +291,7 @@ public class PerceptionDataLogger
       if (channels.get(PerceptionLoggerConstants.D435_DEPTH_NAME).isEnabled())
       {
          byteArrays.put(PerceptionLoggerConstants.D435_DEPTH_NAME, new byte[PerceptionLoggerConstants.FLOAT_BUFFER_SIZE]);
-         var d435DepthSubscription = ros2Helper.subscribe(ROS2Tools.D435_DEPTH_IMAGE);
+         var d435DepthSubscription = ros2Helper.subscribe(PerceptionAPI.D435_DEPTH_IMAGE);
          d435DepthSubscription.addCallback(this::logDepthD435);
          runnablesToStopLogging.addLast(d435DepthSubscription::destroy);
       }
@@ -299,7 +300,7 @@ public class PerceptionDataLogger
       if (channels.get(PerceptionLoggerConstants.L515_DEPTH_NAME).isEnabled())
       {
          byteArrays.put(PerceptionLoggerConstants.L515_DEPTH_NAME, new byte[PerceptionLoggerConstants.FLOAT_BUFFER_SIZE]);
-         var l515DepthSubscription = ros2Helper.subscribe(ROS2Tools.L515_DEPTH_IMAGE);
+         var l515DepthSubscription = ros2Helper.subscribe(PerceptionAPI.L515_DEPTH_IMAGE);
          l515DepthSubscription.addCallback(this::logDepthL515);
          runnablesToStopLogging.addLast(l515DepthSubscription::destroy);
       }
@@ -308,7 +309,7 @@ public class PerceptionDataLogger
       if (channels.get(PerceptionLoggerConstants.L515_COLOR_NAME).isEnabled())
       {
          byteArrays.put(PerceptionLoggerConstants.L515_COLOR_NAME, new byte[PerceptionLoggerConstants.FLOAT_BUFFER_SIZE]);
-         var l515ColorSubscription = ros2Helper.subscribe(ROS2Tools.L515_COLOR_IMAGE);
+         var l515ColorSubscription = ros2Helper.subscribe(PerceptionAPI.L515_COLOR_IMAGE);
          l515ColorSubscription.addCallback(this::logColorL515);
          runnablesToStopLogging.addLast(l515ColorSubscription::destroy);
       }
@@ -317,7 +318,7 @@ public class PerceptionDataLogger
       if (channels.get(PerceptionLoggerConstants.ZED2_COLOR_NAME).isEnabled())
       {
          byteArrays.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, new byte[PerceptionLoggerConstants.FLOAT_BUFFER_SIZE]);
-         var zed2StereoSubscription = ros2Helper.subscribe(ROS2Tools.ZED2_STEREO_COLOR);
+         var zed2StereoSubscription = ros2Helper.subscribe(PerceptionAPI.ZED2_STEREO_COLOR);
          zed2StereoSubscription.addCallback(this::logColorZED2);
          runnablesToStopLogging.addLast(zed2StereoSubscription::destroy);
       }
@@ -327,7 +328,7 @@ public class PerceptionDataLogger
       {
          SampleInfo sampleInfo = new SampleInfo();
          byteArrays.put(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, new byte[PerceptionLoggerConstants.FLOAT_BUFFER_SIZE]);
-         ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.OUSTER_DEPTH_IMAGE, ROS2QosProfile.BEST_EFFORT(), (subscriber) ->
+         ROS2Tools.createCallbackSubscription(realtimeROS2Node, PerceptionAPI.OUSTER_DEPTH_IMAGE, ROS2QosProfile.BEST_EFFORT(), (subscriber) ->
          {
             LogTools.info("Depth Map Received");
 
@@ -342,7 +343,7 @@ public class PerceptionDataLogger
       LogTools.info("MoCap Logging Enabled: " + channels.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).isEnabled());
       if (channels.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).isEnabled())
       {
-         ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.MOCAP_RIGID_BODY, ROS2QosProfile.BEST_EFFORT(), (subscriber) ->
+         ROS2Tools.createCallbackSubscription(realtimeROS2Node, PerceptionAPI.MOCAP_RIGID_BODY, ROS2QosProfile.BEST_EFFORT(), (subscriber) ->
          {
             Pose3D transformMessage = new Pose3D();
             subscriber.takeNextData(transformMessage, new SampleInfo());

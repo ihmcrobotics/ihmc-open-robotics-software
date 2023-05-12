@@ -2,6 +2,7 @@ package us.ihmc.rdx.perception;
 
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -50,7 +51,7 @@ public class RDXSteppableRegionCalculatorDemo
       ROS2Node ros2Node = ROS2Tools.createROS2Node(ros2CommunicationMode.getPubSubImplementation(), "simulation_ui_realtime");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
-      heightMap = new RemoteHeightMapUpdater(ReferenceFrame::getWorldFrame, realtimeRos2Node);
+      heightMap = new RemoteHeightMapUpdater("", ReferenceFrame::getWorldFrame, realtimeRos2Node);
       heightMap.getParameters().setMaxZ(1.5);
 
       heightMapUI = new RDXRemoteHeightMapPanel(ros2Helper);
@@ -98,7 +99,7 @@ public class RDXSteppableRegionCalculatorDemo
 
             steppableRegionsUI.getEnabled().set(true);
 
-            new IHMCROS2Callback<>(ros2Node, ROS2Tools.HEIGHT_MAP_OUTPUT, message ->
+            new IHMCROS2Callback<>(ros2Node, PerceptionAPI.HEIGHT_MAP_OUTPUT, message ->
             {
                heightMapVisualizer.acceptHeightMapMessage(message);
                heightMapUI.acceptHeightMapMessage(message);
@@ -131,7 +132,7 @@ public class RDXSteppableRegionCalculatorDemo
                if (nativesLoadedActivator.isNewlyActivated())
                {
                   ousterLidarSimulator = RDXSimulatedSensorFactory.createOusterLidar(ousterPoseGizmo.getGizmoFrame(), () -> 0L);
-                  ousterLidarSimulator.setupForROS2PointCloud(ros2Node, ROS2Tools.OUSTER_LIDAR_SCAN);
+                  ousterLidarSimulator.setupForROS2PointCloud(ros2Node, PerceptionAPI.OUSTER_LIDAR_SCAN);
                   ousterLidarSimulator.setSensorEnabled(true);
                   ousterLidarSimulator.setRenderPointCloudDirectly(true);
                   ousterLidarSimulator.setPublishPointCloudROS2(true);
@@ -139,7 +140,7 @@ public class RDXSteppableRegionCalculatorDemo
 
                   RDXROS2PointCloudVisualizer ousterPointCloudVisualizer = new RDXROS2PointCloudVisualizer("Ouster Point Cloud",
                                                                                                            ros2Node,
-                                                                                                           ROS2Tools.OUSTER_LIDAR_SCAN);
+                                                                                                           PerceptionAPI.OUSTER_LIDAR_SCAN);
                   ousterPointCloudVisualizer.setSubscribed(true);
                   globalVisualizersUI.addVisualizer(ousterPointCloudVisualizer);
 

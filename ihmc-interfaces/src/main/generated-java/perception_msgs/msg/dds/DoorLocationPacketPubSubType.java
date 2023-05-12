@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class DoorLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.DoorLocationPacket>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::DoorLocationPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "c3249c7a46e3c9ffb7377f61bf886ec032a7aeab854683c41ccf56e1a67aff34";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

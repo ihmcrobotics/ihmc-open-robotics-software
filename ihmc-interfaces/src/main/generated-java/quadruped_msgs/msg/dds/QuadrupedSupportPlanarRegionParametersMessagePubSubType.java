@@ -11,6 +11,18 @@ package quadruped_msgs.msg.dds;
 public class QuadrupedSupportPlanarRegionParametersMessagePubSubType implements us.ihmc.pubsub.TopicDataType<quadruped_msgs.msg.dds.QuadrupedSupportPlanarRegionParametersMessage>
 {
    public static final java.lang.String name = "quadruped_msgs::msg::dds_::QuadrupedSupportPlanarRegionParametersMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "5c2e76d111edc752d0f71524e20d04d6f78adab3d5f2fc5dd0572f738f30d8ee";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

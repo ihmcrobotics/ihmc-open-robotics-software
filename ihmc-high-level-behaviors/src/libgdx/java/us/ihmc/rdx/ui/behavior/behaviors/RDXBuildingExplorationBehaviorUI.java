@@ -10,6 +10,7 @@ import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehavior;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorMode;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorParameters;
 import us.ihmc.behaviors.tools.BehaviorHelper;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -53,7 +54,7 @@ public class RDXBuildingExplorationBehaviorUI extends RDXBehaviorUIInterface
       addChild(traverseStairsUI);
 
       helper.subscribeViaCallback(Mode, mode -> this.mode = mode);
-      helper.subscribeToPlanarRegionsViaCallback(ROS2Tools.LIDAR_REA_REGIONS, regions ->
+      helper.subscribeToPlanarRegionsViaCallback(PerceptionAPI.LIDAR_REA_REGIONS, regions ->
       {
          if (regions != null)
             planarRegionsGraphic.generateMeshesAsync(regions);

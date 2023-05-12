@@ -1,10 +1,10 @@
 {
   "title" : "HeightMapFilterParameters",
-  "Outlier cell height reset epsilon" : [0.04, "If a single cell is higher than all its neighbors by this amount, that cell is labeled an outlier and removed."],
-  "Min neighbors to determine outliers" : [3, "The number of occupied neighbor cells to allow determining if a cell is an outlier."],
-  "Min neighbors at same height for valid" : [2, "Min neighboring cells at the same height to determine that a cell is not an outlier."],
-  "Hole proximity threshold" : [3, "Number of cells in a direction to search for data to fill in holes."],
+  "Outlier cell height reset epsilon" : [ 0.04, "If a single cell is higher than all its neighbors by this amount, that cell is labeled an outlier and removed." ],
+  "Min neighbors to determine outliers" : [ 3, "The number of occupied neighbor cells to allow determining if a cell is an outlier." ],
+  "Min neighbors at same height for valid" : [ 2, "Min neighboring cells at the same height to determine that a cell is not an outlier." ],
+  "Hole proximity threshold" : [ 3, "Number of cells in a direction to search for data to fill in holes." ],
   "Estimate ground height" : true,
-  "Fill holes" :  true,
+  "Fill holes" : true,
   "Remove outlier cells" : true
 }

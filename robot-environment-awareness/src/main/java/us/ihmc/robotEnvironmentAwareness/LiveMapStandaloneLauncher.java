@@ -2,6 +2,7 @@ package us.ihmc.robotEnvironmentAwareness;
 
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.messager.Messager;
@@ -42,7 +43,7 @@ public class LiveMapStandaloneLauncher extends ApplicationNoModule
       messager = new SharedMemoryJavaFXMessager(LiveMapModuleAPI.API);
       messager.startMessager();
       
-      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, ROS2Tools.REA_NODE_NAME);
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, PerceptionAPI.REA_NODE_NAME);
 
       if (launchUI)
          ui = LiveMapUI.createIntraprocessUI(messager, primaryStage);

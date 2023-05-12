@@ -16,6 +16,7 @@ import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -102,7 +103,7 @@ public class SLAMModule implements PerceptionModule
 
    public SLAMModule(Messager messager, File configurationFile)
    {
-      this(ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), messager, configurationFile, new RigidBodyTransform(), true);
+      this(ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, PerceptionAPI.REA_NODE_NAME), messager, configurationFile, new RigidBodyTransform(), true);
    }
 
    public SLAMModule(ROS2Node ros2Node, Messager messager, File configurationFile)
@@ -125,10 +126,10 @@ public class SLAMModule implements PerceptionModule
 
       // TODO: Check name space and fix. Suspected atlas sensor suite and publisher.
       ROS2Tools.createCallbackSubscription(ros2Node,
-                                           ROS2Tools.MULTISENSE_STEREO_POINT_CLOUD,
+                                           PerceptionAPI.MULTISENSE_STEREO_POINT_CLOUD,
                                            this::handlePointCloud);
       ROS2Tools.createCallbackSubscription(ros2Node,
-                                           ROS2Tools.D435_POINT_CLOUD,
+                                           PerceptionAPI.D435_POINT_CLOUD,
                                            this::handlePointCloud);
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            REAStateRequestMessage.class,

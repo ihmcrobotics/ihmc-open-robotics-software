@@ -7,6 +7,7 @@ import us.ihmc.avatar.environments.PhaseOneDemoEnvironment.StartingLocation;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.avatar.simulationStarter.DRCSimulationTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.behaviors.tools.PlanarRegionSLAMMapper;
 import us.ihmc.behaviors.tools.perception.MultisenseHeadStereoSimulator;
@@ -113,7 +114,7 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
       PlanarRegionsList environmentWithoutDebrisRegions = environment.getEnvironmentRegions();
       PlanarRegionsList environmentWithDebrisRegions = environment.getEnvironmentWithDebrisRegions();
 
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(COMMUNICATION_MODE_ROS2.getPubSubImplementation(), ROS2Tools.REA_NODE_NAME);
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(COMMUNICATION_MODE_ROS2.getPubSubImplementation(), PerceptionAPI.REA_NODE_NAME);
 
       PlanarRegionSLAMMapper realsensePlanarRegionSLAM = new PlanarRegionSLAMMapper();
 
@@ -125,12 +126,12 @@ public class AtlasBuildingExplorationDemo extends AtlasSimulationBasics
 
       // might be a weird delay with threads at 0.5 hz depending on each other
       double period = 3.0;
-      new PeriodicPlanarRegionPublisher(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, period, () ->
+      new PeriodicPlanarRegionPublisher(ros2Node, PerceptionAPI.LIDAR_REA_REGIONS, period, () ->
       {
          multisense.setMap(ignoreDebris.get() ? environmentWithoutDebrisRegions : environmentWithDebrisRegions);
          return multisense.computeRegions();
       }).start();
-      new PeriodicPlanarRegionPublisher(ros2Node, ROS2Tools.REALSENSE_SLAM_REGIONS, period, () ->
+      new PeriodicPlanarRegionPublisher(ros2Node, PerceptionAPI.REALSENSE_SLAM_REGIONS, period, () ->
       {
          boolean ignoreDebrisLocal = ignoreDebris.get();
          if (ignoreDebrisLocal != lastIgnoreDebrisValueUsedByRealsense)

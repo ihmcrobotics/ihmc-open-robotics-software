@@ -1,6 +1,5 @@
 package us.ihmc.communication;
 
-import com.eprosima.xmlschemas.fastrtps_profiles.HistoryQosKindType;
 import com.eprosima.xmlschemas.fastrtps_profiles.ReliabilityQosKindType;
 import controller_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
@@ -14,9 +13,10 @@ import toolbox_msgs.msg.dds.*;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.pubsub.Domain;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.*;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class ROS2Tools
 {
@@ -34,10 +33,6 @@ public class ROS2Tools
 
    public static final String HUMANOID_CONTROLLER_NODE_NAME = "ihmc_controller";
    public static final String HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME = "kinematics_ihmc_controller";
-   public static final String REA_NODE_NAME = "REA_module";
-   public static final String GPU_REA_NODE_NAME = "GPU_based_REA_module";
-   public static final String MAPPING_MODULE_NODE_NAME = "mapping_module";
-   public static final String STEREO_REA_NODE_NAME = "SREA_module";
    public static final String LLAMA_NODE_NAME = "llama_network";
    public static final String FOOTSTEP_PLANNER_NODE_NAME = "ihmc_multi_stage_footstep_planning_module";
    public static final String BEHAVIOR_MODULE_NODE_NAME = "behavior_module";
@@ -47,9 +42,6 @@ public class ROS2Tools
    public static final String FOOTSTEP_PLANNER_MODULE_NAME = "toolbox/footstep_plan";
    public static final String CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME = "toolbox/continuous_planning";
    public static final String FOOTSTEP_POSTPROCESSING_TOOLBOX_MODULE_NAME = "toolbox/footstep_postprocessing";
-   public static final String HEIGHT_QUADTREE_TOOLBOX_MODULE_NAME = "toolbox/height_quad_tree";
-   public static final String FIDUCIAL_MODULE_NAME = "toolbox/fiducial_detector";
-   public static final String OBJECT_DETECTOR_MODULE_NAME = "toolbox/object_detector";
 
    public static final String KINEMATICS_TOOLBOX_MODULE_NAME = "toolbox/ik";
    public static final String KINEMATICS_PLANNING_TOOLBOX_MODULE_NAME = "toolbox/ik_planning";
@@ -62,23 +54,9 @@ public class ROS2Tools
    public static final String STEP_TELEOP_TOOLBOX_MODULE_NAME = "toolbox/teleop/step_teleop";
    public static final String DIRECTIONAL_CONTROL_TOOLBOX_MODULE_NAME = "/toolbox/directional_control";
    public static final String QUADRUPED_SUPPORT_REGION_PUBLISHER_MODULE_NAME = "quadruped_support_region_publisher";
-   public static final String BIPED_SUPPORT_REGION_PUBLISHER_MODULE_NAME = "bipedal_support_region_publisher";
-   public static final String BEHAVIOR_MODULE_NAME = "behavior";
-   public static final String REA_MODULE_NAME = "rea";
-   public static final String MAPPING_MODULE_NAME = "map";
-   public static final String PERCEPTION_MODULE_NAME = "perception";
-   public static final String REALSENSE_SLAM_MODULE_NAME = "slam";
-   public static final String MAPSENSE_MODULE_NAME = "mapsense";
-   public static final String HEIGHT_MAP_MODULE_NAME = "height_map";
 
-   public static final String REA_CUSTOM_REGION_NAME = "custom_region";
-   public static final String D435_NAME = "d435";
-   public static final String ZED2_NAME = "zed2";
-   public static final String L515_NAME = "l515";
-   public static final String D455_NAME = "d455";
-   public static final String BLACKFLY_NAME = "blackfly";
-   public static final String T265_NAME = "t265";
-   public static final String MULTISENSE_NAME = "multisense";
+   public static final String BEHAVIOR_MODULE_NAME = "behavior";
+
    public static final String INPUT = ROS2Topic.INPUT;
    public static final String OUTPUT = ROS2Topic.OUTPUT;
 
@@ -88,14 +66,6 @@ public class ROS2Tools
    public static final ROS2Topic<?> FOOTSTEP_PLANNER = IHMC_ROOT.withModule(FOOTSTEP_PLANNER_MODULE_NAME);
    public static final ROS2Topic<?> CONTINUOUS_PLANNING_TOOLBOX = IHMC_ROOT.withModule(CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME);
    public static final ROS2Topic<?> FOOTSTEP_POSTPROCESSING_TOOLBOX = IHMC_ROOT.withModule(FOOTSTEP_POSTPROCESSING_TOOLBOX_MODULE_NAME);
-   public static final ROS2Topic<?> HEIGHT_QUADTREE_TOOLBOX = IHMC_ROOT.withModule(HEIGHT_QUADTREE_TOOLBOX_MODULE_NAME);
-   public static final ROS2Topic<?> FIDUCIAL_DETECTOR_TOOLBOX = IHMC_ROOT.withModule(FIDUCIAL_MODULE_NAME);
-   public static final ROS2Topic<?> FIDUCIAL_DETECTOR_TOOLBOX_INPUT = FIDUCIAL_DETECTOR_TOOLBOX.withInput();
-   public static final ROS2Topic<?> FIDUCIAL_DETECTOR_TOOLBOX_OUTPUT = FIDUCIAL_DETECTOR_TOOLBOX.withOutput();
-
-   public static final ROS2Topic<?> OBJECT_DETECTOR_TOOLBOX = IHMC_ROOT.withModule(OBJECT_DETECTOR_MODULE_NAME);
-   public static final ROS2Topic<?> OBJECT_DETECTOR_TOOLBOX_INPUT = OBJECT_DETECTOR_TOOLBOX.withInput();
-   public static final ROS2Topic<?> OBJECT_DETECTOR_TOOLBOX_OUTPUT = OBJECT_DETECTOR_TOOLBOX.withOutput();
 
    public static final ROS2Topic<?> KINEMATICS_TOOLBOX = IHMC_ROOT.withModule(KINEMATICS_TOOLBOX_MODULE_NAME);
    public static final ROS2Topic<?> KINEMATICS_PLANNING_TOOLBOX = IHMC_ROOT.withModule(KINEMATICS_PLANNING_TOOLBOX_MODULE_NAME);
@@ -107,85 +77,14 @@ public class ROS2Tools
    public static final ROS2Topic<?> STEP_TELEOP_TOOLBOX = IHMC_ROOT.withModule(STEP_TELEOP_TOOLBOX_MODULE_NAME);
    public static final ROS2Topic<?> DIRECTIONAL_CONTROL_TOOLBOX = IHMC_ROOT.withModule(DIRECTIONAL_CONTROL_TOOLBOX_MODULE_NAME);
    public static final ROS2Topic<?> QUADRUPED_SUPPORT_REGION_PUBLISHER = IHMC_ROOT.withModule(QUADRUPED_SUPPORT_REGION_PUBLISHER_MODULE_NAME);
-   public static final ROS2Topic<?> BIPED_SUPPORT_REGION_PUBLISHER = IHMC_ROOT.withModule(BIPED_SUPPORT_REGION_PUBLISHER_MODULE_NAME);
+
    public static final ROS2Topic<?> BEHAVIOR_MODULE = IHMC_ROOT.withModule(BEHAVIOR_MODULE_NAME);
-   public static final ROS2Topic<?> REA = IHMC_ROOT.withModule(REA_MODULE_NAME);
-   public static final ROS2Topic<?> MAPPING_MODULE = IHMC_ROOT.withModule(MAPPING_MODULE_NAME);
-   public static final ROS2Topic<?> PERCEPTION_MODULE = IHMC_ROOT.withModule(PERCEPTION_MODULE_NAME);
-   public static final ROS2Topic<?> REALSENSE_SLAM_MODULE = IHMC_ROOT.withModule(REALSENSE_SLAM_MODULE_NAME);
-   public static final ROS2Topic<?> MAPSENSE_MODULE = IHMC_ROOT.withModule(MAPPING_MODULE_NAME);
-   public static final ROS2Topic<?> HEIGHT_MAP_MODULE = IHMC_ROOT.withModule(HEIGHT_MAP_MODULE_NAME);
+
+   public static final ROS2Topic<Empty> KINEMATICS_SIMULATION_HEARTBEAT
+         = IHMC_ROOT.withModule("kinematics_simulation").withOutput().withSuffix("heartbeat").withType(Empty.class);
 
    public static final ROS2Topic<TextToSpeechPacket> TEXT_STATUS = IHMC_ROOT.withTypeName(TextToSpeechPacket.class);
 
-   public static final ROS2Topic<?> REA_SUPPORT_REGIONS = REA.withSuffix(REA_CUSTOM_REGION_NAME);
-   public static final ROS2Topic<PlanarRegionsListMessage> REA_SUPPORT_REGIONS_INPUT = REA.withRobot(null)
-                                                                                          .withInput()
-                                                                                          .withType(PlanarRegionsListMessage.class)
-                                                                                          .withSuffix(ROS2Tools.REA_CUSTOM_REGION_NAME);
-   public static final ROS2Topic<REAStateRequestMessage> REA_STATE_REQUEST = REA.withInput().withTypeName(REAStateRequestMessage.class);
-   public static final ROS2Topic<ConcaveHullFactoryParametersStringMessage> CONCAVE_HULL_FACTORY_PARAMETERS = REA.withInput()
-                                                                                                                 .withType(ConcaveHullFactoryParametersStringMessage.class)
-                                                                                                                 .withSuffix("concave_hull_factory_parameters");
-   public static final ROS2Topic<PolygonizerParametersStringMessage> POLYGONIZER_PARAMETERS = REA.withInput()
-                                                                                                 .withType(PolygonizerParametersStringMessage.class)
-                                                                                                 .withSuffix("polygonizer_parameters");
-
-   public static final ROS2Topic<VideoPacket> VIDEO = IHMC_ROOT.withTypeName(VideoPacket.class);
-   public static final ROS2Topic<BigVideoPacket> BIG_VIDEO = IHMC_ROOT.withTypeName(BigVideoPacket.class);
-   public static final ROS2Topic<VideoPacket> D435_VIDEO = IHMC_ROOT.withModule(D435_NAME).withType(VideoPacket.class).withSuffix("video");
-   public static final ROS2Topic<ImageMessage> D435_COLOR_IMAGE = IHMC_ROOT.withModule(D435_NAME).withType(ImageMessage.class).withSuffix("video");
-   public static final ROS2Topic<ImageMessage> D435_DEPTH_IMAGE = IHMC_ROOT.withModule(D435_NAME).withType(ImageMessage.class).withSuffix("depth");
-   public static final ROS2Topic<VideoPacket> D435_DEPTH = IHMC_ROOT.withModule(D435_NAME).withType(VideoPacket.class).withSuffix("depth");
-   public static final ROS2Topic<VideoPacket> L515_VIDEO = IHMC_ROOT.withModule(L515_NAME).withType(VideoPacket.class).withSuffix("video");
-   public static final ROS2Topic<ImageMessage> L515_COLOR_IMAGE = IHMC_ROOT.withModule(L515_NAME).withTypeName(ImageMessage.class).withSuffix("color");
-   public static final ROS2Topic<BigVideoPacket> L515_DEPTH_LARGE = IHMC_ROOT.withModule(L515_NAME).withType(BigVideoPacket.class).withSuffix("depth");
-   public static final ROS2Topic<VideoPacket> L515_DEPTH = IHMC_ROOT.withModule(L515_NAME).withType(VideoPacket.class).withSuffix("depth");
-   public static final ROS2Topic<ImageMessage> L515_DEPTH_IMAGE = IHMC_ROOT.withModule(L515_NAME).withTypeName(ImageMessage.class).withSuffix("depth");
-   public static final ROS2Topic<ImageMessage> D455_DEPTH_IMAGE = IHMC_ROOT.withModule(D455_NAME).withTypeName(ImageMessage.class).withSuffix("depth");
-   public static final ROS2Topic<ImageMessage> D455_COLOR_IMAGE = IHMC_ROOT.withModule(D455_NAME).withTypeName(ImageMessage.class).withSuffix("color");
-   public static final ROS2Topic<ImageMessage> TERRAIN_DEBUG_IMAGE
-         = IHMC_ROOT.withModule(L515_NAME).withType(ImageMessage.class).withSuffix("terrain_debug_image");
-   public static final ROS2Topic<BigVideoPacket> L515_DEBUG_EXTRACTION = IHMC_ROOT.withModule(L515_NAME)
-                                                                                  .withType(BigVideoPacket.class)
-                                                                                  .withSuffix("debug_extraction");
-   public static final SideDependentList<ROS2Topic<BigVideoPacket>> BLACKFLY_VIDEO = new SideDependentList<>(IHMC_ROOT.withModule(BLACKFLY_NAME + "left")
-                                                                                                                      .withType(BigVideoPacket.class)
-                                                                                                                      .withSuffix("video"),
-                                                                                                             IHMC_ROOT.withModule(BLACKFLY_NAME + "right")
-                                                                                                                      .withType(BigVideoPacket.class)
-                                                                                                                      .withSuffix("video"));
-   public static final SideDependentList<ROS2Topic<ImageMessage>> BLACKFLY_FISHEYE_COLOR_IMAGE
-         = new SideDependentList<>(IHMC_ROOT.withModule(BLACKFLY_NAME + "_fisheye")
-                                            .withType(ImageMessage.class)
-                                            .withSuffix("left"),
-                                   IHMC_ROOT.withModule(BLACKFLY_NAME + "_fisheye")
-                                            .withType(ImageMessage.class)
-                                            .withSuffix("right"));
-   public static final ROS2Topic<BigVideoPacket> OUSTER_DEPTH_LARGE = IHMC_ROOT.withModule("ouster").withType(BigVideoPacket.class).withSuffix("depth");
-   public static final ROS2Topic<VideoPacket> OUSTER_DEPTH = IHMC_ROOT.withModule("ouster").withType(VideoPacket.class).withSuffix("depth");
-   public static final ROS2Topic<ImageMessage> OUSTER_DEPTH_IMAGE = IHMC_ROOT.withModule("ouster").withTypeName(ImageMessage.class).withSuffix("depth");
-   public static final ROS2Topic<BigVideoPacket> BIG_VIDEO_TEST = IHMC_ROOT.withModule(BLACKFLY_NAME).withType(BigVideoPacket.class).withSuffix("test");
-
-   public static final ROS2Topic<ImageMessage> ZED2_STEREO_COLOR = IHMC_ROOT.withModule(ZED2_NAME).withType(ImageMessage.class).withSuffix("color_stereo");
-
-   public static final ROS2Topic<LidarScanMessage> MULTISENSE_LIDAR_SCAN = IHMC_ROOT.withTypeName(LidarScanMessage.class);
-   public static final ROS2Topic<FusedSensorHeadPointCloudMessage> FUSED_SENSOR_HEAD_POINT_CLOUD = IHMC_ROOT.withTypeName(FusedSensorHeadPointCloudMessage.class);
-   public static final ROS2Topic<FusedSensorHeadPointCloudMessage> D435_COLORED_POINT_CLOUD = IHMC_ROOT.withType(FusedSensorHeadPointCloudMessage.class)
-                                                                                                       .withSuffix("d435_color");
-   public static final ROS2Topic<FusedSensorHeadPointCloudMessage> OUSTER_POINT_CLOUD = IHMC_ROOT.withType(FusedSensorHeadPointCloudMessage.class)
-                                                                                                 .withSuffix("ouster");
-   public static final ROS2Topic<LidarScanMessage> OUSTER_LIDAR_SCAN = IHMC_ROOT.withType(LidarScanMessage.class).withSuffix("ouster");
-   public static final ROS2Topic<StereoVisionPointCloudMessage> MULTISENSE_LIDAR_POINT_CLOUD = IHMC_ROOT.withModule(MULTISENSE_NAME)
-                                                                                                        .withType(StereoVisionPointCloudMessage.class)
-                                                                                                        .withSuffix("pointcloud");
-   public static final ROS2Topic<StereoVisionPointCloudMessage> MULTISENSE_STEREO_POINT_CLOUD = IHMC_ROOT.withTypeName(StereoVisionPointCloudMessage.class);
-
-   public static final ROS2Topic<StereoVisionPointCloudMessage> D435_POINT_CLOUD = IHMC_ROOT.withSuffix(D435_NAME)
-                                                                                            .withTypeName(StereoVisionPointCloudMessage.class);
-   public static final ROS2Topic<StereoVisionPointCloudMessage> L515_POINT_CLOUD = IHMC_ROOT.withSuffix(L515_NAME)
-                                                                                            .withTypeName(StereoVisionPointCloudMessage.class);
-   public static final ROS2Topic<StampedPosePacket> T265_POSE = IHMC_ROOT.withSuffix(T265_NAME).withTypeName(StampedPosePacket.class);
    private static final ROS2Topic<RigidBodyTransformMessage> TRANSFORM_TUNING_BASE_TOPIC = IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class)
                                                                                                     .withModule("transform_tuning");
    public static final ROS2IOTopicPair<RigidBodyTransformMessage> OBJECT_DETECTION_CAMERA_TO_PARENT_TUNING
@@ -197,43 +96,6 @@ public class ROS2Tools
    public static final ROS2IOTopicPair<RigidBodyTransformMessage> OUSTER_TO_CHEST_TUNING
          = new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix("ouster_to_chest"));
 
-   /** MoCap Topics */
-   public static final ROS2Topic<Pose3D> MOCAP_RIGID_BODY = IHMC_ROOT.withTypeName(Pose3D.class)
-                                                                     .withModule("frame_update")
-                                                                     .withSuffix("mocap");
-
-   /** Output regions from Lidar (Multisense) from REA */
-   public static final ROS2Topic<PlanarRegionsListMessage> LIDAR_REA_REGIONS = REA.withOutput().withTypeName(PlanarRegionsListMessage.class);
-   public static final ROS2Topic<PlanarRegionsListMessage> REALSENSE_REA = ROS2Tools.REA.withOutput()
-                                                                                        .withPrefix("stereo")
-                                                                                        .withTypeName(PlanarRegionsListMessage.class);
-   public static final ROS2Topic<PlanarRegionsListMessage> BIPEDAL_SUPPORT_REGIONS = REA_SUPPORT_REGIONS.withTypeName(PlanarRegionsListMessage.class)
-                                                                                                        .withInput();
-   /** Output regions from Atlas Realsense SLAM module */
-   public static final ROS2Topic<PlanarRegionsListMessage> REALSENSE_SLAM_REGIONS = REALSENSE_SLAM_MODULE.withOutput()
-                                                                                                         .withTypeName(PlanarRegionsListMessage.class);
-   public static final ROS2Topic<PlanarRegionsListMessage> MAPSENSE_REGIONS = MAPSENSE_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
-   /** Rapid regions are generated in Java, come with epoch second and nano timestamp, are pre-filtered for body collisions, and in world frame.
-    *  They are prre filtered using the polygonizer, segmentation, and concave hull filtering parameters. There is no need for delay compensation. */
-
-   public static final ROS2Topic<FramePlanarRegionsListMessage> PERSPECTIVE_RAPID_REGIONS_WITH_POSE = MAPSENSE_MODULE.withOutput().withTypeName(FramePlanarRegionsListMessage.class);
-   public static final ROS2Topic<PlanarRegionsListMessage> PERSPECTIVE_RAPID_REGIONS = PERCEPTION_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
-
-   public static final ROS2Topic<FramePlanarRegionsListMessage> SPHERICAL_RAPID_REGIONS_WITH_POSE = MAPSENSE_MODULE.withOutput().withTypeName(FramePlanarRegionsListMessage.class);
-   public static final ROS2Topic<PlanarRegionsListMessage> SPHERICAL_RAPID_REGIONS = PERCEPTION_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
-
-   /**
-    * Rapid regions are generated in Java, come with epoch second and nano timestamp, are pre-filtered
-    * for body collisions, and in world frame. They are prre filtered using the polygonizer,
-    * segmentation, and concave hull filtering parameters. There is no need for delay compensation.
-    */
-   public static final ROS2Topic<PlanarRegionsListMessage> RAPID_REGIONS = PERCEPTION_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
-   /** Output regions from experimental mapping module which assembles the above outputs */
-   public static final ROS2Topic<PlanarRegionsListMessage> MAP_REGIONS = MAPPING_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
-   public static final ROS2Topic<Float64> MAPSENSE_REGIONS_DELAY_OFFSET = MAPSENSE_MODULE.withType(Float64.class).withSuffix("delay_offset");
-   public static final ROS2Topic<HeightMapMessage> HEIGHT_MAP_OUTPUT = HEIGHT_MAP_MODULE.withOutput().withTypeName(HeightMapMessage.class);
-   public static final ROS2Topic<HeightMapStateRequestMessage> HEIGHT_MAP_STATE_REQUEST = HEIGHT_MAP_MODULE.withOutput().withTypeName(HeightMapStateRequestMessage.class);
-
    public static final ROS2Topic<?> BEHAVIOR_MODULE_INPUT = ROS2Tools.BEHAVIOR_MODULE.withInput();
    public static final ROS2Topic<?> BEHAVIOR_MODULE_OUTPUT = ROS2Tools.BEHAVIOR_MODULE.withOutput();
    private static final ROS2Topic<BehaviorControlModePacket> BEHAVIOR_CONTROL_MODE = BEHAVIOR_MODULE_INPUT.withTypeName(BehaviorControlModePacket.class);
@@ -242,24 +104,15 @@ public class ROS2Tools
    private static final ROS2Topic<HandDesiredConfigurationMessage> HAND_CONFIGURATION = HUMANOID_CONTROLLER.withInput()
                                                                                                            .withTypeName(HandDesiredConfigurationMessage.class);
    private static final ROS2Topic<HandJointAnglePacket> HAND_JOINT_ANGLES = HUMANOID_CONTROLLER.withOutput().withTypeName(HandJointAnglePacket.class);
-   private static final ROS2Topic<BipedalSupportPlanarRegionParametersMessage> BIPEDAL_SUPPORT_REGION_PARAMETERS = BIPED_SUPPORT_REGION_PUBLISHER.withInput()
-                                                                                                                                                 .withType(BipedalSupportPlanarRegionParametersMessage.class);
 
    public static final ROS2Topic<Float64> BOX_MASS = IHMC_ROOT.withSuffix("box_mass").withType(Float64.class);
 
-   public static final ROS2Topic<Empty> PUBLISH_LIDAR_SCAN = PERCEPTION_MODULE.withSuffix("publish_lidar_scan").withType(Empty.class);
-   public static final ROS2Topic<Empty> PUBLISH_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("publish_height_map").withType(Empty.class);
-
    public static final ROS2Topic<SystemAvailableMessage> SYSTEM_AVAILABLE = IHMC_ROOT.withModule("mission_control").withType(SystemAvailableMessage.class);
 
-   public static final ROS2Topic<ArUcoMarkerPoses> ARUCO_MARKER_POSES = PERCEPTION_MODULE.withType(ArUcoMarkerPoses.class).withSuffix("aruco_marker_poses");
-
-   public static final Function<String, String> NAMED_BY_TYPE = typeName -> typeName;
-
-   public static ROS2Topic<BipedalSupportPlanarRegionParametersMessage> getBipedalSupportRegionParametersTopic(String robotName)
+   public final static ExceptionHandler RUNTIME_EXCEPTION = e ->
    {
-      return BIPEDAL_SUPPORT_REGION_PARAMETERS.withRobot(robotName);
-   }
+      throw new RuntimeException(e);
+   };
 
    public static ROS2Topic<HandDesiredConfigurationMessage> getHandConfigurationTopic(String robotName)
    {
@@ -269,11 +122,6 @@ public class ROS2Tools
    public static ROS2Topic<HandJointAnglePacket> getHandJointAnglesTopic(String robotName)
    {
       return HAND_JOINT_ANGLES.withRobot(robotName);
-   }
-
-   public static ROS2Topic<DoorLocationPacket> getDoorLocationTopic(String robotName)
-   {
-      return OBJECT_DETECTOR_TOOLBOX_OUTPUT.withRobot(robotName).withTypeName(DoorLocationPacket.class);
    }
 
    public static ROS2Topic<BehaviorControlModePacket> getBehaviorControlModeTopic(String robotName)
@@ -385,6 +233,12 @@ public class ROS2Tools
       return typeNamedTopic(Empty.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
    }
 
+   public static ROS2Topic<SystemServiceLogRefreshMessage> getSystemServiceLogRefreshTopic(UUID instanceId)
+   {
+      String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
+      return typeNamedTopic(SystemServiceLogRefreshMessage.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
+   }
+
    /**
     * Get the system service status QOS profile for Mission Control
     * @return the ROS2QosProfile with history
@@ -392,21 +246,15 @@ public class ROS2Tools
    public static ROS2QosProfile getSystemServiceStatusQosProfile()
    {
       ROS2QosProfile profile = new ROS2QosProfile();
-      profile.setReliability(ReliabilityQosKindType.BEST_EFFORT);
+      profile.setReliability(ReliabilityQosKindType.RELIABLE);
       return profile;
    }
-
-   public final static ExceptionHandler RUNTIME_EXCEPTION = e ->
-   {
-      throw new RuntimeException(e);
-   };
 
    public final static String NAMESPACE = "/us/ihmc"; // ? no idea what this does
 
    private static final RTPSCommunicationFactory FACTORY = new RTPSCommunicationFactory();
    private static final int DOMAIN_ID = FACTORY.getDomainId();
    private static final InetAddress ADDRESS_RESTRICTION = FACTORY.getAddressRestriction();
-   private static final ROS2Distro ROS2_DISTRO = ROS2Distro.fromEnvironment();
 
    /**
     * Creates a ROS2 node that shares the same implementation as a real-time node <b>but that should
@@ -466,9 +314,10 @@ public class ROS2Tools
                                                          String nodeName,
                                                          ExceptionHandler exceptionHandler)
    {
+      Domain domain = DomainFactory.getDomain(pubSubImplementation);
       try
       {
-         return new RealtimeROS2Node(pubSubImplementation, ROS2_DISTRO, periodicThreadSchedulerFactory, nodeName, NAMESPACE, DOMAIN_ID, ADDRESS_RESTRICTION);
+         return new RealtimeROS2Node(domain, periodicThreadSchedulerFactory, nodeName, NAMESPACE, DOMAIN_ID, ADDRESS_RESTRICTION);
       }
       catch (IOException e)
       {
@@ -494,9 +343,10 @@ public class ROS2Tools
 
    public static ROS2Node createROS2Node(PubSubImplementation pubSubImplementation, String nodeName, ExceptionHandler exceptionHandler)
    {
+      Domain domain = DomainFactory.getDomain(pubSubImplementation);
       try
       {
-         return new ROS2Node(pubSubImplementation, ROS2_DISTRO, nodeName, NAMESPACE, DOMAIN_ID, ADDRESS_RESTRICTION);
+         return new ROS2Node(domain, nodeName, NAMESPACE, DOMAIN_ID, ADDRESS_RESTRICTION);
       }
       catch (IOException e)
       {
@@ -644,7 +494,7 @@ public class ROS2Tools
       try
       {
          TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         realtimeROS2Node.createCallbackSubscription(topicDataType, topicName, newMessageListener, qosProfile);
+         realtimeROS2Node.createSubscription(topicDataType, newMessageListener, topicName, qosProfile);
       }
       catch (IOException e)
       {

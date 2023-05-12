@@ -11,6 +11,18 @@ package exoskeleton_msgs.msg.dds;
 public class ExoskeletonBehaviorStatePacketPubSubType implements us.ihmc.pubsub.TopicDataType<exoskeleton_msgs.msg.dds.ExoskeletonBehaviorStatePacket>
 {
    public static final java.lang.String name = "exoskeleton_msgs::msg::dds_::ExoskeletonBehaviorStatePacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "774f5f7ca98d332846e2567fe975fc2dc336b09593bf84ae7a249581a1e24ed4";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

@@ -1,5 +1,6 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.OpenCVArUcoMarkerDetection;
@@ -9,6 +10,7 @@ import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesPublisher;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.perception.RDXOpenCVArUcoMarkerDetectionUI;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
@@ -33,6 +35,7 @@ public class RDXPerceptionSceneGraphDemo
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
    private final ROS2DetectableSceneNodesPublisher detectableSceneObjectsPublisher = new ROS2DetectableSceneNodesPublisher();
    private RDXPerceptionSceneGraphUI perceptionSceneGraphUI;
+   private RDXOpenCVArUcoMarkerDetectionUI openCVArUcoMarkerDetectionUI;
 
    public RDXPerceptionSceneGraphDemo()
    {
@@ -76,7 +79,7 @@ public class RDXPerceptionSceneGraphDemo
 
             RDXROS2ArUcoMarkerPosesVisualizer arUcoMarkerPosesVisualizer = new RDXROS2ArUcoMarkerPosesVisualizer("ArUco Marker Poses",
                                                                                                                  ros2Helper,
-                                                                                                                 ROS2Tools.ARUCO_MARKER_POSES);
+                                                                                                                 PerceptionAPI.ARUCO_MARKER_POSES);
             arUcoMarkerPosesVisualizer.setActive(true);
             globalVisualizersUI.addVisualizer(arUcoMarkerPosesVisualizer);
 
@@ -87,6 +90,10 @@ public class RDXPerceptionSceneGraphDemo
             baseUI.getPrimaryScene().addRenderableProvider(perceptionSceneGraphUI::getRenderables);
             baseUI.getImGuiPanelManager().addPanel(perceptionSceneGraphUI.getPanel());
 
+            openCVArUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI();
+            openCVArUcoMarkerDetectionUI.create(arUcoMarkerDetection);
+            baseUI.getImGuiPanelManager().addPanel(openCVArUcoMarkerDetectionUI.getMainPanel());
+
             globalVisualizersUI.create();
          }
 
@@ -96,6 +103,7 @@ public class RDXPerceptionSceneGraphDemo
             environmentBuilder.update();
             simulatedCamera.render(baseUI.getPrimaryScene());
             arUcoMarkerDetection.update();
+            openCVArUcoMarkerDetectionUI.update();
 
             arUcoMarkerPublisher.update();
 

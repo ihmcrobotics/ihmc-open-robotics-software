@@ -101,7 +101,7 @@ public class DoorSceneNodeDefinitions
 
    public static StaticArUcoRelativeDetectableSceneNode createPushDoorFrame()
    {
-      return new StaticArUcoRelativeDetectableSceneNode("PullDoorFrame",
+      return new StaticArUcoRelativeDetectableSceneNode("PushDoorFrame",
                                                         PUSH_DOOR_MARKER_ID,
                                                         DOOR_ARUCO_MARKER_WIDTH,
                                                         PUSH_DOOR_FRAME_TRANSFORM_TO_MARKER,

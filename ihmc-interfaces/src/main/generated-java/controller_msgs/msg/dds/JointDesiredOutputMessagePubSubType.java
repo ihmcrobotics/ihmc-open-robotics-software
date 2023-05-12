@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class JointDesiredOutputMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.JointDesiredOutputMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::JointDesiredOutputMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "87af4c98bba6a9e00e5d1563ffd0f13acb1cd4f155c9bf62695dad8e1131c68a";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

@@ -11,6 +11,18 @@ package ihmc_common_msgs.msg.dds;
 public class EuclideanStreamingMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.EuclideanStreamingMessage>
 {
    public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::EuclideanStreamingMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "9a93502d06e893ce058864b378ae028bd7d76fbda9166289c69afcf8a3b4824d";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
