@@ -11,6 +11,18 @@ package behavior_msgs.msg.dds;
 public class WalkActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.WalkActionMessage>
 {
    public static final java.lang.String name = "behavior_msgs::msg::dds_::WalkActionMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "28fa9db23a22eba8e96d01b9206d66b9b6497c438ebe05fc81c20a12bb94085d";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
