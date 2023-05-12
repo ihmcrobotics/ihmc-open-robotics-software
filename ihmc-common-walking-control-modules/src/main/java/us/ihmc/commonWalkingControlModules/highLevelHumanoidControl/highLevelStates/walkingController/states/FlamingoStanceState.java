@@ -144,7 +144,6 @@ public class FlamingoStanceState extends SingleSupportState
       balanceManager.setICPPlanSupportSide(supportSide);
       balanceManager.initializeICPPlanForSingleSupport();
 
-      pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(supportSide);
       comHeightManager.setSupportLeg(getSupportSide());
       loadFoot.set(false);
       loadFootStartTime.setToNaN();

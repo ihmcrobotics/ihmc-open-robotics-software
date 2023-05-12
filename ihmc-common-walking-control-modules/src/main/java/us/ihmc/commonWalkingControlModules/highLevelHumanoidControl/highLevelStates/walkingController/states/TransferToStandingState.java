@@ -193,7 +193,6 @@ public class TransferToStandingState extends WalkingState
       midFootPosition.interpolate(footstepLeft.getFootstepPose().getPosition(), footstepRight.getFootstepPose().getPosition(), 0.5);
 
       // Just standing in double support, do nothing
-      pelvisOrientationManager.centerInMidFeetZUpFrame(finalTransferTime);
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.initializeICPPlanForTransferToStanding();
 
