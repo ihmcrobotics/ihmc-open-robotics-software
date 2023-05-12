@@ -181,7 +181,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       unloadFraction = walkingControllerParameters.enforceSmoothFootUnloading() != null ? new DoubleParameter("unloadFraction", registry, 0.5) : null;
 
-      ReferenceFrame pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
       MovingReferenceFrame walkingControlFrame = controllerToolbox.getWalkingTrajectoryPath().getWalkingTrajectoryPathFrame();
 
       ReferenceFrame chestBodyFrame = null;
