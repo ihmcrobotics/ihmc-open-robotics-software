@@ -244,9 +244,6 @@ public abstract class TransferState extends WalkingState
       {
          failureDetectionControlModule.setNextFootstep(null);
       }
-
-      double transferTime = walkingMessageHandler.getNextTransferTime();
-      pelvisOrientationManager.setTrajectoryTime(transferTime);
    }
 
    public boolean isInitialTransfer()

@@ -169,8 +169,6 @@ public class RecoveringSwingState extends PushRecoveryState
 
       feetManager.requestSwing(swingSide, nextFootstep, swingTime, null, null);
 
-      pelvisOrientationManager.initializeSwing();
-
       actualFootPoseInWorld.setFromReferenceFrame(fullRobotModel.getSoleFrame(swingSide));
 
       walkingMessageHandler.reportFootstepStarted(swingSide, nextFootstep.getFootstepPose(), actualFootPoseInWorld, swingTime, nextFootstep.getSequenceID());
@@ -194,9 +192,7 @@ public class RecoveringSwingState extends PushRecoveryState
       controllerToolbox.updateContactPointsForUpcomingFootstep(nextFootstep);
       controllerToolbox.updateBipedSupportPolygons();
 
-      pelvisOrientationManager.setTrajectoryTime(swingTime);
       pelvisOrientationManager.setUpcomingFootstep(nextFootstep);
-      pelvisOrientationManager.updateTrajectoryFromFootstep(); // fixme this shouldn't be called when the footstep is updated
    }
 
    private void updateHeightManager()
