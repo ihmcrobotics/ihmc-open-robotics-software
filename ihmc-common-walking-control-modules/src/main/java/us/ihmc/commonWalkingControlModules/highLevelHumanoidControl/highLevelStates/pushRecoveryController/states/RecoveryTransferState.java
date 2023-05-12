@@ -88,20 +88,12 @@ public class RecoveryTransferState extends PushRecoveryState
 
       failureDetectionControlModule.setNextFootstep(null);
 
-      pelvisOrientationManager.setTrajectoryTime(stepTiming.getTransferTime());
-
-      // In middle of walking or leaving foot pose, pelvis is good leave it like that.
-      pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
 
       double finalTransferTime = pushRecoveryParameters.getFinalTransferDurationForRecovery();
 
       currentTransferDuration.set(stepTiming.getTransferTime());
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.initializeICPPlanForTransfer();
-
-//      pelvisOrientationManager.setUpcomingFootstep(footsteps);
-      pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
-      pelvisOrientationManager.initializeTransfer();
    }
 
    @Override
