@@ -28,7 +28,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.lists.YoPreallocatedList;
@@ -131,6 +133,7 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
          twistRelativeToParentToPack.getAngularPart().set(0.0, 0.0, currentYawRate.getValue());
       }
    };
+   private final SpatialAcceleration walkingTrajectoryAcceleration = new SpatialAcceleration(walkingTrajectoryPathFrame, worldFrame, walkingTrajectoryPathFrame);
 
    private final DoubleParameter filterBreakFrequency;
 
@@ -351,6 +354,8 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
       }
 
       walkingTrajectoryPathFrame.update();
+      walkingTrajectoryAcceleration.getLinearPart().setMatchingFrame(currentLinearAcceleration);
+      walkingTrajectoryAcceleration.getAngularPart().set(0.0, 0.0, currentYawAcceleration.getValue());
 
       updateViz();
 
@@ -474,6 +479,11 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
    public MovingReferenceFrame getWalkingTrajectoryPathFrame()
    {
       return walkingTrajectoryPathFrame;
+   }
+
+   public SpatialAccelerationReadOnly getWalkingTrajectoryPathAcceleration()
+   {
+      return walkingTrajectoryAcceleration;
    }
 
    private static class WaypointData

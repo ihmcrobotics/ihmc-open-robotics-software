@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.referenceFrames.WalkingTrajectoryPath;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -12,6 +13,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -53,6 +55,7 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
    private final FrameVector3D tempAngularVelocity = new FrameVector3D();
    private final FrameVector3D tempAngularAcceleration = new FrameVector3D();
 
+   private final WalkingTrajectoryPath walkingTrajectoryPath;
    private final SideDependentList<MovingReferenceFrame> soleZUpFrames;
    private final ReferenceFrame midFeetZUpGroundFrame;
    private final ReferenceFrame pelvisFrame;
@@ -71,6 +74,8 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
       midFeetZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
       soleZUpFrames = referenceFrames.getSoleZUpFrames();
       pelvisFrame = referenceFrames.getPelvisFrame();
+
+      walkingTrajectoryPath = controllerToolbox.getWalkingTrajectoryPath();
 
       pelvisOrientationTrajectoryGenerator = new SimpleOrientationTrajectoryGenerator("pelvis", true, worldFrame, registry);
 
@@ -146,6 +151,8 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
       initialPelvisOrientationTime.set(yoTime.getDoubleValue());
    }
 
+   private final Twist pelvisTwist = new Twist();
+
    @Override
    public void doAction(double timeInState)
    {
@@ -153,9 +160,16 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
       pelvisOrientationTrajectoryGenerator.compute(deltaTime);
       pelvisOrientationTrajectoryGenerator.getAngularData(desiredPelvisOrientation, desiredPelvisAngularVelocity, desiredPelvisAngularAcceleration);
 
+
+      desiredPelvisOrientation.setToZero(walkingTrajectoryPath.getWalkingTrajectoryPathFrame());
+      walkingTrajectoryPath.getWalkingTrajectoryPathFrame().getTwistRelativeToOther(worldFrame, pelvisTwist);
+      desiredPelvisAngularVelocity.setMatchingFrame(pelvisTwist.getAngularPart());
+      desiredPelvisAngularAcceleration.setMatchingFrame(walkingTrajectoryPath.getWalkingTrajectoryPathAcceleration().getAngularPart());
+
       desiredPelvisOrientation.changeFrame(worldFrame);
       desiredPelvisAngularVelocity.changeFrame(worldFrame);
       desiredPelvisAngularAcceleration.changeFrame(worldFrame);
+
       desiredPelvisFrame.update();
 
       double deltaTimeOffset = yoTime.getDoubleValue() - initialPelvisOrientationOffsetTime.getDoubleValue();
