@@ -177,7 +177,6 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       double finalTransferTime = pushRecoveryParameters.getFinalTransferDurationForRecovery();
 
       // Just standing in double support, do nothing
-      pelvisOrientationManager.centerInMidFeetZUpFrame(finalTransferTime);
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.initializeICPPlanForTransferToStanding();
    }
