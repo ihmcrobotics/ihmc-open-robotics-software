@@ -82,14 +82,7 @@ public class RDXAffordanceFrame
          if (ImGui.button(labels.get("Grasp Frame") + "##" + labelId))
          {
             activeMenu[0] = this.menu;
-            if (isPoseSet)
-            {
-               handTransformToWorld.set(pose);  // move hand to grasp point
-               objectTransformToWorld.set(objectTransformOfFrame);
-            }
-            if (handConfiguration != null)
-               interactableHand.setGripperToConfiguration(handConfiguration);
-
+            selectFrame();
          }
          if (changedColor)
          {
@@ -125,6 +118,17 @@ public class RDXAffordanceFrame
       pose.changeFrame(ReferenceFrame.getWorldFrame());
       isPoseSet = true;
       frameGraphic.updateFromFramePose(pose);
+   }
+
+   public void selectFrame()
+   {
+      if (isPoseSet)
+      {
+         handTransformToWorld.set(pose);  // move hand to grasp point
+         objectTransformToWorld.set(objectTransformOfFrame);
+      }
+      if (handConfiguration != null)
+         interactableHand.setGripperToConfiguration(handConfiguration);
    }
 
    public void setHandConfiguration(HandConfiguration configuration)

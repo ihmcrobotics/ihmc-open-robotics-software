@@ -106,19 +106,7 @@ public class RDXAffordanceFrames
             if (ImGui.button(labels.get(poseIndices.get(i).toString()) + "##" + lableId))
             {
                activeMenu[0] = this.menu;
-               // move hand to selected frame
-               handTransformToWorld.set(poses.get(i));
-               selectedIndex = i;
-               // if hand configuration has been assigned to this frame
-               if (handConfigurations.get(i) != null)
-               {
-                  interactableHand.setGripperToConfiguration(handConfigurations.get(i)); // update hand configuration when teleporting
-                  selectedFrameConfiguration = handConfigurations.get(i);
-               }
-               else
-                  selectedFrameConfiguration = null;
-               // update pose of the object
-               objectTransformToWorld.set(objectTransforms.get(selectedIndex));
+               selectFrame(i);
             }
             if (changedColor)
             {
@@ -178,6 +166,23 @@ public class RDXAffordanceFrames
       objectTransforms.add(new RigidBodyTransform(objectTransformToWorld));
    }
 
+   public void selectFrame(int index)
+   {
+      // move hand to selected frame
+      handTransformToWorld.set(poses.get(index));
+      selectedIndex = index;
+      // if hand configuration has been assigned to this frame
+      if (handConfigurations.get(index) != null)
+      {
+         interactableHand.setGripperToConfiguration(handConfigurations.get(index)); // update hand configuration when teleporting
+         selectedFrameConfiguration = handConfigurations.get(index);
+      }
+      else
+         selectedFrameConfiguration = null;
+      // update pose of the object
+      objectTransformToWorld.set(objectTransforms.get(selectedIndex));
+   }
+
    public void addObjectTransform(RigidBodyTransform transform)
    {
       objectTransforms.add(transform);
@@ -228,5 +233,37 @@ public class RDXAffordanceFrames
    public ArrayList<RigidBodyTransform> getObjectTransforms()
    {
       return objectTransforms;
+   }
+
+   public void selectNext()
+   {
+      selectedIndex++;
+      selectFrame(selectedIndex);
+   }
+
+   public void selectPrevious()
+   {
+      selectedIndex--;
+      selectFrame(selectedIndex);
+   }
+
+   public void resetSelectedIndex()
+   {
+      selectedIndex = -1;
+   }
+
+   public void setSelectedIndexToSize()
+   {
+      selectedIndex = poseIndices.size();
+   }
+
+   public boolean isFirst()
+   {
+      return selectedIndex == 0;
+   }
+
+   public boolean isLast()
+   {
+      return selectedIndex == poseIndices.size() - 1;
    }
 }

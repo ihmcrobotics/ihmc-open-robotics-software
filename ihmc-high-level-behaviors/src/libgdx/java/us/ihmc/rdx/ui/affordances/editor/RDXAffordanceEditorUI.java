@@ -57,6 +57,7 @@ public class RDXAffordanceEditorUI
    private boolean handLocked = false;
    private PoseReferenceFrame handLockedFrame;
    private RDXActiveAffordanceMenu[] activeMenu;
+   private boolean playing = false;
 
    private final ImGuiInputText textInput = new ImGuiInputText("Enter file name to save/load");
    private String fileName = "";
@@ -248,6 +249,100 @@ public class RDXAffordanceEditorUI
          handLocked = !handLocked;
       if (changedColor)
          ImGui.popStyleColor();
+      ImGui.separator();
+
+      ImGui.text("PREVIOUS/NEXT FRAME: ");
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("<"), 20, 25))
+      {
+         switch (activeMenu[0]) {
+            case PRE_GRASP ->
+            {
+               if(!preGraspFrames.isFirst())
+                  preGraspFrames.selectPrevious();
+            }
+            case GRASP ->
+            {
+               activeMenu[0] = RDXActiveAffordanceMenu.PRE_GRASP;
+               preGraspFrames.setSelectedIndexToSize();
+               preGraspFrames.selectPrevious();
+            }
+            case POST_GRASP ->
+            {
+               if (!postGraspFrames.isFirst())
+                  postGraspFrames.selectPrevious();
+               else
+               {
+                  if (graspFrame.isSet())
+                  {
+                     activeMenu[0] = RDXActiveAffordanceMenu.GRASP;
+                     graspFrame.selectFrame();
+                  }
+                  else
+                  {
+                     activeMenu[0] = RDXActiveAffordanceMenu.PRE_GRASP;
+                     preGraspFrames.setSelectedIndexToSize();
+                     preGraspFrames.selectPrevious();
+                  }
+               }
+            }
+         }
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get(">"), 20, 25) || playing)
+      {
+         if (playing)
+         {
+            try
+            {
+               Thread.sleep(300);
+            }
+            catch (InterruptedException e)
+            {
+            }
+         }
+         switch (activeMenu[0])
+         {
+            case PRE_GRASP ->
+            {
+               if (!preGraspFrames.isLast())
+                  preGraspFrames.selectNext();
+               else
+               {
+                  if (graspFrame.isSet())
+                  {
+                     activeMenu[0] = RDXActiveAffordanceMenu.GRASP;
+                     graspFrame.selectFrame();
+                  }
+                  else
+                  {
+                     activeMenu[0] = RDXActiveAffordanceMenu.POST_GRASP;
+                     postGraspFrames.resetSelectedIndex();
+                     postGraspFrames.selectNext();
+                  }
+               }
+            }
+            case GRASP ->
+            {
+               activeMenu[0] = RDXActiveAffordanceMenu.POST_GRASP;
+               postGraspFrames.resetSelectedIndex();
+               postGraspFrames.selectNext();
+            }
+            case POST_GRASP ->
+            {
+               if (!postGraspFrames.isLast())
+                  postGraspFrames.selectNext();
+               else
+                  playing = false;
+            }
+         }
+
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("PLAY")))
+      {
+         playing = true;
+      }
       ImGui.separator();
 
       if (ImGui.button("RESET"))
