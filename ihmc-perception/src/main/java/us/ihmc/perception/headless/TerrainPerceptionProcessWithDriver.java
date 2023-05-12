@@ -287,7 +287,9 @@ public class TerrainPerceptionProcessWithDriver
             depth16UC1Image.convertTo(depthBytedecoImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1, 1, 0);
             FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
             extractFramePlanarRegionsList(depthBytedecoImage, cameraFrame, framePlanarRegionsList);
+
             PerceptionMessageTools.publishPlanarRegionsList(framePlanarRegionsList.getPlanarRegionsList(), regionsTopic, ros2Helper);
+            PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, frameRegionsTopic, ros2Helper);
 
             LogTools.info("Planar regions found: {}", framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions());
          }
