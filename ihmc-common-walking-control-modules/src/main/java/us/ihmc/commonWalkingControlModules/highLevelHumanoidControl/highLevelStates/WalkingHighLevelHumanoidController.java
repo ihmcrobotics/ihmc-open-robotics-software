@@ -63,6 +63,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -181,12 +182,13 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       unloadFraction = walkingControllerParameters.enforceSmoothFootUnloading() != null ? new DoubleParameter("unloadFraction", registry, 0.5) : null;
 
       ReferenceFrame pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
+      MovingReferenceFrame walkingControlFrame = controllerToolbox.getWalkingTrajectoryPath().getWalkingTrajectoryPathFrame();
 
       ReferenceFrame chestBodyFrame = null;
       if (chest != null)
       {
          chestBodyFrame = chest.getBodyFixedFrame();
-         RigidBodyControlManager chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame);
+         RigidBodyControlManager chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, walkingControlFrame);
          bodyManagers.add(chestManager);
       }
 
