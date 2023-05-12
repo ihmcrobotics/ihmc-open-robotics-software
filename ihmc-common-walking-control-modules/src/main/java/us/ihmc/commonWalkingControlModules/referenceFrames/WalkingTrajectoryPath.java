@@ -70,7 +70,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
  */
 public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
 {
-   private static final boolean VISUALIZE = true;
+   private static final boolean VISUALIZE = false;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final String WALKING_TRAJECTORY_PATH_FRAME_NAME = "walkingTrajectoryPathFrame";
