@@ -45,7 +45,6 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
    private final EnumMap<SpineJointName, String> spineJointStrings = new EnumMap<>(SpineJointName.class);
    private final EnumMap<NeckJointName, String> neckJointStrings = new EnumMap<>(NeckJointName.class);
 
-   private final SideDependentList<String> nameOfJointsBeforeThighs = new SideDependentList<>();
    private final SideDependentList<String> nameOfJointsBeforeHands = new SideDependentList<>();
    private final String[] jointNamesBeforeFeet = new String[2];
 
@@ -171,7 +170,6 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
 
       for (RobotSide robtSide : RobotSide.values)
       {
-         nameOfJointsBeforeThighs.put(robtSide, legJointStrings.get(robtSide).get(LegJointName.HIP_PITCH));
          nameOfJointsBeforeHands.put(robtSide, armJointStrings.get(robtSide).get(ArmJointName.FIRST_WRIST_PITCH));
       }
 
@@ -209,12 +207,6 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
    public SideDependentList<String> getNameOfJointBeforeHands()
    {
       return nameOfJointsBeforeHands;
-   }
-
-   @Override
-   public SideDependentList<String> getNameOfJointBeforeThighs()
-   {
-      return nameOfJointsBeforeThighs;
    }
 
    @Override
@@ -365,7 +357,7 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
    }
 
    @Override
-   public RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide robotSide)
+   public RigidBodyTransform getSoleToParentFrameTransform(RobotSide robotSide)
    {
       return physicalProperties.getSoleToAnkleFrameTransform(robotSide);
    }

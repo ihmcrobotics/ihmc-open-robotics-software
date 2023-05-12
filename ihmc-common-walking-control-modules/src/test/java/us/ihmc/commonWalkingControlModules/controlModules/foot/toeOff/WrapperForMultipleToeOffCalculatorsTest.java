@@ -325,12 +325,6 @@ public class WrapperForMultipleToeOffCalculatorsTest
                }
 
                @Override
-               public boolean checkECMPLocationToTriggerToeOff()
-               {
-                  return false;
-               }
-
-               @Override
                public double getMinStepLengthForToeOff()
                {
                   return 0;
