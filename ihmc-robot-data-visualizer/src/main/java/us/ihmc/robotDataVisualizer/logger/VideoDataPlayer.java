@@ -85,17 +85,7 @@ public class VideoDataPlayer
       long videoTimestamp;
       long nextVideoTimestamp = videoTimestamps[currentlyShowingIndex];
 
-
-      if (robotTimestamps.length > currentlyShowingIndex + 1 && robotTimestamps[currentlyShowingIndex + 1] == timestamp)
-      {
-         currentlyShowingIndex++;
-         videoTimestamp = videoTimestamps[currentlyShowingIndex];
-         currentlyShowingRobottimestamp = robotTimestamps[currentlyShowingIndex];
-      }
-      else
-      {
-         videoTimestamp = getVideoTimestampWithBinarySearch(timestamp);
-      }
+      videoTimestamp = getVideoTimestampWithBinarySearch(timestamp);
 
       if (robotTimestamps.length > currentlyShowingIndex + 1)
       {
