@@ -33,7 +33,6 @@ public class RecoveryTransferState extends PushRecoveryState
    private final PushRecoveryControllerParameters pushRecoveryParameters;
    protected final CenterOfMassHeightManager comHeightManager;
    protected final PushRecoveryBalanceManager balanceManager;
-   protected final PelvisOrientationManager pelvisOrientationManager;
    protected final FeetManager feetManager;
 
    private final FramePoint2D capturePoint2d = new FramePoint2D();
@@ -69,7 +68,6 @@ public class RecoveryTransferState extends PushRecoveryState
       this.pushRecoveryParameters = pushRecoveryParameters;
 
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
-      pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
 
       transferToAndNextFootstepsData.setTransferToSide(transferToSide);
@@ -87,7 +85,6 @@ public class RecoveryTransferState extends PushRecoveryState
       controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
 
       failureDetectionControlModule.setNextFootstep(null);
-
 
       double finalTransferTime = pushRecoveryParameters.getFinalTransferDurationForRecovery();
 
