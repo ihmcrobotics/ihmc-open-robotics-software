@@ -27,6 +27,9 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.*;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class RDXAffordanceEditorUI
@@ -42,6 +45,9 @@ public class RDXAffordanceEditorUI
    private final PoseReferenceFrame objectFrame = new PoseReferenceFrame("objectFrame", ReferenceFrame.getWorldFrame());
    private final PoseReferenceFrame affordanceFrame = new PoseReferenceFrame("affordanceFrame", ReferenceFrame.getWorldFrame());
    private final float[] gripperClosure = new float[1];
+   private static final double DEFAULT_DURATION = 1.0;
+   private static final double LINEAR_VELOCITY = 0.1;
+   private static final double ANGULAR_VELOCITY = 1.0; // [rad/s] for the sake gripper this is ~= to 0.1 m/s for a point on the edge of the gripper
    // affordance poses
    private RDXAffordanceFrame graspFrame;
    private RDXAffordanceFrames preGraspFrames;
@@ -52,11 +58,12 @@ public class RDXAffordanceEditorUI
    private PoseReferenceFrame handLockedFrame;
    private RDXActiveAffordanceMenu[] activeMenu;
 
-   private final ImGuiInputText textInput = new ImGuiInputText("File name to save/load");
+   private final ImGuiInputText textInput = new ImGuiInputText("Enter file name to save/load");
    private String fileName = "";
    private final WorkspaceResourceDirectory configurationsDirectory = new WorkspaceResourceDirectory(getClass(), "/affordances");
 
    public RDXAffordanceEditorUI()
+
    {
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -180,12 +187,25 @@ public class RDXAffordanceEditorUI
       {
          side = RobotSide.LEFT;
       }
+      //TODO add double hand logic with side dependent lists
+      if (side == RobotSide.LEFT)
+      {
+         ImGui.pushStyleColor(ImGuiCol.Text, 1.0f, 0.0f, 0.0f, 1.0f);
+         ImGui.text("Work in progress. Left hand currently not supported");
+         ImGui.popStyleColor();
+      }
+      //TODO remove text
       ImGui.sameLine();
       if (ImGui.button(labels.get("ADD") + "##side"))
-         ;
+      {
+
+      }
       ImGui.sameLine();
       if (ImGui.button(labels.get("REMOVE") + "##side"))
-         ; //TODO add double hand logic with side dependent list
+      {
+
+      }
+      //TODO remove text above
       ImGui.text("Hand configuration: ");
       if (ImGui.button(labels.get("OPEN")))
          interactableHand.openGripper();
@@ -257,10 +277,62 @@ public class RDXAffordanceEditorUI
       handTransformToWorld.setToZero();
       handTransformToWorld.getTranslation().set(-0.5, 0, 0);
       interactableHand.closeGripper();
+
       graspFrame.reset();
       preGraspFrames.reset();
       postGraspFrames.reset();
       activeMenu[0] = RDXActiveAffordanceMenu.NONE;
+   }
+
+   private ArrayList<Double> computeTrajectoryDurations(ArrayList<FramePose3D> preGraspPoses, FramePose3D graspPose, ArrayList<FramePose3D> postGraspPoses)
+   {
+      ArrayList<Double> trajectoryDurations = new ArrayList<>();
+      int sizePreGrasp = preGraspPoses.size();
+      // compute trajectory duration as the necessary duration required to reach two consecutive frames at the desired velocity
+      for (int i = 0; i < sizePreGrasp; i++)
+      {
+         if (i != 0)
+         {
+            double positionDistance = preGraspPoses.get(i).getPositionDistance(preGraspPoses.get(i - 1));
+            double angularDistance = preGraspPoses.get(i).getOrientationDistance(preGraspPoses.get(i - 1));
+            // take max duration required to achieve wither desired linear velocity or angular velocity
+            trajectoryDurations.add(Math.max(positionDistance / LINEAR_VELOCITY, angularDistance / ANGULAR_VELOCITY));
+         }
+         else
+            trajectoryDurations.add(DEFAULT_DURATION);
+      }
+
+      if (sizePreGrasp > 0)
+      {
+         double positionDistance = graspPose.getPositionDistance(preGraspPoses.get(sizePreGrasp - 1));
+         double angularDistance = graspPose.getOrientationDistance(preGraspPoses.get(sizePreGrasp - 1));
+         // take max duration required to achieve the desired linear velocity or angular velocity
+         trajectoryDurations.add(Math.max(positionDistance / LINEAR_VELOCITY, angularDistance / ANGULAR_VELOCITY));
+      }
+      else
+         trajectoryDurations.add(DEFAULT_DURATION);
+
+      for (int i = 0; i < postGraspPoses.size(); i++)
+      {
+         if (i != 0)
+         {
+            double positionDistance = postGraspPoses.get(i).getPositionDistance(postGraspPoses.get(i - 1));
+            double angularDistance = postGraspPoses.get(i).getOrientationDistance(postGraspPoses.get(i - 1));
+            // take max duration required to achieve the desired linear velocity or angular velocity
+            trajectoryDurations.add(Math.max(positionDistance / LINEAR_VELOCITY, angularDistance / ANGULAR_VELOCITY));
+         }
+         else if (!graspFrame.isSet())
+         {
+            double positionDistance = postGraspPoses.get(i).getPositionDistance(graspPose);
+            double angularDistance = postGraspPoses.get(i).getOrientationDistance(graspPose);
+            // take max duration required to achieve the desired linear velocity or angular velocity
+            trajectoryDurations.add(Math.max(positionDistance / LINEAR_VELOCITY, angularDistance / ANGULAR_VELOCITY));
+         }
+         else
+            trajectoryDurations.add(DEFAULT_DURATION);
+      }
+
+      return trajectoryDurations;
    }
 
    public void saveToFile(String fileName)
@@ -269,20 +341,23 @@ public class RDXAffordanceEditorUI
       if (file.isFileAccessAvailable())
       {
          LogTools.info("Saving to file ...");
-         JSONFileTools.save(file, root ->
+         JSONFileTools.save(file, jsonNode ->
          {
-            root.put("name", fileName);
-            ArrayNode actionsArrayNode = root.putArray("actions");
+            jsonNode.put("name", fileName);
+            ArrayNode actionsArrayNode = jsonNode.putArray("actions");
             var preGraspPoses = preGraspFrames.getPoses();
+            var graspPose = graspFrame.getPose();
+            var postGraspPoses = postGraspFrames.getPoses();
+            ArrayList<Double> trajectoryDurations = computeTrajectoryDurations(preGraspPoses, graspPose, postGraspPoses);
             var preGraspHandConfigurations = preGraspFrames.getHandConfigurations();
+            var postGraspHandConfigurations = postGraspFrames.getHandConfigurations();
             for (int i = 0; i < preGraspPoses.size(); i++)
             {
                ObjectNode actionNode = actionsArrayNode.addObject();
                actionNode.put("type", "RDXHandPoseAction");
                actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
                actionNode.put("side", side.getLowerCaseName());
-               //TODO fix trajectory duration to a good cm/s velocity
-               actionNode.put("trajectoryDuration", 1);
+               actionNode.put("trajectoryDuration", trajectoryDurations.get(i));
                RigidBodyTransform transformToParent = new RigidBodyTransform(preGraspPoses.get(i));
                JSONTools.toJSON(actionNode, transformToParent);
 
@@ -300,8 +375,8 @@ public class RDXAffordanceEditorUI
                actionNode.put("type", "RDXHandPoseAction");
                actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
                actionNode.put("side", side.getLowerCaseName());
-               actionNode.put("trajectoryDuration", 1);
-               RigidBodyTransform transformToParent = new RigidBodyTransform(graspFrame.getPose());
+               actionNode.put("trajectoryDuration", trajectoryDurations.get(preGraspPoses.size()));
+               RigidBodyTransform transformToParent = new RigidBodyTransform(graspPose);
                JSONTools.toJSON(actionNode, transformToParent);
                if (graspFrame.getHandConfiguration() != null)
                {
@@ -311,16 +386,13 @@ public class RDXAffordanceEditorUI
                   extraActionNode.put("grip", graspFrame.getHandConfiguration().toString());
                }
             }
-
-            var postGraspPoses = postGraspFrames.getPoses();
-            var postGraspHandConfigurations = postGraspFrames.getHandConfigurations();
             for (int i = 0; i < postGraspPoses.size(); i++)
             {
                ObjectNode actionNode = actionsArrayNode.addObject();
                actionNode.put("type", "RDXHandPoseAction");
                actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
                actionNode.put("side", side.getLowerCaseName());
-               actionNode.put("trajectoryDuration", 1);
+               actionNode.put("trajectoryDuration", trajectoryDurations.get(preGraspPoses.size() + 1 + i));
                RigidBodyTransform transformToParent = new RigidBodyTransform(postGraspPoses.get(i));
                JSONTools.toJSON(actionNode, transformToParent);
 
@@ -343,15 +415,15 @@ public class RDXAffordanceEditorUI
       WorkspaceResourceFile extraFile = new WorkspaceResourceFile(configurationsDirectory, fileName + "Extra.json");
       if (extraFile.isFileAccessAvailable())
       {
-         JSONFileTools.save(extraFile, root ->
+         JSONFileTools.save(extraFile, jsonNode ->
          {
-            root.put("name", fileName);
-            root.put("object", objectBuilder.getSelectedObjectName());
-            JSONTools.toJSON(root, new RigidBodyTransform(objectBuilder.getSelectedObject().getInitialPose()));
-            ArrayNode framesArrayNode = root.putArray("frames");
+            jsonNode.put("name", fileName);
+            jsonNode.put("object", objectBuilder.getSelectedObjectName());
+            JSONTools.toJSON(jsonNode, new RigidBodyTransform(objectBuilder.getSelectedObject().getInitialPose()));
+            ArrayNode framesArrayNode = jsonNode.putArray("frames");
             var preGraspObjectTransforms = preGraspFrames.getObjectTransforms();
             var preGraspHandConfigurations = preGraspFrames.getHandConfigurations();
-            root.put("numberPreGraspFrames", preGraspObjectTransforms.size());
+            jsonNode.put("numberPreGraspFrames", preGraspObjectTransforms.size());
             for (int i = 0; i < preGraspObjectTransforms.size(); i++)
             {
                ObjectNode frameArray = framesArrayNode.addObject();
@@ -366,7 +438,7 @@ public class RDXAffordanceEditorUI
             }
             var postGraspObjectTransforms = postGraspFrames.getObjectTransforms();
             var postGraspHandConfigurations = postGraspFrames.getHandConfigurations();
-            root.put("numberPostGraspFrames", postGraspObjectTransforms.size());
+            jsonNode.put("numberPostGraspFrames", postGraspObjectTransforms.size());
             for (int i = 0; i < postGraspObjectTransforms.size(); i++)
             {
                ObjectNode frameArray = framesArrayNode.addObject();
@@ -374,7 +446,7 @@ public class RDXAffordanceEditorUI
                frameArray.put("grip", postGraspHandConfigurations.get(i) == null ? "" : postGraspHandConfigurations.get(i).toString());
             }
          });
-         LogTools.info("SAVED extra info to file {}", extraFile.getFileName());
+         LogTools.info("SAVED to file {}", extraFile.getFileName());
       }
       else
       {
@@ -384,25 +456,24 @@ public class RDXAffordanceEditorUI
 
    public void loadFromFile(String fileName)
    {
-      WorkspaceResourceFile extraFile = new WorkspaceResourceFile(configurationsDirectory, "/affordances/" + fileName + "Extra.json");
-      LogTools.info("Loading from {}", extraFile.getFileName());
+      Path filePath = Paths.get(configurationsDirectory.getFilesystemDirectory().toString(), fileName + "Extra.json");
       final int[] preGraspFramesSize = new int[1];
       final int[] postGraspFramesSize = new int[1];
-      if (extraFile.isFileAccessAvailable())
+      if(Files.exists(filePath))
       {
-         JSONFileTools.load(extraFile, root ->
+         JSONFileTools.load(filePath, jsonNode ->
          {
-            String objectName = root.get("object").asText();
+            String objectName = jsonNode.get("object").asText();
             if (!objectName.isEmpty())
             {
-               objectBuilder.loadObject(root.get("object").asText());
+               objectBuilder.loadObject(jsonNode.get("object").asText());
                RigidBodyTransform initialTransform = new RigidBodyTransform();
-               JSONTools.toEuclid(root, initialTransform);
+               JSONTools.toEuclid(jsonNode, initialTransform);
                objectBuilder.getSelectedObject().setInitialPose(initialTransform);
             }
-            preGraspFramesSize[0] = root.get("numberPreGraspFrames").asInt();
-            postGraspFramesSize[0] = root.get("numberPostGraspFrames").asInt();
-            JsonNode framesArrayNode = root.get("frames");
+            preGraspFramesSize[0] = jsonNode.get("numberPreGraspFrames").asInt();
+            postGraspFramesSize[0] = jsonNode.get("numberPostGraspFrames").asInt();
+            JsonNode framesArrayNode = jsonNode.get("frames");
             for (int i = 0; i < preGraspFramesSize[0]; i++)
             {
                RigidBodyTransform preGraspObjectTransform = new RigidBodyTransform();
@@ -425,18 +496,17 @@ public class RDXAffordanceEditorUI
                postGraspFrames.addHandConfiguration(configuration.isEmpty() ? null : HandConfiguration.valueOf(configuration));
             }
          });
+         LogTools.info("LOADED file {}", filePath);
       }
       else
       {
-         LogTools.warn("Could not load extra info from {}" + extraFile.getFileName());
+         LogTools.warn("Could not load file {}", filePath);
       }
 
-      WorkspaceResourceFile file = new WorkspaceResourceFile(configurationsDirectory, "/affordances/" + fileName + ".json");
-
-      LogTools.info("Loading from {}", file.getClasspathResource().toString());
-      if (file.isFileAccessAvailable())
+      filePath = Paths.get(configurationsDirectory.getFilesystemDirectory().toString(), fileName + ".json");
+      if(Files.exists(filePath))
       {
-         JSONFileTools.load(file, jsonNode ->
+         JSONFileTools.load(filePath, jsonNode ->
          {
             JSONTools.forEachArrayElement(jsonNode, "actions", actionNode ->
             {
@@ -455,10 +525,11 @@ public class RDXAffordanceEditorUI
                }
             });
          });
+         LogTools.info("LOADED file {}", filePath);
       }
-      else
+         else
       {
-         LogTools.warn("Could not load info from {}" + file.getFileName());
+         LogTools.warn("Could not load file {}", filePath);
       }
    }
 
