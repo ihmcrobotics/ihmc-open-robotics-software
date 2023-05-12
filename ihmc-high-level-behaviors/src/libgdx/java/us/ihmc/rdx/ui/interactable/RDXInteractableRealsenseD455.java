@@ -12,11 +12,17 @@ import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
 import us.ihmc.rdx.ui.gizmo.CylinderRayIntersection;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
+/**
+ * We model the collision for the sensor as a cylinder.
+ */
 public class RDXInteractableRealsenseD455
 {
+   private static final double LENGTH = 0.1;
+   private static final double RADIUS = 0.025 / 2.0;
+
    private final RDXInteractableFrameModel interactableFrameModel = new RDXInteractableFrameModel();
    private final CylinderRayIntersection cylinderIntersection = new CylinderRayIntersection();
-   private final Point3D offset = new Point3D();
+   private final Point3D offset = new Point3D(-RADIUS, 0.0, 0.0);
 
    public RDXInteractableRealsenseD455(RDX3DPanel panel3D)
    {
@@ -38,7 +44,7 @@ public class RDXInteractableRealsenseD455
 
    private double calculateClosestCollision(Line3DReadOnly mousePickRay)
    {
-      cylinderIntersection.update(0.028, 0.031, offset, Axis3D.X, interactableFrameModel.getReferenceFrame());
+      cylinderIntersection.update(LENGTH, RADIUS, offset, Axis3D.Y, interactableFrameModel.getReferenceFrame());
       return cylinderIntersection.intersect(mousePickRay);
    }
 
