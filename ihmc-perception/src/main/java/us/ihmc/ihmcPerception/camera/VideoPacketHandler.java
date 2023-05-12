@@ -4,6 +4,7 @@ import boofcv.struct.calib.CameraPinholeBrown;
 import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.producers.CompressedVideoHandler;
@@ -24,12 +25,12 @@ public class VideoPacketHandler implements CompressedVideoHandler
 
    public VideoPacketHandler(ROS2NodeInterface ros2Node)
    {
-      this(ros2Node, ROS2Tools.VIDEO);
+      this(ros2Node, PerceptionAPI.VIDEO);
    }
 
    public VideoPacketHandler(ROS2NodeInterface ros2Node, ROS2QosProfile qosProfile)
    {
-      this(ros2Node, ROS2Tools.VIDEO, qosProfile);
+      this(ros2Node, PerceptionAPI.VIDEO, qosProfile);
    }
 
    public VideoPacketHandler(ROS2NodeInterface ros2Node, ROS2Topic<VideoPacket> topic)

@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class UIConnectedPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.UIConnectedPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::UIConnectedPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "4e1f9e549a02059cbeddb862d35dbc4dcd0a394e5f5b5c3788c791d7c85db278";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

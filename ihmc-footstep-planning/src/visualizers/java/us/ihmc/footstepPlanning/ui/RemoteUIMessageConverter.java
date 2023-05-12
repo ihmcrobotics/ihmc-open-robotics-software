@@ -9,6 +9,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -208,7 +209,7 @@ public class RemoteUIMessageConverter
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepStatusMessage.class, ROS2Tools.getControllerOutputTopic(robotName),
                                            s -> messager.submitMessage(FootstepPlannerMessagerAPI.FootstepStatusMessage, s.takeNextData()));
 
-      ROS2Topic<HeightMapMessage> heightMapOutput = ROS2Tools.HEIGHT_MAP_OUTPUT;
+      ROS2Topic<HeightMapMessage> heightMapOutput = PerceptionAPI.HEIGHT_MAP_OUTPUT;
       new ROS2Callback<>(ros2Node, heightMapOutput, m -> messager.submitMessage(FootstepPlannerMessagerAPI.HeightMapData, m));
 
       /* publishers */
@@ -261,7 +262,7 @@ public class RemoteUIMessageConverter
       IHMCRealtimeROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher =
             ROS2Tools.createPublisher(ros2Node,
                                       BipedalSupportPlanarRegionParametersMessage.class,
-                                      ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName).withInput().withType(BipedalSupportPlanarRegionParametersMessage.class));
+                                      PerceptionAPI.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName).withInput().withType(BipedalSupportPlanarRegionParametersMessage.class));
 
       messager.addTopicListener(FootstepPlannerMessagerAPI.BipedalSupportRegionsParameters,  message ->
       {

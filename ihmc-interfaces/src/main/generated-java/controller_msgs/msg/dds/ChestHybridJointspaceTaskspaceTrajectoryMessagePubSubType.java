@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class ChestHybridJointspaceTaskspaceTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ChestHybridJointspaceTaskspaceTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::ChestHybridJointspaceTaskspaceTrajectoryMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "b669bd06f90f22cac90cdac62a1690a24ce05cce75c46bb9aead54ca829fccef";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

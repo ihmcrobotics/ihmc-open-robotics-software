@@ -931,7 +931,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
                                                                                    Tuple2DReadOnly offset,
                                                                                    double offsetYaw)
    {
-      FullHumanoidRobotModel initialFullRobotModel = robotModel.createFullRobotModel();
+      FullHumanoidRobotModel initialFullRobotModel = robotModel.createFullRobotModel(false);
       robotModel.getDefaultRobotInitialSetup(groundHeight, offsetYaw).initializeFullRobotModel(initialFullRobotModel);
       initialFullRobotModel.getRootJoint().getJointPose().prependTranslation(offset.getX(), offset.getY(), 0.0);
       initialFullRobotModel.updateFrames();

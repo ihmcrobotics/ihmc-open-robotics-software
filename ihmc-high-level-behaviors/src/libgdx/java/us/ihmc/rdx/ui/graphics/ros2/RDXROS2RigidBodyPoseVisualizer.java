@@ -9,6 +9,7 @@ import geometry_msgs.PoseStamped;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -95,7 +96,7 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXVisualizer implements Ren
 
       ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
 
-      new IHMCROS2Callback<>(ros2Node, ROS2Tools.MOCAP_RIGID_BODY, (message) ->
+      new IHMCROS2Callback<>(ros2Node, PerceptionAPI.MOCAP_RIGID_BODY, (message) ->
       {
          queueRenderRigidBodyPose(message);
       });

@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.WholeBodyStreamingMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::WholeBodyStreamingMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "6512aa88f4426fd8c16698b23731ae3332f3046fc86a8c2a5b11061996fb474a";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

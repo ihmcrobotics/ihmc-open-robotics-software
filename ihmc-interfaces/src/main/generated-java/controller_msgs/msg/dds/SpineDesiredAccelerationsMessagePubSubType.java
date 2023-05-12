@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class SpineDesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.SpineDesiredAccelerationsMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::SpineDesiredAccelerationsMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "e9da1226b1a45611e6a2cfb09ce3688d7b8239354015f309278d8c638994f563";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

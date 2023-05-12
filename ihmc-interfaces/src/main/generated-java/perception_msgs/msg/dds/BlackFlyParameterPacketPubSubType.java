@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class BlackFlyParameterPacketPubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.BlackFlyParameterPacket>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::BlackFlyParameterPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "d0dfb53379e17d5c938106c9a5d3088729fef0b4b3687b99a6d4fb70509b382e";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
