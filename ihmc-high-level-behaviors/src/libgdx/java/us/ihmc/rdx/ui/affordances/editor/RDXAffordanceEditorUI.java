@@ -263,9 +263,12 @@ public class RDXAffordanceEditorUI
             }
             case GRASP ->
             {
-               activeMenu[0] = RDXActiveAffordanceMenu.PRE_GRASP;
-               preGraspFrames.setSelectedIndexToSize();
-               preGraspFrames.selectPrevious();
+               if(preGraspFrames.getNumberOfFrames()>0)
+               {
+                  activeMenu[0] = RDXActiveAffordanceMenu.PRE_GRASP;
+                  preGraspFrames.setSelectedIndexToSize();
+                  preGraspFrames.selectPrevious();
+               }
             }
             case POST_GRASP ->
             {
@@ -324,9 +327,12 @@ public class RDXAffordanceEditorUI
             }
             case GRASP ->
             {
-               activeMenu[0] = RDXActiveAffordanceMenu.POST_GRASP;
-               postGraspFrames.resetSelectedIndex();
-               postGraspFrames.selectNext();
+               if(postGraspFrames.getNumberOfFrames()>0)
+               {
+                  activeMenu[0] = RDXActiveAffordanceMenu.POST_GRASP;
+                  postGraspFrames.resetSelectedIndex();
+                  postGraspFrames.selectNext();
+               }
             }
             case POST_GRASP ->
             {
