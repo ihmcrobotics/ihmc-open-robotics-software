@@ -217,7 +217,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
    public void update()
    {
-
       // Update footsteps in the list, and the one being placed
       for (int i = 0; i < footsteps.size(); i++)
       {
@@ -299,6 +298,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
          stepChecker.setSwingStepPose(footsteps.get(size - 2).getFootPose());
          stepChecker.setSwingSide(footsteps.get(size - 2).getFootstepSide());
       }
+
       stepChecker.clear(footsteps);
       clear();
    }
@@ -308,6 +308,31 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       RDXInteractableFootstep nextFootstep = footsteps.add();
       nextFootstep.reset();
       return nextFootstep;
+   }
+
+   public RDXInteractableFootstep getLastFootstep()
+   {
+      if (footsteps.size() > 0)
+      {
+         return footsteps.get(footsteps.size() - 1);
+      }
+      return null;
+   }
+
+   /**
+    * Gets the transform either from the footstep list, or from the synced robot.
+    * Never gets the transform from the footstep currently being placed.
+    */
+   public RigidBodyTransformReadOnly getLastFootstepTransform(RobotSide robotSide)
+   {
+      if (footsteps.size() > 0)
+      {
+         return getLastFootstep().getFootPose();
+      }
+      else
+      {
+         return syncedRobot.getReferenceFrames().getSoleFrame(robotSide).getTransformToWorldFrame();
+      }
    }
 
    public int getNumberOfFootsteps()
@@ -328,31 +353,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       {
          footsteps.remove(footsteps.size() - 1);
       }
-   }
-
-   /**
-    * Gets the transform either from the footstep list, or from the synced robot.
-    * Never gets the transform from the footstep currently being placed.
-    */
-   public RigidBodyTransformReadOnly getLastFootstepTransform(RobotSide robotSide)
-   {
-      if (footsteps.size() > 0)
-      {
-         return getLastFootstep().getFootPose();
-      }
-      else
-      {
-         return syncedRobot.getReferenceFrames().getSoleFrame(robotSide).getTransformToWorldFrame();
-      }
-   }
-
-   public RDXInteractableFootstep getLastFootstep()
-   {
-      if (footsteps.size() > 0)
-      {
-         return footsteps.get(footsteps.size() - 1);
-      }
-      return null;
    }
 
    private RDXInteractableFootstep newPlannedFootstep()
