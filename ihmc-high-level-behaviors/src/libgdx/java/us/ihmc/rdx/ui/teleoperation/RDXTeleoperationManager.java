@@ -174,6 +174,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
                                         ros2Helper,
                                         teleoperationParameters);
       }
+
+      controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2Helper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
    }
 
    public void create(RDXBaseUI baseUI)
