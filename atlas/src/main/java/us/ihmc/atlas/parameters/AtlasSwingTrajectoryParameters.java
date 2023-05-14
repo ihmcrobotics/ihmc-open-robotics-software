@@ -44,13 +44,6 @@ public class AtlasSwingTrajectoryParameters extends SwingTrajectoryParameters
 
    /** {@inheritDoc} */
    @Override
-   public double getSwingFootVelocityAdjustmentDamping()
-   {
-      return runningOnRealRobot ? 0.8 : 0.5; // Robert: 0.8
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public boolean addOrientationMidpointForObstacleClearance()
    {
       return false;

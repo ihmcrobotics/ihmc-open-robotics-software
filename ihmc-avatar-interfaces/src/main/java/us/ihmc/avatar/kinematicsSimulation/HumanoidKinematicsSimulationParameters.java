@@ -5,6 +5,7 @@ import us.ihmc.tools.UnitConversions;
 
 public class HumanoidKinematicsSimulationParameters
 {
+   private boolean createPeriodicThread = true;
    private boolean createYoVariableServer = false;
    private boolean logToFile = false;
    private PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
@@ -116,9 +117,24 @@ public class HumanoidKinematicsSimulationParameters
    {
       return runNoFasterThanMaxRealtimeRate;
    }
+   
+   public void setMaxRealtimeRate(double maxRealtimeRate)
+   {
+      this.maxRealtimeRate = maxRealtimeRate;
+   }
 
    public double getMaxRealtimeRate()
    {
       return maxRealtimeRate;
+   }
+
+   public boolean isPeriodicThreadEnabled()
+   {
+      return createPeriodicThread;
+   }
+
+   public void setEnablePeriodicThread(boolean createPeriodicThread)
+   {
+      this.createPeriodicThread = createPeriodicThread;
    }
 }
