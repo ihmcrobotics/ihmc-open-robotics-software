@@ -73,6 +73,8 @@ public class RDXAffordanceFrames
       {
          activeMenu[0] = this.menu;
          addFrame(handPose);
+         // add a spot for the object transform associated with this frame
+         objectTransforms.add(new RigidBodyTransform(objectTransformToWorld));
          // add an empty spot for the hand configuration
          handConfigurations.add(null);
          // select the frame you've just added
@@ -162,8 +164,6 @@ public class RDXAffordanceFrames
       colorIndex++;
       // no hand configuration is set right when you add a new frame
       selectedFrameConfiguration = null;
-      // add a spot for the object transform associated with this frame
-      objectTransforms.add(new RigidBodyTransform(objectTransformToWorld));
    }
 
    public void selectFrame(int index)

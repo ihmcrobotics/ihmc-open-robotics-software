@@ -523,6 +523,7 @@ public class RDXAffordanceEditorUI
             JSONTools.toJSON(jsonNode, new RigidBodyTransform(objectBuilder.getSelectedObject().getInitialPose()));
             ArrayNode framesArrayNode = jsonNode.putArray("frames");
             var preGraspObjectTransforms = preGraspFrames.getObjectTransforms();
+            LogTools.info(preGraspObjectTransforms.size());
             var preGraspHandConfigurations = preGraspFrames.getHandConfigurations();
             jsonNode.put("numberPreGraspFrames", preGraspObjectTransforms.size());
             for (int i = 0; i < preGraspObjectTransforms.size(); i++)
