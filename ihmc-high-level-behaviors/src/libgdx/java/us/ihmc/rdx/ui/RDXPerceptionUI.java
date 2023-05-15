@@ -1,5 +1,7 @@
 package us.ihmc.rdx.ui;
 
+import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -17,6 +19,7 @@ import us.ihmc.rdx.ui.graphics.ros2.*;
 import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Topic;
 
 import java.net.URISyntaxException;
 
@@ -50,93 +53,32 @@ public class RDXPerceptionUI
          @Override
          public void create()
          {
-            globalVisualizersUI.addVisualizer(new RDXROS2PlanarRegionsVisualizer("Rapid Regions",
-                                                                                 ros2Node,
-                                                                                 PerceptionAPI.PERSPECTIVE_RAPID_REGIONS));
+            addPlanarRegionsVisualizer("Rapid Regions", PerceptionAPI.PERSPECTIVE_RAPID_REGIONS);
+            addPlanarRegionsVisualizer("Rapid Regions", PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS);
 
-            globalVisualizersUI.addVisualizer(new RDXROS2PlanarRegionsVisualizer("Rapid Regions",
-                                                                                 ros2Node,
-                                                                                 PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS));
+            addImageMessageVisualizer("Ouster Depth", PerceptionAPI.OUSTER_DEPTH_IMAGE);
+            addImageMessageVisualizer("D455 Color", PerceptionAPI.D455_COLOR_IMAGE);
+            addImageMessageVisualizer("D455 Depth", PerceptionAPI.D455_DEPTH_IMAGE);
+            addImageMessageVisualizer("D435 Color", PerceptionAPI.D435_COLOR_IMAGE);
+            addImageMessageVisualizer("D435 Depth", PerceptionAPI.D435_DEPTH_IMAGE);
+            addImageMessageVisualizer("ZED2 Color Stereo", PerceptionAPI.ZED2_STEREO_COLOR);
+            addImageMessageVisualizer("Blackfly Fujinon Right", PerceptionAPI.BLACKFLY_FISHEYE_COLOR_IMAGE.get(RobotSide.RIGHT));
 
-            globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("Ouster Depth",
-                                                                                PubSubImplementation.FAST_RTPS,
-                                                                                PerceptionAPI.OUSTER_DEPTH_IMAGE));
+            addColoredPointCloudVisualizer("L515 Colored Depth", PerceptionAPI.L515_DEPTH_IMAGE, PerceptionAPI.L515_COLOR_IMAGE);
+            addColoredPointCloudVisualizer("D435 Colored Depth", PerceptionAPI.D435_DEPTH_IMAGE, PerceptionAPI.D435_COLOR_IMAGE);
+            addColoredPointCloudVisualizer("D455 Colored Depth", PerceptionAPI.D455_DEPTH_IMAGE, PerceptionAPI.D455_COLOR_IMAGE);
 
-            globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("L515 Color",
-                                                                                PubSubImplementation.FAST_RTPS,
-                                                                                PerceptionAPI.L515_COLOR_IMAGE));
 
-            globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("L515 Depth",
-                                                                                PubSubImplementation.FAST_RTPS,
-                                                                                PerceptionAPI.L515_DEPTH_IMAGE));
-
-            globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("D455 Color",
-                                                                                PubSubImplementation.FAST_RTPS,
-                                                                                PerceptionAPI.D455_COLOR_IMAGE));
-
-            globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("D455 Depth",
-                                                                                PubSubImplementation.FAST_RTPS,
-                                                                                PerceptionAPI.D455_DEPTH_IMAGE));
-
-            RDXROS2ColoredPointCloudVisualizer d455ColoredDepthVisualizer = new RDXROS2ColoredPointCloudVisualizer("D455 Colored Depth",
-                                                                                                                   PubSubImplementation.FAST_RTPS,
-                                                                                                                   PerceptionAPI.D455_DEPTH_IMAGE,
-                                                                                                                   PerceptionAPI.D455_COLOR_IMAGE);
-            d455ColoredDepthVisualizer.setSubscribed(true);
-            d455ColoredDepthVisualizer.setActive(true);
-            globalVisualizersUI.addVisualizer(d455ColoredDepthVisualizer);
-
-            globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("D455 Color",
-                                                                                PubSubImplementation.FAST_RTPS,
-                                                                                PerceptionAPI.D455_COLOR_IMAGE));
-
-            globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("D455 Depth",
-                                                                                PubSubImplementation.FAST_RTPS,
-                                                                                PerceptionAPI.D455_DEPTH_IMAGE));
-
-            globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("D435 Color",
-                                                                                PubSubImplementation.FAST_RTPS,
-                                                                                PerceptionAPI.D435_COLOR_IMAGE));
-
-            globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("D435 Depth",
-                                                                                PubSubImplementation.FAST_RTPS,
-                                                                                PerceptionAPI.D435_DEPTH_IMAGE));
-
-            globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("ZED2 Color Stereo",
-                                                                                PubSubImplementation.FAST_RTPS,
-                                                                                PerceptionAPI.ZED2_STEREO_COLOR));
-
-            RDXROS2BigVideoVisualizer blackflyRightVideoVisualizer = new RDXROS2BigVideoVisualizer("IHMC Blackfly Right",
-                                                                                                   PubSubImplementation.FAST_RTPS,
-                                                                                                   PerceptionAPI.BLACKFLY_VIDEO.get(RobotSide.RIGHT));
-            blackflyRightVideoVisualizer.setSubscribed(true);
-            globalVisualizersUI.addVisualizer(blackflyRightVideoVisualizer);
-
-            RDXROS2ColoredPointCloudVisualizer l515ColoredDepthVisualizer = new RDXROS2ColoredPointCloudVisualizer("L515 Colored Depth",
-                                                                                                                   PubSubImplementation.FAST_RTPS,
-                                                                                                                   PerceptionAPI.L515_DEPTH_IMAGE,
-                                                                                                                   PerceptionAPI.L515_COLOR_IMAGE);
-            l515ColoredDepthVisualizer.setSubscribed(true);
-            globalVisualizersUI.addVisualizer(l515ColoredDepthVisualizer);
-
-            RDXROS2ColoredPointCloudVisualizer d435ColoredDepthVisualizer = new RDXROS2ColoredPointCloudVisualizer("D435 Colored Depth",
-                                                                                                                   PubSubImplementation.FAST_RTPS,
-                                                                                                                   PerceptionAPI.D435_DEPTH_IMAGE,
-                                                                                                                   PerceptionAPI.D435_COLOR_IMAGE);
-            d435ColoredDepthVisualizer.setSubscribed(true);
-            globalVisualizersUI.addVisualizer(d435ColoredDepthVisualizer);
-
-            RDXROS2PointCloudVisualizer l515ColoredPointCloudVisualizer = new RDXROS2PointCloudVisualizer("L515 Colored Point Cloud",
-                                                                                                          ros2Node,
-                                                                                                          PerceptionAPI.FUSED_SENSOR_HEAD_POINT_CLOUD);
-            l515ColoredPointCloudVisualizer.setSubscribed(true);
-            globalVisualizersUI.addVisualizer(l515ColoredPointCloudVisualizer);
-
-            RDXROS2PointCloudVisualizer d435ColoredPointCloudVisualizer = new RDXROS2PointCloudVisualizer("D435 Colored Point Cloud",
-                                                                                                          ros2Node,
-                                                                                                          PerceptionAPI.D435_COLORED_POINT_CLOUD);
-            d435ColoredPointCloudVisualizer.setSubscribed(true);
-            globalVisualizersUI.addVisualizer(d435ColoredPointCloudVisualizer);
+            RDXROS2ColoredPointCloudVisualizer ousterFisheyeColoredPointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer(
+                  "Ouster Fisheye Colored Point Cloud",
+                  PubSubImplementation.FAST_RTPS,
+                  PerceptionAPI.OUSTER_DEPTH_IMAGE,
+                  PerceptionAPI.BLACKFLY_FISHEYE_COLOR_IMAGE.get(RobotSide.RIGHT));
+            ousterFisheyeColoredPointCloudVisualizer.setSubscribed(true);
+            ousterFisheyeColoredPointCloudVisualizer.setActive(true);
+            ousterFisheyeColoredPointCloudVisualizer.setPointSize(0.004f);
+            ousterFisheyeColoredPointCloudVisualizer.setLevelOfColorDetail(2);
+            globalVisualizersUI.addVisualizer(ousterFisheyeColoredPointCloudVisualizer);
 
             RDXROS2OusterPointCloudVisualizer ousterPointCloudVisualizer = new RDXROS2OusterPointCloudVisualizer("Ouster Point Cloud",
                                                                                                                  PubSubImplementation.FAST_RTPS,
@@ -150,7 +92,6 @@ public class RDXPerceptionUI
                                                                                                     PerceptionAPI.MOCAP_RIGID_BODY);
             mocapPoseVisualizer.setSubscribed(true);
             globalVisualizersUI.addVisualizer(mocapPoseVisualizer);
-
 
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             buildingConstructor = new RDXBuildingConstructor(baseUI.getPrimary3DPanel());
@@ -179,6 +120,26 @@ public class RDXPerceptionUI
             baseUI.getPrimaryScene().addRenderableProvider(buildingConstructor::getRealRenderables, RDXSceneLevel.MODEL);
 
             globalVisualizersUI.create();
+         }
+
+         private void addImageMessageVisualizer(String name, ROS2Topic<ImageMessage> topic)
+         {
+            globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer(name, PubSubImplementation.FAST_RTPS, topic));
+         }
+
+         private void addPlanarRegionsVisualizer(String name, ROS2Topic<PlanarRegionsListMessage> topic)
+         {
+            globalVisualizersUI.addVisualizer(new RDXROS2PlanarRegionsVisualizer(name, ros2Node, topic));
+         }
+
+         private void addColoredPointCloudVisualizer(String topic, ROS2Topic<ImageMessage> colorTopic, ROS2Topic<ImageMessage> depthTopic)
+         {
+            RDXROS2ColoredPointCloudVisualizer l515ColoredDepthVisualizer = new RDXROS2ColoredPointCloudVisualizer("L515 Colored Depth",
+                                                                                                                   PubSubImplementation.FAST_RTPS,
+                                                                                                                   depthTopic,
+                                                                                                                   colorTopic);
+            l515ColoredDepthVisualizer.setSubscribed(true);
+            globalVisualizersUI.addVisualizer(l515ColoredDepthVisualizer);
          }
 
          @Override

@@ -192,5 +192,7 @@ public class ZED2ColorStereoPublisher
    {
       String cameraId = "";
       ZED2ColorStereoPublisher zed = new ZED2ColorStereoPublisher(cameraId, 1080, 3840, 30, PerceptionAPI.ZED2_STEREO_COLOR, ReferenceFrame::getWorldFrame);
+      zed.run();
+      ThreadTools.sleepForever();
    }
 }
