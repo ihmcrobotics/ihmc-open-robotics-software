@@ -12,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsCustomizer;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
-import us.ihmc.perception.rapidRegions.RapidRegionsDebutOutputGenerator;
+import us.ihmc.perception.rapidRegions.RapidPatchesDebugOutputGenerator;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -32,7 +32,7 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
 
    private RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor;
    private RapidPlanarRegionsCustomizer rapidPlanarRegionsCustomizer;
-   private RapidRegionsDebutOutputGenerator rapidRegionsDebutOutputGenerator;
+   private RapidPatchesDebugOutputGenerator rapidPatchesDebugOutputGenerator;
 
    private ImGuiStoredPropertySetTuner gpuRegionParametersTuner;
    private ImGuiStoredPropertySetTuner polygonizerParametersTuner;
@@ -74,7 +74,7 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
    {
       this.rapidPlanarRegionsExtractor = rapidPlanarRegionsExtractor;
       this.rapidPlanarRegionsCustomizer = rapidPlanarRegionsExtractor.getRapidPlanarRegionsCustomizer();
-      this.rapidRegionsDebutOutputGenerator = rapidPlanarRegionsExtractor.getDebugger();
+      this.rapidPatchesDebugOutputGenerator = rapidPlanarRegionsExtractor.getDebugger();
 
       patchImageWidth = rapidPlanarRegionsExtractor.getPatchImageWidth();
       patchImageHeight = rapidPlanarRegionsExtractor.getPatchImageHeight();
@@ -134,7 +134,7 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
       gyImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getCyImage().getBytedecoOpenCVMat());
       gzImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getCzImage().getBytedecoOpenCVMat());
 
-      debugExtractionPanel.displayByte(rapidRegionsDebutOutputGenerator.getDebugImage());
+      debugExtractionPanel.displayByte(rapidPatchesDebugOutputGenerator.getDebugImage());
    }
 
    public void render3DGraphics(PlanarRegionsList planarRegions, ReferenceFrame cameraFrame)

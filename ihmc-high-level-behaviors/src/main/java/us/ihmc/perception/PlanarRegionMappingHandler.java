@@ -112,8 +112,6 @@ public class PlanarRegionMappingHandler
    private final ArrayList<Point3D> sensorPositionBuffer = new ArrayList<>();
    private final ArrayList<Quaternion> sensorOrientationBuffer = new ArrayList<>();
 
-   private final RapidPatchesBasedICP rapidPatchesBasedICP = new RapidPatchesBasedICP();
-
    private PerceptionDataLoader perceptionDataLoader;
 
    public PlanarRegionMappingHandler(boolean smoothing)
@@ -177,7 +175,6 @@ public class PlanarRegionMappingHandler
       String version = simulation ? "Simulation" : "";
 
       rapidRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth, 654.29, 654.29, 651.14, 361.89, version);
-      rapidPatchesBasedICP.create(openCLManager, openCLProgram, depthHeight, depthWidth);
       depth16UC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
 
       perceptionDataLoader.loadCompressedDepth(sensorLogChannelName, perceptionLogIndex, depthPointer, depth16UC1Image.getBytedecoOpenCVMat());
@@ -192,7 +189,7 @@ public class PlanarRegionMappingHandler
       planarRegionMap = new PlanarRegionMap(smoothing, "Spherical");
       sensorLogChannelName = PerceptionLoggerConstants.OUSTER_DEPTH_NAME;
       rapidRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth);
-      rapidPatchesBasedICP.create(openCLManager, openCLProgram, depthHeight, depthWidth);
+
       depth16UC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
 
       perceptionDataLoader.loadCompressedDepth(sensorLogChannelName, perceptionLogIndex, depthPointer, depth16UC1Image.getBytedecoOpenCVMat());

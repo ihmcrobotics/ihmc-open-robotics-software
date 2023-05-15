@@ -73,7 +73,7 @@ public class RapidPlanarRegionsExtractor
    private int filterPatchImageHeight;
    private int filterPatchImageWidth;
 
-   private final RapidRegionsDebutOutputGenerator debugger = new RapidRegionsDebutOutputGenerator();
+   private final RapidPatchesDebugOutputGenerator debugger = new RapidPatchesDebugOutputGenerator();
    private final Stack<PatchGraphRecursionBlock> depthFirstSearchStack = new Stack<>();
    private final RecyclingArrayList<RapidPlanarRegion> rapidPlanarRegions = new RecyclingArrayList<>(RapidPlanarRegion::new);
    private final Comparator<RapidRegionRing> boundaryLengthComparator = Comparator.comparingInt(regionRing -> regionRing.getBoundaryIndices().size());
@@ -663,7 +663,7 @@ public class RapidPlanarRegionsExtractor
       return planarRegionsList;
    }
 
-   public RapidRegionsDebutOutputGenerator getDebugger()
+   public RapidPatchesDebugOutputGenerator getDebugger()
    {
       return debugger;
    }
