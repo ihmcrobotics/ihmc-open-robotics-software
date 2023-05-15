@@ -52,7 +52,7 @@ import us.ihmc.tools.io.WorkspacePathTools;
 import us.ihmc.valkyrie.behaviors.ValkyrieLookAndStepParameters;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.diagnostic.ValkyrieDiagnosticParameters;
-import us.ihmc.valkyrie.fingers.SimulatedValkyrieFingerControlThread;
+import us.ihmc.valkyrie.fingers.SimulatedValkyrieHandFingerControlThread;
 import us.ihmc.valkyrie.fingers.ValkyrieHandModel;
 import us.ihmc.valkyrie.parameters.ValkyrieCoPTrajectoryParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieCollisionBoxProvider;
@@ -496,15 +496,15 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public SimulatedValkyrieFingerControlThread createSimulatedHandController(RealtimeROS2Node realtimeROS2Node)
+   public SimulatedValkyrieHandFingerControlThread createSimulatedHandController(RealtimeROS2Node realtimeROS2Node)
    {
       if (!robotVersion.hasFingers())
          return null;
 
-      return new SimulatedValkyrieFingerControlThread(createFullRobotModel(),
-                                                      realtimeROS2Node,
-                                                      ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
-                                                      ROS2Tools.getControllerInputTopic(getSimpleRobotName()));
+      return new SimulatedValkyrieHandFingerControlThread(createFullRobotModel(),
+                                                          realtimeROS2Node,
+                                                          ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
+                                                          ROS2Tools.getControllerInputTopic(getSimpleRobotName()));
    }
 
    @Override

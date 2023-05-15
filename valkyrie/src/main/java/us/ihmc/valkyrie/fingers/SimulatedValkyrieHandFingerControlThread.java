@@ -5,11 +5,13 @@ import java.util.List;
 
 import us.ihmc.avatar.AvatarSimulatedHandControlThread;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commons.Conversions;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -17,7 +19,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
-public class SimulatedValkyrieFingerControlThread implements AvatarSimulatedHandControlThread
+public class SimulatedValkyrieHandFingerControlThread implements AvatarSimulatedHandControlThread
 {
    private final YoRegistry registry = new YoRegistry("HandControlThread");
 
@@ -29,14 +31,14 @@ public class SimulatedValkyrieFingerControlThread implements AvatarSimulatedHand
 
    private final FullHumanoidRobotModel fullRobotModel;
    private final HumanoidRobotContextData humanoidRobotContextData;
-   private final SimulatedValkyrieFingerController controller;
+   private final SideDependentList<SimulatedValkyrieSingleHandFingerController> controllers;
 
    private final List<OneDoFJointBasics> controlledFingerJoints = new ArrayList<>();
 
-   public SimulatedValkyrieFingerControlThread(FullHumanoidRobotModel fullRobotModel,
-                                               RealtimeROS2Node realtimeROS2Node,
-                                               ROS2Topic<?> outputTopic,
-                                               ROS2Topic<?> inputTopic)
+   public SimulatedValkyrieHandFingerControlThread(FullHumanoidRobotModel fullRobotModel,
+                                                   RealtimeROS2Node realtimeROS2Node,
+                                                   ROS2Topic<?> outputTopic,
+                                                   ROS2Topic<?> inputTopic)
    {
       this.fullRobotModel = fullRobotModel;
 
@@ -46,13 +48,15 @@ public class SimulatedValkyrieFingerControlThread implements AvatarSimulatedHand
       }
 
       humanoidRobotContextData = new HumanoidRobotContextData(controlledFingerJoints);
-      controller = new SimulatedValkyrieFingerController(fullRobotModel,
-                                                         humanoidRobotContextData.getJointDesiredOutputList(),
-                                                         controllerTime,
-                                                         realtimeROS2Node,
-                                                         outputTopic,
-                                                         inputTopic);
-      registry.addChild(controller.getYoRegistry());
+      LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = humanoidRobotContextData.getJointDesiredOutputList();
+      controllers = new SideDependentList<>(side -> new SimulatedValkyrieSingleHandFingerController(side,
+                                                                                                    fullRobotModel,
+                                                                                                    jointDesiredOutputList,
+                                                                                                    controllerTime,
+                                                                                                    realtimeROS2Node,
+                                                                                                    outputTopic,
+                                                                                                    inputTopic));
+      controllers.values().forEach(controller -> registry.addChild(controller.getYoRegistry()));
 
       firstTick.set(true);
    }
@@ -85,11 +89,13 @@ public class SimulatedValkyrieFingerControlThread implements AvatarSimulatedHand
 
          if (firstTick.getValue())
          {
-            controller.initialize();
+            for (RobotSide robotSide : RobotSide.values)
+               controllers.get(robotSide).initialize();
             firstTick.set(false);
          }
 
-         controller.doControl();
+         for (RobotSide robotSide : RobotSide.values)
+            controllers.get(robotSide).doControl();
          humanoidRobotContextData.setControllerRan(true);
       }
       catch (Exception e)
@@ -131,6 +137,7 @@ public class SimulatedValkyrieFingerControlThread implements AvatarSimulatedHand
    @Override
    public void cleanup()
    {
-      controller.cleanup();
+      for (RobotSide robotSide : RobotSide.values)
+         controllers.get(robotSide).cleanup();
    }
 }
