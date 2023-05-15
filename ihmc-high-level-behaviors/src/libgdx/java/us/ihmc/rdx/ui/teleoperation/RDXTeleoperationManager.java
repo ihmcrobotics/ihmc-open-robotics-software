@@ -55,7 +55,23 @@ import java.util.List;
 import java.util.Set;
 
 /**
- *  Possibly extract simple controller controls to a smaller panel class, like remote safety controls or something.
+ * The teleoperation manager is the top level class for managing UI for
+ * teleoperation. It should contain a bunch of additional managers and UI
+ * tools with clear sub-domains.
+ * <br/>
+ * This class manages the communications with the robot which include ROS 2
+ * and YoVariable Client-Server protocols. It should strive to allow field
+ * members access to these communications in order not to duplicate
+ * network traffic or overhead. This is not always possible or easy due
+ * to threading constraints.
+ * <br/>
+ * Second level managers:
+ * - {@link RDXHandConfigurationManager Hand manager}
+ * - Arm manager:
+ * - Locomotion manager
+ *
+ * TODO:
+ * - Possibly extract simple controller controls to a smaller panel class, like remote safety controls or something.
  */
 public class RDXTeleoperationManager extends ImGuiPanel
 {
