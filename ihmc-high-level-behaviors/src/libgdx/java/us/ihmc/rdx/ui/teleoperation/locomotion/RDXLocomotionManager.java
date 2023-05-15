@@ -68,7 +68,6 @@ public class RDXLocomotionManager
    private boolean isPlacingFootstep = false;
 
    private final RDXWalkingLowLevelMessenger walkingLowLevelMessenger;
-   private boolean spaceBarPressed = false;
    boolean wasWalking = false;
 
 
@@ -252,32 +251,23 @@ public class RDXLocomotionManager
       interactableFootstepPlan.renderImGuiWidgets();
       ImGui.checkbox(labels.get("Show footstep related graphics"), showGraphics);
 
-      if (ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
+      if (ImGui.isKeyReleased(ImGuiTools.getSpaceKey()))
       {
-         if (!spaceBarPressed)
+         if (!wasWalking && interactableFootstepPlan.getNumberOfFootsteps() > 0)
          {
-            spaceBarPressed = true;
-
-            if (!wasWalking && interactableFootstepPlan.getNumberOfFootsteps() > 0)
-            {
-               wasWalking = true;
-               LogTools.info("Walking started");
-               interactableFootstepPlan.walkFromSteps();
-               walkingLowLevelMessenger.setRobotPausedWalking(false);
-            }
-            else if (walkingLowLevelMessenger.getRobotPausedWalking())
-            {
-               walkingLowLevelMessenger.sendContinueWalkingRequest();
-            }
-            else
-            {
-               walkingLowLevelMessenger.sendPauseWalkingRequest();
-            }
+            wasWalking = true;
+            LogTools.info("Walking started");
+            interactableFootstepPlan.walkFromSteps();
+            walkingLowLevelMessenger.setRobotPausedWalking(false);
          }
-      }
-      else
-      {
-         spaceBarPressed = false;
+         else if (walkingLowLevelMessenger.getRobotPausedWalking())
+         {
+            walkingLowLevelMessenger.sendContinueWalkingRequest();
+         }
+         else
+         {
+            walkingLowLevelMessenger.sendPauseWalkingRequest();
+         }
       }
 
       if (wasWalking && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() == 0)
