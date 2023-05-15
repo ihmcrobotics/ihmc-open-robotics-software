@@ -6,11 +6,15 @@ import java.util.LinkedList;
 
 import javax.swing.JButton;
 
+import javafx.event.EventHandler;
+import javafx.scene.control.Button;
+import javafx.scene.control.Tooltip;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
+import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.robot.ExternalWrenchPointDefinition;
 import us.ihmc.scs2.definition.yoComposite.YoTuple3DDefinition;
@@ -39,6 +43,7 @@ public class PushRobotControllerSCS2 implements Controller
    private final YoDouble pushTimeSwitch;
    private final YoInteger pushNumber;
    private final YoBoolean isBeingPushed;
+   private final YoBoolean applyPush;
    private final YoDouble pushDelay;
 
    private final DoubleProvider yoTime;
@@ -69,7 +74,8 @@ public class PushRobotControllerSCS2 implements Controller
       this.jointNameToApplyForce = jointNameToApplyForce;
       this.visualScale = visualScale;
       registry = new YoRegistry(jointNameToApplyForce + "_" + getClass().getSimpleName());
-      forcePoint = pushableRobot.getJoint(jointNameToApplyForce).getAuxialiryData()
+      forcePoint = pushableRobot.getJoint(jointNameToApplyForce)
+                                .getAuxialiryData()
                                 .addExternalWrenchPoint(new ExternalWrenchPointDefinition(jointNameToApplyForce + "_externalForcePoint", forcePointOffset));
 
       pushDuration = new YoDouble(jointNameToApplyForce + "_pushDuration", registry);
@@ -80,6 +86,7 @@ public class PushRobotControllerSCS2 implements Controller
       pushNumber = new YoInteger(jointNameToApplyForce + "_pushNumber", registry);
       isBeingPushed = new YoBoolean(jointNameToApplyForce + "_isBeingPushed", registry);
       pushDelay = new YoDouble(jointNameToApplyForce + "_pushDelay", registry);
+      applyPush = new YoBoolean(jointNameToApplyForce + "_applyPush", registry);
 
       pushableRobot.getControllerManager().addController(this);
 
@@ -134,25 +141,20 @@ public class PushRobotControllerSCS2 implements Controller
       pushDelay.set(delay);
    }
 
-   public void addPushButtonToSCS(final SimulationConstructionSet scs)
+   public void addPushButtonToSCS(final SimulationConstructionSet2 scs)
    {
       if (scs != null)
       {
-         JButton button = new JButton("PushRobot");
-         button.setToolTipText("Click to push the robot as defined in the variables 'pushDirection' and 'pushMagnitude'");
+         Button button = new Button("PushRobot");
+         button.setTooltip(new Tooltip("Click to push the robot as defined in the variables 'pushDirection' and 'pushMagnitude'"));
 
-         ActionListener listener = new ActionListener()
-         {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-               pushCondition = null;
-               applyForce();
-            }
-         };
+         button.setOnAction(event ->
+                            {
+                               pushCondition = null;
+                               applyPush.set(true);
+                            });
 
-         button.addActionListener(listener);
-         scs.addButton(button);
+         scs.addCustomGUIControl(button);
       }
    }
 
@@ -209,6 +211,12 @@ public class PushRobotControllerSCS2 implements Controller
    @Override
    public void doControl()
    {
+      if (applyPush.getBooleanValue())
+      {
+         applyPush.set(false);
+         applyForce();
+      }
+
       if (pushCondition != null)
       {
          if (pushCondition.testCondition(yoTime.getValue()))
