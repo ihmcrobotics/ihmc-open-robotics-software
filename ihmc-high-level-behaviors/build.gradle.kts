@@ -34,7 +34,7 @@ javafxDependencies {
 missionControlDependencies {
    api("us.ihmc:ihmc-commons:0.32.0")
    api("us.ihmc:log-tools:0.6.3")
-   api("us.ihmc:ihmc-ros2-library:0.22.4")
+   api("us.ihmc:ihmc-ros2-library:0.22.6")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-interfaces:source")
@@ -50,7 +50,7 @@ libgdxDependencies {
    api("us.ihmc:ihmc-perception-bytedeco:source")
    api("us.ihmc:ihmc-graphics-libgdx:source")
    api("us.ihmc:scs2-definition:17-0.14.3")
-   api("us.ihmc:mecano-graphviz:17-0.12.2")
+   api("us.ihmc:mecano-graphviz:17-0.12.3")
    api("com.badlogicgames.gdx-controllers:gdx-controllers-core:2.2.1")
    api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.1")
    api("com.badlogicgames.gdx:gdx-bullet:1.11.0")

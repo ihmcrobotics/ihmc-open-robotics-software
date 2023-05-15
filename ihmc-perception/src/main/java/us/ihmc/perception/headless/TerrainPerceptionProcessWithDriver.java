@@ -4,10 +4,11 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import us.ihmc.commons.Conversions;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
@@ -298,11 +299,12 @@ public class TerrainPerceptionProcessWithDriver
       */
 
       String l515SerialNumber = System.getProperty("l515.serial.number", "F1121365"); // Benchtop L515: F1120592, Tripod: F1121365, Local: F0245563
-      new TerrainPerceptionProcessWithDriver(l515SerialNumber, RealsenseConfiguration.L515_COLOR_720P_DEPTH_768P_30HZ,
-                                             ROS2Tools.L515_DEPTH_IMAGE,
-                                             ROS2Tools.L515_COLOR_IMAGE,
-                                             ROS2Tools.PERSPECTIVE_RAPID_REGIONS_WITH_POSE,
-                                             ROS2Tools.PERSPECTIVE_RAPID_REGIONS,
+      new TerrainPerceptionProcessWithDriver(l515SerialNumber,
+                                             RealsenseConfiguration.L515_COLOR_720P_DEPTH_768P_30HZ,
+                                             PerceptionAPI.L515_DEPTH_IMAGE,
+                                             PerceptionAPI.L515_COLOR_IMAGE,
+                                             PerceptionAPI.PERSPECTIVE_RAPID_REGIONS_WITH_POSE,
+                                             PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
                                              ReferenceFrame::getWorldFrame);
    }
 }

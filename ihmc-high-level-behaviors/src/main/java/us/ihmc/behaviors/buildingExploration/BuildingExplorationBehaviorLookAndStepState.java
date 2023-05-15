@@ -8,6 +8,7 @@ import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -84,7 +85,7 @@ class BuildingExplorationBehaviorLookAndStepState implements State
       syncedRobot = helper.newSyncedRobot();
 
       bodyPath = helper.subscribeViaReference(LookAndStepBehaviorAPI.BodyPathPlanForUI, new ArrayList<>());
-      helper.subscribeViaCallback(ROS2Tools.LIDAR_REA_REGIONS, planarRegions::set);
+      helper.subscribeViaCallback(PerceptionAPI.LIDAR_REA_REGIONS, planarRegions::set);
       helper.subscribeToRobotConfigurationDataViaCallback(robotConfigurationData::set);
       helper.subscribeToControllerViaCallback(FootstepStatusMessage.class, footstepStatusMessage ->
       {

@@ -7,6 +7,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
@@ -68,7 +69,7 @@ public class RDXWebcamROS2SubscriberDemo
             baseUI.create();
 
             realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "videosub");
-            ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.BIG_VIDEO_TEST, ROS2QosProfile.BEST_EFFORT(), subscriber ->
+            ROS2Tools.createCallbackSubscription(realtimeROS2Node, PerceptionAPI.BIG_VIDEO_TEST, ROS2QosProfile.BEST_EFFORT(), subscriber ->
             {
                receiveFrequencyPlot.ping();
 

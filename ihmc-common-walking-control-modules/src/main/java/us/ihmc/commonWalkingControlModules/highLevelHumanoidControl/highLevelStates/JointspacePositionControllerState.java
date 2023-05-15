@@ -104,6 +104,17 @@ public class JointspacePositionControllerState extends HighLevelControllerState
       }
    }
 
+   public boolean isExecutingTrajectory()
+   {
+      for (int i = 0; i < jointManagers.length; i++)
+      {
+         if (!jointManagers[i].trajectoryDone.getValue())
+            return true;
+      }
+
+      return false;
+   }
+
    @Override
    public void onEntry()
    {
