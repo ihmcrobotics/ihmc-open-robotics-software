@@ -44,9 +44,8 @@ public class VideoDataPlayer
 
    private final File videoFile;
 
-   private int currentlyShowingIndex = 0;
-   private long currentlyShowingRobottimestamp = 0;
-   private long upcomingRobottimestamp = 0;
+   private long currentRobotTimestamp = 0;
+   private long upcomingRobotTimestamp = 0;
 
    public VideoDataPlayer(Camera camera, File dataDirectory, boolean hasTimeBase) throws IOException
    {
@@ -73,32 +72,33 @@ public class VideoDataPlayer
       viewer = new HideableMediaFrame(camera.getNameAsString(), demuxer.getWidth(), demuxer.getHeight());
    }
 
-   public synchronized void showVideoFrame(long timestamp)
+   public synchronized void showVideoFrame(long queryRobotTimestamp)
    {
-      if (timestamp >= currentlyShowingRobottimestamp && timestamp < upcomingRobottimestamp)
+      if (queryRobotTimestamp >= currentRobotTimestamp && queryRobotTimestamp < upcomingRobotTimestamp)
       {
          return;
       }
 
-      long previousTimestamp = videoTimestamps[currentlyShowingIndex];
+      int index = searchRobotTimestampIndex(queryRobotTimestamp);
+      currentRobotTimestamp = robotTimestamps[index];
 
-      long videoTimestamp;
-      long nextVideoTimestamp = videoTimestamps[currentlyShowingIndex];
+      long videoTimestamp = videoTimestamps[index];
+      long previousTimestamp = videoTimestamps[index];
+      long nextVideoTimestamp = videoTimestamps[index];
 
-      videoTimestamp = getVideoTimestampWithBinarySearch(timestamp);
 
-      if (robotTimestamps.length > currentlyShowingIndex + 1)
+      if (robotTimestamps.length > index + 1)
       {
-         nextVideoTimestamp = videoTimestamps[currentlyShowingIndex + 1];
+         nextVideoTimestamp = videoTimestamps[index + 1];
       }
 
-      if (currentlyShowingIndex + 1 < robotTimestamps.length)
+      if (index + 1 < robotTimestamps.length)
       {
-         upcomingRobottimestamp = robotTimestamps[currentlyShowingIndex + 1];
+         upcomingRobotTimestamp = robotTimestamps[index + 1];
       }
       else
       {
-         upcomingRobottimestamp = currentlyShowingRobottimestamp;
+         upcomingRobotTimestamp = currentRobotTimestamp;
       }
 
       if (previousTimestamp == videoTimestamp)
@@ -112,7 +112,7 @@ public class VideoDataPlayer
          copyForWriting.cameraTargetPTS = nextVideoTimestamp;
          copyForWriting.cameraCurrentPTS = demuxer.getCurrentPTS();
          copyForWriting.cameraPreviousPTS = previousTimestamp;
-         copyForWriting.robotTimestamp = currentlyShowingRobottimestamp;
+         copyForWriting.robotTimestamp = currentRobotTimestamp;
 
          demuxer.seekToPTS(videoTimestamp);
          YUVPicture nextFrame = demuxer.getNextFrame();
@@ -132,29 +132,25 @@ public class VideoDataPlayer
       viewer.setVisible(visible);
    }
 
-   private long getVideoTimestampWithBinarySearch(long timestamp)
+   private int searchRobotTimestampIndex(long queryRobotTimestamp)
    {
-      if (timestamp <= robotTimestamps[0])
+      int index;
+
+      if (queryRobotTimestamp <= robotTimestamps[0])
+         return 0;
+
+      if (queryRobotTimestamp >= robotTimestamps[robotTimestamps.length-1])
+         return robotTimestamps.length - 2;
+
+      index = Arrays.binarySearch(robotTimestamps, queryRobotTimestamp);
+
+      if (index < 0)
       {
-         currentlyShowingIndex = 0;
-         return videoTimestamps[currentlyShowingIndex];
+         int nextIndex = -index - 1; // insertionPoint
+         index = nextIndex;
       }
 
-      if (timestamp >= robotTimestamps[robotTimestamps.length-1])
-      {
-         currentlyShowingIndex = robotTimestamps.length - 2;
-         return videoTimestamps[currentlyShowingIndex];
-      }
-
-      currentlyShowingIndex = Arrays.binarySearch(robotTimestamps, timestamp);
-
-      if (currentlyShowingIndex < 0)
-      {
-         int nextIndex = -currentlyShowingIndex - 1; // insertionPoint
-         currentlyShowingIndex = nextIndex;
-      }
-
-      return videoTimestamps[currentlyShowingIndex];
+      return index;
    }
 
    private void parseTimestampData(File timestampFile) throws IOException
@@ -209,9 +205,11 @@ public class VideoDataPlayer
 
    public void exportVideo(File selectedFile, long startTimestamp, long endTimestamp, ProgressMonitorInterface monitor)
    {
+      int startIndex = searchRobotTimestampIndex(startTimestamp);
+      int endIndex = searchRobotTimestampIndex(endTimestamp);
 
-      long startVideoTimestamp = getVideoTimestampWithBinarySearch(startTimestamp);
-      long endVideoTimestamp = getVideoTimestampWithBinarySearch(endTimestamp);
+      long startVideoTimestamp = videoTimestamps[startIndex];
+      long endVideoTimestamp = videoTimestamps[endIndex];
 
       try
       {
@@ -226,9 +224,11 @@ public class VideoDataPlayer
 
    public void cropVideo(File outputFile, File timestampFile, long startTimestamp, long endTimestamp, ProgressMonitorInterface monitor) throws IOException
    {
+      int startIndex = searchRobotTimestampIndex(startTimestamp);
+      int endIndex = searchRobotTimestampIndex(endTimestamp);
 
-      long startVideoTimestamp = getVideoTimestampWithBinarySearch(startTimestamp);
-      long endVideoTimestamp = getVideoTimestampWithBinarySearch(endTimestamp);
+      long startVideoTimestamp = videoTimestamps[startIndex];
+      long endVideoTimestamp = videoTimestamps[endIndex];
 
       int frameRate = VideoConverter.crop(videoFile, outputFile, startVideoTimestamp, endVideoTimestamp, monitor);
 
