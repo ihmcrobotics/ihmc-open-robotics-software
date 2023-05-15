@@ -1,9 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
-import controller_msgs.msg.dds.DirectionalControlInputMessage;
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
-import controller_msgs.msg.dds.PauseWalkingMessage;
-import controller_msgs.msg.dds.WalkingStatusMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
@@ -142,13 +139,15 @@ public class VelocityBasedSteppingPluginFactory implements HumanoidSteppingPlugi
       fastWalkingJoystickPlugin.setStopWalkingMessenger(new StopWalkingMessenger()
       {
          private final PauseWalkingMessage message = HumanoidMessageTools.createPauseWalkingMessage(true);
+         private final AbortWalkingMessage abortWalkingMessage = new AbortWalkingMessage();
 
          @Override
          public void submitStopWalkingRequest()
          {
-            walkingCommandInputManager.submitMessage(message);
+            walkingCommandInputManager.submitMessage(abortWalkingMessage);
          }
       });
+
       fastWalkingJoystickPlugin.setStartWalkingMessenger(new StartWalkingMessenger()
       {
          private final PauseWalkingMessage message = HumanoidMessageTools.createPauseWalkingMessage(false);

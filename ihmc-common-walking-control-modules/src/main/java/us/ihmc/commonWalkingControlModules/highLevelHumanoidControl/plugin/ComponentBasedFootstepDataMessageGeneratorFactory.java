@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
-import controller_msgs.msg.dds.PauseWalkingMessage;
-import controller_msgs.msg.dds.WalkingStatusMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
@@ -153,16 +150,19 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
       continuousStepGenerator.setFootstepStatusListener(walkingStatusMessageOutputManager);
       continuousStepGenerator.setFrameBasedFootPoseProvider(referenceFrames.getSoleZUpFrames());
       continuousStepGenerator.configureWith(walkingControllerParameters);
+
       continuousStepGenerator.setStopWalkingMessenger(new StopWalkingMessenger()
       {
          private final PauseWalkingMessage message = HumanoidMessageTools.createPauseWalkingMessage(true);
+         private final AbortWalkingMessage abortWalkingMessage = new AbortWalkingMessage();
 
          @Override
          public void submitStopWalkingRequest()
          {
-            walkingCommandInputManager.submitMessage(message);
+            walkingCommandInputManager.submitMessage(abortWalkingMessage);
          }
       });
+
       continuousStepGenerator.setStartWalkingMessenger(new StartWalkingMessenger()
       {
          private final PauseWalkingMessage message = HumanoidMessageTools.createPauseWalkingMessage(false);

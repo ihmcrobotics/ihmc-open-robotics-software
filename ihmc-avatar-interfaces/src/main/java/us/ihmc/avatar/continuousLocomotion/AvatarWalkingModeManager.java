@@ -126,7 +126,7 @@ public class AvatarWalkingModeManager implements Updatable
 
    private boolean isWalkingPaused()
    {
-      return currentWalkingStatus.getEnumValue() == WalkingStatus.PAUSED || currentWalkingStatus.getEnumValue() == WalkingStatus.COMPLETED;
+      return currentWalkingStatus.getEnumValue() == WalkingStatus.PAUSED || currentWalkingStatus.getEnumValue() == WalkingStatus.COMPLETED || currentWalkingStatus.getEnumValue() == WalkingStatus.ABORT_REQUESTED;
    }
 
    private boolean isReadyForPause()
