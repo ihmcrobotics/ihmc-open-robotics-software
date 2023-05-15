@@ -3,6 +3,7 @@ package us.ihmc.behaviors.lookAndStep;
 import controller_msgs.msg.dds.*;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -124,7 +125,7 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
       helper.subscribeToControllerViaCallback(WalkingControllerFailureStatusMessage.class, message -> reset.queueReset());
 
       bodyPathPlanning.initialize(this);
-      helper.subscribeViaCallback(ROS2Tools.LIDAR_REA_REGIONS, planarRegionsListMessage ->
+      helper.subscribeViaCallback(PerceptionAPI.LIDAR_REA_REGIONS, planarRegionsListMessage ->
       {
          bodyPathPlanning.acceptMapRegions(planarRegionsListMessage);
          footstepPlanning.acceptLidarREARegions(planarRegionsListMessage);
@@ -145,7 +146,7 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
          delayFixedPlanarRegionsSubscription.setEnabled(true);
          delayFixedPlanarRegionsSubscription.setPosePublisherEnabled(true);
       }
-      helper.subscribeViaCallback(ROS2Tools.HEIGHT_MAP_OUTPUT, heightMapMessage ->
+      helper.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_OUTPUT, heightMapMessage ->
       {
          bodyPathPlanning.acceptHeightMap(heightMapMessage);
          footstepPlanning.acceptHeightMap(heightMapMessage);

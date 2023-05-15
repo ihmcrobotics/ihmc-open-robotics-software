@@ -99,7 +99,6 @@ public class AtlasJointMap implements HumanoidJointNameMap
    private final AtlasRobotVersion atlasVersion;
    private final AtlasPhysicalProperties atlasPhysicalProperties;
 
-   private final SideDependentList<String> nameOfJointsBeforeThighs = new SideDependentList<>();
    private final SideDependentList<String> nameOfJointsBeforeHands = new SideDependentList<>();
 
    private final String[] jointNamesBeforeFeet = new String[2];
@@ -188,7 +187,6 @@ public class AtlasJointMap implements HumanoidJointNameMap
 
       for (RobotSide robtSide : RobotSide.values)
       {
-         nameOfJointsBeforeThighs.put(robtSide, legJointStrings.get(robtSide).get(HIP_PITCH));
          if (atlasVersion != AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_FOREARMS)
             nameOfJointsBeforeHands.put(robtSide, armJointStrings.get(robtSide).get(SECOND_WRIST_PITCH));
          else
@@ -205,12 +203,6 @@ public class AtlasJointMap implements HumanoidJointNameMap
       if (atlasVersion != AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_FOREARMS)
          return nameOfJointsBeforeHands;
       return null;
-   }
-
-   @Override
-   public SideDependentList<String> getNameOfJointBeforeThighs()
-   {
-      return nameOfJointsBeforeThighs;
    }
 
    @Override
@@ -368,7 +360,7 @@ public class AtlasJointMap implements HumanoidJointNameMap
    }
 
    @Override
-   public RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide robotSide)
+   public RigidBodyTransform getSoleToParentFrameTransform(RobotSide robotSide)
    {
       return atlasPhysicalProperties.getSoleToAnkleFrameTransforms().get(robotSide);
    }
