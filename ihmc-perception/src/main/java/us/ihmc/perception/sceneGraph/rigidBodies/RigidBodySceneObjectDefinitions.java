@@ -28,7 +28,8 @@ public class RigidBodySceneObjectDefinitions
 
    // TODO: Get soup can model from Arghya
    public static final int CAN_OF_SOUP_MARKER_ID = 3;
-   public static final double CAN_OF_SOUP_MARKER_SIZE = 0.2032;
+   // TODO: Make simulation 0.1982
+   public static final double CAN_OF_SOUP_MARKER_SIZE = 0.1982; // Simulation 0.2032;
    public static final double CAN_OF_SOUP_RADIUS = 0.0329375;
    public static final double CAN_OF_SOUP_HEIGHT = 0.082388;
    public static final String CAN_OF_SOUP_VISUAL_MODEL_FILE_PATH = "environmentObjects/canOfSoup/CanOfSoup.g3dj";
