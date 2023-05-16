@@ -17,7 +17,7 @@ mainDependencies {
    api("com.google.guava:guava:18.0")
 
    api("us.ihmc:ihmc-robot-description:0.21.10")
-   api("us.ihmc:scs2-definition:17-0.14.5")
+   api("us.ihmc:scs2-definition:17-0.14.6")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
