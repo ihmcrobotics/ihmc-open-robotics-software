@@ -1,7 +1,11 @@
 package us.ihmc.rdx.ui.interactable;
 
 import imgui.internal.ImGui;
+import perception_msgs.msg.dds.ManuallyPlacedSceneNodeMessage;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
+import us.ihmc.perception.sceneGraph.SceneGraphAPI;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -18,11 +22,27 @@ public class RDXInteractableObjectBuilder extends ImGuiPanel
    private RDXInteractableObject selectedObject;
    private String selectedObjectName = "";
    private final SortedMap<String, String> nameModelMap = new TreeMap<>();
+   private ROS2PublishSubscribeAPI ros2;
+   private final ManuallyPlacedSceneNodeMessage objectMessage = new ManuallyPlacedSceneNodeMessage();
 
    public RDXInteractableObjectBuilder(RDXBaseUI baseUI)
    {
       super(WINDOW_NAME);
       setRenderMethod(this::renderImGuiWidgets);
+
+      selectedObject = new RDXInteractableObject(baseUI);
+      predefinedSceneNodeLibrary = PredefinedSceneNodeLibrary.defaultObjects();
+      //TODO change this to detectable when node library is updated
+      List<ArUcoDetectableNode> availableObjects = predefinedSceneNodeLibrary.getArUcoDetectableNodes();
+      for (var object : availableObjects)
+         nameModelMap.put(object.getName(), object.getVisualModelFilePath());
+   }
+
+   public RDXInteractableObjectBuilder(RDXBaseUI baseUI, ROS2PublishSubscribeAPI ros2)
+   {
+      super(WINDOW_NAME);
+      setRenderMethod(this::renderImGuiWidgets);
+      this.ros2 = ros2;
 
       selectedObject = new RDXInteractableObject(baseUI);
       predefinedSceneNodeLibrary = PredefinedSceneNodeLibrary.defaultObjects();
@@ -47,20 +67,33 @@ public class RDXInteractableObjectBuilder extends ImGuiPanel
          }
          ImGui.separator();
       }
-      if (isAnyObjectSelected() && (ImGui.button(labels.get("SET INITIAL POSE") + "##object")))
+      if (isAnyObjectSelected() && (ImGui.button(labels.get("SET POSE") + "##object")))
       {
-         selectedObject.setInitialPose();
+         selectedObject.setPose();
+         if (ros2 != null)
+            publishUpdate();
       }
       ImGui.sameLine();
-      if (isAnyObjectSelected() && imgui.ImGui.button(labels.get("RESET TO INITIAL POSE") + "##object"))
+      if (isAnyObjectSelected() && imgui.ImGui.button(labels.get("RESET TO POSE") + "##object"))
       {
-         selectedObject.resetToInitialPose();
+         selectedObject.resetToPose();
+         if (ros2 != null)
+            publishUpdate();
       }
       ImGui.sameLine();
       if (isAnyObjectSelected() && (ImGui.button(labels.get("DELETE") + "##object")))
       {
          reset();
+         if (ros2 != null)
+            publishUpdate();
       }
+   }
+
+   public void publishUpdate()
+   {
+         objectMessage.setName(selectedObjectName);
+         MessageTools.toMessage(this.getSelectedObject().getTransformToWorld(), objectMessage.getTransformToWorld());
+         ros2.publish(SceneGraphAPI.PLACED_SCENE_NODE, objectMessage);
    }
 
    public void reset()

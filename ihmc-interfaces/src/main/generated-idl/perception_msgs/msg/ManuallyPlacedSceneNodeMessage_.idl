@@ -1,0 +1,32 @@
+#ifndef __perception_msgs__msg__ManuallyPlacedSceneNodeMessage__idl__
+#define __perception_msgs__msg__ManuallyPlacedSceneNodeMessage__idl__
+
+#include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * A manually placed perception scene node
+       * The topic name identifies the node.
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::ManuallyPlacedSceneNodeMessage_")
+      struct ManuallyPlacedSceneNodeMessage
+      {
+        /**
+         * The name of the scene node
+         */
+        string name;
+        /**
+         * Transform of the node's frame to world frame
+         */
+        controller_msgs::msg::dds::RigidBodyTransformMessage transform_to_world;
+      };
+    };
+  };
+};
+
+#endif

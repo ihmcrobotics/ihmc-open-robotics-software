@@ -11,10 +11,13 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
 import org.bytedeco.spinnaker.global.Spinnaker_C;
+import perception_msgs.msg.dds.DetectableSceneNodesMessage;
 import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.msg.dds.ManuallyPlacedSceneNodeMessage;
 import std_msgs.msg.dds.Float64;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -28,6 +31,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.*;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
+import us.ihmc.perception.sceneGraph.SceneGraphAPI;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
 import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
 import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesPublisher;
@@ -89,6 +93,7 @@ public class DualBlackflyCamera
    private IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
    private ROS2StoredPropertySet<IntrinsicCameraMatrixProperties> ousterFisheyeColoringIntrinsicsROS2;
    private ROS2TunedRigidBodyTransform remoteTunableCameraTransform;
+   private IHMCROS2Input<ManuallyPlacedSceneNodeMessage> placedSceneObjectSubscription;
 
    public DualBlackflyCamera(String serialNumber, ROS2SyncedRobotModel syncedRobot, RigidBodyTransform cameraTransformToParent)
    {
@@ -114,6 +119,7 @@ public class DualBlackflyCamera
       blackfly.setAcquisitionMode(Spinnaker_C.spinAcquisitionModeEnums.AcquisitionMode_Continuous);
       blackfly.setPixelFormat(Spinnaker_C.spinPixelFormatEnums.PixelFormat_BayerRG8);
       blackfly.startAcquiringImages();
+      placedSceneObjectSubscription = ros2Helper.subscribe(SceneGraphAPI.PLACED_SCENE_NODE);
    }
 
    public void update()
@@ -240,7 +246,21 @@ public class DualBlackflyCamera
                arUcoMarkerPublisher.update();
 
                ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, predefinedSceneNodeLibrary);
-               detectableSceneObjectsPublisher.publish(predefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2Helper);
+               // check if object has been manually placed in the UI
+               if (placedSceneObjectSubscription.getMessageNotification().poll())
+               {
+                  ManuallyPlacedSceneNodeMessage placedSceneNodeMessage = placedSceneObjectSubscription.getMessageNotification().read();
+                  String objectName = placedSceneNodeMessage.getNameAsString();
+                  RigidBodyTransform objectTransformToWorld = new RigidBodyTransform();
+                  MessageTools.toEuclid(placedSceneNodeMessage.getTransformToWorld(), objectTransformToWorld);
+                  if (!objectName.isEmpty())
+                     detectableSceneObjectsPublisher.publish(objectName,
+                                                             objectTransformToWorld,
+                                                             predefinedSceneNodeLibrary.getDetectableSceneNodes(),
+                                                             ros2Helper);
+               }
+               else
+                  detectableSceneObjectsPublisher.publish(predefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2Helper);
             }
 
             convertColorDuration.start();

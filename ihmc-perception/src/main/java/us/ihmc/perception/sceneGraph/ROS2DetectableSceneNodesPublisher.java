@@ -6,7 +6,6 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 
 /**
@@ -37,7 +36,7 @@ public class ROS2DetectableSceneNodesPublisher
       ros2PublishSubscribeAPI.publish(SceneGraphAPI.DETECTABLE_SCENE_NODES, detectableSceneObjectsMessage);
    }
 
-   public void publish(String manuallyPlacedObjectName, FramePose3DReadOnly manuallyPlacedObjectPose, Iterable<DetectableSceneNode> detectableSceneObjects, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
+   public void publish(String manuallyPlacedObjectName, RigidBodyTransform manuallyPlacedObjectTransform, Iterable<DetectableSceneNode> detectableSceneObjects, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
       detectableSceneObjectsMessage.getDetectableSceneNodes().clear();
       for (DetectableSceneNode detectableSceneObject : detectableSceneObjects)
@@ -47,8 +46,7 @@ public class ROS2DetectableSceneNodesPublisher
          {
             detectableSceneNodeMessage.setName(manuallyPlacedObjectName);
             detectableSceneNodeMessage.setCurrentlyDetected(true);
-            manuallyPlacedObjectPose.get(sceneObjectToWorldTransform);
-            MessageTools.toMessage(sceneObjectToWorldTransform, detectableSceneNodeMessage.getTransformToWorld());
+            MessageTools.toMessage(manuallyPlacedObjectTransform, detectableSceneNodeMessage.getTransformToWorld());
          }
          else
          {

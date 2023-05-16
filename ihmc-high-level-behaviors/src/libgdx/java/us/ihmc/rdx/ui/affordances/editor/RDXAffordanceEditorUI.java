@@ -353,7 +353,7 @@ public class RDXAffordanceEditorUI
 
       if (ImGui.button("RESET"))
       {
-         objectBuilder.getSelectedObject().resetToInitialPose();
+         objectBuilder.getSelectedObject().resetToPose();
          reset();
       }
       if (textInput.render())
@@ -571,7 +571,7 @@ public class RDXAffordanceEditorUI
                objectBuilder.loadObject(jsonNode.get("object").asText());
                RigidBodyTransform initialTransform = new RigidBodyTransform();
                JSONTools.toEuclid(jsonNode, initialTransform);
-               objectBuilder.getSelectedObject().setInitialPose(initialTransform);
+               objectBuilder.getSelectedObject().setPose(initialTransform);
             }
             preGraspFramesSize[0] = jsonNode.get("numberPreGraspFrames").asInt();
             postGraspFramesSize[0] = jsonNode.get("numberPostGraspFrames").asInt();
