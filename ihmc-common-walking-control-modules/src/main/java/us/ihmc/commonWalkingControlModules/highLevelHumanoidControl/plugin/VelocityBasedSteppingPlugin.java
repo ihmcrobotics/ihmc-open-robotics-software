@@ -130,6 +130,7 @@ public class VelocityBasedSteppingPlugin implements HumanoidSteppingPlugin
          if (counter >= numberOfTicksBeforeSubmittingCommands.getValue())
          {
             directionalControlMessenger.submitDirectionalControlRequest(desiredVelocityX, desiredVelocityY, turningVelocity);
+            directionalControlMessenger.submitGaitParameters(swingHeightInputProvider.getValue(), Double.NaN, Double.NaN);
             counter = 0;
          }
          else
