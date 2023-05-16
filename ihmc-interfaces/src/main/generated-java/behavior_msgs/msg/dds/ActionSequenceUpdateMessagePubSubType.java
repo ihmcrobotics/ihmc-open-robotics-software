@@ -11,6 +11,18 @@ package behavior_msgs.msg.dds;
 public class ActionSequenceUpdateMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.ActionSequenceUpdateMessage>
 {
    public static final java.lang.String name = "behavior_msgs::msg::dds_::ActionSequenceUpdateMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "6c86a3cc1022c2c5ad692130df0492b8e49bafcba2847b1a5991ce6b23fcba0c";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

@@ -19,7 +19,6 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -119,6 +118,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    private final String variableNameSuffix = "CSG";
 
    private BooleanProvider walkInputProvider;
+   private DoubleProvider swingHeightInputProvider;
    private final YoBoolean ignoreWalkInputProvider = new YoBoolean("ignoreWalkInputProvider" + variableNameSuffix, registry);
    private final YoBoolean walk = new YoBoolean("walk" + variableNameSuffix, registry);
    private final YoBoolean walkPreviousValue = new YoBoolean("walkPreviousValue" + variableNameSuffix, registry);
@@ -340,7 +340,10 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
 //         }
 
          footstep.setRobotSide(swingSide.toByte());
-         footstep.setSwingHeight(parameters.getSwingHeight());
+         if (swingHeightInputProvider == null)
+            footstep.setSwingHeight(parameters.getSwingHeight());
+         else
+            footstep.setSwingHeight(swingHeightInputProvider.getValue());
 
          footstepPose2D.set(nextFootstepPose2D);
          swingSide = swingSide.getOppositeSide();
@@ -791,6 +794,17 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    public void setWalkInputProvider(BooleanProvider walkInputProvider)
    {
       this.walkInputProvider = walkInputProvider;
+   }
+
+   /**
+    * Sets a provider that is to be used to update the desired swing height of each foot internally
+    * on each call to {@link #update(double)}
+    *
+    * @param swingHeightInputProvider the provider used to set the swing height
+    */
+   public void setSwingHeightInputProvider(DoubleProvider swingHeightInputProvider)
+   {
+      this.swingHeightInputProvider = swingHeightInputProvider;
    }
 
    /**

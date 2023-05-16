@@ -11,6 +11,18 @@ package behavior_msgs.msg.dds;
 public class ChestOrientationActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.ChestOrientationActionMessage>
 {
    public static final java.lang.String name = "behavior_msgs::msg::dds_::ChestOrientationActionMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "83aa0ab81ade1415a46d2d501cc0253435f37c5283ecf79ba7b4c349210f0ddb";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

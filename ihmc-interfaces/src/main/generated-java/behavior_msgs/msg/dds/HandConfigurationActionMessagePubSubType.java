@@ -11,6 +11,18 @@ package behavior_msgs.msg.dds;
 public class HandConfigurationActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.HandConfigurationActionMessage>
 {
    public static final java.lang.String name = "behavior_msgs::msg::dds_::HandConfigurationActionMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "71b5414c2bdf06088b217659737ec27e393fda38c33facb464fa8a85d597e2f8";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

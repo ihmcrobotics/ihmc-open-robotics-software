@@ -11,6 +11,18 @@ package behavior_msgs.msg.dds;
 public class ArmJointAnglesActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.ArmJointAnglesActionMessage>
 {
    public static final java.lang.String name = "behavior_msgs::msg::dds_::ArmJointAnglesActionMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "20a61d69b4e5e75bf15540e070012e61b4af30e40afeafd579beafe268aeb3b2";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
