@@ -11,6 +11,18 @@ package behavior_msgs.msg.dds;
 public class HandPoseActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.HandPoseActionMessage>
 {
    public static final java.lang.String name = "behavior_msgs::msg::dds_::HandPoseActionMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "817b5f6347516a29f48b5a029d7b40d9b6f548fd306b40873b47c449073a6804";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
