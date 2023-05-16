@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Des
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ComponentBasedFootstepDataMessageGenerator implements HumanoidSteppingPlugin
@@ -76,6 +77,22 @@ public class ComponentBasedFootstepDataMessageGenerator implements HumanoidStepp
    {
       continuousStepGenerator.setWalkInputProvider(walkInputProvider);
    }
+
+   /**
+    * Sets a provider that is to be used to update the desired swing height of each foot internally
+    * on each call to {@link #update(double)}
+    *
+    * @param swingHeightInputProvider the provider used to set the swing height
+    */
+   public void setSwingHeightInputProvider(DoubleProvider swingHeightInputProvider)
+   {
+      continuousStepGenerator.setSwingHeightInputProvider(swingHeightInputProvider);
+   }
+
+   /**
+    * Sets a provider that is used to update the swing height
+    * @return
+    */
 
    public ContinuousStepGenerator getContinuousStepGenerator()
    {
