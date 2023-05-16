@@ -347,7 +347,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    {
       if (interactablesEnabled.get())
       {
-         locomotionManager.caculateWalkPathControlRing3DViewPick(input);
+         locomotionManager.calculateWalkPathControlRing3DViewPick(input);
 
          if (interactablesAvailable)
          {
@@ -397,7 +397,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       chestPitchSlider.renderImGuiWidgets();
       chestYawSlider.renderImGuiWidgets();
 
-      trajectoryTimeSlider.render();
+      trajectoryTimeSlider.renderImGuiWidget();
 
       ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
       ImGui.checkbox(labels.get("Show body path planner parameter tuner"), bodyPathPlanningParametersTuner.getIsShowing());
