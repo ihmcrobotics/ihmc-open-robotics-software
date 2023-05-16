@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.PauseWalkingMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -67,9 +68,10 @@ public class RDXLocomotionManager
    private final ImBoolean showGraphics = new ImBoolean(true);
    private boolean isPlacingFootstep = false;
 
+   private final PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
+   // TODO: Remove this or rework this.
    private final RDXWalkingLowLevelMessenger walkingLowLevelMessenger;
    boolean wasWalking = false;
-
 
    private final ControllerStatusTracker controllerStatusTracker;
 
@@ -258,15 +260,20 @@ public class RDXLocomotionManager
             wasWalking = true;
             LogTools.info("Walking started");
             interactableFootstepPlan.walkFromSteps();
+
             walkingLowLevelMessenger.setRobotPausedWalking(false);
          }
          else if (walkingLowLevelMessenger.getRobotPausedWalking())
          {
-            walkingLowLevelMessenger.sendContinueWalkingRequest();
+//            walkingLowLevelMessenger.sendContinueWalkingRequest();
+            pauseWalkingMessage.setPause(false);
+            communicationHelper.publishToController(pauseWalkingMessage);
          }
          else
          {
-            walkingLowLevelMessenger.sendPauseWalkingRequest();
+//            walkingLowLevelMessenger.sendPauseWalkingRequest();
+            pauseWalkingMessage.setPause(true);
+            communicationHelper.publishToController(pauseWalkingMessage);
          }
       }
 
