@@ -95,6 +95,14 @@ fun us.ihmc.build.IHMCDependenciesExtension.apiCommonBytedecoNatives()
 // We are trying to avoid downloading binaries that aren't used by anyone
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
 {
+   if (name == "opencv")
+   {
+      apiBytedecoSelective("org.bytedeco:opencv:4.7.0-1.5.9-SNAPSHOT")
+      apiBytedecoSelective("org.bytedeco:opencv:4.7.0-1.5.9-SNAPSHOT:linux-x86_64")
+      apiBytedecoSelective("org.bytedeco:opencv:4.7.0-1.5.9-SNAPSHOT:windows-x86_64")
+      return
+   }
+
    apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion")
    apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:linux-x86_64")
    if (name != "spinnaker" && name != "hdf5")
