@@ -6,6 +6,11 @@ import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 
+/**
+ * Warning: This class isn't really great because the "robotPausedWalking" variable
+ * can easily be out of sync with the robot. It's better to use a different approach.
+ * TODO: Delete this class.
+ */
 public class RDXWalkingLowLevelMessenger
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
