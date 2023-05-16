@@ -11,6 +11,18 @@ package behavior_msgs.msg.dds;
 public class PelvisHeightActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.PelvisHeightActionMessage>
 {
    public static final java.lang.String name = "behavior_msgs::msg::dds_::PelvisHeightActionMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "8e514a8d58958f40ea7641921665c783c40c78ce35ded39a8f7533a16f7d7eae";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
