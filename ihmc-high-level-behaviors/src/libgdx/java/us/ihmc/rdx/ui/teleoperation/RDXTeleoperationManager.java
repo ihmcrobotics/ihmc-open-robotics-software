@@ -102,16 +102,19 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final boolean interactablesAvailable;
    private ImGuiStoredPropertySetDoubleWidget trajectoryTimeSlider;
 
-   public RDXTeleoperationManager(String robotRepoName,
-                                  String robotSubsequentPathToResourceFolder,
-                                  CommunicationHelper communicationHelper)
+   /**
+    * For use without interactables available. May crash if a YoVariableClient is needed.
+    */
+   public RDXTeleoperationManager(CommunicationHelper communicationHelper)
    {
-      this(robotRepoName, robotSubsequentPathToResourceFolder, communicationHelper, null, null, null);
+      this(communicationHelper, null, null, null);
    }
 
-   public RDXTeleoperationManager(String robotRepoName,
-                                  String robotSubsequentPathToResourceFolder,
-                                  CommunicationHelper communicationHelper,
+   /**
+    * Enable interactables and use a YoVariable client to show wrist force arrows on
+    * some robots.
+    */
+   public RDXTeleoperationManager(CommunicationHelper communicationHelper,
                                   RobotCollisionModel robotSelfCollisionModel,
                                   RobotCollisionModel robotEnvironmentCollisionModel,
                                   YoVariableClientHelper yoVariableClientHelper)
