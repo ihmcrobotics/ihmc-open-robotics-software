@@ -56,8 +56,8 @@ import java.util.Set;
 
 /**
  * The teleoperation manager is the top level class for managing UI for
- * teleoperation. It should contain a bunch of additional "sub managers" and UI
- * tools with clear sub-domains.
+ * teleoperation of a humanoid robot. It should contain a bunch of additional
+ * "sub managers" and UI tools with clear sub-domains.
  * <br/>
  * This class manages the communications with the robot which include ROS 2
  * and YoVariable Client-Server protocols. It should strive to allow field
@@ -125,6 +125,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final boolean interactablesAvailable;
    private ImGuiStoredPropertySetDoubleWidget trajectoryTimeSlider;
 
+   /** This tracker should be shared with the sub-managers to keep the state consistent. */
    private final ControllerStatusTracker controllerStatusTracker;
    private final LogToolsLogger logToolsLogger = new LogToolsLogger();
 
