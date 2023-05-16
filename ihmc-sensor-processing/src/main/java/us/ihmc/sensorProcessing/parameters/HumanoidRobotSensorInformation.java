@@ -14,7 +14,7 @@ public interface HumanoidRobotSensorInformation extends AvatarRobotRosVisionSens
 
    public default ReferenceFrame getSteppingCameraParentFrame(CommonHumanoidReferenceFrames referenceFrames)
    {
-      return referenceFrames.getPelvisFrame();
+      return referenceFrames.getChestFrame();
    }
 
    public default ReferenceFrame getSteppingCameraFrame(CommonHumanoidReferenceFrames referenceFrames)
