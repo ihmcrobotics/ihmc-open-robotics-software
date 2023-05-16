@@ -17,7 +17,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.TreeSet;
 
-public class RDXPlanarRegionEnvironmentPanel implements RenderableProvider
+public class RDXPlanarRegionEnvironmentUI implements RenderableProvider
 {
    private final String windowName = ImGuiTools.uniqueLabel("Planar Region Data Sets");
    private final HashMap<String, RDXPlanarRegionsGraphic> planarRegionGraphics = new HashMap<>();

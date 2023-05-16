@@ -64,7 +64,11 @@ public class ActiveMappingRemoteProcess
 
    private final PerceptionConfigurationParameters configurationParameters = new PerceptionConfigurationParameters();
 
-   public ActiveMappingRemoteProcess(String simpleRobotName, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobotModel, ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic, ROS2Node ros2Node)
+   public ActiveMappingRemoteProcess(String simpleRobotName,
+                                     DRCRobotModel robotModel,
+                                     ROS2SyncedRobotModel syncedRobotModel,
+                                     ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic,
+                                     ROS2Node ros2Node)
    {
       this.syncedRobotModel = syncedRobotModel;
       this.referenceFrames = syncedRobotModel.getReferenceFrames();

@@ -21,7 +21,7 @@ import java.nio.FloatBuffer;
 import static org.bytedeco.opencv.global.opencv_highgui.imshow;
 import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
 
-public class RapidRegionsDebutOutputGenerator
+public class RapidPatchesDebugOutputGenerator
 {
    private boolean enabled = false;
    private boolean showPointCloud = true;

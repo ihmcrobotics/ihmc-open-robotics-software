@@ -10,7 +10,6 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.behaviors.activeMapping.ActiveMappingModule;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
@@ -24,7 +23,7 @@ import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 
 import java.util.ArrayList;
 
-public class RDXActiveMappingUIPanel implements RenderableProvider
+public class RDXActiveMappingUI implements RenderableProvider
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RDXPlanarRegionsGraphic mapPlanarRegionsGraphic = new RDXPlanarRegionsGraphic();
@@ -40,7 +39,7 @@ public class RDXActiveMappingUIPanel implements RenderableProvider
 
    private final ImBoolean renderEnabled = new ImBoolean(true);
 
-   public RDXActiveMappingUIPanel(String name, ActiveMappingModule mappingManager)
+   public RDXActiveMappingUI(String name, ActiveMappingModule mappingManager)
    {
       this.activeMappingModule = mappingManager;
       imGuiPanel = new ImGuiPanel(name, this::renderImGuiWidgets);
@@ -58,7 +57,7 @@ public class RDXActiveMappingUIPanel implements RenderableProvider
       }
    }
 
-   public RDXActiveMappingUIPanel(String name, ROS2Helper ros2Helper)
+   public RDXActiveMappingUI(String name, ROS2Helper ros2Helper)
    {
       imGuiPanel = new ImGuiPanel(name, this::renderImGuiWidgets);
       perceptionConfigurationParameters = new PerceptionConfigurationParameters();
@@ -96,11 +95,7 @@ public class RDXActiveMappingUIPanel implements RenderableProvider
 
    public void render3DGraphics()
    {
-      if (remotePropertySets != null)
-      {
-
-      }
-      else
+      if (remotePropertySets == null)
       {
          synchronized (mapPlanarRegionsGraphic)
          {

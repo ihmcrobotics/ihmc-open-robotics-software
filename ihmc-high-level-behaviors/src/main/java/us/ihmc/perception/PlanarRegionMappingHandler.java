@@ -376,13 +376,7 @@ public class PlanarRegionMappingHandler
 
    public void updateMapWithNewRegions(FramePlanarRegionsList regions)
    {
-      LogTools.debug("Adding Regions to Map.");
-
       RigidBodyTransform keyframePose = planarRegionMap.registerRegions(regions.getPlanarRegionsList(), regions.getSensorToWorldFrameTransform());
-
-      planarRegionMap.printStatistics(true);
-
-      //planarRegionMap.submitRegionsUsingIterativeReduction(regions);
 
       if (keyframePose != null)
          latestKeyframePoseForRendering.set(keyframePose);

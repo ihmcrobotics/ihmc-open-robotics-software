@@ -5,7 +5,6 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -14,8 +13,6 @@ public class ActiveMappingTools
 {
    public static void getStraightGoalFootPoses(Pose3D leftSolePose, Pose3D rightSolePose, Pose3D leftGoalPose, Pose3D rightGoalPose, float distance)
    {
-      LogTools.info("Start Pose: {}, Goal Pose: {}", leftSolePose, leftGoalPose);
-
       leftSolePose.setZ(0);
       rightSolePose.setZ(0);
 

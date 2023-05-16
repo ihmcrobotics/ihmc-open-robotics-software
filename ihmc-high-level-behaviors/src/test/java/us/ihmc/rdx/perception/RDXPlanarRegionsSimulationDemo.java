@@ -28,7 +28,7 @@ public class RDXPlanarRegionsSimulationDemo
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
    private RDXPose3DGizmo l515PoseGizmo = new RDXPose3DGizmo();
    private RDXEnvironmentBuilder environmentBuilder;
-   private RDXRapidRegionsUIPanel rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
+   private RDXRapidRegionsUI rapidRegionsUI = new RDXRapidRegionsUI();
    private RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor();
    private BytedecoImage bytedecoDepthImage;
 
@@ -96,16 +96,16 @@ public class RDXPlanarRegionsSimulationDemo
                                                      steppingL515Simulator.getLowLevelSimulator().getPrincipalOffsetXPixels().get(),
                                                      steppingL515Simulator.getLowLevelSimulator().getPrincipalOffsetYPixels().get());
 
-                  rapidRegionsUIPanel.create(rapidPlanarRegionsExtractor);
-                  baseUI.getImGuiPanelManager().addPanel(rapidRegionsUIPanel.getPanel());
-                  baseUI.getPrimaryScene().addRenderableProvider(rapidRegionsUIPanel, RDXSceneLevel.VIRTUAL);
+                  rapidRegionsUI.create(rapidPlanarRegionsExtractor);
+                  baseUI.getImGuiPanelManager().addPanel(rapidRegionsUI.getPanel());
+                  baseUI.getPrimaryScene().addRenderableProvider(rapidRegionsUI, RDXSceneLevel.VIRTUAL);
 
                   baseUI.getLayoutManager().reloadLayout();
                }
 
                steppingL515Simulator.render(baseUI.getPrimaryScene());
 
-               if (rapidRegionsUIPanel.getEnabled().get())
+               if (rapidRegionsUI.getEnabled().get())
                {
                   BytedecoOpenCVTools.convertFloatToShort(steppingL515Simulator.getLowLevelSimulator().getMetersDepthOpenCVMat(),
                                                           bytedecoDepthImage.getBytedecoOpenCVMat(),
@@ -119,7 +119,7 @@ public class RDXPlanarRegionsSimulationDemo
 
                   if (rapidPlanarRegionsExtractor.isModified())
                   {
-                     rapidRegionsUIPanel.render3DGraphics(frameRegions);
+                     rapidRegionsUI.render3DGraphics(frameRegions);
                      rapidPlanarRegionsExtractor.setProcessing(false);
                   }
                }

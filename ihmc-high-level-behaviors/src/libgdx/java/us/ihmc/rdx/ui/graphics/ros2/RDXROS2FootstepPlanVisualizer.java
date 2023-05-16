@@ -20,6 +20,11 @@ import us.ihmc.tools.string.StringTools;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+* This class is an RDX global visualizer that is supposed to subscribe to a footstep data list message and visualize it in the UI.
+ * Useful when any remote module is performing footstep planning to help the human operator understand the plan. It can function as a standalone visualizer
+ * for any footstep plan based FootstepDataListMessage.
+* */
 public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
 {
    private final String titleBeforeAdditions;
