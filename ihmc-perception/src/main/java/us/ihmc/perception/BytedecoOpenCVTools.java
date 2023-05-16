@@ -2,6 +2,7 @@ package us.ihmc.perception;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacv.Java2DFrameUtils;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -139,7 +140,7 @@ public class BytedecoOpenCVTools
 
    public static Mat convertBufferedImageToMat(BufferedImage image)
    {
-      return null;
+      return Java2DFrameUtils.toMat(image);
    }
 
    public static void compressRGBImageJPG(Mat image, Mat yuvImageToPack, BytePointer compressedBytes)
