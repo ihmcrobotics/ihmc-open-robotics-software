@@ -74,10 +74,19 @@ libgdxDependencies {
    api("io.github.spair:imgui-java-natives-macos-ft:$imguiVersion")
    api("io.github.spair:imgui-java-natives-windows-ft:$imguiVersion")
 
-   var javaFXVersion = "17.0.2"
+   val javaFXVersion = "17.0.2"
    api(ihmc.javaFXModule("graphics", javaFXVersion)) // JFX Color
 
-   api("us.ihmc:ihmc-perception-javacv:source")
+   val javaCPPVersion = "1.5.9-SNAPSHOT"
+   api("org.bytedeco:javacpp:$javaCPPVersion")
+   // openblas-0.3.23-1.5.9-20230404.015544-39
+   api("org.bytedeco:openblas:0.3.23-1.5.9-20230404.015544-39")
+   api("org.bytedeco:openblas:0.3.23-1.5.9-20230404.015544-39:linux-x86_64")
+   api("org.bytedeco:openblas:0.3.23-1.5.9-20230404.015544-39:windows-x86_64")
+   // opencv-4.7.0-1.5.9-20230516.151940-290
+   api("org.bytedeco:opencv:4.7.0-1.5.9-20230516.151940-290")
+   api("org.bytedeco:opencv:4.7.0-1.5.9-20230516.151940-290:linux-x86_64")
+   api("org.bytedeco:opencv:4.7.0-1.5.9-20230516.151940-290:windows-x86_64")
 }
 
 libgdxTestDependencies {
