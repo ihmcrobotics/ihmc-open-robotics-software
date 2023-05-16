@@ -11,6 +11,18 @@ package behavior_msgs.msg.dds;
 public class HandWrenchActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.HandWrenchActionMessage>
 {
    public static final java.lang.String name = "behavior_msgs::msg::dds_::HandWrenchActionMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "101342c2238b01071b9f9305426c0b16687950e49fd92fdb42e0ea3496a14553";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
