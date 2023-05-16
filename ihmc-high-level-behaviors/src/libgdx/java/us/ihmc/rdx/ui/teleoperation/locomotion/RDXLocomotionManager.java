@@ -20,6 +20,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.imgui.ImGuiEnumPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -68,6 +69,7 @@ public class RDXLocomotionManager
    private final ImBoolean showGraphics = new ImBoolean(true);
    private boolean isPlacingFootstep = false;
 
+   private final ImGuiEnumPlot isWalkingPlot = new ImGuiEnumPlot("Walking", 1000, 25);
    private final PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
    // TODO: Remove this or rework this.
    private final RDXWalkingLowLevelMessenger walkingLowLevelMessenger;
@@ -213,6 +215,9 @@ public class RDXLocomotionManager
 
    public void renderImGuiWidgets()
    {
+      boolean isWalking = controllerStatusTracker.isWalking();
+      isWalkingPlot.render(isWalking ? 1 : 0, isWalking ? "WALKING" : "NOT WALKING");
+
       ImGui.text("Walking Options:");
       ImGui.sameLine();
       walkingLowLevelMessenger.renderImGuiWidgets();
