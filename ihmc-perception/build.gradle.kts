@@ -42,34 +42,34 @@ mainDependencies {
    val javaCPPVersion = "1.5.9-SNAPSHOT"
    api("org.bytedeco:javacpp:$javaCPPVersion")
    api("org.bytedeco:javacv:$javaCPPVersion")
-   // openblas-0.3.23-1.5.9-20230404.015544-39
-   api("org.bytedeco:openblas:0.3.23-1.5.9-20230404.015544-39")
-   api("org.bytedeco:openblas:0.3.23-1.5.9-20230404.015544-39:linux-x86_64")
-   api("org.bytedeco:openblas:0.3.23-1.5.9-20230404.015544-39:windows-x86_64")
-   // opencv-4.7.0-1.5.9-20230516.151940-290
-   api("org.bytedeco:opencv:4.7.0-1.5.9-20230516.151940-290")
-   api("org.bytedeco:opencv:4.7.0-1.5.9-20230516.151940-290:linux-x86_64")
-   api("org.bytedeco:opencv:4.7.0-1.5.9-20230516.151940-290:windows-x86_64")
-   // ffmpeg-6.0-1.5.9-20230506.025210-104
-   api("org.bytedeco:ffmpeg:6.0-1.5.9-20230506.025210-104")
-   api("org.bytedeco:ffmpeg:6.0-1.5.9-20230506.025210-104:linux-x86_64")
-   api("org.bytedeco:ffmpeg:6.0-1.5.9-20230506.025210-104:windows-x86_64")
-   // opencl-3.0-1.5.9-20230508.065821-15
-   api("org.bytedeco:opencl:3.0-1.5.9-20230508.065821-15")
-   api("org.bytedeco:opencl:3.0-1.5.9-20230508.065821-15:linux-x86_64")
-   api("org.bytedeco:opencl:3.0-1.5.9-20230508.065821-15:windows-x86_64")
-   // librealsense2-2.53.1-1.5.9-20230108.102552-8
-   api("org.bytedeco:librealsense2:2.53.1-1.5.9-20230108.102552-8")
-   api("org.bytedeco:librealsense2:2.53.1-1.5.9-20230108.102552-8:linux-x86_64")
-   api("org.bytedeco:librealsense2:2.53.1-1.5.9-20230108.102552-8:windows-x86_64")
-   // spinnaker-3.0.0.118-1.5.9-20230218.091411-11
-   api("org.bytedeco:spinnaker:3.0.0.118-1.5.9-20230218.091411-11")
-   api("org.bytedeco:spinnaker:3.0.0.118-1.5.9-20230218.091411-11:linux-x86_64")
-   api("org.bytedeco:spinnaker:3.0.0.118-1.5.9-20230218.091411-11:windows-x86_64")
-   // hdf5-1.14.0-1.5.9-20230320.102117-24
-   api("org.bytedeco:hdf5:1.14.0-1.5.9-20230320.102117-24")
-   api("org.bytedeco:hdf5:1.14.0-1.5.9-20230320.102117-24:linux-x86_64")
-   api("org.bytedeco:hdf5:1.14.0-1.5.9-20230320.102117-24:windows-x86_64")
+   val openblasVersion = "0.3.23-1.5.9-20230404.015544-39"
+   api("org.bytedeco:openblas:$openblasVersion")
+   api("org.bytedeco:openblas:$openblasVersion:linux-x86_64")
+   api("org.bytedeco:openblas:$openblasVersion:windows-x86_64")
+   val opencvVersion = "4.7.0-1.5.9-20230516.151940-290"
+   api("org.bytedeco:opencv:$opencvVersion")
+   api("org.bytedeco:opencv:$opencvVersion:linux-x86_64")
+   api("org.bytedeco:opencv:$opencvVersion:windows-x86_64")
+   val ffmpegVersion = "6.0-1.5.9-20230506.025210-104"
+   api("org.bytedeco:ffmpeg:$ffmpegVersion")
+   api("org.bytedeco:ffmpeg:$ffmpegVersion:linux-x86_64")
+   api("org.bytedeco:ffmpeg:$ffmpegVersion:windows-x86_64")
+   val openclVersion = "3.0-1.5.9-20230508.065821-15"
+   api("org.bytedeco:opencl:$openclVersion")
+   api("org.bytedeco:opencl:$openclVersion:linux-x86_64")
+   api("org.bytedeco:opencl:$openclVersion:windows-x86_64")
+   val librealsense2Version = "2.53.1-1.5.9-20230108.102552-8"
+   api("org.bytedeco:librealsense2:$librealsense2Version")
+   api("org.bytedeco:librealsense2:$librealsense2Version:linux-x86_64")
+   api("org.bytedeco:librealsense2:$librealsense2Version:windows-x86_64")
+   val spinnakerVersion = "3.0.0.118-1.5.9-20230218.091411-11"
+   api("org.bytedeco:spinnaker:$spinnakerVersion")
+   api("org.bytedeco:spinnaker:$spinnakerVersion:linux-x86_64")
+   api("org.bytedeco:spinnaker:$spinnakerVersion:windows-x86_64")
+   val hdf5Version = "1.14.0-1.5.9-20230320.102117-24"
+   api("org.bytedeco:hdf5:$hdf5Version")
+   api("org.bytedeco:hdf5:$hdf5Version:linux-x86_64")
+   api("org.bytedeco:hdf5:$hdf5Version:windows-x86_64")
 
    api("us.ihmc:euclid:0.20.0")
    api("us.ihmc:simulation-construction-set:0.23.4")
