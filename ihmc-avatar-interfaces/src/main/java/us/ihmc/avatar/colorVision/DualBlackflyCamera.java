@@ -94,6 +94,8 @@ public class DualBlackflyCamera
    private ROS2StoredPropertySet<IntrinsicCameraMatrixProperties> ousterFisheyeColoringIntrinsicsROS2;
    private ROS2TunedRigidBodyTransform remoteTunableCameraTransform;
    private IHMCROS2Input<ManuallyPlacedSceneNodeMessage> placedSceneObjectSubscription;
+   private String placedObjectName = "";
+   private final RigidBodyTransform placedObjectTransformToWorld = new RigidBodyTransform();
 
    public DualBlackflyCamera(String serialNumber, ROS2SyncedRobotModel syncedRobot, RigidBodyTransform cameraTransformToParent)
    {
@@ -250,15 +252,14 @@ public class DualBlackflyCamera
                if (placedSceneObjectSubscription.getMessageNotification().poll())
                {
                   ManuallyPlacedSceneNodeMessage placedSceneNodeMessage = placedSceneObjectSubscription.getMessageNotification().read();
-                  String objectName = placedSceneNodeMessage.getNameAsString();
-                  RigidBodyTransform objectTransformToWorld = new RigidBodyTransform();
-                  MessageTools.toEuclid(placedSceneNodeMessage.getTransformToWorld(), objectTransformToWorld);
-                  if (!objectName.isEmpty())
-                     detectableSceneObjectsPublisher.publish(objectName,
-                                                             objectTransformToWorld,
-                                                             predefinedSceneNodeLibrary.getDetectableSceneNodes(),
-                                                             ros2Helper);
+                  placedObjectName = placedSceneNodeMessage.getNameAsString();
+                  MessageTools.toEuclid(placedSceneNodeMessage.getTransformToWorld(), placedObjectTransformToWorld);
                }
+               if (!placedObjectName.isEmpty())
+                  detectableSceneObjectsPublisher.publish(placedObjectName,
+                                                          placedObjectTransformToWorld,
+                                                       predefinedSceneNodeLibrary.getDetectableSceneNodes(),
+                                                       ros2Helper);
                else
                   detectableSceneObjectsPublisher.publish(predefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2Helper);
             }
