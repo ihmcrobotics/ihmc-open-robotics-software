@@ -11,6 +11,18 @@ package behavior_msgs.msg.dds;
 public class WaitDurationActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.WaitDurationActionMessage>
 {
    public static final java.lang.String name = "behavior_msgs::msg::dds_::WaitDurationActionMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "683065a62744a7948a6da1b7a82e8fdbc627463da4aa66946dce8e5afd4aa97c";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

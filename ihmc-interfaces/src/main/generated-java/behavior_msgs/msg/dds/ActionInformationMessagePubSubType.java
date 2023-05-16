@@ -11,6 +11,18 @@ package behavior_msgs.msg.dds;
 public class ActionInformationMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.ActionInformationMessage>
 {
    public static final java.lang.String name = "behavior_msgs::msg::dds_::ActionInformationMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "7109314ff76e544f3cb423d72b0ce327dd9c714128360d55c13fd076c9406d9b";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
