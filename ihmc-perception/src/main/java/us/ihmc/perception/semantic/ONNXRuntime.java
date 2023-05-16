@@ -1,11 +1,12 @@
 package us.ihmc.perception.semantic;
 
 import ai.onnxruntime.*;
+
 import java.nio.FloatBuffer;
 import java.util.Collections;
 import java.util.Map;
+
 import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
@@ -14,139 +15,111 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.tools.IHMCCommonPaths;
 
-public class ONNXRuntime {
-  String[] labels = {"person",        "bicycle",      "car",
-                     "motorcycle",    "airplane",     "bus",
-                     "train",         "truck",        "boat",
-                     "traffic light", "fire hydrant", "stop sign",
-                     "parking meter", "bench",        "bird",
-                     "cat",           "dog",          "horse",
-                     "sheep",         "cow",          "elephant",
-                     "bear",          "zebra",        "giraffe",
-                     "backpack",      "umbrella",     "handbag",
-                     "tie",           "suitcase",     "frisbee",
-                     "skis",          "snowboard",    "sports ball",
-                     "kite",          "baseball bat", "baseball glove",
-                     "skateboard",    "surfboard",    "tennis racket",
-                     "bottle",        "wine glass",   "cup",
-                     "fork",          "knife",        "spoon",
-                     "bowl",          "banana",       "apple",
-                     "sandwich",      "orange",       "broccoli",
-                     "carrot",        "hot dog",      "pizza",
-                     "donut",         "cake",         "chair",
-                     "couch",         "potted plant", "bed",
-                     "dining table",  "toilet",       "tv",
-                     "laptop",        "mouse",        "remote",
-                     "keyboard",      "cell phone",   "microwave",
-                     "oven",          "toaster",      "sink",
-                     "refrigerator",  "book",         "clock",
-                     "vase",          "scissors",     "teddy bear",
-                     "hair drier",    "toothbrush"};
+public class ONNXRuntime
+{
+   private OrtEnvironment environment;
+   private OrtSession.SessionOptions sessionOptions;
+   private OrtSession session;
 
-  public ONNXRuntime() {
-    try {
+   private Mat rgbInputImage = new Mat();
 
-      Mat bgrInputImage =
-          opencv_imgcodecs.imread(IHMCCommonPaths.DOT_IHMC_DIRECTORY_NAME);
+   private float[][] outputArray;
 
-      Mat rgbInputImage = bgrInputImage;
-      opencv_imgproc.cvtColor(bgrInputImage, rgbInputImage,
-                              opencv_imgproc.COLOR_BGR2RGB);
+   private String[] labels = Semantics.MS_COCO_LABELS;
 
-      BytedecoImage float32Image =
-          new BytedecoImage(640, 640, opencv_core.CV_32FC3);
-      double delta = 0.0;               // no delta added
-      double scaleFactor = 1.0 / 255.0; // scale from 0-255 to 0.0-1.0
-      rgbInputImage.convertTo(float32Image.getBytedecoOpenCVMat(),
-                              opencv_core.CV_32FC3, scaleFactor, delta);
+   private int gpuDeviceId = 0;
 
-      OrtEnvironment environment = OrtEnvironment.getEnvironment();
-      OrtSession.SessionOptions sessionOptions =
-          new OrtSession.SessionOptions();
-      OrtSession session = environment.createSession(
-          IHMCCommonPaths.DOT_IHMC_DIRECTORY.resolve("yolov8s.onnx").toString(),
-          sessionOptions);
+   public ONNXRuntime(String weightsFile)
+   {
+      try
+      {
+         environment = OrtEnvironment.getEnvironment();
 
-      for (Map.Entry<String, NodeInfo> stringNodeInfoEntry :
-           session.getInputInfo().entrySet()) {
-        LogTools.info("{}: {}", stringNodeInfoEntry.getKey(),
-                      stringNodeInfoEntry.getValue());
+         sessionOptions = new OrtSession.SessionOptions();
+         //sessionOptions.addCUDA(gpuDeviceId);
+
+         session = environment.createSession(weightsFile, sessionOptions);
+
+         for (Map.Entry<String, NodeInfo> stringNodeInfoEntry : session.getInputInfo().entrySet())
+         {
+            LogTools.info("{}: {}", stringNodeInfoEntry.getKey(), stringNodeInfoEntry.getValue());
+         }
+         for (Map.Entry<String, NodeInfo> stringNodeInfoEntry : session.getOutputInfo().entrySet())
+         {
+            LogTools.info("{}: {}", stringNodeInfoEntry.getKey(), stringNodeInfoEntry.getValue());
+         }
       }
-      for (Map.Entry<String, NodeInfo> stringNodeInfoEntry :
-           session.getOutputInfo().entrySet()) {
-        LogTools.info("{}: {}", stringNodeInfoEntry.getKey(),
-                      stringNodeInfoEntry.getValue());
+      catch (Exception exception)
+      {
+         exception.printStackTrace();
       }
+   }
 
-      String inputName = session.getInputNames().iterator().next();
-      long[] tensorInputShape = {1, 3, 640, 640};
-      float32Image.rewind();
-      FloatBuffer data =
-          float32Image.getBackingDirectByteBuffer().asFloatBuffer();
+   public void detect(Mat bgrInputImage)
+   {
+      try
+      {
+         opencv_imgproc.cvtColor(bgrInputImage, rgbInputImage, opencv_imgproc.COLOR_BGR2RGB);
 
-      OnnxTensor testTensor =
-          OnnxTensor.createTensor(environment, data, tensorInputShape);
+         BytedecoImage float32Image = new BytedecoImage(640, 640, opencv_core.CV_32FC3);
+         double delta = 0.0;               // no delta added
+         double scaleFactor = 1.0 / 255.0; // scale from 0-255 to 0.0-1.0
+         rgbInputImage.convertTo(float32Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC3, scaleFactor, delta);
 
-      OrtSession.Result output =
-          session.run(Collections.singletonMap(inputName, testTensor));
+         String inputName = session.getInputNames().iterator().next();
+         long[] tensorInputShape = {1, 3, 640, 640};
 
-      LogTools.info("Size: {}", output.size());
+         float32Image.rewind();
+         FloatBuffer data = float32Image.getBackingDirectByteBuffer().asFloatBuffer();
 
-      for (Map.Entry<String, OnnxValue> stringOnnxValueEntry : output) {
-        LogTools.info("{}: {}", stringOnnxValueEntry.getKey(),
-                      stringOnnxValueEntry.getValue());
+         OnnxTensor testTensor = OnnxTensor.createTensor(environment, data, tensorInputShape);
+
+         OrtSession.Result output = session.run(Collections.singletonMap(inputName, testTensor));
+
+         LogTools.info("Size: {}", output.size());
+
+         for (Map.Entry<String, OnnxValue> stringOnnxValueEntry : output)
+         {
+            LogTools.info("{}: {}", stringOnnxValueEntry.getKey(), stringOnnxValueEntry.getValue());
+         }
+
+         outputArray = ((float[][][]) output.get(0).getValue())[0];
+         LogTools.info("Name: {}", outputArray[0].toString());
+
+         plotResults(bgrInputImage, outputArray);
       }
+      catch (Exception exception)
+      {
+         exception.printStackTrace();
+      }
+   }
 
-      float[][] outputArray = ((float[][][])output.get(0).getValue())[0];
-      LogTools.info("Name: {}", outputArray[0].toString());
-
+   public void plotResults(Mat image, float[][] outputArray)
+   {
       // See what classes have a high confidence
-      for (int c = 0; c < 25200; c++) {
-        if (outputArray[c][4] > 0.13) {
-          int largestIndex = 5;
-          for (int i = 5; i < 85; i++) {
-            largestIndex = (outputArray[c][i] > outputArray[c][largestIndex])
-                               ? i
-                               : largestIndex;
-          }
-          LogTools.info("c=:" + c + " and label=" + labels[largestIndex - 5]);
+      for (int c = 0; c < 8400; c++)
+      {
+         int largestIndex = 5;
+         for (int i = 5; i < 84; i++)
+         {
+            largestIndex = (outputArray[i][c] > outputArray[largestIndex][c]) ? i : largestIndex;
+         }
 
-          // Point topLeft = new Point((int) outputArray[c][0], (int)
-          // outputArray[c][1]); Point bottomRight = new Point((int)
-          // outputArray[c][2], (int) outputArray[c][3]);
+         LogTools.info("c=:" + c + " and label=" + labels[largestIndex - 5] + " and confidence=" + outputArray[largestIndex][c]);
 
-          Point topLeft =
-              new Point((int)(outputArray[c][0] - outputArray[c][2] / 2),
-                        (int)(outputArray[c][1] + outputArray[c][3] / 2));
-          Point bottomRight =
-              new Point((int)(outputArray[c][0] + outputArray[c][2] / 2),
-                        (int)(outputArray[c][1] - outputArray[c][3] / 2));
+         if (outputArray[largestIndex][c] > 0.1)
+         {
+            Point topLeft = new Point((int) (outputArray[0][c] - outputArray[2][c] / 2), (int) (outputArray[1][c] + outputArray[3][c] / 2));
+            Point bottomRight = new Point((int) (outputArray[0][c] + outputArray[2][c] / 2), (int) (outputArray[1][c] - outputArray[3][c] / 2));
 
-          // Point topLeft = new Point((int) (outputArray[c][0]), (int)
-          // (outputArray[c][1])); Point bottomRight =new Point((int)
-          // (outputArray[c][0] + outputArray[c][2]/2), (int) (outputArray[c][1]
-          // + outputArray[c][3]/2));
+            opencv_imgproc.rectangle(image, topLeft, bottomRight, new Scalar(255, 0, 0, 255));
+         }
 
-          opencv_imgproc.rectangle(rgbInputImage, topLeft, bottomRight,
-                                   new Scalar(255, 0, 0, 255));
-
-          Point centerOfCircle =
-              new Point((int)outputArray[c][0], (int)outputArray[c][1]);
-
-          opencv_imgproc.putText(rgbInputImage, labels[largestIndex - 5],
-                                 centerOfCircle,
-                                 opencv_imgproc.CV_FONT_HERSHEY_PLAIN, 5.0,
-                                 new Scalar(255, 255, 0, 255));
-
-          opencv_imgproc.circle(rgbInputImage, centerOfCircle, 5,
-                                new Scalar(0, 255, 0, 255));
-        }
       }
+   }
 
-    } catch (Exception exception) {
-      exception.printStackTrace();
-    }
-  }
-
-  public static void main(String[] args) { new ONNXRuntime(); }
+   public static void main(String[] args)
+   {
+      new ONNXRuntime(IHMCCommonPaths.DOT_IHMC_DIRECTORY.resolve("yolov8s.onnx").toString());
+   }
 }
