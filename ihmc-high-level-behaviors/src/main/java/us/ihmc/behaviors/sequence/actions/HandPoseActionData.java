@@ -23,7 +23,6 @@ public class HandPoseActionData implements BehaviorActionData
       jsonNode.put("side", side.getLowerCaseName());
       jsonNode.put("trajectoryDuration", trajectoryDuration);
       JSONTools.toJSON(jsonNode, transformToParent);
-
    }
 
    @Override

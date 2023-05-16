@@ -28,6 +28,8 @@ public class PredefinedSceneNodeLibrary
    private final ArUcoDetectableNode pullDoorPanel;
    private final ArUcoDetectableNode pushDoorLeverHandle;
    private final ArUcoDetectableNode pullDoorLeverHandle;
+   private final StaticArUcoRelativeDetectableSceneNode pushDoorFrame;
+   private final StaticArUcoRelativeDetectableSceneNode pullDoorFrame;
    private final ArUcoDetectableNode box;
    private final ArUcoDetectableNode canOfSoup;
 
@@ -53,6 +55,13 @@ public class PredefinedSceneNodeLibrary
       registerArUcoDetectableSceneNode(pullDoorPanel);
       registerArUcoDetectableSceneNode(pushDoorLeverHandle);
       registerArUcoDetectableSceneNode(pullDoorLeverHandle);
+
+      // TODO door object should be changed in one robot object with 1 joint between panel and lever handle, and frames should be removed
+      // The frames stay in place after being seen
+      pushDoorFrame = DoorSceneNodeDefinitions.createPushDoorFrame();
+      pullDoorFrame = DoorSceneNodeDefinitions.createPullDoorFrame();
+      registerStaticArUcoRelativeDetectableSceneNode(pushDoorFrame);
+      registerStaticArUcoRelativeDetectableSceneNode(pullDoorFrame);
 
       box = RigidBodySceneObjectDefinitions.createBox();
       canOfSoup = RigidBodySceneObjectDefinitions.createCanOfSoup();

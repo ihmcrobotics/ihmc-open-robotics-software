@@ -1,6 +1,5 @@
 package us.ihmc.perception.sceneGraph.rigidBodies;
 
-import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
 import us.ihmc.robotics.EuclidCoreMissingTools;
