@@ -335,16 +335,17 @@ public class HumanoidKinematicsSimulation
       }
       if (kinematicsSimulationParameters.getCreateYoVariableServer())
       {
+         LogTools.info("Starting YoVariable server...");
          yoVariableServer = new YoVariableServer(getClass().getSimpleName(), robotModel.getLogModelProvider(), new DataServerSettings(false), 0.01);
          yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), yoGraphicsListRegistry);
          yoVariableServer.start();
-         System.out.println("YoVariableServer Started");
+         LogTools.info("YoVariable server started.");
       }
 
       walkingOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, this::processFootstepStatus);
       walkingOutputManager.attachStatusMessageListener(WalkingStatusMessage.class, this::processWalkingStatus);
 
-      if(kinematicsSimulationParameters.isPeriodicThreadEnabled())
+      if (kinematicsSimulationParameters.isPeriodicThreadEnabled())
       {
          controlThread = new PausablePeriodicThread(getClass().getSimpleName(), kinematicsSimulationParameters.getUpdatePeriod(), 5, this::controllerTick);
       }
