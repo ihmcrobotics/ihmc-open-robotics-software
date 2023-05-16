@@ -35,7 +35,7 @@ public class RDXPlanarRegionMappingDemo
    private static final File regionLogDirectory = new File(IHMCCommonPaths.LOGS_DIRECTORY + "/");
 
    private PlanarRegionMappingHandler mappingManager;
-   private RDXPlanarRegionMappingUIPanel mappingPanel;
+   private RDXPlanarRegionMappingUI mappingUI;
 
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
 
@@ -81,10 +81,10 @@ public class RDXPlanarRegionMappingDemo
             mapPlanarRegionsGraphic.update();
             mapPlanarRegionsGraphic.setupTooltip(baseUI.getPrimary3DPanel(), "");
 
-            mappingPanel = new RDXPlanarRegionMappingUIPanel("Filtered Map", mappingManager);
-            baseUI.getImGuiPanelManager().addPanel(mappingPanel.getImGuiPanel());
+            mappingUI = new RDXPlanarRegionMappingUI("Filtered Map", mappingManager);
+            baseUI.getImGuiPanelManager().addPanel(mappingUI.getImGuiPanel());
 
-            baseUI.getPrimaryScene().addRenderableProvider(mappingPanel, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(mappingUI, RDXSceneLevel.VIRTUAL);
             baseUI.getPrimaryScene().addRenderableProvider(mapPlanarRegionsGraphic::getRenderables, RDXSceneLevel.VIRTUAL);
             baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer::getRenderables, RDXSceneLevel.VIRTUAL);
 
@@ -120,7 +120,7 @@ public class RDXPlanarRegionMappingDemo
                   baseUI.getPrimaryScene().addRenderableProvider(model, RDXSceneLevel.VIRTUAL);
                }
 
-               if (mappingPanel.getPointCloudRenderEnabled())
+               if (mappingUI.getPointCloudRenderEnabled())
                {
                   pointCloudRenderer.setPointsToRender(mappingManager.getRapidRegionsExtractor().getDebugger().getDebugPoints(), Color.GRAY);
                   pointCloudRenderer.updateMesh();
@@ -155,11 +155,11 @@ public class RDXPlanarRegionMappingDemo
 
                graphicsInitialized = true;
 
-               if (mappingPanel.isCaptured())
+               if (mappingUI.isCaptured())
                {
-                  LogTools.info("Filtered Map Panel Captured: {}", mappingPanel.isCaptured());
+                  LogTools.info("Filtered Map Panel Captured: {}", mappingUI.isCaptured());
                   mappingManager.setCaptured(true);
-                  mappingPanel.setCaptured(false);
+                  mappingUI.setCaptured(false);
                }
 
                //rapidRegionsUIPanel.renderImGuiWidgets();

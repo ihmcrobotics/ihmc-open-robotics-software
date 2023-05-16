@@ -21,14 +21,14 @@ public class DecisionLayer
    public void updateSemanticRewardMap(ArrayList<Point2D> objects)
    {
       Point2D current = new Point2D();
-      for (int i = 0; i<entropy.getNumRows(); i++)
+      for (int i = 0; i < entropy.getNumRows(); i++)
       {
-         for (int j = 0; j<entropy.getNumCols(); j++)
+         for (int j = 0; j < entropy.getNumCols(); j++)
          {
-            current.set(i*resolution, j*resolution);
+            current.set(i * resolution, j * resolution);
             float totalDistance = 0;
 
-            for (int k = 0; k<objects.size(); k++)
+            for (int k = 0; k < objects.size(); k++)
             {
                Point2D object = objects.get(k);
 

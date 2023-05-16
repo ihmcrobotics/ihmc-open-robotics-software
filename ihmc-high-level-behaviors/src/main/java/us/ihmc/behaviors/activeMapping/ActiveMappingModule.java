@@ -69,7 +69,7 @@ public class ActiveMappingModule
 
    public void updateMap(FramePlanarRegionsList regions)
    {
-      if(active)
+      if (active)
       {
          planarRegionMap.registerRegions(regions.getPlanarRegionsList(), regions.getSensorToWorldFrameTransform());
       }
@@ -77,14 +77,14 @@ public class ActiveMappingModule
 
    public void updateFootstepPlan()
    {
-      if(active)
+      if (active)
       {
          leftSolePose.set(referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
          rightSolePose.set(referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
          leftGoalPose.setToZero();
          rightGoalPose.setToZero();
 
-         robotLocation.set( (leftSolePose.getX() + rightSolePose.getX()) / 2.0f, (leftSolePose.getY() + rightSolePose.getY()) / 2.0f);
+         robotLocation.set((leftSolePose.getX() + rightSolePose.getX()) / 2.0f, (leftSolePose.getY() + rightSolePose.getY()) / 2.0f);
 
          Pose2D robotPose2D = new Pose2D(robotLocation.getX(), robotLocation.getY(), leftSolePose.getYaw());
 
@@ -123,11 +123,8 @@ public class ActiveMappingModule
 
             planAvailable = footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps() > 0;
          }
-
       }
    }
-
-
 
    public PlanarRegionMap getPlanarRegionMap()
    {

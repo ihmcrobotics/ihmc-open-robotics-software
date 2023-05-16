@@ -23,7 +23,7 @@ import us.ihmc.robotics.geometry.PlanarLandmarkList;
 
 import java.util.ArrayList;
 
-public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
+public class RDXPlanarRegionMappingUI implements RenderableProvider
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private ImGuiStoredPropertySetTuner mappingParametersTuner;
@@ -48,7 +48,7 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
    private ImInt icpPreviousIndex = new ImInt(10);
    private ImInt icpCurrentIndex = new ImInt(14);
 
-   public RDXPlanarRegionMappingUIPanel(String name, PlanarRegionMappingHandler mappingManager)
+   public RDXPlanarRegionMappingUI(String name, PlanarRegionMappingHandler mappingManager)
    {
       this.mappingManager = mappingManager;
       imGuiPanel = new ImGuiPanel(name, this::renderImGuiWidgets);

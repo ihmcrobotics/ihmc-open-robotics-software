@@ -10,16 +10,30 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.robotics.RegionInWorldInterface;
 
+/**
+ * This class is a limited version of a PlanarRegion with only the plane parameters for fast plane registration algorithms. It is used in the SKIPR
+ * planar region mapping algorithm for fast registration using the Iterative Quaternion Averaging (IQA) approach. The lightweight nature of this class
+ * arises from not having to track and process the concave hull of the region.
+ * */
 public class PlanarLandmark implements RegionInWorldInterface<PlanarLandmark>
 {
    private int id;
    private double area = 0.0;
 
+   /**
+    * The parameters of the plane that this landmark lives in.
+    * */
    private final Plane3D plane;
 
+   /**
+    * Transforms to go between the local frame of the landmark and the world frame.
+    * */
    private final RigidBodyTransform fromLocalToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform fromWorldToLocalTransform = new RigidBodyTransform();
 
+   /**
+    * The bounding box of the landmark in the world frame.
+    * */
    private final BoundingBox3D boundingBox3dInWorld = new BoundingBox3D(new Point3D(Double.NaN, Double.NaN, Double.NaN),
                                                                         new Point3D(Double.NaN, Double.NaN, Double.NaN));
 

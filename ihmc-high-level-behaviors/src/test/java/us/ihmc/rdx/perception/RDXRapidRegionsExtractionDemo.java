@@ -52,7 +52,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private final RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor();
    private final RDXLineGraphic rootJointGraphic = new RDXLineGraphic(0.02f, Color.RED);
    private final RDXLineGraphic mocapGraphic = new RDXLineGraphic(0.02f, Color.YELLOW);
-   private final RDXRapidRegionsUIPanel rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
+   private final RDXRapidRegionsUI rapidRegionsUIPanel = new RDXRapidRegionsUI();
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
    private final FramePlanarRegionsList frameRegions = new FramePlanarRegionsList();
    private final ArrayList<Quaternion> sensorOrientationBuffer = new ArrayList<>();

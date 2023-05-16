@@ -12,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsCustomizer;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
-import us.ihmc.perception.rapidRegions.RapidRegionsDebutOutputGenerator;
+import us.ihmc.perception.rapidRegions.RapidPatchesDebugOutputGenerator;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -24,7 +24,7 @@ import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-public class RDXRapidRegionsUIPanel implements RenderableProvider
+public class RDXRapidRegionsUI implements RenderableProvider
 {
    private RDXPlanarRegionsGraphic planarRegionsGraphic;
    private ModelInstance sensorFrameGraphic;
@@ -33,7 +33,7 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
 
    private RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor;
    private RapidPlanarRegionsCustomizer rapidPlanarRegionsCustomizer;
-   private RapidRegionsDebutOutputGenerator rapidRegionsDebutOutputGenerator;
+   private RapidPatchesDebugOutputGenerator rapidRegionsDebutOutputGenerator;
 
    private ImGuiStoredPropertySetTuner gpuRegionParametersTuner;
    private ImGuiStoredPropertySetTuner polygonizerParametersTuner;

@@ -26,7 +26,7 @@ public class RDXRapidPlanarRegionsHardwareDemo
    private Mat depthU16C1Image;
    private BytedecoImage bytedecoDepthImage;
    private RDXPose3DGizmo l515PoseGizmo = new RDXPose3DGizmo();
-   private RDXRapidRegionsUIPanel rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
+   private RDXRapidRegionsUI rapidRegionsUI = new RDXRapidRegionsUI();
    private RapidPlanarRegionsExtractor rapidRegionsExtractor = new RapidPlanarRegionsExtractor();
    private OpenCLManager openCLManager;
    private _cl_program openCLProgram;
@@ -75,7 +75,7 @@ public class RDXRapidPlanarRegionsHardwareDemo
                {
                   l515.updateDataBytePointers();
 
-                  if (rapidRegionsUIPanel == null)
+                  if (rapidRegionsUI == null)
                   {
                      MutableBytePointer depthFrameData = l515.getDepthFrameData();
                      depthU16C1Image = new Mat(l515.getDepthHeight(), l515.getDepthWidth(), opencv_core.CV_16UC1, depthFrameData);
@@ -92,14 +92,14 @@ public class RDXRapidPlanarRegionsHardwareDemo
                                                   l515.getDepthIntrinsicParameters().ppx(),
                                                   l515.getDepthIntrinsicParameters().ppy());
 
-                     rapidRegionsUIPanel.getEnabled().set(true);
-                     baseUI.getImGuiPanelManager().addPanel(rapidRegionsUIPanel.getPanel());
-                     baseUI.getPrimaryScene().addRenderableProvider(rapidRegionsUIPanel::getRenderables, RDXSceneLevel.VIRTUAL);
+                     rapidRegionsUI.getEnabled().set(true);
+                     baseUI.getImGuiPanelManager().addPanel(rapidRegionsUI.getPanel());
+                     baseUI.getPrimaryScene().addRenderableProvider(rapidRegionsUI::getRenderables, RDXSceneLevel.VIRTUAL);
 
                      baseUI.getLayoutManager().reloadLayout();
                   }
 
-                  if (rapidRegionsUIPanel.getEnabled().get())
+                  if (rapidRegionsUI.getEnabled().get())
                   {
                      depthU16C1Image.convertTo(bytedecoDepthImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1, 1, 0);
 
@@ -110,7 +110,7 @@ public class RDXRapidPlanarRegionsHardwareDemo
 
                      if (rapidRegionsExtractor.isModified())
                      {
-                        rapidRegionsUIPanel.render3DGraphics(frameRegions);
+                        rapidRegionsUI.render3DGraphics(frameRegions);
                         rapidRegionsExtractor.setProcessing(false);
                      }
                   }

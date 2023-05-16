@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * and odometry measurements from ROS2 topics. It asynchronously updates the mapping and localization estimates as more measurements are received. However,
  * it publishes the most recent results of the optimization at a fixed rate. This class may be extended to include visual keypoint landmarks and visual
  * odometry from the visual perception process.
- *
+ * <p>
  * Primary responsibilities include (but are not limited to):
  * 1. Receive planar regions from terrain perception process
  * 2. Receive planar regions from structural perception process
@@ -59,6 +59,10 @@ public class LocalizationAndMappingProcess
                                                                                                         getClass(),
                                                                                                         ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
+   /**
+    * Live Mode refers to being active and accepting new planar regions for updating the map. It can be overridden by the PerceptionConfigurationParameters
+    * parameter for enabling SLAM.
+    */
    private boolean enableLiveMode = true;
 
    private ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic;
@@ -66,7 +70,11 @@ public class LocalizationAndMappingProcess
 
    private final PerceptionConfigurationParameters configurationParameters = new PerceptionConfigurationParameters();
 
-   public LocalizationAndMappingProcess(String simpleRobotName, ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic, ROS2Topic<FramePlanarRegionsListMessage> structuralRegionsTopic, ROS2Node ros2Node, boolean smoothing)
+   public LocalizationAndMappingProcess(String simpleRobotName,
+                                        ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic,
+                                        ROS2Topic<FramePlanarRegionsListMessage> structuralRegionsTopic,
+                                        ROS2Node ros2Node,
+                                        boolean smoothing)
    {
       planarRegionMap = new PlanarRegionMap(true);
 
@@ -95,7 +103,6 @@ public class LocalizationAndMappingProcess
 
    private void statisticsCollectionThread()
    {
-      planarRegionMap.printStatistics(true);
    }
 
    public void onPlanarRegionsReceived(FramePlanarRegionsListMessage message)
@@ -142,8 +149,6 @@ public class LocalizationAndMappingProcess
       latestPlanarRegionsForPublishing.set(planarRegionMap.getMapRegions().copy());
       RigidBodyTransform keyframePose = planarRegionMap.registerRegions(regions.getPlanarRegionsList(), regions.getSensorToWorldFrameTransform());
 
-      planarRegionMap.printStatistics(true);
-
       latestPlanarRegionsForPublishing.set(planarRegionMap.getMapRegions().copy());
    }
 
@@ -161,7 +166,10 @@ public class LocalizationAndMappingProcess
    public static void main(String[] args)
    {
       ROS2Node ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "slam_node");
-      new LocalizationAndMappingProcess("Nadia", PerceptionAPI.PERSPECTIVE_RAPID_REGIONS_WITH_POSE,
-                                        PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE, ros2Node, true);
+      new LocalizationAndMappingProcess("Nadia",
+                                        PerceptionAPI.PERSPECTIVE_RAPID_REGIONS_WITH_POSE,
+                                        PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
+                                        ros2Node,
+                                        true);
    }
 }
