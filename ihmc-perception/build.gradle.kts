@@ -20,6 +20,8 @@ ihmc {
    configurePublications()
 }
 
+val javaCPPVersion = "1.5.9-SNAPSHOT"
+
 mainDependencies {
    api(ihmc.sourceSetProject("slam-wrapper"))
    api(ihmc.sourceSetProject("mapsense-wrapper"))
@@ -39,7 +41,6 @@ mainDependencies {
    api("org.ddogleg:ddogleg:0.18")
 
    // https://oss.sonatype.org/content/repositories/snapshots/org/bytedeco/
-   val javaCPPVersion = "1.5.9-SNAPSHOT"
    api("org.bytedeco:javacpp:$javaCPPVersion")
    api("org.bytedeco:javacv:$javaCPPVersion")
    val openblasVersion = "0.3.23-1.5.9-20230404.015544-39"
@@ -93,11 +94,11 @@ testDependencies {
 }
 
 slamWrapperDependencies {
-   api("org.bytedeco:javacpp:1.5.9-SNAPSHOT")
+   api("org.bytedeco:javacpp:$javaCPPVersion")
    api("us.ihmc:ihmc-java-toolkit:source")
 }
 
 mapsenseWrapperDependencies {
-   api("org.bytedeco:javacpp:1.5.9-SNAPSHOT")
+   api("org.bytedeco:javacpp:$javaCPPVersion")
    api("us.ihmc:ihmc-java-toolkit:source")
 }
