@@ -57,7 +57,7 @@ openpnpDependencies {
    api("org.openpnp:opencv:4.3.0-2")
 }
 
-val javaCPPVersion = "1.5.9"
+val javaCPPVersion = "1.5.9-SNAPSHOT"
 
 bytedecoDependencies {
    api("us.ihmc:euclid:0.20.0")
@@ -66,42 +66,42 @@ bytedecoDependencies {
 }
 
 javacvDependencies {
-   apiBytedecoSelective("org.bytedeco:javacv:$javaCPPVersion-20230303.063631-11")
+   apiBytedecoSelective("org.bytedeco:javacv:$javaCPPVersion")
    apiCommonBytedecoNatives()
 }
 
 slamWrapperDependencies {
-   apiBytedecoNatives("javacpp", "", "-20230222.151859-137")
+   apiBytedecoNatives("javacpp", "")
    api("us.ihmc:ihmc-java-toolkit:source")
 }
 
 mapsenseWrapperDependencies {
-   apiBytedecoNatives("javacpp", "", "-20230222.151859-137")
+   apiBytedecoNatives("javacpp", "")
    api("us.ihmc:ihmc-java-toolkit:source")
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiCommonBytedecoNatives()
 {
-   apiBytedecoNatives("javacpp", "", "-20230222.151859-137")
-   apiBytedecoNatives("openblas", "0.3.21-", "-20221104.072840-16")
-   apiBytedecoNatives("opencv", "4.7.0-", "-20230218.054119-148")
-   apiBytedecoNatives("opencl", "3.0-", "-20221104.001125-5")
-   apiBytedecoNatives("librealsense2", "2.50.0-", "-20221104.001736-8")
-   apiBytedecoNatives("spinnaker", "3.0.0.118-", "-20230218.091411-11")
-   apiBytedecoNatives("ffmpeg", "6.0-", "-20230506.025210-104")
-   apiBytedecoNatives("hdf5", "1.12.2-", "-20221104.003540-9")
+   apiBytedecoNatives("javacpp", "")
+   apiBytedecoNatives("openblas", "0.3.23-")
+   apiBytedecoNatives("opencv", "4.7.0-")
+   apiBytedecoNatives("opencl", "3.0-")
+   apiBytedecoNatives("librealsense2", "2.53.1-")
+   apiBytedecoNatives("spinnaker", "3.0.0.118-")
+   apiBytedecoNatives("ffmpeg", "6.0-")
+   apiBytedecoNatives("hdf5", "1.14.0-")
 }
 
 // We are trying to avoid downloading binaries that aren't used by anyone
-fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "", versionSuffix: String = "")
+fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
 {
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion$versionSuffix")
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion$versionSuffix:linux-x86_64")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:linux-x86_64")
+   if (name != "spinnaker" && name != "hdf5")
+      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:linux-arm64")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:windows-x86_64")
    if (name != "spinnaker")
-      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion$versionSuffix:linux-arm64")
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion$versionSuffix:windows-x86_64")
-   if (name != "spinnaker")
-      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion$versionSuffix:macosx-x86_64")
+      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:macosx-x86_64")
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotation: String)
@@ -132,5 +132,3 @@ tasks.create("generateMappings", Exec::class)
    workingDir = file("src/slam-wrapper/cpp")
    commandLine = listOf("./generate-java-mappings-docker.sh")
 }
-
-
