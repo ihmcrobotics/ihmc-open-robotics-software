@@ -110,19 +110,19 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
 
    private static void configureSymmetricBehavior(List<GroupParameter<Double>> behaviors, HumanoidJointNameMap jointMap, ArmJointName jointName, double weight)
    {
-      behaviors.add(new GroupParameter<>(jointName.toString(), new Double(weight), jointMap.getLeftAndRightJointNames(jointName)));
+      behaviors.add(new GroupParameter<>(jointName.toString(), Double.valueOf(weight), jointMap.getLeftAndRightJointNames(jointName)));
    }
 
    private static void configureBehavior(List<GroupParameter<Double>> behaviors, HumanoidJointNameMap jointMap, SpineJointName jointName, double weight)
    {
       List<String> names = Collections.singletonList(jointMap.getSpineJointName(jointName));
-      behaviors.add(new GroupParameter<>(jointName.toString(), new Double(weight), names));
+      behaviors.add(new GroupParameter<>(jointName.toString(), Double.valueOf(weight), names));
    }
 
    private static void configureBehavior(List<GroupParameter<Double>> behaviors, HumanoidJointNameMap jointMap, NeckJointName jointName, double weight)
    {
       List<String> names = Collections.singletonList(jointMap.getNeckJointName(jointName));
-      behaviors.add(new GroupParameter<>(jointName.toString(), new Double(weight), names));
+      behaviors.add(new GroupParameter<>(jointName.toString(), Double.valueOf(weight), names));
    }
 
    /** @inheritDoc */
