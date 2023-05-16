@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import java.util.ArrayList;
 import java.util.List;
 
+import controller_msgs.msg.dds.FastWalkingGaitParametersMessage;
 import controller_msgs.msg.dds.ManipulationAbortedStatus;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
@@ -21,6 +22,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
+import us.ihmc.humanoidRobotics.communication.fastWalkingAPI.FastWalkingGaitParametersCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -125,6 +127,7 @@ public class WalkingCommandConsumer
       commandsToRegister.add(StepConstraintsListCommand.class);
       commandsToRegister.add(PrepareForLocomotionCommand.class);
       commandsToRegister.add(DirectionalControlInputCommand.class);
+      commandsToRegister.add(FastWalkingGaitParametersCommand.class);
 
       commandConsumerWithDelayBuffers = new CommandConsumerWithDelayBuffers(commandInputManager, commandsToRegister, yoTime);
 
@@ -564,6 +567,7 @@ public class WalkingCommandConsumer
 
       // clear the velocity commands since they aren't used anymore.
       commandConsumerWithDelayBuffers.clearCommands(DirectionalControlInputCommand.class);
+      commandConsumerWithDelayBuffers.clearCommands(FastWalkingGaitParametersCommand.class);
    }
 
    public void consumeAbortWalkingCommands(YoBoolean abortWalkingRequested)

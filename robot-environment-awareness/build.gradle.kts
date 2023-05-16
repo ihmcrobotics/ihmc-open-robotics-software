@@ -24,8 +24,6 @@ ihmc {
    configurePublications()
 }
 
-val javaCPPVersion = "1.5.9-SNAPSHOT"
-
 mainDependencies {
    api("com.vividsolutions:jts:1.13") // TODO Update to https://github.com/locationtech/jts
 
@@ -39,24 +37,17 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-data-logger:0.28.1")
    api("us.ihmc:ihmc-ros-tools:source")
 
-   apiBytedecoNatives("javacpp", "")
-   apiBytedecoNatives("openblas", "0.3.23-")
-   apiBytedecoNatives("opencv", "4.7.0-")
-}
-
-fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
-{
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion")
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:linux-x86_64")
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:windows-x86_64")
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:macosx-x86_64")
-}
-
-fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotation: String)
-{
-   api(dependencyNotation) {
-      exclude(group = "org.bytedeco")
-   }
+   // https://oss.sonatype.org/content/repositories/snapshots/org/bytedeco/
+   val javaCPPVersion = "1.5.9-SNAPSHOT"
+   api("org.bytedeco:javacpp:$javaCPPVersion")
+   val openblasVersion = "0.3.23-1.5.9-20230404.015544-39"
+   api("org.bytedeco:openblas:$openblasVersion")
+   api("org.bytedeco:openblas:$openblasVersion:linux-x86_64")
+   api("org.bytedeco:openblas:$openblasVersion:windows-x86_64")
+   val opencvVersion = "4.7.0-1.5.9-20230516.151940-290"
+   api("org.bytedeco:opencv:$opencvVersion")
+   api("org.bytedeco:opencv:$opencvVersion:linux-x86_64")
+   api("org.bytedeco:opencv:$opencvVersion:windows-x86_64")
 }
 
 applicationDependencies {
