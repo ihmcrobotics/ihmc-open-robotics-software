@@ -219,6 +219,8 @@ public class RDXLocomotionManager
       transferTimeSlider.renderImGuiWidget();
       turnAggressivenessSlider.renderImGuiWidget();
 
+      pauseWalkingMode.renderImGuiWidgets();
+
       ImGui.text("Leg control mode: " + legControlMode.name());
       if (ImGui.radioButton(labels.get("Disabled"), legControlMode == RDXLegControlMode.DISABLED))
       {

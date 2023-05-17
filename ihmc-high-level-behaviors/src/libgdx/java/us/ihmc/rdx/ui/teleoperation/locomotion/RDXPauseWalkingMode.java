@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.PauseWalkingMessage;
 import imgui.ImGui;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 
 /**
@@ -32,11 +33,13 @@ public class RDXPauseWalkingMode
       {
          setPauseWalking(true);
       }
+      ImGuiTools.previousWidgetTooltip("Keybind: Space");
       ImGui.sameLine();
       if (ImGui.button(labels.get("Continue")))
       {
          setPauseWalking(false);
       }
+      ImGuiTools.previousWidgetTooltip("Keybind: Space");
    }
 
    public void setPauseWalking(boolean pauseWalking)
