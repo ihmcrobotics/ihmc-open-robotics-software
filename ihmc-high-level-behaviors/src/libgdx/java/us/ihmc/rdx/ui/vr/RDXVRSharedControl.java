@@ -252,7 +252,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          for (var sceneNodeMessage : detectableSceneNodeMessage.getDetectableSceneNodes())
          {
             // TODO. update this once Panel and LeverHandle are unified into single detectable "Door"
-            if (sceneNodeMessage.currently_detected_ && !sceneNodeMessage.name_.toString().contains("Panel"))
+            if (sceneNodeMessage.currently_detected_ && !sceneNodeMessage.name_.toString().contains("Panel") && !sceneNodeMessage.name_.toString().contains("Frame"))
             {
                objectName = sceneNodeMessage.getNameAsString();
                MessageTools.toEuclid(sceneNodeMessage.getTransformToWorld(), objectTransformToWorld);

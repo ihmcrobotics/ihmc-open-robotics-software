@@ -189,25 +189,23 @@ public class RDXAffordanceEditorUI
       {
          side = RobotSide.LEFT;
       }
-      //TODO add double hand logic with side dependent lists
       if (side == RobotSide.LEFT)
       {
+         //TODO add double hand logic with side dependent lists
          ImGui.pushStyleColor(ImGuiCol.Text, 1.0f, 0.0f, 0.0f, 1.0f);
          ImGui.text("Work in progress. Left hand currently not supported");
          ImGui.popStyleColor();
       }
-      //TODO remove text
       ImGui.sameLine();
       if (ImGui.button(labels.get("ADD") + "##side"))
       {
-
+         //TODO add double hand logic with side dependent lists
       }
       ImGui.sameLine();
       if (ImGui.button(labels.get("REMOVE") + "##side"))
       {
-
+         //TODO add double hand logic with side dependent lists
       }
-      //TODO remove text above
       ImGui.text("Hand configuration: ");
       if (ImGui.button(labels.get("OPEN")))
          interactableHand.openGripper();
@@ -397,7 +395,7 @@ public class RDXAffordanceEditorUI
          {
             double positionDistance = preGraspPoses.get(i).getPositionDistance(preGraspPoses.get(i - 1));
             double angularDistance = preGraspPoses.get(i).getOrientationDistance(preGraspPoses.get(i - 1));
-            // take max duration required to achieve wither desired linear velocity or angular velocity
+            // take max duration required to achieve the desired linear velocity or angular velocity
             trajectoryDurations.add(Math.max(positionDistance / LINEAR_VELOCITY, angularDistance / ANGULAR_VELOCITY));
          }
          else
