@@ -258,9 +258,7 @@ public class RDXLocomotionManager
          if (!robotWasWalking && interactableFootstepPlan.getNumberOfFootsteps() > 0)
          {
             robotWasWalking = true;
-            LogTools.info("Walking started");
             interactableFootstepPlan.walkFromSteps();
-            pauseWalkingMode.setPauseWalking(false);
          }
          else
          {
@@ -274,7 +272,6 @@ public class RDXLocomotionManager
       {
          robotWasWalking = false;
          LogTools.info("Goal reached, walking stopped!");
-         pauseWalkingMode.setPauseWalking(false);
       }
    }
 
