@@ -15,11 +15,14 @@ import java.util.function.Function;
  * These are preplaced objects used for behaviors, manipulation,
  * navigation simulations with {@link RDXSCS2SimulationSession}.
  *
+ * We return Function<ReferenceFrame, Robot> because we don't know the
+ * inertial frame of the Session required to make the Robot.
+ *
  * TODO: This is a very early version of this. If you see an improvement,
  *   like better parameterizing initial state, that's good, let's do it.
  *   Eventually we should make an SCS 2 scene editor.
  */
-public class SimulationSceneObjects
+public class SimulationSceneObjectDefinitions
 {
    public static final double SPACE_TO_ALLOW_IT_TO_FALL_ONTO_SURFACE = 0.01;
    public static final double TABLE_X = -1.0;
@@ -27,7 +30,7 @@ public class SimulationSceneObjects
    public static final double TABLE_Z = TableDefinition.TABLE_LEG_LENGTH + SPACE_TO_ALLOW_IT_TO_FALL_ONTO_SURFACE;
    public static final double TABLE_SURFACE_Z = TableDefinition.TABLE_LEG_LENGTH + TableDefinition.TABLE_THICKNESS;
 
-   public static Function<ReferenceFrame, Robot> pushDoor()
+   public static Function<ReferenceFrame, Robot> buildPushDoor()
    {
       return inertialFrame ->
       {
@@ -40,7 +43,7 @@ public class SimulationSceneObjects
       };
    }
 
-   public static Function<ReferenceFrame, Robot> pullDoor()
+   public static Function<ReferenceFrame, Robot> buildPullDoor()
    {
       return inertialFrame ->
       {
@@ -61,7 +64,7 @@ public class SimulationSceneObjects
       return doorDefinition;
    }
 
-   public static Function<ReferenceFrame, Robot> table()
+   public static Function<ReferenceFrame, Robot> buildTable()
    {
       return inertialFrame ->
       {
@@ -74,7 +77,7 @@ public class SimulationSceneObjects
       };
    }
 
-   public static Function<ReferenceFrame, Robot> canOfSoupOnTable()
+   public static Function<ReferenceFrame, Robot> buildCanOfSoupOnTable()
    {
       return inertialFrame ->
       {
