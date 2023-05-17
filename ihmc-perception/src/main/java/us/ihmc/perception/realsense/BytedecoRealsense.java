@@ -343,12 +343,18 @@ public class BytedecoRealsense
    public void updateDataBytePointers()
    {
       if (depthFrameDataAddress > 0)
+      {
+         depthFrameData.deallocate();
          depthFrameData.setAddress(depthFrameDataAddress);
+      }
 
       if (colorEnabled)
       {
          if (colorFrameDataAddress > 0)
+         {
+            colorFrameData.deallocate();
             colorFrameData.setAddress(colorFrameDataAddress);
+         }
       }
    }
 
