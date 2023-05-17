@@ -76,7 +76,6 @@ public class RDXArUcoMarkerDetectionDemo
 
                   arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
                   arUcoMarkerDetection.create(cameraSensor.getSensorFrame());
-                  arUcoMarkerDetection.getDetectorParameters().markerBorderBits(2);
                   arUcoMarkerDetection.setSourceImageForDetection(cameraSensor.getLowLevelSimulator().getRGBA8888ColorImage());
                   arUcoMarkerDetection.setCameraInstrinsics(cameraSensor.getDepthCameraIntrinsics());
                   arUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI(" from Sensor");
