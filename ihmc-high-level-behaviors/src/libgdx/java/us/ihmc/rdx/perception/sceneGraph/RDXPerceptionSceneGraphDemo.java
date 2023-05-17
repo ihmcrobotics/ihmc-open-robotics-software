@@ -86,7 +86,7 @@ public class RDXPerceptionSceneGraphDemo
             arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetection,
                                                                       ros2Helper,
                                                                       predefinedSceneNodeLibrary.getArUcoMarkerIDsToSizes());
-            perceptionSceneGraphUI = new RDXPerceptionSceneGraphUI(predefinedSceneNodeLibrary, ros2Helper);
+            perceptionSceneGraphUI = new RDXPerceptionSceneGraphUI(predefinedSceneNodeLibrary, ros2Helper, baseUI.getPrimary3DPanel());
             baseUI.getPrimaryScene().addRenderableProvider(perceptionSceneGraphUI::getRenderables);
             baseUI.getImGuiPanelManager().addPanel(perceptionSceneGraphUI.getPanel());
 
