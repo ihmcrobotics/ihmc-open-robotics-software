@@ -18,7 +18,6 @@ import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiEnumPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -70,7 +69,6 @@ public class RDXLocomotionManager
 
    private final ImGuiEnumPlot isWalkingPlot = new ImGuiEnumPlot("Walking", 1000, 25);
    private final RDXPauseWalkingMode pauseWalkingMode;
-   boolean robotWasWalking = false;
 
    private final ControllerStatusTracker controllerStatusTracker;
 
@@ -196,7 +194,6 @@ public class RDXLocomotionManager
 
       if (interactableFootstepPlan.getNumberOfFootsteps() > 0)
       {
-         robotWasWalking = false;
          footstepPlanning.setReadyToWalk(false);
          footstepsSentToControllerGraphic.clear();
       }
@@ -255,23 +252,16 @@ public class RDXLocomotionManager
       // Handles all shortcuts for when the spacebar is pressed
       if (ImGui.isKeyReleased(ImGuiTools.getSpaceKey()))
       {
-         if (!robotWasWalking && interactableFootstepPlan.getNumberOfFootsteps() > 0)
+         if (interactableFootstepPlan.getNumberOfFootsteps() > 0)
          {
-            robotWasWalking = true;
             interactableFootstepPlan.walkFromSteps();
+            pauseWalkingMode.setPauseWalkingWithoutPublish(false);
          }
          else
          {
             // Gets the robot walking state and sets it to the opposite value
-            pauseWalkingMode.setPauseWalking(!pauseWalkingMode.getPauseWalking());
+            pauseWalkingMode.setPauseWalkingAndPublish(!pauseWalkingMode.getPauseWalking());
          }
-      }
-
-      // When we have reached the end all the queued footstep plans, this will be true
-      if (robotWasWalking && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() == 0)
-      {
-         robotWasWalking = false;
-         LogTools.info("Goal reached, walking stopped!");
       }
    }
 

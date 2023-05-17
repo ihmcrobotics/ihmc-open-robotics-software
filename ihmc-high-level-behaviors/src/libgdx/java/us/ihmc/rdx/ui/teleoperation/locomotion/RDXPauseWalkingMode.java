@@ -29,18 +29,18 @@ public class RDXPauseWalkingMode
 
       if (ImGui.button(labels.get("Pause")))
       {
-         setPauseWalking(true);
+         setPauseWalkingAndPublish(true);
       }
       ImGuiTools.previousWidgetTooltip("Keybind: Space");
       ImGui.sameLine();
       if (ImGui.button(labels.get("Continue")))
       {
-         setPauseWalking(false);
+         setPauseWalkingAndPublish(false);
       }
       ImGuiTools.previousWidgetTooltip("Keybind: Space");
    }
 
-   public void setPauseWalking(boolean pauseWalking)
+   public void setPauseWalkingAndPublish(boolean pauseWalking)
    {
       pauseWalkingMessage.setPause(pauseWalking);
       communicationHelper.publishToController(pauseWalkingMessage);
@@ -49,6 +49,11 @@ public class RDXPauseWalkingMode
          LogTools.info("Paused Walking");
       else
          LogTools.info("Continue Walking");
+   }
+
+   public void setPauseWalkingWithoutPublish(boolean pauseWalking)
+   {
+      pauseWalkingMessage.setPause(pauseWalking);
    }
 
    public boolean getPauseWalking()
