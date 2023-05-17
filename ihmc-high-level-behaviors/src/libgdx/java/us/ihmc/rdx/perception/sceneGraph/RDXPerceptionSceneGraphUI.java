@@ -5,11 +5,9 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.perception.sceneGraph.DetectableSceneNode;
-import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
-import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
-import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesSubscription;
+import us.ihmc.perception.sceneGraph.*;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -33,8 +31,13 @@ public class RDXPerceptionSceneGraphUI
    {
       this.predefinedSceneNodeLibrary = predefinedSceneNodeLibrary;
 
+      boolean isOperator = true;
+      boolean isPerceptionProcess = false;
       detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(predefinedSceneNodeLibrary.getDetectableSceneNodes(),
-                                                                                  ros2PublishSubscribeAPI);
+                                                                                  ros2PublishSubscribeAPI,
+                                                                                  ROS2IOTopicQualifier.STATUS,
+                                                                                  isOperator,
+                                                                                  isPerceptionProcess);
 
       for (DetectableSceneNode detectableSceneNode : predefinedSceneNodeLibrary.getDetectableSceneNodes())
       {
