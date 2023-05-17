@@ -88,22 +88,16 @@ public class RDXInteractableObjectBuilder extends ImGuiPanel
       if (isAnyObjectSelected() && (ImGui.button(labels.get("SET INITIAL POSE") + "##object")))
       {
          selectedObject.setInitialPose();
-         if (ros2 != null)
-            publishUpdate();
       }
       ImGui.sameLine();
       if (isAnyObjectSelected() && imgui.ImGui.button(labels.get("RESET TO INITIAL POSE") + "##object"))
       {
          selectedObject.resetToInitialPose();
-         if (ros2 != null)
-            publishUpdate();
       }
       ImGui.sameLine();
       if (isAnyObjectSelected() && (ImGui.button(labels.get("DELETE") + "##object")))
       {
          reset();
-         if (ros2 != null)
-            publishUpdate();
       }
    }
 
