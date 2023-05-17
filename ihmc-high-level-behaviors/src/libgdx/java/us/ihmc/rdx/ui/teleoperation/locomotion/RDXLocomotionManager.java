@@ -71,9 +71,8 @@ public class RDXLocomotionManager
 
    private final ImGuiEnumPlot isWalkingPlot = new ImGuiEnumPlot("Walking", 1000, 25);
    private final PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
-   // TODO: Remove this or rework this.
-   private final RDXWalkingLowLevelMessenger walkingLowLevelMessenger;
    boolean wasWalking = false;
+   private final RDXPauseWalkingMode pauseWalkingMode;
 
    private final ControllerStatusTracker controllerStatusTracker;
 
@@ -88,10 +87,9 @@ public class RDXLocomotionManager
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;
 
+      pauseWalkingMode = new RDXPauseWalkingMode(communicationHelper);
       walkingParameters = new RDXLocomotionParameters(robotModel.getSimpleRobotName());
       walkingParameters.load();
-
-      walkingLowLevelMessenger = new RDXWalkingLowLevelMessenger(communicationHelper);
 
       footstepPlanning = new RDXFootstepPlanning(robotModel, walkingParameters, syncedRobot);
 
@@ -220,7 +218,17 @@ public class RDXLocomotionManager
 
       ImGui.text("Walking Options:");
       ImGui.sameLine();
-      walkingLowLevelMessenger.renderImGuiWidgets();
+
+      if (ImGui.button(labels.get("Pause")))
+      {
+         pauseWalkingMode.setPauseWalking(true);
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Continue")))
+      {
+         pauseWalkingMode.setPauseWalking(false);
+      }
+
       areFootstepsAdjustableCheckbox.renderImGuiWidget();
       swingTimeSlider.renderImGuiWidget();
       transferTimeSlider.renderImGuiWidget();
@@ -265,19 +273,15 @@ public class RDXLocomotionManager
             LogTools.info("Walking started");
             interactableFootstepPlan.walkFromSteps();
 
-            walkingLowLevelMessenger.setRobotPausedWalking(false);
+            pauseWalkingMode.setPauseWalking(false);
          }
-         else if (walkingLowLevelMessenger.getRobotPausedWalking())
+         else if (pauseWalkingMessage.getPause())
          {
-//            walkingLowLevelMessenger.sendContinueWalkingRequest();
-            pauseWalkingMessage.setPause(false);
-            communicationHelper.publishToController(pauseWalkingMessage);
+            pauseWalkingMode.setPauseWalking(false);
          }
          else
          {
-//            walkingLowLevelMessenger.sendPauseWalkingRequest();
-            pauseWalkingMessage.setPause(true);
-            communicationHelper.publishToController(pauseWalkingMessage);
+            pauseWalkingMode.setPauseWalking(true);
          }
       }
 
@@ -285,7 +289,8 @@ public class RDXLocomotionManager
       {
          wasWalking = false;
          LogTools.info("Goal reached, walking stopped!");
-         walkingLowLevelMessenger.setRobotPausedWalking(false);
+         pauseWalkingMessage.setPause(false);
+         communicationHelper.publishToController(pauseWalkingMessage);
       }
    }
 
