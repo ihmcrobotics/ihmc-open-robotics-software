@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.PauseWalkingMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -37,7 +36,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 /**
- * This class provides easy access to everything that involves mobility for the robot.
+ * This class provides easy access to everything that involves mobility for the robot's legs.
  * Everything with walking and moving the legs are contained in this class.
  * This allows the features to all be grouped together in the UI making the robot easier to operate.
  */
@@ -70,9 +69,8 @@ public class RDXLocomotionManager
    private boolean isPlacingFootstep = false;
 
    private final ImGuiEnumPlot isWalkingPlot = new ImGuiEnumPlot("Walking", 1000, 25);
-   private final PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
-   boolean wasWalking = false;
    private final RDXPauseWalkingMode pauseWalkingMode;
+   boolean robotWasWalking = false;
 
    private final ControllerStatusTracker controllerStatusTracker;
 
@@ -198,7 +196,7 @@ public class RDXLocomotionManager
 
       if (interactableFootstepPlan.getNumberOfFootsteps() > 0)
       {
-         wasWalking = false;
+         robotWasWalking = false;
          footstepPlanning.setReadyToWalk(false);
          footstepsSentToControllerGraphic.clear();
       }
@@ -215,19 +213,6 @@ public class RDXLocomotionManager
    {
       boolean isWalking = controllerStatusTracker.isWalking();
       isWalkingPlot.render(isWalking ? 1 : 0, isWalking ? "WALKING" : "NOT WALKING");
-
-      ImGui.text("Walking Options:");
-      ImGui.sameLine();
-
-      if (ImGui.button(labels.get("Pause")))
-      {
-         pauseWalkingMode.setPauseWalking(true);
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Continue")))
-      {
-         pauseWalkingMode.setPauseWalking(false);
-      }
 
       areFootstepsAdjustableCheckbox.renderImGuiWidget();
       swingTimeSlider.renderImGuiWidget();
@@ -265,32 +250,29 @@ public class RDXLocomotionManager
 
       ImGui.checkbox(labels.get("Show footstep related graphics"), showGraphics);
 
+      // Handles all shortcuts for when the spacebar is pressed
       if (ImGui.isKeyReleased(ImGuiTools.getSpaceKey()))
       {
-         if (!wasWalking && interactableFootstepPlan.getNumberOfFootsteps() > 0)
+         if (!robotWasWalking && interactableFootstepPlan.getNumberOfFootsteps() > 0)
          {
-            wasWalking = true;
+            robotWasWalking = true;
             LogTools.info("Walking started");
             interactableFootstepPlan.walkFromSteps();
-
-            pauseWalkingMode.setPauseWalking(false);
-         }
-         else if (pauseWalkingMessage.getPause())
-         {
             pauseWalkingMode.setPauseWalking(false);
          }
          else
          {
-            pauseWalkingMode.setPauseWalking(true);
+            // Gets the robot walking state and sets it to the opposite value
+            pauseWalkingMode.setPauseWalking(!pauseWalkingMode.getPauseWalking());
          }
       }
 
-      if (wasWalking && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() == 0)
+      // When we have reached the end all the queued footstep plans, this will be true
+      if (robotWasWalking && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() == 0)
       {
-         wasWalking = false;
+         robotWasWalking = false;
          LogTools.info("Goal reached, walking stopped!");
-         pauseWalkingMessage.setPause(false);
-         communicationHelper.publishToController(pauseWalkingMessage);
+         pauseWalkingMode.setPauseWalking(false);
       }
    }
 
