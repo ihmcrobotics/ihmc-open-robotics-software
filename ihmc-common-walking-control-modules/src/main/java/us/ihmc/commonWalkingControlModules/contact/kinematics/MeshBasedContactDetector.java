@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 public class MeshBasedContactDetector
 {
    public static String graphicListRegistryName = "Kinematic-Detected Contact Points";
-   private static final double coefficientOfFriction = 0.7;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private Consumer<MultiContactBalanceStatus> balanceStatusConsumer;
@@ -125,31 +124,6 @@ public class MeshBasedContactDetector
    public List<RigidBodyBasics> getContactableRigidBodies()
    {
       return contactableRigidBodies;
-   }
-
-   public void updatePlaneContactState(List<YoPlaneContactState> contactStatesToUpdate)
-   {
-      for (YoPlaneContactState contactState : contactStatesToUpdate)
-      {
-         contactState.clear();
-         contactState.setCoefficientOfFriction(coefficientOfFriction);
-
-         List<DetectedContactPoint> detectedContactPoints = allContactPoints.get(contactState.getRigidBody());
-         List<YoContactPoint> contactPoints = contactState.getContactPoints();
-
-         for (int i = 0; i < detectedContactPoints.size(); i++)
-         {
-            DetectedContactPoint contactPoint = detectedContactPoints.get(i);
-            if (!contactPoint.isInContact())
-               break;
-
-            contactState.setContactNormalVector(contactPoint.getContactPointNormal()); // TODO extract normal from DetectedContactPoint
-            contactPoints.get(i).setInContact(true);
-            contactPoints.get(i).setMatchingFrame(contactPoint.getContactPointPosition());
-         }
-
-         contactState.updateInContact();
-      }
    }
 
    public Map<RigidBodyBasics, List<DetectedContactPoint>> getAllContactPoints()
