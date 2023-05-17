@@ -17,8 +17,6 @@ public class RDXPauseWalkingMode
    private final PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
-
-
    public RDXPauseWalkingMode(CommunicationHelper communicationHelper)
    {
       this.communicationHelper = communicationHelper;
