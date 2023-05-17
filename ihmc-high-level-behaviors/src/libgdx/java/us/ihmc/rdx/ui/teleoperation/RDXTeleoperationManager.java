@@ -13,6 +13,8 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
@@ -100,16 +102,22 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final boolean interactablesAvailable;
    private ImGuiStoredPropertySetDoubleWidget trajectoryTimeSlider;
 
-   public RDXTeleoperationManager(String robotRepoName,
-                                  String robotSubsequentPathToResourceFolder,
-                                  CommunicationHelper communicationHelper)
+   private final ControllerStatusTracker controllerStatusTracker;
+   private final LogToolsLogger logToolsLogger = new LogToolsLogger();
+
+   /**
+    * For use without interactables available. May crash if a YoVariableClient is needed.
+    */
+   public RDXTeleoperationManager(CommunicationHelper communicationHelper)
    {
-      this(robotRepoName, robotSubsequentPathToResourceFolder, communicationHelper, null, null, null);
+      this(communicationHelper, null, null, null);
    }
 
-   public RDXTeleoperationManager(String robotRepoName,
-                                  String robotSubsequentPathToResourceFolder,
-                                  CommunicationHelper communicationHelper,
+   /**
+    * Enable interactables and use a YoVariable client to show wrist force arrows on
+    * some robots.
+    */
+   public RDXTeleoperationManager(CommunicationHelper communicationHelper,
                                   RobotCollisionModel robotSelfCollisionModel,
                                   RobotCollisionModel robotEnvironmentCollisionModel,
                                   YoVariableClientHelper yoVariableClientHelper)
@@ -167,6 +175,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
                                         ros2Helper,
                                         teleoperationParameters);
       }
+
+      controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2Helper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
    }
 
    public void create(RDXBaseUI baseUI)
@@ -337,7 +347,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    {
       if (interactablesEnabled.get())
       {
-         locomotionManager.caculateWalkPathControlRing3DViewPick(input);
+         locomotionManager.calculateWalkPathControlRing3DViewPick(input);
 
          if (interactablesAvailable)
          {
@@ -387,7 +397,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       chestPitchSlider.renderImGuiWidgets();
       chestYawSlider.renderImGuiWidgets();
 
-      trajectoryTimeSlider.render();
+      trajectoryTimeSlider.renderImGuiWidget();
 
       ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
       ImGui.checkbox(labels.get("Show body path planner parameter tuner"), bodyPathPlanningParametersTuner.getIsShowing());

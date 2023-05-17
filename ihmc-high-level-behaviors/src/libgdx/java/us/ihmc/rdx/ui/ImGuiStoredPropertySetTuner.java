@@ -137,7 +137,7 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
 
       for (ImGuiStoredPropertySetWidget widget : imGuiWidgetRenderers)
       {
-         widget.render();
+         widget.renderImGuiWidget();
       }
 
       boolean returnAnyChanged = anyParameterChanged;

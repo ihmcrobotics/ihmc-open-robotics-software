@@ -13,7 +13,6 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -33,8 +32,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 /**
- *  This class provides easy access to everything that involves mobility for the robot. Everything with walking and moving the legs are contained in this class
- *  This allows the features to all be grouped together in the UI making the robot easier to operate.
+ * This class provides easy access to everything that involves mobility for the robot.
+ * Everything with walking and moving the legs are contained in this class.
+ * This allows the features to all be grouped together in the UI making the robot easier to operate.
  */
 public class RDXLocomotionManager
 {
@@ -48,7 +48,6 @@ public class RDXLocomotionManager
    private ImGuiStoredPropertySetDoubleWidget swingTimeSlider;
    private ImGuiStoredPropertySetDoubleWidget transferTimeSlider;
    private ImGuiStoredPropertySetDoubleWidget turnAggressivenessSlider;
-
 
    private final RDXFootstepPlanGraphic footstepsSentToControllerGraphic;
    private final RDXBodyPathPlanGraphic bodyPathPlanGraphic = new RDXBodyPathPlanGraphic();
@@ -70,8 +69,8 @@ public class RDXLocomotionManager
                                ROS2SyncedRobotModel syncedRobot,
                                ROS2ControllerHelper ros2Helper)
    {
-      this.communicationHelper = communicationHelper;
       this.robotModel = robotModel;
+      this.communicationHelper = communicationHelper;
       this.syncedRobot = syncedRobot;
 
       walkingParameters = new RDXLocomotionParameters(robotModel.getSimpleRobotName());
@@ -92,10 +91,9 @@ public class RDXLocomotionManager
       });
 
       footstepsSentToControllerGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
-      communicationHelper.subscribeToControllerViaCallback(FootstepDataListMessage.class,
-                                                           footsteps ->
-                                                                 footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps,
-                                                                                                                                                                     "Teleoperation Panel Controller Spy")));
+      communicationHelper.subscribeToControllerViaCallback(FootstepDataListMessage.class, footsteps ->
+            footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps,
+                                                                                                                "Teleoperation Panel Controller Spy")));
    }
 
    public void create(RDXBaseUI baseUI)
@@ -199,10 +197,10 @@ public class RDXLocomotionManager
 
    public void renderImGuiWidgets()
    {
-      areFootstepsAdjustableCheckbox.render();
-      swingTimeSlider.render();
-      transferTimeSlider.render();
-      turnAggressivenessSlider.render();
+      areFootstepsAdjustableCheckbox.renderImGuiWidget();
+      swingTimeSlider.renderImGuiWidget();
+      transferTimeSlider.renderImGuiWidget();
+      turnAggressivenessSlider.renderImGuiWidget();
 
       ImGui.text("Leg control mode: " + legControlMode.name());
       if (ImGui.radioButton(labels.get("Disabled"), legControlMode == RDXLegControlMode.DISABLED))
@@ -230,10 +228,9 @@ public class RDXLocomotionManager
       if (ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton())
          legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
 
-      ImGui.text("Walk path control ring planner:");
       walkPathControlRing.renderImGuiWidgets();
-
       interactableFootstepPlan.renderImGuiWidgets();
+
       ImGui.checkbox(labels.get("Show footstep related graphics"), showGraphics);
    }
 
@@ -242,7 +239,7 @@ public class RDXLocomotionManager
       walkPathControlRing.update(interactableFootstepPlan);
    }
 
-   public void caculateWalkPathControlRing3DViewPick(ImGui3DViewInput input)
+   public void calculateWalkPathControlRing3DViewPick(ImGui3DViewInput input)
    {
       if (!manualFootstepPlacement.isPlacingFootstep())
          walkPathControlRing.calculate3DViewPick(input);
