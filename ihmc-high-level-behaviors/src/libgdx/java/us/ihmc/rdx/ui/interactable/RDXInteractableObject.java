@@ -110,4 +110,10 @@ public class RDXInteractableObject implements RenderableProvider
       pose3DGizmo.getTransformToParent().setToZero();
       initialObjectPose.setToZero();
    }
+
+   public void switchGizmoVisualization()
+   {
+      boolean visualizationState = pose3DGizmo.isShowingGraphics();
+      pose3DGizmo.setShowGraphics(!visualizationState);
+   }
 }

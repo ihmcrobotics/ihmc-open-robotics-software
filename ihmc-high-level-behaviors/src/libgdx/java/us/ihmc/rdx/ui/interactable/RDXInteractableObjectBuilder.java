@@ -99,6 +99,10 @@ public class RDXInteractableObjectBuilder extends ImGuiPanel
       {
          reset();
       }
+      if (isAnyObjectSelected() && (ImGui.button(labels.get("HIDE/SHOW GIZMO") + "##object")))
+      {
+         selectedObject.switchGizmoVisualization();
+      }
    }
 
    public void publishUpdate()
