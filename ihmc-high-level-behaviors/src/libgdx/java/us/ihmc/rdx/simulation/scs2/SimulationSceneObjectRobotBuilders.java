@@ -22,7 +22,7 @@ import java.util.function.Function;
  *   like better parameterizing initial state, that's good, let's do it.
  *   Eventually we should make an SCS 2 scene editor.
  */
-public class SimulationSceneObjectDefinitions
+public class SimulationSceneObjectRobotBuilders
 {
    public static final double SPACE_TO_ALLOW_IT_TO_FALL_ONTO_SURFACE = 0.01;
    public static final double TABLE_X = -1.0;
@@ -30,11 +30,11 @@ public class SimulationSceneObjectDefinitions
    public static final double TABLE_Z = TableDefinition.TABLE_LEG_LENGTH + SPACE_TO_ALLOW_IT_TO_FALL_ONTO_SURFACE;
    public static final double TABLE_SURFACE_Z = TableDefinition.TABLE_LEG_LENGTH + TableDefinition.TABLE_THICKNESS;
 
-   public static Function<ReferenceFrame, Robot> buildPushDoor()
+   public static Function<ReferenceFrame, Robot> getPushDoorBuilder()
    {
       return inertialFrame ->
       {
-         DoorDefinition doorDefinition = buildDoorWithArUcoMarkers();
+         DoorDefinition doorDefinition = getDoorWithArUcoMarkersDefinition();
          // Rotate the door so the push side is facing
          doorDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(Math.PI, 0.0, 0.0), new Point3D(1.3, 0.5, 0.01));
          Robot robot = new Robot(doorDefinition, inertialFrame);
@@ -43,11 +43,11 @@ public class SimulationSceneObjectDefinitions
       };
    }
 
-   public static Function<ReferenceFrame, Robot> buildPullDoor()
+   public static Function<ReferenceFrame, Robot> getPullDoorBuilder()
    {
       return inertialFrame ->
       {
-         DoorDefinition doorDefinition = buildDoorWithArUcoMarkers();
+         DoorDefinition doorDefinition = getDoorWithArUcoMarkersDefinition();
          doorDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(0.0, 0.0, 0.0), new Point3D(1.0, -0.5, 0.01));
          Robot robot = new Robot(doorDefinition, inertialFrame);
          DoorDefinition.applyPDController(robot);
@@ -55,7 +55,7 @@ public class SimulationSceneObjectDefinitions
       };
    }
 
-   private static DoorDefinition buildDoorWithArUcoMarkers()
+   private static DoorDefinition getDoorWithArUcoMarkersDefinition()
    {
       DoorDefinition doorDefinition = new DoorDefinition();
       doorDefinition.getDoorPanelDefinition().setAddArUcoMarkers(true);
@@ -64,7 +64,7 @@ public class SimulationSceneObjectDefinitions
       return doorDefinition;
    }
 
-   public static Function<ReferenceFrame, Robot> buildTable()
+   public static Function<ReferenceFrame, Robot> getTableBuilder()
    {
       return inertialFrame ->
       {
@@ -77,7 +77,7 @@ public class SimulationSceneObjectDefinitions
       };
    }
 
-   public static Function<ReferenceFrame, Robot> buildCanOfSoupOnTable()
+   public static Function<ReferenceFrame, Robot> getCanOfSoupOnTableBuilder()
    {
       return inertialFrame ->
       {
