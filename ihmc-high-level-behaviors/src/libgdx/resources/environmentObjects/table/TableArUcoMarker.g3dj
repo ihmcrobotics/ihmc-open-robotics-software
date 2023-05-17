@@ -55,7 +55,7 @@
 			"textures": [
 				{
 					"id": "base_color_texture", 
-					"filename": "marker3.jpg", 
+					"filename": "4x4_1000-3.jpg", 
 					"type": "DIFFUSE"
 				}
 			]
