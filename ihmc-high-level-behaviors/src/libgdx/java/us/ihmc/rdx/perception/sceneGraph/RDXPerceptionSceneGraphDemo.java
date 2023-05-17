@@ -3,6 +3,7 @@ package us.ihmc.rdx.perception.sceneGraph;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.perception.OpenCVArUcoMarkerDetection;
 import us.ihmc.perception.OpenCVArUcoMarkerROS2Publisher;
 import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
@@ -107,7 +108,7 @@ public class RDXPerceptionSceneGraphDemo
             arUcoMarkerPublisher.update();
 
             ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, predefinedSceneNodeLibrary);
-            detectableSceneObjectsPublisher.publish(predefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2Helper);
+            detectableSceneObjectsPublisher.publish(predefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2Helper, ROS2IOTopicQualifier.STATUS);
 
             perceptionSceneGraphUI.update();
 

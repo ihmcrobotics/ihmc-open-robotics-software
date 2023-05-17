@@ -81,7 +81,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       ghostRobotGraphic.setActive(true);
       ghostRobotGraphic.create();
 
-      detectableSceneObjectsSubscription = ros2.subscribe(SceneGraphAPI.DETECTABLE_SCENE_NODES);
+      detectableSceneObjectsSubscription = ros2.subscribe(SceneGraphAPI.DETECTABLE_SCENE_NODES.getStatusTopic());
    }
 
    public void processInput(InputDigitalActionData triggerButton)
