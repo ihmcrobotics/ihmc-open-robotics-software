@@ -1,8 +1,7 @@
 package us.ihmc.perception.sceneGraph.multiBodies.door;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticArUcoRelativeDetectableSceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
 import us.ihmc.robotics.EuclidCoreMissingTools;
@@ -10,7 +9,7 @@ import us.ihmc.robotics.EuclidCoreMissingTools;
 public class DoorSceneNodeDefinitions
 {
    /** This refers to the edges of the black parts with no margin. The margins included will be wider than this. */
-   public static final double DOOR_ARUCO_MARKER_WIDTH = 0.2032;
+   public static final double DOOR_ARUCO_MARKER_WIDTH = RigidBodySceneObjectDefinitions.LARGE_MARKER_WIDTH;
 
    public static final int PULL_DOOR_MARKER_ID = 0;
    public static final int PUSH_DOOR_MARKER_ID = 1;
