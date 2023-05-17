@@ -97,20 +97,21 @@ public class ONNXRuntime
    public void plotResults(Mat image, float[][] outputArray)
    {
       // See what classes have a high confidence
-      for (int c = 0; c < 8400; c++)
+      for (int anchor = 0; anchor < 8400; anchor++)
       {
-         int largestIndex = 5;
-         for (int i = 5; i < 84; i++)
+         int bestClass = 0;
+         for (int classIndex = 0; classIndex < 80; classIndex++)
          {
-            largestIndex = (outputArray[i][c] > outputArray[largestIndex][c]) ? i : largestIndex;
+            bestClass = (outputArray[classIndex][anchor] > outputArray[bestClass][anchor]) ? classIndex : bestClass;
          }
 
-         LogTools.info("c=:" + c + " and label=" + labels[largestIndex - 5] + " and confidence=" + outputArray[largestIndex][c]);
 
-         if (outputArray[largestIndex][c] > 0.1)
+         if (outputArray[bestClass][anchor] > 0.1)
          {
-            Point topLeft = new Point((int) (outputArray[0][c] - outputArray[2][c] / 2), (int) (outputArray[1][c] + outputArray[3][c] / 2));
-            Point bottomRight = new Point((int) (outputArray[0][c] + outputArray[2][c] / 2), (int) (outputArray[1][c] - outputArray[3][c] / 2));
+            LogTools.info("c=:" + anchor + " and label=" + labels[anchor] + " and confidence=" + outputArray[bestClass][anchor]);
+
+            Point topLeft = new Point((int) (outputArray[0][anchor] - outputArray[2][anchor] / 2), (int) (outputArray[1][anchor] + outputArray[3][anchor] / 2));
+            Point bottomRight = new Point((int) (outputArray[0][anchor] + outputArray[2][anchor] / 2), (int) (outputArray[1][anchor] - outputArray[3][anchor] / 2));
 
             opencv_imgproc.rectangle(image, topLeft, bottomRight, new Scalar(255, 0, 0, 255));
          }
