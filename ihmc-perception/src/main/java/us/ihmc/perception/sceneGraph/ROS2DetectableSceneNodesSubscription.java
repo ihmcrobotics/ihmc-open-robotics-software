@@ -20,7 +20,8 @@ import java.util.List;
 public class ROS2DetectableSceneNodesSubscription
 {
    private final IHMCROS2Input<DetectableSceneNodesMessage> detectableSceneNodesSubscription;
-   private final ROS2IOTopicQualifier ioQualifier;
+   private final boolean isOperator;
+   private final boolean isPerceptionProcess;
    private final List<DetectableSceneNode> detectableSceneNodes;
    private final RigidBodyTransform nodeToWorldTransform = new RigidBodyTransform();
    private final FramePose3D nodePose = new FramePose3D();
@@ -28,13 +29,21 @@ public class ROS2DetectableSceneNodesSubscription
 
    /**
     * @param ioQualifier If in the on-robot perception process, COMMAND, else STATUS
+    * @param isOperator If this process will be acting as the operator, meaning they can override node poses
+    *                   Warning: The design supports having only one operator. If two operators override the
+    *                   pose of the same object, this method will fail and the scene graph will flicker.
+    * @param isPerceptionProcess We also need to know if we are the perception process, as that is the only
+    *                            thing allowed to modify non-overridden poses.
     */
    public ROS2DetectableSceneNodesSubscription(List<DetectableSceneNode> detectableSceneNodes,
                                                ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
-                                               ROS2IOTopicQualifier ioQualifier)
+                                               ROS2IOTopicQualifier ioQualifier,
+                                               boolean isOperator,
+                                               boolean isPerceptionProcess)
    {
       this.detectableSceneNodes = detectableSceneNodes;
-      this.ioQualifier = ioQualifier;
+      this.isOperator = isOperator;
+      this.isPerceptionProcess = isPerceptionProcess;
 
       detectableSceneNodesSubscription = ros2PublishSubscribeAPI.subscribe(SceneGraphAPI.DETECTABLE_SCENE_NODES.getTopic(ioQualifier));
    }
@@ -65,18 +74,20 @@ public class ROS2DetectableSceneNodesSubscription
 
                // We allow only the operator to change the "poseOverriddenByOperator" variable,
                // to avoid conflicts and race conditions
-               boolean isOperatorSide = ioQualifier == ROS2IOTopicQualifier.STATUS;
-               boolean isOnRobot = ioQualifier == ROS2IOTopicQualifier.COMMAND;
-               if (isOnRobot)
+               if (!isOperator)
                {
                   // We'll always take the state of the operator's scene for this variable
                   detectableSceneNode.setPoseOverriddenByOperator(detectableSceneNodeMessage.getIsPoseOverriddenByOperator());
                }
 
-               // If on robot perception process and pose overridden by operator, accept the pose
-               // else, if on operator side and pose not overridden by operator, accept the pose
-               boolean acceptPoseUpdate = isOnRobot && detectableSceneNode.getPoseOverriddenByOperator();
-               acceptPoseUpdate |= isOperatorSide && !detectableSceneNode.getPoseOverriddenByOperator();
+               // Warning: This section's logic is complicated to avoid race conditions and flickering
+               // between machines when trying to share control of the poses of scene nodes.
+               // Spectators like the behavior module should always accept pose updates.
+               boolean acceptPoseUpdate = !isOperator && !isPerceptionProcess;
+               // The operator should accept the pose update so long as they haven't overridden the pose.
+               acceptPoseUpdate |= isOperator && !detectableSceneNode.getPoseOverriddenByOperator();
+               // The on robot perception process should accept the pose so long as the operator hasn't overridden the pose.
+               acceptPoseUpdate |= isPerceptionProcess && detectableSceneNode.getPoseOverriddenByOperator();
                if (acceptPoseUpdate)
                {
                   MessageTools.toEuclid(detectableSceneNodeMessage.getTransformToWorld(), nodeToWorldTransform);
