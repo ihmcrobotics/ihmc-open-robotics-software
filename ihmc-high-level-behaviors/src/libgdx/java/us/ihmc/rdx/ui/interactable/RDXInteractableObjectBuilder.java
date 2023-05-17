@@ -4,6 +4,10 @@ import imgui.internal.ImGui;
 import perception_msgs.msg.dds.ManuallyPlacedSceneNodeMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
 import us.ihmc.perception.sceneGraph.SceneGraphAPI;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
@@ -18,34 +22,34 @@ public class RDXInteractableObjectBuilder extends ImGuiPanel
 {
    private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(RDXInteractableObjectBuilder.class, "Object Panel");
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private PredefinedSceneNodeLibrary predefinedSceneNodeLibrary;
+   private final PredefinedSceneNodeLibrary predefinedSceneNodeLibrary;
    private RDXInteractableObject selectedObject;
    private String selectedObjectName = "";
    private final SortedMap<String, String> nameModelMap = new TreeMap<>();
    private ROS2PublishSubscribeAPI ros2;
    private final ManuallyPlacedSceneNodeMessage objectMessage = new ManuallyPlacedSceneNodeMessage();
 
-   public RDXInteractableObjectBuilder(RDXBaseUI baseUI)
+   public RDXInteractableObjectBuilder(RDXBaseUI baseUI, PredefinedSceneNodeLibrary predefinedSceneNodeLibrary)
    {
       super(WINDOW_NAME);
       setRenderMethod(this::renderImGuiWidgets);
+      this.predefinedSceneNodeLibrary = predefinedSceneNodeLibrary;
 
       selectedObject = new RDXInteractableObject(baseUI);
-      predefinedSceneNodeLibrary = PredefinedSceneNodeLibrary.defaultObjects();
       //TODO change this to detectable when node library is updated
       List<ArUcoDetectableNode> availableObjects = predefinedSceneNodeLibrary.getArUcoDetectableNodes();
       for (var object : availableObjects)
          nameModelMap.put(object.getName(), object.getVisualModelFilePath());
    }
 
-   public RDXInteractableObjectBuilder(RDXBaseUI baseUI, ROS2PublishSubscribeAPI ros2)
+   public RDXInteractableObjectBuilder(RDXBaseUI baseUI, PredefinedSceneNodeLibrary predefinedSceneNodeLibrary, ROS2PublishSubscribeAPI ros2)
    {
       super(WINDOW_NAME);
       setRenderMethod(this::renderImGuiWidgets);
       this.ros2 = ros2;
+      this.predefinedSceneNodeLibrary = predefinedSceneNodeLibrary;
 
       selectedObject = new RDXInteractableObject(baseUI);
-      predefinedSceneNodeLibrary = PredefinedSceneNodeLibrary.defaultObjects();
       //TODO change this to detectable when node library is updated
       List<ArUcoDetectableNode> availableObjects = predefinedSceneNodeLibrary.getArUcoDetectableNodes();
       for (var object : availableObjects)
@@ -64,19 +68,33 @@ public class RDXInteractableObjectBuilder extends ImGuiPanel
                selectedObject.clear();
             selectedObject.load(entryNameModel.getValue());
             selectedObjectName = entryNameModel.getKey();
+
+            // check if object is currently detected, if so use the detected pose as initial pose
+            List<DetectableSceneNode> detectableSceneObjects = predefinedSceneNodeLibrary.getDetectableSceneNodes();
+            for (DetectableSceneNode detectableSceneObject : detectableSceneObjects)
+            {
+               if (detectableSceneObject.getName().equals(selectedObjectName) && detectableSceneObject.getCurrentlyDetected())
+               {
+                  FramePose3D sceneObjectPose = new FramePose3D(detectableSceneObject.getNodeFrame());
+                  sceneObjectPose.changeFrame(ReferenceFrame.getWorldFrame());
+                  RigidBodyTransform sceneObjectToWorldTransform = new RigidBodyTransform();
+                  sceneObjectPose.get(sceneObjectToWorldTransform);
+                  this.getSelectedObject().setPose(sceneObjectToWorldTransform);
+               }
+            }
          }
          ImGui.separator();
       }
-      if (isAnyObjectSelected() && (ImGui.button(labels.get("SET POSE") + "##object")))
+      if (isAnyObjectSelected() && (ImGui.button(labels.get("SET INITIAL POSE") + "##object")))
       {
-         selectedObject.setPose();
+         selectedObject.setInitialPose();
          if (ros2 != null)
             publishUpdate();
       }
       ImGui.sameLine();
-      if (isAnyObjectSelected() && imgui.ImGui.button(labels.get("RESET TO POSE") + "##object"))
+      if (isAnyObjectSelected() && imgui.ImGui.button(labels.get("RESET TO INITIAL POSE") + "##object"))
       {
-         selectedObject.resetToPose();
+         selectedObject.resetToInitialPose();
          if (ros2 != null)
             publishUpdate();
       }

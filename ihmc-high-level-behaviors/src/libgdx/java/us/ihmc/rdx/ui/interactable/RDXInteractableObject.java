@@ -89,7 +89,7 @@ public class RDXInteractableObject implements RenderableProvider
       return modelInstance;
    }
 
-   public void setPose()
+   public void setInitialPose()
    {
       initialObjectPose.set(pose3DGizmo.getTransformToParent());
    }
@@ -100,7 +100,7 @@ public class RDXInteractableObject implements RenderableProvider
       pose3DGizmo.getTransformToParent().set(initialObjectPose);
    }
 
-   public void resetToPose()
+   public void resetToInitialPose()
    {
       pose3DGizmo.getTransformToParent().set(initialObjectPose);
    }

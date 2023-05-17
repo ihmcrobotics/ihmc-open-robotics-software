@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiInputText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -73,7 +74,7 @@ public class RDXAffordanceEditorUI
          {
             baseUI.create();
             baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
-            objectBuilder = new RDXInteractableObjectBuilder(baseUI);
+            objectBuilder = new RDXInteractableObjectBuilder(baseUI, PredefinedSceneNodeLibrary.defaultObjects());
             baseUI.getImGuiPanelManager().addPanel(objectBuilder.getWindowName(), objectBuilder::renderImGuiWidgets);
 
             handTransformToWorld.getTranslation().set(-0.5, 0, 0);
@@ -353,7 +354,7 @@ public class RDXAffordanceEditorUI
 
       if (ImGui.button("RESET"))
       {
-         objectBuilder.getSelectedObject().resetToPose();
+         objectBuilder.getSelectedObject().resetToInitialPose();
          reset();
       }
       if (textInput.render())
