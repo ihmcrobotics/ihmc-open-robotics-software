@@ -52,7 +52,7 @@ mainDependencies {
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:robot-environment-awareness:source")
 
-   api("com.microsoft.onnxruntime:onnxruntime:1.14.0")
+//   api("com.microsoft.onnxruntime:onnxruntime:1.14.0")
    api("com.microsoft.onnxruntime:onnxruntime_gpu:1.14.0")
 }
 

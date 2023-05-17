@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
@@ -36,7 +37,7 @@ public class ONNXRuntime
          environment = OrtEnvironment.getEnvironment();
 
          sessionOptions = new OrtSession.SessionOptions();
-         //sessionOptions.addCUDA(gpuDeviceId);
+         sessionOptions.addCUDA(gpuDeviceId);
 
          session = environment.createSession(weightsFile, sessionOptions);
 
@@ -121,6 +122,9 @@ public class ONNXRuntime
 
    public static void main(String[] args)
    {
-      new ONNXRuntime(IHMCCommonPaths.DOT_IHMC_DIRECTORY.resolve("yolov8s.onnx").toString());
+      ONNXRuntime runtime = new ONNXRuntime(IHMCCommonPaths.DOT_IHMC_DIRECTORY.resolve("yolov8n.onnx").toString());
+
+      Mat bgrInputImage = opencv_imgcodecs.imread("/home/bmishra/Downloads/new-york.jpg");
+      runtime.detect(bgrInputImage);
    }
 }
