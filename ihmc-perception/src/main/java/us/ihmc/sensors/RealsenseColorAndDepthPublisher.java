@@ -53,21 +53,20 @@ import java.util.function.Supplier;
  */
 public class RealsenseColorAndDepthPublisher
 {
+   private static final double OUTPUT_PERIOD = UnitConversions.hertzToSeconds(20.0);
+
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
-   private final RealsenseConfiguration realsenseConfiguration;
    private final Supplier<ReferenceFrame> sensorFrameUpdater;
    private final ROS2Topic<ImageMessage> colorTopic;
    private final ROS2Topic<ImageMessage> depthTopic;
+   private final ROS2Node ros2Node;
    private final ROS2Helper ros2Helper;
-   private final String serialNumber;
+   private final ImageMessage colorImageMessage = new ImageMessage();
+   private final ImageMessage depthImageMessage = new ImageMessage();
 
    private final PerceptionConfigurationParameters parameters = new PerceptionConfigurationParameters();
    private final PerceptionDataLogger perceptionDataLogger = new PerceptionDataLogger();
-   private final BytePointer compressedColorPointer = new BytePointer();
-   private final BytePointer compressedDepthPointer = new BytePointer();;
    private final FramePose3D colorPoseInDepthFrame = new FramePose3D();
-   private final ImageMessage colorImageMessage = new ImageMessage();
-   private final ImageMessage depthImageMessage = new ImageMessage();
    private final Quaternion cameraQuaternion = new Quaternion();
    private final FramePose3D cameraPose = new FramePose3D();
    private final Point3D cameraPosition = new Point3D();
@@ -78,13 +77,8 @@ public class RealsenseColorAndDepthPublisher
    private boolean loggerInitialized = false;
    private volatile boolean running = true;
 
-   private RealSenseHardwareManager realSenseHardwareManager;
-   private BytedecoRealsense realsense;
-   private Mat depth16UC1Image;
-   private Mat color8UC3Image;
-   private Mat yuvColorImage;
-
-   private final double outputPeriod;
+   private final RealSenseHardwareManager realSenseHardwareManager;
+   private final BytedecoRealsense realsense;
 
    private long depthSequenceNumber = 0;
    private long colorSequenceNumber = 0;
@@ -95,13 +89,9 @@ public class RealsenseColorAndDepthPublisher
                                           ROS2Topic<ImageMessage> colorTopic,
                                           Supplier<ReferenceFrame> sensorFrameUpdater)
    {
-      this.serialNumber = serialNumber;
-      this.realsenseConfiguration = realsenseConfiguration;
       this.colorTopic = colorTopic;
       this.depthTopic = depthTopic;
       this.sensorFrameUpdater = sensorFrameUpdater;
-
-      outputPeriod = UnitConversions.hertzToSeconds(20.0);
 
       BytedecoTools.loadOpenCV();
 
@@ -115,7 +105,7 @@ public class RealsenseColorAndDepthPublisher
       realsense.enableColor(realsenseConfiguration);
       realsense.initialize();
 
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "realsense_color_and_depth_publisher");
+      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "realsense_color_and_depth_publisher");
       ros2Helper = new ROS2Helper(ros2Node);
 
       LogTools.info("Setting Up ROS2 Property Set Group");
@@ -140,7 +130,7 @@ public class RealsenseColorAndDepthPublisher
       while (running)
       {
          update();
-         throttler.waitAndRun(outputPeriod); // do the waiting after we send to remove unnecessary latency
+         throttler.waitAndRun(OUTPUT_PERIOD); // do the waiting after we send to remove unnecessary latency
       }
 
       // Make sure the Realsense
@@ -149,8 +139,7 @@ public class RealsenseColorAndDepthPublisher
       if (realsense != null)
          realsense.deleteDevice();
       realSenseHardwareManager.deleteContext();
-      if (perceptionDataLogger != null)
-         perceptionDataLogger.closeLogFile();
+      perceptionDataLogger.closeLogFile();
 
       destroyedNotification.set();
    }
@@ -169,19 +158,13 @@ public class RealsenseColorAndDepthPublisher
          MutableBytePointer depthFrameData = realsense.getDepthFrameData();
          MutableBytePointer colorFrameData = realsense.getColorFrameData();
 
-         if (depth16UC1Image == null)
-         {
-            depth16UC1Image = new Mat(realsense.getDepthHeight(), realsense.getDepthWidth(), opencv_core.CV_16UC1, depthFrameData);
-            color8UC3Image = new Mat(realsense.getColorHeight(), realsense.getColorWidth(), opencv_core.CV_8UC3, colorFrameData);
-            // YUV I420 has 1.5 times the height of the image
-            // YUV image must be preallocated or there will be a memory leak
-            yuvColorImage = new Mat(realsense.getColorHeight() * 1.5, realsense.getColorWidth(), opencv_core.CV_8UC1);
-         }
-         else
-         {
-            depth16UC1Image.data(depthFrameData);
-            color8UC3Image.data(colorFrameData);
-         }
+         Mat depth16UC1Image = new Mat(realsense.getDepthHeight(), realsense.getDepthWidth(), opencv_core.CV_16UC1, depthFrameData);
+         Mat color8UC3Image = new Mat(realsense.getColorHeight(), realsense.getColorWidth(), opencv_core.CV_8UC3, colorFrameData);
+         // YUV I420 has 1.5 times the height of the image
+         Mat yuvColorImage = new Mat(realsense.getColorHeight() * 1.5, realsense.getColorWidth(), opencv_core.CV_8UC1);
+
+         depth16UC1Image.data(depthFrameData);
+         color8UC3Image.data(colorFrameData);
 
          // Important not to store as a field, as update() needs to be called each frame
          ReferenceFrame cameraFrame = sensorFrameUpdater.get();
@@ -193,7 +176,11 @@ public class RealsenseColorAndDepthPublisher
 
          colorPoseInDepthFrame.set(realsense.getDepthToColorTranslation(), realsense.getDepthToColorRotation());
 
+         BytePointer compressedColorPointer = new BytePointer();
+         BytePointer compressedDepthPointer = new BytePointer();;
+
          BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
+
          if (parameters.getPublishColor())
             BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
 
@@ -255,6 +242,13 @@ public class RealsenseColorAndDepthPublisher
             }
          }
 
+         depth16UC1Image.deallocate();
+         color8UC3Image.deallocate();
+         yuvColorImage.deallocate();
+
+         compressedColorPointer.deallocate();
+         compressedDepthPointer.deallocate();
+
          ros2PropertySetGroup.update();
       }
    }
@@ -283,6 +277,7 @@ public class RealsenseColorAndDepthPublisher
    {
       running = false;
       destroyedNotification.blockingPoll();
+      ros2Node.destroy();
    }
 
    public static void main(String[] args)
