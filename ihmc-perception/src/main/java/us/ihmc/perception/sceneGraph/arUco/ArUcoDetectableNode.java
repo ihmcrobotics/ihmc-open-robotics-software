@@ -18,6 +18,7 @@ public class ArUcoDetectableNode extends PredefinedRigidBodySceneNode
    private final int markerID;
    private final double markerSize;
    private final ModifiableReferenceFrame markerFrame;
+   private RigidBodyTransform markerToNodeFrameTransform;
 
    /**
     * Give the marker info directly from code.
@@ -33,6 +34,7 @@ public class ArUcoDetectableNode extends PredefinedRigidBodySceneNode
                               RigidBodyTransform visualModelToNodeFrameTransform)
    {
       super(name, visualModelFilePath, visualModelToNodeFrameTransform);
+      this.markerToNodeFrameTransform = markerToNodeFrameTransform;
 
       markerFrame = new ModifiableReferenceFrame(name + "MarkerFrame", ReferenceFrame.getWorldFrame());
       changeParentFrame(markerFrame.getReferenceFrame());
@@ -65,6 +67,7 @@ public class ArUcoDetectableNode extends PredefinedRigidBodySceneNode
                                                     arUcoMarker.getMarkerYawRotationToParentDegrees(),
                                                     arUcoMarker.getMarkerPitchRotationToParentDegrees(),
                                                     arUcoMarker.getMarkerRollRotationToParentDegrees());
+      markerToNodeFrameTransform.set(getNodeToParentFrameTransform());
       getNodeFrame().update();
    }
 
@@ -91,5 +94,10 @@ public class ArUcoDetectableNode extends PredefinedRigidBodySceneNode
    public RigidBodyTransform getMarkerToWorldFrameTransform()
    {
       return markerFrame.getTransformToParent();
+   }
+
+   public RigidBodyTransform getMarkerToNodeFrameTransform()
+   {
+      return markerToNodeFrameTransform;
    }
 }

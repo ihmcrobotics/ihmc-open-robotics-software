@@ -1,6 +1,7 @@
 package us.ihmc.perception.sceneGraph.arUco;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.OpenCVArUcoMarkerDetection;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticArUcoRelativeDetectableSceneNode;
 import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
@@ -27,6 +28,8 @@ public class ArUcoSceneTools
                                             arUcoDetectableNode.getMarkerFrame().getParent(),
                                             arUcoDetectableNode.getMarkerToWorldFrameTransform());
                arUcoDetectableNode.getMarkerFrame().update();
+               arUcoDetectableNode.getNodeToParentFrameTransform().setAndInvert(arUcoDetectableNode.getMarkerToNodeFrameTransform());
+               arUcoDetectableNode.getNodeFrame().update();
 
                StaticArUcoRelativeDetectableSceneNode staticArUcoRelativeDetectableSceneNode = predefinedSceneNodeLibrary.getStaticArUcoRelativeDetectableNodes()
                                                                                                                          .get(arUcoDetectableNode.getMarkerID());
