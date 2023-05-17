@@ -95,7 +95,7 @@ public class PerceptionDataLoader
 
       for (int index = 0; index < count; index++)
       {
-         float[] pointFloatArray = new float[3 * PerceptionLoggerConstants.LEGACY_BLOCK_SIZE];
+         float[] pointFloatArray = new float[3 * PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE];
          loadFloatArray(namespace, index, pointFloatArray);
 
          for (int i = 0; i < pointFloatArray.length / 3; i++)
@@ -116,7 +116,7 @@ public class PerceptionDataLoader
       int count = (int) hdf5Manager.getCount(namespace);
       for (int index = 0; index < count; index++)
       {
-         float[] pointFloatArray = new float[4 * PerceptionLoggerConstants.LEGACY_BLOCK_SIZE];
+         float[] pointFloatArray = new float[4 * PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE];
          loadFloatArray(namespace, index, pointFloatArray);
 
          for (int i = 0; i < pointFloatArray.length / 4; i++)
