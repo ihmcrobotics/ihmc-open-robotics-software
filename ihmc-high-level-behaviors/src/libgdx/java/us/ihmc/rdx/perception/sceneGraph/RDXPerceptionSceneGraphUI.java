@@ -16,7 +16,10 @@ import java.util.ArrayList;
 import java.util.Set;
 
 /**
- * Updates and renders perception scene graph nodes.
+ * Manages perception scene graph nodes.
+ * - It keeps them up to date with a subscription to the on robot perception process.
+ * - It renders them in the 3D scene as semi-transparent models.
+ * - TODO: It allows the operator to override the poses of nodes.
  */
 public class RDXPerceptionSceneGraphUI
 {
