@@ -23,6 +23,13 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 
+/**
+ * This class manages being able to click on a humanoid robot's hand in the UI
+ * and move a preview/desired version of it around. There's some complicated
+ * frame operations involved in this.
+ * <br/>
+ * See {@link RDXInteractableRobotLink} for more explanation.
+ */
 public class RDXInteractableHand extends RDXInteractableRobotLink
 {
    private final RobotSide side;

@@ -6,6 +6,10 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+/**
+ * UI for selecting and moving a humanoid robot's foot.
+ * See {@link RDXInteractableRobotLink} for more explanation.
+ */
 public class RDXInteractableFoot extends RDXInteractableRobotLink
 {
    public static boolean robotCollidableIsFoot(RobotSide side, RDXRobotCollidable robotCollidable, FullHumanoidRobotModel fullRobotModel)
