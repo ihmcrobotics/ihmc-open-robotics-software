@@ -80,6 +80,13 @@ public class RealsenseColorAndDepthPublisher
    private final RealSenseHardwareManager realSenseHardwareManager;
    private final BytedecoRealsense realsense;
 
+   private final Mat depth16UC1Image;
+   private final Mat color8UC3Image;
+   private final Mat yuvColorImage;
+
+   private final BytePointer compressedColorPointer = new BytePointer();
+   private final BytePointer compressedDepthPointer = new BytePointer();
+
    private long depthSequenceNumber = 0;
    private long colorSequenceNumber = 0;
 
@@ -104,6 +111,12 @@ public class RealsenseColorAndDepthPublisher
       }
       realsense.enableColor(realsenseConfiguration);
       realsense.initialize();
+
+      // Preallocate the Mat objects
+      depth16UC1Image = new Mat(realsense.getDepthHeight(), realsense.getDepthWidth(), opencv_core.CV_16UC1);
+      color8UC3Image = new Mat(realsense.getColorHeight(), realsense.getColorWidth(), opencv_core.CV_8UC3);
+      // YUV I420 has 1.5 times the height of the image
+      yuvColorImage = new Mat(realsense.getColorHeight() * 1.5, realsense.getColorWidth(), opencv_core.CV_8UC1);
 
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "realsense_color_and_depth_publisher");
       ros2Helper = new ROS2Helper(ros2Node);
@@ -158,11 +171,6 @@ public class RealsenseColorAndDepthPublisher
          MutableBytePointer depthFrameData = realsense.getDepthFrameData();
          MutableBytePointer colorFrameData = realsense.getColorFrameData();
 
-         Mat depth16UC1Image = new Mat(realsense.getDepthHeight(), realsense.getDepthWidth(), opencv_core.CV_16UC1, depthFrameData);
-         Mat color8UC3Image = new Mat(realsense.getColorHeight(), realsense.getColorWidth(), opencv_core.CV_8UC3, colorFrameData);
-         // YUV I420 has 1.5 times the height of the image
-         Mat yuvColorImage = new Mat(realsense.getColorHeight() * 1.5, realsense.getColorWidth(), opencv_core.CV_8UC1);
-
          depth16UC1Image.data(depthFrameData);
          color8UC3Image.data(colorFrameData);
 
@@ -175,9 +183,6 @@ public class RealsenseColorAndDepthPublisher
          cameraQuaternion.set(cameraPose.getOrientation());
 
          colorPoseInDepthFrame.set(realsense.getDepthToColorTranslation(), realsense.getDepthToColorRotation());
-
-         BytePointer compressedColorPointer = new BytePointer();
-         BytePointer compressedDepthPointer = new BytePointer();;
 
          BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
 
@@ -242,13 +247,6 @@ public class RealsenseColorAndDepthPublisher
             }
          }
 
-         depth16UC1Image.deallocate();
-         color8UC3Image.deallocate();
-         yuvColorImage.deallocate();
-
-         compressedColorPointer.deallocate();
-         compressedDepthPointer.deallocate();
-
          ros2PropertySetGroup.update();
       }
    }
@@ -276,8 +274,17 @@ public class RealsenseColorAndDepthPublisher
    public void destroy()
    {
       running = false;
-      destroyedNotification.blockingPoll();
+
+      depth16UC1Image.deallocate();
+      color8UC3Image.deallocate();
+      yuvColorImage.deallocate();
+
+      compressedColorPointer.deallocate();
+      compressedDepthPointer.deallocate();
+
       ros2Node.destroy();
+
+      destroyedNotification.blockingPoll();
    }
 
    public static void main(String[] args)
