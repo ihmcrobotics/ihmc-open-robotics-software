@@ -13,6 +13,8 @@ public abstract class SceneNode
 {
    private final String name;
    private final ModifiableReferenceFrame nodeFrame;
+   /** We allow the operator to override the pose of any node in the scene graph. */
+   private boolean isPoseOverriddenByOperator = false;
 
    public SceneNode(String name)
    {
@@ -48,5 +50,15 @@ public abstract class SceneNode
    protected void changeParentFrame(ReferenceFrame newParentFrame)
    {
       nodeFrame.changeParentFrame(newParentFrame);
+   }
+
+   public boolean getPoseOverriddenByOperator()
+   {
+      return isPoseOverriddenByOperator;
+   }
+
+   public void setPoseOverriddenByOperator(boolean poseOverriddenByOperator)
+   {
+      isPoseOverriddenByOperator = poseOverriddenByOperator;
    }
 }
