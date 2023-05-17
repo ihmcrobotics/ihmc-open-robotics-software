@@ -24,6 +24,10 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
             * Transform of the node's frame to world frame
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage transform_to_world_;
+   /**
+            * Keeps track of when the operator has overridden the pose of this node
+            */
+   public boolean is_pose_overridden_by_operator_;
 
    public DetectableSceneNodeMessage()
    {
@@ -45,6 +49,8 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       currently_detected_ = other.currently_detected_;
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_world_, transform_to_world_);
+      is_pose_overridden_by_operator_ = other.is_pose_overridden_by_operator_;
+
    }
 
    /**
@@ -95,6 +101,21 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       return transform_to_world_;
    }
 
+   /**
+            * Keeps track of when the operator has overridden the pose of this node
+            */
+   public void setIsPoseOverriddenByOperator(boolean is_pose_overridden_by_operator)
+   {
+      is_pose_overridden_by_operator_ = is_pose_overridden_by_operator;
+   }
+   /**
+            * Keeps track of when the operator has overridden the pose of this node
+            */
+   public boolean getIsPoseOverriddenByOperator()
+   {
+      return is_pose_overridden_by_operator_;
+   }
+
 
    public static Supplier<DetectableSceneNodeMessagePubSubType> getPubSubType()
    {
@@ -118,6 +139,8 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.currently_detected_, other.currently_detected_, epsilon)) return false;
 
       if (!this.transform_to_world_.epsilonEquals(other.transform_to_world_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_pose_overridden_by_operator_, other.is_pose_overridden_by_operator_, epsilon)) return false;
+
 
       return true;
    }
@@ -136,6 +159,8 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       if(this.currently_detected_ != otherMyClass.currently_detected_) return false;
 
       if (!this.transform_to_world_.equals(otherMyClass.transform_to_world_)) return false;
+      if(this.is_pose_overridden_by_operator_ != otherMyClass.is_pose_overridden_by_operator_) return false;
+
 
       return true;
    }
@@ -151,7 +176,9 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       builder.append("currently_detected=");
       builder.append(this.currently_detected_);      builder.append(", ");
       builder.append("transform_to_world=");
-      builder.append(this.transform_to_world_);
+      builder.append(this.transform_to_world_);      builder.append(", ");
+      builder.append("is_pose_overridden_by_operator=");
+      builder.append(this.is_pose_overridden_by_operator_);
       builder.append("}");
       return builder.toString();
    }

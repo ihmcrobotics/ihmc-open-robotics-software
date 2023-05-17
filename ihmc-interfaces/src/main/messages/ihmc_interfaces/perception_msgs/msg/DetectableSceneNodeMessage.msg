@@ -9,3 +9,6 @@ bool currently_detected
 
 # Transform of the node's frame to world frame
 controller_msgs/RigidBodyTransformMessage transform_to_world
+
+# Keeps track of when the operator has overridden the pose of this node
+bool is_pose_overridden_by_operator
