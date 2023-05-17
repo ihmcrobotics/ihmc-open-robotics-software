@@ -71,7 +71,6 @@ public class RDXPerceptionSceneGraphDemo
 
             arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
             arUcoMarkerDetection.create(simulatedCamera.getSensorFrame());
-            arUcoMarkerDetection.getDetectorParameters().markerBorderBits(2);
             arUcoMarkerDetection.setSourceImageForDetection(simulatedCamera.getLowLevelSimulator().getRGBA8888ColorImage());
             arUcoMarkerDetection.setCameraInstrinsics(simulatedCamera.getDepthCameraIntrinsics());
 
