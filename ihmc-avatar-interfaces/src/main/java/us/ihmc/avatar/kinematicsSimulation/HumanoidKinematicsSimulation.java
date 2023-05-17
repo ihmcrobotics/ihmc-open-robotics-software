@@ -440,7 +440,7 @@ public class HumanoidKinematicsSimulation
       controllerCore.initialize();
       walkingController.initialize();
 
-      walkingController.requestImmediateTransitionToStandingAndHoldCurrent();
+//      walkingController.requestImmediateTransitionToStandingAndHoldCurrent();
 
       for (RobotSide robotSide : RobotSide.values)
       {
