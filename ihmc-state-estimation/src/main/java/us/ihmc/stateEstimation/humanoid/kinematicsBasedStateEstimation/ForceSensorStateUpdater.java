@@ -265,7 +265,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
 
       // Make sure that both sensors actually exist
       if (inputForceSensorDataHolder.findForceSensorDefinition(wristForceSensorNames.get(RobotSide.LEFT)) == null
-            || inputForceSensorDataHolder.findForceSensorDefinition(wristForceSensorNames.get(RobotSide.RIGHT)) == null)
+          || inputForceSensorDataHolder.findForceSensorDefinition(wristForceSensorNames.get(RobotSide.RIGHT)) == null)
       {
          return false;
       }
@@ -284,7 +284,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
 
       // Make sure that both sensors actually exist
       if (inputForceSensorDataHolder.findForceSensorDefinition(footForceSensorNames.get(RobotSide.LEFT)) == null
-            || inputForceSensorDataHolder.findForceSensorDefinition(footForceSensorNames.get(RobotSide.RIGHT)) == null)
+          || inputForceSensorDataHolder.findForceSensorDefinition(footForceSensorNames.get(RobotSide.RIGHT)) == null)
       {
          return false;
       }
@@ -335,13 +335,11 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
       {
          ForceSensorDefinition footForceSensorDefinition = footForceSensorDefinitions.get(robotSide);
          ForceSensorDataReadOnly footForceSensor = inputForceSensorDataHolder.get(footForceSensorDefinition);
-         footForceSensor.getWrench(tempWrench);
 
-         tempForce.setIncludingFrame(footForceCalibrationOffsets.get(robotSide));
-         tempTorque.setIncludingFrame(footTorqueCalibrationOffsets.get(robotSide));
+         tempWrench.setIncludingFrame(footForceSensor.getWrench());
+         tempWrench.getLinearPart().sub(footForceCalibrationOffsets.get(robotSide));
+         tempWrench.getAngularPart().sub(footTorqueCalibrationOffsets.get(robotSide));
 
-         tempWrench.getLinearPart().sub(tempForce);
-         tempWrench.getAngularPart().sub(tempTorque);
          if (footWrenchSensorDriftEstimator != null)
             tempWrench.sub(footWrenchSensorDriftEstimator.getSensortDriftBias(footForceSensorDefinition));
 
@@ -363,7 +361,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
          ForceSensorDataReadOnly wristForceSensor = inputForceSensorDataHolder.get(wristForceSensorDefinition);
          ReferenceFrame measurementFrame = wristForceSensor.getMeasurementFrame();
          RigidBodyBasics measurementLink = wristForceSensorDefinition.getRigidBody();
-         wristForceSensor.getWrench(tempWrench);
+         tempWrench.setIncludingFrame(wristForceSensor.getWrench());
 
          tempForce.setIncludingFrame(wristForceCalibrationOffsets.get(robotSide));
          tempTorque.setIncludingFrame(wristTorqueCalibrationOffsets.get(robotSide));
@@ -396,10 +394,8 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
       for (RobotSide robotSide : RobotSide.values)
       {
          ForceSensorDataReadOnly footForceSensor = inputForceSensorDataHolder.get(footForceSensorDefinitions.get(robotSide));
-         footForceSensor.getWrench(tempWrench);
-
-         tempForce.setIncludingFrame(tempWrench.getLinearPart());
-         tempTorque.setIncludingFrame(tempWrench.getAngularPart());
+         tempForce.setIncludingFrame(footForceSensor.getWrench().getLinearPart());
+         tempTorque.setIncludingFrame(footForceSensor.getWrench().getAngularPart());
 
          footForceCalibrationOffsets.get(robotSide).setMatchingFrame(tempForce);
          footTorqueCalibrationOffsets.get(robotSide).setMatchingFrame(tempTorque);
@@ -414,7 +410,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
          ForceSensorDataReadOnly wristForceSensor = inputForceSensorDataHolder.get(wristForceSensorDefinitions.get(robotSide));
          ReferenceFrame measurementFrame = wristForceSensor.getMeasurementFrame();
 
-         wristForceSensor.getWrench(tempWrench);
+         tempWrench.setIncludingFrame(wristForceSensor.getWrench());
          cancelHandWeight(robotSide, tempWrench, measurementFrame);
 
          tempForce.setIncludingFrame(tempWrench.getLinearPart());

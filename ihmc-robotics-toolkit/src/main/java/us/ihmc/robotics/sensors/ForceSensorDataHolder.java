@@ -8,7 +8,6 @@ import java.util.Map;
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
 
@@ -87,17 +86,6 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
    }
 
    @Override
-   public ForceSensorData getByName(String sensorName)
-   {
-      ForceSensorDefinition forceSensorDefinition = findForceSensorDefinition(sensorName);
-
-      if (forceSensorDefinition == null)
-         throw new RuntimeException("Force sensor not found " + sensorName);
-      else
-         return get(forceSensorDefinition);
-   }
-
-   @Override
    public ForceSensorDefinition findForceSensorDefinition(String sensorName)
    {
       return sensorNameToDefintionMap.get(sensorName);
@@ -106,6 +94,12 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
    public int getNumberOfForceSensors()
    {
       return forceSensorDefinitions.size();
+   }
+
+   @Override
+   public ForceSensorData getByName(String sensorName)
+   {
+      return (ForceSensorData) ForceSensorDataHolderReadOnly.super.getByName(sensorName);
    }
 
    @Override
@@ -124,7 +118,6 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
       }
    }
 
-   private final transient DMatrixRMaj tempWrench = new DMatrixRMaj(6, 1);
    @Deprecated // maintains compatibility with the thread data synchronizer
    public void setDataOnly(ForceSensorDataHolder other)
    {
@@ -133,8 +126,7 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
          ForceSensorDefinition forceSensorDefinition = other.getForceSensorDefinitions().get(i);
          ForceSensorData thisData = getByName(forceSensorDefinition.getSensorName());
          ForceSensorData otherData = other.getByName(forceSensorDefinition.getSensorName());
-         otherData.getWrench(tempWrench);
-         thisData.setWrench(tempWrench);
+         thisData.setWrench(otherData.getWrenchMatrix());
       }
    }
 
@@ -148,19 +140,6 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
       forceSensorMap.get(key).setWrench(wrench);
    }
 
-   @Override
-   public void getForceSensorValue(ForceSensorDefinition key, Wrench wrenchToPack)
-   {
-      forceSensorMap.get(key).getWrench(wrenchToPack);
-   }
-
-   @Override
-   public void getForceSensorValue(ForceSensorDefinition key, DMatrixRMaj wrenchToPack)
-   {
-      forceSensorMap.get(key).getWrench(wrenchToPack);
-   }
-
-   @Override
    public boolean equals(Object obj)
    {
       if (obj == this)

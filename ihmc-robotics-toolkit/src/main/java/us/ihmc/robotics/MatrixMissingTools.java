@@ -3,16 +3,19 @@ package us.ihmc.robotics;
 import org.ejml.MatrixDimensionException;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrix1Row;
-import org.ejml.data.DMatrixRMaj;
 import org.ejml.data.DMatrix3x3;
+import org.ejml.data.DMatrixD1;
+import org.ejml.data.DMatrixIterator;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.data.Matrix;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.simple.SimpleMatrix;
+
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 
 public class MatrixMissingTools
@@ -30,8 +33,15 @@ public class MatrixMissingTools
     * @param numberOfColumns Column size of the block
     * @param scale           Scale the block from otherMatrix by this value
     */
-   public static void setMatrixBlock(DMatrix1Row dest, int destStartRow, int destStartColumn, DMatrix src, int srcStartRow, int srcStartColumn,
-                                     int numberOfRows, int numberOfColumns, double scale)
+   public static void setMatrixBlock(DMatrix1Row dest,
+                                     int destStartRow,
+                                     int destStartColumn,
+                                     DMatrix src,
+                                     int srcStartRow,
+                                     int srcStartColumn,
+                                     int numberOfRows,
+                                     int numberOfColumns,
+                                     double scale)
    {
       if (numberOfRows == 0 || numberOfColumns == 0)
          return;
@@ -79,6 +89,7 @@ public class MatrixMissingTools
       inverseToPack.set(0, 1, -determinantInverse * matrix.get(0, 1));
       inverseToPack.set(1, 0, -determinantInverse * matrix.get(1, 0));
    }
+
    public static void setDiagonal(DMatrix3x3 mat, double diagonalValue)
    {
       for (int row = 0; row < 3; row++)
@@ -112,13 +123,11 @@ public class MatrixMissingTools
          return;
 
       if (dest.getNumRows() < numberOfRows || dest.getNumCols() < numberOfColumns)
-         throw new IllegalArgumentException(
-               "dest is too small, min size: [rows: " + numberOfRows + ", cols: " + numberOfColumns + "], was: [rows: " + dest.getNumRows() + ", cols: "
-               + dest.getNumCols() + "]");
+         throw new IllegalArgumentException("dest is too small, min size: [rows: " + numberOfRows + ", cols: " + numberOfColumns + "], was: [rows: "
+                                            + dest.getNumRows() + ", cols: " + dest.getNumCols() + "]");
       if (src.getNumRows() < numberOfRows + srcStartRow || src.getNumCols() < numberOfColumns + srcStartColumn)
-         throw new IllegalArgumentException(
-               "src is too small, min size: [rows: " + (numberOfRows + srcStartRow) + ", cols: " + (numberOfColumns + srcStartColumn) + "], was: [rows: "
-               + src.getNumRows() + ", cols: " + src.getNumCols() + "]");
+         throw new IllegalArgumentException("src is too small, min size: [rows: " + (numberOfRows + srcStartRow) + ", cols: "
+                                            + (numberOfColumns + srcStartColumn) + "], was: [rows: " + src.getNumRows() + ", cols: " + src.getNumCols() + "]");
 
       for (int i = 0; i < numberOfRows; i++)
       {
@@ -287,7 +296,6 @@ public class MatrixMissingTools
       skewSymmetricToPack.setM22(0.0);
    }
 
-
    public static void addMatrixBlock(DMatrix1Row dest, int destStartRow, int destStartColumn, DMatrix1Row src)
    {
       addMatrixBlock(dest, destStartRow, destStartColumn, src, 1.0);
@@ -353,7 +361,197 @@ public class MatrixMissingTools
 
    public static void unsafe_add(DMatrixRMaj matrix, int row, int col, double value)
    {
-      matrix.data[ row * matrix.numCols + col ] += value;
+      matrix.data[row * matrix.numCols + col] += value;
+   }
+
+   public static DMatrixRMaj newReadOnlyDMatrixRMajView(DMatrixRMaj source)
+   {
+      return new DMatrixRMaj()
+      {
+         private static final long serialVersionUID = 1133422950923032730L;
+
+         @Override
+         public int getNumCols()
+         {
+            return source.getNumCols();
+         }
+
+         @Override
+         public int getNumRows()
+         {
+            return source.getNumRows();
+         }
+
+         @Override
+         public int getNumElements()
+         {
+            return source.getNumElements();
+         }
+
+         @Override
+         public double get(int row, int col)
+         {
+            return source.get(row, col);
+         }
+
+         @Override
+         public double unsafe_get(int row, int col)
+         {
+            return source.unsafe_get(row, col);
+         }
+
+         @Override
+         public int getIndex(int row, int col)
+         {
+            return source.getIndex(row, col);
+         }
+
+         @Override
+         public boolean isInBounds(int row, int col)
+         {
+            return source.isInBounds(row, col);
+         }
+
+         @Override
+         @SuppressWarnings({"unchecked"})
+         public DMatrixRMaj copy()
+         {
+            return source.copy();
+         }
+
+         @Override
+         public String toString()
+         {
+            return source.toString();
+         }
+
+         @SuppressWarnings("unchecked")
+         @Override
+         public DMatrixRMaj createLike()
+         {
+            return source.createLike();
+         }
+
+         @Override
+         public double[] getData()
+         {
+            throw new UnsupportedOperationException("This is a read-only matrix");
+         }
+
+         @Override
+         public double get(int index)
+         {
+            return source.get(index);
+         }
+
+         @Override
+         public void print()
+         {
+            source.print();
+         }
+
+         @Override
+         public void print(String format)
+         {
+            source.print(format);
+         }
+
+         @Override
+         public void reshape(int numRows, int numCols, boolean saveValues)
+         {
+            throw new UnsupportedOperationException("This is a read-only matrix");
+         }
+
+         @Override
+         public void set(int row, int col, double value)
+         {
+            throw new UnsupportedOperationException("This is a read-only matrix");
+         }
+
+         @Override
+         public void unsafe_set(int row, int col, double value)
+         {
+            throw new UnsupportedOperationException("This is a read-only matrix");
+         }
+
+         @Override
+         public void add(int row, int col, double value)
+         {
+            throw new UnsupportedOperationException("This is a read-only matrix");
+         }
+
+         @Override
+         public void set(int numRows, int numCols, boolean rowMajor, double... data)
+         {
+            throw new UnsupportedOperationException("This is a read-only matrix");
+         }
+
+         @Override
+         public void zero()
+         {
+            throw new UnsupportedOperationException("This is a read-only matrix");
+         }
+
+         @Override
+         public void set(Matrix original)
+         {
+            throw new UnsupportedOperationException("This is a read-only matrix");
+         }
+
+         @Override
+         public void set(double[][] input)
+         {
+            throw new UnsupportedOperationException("This is a read-only matrix");
+         }
+
+         @Override
+         public void setData(double[] data)
+         {
+            throw new UnsupportedOperationException("This is a read-only matrix");
+         }
+
+         @Override
+         public void set(DMatrixD1 b)
+         {
+            throw new UnsupportedOperationException("This is a read-only matrix");
+         }
+
+         @Override
+         public double set(int index, double val)
+         {
+            throw new UnsupportedOperationException("This is a read-only matrix");
+         }
+
+         @Override
+         public double plus(int index, double val)
+         {
+            throw new UnsupportedOperationException("This is a read-only matrix");
+         }
+
+         @Override
+         public double minus(int index, double val)
+         {
+            throw new UnsupportedOperationException("This is a read-only matrix");
+         }
+
+         @Override
+         public double times(int index, double val)
+         {
+            throw new UnsupportedOperationException("This is a read-only matrix");
+         }
+
+         @Override
+         public double div(int index, double val)
+         {
+            throw new UnsupportedOperationException("This is a read-only matrix");
+         }
+
+         @Override
+         public DMatrixIterator iterator(boolean rowMajor, int minRow, int minCol, int maxRow, int maxCol)
+         {
+            throw new UnsupportedOperationException("This is a read-only matrix");
+         }
+      };
    }
 
    /**

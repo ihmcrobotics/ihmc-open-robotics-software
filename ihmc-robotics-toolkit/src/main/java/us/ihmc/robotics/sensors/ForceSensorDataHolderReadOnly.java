@@ -4,19 +4,34 @@ import java.util.List;
 
 import org.ejml.data.DMatrixRMaj;
 
-import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 
 public interface ForceSensorDataHolderReadOnly
 {
-   public abstract ForceSensorDataReadOnly get(ForceSensorDefinition forceSensor);
+   ForceSensorDataReadOnly get(ForceSensorDefinition forceSensor);
 
-   public abstract ForceSensorDataReadOnly getByName(String name);
+   default ForceSensorDataReadOnly getByName(String sensorName)
+   {
+      ForceSensorDefinition forceSensorDefinition = findForceSensorDefinition(sensorName);
 
-   public abstract List<ForceSensorDefinition> getForceSensorDefinitions();
+      if (forceSensorDefinition == null)
+         throw new RuntimeException("Force sensor not found " + sensorName);
+      else
+         return get(forceSensorDefinition);
+   }
 
-   public abstract void getForceSensorValue(ForceSensorDefinition key, Wrench wrenchToPack);
+   ForceSensorDefinition findForceSensorDefinition(String name);
 
-   public abstract void getForceSensorValue(ForceSensorDefinition key, DMatrixRMaj wrenchToPack);
+   List<ForceSensorDefinition> getForceSensorDefinitions();
 
-   public abstract ForceSensorDefinition findForceSensorDefinition(String name);
+   default WrenchReadOnly getForceSensorValue(ForceSensorDefinition key)
+   {
+      return get(key).getWrench();
+   }
+
+   default DMatrixRMaj getForceSensorMatrixValue(ForceSensorDefinition key)
+   {
+      return get(key).getWrenchMatrix();
+   }
+
 }
