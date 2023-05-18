@@ -53,7 +53,13 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
 
    protected JointDesiredOutputList getStateSpecificJointSettings()
    {
-      jointSettingsHelper.update();
+      return getStateSpecificJointSettings(true);
+   }
+
+   protected JointDesiredOutputList getStateSpecificJointSettings(boolean update)
+   {
+      if (update)
+         jointSettingsHelper.update();
       return jointSettingsHelper.getStateSpecificJointSettings();
    }
 
