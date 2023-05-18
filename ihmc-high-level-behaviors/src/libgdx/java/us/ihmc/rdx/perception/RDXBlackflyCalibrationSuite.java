@@ -66,9 +66,8 @@ public class RDXBlackflyCalibrationSuite
    private MatVector imagePointsMatVector;
    private Mat grayscaleImage;
    private Mat calibrationPatternOutput;
-   private final ResettableExceptionHandlingExecutorService patternDetectionThreadQueue = MissingThreadTools.newSingleThreadExecutor("PatternDetection",
-                                                                                                                                     true,
-                                                                                                                                     1);
+   private final ResettableExceptionHandlingExecutorService patternDetectionThreadQueue
+         = MissingThreadTools.newSingleThreadExecutor("PatternDetection", true, 1);
    private boolean patternFound = false;
    private final Notification calibrationSourceImagePatternDrawRequest = new Notification();
    private final Notification calibrationSourceImageDrawRequest = new Notification();

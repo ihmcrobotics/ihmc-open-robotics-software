@@ -189,7 +189,8 @@ public class RDXRapidHeightMapExtractionDemo
 
             long begin = System.nanoTime();
 
-            RigidBodyTransform transform = new RigidBodyTransform(sensorOrientationBuffer.get(frameIndex.get()), sensorPositionBuffer.get(frameIndex.get()));
+            RigidBodyTransform transform = new RigidBodyTransform(sensorOrientationBuffer.get(frameIndex.get()),
+                                                                  sensorPositionBuffer.get(frameIndex.get()));
 
             // Point3D euler = new Point3D();
             // sensorOrientationBuffer.get(frameIndex.get()).getEuler(euler);

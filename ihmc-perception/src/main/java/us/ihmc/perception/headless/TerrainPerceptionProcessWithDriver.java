@@ -61,7 +61,6 @@ public class TerrainPerceptionProcessWithDriver
 
    private final BytePointer compressedColorPointer = new BytePointer();
    private final BytePointer compressedDepthPointer = new BytePointer();
-   ;
 
    private BytedecoImage debugExtractionImage;
    private final ImageMessage depthImageMessage = new ImageMessage();

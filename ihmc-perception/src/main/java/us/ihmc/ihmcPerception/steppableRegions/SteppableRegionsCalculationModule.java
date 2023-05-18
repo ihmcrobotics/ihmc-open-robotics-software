@@ -191,15 +191,16 @@ public class SteppableRegionsCalculationModule
          if (parameters.getYawDiscretizations() > 1)
             yawAngle = ((double) yawValue) / (parameters.getYawDiscretizations() - 1) * Math.PI;
 
-         SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculator.createEnvironmentByMergingCellsIntoRegions(steppabilityImages.get(yawValue),
-                                                                                                                              snapHeightImages.get(yawValue),
-                                                                                                                              snapNormalXImages.get(yawValue),
-                                                                                                                              snapNormalYImages.get(yawValue),
-                                                                                                                              snapNormalZImages.get(yawValue),
-                                                                                                                              steppabilityConnections.get(
-                                                                                                                                    yawValue),
-                                                                                                                              parameters,
-                                                                                                                              heightMapData);
+         SteppableRegionsEnvironmentModel environment
+               = SteppableRegionsCalculator.createEnvironmentByMergingCellsIntoRegions(steppabilityImages.get(yawValue),
+                                                                                       snapHeightImages.get(yawValue),
+                                                                                       snapNormalXImages.get(yawValue),
+                                                                                       snapNormalYImages.get(yawValue),
+                                                                                       snapNormalZImages.get(yawValue),
+                                                                                       steppabilityConnections.get(
+                                                                                             yawValue),
+                                                                                       parameters,
+                                                                                       heightMapData);
 
          SteppableRegionsList regions = SteppableRegionsCalculator.createSteppableRegions(concaveHullParameters,
                                                                                           polygonizerParameters,

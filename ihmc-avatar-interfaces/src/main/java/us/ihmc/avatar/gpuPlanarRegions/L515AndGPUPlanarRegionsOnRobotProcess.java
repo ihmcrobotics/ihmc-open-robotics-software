@@ -168,8 +168,6 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
       LogTools.info("Starting loop.");
       thread.start();
 
-      LogTools.info("Natives loaded.");
-
       realSenseHardwareManager = new RealSenseHardwareManager();
       l515 = realSenseHardwareManager.createFullFeaturedL515(SERIAL_NUMBER);
 

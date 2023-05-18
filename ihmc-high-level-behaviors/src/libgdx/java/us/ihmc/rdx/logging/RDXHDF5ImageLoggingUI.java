@@ -45,8 +45,7 @@ public class RDXHDF5ImageLoggingUI
    private final ImPlotStopwatchPlot encodeDurationPlot = new ImPlotStopwatchPlot("Encode duration");
    private final ImPlotIntegerPlot compressedBytesPlot = new ImPlotIntegerPlot("Compressed bytes");
 
-   private enum Encoding
-   {PNG, JPEG}
+   private enum Encoding {PNG, JPEG}
 
    private Encoding encodingSelection = Encoding.JPEG;
    private final ImInt jpegQuality = new ImInt(95);

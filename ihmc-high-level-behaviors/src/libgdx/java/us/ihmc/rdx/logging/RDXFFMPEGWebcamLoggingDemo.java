@@ -29,9 +29,13 @@ public class RDXFFMPEGWebcamLoggingDemo
    private final boolean lossless = false;
    private final int framerate = 15;
    private final int bitrate = 1450000;
-   private final FFMPEGLoggerDemoHelper ffmpegLoggerDemoHelper = new FFMPEGLoggerDemoHelper("FFMPEGWebcamLoggingDemo.webm", avutil.AV_PIX_FMT_BGR24,
-         //                                                                                            avutil.AV_PIX_FMT_RGBA,
-                                                                                            avutil.AV_PIX_FMT_YUV420P, lossless, framerate, bitrate);
+   private final FFMPEGLoggerDemoHelper ffmpegLoggerDemoHelper = new FFMPEGLoggerDemoHelper("FFMPEGWebcamLoggingDemo.webm",
+                                                                                            avutil.AV_PIX_FMT_BGR24,
+//                                                                                            avutil.AV_PIX_FMT_RGBA,
+                                                                                            avutil.AV_PIX_FMT_YUV420P,
+                                                                                            lossless,
+                                                                                            framerate,
+                                                                                            bitrate);
    private VideoCapture videoCapture;
    private BytedecoImage bgrImage;
    private int imageHeight = -1;
