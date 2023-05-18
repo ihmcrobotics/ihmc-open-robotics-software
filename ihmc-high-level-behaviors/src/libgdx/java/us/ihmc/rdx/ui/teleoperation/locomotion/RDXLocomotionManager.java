@@ -5,7 +5,9 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.PauseWalkingMessage;
 import imgui.ImGui;
+import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -18,6 +20,7 @@ import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiEnumPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -68,7 +71,7 @@ public class RDXLocomotionManager
    private boolean isPlacingFootstep = false;
 
    private final ImGuiEnumPlot isWalkingPlot = new ImGuiEnumPlot("Walking", 1000, 25);
-   private final RDXPauseWalkingMode pauseWalkingMode;
+   private final PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
 
    private final ControllerStatusTracker controllerStatusTracker;
 
@@ -83,7 +86,6 @@ public class RDXLocomotionManager
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;
 
-      pauseWalkingMode = new RDXPauseWalkingMode(communicationHelper);
       walkingParameters = new RDXLocomotionParameters(robotModel.getSimpleRobotName());
       walkingParameters.load();
 
@@ -216,7 +218,50 @@ public class RDXLocomotionManager
       transferTimeSlider.renderImGuiWidget();
       turnAggressivenessSlider.renderImGuiWidget();
 
-      pauseWalkingMode.renderImGuiWidgets();
+      ImGui.text("Walking Options:");
+      ImGui.sameLine();
+
+      if (interactableFootstepPlan.getNumberOfFootsteps() == 0)
+         ImGui.pushStyleColor(ImGuiCol.Button, 0.66f, 0.66f, 0.66f, 1.0f);
+      else
+         ImGui.pushStyleColor(ImGuiCol.Button, 171,203,242, 255);
+
+      if (ImGui.button(labels.get("Walk")) && interactableFootstepPlan.getNumberOfFootsteps() > 0)
+      { // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
+         System.out.println("Walking from planned steps");
+         interactableFootstepPlan.walkFromSteps();
+         setPauseWalkingWithoutPublish(false);
+      }
+      ImGuiTools.previousWidgetTooltip("Keybind: Space");
+      ImGui.sameLine();
+      ImGui.popStyleColor();
+
+      if (!pauseWalkingMessage.getPause() && controllerStatusTracker.isWalking())
+         ImGui.pushStyleColor(ImGuiCol.Button, 171, 203, 242, 255);
+      else
+         ImGui.pushStyleColor(ImGuiCol.Button, 0.66f, 0.66f, 0.66f, 1.0f);
+
+      if (ImGui.button(labels.get("Pause")) && controllerStatusTracker.isWalking())
+      {
+         System.out.println("Pause walking from the robot");
+         setPauseWalkingAndPublish(true);
+      }
+      ImGuiTools.previousWidgetTooltip("Keybind: Space");
+      ImGui.sameLine();
+      ImGui.popStyleColor();
+
+      if (pauseWalkingMessage.getPause())
+         ImGui.pushStyleColor(ImGuiCol.Button, 171,203,242, 255);
+      else
+         ImGui.pushStyleColor(ImGuiCol.Button, 0.66f, 0.66f, 0.66f, 1.0f);
+
+      if (ImGui.button(labels.get("Continue")) && pauseWalkingMessage.getPause())
+      {
+         System.out.println("Continue walking with the robot");
+         setPauseWalkingAndPublish(false);
+      }
+      ImGuiTools.previousWidgetTooltip("Keybind: Space");
+      ImGui.popStyleColor();
 
       ImGui.text("Leg control mode: " + legControlMode.name());
       if (ImGui.radioButton(labels.get("Disabled"), legControlMode == RDXLegControlMode.DISABLED))
@@ -255,12 +300,12 @@ public class RDXLocomotionManager
          if (interactableFootstepPlan.getNumberOfFootsteps() > 0)
          {
             interactableFootstepPlan.walkFromSteps();
-            pauseWalkingMode.setPauseWalkingWithoutPublish(false);
+            setPauseWalkingWithoutPublish(false);
          }
          else
          {
             // Gets the robot walking state and sets it to the opposite value
-            pauseWalkingMode.setPauseWalkingAndPublish(!pauseWalkingMode.getPauseWalking());
+            setPauseWalkingAndPublish(!pauseWalkingMessage.getPause());
          }
       }
    }
@@ -321,6 +366,22 @@ public class RDXLocomotionManager
    public void setLegControlModeToSingleSupportFootPosing()
    {
       legControlMode = RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING;
+   }
+
+   public void setPauseWalkingAndPublish(boolean pauseWalking)
+   {
+      pauseWalkingMessage.setPause(pauseWalking);
+      communicationHelper.publishToController(pauseWalkingMessage);
+
+      if (pauseWalking)
+         LogTools.info("Paused Walking");
+      else
+         LogTools.info("Continue Walking");
+   }
+
+   public void setPauseWalkingWithoutPublish(boolean pauseWalking)
+   {
+      pauseWalkingMessage.setPause(pauseWalking);
    }
 
    public RDXManualFootstepPlacement getManualFootstepPlacement()
