@@ -24,7 +24,9 @@ import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObjectBuilder;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.*;
 
@@ -44,7 +46,8 @@ public class RDXAffordanceEditorUI
    private final FramePose3D handPose = new FramePose3D(ReferenceFrame.getWorldFrame(), handTransformToWorld);
    private RDXInteractableObjectBuilder objectBuilder;
    private final PoseReferenceFrame objectFrame = new PoseReferenceFrame("objectFrame", ReferenceFrame.getWorldFrame());
-   private final PoseReferenceFrame affordanceFrame = new PoseReferenceFrame("affordanceFrame", ReferenceFrame.getWorldFrame());
+   private ReferenceFrame initialObjectFrame;
+   private ModifiableReferenceFrame affordanceFrame = new ModifiableReferenceFrame("affordanceFrame", ReferenceFrame.getWorldFrame());
    private final float[] gripperClosure = new float[1];
    private static final double DEFAULT_DURATION = 1.0;
    private static final double LINEAR_VELOCITY = 0.1;
@@ -86,7 +89,6 @@ public class RDXAffordanceEditorUI
                                                      handTransformToWorld,
                                                      handPose,
                                                      objectBuilder.getSelectedObject().getTransformToWorld(),
-                                                     affordanceFrame,
                                                      activeMenu,
                                                      new ArrayList<>(Arrays.asList(new Color(0xFFE4B5FF),
                                                                                    new Color(0xFF8C00FF),
@@ -98,7 +100,6 @@ public class RDXAffordanceEditorUI
                                                 handTransformToWorld,
                                                 handPose,
                                                 objectBuilder.getSelectedObject().getTransformToWorld(),
-                                                affordanceFrame,
                                                 activeMenu,
                                                 Color.BLACK);
             activeMenu[0] = RDXActiveAffordanceMenu.POST_GRASP;
@@ -106,7 +107,6 @@ public class RDXAffordanceEditorUI
                                                       handTransformToWorld,
                                                       handPose,
                                                       objectBuilder.getSelectedObject().getTransformToWorld(),
-                                                      affordanceFrame,
                                                       activeMenu,
                                                       new ArrayList<>(Arrays.asList(new Color(0xD8BFD8FF),
                                                                                     new Color(0xBA55D3FF),
@@ -152,7 +152,7 @@ public class RDXAffordanceEditorUI
                handLockedFrame = new PoseReferenceFrame("handFrame", objectFrame);
                handPose.changeFrame(objectFrame);
                handLockedFrame.setPoseAndUpdate(handPose);
-               handPose.changeFrame(affordanceFrame);
+               handPose.changeFrame(ReferenceFrame.getWorldFrame());
                affordancePoseLocked = true;
             }
             objectFrame.setPoseAndUpdate(objectPose);
@@ -168,7 +168,6 @@ public class RDXAffordanceEditorUI
       }
       handPose.changeFrame(ReferenceFrame.getWorldFrame());
       handPose.set(handTransformToWorld);
-      handPose.changeFrame(affordanceFrame);
 
       graspFrame.update();
       preGraspFrames.update();
@@ -254,15 +253,16 @@ public class RDXAffordanceEditorUI
       ImGui.sameLine();
       if (ImGui.button(labels.get("<"), 20, 25))
       {
-         switch (activeMenu[0]) {
+         switch (activeMenu[0])
+         {
             case PRE_GRASP ->
             {
-               if(!preGraspFrames.isFirst())
+               if (!preGraspFrames.isFirst())
                   preGraspFrames.selectPrevious();
             }
             case GRASP ->
             {
-               if(preGraspFrames.getNumberOfFrames()>0)
+               if (preGraspFrames.getNumberOfFrames() > 0)
                {
                   activeMenu[0] = RDXActiveAffordanceMenu.PRE_GRASP;
                   preGraspFrames.setSelectedIndexToSize();
@@ -326,7 +326,7 @@ public class RDXAffordanceEditorUI
             }
             case GRASP ->
             {
-               if(postGraspFrames.getNumberOfFrames()>0)
+               if (postGraspFrames.getNumberOfFrames() > 0)
                {
                   activeMenu[0] = RDXActiveAffordanceMenu.POST_GRASP;
                   postGraspFrames.resetSelectedIndex();
@@ -341,7 +341,6 @@ public class RDXAffordanceEditorUI
                   playing = false;
             }
          }
-
       }
       ImGui.sameLine();
       if (ImGui.button(labels.get("PLAY")))
@@ -437,6 +436,11 @@ public class RDXAffordanceEditorUI
 
    public void saveToFile(String fileName)
    {
+      // change affordance reference from world to initial object frame
+      RigidBodyTransform initialObjectTransform = new RigidBodyTransform(objectBuilder.getSelectedObject().getInitialTransformToWorld());
+      initialObjectFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(), initialObjectTransform);
+      affordanceFrame.changeParentFrame(initialObjectFrame);
+
       WorkspaceResourceFile file = new WorkspaceResourceFile(configurationsDirectory, fileName + ".json");
       if (file.isFileAccessAvailable())
       {
@@ -458,6 +462,8 @@ public class RDXAffordanceEditorUI
                actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
                actionNode.put("side", side.getLowerCaseName());
                actionNode.put("trajectoryDuration", trajectoryDurations.get(i));
+               preGraspPoses.get(i).changeFrame(affordanceFrame.getReferenceFrame());
+               LogTools.info(preGraspPoses.get(i));
                RigidBodyTransform transformToParent = new RigidBodyTransform(preGraspPoses.get(i));
                JSONTools.toJSON(actionNode, transformToParent);
 
@@ -476,6 +482,7 @@ public class RDXAffordanceEditorUI
                actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
                actionNode.put("side", side.getLowerCaseName());
                actionNode.put("trajectoryDuration", trajectoryDurations.get(preGraspPoses.size()));
+               graspPose.changeFrame(affordanceFrame.getReferenceFrame());
                RigidBodyTransform transformToParent = new RigidBodyTransform(graspPose);
                JSONTools.toJSON(actionNode, transformToParent);
                if (graspFrame.getHandConfiguration() != null)
@@ -493,6 +500,7 @@ public class RDXAffordanceEditorUI
                actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
                actionNode.put("side", side.getLowerCaseName());
                actionNode.put("trajectoryDuration", trajectoryDurations.get(preGraspPoses.size() + 1 + i));
+               postGraspPoses.get(i).changeFrame(affordanceFrame.getReferenceFrame());
                RigidBodyTransform transformToParent = new RigidBodyTransform(postGraspPoses.get(i));
                JSONTools.toJSON(actionNode, transformToParent);
 
@@ -522,7 +530,6 @@ public class RDXAffordanceEditorUI
             JSONTools.toJSON(jsonNode, new RigidBodyTransform(objectBuilder.getSelectedObject().getInitialPose()));
             ArrayNode framesArrayNode = jsonNode.putArray("frames");
             var preGraspObjectTransforms = preGraspFrames.getObjectTransforms();
-            LogTools.info(preGraspObjectTransforms.size());
             var preGraspHandConfigurations = preGraspFrames.getHandConfigurations();
             jsonNode.put("numberPreGraspFrames", preGraspObjectTransforms.size());
             for (int i = 0; i < preGraspObjectTransforms.size(); i++)
@@ -560,7 +567,7 @@ public class RDXAffordanceEditorUI
       Path filePath = Paths.get(configurationsDirectory.getFilesystemDirectory().toString(), fileName + "Extra.json");
       final int[] preGraspFramesSize = new int[1];
       final int[] postGraspFramesSize = new int[1];
-      if(Files.exists(filePath))
+      if (Files.exists(filePath))
       {
          JSONFileTools.load(filePath, jsonNode ->
          {
@@ -604,8 +611,13 @@ public class RDXAffordanceEditorUI
          LogTools.warn("Could not load file {}", filePath);
       }
 
+      // change affordance reference from whatever it is now to loaded initial object pose
+      RigidBodyTransform initialObjectTransform = new RigidBodyTransform(objectBuilder.getSelectedObject().getInitialTransformToWorld());
+      initialObjectFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(), initialObjectTransform);
+      affordanceFrame.changeParentFrame(initialObjectFrame);
+
       filePath = Paths.get(configurationsDirectory.getFilesystemDirectory().toString(), fileName + ".json");
-      if(Files.exists(filePath))
+      if (Files.exists(filePath))
       {
          JSONFileTools.load(filePath, jsonNode ->
          {
@@ -618,17 +630,17 @@ public class RDXAffordanceEditorUI
                   RigidBodyTransform frameTransform = new RigidBodyTransform();
                   JSONTools.toEuclid(actionNode, frameTransform);
                   if (preGraspFrames.getNumberOfFrames() < preGraspFramesSize[0])
-                     preGraspFrames.addFrame(new FramePose3D(affordanceFrame, frameTransform));
+                     preGraspFrames.addFrame(new FramePose3D(affordanceFrame.getReferenceFrame(), frameTransform));
                   else if (!graspFrame.isSet())
-                     graspFrame.setFrame(new FramePose3D(affordanceFrame, frameTransform));
+                     graspFrame.setFrame(new FramePose3D(affordanceFrame.getReferenceFrame(), frameTransform));
                   else
-                     postGraspFrames.addFrame(new FramePose3D(affordanceFrame, frameTransform));
+                     postGraspFrames.addFrame(new FramePose3D(affordanceFrame.getReferenceFrame(), frameTransform));
                }
             });
          });
          LogTools.info("LOADED file {}", filePath);
       }
-         else
+      else
       {
          LogTools.warn("Could not load file {}", filePath);
       }

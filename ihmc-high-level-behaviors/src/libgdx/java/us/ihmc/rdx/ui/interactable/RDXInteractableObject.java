@@ -84,6 +84,13 @@ public class RDXInteractableObject implements RenderableProvider
       return initialObjectPose;
    }
 
+   public RigidBodyTransform getInitialTransformToWorld()
+   {
+      RigidBodyTransform initialObjectTransformToWorld = new RigidBodyTransform();
+      initialObjectPose.get(initialObjectTransformToWorld);
+      return initialObjectTransformToWorld;
+   }
+
    public ModelInstance getModelInstance()
    {
       return modelInstance;

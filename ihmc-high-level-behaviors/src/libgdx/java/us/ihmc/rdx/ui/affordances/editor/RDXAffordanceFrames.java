@@ -13,6 +13,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfigurat
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 import java.util.ArrayList;
@@ -26,7 +27,6 @@ public class RDXAffordanceFrames
    private final ArrayList<Integer> poseIndices = new ArrayList<>();
    private int index = 0;
    private int colorIndex = 0;
-   public final PoseReferenceFrame affordanceFrame;
    public final RDXInteractableSakeGripper interactableHand;
    private final FramePose3D handPose;
    private final ArrayList<HandConfiguration> handConfigurations = new ArrayList<>();
@@ -43,7 +43,6 @@ public class RDXAffordanceFrames
                               RigidBodyTransform handTransformToWorld,
                               FramePose3D handPose,
                               RigidBodyTransform objectTransformToWorld,
-                              PoseReferenceFrame affordanceFrame,
                               RDXActiveAffordanceMenu[] activeMenu,
                               ArrayList<Color> colors)
    {
@@ -51,7 +50,6 @@ public class RDXAffordanceFrames
       this.handPose = handPose;
       this.handTransformToWorld = handTransformToWorld;
       this.objectTransformToWorld = objectTransformToWorld;
-      this.affordanceFrame = affordanceFrame;
       this.activeMenu = activeMenu;
       this.menu = activeMenu[0];
       this.colors = colors;
@@ -151,14 +149,15 @@ public class RDXAffordanceFrames
       }
    }
 
-   public void addFrame(FramePose3D pose)
+   public void addFrame(FramePose3D poseReference)
    {
       index++;
-      PoseReferenceFrame frame = new PoseReferenceFrame(index + "Frame", affordanceFrame);
-      frame.setPoseAndUpdate(pose);
+      poseReference.changeFrame(ReferenceFrame.getWorldFrame());
+      PoseReferenceFrame frame = new PoseReferenceFrame(index + "Frame", poseReference.getReferenceFrame());
+      frame.setPoseAndUpdate(poseReference);
 
       poseIndices.add(index);
-      poses.add(pose);
+      poses.add(poseReference);
       poseFrames.add(frame);
       frameGraphics.add(new RDXReferenceFrameGraphic(0.1, colors.get(colorIndex % colors.size())));
       colorIndex++;

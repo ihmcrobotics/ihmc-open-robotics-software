@@ -13,6 +13,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfigurat
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 public class RDXAffordanceFrame
@@ -35,7 +36,6 @@ public class RDXAffordanceFrame
                              RigidBodyTransform handTransformToWorld,
                              FramePose3D handPose,
                              RigidBodyTransform objectTransformToWorld,
-                             PoseReferenceFrame affordanceFrame,
                              RDXActiveAffordanceMenu[] activeMenu,
                              Color color)
    {
@@ -45,7 +45,7 @@ public class RDXAffordanceFrame
       this.objectTransformToWorld = objectTransformToWorld;
       this.activeMenu = activeMenu;
       this.menu = activeMenu[0];
-      poseFrame = new PoseReferenceFrame("handFrame", affordanceFrame);
+      poseFrame = new PoseReferenceFrame("handFrame", ReferenceFrame.getWorldFrame());
       frameGraphic = new RDXReferenceFrameGraphic(0.1, color);
    }
 
@@ -61,7 +61,7 @@ public class RDXAffordanceFrame
       if (ImGui.button(labels.get("SET") + "##" + labelId))
       {
          isPoseSet = true;
-         poseFrame.setPoseAndUpdate(handPose);
+         setFrame(handPose);
          objectTransformOfFrame.set(objectTransformToWorld);
          activeMenu[0] = this.menu;
       }
@@ -113,9 +113,9 @@ public class RDXAffordanceFrame
 
    public void setFrame(FramePose3D poseReference)
    {
-      poseFrame.setPoseAndUpdate(poseReference);
-      pose = new FramePose3D(poseFrame);
+      pose = new FramePose3D(poseReference.getReferenceFrame(), poseReference);
       pose.changeFrame(ReferenceFrame.getWorldFrame());
+      poseFrame.setPoseAndUpdate(pose);
       isPoseSet = true;
       frameGraphic.updateFromFramePose(pose);
    }
