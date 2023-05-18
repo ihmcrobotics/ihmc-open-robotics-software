@@ -73,6 +73,11 @@ public class RDXPredefinedRigidBodySceneNode
       if (!showing || !sceneNode.getPoseOverriddenByOperator())
          overridePoseGizmo.getSelected().set(false);
 
+      if (overridePoseGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
+      {
+         sceneNode.markOverridePoseModified();
+      }
+
       nodePose.setToZero(sceneNode.getNodeFrame());
       nodePose.set(sceneNode.getVisualModelToNodeFrameTransform());
       nodePose.changeFrame(ReferenceFrame.getWorldFrame());
