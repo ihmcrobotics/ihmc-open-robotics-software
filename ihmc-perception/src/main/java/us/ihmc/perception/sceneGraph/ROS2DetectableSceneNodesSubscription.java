@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
 
 import java.util.List;
 
@@ -23,8 +24,10 @@ public class ROS2DetectableSceneNodesSubscription
    private final boolean isOperator;
    private final boolean isPerceptionProcess;
    private final List<DetectableSceneNode> detectableSceneNodes;
-   private final RigidBodyTransform nodeToWorldTransform = new RigidBodyTransform();
    private final FramePose3D nodePose = new FramePose3D();
+   private final FramePose3D arUcoMarkerPose = new FramePose3D();
+   private final RigidBodyTransform nodeToWorldTransform = new RigidBodyTransform();
+   private final RigidBodyTransform arUcoMarkerToWorldTransform = new RigidBodyTransform();
    private long numberOfMessagesReceived = 0;
 
    /**
@@ -71,6 +74,18 @@ public class ROS2DetectableSceneNodesSubscription
             if (detectableSceneNodeMessage.getNameAsString().equals(detectableSceneNode.getName()))
             {
                detectableSceneNode.setCurrentlyDetected(detectableSceneNodeMessage.getCurrentlyDetected());
+
+               // We must syncronize the ArUco marker frames so we can reset overriden node
+               // poses back to ArUco relative ones.
+               // The ArUco frame is the parent so we should update it first.
+               if (detectableSceneNode instanceof ArUcoDetectableNode arUcoDetectableNode)
+               {
+                  MessageTools.toEuclid(detectableSceneNodeMessage.getArucoMarkerTransformToWorld(), arUcoMarkerToWorldTransform);
+                  arUcoMarkerPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), arUcoMarkerToWorldTransform);
+                  arUcoMarkerPose.changeFrame(arUcoDetectableNode.getMarkerFrame().getParent());
+                  arUcoMarkerPose.get(arUcoDetectableNode.getMarkerToWorldFrameTransform());
+                  arUcoDetectableNode.getMarkerFrame().update();
+               }
 
                // We allow only the operator to change the "poseOverriddenByOperator" variable,
                // to avoid conflicts and race conditions

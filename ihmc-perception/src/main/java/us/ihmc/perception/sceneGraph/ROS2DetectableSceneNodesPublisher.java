@@ -8,6 +8,7 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
 
 /**
  * Publishes the current state of the complete collection of detectable scene objects.
@@ -17,31 +18,43 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
  */
 public class ROS2DetectableSceneNodesPublisher
 {
-   private final DetectableSceneNodesMessage detectableSceneObjectsMessage = new DetectableSceneNodesMessage();
-   private final FramePose3D sceneObjectPose = new FramePose3D();
-   private final RigidBodyTransform sceneObjectToWorldTransform = new RigidBodyTransform();
+   private final DetectableSceneNodesMessage detectableSceneNodesMessage = new DetectableSceneNodesMessage();
+   private final FramePose3D sceneNodePose = new FramePose3D();
+   private final FramePose3D arUcoMarkerPose = new FramePose3D();
+   private final RigidBodyTransform sceneNodeToWorldTransform = new RigidBodyTransform();
+   private final RigidBodyTransform arUcoMarkerToWorldTransform = new RigidBodyTransform();
 
    /**
     * @param ioQualifier Depending whether on the robot or in some other process.
     *                    If in the on-robot perception process, STATUS, else COMMAND.
     */
-   public void publish(Iterable<DetectableSceneNode> detectableSceneObjects,
+   public void publish(Iterable<DetectableSceneNode> detectableSceneNodes,
                        ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
                        ROS2IOTopicQualifier ioQualifier)
    {
-      detectableSceneObjectsMessage.getDetectableSceneNodes().clear();
-      for (DetectableSceneNode detectableSceneObject : detectableSceneObjects)
+      detectableSceneNodesMessage.getDetectableSceneNodes().clear();
+      for (DetectableSceneNode detectableSceneNode : detectableSceneNodes)
       {
-         DetectableSceneNodeMessage detectableSceneNodeMessage = detectableSceneObjectsMessage.getDetectableSceneNodes().add();
-         detectableSceneNodeMessage.setName(detectableSceneObject.getName());
-         detectableSceneNodeMessage.setCurrentlyDetected(detectableSceneObject.getCurrentlyDetected());
-         detectableSceneNodeMessage.setIsPoseOverriddenByOperator(detectableSceneObject.getPoseOverriddenByOperator());
+         DetectableSceneNodeMessage detectableSceneNodeMessage = detectableSceneNodesMessage.getDetectableSceneNodes().add();
+         detectableSceneNodeMessage.setName(detectableSceneNode.getName());
+         detectableSceneNodeMessage.setCurrentlyDetected(detectableSceneNode.getCurrentlyDetected());
+         detectableSceneNodeMessage.setIsPoseOverriddenByOperator(detectableSceneNode.getPoseOverriddenByOperator());
 
-         sceneObjectPose.setToZero(detectableSceneObject.getNodeFrame());
-         sceneObjectPose.changeFrame(ReferenceFrame.getWorldFrame());
-         sceneObjectPose.get(sceneObjectToWorldTransform);
-         MessageTools.toMessage(sceneObjectToWorldTransform, detectableSceneNodeMessage.getTransformToWorld());
+         sceneNodePose.setToZero(detectableSceneNode.getNodeFrame());
+         sceneNodePose.changeFrame(ReferenceFrame.getWorldFrame());
+         sceneNodePose.get(sceneNodeToWorldTransform);
+         MessageTools.toMessage(sceneNodeToWorldTransform, detectableSceneNodeMessage.getTransformToWorld());
+
+         // We must syncronize the ArUco marker frames so we can reset overriden node
+         // poses back to ArUco relative ones.
+         if (detectableSceneNode instanceof ArUcoDetectableNode arUcoDetectableNode)
+         {
+            arUcoMarkerPose.setToZero(arUcoDetectableNode.getMarkerFrame());
+            arUcoMarkerPose.changeFrame(ReferenceFrame.getWorldFrame());
+            arUcoMarkerPose.get(arUcoMarkerToWorldTransform);
+            MessageTools.toMessage(arUcoMarkerToWorldTransform, detectableSceneNodeMessage.getArucoMarkerTransformToWorld());
+         }
       }
-      ros2PublishSubscribeAPI.publish(SceneGraphAPI.DETECTABLE_SCENE_NODES.getTopic(ioQualifier), detectableSceneObjectsMessage);
+      ros2PublishSubscribeAPI.publish(SceneGraphAPI.DETECTABLE_SCENE_NODES.getTopic(ioQualifier), detectableSceneNodesMessage);
    }
 }
