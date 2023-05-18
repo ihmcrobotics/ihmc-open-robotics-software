@@ -96,8 +96,7 @@ public class RDXPerceptionSceneGraphDemo
             detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(onRobotPredefinedSceneNodeLibrary.getDetectableSceneNodes(),
                                                                                         ros2Helper,
                                                                                         ROS2IOTopicQualifier.COMMAND,
-                                                                                        isOperator,
-                                                                                        isPerceptionProcess);
+                                                                                        isOperator);
             perceptionSceneGraphUI = new RDXPerceptionSceneGraphUI(operatorPredefinedSceneNodeLibrary, ros2Helper, baseUI.getPrimary3DPanel());
             baseUI.getPrimaryScene().addRenderableProvider(perceptionSceneGraphUI::getRenderables);
             baseUI.getImGuiPanelManager().addPanel(perceptionSceneGraphUI.getPanel());

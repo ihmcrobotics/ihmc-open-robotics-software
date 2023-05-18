@@ -10,7 +10,6 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.sceneGraph.*;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 
@@ -46,8 +45,7 @@ public class RDXPerceptionSceneGraphUI
       detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(predefinedSceneNodeLibrary.getDetectableSceneNodes(),
                                                                                   ros2PublishSubscribeAPI,
                                                                                   ROS2IOTopicQualifier.STATUS,
-                                                                                  isOperator,
-                                                                                  isPerceptionProcess);
+                                                                                  isOperator);
 
       for (DetectableSceneNode detectableSceneNode : predefinedSceneNodeLibrary.getDetectableSceneNodes())
       {
