@@ -227,8 +227,7 @@ public class DualBlackflyCamera
                   detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(predefinedSceneNodeLibrary.getDetectableSceneNodes(),
                                                                                               ros2Helper,
                                                                                               ROS2IOTopicQualifier.COMMAND,
-                                                                                              isOperator,
-                                                                                              isPerceptionProcess);
+                                                                                              isOperator);
                }
 
                remoteTunableCameraTransform.update();

@@ -31,8 +31,7 @@ public class BehaviorActionSequenceModule
       detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(predefinedSceneNodeLibrary.getDetectableSceneNodes(),
                                                                                   ros2,
                                                                                   ROS2IOTopicQualifier.STATUS,
-                                                                                  isOperator,
-                                                                                  isPerceptionProcess);
+                                                                                  isOperator);
 
       ReferenceFrameLibrary referenceFrameLibrary = new ReferenceFrameLibrary();
       referenceFrameLibrary.addAll(predefinedSceneNodeLibrary.getReferenceFrames());

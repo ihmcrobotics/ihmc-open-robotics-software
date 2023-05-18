@@ -22,7 +22,6 @@ public class ROS2DetectableSceneNodesSubscription
 {
    private final IHMCROS2Input<DetectableSceneNodesMessage> detectableSceneNodesSubscription;
    private final boolean isOperator;
-   private final boolean isPerceptionProcess;
    private final List<DetectableSceneNode> detectableSceneNodes;
    private final FramePose3D nodePose = new FramePose3D();
    private final FramePose3D arUcoMarkerPose = new FramePose3D();
@@ -32,21 +31,17 @@ public class ROS2DetectableSceneNodesSubscription
 
    /**
     * @param ioQualifier If in the on-robot perception process, COMMAND, else STATUS
-    * @param isOperator If this process will be acting as the operator, meaning they can override node poses
-    *                   Warning: The design supports having only one operator. If two operators override the
-    *                   pose of the same object, this method will fail and the scene graph will flicker.
-    * @param isPerceptionProcess We also need to know if we are the perception process, as that is the only
-    *                            thing allowed to modify non-overridden poses.
+    * @param isOperator  If this process will be acting as the operator, meaning they can override node poses
+    *                    Warning: The design supports having only one operator. If two operators override the
+    *                    pose of the same object, this method will fail and the scene graph will flicker.
     */
    public ROS2DetectableSceneNodesSubscription(List<DetectableSceneNode> detectableSceneNodes,
                                                ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
                                                ROS2IOTopicQualifier ioQualifier,
-                                               boolean isOperator,
-                                               boolean isPerceptionProcess)
+                                               boolean isOperator)
    {
       this.detectableSceneNodes = detectableSceneNodes;
       this.isOperator = isOperator;
-      this.isPerceptionProcess = isPerceptionProcess;
 
       detectableSceneNodesSubscription = ros2PublishSubscribeAPI.subscribe(SceneGraphAPI.DETECTABLE_SCENE_NODES.getTopic(ioQualifier));
    }
