@@ -10,13 +10,10 @@ import us.ihmc.rdx.simulation.sensors.RDXSimulatedSensorFactory;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.perception.BytedecoTools;
-import us.ihmc.tools.thread.Activator;
 
 public class RDXGPUPlanarRegionExtractionDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private Activator nativesLoadedActivator;
    private RDXHighLevelDepthSensorSimulator l515;
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
    private RDXPose3DGizmo l515PoseGizmo = new RDXPose3DGizmo();
@@ -30,8 +27,6 @@ public class RDXGPUPlanarRegionExtractionDemo
          @Override
          public void create()
          {
-            nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
-
             baseUI.create();
 
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
@@ -51,48 +46,42 @@ public class RDXGPUPlanarRegionExtractionDemo
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(l515PoseGizmo::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(l515PoseGizmo, RDXSceneLevel.VIRTUAL);
             l515PoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(60.0));
+
+            l515 = RDXSimulatedSensorFactory.createRealsenseL515(l515PoseGizmo.getGizmoFrame(), () -> 0L);
+            baseUI.getImGuiPanelManager().addPanel(l515);
+            l515.setSensorEnabled(true);
+            l515.setPublishPointCloudROS2(false);
+            l515.setRenderPointCloudDirectly(false);
+            l515.setPublishDepthImageROS1(false);
+            l515.setDebugCoordinateFrame(false);
+            l515.setRenderColorVideoDirectly(true);
+            l515.setRenderDepthVideoDirectly(true);
+            l515.setPublishColorImageROS1(false);
+            l515.setPublishColorImageROS2(false);
+            CameraPinholeBrown cameraIntrinsics = l515.getDepthCameraIntrinsics();
+            baseUI.getPrimaryScene().addRenderableProvider(l515::getRenderables);
+
+            gpuPlanarRegionExtraction = new RDXGPUPlanarRegionExtractionUI();
+            gpuPlanarRegionExtraction.create(l515.getLowLevelSimulator().getImageWidth(),
+                                             l515.getLowLevelSimulator().getImageHeight(),
+                                             l515.getLowLevelSimulator().getMetersDepthFloatBuffer(),
+                                             cameraIntrinsics.getFx(),
+                                             cameraIntrinsics.getFy(),
+                                             cameraIntrinsics.getCx(),
+                                             cameraIntrinsics.getCy(),
+                                             l515PoseGizmo.getGizmoFrame());
+            gpuPlanarRegionExtraction.getEnabled().set(true);
+            baseUI.getImGuiPanelManager().addPanel(gpuPlanarRegionExtraction.getPanel());
+            baseUI.getPrimaryScene().addRenderableProvider(gpuPlanarRegionExtraction::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+
+            baseUI.getLayoutManager().reloadLayout();
          }
 
          @Override
          public void render()
          {
-            if (nativesLoadedActivator.poll())
-            {
-               if (nativesLoadedActivator.isNewlyActivated())
-               {
-                  l515 = RDXSimulatedSensorFactory.createRealsenseL515(l515PoseGizmo.getGizmoFrame(), () -> 0L);
-                  baseUI.getImGuiPanelManager().addPanel(l515);
-                  l515.setSensorEnabled(true);
-                  l515.setPublishPointCloudROS2(false);
-                  l515.setRenderPointCloudDirectly(false);
-                  l515.setPublishDepthImageROS1(false);
-                  l515.setDebugCoordinateFrame(false);
-                  l515.setRenderColorVideoDirectly(true);
-                  l515.setRenderDepthVideoDirectly(true);
-                  l515.setPublishColorImageROS1(false);
-                  l515.setPublishColorImageROS2(false);
-                  CameraPinholeBrown cameraIntrinsics = l515.getDepthCameraIntrinsics();
-                  baseUI.getPrimaryScene().addRenderableProvider(l515::getRenderables);
-
-                  gpuPlanarRegionExtraction = new RDXGPUPlanarRegionExtractionUI();
-                  gpuPlanarRegionExtraction.create(l515.getLowLevelSimulator().getImageWidth(),
-                                                   l515.getLowLevelSimulator().getImageHeight(),
-                                                   l515.getLowLevelSimulator().getMetersDepthFloatBuffer(),
-                                                   cameraIntrinsics.getFx(),
-                                                   cameraIntrinsics.getFy(),
-                                                   cameraIntrinsics.getCx(),
-                                                   cameraIntrinsics.getCy(),
-                                                   l515PoseGizmo.getGizmoFrame());
-                  gpuPlanarRegionExtraction.getEnabled().set(true);
-                  baseUI.getImGuiPanelManager().addPanel(gpuPlanarRegionExtraction.getPanel());
-                  baseUI.getPrimaryScene().addRenderableProvider(gpuPlanarRegionExtraction::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
-
-                  baseUI.getLayoutManager().reloadLayout();
-               }
-
-               l515.render(baseUI.getPrimaryScene());
-               gpuPlanarRegionExtraction.extractPlanarRegions();
-            }
+            l515.render(baseUI.getPrimaryScene());
+            gpuPlanarRegionExtraction.extractPlanarRegions();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();

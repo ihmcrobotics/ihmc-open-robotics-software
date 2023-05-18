@@ -52,11 +52,6 @@ import java.util.function.Supplier;
  */
 public class RealsenseColorAndDepthPublisher
 {
-   static
-   {
-      BytedecoTools.loadOpenCV();
-   }
-
    private static final double OUTPUT_PERIOD = UnitConversions.hertzToSeconds(20.0);
 
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;

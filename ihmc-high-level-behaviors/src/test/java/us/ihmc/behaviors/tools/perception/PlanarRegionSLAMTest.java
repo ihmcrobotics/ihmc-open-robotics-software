@@ -33,7 +33,6 @@ import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullGraphicalMergerListener;
-import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.tools.PlaneRegistrationTools;
 import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.slamWrapper.SlamWrapper;
@@ -1086,7 +1085,6 @@ class PlanarRegionSLAMTest
    @Test
    public void testPlanarRegionFactorGraphSLAM()
    {
-      BytedecoTools.loadSlamWrapper();
       SlamWrapper.FactorGraphExternal slam = new SlamWrapper.FactorGraphExternal();
 
       RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform(new Quaternion(0.03, 0.0, 0.0), new Vector3D(0.05, 0.05, -0.05));

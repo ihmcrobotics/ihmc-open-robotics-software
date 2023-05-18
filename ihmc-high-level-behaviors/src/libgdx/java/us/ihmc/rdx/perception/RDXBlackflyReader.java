@@ -15,7 +15,6 @@ import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanel;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
-import us.ihmc.tools.thread.Activator;
 
 import java.util.function.Consumer;
 
@@ -26,7 +25,6 @@ import java.util.function.Consumer;
 public class RDXBlackflyReader
 {
    private final ImGuiPanel panel = new ImGuiPanel("Blackfly Reader", this::renderImGuiWidgets);
-   private final Activator nativesLoadedActivator;
    private final String serialNumber;
    private volatile int imageWidth = -1;
    private volatile int imageHeight = -1;
@@ -42,9 +40,8 @@ public class RDXBlackflyReader
    private long numberOfImagesRead = 0;
    private Consumer<RDXImagePanelTexture> monitorPanelUIThreadPreprocessor = null;
 
-   public RDXBlackflyReader(Activator nativesLoadedActivator, String serialNumber)
+   public RDXBlackflyReader(String serialNumber)
    {
-      this.nativesLoadedActivator = nativesLoadedActivator;
       this.serialNumber = serialNumber;
    }
 
@@ -75,7 +72,7 @@ public class RDXBlackflyReader
    /**
     * This method works best if called asynchronously, as it runs slower
     * than UI framerates typically.
-    *
+    * <p>
     * However, it can also be called just before update() if in a pinch.
     */
    public void readBlackflyImage()
@@ -135,14 +132,11 @@ public class RDXBlackflyReader
 
    public void renderImGuiWidgets()
    {
-      if (nativesLoadedActivator.peek())
-      {
-         ImGui.text("Serial number: " + serialNumber);
-         ImGui.text("Image dimensions: " + imageWidth + " x " + imageHeight);
-         ImGui.text("Number of images read: " + numberOfImagesRead);
-         readFrequencyPlot.renderImGuiWidgets();
-         readDurationPlot.renderImGuiWidgets();
-      }
+      ImGui.text("Serial number: " + serialNumber);
+      ImGui.text("Image dimensions: " + imageWidth + " x " + imageHeight);
+      ImGui.text("Number of images read: " + numberOfImagesRead);
+      readFrequencyPlot.renderImGuiWidgets();
+      readDurationPlot.renderImGuiWidgets();
    }
 
    public void dispose()

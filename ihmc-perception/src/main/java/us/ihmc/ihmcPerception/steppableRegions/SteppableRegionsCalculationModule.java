@@ -9,23 +9,20 @@ import perception_msgs.msg.dds.SteppableRegionDebugImageMessage;
 import perception_msgs.msg.dds.SteppableRegionDebugImagesMessage;
 import perception_msgs.msg.dds.SteppableRegionsListCollectionMessage;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.ihmcPerception.steppableRegions.data.SteppableCell;
 import us.ihmc.ihmcPerception.steppableRegions.data.SteppableRegionDataHolder;
 import us.ihmc.ihmcPerception.steppableRegions.data.SteppableRegionsEnvironmentModel;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.*;
+import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersReadOnly;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.nio.ByteBuffer;
@@ -77,10 +74,6 @@ public class SteppableRegionsCalculationModule
    {
       this.parameters = new SteppableRegionCalculatorParameters(defaultParameters);
 
-      // Load all the native data on the thread. This effectively just loads all the bytedeco stuff to be used by the planner
-      var nativeLoader = BytedecoTools.loadNativesOnAThread();
-      boolean doneLoading = false;
-
       openCLManager = new OpenCLManager();
       concaveHullParameters.setEdgeLengthThreshold(1.0);
 
@@ -96,17 +89,7 @@ public class SteppableRegionsCalculationModule
          steppabilityConnections.add(new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1));
       }
 
-      while (!doneLoading)
-      {
-         if (nativeLoader.poll())
-         {
-            if (nativeLoader.isNewlyActivated())
-            {
-               createOpenCLStuff(defaultCells);
-               doneLoading = true;
-            }
-         }
-      }
+      createOpenCLStuff(defaultCells);
    }
 
    public SteppableRegionsListCollection getSteppableRegionsListCollection()
@@ -208,15 +191,15 @@ public class SteppableRegionsCalculationModule
          if (parameters.getYawDiscretizations() > 1)
             yawAngle = ((double) yawValue) / (parameters.getYawDiscretizations() - 1) * Math.PI;
 
-         SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculator.createEnvironmentByMergingCellsIntoRegions(
-               steppabilityImages.get(yawValue),
-               snapHeightImages.get(yawValue),
-               snapNormalXImages.get(yawValue),
-               snapNormalYImages.get(yawValue),
-               snapNormalZImages.get(yawValue),
-               steppabilityConnections.get(yawValue),
-               parameters,
-               heightMapData);
+         SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculator.createEnvironmentByMergingCellsIntoRegions(steppabilityImages.get(yawValue),
+                                                                                                                              snapHeightImages.get(yawValue),
+                                                                                                                              snapNormalXImages.get(yawValue),
+                                                                                                                              snapNormalYImages.get(yawValue),
+                                                                                                                              snapNormalZImages.get(yawValue),
+                                                                                                                              steppabilityConnections.get(
+                                                                                                                                    yawValue),
+                                                                                                                              parameters,
+                                                                                                                              heightMapData);
 
          SteppableRegionsList regions = SteppableRegionsCalculator.createSteppableRegions(concaveHullParameters,
                                                                                           polygonizerParameters,
@@ -410,7 +393,6 @@ public class SteppableRegionsCalculationModule
             uncompressedByteBuffer.put(start + 2, (byte) b);
          }
       }
-
 
       messageToPack.getData().reset();
       uncompressedByteBuffer.rewind();
