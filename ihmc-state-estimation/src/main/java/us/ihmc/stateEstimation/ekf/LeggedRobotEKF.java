@@ -162,7 +162,7 @@ public class LeggedRobotEKF implements StateEstimatorController
 
       for (String forceSensorName : forceSensorMap.keySet())
       {
-         ForceSensorDataReadOnly forceSensorOutput = sensorOutput.getForceSensorOutputs().getByName(forceSensorName);
+         ForceSensorDataReadOnly forceSensorOutput = sensorOutput.getForceSensorOutputs().getData(forceSensorName);
          ReferenceFrame soleFrame = forceSensorMap.get(forceSensorName).getLeft();
          ReferenceFrame measurementFrame = forceSensorMap.get(forceSensorName).getRight().getSensorFrame();
          RigidBodyBasics foot = forceSensorMap.get(forceSensorName).getRight().getRigidBody();

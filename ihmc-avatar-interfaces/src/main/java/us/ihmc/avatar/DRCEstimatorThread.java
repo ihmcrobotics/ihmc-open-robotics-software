@@ -249,7 +249,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement, SCS
          {
             String sensorName = forceSensorDefinition.getSensorName();
             RigidBodyBasics sensorLink = forceSensorDefinition.getRigidBody();
-            ForceSensorData forceSensorData = forceSensorDataHolderForEstimator.get(forceSensorDefinition);
+            ForceSensorData forceSensorData = forceSensorDataHolderForEstimator.getData(forceSensorDefinition);
             ForceSensorToJointTorqueProjector footSensorToJointTorqueProjector = new ForceSensorToJointTorqueProjector(sensorName, forceSensorData, sensorLink);
             estimatorController.addRobotController(footSensorToJointTorqueProjector);
          }

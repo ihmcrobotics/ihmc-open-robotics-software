@@ -179,7 +179,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
          bipedFeetMap.put(rigidBody, contactablePlaneBody);
 
          String footForceSensorName = sensorInformation.getFeetForceSensorNames().get(robotSide);
-         ForceSensorDataReadOnly footForceSensorForEstimator = forceSensorDataHolderToUpdate.getByName(footForceSensorName);
+         ForceSensorDataReadOnly footForceSensorForEstimator = forceSensorDataHolderToUpdate.getData(footForceSensorName);
          String namePrefix = bipedFeet.get(robotSide).getName() + "StateEstimator";
 
          FootSwitchFactory footSwitchFactory = footSwitchFactories.get(robotSide);

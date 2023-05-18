@@ -191,7 +191,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
          {
             final WrenchCalculatorInterface forceTorqueSensor = forceTorqueSensorEntry.getValue();
             forceTorqueSensor.calculate();
-            forceSensorDataHolderToUpdate.setForceSensorValue(forceTorqueSensorEntry.getKey(), forceTorqueSensor.getWrench());
+            forceSensorDataHolderToUpdate.getData(forceTorqueSensorEntry.getKey()).setWrench(forceTorqueSensor.getWrench());
          }
       }
 

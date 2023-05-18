@@ -54,7 +54,7 @@ public class JointTorqueBasedWrenchSensorDriftEstimator
 
       for (ForceSensorDefinition forceSensorDefinition : forceSensorDefinitions)
       {
-         ForceSensorDataReadOnly forceSensorData = forceSensorDataHolder.get(forceSensorDefinition);
+         ForceSensorDataReadOnly forceSensorData = forceSensorDataHolder.getData(forceSensorDefinition);
          wrenchSensorDrifInfoMap.put(forceSensorDefinition,
                                      new WrenchSensorDriftInfo(rootJoint,
                                                                updateDT,
