@@ -216,18 +216,15 @@ public class RDXLocomotionManager
       ImGui.beginDisabled(interactableFootstepPlan.getNumberOfFootsteps() == 0);
       if (ImGui.button(labels.get("Walk")) && interactableFootstepPlan.getNumberOfFootsteps() > 0)
       { // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
-         System.out.println("Walking from planned steps");
          interactableFootstepPlan.walkFromSteps();
-         setPauseWalkingWithoutPublish(false);
       }
       ImGuiTools.previousWidgetTooltip("Keybind: Space");
       ImGui.sameLine();
       ImGui.endDisabled();
 
-      ImGui.beginDisabled(pauseWalkingMessage.getPause() || !controllerStatusTracker.isWalking());
+      ImGui.beginDisabled(!controllerStatusTracker.isWalking());
       if (ImGui.button(labels.get("Pause")) && controllerStatusTracker.isWalking())
       {
-         System.out.println("Pause walking from the robot");
          setPauseWalkingAndPublish(true);
       }
       ImGuiTools.previousWidgetTooltip("Keybind: Space");
@@ -237,7 +234,6 @@ public class RDXLocomotionManager
       ImGui.beginDisabled(!pauseWalkingMessage.getPause());
       if (ImGui.button(labels.get("Continue")) && pauseWalkingMessage.getPause())
       {
-         System.out.println("Continue walking with the robot");
          setPauseWalkingAndPublish(false);
       }
       ImGuiTools.previousWidgetTooltip("Keybind: Space");
@@ -280,7 +276,6 @@ public class RDXLocomotionManager
          if (interactableFootstepPlan.getNumberOfFootsteps() > 0)
          {
             interactableFootstepPlan.walkFromSteps();
-            setPauseWalkingWithoutPublish(false);
          }
          else
          {
@@ -354,14 +349,9 @@ public class RDXLocomotionManager
       communicationHelper.publishToController(pauseWalkingMessage);
 
       if (pauseWalking)
-         LogTools.info("Paused Walking");
+         LogTools.info("Commanding Pause Walking...");
       else
-         LogTools.info("Continue Walking");
-   }
-
-   public void setPauseWalkingWithoutPublish(boolean pauseWalking)
-   {
-      pauseWalkingMessage.setPause(pauseWalking);
+         LogTools.info("Commanding Continue Walking...");
    }
 
    public RDXManualFootstepPlacement getManualFootstepPlacement()
