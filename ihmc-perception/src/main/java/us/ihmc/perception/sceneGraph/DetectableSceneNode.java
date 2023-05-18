@@ -2,6 +2,7 @@ package us.ihmc.perception.sceneGraph;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.tools.Timer;
 
 /**
  * An object that is currently detected or not currently detected,
@@ -17,6 +18,7 @@ public abstract class DetectableSceneNode extends SceneNode
     */
    private boolean isPoseOverriddenByOperator = false;
    private final FramePose3D storedOverriddenPose = new FramePose3D();
+   private final Timer overridePoseModifiedTimer = new Timer();
 
    public DetectableSceneNode(String name)
    {
@@ -60,5 +62,15 @@ public abstract class DetectableSceneNode extends SceneNode
       storedOverriddenPose.changeFrame(getNodeFrame().getParent());
       storedOverriddenPose.get(getNodeToParentFrameTransform());
       getNodeFrame().update();
+   }
+
+   public void markOverridePoseModified()
+   {
+      overridePoseModifiedTimer.reset();
+   }
+
+   public boolean readyForUpdates()
+   {
+      return !overridePoseModifiedTimer.isRunning(0.2);
    }
 }
