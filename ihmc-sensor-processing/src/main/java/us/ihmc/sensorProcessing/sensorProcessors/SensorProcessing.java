@@ -444,14 +444,13 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       {
          ForceSensorDefinition forceSensorDefinition = forceSensorDefinitions.get(i);
 
-         tempWrench.setIncludingFrame(inputForceSensors.getData(forceSensorDefinition).getWrench());
          inputForces.get(forceSensorDefinition).setToZero();
          inputTorques.get(forceSensorDefinition).setToZero();
 
          resetProcessors(processedForces.get(forceSensorDefinition));
          resetProcessors(processedTorques.get(forceSensorDefinition));
 
-         tempWrench.setToZero();
+         tempWrench.setToZero(forceSensorDefinition.getSensorFrame(), forceSensorDefinition.getSensorFrame());
          outputForceSensors.getData(forceSensorDefinition).setWrench(tempWrench);
       }
    }

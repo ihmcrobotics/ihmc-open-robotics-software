@@ -1,12 +1,14 @@
 package us.ihmc.robotics.sensors;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
 import us.ihmc.yoVariables.exceptions.IllegalOperationException;
 
@@ -47,6 +49,8 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
 
       sensorPackage = new ForceSensorPackage(forceSensorDefinition);
       sensorNameToDefintionMap.put(sensorName, sensorPackage);
+      forceSensorDefinitions.add(sensorPackage.definition);
+      forceSensorDatas.add(sensorPackage.data);
       return sensorPackage.data;
    }
 
@@ -172,5 +176,16 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
          else
             return false;
       }
+   }
+
+   @Override
+   public String toString()
+   {
+      return "Force sensor data [\n"
+             + EuclidCoreIOTools.getCollectionString("\n\t",
+                                                     "]",
+                                                     "\n\t",
+                                                     forceSensorDatas,
+                                                     data -> "sensorName=" + data.getSensorName() + ", value=" + Arrays.toString(data.getWrenchMatrix().data));
    }
 }

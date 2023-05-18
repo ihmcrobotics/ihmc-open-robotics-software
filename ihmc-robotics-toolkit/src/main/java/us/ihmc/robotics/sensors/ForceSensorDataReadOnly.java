@@ -17,7 +17,7 @@ public interface ForceSensorDataReadOnly
    /**
     * Get force sensor wrench data. The returned type is expected to be read-only.
     */
-   DMatrixRMaj getWrenchMatrix();
+   void getWrenchMatrix(DMatrixRMaj wrenchMatrixToPack);
 
    /**
     * Get force sensor wrench data.
