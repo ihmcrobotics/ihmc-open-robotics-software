@@ -53,7 +53,7 @@ public class RDXPredefinedRigidBodySceneNode
       modelInstance.setColor(GHOST_COLOR);
 
       referenceFrameGraphic = new RDXReferenceFrameGraphic(0.05, Color.BLUE);
-      overridePoseGizmo = new RDXSelectablePose3DGizmo(predefinedRigidBodySceneNode.getNodeFrame().getParent(),
+      overridePoseGizmo = new RDXSelectablePose3DGizmo(predefinedRigidBodySceneNode.getNodeFrame(),
                                                        predefinedRigidBodySceneNode.getNodeToParentFrameTransform());
       overridePoseGizmo.createAndSetupDefault(panel3D);
       overridePoseWrapper = new ImBooleanWrapper(predefinedRigidBodySceneNode::getPoseOverriddenByOperator,
