@@ -50,13 +50,13 @@ public abstract class DetectableSceneNode extends SceneNode
 
    public void storeOverriddenPose()
    {
-      storedOverriddenPose.setIncludingFrame(getNodeFrame(), getNodeToParentFrameTransform());
+      storedOverriddenPose.setIncludingFrame(getNodeFrame().getParent(), getNodeToParentFrameTransform());
    }
 
    public void restoreOverriddenPose()
    {
       storedOverriddenPose.changeFrame(getNodeFrame().getParent());
-      storedOverriddenPose.get(getNodeFrame().getTransformToWorldFrame());
+      storedOverriddenPose.get(getNodeToParentFrameTransform());
       getNodeFrame().update();
    }
 }
