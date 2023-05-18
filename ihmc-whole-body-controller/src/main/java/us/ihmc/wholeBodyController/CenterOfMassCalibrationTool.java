@@ -48,8 +48,8 @@ public class CenterOfMassCalibrationTool implements Updatable
       this.fullRobotModel = fullRobotModel;
       this.forceSensorDataHolder = forceSensorDataHolder;
             
-      ForceSensorDataReadOnly leftAnkleForceSensor = forceSensorDataHolder.getByName("LeftAnkle");
-      ForceSensorDataReadOnly rightAnkleForceSensor = forceSensorDataHolder.getByName("RightAnkle");
+      ForceSensorDataReadOnly leftAnkleForceSensor = forceSensorDataHolder.getData("LeftAnkle");
+      ForceSensorDataReadOnly rightAnkleForceSensor = forceSensorDataHolder.getData("RightAnkle");
       ankleForceSensors.put(RobotSide.LEFT, leftAnkleForceSensor);
       ankleForceSensors.put(RobotSide.RIGHT, rightAnkleForceSensor);
       

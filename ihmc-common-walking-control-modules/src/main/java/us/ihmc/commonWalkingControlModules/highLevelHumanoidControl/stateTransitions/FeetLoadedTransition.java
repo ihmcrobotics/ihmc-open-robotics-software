@@ -35,7 +35,7 @@ public class FeetLoadedTransition implements StateTransitionCondition
                                YoRegistry parentRegistry)
    {
       for (RobotSide robotSide : RobotSide.values)
-         footSensors.put(robotSide, forceSensorDataHolder.getByName(feetForceSensors.get(robotSide)));
+         footSensors.put(robotSide, forceSensorDataHolder.getData(feetForceSensors.get(robotSide)));
 
       int windowSize = (int) Math.floor(TIME_WINDOW / controlDT);
 

@@ -91,7 +91,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       {
          throw new RuntimeException("No Wrist Sensor Definition Found!  Make sure that forceSensorName is properly set.");
       }
-      this.forceSensorData = forceSensorDataHolder.getByName(forceSensorName);
+      this.forceSensorData = forceSensorDataHolder.getData(forceSensorName);
 
       this.sensorMassCompensator = new ForceSensorDistalMassCompensator(wristSensorDefinition, DT, registry);
 

@@ -444,7 +444,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       {
          ForceSensorDefinition forceSensorDefinition = forceSensorDefinitions.get(i);
 
-         tempWrench.setIncludingFrame(inputForceSensors.getForceSensorValue(forceSensorDefinition));
+         tempWrench.setIncludingFrame(inputForceSensors.getData(forceSensorDefinition).getWrench());
          inputForces.get(forceSensorDefinition).setToZero();
          inputTorques.get(forceSensorDefinition).setToZero();
 
@@ -452,7 +452,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          resetProcessors(processedTorques.get(forceSensorDefinition));
 
          tempWrench.setToZero();
-         outputForceSensors.setForceSensorValue(forceSensorDefinition, tempWrench);
+         outputForceSensors.getData(forceSensorDefinition).setWrench(tempWrench);
       }
    }
 
@@ -515,7 +515,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       {
          ForceSensorDefinition forceSensorDefinition = forceSensorDefinitions.get(i);
 
-         tempWrench.setIncludingFrame(inputForceSensors.getForceSensorValue(forceSensorDefinition));
+         tempWrench.setIncludingFrame(inputForceSensors.getData(forceSensorDefinition).getWrench());
          tempForce.setIncludingFrame(tempWrench.getLinearPart());
          tempTorque.setIncludingFrame(tempWrench.getAngularPart());
          inputForces.get(forceSensorDefinition).set(tempForce);
@@ -527,7 +527,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          tempForce.setIncludingFrame(intermediateForces.get(forceSensorDefinition));
          tempTorque.setIncludingFrame(intermediateTorques.get(forceSensorDefinition));
          tempWrench.set(tempTorque, tempForce);
-         outputForceSensors.setForceSensorValue(forceSensorDefinition, tempWrench);
+         outputForceSensors.getData(forceSensorDefinition).setWrench(tempWrench);
       }
 
       for (int i = 0; i < diagnosticModules.size(); i++)
@@ -2350,7 +2350,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       if (value.getNumRows() != Wrench.SIZE || value.getNumCols() != 1)
          throw new RuntimeException("Unexpected size");
 
-      inputForceSensors.setForceSensorValue(forceSensorDefinition, value);
+      inputForceSensors.getData(forceSensorDefinition).setWrench(value);
    }
 
    public SensorOutputMapReadOnly getRawSensorOutputMap()

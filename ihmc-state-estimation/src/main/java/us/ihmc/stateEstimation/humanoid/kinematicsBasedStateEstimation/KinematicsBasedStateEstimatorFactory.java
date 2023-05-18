@@ -151,7 +151,7 @@ public class KinematicsBasedStateEstimatorFactory
       for (RobotSide robotSide : RobotSide.values)
       {
          String footForceSensorName = sensorInformation.getFeetForceSensorNames().get(robotSide);
-         ForceSensorDataReadOnly footForceSensorForEstimator = estimatorForceSensorDataHolder.getByName(footForceSensorName);
+         ForceSensorDataReadOnly footForceSensorForEstimator = estimatorForceSensorDataHolder.getData(footForceSensorName);
          String namePrefix = bipedFeet.get(robotSide).getName() + "StateEstimator";
 
          RigidBodyBasics foot = bipedFeet.get(robotSide).getRigidBody();

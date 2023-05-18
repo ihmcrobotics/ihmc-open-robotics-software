@@ -4,20 +4,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.ejml.data.DMatrixRMaj;
+import java.util.Objects;
 
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
+import us.ihmc.yoVariables.exceptions.IllegalOperationException;
 
 public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Settable<ForceSensorDataHolder>
 {
    private final List<ForceSensorDefinition> forceSensorDefinitions = new ArrayList<>();
    private final List<ForceSensorData> forceSensorDatas = new ArrayList<>();
 
-   private final transient Map<ForceSensorDefinition, ForceSensorData> forceSensorMap = new HashMap<>();
-   private final transient Map<String, ForceSensorDefinition> sensorNameToDefintionMap = new HashMap<>();
+   private final transient Map<String, ForceSensorPackage> sensorNameToDefintionMap = new HashMap<>();
 
    public ForceSensorDataHolder()
    {
@@ -41,25 +39,15 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
 
    public ForceSensorData registerForceSensor(ForceSensorDefinition forceSensorDefinition)
    {
-      ForceSensorDefinition definition = sensorNameToDefintionMap.get(forceSensorDefinition.getSensorName());
-      if (definition == null)
-      {
-         definition = new ForceSensorDefinition();
-         sensorNameToDefintionMap.put(forceSensorDefinition.getSensorName(), definition);
-      }
-      forceSensorDefinitions.add(definition);
-      definition.set(forceSensorDefinition);
+      String sensorName = forceSensorDefinition.getSensorName();
+      ForceSensorPackage sensorPackage = sensorNameToDefintionMap.get(sensorName);
 
-      ForceSensorData forceSensorData = forceSensorMap.get(definition);
-      if (forceSensorData == null)
-      {
-         forceSensorData = new ForceSensorData();
-         forceSensorMap.put(definition, forceSensorData);
-      }
-      forceSensorDatas.add(forceSensorData);
-      forceSensorData.setDefinition(forceSensorDefinition);
+      if (sensorPackage != null)
+         throw new IllegalOperationException("Force sensor (%s) has already been registered.".formatted(forceSensorDefinition.getSensorFrame()));
 
-      return forceSensorData;
+      sensorPackage = new ForceSensorPackage(forceSensorDefinition);
+      sensorNameToDefintionMap.put(sensorName, sensorPackage);
+      return sensorPackage.data;
    }
 
    public void registerForceSensor(ForceSensorDefinition forceSensorDefinition, ForceSensorDataReadOnly forceSensorData)
@@ -71,12 +59,7 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
    {
       forceSensorDefinitions.clear();
       forceSensorDatas.clear();
-   }
-
-   @Override
-   public ForceSensorData get(ForceSensorDefinition forceSensor)
-   {
-      return forceSensorMap.get(forceSensor);
+      sensorNameToDefintionMap.clear();
    }
 
    @Override
@@ -85,21 +68,34 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
       return forceSensorDefinitions;
    }
 
-   @Override
-   public ForceSensorDefinition findForceSensorDefinition(String sensorName)
+   public List<ForceSensorData> getForceSensorDatas()
    {
-      return sensorNameToDefintionMap.get(sensorName);
+      return forceSensorDatas;
+   }
+
+   @Override
+   public ForceSensorData getData(ForceSensorDefinition sensorDefinition)
+   {
+      return getData(sensorDefinition.getSensorName());
+   }
+
+   @Override
+   public ForceSensorData getData(String sensorName)
+   {
+      ForceSensorPackage sensorPackage = sensorNameToDefintionMap.get(sensorName);
+      return sensorPackage == null ? null : sensorPackage.data;
+   }
+
+   @Override
+   public ForceSensorDefinition getDefinition(String sensorName)
+   {
+      ForceSensorPackage sensorPackage = sensorNameToDefintionMap.get(sensorName);
+      return sensorPackage == null ? null : sensorPackage.definition;
    }
 
    public int getNumberOfForceSensors()
    {
       return forceSensorDefinitions.size();
-   }
-
-   @Override
-   public ForceSensorData getByName(String sensorName)
-   {
-      return (ForceSensorData) ForceSensorDataHolderReadOnly.super.getByName(sensorName);
    }
 
    @Override
@@ -114,7 +110,7 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
       for (int i = 0; i < other.getForceSensorDefinitions().size(); i++)
       {
          ForceSensorDefinition forceSensorDefinition = other.getForceSensorDefinitions().get(i);
-         registerForceSensor(forceSensorDefinition, other.get(forceSensorDefinition));
+         registerForceSensor(forceSensorDefinition, other.getData(forceSensorDefinition));
       }
    }
 
@@ -124,40 +120,21 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
       for (int i = 0; i < other.getForceSensorDefinitions().size(); i++)
       {
          ForceSensorDefinition forceSensorDefinition = other.getForceSensorDefinitions().get(i);
-         ForceSensorData thisData = getByName(forceSensorDefinition.getSensorName());
-         ForceSensorData otherData = other.getByName(forceSensorDefinition.getSensorName());
+         ForceSensorData thisData = getData(forceSensorDefinition);
+         ForceSensorData otherData = other.getData(forceSensorDefinition);
          thisData.setWrench(otherData.getWrenchMatrix());
       }
    }
 
-   public void setForceSensorValue(ForceSensorDefinition key, DMatrixRMaj data)
-   {
-      forceSensorMap.get(key).setWrench(data);
-   }
-
-   public void setForceSensorValue(ForceSensorDefinition key, WrenchReadOnly wrench)
-   {
-      forceSensorMap.get(key).setWrench(wrench);
-   }
-
+   @Override
    public boolean equals(Object obj)
    {
       if (obj == this)
       {
          return true;
       }
-      else if (obj instanceof ForceSensorDataHolder)
+      else if (obj instanceof ForceSensorDataHolder other)
       {
-         ForceSensorDataHolder other = (ForceSensorDataHolder) obj;
-         if (forceSensorDefinitions.size() != other.forceSensorDefinitions.size())
-            return false;
-         for (int i = 0; i < forceSensorDefinitions.size(); i++)
-         {
-            if (!forceSensorDefinitions.get(i).equals(other.forceSensorDefinitions.get(i)))
-               return false;
-            if (!forceSensorDatas.get(i).equals(other.forceSensorDatas.get(i)))
-               return false;
-         }
          return true;
       }
       else
@@ -168,10 +145,32 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
 
    public void calculateChecksum(GenericCRC32 checksum)
    {
-      for (int i = 0; i < forceSensorDefinitions.size(); i++)
+      for (int i = 0; i < forceSensorDatas.size(); i++)
       {
-         final ForceSensorDefinition forceSensorDefinition = forceSensorDefinitions.get(i);
-         forceSensorMap.get(forceSensorDefinition).calculateChecksum(checksum);
+         forceSensorDatas.get(i).calculateChecksum(checksum);
+      }
+   }
+
+   private static class ForceSensorPackage
+   {
+      private final ForceSensorDefinition definition;
+      private final ForceSensorData data;
+
+      public ForceSensorPackage(ForceSensorDefinition source)
+      {
+         definition = new ForceSensorDefinition(source);
+         data = new ForceSensorData(definition);
+      }
+
+      @Override
+      public boolean equals(Object object)
+      {
+         if (object == this)
+            return true;
+         else if (object instanceof ForceSensorPackage other)
+            return Objects.equals(definition, other.definition) && Objects.equals(data, other.data);
+         else
+            return false;
       }
    }
 }
