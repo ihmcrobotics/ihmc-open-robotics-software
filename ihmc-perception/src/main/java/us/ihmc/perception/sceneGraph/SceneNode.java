@@ -15,6 +15,11 @@ public abstract class SceneNode
    private final ModifiableReferenceFrame nodeFrame;
    /** We allow the operator to override the pose of any node in the scene graph. */
    private boolean isPoseOverriddenByOperator = false;
+//   /**
+//    * We have to change the parent frame to world when the operator overrides
+//    * the pose, so we need to keep track of this.
+//    */
+//   private ReferenceFrame parentFrameWhenNotOverridden;
 
    public SceneNode(String name)
    {
@@ -59,6 +64,31 @@ public abstract class SceneNode
 
    public void setPoseOverriddenByOperator(boolean poseOverriddenByOperator)
    {
-      isPoseOverriddenByOperator = poseOverriddenByOperator;
+      this.isPoseOverriddenByOperator = poseOverriddenByOperator;
    }
+
+//   /**
+//    * Overriding a node's pose means that it becomes specified in world frame.
+//    *
+//    * Warning! If any nodes are children of this, they will be abandoned in the
+//    * frame tree. TODO: Think about this more. This currently is never the case.
+//    * We probably need to create the tree in the scene graph and it can keep
+//    * the ReferenceFrame tree up to date.
+//    */
+//   public void setPoseOverriddenByOperator(boolean poseOverriddenByOperator)
+//   {
+//      if (isPoseOverriddenByOperator != poseOverriddenByOperator)
+//      {
+//         isPoseOverriddenByOperator = poseOverriddenByOperator;
+//         if (poseOverriddenByOperator)
+//         {
+//            parentFrameWhenNotOverridden = nodeFrame.getReferenceFrame().getParent();
+//            nodeFrame.changeParentFrameWithoutMoving(ReferenceFrame.getWorldFrame());
+//         }
+//         else
+//         {
+//            nodeFrame.changeParentFrameWithoutMoving(parentFrameWhenNotOverridden);
+//         }
+//      }
+//   }
 }

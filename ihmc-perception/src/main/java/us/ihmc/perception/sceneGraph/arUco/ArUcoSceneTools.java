@@ -20,7 +20,7 @@ public class ArUcoSceneTools
          {
             boolean isDetected = arUcoMarkerDetection.isDetected(arUcoDetectableNode.getMarkerID());
             arUcoDetectableNode.setCurrentlyDetected(isDetected);
-            if (isDetected)
+            if (isDetected && !arUcoDetectableNode.getPoseOverriddenByOperator())
             {
                arUcoMarkerDetection.getPose(arUcoDetectableNode.getMarkerID(),
                                             arUcoDetectableNode.getMarkerSize(),

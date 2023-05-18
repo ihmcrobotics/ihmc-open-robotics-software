@@ -83,17 +83,33 @@ public class ROS2DetectableSceneNodesSubscription
                // Warning: This section's logic is complicated to avoid race conditions and flickering
                // between machines when trying to share control of the poses of scene nodes.
                // Spectators like the behavior module should always accept pose updates.
-               boolean acceptPoseUpdate = !isOperator && !isPerceptionProcess;
-               // The operator should accept the pose update so long as they haven't overridden the pose.
-               acceptPoseUpdate |= isOperator && !detectableSceneNode.getPoseOverriddenByOperator();
-               // The on robot perception process should accept the pose so long as the operator hasn't overridden the pose.
-               acceptPoseUpdate |= isPerceptionProcess && detectableSceneNode.getPoseOverriddenByOperator();
-               if (acceptPoseUpdate)
+//               boolean acceptPoseUpdate = !isOperator && !isPerceptionProcess;
+//               // The operator should accept the pose update so long as they haven't overridden the pose.
+//               acceptPoseUpdate |= isOperator && !detectableSceneNode.getPoseOverriddenByOperator();
+//               // The on robot perception process should accept the pose so long as the operator hasn't overridden the pose.
+//               acceptPoseUpdate |= isPerceptionProcess && detectableSceneNode.getPoseOverriddenByOperator();
+//               if (acceptPoseUpdate)
                {
                   MessageTools.toEuclid(detectableSceneNodeMessage.getTransformToWorld(), nodeToWorldTransform);
                   nodePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), nodeToWorldTransform);
-                  nodePose.changeFrame(detectableSceneNode.getNodeFrame().getParent());
-                  nodePose.get(detectableSceneNode.getNodeToParentFrameTransform());
+
+//                  // In the case where the operator is overriding the pose, we are taking that to
+//                  // mean the operator wants to pin the object somewhere in world frame, which
+//                  // means in order to stop it from moving we have to detach it from the frame tree.
+//                  // Since the node might be in the frame of some other actively tracked thing,
+//                  // we need to change the node's parent frame to world so it doesn't move on us.
+//                  if (detectableSceneNode.getPoseOverriddenByOperator())
+//                  {
+//                     if (detectableSceneNode.getNodeFrame().getParent() != ReferenceFrame.getWorldFrame())
+//                     {
+//                        detectableSceneNode.changeParentFrame(ReferenceFrame.getWorldFrame());
+//                     }
+//                  }
+//                  else
+//                  {
+                     nodePose.changeFrame(detectableSceneNode.getNodeFrame().getParent());
+                     nodePose.get(detectableSceneNode.getNodeToParentFrameTransform());
+//                  }
                   detectableSceneNode.getNodeFrame().update();
                }
             }
