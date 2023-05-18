@@ -226,7 +226,7 @@ public class DualBlackflyCamera
                   boolean isPerceptionProcess = true;
                   detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(predefinedSceneNodeLibrary.getDetectableSceneNodes(),
                                                                                               ros2Helper,
-                                                                                              ROS2IOTopicQualifier.STATUS,
+                                                                                              ROS2IOTopicQualifier.COMMAND,
                                                                                               isOperator,
                                                                                               isPerceptionProcess);
                }
