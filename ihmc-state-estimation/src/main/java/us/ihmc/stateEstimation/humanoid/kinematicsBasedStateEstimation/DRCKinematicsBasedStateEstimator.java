@@ -28,7 +28,6 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
-import us.ihmc.sensorProcessing.imu.FusedIMUSensor;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -66,7 +65,6 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final AtomicReference<StateEstimatorMode> atomicOperationMode = new AtomicReference<>(null);
    private final YoEnum<StateEstimatorMode> operatingMode = new YoEnum<>("stateEstimatorOperatingMode", registry, StateEstimatorMode.class, false);
 
-   private final FusedIMUSensor fusedIMUSensor;
    private final JointStateUpdater jointStateUpdater;
    private final PelvisRotationalStateUpdaterInterface pelvisRotationalStateUpdater;
    private final PelvisLinearStateUpdater pelvisLinearStateUpdater;
@@ -151,20 +149,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
             imuProcessedOutputs.add(imu);
       }
 
-      List<IMUSensorReadOnly> imusToUse = new ArrayList<>();
-
-      if (stateEstimatorParameters.createFusedIMUSensor())
-      {
-         if (imuProcessedOutputs.size() != 2)
-            throw new RuntimeException("Cannot create FusedIMUSensor.");
-         fusedIMUSensor = new FusedIMUSensor(imuProcessedOutputs.get(0), imuProcessedOutputs.get(1), estimatorDT, registry);
-         imusToUse.add(fusedIMUSensor);
-      }
-      else
-      {
-         fusedIMUSensor = null;
-         imusToUse.addAll(imuProcessedOutputs);
-      }
+      List<IMUSensorReadOnly> imusToUse = new ArrayList<>(imuProcessedOutputs);
 
       BooleanProvider cancelGravityFromAccelerationMeasurement = new BooleanParameter("cancelGravityFromAccelerationMeasurement",
                                                                                       registry,
@@ -265,8 +250,6 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
 
       imusToVisualize = new ArrayList<>();
       imusToVisualize.addAll(imuProcessedOutputs);
-      if (fusedIMUSensor != null)
-         imusToVisualize.add(fusedIMUSensor);
 
       if (visualizeMeasurementFrames)
          setupYoGraphics(yoGraphicsListRegistry, imusToVisualize);
@@ -319,9 +302,6 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    @Override
    public void initialize()
    {
-      if (fusedIMUSensor != null)
-         fusedIMUSensor.update();
-
       jointStateUpdater.initialize();
       if (pelvisRotationalStateUpdater != null)
       {
@@ -345,9 +325,6 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
          initialize();
       }
       yoTime.set(Conversions.nanosecondsToSeconds(sensorOutput.getWallTime()));
-
-      if (fusedIMUSensor != null)
-         fusedIMUSensor.update();
 
       if (atomicOperationMode.get() != null)
       {

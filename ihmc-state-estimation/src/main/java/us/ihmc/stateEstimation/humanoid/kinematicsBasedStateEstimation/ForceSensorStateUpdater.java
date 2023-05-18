@@ -21,6 +21,7 @@ import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.robotics.sensors.ForceSensorData;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
@@ -39,6 +40,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SCS2YoGraphicHolder
 {
+   private static final boolean DEBUG = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoRegistry registry;
@@ -47,6 +49,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
    private final ForceSensorDataHolder forceSensorDataHolderToUpdate;
    private final ForceSensorDataHolder outputForceSensorDataHolder;
    private final ForceSensorDataHolder outputForceSensorDataHolderWithGravityCancelled;
+   private final List<YoFrameVector3D> outputForces;
 
    private final SideDependentList<ForceSensorDefinition> wristForceSensorDefinitions;
    private final SideDependentList<CenterOfMassReferenceFrame> wristsubtreeCenterOfMassFrames;
@@ -252,6 +255,20 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
          wrenches = null;
          wrenchVisualizer = null;
       }
+
+      if (DEBUG)
+      {
+         outputForces = new ArrayList<>();
+         for (int i = 0; i < outputForceSensorDataHolder.getNumberOfForceSensors(); i++)
+         {
+            ForceSensorDefinition definition = outputForceSensorDataHolder.getForceSensorDefinitions().get(i);
+            outputForces.add(new YoFrameVector3D(definition.getSensorName() + "OutputForce", definition.getSensorFrame(), registry));
+         }
+      }
+      else
+      {
+         outputForces = null;
+      }
    }
 
    private boolean checkIfWristForceSensorsExist(StateEstimatorParameters stateEstimatorParameters)
@@ -316,6 +333,11 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
 
       if (wrenchVisualizer != null)
          wrenchVisualizer.visualize(wrenches);
+
+      for (int i = 0; i < outputForceSensorDataHolder.getNumberOfForceSensors(); i++)
+      {
+         outputForces.get(i).set(outputForceSensorDataHolder.getForceSensorDatas().get(i).getWrench().getLinearPart());
+      }
    }
 
    private void updateFootForceSensorState()
