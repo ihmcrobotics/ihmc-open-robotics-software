@@ -2328,6 +2328,11 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       return rawSensorOutputMap;
    }
 
+   public List<ProcessingYoVariable> getProcessedPositionsForJoint(OneDoFJointBasics joint)
+   {
+      return processedJointPositions.get(joint);
+   }
+
    @Override
    public OneDoFJointStateReadOnly getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint)
    {

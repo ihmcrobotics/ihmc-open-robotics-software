@@ -439,7 +439,7 @@ public class AvatarEstimatorThreadFactory
       if (secondaryStateEstimatorFactoriesField.hasValue())
       {
          for (StateEstimatorControllerFactory stateEstimatorControllerFactory : secondaryStateEstimatorFactoriesField.get())
-            addSecondaryStateEstimator(stateEstimatorControllerFactory.createStateEstimator(getEstimatorFullRobotModel(), getRawSensorOutputMap()));
+            addSecondaryStateEstimator(stateEstimatorControllerFactory.createStateEstimator(getEstimatorFullRobotModel(), getSensorReader()));
       }
 
       AvatarEstimatorThread avatarEstimatorThread = new AvatarEstimatorThread(getSensorReader(),
