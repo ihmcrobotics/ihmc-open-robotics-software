@@ -214,7 +214,7 @@ public class RDXLocomotionManager
       ImGui.sameLine();
 
       ImGui.beginDisabled(interactableFootstepPlan.getNumberOfFootsteps() == 0);
-      if (ImGui.button(labels.get("Walk")) && interactableFootstepPlan.getNumberOfFootsteps() > 0)
+      if (ImGui.button(labels.get("Walk")))
       { // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
          interactableFootstepPlan.walkFromSteps();
       }
@@ -223,7 +223,7 @@ public class RDXLocomotionManager
       ImGui.endDisabled();
 
       ImGui.beginDisabled(!controllerStatusTracker.isWalking());
-      if (ImGui.button(labels.get("Pause")) && controllerStatusTracker.isWalking())
+      if (ImGui.button(labels.get("Pause")))
       {
          setPauseWalkingAndPublish(true);
       }
@@ -232,7 +232,7 @@ public class RDXLocomotionManager
       ImGui.endDisabled();
 
       ImGui.beginDisabled(!pauseWalkingMessage.getPause() || controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() == 0);
-      if (ImGui.button(labels.get("Continue")) && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0)
+      if (ImGui.button(labels.get("Continue")))
       {
          setPauseWalkingAndPublish(false);
       }
