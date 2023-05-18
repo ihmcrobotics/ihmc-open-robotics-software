@@ -51,10 +51,12 @@ public abstract class DetectableSceneNode extends SceneNode
    public void storeOverriddenPose()
    {
       storedOverriddenPose.setIncludingFrame(getNodeFrame().getParent(), getNodeToParentFrameTransform());
+      storedOverriddenPose.changeFrame(ReferenceFrame.getWorldFrame()); // We need to store it in world frame
    }
 
    public void restoreOverriddenPose()
    {
+      // At this point the node frame parent has presumably moved, so let's go back to that frame.
       storedOverriddenPose.changeFrame(getNodeFrame().getParent());
       storedOverriddenPose.get(getNodeToParentFrameTransform());
       getNodeFrame().update();
