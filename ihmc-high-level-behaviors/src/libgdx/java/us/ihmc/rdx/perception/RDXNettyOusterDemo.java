@@ -1,21 +1,16 @@
 package us.ihmc.rdx.perception;
 
-import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.tools.thread.Activator;
 
 public class RDXNettyOusterDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private final Activator nativesLoadedActivator;
    private final RDXNettyOusterUI nettyOusterUI = new RDXNettyOusterUI();
 
    public RDXNettyOusterDemo()
    {
-      nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
-
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
@@ -27,6 +22,8 @@ public class RDXNettyOusterDemo
 
             ImGuiPanel panel = new ImGuiPanel("Ouster", nettyOusterUI::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
+
+            nettyOusterUI.createAfterNativesLoaded();
          }
 
          /**
@@ -38,26 +35,18 @@ public class RDXNettyOusterDemo
          @Override
          public void render()
          {
-            if (nativesLoadedActivator.poll())
+            if (nettyOusterUI.isOusterInitialized())
             {
-               if (nativesLoadedActivator.isNewlyActivated())
+               if (nettyOusterUI.getImagePanel() == null)
                {
-                  nettyOusterUI.createAfterNativesLoaded();
+                  nettyOusterUI.createAfterOusterInitialized();
+
+                  baseUI.getPrimaryScene().addRenderableProvider(nettyOusterUI::getRenderables);
+                  baseUI.getImGuiPanelManager().addPanel(nettyOusterUI.getImagePanel().getImagePanel());
+                  baseUI.getLayoutManager().reloadLayout();
                }
 
-               if (nettyOusterUI.isOusterInitialized())
-               {
-                  if (nettyOusterUI.getImagePanel() == null)
-                  {
-                     nettyOusterUI.createAfterOusterInitialized();
-
-                     baseUI.getPrimaryScene().addRenderableProvider(nettyOusterUI::getRenderables);
-                     baseUI.getImGuiPanelManager().addPanel(nettyOusterUI.getImagePanel().getImagePanel());
-                     baseUI.getLayoutManager().reloadLayout();
-                  }
-
-                  nettyOusterUI.update();
-               }
+               nettyOusterUI.update();
             }
 
             baseUI.renderBeforeOnScreenUI();

@@ -2,7 +2,6 @@ package us.ihmc.rdx.perception;
 
 import imgui.type.ImDouble;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
@@ -11,14 +10,12 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.RDXInteractableBlackflyFujinon;
-import us.ihmc.tools.thread.Activator;
 
 public class RDXNettyOusterFisheyeColorDemo
 {
    private static final String BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.serial.number", "00000000");
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private final Activator nativesLoadedActivator;
    private final RDXNettyOusterUI nettyOusterUI = new RDXNettyOusterUI();
    private RDXBlackflyReader blackflyReader;
    private RDXInteractableBlackflyFujinon interactableBlackflyFujinon;
@@ -32,8 +29,6 @@ public class RDXNettyOusterFisheyeColorDemo
 
    public RDXNettyOusterFisheyeColorDemo()
    {
-      nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
-
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
@@ -45,8 +40,42 @@ public class RDXNettyOusterFisheyeColorDemo
             ImGuiPanel panel = new ImGuiPanel("Ouster Coloring", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
 
-            blackflyReader = new RDXBlackflyReader(nativesLoadedActivator, BLACKFLY_SERIAL_NUMBER);
+            blackflyReader = new RDXBlackflyReader(BLACKFLY_SERIAL_NUMBER);
             baseUI.getImGuiPanelManager().addPanel(blackflyReader.getStatisticsPanel());
+
+            blackflyReader.create();
+            baseUI.getImGuiPanelManager().addPanel(blackflyReader.getSwapImagePanel().getImagePanel());
+
+            interactableBlackflyFujinon = new RDXInteractableBlackflyFujinon(baseUI.getPrimary3DPanel());
+            interactableBlackflyFujinon.getInteractableFrameModel().setPose(SensorHeadParameters.FISHEYE_TO_OUSTER_TRANSFORM_BENCHTOP);
+
+            nettyOusterUI.createAfterNativesLoaded();
+
+            blackflyReader.setMonitorPanelUIThreadPreprocessor(texture ->
+            {
+               if (nettyOusterUI.getIsReady())
+               {
+                  nettyOusterUI.setFisheyeImageToColorPoints(texture.getRGBA8Image(),
+                                                             coloringFx.get(),
+                                                             coloringFy.get(),
+                                                             coloringCx.get(),
+                                                             coloringCy.get());
+                  nettyOusterUI.getSensorFrame()
+                               .getReferenceFrame()
+                               .getTransformToDesiredFrame(nettyOusterUI.getOusterFisheyeKernel()
+                                                                        .getOusterToFisheyeTransformToPack(),
+                                                           interactableBlackflyFujinon.getInteractableFrameModel()
+                                                                                      .getReferenceFrame());
+               }
+            });
+
+            ThreadTools.startAsDaemon(() ->
+            {
+               while (running)
+               {
+                  blackflyReader.readBlackflyImage();
+               }
+            }, "CameraRead");
          }
 
          /**
@@ -58,59 +87,21 @@ public class RDXNettyOusterFisheyeColorDemo
          @Override
          public void render()
          {
-            if (nativesLoadedActivator.poll())
+            interactableBlackflyFujinon.update();
+            blackflyReader.updateOnUIThread();
+
+            if (nettyOusterUI.isOusterInitialized())
             {
-               if (nativesLoadedActivator.isNewlyActivated())
+               if (nettyOusterUI.getImagePanel() == null)
                {
-                  blackflyReader.create();
-                  baseUI.getImGuiPanelManager().addPanel(blackflyReader.getSwapImagePanel().getImagePanel());
+                  nettyOusterUI.createAfterOusterInitialized();
 
-                  interactableBlackflyFujinon = new RDXInteractableBlackflyFujinon(baseUI.getPrimary3DPanel());
-                  interactableBlackflyFujinon.getInteractableFrameModel().setPose(SensorHeadParameters.FISHEYE_TO_OUSTER_TRANSFORM_BENCHTOP);
-
-                  nettyOusterUI.createAfterNativesLoaded();
-
-                  blackflyReader.setMonitorPanelUIThreadPreprocessor(texture ->
-                  {
-                     if (nettyOusterUI.getIsReady())
-                     {
-                        nettyOusterUI.setFisheyeImageToColorPoints(texture.getRGBA8Image(),
-                                                                   coloringFx.get(),
-                                                                   coloringFy.get(),
-                                                                   coloringCx.get(),
-                                                                   coloringCy.get());
-                        nettyOusterUI.getSensorFrame()
-                                     .getReferenceFrame()
-                                     .getTransformToDesiredFrame(nettyOusterUI.getOusterFisheyeKernel().getOusterToFisheyeTransformToPack(),
-                                                                 interactableBlackflyFujinon.getInteractableFrameModel().getReferenceFrame());
-                     }
-                  });
-
-                  ThreadTools.startAsDaemon(() ->
-                  {
-                     while (running)
-                     {
-                        blackflyReader.readBlackflyImage();
-                     }
-                  }, "CameraRead");
+                  baseUI.getPrimaryScene().addRenderableProvider(nettyOusterUI::getRenderables);
+                  baseUI.getImGuiPanelManager().addPanel(nettyOusterUI.getImagePanel().getImagePanel());
+                  baseUI.getLayoutManager().reloadLayout();
                }
 
-               interactableBlackflyFujinon.update();
-               blackflyReader.updateOnUIThread();
-
-               if (nettyOusterUI.isOusterInitialized())
-               {
-                  if (nettyOusterUI.getImagePanel() == null)
-                  {
-                     nettyOusterUI.createAfterOusterInitialized();
-
-                     baseUI.getPrimaryScene().addRenderableProvider(nettyOusterUI::getRenderables);
-                     baseUI.getImGuiPanelManager().addPanel(nettyOusterUI.getImagePanel().getImagePanel());
-                     baseUI.getLayoutManager().reloadLayout();
-                  }
-
-                  nettyOusterUI.update();
-               }
+               nettyOusterUI.update();
             }
 
             baseUI.renderBeforeOnScreenUI();
@@ -120,8 +111,8 @@ public class RDXNettyOusterFisheyeColorDemo
          private void renderImGuiWidgets()
          {
             nettyOusterUI.renderImGuiWidgets();
-            ImGuiTools.sliderDouble(labels.get("Coloring Fx (px)"), coloringFx, -100.0, 800.0 , "%.5f");
-            ImGuiTools.sliderDouble(labels.get("Coloring Fy (px)"), coloringFy, -100.0,  800.0 , "%.5f");
+            ImGuiTools.sliderDouble(labels.get("Coloring Fx (px)"), coloringFx, -100.0, 800.0, "%.5f");
+            ImGuiTools.sliderDouble(labels.get("Coloring Fy (px)"), coloringFy, -100.0, 800.0, "%.5f");
             ImGuiTools.sliderDouble(labels.get("Coloring Cx (px)"), coloringCx, -100.0, 1200.0, "%.5f");
             ImGuiTools.sliderDouble(labels.get("Coloring Cy (px)"), coloringCy, -1000.0, 1200.0, "%.5f");
          }

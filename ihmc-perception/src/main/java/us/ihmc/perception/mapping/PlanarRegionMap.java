@@ -7,7 +7,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.tools.PlanarRegionCuttingTools;
 import us.ihmc.perception.tools.PlaneRegistrationTools;
 import us.ihmc.perception.slamWrapper.SlamWrapper;
@@ -95,7 +94,6 @@ public class PlanarRegionMap
       {
          this.merger = MergingMode.SMOOTHING;
 
-         BytedecoTools.loadSlamWrapper();
          factorGraph = new SlamWrapper.FactorGraphExternal();
       }
       else
