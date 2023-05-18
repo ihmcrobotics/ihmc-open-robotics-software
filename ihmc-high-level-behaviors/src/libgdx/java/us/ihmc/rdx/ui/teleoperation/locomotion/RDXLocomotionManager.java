@@ -7,7 +7,6 @@ import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import imgui.ImGui;
-import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -21,7 +20,6 @@ import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.log.LogTools;
-import us.ihmc.rdx.imgui.ImGuiEnumPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -69,10 +67,7 @@ public class RDXLocomotionManager
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean showGraphics = new ImBoolean(true);
    private boolean isPlacingFootstep = false;
-
-   private final ImGuiEnumPlot isWalkingPlot = new ImGuiEnumPlot("Walking", 1000, 25);
    private final PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
-
    private final ControllerStatusTracker controllerStatusTracker;
 
    public RDXLocomotionManager(DRCRobotModel robotModel,
@@ -210,9 +205,6 @@ public class RDXLocomotionManager
 
    public void renderImGuiWidgets()
    {
-      boolean isWalking = controllerStatusTracker.isWalking();
-      isWalkingPlot.render(isWalking ? 1 : 0, isWalking ? "WALKING" : "NOT WALKING");
-
       areFootstepsAdjustableCheckbox.renderImGuiWidget();
       swingTimeSlider.renderImGuiWidget();
       transferTimeSlider.renderImGuiWidget();
@@ -221,11 +213,7 @@ public class RDXLocomotionManager
       ImGui.text("Walking Options:");
       ImGui.sameLine();
 
-      if (interactableFootstepPlan.getNumberOfFootsteps() == 0)
-         ImGui.pushStyleColor(ImGuiCol.Button, 0.66f, 0.66f, 0.66f, 1.0f);
-      else
-         ImGui.pushStyleColor(ImGuiCol.Button, 171,203,242, 255);
-
+      ImGui.beginDisabled(interactableFootstepPlan.getNumberOfFootsteps() == 0);
       if (ImGui.button(labels.get("Walk")) && interactableFootstepPlan.getNumberOfFootsteps() > 0)
       { // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
          System.out.println("Walking from planned steps");
@@ -234,13 +222,9 @@ public class RDXLocomotionManager
       }
       ImGuiTools.previousWidgetTooltip("Keybind: Space");
       ImGui.sameLine();
-      ImGui.popStyleColor();
+      ImGui.endDisabled();
 
-      if (!pauseWalkingMessage.getPause() && controllerStatusTracker.isWalking())
-         ImGui.pushStyleColor(ImGuiCol.Button, 171, 203, 242, 255);
-      else
-         ImGui.pushStyleColor(ImGuiCol.Button, 0.66f, 0.66f, 0.66f, 1.0f);
-
+      ImGui.beginDisabled(pauseWalkingMessage.getPause() || !controllerStatusTracker.isWalking());
       if (ImGui.button(labels.get("Pause")) && controllerStatusTracker.isWalking())
       {
          System.out.println("Pause walking from the robot");
@@ -248,20 +232,16 @@ public class RDXLocomotionManager
       }
       ImGuiTools.previousWidgetTooltip("Keybind: Space");
       ImGui.sameLine();
-      ImGui.popStyleColor();
+      ImGui.endDisabled();
 
-      if (pauseWalkingMessage.getPause())
-         ImGui.pushStyleColor(ImGuiCol.Button, 171,203,242, 255);
-      else
-         ImGui.pushStyleColor(ImGuiCol.Button, 0.66f, 0.66f, 0.66f, 1.0f);
-
+      ImGui.beginDisabled(!pauseWalkingMessage.getPause());
       if (ImGui.button(labels.get("Continue")) && pauseWalkingMessage.getPause())
       {
          System.out.println("Continue walking with the robot");
          setPauseWalkingAndPublish(false);
       }
       ImGuiTools.previousWidgetTooltip("Keybind: Space");
-      ImGui.popStyleColor();
+      ImGui.endDisabled();
 
       ImGui.text("Leg control mode: " + legControlMode.name());
       if (ImGui.radioButton(labels.get("Disabled"), legControlMode == RDXLegControlMode.DISABLED))
