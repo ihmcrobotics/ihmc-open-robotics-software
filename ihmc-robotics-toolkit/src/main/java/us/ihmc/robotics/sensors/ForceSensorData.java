@@ -4,22 +4,26 @@ import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.robotics.MatrixMissingTools;
+import us.ihmc.robotics.MecanoMissingTools;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
 
 public class ForceSensorData implements ForceSensorDataReadOnly, Settable<ForceSensorData>
 {
-   private final DMatrixRMaj wrench = new DMatrixRMaj(Wrench.SIZE, 1);
+   private final DMatrixRMaj wrenchMatrix = new DMatrixRMaj(Wrench.SIZE, 1);
+   private final DMatrixRMaj wrenchMatrixView = MatrixMissingTools.newReadOnlyDMatrixRMajView(wrenchMatrix);
 
    private String sensorName;
    private ReferenceFrame measurementFrame;
    private RigidBodyBasics measurementLink;
+
+   private final WrenchReadOnly wrench = MecanoMissingTools.newLinkedWrenchReadOnly(this::getMeasurementFrame, this::getMeasurementFrame, wrenchMatrix);
 
    public ForceSensorData()
    {
@@ -44,20 +48,20 @@ public class ForceSensorData implements ForceSensorDataReadOnly, Settable<ForceS
 
    public void setWrench(Vector3DReadOnly moment, Vector3DReadOnly force)
    {
-      moment.get(0, wrench);
-      force.get(3, wrench);
+      moment.get(0, wrenchMatrix);
+      force.get(3, wrenchMatrix);
    }
 
    public void setWrench(DMatrixRMaj newWrench)
    {
-      wrench.set(newWrench);
+      wrenchMatrix.set(newWrench);
    }
 
    public void setWrench(float[] newWrench)
    {
       for (int i = 0; i < SpatialVectorReadOnly.SIZE; i++)
       {
-         wrench.set(i, 0, newWrench[i]);
+         wrenchMatrix.set(i, 0, newWrench[i]);
       }
    }
 
@@ -65,7 +69,7 @@ public class ForceSensorData implements ForceSensorDataReadOnly, Settable<ForceS
    {
       measurementFrame.checkReferenceFrameMatch(newWrench.getReferenceFrame());
       measurementFrame.checkReferenceFrameMatch(newWrench.getBodyFrame());
-      newWrench.get(wrench);
+      newWrench.get(wrenchMatrix);
    }
 
    @Override
@@ -87,32 +91,15 @@ public class ForceSensorData implements ForceSensorDataReadOnly, Settable<ForceS
    }
 
    @Override
-   public void getWrench(DMatrixRMaj wrenchToPack)
+   public DMatrixRMaj getWrenchMatrix()
    {
-      wrenchToPack.set(wrench);
+      return wrenchMatrixView;
    }
 
    @Override
-   public void getWrench(Wrench wrenchToPack)
+   public WrenchReadOnly getWrench()
    {
-      wrenchToPack.setBodyFrame(measurementFrame);
-      wrenchToPack.setIncludingFrame(measurementFrame, wrench);
-   }
-
-   @Override
-   public void getWrench(Vector3DBasics momentToPack, Vector3DBasics forceToPack)
-   {
-      momentToPack.set(0, wrench);
-      forceToPack.set(3, wrench);
-   }
-
-   @Override
-   public void getWrench(float[] wrenchToPack)
-   {
-      for (int i = 0; i < SpatialVectorReadOnly.SIZE; i++)
-      {
-         wrenchToPack[i] = (float) wrench.get(i, 0);
-      }
+      return wrench;
    }
 
    @Override
@@ -126,7 +113,7 @@ public class ForceSensorData implements ForceSensorDataReadOnly, Settable<ForceS
       sensorName = other.getSensorName();
       measurementFrame = other.getMeasurementFrame();
       measurementLink = other.getMeasurementLink();
-      other.getWrench(wrench);
+      wrenchMatrix.set(other.getWrenchMatrix());
    }
 
    @Override
@@ -145,7 +132,7 @@ public class ForceSensorData implements ForceSensorDataReadOnly, Settable<ForceS
             return false;
          if (measurementLink != other.measurementLink)
             return false;
-         if (!MatrixTools.equals(wrench, other.wrench))
+         if (!MatrixTools.equals(wrenchMatrix, other.wrenchMatrix))
             return false;
          return true;
       }
@@ -157,6 +144,6 @@ public class ForceSensorData implements ForceSensorDataReadOnly, Settable<ForceS
 
    public void calculateChecksum(GenericCRC32 checksum)
    {
-      checksum.update(wrench);
+      checksum.update(wrenchMatrix);
    }
 }
