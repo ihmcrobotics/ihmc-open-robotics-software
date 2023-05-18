@@ -1502,8 +1502,8 @@ public class EuclidCoreMissingTools
       int yIndex = startIndex + 1;
       int zIndex = startIndex + 2;
       return EuclidFrameFactories.newLinkedFrameVector3DReadOnly(referenceFrameHolder,
-                                                                 () -> source.get(xIndex),
-                                                                 () -> source.get(yIndex),
-                                                                 () -> source.get(zIndex));
+                                                                 () -> source.get(xIndex, 0),
+                                                                 () -> source.get(yIndex, 0),
+                                                                 () -> source.get(zIndex, 0));
    }
 }
