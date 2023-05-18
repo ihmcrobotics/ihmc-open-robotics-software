@@ -231,8 +231,8 @@ public class RDXLocomotionManager
       ImGui.sameLine();
       ImGui.endDisabled();
 
-      ImGui.beginDisabled(!pauseWalkingMessage.getPause());
-      if (ImGui.button(labels.get("Continue")) && pauseWalkingMessage.getPause())
+      ImGui.beginDisabled(!pauseWalkingMessage.getPause() || controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() == 0);
+      if (ImGui.button(labels.get("Continue")) && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0)
       {
          setPauseWalkingAndPublish(false);
       }
