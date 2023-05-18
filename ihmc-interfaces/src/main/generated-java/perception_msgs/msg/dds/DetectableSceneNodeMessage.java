@@ -25,6 +25,11 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage transform_to_world_;
    /**
+            * If this node is trackable via an ArUco maker, this is the ArUco marker's
+            * transform to world frame
+            */
+   public controller_msgs.msg.dds.RigidBodyTransformMessage aruco_marker_transform_to_world_;
+   /**
             * Keeps track of when the operator has overridden the pose of this node
             */
    public boolean is_pose_overridden_by_operator_;
@@ -33,6 +38,7 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
    {
       name_ = new java.lang.StringBuilder(255);
       transform_to_world_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
+      aruco_marker_transform_to_world_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
 
    public DetectableSceneNodeMessage(DetectableSceneNodeMessage other)
@@ -49,6 +55,7 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       currently_detected_ = other.currently_detected_;
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_world_, transform_to_world_);
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.aruco_marker_transform_to_world_, aruco_marker_transform_to_world_);
       is_pose_overridden_by_operator_ = other.is_pose_overridden_by_operator_;
 
    }
@@ -101,6 +108,16 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       return transform_to_world_;
    }
 
+
+   /**
+            * If this node is trackable via an ArUco maker, this is the ArUco marker's
+            * transform to world frame
+            */
+   public controller_msgs.msg.dds.RigidBodyTransformMessage getArucoMarkerTransformToWorld()
+   {
+      return aruco_marker_transform_to_world_;
+   }
+
    /**
             * Keeps track of when the operator has overridden the pose of this node
             */
@@ -139,6 +156,7 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.currently_detected_, other.currently_detected_, epsilon)) return false;
 
       if (!this.transform_to_world_.epsilonEquals(other.transform_to_world_, epsilon)) return false;
+      if (!this.aruco_marker_transform_to_world_.epsilonEquals(other.aruco_marker_transform_to_world_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_pose_overridden_by_operator_, other.is_pose_overridden_by_operator_, epsilon)) return false;
 
 
@@ -159,6 +177,7 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       if(this.currently_detected_ != otherMyClass.currently_detected_) return false;
 
       if (!this.transform_to_world_.equals(otherMyClass.transform_to_world_)) return false;
+      if (!this.aruco_marker_transform_to_world_.equals(otherMyClass.aruco_marker_transform_to_world_)) return false;
       if(this.is_pose_overridden_by_operator_ != otherMyClass.is_pose_overridden_by_operator_) return false;
 
 
@@ -177,6 +196,8 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       builder.append(this.currently_detected_);      builder.append(", ");
       builder.append("transform_to_world=");
       builder.append(this.transform_to_world_);      builder.append(", ");
+      builder.append("aruco_marker_transform_to_world=");
+      builder.append(this.aruco_marker_transform_to_world_);      builder.append(", ");
       builder.append("is_pose_overridden_by_operator=");
       builder.append(this.is_pose_overridden_by_operator_);
       builder.append("}");

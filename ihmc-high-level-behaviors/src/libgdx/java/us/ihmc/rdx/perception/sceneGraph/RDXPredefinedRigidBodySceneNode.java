@@ -71,7 +71,7 @@ public class RDXPredefinedRigidBodySceneNode
 
    public void update()
    {
-      showing = sceneNode.getCurrentlyDetected();
+      showing = sceneNode.getCurrentlyDetected() || sceneNode.getPoseOverriddenByOperator();
 
       referenceFrameGraphic.setToReferenceFrame(sceneNode.getNodeFrame());
       if (!showing || !sceneNode.getPoseOverriddenByOperator())
