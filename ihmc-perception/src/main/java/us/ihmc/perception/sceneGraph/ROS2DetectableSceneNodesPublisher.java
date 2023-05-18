@@ -11,7 +11,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 
 /**
  * Publishes the current state of the complete collection of detectable scene objects.
- * Publishing all scene objects in one messages can simplify synchronization and
+ * Publishing all scene objects in one message can simplify synchronization and
  * reduce the complexity of logic in figuring out when objects are currently under
  * consideraion.
  */
@@ -37,19 +37,10 @@ public class ROS2DetectableSceneNodesPublisher
          detectableSceneNodeMessage.setCurrentlyDetected(detectableSceneObject.getCurrentlyDetected());
          detectableSceneNodeMessage.setIsPoseOverriddenByOperator(detectableSceneObject.getPoseOverriddenByOperator());
 
-         // If the pose is overridden by the operator, the operator side packs the pose
-         // else, the on robot process packs the pose
-         boolean isOperatorSide = ioQualifier == ROS2IOTopicQualifier.COMMAND;
-         boolean isOnRobot = ioQualifier == ROS2IOTopicQualifier.STATUS;
-         boolean shouldPackPose = detectableSceneObject.getPoseOverriddenByOperator() && isOperatorSide;
-         shouldPackPose |= !detectableSceneObject.getPoseOverriddenByOperator() && isOnRobot;
-//         if (shouldPackPose)
-         {
-            sceneObjectPose.setToZero(detectableSceneObject.getNodeFrame());
-            sceneObjectPose.changeFrame(ReferenceFrame.getWorldFrame());
-            sceneObjectPose.get(sceneObjectToWorldTransform);
-            MessageTools.toMessage(sceneObjectToWorldTransform, detectableSceneNodeMessage.getTransformToWorld());
-         }
+         sceneObjectPose.setToZero(detectableSceneObject.getNodeFrame());
+         sceneObjectPose.changeFrame(ReferenceFrame.getWorldFrame());
+         sceneObjectPose.get(sceneObjectToWorldTransform);
+         MessageTools.toMessage(sceneObjectToWorldTransform, detectableSceneNodeMessage.getTransformToWorld());
       }
       ros2PublishSubscribeAPI.publish(SceneGraphAPI.DETECTABLE_SCENE_NODES.getTopic(ioQualifier), detectableSceneObjectsMessage);
    }
