@@ -175,7 +175,7 @@ public class PlanarRegionMappingHandler
 
    private void createTerrain(int depthHeight, int depthWidth, boolean smoothing, boolean simulation)
    {
-      planarRegionMap = new PlanarRegionMap(smoothing);
+      planarRegionMap = new PlanarRegionMap(smoothing, "Fast");
       sensorLogChannelName = PerceptionLoggerConstants.L515_DEPTH_NAME;
 
       String version = simulation ? "Simulation" : "";
