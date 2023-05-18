@@ -43,7 +43,7 @@ public class ROS2DetectableSceneNodesPublisher
          boolean isOnRobot = ioQualifier == ROS2IOTopicQualifier.STATUS;
          boolean shouldPackPose = detectableSceneObject.getPoseOverriddenByOperator() && isOperatorSide;
          shouldPackPose |= !detectableSceneObject.getPoseOverriddenByOperator() && isOnRobot;
-         if (shouldPackPose)
+//         if (shouldPackPose)
          {
             sceneObjectPose.setToZero(detectableSceneObject.getNodeFrame());
             sceneObjectPose.changeFrame(ReferenceFrame.getWorldFrame());

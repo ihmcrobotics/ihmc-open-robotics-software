@@ -14,13 +14,14 @@ public class ArUcoSceneTools
    public static void updateLibraryPosesFromDetectionResults(OpenCVArUcoMarkerDetection arUcoMarkerDetection,
                                                              PredefinedSceneNodeLibrary predefinedSceneNodeLibrary)
    {
+      predefinedSceneNodeLibrary.storeOverriddenPoses();
       synchronized (arUcoMarkerDetection.getSyncObject())
       {
          for (ArUcoDetectableNode arUcoDetectableNode : predefinedSceneNodeLibrary.getArUcoDetectableNodes())
          {
             boolean isDetected = arUcoMarkerDetection.isDetected(arUcoDetectableNode.getMarkerID());
             arUcoDetectableNode.setCurrentlyDetected(isDetected);
-            if (isDetected && !arUcoDetectableNode.getPoseOverriddenByOperator())
+            if (isDetected)
             {
                arUcoMarkerDetection.getPose(arUcoDetectableNode.getMarkerID(),
                                             arUcoDetectableNode.getMarkerSize(),
@@ -47,5 +48,6 @@ public class ArUcoSceneTools
             }
          }
       }
+      predefinedSceneNodeLibrary.restoreOverriddenPoses();
    }
 }
