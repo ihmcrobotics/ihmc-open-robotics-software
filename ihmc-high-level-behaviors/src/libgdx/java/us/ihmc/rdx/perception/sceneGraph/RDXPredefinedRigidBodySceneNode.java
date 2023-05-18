@@ -39,6 +39,8 @@ public class RDXPredefinedRigidBodySceneNode
    private boolean showing = false;
    private final RDXModelInstance modelInstance;
    private final FramePose3D nodePose = new FramePose3D();
+   /** For resetting the pose after overriding. */
+   private final RigidBodyTransform originalTransformToParent = new RigidBodyTransform();
    private final RigidBodyTransform visualModelToWorldTransform = new RigidBodyTransform();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiEnumPlot currentlyDetectedPlot;
@@ -48,6 +50,8 @@ public class RDXPredefinedRigidBodySceneNode
    public RDXPredefinedRigidBodySceneNode(PredefinedRigidBodySceneNode predefinedRigidBodySceneNode, RDX3DPanel panel3D)
    {
       this.sceneNode = predefinedRigidBodySceneNode;
+
+      originalTransformToParent.set(predefinedRigidBodySceneNode.getNodeToParentFrameTransform());
 
       modelInstance = new RDXModelInstance(RDXModelLoader.load(predefinedRigidBodySceneNode.getVisualModelFilePath()));
       modelInstance.setColor(GHOST_COLOR);
@@ -97,6 +101,13 @@ public class RDXPredefinedRigidBodySceneNode
       ImGui.sameLine();
       ImGui.beginDisabled(!showing || !sceneNode.getPoseOverriddenByOperator());
       ImGui.checkbox(labels.get("Use gizmo"), overridePoseGizmo.getSelected());
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Reset pose")))
+      {
+         sceneNode.getNodeToParentFrameTransform().set(originalTransformToParent);
+         sceneNode.getNodeFrame().update();
+         sceneNode.markOverridePoseModified();
+      }
       ImGui.endDisabled();
 
       ImGui.separator();
