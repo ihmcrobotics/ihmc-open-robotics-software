@@ -57,7 +57,6 @@ import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
 import us.ihmc.rosControl.wholeRobot.IMUHandle;
 import us.ihmc.rosControl.wholeRobot.JointStateHandle;
 import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -81,7 +80,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    public static final String CUSTOM_ROBOT_PATH_ARG = "customRobotPath";
 
    public static final boolean ENABLE_FINGER_JOINTS = VERSION.hasFingers();
-   public static final boolean LOG_SECONDARY_HIGH_LEVEL_STATES = false;
+   public static final boolean LOG_SECONDARY_HIGH_LEVEL_STATES = true;
 
    private static final String[] torqueControlledJoints;
    static
@@ -166,6 +165,8 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 
    private YoVariableServer yoVariableServer;
    private AvatarEstimatorThread estimatorThread;
+   // Save the reference to the sensor reader, we're going to use this to write controller commands right after the controller is done. 
+   private ValkyrieRosControlSensorReader sensorReader;
    private RobotController robotController;
 
    private final SettableTimestampProvider wallTimeProvider = new SettableTimestampProvider();
@@ -397,7 +398,6 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
        * Create controllers
        */
       HighLevelHumanoidControllerFactory controllerFactory = createHighLevelControllerFactory(robotModel, controllerRealtimeROS2Node, sensorInformation);
-      JointDesiredOutputWriter outputWriter = null;
       DRCOutputProcessor drcOutputProcessor = null;
 
       if (USE_STATE_CHANGE_TORQUE_SMOOTHER_PROCESSOR)
@@ -425,7 +425,11 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       avatarEstimatorThreadFactory.setHumanoidRobotContextDataFactory(estimatorContextDataFactory);
       avatarEstimatorThreadFactory.setGravity(gravity);
       estimatorThread = avatarEstimatorThreadFactory.createAvatarEstimatorThread();
-      yoVariableServer.setMainRegistry(estimatorThread.getYoRegistry(), estimatorThread.getFullRobotModel().getElevator(), estimatorThread.getSCS1YoGraphicsListRegistry());
+      sensorReader = sensorReaderFactory.getSensorReader();
+      sensorReader.skipWritingCommandsInRead(); // Indicate that we'll handle the write separately
+      yoVariableServer.setMainRegistry(estimatorThread.getYoRegistry(),
+                                       estimatorThread.getFullRobotModel().getElevator(),
+                                       estimatorThread.getSCS1YoGraphicsListRegistry());
 
       // The estimator runs synchronous with the scheduler so its context is the master context.
       HumanoidRobotContextData masterContext = estimatorThread.getHumanoidRobotContextData();
@@ -568,16 +572,20 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       }
 
       wallTimeProvider.setTimestamp(rosTime);
-      // Read sensor data from robot
+      // Read sensor data from robot before running the controller so it gets the newest data.
       HumanoidRobotContextData masterContext = estimatorThread.getHumanoidRobotContextData();
-      long newTimestamp = estimatorThread.getSensorReader().read(masterContext.getSensorDataContext());
+      long newTimestamp = sensorReader.read(masterContext.getSensorDataContext());
       masterContext.setTimestamp(newTimestamp);
-
-      // Run barrier scheduler: this releases the controller thread at the appropriate time
-      robotController.doControl();
-
       // Run the estimator
       estimatorThread.run();
+
+      // Run barrier scheduler:
+      // Doing this after the estimator allows the controller to get newest data
+      // Doing this before writing command to the robot allows to get the robot with the newest commands
+      robotController.doControl();
+
+      // Finally write the commands to the robot.
+      sensorReader.writeCommandsToRobot();
       yoVariableServer.update(masterContext.getTimestamp(), estimatorThread.getYoRegistry());
    }
 }
