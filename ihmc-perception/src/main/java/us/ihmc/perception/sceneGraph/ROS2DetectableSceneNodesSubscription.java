@@ -3,6 +3,7 @@ package us.ihmc.perception.sceneGraph;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodesMessage;
 import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
@@ -37,7 +38,7 @@ public class ROS2DetectableSceneNodesSubscription
    {
       this.detectableSceneNodes = detectableSceneNodes;
 
-      detectableSceneNodesSubscription = ros2PublishSubscribeAPI.subscribe(SceneGraphAPI.DETECTABLE_SCENE_NODES.getTopic(ioQualifier));
+      detectableSceneNodesSubscription = ros2PublishSubscribeAPI.subscribe(PerceptionAPI.DETECTABLE_SCENE_NODES.getTopic(ioQualifier));
    }
 
    /**

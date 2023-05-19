@@ -2,6 +2,7 @@ package us.ihmc.perception.sceneGraph;
 
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodesMessage;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
@@ -55,6 +56,6 @@ public class ROS2DetectableSceneNodesPublisher
             MessageTools.toMessage(arUcoMarkerToWorldTransform, detectableSceneNodeMessage.getArucoMarkerTransformToWorld());
          }
       }
-      ros2PublishSubscribeAPI.publish(SceneGraphAPI.DETECTABLE_SCENE_NODES.getTopic(ioQualifier), detectableSceneNodesMessage);
+      ros2PublishSubscribeAPI.publish(PerceptionAPI.DETECTABLE_SCENE_NODES.getTopic(ioQualifier), detectableSceneNodesMessage);
    }
 }
