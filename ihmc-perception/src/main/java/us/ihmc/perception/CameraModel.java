@@ -13,7 +13,7 @@ public enum CameraModel
    PINHOLE,
    /**
     * If the camera model is the Ouster camera model.
-    * With the Ouster camera model, the vertical and horizonal fields of view
+    * With the Ouster camera model, the vertical and horizontal fields of view
     * are used instead of the focal length and principal point parameters.
     */
    OUSTER,
