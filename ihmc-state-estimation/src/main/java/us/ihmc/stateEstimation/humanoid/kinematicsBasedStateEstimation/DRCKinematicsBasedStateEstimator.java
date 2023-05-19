@@ -25,6 +25,8 @@ import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameTwist;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.robotics.sensors.ForceSensorDataHolder;
+import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
@@ -66,6 +68,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final YoEnum<StateEstimatorMode> operatingMode = new YoEnum<>("stateEstimatorOperatingMode", registry, StateEstimatorMode.class, false);
 
    private final JointStateUpdater jointStateUpdater;
+   private final ForceSensorStateUpdater forceSensorStateUpdater;
    private final PelvisRotationalStateUpdaterInterface pelvisRotationalStateUpdater;
    private final PelvisLinearStateUpdater pelvisLinearStateUpdater;
    private final MomentumStateUpdater momentumStateUpdater;
@@ -106,6 +109,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
                                            CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
                                            RobotMotionStatusHolder robotMotionStatusFromController,
                                            Map<RigidBodyBasics, ? extends ContactablePlaneBody> feet,
+                                           ForceSensorDataHolder forceSensorDataHolderToUpdate,
                                            YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       estimatorDT = stateEstimatorParameters.getEstimatorDT();
@@ -170,6 +174,23 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
                                                       registry);
 
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMap, stateEstimatorParameters, registry);
+
+      if (forceSensorDataHolderToUpdate != null)
+      {
+         forceSensorStateUpdater = new ForceSensorStateUpdater(rootJoint,
+                                                               sensorOutputMap,
+                                                               forceSensorDataHolderToUpdate,
+                                                               stateEstimatorParameters,
+                                                               gravitationalAcceleration,
+                                                               robotMotionStatusFromController,
+                                                               yoGraphicsListRegistry,
+                                                               registry);
+      }
+      else
+      {
+         forceSensorStateUpdater = null;
+      }
+
       if (imusToUse.size() > 0)
       {
          pelvisRotationalStateUpdater = new IMUBasedPelvisRotationalStateUpdater(inverseDynamicsStructure,
@@ -307,6 +328,10 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       {
          pelvisRotationalStateUpdater.initialize();
       }
+
+      if (forceSensorStateUpdater != null)
+         forceSensorStateUpdater.initialize();
+
       pelvisLinearStateUpdater.initialize();
 
       if (momentumStateUpdater != null)
@@ -334,13 +359,14 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
 
       jointStateUpdater.updateJointState();
 
+      if (pelvisRotationalStateUpdater != null)
+         pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
+
+      if (forceSensorStateUpdater != null)
+         forceSensorStateUpdater.updateForceSensorState();
+
       for (int i = 0; i < footSwitchList.size(); i++)
          footSwitchList.get(i).update();
-
-      if (pelvisRotationalStateUpdater != null)
-      {
-         pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
-      }
 
       switch (operatingMode.getEnumValue())
       {
@@ -424,10 +450,28 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       atomicOperationMode.set(stateEstimatorMode);
    }
 
+   public ForceSensorStateUpdater getForceSensorStateUpdater()
+   {
+      return forceSensorStateUpdater;
+   }
+
+   @Override
+   public ForceSensorCalibrationModule getForceSensorCalibrationModule()
+   {
+      return forceSensorStateUpdater;
+   }
+
+   @Override
+   public ForceSensorDataHolderReadOnly getForceSensorOutputWithGravityCancelled()
+   {
+      return forceSensorStateUpdater.getForceSensorOutputWithGravityCancelled();
+   }
+
    @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(forceSensorStateUpdater.getSCS2YoGraphics());
       group.addChild(pelvisLinearStateUpdater.getSCS2YoGraphics());
       if (momentumStateUpdater != null)
          group.addChild(momentumStateUpdater.getSCS2YoGraphics());
