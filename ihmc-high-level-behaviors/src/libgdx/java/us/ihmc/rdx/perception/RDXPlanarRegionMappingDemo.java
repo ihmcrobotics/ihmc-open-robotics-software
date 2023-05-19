@@ -7,7 +7,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.PlanarRegionMappingHandler;
 import us.ihmc.perception.tools.MocapTools;
 import us.ihmc.pubsub.DomainFactory;
@@ -21,14 +20,12 @@ import us.ihmc.rdx.visualizers.RDXLineGraphic;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.IHMCCommonPaths;
-import us.ihmc.tools.thread.Activator;
 
 import java.io.File;
 import java.util.ArrayList;
 
 public class RDXPlanarRegionMappingDemo
 {
-   private Activator nativesLoadedActivator;
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "filtered_map_node");
 
@@ -67,7 +64,6 @@ public class RDXPlanarRegionMappingDemo
          @Override
          public void create()
          {
-            nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
             baseUI.create();
 
             // To Run With Perception Logs (HDF5)
@@ -95,7 +91,8 @@ public class RDXPlanarRegionMappingDemo
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(mapPlanarRegionsGraphic::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(mapPlanarRegionsGraphic::process3DViewInput);
 
-            baseUI.getLayoutManager().reloadLayout();
+            baseUI.getPrimaryScene().addRenderableProvider(mocapGraphic, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(rootJointGraphic, RDXSceneLevel.VIRTUAL);
          }
 
          public void renderPlanarRegions()
@@ -135,41 +132,33 @@ public class RDXPlanarRegionMappingDemo
          @Override
          public void render()
          {
-            if (nativesLoadedActivator.poll())
+
+            if (!mappingManager.getMocapPositionBuffer().isEmpty() && !graphicsInitialized)
             {
-               if (nativesLoadedActivator.isNewlyActivated())
-               {
-                  baseUI.getPrimaryScene().addRenderableProvider(mocapGraphic, RDXSceneLevel.VIRTUAL);
-                  baseUI.getPrimaryScene().addRenderableProvider(rootJointGraphic, RDXSceneLevel.VIRTUAL);
-               }
+               MocapTools.adjustMocapPositionsByOffset(mappingManager.getMocapPositionBuffer(), mappingManager.getSensorPositionBuffer().get(0));
 
-               if (!mappingManager.getMocapPositionBuffer().isEmpty() && !graphicsInitialized)
-               {
-                  MocapTools.adjustMocapPositionsByOffset(mappingManager.getMocapPositionBuffer(), mappingManager.getSensorPositionBuffer().get(0));
-
-                  mocapGraphic.generateMeshes(mappingManager.getMocapPositionBuffer(), 10);
-                  mocapGraphic.update();
-               }
-
-               if (!mappingManager.getSensorPositionBuffer().isEmpty())
-               {
-                  rootJointGraphic.generateMeshes(mappingManager.getSensorPositionBuffer(), 5);
-                  rootJointGraphic.update();
-               }
-
-               graphicsInitialized = true;
-
-               if (mappingPanel.isCaptured())
-               {
-                  LogTools.info("Filtered Map Panel Captured: {}", mappingPanel.isCaptured());
-                  mappingManager.setCaptured(true);
-                  mappingPanel.setCaptured(false);
-               }
-
-               //rapidRegionsUIPanel.renderImGuiWidgets();
-
-               renderPlanarRegions();
+               mocapGraphic.generateMeshes(mappingManager.getMocapPositionBuffer(), 10);
+               mocapGraphic.update();
             }
+
+            if (!mappingManager.getSensorPositionBuffer().isEmpty())
+            {
+               rootJointGraphic.generateMeshes(mappingManager.getSensorPositionBuffer(), 5);
+               rootJointGraphic.update();
+            }
+
+            graphicsInitialized = true;
+
+            if (mappingPanel.isCaptured())
+            {
+               LogTools.info("Filtered Map Panel Captured: {}", mappingPanel.isCaptured());
+               mappingManager.setCaptured(true);
+               mappingPanel.setCaptured(false);
+            }
+
+            //rapidRegionsUIPanel.renderImGuiWidgets();
+
+            renderPlanarRegions();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
