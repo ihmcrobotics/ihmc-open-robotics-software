@@ -205,7 +205,7 @@ public class RDXLocomotionManager
 
    public void renderImGuiWidgets()
    {
-      // Used to calculate whether the Walking Options buttons are active or disabled. This ensures that when the space bar is pressed it executes the correct aciton.
+      // Used to calculate whether the Walking Options buttons are active or disabled. This ensures that when the spacebar key is pressed it executes the correct aciton.
       boolean pauseAvailable = controllerStatusTracker.isWalking();
       boolean walkAvailable = interactableFootstepPlan.getNumberOfFootsteps() > 0 && !pauseWalkingMessage.getPause();
       boolean continueAvailable = pauseWalkingMessage.getPause() && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0;
@@ -275,7 +275,7 @@ public class RDXLocomotionManager
 
       ImGui.checkbox(labels.get("Show footstep related graphics"), showGraphics);
 
-      // Handles all shortcuts for when the spacebar is pressed
+      // Handles all shortcuts for when the spacebar key is pressed
       if (ImGui.isKeyReleased(ImGuiTools.getSpaceKey()))
       {
          if (walkAvailable)
