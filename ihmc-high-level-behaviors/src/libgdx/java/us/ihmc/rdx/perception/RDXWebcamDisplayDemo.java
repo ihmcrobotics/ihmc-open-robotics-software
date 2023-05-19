@@ -27,7 +27,6 @@ public class RDXWebcamDisplayDemo
 
             webcamReader.create();
             baseUI.getImGuiPanelManager().addPanel(webcamReader.getSwapCVPanel().getImagePanel());
-            baseUI.getLayoutManager().reloadLayout();
 
             ThreadTools.startAsDaemon(() ->
                                       {

@@ -55,7 +55,6 @@ public class RDXFFMPEGVP9LoggingDemo
             imagePanel = new RDXBytedecoImagePanel("Sample Image", image);
 
             baseUI.getImGuiPanelManager().addPanel(imagePanel.getImagePanel());
-            baseUI.getLayoutManager().reloadLayout();
          }
 
          @Override

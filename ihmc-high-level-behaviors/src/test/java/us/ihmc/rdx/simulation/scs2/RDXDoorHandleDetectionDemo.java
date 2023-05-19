@@ -64,8 +64,6 @@ public class RDXDoorHandleDetectionDemo
             doorHandleDetectionUI = new RDXOpenCVOpticalFlowTrackingUI();
             doorHandleDetectionUI.create(cameraSensor.getLowLevelSimulator().getRGBA8888ColorImage());
             baseUI.getImGuiPanelManager().addPanel(doorHandleDetectionUI.getMainPanel());
-
-            baseUI.getLayoutManager().reloadLayout();
          }
 
          @Override

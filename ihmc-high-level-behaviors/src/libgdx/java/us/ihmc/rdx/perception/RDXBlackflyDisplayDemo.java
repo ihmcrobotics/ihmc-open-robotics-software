@@ -29,7 +29,6 @@ public class RDXBlackflyDisplayDemo
 
             blackflyReader.create();
             baseUI.getImGuiPanelManager().addPanel(blackflyReader.getSwapImagePanel().getImagePanel());
-            baseUI.getLayoutManager().reloadLayout();
 
             ThreadTools.startAsDaemon(() ->
             {

@@ -119,7 +119,6 @@ public class RDXHeightMapExtractionDemo
 
             // testProjection(loadedDepthImage.getBytedecoOpenCVMat());
 
-            baseUI.getLayoutManager().reloadLayout();
             navigationPanel.setRenderMethod(this::renderNavigationPanel);
          }
 

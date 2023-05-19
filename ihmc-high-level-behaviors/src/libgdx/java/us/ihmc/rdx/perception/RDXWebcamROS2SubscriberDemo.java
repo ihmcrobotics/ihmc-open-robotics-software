@@ -87,8 +87,6 @@ public class RDXWebcamROS2SubscriberDemo
             cvImagePanel = new RDXBytedecoImagePanel("Video1", 1920, 1080);
             baseUI.getImGuiPanelManager().addPanel(cvImagePanel.getImagePanel());
 
-            baseUI.getLayoutManager().reloadLayout();
-
             messageEncodedBytePointer = new BytePointer(25000000);
             //                  inputJPEGYUVI420Mat = new Mat(25000000);
             inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);

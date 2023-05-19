@@ -75,7 +75,6 @@ public class RDXWebcamROS2PublisherDemo
 
             webcamReader.create();
             baseUI.getImGuiPanelManager().addPanel(webcamReader.getSwapCVPanel().getImagePanel());
-            baseUI.getLayoutManager().reloadLayout();
 
             yuv420Image = new Mat();
             jpegImageBytePointer = new BytePointer();

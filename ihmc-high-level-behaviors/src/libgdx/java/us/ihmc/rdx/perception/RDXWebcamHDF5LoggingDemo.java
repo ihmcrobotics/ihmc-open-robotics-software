@@ -32,7 +32,6 @@ public class RDXWebcamHDF5LoggingDemo
 
             hdf5ImageLoggingUI = new RDXHDF5ImageLoggingUI(webcamReader.getImageWidth(), webcamReader.getImageHeight());
             baseUI.getImGuiPanelManager().addPanel(hdf5ImageLoggingUI.getPanel());
-            baseUI.getLayoutManager().reloadLayout();
 
             ThreadTools.startAsDaemon(() ->
             {
