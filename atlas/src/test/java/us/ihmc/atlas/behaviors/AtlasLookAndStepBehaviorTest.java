@@ -277,7 +277,7 @@ public class AtlasLookAndStepBehaviorTest
             = new IHMCROS2Publisher<>(ros2Node, PARAMETERS.getCommandTopic());
       parametersPublisher.publish(storedPropertySetMessage);
 
-      IHMCROS2Publisher<Pose3D> goalInputPublisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, LookAndStepBehaviorAPI.GOAL_INPUT);
+      IHMCROS2Publisher<Pose3D> goalInputPublisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, LookAndStepBehaviorAPI.GOAL_COMMAND);
       new IHMCROS2Callback<>(ros2Node, LookAndStepBehaviorAPI.REACHED_GOAL, message ->
       {
          LogTools.info("REACHED GOAL");
