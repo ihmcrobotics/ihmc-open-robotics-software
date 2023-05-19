@@ -207,8 +207,8 @@ public class RDXLocomotionManager
    {
       // Used to calculate whether the Walking Options buttons are active or disabled. This ensures that when the spacebar key is pressed it executes the correct aciton.
       boolean pauseAvailable = controllerStatusTracker.isWalking();
-      boolean walkAvailable = interactableFootstepPlan.getNumberOfFootsteps() > 0 && !pauseWalkingMessage.getPause();
-      boolean continueAvailable = pauseWalkingMessage.getPause() && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0;
+      boolean continueAvailable = !pauseAvailable && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0;
+      boolean walkAvailable = !continueAvailable && interactableFootstepPlan.getNumberOfFootsteps() > 0;
 
       areFootstepsAdjustableCheckbox.renderImGuiWidget();
       swingTimeSlider.renderImGuiWidget();
