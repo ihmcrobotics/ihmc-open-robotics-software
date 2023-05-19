@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.lookAndStep;
 
 import controller_msgs.msg.dds.*;
+import std_msgs.msg.dds.Bool;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.communication.PerceptionAPI;
@@ -109,11 +110,11 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
       });
 
       operatorReviewEnabledInput = new AtomicReference<>();
-      helper.subscribeViaCallback(OperatorReviewEnabled, enabled ->
+      helper.subscribeViaCallback(OPERATOR_REVIEW_ENABLED_COMMAND, enabled ->
       {
          LogTools.info("Received operator review enabled toggle message: {}", enabled);
-         operatorReviewEnabledInput.set(enabled);
-         helper.publish(OperatorReviewEnabledToUI, enabled);
+         operatorReviewEnabledInput.set(enabled.getData());
+         helper.publish(OPERATOR_REVIEW_ENABLED_STATUS, new Bool(enabled));
       });
       approvalNotification = helper.subscribeViaNotification(ReviewApproval);
 

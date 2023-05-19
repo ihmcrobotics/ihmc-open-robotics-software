@@ -158,7 +158,7 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
             statusLogger.info("Walking to {}", StringTools.zUpPoseString(goal));
             helper.publish(WalkingToPose, goal);
 
-            messager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
+            helper.publish(LookAndStepBehaviorAPI.OPERATOR_REVIEW_ENABLED_COMMAND, MessageTools.createBoolMessage(false));
             helper.publish(LookAndStepBehaviorAPI.BODY_PATH_INPUT, MessageTools.createPoseListMessage(bestBodyPath));
             lookAndStepReachedGoal.poll();
             lookAndStepReachedGoal.blockingPoll();

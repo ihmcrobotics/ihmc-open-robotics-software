@@ -17,6 +17,8 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUIDefinition;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUIInterface;
 import us.ihmc.behaviors.javafx.editors.WalkingGoalPlacementEditor;
+import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParameterKeys;
@@ -83,8 +85,8 @@ public class LookAndStepBehaviorUI extends JavaFXBehaviorUIInterface
       JavaFXStoredPropertyTable swingPlannerJavaFXStoredPropertyTable = new JavaFXStoredPropertyTable(swingPlannerParameterTable);
       swingPlannerJavaFXStoredPropertyTable.setup(swingPlannerParameters, SwingPlannerParameterKeys.keys, this::publishSwingPlanningParameters);
 
-      behaviorMessager.addTopicListener(CurrentState, state -> Platform.runLater(() -> behaviorState.setText(state)));
-      behaviorMessager.addTopicListener(OperatorReviewEnabledToUI, enabled -> Platform.runLater(() -> operatorReviewCheckBox.setSelected(enabled)));
+//      behaviorMessager.addTopicListener(CurrentState, state -> Platform.runLater(() -> behaviorState.setText(state)));
+//      behaviorMessager.addTopicListener(OperatorReviewEnabledToUI, enabled -> Platform.runLater(() -> operatorReviewCheckBox.setSelected(enabled)));
 
       walkingGoalPlacementEditor.init(sceneNode, placeGoalButton, placedGoal -> ros2Publisher.publish(GOAL_COMMAND, placedGoal));
 
@@ -160,12 +162,12 @@ public class LookAndStepBehaviorUI extends JavaFXBehaviorUIInterface
 
    @FXML public void publishSupportRegions()
    {
-      getBehaviorMessager().submitMessage(PublishSupportRegions, new Object());
+
    }
 
    @FXML public void operatorReviewCheckBox()
    {
-      getBehaviorMessager().submitMessage(OperatorReviewEnabled, operatorReviewCheckBox.isSelected());
+      ros2Publisher.publish(LookAndStepBehaviorAPI.OPERATOR_REVIEW_ENABLED_COMMAND, MessageTools.createBoolMessage(operatorReviewCheckBox.isSelected()));
    }
 
    @FXML public void reset()
