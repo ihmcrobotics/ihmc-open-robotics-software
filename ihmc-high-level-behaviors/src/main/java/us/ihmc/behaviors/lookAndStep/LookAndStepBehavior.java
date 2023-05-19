@@ -5,6 +5,7 @@ import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -136,7 +137,7 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
 
       bodyPathLocalization.initialize(this);
       helper.subscribeToControllerViaCallback(CapturabilityBasedStatus.class, imminentStanceTracker::acceptCapturabilityBasedStatus);
-      helper.subscribeViaCallback(BodyPathInput, this::bodyPathPlanInput);
+      helper.subscribeViaCallback(BODY_PATH_INPUT, message -> bodyPathPlanInput(MessageTools.unpackPoseListMessage(message)));
 
       footstepPlanning.initialize(this);
       if (helper.getROS1Helper() != null)

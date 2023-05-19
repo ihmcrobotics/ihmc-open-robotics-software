@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.lookAndStep;
 
+import ihmc_common_msgs.msg.dds.PoseListMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -53,12 +54,12 @@ public class LookAndStepBehaviorAPI
     *  RESET should probably reset more instance variables than just the goal
     */
 
+   /** Starts the look and step behavior onto a precomputed body path */
+   public static final ROS2Topic<PoseListMessage> BODY_PATH_INPUT = LOOK_AND_STEP_BEHAVIOR.withType(PoseListMessage.class).withInput().withSuffix("body_path");
+
    private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
    private static final MessagerAPIFactory.Category RootCategory = apiFactory.createRootCategory("LookAndStepBehavior");
    private static final MessagerAPIFactory.CategoryTheme LookAndStepTheme = apiFactory.createCategoryTheme("LookAndStep");
-
-   /** Starts the look and step behavior onto a precomputed body path */
-   public static final MessagerAPIFactory.Topic<List<Pose3D>> BodyPathInput = topic("BodyPathInput");
 
    /*
     * TODO: Review API should contain the data to be reviewed and the Approval should accept a modified version

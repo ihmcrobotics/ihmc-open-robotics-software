@@ -8,6 +8,7 @@ import perception_msgs.msg.dds.*;
 import toolbox_msgs.msg.dds.*;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
@@ -40,6 +41,7 @@ import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 public class MessageTools
@@ -1351,5 +1353,33 @@ public class MessageTools
          byteBufferToPack.putFloat(value);
       }
       byteBufferToPack.flip();
+   }
+
+   public static PoseListMessage createPoseListMessage(Collection<Pose3DReadOnly> poses)
+   {
+      PoseListMessage poseListMessage = new PoseListMessage();
+      packPoseListMessage(poses, poseListMessage);
+      return poseListMessage;
+   }
+
+   public static void packPoseListMessage(Collection<Pose3DReadOnly> poses, PoseListMessage poseListMessage)
+   {
+      poseListMessage.getPoses().clear();
+      for (Pose3DReadOnly pose : poses)
+      {
+         Pose3D messagePose = poseListMessage.getPoses().add();
+         messagePose.set(pose);
+      }
+   }
+
+   public static List<Pose3D> unpackPoseListMessage(PoseListMessage poseListMessage)
+   {
+      ArrayList<Pose3D> poses = new ArrayList<>();
+      for (int i = 0; i < poseListMessage.getPoses().size(); i++)
+      {
+         Pose3D pose = new Pose3D(poseListMessage.getPoses().get(i));
+         poses.add(pose);
+      }
+      return poses;
    }
 }
