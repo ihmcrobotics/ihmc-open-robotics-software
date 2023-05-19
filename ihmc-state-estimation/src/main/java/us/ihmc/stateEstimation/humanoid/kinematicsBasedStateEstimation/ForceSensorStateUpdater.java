@@ -331,9 +331,12 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
       if (wrenchVisualizer != null)
          wrenchVisualizer.visualize(wrenches);
 
-      for (int i = 0; i < outputForceSensorDataHolder.getNumberOfForceSensors(); i++)
+      if (DEBUG)
       {
-         outputForces.get(i).set(outputForceSensorDataHolder.getForceSensorDatas().get(i).getWrench().getLinearPart());
+         for (int i = 0; i < outputForceSensorDataHolder.getNumberOfForceSensors(); i++)
+         {
+            outputForces.get(i).set(outputForceSensorDataHolder.getForceSensorDatas().get(i).getWrench().getLinearPart());
+         }
       }
    }
 
