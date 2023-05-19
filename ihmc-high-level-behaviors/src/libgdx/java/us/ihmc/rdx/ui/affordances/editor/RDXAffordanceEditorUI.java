@@ -80,6 +80,7 @@ public class RDXAffordanceEditorUI
             objectBuilder = new RDXInteractableObjectBuilder(baseUI, PredefinedSceneNodeLibrary.defaultObjects());
             baseUI.getImGuiPanelManager().addPanel(objectBuilder.getWindowName(), objectBuilder::renderImGuiWidgets);
 
+            handTransformToWorld.getRotation().setYawPitchRoll(0.0, Math.toRadians(-90.0), 0.0);
             handTransformToWorld.getTranslation().set(-0.5, 0, 0);
             interactableHand = new RDXInteractableSakeGripper(baseUI.getPrimary3DPanel(), handTransformToWorld);
 

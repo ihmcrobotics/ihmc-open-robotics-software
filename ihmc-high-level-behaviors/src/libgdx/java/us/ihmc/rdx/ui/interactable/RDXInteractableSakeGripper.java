@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -20,49 +21,52 @@ import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
 import us.ihmc.rdx.ui.gizmo.BoxRayIntersection;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.robotics.EuclidCoreMissingTools;
+import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class RDXInteractableSakeGripper implements RenderableProvider
 {
    private static final int NUMBER_OF_FINGERS = 2;
    private static final RigidBodyTransform[] FINGERS_TO_PALM_OPEN = new RigidBodyTransform[] {new RigidBodyTransform(), new RigidBodyTransform()};
+
    static
    {
-      EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_OPEN[0].getRotation(), -90.0, 0.0, 0.0);
-      FINGERS_TO_PALM_OPEN[0].getTranslation().set(0.11, -0.03, 0.0);
-
-      EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_OPEN[1].getRotation(), 90.0, 0.0, 180.0);
-      FINGERS_TO_PALM_OPEN[1].getTranslation().set(0.11, 0.03, 0.0);
+      FINGERS_TO_PALM_OPEN[0].getTranslation().set(0.0, 0.03, 0.0);
+      EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_OPEN[1].getRotation(), 180.0, 0.0, 0.0);
+      FINGERS_TO_PALM_OPEN[1].getTranslation().set(0.0, -0.03, 0.0);
    }
 
    private static final RigidBodyTransform[] FINGERS_TO_PALM_HALF_CLOSE = new RigidBodyTransform[] {new RigidBodyTransform(), new RigidBodyTransform()};
+
    static
    {
-      EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_HALF_CLOSE[0].getRotation(), -13.0, 0.0, 0.0);
-      FINGERS_TO_PALM_HALF_CLOSE[0].getTranslation().set(0.11, -0.03, 0.0);
+      EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_HALF_CLOSE[0].getRotation(), 0.0, 0.0, -65.0);
+      FINGERS_TO_PALM_HALF_CLOSE[0].getTranslation().set(0.0, 0.03, 0.0);
 
-      EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_HALF_CLOSE[1].getRotation(), 13.0, 0.0, 180.0);
-      FINGERS_TO_PALM_HALF_CLOSE[1].getTranslation().set(0.11, 0.03, 0.0);
+      EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_HALF_CLOSE[1].getRotation(), 180.0, 0.0, -65.0);
+      FINGERS_TO_PALM_HALF_CLOSE[1].getTranslation().set(0.0, -0.03, 0.0);
    }
 
    private static final RigidBodyTransform[] FINGERS_TO_PALM_CLOSE = new RigidBodyTransform[] {new RigidBodyTransform(), new RigidBodyTransform()};
+
    static
    {
-      EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_CLOSE[0].getRotation(), 12.5, 0.0, 0.0);
-      FINGERS_TO_PALM_CLOSE[0].getTranslation().set(0.11, -0.03, 0.0);
+      EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_CLOSE[0].getRotation(), 0.0, 0.0, -100.0);
+      FINGERS_TO_PALM_CLOSE[0].getTranslation().set(0.0, 0.03, 0.0);
 
-      EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_CLOSE[1].getRotation(), -12.5, 0.0, 180.0);
-      FINGERS_TO_PALM_CLOSE[1].getTranslation().set(0.11, 0.03, 0.0);
+      EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_CLOSE[1].getRotation(), 180.0, 0.0, -100.0);
+      FINGERS_TO_PALM_CLOSE[1].getTranslation().set(0.0, -0.03, 0.0);
    }
 
    private static final RigidBodyTransform[] FINGERS_TO_PALM_CRUSH = new RigidBodyTransform[] {new RigidBodyTransform(), new RigidBodyTransform()};
+
    static
    {
-      EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_CRUSH[0].getRotation(), 16.0, 0.0, 0.0);
-      FINGERS_TO_PALM_CRUSH[0].getTranslation().set(0.11, -0.03, 0.0);
+      EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_CRUSH[0].getRotation(), 0.0, 0.0, -106.0);
+      FINGERS_TO_PALM_CRUSH[0].getTranslation().set(0.0, 0.03, 0.0);
 
-      EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_CRUSH[1].getRotation(), -16.0, 0.0, 180.0);
-      FINGERS_TO_PALM_CRUSH[1].getTranslation().set(0.11, 0.03, 0.0);
+      EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_CRUSH[1].getRotation(), 180.0, 0.0, -106.0);
+      FINGERS_TO_PALM_CRUSH[1].getTranslation().set(0.0, -0.03, 0.0);
    }
 
    private final RDXInteractableFrameModel interactableHandFrameModel = new RDXInteractableFrameModel();
@@ -134,13 +138,13 @@ public class RDXInteractableSakeGripper implements RenderableProvider
    public void setGripperClosure(double closure)
    {
       EuclidCoreMissingTools.setYawPitchRollDegrees(fingersTransforms[0].getRotation(),
-                                                    closure,
+                                                    fingersTransforms[0].getRotation().getYaw(),
                                                     fingersTransforms[0].getRotation().getPitch(),
-                                                    fingersTransforms[0].getRotation().getRoll());
+                                                    closure);
       EuclidCoreMissingTools.setYawPitchRollDegrees(fingersTransforms[1].getRotation(),
-                                                    -closure,
+                                                    180 + fingersTransforms[0].getRotation().getYaw(),
                                                     fingersTransforms[1].getRotation().getPitch(),
-                                                    fingersTransforms[1].getRotation().getRoll());
+                                                    closure);
    }
 
    public void setGripperToConfiguration(HandConfiguration configuration)
@@ -161,11 +165,11 @@ public class RDXInteractableSakeGripper implements RenderableProvider
    {
       RigidBodyTransform intersectionHandOrigin = new RigidBodyTransform(interactableHandFrameModel.getReferenceFrame().getTransformToWorldFrame());
       intersectionHandOrigin.getTranslation()
-                            .set(new Vector3D(interactableHandFrameModel.getReferenceFrame().getTransformToWorldFrame().getTranslationX() + 0.05,
+                            .set(new Vector3D(intersectionHandOrigin.getTranslationX(),
                                               intersectionHandOrigin.getTranslationY(),
-                                              intersectionHandOrigin.getTranslationZ()));
+                                              interactableHandFrameModel.getReferenceFrame().getTransformToWorldFrame().getTranslationZ() + 0.05));
 
-      if (boxRayIntersection.intersect(0.20, 0.1, 0.08, intersectionHandOrigin, mousePickRay))
+      if (boxRayIntersection.intersect(0.08, 0.1, 0.20, intersectionHandOrigin, mousePickRay))
       {
          return mousePickRay.getPoint().distance(boxRayIntersection.getFirstIntersectionToPack());
       }
@@ -177,17 +181,17 @@ public class RDXInteractableSakeGripper implements RenderableProvider
 
    public float getMinGripperClosure()
    {
-      return (float) Math.toDegrees(FINGERS_TO_PALM_OPEN[0].getRotation().getYaw());
+      return (float) Math.toDegrees(FINGERS_TO_PALM_OPEN[0].getRotation().getRoll());
    }
 
    public float getMaxGripperClosure()
    {
-      return (float) Math.toDegrees(FINGERS_TO_PALM_CRUSH[0].getRotation().getYaw());
+      return (float) Math.toDegrees(FINGERS_TO_PALM_CRUSH[0].getRotation().getRoll());
    }
 
    public float getGripperClosure()
    {
-      return (float) Math.toDegrees(fingersTransforms[0].getRotation().getYaw());
+      return (float) Math.toDegrees(fingersTransforms[0].getRotation().getRoll());
    }
 
    public RDXPose3DGizmo getPose3DGizmo()
