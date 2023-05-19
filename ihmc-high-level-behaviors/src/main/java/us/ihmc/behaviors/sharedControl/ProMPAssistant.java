@@ -61,7 +61,8 @@ public class ProMPAssistant
       InputStream inputStream = getClass().getClassLoader().getResourceAsStream("us/ihmc/behaviors/sharedControl/ProMPAssistant.json");
 
       // If the inputStream is null it's likely because the file doesn't exist or got moved. Check file path
-      assert inputStream != null;
+      if (inputStream == null)
+         LogTools.info("File path is null");
 
       JSONFileTools.load(inputStream, jsonNode ->
       {
