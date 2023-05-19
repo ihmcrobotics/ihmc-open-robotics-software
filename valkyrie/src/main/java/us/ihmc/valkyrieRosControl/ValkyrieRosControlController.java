@@ -373,7 +373,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       LogModelProvider logModelProvider = robotModel.getLogModelProvider();
       DataServerSettings logSettings = robotModel.getLogSettings();
       double estimatorDT = robotModel.getEstimatorDT();
-      YoVariableServer yoVariableServer = new YoVariableServer(getClass(), logModelProvider, logSettings, estimatorDT);
+      yoVariableServer = new YoVariableServer(getClass(), logModelProvider, logSettings, estimatorDT);
 
       /*
        * Create sensors
@@ -425,6 +425,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       avatarEstimatorThreadFactory.setHumanoidRobotContextDataFactory(estimatorContextDataFactory);
       avatarEstimatorThreadFactory.setGravity(gravity);
       estimatorThread = avatarEstimatorThreadFactory.createAvatarEstimatorThread();
+      yoVariableServer.setMainRegistry(estimatorThread.getYoRegistry(), estimatorThread.getFullRobotModel().getElevator(), estimatorThread.getSCS1YoGraphicsListRegistry());
 
       // The estimator runs synchronous with the scheduler so its context is the master context.
       HumanoidRobotContextData masterContext = estimatorThread.getHumanoidRobotContextData();
