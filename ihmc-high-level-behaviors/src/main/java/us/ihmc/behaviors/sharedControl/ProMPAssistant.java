@@ -62,7 +62,10 @@ public class ProMPAssistant
 
       // If the inputStream is null it's likely because the file doesn't exist or got moved. Check file path
       if (inputStream == null)
+      {
          LogTools.info("File path is null");
+         return;
+      }
 
       JSONFileTools.load(inputStream, jsonNode ->
       {
