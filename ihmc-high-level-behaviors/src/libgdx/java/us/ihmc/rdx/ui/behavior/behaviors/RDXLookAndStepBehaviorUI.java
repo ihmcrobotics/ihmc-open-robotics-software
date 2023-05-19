@@ -269,12 +269,12 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       }
       if (ImGui.button("Reject"))
       {
-         helper.publish(ReviewApproval, false);
+         helper.publish(REVIEW_APPROVAL, false);
       }
       ImGui.sameLine();
       if (ImGui.button("Approve"))
       {
-         helper.publish(ReviewApproval, true);
+         helper.publish(REVIEW_APPROVAL, true);
       }
       footstepPlanningDurationPlot.renderImGuiWidgets();
       ImGui.text("Footstep planning regions recieved:");

@@ -69,15 +69,11 @@ public class LookAndStepBehaviorAPI
                                                                                                    .withSuffix("operator_review_enabled"));
    public static final ROS2Topic<Bool> OPERATOR_REVIEW_ENABLED_COMMAND = OPERATOR_REVIEW_ENABLED.getCommandTopic();
    public static final ROS2Topic<Bool> OPERATOR_REVIEW_ENABLED_STATUS = OPERATOR_REVIEW_ENABLED.getStatusTopic();
+   public static final ROS2Topic<Bool> REVIEW_APPROVAL = LOOK_AND_STEP_BEHAVIOR.withType(Bool.class).withSuffix("review_approval");
 
    private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
    private static final MessagerAPIFactory.Category RootCategory = apiFactory.createRootCategory("LookAndStepBehavior");
    private static final MessagerAPIFactory.CategoryTheme LookAndStepTheme = apiFactory.createCategoryTheme("LookAndStep");
-
-   /*
-    * TODO: Review API should contain the data to be reviewed and the Approval should accept a modified version
-    */
-   public static final MessagerAPIFactory.Topic<Boolean> ReviewApproval = topic("ReviewApproval");
 
    // Parameter tuning topics
    public static final MessagerAPIFactory.Topic<List<String>> FootstepPlannerParameters = topic("FootstepPlannerParameters");
