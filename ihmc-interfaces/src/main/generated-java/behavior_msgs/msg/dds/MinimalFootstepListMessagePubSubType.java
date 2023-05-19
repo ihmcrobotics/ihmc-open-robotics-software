@@ -15,7 +15,7 @@ public class MinimalFootstepListMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "19a1c2151bad5d8c3e94b4dfe2e15ef09b035f5d16b1f1ea51dab241ccb44377";
+   		return "8f15b71e8940f26bd7aee5941da5c5ff13a2e676e39258798ed3109288d56ea4";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class MinimalFootstepListMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      for(int i0 = 0; i0 < (200); ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.MinimalFootstepMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       return current_alignment - initial_alignment;
@@ -67,40 +67,39 @@ public class MinimalFootstepListMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      for(int i0 = 0; i0 < data.getMinimalFootsteps().length; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getMinimalFootsteps().size(); ++i0)
       {
-              current_alignment += behavior_msgs.msg.dds.MinimalFootstepMessagePubSubType.getCdrSerializedSize(data.getMinimalFootsteps()[i0], current_alignment);
-      }
+          current_alignment += behavior_msgs.msg.dds.MinimalFootstepMessagePubSubType.getCdrSerializedSize(data.getMinimalFootsteps().get(i0), current_alignment);}
+
       return current_alignment - initial_alignment;
    }
 
    public static void write(behavior_msgs.msg.dds.MinimalFootstepListMessage data, us.ihmc.idl.CDR cdr)
    {
-      for(int i0 = 0; i0 < data.getMinimalFootsteps().length; ++i0)
-      {
-        	behavior_msgs.msg.dds.MinimalFootstepMessagePubSubType.write(data.getMinimalFootsteps()[i0], cdr);		
-      }
+      if(data.getMinimalFootsteps().size() <= 200)
+      cdr.write_type_e(data.getMinimalFootsteps());else
+          throw new RuntimeException("minimal_footsteps field exceeds the maximum length");
+
    }
 
    public static void read(behavior_msgs.msg.dds.MinimalFootstepListMessage data, us.ihmc.idl.CDR cdr)
    {
-      for(int i0 = 0; i0 < data.getMinimalFootsteps().length; ++i0)
-      {
-        	behavior_msgs.msg.dds.MinimalFootstepMessagePubSubType.read(data.getMinimalFootsteps()[i0], cdr);	
-      }
-      	
+      cdr.read_type_e(data.getMinimalFootsteps());	
 
    }
 
    @Override
    public final void serialize(behavior_msgs.msg.dds.MinimalFootstepListMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_f("minimal_footsteps", new behavior_msgs.msg.dds.MinimalFootstepMessagePubSubType(), data.getMinimalFootsteps());   }
+      ser.write_type_e("minimal_footsteps", data.getMinimalFootsteps());
+   }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.MinimalFootstepListMessage data)
    {
-      ser.read_type_f("minimal_footsteps", new behavior_msgs.msg.dds.MinimalFootstepMessagePubSubType(), data.getMinimalFootsteps());   }
+      ser.read_type_e("minimal_footsteps", data.getMinimalFootsteps());
+   }
 
    public static void staticCopy(behavior_msgs.msg.dds.MinimalFootstepListMessage src, behavior_msgs.msg.dds.MinimalFootstepListMessage dest)
    {

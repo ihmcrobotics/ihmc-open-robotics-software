@@ -9,7 +9,7 @@ geometry_msgs/Point position
 geometry_msgs/Quaternion orientation
 
 # Support polygon
-ihmc_common_msgs/Point2DMessage[16] support_polygon
+ihmc_common_msgs/Point2DMessage[<=16] support_polygon
 
 # Description of the footstep
 string description
