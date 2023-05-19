@@ -71,17 +71,15 @@ public class LookAndStepBehaviorAPI
    public static final ROS2Topic<Bool> OPERATOR_REVIEW_ENABLED_STATUS = OPERATOR_REVIEW_ENABLED.getStatusTopic();
    public static final ROS2Topic<Bool> REVIEW_APPROVAL = LOOK_AND_STEP_BEHAVIOR.withType(Bool.class).withSuffix("review_approval");
 
+   // Visualization only topics
+   public static final ROS2Topic<std_msgs.msg.dds.String> CURRENT_STATE = LOOK_AND_STEP_BEHAVIOR.withType(std_msgs.msg.dds.String.class)
+                                                                                                .withSuffix("current_state");
+
    private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
    private static final MessagerAPIFactory.Category RootCategory = apiFactory.createRootCategory("LookAndStepBehavior");
    private static final MessagerAPIFactory.CategoryTheme LookAndStepTheme = apiFactory.createCategoryTheme("LookAndStep");
 
-   // Parameter tuning topics
-   public static final MessagerAPIFactory.Topic<List<String>> FootstepPlannerParameters = topic("FootstepPlannerParameters");
-   public static final MessagerAPIFactory.Topic<List<String>> SwingPlannerParameters = topic("SwingPlannerParameters");
-
    // Visualization only topics
-   public static final MessagerAPIFactory.Topic<String> CurrentState = topic("CurrentState");
-   public static final MessagerAPIFactory.Topic<Boolean> ToggleAllVisualization = topic("ToggleAllVisualization");
    public static final MessagerAPIFactory.Topic<ArrayList<MinimalFootstep>> ImminentFootPosesForUI = topic("ImminentFootPosesForUI");
    public static final MessagerAPIFactory.Topic<ArrayList<MinimalFootstep>> PlannedFootstepsForUI = topic("PlannedFootstepsForUI");
    public static final MessagerAPIFactory.Topic<ArrayList<MinimalFootstep>> LastCommandedFootsteps = topic("LastCommandedFootsteps");

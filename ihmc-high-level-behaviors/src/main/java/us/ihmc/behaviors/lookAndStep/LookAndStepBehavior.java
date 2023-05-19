@@ -120,7 +120,7 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
 
       // Trying to hold a lot of the state here? TODO: In general, where to put what state?
       imminentStanceTracker = new LookAndStepImminentStanceTracker(helper);
-      behaviorStateReference = new BehaviorStateReference<>(State.BODY_PATH_PLANNING, statusLogger, helper::publish);
+      behaviorStateReference = new BehaviorStateReference<>(State.BODY_PATH_PLANNING, statusLogger, helper);
       controllerStatusTracker = helper.getOrCreateControllerStatusTracker();
       reset.initialize(this);
       helper.subscribeViaCallback(RESET, reset::queueReset);

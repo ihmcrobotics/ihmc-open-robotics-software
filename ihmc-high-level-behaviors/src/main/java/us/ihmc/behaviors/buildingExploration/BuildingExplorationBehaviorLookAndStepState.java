@@ -94,9 +94,9 @@ class BuildingExplorationBehaviorLookAndStepState implements State
             stepCounter.incrementAndGet();
          }
       });
-      helper.subscribeViaCallback(LookAndStepBehaviorAPI.CurrentState, state ->
+      helper.subscribeViaCallback(LookAndStepBehaviorAPI.CURRENT_STATE, state ->
       {
-         currentState = LookAndStepBehavior.State.valueOf(state);
+         currentState = LookAndStepBehavior.State.valueOf(state.getDataAsString());
       });
    }
 
