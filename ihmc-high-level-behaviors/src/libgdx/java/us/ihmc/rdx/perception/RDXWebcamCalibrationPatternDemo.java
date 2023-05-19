@@ -33,7 +33,6 @@ public class RDXWebcamCalibrationPatternDemo
 
             calibrationPatternDetectionUI = new RDXCalibrationPatternDetectionUI();
             baseUI.getImGuiPanelManager().addPanel(calibrationPatternDetectionUI.getPanel());
-            baseUI.getLayoutManager().reloadLayout();
 
             ThreadTools.startAsDaemon(() ->
             {

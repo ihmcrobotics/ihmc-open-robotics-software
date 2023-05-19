@@ -97,7 +97,6 @@ public class RDXRapidHeightMapExtractionDemo
 
             // testProjection(loadedDepthImage.getBytedecoOpenCVMat());
 
-            baseUI.getLayoutManager().reloadLayout();
             navigationPanel.setRenderMethod(this::renderNavigationPanel);
          }
 

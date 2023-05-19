@@ -121,7 +121,6 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             rootJointGraphic.generateMeshes(sensorPositionBuffer, 5);
             rootJointGraphic.update();
 
-            baseUI.getLayoutManager().reloadLayout();
             navigationPanel.setRenderMethod(this::renderNavigationPanel);
          }
 

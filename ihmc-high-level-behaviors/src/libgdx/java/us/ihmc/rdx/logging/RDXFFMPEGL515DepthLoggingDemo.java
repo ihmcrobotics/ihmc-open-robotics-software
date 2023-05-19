@@ -113,8 +113,6 @@ public class RDXFFMPEGL515DepthLoggingDemo
 
                ffmpegLoggerDemoHelper.getLogger().put(rgbaDepthImage);
             });
-
-            baseUI.getLayoutManager().reloadLayout();
          }
 
          @Override

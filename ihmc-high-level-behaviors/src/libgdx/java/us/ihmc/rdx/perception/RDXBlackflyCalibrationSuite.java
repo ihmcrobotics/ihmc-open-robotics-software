@@ -185,8 +185,6 @@ public class RDXBlackflyCalibrationSuite
             baseUI.getImGuiPanelManager().addPanel(arUcoMarkerDetectionUI.getMainPanel());
             baseUI.getPrimaryScene().addRenderableProvider(arUcoMarkerDetectionUI::getRenderables, RDXSceneLevel.VIRTUAL);
 
-            baseUI.getLayoutManager().reloadLayout();
-
             grayscaleImage = new Mat();
             calibrationPatternOutput = new Mat();
             cornersOrCentersMatVector = new MatVector();

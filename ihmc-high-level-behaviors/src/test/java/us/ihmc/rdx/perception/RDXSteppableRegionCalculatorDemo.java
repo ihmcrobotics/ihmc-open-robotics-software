@@ -135,7 +135,6 @@ public class RDXSteppableRegionCalculatorDemo
 
             baseUI.getImGuiPanelManager().addPanel(steppableRegionsUI.getBasePanel());
 
-            baseUI.getLayoutManager().reloadLayout();
             realtimeRos2Node.spin();
             heightMap.start();
          }

@@ -84,7 +84,6 @@ public class RDXFFMPEGWebcamLoggingDemo
 
             swapCVPanel = new RDXOpenCVGuidedSwapVideoPanel("Video", this::videoUpdateOnAsynchronousThread);
             baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getImagePanel());
-            baseUI.getLayoutManager().reloadLayout();
 
             readPerformancePlot = new ImPlotStopwatchPlot("VideoCapture read(Mat)");
             readFrequencyPlot = new ImPlotFrequencyPlot("read Frequency");
@@ -93,8 +92,6 @@ public class RDXFFMPEGWebcamLoggingDemo
             {
                swapCVPanel.updateOnAsynchronousThread();
             });
-
-            baseUI.getLayoutManager().reloadLayout();
          }
 
          @Override

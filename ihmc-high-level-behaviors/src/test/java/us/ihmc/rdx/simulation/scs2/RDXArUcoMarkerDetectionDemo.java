@@ -85,8 +85,6 @@ public class RDXArUcoMarkerDetectionDemo
             ImGuiPanel testUIPanel = new ImGuiPanel("Test image detection", this::renderTestUIImGuiWidgets);
             testUIPanel.addChild(testImageArUcoMarkerDetectionUI.getMarkerImagePanel());
             baseUI.getImGuiPanelManager().addPanel(testUIPanel);
-
-            baseUI.getLayoutManager().reloadLayout();
          }
 
          @Override

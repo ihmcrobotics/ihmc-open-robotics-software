@@ -73,8 +73,6 @@ public class RDXGPUPlanarRegionExtractionDemo
             gpuPlanarRegionExtraction.getEnabled().set(true);
             baseUI.getImGuiPanelManager().addPanel(gpuPlanarRegionExtraction.getPanel());
             baseUI.getPrimaryScene().addRenderableProvider(gpuPlanarRegionExtraction::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
-
-            baseUI.getLayoutManager().reloadLayout();
          }
 
          @Override

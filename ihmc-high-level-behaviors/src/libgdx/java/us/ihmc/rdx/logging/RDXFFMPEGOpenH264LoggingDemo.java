@@ -56,7 +56,6 @@ public class RDXFFMPEGOpenH264LoggingDemo
             imagePanel = new RDXBytedecoImagePanel("Sample Image", image);
 
             baseUI.getImGuiPanelManager().addPanel(imagePanel.getImagePanel());
-            baseUI.getLayoutManager().reloadLayout();
          }
 
          @Override

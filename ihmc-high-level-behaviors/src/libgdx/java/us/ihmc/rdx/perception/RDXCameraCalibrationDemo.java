@@ -137,7 +137,6 @@ public class RDXCameraCalibrationDemo
             baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getImagePanel());
             baseUI.getImGuiPanelManager().addPanel(undistortedVideoPanel.getImagePanel());
             baseUI.getImGuiPanelManager().addPanel(testImagePanel.getImagePanel());
-            baseUI.getLayoutManager().reloadLayout();
 
             compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
 
