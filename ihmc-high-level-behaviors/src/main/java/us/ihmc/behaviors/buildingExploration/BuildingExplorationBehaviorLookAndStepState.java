@@ -132,7 +132,7 @@ class BuildingExplorationBehaviorLookAndStepState implements State
 
          boolean operatorReviewEnabled = false;
          LogTools.info("Sending operator review enabled: {}", operatorReviewEnabled);
-         helper.publish(LookAndStepBehaviorAPI.OPERATOR_REVIEW_ENABLED_COMMAND, MessageTools.createBoolMessage(operatorReviewEnabled));
+         helper.publish(LookAndStepBehaviorAPI.OPERATOR_REVIEW_ENABLED_COMMAND, operatorReviewEnabled);
          ThreadTools.sleep(100);
 
          LogTools.info("Publishing goal pose: {}", bombPose);

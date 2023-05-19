@@ -167,7 +167,7 @@ public class LookAndStepBehaviorUI extends JavaFXBehaviorUIInterface
 
    @FXML public void operatorReviewCheckBox()
    {
-      ros2Publisher.publish(LookAndStepBehaviorAPI.OPERATOR_REVIEW_ENABLED_COMMAND, MessageTools.createBoolMessage(operatorReviewCheckBox.isSelected()));
+      ros2Publisher.publish(LookAndStepBehaviorAPI.OPERATOR_REVIEW_ENABLED_COMMAND, operatorReviewCheckBox.isSelected());
    }
 
    @FXML public void reset()

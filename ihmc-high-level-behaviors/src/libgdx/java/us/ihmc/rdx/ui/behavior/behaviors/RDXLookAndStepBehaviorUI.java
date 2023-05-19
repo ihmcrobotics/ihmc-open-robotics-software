@@ -265,7 +265,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
 
       if (ImGui.checkbox("Operator review", operatorReview))
       {
-         helper.publish(LookAndStepBehaviorAPI.OPERATOR_REVIEW_ENABLED_COMMAND, MessageTools.createBoolMessage(operatorReview.get()));
+         helper.publish(LookAndStepBehaviorAPI.OPERATOR_REVIEW_ENABLED_COMMAND, operatorReview.get());
       }
       if (ImGui.button("Reject"))
       {
