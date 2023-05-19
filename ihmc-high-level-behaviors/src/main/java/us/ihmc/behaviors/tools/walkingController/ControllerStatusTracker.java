@@ -7,7 +7,6 @@ import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.log.LogToolsWriteOnly;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.tools.Timer;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -19,7 +18,6 @@ import us.ihmc.tools.thread.Throttler;
 import java.util.ArrayList;
 
 import static us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition.getTopic;
-import static us.ihmc.tools.string.StringTools.format;
 
 /**
  * A class to keep track of the controller by listening to its ROS 2 status API.
