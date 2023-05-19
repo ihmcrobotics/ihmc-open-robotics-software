@@ -197,8 +197,7 @@ public class SteppableRegionsCalculationModule
                                                                                        snapNormalXImages.get(yawValue),
                                                                                        snapNormalYImages.get(yawValue),
                                                                                        snapNormalZImages.get(yawValue),
-                                                                                       steppabilityConnections.get(
-                                                                                             yawValue),
+                                                                                       steppabilityConnections.get(yawValue),
                                                                                        parameters,
                                                                                        heightMapData);
 
