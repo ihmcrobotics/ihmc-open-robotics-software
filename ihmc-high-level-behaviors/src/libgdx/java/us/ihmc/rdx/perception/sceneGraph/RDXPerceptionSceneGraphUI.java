@@ -12,6 +12,7 @@ import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.tools.thread.Throttler;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -32,6 +33,7 @@ public class RDXPerceptionSceneGraphUI
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final ArrayList<RDXPredefinedRigidBodySceneNode> predefinedRigidBodySceneNodes = new ArrayList<>();
+   private final Throttler publishThrottler = new Throttler().setFrequency(30.0);
 
    public RDXPerceptionSceneGraphUI(PredefinedSceneNodeLibrary predefinedSceneNodeLibrary,
                                     ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
@@ -62,7 +64,8 @@ public class RDXPerceptionSceneGraphUI
          predefinedRigidBodySceneNode.update();
       }
 
-      detectableSceneObjectsPublisher.publish(predefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2PublishSubscribeAPI, ROS2IOTopicQualifier.COMMAND);
+      if (publishThrottler.run())
+         detectableSceneObjectsPublisher.publish(predefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2PublishSubscribeAPI, ROS2IOTopicQualifier.COMMAND);
    }
 
    public void renderImGuiWidgets()
