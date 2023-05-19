@@ -15,7 +15,7 @@ module behavior_msgs
         /**
          * List of minimal footsteps
          */
-        behavior_msgs::msg::dds::MinimalFootstepMessage minimal_footsteps[200];
+        sequence<behavior_msgs::msg::dds::MinimalFootstepMessage, 200> minimal_footsteps;
       };
     };
   };

@@ -11,16 +11,12 @@ public class MinimalFootstepListMessage extends Packet<MinimalFootstepListMessag
    /**
             * List of minimal footsteps
             */
-   public behavior_msgs.msg.dds.MinimalFootstepMessage[] minimal_footsteps_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.MinimalFootstepMessage>  minimal_footsteps_;
 
    public MinimalFootstepListMessage()
    {
-      minimal_footsteps_ = new behavior_msgs.msg.dds.MinimalFootstepMessage[200];
+      minimal_footsteps_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.MinimalFootstepMessage> (200, new behavior_msgs.msg.dds.MinimalFootstepMessagePubSubType());
 
-      for(int i1 = 0; i1 < minimal_footsteps_.length; ++i1)
-      {
-          minimal_footsteps_[i1] = new behavior_msgs.msg.dds.MinimalFootstepMessage();
-      }
    }
 
    public MinimalFootstepListMessage(MinimalFootstepListMessage other)
@@ -31,16 +27,14 @@ public class MinimalFootstepListMessage extends Packet<MinimalFootstepListMessag
 
    public void set(MinimalFootstepListMessage other)
    {
-      for(int i3 = 0; i3 < minimal_footsteps_.length; ++i3)
-      {
-            behavior_msgs.msg.dds.MinimalFootstepMessagePubSubType.staticCopy(other.minimal_footsteps_[i3], minimal_footsteps_[i3]);}
+      minimal_footsteps_.set(other.minimal_footsteps_);
    }
 
 
    /**
             * List of minimal footsteps
             */
-   public behavior_msgs.msg.dds.MinimalFootstepMessage[] getMinimalFootsteps()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.MinimalFootstepMessage>  getMinimalFootsteps()
    {
       return minimal_footsteps_;
    }
@@ -63,9 +57,11 @@ public class MinimalFootstepListMessage extends Packet<MinimalFootstepListMessag
       if(other == null) return false;
       if(other == this) return true;
 
-      for(int i5 = 0; i5 < minimal_footsteps_.length; ++i5)
+      if (this.minimal_footsteps_.size() != other.minimal_footsteps_.size()) { return false; }
+      else
       {
-              if (!this.minimal_footsteps_[i5].epsilonEquals(other.minimal_footsteps_[i5], epsilon)) return false;
+         for (int i = 0; i < this.minimal_footsteps_.size(); i++)
+         {  if (!this.minimal_footsteps_.get(i).epsilonEquals(other.minimal_footsteps_.get(i), epsilon)) return false; }
       }
 
       return true;
@@ -80,10 +76,8 @@ public class MinimalFootstepListMessage extends Packet<MinimalFootstepListMessag
 
       MinimalFootstepListMessage otherMyClass = (MinimalFootstepListMessage) other;
 
-      for(int i7 = 0; i7 < minimal_footsteps_.length; ++i7)
-      {
-                if (!this.minimal_footsteps_[i7].equals(otherMyClass.minimal_footsteps_[i7])) return false;
-      }
+      if (!this.minimal_footsteps_.equals(otherMyClass.minimal_footsteps_)) return false;
+
       return true;
    }
 
@@ -94,7 +88,7 @@ public class MinimalFootstepListMessage extends Packet<MinimalFootstepListMessag
 
       builder.append("MinimalFootstepListMessage {");
       builder.append("minimal_footsteps=");
-      builder.append(java.util.Arrays.toString(this.minimal_footsteps_));
+      builder.append(this.minimal_footsteps_);
       builder.append("}");
       return builder.toString();
    }

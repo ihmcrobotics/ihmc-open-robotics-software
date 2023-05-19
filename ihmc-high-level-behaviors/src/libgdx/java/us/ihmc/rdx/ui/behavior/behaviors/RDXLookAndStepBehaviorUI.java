@@ -137,7 +137,8 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       startAndGoalFootstepsGraphic.setColor(RobotSide.LEFT, Color.BLUE);
       startAndGoalFootstepsGraphic.setColor(RobotSide.RIGHT, Color.BLUE);
       startAndGoalFootstepsGraphic.setTransparency(0.4);
-      helper.subscribeViaCallback(ImminentFootPosesForUI, startAndGoalFootstepsGraphic::generateMeshesAsync);
+      helper.subscribeViaCallback(IMMINENT_FOOT_POSES_FOR_UI, message ->
+            startAndGoalFootstepsGraphic.generateMeshesAsync(MinimalFootstep.convertMinimalFootstepListMessage(message)));
       footstepPlanningDurationPlot = new ImPlotYoHelperDoublePlotLine("LookAndStepBehavior.footstepPlanningDuration", 10.0, helper);
       helper.subscribeViaCallback(FootstepPlannerLatestLogPath, latestFootstepPlannerLogPath::set);
       helper.subscribeViaCallback(FootstepPlannerRejectionReasons, reasons ->

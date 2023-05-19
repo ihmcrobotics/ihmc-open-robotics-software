@@ -183,7 +183,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       footstepsSentToControllerGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       communicationHelper.subscribeToControllerViaCallback(FootstepDataListMessage.class, footsteps ->
       {
-         footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, "Teleoperation Panel Controller Spy"));
+         footstepsSentToControllerGraphic.generateMeshesAsync(footsteps, "Teleoperation Panel Controller Spy");
       });
 
       locomotionManager = new RDXLocomotionManager(robotModel, communicationHelper, syncedRobot, ros2Helper);

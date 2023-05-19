@@ -15,7 +15,7 @@ public class MinimalFootstepMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "58fe799691272ffdfbfb7878489f57f5f45951556d3632d6411ec987f90d0ab1";
+   		return "62f77d2733cffe10d361d4981953d18fe1dc4bc04beb1dc12bc89d8ab7dcd6ed";
    }
    
    @Override
@@ -58,7 +58,7 @@ public class MinimalFootstepMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      for(int i0 = 0; i0 < (16); ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 16; ++i0)
       {
           current_alignment += ihmc_common_msgs.msg.dds.Point2DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
@@ -82,10 +82,11 @@ public class MinimalFootstepMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getOrientation(), current_alignment);
 
-      for(int i0 = 0; i0 < data.getSupportPolygon().length; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getSupportPolygon().size(); ++i0)
       {
-              current_alignment += ihmc_common_msgs.msg.dds.Point2DMessagePubSubType.getCdrSerializedSize(data.getSupportPolygon()[i0], current_alignment);
-      }
+          current_alignment += ihmc_common_msgs.msg.dds.Point2DMessagePubSubType.getCdrSerializedSize(data.getSupportPolygon().get(i0), current_alignment);}
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getDescription().length() + 1;
 
 
@@ -98,10 +99,9 @@ public class MinimalFootstepMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getOrientation(), cdr);
-      for(int i0 = 0; i0 < data.getSupportPolygon().length; ++i0)
-      {
-        	ihmc_common_msgs.msg.dds.Point2DMessagePubSubType.write(data.getSupportPolygon()[i0], cdr);		
-      }
+      if(data.getSupportPolygon().size() <= 16)
+      cdr.write_type_e(data.getSupportPolygon());else
+          throw new RuntimeException("support_polygon field exceeds the maximum length");
 
       if(data.getDescription().length() <= 255)
       cdr.write_type_d(data.getDescription());else
@@ -115,11 +115,7 @@ public class MinimalFootstepMessagePubSubType implements us.ihmc.pubsub.TopicDat
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getPosition(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientation(), cdr);	
-      for(int i0 = 0; i0 < data.getSupportPolygon().length; ++i0)
-      {
-        	ihmc_common_msgs.msg.dds.Point2DMessagePubSubType.read(data.getSupportPolygon()[i0], cdr);	
-      }
-      	
+      cdr.read_type_e(data.getSupportPolygon());	
       cdr.read_type_d(data.getDescription());	
 
    }
@@ -132,7 +128,7 @@ public class MinimalFootstepMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       ser.write_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
 
-      ser.write_type_f("support_polygon", new ihmc_common_msgs.msg.dds.Point2DMessagePubSubType(), data.getSupportPolygon());
+      ser.write_type_e("support_polygon", data.getSupportPolygon());
       ser.write_type_d("description", data.getDescription());
    }
 
@@ -144,7 +140,7 @@ public class MinimalFootstepMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       ser.read_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
 
-      ser.read_type_f("support_polygon", new ihmc_common_msgs.msg.dds.Point2DMessagePubSubType(), data.getSupportPolygon());
+      ser.read_type_e("support_polygon", data.getSupportPolygon());
       ser.read_type_d("description", data.getDescription());
    }
 

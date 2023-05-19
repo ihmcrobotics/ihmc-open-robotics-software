@@ -24,7 +24,7 @@ public class MinimalFootstepMessage extends Packet<MinimalFootstepMessage> imple
    /**
             * Support polygon
             */
-   public ihmc_common_msgs.msg.dds.Point2DMessage[] support_polygon_;
+   public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.Point2DMessage>  support_polygon_;
    /**
             * Description of the footstep
             */
@@ -34,13 +34,9 @@ public class MinimalFootstepMessage extends Packet<MinimalFootstepMessage> imple
    {
       position_ = new us.ihmc.euclid.tuple3D.Point3D();
       orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
-      support_polygon_ = new ihmc_common_msgs.msg.dds.Point2DMessage[16];
-
-      for(int i1 = 0; i1 < support_polygon_.length; ++i1)
-      {
-          support_polygon_[i1] = new ihmc_common_msgs.msg.dds.Point2DMessage();
-      }
+      support_polygon_ = new us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.Point2DMessage> (16, new ihmc_common_msgs.msg.dds.Point2DMessagePubSubType());
       description_ = new java.lang.StringBuilder(255);
+
    }
 
    public MinimalFootstepMessage(MinimalFootstepMessage other)
@@ -55,10 +51,7 @@ public class MinimalFootstepMessage extends Packet<MinimalFootstepMessage> imple
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.position_, position_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.orientation_, orientation_);
-      for(int i3 = 0; i3 < support_polygon_.length; ++i3)
-      {
-            ihmc_common_msgs.msg.dds.Point2DMessagePubSubType.staticCopy(other.support_polygon_[i3], support_polygon_[i3]);}
-
+      support_polygon_.set(other.support_polygon_);
       description_.setLength(0);
       description_.append(other.description_);
 
@@ -103,7 +96,7 @@ public class MinimalFootstepMessage extends Packet<MinimalFootstepMessage> imple
    /**
             * Support polygon
             */
-   public ihmc_common_msgs.msg.dds.Point2DMessage[] getSupportPolygon()
+   public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.Point2DMessage>  getSupportPolygon()
    {
       return support_polygon_;
    }
@@ -154,9 +147,11 @@ public class MinimalFootstepMessage extends Packet<MinimalFootstepMessage> imple
 
       if (!this.position_.epsilonEquals(other.position_, epsilon)) return false;
       if (!this.orientation_.epsilonEquals(other.orientation_, epsilon)) return false;
-      for(int i5 = 0; i5 < support_polygon_.length; ++i5)
+      if (this.support_polygon_.size() != other.support_polygon_.size()) { return false; }
+      else
       {
-              if (!this.support_polygon_[i5].epsilonEquals(other.support_polygon_[i5], epsilon)) return false;
+         for (int i = 0; i < this.support_polygon_.size(); i++)
+         {  if (!this.support_polygon_.get(i).epsilonEquals(other.support_polygon_.get(i), epsilon)) return false; }
       }
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.description_, other.description_, epsilon)) return false;
@@ -178,10 +173,7 @@ public class MinimalFootstepMessage extends Packet<MinimalFootstepMessage> imple
 
       if (!this.position_.equals(otherMyClass.position_)) return false;
       if (!this.orientation_.equals(otherMyClass.orientation_)) return false;
-      for(int i7 = 0; i7 < support_polygon_.length; ++i7)
-      {
-                if (!this.support_polygon_[i7].equals(otherMyClass.support_polygon_[i7])) return false;
-      }
+      if (!this.support_polygon_.equals(otherMyClass.support_polygon_)) return false;
       if (!us.ihmc.idl.IDLTools.equals(this.description_, otherMyClass.description_)) return false;
 
 
@@ -201,7 +193,7 @@ public class MinimalFootstepMessage extends Packet<MinimalFootstepMessage> imple
       builder.append("orientation=");
       builder.append(this.orientation_);      builder.append(", ");
       builder.append("support_polygon=");
-      builder.append(java.util.Arrays.toString(this.support_polygon_));      builder.append(", ");
+      builder.append(this.support_polygon_);      builder.append(", ");
       builder.append("description=");
       builder.append(this.description_);
       builder.append("}");

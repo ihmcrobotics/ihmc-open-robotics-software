@@ -1,9 +1,12 @@
 package us.ihmc.behaviors.lookAndStep;
 
+import behavior_msgs.msg.dds.MinimalFootstepListMessage;
+import behavior_msgs.msg.dds.MinimalFootstepMessage;
 import com.esotericsoftware.minlog.Log;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import ihmc_common_msgs.msg.dds.Point2DMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import perception_msgs.msg.dds.HeightMapMessage;
@@ -27,6 +30,8 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -386,15 +391,20 @@ public class LookAndStepFootstepPlanningTask
       uiPublisher.publishToUI(ImpassibilityDetected, false);
 
       // update last stepped poses to plan from; initialize to current poses
-      ArrayList<MinimalFootstep> imminentFootPosesForUI = new ArrayList<>();
+      MinimalFootstepListMessage imminentFootPosesForUI = new MinimalFootstepListMessage();
       for (RobotSide side : RobotSide.values)
       {
-         imminentFootPosesForUI.add(new MinimalFootstep(side,
-                                                        new Pose3D(startFootPoses.get(side).getSolePoseInWorld()),
-                                                        startFootPoses.get(side).getFoothold(),
-                                                        "Look and Step " + side.getPascalCaseName() + " Imminent"));
+         MinimalFootstep startFootPose = startFootPoses.get(side);
+         MinimalFootstepMessage minimalFootstepMessage = imminentFootPosesForUI.getMinimalFootsteps().add();
+         minimalFootstepMessage.setRobotSide(startFootPose.getSide().toByte());
+         minimalFootstepMessage.setDescription("Look and Step " + side.getPascalCaseName() + " Imminent");
+         Pose3DReadOnly solePoseInWorld = startFootPose.getSolePoseInWorld();
+         minimalFootstepMessage.getPosition().set(solePoseInWorld.getPosition());
+         minimalFootstepMessage.getOrientation().set(solePoseInWorld.getOrientation());
+         MinimalFootstep.packFootholdToMessage(startFootPose.getFoothold(), minimalFootstepMessage);
       }
-      uiPublisher.publishToUI(ImminentFootPosesForUI, imminentFootPosesForUI);
+
+      helper.publish(IMMINENT_FOOT_POSES_FOR_UI, imminentFootPosesForUI);
 
       RobotSide initialStanceSide;
       // if last plan failed

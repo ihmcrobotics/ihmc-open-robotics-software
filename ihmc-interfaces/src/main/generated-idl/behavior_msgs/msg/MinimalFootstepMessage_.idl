@@ -30,7 +30,7 @@ module behavior_msgs
         /**
          * Support polygon
          */
-        ihmc_common_msgs::msg::dds::Point2DMessage support_polygon[16];
+        sequence<ihmc_common_msgs::msg::dds::Point2DMessage, 16> support_polygon;
         /**
          * Description of the footstep
          */
