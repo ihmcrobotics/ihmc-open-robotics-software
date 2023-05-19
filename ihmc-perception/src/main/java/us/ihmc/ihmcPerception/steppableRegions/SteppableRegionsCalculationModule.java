@@ -191,8 +191,7 @@ public class SteppableRegionsCalculationModule
          if (parameters.getYawDiscretizations() > 1)
             yawAngle = ((double) yawValue) / (parameters.getYawDiscretizations() - 1) * Math.PI;
 
-         SteppableRegionsEnvironmentModel environment
-               = SteppableRegionsCalculator.createEnvironmentByMergingCellsIntoRegions(steppabilityImages.get(yawValue),
+         SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculator.createEnvironmentByMergingCellsIntoRegions(steppabilityImages.get(yawValue),
                                                                                        snapHeightImages.get(yawValue),
                                                                                        snapNormalXImages.get(yawValue),
                                                                                        snapNormalYImages.get(yawValue),
