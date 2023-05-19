@@ -59,7 +59,7 @@ public class LookAndStepReset
       lookAndStep.behaviorStateReference.set(LookAndStepBehavior.State.RESET);
 
       lookAndStep.operatorReviewEnabledInput.set(true);
-      lookAndStep.helper.publish(OperatorReviewEnabledToUI, true);
+      lookAndStep.helper.publish(OPERATOR_REVIEW_ENABLED_STATUS, true);
 
       lookAndStep.bodyPathPlanning.reset();
       lookAndStep.bodyPathLocalization.reset();

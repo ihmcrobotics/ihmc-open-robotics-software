@@ -9,6 +9,7 @@ import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -131,7 +132,7 @@ class BuildingExplorationBehaviorLookAndStepState implements State
 
          boolean operatorReviewEnabled = false;
          LogTools.info("Sending operator review enabled: {}", operatorReviewEnabled);
-         helper.publish(LookAndStepBehaviorAPI.OperatorReviewEnabled, operatorReviewEnabled);
+         helper.publish(LookAndStepBehaviorAPI.OPERATOR_REVIEW_ENABLED_COMMAND, MessageTools.createBoolMessage(operatorReviewEnabled));
          ThreadTools.sleep(100);
 
          LogTools.info("Publishing goal pose: {}", bombPose);

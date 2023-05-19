@@ -5,6 +5,7 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -60,6 +61,15 @@ public class LookAndStepBehaviorAPI
    /** Starts the look and step behavior onto a precomputed body path */
    public static final ROS2Topic<PoseListMessage> BODY_PATH_INPUT = LOOK_AND_STEP_BEHAVIOR.withType(PoseListMessage.class).withInput().withSuffix("body_path");
 
+   /*
+    * TODO: Review API should contain the data to be reviewed and the Approval should accept a modified version
+    */
+   public static final ROS2IOTopicPair<Bool> OPERATOR_REVIEW_ENABLED = new ROS2IOTopicPair<>(LOOK_AND_STEP_BEHAVIOR
+                                                                                                   .withType(Bool.class)
+                                                                                                   .withSuffix("operator_review_enabled"));
+   public static final ROS2Topic<Bool> OPERATOR_REVIEW_ENABLED_COMMAND = OPERATOR_REVIEW_ENABLED.getCommandTopic();
+   public static final ROS2Topic<Bool> OPERATOR_REVIEW_ENABLED_STATUS = OPERATOR_REVIEW_ENABLED.getStatusTopic();
+
    private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
    private static final MessagerAPIFactory.Category RootCategory = apiFactory.createRootCategory("LookAndStepBehavior");
    private static final MessagerAPIFactory.CategoryTheme LookAndStepTheme = apiFactory.createCategoryTheme("LookAndStep");
@@ -67,8 +77,6 @@ public class LookAndStepBehaviorAPI
    /*
     * TODO: Review API should contain the data to be reviewed and the Approval should accept a modified version
     */
-   public static final MessagerAPIFactory.Topic<Object> PublishSupportRegions = topic("PublishSupportRegions");
-   public static final MessagerAPIFactory.Topic<Boolean> OperatorReviewEnabled = topic("OperatorReviewEnabled");
    public static final MessagerAPIFactory.Topic<Boolean> OperatorReviewEnabledToUI = topic("OperatorReviewEnabledToUI");
    public static final MessagerAPIFactory.Topic<Boolean> ReviewApproval = topic("ReviewApproval");
 

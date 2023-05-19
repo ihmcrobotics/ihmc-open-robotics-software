@@ -5,6 +5,7 @@ import gnu.trove.list.array.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import ihmc_common_msgs.msg.dds.*;
 import perception_msgs.msg.dds.*;
+import std_msgs.msg.dds.Bool;
 import toolbox_msgs.msg.dds.*;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -1381,5 +1382,12 @@ public class MessageTools
          poses.add(pose);
       }
       return poses;
+   }
+
+   public static Bool createBoolMessage(boolean data)
+   {
+      Bool bool = new Bool();
+      bool.setData(data);
+      return bool;
    }
 }

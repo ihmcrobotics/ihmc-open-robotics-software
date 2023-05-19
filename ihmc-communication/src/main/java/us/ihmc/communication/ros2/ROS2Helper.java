@@ -1,9 +1,12 @@
 package us.ihmc.communication.ros2;
 
+import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Callback;
@@ -72,6 +75,22 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    }
 
    @Override
+   public <T> TypedNotification<T> subscribeViaTypedNotification(ROS2Topic<T> topic)
+   {
+      TypedNotification<T> typedNotification = new TypedNotification<>();
+      ROS2Tools.createCallbackSubscription2(ros2NodeInterface, topic, typedNotification::set);
+      return typedNotification;
+   }
+
+   @Override
+   public TypedNotification<Boolean> subscribeViaBooleanNotification(ROS2Topic<Bool> topic)
+   {
+      TypedNotification<Boolean> typedNotification = new TypedNotification<>();
+      ROS2Tools.createCallbackSubscription2(ros2NodeInterface, topic, message -> typedNotification.set(message.getData()));
+      return typedNotification;
+   }
+
+   @Override
    public <T> void createPublisher(ROS2Topic<T> topic)
    {
       ros2PublisherMap.getOrCreatePublisher(topic);
@@ -101,6 +120,12 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    public void publish(ROS2Topic<Empty> topic)
    {
       ros2PublisherMap.publish(topic);
+   }
+
+   @Override
+   public void publish(ROS2Topic<Bool> topic, boolean message)
+   {
+      ros2PublisherMap.publish(topic, MessageTools.createBoolMessage(message));
    }
 
    public ROS2NodeInterface getROS2NodeInterface()
