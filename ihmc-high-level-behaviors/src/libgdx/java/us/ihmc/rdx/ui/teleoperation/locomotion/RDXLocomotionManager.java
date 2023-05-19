@@ -282,10 +282,13 @@ public class RDXLocomotionManager
          {
             interactableFootstepPlan.walkFromSteps();
          }
-         else
+         else if (pauseAvailable)
          {
-            // Get the robot walking state and sets it to the opposite value
-            setPauseWalkingAndPublish(!pauseWalkingMessage.getPause());
+            setPauseWalkingAndPublish(true);
+         }
+         else if (continueAvailable)
+         {
+            setPauseWalkingAndPublish(false);
          }
       }
    }
