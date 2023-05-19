@@ -77,7 +77,6 @@ public class LookAndStepBehaviorAPI
    /*
     * TODO: Review API should contain the data to be reviewed and the Approval should accept a modified version
     */
-   public static final MessagerAPIFactory.Topic<Boolean> OperatorReviewEnabledToUI = topic("OperatorReviewEnabledToUI");
    public static final MessagerAPIFactory.Topic<Boolean> ReviewApproval = topic("ReviewApproval");
 
    // Parameter tuning topics

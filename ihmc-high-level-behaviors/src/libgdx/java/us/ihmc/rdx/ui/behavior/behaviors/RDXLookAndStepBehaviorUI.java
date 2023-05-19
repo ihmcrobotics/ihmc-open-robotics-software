@@ -101,7 +101,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    {
       this.helper = helper;
       helper.subscribeViaCallback(CurrentState, state -> currentState = state);
-      helper.subscribeViaCallback(OperatorReviewEnabledToUI, operatorReview::set);
+      helper.subscribeViaCallback(OPERATOR_REVIEW_ENABLED_STATUS, message -> operatorReview.set(message.getData()));
       helper.subscribeViaCallback(PlanarRegionsForUI, regions ->
       {
          ++numberOfSteppingRegionsReceived;
