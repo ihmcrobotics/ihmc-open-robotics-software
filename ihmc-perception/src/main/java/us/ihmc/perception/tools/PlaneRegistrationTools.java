@@ -77,7 +77,7 @@ public class PlaneRegistrationTools
 
          transform = PlaneRegistrationTools.computeQuaternionAveragingTransform(previousRegions, currentRegions, matches);
 
-         if(transform.containsNaN())
+         if (transform.containsNaN())
          {
             LogTools.warn("Transform contains NaNs, breaking out of IQA loop.");
             break;
@@ -110,11 +110,13 @@ public class PlaneRegistrationTools
     * orthogonal projection based translation estimation
     *
     * @param previousRegions The previous planar regions list.
-    * @param currentRegions The current planar regions list.
-    * @param matches The matches from current to previous region lists.
+    * @param currentRegions  The current planar regions list.
+    * @param matches         The matches from current to previous region lists.
     * @return The transform from the current to previous planar region lists.
     */
-   public static RigidBodyTransform computeQuaternionAveragingTransform(PlanarLandmarkList previousRegions, PlanarLandmarkList currentRegions, TIntIntMap matches)
+   public static RigidBodyTransform computeQuaternionAveragingTransform(PlanarLandmarkList previousRegions,
+                                                                        PlanarLandmarkList currentRegions,
+                                                                        TIntIntMap matches)
    {
       RigidBodyTransform transformToReturn = new RigidBodyTransform();
 
@@ -137,8 +139,8 @@ public class PlaneRegistrationTools
     * Computes the transform from the previous to the current planar regions list using least squares based optimization.
     *
     * @param previousRegions The previous planar regions list.
-    * @param currentRegions The current planar regions list.
-    * @param matches The matches between the previous and the current planar regions list.
+    * @param currentRegions  The current planar regions list.
+    * @param matches         The matches between the previous and the current planar regions list.
     * @return The transform from the previous to the current planar regions list.
     */
    public static RigidBodyTransform computeTransformFromRegions(PlanarRegionsList previousRegions, PlanarRegionsList currentRegions, TIntIntMap matches)
@@ -169,6 +171,7 @@ public class PlaneRegistrationTools
 
    /**
     * Computes the translation from the current to the previous planar regions list using orthogonal distance minimization.
+    *
     * @param previousRegions
     * @param currentRegions
     * @param matches
@@ -203,8 +206,8 @@ public class PlaneRegistrationTools
     * calculations.
     *
     * @param previousRegions The previous planar regions list.
-    * @param currentRegions The current planar regions list.
-    * @param matches The matches between the previous and the current planar regions list.
+    * @param currentRegions  The current planar regions list.
+    * @param matches         The matches between the previous and the current planar regions list.
     * @return The list of rotations (quaternions) from matching pairs from current to the previous planar regions list.
     */
    public static ArrayList<QuaternionReadOnly> findRotationEstimates(PlanarLandmarkList previousRegions, PlanarLandmarkList currentRegions, TIntIntMap matches)
@@ -255,6 +258,7 @@ public class PlaneRegistrationTools
    /**
     * Computes the weights for quaternion averaging for the given list of quaternions corresponding to the matches between the previous and the current.
     * The weight for a quaternion represents the utility of that quaternion for finding the optimal quaternion average.
+    *
     * @param previousRegions
     * @param currentRegions
     * @param matches
@@ -296,11 +300,12 @@ public class PlaneRegistrationTools
 
    /**
     * Constructs the linear least squares matrices A and b for registration between two planar regions lists.
+    *
     * @param previousRegions The previous planar regions list.
-    * @param currentRegions The current planar regions list.
-    * @param matches The matches between the previous and the current planar regions list.
-    * @param A The matrix A in the linear least squares problem.
-    * @param b The vector b in the linear least squares problem.
+    * @param currentRegions  The current planar regions list.
+    * @param matches         The matches between the previous and the current planar regions list.
+    * @param A               The matrix A in the linear least squares problem.
+    * @param b               The vector b in the linear least squares problem.
     */
    public static void constructLeastSquaresProblem(PlanarRegionsList previousRegions,
                                                    PlanarRegionsList currentRegions,
@@ -354,6 +359,7 @@ public class PlaneRegistrationTools
 
    /**
     * Solves the linear least squares problem using SVD decomposition.
+    *
     * @param A The matrix A in the linear least squares problem.
     * @param b The vector b in the linear least squares problem.
     * @return The solution to the linear least squares problem.
@@ -391,6 +397,7 @@ public class PlaneRegistrationTools
 
    /**
     * Solves the linear least squares problem using damped least squares.
+    *
     * @param A The matrix A in the linear least squares problem.
     * @param b The vector b in the linear least squares problem.
     * @return The solution to the linear least squares problem.
@@ -420,6 +427,7 @@ public class PlaneRegistrationTools
 
    /**
     * Solves the linear least squares problem using QR decomposition.
+    *
     * @param A The matrix A in the linear least squares problem.
     * @param b The vector b in the linear least squares problem.
     * @return The solution to the linear least squares problem.
@@ -445,9 +453,10 @@ public class PlaneRegistrationTools
 
    /**
     * Computes the registration error between two planar regions lists.
-    * @param referenceRegions The reference planar regions list.
+    *
+    * @param referenceRegions   The reference planar regions list.
     * @param transformedRegions The transformed planar regions list.
-    * @param matches The matches between the two planar regions lists.
+    * @param matches            The matches between the two planar regions lists.
     * @return The registration error.
     */
    public static double computeRegistrationError(PlanarLandmarkList referenceRegions, PlanarLandmarkList transformedRegions, TIntIntMap matches)
@@ -475,13 +484,14 @@ public class PlaneRegistrationTools
 
    /**
     * Finds the best planar region matches between two planar regions lists.
-    * @param map The map planar regions list.
-    * @param incoming The incoming planar regions list.
-    * @param matches The matches between the two planar regions lists.
-    * @param overlapThreshold The overlap threshold between two planar region bounding boxes in the world frame
-    * @param normalThreshold The normal cosine-similarity threshold between two planar regions
+    *
+    * @param map               The map planar regions list.
+    * @param incoming          The incoming planar regions list.
+    * @param matches           The matches between the two planar regions lists.
+    * @param overlapThreshold  The overlap threshold between two planar region bounding boxes in the world frame
+    * @param normalThreshold   The normal cosine-similarity threshold between two planar regions
     * @param distanceThreshold The orthogonal distance threshold between two planar regions (origin-to-plane distance)
-    * @param minBoxSize The minimum size of the bounding box of a planar region
+    * @param minBoxSize        The minimum size of the bounding box of a planar region
     */
    public static void findBestPlanarRegionMatches(PlanarLandmarkList map,
                                                   PlanarLandmarkList incoming,
