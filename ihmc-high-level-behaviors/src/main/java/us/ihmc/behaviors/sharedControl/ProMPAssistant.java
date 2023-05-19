@@ -141,7 +141,7 @@ public class ProMPAssistant
       }
       catch (IOException e)
       {
-         throw new RuntimeException(e);
+         LogTools.info(e);
       }
    }
 
