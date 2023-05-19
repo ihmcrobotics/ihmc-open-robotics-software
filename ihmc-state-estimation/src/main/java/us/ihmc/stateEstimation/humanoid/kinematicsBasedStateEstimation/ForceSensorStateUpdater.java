@@ -12,7 +12,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -21,7 +20,6 @@ import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.robotics.sensors.ForceSensorData;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
@@ -55,6 +53,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
    private final SideDependentList<CenterOfMassReferenceFrame> wristsubtreeCenterOfMassFrames;
 
    private final YoBoolean calibrateWristForceSensors;
+   private final AtomicBoolean calibrateWristForceSensorsAtomic = new AtomicBoolean(false);
    private final SideDependentList<YoDouble> wristSubtreeMass;
    private final SideDependentList<YoFrameVector3D> wristForcesSubtreeWeightCancelled;
    private final SideDependentList<YoFrameVector3D> wristTorquesSubtreeWeightCancelled;
@@ -70,8 +69,6 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
 
    private final SideDependentList<YoFrameVector3D> footForceCalibrationOffsets;
    private final SideDependentList<YoFrameVector3D> footTorqueCalibrationOffsets;
-
-   private RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber = null;
 
    private final Wrench wristWrenchDueToGravity = new Wrench();
    private final Wrench tempWrench = new Wrench();
@@ -371,7 +368,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
 
    private void updateWristForceSensorState()
    {
-      if (requestWristForceSensorCalibrationSubscriber != null && requestWristForceSensorCalibrationSubscriber.checkForNewCalibrationRequest())
+      if (calibrateWristForceSensorsAtomic.getAndSet(false))
          calibrateWristForceSensors.set(true);
 
       if (calibrateWristForceSensors.getBooleanValue())
@@ -471,15 +468,15 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
       return outputForceSensorDataHolderWithGravityCancelled;
    }
 
-   public void setRequestWristForceSensorCalibrationSubscriber(RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber)
-   {
-      this.requestWristForceSensorCalibrationSubscriber = requestWristForceSensorCalibrationSubscriber;
-   }
-
    @Override
    public void requestFootForceSensorCalibrationAtomic()
    {
       calibrateFootForceSensorsAtomic.set(true);
+   }
+
+   public void requestWristForceSensorCalibrationAtomic()
+   {
+      calibrateWristForceSensorsAtomic.set(true);
    }
 
    @Override

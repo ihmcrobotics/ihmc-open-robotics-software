@@ -9,7 +9,6 @@ import java.util.Map;
 
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
-import controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket;
 import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.controlModules.ForceSensorToJointTorqueProjector;
@@ -25,7 +24,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
-import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -65,7 +63,6 @@ import us.ihmc.stateEstimation.ekf.HumanoidRobotEKFWithSimpleJoints;
 import us.ihmc.stateEstimation.ekf.LeggedRobotEKF;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
-import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.KinematicsBasedStateEstimatorFactory;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -122,8 +119,6 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement, SCS
 
    private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher;
 
-   private final ForceSensorStateUpdater forceSensorStateUpdater;
-
    private final SensorDataContext sensorDataContext = new SensorDataContext();
 
    public DRCEstimatorThread(String robotName,
@@ -168,41 +163,6 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement, SCS
                                                                        ROS2Tools.getControllerOutputTopic(robotName));
       else
          controllerCrashPublisher = null;
-
-      if (sensorReaderFactory.useStateEstimator())
-      {
-         if (forceSensorDataHolderForEstimator != null)
-         {
-            forceSensorStateUpdater = new ForceSensorStateUpdater(estimatorFullRobotModel.getRootJoint(),
-                                                                  processedSensorOutputMap,
-                                                                  forceSensorDataHolderForEstimator,
-                                                                  stateEstimatorParameters,
-                                                                  gravity,
-                                                                  robotMotionStatusFromController,
-                                                                  yoGraphicsListRegistry,
-                                                                  estimatorRegistry);
-            scs2YoGraphics.addChild(forceSensorStateUpdater.getSCS2YoGraphics());
-         }
-         else
-         {
-            forceSensorStateUpdater = null;
-         }
-
-         if (realtimeROS2Node != null)
-         {
-            RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber = new RequestWristForceSensorCalibrationSubscriber();
-            ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotName);
-            ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
-                                                          RequestWristForceSensorCalibrationPacket.class,
-                                                          inputTopic,
-                                                          subscriber -> requestWristForceSensorCalibrationSubscriber.receivedPacket(subscriber.takeNextData()));
-            forceSensorStateUpdater.setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
-         }
-      }
-      else
-      {
-         forceSensorStateUpdater = null;
-      }
 
       if (sensorReaderFactory.useStateEstimator() && !USE_EKF_ESTIMATOR)
       {
@@ -258,8 +218,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement, SCS
       if (realtimeROS2Node != null)
       {
          ForceSensorDataHolderReadOnly forceSensorDataHolderToSend;
-         if (sensorReaderFactory.useStateEstimator() && forceSensorStateUpdater.getForceSensorOutputWithGravityCancelled() != null)
-            forceSensorDataHolderToSend = forceSensorStateUpdater.getForceSensorOutputWithGravityCancelled();
+         if (sensorReaderFactory.useStateEstimator() && drcStateEstimator.getForceSensorOutputWithGravityCancelled() != null)
+            forceSensorDataHolderToSend = drcStateEstimator.getForceSensorOutputWithGravityCancelled();
          else
             forceSensorDataHolderToSend = forceSensorDataHolderForEstimator;
 
@@ -449,10 +409,6 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement, SCS
          if (firstTick.getBooleanValue())
          {
             estimatorController.initialize();
-            if (forceSensorStateUpdater != null)
-            {
-               forceSensorStateUpdater.initialize();
-            }
             firstTick.set(false);
          }
 
@@ -464,10 +420,6 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement, SCS
             ekfStateEstimator.initializeEstimator(rootToWorldTransform);
          }
          estimatorController.doControl();
-         if (forceSensorStateUpdater != null)
-         {
-            forceSensorStateUpdater.updateForceSensorState();
-         }
          estimatorTimer.stopMeasurement();
       }
       catch (Throwable e)
@@ -528,7 +480,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement, SCS
 
    public ForceSensorCalibrationModule getForceSensorCalibrationModule()
    {
-      return forceSensorStateUpdater;
+      return drcStateEstimator.getForceSensorCalibrationModule();
    }
 
    @Override

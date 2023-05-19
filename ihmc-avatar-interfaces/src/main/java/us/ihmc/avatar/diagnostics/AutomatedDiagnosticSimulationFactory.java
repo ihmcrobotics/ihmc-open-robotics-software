@@ -45,7 +45,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
-import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
@@ -74,7 +73,6 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
    private HumanoidFloatingRootJointRobot simulatedRobot;
    private HumanoidReferenceFrames humanoidReferenceFrames;
    private StateEstimatorController stateEstimator;
-   private ForceSensorStateUpdater forceSensorStateUpdater;
 
    private final SensorDataContext sensorDataContext = new SensorDataContext();
 
@@ -206,17 +204,9 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
                                                             null,
                                                             robotMotionStatusHolder,
                                                             bipedFeetMap,
+                                                            forceSensorDataHolderToUpdate,
                                                             null);
       simulationRegistry.addChild(stateEstimator.getYoRegistry());
-
-      forceSensorStateUpdater = new ForceSensorStateUpdater(fullRobotModel.getRootJoint(),
-                                                            processedSensorOutputMap,
-                                                            forceSensorDataHolderToUpdate,
-                                                            stateEstimatorParameters,
-                                                            gravitationalAcceleration,
-                                                            robotMotionStatusHolder,
-                                                            null,
-                                                            simulationRegistry);
 
       return sensorReader.getProcessedSensorOutputMap();
    }
@@ -275,14 +265,12 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       if (firstControlTick)
       {
          stateEstimator.initialize();
-         forceSensorStateUpdater.initialize();
          automatedDiagnosticAnalysisController.initialize();
          firstControlTick = false;
       }
       else
       {
          stateEstimator.doControl();
-         forceSensorStateUpdater.updateForceSensorState();
          automatedDiagnosticAnalysisController.doControl();
       }
 
