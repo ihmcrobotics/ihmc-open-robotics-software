@@ -9,6 +9,7 @@ import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
+import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -33,7 +34,9 @@ public class LookAndStepBehaviorAPI
     * Starts the look and step behavior pursuing a goal if not already pursiung a goal.
     * If look and step is already working on a goal, first send a RESET and then send a new GOAL_INPUT. (Todo: Make this better.)
     */
-   public static final ROS2Topic<Pose3D> GOAL_INPUT = LOOK_AND_STEP_BEHAVIOR.withInput().withTypeName(Pose3D.class);
+   public static final ROS2IOTopicPair<Pose3D> GOAL = new ROS2IOTopicPair<>(LOOK_AND_STEP_BEHAVIOR.withType(Pose3D.class).withSuffix("goal"));
+   public static final ROS2Topic<Pose3D> GOAL_COMMAND = GOAL.getCommandTopic();
+   public static final ROS2Topic<Pose3D> GOAL_STATUS = GOAL.getStatusTopic();
    /**
     * Robot will finish taking the current step, the goal will be cleared, and the behavior will wait for a new GOAL_INPUT.
     */
@@ -80,7 +83,6 @@ public class LookAndStepBehaviorAPI
    public static final MessagerAPIFactory.Topic<ArrayList<MinimalFootstep>> PlannedFootstepsForUI = topic("PlannedFootstepsForUI");
    public static final MessagerAPIFactory.Topic<ArrayList<MinimalFootstep>> LastCommandedFootsteps = topic("LastCommandedFootsteps");
    public static final MessagerAPIFactory.Topic<Pose3D> ClosestPointForUI = topic("ClosestPointForUI");
-   public static final MessagerAPIFactory.Topic<Pose3D> GoalForUI = topic("GoalForUI");
    public static final MessagerAPIFactory.Topic<Pose3D> SubGoalForUI = topic("SubGoalForUI");
    public static final MessagerAPIFactory.Topic<PlanarRegionsList> PlanarRegionsForUI = topic("PlanarRegionsForUI");
    public static final MessagerAPIFactory.Topic<PlanarRegionsList> ReceivedPlanarRegionsForUI = topic("ReceivedlanarRegionsForUI");

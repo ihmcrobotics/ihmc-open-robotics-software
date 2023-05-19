@@ -86,7 +86,7 @@ public class LookAndStepBehaviorUI extends JavaFXBehaviorUIInterface
       behaviorMessager.addTopicListener(CurrentState, state -> Platform.runLater(() -> behaviorState.setText(state)));
       behaviorMessager.addTopicListener(OperatorReviewEnabledToUI, enabled -> Platform.runLater(() -> operatorReviewCheckBox.setSelected(enabled)));
 
-      walkingGoalPlacementEditor.init(sceneNode, placeGoalButton, placedGoal -> ros2Publisher.publish(GOAL_INPUT, placedGoal));
+      walkingGoalPlacementEditor.init(sceneNode, placeGoalButton, placedGoal -> ros2Publisher.publish(GOAL_COMMAND, placedGoal));
 
       behaviorMessager.addTopicListener(ResetForUI, message -> lookAndStepVisualizationGroup.clearGraphics());
 

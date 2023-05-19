@@ -36,7 +36,7 @@ public class ImGuiTargetPlacementPanel
       messagerHelper = new MessagerHelper(BehaviorRegistry.getActiveRegistry().getMessagerAPI());
 
       executor.scheduleAtFixedRate(this::run, 0, 2000, TimeUnit.MILLISECONDS);
-      this.goalInputPublisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, LookAndStepBehaviorAPI.GOAL_INPUT);
+      this.goalInputPublisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, LookAndStepBehaviorAPI.GOAL_COMMAND);
       messagerHelper.subscribeViaCallback(LookAndStepBehaviorAPI.CurrentState, message -> {
          LogTools.info("Received State Message: {}", message);
          currentBehaviorState = message;

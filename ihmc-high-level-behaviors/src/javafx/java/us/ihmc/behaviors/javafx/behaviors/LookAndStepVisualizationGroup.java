@@ -56,7 +56,7 @@ public class LookAndStepVisualizationGroup extends Group
       messager.addTopicListener(PlanarRegionsForUI, planarRegionsGraphic::acceptPlanarRegions);
 
       goalGraphic = new PoseGraphic("Goal", Color.DEEPSKYBLUE, 0.03);
-      new IHMCROS2Callback<>(ros2Node, GOAL_INPUT, goal ->
+      new IHMCROS2Callback<>(ros2Node, GOAL_COMMAND, goal ->
       {
          Platform.runLater(() -> goalGraphic.setPose(goal));
       });

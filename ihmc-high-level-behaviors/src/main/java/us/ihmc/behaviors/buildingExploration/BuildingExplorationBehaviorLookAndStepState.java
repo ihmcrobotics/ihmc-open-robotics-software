@@ -9,7 +9,6 @@ import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -137,7 +136,7 @@ class BuildingExplorationBehaviorLookAndStepState implements State
 
          LogTools.info("Publishing goal pose: {}", bombPose);
 
-         helper.publish(LookAndStepBehaviorAPI.GOAL_INPUT, new Pose3D(bombPose));
+         helper.publish(LookAndStepBehaviorAPI.GOAL_COMMAND, new Pose3D(bombPose));
       }
       else if (!lookAndStepStarted)
       {
