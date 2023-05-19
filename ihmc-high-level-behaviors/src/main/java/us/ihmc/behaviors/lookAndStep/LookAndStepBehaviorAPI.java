@@ -75,14 +75,16 @@ public class LookAndStepBehaviorAPI
    public static final ROS2Topic<std_msgs.msg.dds.String> CURRENT_STATE = BASE_TOPIC.withType(std_msgs.msg.dds.String.class).withSuffix("current_state");
    public static final ROS2Topic<MinimalFootstepListMessage> IMMINENT_FOOT_POSES_FOR_UI = BASE_TOPIC.withType(MinimalFootstepListMessage.class)
                                                                                                     .withSuffix("imminent_foot_poses_for_ui");
+   public static final ROS2Topic<MinimalFootstepListMessage> PLANNED_FOOTSTEPS_FOR_UI = BASE_TOPIC.withType(MinimalFootstepListMessage.class)
+                                                                                                  .withSuffix("planned_footsteps_for_ui");
+   public static final ROS2Topic<MinimalFootstepListMessage> LAST_COMMANDED_FOOTSTEPS = BASE_TOPIC.withType(MinimalFootstepListMessage.class)
+                                                                                                  .withSuffix("last_commanded_footsteps");
 
    private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
    private static final MessagerAPIFactory.Category RootCategory = apiFactory.createRootCategory("LookAndStepBehavior");
    private static final MessagerAPIFactory.CategoryTheme LookAndStepTheme = apiFactory.createCategoryTheme("LookAndStep");
 
    // Visualization only topics
-   public static final MessagerAPIFactory.Topic<ArrayList<MinimalFootstep>> PlannedFootstepsForUI = topic("PlannedFootstepsForUI");
-   public static final MessagerAPIFactory.Topic<ArrayList<MinimalFootstep>> LastCommandedFootsteps = topic("LastCommandedFootsteps");
    public static final MessagerAPIFactory.Topic<Pose3D> ClosestPointForUI = topic("ClosestPointForUI");
    public static final MessagerAPIFactory.Topic<Pose3D> SubGoalForUI = topic("SubGoalForUI");
    public static final MessagerAPIFactory.Topic<PlanarRegionsList> PlanarRegionsForUI = topic("PlanarRegionsForUI");

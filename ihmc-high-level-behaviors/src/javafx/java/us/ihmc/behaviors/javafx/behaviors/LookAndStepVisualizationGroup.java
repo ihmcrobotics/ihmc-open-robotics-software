@@ -43,13 +43,7 @@ public class LookAndStepVisualizationGroup extends Group
       startAndGoalFootPoses.setTransparency(0.4);
       footstepPlanGraphic = new FootstepPlanGraphic();
       footstepPlanGraphic.setTransparency(0.2);
-      messager.addTopicListener(PlannedFootstepsForUI, footsteps ->
-      {
-         reviewingBodyPath = false;
-         footstepPlanGraphic.generateMeshesAsynchronously(footsteps);
-      });
       commandedFootsteps = new FootstepPlanGraphic();
-      messager.addTopicListener(LastCommandedFootsteps, commandedFootsteps::generateMeshesAsynchronously);
 
       planarRegionsGraphic = new JavaFXLivePlanarRegionsGraphic(false);
       messager.addTopicListener(PlanarRegionsForUI, planarRegionsGraphic::acceptPlanarRegions);

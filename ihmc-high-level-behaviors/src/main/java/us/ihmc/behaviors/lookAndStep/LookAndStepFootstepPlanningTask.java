@@ -575,7 +575,7 @@ public class LookAndStepFootstepPlanningTask
          reducedPlan.setFinalTransferSplitFraction(fullPlan.getFinalTransferSplitFraction());
          reducedPlan.setFinalTransferWeightDistribution(fullPlan.getFinalTransferWeightDistribution());
 
-         uiPublisher.publishToUI(PlannedFootstepsForUI, MinimalFootstep.reduceFootstepPlanForUIMessager(reducedPlan, "Look and Step Planned"));
+         helper.publish(PLANNED_FOOTSTEPS_FOR_UI, MinimalFootstep.reduceFootstepPlanForUIROS2(reducedPlan, "Look and Step Planned"));
 
          updatePlannedFootstepDurations(reducedPlan, startFootPoses);
 
