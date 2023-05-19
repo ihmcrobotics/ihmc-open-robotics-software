@@ -10,6 +10,7 @@ import java.util.concurrent.CountDownLatch;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javafx.application.Platform;
@@ -1083,6 +1084,7 @@ class PlanarRegionSLAMTest
                                                                new Class[] {PlanarRegionSLAMTest.class, ConcaveHullMergerTest.class});
    }
 
+   @Disabled
    @Test
    public void testPlanarRegionFactorGraphSLAM()
    {

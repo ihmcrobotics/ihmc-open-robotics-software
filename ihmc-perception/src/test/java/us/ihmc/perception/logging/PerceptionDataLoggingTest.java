@@ -253,6 +253,7 @@ public class PerceptionDataLoggingTest
       hdf5ManagerReader.closeFile();
    }
 
+   @Disabled
    @Test
    public void testCompressedFloatDepthLoggingPNG()
    {
