@@ -130,7 +130,7 @@ public class RDXFFMPEGL515DepthLoggingDemo
             ImGui.text("System native byte order: " + ByteOrder.nativeOrder().toString());
             ffmpegLoggerDemoHelper.renderImGuiBasicInfo();
             ImGui.text("Image dimensions: " + imageWidth + " x " + imageHeight);
-            ffmpegLoggerDemoHelper.renderImGuiNativesLoaded();
+            ffmpegLoggerDemoHelper.renderImGuiWidgets();
          }
 
          @Override

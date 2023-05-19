@@ -73,7 +73,7 @@ public class RDXFFMPEGMP4LoggingDemo
 
             ffmpegLoggerDemoHelper.renderImGuiBasicInfo();
 
-            ffmpegLoggerDemoHelper.renderImGuiNativesLoaded();
+            ffmpegLoggerDemoHelper.renderImGuiWidgets();
          }
 
          private void prepareSourceImage()
