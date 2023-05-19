@@ -7,6 +7,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.slamWrapper.SlamWrapperNativeLibrary;
 import us.ihmc.perception.tools.PlanarRegionCuttingTools;
 import us.ihmc.perception.tools.PlaneRegistrationTools;
 import us.ihmc.perception.slamWrapper.SlamWrapper;
@@ -31,6 +32,11 @@ import java.util.*;
  */
 public class PlanarRegionMap
 {
+   static
+   {
+      SlamWrapperNativeLibrary.load();
+   }
+
    public enum MergingMode
    {
       FILTERING, SMOOTHING

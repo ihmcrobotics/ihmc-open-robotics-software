@@ -14,7 +14,6 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -116,7 +115,7 @@ public class RDXCameraCalibrationDemo
             LogTools.info("Default resolution: {} x {}", reportedImageWidth, reportedImageHeight);
             LogTools.info("Default fps: {}", reportedFPS);
 
-            backendName = BytedecoTools.stringFromByteBuffer(videoCapture.getBackendName());
+            backendName = videoCapture.getBackendName().getString();
 
             videoCapture.set(opencv_videoio.CAP_PROP_FRAME_WIDTH, imageWidth);
             videoCapture.set(opencv_videoio.CAP_PROP_FRAME_HEIGHT, imageHeight);

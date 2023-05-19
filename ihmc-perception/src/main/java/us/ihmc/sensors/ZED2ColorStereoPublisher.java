@@ -15,6 +15,7 @@ import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.perception.zedDriver.ZEDOpenDriver;
+import us.ihmc.perception.zedDriver.ZedDriverNativeLibrary;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
@@ -49,6 +50,11 @@ import java.util.function.Supplier;
 
 public class ZED2ColorStereoPublisher
 {
+   static
+   {
+      ZedDriverNativeLibrary.load();
+   }
+
    private final ROS2Helper ros2Helper;
    private final Supplier<ReferenceFrame> sensorFrameUpdater;
    private final FramePose3D cameraPose = new FramePose3D();
