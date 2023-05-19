@@ -112,9 +112,9 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
       operatorReviewEnabledInput = new AtomicReference<>();
       helper.subscribeViaCallback(OPERATOR_REVIEW_ENABLED_COMMAND, enabled ->
       {
-         LogTools.info("Received operator review enabled toggle message: {}", enabled);
+         LogTools.info("Received operator review enabled toggle message: {}", enabled.getData());
          operatorReviewEnabledInput.set(enabled.getData());
-         helper.publish(OPERATOR_REVIEW_ENABLED_STATUS, new Bool(enabled));
+         helper.publish(OPERATOR_REVIEW_ENABLED_STATUS, enabled.getData());
       });
       approvalNotification = helper.subscribeViaNotification(ReviewApproval);
 

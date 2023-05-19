@@ -125,7 +125,7 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    @Override
    public void publish(ROS2Topic<Bool> topic, boolean message)
    {
-      ros2PublisherMap.publish(topic, MessageTools.createBoolMessage(message));
+      ros2PublisherMap.publish(topic, message);
    }
 
    public ROS2NodeInterface getROS2NodeInterface()
