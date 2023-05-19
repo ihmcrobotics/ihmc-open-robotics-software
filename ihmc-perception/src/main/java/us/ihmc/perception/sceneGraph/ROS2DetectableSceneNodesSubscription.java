@@ -21,7 +21,6 @@ import java.util.List;
 public class ROS2DetectableSceneNodesSubscription
 {
    private final IHMCROS2Input<DetectableSceneNodesMessage> detectableSceneNodesSubscription;
-   private final boolean isOperator;
    private final List<DetectableSceneNode> detectableSceneNodes;
    private final FramePose3D nodePose = new FramePose3D();
    private final FramePose3D arUcoMarkerPose = new FramePose3D();
@@ -31,17 +30,12 @@ public class ROS2DetectableSceneNodesSubscription
 
    /**
     * @param ioQualifier If in the on-robot perception process, COMMAND, else STATUS
-    * @param isOperator  If this process will be acting as the operator, meaning they can override node poses
-    *                    Warning: The design supports having only one operator. If two operators override the
-    *                    pose of the same object, this method will fail and the scene graph will flicker.
     */
    public ROS2DetectableSceneNodesSubscription(List<DetectableSceneNode> detectableSceneNodes,
                                                ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
-                                               ROS2IOTopicQualifier ioQualifier,
-                                               boolean isOperator)
+                                               ROS2IOTopicQualifier ioQualifier)
    {
       this.detectableSceneNodes = detectableSceneNodes;
-      this.isOperator = isOperator;
 
       detectableSceneNodesSubscription = ros2PublishSubscribeAPI.subscribe(SceneGraphAPI.DETECTABLE_SCENE_NODES.getTopic(ioQualifier));
    }
@@ -82,16 +76,15 @@ public class ROS2DetectableSceneNodesSubscription
                   arUcoDetectableNode.getMarkerFrame().update();
                }
 
-               // We allow only the operator to change the "poseOverriddenByOperator" variable,
-               // to avoid conflicts and race conditions
-               if (!isOperator)
+               // If the node was recently modified by the operator, the node does not accept
+               // updates of this variable. This is to allow the operator's changes to propagate.
+               if (detectableSceneNode.noLongerFrozenByOperator())
                {
-                  // We'll always take the state of the operator's scene for this variable
                   detectableSceneNode.setPoseOverriddenByOperator(detectableSceneNodeMessage.getIsPoseOverriddenByOperator());
                }
 
                // If we just modified the override pose, wait for the timer to expire before accepting further changes.
-               if (!detectableSceneNode.getPoseOverriddenByOperator() || detectableSceneNode.readyForUpdates())
+               if (!detectableSceneNode.getPoseOverriddenByOperator() || detectableSceneNode.noLongerFrozenByOperator())
                {
                   MessageTools.toEuclid(detectableSceneNodeMessage.getTransformToWorld(), nodeToWorldTransform);
                   nodePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), nodeToWorldTransform);

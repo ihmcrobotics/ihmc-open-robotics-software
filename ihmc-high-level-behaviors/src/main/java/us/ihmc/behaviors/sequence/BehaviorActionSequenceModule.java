@@ -26,12 +26,9 @@ public class BehaviorActionSequenceModule
    {
       ROS2ControllerHelper ros2 = new ROS2ControllerHelper(PubSubImplementation.FAST_RTPS, "behavior_action_sequence", robotModel);
 
-      boolean isOperator = false;
-      boolean isPerceptionProcess = false;
       detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(predefinedSceneNodeLibrary.getDetectableSceneNodes(),
                                                                                   ros2,
-                                                                                  ROS2IOTopicQualifier.STATUS,
-                                                                                  isOperator);
+                                                                                  ROS2IOTopicQualifier.STATUS);
 
       ReferenceFrameLibrary referenceFrameLibrary = new ReferenceFrameLibrary();
       referenceFrameLibrary.addAll(predefinedSceneNodeLibrary.getReferenceFrames());

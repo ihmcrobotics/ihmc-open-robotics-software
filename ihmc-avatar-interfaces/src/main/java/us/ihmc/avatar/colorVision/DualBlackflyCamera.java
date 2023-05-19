@@ -222,12 +222,9 @@ public class DualBlackflyCamera
                                                                                        ROS2Tools.OBJECT_DETECTION_CAMERA_TO_PARENT_TUNING,
                                                                                        cameraTransformToParent);
 
-                  boolean isOperator = false;
-                  boolean isPerceptionProcess = true;
                   detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(predefinedSceneNodeLibrary.getDetectableSceneNodes(),
                                                                                               ros2Helper,
-                                                                                              ROS2IOTopicQualifier.COMMAND,
-                                                                                              isOperator);
+                                                                                              ROS2IOTopicQualifier.COMMAND);
                }
 
                remoteTunableCameraTransform.update();

@@ -91,12 +91,9 @@ public class RDXPerceptionSceneGraphDemo
                                                                       ros2Helper,
                                                                       onRobotPredefinedSceneNodeLibrary.getArUcoMarkerIDsToSizes());
 
-            boolean isOperator = false;
-            boolean isPerceptionProcess = true;
             detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(onRobotPredefinedSceneNodeLibrary.getDetectableSceneNodes(),
                                                                                         ros2Helper,
-                                                                                        ROS2IOTopicQualifier.COMMAND,
-                                                                                        isOperator);
+                                                                                        ROS2IOTopicQualifier.COMMAND);
             perceptionSceneGraphUI = new RDXPerceptionSceneGraphUI(operatorPredefinedSceneNodeLibrary, ros2Helper, baseUI.getPrimary3DPanel());
             baseUI.getPrimaryScene().addRenderableProvider(perceptionSceneGraphUI::getRenderables);
             baseUI.getImGuiPanelManager().addPanel(perceptionSceneGraphUI.getPanel());

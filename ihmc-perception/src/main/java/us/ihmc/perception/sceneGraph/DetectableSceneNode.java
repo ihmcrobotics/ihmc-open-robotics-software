@@ -10,6 +10,12 @@ import us.ihmc.tools.Timer;
  */
 public abstract class DetectableSceneNode extends SceneNode
 {
+   /**
+    * Scene nodes are usually being synced at 20 Hz or faster, so 1/5 of a second
+    * should allow enough time for changes to propagate.
+    */
+   public static final double OPERATOR_FREEZE_TIME = 0.2;
+
    private boolean currentlyDetected;
    /**
     * We allow the operator to override the pose of a detectable scene node.
@@ -18,7 +24,12 @@ public abstract class DetectableSceneNode extends SceneNode
     */
    private boolean isPoseOverriddenByOperator = false;
    private final FramePose3D storedOverriddenPose = new FramePose3D();
-   private final Timer overridePoseModifiedTimer = new Timer();
+   /**
+    * This timer is used in the case that an operator can "mark modified" this node's
+    * data so it won't accept updates from other sources for a short period of time.
+    * This is to allow the changes to propagate elsewhere.
+    */
+   private final Timer modifiedTimer = new Timer();
 
    public DetectableSceneNode(String name)
    {
@@ -64,13 +75,13 @@ public abstract class DetectableSceneNode extends SceneNode
       getNodeFrame().update();
    }
 
-   public void markOverridePoseModified()
+   public void markModifiedByOperator()
    {
-      overridePoseModifiedTimer.reset();
+      modifiedTimer.reset();
    }
 
-   public boolean readyForUpdates()
+   public boolean noLongerFrozenByOperator()
    {
-      return !overridePoseModifiedTimer.isRunning(0.2);
+      return !modifiedTimer.isRunning(OPERATOR_FREEZE_TIME);
    }
 }
