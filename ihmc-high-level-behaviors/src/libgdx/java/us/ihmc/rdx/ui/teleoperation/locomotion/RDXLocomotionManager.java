@@ -205,6 +205,11 @@ public class RDXLocomotionManager
 
    public void renderImGuiWidgets()
    {
+      // Used to calculate whether the Walking Options buttons are active or disabled. This ensures that when the space bar is pressed it executes the correct aciton.
+      boolean pauseAvailable = controllerStatusTracker.isWalking();
+      boolean walkAvailable = interactableFootstepPlan.getNumberOfFootsteps() > 0 && !pauseWalkingMessage.getPause();
+      boolean continueAvailable = pauseWalkingMessage.getPause() && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0;
+
       areFootstepsAdjustableCheckbox.renderImGuiWidget();
       swingTimeSlider.renderImGuiWidget();
       transferTimeSlider.renderImGuiWidget();
@@ -213,7 +218,7 @@ public class RDXLocomotionManager
       ImGui.text("Walking Options:");
       ImGui.sameLine();
 
-      ImGui.beginDisabled(interactableFootstepPlan.getNumberOfFootsteps() == 0);
+      ImGui.beginDisabled(!walkAvailable);
       if (ImGui.button(labels.get("Walk")))
       { // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
          interactableFootstepPlan.walkFromSteps();
@@ -222,7 +227,7 @@ public class RDXLocomotionManager
       ImGui.sameLine();
       ImGui.endDisabled();
 
-      ImGui.beginDisabled(!controllerStatusTracker.isWalking());
+      ImGui.beginDisabled(!pauseAvailable);
       if (ImGui.button(labels.get("Pause")))
       {
          setPauseWalkingAndPublish(true);
@@ -231,7 +236,7 @@ public class RDXLocomotionManager
       ImGui.sameLine();
       ImGui.endDisabled();
 
-      ImGui.beginDisabled(!pauseWalkingMessage.getPause() || controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() == 0);
+      ImGui.beginDisabled(!continueAvailable);
       if (ImGui.button(labels.get("Continue")))
       {
          setPauseWalkingAndPublish(false);
@@ -273,13 +278,13 @@ public class RDXLocomotionManager
       // Handles all shortcuts for when the spacebar is pressed
       if (ImGui.isKeyReleased(ImGuiTools.getSpaceKey()))
       {
-         if (interactableFootstepPlan.getNumberOfFootsteps() > 0)
+         if (walkAvailable)
          {
             interactableFootstepPlan.walkFromSteps();
          }
          else
          {
-            // Gets the robot walking state and sets it to the opposite value
+            // Get the robot walking state and sets it to the opposite value
             setPauseWalkingAndPublish(!pauseWalkingMessage.getPause());
          }
       }
