@@ -111,6 +111,28 @@ public class MinimalFootstep
       return minimalFootsteps;
    }
 
+   public static MinimalFootstepListMessage convertToMinimalFootstepListMessage(FootstepDataListMessage footstepDataListMessage, String description)
+   {
+      MinimalFootstepListMessage minimalFootsteps = new MinimalFootstepListMessage();
+      int size = footstepDataListMessage.getFootstepDataList().size();
+      for (int i = 0; i < size; i++)
+      {
+         FootstepDataMessage footstep = footstepDataListMessage.getFootstepDataList().get(i);
+         MinimalFootstepMessage minimalFootstep = minimalFootsteps.getMinimalFootsteps().add();
+         for (Point3D contactPoint : footstep.getPredictedContactPoints2d())
+         {
+            Point2DMessage vertex = minimalFootstep.getSupportPolygon().add();
+            vertex.setX(contactPoint.getX());
+            vertex.setY(contactPoint.getY());
+         }
+         minimalFootstep.setRobotSide(footstep.getRobotSide());
+         minimalFootstep.getPosition().set(footstep.getLocation());
+         minimalFootstep.getOrientation().set(footstep.getOrientation());
+         minimalFootstep.setDescription( i == size - 1 ? description : "");
+      }
+      return minimalFootsteps;
+   }
+
    public static ArrayList<MinimalFootstep> convertMinimalFootstepListMessage(MinimalFootstepListMessage minimalFootstepListMessage)
    {
       ArrayList<MinimalFootstep> minimalFootsteps = new ArrayList<>();

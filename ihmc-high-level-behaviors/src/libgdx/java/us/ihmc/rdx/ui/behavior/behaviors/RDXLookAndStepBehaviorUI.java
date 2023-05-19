@@ -52,8 +52,6 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    public static final RDXBehaviorUIDefinition DEFINITION = new RDXBehaviorUIDefinition(LookAndStepBehavior.DEFINITION,
                                                                                         RDXLookAndStepBehaviorUI::new);
    private final BehaviorHelper helper;
-   private final AtomicReference<ArrayList<MinimalFootstep>> latestPlannedFootsteps;
-   private final AtomicReference<ArrayList<MinimalFootstep>> latestCommandedFootsteps;
    private String currentState = "";
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean operatorReview = new ImBoolean(true);
@@ -125,15 +123,16 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       commandedFootstepsGraphic = new RDXFootstepPlanGraphic(helper.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints());
       startAndGoalFootstepsGraphic = new RDXFootstepPlanGraphic(helper.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints());
       footstepPlanGraphic.setTransparency(0.2);
-      latestPlannedFootsteps = helper.subscribeViaReference(PlannedFootstepsForUI, new ArrayList<>());
-      latestCommandedFootsteps = helper.subscribeViaReference(LastCommandedFootsteps, new ArrayList<>());
-      helper.subscribeViaCallback(PlannedFootstepsForUI, footsteps ->
+      helper.subscribeViaCallback(PLANNED_FOOTSTEPS_FOR_UI, footsteps ->
       {
          reviewingBodyPath = false;
-         numberOfPlannedSteps = footsteps.size();
-         footstepPlanGraphic.generateMeshesAsync(footsteps);
+         numberOfPlannedSteps = footsteps.getMinimalFootsteps().size();
+         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.convertMinimalFootstepListMessage(footsteps));
       });
-      helper.subscribeViaCallback(LastCommandedFootsteps, commandedFootstepsGraphic::generateMeshesAsync);
+      helper.subscribeViaCallback(LAST_COMMANDED_FOOTSTEPS, footsteps ->
+      {
+         commandedFootstepsGraphic.generateMeshesAsync(MinimalFootstep.convertMinimalFootstepListMessage(footsteps));
+      });
       startAndGoalFootstepsGraphic.setColor(RobotSide.LEFT, Color.BLUE);
       startAndGoalFootstepsGraphic.setColor(RobotSide.RIGHT, Color.BLUE);
       startAndGoalFootstepsGraphic.setTransparency(0.4);
