@@ -70,10 +70,7 @@ public class RDXNettyOusterUI
       ouster = new NettyOuster();
       ouster.setOnFrameReceived(this::onFrameReceived);
       ouster.bind();
-   }
 
-   public void createAfterNativesLoaded()
-   {
       openCLManager = new OpenCLManager();
       ousterFisheyeKernel = new RDXOusterFisheyeColoredPointCloudKernel(openCLManager);
    }

@@ -72,7 +72,7 @@ public class RDXFFMPEGVP9LoggingDemo
             ImGui.text("Resolution: " + WIDTH + " x " + HEIGHT);
 
             ffmpegLoggerDemoHelper.renderImGuiBasicInfo();
-            ffmpegLoggerDemoHelper.renderImGuiNativesLoaded();
+            ffmpegLoggerDemoHelper.renderImGuiWidgets();
          }
 
          private void prepareSourceImage()

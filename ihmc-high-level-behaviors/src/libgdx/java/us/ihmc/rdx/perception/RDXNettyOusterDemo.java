@@ -22,8 +22,6 @@ public class RDXNettyOusterDemo
 
             ImGuiPanel panel = new ImGuiPanel("Ouster", nettyOusterUI::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
-
-            nettyOusterUI.createAfterNativesLoaded();
          }
 
          /**

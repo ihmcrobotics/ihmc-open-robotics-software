@@ -137,7 +137,7 @@ public class RDXFFMPEGWebcamLoggingDemo
             readPerformancePlot.renderImGuiWidgets();
             readFrequencyPlot.renderImGuiWidgets();
 
-            ffmpegLoggerDemoHelper.renderImGuiNativesLoaded();
+            ffmpegLoggerDemoHelper.renderImGuiWidgets();
          }
 
          @Override
