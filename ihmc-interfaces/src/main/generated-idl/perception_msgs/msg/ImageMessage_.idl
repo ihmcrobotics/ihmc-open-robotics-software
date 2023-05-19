@@ -51,11 +51,11 @@ module perception_msgs
          */
         octet format;
         /**
-         * Position of the focal point at sensor data aquisition
+         * Position of the focal point at sensor data acquisition
          */
         geometry_msgs::msg::dds::Point position;
         /**
-         * Orientation of the focal point at sensor data aquisition
+         * Orientation of the focal point at sensor data acquisition
          */
         geometry_msgs::msg::dds::Quaternion orientation;
         /**
