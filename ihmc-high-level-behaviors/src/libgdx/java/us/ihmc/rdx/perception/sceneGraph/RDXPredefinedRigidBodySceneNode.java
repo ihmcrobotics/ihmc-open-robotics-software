@@ -61,7 +61,11 @@ public class RDXPredefinedRigidBodySceneNode
                                                        predefinedRigidBodySceneNode.getNodeToParentFrameTransform());
       overridePoseGizmo.createAndSetupDefault(panel3D);
       overridePoseWrapper = new ImBooleanWrapper(predefinedRigidBodySceneNode::getPoseOverriddenByOperator,
-                                                 predefinedRigidBodySceneNode::setPoseOverriddenByOperator,
+                                                 poseOverriddenByOperator ->
+                                                 {
+                                                    predefinedRigidBodySceneNode.setPoseOverriddenByOperator(poseOverriddenByOperator);
+                                                    predefinedRigidBodySceneNode.markModifiedByOperator();
+                                                 },
                                                  imBoolean -> ImGui.checkbox(labels.get("Override pose"), imBoolean));
 
       int bufferSize = 1000;
@@ -79,7 +83,7 @@ public class RDXPredefinedRigidBodySceneNode
 
       if (overridePoseGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
       {
-         sceneNode.markOverridePoseModified();
+         sceneNode.markModifiedByOperator();
       }
 
       nodePose.setToZero(sceneNode.getNodeFrame());
@@ -106,7 +110,7 @@ public class RDXPredefinedRigidBodySceneNode
       {
          sceneNode.getNodeToParentFrameTransform().set(originalTransformToParent);
          sceneNode.getNodeFrame().update();
-         sceneNode.markOverridePoseModified();
+         sceneNode.markModifiedByOperator();
       }
       ImGui.endDisabled();
 

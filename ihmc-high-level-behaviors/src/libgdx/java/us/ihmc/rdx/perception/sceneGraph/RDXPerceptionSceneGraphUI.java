@@ -40,12 +40,9 @@ public class RDXPerceptionSceneGraphUI
       this.predefinedSceneNodeLibrary = predefinedSceneNodeLibrary;
       this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
 
-      boolean isOperator = true;
-      boolean isPerceptionProcess = false;
       detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(predefinedSceneNodeLibrary.getDetectableSceneNodes(),
                                                                                   ros2PublishSubscribeAPI,
-                                                                                  ROS2IOTopicQualifier.STATUS,
-                                                                                  isOperator);
+                                                                                  ROS2IOTopicQualifier.STATUS);
 
       for (DetectableSceneNode detectableSceneNode : predefinedSceneNodeLibrary.getDetectableSceneNodes())
       {
