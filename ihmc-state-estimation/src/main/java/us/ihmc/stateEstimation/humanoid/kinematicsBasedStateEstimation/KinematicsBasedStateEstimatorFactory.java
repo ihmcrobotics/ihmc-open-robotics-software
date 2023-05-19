@@ -196,7 +196,7 @@ public class KinematicsBasedStateEstimatorFactory
       return estimator;
    }
 
-   private FullInverseDynamicsStructure createFullInverseDynamicsStructure(FullHumanoidRobotModel fullRobotModel)
+   public static FullInverseDynamicsStructure createFullInverseDynamicsStructure(FullHumanoidRobotModel fullRobotModel)
    {
       RigidBodyBasics elevator = fullRobotModel.getElevator();
       FloatingJointBasics rootInverseDynamicsJoint = fullRobotModel.getRootJoint();

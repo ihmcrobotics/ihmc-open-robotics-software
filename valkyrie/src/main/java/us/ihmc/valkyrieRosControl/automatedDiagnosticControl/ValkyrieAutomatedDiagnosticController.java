@@ -47,6 +47,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.KinematicsBasedStateEstimatorFactory;
 import us.ihmc.tools.SettableTimestampProvider;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -55,7 +56,6 @@ import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlSensorReader;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlSensorReaderFactory;
-import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticConfiguration;
@@ -262,7 +262,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
                                                          SensorOutputMapReadOnly sensorOutputMapReadOnly,
                                                          FullHumanoidRobotModel fullRobotModel)
    {
-      FullInverseDynamicsStructure inverseDynamicsStructure = DRCControllerThread.createInverseDynamicsStructure(fullRobotModel);
+      FullInverseDynamicsStructure inverseDynamicsStructure = KinematicsBasedStateEstimatorFactory.createFullInverseDynamicsStructure(fullRobotModel);
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
       HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
