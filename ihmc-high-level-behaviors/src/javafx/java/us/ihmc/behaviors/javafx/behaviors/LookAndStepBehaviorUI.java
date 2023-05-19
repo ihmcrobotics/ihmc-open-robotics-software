@@ -118,12 +118,12 @@ public class LookAndStepBehaviorUI extends JavaFXBehaviorUIInterface
 
    private void publishFootstepPlanningParameters()
    {
-      getBehaviorMessager().submitMessage(FootstepPlannerParameters, footstepPlannerParameters.getAllAsStrings());
+
    }
 
    private void publishSwingPlanningParameters()
    {
-      getBehaviorMessager().submitMessage(SwingPlannerParameters, swingPlannerParameters.getAllAsStrings());
+
    }
 
    @FXML public void placeGoalButton()

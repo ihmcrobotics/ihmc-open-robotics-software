@@ -15,7 +15,6 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
@@ -100,7 +99,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    public RDXLookAndStepBehaviorUI(BehaviorHelper helper)
    {
       this.helper = helper;
-      helper.subscribeViaCallback(CurrentState, state -> currentState = state);
+      helper.subscribeViaCallback(CURRENT_STATE, state -> currentState = state.getDataAsString());
       helper.subscribeViaCallback(OPERATOR_REVIEW_ENABLED_STATUS, message -> operatorReview.set(message.getData()));
       helper.subscribeViaCallback(PlanarRegionsForUI, regions ->
       {
