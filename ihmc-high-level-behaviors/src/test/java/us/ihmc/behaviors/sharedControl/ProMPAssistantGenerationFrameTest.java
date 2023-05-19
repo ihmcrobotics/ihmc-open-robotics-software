@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.sharedControl;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -22,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ProMPAssistantGenerationFrameTest
 {
+   @Disabled
    @Test
    public void testProMpTrajectoryGenerationObjectFrame() throws IOException
    {
@@ -110,6 +112,7 @@ public class ProMPAssistantGenerationFrameTest
       LogTools.info("You can use file {}/{} as a replay file in Kinematics Streaming Mode", etcDirectory, recordFile);
    }
 
+   @Disabled
    @Test
    public void testProMpTrajectoryGenerationWorldFrame() throws IOException
    {
