@@ -397,8 +397,7 @@ public class SCS2AvatarSimulationFactory
                                                     contextDataFactory,
                                                     null,
                                                     ros2Node,
-                                                    gravity.get(),
-                                                    robotModel.get().getEstimatorDT());
+                                                    gravity.get());
       if (enableSCS1YoGraphics.get())
          simulationConstructionSet.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(controllerThread.getSCS1YoGraphicsListRegistry()));
       if (enableSCS2YoGraphics.get())

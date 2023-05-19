@@ -309,8 +309,7 @@ public class AvatarSimulationFactory
                                                     contextDataFactory,
                                                     simulationOutputProcessor,
                                                     realtimeROS2Node.get(),
-                                                    gravity.get(),
-                                                    robotModel.get().getEstimatorDT());
+                                                    gravity.get());
    }
 
    private void setupStepGeneratorThread()

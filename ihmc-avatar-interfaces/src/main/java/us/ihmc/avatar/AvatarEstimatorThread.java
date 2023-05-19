@@ -28,6 +28,7 @@ import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -215,5 +216,10 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
    public HumanoidRobotContextData getHumanoidRobotContextData()
    {
       return humanoidRobotContextData;
+   }
+
+   public ForceSensorCalibrationModule getForceSensorCalibrationModule()
+   {
+      return mainStateEstimator.getForceSensorCalibrationModule();
    }
 }
