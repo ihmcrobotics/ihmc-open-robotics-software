@@ -38,7 +38,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SCS2YoGraphicHolder
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoRegistry registry;

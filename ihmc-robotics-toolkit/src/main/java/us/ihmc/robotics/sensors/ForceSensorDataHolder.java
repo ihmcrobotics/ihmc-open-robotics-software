@@ -2,7 +2,7 @@ package us.ihmc.robotics.sensors;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -10,14 +10,13 @@ import java.util.Objects;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
-import us.ihmc.yoVariables.exceptions.IllegalOperationException;
 
 public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Settable<ForceSensorDataHolder>
 {
    private final List<ForceSensorDefinition> forceSensorDefinitions = new ArrayList<>();
    private final List<ForceSensorData> forceSensorDatas = new ArrayList<>();
 
-   private final transient Map<String, ForceSensorPackage> sensorNameToDefintionMap = new HashMap<>();
+   private final transient Map<String, ForceSensorPackage> sensorNameToDefintionMap = new LinkedHashMap<>();
 
    public ForceSensorDataHolder()
    {
@@ -39,31 +38,30 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
       }
    }
 
+   public void clear()
+   {
+      forceSensorDefinitions.clear();
+      forceSensorDatas.clear();
+   }
+
    public ForceSensorData registerForceSensor(ForceSensorDefinition forceSensorDefinition)
    {
       String sensorName = forceSensorDefinition.getSensorName();
       ForceSensorPackage sensorPackage = sensorNameToDefintionMap.get(sensorName);
 
-      if (sensorPackage != null)
-         throw new IllegalOperationException("Force sensor (%s) has already been registered.".formatted(forceSensorDefinition.getSensorFrame()));
+      if (sensorPackage == null)
+      {
+         sensorPackage = new ForceSensorPackage(forceSensorDefinition);
+         sensorNameToDefintionMap.put(sensorName, sensorPackage);
+      }
+      else
+      {
+         sensorPackage.definition.set(forceSensorDefinition);
+      }
 
-      sensorPackage = new ForceSensorPackage(forceSensorDefinition);
-      sensorNameToDefintionMap.put(sensorName, sensorPackage);
       forceSensorDefinitions.add(sensorPackage.definition);
       forceSensorDatas.add(sensorPackage.data);
       return sensorPackage.data;
-   }
-
-   public void registerForceSensor(ForceSensorDefinition forceSensorDefinition, ForceSensorDataReadOnly forceSensorData)
-   {
-      registerForceSensor(forceSensorDefinition).set(forceSensorData);
-   }
-
-   public void clear()
-   {
-      forceSensorDefinitions.clear();
-      forceSensorDatas.clear();
-      sensorNameToDefintionMap.clear();
    }
 
    @Override
@@ -105,16 +103,24 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
    @Override
    public void set(ForceSensorDataHolder other)
    {
-      set((ForceSensorDataHolderReadOnly) other);
+      clear();
+
+      for (int i = 0; i < other.getForceSensorDefinitions().size(); i++)
+      {
+         ForceSensorDefinition definition = other.getForceSensorDefinitions().get(i);
+         ForceSensorData data = other.getForceSensorDatas().get(i);
+         registerForceSensor(definition).set(data);
+      }
    }
 
    public void set(ForceSensorDataHolderReadOnly other)
    {
       clear();
+
       for (int i = 0; i < other.getForceSensorDefinitions().size(); i++)
       {
          ForceSensorDefinition forceSensorDefinition = other.getForceSensorDefinitions().get(i);
-         registerForceSensor(forceSensorDefinition, other.getData(forceSensorDefinition));
+         registerForceSensor(forceSensorDefinition).set(other.getData(forceSensorDefinition));
       }
    }
 
@@ -181,9 +187,9 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
    @Override
    public String toString()
    {
-      return "Force sensor data [\n"
-             + EuclidCoreIOTools.getCollectionString("\n\t",
-                                                     "]",
+      return "Force sensor data: "
+             + EuclidCoreIOTools.getCollectionString("[\n\t",
+                                                     "\n]",
                                                      "\n\t",
                                                      forceSensorDatas,
                                                      data -> "sensorName=" + data.getSensorName() + ", value=" + Arrays.toString(data.getWrenchMatrix().data));
