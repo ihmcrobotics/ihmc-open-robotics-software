@@ -9,7 +9,6 @@ import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 import org.bytedeco.opencv.opencv_videoio.VideoWriter;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -67,7 +66,7 @@ public class RDXFFMPEGWebcamLoggingDemo
             LogTools.info("Default resolution: {} x {}", imageWidth, imageHeight);
             LogTools.info("Default fps: {}", reportedFPS);
 
-            backendName = BytedecoTools.stringFromByteBuffer(videoCapture.getBackendName());
+            backendName = videoCapture.getBackendName().getString();
 
             //                  videoCapture.set(opencv_videoio.CAP_PROP_FRAME_WIDTH, 1920.0);
             //                  videoCapture.set(opencv_videoio.CAP_PROP_FRAME_HEIGHT, 1080.0);

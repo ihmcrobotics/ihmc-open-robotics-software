@@ -7,7 +7,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 import org.bytedeco.opencv.opencv_videoio.VideoWriter;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVGuidedSwapVideoPanel;
@@ -47,7 +46,7 @@ public class RDXOpenCVWebcamReader
       LogTools.info("Default resolution: {} x {}", reportedImageWidth, reportedImageHeight);
       LogTools.info("Default fps: {}", reportedFPS);
 
-      backendName = BytedecoTools.stringFromByteBuffer(videoCapture.getBackendName());
+      backendName = videoCapture.getBackendName().getString();
 
       // Set buffer size low to make sure not to get backed up
       videoCapture.set(opencv_videoio.CAP_PROP_BUFFERSIZE, 2);
