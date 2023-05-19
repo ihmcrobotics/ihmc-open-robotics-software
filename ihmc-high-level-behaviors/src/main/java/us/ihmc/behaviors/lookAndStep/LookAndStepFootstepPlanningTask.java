@@ -174,7 +174,7 @@ public class LookAndStepFootstepPlanningTask
                                  () -> capturabilityBasedStatusReceptionTimerSnapshot.isExpired());
          suppressor.addCondition(() -> "No capturability based status. ", () -> capturabilityBasedStatus == null);
          suppressor.addCondition(() -> "No localization result. ", () -> localizationResult == null);
-         TypedNotification<Boolean> reviewApprovalNotification = lookAndStep.helper.subscribeViaNotification(ReviewApproval);
+         TypedNotification<Boolean> reviewApprovalNotification = lookAndStep.helper.subscribeViaBooleanNotification(REVIEW_APPROVAL);
          Supplier<Boolean> operatorJustRejected = () -> reviewApprovalNotification.poll() && !reviewApprovalNotification.read();
          suppressor.addCondition("Planner failed and operator is reviewing and hasn't just rejected.",
                                  () -> plannerFailedLastTime.get() && operatorReviewEnabledSupplier.get() && !operatorJustRejected.get());

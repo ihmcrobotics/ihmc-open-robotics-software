@@ -116,7 +116,7 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
          operatorReviewEnabledInput.set(enabled.getData());
          helper.publish(OPERATOR_REVIEW_ENABLED_STATUS, enabled.getData());
       });
-      approvalNotification = helper.subscribeViaNotification(ReviewApproval);
+      approvalNotification = helper.subscribeViaBooleanNotification(REVIEW_APPROVAL);
 
       // Trying to hold a lot of the state here? TODO: In general, where to put what state?
       imminentStanceTracker = new LookAndStepImminentStanceTracker(helper);

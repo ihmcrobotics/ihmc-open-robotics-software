@@ -133,12 +133,12 @@ public class LookAndStepBehaviorUI extends JavaFXBehaviorUIInterface
 
    @FXML public void approve()
    {
-      getBehaviorMessager().submitMessage(ReviewApproval, true);
+      ros2Publisher.publish(REVIEW_APPROVAL, true);
    }
 
    @FXML public void reject()
    {
-      getBehaviorMessager().submitMessage(ReviewApproval, false);
+      ros2Publisher.publish(REVIEW_APPROVAL, false);
       if (lookAndStepVisualizationGroup.isReviewingBodyPath())
          lookAndStepVisualizationGroup.clearBodyPathPlanGraphic();
       else
