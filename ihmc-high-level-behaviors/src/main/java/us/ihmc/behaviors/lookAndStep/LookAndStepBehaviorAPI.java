@@ -81,14 +81,26 @@ public class LookAndStepBehaviorAPI
                                                                                                   .withSuffix("last_commanded_footsteps");
    public static final ROS2Topic<Pose3D> CLOSEST_POINT_FOR_UI = BASE_TOPIC.withType(Pose3D.class).withSuffix("closest_point_for_ui");
    public static final ROS2Topic<Pose3D> SUB_GOAL_FOR_UI = BASE_TOPIC.withType(Pose3D.class).withSuffix("sub_goal_for_ui");
+   /**
+    * The planar regions that are being used for footstep planning.
+    * These are important to inspect the regions used, to figure out why planning went wrong
+    * or something.
+    */
+   public static final ROS2Topic<PlanarRegionsListMessage> PLANAR_REGIONS_FOR_UI = BASE_TOPIC.withType(PlanarRegionsListMessage.class)
+                                                                                             .withSuffix("planar_regions_for_ui");
+   /**
+    * The latest set of planar regions received by the behavior; regardless if being used.
+    * This topic is useful to just see if the behavior is getting regions data and see
+    * approximately the rate, quality, and jitter of them.
+    */
+   public static final ROS2Topic<PlanarRegionsListMessage> RECEIVED_PLANAR_REGIONS_FOR_UI = BASE_TOPIC.withType(PlanarRegionsListMessage.class)
+                                                                                                      .withSuffix("received_planar_regions_for_ui");
 
    private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
    private static final MessagerAPIFactory.Category RootCategory = apiFactory.createRootCategory("LookAndStepBehavior");
    private static final MessagerAPIFactory.CategoryTheme LookAndStepTheme = apiFactory.createCategoryTheme("LookAndStep");
 
    // Visualization only topics
-   public static final MessagerAPIFactory.Topic<PlanarRegionsList> PlanarRegionsForUI = topic("PlanarRegionsForUI");
-   public static final MessagerAPIFactory.Topic<PlanarRegionsList> ReceivedPlanarRegionsForUI = topic("ReceivedlanarRegionsForUI");
    public static final MessagerAPIFactory.Topic<Boolean> ImpassibilityDetected = topic("ImpassibilityDetected");
    public static final MessagerAPIFactory.Topic<Boolean> PlanningFailed = topic("PlanningFailed");
    public static final MessagerAPIFactory.Topic<MutablePair<Pose3D, Vector3D>> Obstacle = topic("Obstacle");

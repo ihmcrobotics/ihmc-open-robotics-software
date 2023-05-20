@@ -141,7 +141,7 @@ public class LookAndStepBodyPathPlanningTask
 //         }
          suppressor.addCondition("No goal specified",
                                  () -> !(goal != null && !goal.containsNaN()),
-                                 () -> uiPublisher.publishToUI(PlanarRegionsForUI, mapRegions));
+                                 () -> helper.publish(PLANAR_REGIONS_FOR_UI, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(mapRegions)));
 //         suppressor.addCondition(() -> "Regions expired. haveReceivedAny: " + mapRegionsReceptionTimerSnapshot.hasBeenSet()
 //                                       + " timeSinceLastUpdate: " + mapRegionsReceptionTimerSnapshot.getTimePassedSinceReset(),
 //                                 () -> mapRegionsReceptionTimerSnapshot.isExpired());
@@ -239,7 +239,7 @@ public class LookAndStepBodyPathPlanningTask
       {
          if (mapRegions != null)
          {
-            uiPublisher.publishToUI(PlanarRegionsForUI, mapRegions);
+            helper.publish(PLANAR_REGIONS_FOR_UI, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(mapRegions));
             result = performTaskWithVisibilityGraphPlanner();
          }
          else
