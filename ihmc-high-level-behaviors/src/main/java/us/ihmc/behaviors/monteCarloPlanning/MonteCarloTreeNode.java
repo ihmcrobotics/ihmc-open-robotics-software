@@ -6,8 +6,8 @@ import java.util.ArrayList;
 
 public class MonteCarloTreeNode
 {
-   private final AgentState agent;
-   private WorldState world;
+   private final Agent agent;
+   private World world;
    private MonteCarloTreeNode parent;
    private ArrayList<MonteCarloTreeNode> children;
 
@@ -17,9 +17,10 @@ public class MonteCarloTreeNode
 
    float exploration_weight = 2.0f;
 
-   public MonteCarloTreeNode(Point2D state)
+   public MonteCarloTreeNode(Point2D state, MonteCarloTreeNode parent)
    {
-      this.agent = new AgentState(state);
+      this.parent = parent;
+      this.agent = new Agent(state);
       children = new ArrayList<>();
    }
 
@@ -44,14 +45,44 @@ public class MonteCarloTreeNode
       return children;
    }
 
-   public AgentState getAgentState()
+   public Agent getAgentState()
    {
       return agent;
    }
 
-   public WorldState getWorldState()
+   public World getWorldState()
    {
       return world;
+   }
+
+   public int getVisits()
+   {
+      return visits;
+   }
+
+   public float getValue()
+   {
+      return value;
+   }
+
+   public void setValue(float value)
+   {
+      this.value = value;
+   }
+
+   public void setVisits(int visits)
+   {
+      this.visits = visits;
+   }
+
+   public void setWorldState(World world)
+   {
+      this.world = world;
+   }
+
+   public MonteCarloTreeNode getParent()
+   {
+      return parent;
    }
 
 }
