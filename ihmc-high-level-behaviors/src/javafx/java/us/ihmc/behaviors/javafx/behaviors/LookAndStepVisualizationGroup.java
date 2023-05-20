@@ -14,7 +14,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2NodeInterface;
 
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
-import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.BodyPathPlanForUI;
 
 public class LookAndStepVisualizationGroup extends Group
 {
@@ -57,11 +56,6 @@ public class LookAndStepVisualizationGroup extends Group
       subGoalGraphic = new PoseGraphic("Sub goal", Color.YELLOW, 0.027);
 
       bodyPathPlanGraphic = new BodyPathPlanGraphic();
-      messager.addTopicListener(BodyPathPlanForUI, bodyPathPlan ->
-      {
-         reviewingBodyPath = true;
-         Platform.runLater(() -> bodyPathPlanGraphic.generateMeshesAsynchronously(bodyPathPlan));
-      });
    }
 
    public void setEnabled(boolean enabled)

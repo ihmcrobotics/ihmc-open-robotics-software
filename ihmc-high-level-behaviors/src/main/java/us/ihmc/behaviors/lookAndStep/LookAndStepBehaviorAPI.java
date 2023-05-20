@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.lookAndStep;
 
 import behavior_msgs.msg.dds.MinimalFootstepListMessage;
+import ihmc_common_msgs.msg.dds.Box3DMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
@@ -97,14 +98,14 @@ public class LookAndStepBehaviorAPI
                                                                                                       .withSuffix("received_planar_regions_for_ui");
    public static final ROS2Topic<Bool> IMPASSIBILITY_DETECTED = BASE_TOPIC.withType(Bool.class).withSuffix("impassibility_detected");
    public static final ROS2Topic<Bool> PLANNING_FAILED = BASE_TOPIC.withType(Bool.class).withSuffix("planning_failed");
+   public static final ROS2Topic<Box3DMessage> OBSTACLE = BASE_TOPIC.withType(Box3DMessage.class).withSuffix("obstacle");
+   public static final ROS2Topic<PoseListMessage> BODY_PATH_PLAN_FOR_UI = BASE_TOPIC.withType(PoseListMessage.class).withSuffix("body_path_plan_for_ui");
 
    private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
    private static final MessagerAPIFactory.Category RootCategory = apiFactory.createRootCategory("LookAndStepBehavior");
    private static final MessagerAPIFactory.CategoryTheme LookAndStepTheme = apiFactory.createCategoryTheme("LookAndStep");
 
    // Visualization only topics
-   public static final MessagerAPIFactory.Topic<MutablePair<Pose3D, Vector3D>> Obstacle = topic("Obstacle");
-   public static final MessagerAPIFactory.Topic<List<Pose3D>> BodyPathPlanForUI = topic("BodyPathPlanForUI");
    public static final MessagerAPIFactory.Topic<Object> ResetForUI = topic("ResetForUI");
    public static final MessagerAPIFactory.Topic<Double> MeasuredPlanarRegionDelay = topic("MeasuredPlanarRegionDelay");
    public static final MessagerAPIFactory.Topic<ArrayList<Pair<Integer, Double>>> FootstepPlannerRejectionReasons = topic("FootstepPlannerRejectionReasons");
