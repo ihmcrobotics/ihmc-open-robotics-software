@@ -12,9 +12,11 @@ import imgui.type.ImDouble;
 import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import perception_msgs.msg.dds.HeightMapMessage;
+import std_msgs.msg.dds.Bool;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.shape.primitives.Box3D;
@@ -44,7 +46,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
@@ -60,7 +61,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    private long numberOfSteppingRegionsReceived = 0;
    private final ImGuiPlot steppingRegionsPlot = new ImGuiPlot("", 1000, 250, 15);
    private final ImGuiMovingPlot impassibilityDetectedPlot = new ImGuiMovingPlot("Impassibility", 1000, 250, 15);
-   private final AtomicReference<Boolean> impassibilityDetected;
+   private final IHMCROS2Input<Bool> impassibilityDetected;
    private ImBooleanWrapper stopForImpassibilities;
    private final ImPlotYoHelperDoublePlotLine footstepPlanningDurationPlot;
    private final ImGuiYoDoublePlot footholdVolumePlot;
@@ -148,7 +149,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
          planningFailedNotification.set();
       });
       footholdVolumePlot = new ImGuiYoDoublePlot("footholdVolume", helper, 1000, 250, 15);
-      impassibilityDetected = helper.subscribeViaReference(ImpassibilityDetected, false);
+      impassibilityDetected = helper.subscribe(IMPASSIBILITY_DETECTED);
       obstacleBoxVisualizer.setColor(Color.RED);
       helper.subscribeViaCallback(Obstacle, boxDescription ->
       {
@@ -280,8 +281,8 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       ImGui.text("Footstep planning regions recieved:");
       steppingRegionsPlot.render(numberOfSteppingRegionsReceived);
       stopForImpassibilities.renderImGuiWidget();
-      impassibilityDetectedPlot.setNextValue(impassibilityDetected.get() ? 1.0f : 0.0f);
-      impassibilityDetectedPlot.calculate(impassibilityDetected.get() ? "OBSTRUCTED" : "ALL CLEAR");
+      impassibilityDetectedPlot.setNextValue(impassibilityDetected.getLatest().getData() ? 1.0f : 0.0f);
+      impassibilityDetectedPlot.calculate(impassibilityDetected.getLatest().getData() ? "OBSTRUCTED" : "ALL CLEAR");
 
       ImGui.text(ReferenceBasedIdealStepCalculator.statusMessage);
 
@@ -371,7 +372,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
          }
          if (sceneLevels.contains(RDXSceneLevel.MODEL))
          {
-            if (impassibilityDetected.get())
+            if (impassibilityDetected.getLatest().getData())
                obstacleBoxVisualizer.getRenderables(renderables, pool);
             planarRegionsGraphic.getRenderables(renderables, pool);
             if (showHeightMap.get())

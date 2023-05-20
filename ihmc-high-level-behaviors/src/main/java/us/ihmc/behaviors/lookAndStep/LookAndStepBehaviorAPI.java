@@ -95,14 +95,14 @@ public class LookAndStepBehaviorAPI
     */
    public static final ROS2Topic<PlanarRegionsListMessage> RECEIVED_PLANAR_REGIONS_FOR_UI = BASE_TOPIC.withType(PlanarRegionsListMessage.class)
                                                                                                       .withSuffix("received_planar_regions_for_ui");
+   public static final ROS2Topic<Bool> IMPASSIBILITY_DETECTED = BASE_TOPIC.withType(Bool.class).withSuffix("impassibility_detected");
+   public static final ROS2Topic<Bool> PLANNING_FAILED = BASE_TOPIC.withType(Bool.class).withSuffix("planning_failed");
 
    private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
    private static final MessagerAPIFactory.Category RootCategory = apiFactory.createRootCategory("LookAndStepBehavior");
    private static final MessagerAPIFactory.CategoryTheme LookAndStepTheme = apiFactory.createCategoryTheme("LookAndStep");
 
    // Visualization only topics
-   public static final MessagerAPIFactory.Topic<Boolean> ImpassibilityDetected = topic("ImpassibilityDetected");
-   public static final MessagerAPIFactory.Topic<Boolean> PlanningFailed = topic("PlanningFailed");
    public static final MessagerAPIFactory.Topic<MutablePair<Pose3D, Vector3D>> Obstacle = topic("Obstacle");
    public static final MessagerAPIFactory.Topic<List<Pose3D>> BodyPathPlanForUI = topic("BodyPathPlanForUI");
    public static final MessagerAPIFactory.Topic<Object> ResetForUI = topic("ResetForUI");
