@@ -113,7 +113,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
             receivedRegionsGraphic.generateMeshesAsync(regions.copy());
       });
       helper.subscribeViaCallback(GOAL_STATUS, goalAffordance::setGoalPoseNoCallbacks);
-      helper.subscribeViaCallback(SubGoalForUI, subGoalGraphic::setToPose);
+      helper.subscribeViaCallback(SUB_GOAL_FOR_UI, subGoalGraphic::setToPose);
       helper.subscribeViaCallback(BodyPathPlanForUI, bodyPath ->
       {
          if (bodyPath != null)

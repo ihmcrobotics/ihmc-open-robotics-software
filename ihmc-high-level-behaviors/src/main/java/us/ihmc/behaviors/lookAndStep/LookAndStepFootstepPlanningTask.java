@@ -436,7 +436,7 @@ public class LookAndStepFootstepPlanningTask
       lastPlanInitialStanceSide = initialStanceSide;
       plannerFailedLastTime.set(false);
 
-      uiPublisher.publishToUI(SubGoalForUI, new Pose3D(subGoalPoseBetweenFeet));
+      helper.publish(SUB_GOAL_FOR_UI, subGoalPoseBetweenFeet);
 
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
       footstepPlannerRequest.setPlanBodyPath(false);
