@@ -55,9 +55,7 @@ public class LookAndStepVisualizationGroup extends Group
       });
 
       closestPointAlongPathGraphic = new PoseGraphic("Closest", Color.BLUE, 0.027);
-      messager.addTopicListener(ClosestPointForUI, pose -> Platform.runLater(() -> closestPointAlongPathGraphic.setPose(pose)));
       subGoalGraphic = new PoseGraphic("Sub goal", Color.YELLOW, 0.027);
-      messager.addTopicListener(SubGoalForUI, pose -> Platform.runLater(() -> subGoalGraphic.setPose(pose)));
 
       bodyPathPlanGraphic = new BodyPathPlanGraphic();
       messager.addTopicListener(BodyPathPlanForUI, bodyPathPlan ->

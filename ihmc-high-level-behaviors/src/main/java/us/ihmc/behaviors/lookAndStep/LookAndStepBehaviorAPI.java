@@ -79,14 +79,14 @@ public class LookAndStepBehaviorAPI
                                                                                                   .withSuffix("planned_footsteps_for_ui");
    public static final ROS2Topic<MinimalFootstepListMessage> LAST_COMMANDED_FOOTSTEPS = BASE_TOPIC.withType(MinimalFootstepListMessage.class)
                                                                                                   .withSuffix("last_commanded_footsteps");
+   public static final ROS2Topic<Pose3D> CLOSEST_POINT_FOR_UI = BASE_TOPIC.withType(Pose3D.class).withSuffix("closest_point_for_ui");
+   public static final ROS2Topic<Pose3D> SUB_GOAL_FOR_UI = BASE_TOPIC.withType(Pose3D.class).withSuffix("sub_goal_for_ui");
 
    private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
    private static final MessagerAPIFactory.Category RootCategory = apiFactory.createRootCategory("LookAndStepBehavior");
    private static final MessagerAPIFactory.CategoryTheme LookAndStepTheme = apiFactory.createCategoryTheme("LookAndStep");
 
    // Visualization only topics
-   public static final MessagerAPIFactory.Topic<Pose3D> ClosestPointForUI = topic("ClosestPointForUI");
-   public static final MessagerAPIFactory.Topic<Pose3D> SubGoalForUI = topic("SubGoalForUI");
    public static final MessagerAPIFactory.Topic<PlanarRegionsList> PlanarRegionsForUI = topic("PlanarRegionsForUI");
    public static final MessagerAPIFactory.Topic<PlanarRegionsList> ReceivedPlanarRegionsForUI = topic("ReceivedlanarRegionsForUI");
    public static final MessagerAPIFactory.Topic<Boolean> ImpassibilityDetected = topic("ImpassibilityDetected");
