@@ -9,7 +9,9 @@ import us.ihmc.robotics.screwTheory.GenericCRC32;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJointStateChecksum;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJointStateCopier;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
+import us.ihmc.robotics.sensors.ForceSensorData;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
+import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 
 public class IntermediateEstimatorStateHolder
@@ -40,10 +42,15 @@ public class IntermediateEstimatorStateHolder
    private final RawJointSensorDataHolderMap intermediateRawJointSensorDataHolderMap;
    private final RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap;
 
-   public IntermediateEstimatorStateHolder(FullHumanoidRobotModelFactory fullRobotModelFactory, RigidBodyBasics estimatorRootBody, RigidBodyBasics controllerRootBody,
-         ForceSensorDataHolder estimatorForceSensorDataHolder, ForceSensorDataHolder controllerForceSensorDataHolder,
-         CenterOfMassDataHolder estimatorCenterOfMassDataHolder, CenterOfMassDataHolder controllerCenterOfMassDataHolder,
-         RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap, RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap)
+   public IntermediateEstimatorStateHolder(FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                           RigidBodyBasics estimatorRootBody,
+                                           RigidBodyBasics controllerRootBody,
+                                           ForceSensorDataHolder estimatorForceSensorDataHolder,
+                                           ForceSensorDataHolder controllerForceSensorDataHolder,
+                                           CenterOfMassDataHolder estimatorCenterOfMassDataHolder,
+                                           CenterOfMassDataHolder controllerCenterOfMassDataHolder,
+                                           RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap,
+                                           RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap)
    {
       FullHumanoidRobotModel intermediateModel = fullRobotModelFactory.createFullRobotModel();
       RigidBodyBasics intermediateRootBody = intermediateModel.getElevator();
@@ -75,7 +82,7 @@ public class IntermediateEstimatorStateHolder
 
       checksum = calculateEstimatorChecksum();
       estimatorToIntermediateCopier.copy();
-      intermediateForceSensorDataHolder.setDataOnly(estimatorForceSensorDataHolder);
+      copyDataOnly(estimatorForceSensorDataHolder, intermediateForceSensorDataHolder);
       intermediateCenterOfMassDataHolder.set(estimatorCenterOfMassDataHolder);
       intermediateRawJointSensorDataHolderMap.set(estimatorRawJointSensorDataHolderMap);
    }
@@ -83,9 +90,20 @@ public class IntermediateEstimatorStateHolder
    public void getIntoControllerModel()
    {
       intermediateToControllerCopier.copy();
-      controllerForceSensorDataHolder.setDataOnly(intermediateForceSensorDataHolder);
+      copyDataOnly(intermediateForceSensorDataHolder, controllerForceSensorDataHolder);
       controllerCenterOfMassDataHolder.set(intermediateCenterOfMassDataHolder);
       controllerRawJointSensorDataHolderMap.set(intermediateRawJointSensorDataHolderMap);
+   }
+
+   private static void copyDataOnly(ForceSensorDataHolder source, ForceSensorDataHolder destination)
+   {
+      for (int i = 0; i < source.getForceSensorDefinitions().size(); i++)
+      {
+         ForceSensorDefinition forceSensorDefinition = source.getForceSensorDefinitions().get(i);
+         ForceSensorData thisData = destination.getData(forceSensorDefinition);
+         ForceSensorData otherData = source.getData(forceSensorDefinition);
+         thisData.setWrench(otherData.getWrenchMatrix());
+      }
    }
 
    public long getTimestamp()
@@ -123,7 +141,7 @@ public class IntermediateEstimatorStateHolder
 
    public void validate()
    {
-      if(checksum != calculateControllerChecksum())
+      if (checksum != calculateControllerChecksum())
       {
          throw new RuntimeException("Controller checksum doesn't match estimator checksum.");
       }
@@ -145,11 +163,15 @@ public class IntermediateEstimatorStateHolder
       private final RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap;
       private final RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap;
 
-
-      public Builder(FullHumanoidRobotModelFactory fullRobotModelFactory, RigidBodyBasics estimatorRootJoint, RigidBodyBasics controllerRootJoint,
-            ForceSensorDataHolder estimatorForceSensorDataHolder, ForceSensorDataHolder controllerForceSensorDataHolder,
-            CenterOfMassDataHolder estimatorCenterOfMassDataHolder, CenterOfMassDataHolder controllerCenterOfMassDataHolder,
-            RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap, RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap)
+      public Builder(FullHumanoidRobotModelFactory fullRobotModelFactory,
+                     RigidBodyBasics estimatorRootJoint,
+                     RigidBodyBasics controllerRootJoint,
+                     ForceSensorDataHolder estimatorForceSensorDataHolder,
+                     ForceSensorDataHolder controllerForceSensorDataHolder,
+                     CenterOfMassDataHolder estimatorCenterOfMassDataHolder,
+                     CenterOfMassDataHolder controllerCenterOfMassDataHolder,
+                     RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap,
+                     RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap)
       {
          this.fullRobotModelFactory = fullRobotModelFactory;
          this.estimatorRootJoint = estimatorRootJoint;
@@ -165,9 +187,15 @@ public class IntermediateEstimatorStateHolder
       @Override
       public IntermediateEstimatorStateHolder newInstance()
       {
-         return new IntermediateEstimatorStateHolder(fullRobotModelFactory, estimatorRootJoint, controllerRootJoint, estimatorForceSensorDataHolder,
-               controllerForceSensorDataHolder, estimatorCenterOfMassDataHolder, controllerCenterOfMassDataHolder,
-               estimatorRawJointSensorDataHolderMap, controllerRawJointSensorDataHolderMap);
+         return new IntermediateEstimatorStateHolder(fullRobotModelFactory,
+                                                     estimatorRootJoint,
+                                                     controllerRootJoint,
+                                                     estimatorForceSensorDataHolder,
+                                                     controllerForceSensorDataHolder,
+                                                     estimatorCenterOfMassDataHolder,
+                                                     controllerCenterOfMassDataHolder,
+                                                     estimatorRawJointSensorDataHolderMap,
+                                                     controllerRawJointSensorDataHolderMap);
       }
 
    }
