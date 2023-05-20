@@ -13,6 +13,8 @@ import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import perception_msgs.msg.dds.HeightMapMessage;
 import std_msgs.msg.dds.Bool;
+import toolbox_msgs.msg.dds.FootstepPlannerRejectionReasonMessage;
+import toolbox_msgs.msg.dds.FootstepPlannerRejectionReasonsMessage;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.commons.thread.Notification;
@@ -73,7 +75,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
 
    private boolean reviewingBodyPath = true;
    private final ImString latestFootstepPlannerLogPath = new ImString();
-   private ArrayList<Pair<Integer, Double>> latestFootstepPlannerRejectionReasons = new ArrayList<>();
+   private FootstepPlannerRejectionReasonsMessage latestFootstepPlannerRejectionReasons = new FootstepPlannerRejectionReasonsMessage();
 
    private final RDXSphereAndArrowGraphic subGoalGraphic = new RDXSphereAndArrowGraphic();
    private final RDXPlanarRegionsGraphic planarRegionsGraphic = new RDXPlanarRegionsGraphic();
@@ -141,8 +143,8 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       helper.subscribeViaCallback(IMMINENT_FOOT_POSES_FOR_UI, message ->
             startAndGoalFootstepsGraphic.generateMeshesAsync(MinimalFootstep.convertMinimalFootstepListMessage(message)));
       footstepPlanningDurationPlot = new ImPlotYoHelperDoublePlotLine("LookAndStepBehavior.footstepPlanningDuration", 10.0, helper);
-      helper.subscribeViaCallback(FootstepPlannerLatestLogPath, latestFootstepPlannerLogPath::set);
-      helper.subscribeViaCallback(FootstepPlannerRejectionReasons, reasons ->
+      helper.subscribeViaCallback(FOOTSTEP_PLANNER_LATEST_LOG_PATH, message -> latestFootstepPlannerLogPath.set(message.getDataAsString()));
+      helper.subscribeViaCallback(FOOTSTEP_PLANNER_REJECTION_REASONS, reasons ->
       {
          latestFootstepPlannerRejectionReasons = reasons;
          numberOfPlannedSteps = 0;
@@ -157,7 +159,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
          box3D.set(box3DMessage.getPose(), box3DMessage.getSize());
          obstacleBoxVisualizer.generateMeshAsync(box3D);
       });
-      helper.subscribeViaCallback(ResetForUI, goalAffordance::clear);
+      helper.subscribeViaCallback(RESET_FOR_UI, goalAffordance::clear);
       lookAndStepRemotePropertySet = new ImGuiRemoteROS2StoredPropertySet(helper, helper.getRobotModel().getLookAndStepParameters(), PARAMETERS);
       footstepPlannerRemotePropertySet = new ImGuiRemoteROS2StoredPropertySet(helper,
                                                                               helper.getRobotModel().getFootstepPlannerParameters("ForLookAndStep"),
@@ -322,11 +324,16 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       ImGui.text("Rejection reasons:");
       for (int i = 0; i < 5; i++) // Variable number of lines was crashing rendering in imgui-node-editor
       {
-         if (latestFootstepPlannerRejectionReasons.size() > i && latestFootstepPlannerRejectionReasons.get(i) != null)
-            ImGui.text(latestFootstepPlannerRejectionReasons.get(i).getRight() + "%: "
-                       + BipedalFootstepPlannerNodeRejectionReason.values[latestFootstepPlannerRejectionReasons.get(i).getLeft()].name());
+         if (latestFootstepPlannerRejectionReasons.getRejectionReasons().size() > i)
+         {
+            FootstepPlannerRejectionReasonMessage rejectionReasonMessage = latestFootstepPlannerRejectionReasons.getRejectionReasons().get(i);
+            ImGui.text(rejectionReasonMessage.getRejectionPercentage() + "%: "
+                       + BipedalFootstepPlannerNodeRejectionReason.values[(int) rejectionReasonMessage.getReason()].name());
+         }
          else
+         {
             ImGui.text("");
+         }
       }
 //      if (ImGui.collapsingHeader("Swing Planning"))
 //      {

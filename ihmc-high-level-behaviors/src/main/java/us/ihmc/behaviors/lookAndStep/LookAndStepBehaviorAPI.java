@@ -5,24 +5,17 @@ import ihmc_common_msgs.msg.dds.Box3DMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
+import toolbox_msgs.msg.dds.FootstepPlannerRejectionReasonsMessage;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.messager.MessagerAPIFactory;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.utilities.ros.RosTools;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class LookAndStepBehaviorAPI
 {
@@ -100,16 +93,15 @@ public class LookAndStepBehaviorAPI
    public static final ROS2Topic<Bool> PLANNING_FAILED = BASE_TOPIC.withType(Bool.class).withSuffix("planning_failed");
    public static final ROS2Topic<Box3DMessage> OBSTACLE = BASE_TOPIC.withType(Box3DMessage.class).withSuffix("obstacle");
    public static final ROS2Topic<PoseListMessage> BODY_PATH_PLAN_FOR_UI = BASE_TOPIC.withType(PoseListMessage.class).withSuffix("body_path_plan_for_ui");
+   public static final ROS2Topic<Empty> RESET_FOR_UI = BASE_TOPIC.withType(Empty.class).withSuffix("reset_for_ui");
+   public static final ROS2Topic<FootstepPlannerRejectionReasonsMessage> FOOTSTEP_PLANNER_REJECTION_REASONS
+         = BASE_TOPIC.withType(FootstepPlannerRejectionReasonsMessage.class).withSuffix("footstep_planner_rejection_reasons");
+   public static final ROS2Topic<std_msgs.msg.dds.String> FOOTSTEP_PLANNER_LATEST_LOG_PATH
+         = BASE_TOPIC.withType(std_msgs.msg.dds.String.class).withSuffix("footstep_planner_latest_log_path");
 
    private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
    private static final MessagerAPIFactory.Category RootCategory = apiFactory.createRootCategory("LookAndStepBehavior");
    private static final MessagerAPIFactory.CategoryTheme LookAndStepTheme = apiFactory.createCategoryTheme("LookAndStep");
-
-   // Visualization only topics
-   public static final MessagerAPIFactory.Topic<Object> ResetForUI = topic("ResetForUI");
-   public static final MessagerAPIFactory.Topic<Double> MeasuredPlanarRegionDelay = topic("MeasuredPlanarRegionDelay");
-   public static final MessagerAPIFactory.Topic<ArrayList<Pair<Integer, Double>>> FootstepPlannerRejectionReasons = topic("FootstepPlannerRejectionReasons");
-   public static final MessagerAPIFactory.Topic<String> FootstepPlannerLatestLogPath = topic("FootstepPlannerLatestLogPath");
 
    private static <T> MessagerAPIFactory.Topic<T> topic(String name)
    {

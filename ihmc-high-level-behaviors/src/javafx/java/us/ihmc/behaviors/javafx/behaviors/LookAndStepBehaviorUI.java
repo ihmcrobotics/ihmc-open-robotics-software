@@ -90,8 +90,6 @@ public class LookAndStepBehaviorUI extends JavaFXBehaviorUIInterface
 
       walkingGoalPlacementEditor.init(sceneNode, placeGoalButton, placedGoal -> ros2Publisher.publish(GOAL_COMMAND, placedGoal));
 
-      behaviorMessager.addTopicListener(ResetForUI, message -> lookAndStepVisualizationGroup.clearGraphics());
-
       // TODO Add joystick support
    }
 
