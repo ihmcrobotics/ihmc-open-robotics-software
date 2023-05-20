@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.lookAndStep;
 
+import ihmc_common_msgs.msg.dds.PoseListMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
@@ -83,7 +84,7 @@ public class LookAndStepReset
       // helper.publish(PerceptionAPI.REA_STATE_REQUEST, clearMessage);
 
       lookAndStep.helper.publish(PLANAR_REGIONS_FOR_UI, new PlanarRegionsListMessage());
-      lookAndStep.helper.publish(BodyPathPlanForUI, new ArrayList<>());
+      lookAndStep.helper.publish(BODY_PATH_PLAN_FOR_UI, new PoseListMessage());
 
       lookAndStep.statusLogger.info("Clearing SLAM");
       lookAndStep.helper.publish(SLAMModuleAPI.CLEAR);

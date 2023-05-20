@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import ihmc_common_msgs.msg.dds.PoseListMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -264,11 +265,13 @@ public class LookAndStepBodyPathPlanningTask
 
       if (result.getRight() != null)
       {
+         PoseListMessage bodyPathPlanForReviewMessage = new PoseListMessage();
          for (Pose3DReadOnly poseWaypoint : result.getRight())
          {
             bodyPathPlanForReview.add(new Pose3D(poseWaypoint));
+            bodyPathPlanForReviewMessage.getPoses().add().set(poseWaypoint);
          }
-         uiPublisher.publishToUI(BodyPathPlanForUI, bodyPathPlanForReview);
+         helper.publish(BODY_PATH_PLAN_FOR_UI, bodyPathPlanForReviewMessage);
       }
 
       if (bodyPathPlanForReview.size() >= 2)

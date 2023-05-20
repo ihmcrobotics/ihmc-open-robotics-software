@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.buildingExploration;
 
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import ihmc_common_msgs.msg.dds.PoseListMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -8,8 +9,8 @@ import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -47,7 +48,7 @@ class BuildingExplorationBehaviorLookAndStepState implements State
 
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
 
-   private final AtomicReference<List<Pose3D>> bodyPath;
+   private final IHMCROS2Input<PoseListMessage> bodyPathSubscription;
    private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
    private final AtomicReference<RobotConfigurationData> robotConfigurationData = new AtomicReference<>();
 
@@ -84,7 +85,7 @@ class BuildingExplorationBehaviorLookAndStepState implements State
 
       syncedRobot = helper.newSyncedRobot();
 
-      bodyPath = helper.subscribeViaReference(LookAndStepBehaviorAPI.BodyPathPlanForUI, new ArrayList<>());
+      bodyPathSubscription = helper.subscribe(LookAndStepBehaviorAPI.BODY_PATH_PLAN_FOR_UI);
       helper.subscribeViaCallback(PerceptionAPI.LIDAR_REA_REGIONS, planarRegions::set);
       helper.subscribeToRobotConfigurationDataViaCallback(robotConfigurationData::set);
       helper.subscribeToControllerViaCallback(FootstepStatusMessage.class, footstepStatusMessage ->
@@ -108,7 +109,6 @@ class BuildingExplorationBehaviorLookAndStepState implements State
       LogTools.info("Entering " + getClass().getSimpleName());
 
       planarRegions.set(null);
-      bodyPath.set(null);
       debrisDetected.set(false);
       stairsDetected.set(false);
       stepCounter.set(0);
@@ -161,7 +161,7 @@ class BuildingExplorationBehaviorLookAndStepState implements State
 
    private void checkForDebris()
    {
-      List<Pose3D> bodyPath = this.bodyPath.get();
+      List<Pose3D> bodyPath = bodyPathSubscription.getLatest().getPoses();
       if (bodyPath == null)
       {
          LogTools.info("No body path received");
@@ -200,7 +200,7 @@ class BuildingExplorationBehaviorLookAndStepState implements State
 
    private void checkForStairs()
    {
-      List<Pose3D> bodyPath = this.bodyPath.get();
+      List<Pose3D> bodyPath = this.bodyPathSubscription.getLatest().getPoses();
       if (bodyPath == null)
          return;
 

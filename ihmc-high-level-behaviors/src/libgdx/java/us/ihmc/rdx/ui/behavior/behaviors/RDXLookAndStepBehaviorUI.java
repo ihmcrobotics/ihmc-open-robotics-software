@@ -116,10 +116,10 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       });
       helper.subscribeViaCallback(GOAL_STATUS, goalAffordance::setGoalPoseNoCallbacks);
       helper.subscribeViaCallback(SUB_GOAL_FOR_UI, subGoalGraphic::setToPose);
-      helper.subscribeViaCallback(BodyPathPlanForUI, bodyPath ->
+      helper.subscribeViaCallback(BODY_PATH_PLAN_FOR_UI, bodyPath ->
       {
          if (bodyPath != null)
-            Gdx.app.postRunnable(() -> bodyPathPlanGraphic.generateMeshes(bodyPath));
+            Gdx.app.postRunnable(() -> bodyPathPlanGraphic.generateMeshes(bodyPath.getPoses()));
       });
       footstepPlanGraphic = new RDXFootstepPlanGraphic(helper.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints());
       commandedFootstepsGraphic = new RDXFootstepPlanGraphic(helper.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints());
@@ -151,10 +151,10 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       footholdVolumePlot = new ImGuiYoDoublePlot("footholdVolume", helper, 1000, 250, 15);
       impassibilityDetected = helper.subscribe(IMPASSIBILITY_DETECTED);
       obstacleBoxVisualizer.setColor(Color.RED);
-      helper.subscribeViaCallback(Obstacle, boxDescription ->
+      helper.subscribeViaCallback(OBSTACLE, box3DMessage ->
       {
          Box3D box3D = new Box3D();
-         box3D.set(boxDescription.getLeft(), boxDescription.getRight());
+         box3D.set(box3DMessage.getPose(), box3DMessage.getSize());
          obstacleBoxVisualizer.generateMeshAsync(box3D);
       });
       helper.subscribeViaCallback(ResetForUI, goalAffordance::clear);

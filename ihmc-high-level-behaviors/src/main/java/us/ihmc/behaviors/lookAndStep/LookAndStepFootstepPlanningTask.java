@@ -5,6 +5,7 @@ import behavior_msgs.msg.dds.MinimalFootstepMessage;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import ihmc_common_msgs.msg.dds.Box3DMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import perception_msgs.msg.dds.HeightMapMessage;
@@ -32,7 +33,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
@@ -377,8 +377,10 @@ public class LookAndStepFootstepPlanningTask
                                                                                       lookAndStepParameters.getHorizonFromDebrisToStop());
          if (collisionData != null && collisionData.isCollisionDetected())
          {
-            uiPublisher.publishToUI(Obstacle,
-                                    MutablePair.of(new Pose3D(collisionData.getBodyBox().getPose()), new Vector3D(collisionData.getBodyBox().getSize())));
+            Box3DMessage box3DMessage = new Box3DMessage();
+            box3DMessage.getPose().set(collisionData.getBodyBox().getPose());
+            box3DMessage.getSize().set(collisionData.getBodyBox().getSize());
+            helper.publish(OBSTACLE, box3DMessage);
             helper.publish(IMPASSIBILITY_DETECTED, true);
             doFailureAction("Impassibility detected. Aborting task...");
             return;
