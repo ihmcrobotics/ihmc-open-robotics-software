@@ -2,11 +2,9 @@ package us.ihmc.behaviors.lookAndStep;
 
 import behavior_msgs.msg.dds.MinimalFootstepListMessage;
 import behavior_msgs.msg.dds.MinimalFootstepMessage;
-import com.esotericsoftware.minlog.Log;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
-import ihmc_common_msgs.msg.dds.Point2DMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import perception_msgs.msg.dds.HeightMapMessage;
@@ -30,8 +28,6 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -383,12 +379,12 @@ public class LookAndStepFootstepPlanningTask
          {
             uiPublisher.publishToUI(Obstacle,
                                     MutablePair.of(new Pose3D(collisionData.getBodyBox().getPose()), new Vector3D(collisionData.getBodyBox().getSize())));
-            uiPublisher.publishToUI(ImpassibilityDetected, true);
+            helper.publish(IMPASSIBILITY_DETECTED, true);
             doFailureAction("Impassibility detected. Aborting task...");
             return;
          }
       }
-      uiPublisher.publishToUI(ImpassibilityDetected, false);
+      helper.publish(IMPASSIBILITY_DETECTED, false);
 
       // update last stepped poses to plan from; initialize to current poses
       MinimalFootstepListMessage imminentFootPosesForUI = new MinimalFootstepListMessage();
@@ -533,7 +529,7 @@ public class LookAndStepFootstepPlanningTask
             rejectionReasonsMessage.add(MutablePair.of(reason.ordinal(), MathTools.roundToSignificantFigures(rejectionPercentage, 3)));
          }
          uiPublisher.publishToUI(FootstepPlannerRejectionReasons, rejectionReasonsMessage);
-         uiPublisher.publishToUI(PlanningFailed, true);
+         helper.publish(PLANNING_FAILED, true);
 
          previousFootstepPlan = null;
          doFailureAction("Footstep planning failure. Aborting task...");
@@ -605,14 +601,14 @@ public class LookAndStepFootstepPlanningTask
          }
          else
          {
-            uiPublisher.publishToUI(PlanningFailed, true);
+            helper.publish(PLANNING_FAILED, true);
             doFailureAction("Footstep planning failure, our sequencing is wrong. Aborting task...");
             return false;
          }
       }
       if (fullPlan.isEmpty())
       {
-         uiPublisher.publishToUI(PlanningFailed, true);
+         helper.publish(PLANNING_FAILED, true);
          doFailureAction("Footstep planning failure. We finished all the steps. Aborting task...");
          return false;
       }
