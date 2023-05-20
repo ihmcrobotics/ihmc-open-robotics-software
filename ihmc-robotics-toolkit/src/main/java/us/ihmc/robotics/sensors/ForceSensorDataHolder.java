@@ -124,18 +124,6 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
       }
    }
 
-   @Deprecated // maintains compatibility with the thread data synchronizer
-   public void setDataOnly(ForceSensorDataHolder other)
-   {
-      for (int i = 0; i < other.getForceSensorDefinitions().size(); i++)
-      {
-         ForceSensorDefinition forceSensorDefinition = other.getForceSensorDefinitions().get(i);
-         ForceSensorData thisData = getData(forceSensorDefinition);
-         ForceSensorData otherData = other.getData(forceSensorDefinition);
-         thisData.setWrench(otherData.getWrenchMatrix());
-      }
-   }
-
    @Override
    public boolean equals(Object obj)
    {
