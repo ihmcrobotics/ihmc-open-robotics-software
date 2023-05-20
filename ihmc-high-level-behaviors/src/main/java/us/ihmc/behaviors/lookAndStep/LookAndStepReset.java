@@ -74,7 +74,7 @@ public class LookAndStepReset
    private void runAfterWaitingForWalkingToFinish()
    {
       lookAndStep.bodyPathPlanning.acceptGoal(null);
-      lookAndStep.helper.publish(ResetForUI);
+      lookAndStep.helper.publish(RESET_FOR_UI);
       lookAndStep.imminentStanceTracker.clear();
       lookAndStep.controllerStatusTracker.reset();
 

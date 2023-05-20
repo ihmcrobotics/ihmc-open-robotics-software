@@ -6,10 +6,10 @@ import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import ihmc_common_msgs.msg.dds.Box3DMessage;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import toolbox_msgs.msg.dds.FootstepPlannerRejectionReasonMessage;
+import toolbox_msgs.msg.dds.FootstepPlannerRejectionReasonsMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.tools.BehaviorHelper;
@@ -500,7 +500,7 @@ public class LookAndStepFootstepPlanningTask
 
       String latestLogDirectory = FootstepPlannerLogger.generateALogFolderName();
       statusLogger.info("Footstep planner log folder: {}", latestLogDirectory);
-      uiPublisher.publishToUI(FootstepPlannerLatestLogPath, latestLogDirectory);
+      helper.publish(FOOTSTEP_PLANNER_LATEST_LOG_PATH, latestLogDirectory);
       ThreadTools.startAThread(() ->
       {
          synchronized (logSessionSyncObject)
@@ -523,14 +523,16 @@ public class LookAndStepFootstepPlanningTask
       {
          FootstepPlannerRejectionReasonReport rejectionReasonReport = new FootstepPlannerRejectionReasonReport(footstepPlanningModule);
          rejectionReasonReport.update();
-         ArrayList<Pair<Integer, Double>> rejectionReasonsMessage = new ArrayList<>();
+         FootstepPlannerRejectionReasonsMessage footstepPlannerRejectionReasonsMessage = new FootstepPlannerRejectionReasonsMessage();
          for (BipedalFootstepPlannerNodeRejectionReason reason : rejectionReasonReport.getSortedReasons())
          {
+            FootstepPlannerRejectionReasonMessage footstepPlannerRejectionReasonMessage = footstepPlannerRejectionReasonsMessage.getRejectionReasons().add();
             double rejectionPercentage = rejectionReasonReport.getRejectionReasonPercentage(reason);
             statusLogger.info("Rejection {}%: {}", FormattingTools.getFormattedToSignificantFigures(rejectionPercentage, 3), reason);
-            rejectionReasonsMessage.add(MutablePair.of(reason.ordinal(), MathTools.roundToSignificantFigures(rejectionPercentage, 3)));
+            footstepPlannerRejectionReasonMessage.setReason(reason.ordinal());
+            footstepPlannerRejectionReasonMessage.setRejectionPercentage((float) MathTools.roundToSignificantFigures(rejectionPercentage, 3));
          }
-         uiPublisher.publishToUI(FootstepPlannerRejectionReasons, rejectionReasonsMessage);
+         helper.publish(FOOTSTEP_PLANNER_REJECTION_REASONS, footstepPlannerRejectionReasonsMessage);
          helper.publish(PLANNING_FAILED, true);
 
          previousFootstepPlan = null;
