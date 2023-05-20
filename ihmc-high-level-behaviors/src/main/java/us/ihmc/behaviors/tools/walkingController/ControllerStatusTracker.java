@@ -129,7 +129,7 @@ public class ControllerStatusTracker
          isWalking = false;
          footstepTracker.reset();
 
-         LogTools.info("Abort Requested...");
+         LogTools.info("Walking Aborted.");
       }
       else
       {
