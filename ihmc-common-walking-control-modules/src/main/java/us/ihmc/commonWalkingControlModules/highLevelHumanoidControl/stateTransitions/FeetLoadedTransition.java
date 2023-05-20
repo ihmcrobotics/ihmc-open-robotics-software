@@ -69,7 +69,7 @@ public class FeetLoadedTransition implements StateTransitionCondition
          YoDouble prepFootFz = prepFootFzs.get(robotSide);
          SimpleMovingAverageFilteredYoVariable prepFootFzAverage = prepFootFzAverages.get(robotSide);
 
-         temporaryFootWrench.set(footSensors.get(robotSide).getWrench());
+         temporaryFootWrench.setIncludingFrame(footSensors.get(robotSide).getWrench());
          temporaryFootWrench.changeFrame(ReferenceFrame.getWorldFrame());
          prepFootFz.set(temporaryFootWrench.getLinearPartZ());
          prepFootFzAverage.update();
