@@ -46,7 +46,6 @@ public class LookAndStepVisualizationGroup extends Group
       commandedFootsteps = new FootstepPlanGraphic();
 
       planarRegionsGraphic = new JavaFXLivePlanarRegionsGraphic(false);
-      messager.addTopicListener(PlanarRegionsForUI, planarRegionsGraphic::acceptPlanarRegions);
 
       goalGraphic = new PoseGraphic("Goal", Color.DEEPSKYBLUE, 0.03);
       new IHMCROS2Callback<>(ros2Node, GOAL_COMMAND, goal ->

@@ -221,7 +221,7 @@ public class LookAndStepFootstepPlanningTask
 
       public void acceptPlanarRegions(PlanarRegionsList planarRegionsList)
       {
-         uiPublisher.publishToUI(ReceivedPlanarRegionsForUI, planarRegionsList);
+         helper.publish(RECEIVED_PLANAR_REGIONS_FOR_UI, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
 
          planarRegionsExpirationTimer.reset();
 
@@ -356,7 +356,7 @@ public class LookAndStepFootstepPlanningTask
       //      combinedRegionsForPlanning.addPlanarRegionsList(planarRegions);
       planarRegionsManager.getPlanarRegionsHistory().forEach(combinedRegionsForPlanning::addPlanarRegionsList);
 
-      uiPublisher.publishToUI(PlanarRegionsForUI, combinedRegionsForPlanning);
+      helper.publish(PLANAR_REGIONS_FOR_UI, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(combinedRegionsForPlanning));
 
       Pose3D closestPointAlongPath = localizationResult.getClosestPointAlongPath();
       int closestSegmentIndex = localizationResult.getClosestSegmentIndex();

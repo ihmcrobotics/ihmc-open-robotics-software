@@ -15,6 +15,7 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
@@ -99,18 +100,18 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       this.helper = helper;
       helper.subscribeViaCallback(CURRENT_STATE, state -> currentState = state.getDataAsString());
       helper.subscribeViaCallback(OPERATOR_REVIEW_ENABLED_STATUS, message -> operatorReview.set(message.getData()));
-      helper.subscribeViaCallback(PlanarRegionsForUI, regions ->
+      helper.subscribeViaCallback(PLANAR_REGIONS_FOR_UI, regions ->
       {
          ++numberOfSteppingRegionsReceived;
          if (regions != null)
-            planarRegionsGraphic.generateMeshesAsync(regions.copy());
+            planarRegionsGraphic.generateMeshesAsync(PlanarRegionMessageConverter.convertToPlanarRegionsList(regions));
       });
       heightMapGraphic.getRenderGroundPlane().set(false);
       helper.subscribeViaCallback(HEIGHT_MAP_FOR_UI, heightMapGraphic::generateMeshesAsync);
-      helper.subscribeViaCallback(ReceivedPlanarRegionsForUI, regions ->
+      helper.subscribeViaCallback(RECEIVED_PLANAR_REGIONS_FOR_UI, regions ->
       {
          if (regions != null)
-            receivedRegionsGraphic.generateMeshesAsync(regions.copy());
+            receivedRegionsGraphic.generateMeshesAsync(PlanarRegionMessageConverter.convertToPlanarRegionsList(regions));
       });
       helper.subscribeViaCallback(GOAL_STATUS, goalAffordance::setGoalPoseNoCallbacks);
       helper.subscribeViaCallback(SUB_GOAL_FOR_UI, subGoalGraphic::setToPose);
