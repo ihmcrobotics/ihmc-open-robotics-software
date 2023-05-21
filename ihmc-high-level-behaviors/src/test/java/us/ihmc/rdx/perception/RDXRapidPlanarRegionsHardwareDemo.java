@@ -6,20 +6,20 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.*;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
+import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.MutableBytePointer;
+import us.ihmc.perception.realsense.BytedecoRealsense;
+import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.perception.realsense.BytedecoRealsense;
-import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
-import us.ihmc.tools.thread.Activator;
 
 public class RDXRapidPlanarRegionsHardwareDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private Activator nativesLoadedActivator;
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
    private RealSenseHardwareManager realSenseHardwareManager;
    private BytedecoRealsense l515;
@@ -38,8 +38,6 @@ public class RDXRapidPlanarRegionsHardwareDemo
          @Override
          public void create()
          {
-            nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
-
             baseUI.create();
 
             robotInteractableReferenceFrame = new RDXInteractableReferenceFrame();
@@ -54,14 +52,21 @@ public class RDXRapidPlanarRegionsHardwareDemo
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(l515PoseGizmo::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(l515PoseGizmo, RDXSceneLevel.VIRTUAL);
             l515PoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(60.0));
+
+            realSenseHardwareManager = new RealSenseHardwareManager();
+            //                  l515 = realSenseHardwareManager.createFullFeaturedL515("F1120418");
+            l515 = realSenseHardwareManager.createFullFeaturedL515("F1121365");
+            l515.initialize();
          }
 
          @Override
          public void render()
          {
-            if (nativesLoadedActivator.poll())
+            if (l515.readFrameData())
             {
-               if (nativesLoadedActivator.isNewlyActivated())
+               l515.updateDataBytePointers();
+
+               if (openCLManager == null)
                {
                   openCLManager = new OpenCLManager();
                   openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
