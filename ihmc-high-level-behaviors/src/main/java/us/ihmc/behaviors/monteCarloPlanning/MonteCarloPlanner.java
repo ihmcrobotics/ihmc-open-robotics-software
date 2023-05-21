@@ -8,17 +8,19 @@ import java.util.ArrayList;
 
 public class MonteCarloPlanner
 {
-   private int searchIterations = 100;
-   private int simulationIterations = 50;
+   private int searchIterations;
+   private int simulationIterations;
 
    private World world;
    private Agent agent;
    private MonteCarloTreeNode root;
 
-   public MonteCarloPlanner(World world, Agent agent)
+   public MonteCarloPlanner(World world, Agent agent, int searchIterations, int simulationIterations)
    {
       this.world = world;
       this.agent = agent;
+      this.searchIterations = searchIterations;
+      this.simulationIterations = simulationIterations;
 
       root = new MonteCarloTreeNode(agent.getPosition(), null);
    }
@@ -180,29 +182,6 @@ public class MonteCarloPlanner
    {
       return new Point2D(state.getX() + action.getX(), state.getY() + action.getY());
    }
-
-   //def check_action_obstacles(self, state, action, obstacles):
-   //
-   //position = state + action
-   //
-   //   collision = False
-   //     for obstacle in obstacles:
-   //
-   //obstacle_size_x = obstacle[2]
-   //obstacle_size_y = obstacle[3]
-   //obstacle_min_x = obstacle[0] - obstacle_size_x
-   //   obstacle_max_x = obstacle[0] + obstacle_size_x
-   //obstacle_min_y = obstacle[1] - obstacle_size_y
-   //   obstacle_max_y = obstacle[1] + obstacle_size_y
-   //
-   //         if position[0] > obstacle_min_x and position[0] < obstacle_max_x:
-   //   if position[1] > obstacle_min_y and position[1] < obstacle_max_y:
-   //collision = True
-   //                 break
-   //
-   //                       return not(collision)
-
-//   Java:
 
    public boolean checkActionObstacles(Point2D state, Vector2D action, ArrayList<Vector4D32> obstacles)
    {

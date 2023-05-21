@@ -23,10 +23,10 @@ public class Agent
       this.averagePosition.set(position);
    }
 
-   public void updateState(Vector2D action)
+   public void updateState(Point2D newState)
    {
       previousPosition.set(position);
-      position.add(action);
+      position.set(newState);
 
       averagePosition.scale(0.95);
       averagePosition.add(position.getX() * 0.05, position.getY() * 0.05);
@@ -53,5 +53,14 @@ public class Agent
       return averagePosition;
    }
 
+   public Point2D getPreviousPosition()
+   {
+      return previousPosition;
+   }
+
+   public ArrayList<Point2D> getScanPoints()
+   {
+      return points;
+   }
 
 }

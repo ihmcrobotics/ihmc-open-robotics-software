@@ -17,16 +17,16 @@ public class World
    private final int gridWidth;
    private final int goalMargin;
 
-   public World(Mat grid, int gridHeight, int gridWidth, Point2D goal, int goalMargin)
+   public World(ArrayList<Vector4D32> obstacles, Point2D goal, int goalMargin, int gridHeight, int gridWidth)
    {
-      this.grid = grid;
+      this.grid = new Mat(gridHeight, gridWidth, 0);
       this.gridHeight = gridHeight;
       this.gridWidth = gridWidth;
       this.goal = goal;
       this.goalMargin = goalMargin;
    }
 
-   public void updateGrid(Vector4D agent_state, int radius)
+   public void updateGrid(Point2D agent_state, int radius)
    {
       // set a circle of pixels around the agent to be 50
       int agent_min_x = (int) (agent_state.getX() - radius);
