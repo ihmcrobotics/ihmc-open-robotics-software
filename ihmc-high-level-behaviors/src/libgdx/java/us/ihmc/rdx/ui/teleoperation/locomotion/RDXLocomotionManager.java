@@ -123,8 +123,6 @@ public class RDXLocomotionManager
 
    public void update()
    {
-      footstepsSentToControllerGraphic.update();
-
       if (ballAndArrowMidFeetPosePlacement.getPlacedNotification().poll())
       {
          footstepPlanning.setMidFeetGoalPose(ballAndArrowMidFeetPosePlacement.getGoalPose());
