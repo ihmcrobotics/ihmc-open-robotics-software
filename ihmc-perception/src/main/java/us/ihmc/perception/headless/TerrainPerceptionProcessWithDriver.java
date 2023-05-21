@@ -23,6 +23,10 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.perception.*;
+import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.MutableBytePointer;
+import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
@@ -38,8 +42,10 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
+import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -65,6 +71,10 @@ public class TerrainPerceptionProcessWithDriver
    private final BytePointer compressedColorPointer = new BytePointer();
    private final BytePointer compressedDepthPointer = new BytePointer();
    private final FramePose3D colorPoseInDepthFrame = new FramePose3D();
+
+   private final RealtimeROS2Node realtimeROS2Node;
+
+   private BytedecoImage debugExtractionImage;
    private final ImageMessage depthImageMessage = new ImageMessage();
    private final ImageMessage colorImageMessage = new ImageMessage();
    private final FramePose3D cameraPose = new FramePose3D();
@@ -85,7 +95,6 @@ public class TerrainPerceptionProcessWithDriver
    private ROS2StoredPropertySetGroup ros2PropertySetGroup;
    private RealsenseConfiguration realsenseConfiguration;
    private CollidingScanRegionFilter collisionFilter;
-   private BytedecoImage debugExtractionImage;
    private BytedecoImage depthBytedecoImage;
    private _cl_program openCLProgram;
    private BytedecoRealsense sensor;
@@ -120,9 +129,10 @@ public class TerrainPerceptionProcessWithDriver
       this.sensorFrameUpdater = sensorFrameUpdater;
       this.regionsTopic = regionsTopic;
 
-      outputPeriod = UnitConversions.hertzToSeconds(20.0);
+      this.outputPeriod = UnitConversions.hertzToSeconds(31.0f);
 
-      BytedecoTools.loadOpenCV();
+      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_videopub");
+      realtimeROS2Node.spin();
 
       openCLManager = new OpenCLManager();
       rapidRegionsExtractor = new RapidPlanarRegionsExtractor();

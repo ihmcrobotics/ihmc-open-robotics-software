@@ -5,7 +5,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoOpenCVTools;
-import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
@@ -17,12 +16,10 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
-import us.ihmc.tools.thread.Activator;
 
 public class RDXPlanarRegionsSimulationDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private Activator nativesLoadedActivator;
    private RDXHighLevelDepthSensorSimulator steppingL515Simulator;
    private OpenCLManager openCLManager;
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
@@ -32,6 +29,8 @@ public class RDXPlanarRegionsSimulationDemo
    private RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor();
    private BytedecoImage bytedecoDepthImage;
 
+   private boolean initialized = false;
+
    public RDXPlanarRegionsSimulationDemo()
    {
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
@@ -39,8 +38,6 @@ public class RDXPlanarRegionsSimulationDemo
          @Override
          public void create()
          {
-            nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
-
             baseUI.create();
 
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
@@ -65,9 +62,7 @@ public class RDXPlanarRegionsSimulationDemo
          @Override
          public void render()
          {
-            if (nativesLoadedActivator.poll())
-            {
-               if (nativesLoadedActivator.isNewlyActivated())
+               if (!initialized)
                {
                   openCLManager = new OpenCLManager();
 
@@ -101,6 +96,8 @@ public class RDXPlanarRegionsSimulationDemo
                   baseUI.getPrimaryScene().addRenderableProvider(rapidRegionsUI, RDXSceneLevel.VIRTUAL);
 
                   baseUI.getLayoutManager().reloadLayout();
+
+                  initialized = true;
                }
 
                steppingL515Simulator.render(baseUI.getPrimaryScene());
@@ -123,7 +120,7 @@ public class RDXPlanarRegionsSimulationDemo
                      rapidPlanarRegionsExtractor.setProcessing(false);
                   }
                }
-            }
+
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();

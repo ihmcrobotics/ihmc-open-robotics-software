@@ -330,6 +330,8 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
    public void renderImGuiWidgets()
    {
+      ImGui.text("Walk path control ring planner:");
+
       if (ImGui.radioButton(labels.get("A* Planner"), footstepPlanningAlgorithm == RDXFootstepPlanningAlgorithm.A_STAR))
       {
          footstepPlanningAlgorithm = RDXFootstepPlanningAlgorithm.A_STAR;

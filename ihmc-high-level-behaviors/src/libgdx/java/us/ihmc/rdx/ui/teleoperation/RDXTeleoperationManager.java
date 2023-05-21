@@ -55,7 +55,30 @@ import java.util.List;
 import java.util.Set;
 
 /**
- *  Possibly extract simple controller controls to a smaller panel class, like remote safety controls or something.
+ * The teleoperation manager is the top level class for managing UI for
+ * teleoperation of a humanoid robot. It should contain a bunch of additional
+ * "sub managers" and UI tools with clear sub-domains.
+ * <br/>
+ * This class manages the communications with the robot which include ROS 2
+ * and YoVariable Client-Server protocols. It should strive to allow field
+ * members access to these communications in order not to duplicate
+ * network traffic or overhead. This is not always possible or easy due
+ * to threading constraints.
+ * <br/>
+ * The interactable robot parts are all in this class so they can be shared
+ * by the sub managers.
+ * <br/>
+ * Sub managers:
+ * <ul>
+ * <li>{@link RDXHandConfigurationManager Hand manager} TODO: Perhaps this should go in arm manager?</li>
+ * <li>{@link RDXArmManager Arm manager}</li>
+ * <li>{@link RDXLocomotionManager Locomotion manager}</li>
+ * </ul>
+ *
+ * TODO:
+ * <ul>
+ * <li>Possibly extract simple controller controls to a smaller panel class, like remote safety controls or something.</li>
+ * </ul>
  */
 public class RDXTeleoperationManager extends ImGuiPanel
 {
@@ -102,19 +125,23 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final boolean interactablesAvailable;
    private ImGuiStoredPropertySetDoubleWidget trajectoryTimeSlider;
 
+   /** This tracker should be shared with the sub-managers to keep the state consistent. */
    private final ControllerStatusTracker controllerStatusTracker;
    private final LogToolsLogger logToolsLogger = new LogToolsLogger();
 
-   public RDXTeleoperationManager(String robotRepoName,
-                                  String robotSubsequentPathToResourceFolder,
-                                  CommunicationHelper communicationHelper)
+   /**
+    * For use without interactables available. May crash if a YoVariableClient is needed.
+    */
+   public RDXTeleoperationManager(CommunicationHelper communicationHelper)
    {
-      this(robotRepoName, robotSubsequentPathToResourceFolder, communicationHelper, null, null, null);
+      this(communicationHelper, null, null, null);
    }
 
-   public RDXTeleoperationManager(String robotRepoName,
-                                  String robotSubsequentPathToResourceFolder,
-                                  CommunicationHelper communicationHelper,
+   /**
+    * Enable interactables and use a YoVariable client to show wrist force arrows on
+    * some robots.
+    */
+   public RDXTeleoperationManager(CommunicationHelper communicationHelper,
                                   RobotCollisionModel robotSelfCollisionModel,
                                   RobotCollisionModel robotEnvironmentCollisionModel,
                                   YoVariableClientHelper yoVariableClientHelper)
@@ -344,7 +371,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    {
       if (interactablesEnabled.get())
       {
-         locomotionManager.caculateWalkPathControlRing3DViewPick(input);
+         locomotionManager.calculateWalkPathControlRing3DViewPick(input);
 
          if (interactablesAvailable)
          {
@@ -394,7 +421,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       chestPitchSlider.renderImGuiWidgets();
       chestYawSlider.renderImGuiWidgets();
 
-      trajectoryTimeSlider.render();
+      trajectoryTimeSlider.renderImGuiWidget();
 
       ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
       ImGui.checkbox(labels.get("Show body path planner parameter tuner"), bodyPathPlanningParametersTuner.getIsShowing());

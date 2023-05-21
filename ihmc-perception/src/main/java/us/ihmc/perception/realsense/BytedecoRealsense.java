@@ -55,8 +55,8 @@ public class BytedecoRealsense
    protected rs2_stream_profile colorFrameStreamProfile;
    protected double depthDiscretization;
    protected rs2_frame syncedFrames = new rs2_frame();
-   protected MutableBytePointer depthFrameData = null;
-   protected MutableBytePointer colorFrameData = null;
+   protected MutableBytePointer depthFrameData = new MutableBytePointer();
+   protected MutableBytePointer colorFrameData = new MutableBytePointer();
    private int depthFrameDataSize;
    private int colorFrameDataSize;
    private rs2_processing_block colorAlignProcessingBlock;
@@ -235,14 +235,7 @@ public class BytedecoRealsense
 
          if (depthFrameDataSize > 0)
          {
-            if (depthFrameData == null)
-            {
-               depthFrameData = new MutableBytePointer(realsense2.rs2_get_frame_data(syncedFrames, error));
-            }
-            else
-            {
-               depthFrameDataAddress = realsense2.rs2_get_frame_data_address(syncedFrames, error);
-            }
+            depthFrameDataAddress = realsense2.rs2_get_frame_data_address(syncedFrames, error);
 
             if (depthFrameStreamProfile == null)
             {
@@ -263,14 +256,7 @@ public class BytedecoRealsense
 
             if (colorEnabled)
             {
-               if (colorFrameData == null)
-               {
-                  colorFrameData = new MutableBytePointer(realsense2.rs2_get_frame_data(extractedColorFrame, error));
-               }
-               else
-               {
-                  colorFrameDataAddress = realsense2.rs2_get_frame_data_address(extractedColorFrame, error);
-               }
+               colorFrameDataAddress = realsense2.rs2_get_frame_data_address(extractedColorFrame, error);
 
                if (colorFrameStreamProfile == null)
                {
@@ -343,12 +329,18 @@ public class BytedecoRealsense
    public void updateDataBytePointers()
    {
       if (depthFrameDataAddress > 0)
+      {
+         depthFrameData.deallocate();
          depthFrameData.setAddress(depthFrameDataAddress);
+      }
 
       if (colorEnabled)
       {
          if (colorFrameDataAddress > 0)
+         {
+            colorFrameData.deallocate();
             colorFrameData.setAddress(colorFrameDataAddress);
+         }
       }
    }
 

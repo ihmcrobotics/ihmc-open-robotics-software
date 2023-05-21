@@ -6,7 +6,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
 import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
 import us.ihmc.perception.spinnaker.SpinnakerSystemManager;
@@ -16,11 +15,11 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.thread.Throttler;
 
-/** To run this you have to download the Spinnaker SDK, move it to the robot computer, then run
- *  the install script inside of it.
+/**
+ * To run this you have to download the Spinnaker SDK, move it to the robot computer, then run
+ * the install script inside of it.
  */
 public class DualBlackflyAndAruCoMarkerOnRobotProcess
 {
@@ -28,7 +27,6 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    private static final String RIGHT_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "00000000");
    public static final double MAX_PERIOD = UnitConversions.hertzToSeconds(20.0);
 
-   private final Activator nativesLoadedActivator;
    private SpinnakerSystemManager spinnakerSystemManager;
    private final ROS2Helper ros2Helper;
    private final RealtimeROS2Node realtimeROS2Node;
@@ -45,7 +43,6 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    {
       this.predefinedSceneNodeLibrary = predefinedSceneNodeLibrary;
       this.ousterFisheyeColoringIntrinsics = ousterFisheyeColoringIntrinsics;
-      nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "blackfly_node");
       ros2Helper = new ROS2Helper(ros2Node);
@@ -66,9 +63,8 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
       if (!RIGHT_SERIAL_NUMBER.equals("00000000"))
       {
          LogTools.info("Adding Blackfly RIGHT with serial number: {}", RIGHT_SERIAL_NUMBER);
-         blackflies.put(RobotSide.RIGHT, new DualBlackflyCamera(RIGHT_SERIAL_NUMBER,
-                                                                syncedRobot,
-                                                                robotModel.getSensorInformation().getObjectDetectionCameraTransform()));
+         blackflies.put(RobotSide.RIGHT,
+                        new DualBlackflyCamera(RIGHT_SERIAL_NUMBER, syncedRobot, robotModel.getSensorInformation().getObjectDetectionCameraTransform()));
       }
       else
       {
@@ -79,6 +75,18 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "DualBlackflyShutdown"));
       ThreadTools.startAThread(this::update, "DualBlackflyNode");
+
+      spinnakerSystemManager = new SpinnakerSystemManager();
+      for (RobotSide side : blackflies.sides())
+      {
+         DualBlackflyCamera blackfly = blackflies.get(side);
+         blackfly.create(spinnakerSystemManager.createBlackfly(blackfly.getSerialNumber()),
+                         side,
+                         ros2Helper,
+                         realtimeROS2Node,
+                         predefinedSceneNodeLibrary,
+                         ousterFisheyeColoringIntrinsics);
+      }
    }
 
    private void update()
@@ -86,43 +94,16 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
       while (running)
       {
          throttler.waitAndRun(MAX_PERIOD);
-
-         if (nativesLoadedActivator.poll())
+         spinnakerSystemManager = new SpinnakerSystemManager();
+         for (RobotSide side : blackflies.sides())
          {
-            if (nativesLoadedActivator.isNewlyActivated())
-            {
-               spinnakerSystemManager = new SpinnakerSystemManager();
-               for (RobotSide side : blackflies.sides())
-               {
-                  DualBlackflyCamera blackfly = blackflies.get(side);
-                  blackfly.create(spinnakerSystemManager.createBlackfly(blackfly.getSerialNumber()),
-                                  side,
-                                  ros2Helper,
-                                  realtimeROS2Node, predefinedSceneNodeLibrary,
-                                  ousterFisheyeColoringIntrinsics);
-               }
-            }
-
-            for (RobotSide side : blackflies.sides())
-            {
-               blackflies.get(side).update();
-            }
-
-            if (!nodeSpun)
-            {
-               boolean allInitialized = true;
-               for (RobotSide side : blackflies.sides())
-               {
-                  allInitialized &= blackflies.get(side).getRos2ImagePublisher() != null;
-               }
-
-               if (allInitialized)
-               {
-                  nodeSpun = true;
-                  LogTools.info("Spinning Realtime ROS 2 node");
-                  realtimeROS2Node.spin();
-               }
-            }
+            DualBlackflyCamera blackfly = blackflies.get(side);
+            blackfly.create(spinnakerSystemManager.createBlackfly(blackfly.getSerialNumber()),
+                            side,
+                            ros2Helper,
+                            realtimeROS2Node,
+                            predefinedSceneNodeLibrary,
+                            ousterFisheyeColoringIntrinsics);
          }
       }
    }
@@ -151,6 +132,6 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
 
    public static void main(String[] args)
    {
-//      SpinnakerTools.printAllConnectedDevicesInformation();
+      //      SpinnakerTools.printAllConnectedDevicesInformation();
    }
 }

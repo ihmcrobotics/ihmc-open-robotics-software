@@ -31,5 +31,5 @@ public class DoorModelParameters
    public static final double ARUCO_MARKER_PUSH_SIDE_BOTTOM_RIGHT_CORNER_Y_IN_PANEL_FRAME = 0.780302;
 
    public static final double ARUCO_MARKER_PULL_SIDE_BOTTOM_RIGHT_CORNER_Z_IN_PANEL_FRAME = 1.03981;
-   public static final double ARUCO_MARKER_PULL_SIDE_BOTTOM_RIGHT_CORNER_Y_IN_PANEL_FRAME = 0.780301;
+   public static final double ARUCO_MARKER_PULL_SIDE_BOTTOM_RIGHT_CORNER_Y_IN_PANEL_FRAME = 0.577101;
 }
