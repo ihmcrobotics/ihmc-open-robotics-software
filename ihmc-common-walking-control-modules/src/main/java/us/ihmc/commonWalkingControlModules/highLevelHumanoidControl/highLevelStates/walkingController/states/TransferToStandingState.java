@@ -201,6 +201,8 @@ public class TransferToStandingState extends WalkingState
       WalkingTrajectoryPath walkingTrajectoryPath = controllerToolbox.getWalkingTrajectoryPath();
       walkingTrajectoryPath.clearFootsteps();
       walkingTrajectoryPath.initializeDoubleSupport();
+      controllerToolbox.getWalkingTrajectoryPath().updateTrajectory(feetManager.getCurrentConstraintType(RobotSide.LEFT),
+                                                                    feetManager.getCurrentConstraintType(RobotSide.RIGHT));
    }
 
    @Override
