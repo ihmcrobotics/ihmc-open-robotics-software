@@ -63,10 +63,6 @@ public class RDXRobotLowLevelMessenger
          sendStandRequest();
       }
       ImGui.sameLine();
-//      if (ImGui.button(labels.get("Abort")))
-//      {
-//         robotLowLevelMessenger.sendAbortWalkingRequest();
-//      }
 
       if (ImGui.button(labels.get("Freeze")))
       {
