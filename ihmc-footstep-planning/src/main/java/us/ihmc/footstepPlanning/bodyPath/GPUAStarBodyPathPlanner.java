@@ -28,7 +28,6 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.thread.Activator;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -188,21 +187,7 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       // Sets up the post-processing waypoint smoother
       smoother = new GPUAStarBodyPathSmoother(plannerParameters, null, openCLManager, null, null);
 
-      // Load all the native data on the thread. This effectively just loads all the bytedeco stuff to be used by the planner
-      Activator nativeLoader = BytedecoTools.loadNativesOnAThread();
-      boolean doneLoading = false;
-
-      while (!doneLoading)
-      {
-         if (nativeLoader.poll())
-         {
-            if (nativeLoader.isNewlyActivated())
-            {
-               createOpenCLStuff(defaultCells, defaultNodes);
-               doneLoading = true;
-            }
-         }
-      }
+      createOpenCLStuff(defaultCells, defaultNodes);
 
       // this sets up all the data to be stored by the logger. This callback is called whenever the graph is expanded, where it then creates a new big of edge
       // data, and stores it in a map, and resets all the variables. This gets called inside the planning loop.

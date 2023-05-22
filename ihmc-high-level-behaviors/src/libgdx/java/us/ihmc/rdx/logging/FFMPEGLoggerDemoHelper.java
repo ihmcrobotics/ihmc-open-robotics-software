@@ -85,7 +85,7 @@ public class FFMPEGLoggerDemoHelper
       ImGui.inputInt(labels.get("framerate"), framerate, 1);
    }
 
-   public void renderImGuiNativesLoaded()
+   public void renderImGuiWidgets()
    {
       if (!logging)
       {

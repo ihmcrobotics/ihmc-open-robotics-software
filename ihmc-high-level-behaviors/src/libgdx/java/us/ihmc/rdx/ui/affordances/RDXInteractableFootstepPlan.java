@@ -157,16 +157,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    {
       ImGui.text("Footstep plan:");
       ImGui.sameLine();
-      if (footsteps.size() > 0)
-      {
-         // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
-         if (ImGui.button(labels.get("Walk")) || ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
-         {
-            walkFromSteps();
-         }
-         ImGuiTools.previousWidgetTooltip("Keybind: Space");
-         ImGui.sameLine();
-      }
+
       if (ImGui.button(labels.get("Delete Last")) || ImGui.isKeyPressed(ImGuiTools.getDeleteKey()))
       {
          removeLastStep();
