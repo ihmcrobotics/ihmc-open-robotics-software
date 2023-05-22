@@ -227,7 +227,10 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    public void exitPlacement()
    {
       footstepBeingPlaced = null;
-      footstepIndex = 0;
+      if (footstepPlan.getFootsteps().size() == 0)
+      {
+         footstepIndex = 0;;
+      }
    }
 
    public void createNewFootStep(RobotSide footstepSide)
