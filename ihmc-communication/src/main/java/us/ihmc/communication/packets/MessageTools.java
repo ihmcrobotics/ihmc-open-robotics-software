@@ -1363,7 +1363,7 @@ public class MessageTools
       return poseListMessage;
    }
 
-   public static void packPoseListMessage(Collection<Pose3DReadOnly> poses, PoseListMessage poseListMessage)
+   public static <T extends Pose3DReadOnly> void packPoseListMessage(Iterable<T> poses, PoseListMessage poseListMessage)
    {
       poseListMessage.getPoses().clear();
       for (Pose3DReadOnly pose : poses)
