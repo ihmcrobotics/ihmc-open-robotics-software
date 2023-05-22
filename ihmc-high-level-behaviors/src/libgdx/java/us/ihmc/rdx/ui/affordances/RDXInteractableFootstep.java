@@ -89,7 +89,7 @@ public class RDXInteractableFootstep
       selectablePose3DGizmo = new RDXSelectablePose3DGizmo();
       selectablePose3DGizmo.create(baseUI.getPrimary3DPanel());
 
-      String txt = footstepSide.getSideNameFirstLetter() + (index + 1);
+      String txt = footstepSide.getSideNameFirstLetter() + index;
       if (!textRenderablesMap.containsKey(txt))
       {
          footstepIndexText = new RDX3DSituatedText("" + txt);

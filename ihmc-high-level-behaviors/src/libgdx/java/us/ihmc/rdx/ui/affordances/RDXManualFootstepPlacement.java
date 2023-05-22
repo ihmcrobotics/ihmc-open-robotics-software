@@ -36,7 +36,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 {
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private RDXInteractableFootstep footstepBeingPlaced;
-   private int footstepIndex = -1;
+   private int footstepIndex = 0;
    private boolean modeNewlyActivated = false;
    private RDXBaseUI baseUI;
    private RobotSide currentFootStepSide;
@@ -227,7 +227,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    public void exitPlacement()
    {
       footstepBeingPlaced = null;
-      footstepIndex = -1;
+      footstepIndex = 0;
    }
 
    public void createNewFootStep(RobotSide footstepSide)
