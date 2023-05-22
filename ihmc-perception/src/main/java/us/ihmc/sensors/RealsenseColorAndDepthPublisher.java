@@ -19,7 +19,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
-import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.logging.HDF5Tools;
@@ -52,11 +51,6 @@ import java.util.function.Supplier;
  */
 public class RealsenseColorAndDepthPublisher
 {
-   static
-   {
-      BytedecoTools.loadOpenCV();
-   }
-
    private static final double OUTPUT_PERIOD = UnitConversions.hertzToSeconds(20.0);
 
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
