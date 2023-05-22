@@ -79,7 +79,7 @@ float get_height_on_plane(float x, float y, global float *plane) {
 }
 
 void kernel heightMapUpdateKernel(read_only image2d_t in,
-                                  read_write image2d_t out,
+                                  write_only image2d_t out,
                                   global float *params,
                                   global float *sensorToWorldTf,
                                   global float *worldToSensorTf,

@@ -23,6 +23,11 @@ import static org.bytedeco.opencl.global.OpenCL.*;
  */
 public class OpenCLManager
 {
+   static
+   {
+      Loader.load(OpenCL.class);
+   }
+
    private static _cl_platform_id platforms = new _cl_platform_id();
    private static _cl_device_id devices = new _cl_device_id();
    private static _cl_context context = null;

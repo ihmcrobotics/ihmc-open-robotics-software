@@ -1,12 +1,10 @@
 package us.ihmc.perception.spinnaker;
 
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.CharPointer;
 import org.bytedeco.javacpp.SizeTPointer;
 import org.bytedeco.spinnaker.Spinnaker_C.*;
 import org.bytedeco.spinnaker.global.Spinnaker_C;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoTools;
 import us.ihmc.tools.string.StringTools;
 
 import java.nio.charset.StandardCharsets;
