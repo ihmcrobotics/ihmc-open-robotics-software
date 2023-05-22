@@ -90,6 +90,7 @@ public class LocalizationAndMappingProcess
 
       ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(WalkingControllerFailureStatusMessage.class, simpleRobotName), message ->
       {
+         LogTools.warn("Resetting Map (Walking Failure Detected)");
          setEnableLiveMode(false);
          resetMap();
       });
