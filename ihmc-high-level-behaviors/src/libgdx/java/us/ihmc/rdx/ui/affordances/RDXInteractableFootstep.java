@@ -153,7 +153,7 @@ public class RDXInteractableFootstep
       selectablePose3DGizmo = new RDXSelectablePose3DGizmo();
       selectablePose3DGizmo.create(baseUI.getPrimary3DPanel());
 
-      String text = plannedFootstepInternal.getRobotSide().getSideNameFirstLetter() + (footstepIndex + 1);
+      String text = plannedFootstepInternal.getRobotSide().getSideNameFirstLetter() + footstepIndex;
       if (!textRenderablesMap.containsKey(text))
       {
          footstepIndexText = new RDX3DSituatedText("" + text);
