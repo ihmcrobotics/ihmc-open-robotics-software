@@ -66,7 +66,6 @@ public class RDXLocomotionManager
    private RDXLegControlMode legControlMode = RDXLegControlMode.DISABLED;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean showGraphics = new ImBoolean(true);
    private boolean isPlacingFootstep = false;
    private final PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
    private final AbortWalkingMessage abortWalkingMessage = new AbortWalkingMessage();
@@ -279,8 +278,6 @@ public class RDXLocomotionManager
 
       walkPathControlRing.renderImGuiWidgets();
       interactableFootstepPlan.renderImGuiWidgets();
-
-      ImGui.checkbox(labels.get("Show footstep related graphics"), showGraphics);
 
       // Handles all shortcuts for when the spacebar key is pressed
       if (ImGui.isKeyReleased(ImGuiTools.getSpaceKey()))
