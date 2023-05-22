@@ -13,8 +13,7 @@ public class RDX3DPanelToolbar
 {
    private boolean show = true;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final float iconSize = 35.0f;
-   private final float gap = 17.7f;
+   private final float iconSize = 40.0f;
    private final ArrayList<RDX3DPanelToolbarButton> buttons = new ArrayList<>();
 
    public RDX3DPanelToolbarButton addButton()
@@ -28,10 +27,8 @@ public class RDX3DPanelToolbar
    {
       if (buttons.size() > 0 && show)
       {
-         int numButtons = buttons.size();
-         float offsetY = 12.0f;
-         float panelWidth = iconSize * numButtons + gap * numButtons;
-         float panelHeight = iconSize + 2 * offsetY;
+         float panelWidth = iconSize * buttons.size() + 9.0f * buttons.size() - 1.0f;
+         float panelHeight = iconSize + 16.0f;
 
          ImGui.setNextWindowSize(panelWidth, panelHeight);
          float centerX = mainWindowPosX + mainWindowWidth / 2;
@@ -63,7 +60,7 @@ public class RDX3DPanelToolbar
             float tintB = 1.0f;
             float tintA = 1.0f;
             int framePadding = 0;
-            if (ImGui.imageButton(icon.getTexture().getTextureObjectHandle(), iconSize, iconSize, uv0X, uv0Y, uv1X, uv1Y, framePadding,
+            if (ImGui.imageButton(icon.getTexture().getTextureObjectHandle(), sizeX, sizeY, uv0X, uv0Y, uv1X, uv1Y, framePadding,
                                   bgColorR, bgColorG, bgColorB, bgColorA, tintR, tintG, tintB, tintA))
             {
                button.onPressed();
