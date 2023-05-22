@@ -224,10 +224,12 @@ public class PerceptionDebugTools
 
    public static void display(String tag, Mat image, int delay, int screenSize)
    {
+      opencv_highgui.namedWindow(tag, opencv_highgui.WINDOW_NORMAL);
       opencv_highgui.imshow(tag, image);
 
       if (screenSize != -1)
       {
+         LogTools.info("Resizing window to %d".formatted(screenSize));
          opencv_highgui.resizeWindow(tag, screenSize, screenSize);
       }
 
