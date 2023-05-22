@@ -16,9 +16,7 @@ import us.ihmc.rdx.tools.RDXIconTexture;
 public class RDX3DPanelToolbarButton
 {
    private Runnable onPressed;
-   private RDXIconTexture upIcon;
-   private RDXIconTexture hoverIcon;
-   private RDXIconTexture downIcon;
+   private RDXButtonIconTextures activeIconTextures;
    private String tooltipText = null;
    private boolean isHovered = false;
    private boolean isDown = false;
@@ -33,18 +31,20 @@ public class RDX3DPanelToolbarButton
       tooltipText = text;
    }
 
-   public void loadAndSetIcons(String iconAbsoluteResourcePath)
+   public RDXButtonIconTextures loadAndSetIcons(String iconAbsoluteResourcePath)
    {
-      upIcon = new RDXIconTexture(iconAbsoluteResourcePath);
+      RDXIconTexture upIcon = new RDXIconTexture(iconAbsoluteResourcePath);
       String hoverPath = iconAbsoluteResourcePath.substring(0, iconAbsoluteResourcePath.indexOf(".png")) + "_hover.png";
-      hoverIcon = new RDXIconTexture(hoverPath);
+      RDXIconTexture hoverIcon = new RDXIconTexture(hoverPath);
       String downPath = iconAbsoluteResourcePath.substring(0, iconAbsoluteResourcePath.indexOf(".png")) + "_down.png";
-      downIcon = new RDXIconTexture(downPath);
+      RDXIconTexture downIcon = new RDXIconTexture(downPath);
+      activeIconTextures = new RDXButtonIconTextures(upIcon, hoverIcon, downIcon);
+      return activeIconTextures;
    }
 
-   public void setUpIcon(RDXIconTexture iconTexture)
+   public void setActiveIconTextures(RDXButtonIconTextures activeIconTextures)
    {
-      this.upIcon = iconTexture;
+      this.activeIconTextures = activeIconTextures;
    }
 
    public void onPressed()
@@ -56,26 +56,11 @@ public class RDX3DPanelToolbarButton
    public RDXIconTexture getAppropriateIcon()
    {
       if (isDown)
-         return downIcon;
+         return activeIconTextures.getDownIcon();
       if (isHovered)
-         return hoverIcon;
+         return activeIconTextures.getHoverIcon();
       else
-         return upIcon;
-   }
-
-   public RDXIconTexture getUpIcon()
-   {
-      return upIcon;
-   }
-
-   public RDXIconTexture getHoverIcon()
-   {
-      return hoverIcon;
-   }
-
-   public RDXIconTexture getDownIcon()
-   {
-      return downIcon;
+         return activeIconTextures.getUpIcon();
    }
 
    public String getTooltipText()
