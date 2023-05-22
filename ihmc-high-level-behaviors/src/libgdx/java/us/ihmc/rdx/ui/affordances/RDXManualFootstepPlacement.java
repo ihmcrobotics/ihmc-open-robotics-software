@@ -229,7 +229,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       footstepBeingPlaced = null;
       if (footstepPlan.getFootsteps().size() == 0)
       {
-         footstepIndex = 0;;
+         footstepIndex = 0;
       }
    }
 
