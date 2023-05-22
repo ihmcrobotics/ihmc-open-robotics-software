@@ -31,8 +31,6 @@ public class WalkingFootstepTracker
    {
       new IHMCROS2Callback<>(ros2Node, getTopic(FootstepDataListMessage.class, robotName), this::interceptFootstepDataListMessage);
       new IHMCROS2Callback<>(ros2Node, getTopic(FootstepStatusMessage.class, robotName), this::acceptFootstepStatusMessage);
-
-      // TODO: Observe when footsteps are cancelled / walking aborted?
    }
 
    private void acceptFootstepStatusMessage(FootstepStatusMessage footstepStatusMessage)

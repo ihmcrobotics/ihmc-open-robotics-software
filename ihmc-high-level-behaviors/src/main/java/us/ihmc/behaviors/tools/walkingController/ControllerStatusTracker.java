@@ -126,7 +126,10 @@ public class ControllerStatusTracker
       }
       else if (walkingStatus == WalkingStatus.ABORT_REQUESTED)
       {
+         isWalking = false;
+         footstepTracker.reset();
 
+         LogTools.info("Walking Aborted.");
       }
       else
       {
