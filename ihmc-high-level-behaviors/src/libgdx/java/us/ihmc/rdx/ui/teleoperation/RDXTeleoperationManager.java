@@ -301,7 +301,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       // STAND PREP
       RDX3DPanelToolbarButton standPrepButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      standPrepButton.loadAndSetIcon("icons/standPrep.png");
+      standPrepButton.loadAndSetIcons("icons/standPrep.png");
       standPrepButton.setOnPressed(robotLowLevelMessenger::sendStandRequest);
       standPrepButton.setTooltipText("Stand prep");
 

@@ -49,41 +49,41 @@ public class RDXHandConfigurationManager
          handConfigurationNames[i] = values[i].name();
       }
 
-      SideDependentList<RDXIconTexture> toggleIcons = new SideDependentList<>(new RDXIconTexture("icons/leftToggle.jpg"),
-                                                                              new RDXIconTexture("icons/rightToggle.jpg"));
+      SideDependentList<RDXIconTexture> toggleIcons = new SideDependentList<>(new RDXIconTexture("icons/leftToggle.png"),
+                                                                              new RDXIconTexture("icons/rightToggle.png"));
       RDX3DPanelToolbarButton leftRightHandToggleButton = baseUI.getPrimary3DPanel().addToolbarButton();
       leftRightHandToggleButton.setTooltipText("Toggle hand. Red: Left | Green: Right");
-      leftRightHandToggleButton.setIcon(toggleIcons.get(toolbarSelectedSide));
+      leftRightHandToggleButton.setUpIcon(toggleIcons.get(toolbarSelectedSide));
       leftRightHandToggleButton.setOnPressed(() ->
       {
          toolbarSelectedSide = toolbarSelectedSide.getOppositeSide();
-         leftRightHandToggleButton.setIcon(toggleIcons.get(toolbarSelectedSide));
+         leftRightHandToggleButton.setUpIcon(toggleIcons.get(toolbarSelectedSide));
       });
 
       SideDependentList<Runnable> calibrateCommands = new SideDependentList<>(() -> publishHandCommand(RobotSide.LEFT, HandConfiguration.CALIBRATE),
                                                                               () -> publishHandCommand(RobotSide.RIGHT, HandConfiguration.CALIBRATE));
       RDX3DPanelToolbarButton calibrateButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      calibrateButton.loadAndSetIcon("icons/calibrate.png");
+      calibrateButton.loadAndSetIcons("icons/calibrate.png");
       calibrateButton.setTooltipText("Calibrate hand");
       calibrateButton.setOnPressed(() -> calibrateCommands.get(toolbarSelectedSide).run());
 
       SideDependentList<Runnable> openCommands = new SideDependentList<>(() -> publishHandCommand(RobotSide.LEFT, HandConfiguration.OPEN),
                                                                           () -> publishHandCommand(RobotSide.RIGHT, HandConfiguration.OPEN));
       RDX3DPanelToolbarButton openHandButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      openHandButton.loadAndSetIcon("icons/openGripper.jpg");
+      openHandButton.loadAndSetIcons("icons/openGripper.png");
       openHandButton.setTooltipText("Open hand");
       openHandButton.setOnPressed(() -> openCommands.get(toolbarSelectedSide).run());
 
       SideDependentList<Runnable> closeCommands = new SideDependentList<>(() -> publishHandCommand(RobotSide.LEFT, HandConfiguration.CLOSE),
                                                                           () -> publishHandCommand(RobotSide.RIGHT, HandConfiguration.CLOSE));
       RDX3DPanelToolbarButton closeHandButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      closeHandButton.loadAndSetIcon("icons/closeGripper.jpg");
+      closeHandButton.loadAndSetIcons("icons/closeGripper.png");
       closeHandButton.setTooltipText("Close hand");
       closeHandButton.setOnPressed(() -> closeCommands.get(toolbarSelectedSide).run());
 
       RDXIconTexture homeIcon = new RDXIconTexture("icons/home.png");
       RDX3DPanelToolbarButton armHomeButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      armHomeButton.setIcon(homeIcon);
+      armHomeButton.setUpIcon(homeIcon);
       armHomeButton.setTooltipText("left/right arm home pose");
       armHomeButton.setOnPressed(() -> publishArmHomeCommand(toolbarSelectedSide));
 
@@ -189,7 +189,7 @@ public class RDXHandConfigurationManager
    {
       RDX3DPanelToolbarButton shieldButton = baseUI.getPrimary3DPanel().addToolbarButton();
       RDXIconTexture shieldIcon = new RDXIconTexture("icons/shield.png");
-      shieldButton.setIcon(shieldIcon);
+      shieldButton.setUpIcon(shieldIcon);
       shieldButton.setTooltipText("left/right side - testing shield lifting on Nadia");
 
       // Hand-tuned joint angles to hold the shield

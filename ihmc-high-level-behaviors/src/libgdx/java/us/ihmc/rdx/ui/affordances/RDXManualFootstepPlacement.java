@@ -8,7 +8,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -59,12 +58,12 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       feetIcon = new RDXIconTexture("icons/feet.png");
 
       RDX3DPanelToolbarButton leftFootButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      leftFootButton.loadAndSetIcon("icons/leftFoot_depress.png");
+      leftFootButton.loadAndSetIcons("icons/leftFoot.png");
       leftFootButton.setTooltipText("Place left footstep");
       leftFootButton.setOnPressed(() -> createNewFootStep(RobotSide.LEFT));
 
       RDX3DPanelToolbarButton rightFootButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      rightFootButton.loadAndSetIcon("icons/rightFoot_depress.png");
+      rightFootButton.loadAndSetIcons("icons/rightFoot.png");
       rightFootButton.setTooltipText("Place right footstep");
       rightFootButton.setOnPressed(() -> createNewFootStep(RobotSide.RIGHT));
    }
