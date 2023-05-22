@@ -67,16 +67,7 @@ public class RDXRobotLowLevelMessenger
       {
          robotLowLevelMessenger.sendAbortWalkingRequest();
       }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Pause")))
-      {
-         robotLowLevelMessenger.sendPauseWalkingRequest();
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Continue")))
-      {
-         robotLowLevelMessenger.sendContinueWalkingRequest();
-      }
+
       if (ImGui.button(labels.get("Freeze")))
       {
          robotLowLevelMessenger.sendFreezeRequest();
