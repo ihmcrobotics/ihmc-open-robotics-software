@@ -69,8 +69,8 @@ public class RDXLocomotionManager
                                ROS2SyncedRobotModel syncedRobot,
                                ROS2ControllerHelper ros2Helper)
    {
-      this.communicationHelper = communicationHelper;
       this.robotModel = robotModel;
+      this.communicationHelper = communicationHelper;
       this.syncedRobot = syncedRobot;
 
       walkingParameters = new RDXLocomotionParameters(robotModel.getSimpleRobotName());
@@ -197,10 +197,10 @@ public class RDXLocomotionManager
 
    public void renderImGuiWidgets()
    {
-      areFootstepsAdjustableCheckbox.render();
-      swingTimeSlider.render();
-      transferTimeSlider.render();
-      turnAggressivenessSlider.render();
+      areFootstepsAdjustableCheckbox.renderImGuiWidget();
+      swingTimeSlider.renderImGuiWidget();
+      transferTimeSlider.renderImGuiWidget();
+      turnAggressivenessSlider.renderImGuiWidget();
 
       ImGui.text("Leg control mode: " + legControlMode.name());
       if (ImGui.radioButton(labels.get("Disabled"), legControlMode == RDXLegControlMode.DISABLED))
@@ -228,10 +228,9 @@ public class RDXLocomotionManager
       if (ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton())
          legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
 
-      ImGui.text("Walk path control ring planner:");
       walkPathControlRing.renderImGuiWidgets();
-
       interactableFootstepPlan.renderImGuiWidgets();
+
       ImGui.checkbox(labels.get("Show footstep related graphics"), showGraphics);
    }
 
@@ -240,7 +239,7 @@ public class RDXLocomotionManager
       walkPathControlRing.update(interactableFootstepPlan);
    }
 
-   public void caculateWalkPathControlRing3DViewPick(ImGui3DViewInput input)
+   public void calculateWalkPathControlRing3DViewPick(ImGui3DViewInput input)
    {
       if (!manualFootstepPlacement.isPlacingFootstep())
          walkPathControlRing.calculate3DViewPick(input);

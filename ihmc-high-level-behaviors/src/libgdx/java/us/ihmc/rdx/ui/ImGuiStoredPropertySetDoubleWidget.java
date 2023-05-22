@@ -111,7 +111,7 @@ public class ImGuiStoredPropertySetDoubleWidget implements ImGuiStoredPropertySe
    }
 
    @Override
-   public void render()
+   public void renderImGuiWidget()
    {
       imDoubleWrapper.renderImGuiWidget();
    }

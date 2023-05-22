@@ -23,6 +23,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.thread.SwapReference;
 import us.ihmc.tools.thread.Throttler;
@@ -264,39 +265,49 @@ public class OpenCVArUcoMarkerDetection
          BytedecoOpenCVTools.putFloat3(objectPointsDataPointer, 3, 0.0f, (float) -markerSize, 0.0f);
 
          OpenCVArUcoMakerDetectionSwapData data = detectionSwapReference.getForThreadTwo();
-         Mat markerCorners = data.getCorners().get(data.getMarkerIDToCornersIndexMap().get(markerID));
-         opencv_calib3d.solvePnP(objectPoints, markerCorners, cameraMatrix, distortionCoefficients, rotationVector, translationVector);
+         int cornersIndex = data.getMarkerIDToCornersIndexMap().get(markerID);
+         long cornersSize = data.getCorners().size();
+         if (cornersIndex >= cornersSize)
+         { // This happens sometimes. There is a bug somewhere, potentially to do with threading, but I can't find it. - @dcalvert
+            LogTools.error("Corners index {} is >= the vector size {}. Can't update the pose of this marker this frame.",
+                           cornersIndex, cornersSize);
+         }
+         else
+         {
+            Mat markerCorners = data.getCorners().get(cornersIndex);
+            opencv_calib3d.solvePnP(objectPoints, markerCorners, cameraMatrix, distortionCoefficients, rotationVector, translationVector);
 
-         // Couldn't figure out why we had to apply these transforms here and below, but it works.
-         double rx = rotationVector.ptr(0).getDouble();
-         double ry = rotationVector.ptr(0).getDouble(Double.BYTES);
-         double rz = rotationVector.ptr(0).getDouble(2 * Double.BYTES);
-         rotationVector.ptr(0).putDouble(rz);
-         rotationVector.ptr(0).putDouble(Double.BYTES, -rx);
-         rotationVector.ptr(0).putDouble(2 * Double.BYTES, -ry);
+            // Couldn't figure out why we had to apply these transforms here and below, but it works.
+            double rx = rotationVector.ptr(0).getDouble();
+            double ry = rotationVector.ptr(0).getDouble(Double.BYTES);
+            double rz = rotationVector.ptr(0).getDouble(2 * Double.BYTES);
+            rotationVector.ptr(0).putDouble(rz);
+            rotationVector.ptr(0).putDouble(Double.BYTES, -rx);
+            rotationVector.ptr(0).putDouble(2 * Double.BYTES, -ry);
 
-         opencv_calib3d.Rodrigues(rotationVector, rotationMatrix);
+            opencv_calib3d.Rodrigues(rotationVector, rotationMatrix);
 
-         BytePointer basePtr = rotationMatrix.ptr(0);
-         euclidLinearTransform.set(basePtr.getDouble(),
-                                   basePtr.getDouble(Double.BYTES),
-                                   basePtr.getDouble(2 * Double.BYTES),
-                                   basePtr.getDouble(3 * Double.BYTES),
-                                   basePtr.getDouble(4 * Double.BYTES),
-                                   basePtr.getDouble(5 * Double.BYTES),
-                                   basePtr.getDouble(6 * Double.BYTES),
-                                   basePtr.getDouble(7 * Double.BYTES),
-                                   basePtr.getDouble(8 * Double.BYTES));
-         // These are probably because the coordinate system we define ourselves now for the solvePnP method,
-         // probably why they did it,so the way we define it must be different to the way it was internally
-         // in estimatePoseSingleMarkers.
-         euclidLinearTransform.appendRollRotation(-Math.PI / 2.0);
-         euclidLinearTransform.appendPitchRotation(Math.PI / 2.0);
+            BytePointer basePtr = rotationMatrix.ptr(0);
+            euclidLinearTransform.set(basePtr.getDouble(),
+                                      basePtr.getDouble(Double.BYTES),
+                                      basePtr.getDouble(2 * Double.BYTES),
+                                      basePtr.getDouble(3 * Double.BYTES),
+                                      basePtr.getDouble(4 * Double.BYTES),
+                                      basePtr.getDouble(5 * Double.BYTES),
+                                      basePtr.getDouble(6 * Double.BYTES),
+                                      basePtr.getDouble(7 * Double.BYTES),
+                                      basePtr.getDouble(8 * Double.BYTES));
+            // These are probably because the coordinate system we define ourselves now for the solvePnP method,
+            // probably why they did it,so the way we define it must be different to the way it was internally
+            // in estimatePoseSingleMarkers.
+            euclidLinearTransform.appendRollRotation(-Math.PI / 2.0);
+            euclidLinearTransform.appendPitchRotation(Math.PI / 2.0);
 
-         double x = translationVector.ptr(0).getDouble();
-         double y = translationVector.ptr(0).getDouble(Double.BYTES);
-         double z = translationVector.ptr(0).getDouble(2 * Double.BYTES);
-         euclidPosition.set(z, -x, -y);
+            double x = translationVector.ptr(0).getDouble();
+            double y = translationVector.ptr(0).getDouble(Double.BYTES);
+            double z = translationVector.ptr(0).getDouble(2 * Double.BYTES);
+            euclidPosition.set(z, -x, -y);
+         }
       }
    }
 
