@@ -82,7 +82,8 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
          blackfly.create(spinnakerSystemManager.createBlackfly(blackfly.getSerialNumber()),
                          side,
                          ros2Helper,
-                         realtimeROS2Node, predefinedSceneNodeLibrary,
+                         realtimeROS2Node,
+                         predefinedSceneNodeLibrary,
                          ousterFisheyeColoringIntrinsics);
       }
 
