@@ -99,9 +99,9 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             navigationPanel = new ImGuiPanel("Dataset Navigation Panel");
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
 
-            createL515(720, 1280, false); // Real D455
-            //createL515(768, 1024, false); // Real L515
-            //createL515(768, 1280, true); // Simulated L515
+            createForPerspective(720, 1280, false); // Real D455
+            //createForPerspective(768, 1024, false); // Real L515
+            //createForPerspective(768, 1280, true); // Simulated L515
 
             //createOuster(128, 1024);
 
@@ -125,7 +125,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             navigationPanel.setRenderMethod(this::renderNavigationPanel);
          }
 
-         private void createOuster(int depthHeight, int depthWidth)
+         private void createForSpherical(int depthHeight, int depthWidth)
          {
             sensorTopicName = PerceptionLoggerConstants.OUSTER_DEPTH_NAME;
             perceptionDataLoader.openLogFile(perceptionLogFile);
@@ -150,7 +150,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             totalFrameCount = (int) (perceptionDataLoader.getHDF5Manager().getCount(sensorTopicName) - 1);
          }
 
-         private void createL515(int depthHeight, int depthWidth, boolean simulation)
+         private void createForPerspective(int depthHeight, int depthWidth, boolean simulation)
          {
             sensorTopicName = PerceptionLoggerConstants.L515_DEPTH_NAME;
             perceptionDataLoader.openLogFile(perceptionLogFile);
