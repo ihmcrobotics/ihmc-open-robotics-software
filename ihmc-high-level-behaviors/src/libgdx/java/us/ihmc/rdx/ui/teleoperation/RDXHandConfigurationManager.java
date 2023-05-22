@@ -1,7 +1,6 @@
 package us.ihmc.rdx.ui.teleoperation;
 
 import controller_msgs.msg.dds.*;
-import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import imgui.ImGui;
 import imgui.type.ImInt;
 import us.ihmc.behaviors.tools.CommunicationHelper;
@@ -14,7 +13,6 @@ import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -22,6 +20,9 @@ import java.util.function.Consumer;
 import static us.ihmc.robotics.robotSide.RobotSide.LEFT;
 import static us.ihmc.robotics.robotSide.RobotSide.RIGHT;
 
+/**
+ * Manages the UI for a humanoid robot's hands. A hand configuration is like "open", "closed", etc.
+ */
 public class RDXHandConfigurationManager
 {
    private static final boolean ADD_SHIELD_BUTTON = false;

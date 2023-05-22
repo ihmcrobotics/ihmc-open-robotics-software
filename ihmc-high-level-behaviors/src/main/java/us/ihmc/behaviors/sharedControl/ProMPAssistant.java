@@ -2,20 +2,18 @@ package us.ihmc.behaviors.sharedControl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
-import us.ihmc.tools.io.WorkspaceResourceFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -60,12 +58,16 @@ public class ProMPAssistant
 
    public ProMPAssistant()
    {
-      // read parameters regarding the properties of available learned tasks from json file
-      String configurationFile = "ProMPAssistant.json";
-      LogTools.info("Loading parameters from resource: {}", configurationFile);
-      WorkspaceResourceDirectory directory = new WorkspaceResourceDirectory(getClass(), "/us/ihmc/behaviors/sharedControl");
-      WorkspaceResourceFile file = new WorkspaceResourceFile(directory, configurationFile);
-      JSONFileTools.load(file, jsonNode ->
+      InputStream inputStream = getClass().getClassLoader().getResourceAsStream("us/ihmc/behaviors/sharedControl/ProMPAssistant.json");
+
+      // If the inputStream is null it's likely because the file doesn't exist or got moved. Check file path
+      if (inputStream == null)
+      {
+         LogTools.info("File path is null");
+         return;
+      }
+
+      JSONFileTools.load(inputStream, jsonNode ->
       {
          testNumber = jsonNode.get("testNumberUseOnlyForTesting").asInt();
          boolean logEnabled = jsonNode.get("logging").asBoolean();
@@ -136,6 +138,15 @@ public class ProMPAssistant
 
          LogTools.info("ProMPs are ready to be used!");
       });
+
+      try
+      {
+         inputStream.close();
+      }
+      catch (IOException e)
+      {
+         LogTools.info(e);
+      }
    }
 
    public void framePoseToPack(FramePose3D framePose, String bodyPart)

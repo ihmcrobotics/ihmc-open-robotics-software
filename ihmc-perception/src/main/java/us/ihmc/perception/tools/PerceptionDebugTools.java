@@ -226,8 +226,10 @@ public class PerceptionDebugTools
    {
       opencv_highgui.imshow(tag, image);
 
-      if (screenSize == -1)
+      if (screenSize != -1)
+      {
          opencv_highgui.resizeWindow(tag, screenSize, screenSize);
+      }
 
       int code = opencv_highgui.waitKeyEx(delay);
       if (code == 113 || code != -1) // Keycode for 'q'

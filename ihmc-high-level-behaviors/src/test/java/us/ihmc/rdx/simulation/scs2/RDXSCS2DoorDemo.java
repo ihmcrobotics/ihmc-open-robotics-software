@@ -33,7 +33,7 @@ public class RDXSCS2DoorDemo
             SimulationSession simulationSession = new SimulationSession(BulletPhysicsEngine::new);
 
             DoorDefinition doorDefinition = new DoorDefinition();
-            doorDefinition.getDoorPanelDefinition().setAddFiducials(true);
+            doorDefinition.getDoorPanelDefinition().setAddArUcoMarkers(true);
             doorDefinition.build();
 
             // Pull door
