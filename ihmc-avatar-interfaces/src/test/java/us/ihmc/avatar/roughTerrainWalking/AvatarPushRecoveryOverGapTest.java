@@ -38,7 +38,6 @@ import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.tools.TerrainObjectDefinitionTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.PlanarRegionEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationToolkit.controllers.PushRobotControllerSCS2;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
@@ -73,7 +72,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       double gapWidth = 0.10;
       double sideGapWidth = 0.04;
 
-      NewGapPlanarRegionEnvironment environment = new NewGapPlanarRegionEnvironment(platform1Length, platform2Length, platformWidth, gapWidth, sideGapWidth);
+      GapPlanarRegionEnvironment environment = new GapPlanarRegionEnvironment(platform1Length, platform2Length, platformWidth, gapWidth, sideGapWidth);
 
       DRCRobotModel robotModel = getRobotModel();
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
@@ -237,7 +236,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
    }
 
 
-   private static class NewGapPlanarRegionEnvironment implements CommonAvatarEnvironmentInterface
+   private static class GapPlanarRegionEnvironment implements CommonAvatarEnvironmentInterface
    {
       private final RigidBodyTransformGenerator transformGenerator = new RigidBodyTransformGenerator();
       private final TerrainObjectDefinition terrainObjectDefinition ;
@@ -245,7 +244,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       private final PlanarRegionsList planarRegionsList;
       private int id = 0;
 
-      public NewGapPlanarRegionEnvironment(double platform1Length, double platform2Length, double platformWidth, double forwardGapSize, double sideGapSize)
+      public GapPlanarRegionEnvironment(double platform1Length, double platform2Length, double platformWidth, double forwardGapSize, double sideGapSize)
       {
          double platformHeight = 0.2;
          transformGenerator.translate(0.0, 0.0, 0.01);

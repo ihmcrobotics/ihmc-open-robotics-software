@@ -387,6 +387,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                                        captureRegionCalculator.getCaptureRegion());
       FrameConvexPolygon2DReadOnly singleStepRegion = oneStepSafetyHeuristics.getCaptureRegionWithSafetyMargin().getNumberOfVertices() < 3 ? captureRegionCalculator.getCaptureRegion() :
             oneStepSafetyHeuristics.getCaptureRegionWithSafetyMargin();
+      // Steps in queue accounts for the current step, so for it to hold value, it has to be at least 2.
       multiStepCaptureRegionCalculator.compute(stanceSide,
                                                singleStepRegion,
                                                stepsInQueue.getIntegerValue() < 2 ? Double.NaN : subsequentStepDuration.getDoubleValue(),
