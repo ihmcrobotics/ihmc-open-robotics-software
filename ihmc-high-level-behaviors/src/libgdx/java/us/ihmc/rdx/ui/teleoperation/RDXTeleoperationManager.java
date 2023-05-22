@@ -173,7 +173,9 @@ public class RDXTeleoperationManager extends ImGuiPanel
       // TODO this should update the GDX desired robot.
       chestYawSlider = new RDXChestOrientationSlider(syncedRobot, YawPitchRollAxis.YAW, ros2Helper, teleoperationParameters);
 
-      locomotionManager = new RDXLocomotionManager(robotModel, communicationHelper, syncedRobot, ros2Helper);
+      controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2Helper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
+
+      locomotionManager = new RDXLocomotionManager(robotModel, communicationHelper, syncedRobot, ros2Helper, controllerStatusTracker);
 
       interactablesAvailable = robotSelfCollisionModel != null;
       if (interactablesAvailable)
@@ -186,8 +188,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
                                         ros2Helper,
                                         teleoperationParameters);
       }
-
-      controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2Helper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
    }
 
    public void create(RDXBaseUI baseUI)
