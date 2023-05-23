@@ -48,8 +48,18 @@ public class RDX3DPanelToolbar
             float sizeY = iconSize;
             float uv0X = 0.0f;
             float uv0Y = 0.0f;
-            float uv1X = 1.0f;
+            float uv1X = 1.0f / 3.0f;
             float uv1Y = 1.0f;
+            if (button.getHovered())
+            {
+               uv0X = 1.0f / 3.0f;
+               uv1X = 2.0f / 3.0f;
+            }
+            else if (button.getDown())
+            {
+               uv0X = 2.0f / 3.0f;
+               uv1X = 1.0f;
+            }
             float bgColorR = 1.0f;
             float bgColorG = 1.0f;
             float bgColorB = 1.0f;
