@@ -29,8 +29,8 @@ public class RDX3DPanelToolbar
          float spaceBetweenButtons = 9.0f;
          float toolbarWidth = buttons.size() * (iconSize + spaceBetweenButtons);
 
-         float centerX = mainWindowWidth / 2;
-         float startX = centerX - toolbarWidth / 2;
+         float centerX = mainWindowWidth / 2.0f;
+         float startX = centerX - toolbarWidth / 2.0f;
          float startY = 40.0f;
 
          float upGray = 1.0f;
@@ -55,11 +55,11 @@ public class RDX3DPanelToolbar
             float uv0Y = 0.0f;
             float uv1X = button.getUVX1();
             float uv1Y = 1.0f;
-            // We are making this bg fully transparent currently
-            float bgColorR = 1.0f;
-            float bgColorG = 1.0f;
-            float bgColorB = 1.0f;
-            float bgColorA = 0.0f;
+            // We are making this background fully transparent currently
+            float backgroundColorR = 1.0f;
+            float backgroundColorG = 1.0f;
+            float backgroundColorB = 1.0f;
+            float backgroundColorA = 0.0f;
             // The "tint" is a fade of the full button look. White and 1.0f alpha
             // is the only value that does not "tamper" with the button look.
             float tintR = 1.0f;
@@ -78,10 +78,10 @@ public class RDX3DPanelToolbar
                                   uv1X,
                                   uv1Y,
                                   framePadding,
-                                  bgColorR,
-                                  bgColorG,
-                                  bgColorB,
-                                  bgColorA,
+                                  backgroundColorR,
+                                  backgroundColorG,
+                                  backgroundColorB,
+                                  backgroundColorA,
                                   tintR,
                                   tintG,
                                   tintB,
