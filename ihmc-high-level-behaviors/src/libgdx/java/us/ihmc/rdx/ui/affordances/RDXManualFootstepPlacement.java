@@ -229,12 +229,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       footstepBeingPlaced = null;
    }
 
-   public void clearAndExitPlacement()
-   {
-      footstepBeingPlaced = null;
-      footstepPlan.clear();
-   }
-
    public void createNewFootStep(RobotSide footstepSide)
    {
       modeNewlyActivated = true;
