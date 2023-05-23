@@ -27,7 +27,7 @@ public class RDX3DPanelHandWrenchIndicator
       {
          // temporarily set arbitrary width height
          float panelWidth = 200;
-         float panelHeight = 110;
+         float panelHeight = 115;
 
          ImGui.setNextWindowSize(panelWidth, panelHeight);
          float startX = panel.getWindowPositionX() + (panel.getWindowSizeX() - panelWidth - 5);
@@ -41,7 +41,8 @@ public class RDX3DPanelHandWrenchIndicator
          {
             ImGui.text(side.getPascalCaseName() + " Linear: " + String.format("%.2f", linearParts.get(side)) + " N");
             ImGui.text(side.getPascalCaseName() + " Angular: " + String.format("%.2f", angularParts.get(side)) + " Nm");
-            ImGui.separator();
+            if (side == RobotSide.LEFT)
+               ImGui.separator();
          }
          ImGui.popFont();
          ImGui.end();
