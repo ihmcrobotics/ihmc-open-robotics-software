@@ -98,7 +98,7 @@ public class RDXInteractableFootstep
     */
    public void updateFootstepIndexText(int index)
    {
-      String txt = plannedFootstepInternal.getRobotSide().getSideNameFirstLetter() + index;     //footstepSide.getSideNameFirstLetter() + index;
+      String txt = plannedFootstepInternal.getRobotSide().getSideNameFirstLetter() + index;
       if (!textRenderablesMap.containsKey(txt))
       {
          footstepIndexText = new RDX3DSituatedText(txt);
@@ -162,16 +162,7 @@ public class RDXInteractableFootstep
       selectablePose3DGizmo = new RDXSelectablePose3DGizmo();
       selectablePose3DGizmo.create(baseUI.getPrimary3DPanel());
 
-      String text = plannedFootstepInternal.getRobotSide().getSideNameFirstLetter() + footstepIndex;
-      if (!textRenderablesMap.containsKey(text))
-      {
-         footstepIndexText = new RDX3DSituatedText("" + text);
-         textRenderablesMap.put(text, footstepIndexText);
-      }
-      else
-      {
-         footstepIndexText = textRenderablesMap.get(text);
-      }
+      updateFootstepIndexText(footstepIndex);
 
       updatePose(plannedFootstep.getFootstepPose());
    }
