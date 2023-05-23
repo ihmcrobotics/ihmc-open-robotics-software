@@ -24,9 +24,7 @@ public class AtlasBehaviorModule
       boolean enableROS1 = true;
       behaviorModule = new BehaviorModule(registry,
                                           createRobotModel(),
-                                          CommunicationMode.INTERPROCESS,
-                                          CommunicationMode.INTERPROCESS,
-                                          enableROS1);
+                                          CommunicationMode.INTERPROCESS);
    }
 
    private void shutdown() // add cleanup actions here

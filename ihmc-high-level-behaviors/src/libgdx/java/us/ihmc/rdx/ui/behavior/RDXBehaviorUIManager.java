@@ -16,6 +16,7 @@ import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
 import us.ihmc.behaviors.tools.behaviorTree.FallbackNode;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2HeartbeatMonitor;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.rdx.imgui.*;
@@ -26,18 +27,17 @@ import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIInterface;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIRegistry;
 import us.ihmc.rdx.ui.behavior.tree.RDXImNodesBehaviorTreeUI;
 import us.ihmc.rdx.ui.tools.ImGuiLogWidget;
-import us.ihmc.rdx.ui.tools.ImGuiMessagerManagerWidget;
 import us.ihmc.rdx.ui.yo.ImGuiYoVariableClientManagerWidget;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-import static us.ihmc.behaviors.BehaviorModule.API.BehaviorTreeStatus;
-import static us.ihmc.behaviors.BehaviorModule.API.StatusLog;
+import static us.ihmc.behaviors.BehaviorModule.API.*;
 
 /**
  * This is the UI for interacting with a remotely running behavior tree.
@@ -54,7 +54,6 @@ public class RDXBehaviorUIManager
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiMovingPlot statusReceivedPlot = new ImGuiMovingPlot("Tree status", 1000, 230, 15);
    private final ImGuiLogWidget logWidget;
-   private final ImGuiMessagerManagerWidget messagerManagerWidget;
    private final ImGuiYoVariableClientManagerWidget yoVariableClientManagerWidget;
    private RDXBehaviorUIInterface highestLevelUI;
    private final BehaviorHelper helper;
@@ -73,16 +72,14 @@ public class RDXBehaviorUIManager
                                boolean enableROS1)
    {
       this.behaviorRegistry = behaviorRegistry;
-      helper = new BehaviorHelper("Behaviors panel", robotModelSupplier.get(), ros2Node, enableROS1);
+      helper = new BehaviorHelper("Behaviors panel", robotModelSupplier.get(), ros2Node);
       heartbeatMonitor = new ROS2HeartbeatMonitor(helper, BehaviorModule.API.HEARTBEAT);
-      messagerManagerWidget = new ImGuiMessagerManagerWidget(helper.getMessagerHelper(),
-                                                             behaviorModuleHost::get,
-                                                             NetworkPorts.BEHAVIOR_MODULE_MESSAGER_PORT.getPort());
       yoVariableClientManagerWidget = new ImGuiYoVariableClientManagerWidget(helper.getYoVariableClientHelper(),
                                                                              behaviorModuleHost::get,
                                                                              NetworkPorts.BEHAVIOR_MODULE_YOVARIABLESERVER_PORT.getPort());
       logWidget = new ImGuiLogWidget("Behavior status");
-      helper.subscribeViaCallback(StatusLog, logWidget::submitEntry);
+      helper.subscribeViaCallback(STATUS_LOG, message ->
+            logWidget.submitEntry(message.getLogLevel(), MessageTools.unpackLongStringFromByteSequence(message.getLogMessage())));
       helper.subscribeViaCallback(ROS2Tools.TEXT_STATUS, textStatus ->
       {
          LogTools.info("TextToSpeech: {}", textStatus.getTextToSpeakAsString());
@@ -189,7 +186,6 @@ public class RDXBehaviorUIManager
       ImGui.sameLine();
       ImGui.inputText(ImGuiTools.uniqueIDOnly(getClass(), "BehaviorModuleHostInput"), behaviorModuleHost, flags);
       ImGui.popItemWidth();
-      messagerManagerWidget.renderImGuiWidgets();
       yoVariableClientManagerWidget.renderImGuiWidgets();
       statusReceivedPlot.setNextValue((float) statusStopwatch.totalElapsed());
       statusReceivedPlot.calculate("");
@@ -221,22 +217,11 @@ public class RDXBehaviorUIManager
    public void connectViaKryo(String hostname)
    {
       behaviorModuleHost.set(hostname);
-      messagerManagerWidget.connect();
-   }
-
-   public void connectMessager()
-   {
-      messagerManagerWidget.connect();
    }
 
    public void connectYoVariableClient()
    {
       helper.getYoVariableClientHelper().start(behaviorModuleHost.get(), NetworkPorts.BEHAVIOR_MODULE_YOVARIABLESERVER_PORT.getPort());
-   }
-
-   public void disconnectMessager()
-   {
-      messagerManagerWidget.disconnectMessager();
    }
 
    public void destroy()

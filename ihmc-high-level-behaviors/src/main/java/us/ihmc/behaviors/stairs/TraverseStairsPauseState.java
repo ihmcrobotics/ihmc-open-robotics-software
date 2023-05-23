@@ -68,7 +68,7 @@ public class TraverseStairsPauseState extends TraverseStairsState
       else if (!minimumPauseTimeElapsed)
       {
          double totalPauseDuration = parameters.get(TraverseStairsBehaviorParameters.pauseTime);
-         helper.publish(TimeLeftInPause, totalPauseDuration - timeInState);
+//         helper.publish(TimeLeftInPause, totalPauseDuration - timeInState);
       }
       else if (!receivedAnyRegions)
       {

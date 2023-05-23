@@ -39,7 +39,7 @@ public class UpDownExplorer
 
    private final UpDownFlatAreaFinder upDownFlatAreaFinder;
    private TypedNotification<Optional<FramePose3D>> upDownSearchNotification = new TypedNotification<>();
-   private final AtomicReference<Point3D> upDownCenter;
+   private final AtomicReference<Point3D> upDownCenter = null;
 
    private double accumulatedTurnAmount = 0.0;
    private RobotSide turnDirection = RobotSide.LEFT;
@@ -64,11 +64,12 @@ public class UpDownExplorer
    public UpDownExplorer(BehaviorHelper behaviorHelper, RemoteREAInterface rea)
    {
       this.behaviorHelper = behaviorHelper;
-      upDownFlatAreaFinder = new UpDownFlatAreaFinder(behaviorHelper.getMessager());
+      upDownFlatAreaFinder = null;
+//      upDownFlatAreaFinder = new UpDownFlatAreaFinder(behaviorHelper.getMessager());
       this.rea = rea;
 
-      behaviorHelper.subscribeViaCallback(UpDownExplorationEnabled, enabled -> { if (enabled) state = UpDownState.TRAVERSING; });
-      upDownCenter = behaviorHelper.subscribeViaReference(UpDownCenter, new Point3D(0.0, 0.0, 0.0));
+//      behaviorHelper.subscribeViaCallback(UpDownExplorationEnabled, enabled -> { if (enabled) state = UpDownState.TRAVERSING; });
+//      upDownCenter = behaviorHelper.subscribeViaReference(UpDownCenter, new Point3D(0.0, 0.0, 0.0));
    }
 
    public void onNavigateEntry(ROS2SyncedRobotModel syncedRobot)

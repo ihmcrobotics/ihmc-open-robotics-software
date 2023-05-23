@@ -39,9 +39,7 @@ public class BehaviorModuleProcess extends RestartableProcess
       LogTools.info("Starting behavior module");
       behaviorModule = new BehaviorModule(behaviorRegistry,
                                           robotModelSupplier.get(),
-                                          CommunicationMode.fromOrdinal(ros2Mode.get()),
-                                          CommunicationMode.fromOrdinal(messagerMode.get()),
-                                          enableROS1.get());
+                                          CommunicationMode.fromOrdinal(ros2Mode.get()));
    }
 
    @Override

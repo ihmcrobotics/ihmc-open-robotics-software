@@ -22,10 +22,6 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.messager.MessagerAPIFactory;
-import us.ihmc.messager.MessagerAPIFactory.Category;
-import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
-import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Topic;
@@ -33,7 +29,7 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 
 public class StepInPlaceBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
 {
-   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Step in Place", StepInPlaceBehavior::new, API.create());
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Step in Place", StepInPlaceBehavior::new);
 
    private final BehaviorHelper helper;
 
@@ -148,14 +144,5 @@ public class StepInPlaceBehavior extends BehaviorTreeControlFlowNode implements 
 
       public static final ROS2Topic<Bool> STEPPING = BASE_TOPIC.withType(Bool.class).withSuffix("stepping");
       public static final ROS2Topic<Bool> ABORT = BASE_TOPIC.withType(Bool.class).withSuffix("abort");
-
-      private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
-      private static final Category Root = apiFactory.createRootCategory("StepInPlaceBehavior");
-      private static final CategoryTheme StepInPlace = apiFactory.createCategoryTheme("StepInPlace");
-
-      public static final MessagerAPI create()
-      {
-         return apiFactory.getAPIAndCloseFactory();
-      }
    }
 }

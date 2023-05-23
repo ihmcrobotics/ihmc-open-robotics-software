@@ -10,7 +10,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -64,7 +63,7 @@ import static us.ihmc.pathPlanning.PlannerTestEnvironments.MAZE_CORRIDOR_SQUARE_
 
 public class NavigationBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
 {
-   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Navigation", NavigationBehavior::new, NavigationBehaviorAPI.create());
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Navigation", NavigationBehavior::new);
 
    private static final Point3D goal = new Point3D(MAZE_CORRIDOR_SQUARE_SIZE * 4.0, MAZE_CORRIDOR_SQUARE_SIZE, 0.0);
 
@@ -78,7 +77,7 @@ public class NavigationBehavior extends BehaviorTreeControlFlowNode implements B
 
    private final FramePose3D robotPose = new FramePose3D();
    private final LoopSequenceNode sequence;
-   private final Notification stepThroughAlgorithm;
+   private final Notification stepThroughAlgorithm = null;
    private final PausablePeriodicThread mainThread;
 
    private long latestMapSequenceId = 0;
@@ -107,7 +106,7 @@ public class NavigationBehavior extends BehaviorTreeControlFlowNode implements B
          footPolygons.set(side, scaledFoot);
       }
 
-      stepThroughAlgorithm = helper.subscribeTypelessViaNotification(StepThroughAlgorithm);
+//      stepThroughAlgorithm = helper.subscribeTypelessViaNotification(StepThroughAlgorithm);
 
       sequence = new LoopSequenceNode();
       sequence.addChild(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("aquire map")));
@@ -152,7 +151,7 @@ public class NavigationBehavior extends BehaviorTreeControlFlowNode implements B
       latestMapSequenceId = mapRegionsInput.getLatest().getSequenceId();
       //      ThreadTools.sleep(100); // try to get a little more perception data TODO wait for a SLAM update
 
-      helper.publish(MapRegionsForUI, PlanarRegionMessageConverter.convertToPlanarRegionsList(mapRegionsInput.getLatest()));
+//      helper.publish(MapRegionsForUI, PlanarRegionMessageConverter.convertToPlanarRegionsList(mapRegionsInput.getLatest()));
    }
 
    private void planBodyPath()
@@ -194,7 +193,7 @@ public class NavigationBehavior extends BehaviorTreeControlFlowNode implements B
          pathPoses.add(new Pose3D(pathPoint, new Quaternion()));
       }
 
-      helper.getMessager().submitMessage(BodyPathPlanForUI, pathPoses);
+//      helper.getMessager().submitMessage(BodyPathPlanForUI, pathPoses);
    }
 
    private void planBodyOrientationTrajectoryAndFootsteps()

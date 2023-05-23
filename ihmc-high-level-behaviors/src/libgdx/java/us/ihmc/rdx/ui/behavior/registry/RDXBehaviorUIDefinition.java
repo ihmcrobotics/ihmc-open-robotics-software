@@ -9,9 +9,7 @@ public class RDXBehaviorUIDefinition extends BehaviorDefinition
    public RDXBehaviorUIDefinition(BehaviorDefinition definition, RDXBehaviorUIInterfaceConstructor behaviorUISupplier)
    {
       super(definition.getName(),
-            definition.getBehaviorSupplier(),
-            definition.getBehaviorAPI(),
-            definition.getSubBehaviors().toArray(new BehaviorDefinition[0]));
+            definition.getBehaviorSupplier(), definition.getSubBehaviors().toArray(new BehaviorDefinition[0]));
       this.behaviorUISupplier = behaviorUISupplier;
    }
 

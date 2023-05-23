@@ -27,8 +27,7 @@ import static us.ihmc.behaviors.targetFollowing.TargetFollowingBehaviorAPI.*;
 public class TargetFollowingBehavior extends ResettingNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Target Following",
-                                                                              TargetFollowingBehavior::new,
-                                                                              TargetFollowingBehaviorAPI.API);
+                                                                              TargetFollowingBehavior::new);
    private final BehaviorHelper helper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final LookAndStepBehavior lookAndStepBehavior;
@@ -38,7 +37,7 @@ public class TargetFollowingBehavior extends ResettingNode implements BehaviorIn
    private final FramePose3D targetPoseGroundProjection = new FramePose3D();
    private final FramePose3D approachPose = new FramePose3D();
    private final FramePose3D robotMidFeetUnderPelvisPose = new FramePose3D();
-   private final RosTopicPublisher<PoseStamped> targetPosePublisher;
+   private final RosTopicPublisher<PoseStamped> targetPosePublisher = null;
 
    public TargetFollowingBehavior(BehaviorHelper helper)
    {
@@ -48,13 +47,13 @@ public class TargetFollowingBehavior extends ResettingNode implements BehaviorIn
       targetFollowingParameters = new TargetFollowingBehaviorParameters();
       lookAndStepBehavior = new LookAndStepBehavior(helper);
       addChild(lookAndStepBehavior);
-      helper.subscribeViaCallback(TargetFollowingParameters, parameters ->
-      {
-         helper.getOrCreateStatusLogger().info("Accepting new target following parameters");
-         this.targetFollowingParameters.setAllFromStrings(parameters);
-      });
-      helper.getROS1Helper().subscribeToPoseViaCallback(RosTools.SEMANTIC_TARGET_POSE, latestSemanticTargetPoseReference::set);
-      targetPosePublisher = helper.getROS1Helper().publishPose("/ihmc/target_pose_world");
+//      helper.subscribeViaCallback(TargetFollowingParameters, parameters ->
+//      {
+//         helper.getOrCreateStatusLogger().info("Accepting new target following parameters");
+//         this.targetFollowingParameters.setAllFromStrings(parameters);
+//      });
+//      helper.getROS1Helper().subscribeToPoseViaCallback(RosTools.SEMANTIC_TARGET_POSE, latestSemanticTargetPoseReference::set);
+//      targetPosePublisher = helper.getROS1Helper().publishPose("/ihmc/target_pose_world");
    }
 
    @Override
@@ -71,11 +70,11 @@ public class TargetFollowingBehavior extends ResettingNode implements BehaviorIn
          RosTools.toEuclid(latestSemanticTargetPose.getPose(), targetPoseGroundProjection);
          targetPoseGroundProjection.changeFrame(ReferenceFrame.getWorldFrame());
          targetPoseGroundProjection.getPosition().setZ(robotMidFeetUnderPelvisPose.getZ());
-         helper.publish(TargetPose, new Pose3D(targetPoseGroundProjection));
+//         helper.publish(TargetPose, new Pose3D(targetPoseGroundProjection));
          PoseStamped ros1Pose = targetPosePublisher.getMessage();
          RosTools.toRos(targetPoseGroundProjection, ros1Pose.getPose());
          ros1Pose.getHeader().setFrameId("world");
-         ros1Pose.getHeader().setStamp(new Time(helper.getROS1Helper().getROS1Node().getCurrentTime().totalNsecs()));
+//         ros1Pose.getHeader().setStamp(new Time(helper.getROS1Helper().getROS1Node().getCurrentTime().totalNsecs()));
          targetPosePublisher.publish(ros1Pose);
 
          approachPose.set(targetPoseGroundProjection);
@@ -87,7 +86,7 @@ public class TargetFollowingBehavior extends ResettingNode implements BehaviorIn
          Vector3D toTarget = new Vector3D();
          toTarget.sub(targetPoseGroundProjection.getPosition(), robotMidFeetUnderPelvisPose.getPosition());
          EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.X, toTarget, approachPose.getOrientation());
-         helper.publish(TargetApproachPose, new Pose3D(approachPose));
+//         helper.publish(TargetApproachPose, new Pose3D(approachPose));
 
          if (!lookAndStepGoalSubmissionTimer.isRunning(targetFollowingParameters.getLookAndStepGoalUpdatePeriod()))
          {

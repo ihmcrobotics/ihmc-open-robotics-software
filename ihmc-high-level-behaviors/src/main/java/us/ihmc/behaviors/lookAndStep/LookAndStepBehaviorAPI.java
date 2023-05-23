@@ -13,7 +13,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.utilities.ros.RosTools;
 
@@ -98,18 +97,4 @@ public class LookAndStepBehaviorAPI
          = BASE_TOPIC.withType(FootstepPlannerRejectionReasonsMessage.class).withSuffix("footstep_planner_rejection_reasons");
    public static final ROS2Topic<std_msgs.msg.dds.String> FOOTSTEP_PLANNER_LATEST_LOG_PATH
          = BASE_TOPIC.withType(std_msgs.msg.dds.String.class).withSuffix("footstep_planner_latest_log_path");
-
-   private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
-   private static final MessagerAPIFactory.Category RootCategory = apiFactory.createRootCategory("LookAndStepBehavior");
-   private static final MessagerAPIFactory.CategoryTheme LookAndStepTheme = apiFactory.createCategoryTheme("LookAndStep");
-
-   private static <T> MessagerAPIFactory.Topic<T> topic(String name)
-   {
-      return RootCategory.child(LookAndStepTheme).topic(apiFactory.createTypedTopicTheme(name));
-   }
-
-   public static MessagerAPIFactory.MessagerAPI create()
-   {
-      return apiFactory.getAPIAndCloseFactory();
-   }
 }
