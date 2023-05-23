@@ -36,9 +36,9 @@ public class RDX3DPanelToolbar
          float upGray = 1.0f;
          float hoverGray = 0.4f;
          float downGray = 0.2f;
-         ImGui.pushStyleColor(ImGuiCol.Button, upGray, upGray, upGray, 0.3f);
-         ImGui.pushStyleColor(ImGuiCol.ButtonHovered, hoverGray, hoverGray, hoverGray, 0.6f);
-         ImGui.pushStyleColor(ImGuiCol.ButtonActive, downGray, downGray, downGray, 0.8f);
+         ImGui.pushStyleColor(ImGuiCol.Button, upGray, upGray, upGray, 0.5f);
+         ImGui.pushStyleColor(ImGuiCol.ButtonHovered, hoverGray, hoverGray, hoverGray, 0.8f);
+         ImGui.pushStyleColor(ImGuiCol.ButtonActive, downGray, downGray, downGray, 0.9f);
 
          for (int i = 0; i < buttons.size(); i++)
          {
