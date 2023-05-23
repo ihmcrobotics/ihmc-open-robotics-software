@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import ihmc_common_msgs.msg.dds.PoseListMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -141,7 +142,7 @@ public class LookAndStepBodyPathPlanningTask
 //         }
          suppressor.addCondition("No goal specified",
                                  () -> !(goal != null && !goal.containsNaN()),
-                                 () -> uiPublisher.publishToUI(PlanarRegionsForUI, mapRegions));
+                                 () -> helper.publish(PLANAR_REGIONS_FOR_UI, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(mapRegions)));
 //         suppressor.addCondition(() -> "Regions expired. haveReceivedAny: " + mapRegionsReceptionTimerSnapshot.hasBeenSet()
 //                                       + " timeSinceLastUpdate: " + mapRegionsReceptionTimerSnapshot.getTimePassedSinceReset(),
 //                                 () -> mapRegionsReceptionTimerSnapshot.isExpired());
@@ -239,7 +240,7 @@ public class LookAndStepBodyPathPlanningTask
       {
          if (mapRegions != null)
          {
-            uiPublisher.publishToUI(PlanarRegionsForUI, mapRegions);
+            helper.publish(PLANAR_REGIONS_FOR_UI, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(mapRegions));
             result = performTaskWithVisibilityGraphPlanner();
          }
          else
@@ -264,11 +265,13 @@ public class LookAndStepBodyPathPlanningTask
 
       if (result.getRight() != null)
       {
+         PoseListMessage bodyPathPlanForReviewMessage = new PoseListMessage();
          for (Pose3DReadOnly poseWaypoint : result.getRight())
          {
             bodyPathPlanForReview.add(new Pose3D(poseWaypoint));
+            bodyPathPlanForReviewMessage.getPoses().add().set(poseWaypoint);
          }
-         uiPublisher.publishToUI(BodyPathPlanForUI, bodyPathPlanForReview);
+         helper.publish(BODY_PATH_PLAN_FOR_UI, bodyPathPlanForReviewMessage);
       }
 
       if (bodyPathPlanForReview.size() >= 2)

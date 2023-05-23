@@ -1,0 +1,24 @@
+#ifndef __ihmc_common_msgs__msg__PoseListMessage__idl__
+#define __ihmc_common_msgs__msg__PoseListMessage__idl__
+
+#include "geometry_msgs/msg/./Pose_.idl"
+module ihmc_common_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="ihmc_common_msgs::msg::dds_::PoseListMessage_")
+      struct PoseListMessage
+      {
+        /**
+         * A list of poses
+         */
+        sequence<geometry_msgs::msg::dds::Pose> poses;
+      };
+    };
+  };
+};
+
+#endif
