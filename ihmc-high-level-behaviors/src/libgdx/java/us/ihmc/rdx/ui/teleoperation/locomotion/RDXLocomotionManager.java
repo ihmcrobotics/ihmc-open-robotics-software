@@ -174,7 +174,7 @@ public class RDXLocomotionManager
 
       if (legControlMode != RDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT)
       {
-         manualFootstepPlacement.exitPlacement();
+         manualFootstepPlacement.clearAndExitPlacement();
       }
 
       if (legControlMode == RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING || legControlMode == RDXLegControlMode.DISABLED)
@@ -321,8 +321,7 @@ public class RDXLocomotionManager
    {
       footstepsSentToControllerGraphic.clear();
       ballAndArrowMidFeetPosePlacement.clear();
-      manualFootstepPlacement.exitPlacement();
-      interactableFootstepPlan.clear();
+      manualFootstepPlacement.clearAndExitPlacement();
       bodyPathPlanGraphic.clear();
       walkPathControlRing.delete();
 
