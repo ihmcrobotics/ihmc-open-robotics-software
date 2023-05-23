@@ -6,12 +6,13 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import org.apache.commons.lang3.StringUtils;
+import std_msgs.msg.dds.UInt16;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehavior;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorMode;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorParameters;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -53,23 +54,24 @@ public class RDXBuildingExplorationBehaviorUI extends RDXBehaviorUIInterface
       traverseStairsUI = new RDXTraverseStairsBehaviorUI(helper);
       addChild(traverseStairsUI);
 
-      helper.subscribeViaCallback(Mode, mode -> this.mode = mode);
+      helper.subscribeViaCallback(MODE, message -> this.mode = BuildingExplorationBehaviorMode.values()[message.getData()]);
       helper.subscribeToPlanarRegionsViaCallback(PerceptionAPI.LIDAR_REA_REGIONS, regions ->
       {
          if (regions != null)
             planarRegionsGraphic.generateMeshesAsync(regions);
       });
-      helper.subscribeViaCallback(LastTickedThing, lastTickedThing -> this.lastTickedThing = lastTickedThing);
+      helper.subscribeViaCallback(LAST_TICKED_THING, lastTickedThing -> this.lastTickedThing = lastTickedThing.getDataAsString());
    }
 
    @Override
    public void create(RDXBaseUI baseUI)
    {
       parameters = new BuildingExplorationBehaviorParameters();
-      parameterTuner.create(parameters, () -> helper.publish(Parameters, parameters.getAllAsStrings()));
+      parameterTuner.create(parameters, () ->
+            helper.publish(PARAMETERS.getCommandTopic(), StoredPropertySetMessageTools.newMessage(parameters)));
       goalAffordance.create(goalPose ->
       {
-         helper.publish(Goal, goalPose);
+         helper.publish(GOAL_COMMAND, goalPose);
          lookAndStepUI.setGoal(goalPose);
          traverseStairsUI.setGoal(goalPose);
       }, Color.GREEN);
@@ -107,7 +109,9 @@ public class RDXBuildingExplorationBehaviorUI extends RDXBehaviorUIInterface
          ImGui.sameLine();
          if (ImGui.radioButton(labels.get(StringUtils.capitalize(modeValue.name().toLowerCase().replaceAll("_", " "))), mode.equals(modeValue)))
          {
-            helper.publish(Mode, modeValue);
+            UInt16 modeMessage = new UInt16();
+            modeMessage.setData(modeValue.ordinal());
+            helper.publish(MODE, modeMessage);
          }
       }
    }

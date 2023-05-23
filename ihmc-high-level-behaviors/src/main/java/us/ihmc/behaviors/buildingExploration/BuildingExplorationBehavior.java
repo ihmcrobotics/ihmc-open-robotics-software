@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.buildingExploration;
 
+import std_msgs.msg.dds.UInt16;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorInterface;
@@ -10,6 +11,7 @@ import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
+import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -49,17 +51,18 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
       traverseStairsBehavior = new TraverseStairsBehavior(helper);
       traverseStairsBehavior.setSyncedRobot(syncedRobot);
       addChild(traverseStairsBehavior);
-      helper.subscribeViaCallback(Parameters, parameters ->
+      helper.subscribeViaCallback(PARAMETERS.getCommandTopic(), message ->
       {
          helper.getOrCreateStatusLogger().info("Accepting new building exploration parameters");
-         this.parameters.setAllFromStrings(parameters);
+         StoredPropertySetMessageTools.copyToStoredPropertySet(message, parameters, () -> { });
       });
-      helper.subscribeViaCallback(Goal, newGoal ->
+      helper.subscribeViaCallback(GOAL_COMMAND, newGoal ->
       {
          goal.set(newGoal);
       });
-      helper.subscribeViaCallback(Mode, newValue ->
+      helper.subscribeViaCallback(MODE, message ->
       {
+         BuildingExplorationBehaviorMode newValue = values()[message.getData()];
          LogTools.info("Received mode: {}", newValue);
          mode.set(newValue);
       });
@@ -67,7 +70,12 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
       {
          mode.set(TELEOP);
          traverseStairsBehavior.reset();
-         executor.submit(() -> helper.publish(Mode, mode.get()));
+         executor.submit(() ->
+         {
+            UInt16 modeMessage = new UInt16();
+            modeMessage.setData(mode.get().ordinal());
+            helper.publish(MODE, modeMessage);
+         });
       });
    }
 
@@ -112,7 +120,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
          status = tickStairs();
       }
 
-      helper.publish(LastTickedThing, lastTickedThing);
+      helper.publish(LAST_TICKED_THING, lastTickedThing);
 
       return status;
    }
