@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.*;
@@ -361,7 +360,7 @@ public class SwingOverPlanarRegionsTest
       }
 
       planningModule.getSwingPlanningModule().computeSwingWaypoints(request.getPlanarRegionsList(),
-                                                                    HeightMapMessageTools.unpackMessage(request.getHeightMapMessage()),
+                                                                    request.getHeightMapData(),
                                                                     footstepPlan,
                                                                     request.getStartFootPoses(),
                                                                     SwingPlannerType.TWO_WAYPOINT_POSITION);
