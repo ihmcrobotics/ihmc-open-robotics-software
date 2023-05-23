@@ -251,8 +251,8 @@ public class RDXGPUHeightMapBodyPathPlanningDemo
                //                  bodyPathPlanGraphic.update();
 
                FootstepPlanningModule footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(robotModel);
-               heightMapMessage.setEstimatedGroundHeight(-1.0);
-               footstepPlannerRequest.setHeightMapMessage(heightMapMessage);
+               heightMapData.setEstimatedGroundHeight(-1.0);
+               footstepPlannerRequest.setHeightMapData(heightMapData);
                footstepPlannerRequest.setPlanBodyPath(true);
                footstepPlanningModule.handleRequest(footstepPlannerRequest);
                FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
