@@ -34,7 +34,6 @@ import us.ihmc.rdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.visualizers.RDXPolynomial;
 import us.ihmc.robotics.math.trajectories.core.Polynomial;
-import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -89,15 +88,25 @@ public class RDXInteractableFootstep
       selectablePose3DGizmo = new RDXSelectablePose3DGizmo();
       selectablePose3DGizmo.create(baseUI.getPrimary3DPanel());
 
-      String txt = footstepSide.getSideNameFirstLetter() + (index + 1);
-      if (!textRenderablesMap.containsKey(txt))
+      updateFootstepIndexText(index);
+   }
+
+   /**
+    * Adds the footstep index text to the footstep (e.g. "R0" or "L4")
+    *
+    * @param index Index of the footstep within the array of footsteps being planned - determines the number displayed
+    */
+   public void updateFootstepIndexText(int index)
+   {
+      String text = plannedFootstepInternal.getRobotSide().getSideNameFirstLetter() + index;
+      if (!textRenderablesMap.containsKey(text))
       {
-         footstepIndexText = new RDX3DSituatedText("" + txt);
-         textRenderablesMap.put(txt, footstepIndexText);
+         footstepIndexText = new RDX3DSituatedText(text);
+         textRenderablesMap.put(text, footstepIndexText);
       }
       else
       {
-         footstepIndexText = textRenderablesMap.get(txt);
+         footstepIndexText = textRenderablesMap.get(text);
       }
    }
 
@@ -153,16 +162,7 @@ public class RDXInteractableFootstep
       selectablePose3DGizmo = new RDXSelectablePose3DGizmo();
       selectablePose3DGizmo.create(baseUI.getPrimary3DPanel());
 
-      String text = plannedFootstepInternal.getRobotSide().getSideNameFirstLetter() + (footstepIndex + 1);
-      if (!textRenderablesMap.containsKey(text))
-      {
-         footstepIndexText = new RDX3DSituatedText("" + text);
-         textRenderablesMap.put(text, footstepIndexText);
-      }
-      else
-      {
-         footstepIndexText = textRenderablesMap.get(text);
-      }
+      updateFootstepIndexText(footstepIndex);
 
       updatePose(plannedFootstep.getFootstepPose());
    }

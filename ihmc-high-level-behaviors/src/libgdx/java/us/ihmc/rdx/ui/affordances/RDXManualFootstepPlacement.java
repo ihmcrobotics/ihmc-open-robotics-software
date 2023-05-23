@@ -35,7 +35,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 {
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private RDXInteractableFootstep footstepBeingPlaced;
-   private int footstepIndex = -1;
    private boolean modeNewlyActivated = false;
    private RDXBaseUI baseUI;
    private RobotSide currentFootStepSide;
@@ -153,7 +152,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
    private void placeFootstep()
    {
-      footstepIndex++;
       RDXInteractableFootstep addedStep = footstepPlan.getNextFootstep();
       addedStep.copyFrom(baseUI, footstepBeingPlaced);
       // Switch sides
@@ -220,13 +218,15 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    public void update()
    {
       if (footstepBeingPlaced != null)
+      {
          footstepBeingPlaced.update();
+         footstepBeingPlaced.updateFootstepIndexText(footstepPlan.getNumberOfFootsteps());
+      }
    }
 
    public void exitPlacement()
    {
       footstepBeingPlaced = null;
-      footstepIndex = -1;
    }
 
    public void createNewFootStep(RobotSide footstepSide)
@@ -235,7 +235,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       RigidBodyTransformReadOnly latestFootstepTransform = footstepPlan.getLastFootstepTransform(footstepSide.getOppositeSide());
       double latestFootstepYaw = latestFootstepTransform.getRotation().getYaw();
 
-      footstepBeingPlaced = new RDXInteractableFootstep(baseUI, footstepSide, footstepIndex, null);
+      footstepBeingPlaced = new RDXInteractableFootstep(baseUI, footstepSide, footstepPlan.getNumberOfFootsteps(), null);
       currentFootStepSide = footstepSide;
 
       // Set the yaw of the new footstep to the yaw of the previous footstep
