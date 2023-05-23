@@ -98,15 +98,15 @@ public class RDXInteractableFootstep
     */
    public void updateFootstepIndexText(int index)
    {
-      String txt = plannedFootstepInternal.getRobotSide().getSideNameFirstLetter() + index;
-      if (!textRenderablesMap.containsKey(txt))
+      String text = plannedFootstepInternal.getRobotSide().getSideNameFirstLetter() + index;
+      if (!textRenderablesMap.containsKey(text))
       {
-         footstepIndexText = new RDX3DSituatedText(txt);
-         textRenderablesMap.put(txt, footstepIndexText);
+         footstepIndexText = new RDX3DSituatedText(text);
+         textRenderablesMap.put(text, footstepIndexText);
       }
       else
       {
-         footstepIndexText = textRenderablesMap.get(txt);
+         footstepIndexText = textRenderablesMap.get(text);
       }
    }
 
