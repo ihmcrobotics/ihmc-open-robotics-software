@@ -34,7 +34,6 @@ import us.ihmc.rdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.visualizers.RDXPolynomial;
 import us.ihmc.robotics.math.trajectories.core.Polynomial;
-import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -89,10 +88,20 @@ public class RDXInteractableFootstep
       selectablePose3DGizmo = new RDXSelectablePose3DGizmo();
       selectablePose3DGizmo.create(baseUI.getPrimary3DPanel());
 
-      String txt = footstepSide.getSideNameFirstLetter() + index;
+      updateFootstepIndexText(index);
+   }
+
+   /**
+    * Adds the footstep index text to the footstep (e.g. "R0" or "L4")
+    *
+    * @param index Index of the footstep within the array of footsteps being planned - determines the number displayed
+    */
+   public void updateFootstepIndexText(int index)
+   {
+      String txt = plannedFootstepInternal.getRobotSide().getSideNameFirstLetter() + index;     //footstepSide.getSideNameFirstLetter() + index;
       if (!textRenderablesMap.containsKey(txt))
       {
-         footstepIndexText = new RDX3DSituatedText("" + txt);
+         footstepIndexText = new RDX3DSituatedText(txt);
          textRenderablesMap.put(txt, footstepIndexText);
       }
       else
