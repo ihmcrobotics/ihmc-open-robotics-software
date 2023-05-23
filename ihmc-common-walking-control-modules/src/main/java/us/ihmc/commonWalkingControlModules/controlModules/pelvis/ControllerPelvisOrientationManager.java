@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -48,13 +49,10 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
 
    private final WalkingTrajectoryPath walkingTrajectoryPath;
    private final ReferenceFrame pelvisFrame;
-   private final ReferenceFrame walkingPathFrame;
+   private final MovingReferenceFrame walkingPathFrame;
 
    private final PID3DGainsReadOnly gains;
 
-   private Footstep nextFootstep;
-   private final ReferenceFrame nextSoleZUpFrame;
-   private final ReferenceFrame nextSoleFrame;
 
    public ControllerPelvisOrientationManager(PID3DGainsReadOnly gains, HighLevelHumanoidControllerToolbox controllerToolbox, YoRegistry parentRegistry)
    {
@@ -73,16 +71,6 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
 
       walkingPathFrame = walkingTrajectoryPath.getWalkingTrajectoryPathFrame();
 
-      nextSoleFrame = new ReferenceFrame("nextSoleFrame", worldFrame)
-      {
-         @Override
-         protected void updateTransformToParent(RigidBodyTransform transformToParent)
-         {
-            nextFootstep.getSoleReferenceFrame().getTransformToDesiredFrame(transformToParent, getParent());
-         }
-      };
-      nextSoleZUpFrame = new ZUpFrame(nextSoleFrame, "nextAnkleZUp");
-
       pelvisOrientationOffsetTrajectoryGenerator = new SimpleOrientationTrajectoryGenerator("pelvisOffset", false, walkingPathFrame, registry);
 
       parentRegistry.addChild(registry);
@@ -98,8 +86,8 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
    @Override
    public void doAction(double timeInState)
    {
-      desiredPelvisOrientation.setToZero(walkingTrajectoryPath.getWalkingTrajectoryPathFrame());
-      walkingTrajectoryPath.getWalkingTrajectoryPathFrame().getTwistRelativeToOther(worldFrame, pelvisTwist);
+      desiredPelvisOrientation.setToZero(walkingPathFrame);
+      walkingPathFrame.getTwistRelativeToOther(worldFrame, pelvisTwist);
       desiredPelvisAngularVelocity.setMatchingFrame(pelvisTwist.getAngularPart());
       desiredPelvisAngularAcceleration.setMatchingFrame(walkingTrajectoryPath.getWalkingTrajectoryPathAcceleration().getAngularPart());
 
@@ -128,16 +116,7 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
    @Override
    public void goToHomeFromCurrentDesired(double trajectoryTime)
    {
-      initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
-
-      tempOrientation.setIncludingFrame(pelvisOrientationOffsetTrajectoryGenerator.getOrientation());
-
-      tempOrientation.changeFrame(walkingPathFrame);
-      pelvisOrientationOffsetTrajectoryGenerator.setInitialOrientation(tempOrientation);
-      tempOrientation.setToZero(walkingPathFrame);
-      pelvisOrientationOffsetTrajectoryGenerator.setFinalOrientation(tempOrientation);
-      pelvisOrientationOffsetTrajectoryGenerator.setTrajectoryTime(trajectoryTime);
-      pelvisOrientationOffsetTrajectoryGenerator.initialize();
+      goToHomeFromOffset(pelvisOrientationOffsetTrajectoryGenerator.getOrientation(), trajectoryTime);
    }
 
    public void goToHomeFromOffset(FrameQuaternionReadOnly offset, double trajectoryTime)
@@ -174,22 +153,14 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
 
    public void setToHoldCurrentInWorldFrame()
    {
-      desiredPelvisOrientation.setToZero(walkingTrajectoryPath.getWalkingTrajectoryPathFrame());
-      desiredPelvisOrientation.changeFrame(worldFrame);
+      desiredPelvisOrientation.setToZero(walkingPathFrame);
       desiredPelvisOrientationWithOffset.setToZero(pelvisFrame);
-      desiredPelvisOrientationWithOffset.changeFrame(worldFrame);
+      desiredPelvisOrientationWithOffset.changeFrame(walkingPathFrame);
 
+      tempOrientation.setReferenceFrame(walkingPathFrame);
       tempOrientation.difference(desiredPelvisOrientationWithOffset, desiredPelvisOrientation);
 
       setOffset(tempOrientation);
-   }
-
-   public void setUpcomingFootstep(Footstep upcomingFootstep)
-   {
-      nextFootstep = upcomingFootstep;
-
-      nextSoleFrame.update();
-      nextSoleZUpFrame.update();
    }
 
    public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
