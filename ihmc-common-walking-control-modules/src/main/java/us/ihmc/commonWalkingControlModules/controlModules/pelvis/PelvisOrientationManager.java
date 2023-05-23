@@ -136,10 +136,6 @@ public class PelvisOrientationManager implements SCS2YoGraphicHolder
       walkingManager.setToHoldCurrentInWorldFrame();
    }
 
-   public void setUpcomingFootstep(Footstep upcomingFootstep)
-   {
-      walkingManager.setUpcomingFootstep(upcomingFootstep);
-   }
 
    public boolean handlePelvisOrientationTrajectoryCommands(PelvisOrientationTrajectoryCommand command)
    {

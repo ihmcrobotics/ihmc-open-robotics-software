@@ -352,8 +352,6 @@ public class WalkingSingleSupportState extends SingleSupportState
       // Update the contact states based on the footstep. If the footstep doesn't have any predicted contact points, then use the default ones in the ContactablePlaneBodies.
       controllerToolbox.updateContactPointsForUpcomingFootstep(nextFootstep);
       controllerToolbox.updateBipedSupportPolygons();
-
-      pelvisOrientationManager.setUpcomingFootstep(nextFootstep);
    }
 
    private void updateHeightManager()
