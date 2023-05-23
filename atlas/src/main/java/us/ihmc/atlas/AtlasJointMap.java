@@ -84,7 +84,6 @@ public class AtlasJointMap implements HumanoidJointNameMap
    private final NeckJointName[] neckJoints = {PROXIMAL_NECK_PITCH};
 
    private final LinkedHashMap<String, JointRole> jointRoles = new LinkedHashMap<String, JointRole>();
-   private final LinkedHashMap<String, ImmutablePair<RobotSide, LimbName>> limbNames = new LinkedHashMap<String, ImmutablePair<RobotSide, LimbName>>();
 
    private final LinkedHashMap<String, ImmutablePair<RobotSide, LegJointName>> legJointNames = new LinkedHashMap<String, ImmutablePair<RobotSide, LegJointName>>();
    private final LinkedHashMap<String, ImmutablePair<RobotSide, ArmJointName>> armJointNames = new LinkedHashMap<String, ImmutablePair<RobotSide, ArmJointName>>();
@@ -115,7 +114,6 @@ public class AtlasJointMap implements HumanoidJointNameMap
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         String prefix = getRobotSidePrefix(robotSide);
          String[] forcedSideJointNames = forcedSideDependentJointNames.get(robotSide);
 
          legJointNames.put(forcedSideJointNames[l_leg_hpz], new ImmutablePair<RobotSide, LegJointName>(robotSide, HIP_YAW));
@@ -125,8 +123,6 @@ public class AtlasJointMap implements HumanoidJointNameMap
          legJointNames.put(forcedSideJointNames[l_leg_aky], new ImmutablePair<RobotSide, LegJointName>(robotSide, ANKLE_PITCH));
          legJointNames.put(forcedSideJointNames[l_leg_akx], new ImmutablePair<RobotSide, LegJointName>(robotSide, ANKLE_ROLL));
 
-         limbNames.put(prefix + "foot", new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.LEG));
-
          armJointNames.put(forcedSideJointNames[l_arm_shz], new ImmutablePair<RobotSide, ArmJointName>(robotSide, SHOULDER_YAW));
          armJointNames.put(forcedSideJointNames[l_arm_shx], new ImmutablePair<RobotSide, ArmJointName>(robotSide, SHOULDER_ROLL));
          armJointNames.put(forcedSideJointNames[l_arm_ely], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ELBOW_PITCH));
@@ -134,12 +130,10 @@ public class AtlasJointMap implements HumanoidJointNameMap
 
          if (atlasVersion != AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_FOREARMS)
          {
-            limbNames.put(prefix + "hand", new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.ARM));
             handNames.put(robotSide, getRobotSidePrefix(robotSide) + "hand");
          }
          else
          {
-            limbNames.put(prefix + "larm", new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.ARM));
             handNames.put(robotSide, getRobotSidePrefix(robotSide) + "larm");
          }
 
@@ -226,12 +220,6 @@ public class AtlasJointMap implements HumanoidJointNameMap
    public ImmutablePair<RobotSide, ArmJointName> getArmJointName(String jointName)
    {
       return armJointNames.get(jointName);
-   }
-
-   @Override
-   public ImmutablePair<RobotSide, LimbName> getLimbName(String limbName)
-   {
-      return limbNames.get(limbName);
    }
 
    @Override
