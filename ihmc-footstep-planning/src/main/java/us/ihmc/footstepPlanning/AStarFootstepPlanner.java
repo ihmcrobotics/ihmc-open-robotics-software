@@ -150,7 +150,7 @@ public class AStarFootstepPlanner
       // Update planar regions
       boolean hasPlanarRegions = request.getPlanarRegionsList() != null && !request.getPlanarRegionsList().isEmpty();
       boolean hasHeightMap = request.getHeightMapData() != null && !request.getHeightMapData().isEmpty();
-      boolean flatGroundMode = request.getAssumeFlatGround() || (!hasPlanarRegions || !hasHeightMap);
+      boolean flatGroundMode = request.getAssumeFlatGround() || (!hasPlanarRegions && !hasHeightMap);
 
       PlanarRegionsList planarRegionsListForStepping = flatGroundMode ? null : request.getPlanarRegionsList();
       PlanarRegionsList planarRegionsListForCollisionChecking = request.getPlanarRegionsList();
