@@ -11,6 +11,7 @@ import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
@@ -159,5 +160,50 @@ public class FootstepSnappingTools
       polygon.update();
 
       return new PlanarRegion(transformToWorld, polygon);
+   }
+
+   public static ConvexPolygon2D reduceNumberOfVertices(ConvexPolygon2DReadOnly polygonToReduce, int maxVertices)
+   {
+      if (maxVertices < 3)
+         throw new RuntimeException("Invalid number of vertices.");
+
+      if (polygonToReduce.getNumberOfVertices() <= maxVertices)
+         return new ConvexPolygon2D(polygonToReduce);
+
+
+      ConvexPolygon2D reducedPolygon = new ConvexPolygon2D(polygonToReduce);
+      while (reducedPolygon.getNumberOfVertices() > maxVertices)
+      {
+         // find the shortest edge
+         int shortestEdgeStart = 0;
+         Point2DReadOnly vertex = reducedPolygon.getVertex(shortestEdgeStart);
+         Point2DReadOnly nextVertex = reducedPolygon.getNextVertex(shortestEdgeStart);
+         double shortestEdgeLengthSquared = vertex.distanceSquared(nextVertex);
+         vertex = nextVertex;
+         for (int vertexIdx = 1; vertexIdx < reducedPolygon.getNumberOfVertices(); vertexIdx++)
+         {
+            nextVertex = reducedPolygon.getNextVertex(vertexIdx);
+            double distanceSquared = vertex.distanceSquared(nextVertex);
+            if (distanceSquared < shortestEdgeLengthSquared)
+            {
+               shortestEdgeStart = vertexIdx;
+               shortestEdgeLengthSquared = distanceSquared;
+            }
+
+            vertex = nextVertex;
+         }
+
+         // move the vertex to half way between this edge and the next one.
+         Point2DBasics vertexToEdit = reducedPolygon.getVertexUnsafe(shortestEdgeStart);
+         nextVertex = reducedPolygon.getNextVertex(shortestEdgeStart);
+         vertexToEdit.interpolate(nextVertex, 0.5);
+         reducedPolygon.removeVertex(reducedPolygon.getNextVertexIndex(shortestEdgeStart));
+
+         // compute the newer vetex
+         reducedPolygon.update();
+
+      }
+
+      return  reducedPolygon;
    }
 }
