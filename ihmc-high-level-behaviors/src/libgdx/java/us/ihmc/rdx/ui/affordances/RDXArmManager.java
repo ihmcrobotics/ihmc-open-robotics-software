@@ -96,7 +96,7 @@ public class RDXArmManager
          armManagers.get(side).create(robotModel, syncedRobot.getFullRobotModel(), desiredRobot, workingRobot);
       }
       wrenchToolbarButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      wrenchToolbarButton.loadAndSetIcons("icons/handWrench.png");
+      wrenchToolbarButton.loadAndSetIcon("icons/handWrench.png");
       wrenchToolbarButton.setTooltipText("Show / hide estimated hand wrench");
       wrenchToolbarButton.setOnPressed(()->
                                        {

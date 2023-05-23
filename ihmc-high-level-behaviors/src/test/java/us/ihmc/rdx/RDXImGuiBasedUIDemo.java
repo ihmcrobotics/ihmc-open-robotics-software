@@ -64,12 +64,12 @@ public class RDXImGuiBasedUIDemo
             });
 
             flyingCarButton = baseUI.getPrimary3DPanel().addToolbarButton();
-            flyingCarButton.loadAndSetIcons("icons/flyingCar.png");
+            flyingCarButton.loadAndSetIcon("icons/flyingCar.png");
             flyingCarButton.setOnPressed(() -> pressCount++);
             flyingCarButton.setTooltipText("Tooltip text");
 
             RDX3DPanelToolbarButton hoverboardButton = baseUI.getPrimary3DPanel().addToolbarButton();
-            hoverboardButton.loadAndSetIcons("icons/hoverboard.png");
+            hoverboardButton.loadAndSetIcon("icons/hoverboard.png");
 
             RDX3DPanel second3DPanel = new RDX3DPanel("Second 3D View", true);
             baseUI.add3DPanel(second3DPanel);

@@ -51,8 +51,8 @@ public class RDXHandConfigurationManager
 
       SideDependentList<RDXIconTexture> toggleIcons = new SideDependentList<>();
       RDX3DPanelToolbarButton leftRightHandToggleButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      toggleIcons.set(LEFT, leftRightHandToggleButton.loadAndSetIcons("icons/leftToggle.png"));
-      toggleIcons.set(RIGHT, leftRightHandToggleButton.loadAndSetIcons("icons/rightToggle.png"));
+      toggleIcons.set(LEFT, leftRightHandToggleButton.loadAndSetIcon("icons/leftToggle.png"));
+      toggleIcons.set(RIGHT, leftRightHandToggleButton.loadAndSetIcon("icons/rightToggle.png"));
       leftRightHandToggleButton.setTooltipText("Toggle hand. Red: Left | Green: Right");
       leftRightHandToggleButton.setIconTexture(toggleIcons.get(toolbarSelectedSide));
       leftRightHandToggleButton.setOnPressed(() ->
@@ -64,26 +64,26 @@ public class RDXHandConfigurationManager
       SideDependentList<Runnable> calibrateCommands = new SideDependentList<>(() -> publishHandCommand(RobotSide.LEFT, HandConfiguration.CALIBRATE),
                                                                               () -> publishHandCommand(RobotSide.RIGHT, HandConfiguration.CALIBRATE));
       RDX3DPanelToolbarButton calibrateButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      calibrateButton.loadAndSetIcons("icons/calibrate.png");
+      calibrateButton.loadAndSetIcon("icons/calibrate.png");
       calibrateButton.setTooltipText("Calibrate hand");
       calibrateButton.setOnPressed(() -> calibrateCommands.get(toolbarSelectedSide).run());
 
       SideDependentList<Runnable> openCommands = new SideDependentList<>(() -> publishHandCommand(RobotSide.LEFT, HandConfiguration.OPEN),
                                                                           () -> publishHandCommand(RobotSide.RIGHT, HandConfiguration.OPEN));
       RDX3DPanelToolbarButton openHandButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      openHandButton.loadAndSetIcons("icons/openGripper.png");
+      openHandButton.loadAndSetIcon("icons/openGripper.png");
       openHandButton.setTooltipText("Open hand");
       openHandButton.setOnPressed(() -> openCommands.get(toolbarSelectedSide).run());
 
       SideDependentList<Runnable> closeCommands = new SideDependentList<>(() -> publishHandCommand(RobotSide.LEFT, HandConfiguration.CLOSE),
                                                                           () -> publishHandCommand(RobotSide.RIGHT, HandConfiguration.CLOSE));
       RDX3DPanelToolbarButton closeHandButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      closeHandButton.loadAndSetIcons("icons/closeGripper.png");
+      closeHandButton.loadAndSetIcon("icons/closeGripper.png");
       closeHandButton.setTooltipText("Close hand");
       closeHandButton.setOnPressed(() -> closeCommands.get(toolbarSelectedSide).run());
 
       RDX3DPanelToolbarButton armHomeButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      armHomeButton.loadAndSetIcons("icons/home.png");
+      armHomeButton.loadAndSetIcon("icons/home.png");
       armHomeButton.setTooltipText("left/right arm home pose");
       armHomeButton.setOnPressed(() -> publishArmHomeCommand(toolbarSelectedSide));
 
@@ -188,7 +188,7 @@ public class RDXHandConfigurationManager
    private void setupShieldButton(RDXBaseUI baseUI, CommunicationHelper communicationHelper)
    {
       RDX3DPanelToolbarButton shieldButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      shieldButton.loadAndSetIcons("icons/shield.png");
+      shieldButton.loadAndSetIcon("icons/shield.png");
       shieldButton.setTooltipText("left/right side - testing shield lifting on Nadia");
 
       // Hand-tuned joint angles to hold the shield
