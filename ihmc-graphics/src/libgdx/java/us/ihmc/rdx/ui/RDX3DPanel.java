@@ -127,7 +127,6 @@ public class RDX3DPanel
          view3DPanelSizeHandler.handleSizeBeforeBegin();
          ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
          int flags = ImGuiWindowFlags.None;
-         ImGui.setNextWindowBgAlpha(1.0f);
          ImGui.begin(panelName, flags);
          view3DPanelSizeHandler.handleSizeAfterBegin();
          ImGui.popStyleVar();
