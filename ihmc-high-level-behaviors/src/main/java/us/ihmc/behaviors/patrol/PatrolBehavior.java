@@ -47,7 +47,7 @@ import us.ihmc.commons.thread.TypedNotification;
  */
 public class PatrolBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
 {
-   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Patrol", PatrolBehavior::new, PatrolBehaviorAPI.create());
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Patrol", PatrolBehavior::new);
 
    public enum PatrolBehaviorState
    {
@@ -92,11 +92,11 @@ public class PatrolBehavior extends BehaviorTreeControlFlowNode implements Behav
 
    private final WaypointManager waypointManager;
 
-   private final AtomicReference<Boolean> loop;
-   private final AtomicReference<Boolean> swingOvers;
-   private final AtomicReference<Boolean> planReviewEnabled;
-   private final AtomicReference<Boolean> upDownExplorationEnabled;
-   private final AtomicReference<Double> perceiveDuration;
+   private final AtomicReference<Boolean> loop = null;
+   private final AtomicReference<Boolean> swingOvers = null;
+   private final AtomicReference<Boolean> planReviewEnabled = null;
+   private final AtomicReference<Boolean> upDownExplorationEnabled = null;
+   private final AtomicReference<Double> perceiveDuration = null;
 
    public PatrolBehavior(BehaviorHelper helper)
    {
@@ -131,41 +131,42 @@ public class PatrolBehavior extends BehaviorTreeControlFlowNode implements Behav
 
       factory.getFactory().addStateChangedListener((from, to) ->
       {
-         helper.publish(CurrentState, to);
+//         helper.publish(CurrentState, to);
          LogTools.debug("{} -> {}", from == null ? null : from.name(), to == null ? null : to.name());
       });
       factory.getFactory().buildClock(() -> Conversions.nanosecondsToSeconds(System.nanoTime()));
       stateMachine = factory.getFactory().build(STOP);
 
-      waypointManager = WaypointManager.createForModule(helper.getMessager(),
-                                                        WaypointsToModule,
-                                                        WaypointsToUI,
-                                                        GoToWaypoint,
-                                                        CurrentWaypointIndexStatus,
-                                                        goNotification);
+      waypointManager = null;
+//      waypointManager = WaypointManager.createForModule(helper.getMessager(),
+//                                                        WaypointsToModule,
+//                                                        WaypointsToUI,
+//                                                        GoToWaypoint,
+//                                                        CurrentWaypointIndexStatus,
+//                                                        goNotification);
 
       // TODO: Use helper
-      helper.subscribeViaCallback(Stop, object -> stopNotification.set());
-      helper.subscribeViaCallback(PlanReviewResult, message ->
-      {
-         planReviewResult.set(message);
-      });
-      helper.subscribeViaCallback(SkipPerceive, object -> skipPerceive.set());
+//      helper.subscribeViaCallback(Stop, object -> stopNotification.set());
+//      helper.subscribeViaCallback(PlanReviewResult, message ->
+//      {
+//         planReviewResult.set(message);
+//      });
+//      helper.subscribeViaCallback(SkipPerceive, object -> skipPerceive.set());
 
       // TODO: Use helper
-      loop = helper.subscribeViaReference(Loop, false);
-      swingOvers = helper.subscribeViaReference(SwingOvers, false);
-      planReviewEnabled = helper.subscribeViaReference(PlanReviewEnabled, false);
-      upDownExplorationEnabled = helper.subscribeViaReference(UpDownExplorationEnabled, false);
-      perceiveDuration = helper.subscribeViaReference(PerceiveDuration, RemoteFootstepPlannerInterface.DEFAULT_PERCEIVE_TIME_REQUIRED);
-      helper.subscribeViaCallback(UpDownExplorationEnabled, enabled -> { if (enabled) goNotification.set(); });
+//      loop = helper.subscribeViaReference(Loop, false);
+//      swingOvers = helper.subscribeViaReference(SwingOvers, false);
+//      planReviewEnabled = helper.subscribeViaReference(PlanReviewEnabled, false);
+//      upDownExplorationEnabled = helper.subscribeViaReference(UpDownExplorationEnabled, false);
+//      perceiveDuration = helper.subscribeViaReference(PerceiveDuration, RemoteFootstepPlannerInterface.DEFAULT_PERCEIVE_TIME_REQUIRED);
+//      helper.subscribeViaCallback(UpDownExplorationEnabled, enabled -> { if (enabled) goNotification.set(); });
 
       upDownExplorer = new UpDownExplorer(helper, rea);
-      helper.subscribeViaCallback(CancelPlanning, object ->
-      {
-         cancelPlanning.set();
-         upDownExplorer.abortPlanning();
-      });
+//      helper.subscribeViaCallback(CancelPlanning, object ->
+//      {
+//         cancelPlanning.set();
+//         upDownExplorer.abortPlanning();
+//      });
 
       mainThread = helper.createPausablePeriodicThread(getClass(), UnitConversions.hertzToSeconds(250), 5, this::patrolThread);
    }
@@ -317,8 +318,8 @@ public class PatrolBehavior extends BehaviorTreeControlFlowNode implements Behav
 
    private void onReviewStateEntry()
    {
-      helper.publish(CurrentFootstepPlan,
-                     FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepPlanResultNotification.read().getFootstepPlan()));
+//      helper.publish(CurrentFootstepPlan,
+//                     FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepPlanResultNotification.read().getFootstepPlan()));
    }
 
    private void onReviewStateAction(double timeInState)
@@ -363,7 +364,7 @@ public class PatrolBehavior extends BehaviorTreeControlFlowNode implements Behav
 
       walkingCompleted = robotInterface.requestWalk(footstepDataListMessage);
 
-      helper.publish(CurrentFootstepPlan, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepDataListMessage));
+//      helper.publish(CurrentFootstepPlan, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepDataListMessage));
    }
 
    private PlanTravelDistance decidePlanDistance(FootstepDataListMessage footstepPlan, HumanoidReferenceFrames humanoidReferenceFrames)

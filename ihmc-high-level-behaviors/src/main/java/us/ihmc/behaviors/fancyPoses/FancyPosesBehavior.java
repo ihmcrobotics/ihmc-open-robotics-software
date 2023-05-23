@@ -37,11 +37,11 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 
 public class FancyPosesBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
 {
-   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Fancy Poses", FancyPosesBehavior::new, API.create());
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Fancy Poses", FancyPosesBehavior::new);
 
    private final BehaviorHelper helper;
 
-   private final ActivationReference<Boolean> stepping;
+   private final ActivationReference<Boolean> stepping = null;
    private final Notification goToSingleSupportNotification = new Notification();
    private final Notification goToDoubleSupportNotification = new Notification();
    private final Notification goToRunningManNotification = new Notification();
@@ -69,18 +69,18 @@ public class FancyPosesBehavior extends BehaviorTreeControlFlowNode implements B
       syncedRobot = robotInterface.newSyncedRobot();
 
       robotInterface.createFootstepStatusCallback(this::acceptFootstepStatus);
-      stepping = helper.subscribeViaActivationReference(API.Stepping);
+//      stepping = helper.subscribeViaActivationReference(API.Stepping);
 
-      helper.subscribeViaCallback(API.GoToSingleSupport, object -> goToSingleSupportNotification.set());
-      helper.subscribeViaCallback(API.GoToDoubleSupport, object -> goToDoubleSupportNotification.set());
-      helper.subscribeViaCallback(API.GoToRunningMan, object -> goToRunningManNotification.set());
-      helper.subscribeViaCallback(API.GoToKarateKid1, object -> goToKarateKid1Notification.set());
-      helper.subscribeViaCallback(API.GoToKarateKid2, object -> goToKarateKid2Notification.set());
-      helper.subscribeViaCallback(API.GoToKarateKid3, object -> goToKarateKid3Notification.set());
-      helper.subscribeViaCallback(API.GoToPresent, object -> goToPresentNotification.set());
-      helper.subscribeViaCallback(API.GoToShutdownPose, object -> goToShutdownPoseNotification.set());
-
-      helper.subscribeViaCallback(API.Abort, this::doOnAbort);
+//      helper.subscribeViaCallback(API.GoToSingleSupport, object -> goToSingleSupportNotification.set());
+//      helper.subscribeViaCallback(API.GoToDoubleSupport, object -> goToDoubleSupportNotification.set());
+//      helper.subscribeViaCallback(API.GoToRunningMan, object -> goToRunningManNotification.set());
+//      helper.subscribeViaCallback(API.GoToKarateKid1, object -> goToKarateKid1Notification.set());
+//      helper.subscribeViaCallback(API.GoToKarateKid2, object -> goToKarateKid2Notification.set());
+//      helper.subscribeViaCallback(API.GoToKarateKid3, object -> goToKarateKid3Notification.set());
+//      helper.subscribeViaCallback(API.GoToPresent, object -> goToPresentNotification.set());
+//      helper.subscribeViaCallback(API.GoToShutdownPose, object -> goToShutdownPoseNotification.set());
+//
+//      helper.subscribeViaCallback(API.Abort, this::doOnAbort);
 
       mainThread = helper.createPausablePeriodicThread(getClass(), 1.0, this::doBehavior);
    }

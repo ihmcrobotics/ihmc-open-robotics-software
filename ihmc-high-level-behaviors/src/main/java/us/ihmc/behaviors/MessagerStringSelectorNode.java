@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static us.ihmc.behaviors.BehaviorModule.API.BehaviorSelection;
+import static us.ihmc.behaviors.BehaviorModule.API.SET_HIGHEST_LEVEL_BEHAVIOR;
 
 /**
  * Not finished or tested. Mostly to hold old code.
@@ -40,7 +40,7 @@ public class MessagerStringSelectorNode extends BehaviorTreeControlFlowNode impl
          }
       }
 
-      helper.subscribeViaCallback(BehaviorSelection, this::stringBasedSelection);
+      helper.subscribeViaCallback(SET_HIGHEST_LEVEL_BEHAVIOR, message -> stringBasedSelection(message.getDataAsString()));
    }
 
    private void stringBasedSelection(String selection)
