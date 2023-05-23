@@ -33,9 +33,12 @@ public class RDX3DPanelToolbar
          float startX = centerX - toolbarWidth / 2;
          float startY = 40.0f;
 
-         ImGui.pushStyleColor(ImGuiCol.Button, 0);
-         ImGui.pushStyleColor(ImGuiCol.ButtonActive, 0);
-         ImGui.pushStyleColor(ImGuiCol.ButtonHovered, 0);
+         float upGray = 1.0f;
+         float hoverGray = 0.4f;
+         float downGray = 0.2f;
+         ImGui.pushStyleColor(ImGuiCol.Button, upGray, upGray, upGray, 0.3f);
+         ImGui.pushStyleColor(ImGuiCol.ButtonHovered, hoverGray, hoverGray, hoverGray, 0.6f);
+         ImGui.pushStyleColor(ImGuiCol.ButtonActive, downGray, downGray, downGray, 0.8f);
 
          for (int i = 0; i < buttons.size(); i++)
          {
