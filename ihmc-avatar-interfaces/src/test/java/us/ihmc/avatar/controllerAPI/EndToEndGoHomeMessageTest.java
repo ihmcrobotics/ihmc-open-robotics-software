@@ -74,11 +74,11 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
       createSimulation();
 
       double trajectoryTime = 0.5;
-      MovingReferenceFrame pelvisZUpFrame = testHelper.getControllerReferenceFrames().getPelvisZUpFrame();
+      MovingReferenceFrame walkingFrame = testHelper.getHighLevelHumanoidControllerToolbox().getWalkingTrajectoryPath().getWalkingTrajectoryPathFrame();
       FullHumanoidRobotModel robot = testHelper.getControllerFullRobotModel();
-      FrameQuaternion chestHome = new FrameQuaternion(pelvisZUpFrame, getChestHome(getRobotModel(), robot).getOrientation());
+      FrameQuaternion chestHome = new FrameQuaternion(walkingFrame, getChestHome(getRobotModel(), robot).getOrientation());
 
-      testHelper.publishToController(AvatarRandomTestMessages.nextChestTrajectoryMessage(random, trajectoryTime, pelvisZUpFrame, robot));
+      testHelper.publishToController(AvatarRandomTestMessages.nextChestTrajectoryMessage(random, trajectoryTime, walkingFrame, robot));
 
       Assert.assertTrue(testHelper.simulateNow(trajectoryTime + 0.25));
 
