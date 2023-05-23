@@ -126,6 +126,7 @@ public class RDXInteractableFootstep
    {
       plannedFootstepInput.set(null);
       plannedFootstepInternal.set(plannedFootstep);
+      plannedFootstepInternal.limitFootholdVertices();
       plannedFootstepTrajectory.clear();
       if (swingTrajectory != null)
          swingTrajectory.keySet().forEach(key -> plannedFootstepTrajectory.put(key, copyPolynomialList(swingTrajectory.get(key))));

@@ -28,6 +28,8 @@ import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -70,7 +72,7 @@ public class LookAndStepBodyPathPlanningTask
    protected YoDouble bodyPathPlanningDuration;
 
    protected PlanarRegionsList mapRegions;
-   protected HeightMapMessage heightMap;
+   protected HeightMapData heightMap;
    protected Pose3DReadOnly goal;
    protected ROS2SyncedRobotModel syncedRobot;
    protected boolean doBodyPathPlan;
@@ -81,7 +83,7 @@ public class LookAndStepBodyPathPlanningTask
    {
       private ResettableExceptionHandlingExecutorService executor;
       private final TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
-      private final TypedInput<HeightMapMessage> heightMapInput = new TypedInput<>();
+      private final TypedInput<HeightMapData> heightMapInput = new TypedInput<>();
       private final TypedInput<Pose3DReadOnly> goalInput = new TypedInput<>();
       private final Timer mapRegionsExpirationTimer = new Timer();
       private final Timer heightMapExpirationTimer = new Timer();
@@ -165,7 +167,7 @@ public class LookAndStepBodyPathPlanningTask
 
       public void acceptHeightMap(HeightMapMessage heightMapMessage)
       {
-         heightMapInput.set(heightMapMessage);
+         heightMapInput.set(HeightMapMessageTools.unpackMessage(heightMapMessage));
          heightMapExpirationTimer.reset();
       }
 
@@ -384,7 +386,7 @@ public class LookAndStepBodyPathPlanningTask
       footstepPlannerRequest.setTimeout(10.0);
 
 //      heightMapMessage.setEstimatedGroundHeight(-1.0);
-      footstepPlannerRequest.setHeightMapMessage(heightMap);
+      footstepPlannerRequest.setHeightMapData(heightMap);
       footstepPlannerRequest.setPlanBodyPath(true);
       footstepPlannerRequest.setPlanFootsteps(false);
       footstepPlanningModule.handleRequest(footstepPlannerRequest);
