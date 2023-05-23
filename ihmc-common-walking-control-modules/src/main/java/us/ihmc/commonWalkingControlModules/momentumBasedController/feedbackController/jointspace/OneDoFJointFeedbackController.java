@@ -192,6 +192,27 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
    public void submitFeedbackControlCommand(OneDoFJointFeedbackControlCommand command)
    {
+      if (WholeBodyControllerCore.CHECK_FOR_NANS)
+      {
+         if (Double.isNaN(command.getWeightForSolver()))
+            throw new IllegalArgumentException("Weight is NaN for joint: " + command.getJoint().getName());
+         if (Double.isNaN(command.getGains().getKp()))
+            throw new IllegalArgumentException("Kp is NaN for joint: " + command.getJoint().getName());
+         if (kd != null && Double.isNaN(command.getGains().getKd()))
+            throw new IllegalArgumentException("Kd is NaN for joint: " + command.getJoint().getName());
+         if (Double.isNaN(command.getGains().getMaximumFeedback()))
+            throw new IllegalArgumentException("Max feedback is NaN for joint: " + command.getJoint().getName());
+         if (Double.isNaN(command.getGains().getMaximumFeedbackRate()))
+            throw new IllegalArgumentException("Max feedback rate is NaN for joint: " + command.getJoint().getName());
+         if (Double.isNaN(command.getReferencePosition()))
+            throw new IllegalArgumentException("Reference position is NaN for joint: " + command.getJoint().getName());
+         if (Double.isNaN(command.getReferenceVelocity()))
+            throw new IllegalArgumentException("Reference velocity is NaN for joint: " + command.getJoint().getName());
+         if (qDDFeedforward != null && Double.isNaN(command.getReferenceAcceleration()))
+            throw new IllegalArgumentException("Reference acceleration is NaN for joint: " + command.getJoint().getName());
+         if (tauFeedforward != null && Double.isNaN(command.getReferenceEffort()))
+            throw new IllegalArgumentException("Reference effort is NaN for joint: " + command.getJoint().getName());
+      }
 
       weightForSolver.set(command.getWeightForSolver());
 

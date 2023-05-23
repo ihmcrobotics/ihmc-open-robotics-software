@@ -10,24 +10,22 @@ import us.ihmc.euclid.matrix.Matrix3D;
 public interface PID3DGainsReadOnly
 {
    /**
-    * Returns the proportional PID gains for all three dimensions. The returned
-    * array is of length three.
+    * Returns the proportional PID gains for all three dimensions. The returned array is of length
+    * three.
     *
     * @return the proportional PID gains as double array.
     */
    public abstract double[] getProportionalGains();
 
    /**
-    * Returns the derivative PID gains for all three dimensions. The returned
-    * array is of length three.
+    * Returns the derivative PID gains for all three dimensions. The returned array is of length three.
     *
     * @return the derivative PID gains as double array.
     */
    public abstract double[] getDerivativeGains();
 
    /**
-    * Returns the derivative PID gains for all three dimensions. The returned
-    * array is of length three.
+    * Returns the derivative PID gains for all three dimensions. The returned array is of length three.
     *
     * @return the integral PID gains as double array.
     */
@@ -41,16 +39,14 @@ public interface PID3DGainsReadOnly
    public abstract double getMaximumIntegralError();
 
    /**
-    * Returns the maximum error in the derivative input to the controller that
-    * should be considered.
+    * Returns the maximum error in the derivative input to the controller that should be considered.
     *
     * @return the maximum derivative error.
     */
    public abstract double getMaximumDerivativeError();
 
    /**
-    * Returns the maximum error in the proportional input to the controller that
-    * should be considered.
+    * Returns the maximum error in the proportional input to the controller that should be considered.
     *
     * @return the maximum proportional error.
     */
@@ -71,8 +67,8 @@ public interface PID3DGainsReadOnly
    public abstract double getMaximumFeedbackRate();
 
    /**
-    * Will pack the proportional gain matrix. The matrix will be a diagonal
-    * matrix with the diagonal elements set to the proportional gains.
+    * Will pack the proportional gain matrix. The matrix will be a diagonal matrix with the diagonal
+    * elements set to the proportional gains.
     *
     * @param proportialGainMatrixToPack the matrix in which the gains are stored. Modified.
     */
@@ -82,8 +78,8 @@ public interface PID3DGainsReadOnly
    }
 
    /**
-    * Will pack the derivative gain matrix. The matrix will be a diagonal
-    * matrix with the diagonal elements set to the derivative gains.
+    * Will pack the derivative gain matrix. The matrix will be a diagonal matrix with the diagonal
+    * elements set to the derivative gains.
     *
     * @param derivativeGainMatrixToPack the matrix in which the gains are stored. Modified.
     */
@@ -93,8 +89,8 @@ public interface PID3DGainsReadOnly
    }
 
    /**
-    * Will pack the integral gain matrix. The matrix will be a diagonal
-    * matrix with the diagonal elements set to the integral gains.
+    * Will pack the integral gain matrix. The matrix will be a diagonal matrix with the diagonal
+    * elements set to the integral gains.
     *
     * @param integralGainMatrixToPack the matrix in which the gains are stored. Modified.
     */
@@ -103,13 +99,27 @@ public interface PID3DGainsReadOnly
       setMatrixDiagonal(getIntegralGains(), integralGainMatrixToPack);
    }
 
+   default boolean proportionalGainsContainNaN()
+   {
+      return containsNaN(getProportionalGains());
+   }
+
+   default boolean derivativeGainsContainNaN()
+   {
+      return containsNaN(getDerivativeGains());
+   }
+
+   default boolean integralGainsContainNaN()
+   {
+      return containsNaN(getIntegralGains());
+   }
+
    /**
-    * Helper method to fill the gain matrices. Will set the matrix to a diagonal
-    * matrix with the diagonal elements equal to the provided array. The array is
-    * expected to be of length three.
+    * Helper method to fill the gain matrices. Will set the matrix to a diagonal matrix with the
+    * diagonal elements equal to the provided array. The array is expected to be of length three.
     *
     * @param diagonalElements the diagonal elements of the matrix
-    * @param matrixToFill the matrix that will be set diagonal. Modified.
+    * @param matrixToFill     the matrix that will be set diagonal. Modified.
     */
    static void setMatrixDiagonal(double[] diagonalElements, Matrix3D matrixToFill)
    {
@@ -133,6 +143,18 @@ public interface PID3DGainsReadOnly
       {
          throw new RuntimeException("Expected array of length three.");
       }
+   }
+
+   public static boolean containsNaN(double[] array)
+   {
+      if (array == null || array.length == 0)
+         return false;
+      for (int i = 0; i < array.length; i++)
+      {
+         if (Double.isNaN(array[i]))
+            return true;
+      }
+      return false;
    }
 
    public default boolean equals(PID3DGainsReadOnly other)

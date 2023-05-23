@@ -29,6 +29,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class WholeBodyControllerCore implements SCS2YoGraphicHolder
 {
+   public static final boolean CHECK_FOR_NANS = true;
+
    public static boolean REDUCE_YOVARIABLES = false;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());

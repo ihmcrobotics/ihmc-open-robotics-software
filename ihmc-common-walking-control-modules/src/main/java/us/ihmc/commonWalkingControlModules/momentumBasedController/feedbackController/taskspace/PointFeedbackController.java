@@ -16,6 +16,8 @@ import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerException;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
@@ -39,6 +41,7 @@ import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -295,14 +298,42 @@ public class PointFeedbackController implements FeedbackControllerInterface
       if (command.getEndEffector() != endEffector)
          throw new FeedbackControllerException("Wrong end effector - received: " + command.getEndEffector() + ", expected: " + endEffector);
 
+      SpatialAccelerationCommand spatialAccelerationCommand = command.getSpatialAccelerationCommand();
+
+      if (WholeBodyControllerCore.CHECK_FOR_NANS)
+      {
+         SelectionMatrix6D selectionMatrix = spatialAccelerationCommand.getSelectionMatrix();
+         WeightMatrix6D weightMatrix = spatialAccelerationCommand.getWeightMatrix();
+         if (selectionMatrix.getLinearPart().getNumberOfSelectedAxes() > 0 && weightMatrix.getLinearPart().containsNaN())
+            throw new IllegalArgumentException("Weight is NaN for body: " + command.getEndEffector().getName());
+         if (command.getGains().proportionalGainsContainNaN())
+            throw new IllegalArgumentException("Kp is NaN for body: " + command.getEndEffector().getName());
+         if (command.getControlMode() != WholeBodyControllerCoreMode.INVERSE_KINEMATICS && command.getGains().derivativeGainsContainNaN())
+            throw new IllegalArgumentException("Kd is NaN for body: " + command.getEndEffector().getName());
+         if (command.getGains().integralGainsContainNaN())
+            throw new IllegalArgumentException("Ki is NaN for body: " + command.getEndEffector().getName());
+         if (Double.isNaN(command.getGains().getMaximumFeedback()))
+            throw new IllegalArgumentException("Max feedback is NaN for body: " + command.getEndEffector().getName());
+         if (Double.isNaN(command.getGains().getMaximumFeedbackRate()))
+            throw new IllegalArgumentException("Max feedback rate is NaN for body: " + command.getEndEffector().getName());
+         if (command.getReferencePosition().containsNaN())
+            throw new IllegalArgumentException("Reference position is NaN for body: " + command.getEndEffector().getName());
+         if (command.getReferenceLinearVelocity().containsNaN())
+            throw new IllegalArgumentException("Reference linear velocity is NaN for body: " + command.getEndEffector().getName());
+         if (yoFeedForwardLinearAcceleration != null && command.getReferenceLinearAcceleration().containsNaN())
+            throw new IllegalArgumentException("Reference linear acceleration is NaN for body: " + command.getEndEffector().getName());
+         if (yoFeedForwardLinearForce != null && command.getReferenceForce().containsNaN())
+            throw new IllegalArgumentException("Reference force is NaN for body: " + command.getEndEffector().getName());
+      }
+
       currentCommandId = command.getCommandId();
       base = command.getBase();
       controlBaseFrame = command.getControlBaseFrame();
 
-      inverseDynamicsOutput.set(command.getSpatialAccelerationCommand());
+      inverseDynamicsOutput.set(spatialAccelerationCommand);
 
       gains.set(command.getGains());
-      command.getSpatialAccelerationCommand().getSelectionMatrix(selectionMatrix);
+      spatialAccelerationCommand.getSelectionMatrix(selectionMatrix);
       linearGainsFrame = command.getLinearGainsFrame();
 
       command.getBodyFixedPointIncludingFrame(desiredPosition);

@@ -14,6 +14,8 @@ import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDF
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerException;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
@@ -30,6 +32,7 @@ import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoMutableFrameVector3D;
 import us.ihmc.robotics.math.filters.RateLimitedYoMutableFrameVector3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -106,11 +109,9 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       yoCurrentPosition = feedbackControllerToolbox.getOrCreateCenterOfMassPositionData(CURRENT, isEnabled, true);
       yoErrorPosition = feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(ERROR, POSITION, isEnabled, false);
 
-      yoErrorPositionIntegrated = computeIntegralTerm ? feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(ERROR_INTEGRATED,
-                                                                                                                    POSITION,
-                                                                                                                    isEnabled,
-                                                                                                                    false)
-                                                      : null;
+      yoErrorPositionIntegrated = computeIntegralTerm
+            ? feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(ERROR_INTEGRATED, POSITION, isEnabled, false)
+            : null;
 
       yoDesiredLinearVelocity = feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(DESIRED, LINEAR_VELOCITY, isEnabled, true);
 
@@ -174,10 +175,35 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
 
    public void submitFeedbackControlCommand(CenterOfMassFeedbackControlCommand command)
    {
-      inverseDynamicsOutput.set(command.getMomentumRateCommand());
+      MomentumRateCommand momentumRateCommand = command.getMomentumRateCommand();
+
+      if (WholeBodyControllerCore.CHECK_FOR_NANS)
+      {
+         WeightMatrix6D weightMatrix = momentumRateCommand.getWeightMatrix();
+         if (weightMatrix.getLinearPart().containsNaN())
+            throw new IllegalArgumentException("Weight is NaN for CoM");
+         if (command.getGains().proportionalGainsContainNaN())
+            throw new IllegalArgumentException("Kp is NaN for  CoM");
+         if (command.getControlMode() != WholeBodyControllerCoreMode.INVERSE_KINEMATICS && command.getGains().derivativeGainsContainNaN())
+            throw new IllegalArgumentException("Kd is NaN for CoM");
+         if (command.getGains().integralGainsContainNaN())
+            throw new IllegalArgumentException("Ki is NaN for CoM");
+         if (Double.isNaN(command.getGains().getMaximumFeedback()))
+            throw new IllegalArgumentException("Max feedback is NaN for CoM");
+         if (Double.isNaN(command.getGains().getMaximumFeedbackRate()))
+            throw new IllegalArgumentException("Max feedback rate is NaN for CoM");
+         if (command.getReferencePosition().containsNaN())
+            throw new IllegalArgumentException("Reference position is NaN for CoM");
+         if (command.getReferenceLinearVelocity().containsNaN())
+            throw new IllegalArgumentException("Reference linear velocity is NaN for CoM");
+         if (yoFeedForwardLinearAcceleration != null && command.getReferenceLinearAcceleration().containsNaN())
+            throw new IllegalArgumentException("Reference linear acceleration is NaN for CoM");
+      }
+
+      inverseDynamicsOutput.set(momentumRateCommand);
 
       gains.set(command.getGains());
-      command.getMomentumRateCommand().getSelectionMatrix(selectionMatrix);
+      momentumRateCommand.getSelectionMatrix(selectionMatrix);
 
       yoDesiredPosition.setIncludingFrame(command.getReferencePosition());
       yoDesiredLinearVelocity.setIncludingFrame(command.getReferenceLinearVelocity());

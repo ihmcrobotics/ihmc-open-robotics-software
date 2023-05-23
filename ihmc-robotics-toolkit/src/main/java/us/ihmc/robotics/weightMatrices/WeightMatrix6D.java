@@ -520,6 +520,11 @@ public class WeightMatrix6D
       return linearWeights;
    }
 
+   public boolean containsNaN()
+   {
+      return angularWeights.containsNaN() || linearWeights.containsNaN();
+   }
+
    @Override
    public String toString()
    {

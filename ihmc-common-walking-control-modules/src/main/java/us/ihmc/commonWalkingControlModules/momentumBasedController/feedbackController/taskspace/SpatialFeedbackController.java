@@ -23,6 +23,8 @@ import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerException;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
@@ -48,9 +50,11 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -254,13 +258,9 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
             yoFeedForwardAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDFORWARD, ACCELERATION, isEnabled, false);
             yoProportionalFeedbackAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, P_FEEDBACK, ACCELERATION, isEnabled, false);
             yoDerivativeFeedbackAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, D_FEEDBACK, ACCELERATION, isEnabled, false);
-            yoIntegralFeedbackAcceleration = computeIntegralTerm ? fbToolbox.getOrCreateVectorData6D(endEffector,
-                                                                                                     controllerIndex,
-                                                                                                     I_FEEDBACK,
-                                                                                                     ACCELERATION,
-                                                                                                     isEnabled,
-                                                                                                     false)
-                                                                 : null;
+            yoIntegralFeedbackAcceleration = computeIntegralTerm
+                  ? fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, I_FEEDBACK, ACCELERATION, isEnabled, false)
+                  : null;
             yoFeedbackAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDBACK, ACCELERATION, isEnabled, false);
             rateLimitedFeedbackAcceleration = fbToolbox.getOrCreateRateLimitedVectorData6D(endEffector,
                                                                                            controllerIndex,
@@ -356,15 +356,73 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       if (command.getEndEffector() != endEffector)
          throw new FeedbackControllerException("Wrong end effector - received: " + command.getEndEffector() + ", expected: " + endEffector);
 
+      SpatialAccelerationCommand spatialAccelerationCommand = command.getSpatialAccelerationCommand();
+
+      if (WholeBodyControllerCore.CHECK_FOR_NANS)
+      {
+         SelectionMatrix6D selectionMatrix = spatialAccelerationCommand.getSelectionMatrix();
+         if (selectionMatrix.getAngularPart().getNumberOfSelectedAxes() > 0)
+         { // Check angular stuff
+            WeightMatrix6D weightMatrix = spatialAccelerationCommand.getWeightMatrix();
+            if (weightMatrix.getAngularPart().containsNaN())
+               throw new IllegalArgumentException("Angular weight is NaN for body: " + command.getEndEffector().getName());
+            PID3DGains gains = command.getGains().getOrientationGains();
+            if (gains.proportionalGainsContainNaN())
+               throw new IllegalArgumentException("Kp is NaN for body: " + command.getEndEffector().getName());
+            if (command.getControlMode() != WholeBodyControllerCoreMode.INVERSE_KINEMATICS && gains.derivativeGainsContainNaN())
+               throw new IllegalArgumentException("Kd is NaN for body: " + command.getEndEffector().getName());
+            if (gains.integralGainsContainNaN())
+               throw new IllegalArgumentException("Ki is NaN for body: " + command.getEndEffector().getName());
+            if (Double.isNaN(gains.getMaximumFeedback()))
+               throw new IllegalArgumentException("Max feedback is NaN for body: " + command.getEndEffector().getName());
+            if (Double.isNaN(gains.getMaximumFeedbackRate()))
+               throw new IllegalArgumentException("Max feedback rate is NaN for body: " + command.getEndEffector().getName());
+            if (command.getReferenceOrientation().containsNaN())
+               throw new IllegalArgumentException("Reference orientation is NaN for body: " + command.getEndEffector().getName());
+            if (command.getReferenceAngularVelocity().containsNaN())
+               throw new IllegalArgumentException("Reference angular velocity is NaN for body: " + command.getEndEffector().getName());
+            if (yoFeedForwardAcceleration != null && command.getReferenceAngularAcceleration().containsNaN())
+               throw new IllegalArgumentException("Reference angular acceleration is NaN for body: " + command.getEndEffector().getName());
+            if (yoFeedForwardWrench != null && command.getReferenceTorque().containsNaN())
+               throw new IllegalArgumentException("Reference torque is NaN for body: " + command.getEndEffector().getName());
+         }
+
+         if (selectionMatrix.getLinearPart().getNumberOfSelectedAxes() > 0)
+         { // Check linear stuff
+            WeightMatrix6D weightMatrix = spatialAccelerationCommand.getWeightMatrix();
+            if (weightMatrix.getLinearPart().containsNaN())
+               throw new IllegalArgumentException("Angular weight is NaN for body: " + command.getEndEffector().getName());
+            PID3DGains gains = command.getGains().getPositionGains();
+            if (gains.proportionalGainsContainNaN())
+               throw new IllegalArgumentException("Kp is NaN for body: " + command.getEndEffector().getName());
+            if (command.getControlMode() != WholeBodyControllerCoreMode.INVERSE_KINEMATICS && gains.derivativeGainsContainNaN())
+               throw new IllegalArgumentException("Kd is NaN for body: " + command.getEndEffector().getName());
+            if (gains.integralGainsContainNaN())
+               throw new IllegalArgumentException("Ki is NaN for body: " + command.getEndEffector().getName());
+            if (Double.isNaN(gains.getMaximumFeedback()))
+               throw new IllegalArgumentException("Max feedback is NaN for body: " + command.getEndEffector().getName());
+            if (Double.isNaN(gains.getMaximumFeedbackRate()))
+               throw new IllegalArgumentException("Max feedback rate is NaN for body: " + command.getEndEffector().getName());
+            if (command.getReferencePosition().containsNaN())
+               throw new IllegalArgumentException("Reference position is NaN for body: " + command.getEndEffector().getName());
+            if (command.getReferenceLinearVelocity().containsNaN())
+               throw new IllegalArgumentException("Reference linear velocity is NaN for body: " + command.getEndEffector().getName());
+            if (yoFeedForwardAcceleration != null && command.getReferenceLinearAcceleration().containsNaN())
+               throw new IllegalArgumentException("Reference linear acceleration is NaN for body: " + command.getEndEffector().getName());
+            if (yoFeedForwardWrench != null && command.getReferenceForce().containsNaN())
+               throw new IllegalArgumentException("Reference force is NaN for body: " + command.getEndEffector().getName());
+         }
+      }
+
       currentCommandId = command.getCommandId();
       base = command.getBase();
       controlBaseFrame = command.getControlBaseFrame();
-      inverseDynamicsOutput.set(command.getSpatialAccelerationCommand());
-      inverseKinematicsOutput.setProperties(command.getSpatialAccelerationCommand());
-      virtualModelControlOutput.setProperties(command.getSpatialAccelerationCommand());
+      inverseDynamicsOutput.set(spatialAccelerationCommand);
+      inverseKinematicsOutput.setProperties(spatialAccelerationCommand);
+      virtualModelControlOutput.setProperties(spatialAccelerationCommand);
 
       gains.set(command.getGains());
-      command.getSpatialAccelerationCommand().getSelectionMatrix(selectionMatrix);
+      spatialAccelerationCommand.getSelectionMatrix(selectionMatrix);
       angularGainsFrame = command.getAngularGainsFrame();
       linearGainsFrame = command.getLinearGainsFrame();
 
