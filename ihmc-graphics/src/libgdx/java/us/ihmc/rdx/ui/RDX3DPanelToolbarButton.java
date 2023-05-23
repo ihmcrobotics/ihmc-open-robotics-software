@@ -15,8 +15,11 @@ import us.ihmc.rdx.tools.RDXIconTexture;
  */
 public class RDX3DPanelToolbarButton
 {
+   private static final float ONE_THIRD = 1.0f / 3.0f;
+   private static final float TWO_THIRDS = 2.0f / 3.0f;
+
    private Runnable onPressed;
-   private RDXButtonIconTextures activeIconTextures;
+   private RDXIconTexture iconTexture;
    private String tooltipText = null;
    private boolean isHovered = false;
    private boolean isDown = false;
@@ -31,20 +34,15 @@ public class RDX3DPanelToolbarButton
       tooltipText = text;
    }
 
-   public RDXButtonIconTextures loadAndSetIcons(String iconAbsoluteResourcePath)
+   public RDXIconTexture loadAndSetIcons(String iconAbsoluteResourcePath)
    {
-      RDXIconTexture upIcon = new RDXIconTexture(iconAbsoluteResourcePath);
-      String hoverPath = iconAbsoluteResourcePath.substring(0, iconAbsoluteResourcePath.indexOf(".png")) + "_hover.png";
-      RDXIconTexture hoverIcon = new RDXIconTexture(hoverPath);
-      String downPath = iconAbsoluteResourcePath.substring(0, iconAbsoluteResourcePath.indexOf(".png")) + "_down.png";
-      RDXIconTexture downIcon = new RDXIconTexture(downPath);
-      activeIconTextures = new RDXButtonIconTextures(upIcon, hoverIcon, downIcon);
-      return activeIconTextures;
+      iconTexture = new RDXIconTexture(iconAbsoluteResourcePath);
+      return iconTexture;
    }
 
-   public void setActiveIconTextures(RDXButtonIconTextures activeIconTextures)
+   public void setIconTexture(RDXIconTexture iconTexture)
    {
-      this.activeIconTextures = activeIconTextures;
+      this.iconTexture = iconTexture;
    }
 
    public void onPressed()
@@ -53,14 +51,27 @@ public class RDX3DPanelToolbarButton
          onPressed.run();
    }
 
-   public RDXIconTexture getAppropriateIcon()
+   public float getUVX0()
    {
-//      if (isDown)
-//         return activeIconTextures.getDownIcon();
-//      if (isHovered)
-//         return activeIconTextures.getHoverIcon();
-//      else
-         return activeIconTextures.getUpIcon();
+      if (isHovered)
+         return ONE_THIRD;
+      if (isDown)
+         return TWO_THIRDS;
+      return 0.0f;
+   }
+
+   public float getUVX1()
+   {
+      if (isHovered)
+         return TWO_THIRDS;
+      if (isDown)
+         return 1.0f;
+      return ONE_THIRD;
+   }
+
+   public RDXIconTexture getIconTexture()
+   {
+      return iconTexture;
    }
 
    public String getTooltipText()

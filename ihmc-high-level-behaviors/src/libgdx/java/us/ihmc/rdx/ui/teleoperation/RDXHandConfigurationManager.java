@@ -13,7 +13,6 @@ import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.rdx.ui.RDXButtonIconTextures;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -50,16 +49,16 @@ public class RDXHandConfigurationManager
          handConfigurationNames[i] = values[i].name();
       }
 
-      SideDependentList<RDXButtonIconTextures> toggleIcons = new SideDependentList<>();
+      SideDependentList<RDXIconTexture> toggleIcons = new SideDependentList<>();
       RDX3DPanelToolbarButton leftRightHandToggleButton = baseUI.getPrimary3DPanel().addToolbarButton();
       toggleIcons.set(LEFT, leftRightHandToggleButton.loadAndSetIcons("icons/leftToggle.png"));
       toggleIcons.set(RIGHT, leftRightHandToggleButton.loadAndSetIcons("icons/rightToggle.png"));
       leftRightHandToggleButton.setTooltipText("Toggle hand. Red: Left | Green: Right");
-      leftRightHandToggleButton.setActiveIconTextures(toggleIcons.get(toolbarSelectedSide));
+      leftRightHandToggleButton.setIconTexture(toggleIcons.get(toolbarSelectedSide));
       leftRightHandToggleButton.setOnPressed(() ->
       {
          toolbarSelectedSide = toolbarSelectedSide.getOppositeSide();
-         leftRightHandToggleButton.setActiveIconTextures(toggleIcons.get(toolbarSelectedSide));
+         leftRightHandToggleButton.setIconTexture(toggleIcons.get(toolbarSelectedSide));
       });
 
       SideDependentList<Runnable> calibrateCommands = new SideDependentList<>(() -> publishHandCommand(RobotSide.LEFT, HandConfiguration.CALIBRATE),
