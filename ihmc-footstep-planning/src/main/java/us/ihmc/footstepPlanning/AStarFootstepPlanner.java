@@ -296,12 +296,13 @@ public class AStarFootstepPlanner
             edgeDataMap.get(new GraphEdge<>(path.get(i - 1), path.get(i))).getEndStepSnapData().set(snapData);
          }
 
-         footstep.getFoothold().set(snapData.getCroppedFoothold());
+         footstep.getFoothold().set(FootstepSnappingTools.reduceNumberOfVertices(snapData.getCroppedFoothold(), 4));
          outputToPack.getFootstepPlan().addFootstep(footstep);
       }
 
       if (!request.getAssumeFlatGround())
       {
+         // FIXME this is unpacking the height map message again.
          swingPlanningModule.computeSwingWaypoints(request.getPlanarRegionsList(),
                                                    HeightMapMessageTools.unpackMessage(request.getHeightMapMessage()),
                                                    outputToPack.getFootstepPlan(),
