@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import imgui.ImGui;
@@ -65,9 +66,9 @@ public class RDXLocomotionManager
    private RDXLegControlMode legControlMode = RDXLegControlMode.DISABLED;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean showGraphics = new ImBoolean(true);
    private boolean isPlacingFootstep = false;
    private final PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
+   private final AbortWalkingMessage abortWalkingMessage = new AbortWalkingMessage();
    private final ControllerStatusTracker controllerStatusTracker;
 
    public RDXLocomotionManager(DRCRobotModel robotModel,
@@ -217,6 +218,12 @@ public class RDXLocomotionManager
       ImGui.text("Walking Options:");
       ImGui.sameLine();
 
+      if (ImGui.button(labels.get("Abort")))
+      {
+         sendAbortWalkingMessage();
+      }
+      ImGui.sameLine();
+
       ImGui.beginDisabled(!walkAvailable);
       if (ImGui.button(labels.get("Walk")))
       { // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
@@ -271,8 +278,6 @@ public class RDXLocomotionManager
 
       walkPathControlRing.renderImGuiWidgets();
       interactableFootstepPlan.renderImGuiWidgets();
-
-      ImGui.checkbox(labels.get("Show footstep related graphics"), showGraphics);
 
       // Handles all shortcuts for when the spacebar key is pressed
       if (ImGui.isKeyReleased(ImGuiTools.getSpaceKey()))
@@ -347,6 +352,11 @@ public class RDXLocomotionManager
    public void setLegControlModeToSingleSupportFootPosing()
    {
       legControlMode = RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING;
+   }
+
+   public void sendAbortWalkingMessage()
+   {
+      communicationHelper.publishToController(abortWalkingMessage);
    }
 
    public void setPauseWalkingAndPublish(boolean pauseWalking)

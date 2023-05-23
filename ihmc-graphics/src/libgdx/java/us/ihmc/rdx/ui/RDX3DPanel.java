@@ -121,7 +121,6 @@ public class RDX3DPanel
 
    public void render()
    {
-      // NOTE: show panel(window) here
       ImBoolean isShowing = imGuiPanel.getIsShowing();
       if (imGuiPanel.getIsShowing().get())
       {
@@ -130,6 +129,7 @@ public class RDX3DPanel
          int flags = ImGuiWindowFlags.None;
          ImGui.begin(panelName, flags);
          view3DPanelSizeHandler.handleSizeAfterBegin();
+         ImGui.popStyleVar();
 
          windowPositionX = ImGui.getWindowPosX();
          windowPositionY = ImGui.getWindowPosY() + ImGuiTools.TAB_BAR_HEIGHT;
@@ -212,12 +212,12 @@ public class RDX3DPanel
          float uvMaxY = 0.0f;
 
          ImGui.getWindowDrawList().addImage(textureID, windowDrawMinX, windowDrawMinY, windowDrawMaxX, windowDrawMaxY, uvMinX, uvMinY, uvMaxX, uvMaxY);
-         ImGui.popStyleVar();
 
          for (Runnable imguiOverlayAddition : imGuiOverlayAdditions)
          {
             imguiOverlayAddition.run();
          }
+         toolbar.render(windowSizeX, windowPositionX, windowPositionY);
 
          if (ImGui.isMouseDoubleClicked(ImGuiMouseButton.Right))
          {
@@ -225,8 +225,6 @@ public class RDX3DPanel
          }
 
          ImGui.end();
-
-         toolbar.render(windowSizeX, windowPositionX, windowPositionY);
       }
    }
 
