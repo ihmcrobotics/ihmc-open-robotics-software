@@ -55,11 +55,11 @@ public class RDX3DPanelToolbarButton
 
    public RDXIconTexture getAppropriateIcon()
    {
-      if (isDown)
-         return activeIconTextures.getDownIcon();
-      if (isHovered)
-         return activeIconTextures.getHoverIcon();
-      else
+//      if (isDown)
+//         return activeIconTextures.getDownIcon();
+//      if (isHovered)
+//         return activeIconTextures.getHoverIcon();
+//      else
          return activeIconTextures.getUpIcon();
    }
 
