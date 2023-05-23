@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui;
 
 import us.ihmc.rdx.tools.RDXIconTexture;
+import us.ihmc.tools.Timer;
 
 /**
  * Icons must be PNGs and should have transparent backgrounds.
@@ -29,6 +30,7 @@ public class RDX3DPanelToolbarButton
    private String tooltipText = null;
    private boolean isHovered = false;
    private boolean isDown = false;
+   private final Timer tooltipTimer = new Timer();
 
    public void setOnPressed(Runnable onPressed)
    {
@@ -103,5 +105,10 @@ public class RDX3DPanelToolbarButton
    public void setDown(boolean down)
    {
       isDown = down;
+   }
+
+   public Timer getTooltipTimer()
+   {
+      return tooltipTimer;
    }
 }
