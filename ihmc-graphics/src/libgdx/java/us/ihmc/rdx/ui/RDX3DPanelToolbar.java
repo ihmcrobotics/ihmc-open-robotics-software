@@ -40,26 +40,16 @@ public class RDX3DPanelToolbar
 
          for (RDX3DPanelToolbarButton button : buttons)
          {
-            RDXIconTexture icon = button.getAppropriateIcon();
+            RDXIconTexture icon = button.getIconTexture();
             if (icon == null)
                continue;
 
             float sizeX = iconSize;
             float sizeY = iconSize;
-            float uv0X = 0.0f;
+            float uv0X = button.getUVX0();
             float uv0Y = 0.0f;
-            float uv1X = 1.0f / 3.0f;
+            float uv1X = button.getUVX1();
             float uv1Y = 1.0f;
-            if (button.getHovered())
-            {
-               uv0X = 1.0f / 3.0f;
-               uv1X = 2.0f / 3.0f;
-            }
-            else if (button.getDown())
-            {
-               uv0X = 2.0f / 3.0f;
-               uv1X = 1.0f;
-            }
             float bgColorR = 1.0f;
             float bgColorG = 1.0f;
             float bgColorB = 1.0f;
@@ -70,6 +60,9 @@ public class RDX3DPanelToolbar
             float tintB = 1.0f;
             float tintA = 1.0f;
             int framePadding = 0;
+            // An ImGui imageButton must have a consistent texture object handle or it will not operate correctly.
+            // You must use UV coordinates to change the graphic based on state. (You could also reupload the texture
+            // to the GPU, but that's probably not the best method.)
             if (ImGui.imageButton(icon.getTexture().getTextureObjectHandle(), sizeX, sizeY, uv0X, uv0Y, uv1X, uv1Y, framePadding,
                                   bgColorR, bgColorG, bgColorB, bgColorA, tintR, tintG, tintB, tintA))
             {
