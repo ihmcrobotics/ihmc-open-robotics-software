@@ -1,5 +1,5 @@
-#ifndef __behavior_msgs__msg__BehaviorTreeControlFlowNodeMessage__idl__
-#define __behavior_msgs__msg__BehaviorTreeControlFlowNodeMessage__idl__
+#ifndef __behavior_msgs__msg__BehaviorTreeNodeMessage__idl__
+#define __behavior_msgs__msg__BehaviorTreeNodeMessage__idl__
 
 #include "ihmc_common_msgs/msg/./InstantMessage_.idl"
 module behavior_msgs
@@ -9,8 +9,8 @@ module behavior_msgs
     module dds
     {
 
-      @TypeCode(type="behavior_msgs::msg::dds_::BehaviorTreeControlFlowNodeMessage_")
-      struct BehaviorTreeControlFlowNodeMessage
+      @TypeCode(type="behavior_msgs::msg::dds_::BehaviorTreeNodeMessage_")
+      struct BehaviorTreeNodeMessage
       {
         /**
          * The number of children
@@ -24,17 +24,18 @@ module behavior_msgs
         /**
          * Name of the node
          */
-        sequence<string, 256> node_name;
+        string node_name;
         /**
          * The type of the node, as a string
          */
-        sequence<string, 256> node_type;
+        string node_type;
         /**
          * Previous node status
          */
         octet previous_status;
         /**
          * Whether this node has been clocked
+         * This field is only for control flow nodes.
          */
         boolean has_been_clocked;
       };

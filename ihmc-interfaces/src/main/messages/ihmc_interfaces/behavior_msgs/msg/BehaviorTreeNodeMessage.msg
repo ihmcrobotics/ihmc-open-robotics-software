@@ -6,13 +6,14 @@ uint32 number_of_children
 ihmc_common_msgs/InstantMessage last_tick_instant
 
 # Name of the node
-string[<=256] node_name
+string node_name
 
 # The type of the node, as a string
-string[<=256] node_type
+string node_type
 
 # Previous node status
 uint8 previous_status
 
 # Whether this node has been clocked
+# This field is only for control flow nodes.
 bool has_been_clocked

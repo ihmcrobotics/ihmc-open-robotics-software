@@ -11,8 +11,9 @@ import org.apache.logging.log4j.Level;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.behaviors.tools.BehaviorHelper;
+import us.ihmc.behaviors.tools.BehaviorMessageTools;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeBasics;
 import us.ihmc.behaviors.tools.yo.YoBooleanClientHelper;
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
 import us.ihmc.behaviors.tools.behaviorTree.FallbackNode;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
@@ -32,7 +33,6 @@ import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -49,7 +49,7 @@ import static us.ihmc.behaviors.BehaviorModule.API.*;
 public class RDXBehaviorUIManager
 {
    private final ImString behaviorModuleHost = new ImString("localhost", 100);
-   private final AtomicReference<BehaviorTreeControlFlowNode> behaviorTreeStatus = new AtomicReference<>(new FallbackNode());
+   private final AtomicReference<BehaviorTreeNodeBasics> behaviorTreeStatus = new AtomicReference<>(new FallbackNode());
    private final Stopwatch statusStopwatch = new Stopwatch();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiMovingPlot statusReceivedPlot = new ImGuiMovingPlot("Tree status", 1000, 230, 15);
@@ -85,10 +85,10 @@ public class RDXBehaviorUIManager
          LogTools.info("TextToSpeech: {}", textStatus.getTextToSpeakAsString());
          logWidget.submitEntry(Level.INFO, textStatus.getTextToSpeakAsString());
       });
-      helper.subscribeViaCallback(BehaviorTreeStatus, status ->
+      helper.subscribeViaCallback(BEHAVIOR_TREE_STATUS, behaviorTreeMessage ->
       {
          statusStopwatch.reset();
-         behaviorTreeStatus.set(status);
+         behaviorTreeStatus.set(BehaviorMessageTools.unpackBehaviorTreeMessage(behaviorTreeMessage));
       });
 
       treeViewPanel = new ImGuiPanel(ImGuiTools.uniqueLabel(getClass(), "Behavior Tree Panel"), this::renderBehaviorTreeImGuiWidgets, false, true);
