@@ -16,6 +16,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -42,6 +43,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    private ROS2SyncedRobotModel syncedRobot;
    private RobotSide currentFootStepSide;
    private RDXFootstepChecker stepChecker;
+   private FootstepPlannerParametersReadOnly footstepPlannerParameters;
    private ImGui3DViewInput latestInput;
    private RDX3DPanel primary3DPanel;
    private RDXInteractableFootstepPlan footstepPlan;
@@ -50,11 +52,13 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    private final FramePose3D tempFramePose = new FramePose3D();
    private RDXIconTexture feetIcon;
 
-   public void create(ROS2SyncedRobotModel syncedRobot, RDXBaseUI baseUI, RDXInteractableFootstepPlan footstepPlan)
+   public void create(ROS2SyncedRobotModel syncedRobot, RDXBaseUI baseUI, RDXInteractableFootstepPlan footstepPlan,
+                      FootstepPlannerParametersReadOnly footstepPlannerParameters)
    {
+      this.syncedRobot = syncedRobot;
       this.baseUI = baseUI;
       this.footstepPlan = footstepPlan;
-      this.syncedRobot = syncedRobot;
+      this.footstepPlannerParameters = footstepPlannerParameters;
       primary3DPanel = baseUI.getPrimary3DPanel();
       primary3DPanel.addImGuiOverlayAddition(this::renderTooltips);
       stepChecker = footstepPlan.getStepChecker();
@@ -158,17 +162,16 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    {
       FramePose3D previousFootstepPose;
 
-      //find the previous footstep of the opposite side of the footstep being placed
-      int i = 0;
-      while(i < footstepPlan.getNumberOfFootsteps()
-            && footstepPlan.getFootsteps().get(footstepPlan.getNumberOfFootsteps() - i - 1).getFootstepSide() == footstepBeingPlaced.getFootstepSide())
+      // Find the previous footstep of the opposite side of the footstep being placed
+      int i = footstepPlan.getNumberOfFootsteps() - 1;
+      while (i >= 0 && footstepPlan.getFootsteps().get(i).getFootstepSide() == footstepBeingPlaced.getFootstepSide())
       {
-         ++i;
+         --i;
       }
 
-      if (i < footstepPlan.getNumberOfFootsteps())
+      if (i >= 0)
       {
-         previousFootstepPose = new FramePose3D(footstepPlan.getFootsteps().get(footstepPlan.getNumberOfFootsteps() - i - 1).getFootPose());
+         previousFootstepPose = new FramePose3D(footstepPlan.getFootsteps().get(i).getFootPose());
       }
       else
       {
@@ -176,27 +179,24 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          previousFootstepPose.setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(currentFootStepSide.getOppositeSide()));
       }
 
-      //print footstep info
-      LogTools.info("Previous footstep:     " + previousFootstepPose
-                    + "\nFootstep being placed: " + footstepBeingPlaced.getFootPose()
-                    + "\nDistance between footsteps: " + footstepBeingPlaced.getFootPose().getPositionDistance(previousFootstepPose)
-                    + "\nHeight between footsteps:   " + (footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ()));
+      // Print footstep info
+      LogTools.info("\n\tPrevious footstep:     " + previousFootstepPose + "\n\tFootstep being placed: " + footstepBeingPlaced.getFootPose()
+                    + "\n\tDistance between footsteps: " + footstepBeingPlaced.getFootPose().getPositionDistance(previousFootstepPose)
+                    + "\n\tHeight between footsteps:   " + (footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ()));
 
-      //check whether footstep being placed is within safe zone
-      if (footstepBeingPlaced.getFootPose().getPositionDistance(previousFootstepPose) > 0.6
-          || footstepBeingPlaced.getFootPose().getZ() > previousFootstepPose.getZ() + 0.4
-          || footstepBeingPlaced.getFootPose().getZ() < previousFootstepPose.getZ() - 0.4)
+      // Check whether footstep being placed is within safe zone
+      if (footstepBeingPlaced.getFootPose().getPositionDistance(previousFootstepPose) > 2.0 * footstepPlannerParameters.getMaximumStepReach()
+          || footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ() > 2.0 * footstepPlannerParameters.getMaxStepZ()
+          || footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ() < -2.0 * footstepPlannerParameters.getMaxStepZ())
       {
-         //if not safe print message and abort footstep placement
-         String rejectionReason = footstepBeingPlaced.getFootPose().getPositionDistance(previousFootstepPose) > 0.6 ? "Placement too far" :
-               (footstepBeingPlaced.getFootPose().getZ() > previousFootstepPose.getZ() + 0.4 ? "Placement too high" : "Placement too low");
-         LogTools.info("Footstep Rejected, too far from previous foot... not placing footstep"
-                       + "\nRejection reason: " + rejectionReason);
+         // If not safe print message and abort footstep placement
+
+         LogTools.info("Footstep Rejected, too far from previous foot... not placing footstep");
 
          return;
       }
 
-      //if safe place footstep
+      // If safe place footstep
       RDXInteractableFootstep addedStep = footstepPlan.getNextFootstep();
       addedStep.copyFrom(baseUI, footstepBeingPlaced);
       // Switch sides
