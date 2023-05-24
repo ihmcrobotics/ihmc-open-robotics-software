@@ -6,6 +6,7 @@ import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import perception_msgs.msg.dds.*;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
+import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.*;
@@ -23,6 +24,7 @@ public class PerceptionAPI
    public static final String FIDUCIAL_MODULE_NAME = "toolbox/fiducial_detector";
    public static final String OBJECT_DETECTOR_MODULE_NAME = "toolbox/object_detector";
 
+   public static final String SCENE_GRAPH_MODULE_NAME = "scene_graph";
    public static final String REA_MODULE_NAME = "rea";
    public static final String MAPPING_MODULE_NAME = "map";
    public static final String PERCEPTION_MODULE_NAME = "perception";
@@ -49,6 +51,7 @@ public class PerceptionAPI
    public static final ROS2Topic<?> OBJECT_DETECTOR_TOOLBOX_INPUT = OBJECT_DETECTOR_TOOLBOX.withInput();
    public static final ROS2Topic<?> OBJECT_DETECTOR_TOOLBOX_OUTPUT = OBJECT_DETECTOR_TOOLBOX.withOutput();
 
+   public static final ROS2Topic<?> SCENE_GRAPH_MODULE = IHMC_ROOT.withModule(SCENE_GRAPH_MODULE_NAME);
    public static final ROS2Topic<?> REA = IHMC_ROOT.withModule(REA_MODULE_NAME);
    public static final ROS2Topic<?> MAPPING_MODULE = IHMC_ROOT.withModule(MAPPING_MODULE_NAME);
    public static final ROS2Topic<?> PERCEPTION_MODULE = IHMC_ROOT.withModule(PERCEPTION_MODULE_NAME);
@@ -126,6 +129,9 @@ public class PerceptionAPI
    public static final ROS2Topic<StereoVisionPointCloudMessage> L515_POINT_CLOUD = IHMC_ROOT.withSuffix(L515_NAME)
                                                                                             .withTypeName(StereoVisionPointCloudMessage.class);
    public static final ROS2Topic<StampedPosePacket> T265_POSE = IHMC_ROOT.withSuffix(T265_NAME).withTypeName(StampedPosePacket.class);
+
+   public static final ROS2IOTopicPair<DetectableSceneNodesMessage> DETECTABLE_SCENE_NODES
+         = new ROS2IOTopicPair<>(SCENE_GRAPH_MODULE.withTypeName(DetectableSceneNodesMessage.class));
 
    /** MoCap Topics */
    public static final ROS2Topic<Pose3D> MOCAP_RIGID_BODY = IHMC_ROOT.withTypeName(Pose3D.class)

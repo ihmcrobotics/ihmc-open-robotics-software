@@ -33,9 +33,27 @@ public class ModifiableReferenceFrame
     * Warning! Frames that declared this one as the parent or
     * have this above them in the frame tree are going to be
     * broken after this change!
+    *
+    * Also note that this method will move the reference frame.
+    * It doesn't update transformToParent.
     */
    public void changeParentFrame(ReferenceFrame parentFrame)
    {
+      referenceFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(frameName, parentFrame, transformToParent);
+   }
+
+   /**
+    * Warning! Frames that declared this one as the parent or
+    * have this above them in the frame tree are going to be
+    * broken after this change!
+    *
+    * This method will keep the frame in the same spot.
+    */
+   public void changeParentFrameWithoutMoving(ReferenceFrame parentFrame)
+   {
+      RigidBodyTransform newTransformToParent = new RigidBodyTransform();
+      referenceFrame.getTransformToDesiredFrame(newTransformToParent, parentFrame);
+      transformToParent.set(newTransformToParent);
       referenceFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(frameName, parentFrame, transformToParent);
    }
 
