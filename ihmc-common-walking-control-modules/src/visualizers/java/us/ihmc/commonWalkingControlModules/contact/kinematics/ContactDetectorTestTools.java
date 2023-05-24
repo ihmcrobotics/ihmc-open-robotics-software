@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.contact.kinematics;
 
-import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
@@ -17,6 +16,15 @@ import us.ihmc.mecano.multiBodySystem.*;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotDescription.*;
+import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
+import us.ihmc.scs2.definition.geometry.GeometryDefinition;
+import us.ihmc.scs2.definition.geometry.Sphere3DDefinition;
+import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.robot.SixDoFJointDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
+import us.ihmc.scs2.definition.visual.MaterialDefinition;
+import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 /**
@@ -82,27 +90,34 @@ public class ContactDetectorTestTools
          addJointRecursive(childJoint, successor);
    }
 
-   static RobotDescription newSphereRobot(String name, double radius, double mass, double radiusOfGyrationPercent, AppearanceDefinition appearance)
+   static RobotDefinition newSphereRobot(String name, double radius, double mass, double radiusOfGyrationPercent, ColorDefinition color)
    {
-      RobotDescription robotDescription = new RobotDescription(name);
-      FloatingJointDescription rootJoint = new FloatingJointDescription(name, name);
-      rootJoint.setLink(newSphereLink(name + "Link", radius, mass, radiusOfGyrationPercent, appearance));
-      robotDescription.addRootJoint(rootJoint);
+      RigidBodyDefinition elevator = new RigidBodyDefinition("elevator");
+      SixDoFJointDefinition floatingJoint = new SixDoFJointDefinition("floatingJoint");
+      RigidBodyDefinition sphere = newSphereLink("sphereLink", radius, mass, radiusOfGyrationPercent, color);
+
+      RobotDefinition robotDescription = new RobotDefinition(name);
+      robotDescription.setRootBodyDefinition(elevator);
+      elevator.addChildJoint(floatingJoint);
+      floatingJoint.setSuccessor(sphere);
 
       return robotDescription;
    }
 
-   public static LinkDescription newSphereLink(String name, double radius, double mass, double radiusOfGyrationPercent, AppearanceDefinition appearance)
+   public static RigidBodyDefinition newSphereLink(String name, double radius, double mass, double radiusOfGyrationPercent, ColorDefinition color)
    {
-      LinkDescription link = new LinkDescription(name);
+      RigidBodyDefinition sphere = new RigidBodyDefinition(name);
+
+      sphere.setMass(mass);
       double radiusOfGyration = radiusOfGyrationPercent * radius;
-      link.setMassAndRadiiOfGyration(mass, radiusOfGyration, radiusOfGyration, radiusOfGyration);
+      sphere.getMomentOfInertia().setToDiagonal(radiusOfGyration, radiusOfGyration, radiusOfGyration);
 
-      LinkGraphicsDescription linkGraphics = new LinkGraphicsDescription();
-      linkGraphics.addSphere(radius, appearance);
+      GeometryDefinition geometryDefinition = new Sphere3DDefinition(radius);
+      MaterialDefinition materialDefinition = new MaterialDefinition(color);
+      sphere.addVisualDefinition(new VisualDefinition(geometryDefinition, materialDefinition));
+      sphere.addCollisionShapeDefinition(new CollisionShapeDefinition(geometryDefinition));
 
-      link.setLinkGraphics(linkGraphics);
-      return link;
+      return sphere;
    }
 
    static RobotDescription newCylinderRobot(String name, double radius, double height, double mass, double radiusOfGyrationPercent, AppearanceDefinition appearance)

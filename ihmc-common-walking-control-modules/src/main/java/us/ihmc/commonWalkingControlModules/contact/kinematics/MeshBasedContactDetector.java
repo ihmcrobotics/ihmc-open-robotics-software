@@ -11,6 +11,8 @@ import us.ihmc.euclid.shape.collision.epa.ExpandingPolytopeAlgorithm;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.physics.Collidable;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
@@ -137,7 +139,7 @@ public class MeshBasedContactDetector
       boolean contactDetected = collisionResult.getSignedDistance() < contactThreshold;
       if (contactDetected)
       {
-         tempContactPointA.set(robotShapeFrame, collisionResult.getPointOnB());
+         tempContactPointA.setIncludingFrame(robotShapeFrame, collisionResult.getPointOnB());
          environmentShape.evaluatePoint3DCollision(tempContactPointA, tempContactPointB, tempSurfaceNormal);
 
          tempContactPointA.setReferenceFrame(robotShapeFrame);
@@ -153,6 +155,22 @@ public class MeshBasedContactDetector
       environmentShape.setReferenceFrame(environmentShapeFrame);
 
       return contactDetected;
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+
+      for (int i = 0; i < contactableRigidBodies.size(); i++)
+      {
+         List<YoDetectedContactPoint> yoContactPoints = contactPointMap.get(contactableRigidBodies.get(i));
+         for (int j = 0; j < yoContactPoints.size(); j++)
+         {
+            group.addChild(yoContactPoints.get(j).getSCS2Graphic());
+         }
+      }
+
+      return group;
    }
 
    public List<RigidBodyBasics> getContactableRigidBodies()
