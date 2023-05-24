@@ -97,6 +97,7 @@ import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobo
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
+import us.ihmc.stateEstimation.humanoid.StateEstimatorControllerFactory;
 import us.ihmc.tools.factories.FactoryFieldNotSetException;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
@@ -146,6 +147,7 @@ public class SCS2AvatarSimulationFactory
    private final OptionalFactoryField<Boolean> useHeadingAndVelocityScript = new OptionalFactoryField<>("useHeadingAndVelocityScript");
    private final OptionalFactoryField<HeightMap> heightMapForFootstepZ = new OptionalFactoryField<>("heightMapForFootstepZ");
    private final OptionalFactoryField<HeadingAndVelocityEvaluationScriptParameters> headingAndVelocityEvaluationScriptParameters = new OptionalFactoryField<>("headingAndVelocityEvaluationScriptParameters");
+   private final OptionalFactoryField<StateEstimatorControllerFactory> secondaryStateEstimatorFactory = new OptionalFactoryField<>("SecondaryStateEstimatorFactory");
 
    // TO CONSTRUCT
    protected RobotDefinition robotDefinition;
@@ -370,6 +372,8 @@ public class SCS2AvatarSimulationFactory
       avatarEstimatorThreadFactory.setExternalPelvisCorrectorSubscriber(pelvisPoseCorrectionCommunicator);
       avatarEstimatorThreadFactory.setJointDesiredOutputWriter(simulationOutputWriter);
       avatarEstimatorThreadFactory.setGravity(gravity.get());
+      if (secondaryStateEstimatorFactory.hasBeenSet())
+         avatarEstimatorThreadFactory.addSecondaryStateEstimatorFactory(secondaryStateEstimatorFactory.get());
       estimatorThread = avatarEstimatorThreadFactory.createAvatarEstimatorThread();
    }
 
@@ -930,6 +934,11 @@ public class SCS2AvatarSimulationFactory
    public void addSecondaryRobot(Robot secondaryRobot)
    {
       this.secondaryRobots.get().add(secondaryRobot);
+   }
+
+   public void setSecondaryStateEstimatorFactory(StateEstimatorControllerFactory secondaryStateEstimatorFactory)
+   {
+      this.secondaryStateEstimatorFactory.set(secondaryStateEstimatorFactory);
    }
 
    public void setComponentBasedFootstepDataMessageGeneratorParameters(boolean useHeadingAndVelocityScript,

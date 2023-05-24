@@ -118,7 +118,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
    private boolean flatGroundMode()
    {
-      return (planarRegionsList == null || planarRegionsList.isEmpty()) && heightMapData == null;
+      return (planarRegionsList == null || planarRegionsList.isEmpty()) && (heightMapData == null || heightMapData.isEmpty());
    }
 
    public FootstepSnapData snapFootstep(DiscreteFootstep footstep)

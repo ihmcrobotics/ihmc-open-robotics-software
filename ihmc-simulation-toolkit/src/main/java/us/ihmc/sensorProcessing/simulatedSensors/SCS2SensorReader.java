@@ -574,6 +574,12 @@ public class SCS2SensorReader implements SensorReader
       }
    }
 
+   @Override
+   public SensorProcessing getSensorProcessing()
+   {
+      return sensorProcessing;
+   }
+
    public static interface OneDoFJointStateCorruptor
    {
       /**

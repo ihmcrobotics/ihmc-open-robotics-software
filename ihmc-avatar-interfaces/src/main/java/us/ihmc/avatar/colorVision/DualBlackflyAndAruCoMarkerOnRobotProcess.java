@@ -74,7 +74,6 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "videopub");
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "DualBlackflyShutdown"));
-      ThreadTools.startAThread(this::update, "DualBlackflyNode");
 
       spinnakerSystemManager = new SpinnakerSystemManager();
       for (RobotSide side : blackflies.sides())
@@ -87,6 +86,8 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
                          predefinedSceneNodeLibrary,
                          ousterFisheyeColoringIntrinsics);
       }
+
+      ThreadTools.startAThread(this::update, "DualBlackflyNode");
    }
 
    private void update()
@@ -94,16 +95,26 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
       while (running)
       {
          throttler.waitAndRun(MAX_PERIOD);
-         spinnakerSystemManager = new SpinnakerSystemManager();
+
          for (RobotSide side : blackflies.sides())
          {
-            DualBlackflyCamera blackfly = blackflies.get(side);
-            blackfly.create(spinnakerSystemManager.createBlackfly(blackfly.getSerialNumber()),
-                            side,
-                            ros2Helper,
-                            realtimeROS2Node,
-                            predefinedSceneNodeLibrary,
-                            ousterFisheyeColoringIntrinsics);
+            blackflies.get(side).update();
+         }
+
+         if (!nodeSpun)
+         {
+            boolean allInitialized = true;
+            for (RobotSide side : blackflies.sides())
+            {
+               allInitialized &= blackflies.get(side).getRos2ImagePublisher() != null;
+            }
+
+            if (allInitialized)
+            {
+               nodeSpun = true;
+               LogTools.info("Spinning Realtime ROS 2 node");
+               realtimeROS2Node.spin();
+            }
          }
       }
    }

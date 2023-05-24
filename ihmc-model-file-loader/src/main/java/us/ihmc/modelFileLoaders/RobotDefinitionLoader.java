@@ -239,6 +239,11 @@ public class RobotDefinitionLoader
 
    public static void addGroundContactPoints(RobotDefinition robotDefinition, ContactPointDefinitionHolder contactPointHolder, boolean addVisualization)
    {
+      addGroundContactPoints(robotDefinition, contactPointHolder, addVisualization ? 0.01 : 0.0);
+   }
+
+   public static void addGroundContactPoints(RobotDefinition robotDefinition, ContactPointDefinitionHolder contactPointHolder, double contactPointVizSize)
+   {
       if (contactPointHolder == null)
          return;
 
@@ -276,11 +281,11 @@ public class RobotDefinitionLoader
 
          counters.put(jointName, count);
 
-         if (addVisualization)
+         if (Double.isFinite(contactPointVizSize) && contactPointVizSize > 0.0)
          {
             VisualDefinitionFactory visualDefinitionFactory = new VisualDefinitionFactory();
             visualDefinitionFactory.appendTranslation(jointContactPoint.getRight());
-            visualDefinitionFactory.addSphere(0.01, ColorDefinitions.Orange());
+            visualDefinitionFactory.addSphere(contactPointVizSize, ColorDefinitions.Orange());
             jointDefinition.getSuccessor().getVisualDefinitions().addAll(visualDefinitionFactory.getVisualDefinitions());
          }
       }

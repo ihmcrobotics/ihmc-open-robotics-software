@@ -412,6 +412,7 @@ public class SwingOverHeightMapTest
       ConvexPolygon2D foot = getFootPolygon();
 
       HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList, heightMapResolution);
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
       SwingPlannerParametersBasics swingPlannerParameters = getParameters();
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(side -> getFootPolygon());
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -482,7 +483,7 @@ public class SwingOverHeightMapTest
       request.getStartFootPoses().get(RobotSide.LEFT).set(stanceFoot);
       request.getStartFootPoses().get(RobotSide.RIGHT).set(startFoot);
       request.setPlanarRegionsList(planarRegionsList);
-      request.setHeightMapMessage(heightMapMessage);
+      request.setHeightMapData(heightMapData);
 
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("environment", planarRegionsList, 1e-2, false);
 
@@ -517,7 +518,6 @@ public class SwingOverHeightMapTest
 //         scs.startSimulationThread();
       }
 
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
       expander.setHeightMapData(heightMapData);
 //      expander.setPlanarRegionsList(planarRegionsList);
       expander.computeSwingTrajectories(request.getStartFootPoses(), footstepPlan);
@@ -606,7 +606,7 @@ public class SwingOverHeightMapTest
       };
       swingPlannerParameters.set(originalSwingPlannerParameters);
 
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(request.getHeightMapMessage());
+      HeightMapData heightMapData = request.getHeightMapData();
 
       for (double time = 0.0; time <= 1.0; time += dt)
       {

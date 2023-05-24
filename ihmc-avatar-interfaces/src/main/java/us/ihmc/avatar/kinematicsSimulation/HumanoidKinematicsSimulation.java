@@ -235,7 +235,8 @@ public class HumanoidKinematicsSimulation
       RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(kinematicsSimulationParameters.getInitialGroundHeight(),
                                                                                                                    kinematicsSimulationParameters.getInitialRobotYaw(),
                                                                                                                    kinematicsSimulationParameters.getInitialRobotX(),
-                                                                                                                   kinematicsSimulationParameters.getInitialRobotY());
+                                                                                                                   kinematicsSimulationParameters.getInitialRobotY(),
+                                                                                                                   kinematicsSimulationParameters.getInitialRobotZ());
       robotInitialSetup.initializeFullRobotModel(fullRobotModel);
 
       managerFactory = new HighLevelControlManagerFactory(managerParentRegistry);
@@ -440,7 +441,7 @@ public class HumanoidKinematicsSimulation
       controllerCore.initialize();
       walkingController.initialize();
 
-      walkingController.requestImmediateTransitionToStandingAndHoldCurrent();
+//      walkingController.requestImmediateTransitionToStandingAndHoldCurrent();
 
       for (RobotSide robotSide : RobotSide.values)
       {
