@@ -8,7 +8,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -16,7 +15,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -39,7 +37,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    private RDXInteractableFootstep footstepBeingPlaced;
    private boolean modeNewlyActivated = false;
    private RDXBaseUI baseUI;
-   private ROS2SyncedRobotModel syncedRobot;
    private RobotSide currentFootStepSide;
    private RDXFootstepChecker stepChecker;
    private ImGui3DViewInput latestInput;
@@ -50,11 +47,10 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    private final FramePose3D tempFramePose = new FramePose3D();
    private RDXIconTexture feetIcon;
 
-   public void create(ROS2SyncedRobotModel syncedRobot, RDXBaseUI baseUI, RDXInteractableFootstepPlan footstepPlan)
+   public void create(RDXBaseUI baseUI, RDXInteractableFootstepPlan footstepPlan)
    {
       this.baseUI = baseUI;
       this.footstepPlan = footstepPlan;
-      this.syncedRobot = syncedRobot;
       primary3DPanel = baseUI.getPrimary3DPanel();
       primary3DPanel.addImGuiOverlayAddition(this::renderTooltips);
       stepChecker = footstepPlan.getStepChecker();
@@ -154,49 +150,8 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       }
    }
 
-   //TODO: Test and fix bugs
-   //FIXME: Refactor code to be better
    private void placeFootstep()
    {
-      if (footstepPlan.getNumberOfFootsteps() == 0)
-      {
-         FramePose3D stanceFoot = new FramePose3D();
-         stanceFoot.setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(currentFootStepSide.getOppositeSide()));
-
-         LogTools.info("Previous footstep:     " + stanceFoot);
-         LogTools.info("Footstep being placed: " + footstepBeingPlaced.getFootPose());
-
-         if (footstepBeingPlaced.getFootPose().getPositionDistance(stanceFoot) > 0.6
-             || footstepBeingPlaced.getFootPose().getZ() > stanceFoot.getZ() + 0.4
-             || footstepBeingPlaced.getFootPose().getZ() < stanceFoot.getZ() - 0.4)
-         {
-            String rejectionReason = footstepBeingPlaced.getFootPose().getPositionDistance(stanceFoot) > 0.6 ? "Placement too far" :
-                  (footstepBeingPlaced.getFootPose().getZ() > stanceFoot.getZ() + 0.4 ? "Placement too high" : "Placement too low");
-            LogTools.info("Footstep Rejected, too far from previous foot... not placing footstep\n"
-                           + "\t\t\tRejection reason: " + rejectionReason);
-            return;
-         }
-      }
-      else
-      {
-         FramePose3D previousFootstep = new FramePose3D(footstepPlan.getFootsteps().get(footstepPlan.getNumberOfFootsteps() - 1).getFootPose());
-
-         LogTools.info("Previous footstep:     " + previousFootstep);
-         LogTools.info("Footstep being placed: " + footstepBeingPlaced.getFootPose());
-
-         if (footstepBeingPlaced.getFootPose().getPositionDistance(previousFootstep) > 0.6
-             || footstepBeingPlaced.getFootPose().getZ() > previousFootstep.getZ() + 0.4
-             || footstepBeingPlaced.getFootPose().getZ() < previousFootstep.getZ() - 0.4)
-         {
-            String rejectionReason = footstepBeingPlaced.getFootPose().getPositionDistance(previousFootstep) > 0.6 ? "Placement too far" :
-                  (footstepBeingPlaced.getFootPose().getZ() > previousFootstep.getZ() + 0.4 ? "Placement too high" : "Placement too low");
-            LogTools.info("Footstep Rejected, too far from previous foot... not placing footstep\n"
-                          + "\t\t\tRejection reason: " + rejectionReason);
-
-            return;
-         }
-      }
-
       RDXInteractableFootstep addedStep = footstepPlan.getNextFootstep();
       addedStep.copyFrom(baseUI, footstepBeingPlaced);
       // Switch sides
