@@ -12,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsCustomizer;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
-import us.ihmc.perception.rapidRegions.RapidRegionsDebutOutputGenerator;
+import us.ihmc.perception.rapidRegions.RapidPatchesDebugOutputGenerator;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -21,9 +21,10 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-public class RDXRapidRegionsUIPanel implements RenderableProvider
+public class RDXRapidRegionsUI implements RenderableProvider
 {
    private RDXPlanarRegionsGraphic planarRegionsGraphic;
    private ModelInstance sensorFrameGraphic;
@@ -32,17 +33,17 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
 
    private RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor;
    private RapidPlanarRegionsCustomizer rapidPlanarRegionsCustomizer;
-   private RapidRegionsDebutOutputGenerator rapidRegionsDebutOutputGenerator;
+   private RapidPatchesDebugOutputGenerator rapidRegionsDebutOutputGenerator;
 
    private ImGuiStoredPropertySetTuner gpuRegionParametersTuner;
    private ImGuiStoredPropertySetTuner polygonizerParametersTuner;
    private ImGuiStoredPropertySetTuner concaveHullParametersTuner;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean enabled = new ImBoolean(false);
+   private final ImBoolean enabled = new ImBoolean(true);
    private final ImBoolean drawPatches = new ImBoolean(true);
    private final ImBoolean drawBoundaries = new ImBoolean(true);
-   private final ImBoolean render3DPlanarRegions = new ImBoolean(true);
+   private final ImBoolean render3DPlanarRegions = new ImBoolean(false);
    private final ImBoolean renderPointCloud = new ImBoolean(false);
 
    private ImGuiPlot wholeAlgorithmDurationPlot;
@@ -137,16 +138,22 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
       debugExtractionPanel.displayByte(rapidRegionsDebutOutputGenerator.getDebugImage());
    }
 
-   public void render3DGraphics(PlanarRegionsList planarRegions, ReferenceFrame cameraFrame)
+   public void render3DGraphics(FramePlanarRegionsList planarRegions)
    {
-      framePose.setToZero(cameraFrame);
-      framePose.changeFrame(ReferenceFrame.getWorldFrame());
+      framePose.setToZero(ReferenceFrame.getWorldFrame());
+      framePose.set(planarRegions.getSensorToWorldFrameTransform());
       LibGDXTools.toLibGDX(framePose, tempTransform, sensorFrameGraphic.transform);
+
+      PlanarRegionsList regionsToRender = planarRegions.getPlanarRegionsList().copy();
+      regionsToRender.applyTransform(planarRegions.getSensorToWorldFrameTransform());
 
       synchronized (planarRegionsGraphic)
       {
-         planarRegionsGraphic.generateMeshes(planarRegions);
-         planarRegionsGraphic.update();
+         if (render3DPlanarRegions.get())
+         {
+            planarRegionsGraphic.generateMeshes(regionsToRender);
+            planarRegionsGraphic.update();
+         }
       }
    }
 
@@ -157,6 +164,10 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
 
       ImGui.text("Input image dimensions: " + imageWidth + " x " + imageHeight);
       ImGui.checkbox(labels.get("Enabled"), enabled);
+      ImGui.checkbox(labels.get("Render 3D planar regions"), render3DPlanarRegions);
+      ImGui.checkbox(labels.get("Render Point Cloud"), renderPointCloud);
+      ImGui.checkbox(labels.get("Draw patches"), drawPatches);
+      ImGui.checkbox(labels.get("Draw boundaries"), drawBoundaries);
 
       wholeAlgorithmDurationPlot.render(rapidPlanarRegionsExtractor.getWholeAlgorithmDurationStopwatch().totalElapsed());
       gpuDurationPlot.render(rapidPlanarRegionsExtractor.getGpuDurationStopwatch().totalElapsed());
@@ -173,10 +184,6 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
 
       svdDurationPlot.render((float) rapidPlanarRegionsExtractor.getMaxSVDSolveTime());
 
-      ImGui.checkbox(labels.get("Render Point Cloud"), renderPointCloud);
-      ImGui.checkbox(labels.get("Draw patches"), drawPatches);
-      ImGui.checkbox(labels.get("Draw boundaries"), drawBoundaries);
-      ImGui.checkbox(labels.get("Render 3D planar regions"), render3DPlanarRegions);
    }
 
    public void destroy()

@@ -20,11 +20,15 @@ public class PerceptionConfigurationParameters extends StoredPropertySet impleme
 
    public static final IntegerStoredPropertyKey l515ThrottlerFrequency = keys.addIntegerKey("L515 throttler frequency");
    public static final IntegerStoredPropertyKey ousterThrottlerFrequency = keys.addIntegerKey("Ouster throttler frequency");
+   public static final BooleanStoredPropertyKey rapidRegionsEnabled = keys.addBooleanKey("Rapid regions enabled");
    public static final BooleanStoredPropertyKey loggingEnabled = keys.addBooleanKey("Logging enabled");
    public static final BooleanStoredPropertyKey publishColor = keys.addBooleanKey("Publish color");
    public static final BooleanStoredPropertyKey publishDepth = keys.addBooleanKey("Publish depth");
    public static final BooleanStoredPropertyKey logColor = keys.addBooleanKey("Log color");
    public static final BooleanStoredPropertyKey logDepth = keys.addBooleanKey("Log depth");
+   public static final BooleanStoredPropertyKey slamEnabled = keys.addBooleanKey("SLAM enabled");
+   public static final BooleanStoredPropertyKey slamReset = keys.addBooleanKey("SLAM reset");
+   public static final BooleanStoredPropertyKey activeMapping = keys.addBooleanKey("Active mapping");
 
    /**
     * Loads this property set.

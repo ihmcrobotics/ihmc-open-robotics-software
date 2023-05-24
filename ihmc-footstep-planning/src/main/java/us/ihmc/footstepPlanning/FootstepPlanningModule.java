@@ -75,7 +75,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final PlanThenSnapPlanner planThenSnapPlanner;
    private final AStarFootstepPlanner aStarFootstepPlanner;
    private final List<VariableDescriptor> footstepPlanVariableDescriptors;
-   private HeightMapData heightMapData;
 
    private final AtomicBoolean isPlanning = new AtomicBoolean();
    private final FootstepPlannerRequest request = new FootstepPlannerRequest();
@@ -197,19 +196,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       aStarFootstepPlanner.clearLoggedData();
       bodyPathPlannerInterface.clearLoggedData();
 
-      boolean heightMapAvailable = request.getHeightMapMessage() != null && !request.getHeightMapMessage().getHeights().isEmpty();
+      boolean heightMapAvailable = request.getHeightMapData() != null && !request.getHeightMapData().isEmpty();
       boolean planarRegionsAvailable = request.getPlanarRegionsList() != null && !request.getPlanarRegionsList().isEmpty();
-
-      if (heightMapAvailable)
-      {
-         heightMapData = HeightMapMessageTools.unpackMessage(request.getHeightMapMessage());
-         aStarFootstepPlanner.setHeightMapData(heightMapData);
-      }
-      else
-      {
-         heightMapData = null;
-         aStarFootstepPlanner.setHeightMapData(null);
-      }
 
       startMidFootPose.interpolate(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT), 0.5);
       goalMidFootPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
@@ -265,7 +253,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       }
       else if (request.getPlanBodyPath() && !flatGroundMode && heightMapAvailable)
       {
-         bodyPathPlannerInterface.setHeightMapData(heightMapData);
          bodyPathPlannerInterface.handleRequest(request, output);
          List<Pose3D> bodyPathWaypoints = output.getBodyPath();
 
@@ -359,7 +346,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
          aStarFootstepPlanner.getSwingPlanningModule()
                              .computeSwingWaypoints(request.getPlanarRegionsList(),
-                                                    HeightMapMessageTools.unpackMessage(request.getHeightMapMessage()),
+                                                    request.getHeightMapData(),
                                                     output.getFootstepPlan(),
                                                     request.getStartFootPoses(),
                                                     request.getSwingPlannerType());
@@ -401,7 +388,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       {
          swingReplanRequestCallbacks.forEach(callback -> callback.accept(swingPlannerType));
          aStarFootstepPlanner.getSwingPlanningModule().computeSwingWaypoints(request.getPlanarRegionsList(),
-                                                                             HeightMapMessageTools.unpackMessage(request.getHeightMapMessage()),
+                                                                             request.getHeightMapData(),
                                                                              output.getFootstepPlan(),
                                                                              request.getStartFootPoses(),
                                                                              swingPlannerType);
