@@ -21,7 +21,7 @@ import java.nio.FloatBuffer;
 import static org.bytedeco.opencv.global.opencv_highgui.imshow;
 import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
 
-public class RapidRegionsDebutOutputGenerator
+public class RapidPatchesDebugOutputGenerator
 {
    private boolean enabled = false;
    private boolean showPointCloud = true;
@@ -246,7 +246,7 @@ public class RapidRegionsDebutOutputGenerator
       //      constructCentroidSurfelCloud(patchFeatureGrid.getCxImage(), patchFeatureGrid.getCyImage(), patchFeatureGrid.getCzImage(), patchFeatureGrid.getNxImage(),
 //                                   patchFeatureGrid.getNyImage(), patchFeatureGrid.getNzImage());
 
-      //BytedecoOpenCVTools.displayDepth("Depth", inputDepthImage, 1);
+      PerceptionDebugTools.displayDepth("Depth", inputDepthImage, 1);
       showDebugImage(1);
    }
 
