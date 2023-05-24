@@ -11,6 +11,7 @@ import us.ihmc.avatar.logging.PlanarRegionsReplayBuffer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -30,6 +31,7 @@ import us.ihmc.perception.odometry.RapidPatchesBasedICP;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PlaneRegistrationTools;
+import us.ihmc.robotics.geometry.PlanarLandmarkList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
@@ -55,6 +57,8 @@ public class PlanarRegionMappingHandler
    private final DataSource source;
 
    private final static long PUBLISH_MILLISECONDS = 100;
+
+   private int delayMilliseconds = 100;
 
    private ROS2Node ros2Node = null;
    private ROS2Helper ros2Helper = null;
@@ -162,8 +166,8 @@ public class PlanarRegionMappingHandler
       perceptionDataLoader = new PerceptionDataLoader();
       perceptionDataLoader.openLogFile(logFile);
 
-      perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionBuffer);
-      perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
+//      perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionBuffer);
+//      perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
 
       //createOuster(128, 1024, smoothing);
       createTerrain(720, 1280, smoothing, false);
@@ -171,7 +175,7 @@ public class PlanarRegionMappingHandler
 
    private void createTerrain(int depthHeight, int depthWidth, boolean smoothing, boolean simulation)
    {
-      planarRegionMap = new PlanarRegionMap(smoothing);
+      planarRegionMap = new PlanarRegionMap(smoothing, "Fast");
       sensorLogChannelName = PerceptionLoggerConstants.L515_DEPTH_NAME;
 
       String version = simulation ? "Simulation" : "";
@@ -269,7 +273,12 @@ public class PlanarRegionMappingHandler
 
    public void autoIncrementButtonCallback()
    {
-      updateMapFuture = executorService.scheduleAtFixedRate(this::nextButtonCallback, 0, 100, TimeUnit.MILLISECONDS);
+      updateMapFuture = executorService.scheduleAtFixedRate(this::nextButtonCallback, 0, 120, TimeUnit.MILLISECONDS);
+   }
+
+   public void pauseButtonCallback()
+   {
+      updateMapFuture.cancel(true);
    }
 
    public void nextButtonCallback()
@@ -367,17 +376,19 @@ public class PlanarRegionMappingHandler
 
    public void updateMapWithNewRegions(FramePlanarRegionsList regions)
    {
-      LogTools.debug("Adding Regions to Map.");
+      planarRegionMap.setModified(true);
+
+      LogTools.debug("Updating Map with {} regions", regions.getPlanarRegionsList().getNumberOfPlanarRegions());
 
       RigidBodyTransform keyframePose = planarRegionMap.registerRegions(regions.getPlanarRegionsList(), regions.getSensorToWorldFrameTransform());
-
-      //planarRegionMap.submitRegionsUsingIterativeReduction(regions);
 
       if (keyframePose != null)
          latestKeyframePoseForRendering.set(keyframePose);
 
       latestPlanarRegionsForRendering.set(planarRegionMap.getMapRegions().copy());
       latestPlanarRegionsForPublishing.set(planarRegionMap.getMapRegions().copy());
+
+      LogTools.debug("Total Regions in Map: {}", planarRegionMap.getMapRegions().getNumberOfPlanarRegions());
    }
 
    public boolean isCaptured()
@@ -435,10 +446,13 @@ public class PlanarRegionMappingHandler
    public void computeICP()
    {
       RigidBodyTransform currentToPreviousTransform = new RigidBodyTransform();
-      boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(previousRegions.getPlanarRegionsList(),
-                                                                                                  currentRegions.getPlanarRegionsList(),
+      boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(new PlanarLandmarkList(previousRegions.getPlanarRegionsList()),
+                                                                                                  new PlanarLandmarkList(currentRegions.getPlanarRegionsList()),
                                                                                                   currentToPreviousTransform,
                                                                                                   getParameters());
+
+      if (valid)
+         currentRegions.getPlanarRegionsList().applyTransform(currentToPreviousTransform);
 
       PerceptionDebugTools.printTransform("ComputeICP", currentToPreviousTransform, true);
    }
@@ -510,5 +524,10 @@ public class PlanarRegionMappingHandler
    public int getTotalDepthCount()
    {
       return totalDepthCount;
+   }
+
+   public PlanarRegionMap getPlanarRegionMap()
+   {
+      return planarRegionMap;
    }
 }

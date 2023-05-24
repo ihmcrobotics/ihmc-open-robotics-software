@@ -32,18 +32,14 @@ public class RDXPlanarRegionMappingDemo
    private static final File regionLogDirectory = new File(IHMCCommonPaths.LOGS_DIRECTORY + "/");
 
    private PlanarRegionMappingHandler mappingManager;
-   private RDXPlanarRegionMappingUIPanel mappingPanel;
+   private RDXPlanarRegionMappingUI mappingUI;
 
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
 
    private final RDXLineGraphic mocapGraphic = new RDXLineGraphic(0.02f, Color.YELLOW);
    private final RDXLineGraphic rootJointGraphic = new RDXLineGraphic(0.02f, Color.RED);
 
-   // 20230207_214209_PerceptionLogFixed.hdf5 -> Ouster_Indoor_Urban
-   // L515_CinderBlocks_PerceptionLog.hdf5 -> L515_CinderBlocks
-   // L515_RoughTerrain_PerceptionLog.hdf5 -> L515_RoughTerrain
-
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("IROS_2023/20230228_201947_PerceptionLog.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230517_114430_PerceptionLog_900_ms.hdf5").toString();
 
    private final RDXPlanarRegionsGraphic mapPlanarRegionsGraphic = new RDXPlanarRegionsGraphic();
    private final ArrayList<ModelInstance> poseModels = new ArrayList<>();
@@ -81,10 +77,10 @@ public class RDXPlanarRegionMappingDemo
             mapPlanarRegionsGraphic.update();
             mapPlanarRegionsGraphic.setupTooltip(baseUI.getPrimary3DPanel(), "");
 
-            mappingPanel = new RDXPlanarRegionMappingUIPanel("Filtered Map", mappingManager);
-            baseUI.getImGuiPanelManager().addPanel(mappingPanel.getImGuiPanel());
+            mappingUI = new RDXPlanarRegionMappingUI("Filtered Map", mappingManager);
+            baseUI.getImGuiPanelManager().addPanel(mappingUI.getImGuiPanel());
 
-            baseUI.getPrimaryScene().addRenderableProvider(mappingPanel, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(mappingUI, RDXSceneLevel.VIRTUAL);
             baseUI.getPrimaryScene().addRenderableProvider(mapPlanarRegionsGraphic::getRenderables, RDXSceneLevel.VIRTUAL);
             baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer::getRenderables, RDXSceneLevel.VIRTUAL);
 
@@ -121,7 +117,7 @@ public class RDXPlanarRegionMappingDemo
                   baseUI.getPrimaryScene().addRenderableProvider(model, RDXSceneLevel.VIRTUAL);
                }
 
-               if (mappingPanel.getPointCloudRenderEnabled())
+               if (mappingUI.getPointCloudRenderEnabled())
                {
                   pointCloudRenderer.setPointsToRender(mappingManager.getRapidRegionsExtractor().getDebugger().getDebugPoints(), Color.GRAY);
                   pointCloudRenderer.updateMesh();
@@ -137,8 +133,32 @@ public class RDXPlanarRegionMappingDemo
             {
                MocapTools.adjustMocapPositionsByOffset(mappingManager.getMocapPositionBuffer(), mappingManager.getSensorPositionBuffer().get(0));
 
-               mocapGraphic.generateMeshes(mappingManager.getMocapPositionBuffer(), 10);
-               mocapGraphic.update();
+               if (!mappingManager.getMocapPositionBuffer().isEmpty() && !graphicsInitialized)
+               {
+                  MocapTools.adjustMocapPositionsByOffset(mappingManager.getMocapPositionBuffer(), mappingManager.getSensorPositionBuffer().get(0));
+
+                  mocapGraphic.generateMeshes(mappingManager.getMocapPositionBuffer(), 10);
+                  mocapGraphic.update();
+               }
+
+               if (!mappingManager.getSensorPositionBuffer().isEmpty())
+               {
+                  rootJointGraphic.generateMeshes(mappingManager.getSensorPositionBuffer(), 5);
+                  rootJointGraphic.update();
+               }
+
+               graphicsInitialized = true;
+
+               if (mappingUI.isCaptured())
+               {
+                  LogTools.info("Filtered Map Panel Captured: {}", mappingUI.isCaptured());
+                  mappingManager.setCaptured(true);
+                  mappingUI.setCaptured(false);
+               }
+
+               //rapidRegionsUIPanel.renderImGuiWidgets();
+
+               renderPlanarRegions();
             }
 
             if (!mappingManager.getSensorPositionBuffer().isEmpty())
@@ -148,15 +168,6 @@ public class RDXPlanarRegionMappingDemo
             }
 
             graphicsInitialized = true;
-
-            if (mappingPanel.isCaptured())
-            {
-               LogTools.info("Filtered Map Panel Captured: {}", mappingPanel.isCaptured());
-               mappingManager.setCaptured(true);
-               mappingPanel.setCaptured(false);
-            }
-
-            //rapidRegionsUIPanel.renderImGuiWidgets();
 
             renderPlanarRegions();
 

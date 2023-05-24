@@ -4,12 +4,14 @@ import perception_msgs.msg.dds.DoorLocationPacket;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import org.apache.commons.lang3.tuple.Pair;
+import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.avatar.sensors.realsense.DelayFixedPlanarRegionsSubscription;
 import us.ihmc.avatar.sensors.realsense.MapsenseTools;
@@ -254,6 +256,18 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    }
 
    @Override
+   public <T> TypedNotification<T> subscribeViaTypedNotification(ROS2Topic<T> topic)
+   {
+      return ros2Helper.subscribeViaTypedNotification(topic);
+   }
+
+   @Override
+   public TypedNotification<Boolean> subscribeViaBooleanNotification(ROS2Topic<Bool> topic)
+   {
+      return ros2Helper.subscribeViaBooleanNotification(topic);
+   }
+
+   @Override
    public <T> void publish(ROS2Topic<T> topic, T message)
    {
       ros2Helper.publish(topic, message);
@@ -275,6 +289,12 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    public void publish(ROS2Topic<Empty> topic)
    {
       ros2Helper.publish(topic);
+   }
+
+   @Override
+   public void publish(ROS2Topic<Bool> topic, boolean message)
+   {
+      ros2Helper.publish(topic, message);
    }
 
    @Override

@@ -44,13 +44,13 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private final ResettableExceptionHandlingExecutorService loadAndDecompressThreadExecutor = MissingThreadTools.newSingleThreadExecutor("LoadAndDecompress",
                                                                                                                                          true,
                                                                                                                                          1);
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("IROS_2023/20230228_201947_PerceptionLog.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230517_114430_PerceptionLog_900_ms.hdf5").toString();
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
    private final TypedNotification<PlanarRegionsList> planarRegionsListToRenderNotification = new TypedNotification<>();
    private final RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor();
    private final RDXLineGraphic rootJointGraphic = new RDXLineGraphic(0.02f, Color.RED);
    private final RDXLineGraphic mocapGraphic = new RDXLineGraphic(0.02f, Color.YELLOW);
-   private final RDXRapidRegionsUIPanel rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
+   private final RDXRapidRegionsUI rapidRegionsUIPanel = new RDXRapidRegionsUI();
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
    private final FramePlanarRegionsList frameRegions = new FramePlanarRegionsList();
    private final ArrayList<Quaternion> sensorOrientationBuffer = new ArrayList<>();
@@ -99,9 +99,10 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             navigationPanel = new ImGuiPanel("Dataset Navigation Panel");
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
 
-            createL515(720, 1280, false); // Real D455
-            //createL515(768, 1024, false); // Real L515
-            //createL515(768, 1280, true); // Simulated L515
+            createForPerspective(720, 1280, false); // Real D455
+            //createForPerspective(768, 1024, false); // Real L515
+            //createForPerspective(768, 1280, true); // Simulated L515
+
             //createOuster(128, 1024);
 
             baseUI.getPrimaryScene().addRenderableProvider(RDXRapidRegionsExtractionDemo.this, RDXSceneLevel.VIRTUAL);
@@ -124,7 +125,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             navigationPanel.setRenderMethod(this::renderNavigationPanel);
          }
 
-         private void createOuster(int depthHeight, int depthWidth)
+         private void createForSpherical(int depthHeight, int depthWidth)
          {
             sensorTopicName = PerceptionLoggerConstants.OUSTER_DEPTH_NAME;
             perceptionDataLoader.openLogFile(perceptionLogFile);
@@ -149,7 +150,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             totalFrameCount = (int) (perceptionDataLoader.getHDF5Manager().getCount(sensorTopicName) - 1);
          }
 
-         private void createL515(int depthHeight, int depthWidth, boolean simulation)
+         private void createForPerspective(int depthHeight, int depthWidth, boolean simulation)
          {
             sensorTopicName = PerceptionLoggerConstants.L515_DEPTH_NAME;
             perceptionDataLoader.openLogFile(perceptionLogFile);
@@ -161,8 +162,8 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
                                                      bytedecoDepthImage.getBytedecoOpenCVMat());
             perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer);
             perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, sensorOrientationBuffer);
-            perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionBuffer);
-            perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
+//            perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionBuffer);
+//            perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
 
             String version = simulation ? "Simulation" : "";
             rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth, 654.29, 654.29, 651.14, 361.89, version);
@@ -274,7 +275,8 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    {
       if (rapidPlanarRegionsExtractor.isModified())
       {
-         rapidRegionsUIPanel.render3DGraphics(regionsList, cameraFrame);
+         FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList(regionsList, cameraFrame.getTransformToWorldFrame());
+         rapidRegionsUIPanel.render3DGraphics(framePlanarRegionsList);
          rapidRegionsUIPanel.render();
          rapidPlanarRegionsExtractor.setModified(false);
          rapidPlanarRegionsExtractor.setProcessing(false);

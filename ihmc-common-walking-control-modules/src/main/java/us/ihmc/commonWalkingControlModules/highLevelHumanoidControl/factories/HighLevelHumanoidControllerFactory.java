@@ -289,6 +289,15 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       //TODO
    }
 
+   public void replaceControllerFactory(HighLevelControllerName controllerName, HighLevelControllerStateFactory controllerFactory)
+   {
+      if (controllerFactoriesMap.containsKey(controllerName))
+         controllerStateFactories.remove(controllerFactoriesMap.get(controllerName));
+
+      controllerStateFactories.add(controllerFactory);
+      controllerFactoriesMap.put(controllerName, controllerFactory);
+   }
+
    public void useDefaultDoNothingControlState()
    {
       DoNothingControllerStateFactory controllerStateFactory = new DoNothingControllerStateFactory();

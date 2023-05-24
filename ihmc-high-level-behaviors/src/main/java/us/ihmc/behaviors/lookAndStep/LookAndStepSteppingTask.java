@@ -5,6 +5,7 @@ import java.util.UUID;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WalkingStatusMessage;
+import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.FormattingTools;
@@ -24,12 +25,13 @@ import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.LastCommandedFootsteps;
+import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
 public class LookAndStepSteppingTask
 {
    protected StatusLogger statusLogger;
    protected UIPublisher uiPublisher;
+   protected BehaviorHelper helper;
    protected LookAndStepBehaviorParametersReadOnly lookAndStepParameters;
 
    protected RobotWalkRequester robotWalkRequester;
@@ -58,6 +60,7 @@ public class LookAndStepSteppingTask
          imminentStanceTracker = lookAndStep.imminentStanceTracker;
          statusLogger = lookAndStep.statusLogger;
          syncedRobot = lookAndStep.robotInterface.newSyncedRobot();
+         helper = lookAndStep.helper;
          uiPublisher = lookAndStep.helper::publish;
          robotWalkRequester = lookAndStep.robotInterface::requestWalk;
          stepDuration = new YoDouble("stepDuration", lookAndStep.yoRegistry);
@@ -122,7 +125,7 @@ public class LookAndStepSteppingTask
       }
 
       // TODO: Add combo to look and step UI to chose which steps to visualize
-      uiPublisher.publishToUI(LastCommandedFootsteps, MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage, "Look and Step Last Commanded"));
+      helper.publish(LAST_COMMANDED_FOOTSTEPS, MinimalFootstep.convertToMinimalFootstepListMessage(footstepDataListMessage, "Look and Step Last Commanded"));
 
       ExecutionMode executionMode = ExecutionMode.OVERRIDE; // Always override, which we can do now
       imminentStanceTracker.addCommandedFootsteps(footstepPlan);

@@ -3,6 +3,7 @@ package us.ihmc.behaviors.exploreArea;
 import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.behaviors.BehaviorDefinition;
@@ -19,7 +20,6 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static us.ihmc.behaviors.exploreArea.ExploreAreaBehavior.ExploreAreaBehaviorState.*;
 import static us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI.*;
@@ -158,8 +158,8 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
             statusLogger.info("Walking to {}", StringTools.zUpPoseString(goal));
             helper.publish(WalkingToPose, goal);
 
-            messager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
-            helper.publish(LookAndStepBehaviorAPI.BodyPathInput, bestBodyPath.stream().map(Pose3D::new).collect(Collectors.toList()));
+            helper.publish(LookAndStepBehaviorAPI.OPERATOR_REVIEW_ENABLED_COMMAND, false);
+            helper.publish(LookAndStepBehaviorAPI.BODY_PATH_INPUT, MessageTools.createPoseListMessage(bestBodyPath));
             lookAndStepReachedGoal.poll();
             lookAndStepReachedGoal.blockingPoll();
             return SUCCESS;
