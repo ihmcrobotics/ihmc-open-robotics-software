@@ -4,6 +4,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
 import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesSubscription;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -25,7 +26,9 @@ public class BehaviorActionSequenceModule
    {
       ROS2ControllerHelper ros2 = new ROS2ControllerHelper(PubSubImplementation.FAST_RTPS, "behavior_action_sequence", robotModel);
 
-      detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(predefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2);
+      detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(predefinedSceneNodeLibrary.getDetectableSceneNodes(),
+                                                                                  ros2,
+                                                                                  ROS2IOTopicQualifier.STATUS);
 
       ReferenceFrameLibrary referenceFrameLibrary = new ReferenceFrameLibrary();
       referenceFrameLibrary.addAll(predefinedSceneNodeLibrary.getReferenceFrames());
