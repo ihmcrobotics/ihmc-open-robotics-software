@@ -154,49 +154,49 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       }
    }
 
-   //TODO: Test and fix bugs
-   //FIXME: Refactor code to be better
    private void placeFootstep()
    {
-      if (footstepPlan.getNumberOfFootsteps() == 0)
+      FramePose3D previousFootstepPose;
+
+      //find the previous footstep of the opposite side of the footstep being placed
+      int i = 0;
+      while(i < footstepPlan.getNumberOfFootsteps()
+            && footstepPlan.getFootsteps().get(footstepPlan.getNumberOfFootsteps() - i - 1).getFootstepSide() == footstepBeingPlaced.getFootstepSide())
       {
-         FramePose3D stanceFoot = new FramePose3D();
-         stanceFoot.setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(currentFootStepSide.getOppositeSide()));
+         ++i;
+      }
 
-         LogTools.info("Previous footstep:     " + stanceFoot);
-         LogTools.info("Footstep being placed: " + footstepBeingPlaced.getFootPose());
-
-         if (footstepBeingPlaced.getFootPose().getPositionDistance(stanceFoot) > 0.6
-             || footstepBeingPlaced.getFootPose().getZ() > stanceFoot.getZ() + 0.4
-             || footstepBeingPlaced.getFootPose().getZ() < stanceFoot.getZ() - 0.4)
-         {
-            String rejectionReason = footstepBeingPlaced.getFootPose().getPositionDistance(stanceFoot) > 0.6 ? "Placement too far" :
-                  (footstepBeingPlaced.getFootPose().getZ() > stanceFoot.getZ() + 0.4 ? "Placement too high" : "Placement too low");
-            LogTools.info("Footstep Rejected, too far from previous foot... not placing footstep\n"
-                           + "\t\t\tRejection reason: " + rejectionReason);
-            return;
-         }
+      if (i < footstepPlan.getNumberOfFootsteps())
+      {
+         previousFootstepPose = new FramePose3D(footstepPlan.getFootsteps().get(footstepPlan.getNumberOfFootsteps() - i - 1).getFootPose());
       }
       else
       {
-         FramePose3D previousFootstep = new FramePose3D(footstepPlan.getFootsteps().get(footstepPlan.getNumberOfFootsteps() - 1).getFootPose());
-
-         LogTools.info("Previous footstep:     " + previousFootstep);
-         LogTools.info("Footstep being placed: " + footstepBeingPlaced.getFootPose());
-
-         if (footstepBeingPlaced.getFootPose().getPositionDistance(previousFootstep) > 0.6
-             || footstepBeingPlaced.getFootPose().getZ() > previousFootstep.getZ() + 0.4
-             || footstepBeingPlaced.getFootPose().getZ() < previousFootstep.getZ() - 0.4)
-         {
-            String rejectionReason = footstepBeingPlaced.getFootPose().getPositionDistance(previousFootstep) > 0.6 ? "Placement too far" :
-                  (footstepBeingPlaced.getFootPose().getZ() > previousFootstep.getZ() + 0.4 ? "Placement too high" : "Placement too low");
-            LogTools.info("Footstep Rejected, too far from previous foot... not placing footstep\n"
-                          + "\t\t\tRejection reason: " + rejectionReason);
-
-            return;
-         }
+         previousFootstepPose = new FramePose3D();
+         previousFootstepPose.setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(currentFootStepSide.getOppositeSide()));
       }
 
+      //print footstep info
+      LogTools.info("Previous footstep:     " + previousFootstepPose
+                    + "\nFootstep being placed: " + footstepBeingPlaced.getFootPose()
+                    + "\nDistance between footsteps: " + footstepBeingPlaced.getFootPose().getPositionDistance(previousFootstepPose)
+                    + "\nHeight between footsteps:   " + (footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ()));
+
+      //check whether footstep being placed is within safe zone
+      if (footstepBeingPlaced.getFootPose().getPositionDistance(previousFootstepPose) > 0.6
+          || footstepBeingPlaced.getFootPose().getZ() > previousFootstepPose.getZ() + 0.4
+          || footstepBeingPlaced.getFootPose().getZ() < previousFootstepPose.getZ() - 0.4)
+      {
+         //if not safe print message and abort footstep placement
+         String rejectionReason = footstepBeingPlaced.getFootPose().getPositionDistance(previousFootstepPose) > 0.6 ? "Placement too far" :
+               (footstepBeingPlaced.getFootPose().getZ() > previousFootstepPose.getZ() + 0.4 ? "Placement too high" : "Placement too low");
+         LogTools.info("Footstep Rejected, too far from previous foot... not placing footstep"
+                       + "\nRejection reason: " + rejectionReason);
+
+         return;
+      }
+
+      //if safe place footstep
       RDXInteractableFootstep addedStep = footstepPlan.getNextFootstep();
       addedStep.copyFrom(baseUI, footstepBeingPlaced);
       // Switch sides
