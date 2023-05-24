@@ -179,18 +179,13 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          previousFootstepPose.setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(currentFootStepSide.getOppositeSide()));
       }
 
-      // Print footstep info
-      LogTools.info("\n\tPrevious footstep:     " + previousFootstepPose + "\n\tFootstep being placed: " + footstepBeingPlaced.getFootPose()
-                    + "\n\tDistance between footsteps: " + footstepBeingPlaced.getFootPose().getPositionDistance(previousFootstepPose)
-                    + "\n\tHeight between footsteps:   " + (footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ()));
-
       // Check whether footstep being placed is within safe zone
+      // Safe zone is a sphere of radius 2.5 * maximumStepReach with top and bottom cut off by the planes Z = +-2.9 * maxStepZ
       if (footstepBeingPlaced.getFootPose().getPositionDistance(previousFootstepPose) > 2.5 * footstepPlannerParameters.getMaximumStepReach()
           || footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ() > 2.9 * footstepPlannerParameters.getMaxStepZ()
           || footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ() < -2.9 * footstepPlannerParameters.getMaxStepZ())
       {
          // If not safe print message and abort footstep placement
-
          LogTools.info("Footstep Rejected, too far from previous foot... not placing footstep");
 
          return;
