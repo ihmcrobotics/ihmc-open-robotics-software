@@ -51,6 +51,9 @@ public class MonteCarloPlanner
 
    public void updateTree(MonteCarloTreeNode node)
    {
+      if (node == null)
+         return;
+
       if (node.getVisits() == 0)
       {
          MonteCarloTreeNode childNode = expand(node);

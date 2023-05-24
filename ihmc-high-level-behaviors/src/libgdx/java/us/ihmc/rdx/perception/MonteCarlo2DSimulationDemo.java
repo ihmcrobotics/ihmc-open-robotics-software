@@ -2,6 +2,8 @@ package us.ihmc.rdx.perception;
 
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Point;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.behaviors.monteCarloPlanning.Agent;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanner;
 import us.ihmc.behaviors.monteCarloPlanning.World;
@@ -15,50 +17,6 @@ import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_GRAY2RGB;
 
 class MonteCarlo2DSimulationDemo
 {
-   public static void plotWorldCV(World world, Agent agent, int scale)
-   {
-      for (Vector4D32 obstacle : world.getObstacles())
-      {
-         int obstacleSizeX = (int) obstacle.getZ32();
-         int obstacleSizeY = (int) obstacle.getS32();
-         int obstacleMinX = (int) (obstacle.getX32() - obstacleSizeX);
-         int obstacleMaxX = (int) (obstacle.getX32() + obstacleSizeX);
-         int obstacleMinY = (int) (obstacle.getY32() - obstacleSizeY);
-         int obstacleMaxY = (int) (obstacle.getY32() + obstacleSizeY);
-
-         world.getGrid().ptr(obstacleMinX, obstacleMaxX).putInt(100);
-      }
-
-      // Display a yellow square on goal of total width goal_margin
-      int goalMargin = world.getGoalMargin();
-      int goalMinX = (int) (world.getGoal().getX32() - goalMargin);
-      int goalMaxX = (int) (world.getGoal().getX32() + goalMargin);
-      int goalMinY = (int) (world.getGoal().getY32() - goalMargin);
-      int goalMaxY = (int) (world.getGoal().getY32() + goalMargin);
-      world.getGrid().ptr(goalMinX, goalMaxX).putInt(200);
-
-      // Convert the floating point grid to 8-bit grayscale then convert it to RGB image
-      Mat gridColor = new Mat();
-      opencv_imgproc.cvtColor(world.getGrid(), gridColor, COLOR_GRAY2RGB);
-
-      // Set the agent's position as 50
-      gridColor.ptr((int)(agent.getPreviousPosition().getX32()), (int)(agent.getPreviousPosition().getY32())).put(new byte[] {0, 0, 0});
-      gridColor.ptr((int)(agent.getPosition().getX32()), (int)(agent.getPosition().getY32())).put(new byte[] {0, (byte) 255, (byte) 250});
-
-      gridColor.ptr((int)(agent.getAveragePosition().getX32()), (int)(agent.getAveragePosition().getY32())).put(new byte[] {100, 100, (byte) 255});
-
-      // Plot lidar scan points as filled red cells
-      for (Point2D point : agent.getScanPoints())
-      {
-         if (point.getX32() < gridColor.rows() && point.getY32() < gridColor.cols() && point.getX32() >= 0 && point.getY32() >= 0)
-         {
-            gridColor.ptr((int) point.getX32(), (int) point.getY32()).put(new byte[] {0, 0, (byte) 255});
-         }
-      }
-
-      PerceptionDebugTools.display("Grid", gridColor, 1, scale);
-   }
-
    public static void main(String[] args)
    {
       int scale = 2;
@@ -103,5 +61,61 @@ class MonteCarlo2DSimulationDemo
 
          i += 1;
       }
+   }
+
+   public static void plotWorldCV(World world, Agent agent, int scale)
+   {
+      // Convert the floating point grid to 8-bit grayscale then convert it to RGB image
+      Mat gridColor = new Mat();
+      opencv_imgproc.cvtColor(world.getGrid(), gridColor, COLOR_GRAY2RGB);
+
+      for (Vector4D32 obstacle : world.getObstacles())
+      {
+         int obstacleSizeX = (int) obstacle.getZ32();
+         int obstacleSizeY = (int) obstacle.getS32();
+         int obstacleMinX = (int) (obstacle.getX32() - obstacleSizeX);
+         int obstacleMaxX = (int) (obstacle.getX32() + obstacleSizeX);
+         int obstacleMinY = (int) (obstacle.getY32() - obstacleSizeY);
+         int obstacleMaxY = (int) (obstacle.getY32() + obstacleSizeY);
+
+         // Draw a red rectangle on the obstacle
+         opencv_imgproc.rectangle(gridColor,
+                 new Point(obstacleMinX, obstacleMinY),
+                 new Point(obstacleMaxX, obstacleMaxY),
+                 new Scalar(0, 0, 255, 255)
+         );
+      }
+
+      // Display a yellow square on goal of total width goal_margin
+      int goalMargin = world.getGoalMargin();
+      int goalMinX = (int) (world.getGoal().getX32() - goalMargin);
+      int goalMaxX = (int) (world.getGoal().getX32() + goalMargin);
+      int goalMinY = (int) (world.getGoal().getY32() - goalMargin);
+      int goalMaxY = (int) (world.getGoal().getY32() + goalMargin);
+
+      opencv_imgproc.rectangle(gridColor,
+              new Point(goalMinX, goalMinY),
+              new Point(goalMaxX, goalMaxY),
+              new Scalar(0, 255, 255, 255)
+      );
+
+
+
+      // Set the agent's position as 50
+      gridColor.ptr((int)(agent.getPreviousPosition().getX32()), (int)(agent.getPreviousPosition().getY32())).put(new byte[] {0, 0, 0});
+      gridColor.ptr((int)(agent.getPosition().getX32()), (int)(agent.getPosition().getY32())).put(new byte[] {0, (byte) 255, (byte) 250});
+
+      gridColor.ptr((int)(agent.getAveragePosition().getX32()), (int)(agent.getAveragePosition().getY32())).put(new byte[] {100, 100, (byte) 255});
+
+      // Plot lidar scan points as filled red cells
+      for (Point2D point : agent.getScanPoints())
+      {
+         if (point.getX32() < gridColor.rows() && point.getY32() < gridColor.cols() && point.getX32() >= 0 && point.getY32() >= 0)
+         {
+            gridColor.ptr((int) point.getX32(), (int) point.getY32()).put(new byte[] {0, 0, (byte) 255});
+         }
+      }
+
+      PerceptionDebugTools.display("Grid", gridColor, 50, scale);
    }
 }

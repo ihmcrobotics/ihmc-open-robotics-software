@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.monteCarloPlanning;
 
+import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple4D.Vector4D;
@@ -19,7 +20,7 @@ public class World
 
    public World(ArrayList<Vector4D32> obstacles, Point2D goal, int goalMargin, int gridHeight, int gridWidth)
    {
-      this.grid = new Mat(gridHeight, gridWidth, 0);
+      this.grid = new Mat(gridHeight, gridWidth, opencv_core.CV_8UC1);
       this.gridHeight = gridHeight;
       this.gridWidth = gridWidth;
       this.goal = goal;
