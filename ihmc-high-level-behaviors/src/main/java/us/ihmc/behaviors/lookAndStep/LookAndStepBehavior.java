@@ -1,10 +1,12 @@
 package us.ihmc.behaviors.lookAndStep;
 
 import controller_msgs.msg.dds.*;
+import std_msgs.msg.dds.Bool;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -108,17 +110,17 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
       });
 
       operatorReviewEnabledInput = new AtomicReference<>();
-      helper.subscribeViaCallback(OperatorReviewEnabled, enabled ->
+      helper.subscribeViaCallback(OPERATOR_REVIEW_ENABLED_COMMAND, enabled ->
       {
-         LogTools.info("Received operator review enabled toggle message: {}", enabled);
-         operatorReviewEnabledInput.set(enabled);
-         helper.publish(OperatorReviewEnabledToUI, enabled);
+         LogTools.info("Received operator review enabled toggle message: {}", enabled.getData());
+         operatorReviewEnabledInput.set(enabled.getData());
+         helper.publish(OPERATOR_REVIEW_ENABLED_STATUS, enabled.getData());
       });
-      approvalNotification = helper.subscribeViaNotification(ReviewApproval);
+      approvalNotification = helper.subscribeViaBooleanNotification(REVIEW_APPROVAL);
 
       // Trying to hold a lot of the state here? TODO: In general, where to put what state?
       imminentStanceTracker = new LookAndStepImminentStanceTracker(helper);
-      behaviorStateReference = new BehaviorStateReference<>(State.BODY_PATH_PLANNING, statusLogger, helper::publish);
+      behaviorStateReference = new BehaviorStateReference<>(State.BODY_PATH_PLANNING, statusLogger, helper);
       controllerStatusTracker = helper.getOrCreateControllerStatusTracker();
       reset.initialize(this);
       helper.subscribeViaCallback(RESET, reset::queueReset);
@@ -130,13 +132,13 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
          bodyPathPlanning.acceptMapRegions(planarRegionsListMessage);
          footstepPlanning.acceptLidarREARegions(planarRegionsListMessage);
       });
-      helper.subscribeViaCallback(GOAL_INPUT, this::acceptGoal);
+      helper.subscribeViaCallback(GOAL_COMMAND, this::acceptGoal);
       // TODO add height map to footstep planner
       helper.subscribeViaCallback(ROS2_HEIGHT_MAP, bodyPathPlanning::acceptHeightMap);
 
       bodyPathLocalization.initialize(this);
       helper.subscribeToControllerViaCallback(CapturabilityBasedStatus.class, imminentStanceTracker::acceptCapturabilityBasedStatus);
-      helper.subscribeViaCallback(BodyPathInput, this::bodyPathPlanInput);
+      helper.subscribeViaCallback(BODY_PATH_INPUT, message -> bodyPathPlanInput(MessageTools.unpackPoseListMessage(message)));
 
       footstepPlanning.initialize(this);
       if (helper.getROS1Helper() != null)
@@ -184,7 +186,7 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
    public void acceptGoal(Pose3DReadOnly goal)
    {
       behaviorStateReference.broadcast();
-      helper.publish(GoalForUI, new Pose3D(goal));
+      helper.publish(GOAL_STATUS, new Pose3D(goal));
       bodyPathLocalization.acceptNewGoalSubmitted();
       bodyPathPlanning.acceptGoal(goal);
    }

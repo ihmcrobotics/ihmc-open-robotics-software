@@ -106,6 +106,7 @@ public class AStarBodyPathPlannerVisualizer
          request.getStartFootPoses().get(robotSide).appendTranslation(0.0, robotSide.negateIfRightSide(0.1), 0.0);
          request.getGoalFootPoses().get(robotSide).appendTranslation(0.0, robotSide.negateIfRightSide(0.1), 0.0);
       }
+      request.setHeightMapData(heightMapData);
 
       FootstepPlannerOutput output = new FootstepPlannerOutput();
 

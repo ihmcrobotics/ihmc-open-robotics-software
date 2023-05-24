@@ -53,6 +53,11 @@ public class HeightMapData
       estimatedGroundHeight = Double.NaN;
    }
 
+   public boolean isEmpty()
+   {
+      return occupiedCells.isEmpty();
+   }
+
    public double getGridResolutionXY()
    {
       return gridResolutionXY;

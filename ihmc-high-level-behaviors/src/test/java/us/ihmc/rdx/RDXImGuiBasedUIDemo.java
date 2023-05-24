@@ -29,6 +29,7 @@ public class RDXImGuiBasedUIDemo
    private final ImBoolean option = new ImBoolean();
    private int pressCount = 0;
    private final ImString textForArea = new ImString();
+   private RDX3DPanelToolbarButton flyingCarButton;
 
    public RDXImGuiBasedUIDemo()
    {
@@ -62,7 +63,7 @@ public class RDXImGuiBasedUIDemo
                }
             });
 
-            RDX3DPanelToolbarButton flyingCarButton = baseUI.getPrimary3DPanel().addToolbarButton();
+            flyingCarButton = baseUI.getPrimary3DPanel().addToolbarButton();
             flyingCarButton.loadAndSetIcon("icons/flyingCar.png");
             flyingCarButton.setOnPressed(() -> pressCount++);
             flyingCarButton.setTooltipText("Tooltip text");
@@ -86,6 +87,10 @@ public class RDXImGuiBasedUIDemo
          public void render()
          {
             // call update() methods here
+            if (flyingCarButton.getDown())
+               flyingCarButton.setTooltipText("Mouse down.");
+            else if (flyingCarButton.getHovered())
+               flyingCarButton.setTooltipText("Mouse hovered.");
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
