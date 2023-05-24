@@ -1,0 +1,22 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : true,
+    "Environment###java.lang.Class:Environment" : false,
+    "GPU Planar Region Extraction" : true,
+    "Blurred Depth" : false,
+    "Filtered Depth" : false,
+    "Gx Image" : false,
+    "Gy Image" : false,
+    "Gz Image" : false,
+    "Nx Image" : false,
+    "Ny Image" : false,
+    "Nz Image" : false,
+    "Planar Region Extraction Image" : false,
+    "Stepping L515 Simulator###java.lang.Integer:Stepping L515 Simulator" : false,
+    "Stepping L515 Color###GlobalWidgetIndex:1:Stepping L515 Color" : true,
+    "Stepping L515 Depth###GlobalWidgetIndex:0:Stepping L515 Depth" : true,
+    "VR Settings" : false,
+    "VR Thread Debugger" : false
+  }
+}

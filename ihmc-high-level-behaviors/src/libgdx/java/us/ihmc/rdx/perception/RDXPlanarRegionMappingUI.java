@@ -14,17 +14,27 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.PlanarRegionMappingHandler;
 import us.ihmc.perception.tools.PlaneRegistrationTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.ImGuiPlot;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.visualizers.RDXLineGraphic;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
+import us.ihmc.robotics.geometry.PlanarLandmarkList;
 
 import java.util.ArrayList;
 
-public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
+public class RDXPlanarRegionMappingUI implements RenderableProvider
 {
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private ImGuiStoredPropertySetTuner mappingParametersTuner;
    private PlanarRegionMappingHandler mappingManager;
    private ImGuiPanel imGuiPanel;
+
+   private ImGuiPlot wholeAlgorithmDurationPlot;
+   private ImGuiPlot quaternionAveragingDurationPlot;
+   private ImGuiPlot factorGraphDurationPlot;
+   private ImGuiPlot regionMergingDurationPlot;
+
    private final ImBoolean liveModeEnabled = new ImBoolean();
    private final ImBoolean renderEnabled = new ImBoolean(true);
    private final ImBoolean renderBoundingBoxEnabled = new ImBoolean(false);
@@ -38,13 +48,18 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
    private ImInt icpPreviousIndex = new ImInt(10);
    private ImInt icpCurrentIndex = new ImInt(14);
 
-   public RDXPlanarRegionMappingUIPanel(String name, PlanarRegionMappingHandler mappingManager)
+   public RDXPlanarRegionMappingUI(String name, PlanarRegionMappingHandler mappingManager)
    {
       this.mappingManager = mappingManager;
       imGuiPanel = new ImGuiPanel(name, this::renderImGuiWidgets);
       mappingParametersTuner = new ImGuiStoredPropertySetTuner(mappingManager.getParameters().getTitle());
       mappingParametersTuner.create(mappingManager.getParameters());
       imGuiPanel.addChild(mappingParametersTuner);
+
+      wholeAlgorithmDurationPlot = new ImGuiPlot(labels.get("Whole algorithm duration"), 1000, 300, 50);
+      quaternionAveragingDurationPlot = new ImGuiPlot(labels.get("ICP duration"), 1000, 300, 50);
+      factorGraphDurationPlot = new ImGuiPlot(labels.get("ICP registration duration"), 1000, 300, 50);
+      regionMergingDurationPlot = new ImGuiPlot(labels.get("Region merging duration"), 1000, 300, 50);
    }
 
    public void renderImGuiWidgets()
@@ -53,6 +68,11 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
       {
          if (ImGui.beginTabItem("Map"))
          {
+            wholeAlgorithmDurationPlot.render(mappingManager.getPlanarRegionMap().getWholeAlgorithmDurationStopwatch().averageLap());
+            quaternionAveragingDurationPlot.render(mappingManager.getPlanarRegionMap().getQuaternionAveragingStopwatch().averageLap());
+            factorGraphDurationPlot.render(mappingManager.getPlanarRegionMap().getFactorGraphStopwatch().averageLap());
+            regionMergingDurationPlot.render(mappingManager.getPlanarRegionMap().getRegionMergingStopwatch().averageLap());
+
             if (ImGui.button("Load Next Set"))
                mappingManager.nextButtonCallback();
             ImGui.sameLine();
@@ -60,6 +80,9 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
                mappingManager.performMapCleanUp();
             if (ImGui.button("Auto Increment"))
                mappingManager.autoIncrementButtonCallback();
+            ImGui.sameLine();
+            if (ImGui.button("Pause"))
+               mappingManager.pauseButtonCallback();
             if (ImGui.checkbox("Enable Live Mode", liveModeEnabled))
                mappingManager.setEnableLiveMode(liveModeEnabled.get());
             ImGui.checkbox("Render live mode", renderEnabled);
@@ -135,8 +158,8 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
    {
       lineMeshModel.clear();
       TIntIntMap matches = new TIntIntHashMap();
-      PlaneRegistrationTools.findBestPlanarRegionMatches(mappingManager.getCurrentRegions().getPlanarRegionsList(),
-                                                         mappingManager.getPreviousRegions().getPlanarRegionsList(),
+      PlaneRegistrationTools.findBestPlanarRegionMatches(new PlanarLandmarkList(mappingManager.getCurrentRegions().getPlanarRegionsList()),
+                                                         new PlanarLandmarkList(mappingManager.getPreviousRegions().getPlanarRegionsList()),
                                                          matches,
                                                          (float) mappingManager.getParameters().getBestMinimumOverlapThreshold(),
                                                          (float) mappingManager.getParameters().getBestMatchAngularThreshold(),
