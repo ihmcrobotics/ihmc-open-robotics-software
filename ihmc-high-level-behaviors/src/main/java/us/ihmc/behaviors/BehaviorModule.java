@@ -6,6 +6,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.behaviors.tools.BehaviorMessageTools;
 import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
@@ -56,6 +57,7 @@ public class BehaviorModule
    private BehaviorDefinition highestLevelBehaviorDefinition;
    private BehaviorHelper helper;
    private ROS2Heartbeat heartbeat;
+   private final BehaviorTreeMessage behaviorTreeMessage = new BehaviorTreeMessage();
 
    public static BehaviorModule createInterprocess(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel)
    {
@@ -118,7 +120,9 @@ public class BehaviorModule
       behaviorTreeTickThread = new PausablePeriodicThread("BehaviorTree", UnitConversions.hertzToSeconds(5.0), () ->
       {
          rootNode.tick();
-         helper.publish(API.BehaviorTreeStatus, new BehaviorTreeStatus(rootNode));
+         behaviorTreeMessage.getNodes().clear();
+         BehaviorMessageTools.packBehaviorTreeMessage(rootNode, behaviorTreeMessage);
+         helper.publish(API.BEHAVIOR_TREE_STATUS, behaviorTreeMessage);
       });
       behaviorTreeTickThread.start();
 

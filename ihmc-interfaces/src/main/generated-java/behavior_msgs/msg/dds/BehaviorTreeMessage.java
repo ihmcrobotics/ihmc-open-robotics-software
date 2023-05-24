@@ -13,11 +13,11 @@ public class BehaviorTreeMessage extends Packet<BehaviorTreeMessage> implements 
             * We must reconstruct the tree on the subscription end.
             * This is because messages cannot be recursive.
             */
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BehaviorTreeControlFlowNodeMessage>  nodes_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BehaviorTreeNodeMessage>  nodes_;
 
    public BehaviorTreeMessage()
    {
-      nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BehaviorTreeControlFlowNodeMessage> (2048, new behavior_msgs.msg.dds.BehaviorTreeControlFlowNodeMessagePubSubType());
+      nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BehaviorTreeNodeMessage> (2048, new behavior_msgs.msg.dds.BehaviorTreeNodeMessagePubSubType());
 
    }
 
@@ -38,7 +38,7 @@ public class BehaviorTreeMessage extends Packet<BehaviorTreeMessage> implements 
             * We must reconstruct the tree on the subscription end.
             * This is because messages cannot be recursive.
             */
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BehaviorTreeControlFlowNodeMessage>  getNodes()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BehaviorTreeNodeMessage>  getNodes()
    {
       return nodes_;
    }

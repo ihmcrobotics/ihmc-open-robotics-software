@@ -15,7 +15,7 @@ public class BehaviorTreeMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f9434f9084f080f597d02086a109a365396baab54a7df29361c85213ccf99007";
+   		return "424333c04adcb7441353d8eebff22ddffa1639b7143561a51fb4ad188dbf7c3e";
    }
    
    @Override
@@ -54,7 +54,7 @@ public class BehaviorTreeMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 2048; ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.BehaviorTreeControlFlowNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       return current_alignment - initial_alignment;
    }
 
@@ -70,7 +70,7 @@ public class BehaviorTreeMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getNodes().size(); ++i0)
       {
-          current_alignment += behavior_msgs.msg.dds.BehaviorTreeControlFlowNodeMessagePubSubType.getCdrSerializedSize(data.getNodes().get(i0), current_alignment);}
+          current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeMessagePubSubType.getCdrSerializedSize(data.getNodes().get(i0), current_alignment);}
 
       return current_alignment - initial_alignment;
    }

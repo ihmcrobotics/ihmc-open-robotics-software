@@ -6,7 +6,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class BehaviorTreeControlFlowNodeMessage extends Packet<BehaviorTreeControlFlowNodeMessage> implements Settable<BehaviorTreeControlFlowNodeMessage>, EpsilonComparable<BehaviorTreeControlFlowNodeMessage>
+public class BehaviorTreeNodeMessage extends Packet<BehaviorTreeNodeMessage> implements Settable<BehaviorTreeNodeMessage>, EpsilonComparable<BehaviorTreeNodeMessage>
 {
    /**
             * The number of children
@@ -20,40 +20,45 @@ public class BehaviorTreeControlFlowNodeMessage extends Packet<BehaviorTreeContr
    /**
             * Name of the node
             */
-   public us.ihmc.idl.IDLSequence.StringBuilderHolder  node_name_;
+   public java.lang.StringBuilder node_name_;
    /**
             * The type of the node, as a string
             */
-   public us.ihmc.idl.IDLSequence.StringBuilderHolder  node_type_;
+   public java.lang.StringBuilder node_type_;
    /**
             * Previous node status
             */
    public byte previous_status_;
    /**
             * Whether this node has been clocked
+            * This field is only for control flow nodes.
             */
    public boolean has_been_clocked_;
 
-   public BehaviorTreeControlFlowNodeMessage()
+   public BehaviorTreeNodeMessage()
    {
       last_tick_instant_ = new ihmc_common_msgs.msg.dds.InstantMessage();
-      node_name_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (256, "type_d");
-      node_type_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (256, "type_d");
+      node_name_ = new java.lang.StringBuilder(255);
+      node_type_ = new java.lang.StringBuilder(255);
    }
 
-   public BehaviorTreeControlFlowNodeMessage(BehaviorTreeControlFlowNodeMessage other)
+   public BehaviorTreeNodeMessage(BehaviorTreeNodeMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(BehaviorTreeControlFlowNodeMessage other)
+   public void set(BehaviorTreeNodeMessage other)
    {
       number_of_children_ = other.number_of_children_;
 
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.staticCopy(other.last_tick_instant_, last_tick_instant_);
-      node_name_.set(other.node_name_);
-      node_type_.set(other.node_type_);
+      node_name_.setLength(0);
+      node_name_.append(other.node_name_);
+
+      node_type_.setLength(0);
+      node_type_.append(other.node_type_);
+
       previous_status_ = other.previous_status_;
 
       has_been_clocked_ = other.has_been_clocked_;
@@ -86,20 +91,50 @@ public class BehaviorTreeControlFlowNodeMessage extends Packet<BehaviorTreeContr
       return last_tick_instant_;
    }
 
+   /**
+            * Name of the node
+            */
+   public void setNodeName(java.lang.String node_name)
+   {
+      node_name_.setLength(0);
+      node_name_.append(node_name);
+   }
 
    /**
             * Name of the node
             */
-   public us.ihmc.idl.IDLSequence.StringBuilderHolder  getNodeName()
+   public java.lang.String getNodeNameAsString()
+   {
+      return getNodeName().toString();
+   }
+   /**
+            * Name of the node
+            */
+   public java.lang.StringBuilder getNodeName()
    {
       return node_name_;
    }
 
+   /**
+            * The type of the node, as a string
+            */
+   public void setNodeType(java.lang.String node_type)
+   {
+      node_type_.setLength(0);
+      node_type_.append(node_type);
+   }
 
    /**
             * The type of the node, as a string
             */
-   public us.ihmc.idl.IDLSequence.StringBuilderHolder  getNodeType()
+   public java.lang.String getNodeTypeAsString()
+   {
+      return getNodeType().toString();
+   }
+   /**
+            * The type of the node, as a string
+            */
+   public java.lang.StringBuilder getNodeType()
    {
       return node_type_;
    }
@@ -121,6 +156,7 @@ public class BehaviorTreeControlFlowNodeMessage extends Packet<BehaviorTreeContr
 
    /**
             * Whether this node has been clocked
+            * This field is only for control flow nodes.
             */
    public void setHasBeenClocked(boolean has_been_clocked)
    {
@@ -128,6 +164,7 @@ public class BehaviorTreeControlFlowNodeMessage extends Packet<BehaviorTreeContr
    }
    /**
             * Whether this node has been clocked
+            * This field is only for control flow nodes.
             */
    public boolean getHasBeenClocked()
    {
@@ -135,19 +172,19 @@ public class BehaviorTreeControlFlowNodeMessage extends Packet<BehaviorTreeContr
    }
 
 
-   public static Supplier<BehaviorTreeControlFlowNodeMessagePubSubType> getPubSubType()
+   public static Supplier<BehaviorTreeNodeMessagePubSubType> getPubSubType()
    {
-      return BehaviorTreeControlFlowNodeMessagePubSubType::new;
+      return BehaviorTreeNodeMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return BehaviorTreeControlFlowNodeMessagePubSubType::new;
+      return BehaviorTreeNodeMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(BehaviorTreeControlFlowNodeMessage other, double epsilon)
+   public boolean epsilonEquals(BehaviorTreeNodeMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -155,9 +192,9 @@ public class BehaviorTreeControlFlowNodeMessage extends Packet<BehaviorTreeContr
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_children_, other.number_of_children_, epsilon)) return false;
 
       if (!this.last_tick_instant_.epsilonEquals(other.last_tick_instant_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.node_name_, other.node_name_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.node_name_, other.node_name_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.node_type_, other.node_type_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.node_type_, other.node_type_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.previous_status_, other.previous_status_, epsilon)) return false;
 
@@ -172,15 +209,17 @@ public class BehaviorTreeControlFlowNodeMessage extends Packet<BehaviorTreeContr
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof BehaviorTreeControlFlowNodeMessage)) return false;
+      if(!(other instanceof BehaviorTreeNodeMessage)) return false;
 
-      BehaviorTreeControlFlowNodeMessage otherMyClass = (BehaviorTreeControlFlowNodeMessage) other;
+      BehaviorTreeNodeMessage otherMyClass = (BehaviorTreeNodeMessage) other;
 
       if(this.number_of_children_ != otherMyClass.number_of_children_) return false;
 
       if (!this.last_tick_instant_.equals(otherMyClass.last_tick_instant_)) return false;
-      if (!this.node_name_.equals(otherMyClass.node_name_)) return false;
-      if (!this.node_type_.equals(otherMyClass.node_type_)) return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.node_name_, otherMyClass.node_name_)) return false;
+
+      if (!us.ihmc.idl.IDLTools.equals(this.node_type_, otherMyClass.node_type_)) return false;
+
       if(this.previous_status_ != otherMyClass.previous_status_) return false;
 
       if(this.has_been_clocked_ != otherMyClass.has_been_clocked_) return false;
@@ -194,7 +233,7 @@ public class BehaviorTreeControlFlowNodeMessage extends Packet<BehaviorTreeContr
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("BehaviorTreeControlFlowNodeMessage {");
+      builder.append("BehaviorTreeNodeMessage {");
       builder.append("number_of_children=");
       builder.append(this.number_of_children_);      builder.append(", ");
       builder.append("last_tick_instant=");

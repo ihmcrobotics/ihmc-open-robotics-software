@@ -1,7 +1,7 @@
 #ifndef __behavior_msgs__msg__BehaviorTreeMessage__idl__
 #define __behavior_msgs__msg__BehaviorTreeMessage__idl__
 
-#include "behavior_msgs/msg/./BehaviorTreeControlFlowNodeMessage_.idl"
+#include "behavior_msgs/msg/./BehaviorTreeNodeMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -17,7 +17,7 @@ module behavior_msgs
          * We must reconstruct the tree on the subscription end.
          * This is because messages cannot be recursive.
          */
-        sequence<behavior_msgs::msg::dds::BehaviorTreeControlFlowNodeMessage, 2048> nodes;
+        sequence<behavior_msgs::msg::dds::BehaviorTreeNodeMessage, 2048> nodes;
       };
     };
   };
