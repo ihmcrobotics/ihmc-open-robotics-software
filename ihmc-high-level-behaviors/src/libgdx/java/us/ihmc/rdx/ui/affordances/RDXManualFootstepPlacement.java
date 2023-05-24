@@ -185,9 +185,9 @@ public class RDXManualFootstepPlacement implements RenderableProvider
                     + "\n\tHeight between footsteps:   " + (footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ()));
 
       // Check whether footstep being placed is within safe zone
-      if (footstepBeingPlaced.getFootPose().getPositionDistance(previousFootstepPose) > 3.5 * footstepPlannerParameters.getMaximumStepReach()
-          || footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ() > 3.5 * footstepPlannerParameters.getMaxStepZ()
-          || footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ() < -3.5 * footstepPlannerParameters.getMaxStepZ())
+      if (footstepBeingPlaced.getFootPose().getPositionDistance(previousFootstepPose) > 2.5 * footstepPlannerParameters.getMaximumStepReach()
+          || footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ() > 2.9 * footstepPlannerParameters.getMaxStepZ()
+          || footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ() < -2.9 * footstepPlannerParameters.getMaxStepZ())
       {
          // If not safe print message and abort footstep placement
 
