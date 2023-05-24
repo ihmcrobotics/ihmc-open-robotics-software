@@ -5,17 +5,38 @@ package us.ihmc.sensorProcessing.parameters;
  */
 public interface AvatarRobotVisionSensorInformation
 {
-   public AvatarRobotCameraParameters[] getCameraParameters();
+   AvatarRobotCameraParameters[] getCameraParameters();
 
-   public AvatarRobotLidarParameters[] getLidarParameters();
+   AvatarRobotLidarParameters[] getLidarParameters();
 
-   public AvatarRobotPointCloudParameters[] getPointCloudParameters();
+   AvatarRobotPointCloudParameters[] getPointCloudParameters();
 
-   public AvatarRobotCameraParameters getCameraParameters(int cameraId);
+   default AvatarRobotCameraParameters getCameraParameters(int cameraId)
+   {
+      if (getCameraParameters() == null)
+         return null;
+      else
+         return getCameraParameters()[cameraId];
+   }
 
-   public AvatarRobotLidarParameters getLidarParameters(int lidarId);
+   default AvatarRobotLidarParameters getLidarParameters(int lidarId)
+   {
+      if (getLidarParameters() == null)
+         return null;
+      else
+         return getLidarParameters()[lidarId];
+   }
 
-   public AvatarRobotPointCloudParameters getPointCloudParameters(int pointCloudSensorId);
+   default AvatarRobotPointCloudParameters getPointCloudParameters(int pointCloudSensorId)
+   {
+      if (getPointCloudParameters() == null)
+         return null;
+      else
+         return getPointCloudParameters()[pointCloudSensorId];
+   }
 
-   public boolean isMultisenseHead();
+   default boolean isMultisenseHead()
+   {
+      return false;
+   }
 }

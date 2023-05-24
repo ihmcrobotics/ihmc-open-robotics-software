@@ -28,6 +28,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.tools.thread.Throttler;
@@ -141,7 +142,7 @@ public class RDXFootstepPlanning
       if (heightMapMessage != null)
       {
          assumeFlatGround = false;
-         request.setHeightMapMessage(heightMapMessage);
+         request.setHeightMapData(HeightMapMessageTools.unpackMessage(heightMapMessage));
       }
       if (planarRegionsListMessage != null)
       {

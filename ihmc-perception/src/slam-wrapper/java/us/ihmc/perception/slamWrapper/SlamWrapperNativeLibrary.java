@@ -32,6 +32,7 @@ public class SlamWrapperNativeLibrary implements NativeLibraryDescription
          // TODO: Windows support
          case LINUX64:
             return NativeLibraryWithDependencies.fromFilename("libjniSlamWrapper.so",
+                                                              "libtbbmalloc.so",
                                                               "libtbb.so",
                                                               "libboost_filesystem.so",
                                                               "libboost_chrono.so",

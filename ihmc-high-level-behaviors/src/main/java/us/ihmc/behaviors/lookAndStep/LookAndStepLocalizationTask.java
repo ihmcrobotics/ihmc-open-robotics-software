@@ -2,6 +2,7 @@ package us.ihmc.behaviors.lookAndStep;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import std_msgs.msg.dds.Empty;
+import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
@@ -32,12 +33,12 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.ClosestPointForUI;
-import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.REACHED_GOAL;
+import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
 public class LookAndStepLocalizationTask
 {
    protected StatusLogger statusLogger;
+   protected BehaviorHelper helper;
    protected UIPublisher uiPublisher;
    protected Consumer<ROS2Topic<Empty>> ros2EmptyPublisher;
    protected LookAndStepBodyPathPlanning bodyPathPlanning;
@@ -66,6 +67,7 @@ public class LookAndStepLocalizationTask
          ros2LookAndStepParameters = lookAndStep.ros2LookAndStepParameters;
          lookAndStepParameters = ros2LookAndStepParameters.getStoredPropertySet();
          finishedWalkingNotification = lookAndStep.helper.subscribeToWalkingCompletedViaNotification();
+         helper = lookAndStep.helper;
          ros2EmptyPublisher = lookAndStep.helper::publish;
          bodyPathPlanning = lookAndStep.bodyPathPlanning;
          behaviorStateReference = lookAndStep.behaviorStateReference;
@@ -138,7 +140,7 @@ public class LookAndStepLocalizationTask
       Pose3D closestPoseAlongPath = new Pose3D();
       int closestSegmentIndex = BodyPathPlannerTools.findClosestPoseAlongPath(bodyPathPlan, imminentMidFeetPose.getPosition(), closestPoseAlongPath);
 
-      uiPublisher.publishToUI(ClosestPointForUI, closestPoseAlongPath);
+      helper.publish(CLOSEST_POINT_FOR_UI, closestPoseAlongPath);
 
       Pose3DReadOnly terminalGoal = bodyPathPlan.get(bodyPathPlan.size() - 1);
       double distanceToExactGoal = imminentMidFeetPose.getPosition().distanceXY(terminalGoal.getPosition());

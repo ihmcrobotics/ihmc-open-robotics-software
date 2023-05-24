@@ -2,81 +2,35 @@ package us.ihmc.robotics.partNames;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.base.CaseFormat;
+
 public enum ArmJointName
 {
-   CLAVICLE_ROLL, SHOULDER_YAW, SHOULDER_ROLL, SHOULDER_PITCH, ELBOW_PITCH, WRIST_ROLL, FIRST_WRIST_PITCH, SECOND_WRIST_PITCH, ELBOW_ROLL, ELBOW_YAW, WRIST_YAW;
+   CLAVICLE_ROLL,
+   SHOULDER_YAW,
+   SHOULDER_ROLL,
+   SHOULDER_PITCH,
+   ELBOW_PITCH,
+   WRIST_ROLL,
+   FIRST_WRIST_PITCH,
+   SECOND_WRIST_PITCH,
+   ELBOW_ROLL,
+   ELBOW_YAW,
+   WRIST_YAW;
 
    public static final ArmJointName[] values = values();
-   
+
    public String getCamelCaseNameForStartOfExpression()
    {
-      switch (this)
-      {
-         case CLAVICLE_ROLL:
-         {
-            return "clavicleRoll";
-         }
-         case SHOULDER_YAW :
-         {
-            return "shoulderYaw";
-         }
-
-         case SHOULDER_ROLL :
-         {
-            return "shoulderRoll";
-         }
-
-         case SHOULDER_PITCH :
-         {
-            return "shoulderPitch";
-         }
-
-         case ELBOW_PITCH :
-         {
-            return "elbowPitch";
-         }
-         
-         case ELBOW_ROLL :
-         {
-            return "elbowRoll";
-         }
-         
-         case ELBOW_YAW :
-         { 
-            return "elbowYaw";
-         }
-         
-         case WRIST_ROLL :
-         {
-            return "wristRoll";
-         }
-         
-         case FIRST_WRIST_PITCH:
-         {
-            return "firstWristPitch";
-         }
-
-         case SECOND_WRIST_PITCH:
-         {
-            return "secondWristPitch";
-         }
-         
-         case WRIST_YAW:
-            return "wristYaw";
-
-         default :
-         {
-            throw new RuntimeException("Should not get to here");
-         }
-      }
+      return CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, name());
    }
-
 
    public String getCamelCaseNameForMiddleOfExpression()
    {
       return StringUtils.capitalize(getCamelCaseNameForStartOfExpression());
    }
 
+   @Override
    public String toString()
    {
       return getCamelCaseNameForMiddleOfExpression();

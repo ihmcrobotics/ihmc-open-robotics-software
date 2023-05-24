@@ -14,6 +14,10 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
 
+/**
+ * Uses OpenCV to load a PNG icon from file or as a resource
+ * and writes it to an OpenGL texture to be rendered by libGDX.
+ */
 public class RDXIconTexture
 {
    private final Texture texture;
@@ -41,7 +45,8 @@ public class RDXIconTexture
       BytePointer bytePointer = new BytePointer(directByteBuffer);
       Mat encodedDataMat = new Mat(bytes.length, 1, opencv_core.CV_8UC1, bytePointer);
 
-      Mat readImage = opencv_imgcodecs.imdecode(encodedDataMat, opencv_imgcodecs.IMREAD_COLOR);
+      // IMREAD_UNCHANGED will keep the 4th channel, the alpha channel; IMREAD_COLOR drops it.
+      Mat readImage = opencv_imgcodecs.imdecode(encodedDataMat, opencv_imgcodecs.IMREAD_UNCHANGED);
       texture = initialize(readImage);
    }
 
