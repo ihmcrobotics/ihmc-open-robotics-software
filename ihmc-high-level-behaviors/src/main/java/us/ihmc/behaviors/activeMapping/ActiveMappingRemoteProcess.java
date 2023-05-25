@@ -93,7 +93,7 @@ public class ActiveMappingRemoteProcess
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, configurationParameters);
 
-      ros2Helper.subscribeViaCallback(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS_WITH_POSE, this::onPlanarRegionsReceived);
+      ros2Helper.subscribeViaCallback(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, this::onPlanarRegionsReceived);
       ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(WalkingStatusMessage.class, robotModel.getSimpleRobotName()), walkingStatusMessage::set);
 
       executorService.scheduleAtFixedRate(this::updateActiveMappingPlan, 0, 500, TimeUnit.MILLISECONDS);
