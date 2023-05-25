@@ -713,7 +713,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       if (robotVersion == ValkyrieRobotVersion.ARM_MASS_SIM)
       {
-         ValkyrieArmMassSimCollisionModel collisionModel = new ValkyrieArmMassSimCollisionModel(getJointMap(), true);
+         ValkyrieArmMassSimCollisionModel collisionModel = new ValkyrieArmMassSimCollisionModel(getJointMap(), getContactPointParameters(), true);
          collisionModel.setCollidableHelper(helper, robotCollisionMask, environmentCollisionMasks);
          return collisionModel;
       }
