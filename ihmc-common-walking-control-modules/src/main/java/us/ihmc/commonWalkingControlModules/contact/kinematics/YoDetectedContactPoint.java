@@ -61,6 +61,7 @@ public class YoDetectedContactPoint
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(name);
       group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D(name + "Normal", contactPointPosition, contactPointNormal, 0.2, ColorDefinitions.Red()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D(name + "InverseNormal", contactPointPosition, contactPointNormal, -0.2, ColorDefinitions.LightSeaGreen()));
       group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D(name + "Position", contactPointPosition, 0.03, ColorDefinitions.Red()));
       return group;
    }
