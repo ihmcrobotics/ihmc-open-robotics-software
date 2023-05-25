@@ -6,7 +6,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.ImageMessage;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
@@ -64,7 +63,6 @@ public class TerrainPerceptionProcessWithDriver
    private final Throttler throttler = new Throttler();
 
    private final ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic;
-   private final ROS2Topic<PlanarRegionsListMessage> regionsTopic;
    private final Supplier<ReferenceFrame> sensorFrameUpdater;
    private final ROS2Topic<ImageMessage> colorTopic;
    private final ROS2Topic<ImageMessage> depthTopic;
@@ -100,7 +98,6 @@ public class TerrainPerceptionProcessWithDriver
                                              ROS2Topic<ImageMessage> depthTopic,
                                              ROS2Topic<ImageMessage> colorTopic,
                                              ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic,
-                                             ROS2Topic<PlanarRegionsListMessage> regionsTopic,
                                              Supplier<ReferenceFrame> sensorFrameUpdater)
    {
       this.realsenseConfiguration = realsenseConfiguration;
@@ -108,7 +105,6 @@ public class TerrainPerceptionProcessWithDriver
       this.colorTopic = colorTopic;
       this.frameRegionsTopic = frameRegionsTopic;
       this.sensorFrameUpdater = sensorFrameUpdater;
-      this.regionsTopic = regionsTopic;
 
       this.outputPeriod = UnitConversions.hertzToSeconds(31.0f);
 
@@ -293,7 +289,6 @@ public class TerrainPerceptionProcessWithDriver
             FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
             extractFramePlanarRegionsList(depthBytedecoImage, cameraFrame, framePlanarRegionsList);
 
-            PerceptionMessageTools.publishPlanarRegionsList(framePlanarRegionsList.getPlanarRegionsList(), regionsTopic, ros2Helper);
             PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, frameRegionsTopic, ros2Helper);
 
             LogTools.info("Total Planar Regions: " + framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions());
@@ -331,13 +326,12 @@ public class TerrainPerceptionProcessWithDriver
    {
       // Benchtop L515: F1120592, Tripod: F1121365, Local: F0245563, Nadia: F112114, D435: 108522071219, D435: 213522252883, 215122254074
       String realsenseSerialNumber = System.getProperty("d455.serial.number", "213522252883");
-      TerrainPerceptionProcessWithDriver process =
-              new TerrainPerceptionProcessWithDriver(realsenseSerialNumber, RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
-                      PerceptionAPI.D455_DEPTH_IMAGE,
-                      PerceptionAPI.D455_COLOR_IMAGE,
-                      PerceptionAPI.PERSPECTIVE_RAPID_REGIONS_WITH_POSE,
-                      PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
-                      ReferenceFrame::getWorldFrame);
+      TerrainPerceptionProcessWithDriver process = new TerrainPerceptionProcessWithDriver(realsenseSerialNumber,
+                                                                                          RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
+                                                                                          PerceptionAPI.D455_DEPTH_IMAGE,
+                                                                                          PerceptionAPI.D455_COLOR_IMAGE,
+                                                                                          PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
+                                                                                          ReferenceFrame::getWorldFrame);
       process.run();
       ThreadTools.sleepForever();
    }

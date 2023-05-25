@@ -9,7 +9,7 @@ import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
 import org.bytedeco.spinnaker.global.Spinnaker_C;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
-import us.ihmc.perception.spinnaker.SpinnakerSystemManager;
+import us.ihmc.perception.spinnaker.SpinnakerBlackflyManager;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanel;
@@ -28,7 +28,7 @@ public class RDXBlackflyReader
    private final String serialNumber;
    private volatile int imageWidth = -1;
    private volatile int imageHeight = -1;
-   private SpinnakerSystemManager spinnakerSystemManager;
+   private SpinnakerBlackflyManager spinnakerBlackflyManager;
    private SpinnakerBlackfly blackfly;
    private spinImage spinImage;
    private BytePointer spinImageDataPointer;
@@ -47,8 +47,8 @@ public class RDXBlackflyReader
 
    public void create()
    {
-      spinnakerSystemManager = new SpinnakerSystemManager();
-      blackfly = spinnakerSystemManager.createBlackfly(serialNumber);
+      spinnakerBlackflyManager = new SpinnakerBlackflyManager();
+      blackfly = spinnakerBlackflyManager.createSpinnakerBlackfly(serialNumber);
 
       spinImage = new spinImage();
 
@@ -144,7 +144,7 @@ public class RDXBlackflyReader
       ThreadTools.sleep(250);
       blackfly.stopAcquiringImages();
       ThreadTools.sleep(100);
-      spinnakerSystemManager.destroy();
+      spinnakerBlackflyManager.destroy();
    }
 
    public boolean getImageWasRead()

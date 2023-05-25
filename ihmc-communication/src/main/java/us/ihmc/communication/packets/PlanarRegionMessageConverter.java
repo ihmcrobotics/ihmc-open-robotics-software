@@ -236,6 +236,13 @@ public class PlanarRegionMessageConverter
       return framePlanarRegionsListToReturn;
    }
 
+   public static PlanarRegionsList convertToPlanarRegionsListInWorld(FramePlanarRegionsListMessage message)
+   {
+      PlanarRegionsList planarRegionsList = convertToPlanarRegionsList(message.getPlanarRegions());
+      planarRegionsList.applyTransform(new RigidBodyTransform(message.getSensorOrientation(), message.getSensorPosition()));
+      return planarRegionsList;
+   }
+
    public static FramePlanarRegionsListMessage convertToFramePlanarRegionsListMessage(FramePlanarRegionsList frameRegions)
    {
       FramePlanarRegionsListMessage messageToReturn = new FramePlanarRegionsListMessage();

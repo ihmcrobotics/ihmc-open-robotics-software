@@ -132,6 +132,7 @@ public class BytedecoImage
 
    public void changeAddress(long address)
    {
+      bytedecoByteBufferPointer.deallocate();
       bytedecoByteBufferPointer.setAddress(address);
       backingDirectByteBuffer = bytedecoByteBufferPointer.asByteBuffer(); // Allocates, but on the native side?
       bytedecoOpenCVMat.data(bytedecoByteBufferPointer);
