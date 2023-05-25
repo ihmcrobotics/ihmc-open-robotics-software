@@ -74,7 +74,7 @@ public class PlanarRegionMappingHandler
    private final AtomicReference<RigidBodyTransform> latestKeyframePoseForRendering = new AtomicReference<>(new RigidBodyTransform());
 
    private boolean enableCapture = false;
-   private boolean enableLiveMode = false;
+   private boolean enableLiveMode = true;
 
    private static final File logDirectory = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator);
 
@@ -270,16 +270,6 @@ public class PlanarRegionMappingHandler
       }
    }
 
-   public void autoIncrementButtonCallback()
-   {
-      updateMapFuture = executorService.scheduleAtFixedRate(this::nextButtonCallback, 0, 120, TimeUnit.MILLISECONDS);
-   }
-
-   public void pauseButtonCallback()
-   {
-      updateMapFuture.cancel(true);
-   }
-
    public void nextButtonCallback()
    {
       if (source == DataSource.PLANAR_REGIONS_LOG && (planarRegionListIndex < planarRegionsListBuffer.getBufferLength()))
@@ -350,11 +340,6 @@ public class PlanarRegionMappingHandler
                                                            });
    }
 
-   public PlanarRegionsList pollMapRegions()
-   {
-      return latestPlanarRegionsForRendering.getAndSet(null);
-   }
-
    public RigidBodyTransform pollKeyframePose()
    {
       LogTools.debug("Polling Keyframe Pose: {}", latestKeyframePoseForRendering.get());
@@ -366,11 +351,6 @@ public class PlanarRegionMappingHandler
       boolean modified = planarRegionMap.isModified();
       planarRegionMap.setModified(false);
       return modified;
-   }
-
-   public boolean hasPlanarRegionsToRender()
-   {
-      return latestPlanarRegionsForRendering.get() != null;
    }
 
    public void updateMapWithNewRegions(FramePlanarRegionsList regions)
@@ -388,21 +368,6 @@ public class PlanarRegionMappingHandler
       latestPlanarRegionsForPublishing.set(planarRegionMap.getMapRegions().copy());
 
       LogTools.debug("Total Regions in Map: {}", planarRegionMap.getMapRegions().getNumberOfPlanarRegions());
-   }
-
-   public boolean isCaptured()
-   {
-      return enableCapture;
-   }
-
-   public void setCaptured(boolean enableCapture)
-   {
-      this.enableCapture = enableCapture;
-   }
-
-   public boolean isEnabled()
-   {
-      return enableLiveMode;
    }
 
    public void resetMap()
@@ -454,6 +419,41 @@ public class PlanarRegionMappingHandler
          currentRegions.getPlanarRegionsList().applyTransform(currentToPreviousTransform);
 
       PerceptionDebugTools.printTransform("ComputeICP", currentToPreviousTransform, true);
+   }
+
+   public void autoIncrementButtonCallback()
+   {
+      updateMapFuture = executorService.scheduleAtFixedRate(this::nextButtonCallback, 0, 120, TimeUnit.MILLISECONDS);
+   }
+
+   public void pauseButtonCallback()
+   {
+      updateMapFuture.cancel(true);
+   }
+
+   public PlanarRegionsList pollMapRegions()
+   {
+      return latestPlanarRegionsForRendering.getAndSet(null);
+   }
+
+   public boolean hasPlanarRegionsToRender()
+   {
+      return latestPlanarRegionsForRendering.get() != null;
+   }
+
+   public boolean isCaptured()
+   {
+      return enableCapture;
+   }
+
+   public void setCaptured(boolean enableCapture)
+   {
+      this.enableCapture = enableCapture;
+   }
+
+   public boolean isEnabled()
+   {
+      return enableLiveMode;
    }
 
    public void hardResetTheMap()
