@@ -7,8 +7,8 @@ import java.util.ArrayList;
 
 public class RangeScanner
 {
-   private final int numPoints = 100;
-   private final int maxRange = 10;
+   private final int numPoints = 24;
+   private final int maxRange = 20;
 
    public Point2D getClosestIntersectionPoint(Point2D start_point, Point2D end_point, Point2D obstacle_center, float obstacle_size_x, float obstacle_size_y)
    {

@@ -229,7 +229,6 @@ public class PerceptionDebugTools
 
       if (screenSize != -1)
       {
-         LogTools.info("Resizing window to %d".formatted(screenSize));
          opencv_highgui.resizeWindow(tag, screenSize, screenSize);
       }
 
