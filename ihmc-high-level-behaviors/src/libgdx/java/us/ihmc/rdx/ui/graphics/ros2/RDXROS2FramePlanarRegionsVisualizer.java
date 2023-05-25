@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.graphics.ros2;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.robotics.geometry.FramePlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -22,10 +22,9 @@ public class RDXROS2FramePlanarRegionsVisualizer extends RDXPlanarRegionsVisuali
       {
          getExecutorService().clearQueueAndExecute(() ->
          {
-            FramePlanarRegionsList framePlanarRegionsList = PlanarRegionMessageConverter.convertToFramePlanarRegionsList(framePlanarRegionsListMessage);
-            framePlanarRegionsList.changeFrameToWorld();
-            setNumberOfPlanarRegions(framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions());
-            getPlanarRegionsGraphic().generateMeshes(framePlanarRegionsList.getPlanarRegionsList());
+            PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsListInWorld(framePlanarRegionsListMessage);
+            setNumberOfPlanarRegions(planarRegionsList.getNumberOfPlanarRegions());
+            getPlanarRegionsGraphic().generateMeshes(planarRegionsList);
          });
       }
    }

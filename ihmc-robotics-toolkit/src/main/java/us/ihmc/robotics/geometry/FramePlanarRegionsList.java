@@ -19,16 +19,6 @@ public class FramePlanarRegionsList
       this.planarRegionsList = new PlanarRegionsList();
    }
 
-   /**
-    * Use this method to change the frame of the planar regions in the list to world frame.
-    * Warning! Don't call this more than once. This method currently is a one-time conversion
-    * to world frame and you can't undo it.
-    */
-   public void changeFrameToWorld()
-   {
-      planarRegionsList.applyTransform(sensorToWorldFrameTransform);
-   }
-
    public PlanarRegionsList getPlanarRegionsList()
    {
       return planarRegionsList;
