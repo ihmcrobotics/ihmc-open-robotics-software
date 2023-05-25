@@ -145,8 +145,8 @@ public class DualBlackflyCamera
 
             while (!destroyed)
             {
-               throttler.waitAndRun();
                imageProcessAndPublish();
+               throttler.waitAndRun();
             }
          }
       }, "SpinnakerImageProcessAndPublish");
