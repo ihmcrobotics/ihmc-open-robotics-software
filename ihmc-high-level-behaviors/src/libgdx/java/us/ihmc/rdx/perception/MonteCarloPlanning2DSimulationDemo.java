@@ -9,13 +9,14 @@ import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanner;
 import us.ihmc.behaviors.monteCarloPlanning.World;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple4D.Vector4D32;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.util.ArrayList;
 
 import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_GRAY2RGB;
 
-class MonteCarlo2DSimulationDemo
+class MonteCarloPlanning2DSimulationDemo
 {
    public static void main(String[] args)
    {
@@ -26,20 +27,26 @@ class MonteCarlo2DSimulationDemo
       int iterations = 10;
       int simulationCount = 10;
 
-      // obstacles = [(10, 20, 5, 5), (45, 61, 8, 8), (70, 82, 10, 8), (90, 43, 3, 3), (20, 34, 6, 6)]
-
       ArrayList<Vector4D32> obstacles = new ArrayList<>();
-      obstacles.add(new Vector4D32(30, 10, 1, 10));
-      obstacles.add(new Vector4D32(30, 28, 1, 2));
-      obstacles.add(new Vector4D32(15, 30, 15, 1));
-      obstacles.add(new Vector4D32(60, 30, 1, 30));
-      obstacles.add(new Vector4D32(10, 60, 10, 1));
-      obstacles.add(new Vector4D32(58, 60, 2, 1));
-      obstacles.add(new Vector4D32(80, 40, 1, 40));
-      obstacles.add(new Vector4D32(30, 80, 30, 1));
-      obstacles.add(new Vector4D32(75, 80, 5, 1));
 
-      Point2D agentPos = new Point2D(20, 60);
+      obstacles.add(new Vector4D32(10, 20, 5, 5));
+      obstacles.add(new Vector4D32(45, 61, 8, 8));
+      obstacles.add(new Vector4D32(70, 82, 10, 8));
+      obstacles.add(new Vector4D32(90, 43, 3, 3));
+      obstacles.add(new Vector4D32(20, 34, 6, 6));
+
+
+      //obstacles.add(new Vector4D32(30, 10, 1, 10));
+      //obstacles.add(new Vector4D32(30, 28, 1, 2));
+      //obstacles.add(new Vector4D32(15, 30, 15, 1));
+      //obstacles.add(new Vector4D32(60, 30, 1, 30));
+      //obstacles.add(new Vector4D32(10, 60, 10, 1));
+      //obstacles.add(new Vector4D32(58, 60, 2, 1));
+      //obstacles.add(new Vector4D32(80, 40, 1, 40));
+      //obstacles.add(new Vector4D32(30, 80, 30, 1));
+      //obstacles.add(new Vector4D32(75, 80, 5, 1));
+
+      Point2D agentPos = new Point2D(10, 10);
       Point2D goal = new Point2D(10, worldHeight - 10);
       int goalMargin = 5;
 
@@ -80,9 +87,9 @@ class MonteCarlo2DSimulationDemo
 
          // Draw a red rectangle on the obstacle
          opencv_imgproc.rectangle(gridColor,
-                 new Point(obstacleMinX, obstacleMinY),
-                 new Point(obstacleMaxX, obstacleMaxY),
-                 new Scalar(0, 0, 255, 255)
+                 new Point(obstacleMinY, obstacleMinX),
+                 new Point(obstacleMaxY, obstacleMaxX),
+                 new Scalar(150, 150, 150, 150), -1, 0, 0
          );
       }
 
@@ -94,12 +101,10 @@ class MonteCarlo2DSimulationDemo
       int goalMaxY = (int) (world.getGoal().getY32() + goalMargin);
 
       opencv_imgproc.rectangle(gridColor,
-              new Point(goalMinX, goalMinY),
-              new Point(goalMaxX, goalMaxY),
-              new Scalar(0, 255, 255, 255)
+              new Point(goalMinY, goalMinX),
+              new Point(goalMaxY, goalMaxX),
+              new Scalar(255, 255, 255, 255), -1, 0, 0
       );
-
-
 
       // Set the agent's position as 50
       gridColor.ptr((int)(agent.getPreviousPosition().getX32()), (int)(agent.getPreviousPosition().getY32())).put(new byte[] {0, 0, 0});

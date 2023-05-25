@@ -12,7 +12,7 @@ public class World
 {
    private final Mat grid;
    private final Point2D goal;
-   private final ArrayList<Vector4D32> obstacles = new ArrayList<>();
+   private final ArrayList<Vector4D32> obstacles;
 
    private final int gridHeight;
    private final int gridWidth;
@@ -20,6 +20,7 @@ public class World
 
    public World(ArrayList<Vector4D32> obstacles, Point2D goal, int goalMargin, int gridHeight, int gridWidth)
    {
+      this.obstacles = obstacles;
       this.grid = new Mat(gridHeight, gridWidth, opencv_core.CV_8UC1);
       this.gridHeight = gridHeight;
       this.gridWidth = gridWidth;
