@@ -190,7 +190,6 @@ public class StructuralPerceptionProcessWithDriver
 
    public static void main(String[] args)
    {
-      new StructuralPerceptionProcessWithDriver(PerceptionAPI.OUSTER_DEPTH_IMAGE, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
-                                                ReferenceFrame::getWorldFrame);
+      new StructuralPerceptionProcessWithDriver(PerceptionAPI.OUSTER_DEPTH_IMAGE, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ReferenceFrame::getWorldFrame);
    }
 }
