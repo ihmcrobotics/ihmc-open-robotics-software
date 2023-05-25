@@ -53,8 +53,6 @@ public class DualBlackflyCamera
 
    private final RobotSide side;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final RigidBodyTransform cameraTransformToParent;
-   private final ROS2Node ros2Node;
    private SpinnakerBlackfly spinnakerBlackfly;
    private final ROS2StoredPropertySet<IntrinsicCameraMatrixProperties> ousterFisheyeColoringIntrinsicsROS2;
 
@@ -65,9 +63,9 @@ public class DualBlackflyCamera
    private final PredefinedSceneNodeLibrary predefinedSceneNodeLibrary;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
-   private ROS2TunedRigidBodyTransform remoteTunableCameraTransform;
+   private final ROS2TunedRigidBodyTransform remoteTunableCameraTransform;
    private final ROS2DetectableSceneNodesPublisher detectableSceneObjectsPublisher = new ROS2DetectableSceneNodesPublisher();
-   private ROS2DetectableSceneNodesSubscription detectableSceneNodesSubscription;
+   private final ROS2DetectableSceneNodesSubscription detectableSceneNodesSubscription;
 
    private final AtomicReference<BytePointer> spinImageData = new AtomicReference<>();
    private final AtomicReference<Instant> spinImageAcquisitionTime = new AtomicReference<>();
@@ -102,8 +100,6 @@ public class DualBlackflyCamera
    {
       this.side = side;
       this.syncedRobot = syncedRobot;
-      this.cameraTransformToParent = cameraTransformToParent;
-      this.ros2Node = ros2Node;
       this.spinnakerBlackfly = spinnakerBlackfly;
       this.ousterFisheyeColoringIntrinsics = ousterFisheyeColoringIntrinsics;
       this.predefinedSceneNodeLibrary = predefinedSceneNodeLibrary;
@@ -116,6 +112,15 @@ public class DualBlackflyCamera
                                                                         DualBlackflyComms.OUSTER_FISHEYE_COLORING_INTRINSICS,
                                                                         ousterFisheyeColoringIntrinsics);
 
+      remoteTunableCameraTransform = ROS2TunedRigidBodyTransform.toBeTuned(ros2Helper,
+                                                                           ROS2Tools.OBJECT_DETECTION_CAMERA_TO_PARENT_TUNING,
+                                                                           cameraTransformToParent);
+
+      detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(predefinedSceneNodeLibrary.getDetectableSceneNodes(),
+                                                                                  ros2Helper,
+                                                                                  ROS2IOTopicQualifier.COMMAND);
+
+      // Camera read thread
       ThreadTools.startAsDaemon(new Runnable()
       {
          @Override
@@ -128,6 +133,7 @@ public class DualBlackflyCamera
          }
       }, "SpinnakerCameraRead");
 
+      // Image processing and publishing thread
       ThreadTools.startAThread(new Runnable()
       {
          private final Throttler throttler = new Throttler();
@@ -209,21 +215,13 @@ public class DualBlackflyCamera
                                                        undistortionMap1,
                                                        undistortionMap2);
 
+         // Create arUco marker detection
          ReferenceFrame blackflyCameraFrame = syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame();
-
          arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
          arUcoMarkerDetection.create(blackflyCameraFrame);
          arUcoMarkerDetection.setSourceImageForDetection(undistortedImage);
          newCameraMatrixEstimate.copyTo(arUcoMarkerDetection.getCameraMatrix());
          arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetection, ros2Helper, predefinedSceneNodeLibrary.getArUcoMarkerIDsToSizes());
-
-         remoteTunableCameraTransform = ROS2TunedRigidBodyTransform.toBeTuned(ros2Helper,
-                                                                              ROS2Tools.OBJECT_DETECTION_CAMERA_TO_PARENT_TUNING,
-                                                                              cameraTransformToParent);
-
-         detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(predefinedSceneNodeLibrary.getDetectableSceneNodes(),
-                                                                                     ros2Helper,
-                                                                                     ROS2IOTopicQualifier.COMMAND);
       }
    }
 
@@ -296,10 +294,7 @@ public class DualBlackflyCamera
          ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, predefinedSceneNodeLibrary);
          detectableSceneObjectsPublisher.publish(predefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2Helper, ROS2IOTopicQualifier.STATUS);
       }
-      else
-      {
-         // TODO: left behavior?
-      }
+      // TODO: left behavior?
 
       remoteTunableCameraTransform.update();
       syncedRobot.update();
@@ -336,6 +331,9 @@ public class DualBlackflyCamera
       destroyed = true;
       if (spinnakerBlackfly != null)
          spinnakerBlackfly.stopAcquiringImages();
+      if (arUcoMarkerDetection != null)
+         arUcoMarkerDetection.destroy();
       spinnakerBlackfly = null;
+      arUcoMarkerDetection = null;
    }
 }
