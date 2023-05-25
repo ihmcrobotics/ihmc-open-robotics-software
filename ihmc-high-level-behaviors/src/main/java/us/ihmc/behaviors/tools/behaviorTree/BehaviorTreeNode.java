@@ -12,7 +12,6 @@ public abstract class BehaviorTreeNode implements BehaviorTreeNodeBasics
    private BehaviorTreeNodeStatus previousStatus = null;
    private Instant lastTickInstant = null;
    private String name = getClass().getSimpleName();
-   // TODO: Type should just be a String of the class simple name
    private Class<?> type = BehaviorTreeNode.class;
 
    @Override
