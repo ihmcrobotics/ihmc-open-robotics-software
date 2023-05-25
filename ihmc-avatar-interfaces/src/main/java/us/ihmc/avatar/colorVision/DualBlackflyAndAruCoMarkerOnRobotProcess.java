@@ -64,7 +64,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
 
    private void destroy()
    {
-      for (DualBlackflyCamera dualBlackflyCamera : dualBlackflyCameras.values())
+      for (DualBlackflyCamera dualBlackflyCamera : dualBlackflyCameras)
       {
          if (dualBlackflyCamera != null)
             dualBlackflyCamera.destroy();
