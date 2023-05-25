@@ -6,7 +6,6 @@ import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.ImageMessage;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.PerceptionAPI;
@@ -74,19 +73,16 @@ public class StructuralPerceptionProcessWithDriver
 
    private final ROS2Helper ros2Helper;
    private ROS2Topic<ImageMessage> depthTopic;
-   private ROS2Topic<PlanarRegionsListMessage> regionsTopic;
    private ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic;
    private ROS2StoredPropertySetGroup ros2PropertySetGroup;
 
    private final RapidPlanarRegionsExtractor rapidRegionsExtractor;
 
    public StructuralPerceptionProcessWithDriver(ROS2Topic<ImageMessage> depthTopic,
-                                                ROS2Topic<PlanarRegionsListMessage> regionsTopic,
                                                 ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic,
                                                 Supplier<ReferenceFrame> sensorFrameUpdater)
    {
       this.depthTopic = depthTopic;
-      this.regionsTopic = regionsTopic;
       this.frameRegionsTopic = frameRegionsTopic;
       this.sensorFrameUpdater = sensorFrameUpdater;
 
@@ -184,7 +180,7 @@ public class StructuralPerceptionProcessWithDriver
 
       LogTools.info("Extracted {} planar regions", planarRegionsList.getNumberOfPlanarRegions());
 
-      PerceptionMessageTools.publishPlanarRegionsList(planarRegionsList, regionsTopic, ros2Helper);
+      PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, frameRegionsTopic, ros2Helper);
    }
 
    private void extractFramePlanarRegionsList(BytedecoImage depthImage, ReferenceFrame cameraFrame, FramePlanarRegionsList framePlanarRegionsList)
@@ -194,9 +190,6 @@ public class StructuralPerceptionProcessWithDriver
 
    public static void main(String[] args)
    {
-      new StructuralPerceptionProcessWithDriver(PerceptionAPI.OUSTER_DEPTH_IMAGE,
-                                                PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
-                                                PerceptionAPI.PERSPECTIVE_RAPID_REGIONS_WITH_POSE,
-                                                ReferenceFrame::getWorldFrame);
+      new StructuralPerceptionProcessWithDriver(PerceptionAPI.OUSTER_DEPTH_IMAGE, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ReferenceFrame::getWorldFrame);
    }
 }
