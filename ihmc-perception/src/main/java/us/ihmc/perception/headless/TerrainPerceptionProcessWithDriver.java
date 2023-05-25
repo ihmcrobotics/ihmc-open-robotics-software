@@ -109,7 +109,8 @@ public class TerrainPerceptionProcessWithDriver
                                              RealsenseConfiguration realsenseConfiguration,
                                              ROS2Topic<ImageMessage> depthTopic,
                                              ROS2Topic<ImageMessage> colorTopic,
-                                             ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic, Supplier<ReferenceFrame> sensorFrameUpdater)
+                                             ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic,
+                                             Supplier<ReferenceFrame> sensorFrameUpdater)
    {
       this.realsenseConfiguration = realsenseConfiguration;
       this.depthTopic = depthTopic;
