@@ -256,6 +256,11 @@ public class DualBlackflyCamera
       spinnakerBlackfly.releaseImage(spinImage);
    }
 
+   /**
+    * Get the last image read from the camera read thread, undistort fisheye,
+    * update arUco marker detection (if right fisheye camera), change pixel formats,
+    * apply jpeg compression, and publish over the network
+    */
    private void imageProcessAndPublish()
    {
       BytePointer spinImageData = this.spinImageData.get();
