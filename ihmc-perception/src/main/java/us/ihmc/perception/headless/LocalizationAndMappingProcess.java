@@ -168,7 +168,7 @@ public class LocalizationAndMappingProcess
    {
       ROS2Node ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "slam_node");
       new LocalizationAndMappingProcess("Nadia",
-                                        PerceptionAPI.PERSPECTIVE_RAPID_REGIONS_WITH_POSE,
+                                        PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
                                         PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
                                         ros2Node,
                                         true);
