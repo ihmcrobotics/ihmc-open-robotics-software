@@ -35,6 +35,7 @@ import java.util.ArrayList;
  */
 public class RDXManualFootstepPlacement implements RenderableProvider
 {
+   private static final double MAX_DISTANCE_MULTIPLIER = 3.0;
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private RDXInteractableFootstep footstepBeingPlaced;
    private boolean footstepBeingPlacedIsReachable;
@@ -210,17 +211,14 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    {
       if (renderTooltip)
       {
-         String footstepPlacementText;
          if (footstepBeingPlacedIsReachable)
          {
-            footstepPlacementText = "Safe to place here!";
+            tooltip.render("Right click to exit", 1);
          }
          else
          {
-            footstepPlacementText = "Footstep out of reach.";
+            tooltip.render("Footstep out of reach.\nRight click to exit", 2);
          }
-
-         tooltip.render(footstepPlacementText + "\nRight click to exit", 2);
       }
    }
 
@@ -295,28 +293,25 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
    private boolean isFootstepBeingPlacedReachable()
    {
-      FramePose3D previousFootstepPose;
-
+      FramePose3D previousFootstepPose = new FramePose3D();
       // Find the previous footstep of the opposite side of the footstep being placed
       int i = footstepPlan.getNumberOfFootsteps() - 1;
       while (i >= 0 && footstepPlan.getFootsteps().get(i).getFootstepSide() == footstepBeingPlaced.getFootstepSide())
       {
          --i;
       }
-
       if (i >= 0)
       {
-         previousFootstepPose = new FramePose3D(footstepPlan.getFootsteps().get(i).getFootPose());
+         previousFootstepPose.setIncludingFrame(footstepPlan.getFootsteps().get(i).getFootPose());
       }
       else
       {
-         previousFootstepPose = new FramePose3D();
          previousFootstepPose.setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(currentFootStepSide.getOppositeSide()));
       }
 
-      boolean isReachable = footstepBeingPlaced.getFootPose().getPositionDistance(previousFootstepPose) < 2.5 * footstepPlannerParameters.getMaximumStepReach();
-      isReachable &= footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ() < 2.9 * footstepPlannerParameters.getMaxStepZ();
-      isReachable &= footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ() > -2.9 * footstepPlannerParameters.getMaxStepZ();
+      boolean isReachable = footstepBeingPlaced.getFootPose().getPositionDistance(previousFootstepPose) < MAX_DISTANCE_MULTIPLIER * footstepPlannerParameters.getMaximumStepReach();
+      isReachable &= footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ() < MAX_DISTANCE_MULTIPLIER * footstepPlannerParameters.getMaxStepZ();
+      isReachable &= footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ() > -MAX_DISTANCE_MULTIPLIER * footstepPlannerParameters.getMaxStepZ();
 
       return isReachable;
    }
