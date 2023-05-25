@@ -376,6 +376,10 @@ public class PlanarRegionMappingHandler
 
    public void updateMapWithNewRegions(FramePlanarRegionsList regions)
    {
+      planarRegionMap.setModified(true);
+
+      LogTools.debug("Updating Map with {} regions", regions.getPlanarRegionsList().getNumberOfPlanarRegions());
+
       RigidBodyTransform keyframePose = planarRegionMap.registerRegions(regions.getPlanarRegionsList(), regions.getSensorToWorldFrameTransform());
 
       if (keyframePose != null)
@@ -383,6 +387,8 @@ public class PlanarRegionMappingHandler
 
       latestPlanarRegionsForRendering.set(planarRegionMap.getMapRegions().copy());
       latestPlanarRegionsForPublishing.set(planarRegionMap.getMapRegions().copy());
+
+      LogTools.debug("Total Regions in Map: {}", planarRegionMap.getMapRegions().getNumberOfPlanarRegions());
    }
 
    public boolean isCaptured()
