@@ -27,8 +27,8 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    private final ROS2Node ros2Node;
 
    public DualBlackflyAndAruCoMarkerOnRobotProcess(DRCRobotModel robotModel,
-                                                   IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics,
-                                                   PredefinedSceneNodeLibrary predefinedSceneNodeLibrary)
+                                                   PredefinedSceneNodeLibrary predefinedSceneNodeLibrary,
+                                                   IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics)
    {
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "blackfly_node");
 
