@@ -37,7 +37,7 @@ public class BehaviorMessageTools
    }
 
    /**
-    * We unpack a tree from a list of nodes using a stack that hold the number of
+    * We unpack a tree from a list of nodes using recursion and the number of
     * children of that node. We assume the ordering as packed in {@link #packBehaviorTreeMessage}.
     */
    public static BehaviorTreeNodeBasics unpackBehaviorTreeMessage(BehaviorTreeMessage behaviorTreeMessage)
