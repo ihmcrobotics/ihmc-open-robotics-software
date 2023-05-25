@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.contact.kinematics;
 
+import controller_msgs.msg.dds.MultiContactBalanceStatus;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -201,5 +202,29 @@ public class MeshBasedContactDetector
    public YoRegistry getRegistry()
    {
       return registry;
+   }
+
+   public void packMultiContactBalanceStatus(MultiContactBalanceStatus balanceStatus)
+   {
+      balanceStatus.getContactPointsInWorld().clear();
+      balanceStatus.getSurfaceNormalsInWorld().clear();
+      balanceStatus.getSupportRigidBodyIds().clear();
+
+      for (int i = 0; i < contactableRigidBodies.size(); i++)
+      {
+         RigidBodyBasics rigidBody = contactableRigidBodies.get(i);
+         List<YoDetectedContactPoint> contactPoints = contactPointMap.get(rigidBody);
+
+         for (int j = 0; j < contactPoints.size(); j++)
+         {
+            YoDetectedContactPoint contactPoint = contactPoints.get(j);
+            if (contactPoint.isInContact())
+            {
+               balanceStatus.getContactPointsInWorld().add().set(contactPoint.getContactPointPosition());
+               balanceStatus.getSurfaceNormalsInWorld().add().set(contactPoint.getContactPointNormal());
+               balanceStatus.getSupportRigidBodyIds().add(rigidBody.hashCode());
+            }
+         }
+      }
    }
 }
