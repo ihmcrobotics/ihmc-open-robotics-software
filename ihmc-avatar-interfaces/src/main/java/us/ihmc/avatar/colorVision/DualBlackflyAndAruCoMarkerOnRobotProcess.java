@@ -64,11 +64,11 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
 
    private void destroy()
    {
-      dualBlackflyCameras.forEach((robotSide, dualBlackflyCamera) ->
+      for (DualBlackflyCamera dualBlackflyCamera : dualBlackflyCameras.values())
       {
          if (dualBlackflyCamera != null)
             dualBlackflyCamera.destroy();
-      });
+      }
       ros2Node.destroy();
       spinnakerBlackflyManager.destroy();
    }
