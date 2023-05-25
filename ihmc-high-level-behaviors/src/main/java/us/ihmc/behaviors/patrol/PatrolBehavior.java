@@ -43,6 +43,8 @@ import us.ihmc.commons.thread.TypedNotification;
 
 /**
  * Walk through a list of waypoints in order, looping forever.
+ * This also was used to walk to high and low big planar regions autonomously.
+ * @deprecated Not supported right now. Being kept for reference or revival.
  */
 public class PatrolBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
 {

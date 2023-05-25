@@ -31,6 +31,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.*;
 
+/**
+ * This was for Atlas to deal with all the state machine stuff involves in doing
+ * stairs autonomously, I think we might be able to simplify it on Nadia.
+ * @deprecated Not supported right now. Being kept for reference or revival.
+ */
 public class TraverseStairsBehavior extends ResettingNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Traverse Stairs", TraverseStairsBehavior::new);

@@ -42,6 +42,11 @@ import java.util.function.Consumer;
 
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.REACHED_GOAL;
 
+/**
+ * This was used for the 2019 Atlas building exploration demo. It is called old because
+ * an upgrade was planned but never finished.
+ * @deprecated Not supported right now. Being kept for reference or revival.
+ */
 public class BuildingExplorationBehaviorOld extends ResettingNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Building Exploration", BuildingExplorationBehaviorOld::new);

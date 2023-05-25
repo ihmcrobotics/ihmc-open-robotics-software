@@ -54,6 +54,10 @@ import java.util.List;
 
 import static us.ihmc.pathPlanning.PlannerTestEnvironments.MAZE_CORRIDOR_SQUARE_SIZE;
 
+/**
+ * Used visibility graphs to walk through a maze.
+ * @deprecated Not supported right now. Being kept for reference or revival.
+ */
 public class NavigationBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Navigation", NavigationBehavior::new);

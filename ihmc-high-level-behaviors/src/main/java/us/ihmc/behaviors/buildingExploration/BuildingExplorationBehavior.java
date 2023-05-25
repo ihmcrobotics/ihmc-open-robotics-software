@@ -22,6 +22,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorAPI.*;
 import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorMode.*;
 
+/**
+ * This was intended to be an upgrade for the 2019 Atlas building exploration demo but never got used.
+ * @deprecated Not supported right now. Being kept for reference or revival.
+ */
 public class BuildingExplorationBehavior extends ResettingNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Building Exploration", BuildingExplorationBehavior::new);
