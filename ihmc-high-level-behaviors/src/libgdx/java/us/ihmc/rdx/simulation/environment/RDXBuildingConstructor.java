@@ -45,7 +45,6 @@ public class RDXBuildingConstructor extends ImGuiPanel
    private final RDXPose3DGizmo pose3DGizmo = new RDXPose3DGizmo();
    private final ImGuiPanel poseGizmoTunerPanel = pose3DGizmo.createTunerPanel(getClass().getSimpleName());
 
-   private final StepCheckIsPointInsideAlgorithm stepCheckIsPointInsideAlgorithm = new StepCheckIsPointInsideAlgorithm();
    private final RDX3DPanel panel3D;
    private final Point3D tempIntersection = new Point3D();
 
