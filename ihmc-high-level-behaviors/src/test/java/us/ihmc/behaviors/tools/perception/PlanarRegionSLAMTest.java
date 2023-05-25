@@ -1102,7 +1102,7 @@ class PlanarRegionSLAMTest
       FramePlanarRegionsList frameRegionsListOne = new FramePlanarRegionsList(listOne, new RigidBodyTransform());
       FramePlanarRegionsList frameRegionsListTwo = new FramePlanarRegionsList(listTwo, sensorToWorldTransform);
 
-      PlanarRegionMap map = new PlanarRegionMap(true);
+      PlanarRegionMap map = new PlanarRegionMap();
 
       map.submitRegionsUsingIterativeReduction(frameRegionsListOne);
       map.submitRegionsUsingIterativeReduction(frameRegionsListTwo);

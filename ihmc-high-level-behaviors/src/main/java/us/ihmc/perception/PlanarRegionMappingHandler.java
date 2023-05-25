@@ -119,16 +119,16 @@ public class PlanarRegionMappingHandler
 
    private PerceptionDataLoader perceptionDataLoader;
 
-   public PlanarRegionMappingHandler(boolean smoothing)
+   public PlanarRegionMappingHandler()
    {
       source = DataSource.SUBMIT_API;
-      planarRegionMap = new PlanarRegionMap(smoothing);
+      planarRegionMap = new PlanarRegionMap();
    }
 
-   public PlanarRegionMappingHandler(String simpleRobotName, ROS2Node ros2Node, boolean smoothing)
+   public PlanarRegionMappingHandler(String simpleRobotName, ROS2Node ros2Node)
    {
       source = DataSource.ROS2_CALLBACK;
-      planarRegionMap = new PlanarRegionMap(smoothing);
+      planarRegionMap = new PlanarRegionMap();
 
       if (ros2Node != null)
       {
@@ -169,12 +169,12 @@ public class PlanarRegionMappingHandler
 //      perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
 
       //createOuster(128, 1024, smoothing);
-      createTerrain(720, 1280, smoothing, false);
+      createTerrain(720, 1280, false);
    }
 
-   private void createTerrain(int depthHeight, int depthWidth, boolean smoothing, boolean simulation)
+   private void createTerrain(int depthHeight, int depthWidth, boolean simulation)
    {
-      planarRegionMap = new PlanarRegionMap(smoothing, "Fast");
+      planarRegionMap = new PlanarRegionMap("Fast");
       sensorLogChannelName = PerceptionLoggerConstants.L515_DEPTH_NAME;
 
       String version = simulation ? "Simulation" : "";
@@ -190,9 +190,9 @@ public class PlanarRegionMappingHandler
       totalDepthCount = perceptionDataLoader.getHDF5Manager().getCount(sensorLogChannelName);
    }
 
-   private void createOuster(int depthHeight, int depthWidth, boolean smoothing)
+   private void createOuster(int depthHeight, int depthWidth)
    {
-      planarRegionMap = new PlanarRegionMap(smoothing, "Spherical");
+      planarRegionMap = new PlanarRegionMap("Spherical");
       sensorLogChannelName = PerceptionLoggerConstants.OUSTER_DEPTH_NAME;
       rapidRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth);
       rapidPatchesBasedICP.create(openCLManager, openCLProgram, depthHeight, depthWidth);
@@ -205,10 +205,10 @@ public class PlanarRegionMappingHandler
       totalDepthCount = perceptionDataLoader.getHDF5Manager().getCount(sensorLogChannelName);
    }
 
-   public PlanarRegionMappingHandler(File planarRegionLogDirectory, boolean smoothing)
+   public PlanarRegionMappingHandler(File planarRegionLogDirectory)
    {
       source = DataSource.PLANAR_REGIONS_LOG;
-      planarRegionMap = new PlanarRegionMap(smoothing);
+      planarRegionMap = new PlanarRegionMap();
 
       for (File file : planarRegionLogDirectory.listFiles())
       {
