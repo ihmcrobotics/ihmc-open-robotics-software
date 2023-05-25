@@ -28,7 +28,6 @@ import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 
 /**
@@ -49,12 +48,13 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    private RDX3DPanel primary3DPanel;
    private RDXInteractableFootstepPlan footstepPlan;
    private boolean renderTooltip = false;
-   private final ArrayDeque<RDXInteractableFootstep> newlyPlacedFootsteps = new ArrayDeque<>();
    private final FramePose3D tempFramePose = new FramePose3D();
    private RDXIconTexture feetIcon;
    private RDX3DPanelTooltip tooltip;
 
-   public void create(ROS2SyncedRobotModel syncedRobot, RDXBaseUI baseUI, RDXInteractableFootstepPlan footstepPlan,
+   public void create(ROS2SyncedRobotModel syncedRobot,
+                      RDXBaseUI baseUI,
+                      RDXInteractableFootstepPlan footstepPlan,
                       FootstepPlannerParametersReadOnly footstepPlannerParameters)
    {
       this.syncedRobot = syncedRobot;
