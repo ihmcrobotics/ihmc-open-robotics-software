@@ -123,7 +123,7 @@ public class RDXLocomotionManager
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(interactableFootstepPlan::processImGui3DViewInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(interactableFootstepPlan::calculate3DViewPick);
 
-      manualFootstepPlacement.create(baseUI, interactableFootstepPlan);
+      manualFootstepPlacement.create(syncedRobot, baseUI, interactableFootstepPlan, footstepPlanning.getFootstepPlannerParameters());
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(manualFootstepPlacement::processImGui3DViewInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(manualFootstepPlacement::calculate3DViewPick);
 
