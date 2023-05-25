@@ -5,9 +5,6 @@ import behavior_msgs.msg.dds.BehaviorTreeMessage;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.log.LogTools;
-
-import java.util.Stack;
 
 public class BehaviorMessageTools
 {
@@ -45,81 +42,49 @@ public class BehaviorMessageTools
     */
    public static BehaviorTreeNodeBasics unpackBehaviorTreeMessage(BehaviorTreeMessage behaviorTreeMessage)
    {
-      return unpackBehaviorTreeMessage(behaviorTreeMessage, new MutableInt(), new Stack<>());
+      return unpackBehaviorTreeMessage(behaviorTreeMessage, new MutableInt());
    }
 
-   private static BehaviorTreeNodeBasics unpackBehaviorTreeMessage(BehaviorTreeMessage behaviorTreeMessage, MutableInt nodeIndex, Stack<Integer> childrenStack)
+   private static BehaviorTreeNodeBasics unpackBehaviorTreeMessage(BehaviorTreeMessage behaviorTreeMessage, MutableInt nodeIndex)
    {
       BehaviorTreeNodeMessage treeNodeMessage = behaviorTreeMessage.getNodes().get(nodeIndex.getAndIncrement());
 
-      BehaviorTreeNode behaviorTreeNode = createBehaviorTreeNode(treeNodeMessage.getNodeTypeAsString());
-      behaviorTreeNode.setLastTickInstant(MessageTools.toInstant(treeNodeMessage.getLastTickInstant()));
+      BehaviorTreeStatusNode behaviorTreeStatusNode = createBehaviorTreeNode(treeNodeMessage.getNodeTypeAsString());
+      behaviorTreeStatusNode.setLastTickInstant(MessageTools.toInstant(treeNodeMessage.getLastTickInstant()));
+      behaviorTreeStatusNode.setName(treeNodeMessage.getNodeNameAsString());
+      behaviorTreeStatusNode.setPreviousStatus(BehaviorTreeNodeStatus.fromByte(treeNodeMessage.getPreviousStatus()));
+      behaviorTreeStatusNode.setHasBeenClocked(treeNodeMessage.getHasBeenClocked());
 
-      // TODO ...
+      for (int i = 0; i < treeNodeMessage.getNumberOfChildren(); i++)
+      {
+         behaviorTreeStatusNode.getChildren().add(unpackBehaviorTreeMessage(behaviorTreeMessage, nodeIndex));
+      }
 
-      return behaviorTreeNode;
+      return behaviorTreeStatusNode;
    }
 
    /**
-    * FIXME: The design of this stuff seems terrible, we need to review it.
+    * FIXME: The type should just be a String, then we don't have to have this.
     */
-   private static BehaviorTreeNode createBehaviorTreeNode(String typeName)
+   private static BehaviorTreeStatusNode createBehaviorTreeNode(String typeName)
    {
-      BehaviorTreeNode behaviorTreeNode;
+      BehaviorTreeStatusNode behaviorTreeStatusNode = new BehaviorTreeStatusNode();
       if (typeName.equals(SequenceNode.class.getSimpleName()))
-      {
-         behaviorTreeNode = new SequenceNode();
-      }
+         behaviorTreeStatusNode.setType(SequenceNode.class);
       else if (typeName.equals(FallbackNode.class.getSimpleName()))
-      {
-         behaviorTreeNode = new FallbackNode();
-      }
+         behaviorTreeStatusNode.setType(FallbackNode.class);
       else if (typeName.equals(AsynchronousActionNode.class.getSimpleName()))
-      {
-         behaviorTreeNode = new AsynchronousActionNode()
-         {
-            @Override
-            public void resetInternal()
-            {
-
-            }
-         };
-      }
+         behaviorTreeStatusNode.setType(AsynchronousActionNode.class);
       else if (typeName.equals(BehaviorTreeAction.class.getSimpleName()))
-      {
-         behaviorTreeNode = new BehaviorTreeAction()
-         {
-            @Override
-            public BehaviorTreeNodeStatus tickInternal()
-            {
-               return null;
-            }
-         };
-      }
+         behaviorTreeStatusNode.setType(BehaviorTreeAction.class);
       else if (typeName.equals(BehaviorTreeCondition.class.getSimpleName()))
-      {
-         behaviorTreeNode = new BehaviorTreeCondition(() -> true);
-      }
+         behaviorTreeStatusNode.setType(BehaviorTreeCondition.class);
       else if (typeName.equals(OneShotAction.class.getSimpleName()))
-      {
-         behaviorTreeNode = new OneShotAction(() -> { });
-      }
+         behaviorTreeStatusNode.setType(OneShotAction.class);
       else if (typeName.equals(AlwaysSuccessfulAction.class.getSimpleName()))
-      {
-         behaviorTreeNode = new AlwaysSuccessfulAction(() -> { });
-      }
+         behaviorTreeStatusNode.setType(AlwaysSuccessfulAction.class);
       else
-      {
-         LogTools.warn("Not sure what to create here...");
-         behaviorTreeNode = new BehaviorTreeNode()
-         {
-            @Override
-            public BehaviorTreeNodeStatus tickInternal()
-            {
-               return BehaviorTreeNodeStatus.SUCCESS;
-            }
-         };
-      }
-      return behaviorTreeNode;
+         behaviorTreeStatusNode.setType(BehaviorTreeNode.class);
+      return behaviorTreeStatusNode;
    }
 }

@@ -20,11 +20,7 @@ public class AtlasBehaviorModule
       Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown, "Cleanup"));
 
       BehaviorRegistry registry = BehaviorRegistry.DEFAULT_BEHAVIORS;
-      registry.activateRegistry();
-      boolean enableROS1 = true;
-      behaviorModule = new BehaviorModule(registry,
-                                          createRobotModel(),
-                                          CommunicationMode.INTERPROCESS);
+      behaviorModule = new BehaviorModule(registry, createRobotModel(), CommunicationMode.INTERPROCESS);
    }
 
    private void shutdown() // add cleanup actions here

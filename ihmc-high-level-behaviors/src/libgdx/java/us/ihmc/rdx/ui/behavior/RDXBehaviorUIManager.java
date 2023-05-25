@@ -66,10 +66,7 @@ public class RDXBehaviorUIManager
    /** For knowing when the robot's behavior module is running. */
    private final ROS2HeartbeatMonitor heartbeatMonitor;
 
-   public RDXBehaviorUIManager(ROS2Node ros2Node,
-                               Supplier<? extends DRCRobotModel> robotModelSupplier,
-                               RDXBehaviorUIRegistry behaviorRegistry,
-                               boolean enableROS1)
+   public RDXBehaviorUIManager(ROS2Node ros2Node, Supplier<? extends DRCRobotModel> robotModelSupplier, RDXBehaviorUIRegistry behaviorRegistry)
    {
       this.behaviorRegistry = behaviorRegistry;
       helper = new BehaviorHelper("Behaviors panel", robotModelSupplier.get(), ros2Node);

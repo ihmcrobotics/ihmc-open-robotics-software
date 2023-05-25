@@ -1,6 +1,5 @@
 package us.ihmc.rdx.ui.processes;
 
-import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.CommunicationMode;
@@ -14,22 +13,14 @@ public class BehaviorModuleProcess extends RestartableProcess
 {
    private final Supplier<DRCRobotModel> robotModelSupplier;
    private final ImInt ros2Mode;
-   private final ImInt messagerMode;
-   private final ImBoolean enableROS1;
    // TODO: GUI selection
    private RDXBehaviorUIRegistry behaviorRegistry;
    private BehaviorModule behaviorModule;
 
-   public BehaviorModuleProcess(Supplier<DRCRobotModel> robotModelSupplier,
-                                ImInt ros2Mode,
-                                ImInt messagerMode,
-                                ImBoolean enableROS1,
-                                RDXBehaviorUIRegistry behaviorRegistry)
+   public BehaviorModuleProcess(Supplier<DRCRobotModel> robotModelSupplier, ImInt ros2Mode, RDXBehaviorUIRegistry behaviorRegistry)
    {
       this.robotModelSupplier = robotModelSupplier;
       this.ros2Mode = ros2Mode;
-      this.messagerMode = messagerMode;
-      this.enableROS1 = enableROS1;
       this.behaviorRegistry = behaviorRegistry;
    }
 
@@ -37,9 +28,7 @@ public class BehaviorModuleProcess extends RestartableProcess
    protected void startInternal()
    {
       LogTools.info("Starting behavior module");
-      behaviorModule = new BehaviorModule(behaviorRegistry,
-                                          robotModelSupplier.get(),
-                                          CommunicationMode.fromOrdinal(ros2Mode.get()));
+      behaviorModule = new BehaviorModule(behaviorRegistry, robotModelSupplier.get(), CommunicationMode.fromOrdinal(ros2Mode.get()));
    }
 
    @Override
