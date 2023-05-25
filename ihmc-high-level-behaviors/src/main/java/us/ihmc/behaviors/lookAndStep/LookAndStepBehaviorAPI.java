@@ -3,6 +3,7 @@ package us.ihmc.behaviors.lookAndStep;
 import behavior_msgs.msg.dds.MinimalFootstepListMessage;
 import ihmc_common_msgs.msg.dds.Box3DMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
+import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import std_msgs.msg.dds.Bool;
@@ -22,7 +23,7 @@ public class LookAndStepBehaviorAPI
    private static final ROS2Topic<?> BASE_TOPIC = ROS2Tools.IHMC_ROOT.withModule(MODULE_NAME);
 
    public static final String REGIONS_FOR_FOOTSTEP_PLANNING = RosTools.MAPSENSE_REGIONS;
-   public static final ROS2Topic<PlanarRegionsListMessage> ROS2_REGIONS_FOR_FOOTSTEP_PLANNING = PerceptionAPI.PERSPECTIVE_RAPID_REGIONS;
+   public static final ROS2Topic<FramePlanarRegionsListMessage> ROS2_REGIONS_FOR_FOOTSTEP_PLANNING = PerceptionAPI.PERSPECTIVE_RAPID_REGIONS;
    public static final ROS2Topic<HeightMapMessage> ROS2_HEIGHT_MAP = PerceptionAPI.HEIGHT_MAP_OUTPUT;
 
    /**
