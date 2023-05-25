@@ -83,9 +83,13 @@ public class VideoDataPlayer
       currentRobotTimestamp = robotTimestamps[index];
 
       long videoTimestamp = videoTimestamps[index];
-      long previousTimestamp = videoTimestamps[index];
-      long nextVideoTimestamp = videoTimestamps[index];
+      long previousTimestamp;
+      long nextVideoTimestamp;
 
+      if (index > 0)
+      {
+         previousTimestamp = videoTimestamps[index - 1];
+      }
 
       if (robotTimestamps.length > index + 1)
       {
@@ -101,11 +105,6 @@ public class VideoDataPlayer
          upcomingRobotTimestamp = currentRobotTimestamp;
       }
 
-      if (previousTimestamp == videoTimestamp)
-      {
-         return;
-      }
-
       try
       {
          FrameData copyForWriting = new FrameData();
@@ -114,6 +113,7 @@ public class VideoDataPlayer
          copyForWriting.cameraPreviousPTS = previousTimestamp;
          copyForWriting.robotTimestamp = currentRobotTimestamp;
 
+         System.out.println(videoTimestamp);
          demuxer.seekToPTS(videoTimestamp);
          YUVPicture nextFrame = demuxer.getNextFrame();
 
