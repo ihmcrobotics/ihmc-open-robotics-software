@@ -49,7 +49,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class DualBlackflyCamera
 {
    private static final IntPointer COMPRESSION_PARAMETERS = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
-   private static final double PUBLISH_RATE = 30.0;
+   private static final double PUBLISH_RATE = 15.0;
 
    private final RobotSide side;
    private final ROS2SyncedRobotModel syncedRobot;
