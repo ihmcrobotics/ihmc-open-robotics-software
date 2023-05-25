@@ -60,7 +60,7 @@ public class RDXBuildingExplorationBehaviorUI extends RDXBehaviorUIInterface
          if (regions != null)
             planarRegionsGraphic.generateMeshesAsync(regions);
       });
-      helper.subscribeViaCallback(LAST_TICKED_THING, lastTickedThing -> this.lastTickedThing = lastTickedThing.getDataAsString());
+      helper.subscribeViaCallback(LAST_TICKED_NODE, lastTickedNode -> this.lastTickedThing = lastTickedNode.getDataAsString());
    }
 
    @Override
