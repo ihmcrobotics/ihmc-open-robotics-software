@@ -9,6 +9,6 @@ public abstract class BehaviorTreeAction extends BehaviorTreeNode
 
    public BehaviorTreeAction()
    {
-      setType(BehaviorTreeAction.class.getSimpleName());
+      setType(BehaviorTreeAction.class);
    }
 }

@@ -12,7 +12,7 @@ public class BehaviorTreeCondition extends BehaviorTreeAction implements Behavio
    public BehaviorTreeCondition(BooleanSupplier conditionSupplier)
    {
       this.conditionSupplier = conditionSupplier;
-      setType(BehaviorTreeCondition.class.getSimpleName());
+      setType(BehaviorTreeCondition.class);
    }
 
    @Override

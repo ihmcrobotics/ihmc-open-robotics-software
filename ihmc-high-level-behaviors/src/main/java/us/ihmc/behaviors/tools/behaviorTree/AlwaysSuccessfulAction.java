@@ -12,7 +12,7 @@ public class AlwaysSuccessfulAction extends BehaviorTreeAction
    public AlwaysSuccessfulAction(Runnable action)
    {
       this.action = action;
-      setType(AlwaysSuccessfulAction.class.getSimpleName());
+      setType(AlwaysSuccessfulAction.class);
    }
 
    @Override
