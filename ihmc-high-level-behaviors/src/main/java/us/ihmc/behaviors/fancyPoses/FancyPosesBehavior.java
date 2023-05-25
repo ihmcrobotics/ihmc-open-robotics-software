@@ -25,11 +25,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.messager.MessagerAPIFactory;
-import us.ihmc.messager.MessagerAPIFactory.Category;
-import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
-import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
-import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.ActivationReference;
@@ -405,26 +400,6 @@ public class FancyPosesBehavior extends BehaviorTreeControlFlowNode implements B
 
    public static class API
    {
-      private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
-      private static final Category RootCategory = apiFactory.createRootCategory("FancyPosesBehavior");
-      private static final CategoryTheme FancyPoses = apiFactory.createCategoryTheme("FancyPoses");
-      private static final Category FancyPosesCategory = RootCategory.child(FancyPoses);
 
-      public static final Topic<Boolean> Stepping = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("Stepping"));
-      public static final Topic<Boolean> Abort = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("Abort"));
-      public static final Topic<Boolean> Enable = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("Enable"));
-      public static final Topic<Boolean> GoToSingleSupport = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToSingleSupport"));
-      public static final Topic<Boolean> GoToDoubleSupport = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToDoubleSupport"));
-      public static final Topic<Boolean> GoToRunningMan = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToRunningMan"));
-      public static final Topic<Boolean> GoToKarateKid1 = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToKarateKid1"));
-      public static final Topic<Boolean> GoToKarateKid2 = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToKarateKid2"));
-      public static final Topic<Boolean> GoToKarateKid3 = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToKarateKid3"));
-      public static final Topic<Boolean> GoToPresent = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToPresent"));
-      public static final Topic<Boolean> GoToShutdownPose = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToShutdownPose"));
-
-      public static final MessagerAPI create()
-      {
-         return apiFactory.getAPIAndCloseFactory();
-      }
    }
 }

@@ -1,8 +1,5 @@
 package us.ihmc.behaviors.upDownExploration;
 
-import static us.ihmc.behaviors.patrol.PatrolBehaviorAPI.UpDownCenter;
-import static us.ihmc.behaviors.patrol.PatrolBehaviorAPI.UpDownExplorationEnabled;
-
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;

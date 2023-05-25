@@ -2,7 +2,6 @@ package us.ihmc.behaviors.navigation;
 
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
-import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.commons.thread.Notification;
@@ -36,11 +35,6 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.behaviorTree.AlwaysSuccessfulAction;
 import us.ihmc.behaviors.tools.behaviorTree.LoopSequenceNode;
 import us.ihmc.log.LogTools;
-import us.ihmc.messager.MessagerAPIFactory;
-import us.ihmc.messager.MessagerAPIFactory.Category;
-import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
-import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
-import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
@@ -58,7 +52,6 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.behaviors.navigation.NavigationBehavior.NavigationBehaviorAPI.*;
 import static us.ihmc.pathPlanning.PlannerTestEnvironments.MAZE_CORRIDOR_SQUARE_SIZE;
 
 public class NavigationBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
@@ -344,23 +337,6 @@ public class NavigationBehavior extends BehaviorTreeControlFlowNode implements B
 
    public static class NavigationBehaviorAPI
    {
-      private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
-      private static final Category RootCategory = apiFactory.createRootCategory("NavigationBehavior");
-      private static final CategoryTheme NavigationTheme = apiFactory.createCategoryTheme("Navigation");
 
-      public static final Topic<Object> StepThroughAlgorithm = topic("StepThroughAlgorithm");
-      public static final Topic<PlanarRegionsList> MapRegionsForUI = topic("MapRegionsForUI");
-      public static final Topic<ArrayList<Pose3DReadOnly>> BodyPathPlanForUI = topic("BodyPathPlanForUI");
-      public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> FootstepPlanForUI = topic("FootstepPlan");
-
-      private static final <T> Topic<T> topic(String name)
-      {
-         return RootCategory.child(NavigationTheme).topic(apiFactory.createTypedTopicTheme(name));
-      }
-
-      public static final MessagerAPI create()
-      {
-         return apiFactory.getAPIAndCloseFactory();
-      }
    }
 }
