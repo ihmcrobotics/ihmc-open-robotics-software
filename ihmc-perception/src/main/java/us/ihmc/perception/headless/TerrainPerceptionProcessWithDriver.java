@@ -15,30 +15,20 @@ import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
-import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.perception.*;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.comms.PerceptionComms;
-import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -46,8 +36,6 @@ import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Supplier;
 
 /**
@@ -90,7 +78,6 @@ public class TerrainPerceptionProcessWithDriver
    private final BytedecoRealsense realsense;
 
    private ROS2StoredPropertySetGroup ros2PropertySetGroup;
-   private CollidingScanRegionFilter collisionFilter;
    private BytedecoImage depthBytedecoImage;
 
    private Mat depth16UC1Image;
@@ -338,33 +325,6 @@ public class TerrainPerceptionProcessWithDriver
       depthBytedecoImage.destroy(openCLManager);
       openCLManager.destroy();
       destroyedNotification.blockingPoll();
-   }
-
-   public void setupCollisionFilter(FullHumanoidRobotModel fullRobotModel, CollisionBoxProvider collisionBoxProvider)
-   {
-      CollisionShapeTester shapeTester = new CollisionShapeTester();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         List<JointBasics> joints = new ArrayList<>();
-         RigidBodyBasics shin = fullRobotModel.getFoot(robotSide).getParentJoint().getPredecessor().getParentJoint().getPredecessor();
-         MultiBodySystemTools.collectJointPath(fullRobotModel.getPelvis(), shin, joints);
-         joints.forEach(joint -> shapeTester.addJoint(collisionBoxProvider, joint));
-      }
-      collisionFilter = new CollidingScanRegionFilter(shapeTester);
-   }
-
-   public void applyCollisionFilter(PlanarRegionsList planarRegionsList)
-   {
-      // Filter out regions that are colliding with the body
-      collisionFilter.update();
-      int regionIndex = 0;
-      while (regionIndex < planarRegionsList.getNumberOfPlanarRegions())
-      {
-         if (!collisionFilter.test(regionIndex, planarRegionsList.getPlanarRegion(regionIndex)))
-            planarRegionsList.pollPlanarRegion(regionIndex);
-         else
-            ++regionIndex;
-      }
    }
 
    public static void main(String[] args)
