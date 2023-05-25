@@ -6,19 +6,19 @@ package us.ihmc.behaviors.tools.behaviorTree;
  * of the tree's state and NOT to perform any computation.
  * All nodes in the UI side tree are instances of this class.
  */
-public class BehaviorTreeStatus extends BehaviorTreeControlFlowNode
+public class BehaviorTreeStatusNode extends BehaviorTreeControlFlowNode
 {
    /**
     * Normal use.
     */
-   public BehaviorTreeStatus()
+   public BehaviorTreeStatusNode()
    {
    }
 
    /**
     * Deep copy constuctor.
     */
-   public BehaviorTreeStatus(BehaviorTreeNodeBasics node)
+   public BehaviorTreeStatusNode(BehaviorTreeNodeBasics node)
    {
       setPreviousStatus(node.getPreviousStatus());
       setName(node.getName());
@@ -31,7 +31,7 @@ public class BehaviorTreeStatus extends BehaviorTreeControlFlowNode
 
          for (BehaviorTreeNodeBasics child : controlFlowNode.getChildren())
          {
-            addChild(new BehaviorTreeStatus(child));
+            addChild(new BehaviorTreeStatusNode(child));
          }
       }
    }
