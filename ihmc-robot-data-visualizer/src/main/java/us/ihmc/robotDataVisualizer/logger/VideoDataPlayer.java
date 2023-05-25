@@ -83,8 +83,8 @@ public class VideoDataPlayer
       currentRobotTimestamp = robotTimestamps[index];
 
       long videoTimestamp = videoTimestamps[index];
-      long previousTimestamp;
-      long nextVideoTimestamp;
+      long previousTimestamp = 0;
+      long nextVideoTimestamp = 0;
 
       if (index > 0)
       {
