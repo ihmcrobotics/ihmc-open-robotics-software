@@ -25,6 +25,10 @@ import us.ihmc.tools.Timer;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * A behavior tree layer on top of the door behavior that John wrote for Atlas.
+ * @deprecated Not supported right now. Being kept for reference or revival.
+ */
 public class DoorBehavior extends ResettingNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Door", DoorBehavior::new);

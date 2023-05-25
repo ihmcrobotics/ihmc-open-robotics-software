@@ -24,6 +24,10 @@ import static us.ihmc.behaviors.exploreArea.ExploreAreaBehavior.ExploreAreaBehav
 import static us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI.*;
 import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
 
+/**
+ * An attempt mostly in simulation to explore a building.
+ * @deprecated Not supported right now. Being kept for reference or revival.
+ */
 public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Explore Area",

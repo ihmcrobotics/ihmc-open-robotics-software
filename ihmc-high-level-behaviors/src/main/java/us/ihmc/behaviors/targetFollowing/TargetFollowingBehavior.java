@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.targetFollowing;
 
 import geometry_msgs.PoseStamped;
-import org.ros.message.Time;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorInterface;
@@ -10,7 +9,6 @@ import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -22,8 +20,11 @@ import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.behaviors.targetFollowing.TargetFollowingBehaviorAPI.*;
-
+/**
+ * Follows a person, but keeping a distance. This worked on Atlas and there
+ * are good videos of it following Bhavyansh.
+ * @deprecated Not supported right now. Being kept for reference or revival.
+ */
 public class TargetFollowingBehavior extends ResettingNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Target Following",

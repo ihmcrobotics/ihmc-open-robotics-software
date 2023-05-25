@@ -30,6 +30,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.ActivationReference;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
+/**
+ * @deprecated Not supported right now. Being kept for reference or revival.
+ */
 public class FancyPosesBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Fancy Poses", FancyPosesBehavior::new);
