@@ -1,8 +1,6 @@
 package us.ihmc.commonWalkingControlModules.contact.kinematics;
 
-import us.ihmc.euclid.referenceFrame.FrameBox3D;
-import us.ihmc.euclid.referenceFrame.FrameSphere3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DBasics;
 import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
 import us.ihmc.euclid.shape.convexPolytope.interfaces.Face3DReadOnly;
@@ -34,37 +32,79 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class MeshBasedContactDetectorVisualizer
 {
    private static final double contactThreshold = 0.04;
+   private static final ColorDefinition color = ColorDefinitions.DarkGreen();
+
+   static
+   {
+      color.setAlpha(0.3);
+   }
 
    public static void main(String[] args)
    {
-      visualizeSphereContact();
+//      visualizeSphereContact();
 //      visualizeCylinderContact();
-//      visualizeCapsuleContact();
+      visualizeCapsuleContact();
 //      visualizeBoxContact();
    }
 
    private static void visualizeSphereContact()
    {
       double radius = 0.2;
-      ColorDefinition color = ColorDefinitions.DarkGreen();
-      color.setAlpha(0.0);
-
       RobotDefinition sphereRobot = ContactDetectorTestTools.newSphereRobot("sphere", radius, 1.0, radius, color);
-      sphereRobot.ignoreAllJoints();
+      Function<RigidBodyBasics, Collidable> collidableBuilder = body -> new Collidable(body, -1, -1, new FrameSphere3D(body.getBodyFixedFrame(), radius));
 
-      String linkName = "sphereLink";
-      RobotCollisionModel collisionModel = RobotCollisionModel.singleBodyCollisionModel(linkName, body -> new Collidable(body, -1, -1, new FrameSphere3D(body.getBodyFixedFrame(), radius)));
+      runVisualizer(sphereRobot, collidableBuilder);
+   }
 
-      RigidBodyBasics rootBody = sphereRobot.newInstance(ReferenceFrame.getWorldFrame());
+
+   private static void visualizeCylinderContact()
+   {
+      double radius = 0.15;
+      double length = 0.3;
+      RobotDefinition cylinderRobot = ContactDetectorTestTools.newCylinderRobot("cylinder", radius, length, 1.0, radius, color);
+      Function<RigidBodyBasics, Collidable> collidableBuilder = body -> new Collidable(body, -1, -1, new FrameCylinder3D(body.getBodyFixedFrame(), length, radius));
+
+      runVisualizer(cylinderRobot, collidableBuilder);
+   }
+
+   private static void visualizeCapsuleContact()
+   {
+      double radius = 0.1;
+      double length = 0.4;
+      RobotDefinition capsuleRobot = ContactDetectorTestTools.newCapsuleRobot("capsule", radius, length, 1.0, 0.1, color);
+      Function<RigidBodyBasics, Collidable> collidableBuilder = body -> new Collidable(body, -1, -1, new FrameCapsule3D(body.getBodyFixedFrame(), length, radius));
+
+      runVisualizer(capsuleRobot, collidableBuilder);
+   }
+
+   private static void visualizeBoxContact()
+   {
+      double sizeX = 0.1;
+      double sizeY = 0.2;
+      double sizeZ = 0.25;
+      RobotDefinition boxRobot = ContactDetectorTestTools.newBoxRobot("box", sizeX, sizeY, sizeZ, 1.0, 0.1, color);
+      Function<RigidBodyBasics, Collidable> collidableBuilder = body -> new Collidable(body, -1, -1, new FrameBox3D(body.getBodyFixedFrame(), sizeX, sizeY, sizeZ));
+
+      runVisualizer(boxRobot, collidableBuilder);
+   }
+
+   private static void runVisualizer(RobotDefinition robotDefinition, Function<RigidBodyBasics, Collidable> collidableBuilder)
+   {
+      String linkName = robotDefinition.getName() + "Link";
+      RobotCollisionModel collisionModel = RobotCollisionModel.singleBodyCollisionModel(linkName, collidableBuilder);
+
+      robotDefinition.ignoreAllJoints();
+      RigidBodyBasics rootBody = robotDefinition.newInstance(ReferenceFrame.getWorldFrame());
       MeshBasedContactDetector contactDetector = new MeshBasedContactDetector(collisionModel.getRobotCollidables(rootBody));
 
       SimulationSession simulationSession = new SimulationSession();
-      Robot robot = simulationSession.getPhysicsEngine().addRobot(sphereRobot);
+      Robot robot = simulationSession.getPhysicsEngine().addRobot(robotDefinition);
       robot.addController(setupContactController(robot, rootBody, contactDetector, simulationSession.getRootRegistry()));
       setContactGraphics(contactDetector, simulationSession);
       simulationSession.getRootRegistry().addChild(contactDetector.getRegistry());
@@ -73,79 +113,6 @@ public class MeshBasedContactDetectorVisualizer
       SessionVisualizer.startSessionVisualizer(simulationSession);
    }
 
-//      RigidBodyBasics idRobot = ContactDetectorTestTools.toInverseDynamicsRobot(sphereRobot);
-//      SixDoFJoint floatingJoint = (SixDoFJoint) idRobot.getChildrenJoints().get(0);
-//
-//      YoRegistry registry = new YoRegistry("visualizationRegistry");
-//      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-//      MeshBasedContactDetector contactDetector = new MeshBasedContactDetector(collisionModel.getRobotCollidables(idRobot));
-//      RobotFromDescription robot = setupRobot(sphereRobot, idRobot, floatingJoint, contactDetector);
-//
-//      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
-//      scs.addYoGraphicsListRegistry(graphicsListRegistry);
-//      scs.addYoRegistry(registry);
-//
-//      setContactGraphics(contactDetector, scs);
-//
-//      scs.startOnAThread();
-//      ThreadTools.sleepForever();
-
-//   private static void visualizeCylinderContact()
-//   {
-//      double radius = 0.1;
-//      double height = 0.4;
-//      AppearanceDefinition appearance = YoAppearance.DarkGreen();
-//      appearance.setTransparency(0.3);
-//      RobotDescription cylinderRobot = ContactDetectorTestTools.newCylinderRobot("cylinder", radius, height, 1.0, 0.1, appearance);
-//      String linkName = "cylinderLink";
-//      RobotCollisionModel collisionModel = RobotCollisionModel.singleBodyCollisionModel(linkName, body -> new Collidable(body, -1, -1, new FrameCylinder3D(body.getBodyFixedFrame(), height, radius)));
-//      RigidBodyBasics idRobot = ContactDetectorTestTools.toInverseDynamicsRobot(cylinderRobot);
-//      SixDoFJoint floatingJoint = (SixDoFJoint) idRobot.getChildrenJoints().get(0);
-//
-//      YoRegistry registry = new YoRegistry("visualizationRegistry");
-//      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-//      MeshBasedContactDetector contactDetector = new MeshBasedContactDetector(collisionModel.getRobotCollidables(idRobot), graphicsListRegistry, registry);
-//
-//      RobotFromDescription robot = setupRobot(cylinderRobot, idRobot, floatingJoint, contactDetector);
-//
-//      FloatingJoint scsFloatingJoint = (FloatingJoint) robot.getRootJoints().get(0);
-//      scsFloatingJoint.getOrientation().set(new YawPitchRoll(0.4, 1.2, -0.3));
-//
-//      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
-//      scs.addYoGraphicsListRegistry(graphicsListRegistry);
-//      scs.addYoRegistry(registry);
-//
-//      setContactGraphics(contactDetector, scs);
-//      scs.startOnAThread();
-//      ThreadTools.sleepForever();
-//   }
-//
-//   private static void visualizeCapsuleContact()
-//   {
-//      double radius = 0.1;
-//      double height = 0.4;
-//      AppearanceDefinition appearance = YoAppearance.DarkGreen();
-//      appearance.setTransparency(0.3);
-//      RobotDescription capsuleRobot = ContactDetectorTestTools.newCapsuleRobot("capsule", radius, height, 1.0, 0.1, appearance);
-//      String linkName = "capsuleLink";
-//      RobotCollisionModel collisionModel = RobotCollisionModel.singleBodyCollisionModel(linkName, body -> new Collidable(body, -1, -1, new FrameCapsule3D(body.getBodyFixedFrame(), height, radius)));
-//      RigidBodyBasics idRobot = ContactDetectorTestTools.toInverseDynamicsRobot(capsuleRobot);
-//      SixDoFJoint floatingJoint = (SixDoFJoint) idRobot.getChildrenJoints().get(0);
-//
-//      YoRegistry registry = new YoRegistry("visualizationRegistry");
-//      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-//      MeshBasedContactDetector contactDetector = new MeshBasedContactDetector(collisionModel.getRobotCollidables(idRobot), graphicsListRegistry, registry);
-//
-//      RobotFromDescription robot = setupRobot(capsuleRobot, idRobot, floatingJoint, contactDetector);
-//
-//      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
-//      scs.addYoGraphicsListRegistry(graphicsListRegistry);
-//      scs.addYoRegistry(registry);
-//
-//      setContactGraphics(contactDetector, scs);
-//      scs.startOnAThread();
-//      ThreadTools.sleepForever();
-//   }
 //
 //   private static void visualizeBoxContact()
 //   {
