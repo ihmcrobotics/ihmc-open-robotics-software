@@ -18,6 +18,11 @@ public interface PerceptionConfigurationParametersBasics extends PerceptionConfi
       set(PerceptionConfigurationParameters.ousterThrottlerFrequency, ousterThrottlerFrequency);
    }
 
+   default void setRapidRegionsEnabled(boolean rapidRegionsEnabled)
+   {
+      set(PerceptionConfigurationParameters.rapidRegionsEnabled, rapidRegionsEnabled);
+   }
+
    default void setLoggingEnabled(boolean loggingEnabled)
    {
       set(PerceptionConfigurationParameters.loggingEnabled, loggingEnabled);
@@ -41,5 +46,20 @@ public interface PerceptionConfigurationParametersBasics extends PerceptionConfi
    default void setLogDepth(boolean logDepth)
    {
       set(PerceptionConfigurationParameters.logDepth, logDepth);
+   }
+
+   default void setSLAMEnabled(boolean slamEnabled)
+   {
+      set(PerceptionConfigurationParameters.slamEnabled, slamEnabled);
+   }
+
+   default void setSLAMReset(boolean slamReset)
+   {
+      set(PerceptionConfigurationParameters.slamReset, slamReset);
+   }
+
+   default void setActiveMapping(boolean activeMapping)
+   {
+      set(PerceptionConfigurationParameters.activeMapping, activeMapping);
    }
 }

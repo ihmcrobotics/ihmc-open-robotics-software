@@ -8,44 +8,34 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
-import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.LineSegment3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.shape.primitives.Ellipsoid3D;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
-import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.*;
-import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotics.Assert;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 public class AStarBodyPathHeightMapDataSetTest
 {
@@ -165,7 +155,7 @@ public class AStarBodyPathHeightMapDataSetTest
    {
       String datasetName = dataset.name();
 
-      HeightMapMessage heightMap = dataset.getMessage();
+      HeightMapData heightMap = HeightMapMessageTools.unpackMessage(dataset.getMessage());
 
       Point3D start = dataset.getStart().getPosition();
       Point3D goal = dataset.getGoal().getPosition();
@@ -180,6 +170,7 @@ public class AStarBodyPathHeightMapDataSetTest
       String datasetName = dataset.name();
 
       HeightMapMessage heightMapMessage = dataset.getMessage();
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
 
       Point3D start = dataset.getStart().getPosition();
       Point3D goal = dataset.getGoal().getPosition();
@@ -197,7 +188,7 @@ public class AStarBodyPathHeightMapDataSetTest
       while (!walkerPosition.geometricallyEquals(goal, 1.0e-2))
       {
          long startTime = System.currentTimeMillis();
-         errorMessages += calculateAndTestAStarBodyPath(datasetName, walkerPosition, goal, heightMapMessage, latestBodyPath);
+         errorMessages += calculateAndTestAStarBodyPath(datasetName, walkerPosition, goal, heightMapData, latestBodyPath);
          long endTime = System.currentTimeMillis();
          if (ENABLE_TIMERS)
          {
@@ -271,11 +262,11 @@ public class AStarBodyPathHeightMapDataSetTest
    private String calculateAndTestAStarBodyPath(String datasetName,
                                                 Point3D start,
                                                 Point3D goal,
-                                                HeightMapMessage heightMapMessage,
+                                                HeightMapData heightMapData,
                                                 List<Pose3D> pathToPack)
    {
       FootstepPlannerRequest request = new FootstepPlannerRequest();
-      request.setHeightMapMessage(heightMapMessage);
+      request.setHeightMapData(heightMapData);
       request.setPlanBodyPath(true);
       request.setPlanFootsteps(false);
       request.setAssumeFlatGround(false);
@@ -319,7 +310,6 @@ public class AStarBodyPathHeightMapDataSetTest
       walkerBody3D.addZ(walkerOffsetHeight);
       walkerShape.getPosition().set(walkerBody3D);
 
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
       errorMessages += walkerCollisionChecks(datasetName, walkerShape, heightMapData, collisions);
 
       while (!walkerCurrentPosition.geometricallyEquals(pathEnd, 1.0e-2))

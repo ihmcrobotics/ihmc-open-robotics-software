@@ -14,6 +14,7 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
@@ -97,6 +98,8 @@ public class RDXPose3DGizmo implements RenderableProvider
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
    /** Transforms to world for placing the graphics. */
    private final RigidBodyTransform[] axisTransformToWorlds = new RigidBodyTransform[3];
+   /** For being able to tell if the user moved the gizmo. */
+   private final Notification gizmoModifiedByUser = new Notification();
    private static final YawPitchRoll FLIP_180 = new YawPitchRoll(0.0, Math.PI, 0.0);
    private final Line3DMouseDragAlgorithm lineDragAlgorithm = new Line3DMouseDragAlgorithm();
    private final ClockFaceRotation3DMouseDragAlgorithm clockFaceDragAlgorithm = new ClockFaceRotation3DMouseDragAlgorithm();
@@ -402,6 +405,7 @@ public class RDXPose3DGizmo implements RenderableProvider
          adjustmentNeedsToBeApplied = false;
          adjustmentPose3D.changeFrame(parentReferenceFrame);
          adjustmentPose3D.get(transformToParent);
+         gizmoModifiedByUser.set();
       }
 
       gizmoFrame.update();
@@ -890,5 +894,10 @@ public class RDXPose3DGizmo implements RenderableProvider
    ClockFaceRotation3DMouseDragAlgorithm getClockFaceDragAlgorithm()
    {
       return clockFaceDragAlgorithm;
+   }
+
+   public Notification getGizmoModifiedByUser()
+   {
+      return gizmoModifiedByUser;
    }
 }
