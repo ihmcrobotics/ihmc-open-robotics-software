@@ -28,4 +28,13 @@ public class ROS2IOTopicPair<T>
    {
       return statusTopic;
    }
+
+   public ROS2Topic<T> getTopic(ROS2IOTopicQualifier ioQualifier)
+   {
+      return switch (ioQualifier)
+      {
+         case COMMAND -> commandTopic;
+         case STATUS -> statusTopic;
+      };
+   }
 }

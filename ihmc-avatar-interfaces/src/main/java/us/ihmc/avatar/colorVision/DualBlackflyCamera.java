@@ -21,6 +21,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -28,6 +29,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.*;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
+import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesSubscription;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
 import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
 import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesPublisher;
@@ -85,6 +87,7 @@ public class DualBlackflyCamera
    private PredefinedSceneNodeLibrary predefinedSceneNodeLibrary;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
+   private ROS2DetectableSceneNodesSubscription detectableSceneNodesSubscription;
    private final ROS2DetectableSceneNodesPublisher detectableSceneObjectsPublisher = new ROS2DetectableSceneNodesPublisher();
    private IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
    private ROS2StoredPropertySet<IntrinsicCameraMatrixProperties> ousterFisheyeColoringIntrinsicsROS2;
@@ -218,6 +221,10 @@ public class DualBlackflyCamera
                   remoteTunableCameraTransform = ROS2TunedRigidBodyTransform.toBeTuned(ros2Helper,
                                                                                        ROS2Tools.OBJECT_DETECTION_CAMERA_TO_PARENT_TUNING,
                                                                                        cameraTransformToParent);
+
+                  detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(predefinedSceneNodeLibrary.getDetectableSceneNodes(),
+                                                                                              ros2Helper,
+                                                                                              ROS2IOTopicQualifier.COMMAND);
                }
 
                remoteTunableCameraTransform.update();
@@ -239,8 +246,9 @@ public class DualBlackflyCamera
                // arUcoMarkerDetection.drawRejectedPoints(blackflySourceImage.getBytedecoOpenCVMat());
                arUcoMarkerPublisher.update();
 
+               detectableSceneNodesSubscription.update(); // Receive overridden poses from operator
                ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, predefinedSceneNodeLibrary);
-               detectableSceneObjectsPublisher.publish(predefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2Helper);
+               detectableSceneObjectsPublisher.publish(predefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2Helper, ROS2IOTopicQualifier.STATUS);
             }
 
             convertColorDuration.start();
