@@ -7,5 +7,5 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 
 public interface StateEstimatorControllerFactory
 {
-   StateEstimatorController createStateEstimator(FullHumanoidRobotModel fullRobotModel, SensorReader sensorReader);
+   StateEstimatorController createStateEstimator(FullHumanoidRobotModel fullRobotModel, SensorOutputMapReadOnly rawSensorOutputMap);
 }
