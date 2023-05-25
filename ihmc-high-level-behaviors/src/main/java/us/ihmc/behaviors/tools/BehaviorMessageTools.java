@@ -63,9 +63,6 @@ public class BehaviorMessageTools
       return behaviorTreeStatusNode;
    }
 
-   /**
-    * FIXME: The type should just be a String, then we don't have to have this.
-    */
    private static BehaviorTreeStatusNode createBehaviorTreeNode(String typeName)
    {
       BehaviorTreeStatusNode behaviorTreeStatusNode = new BehaviorTreeStatusNode();
