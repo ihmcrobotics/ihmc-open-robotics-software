@@ -17,8 +17,6 @@ import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.log.LogTools;
-import us.ihmc.messager.MessagerAPIFactory;
-import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.ros2.ROS2Node;
@@ -203,23 +201,5 @@ public class BehaviorModule
                                             = BASE_TOPIC.withOutput().withType(StatusLogMessage.class).withSuffix("status_log");
       public static final ROS2Topic<BehaviorTreeMessage> BEHAVIOR_TREE_STATUS
                                             = BASE_TOPIC.withOutput().withType(BehaviorTreeMessage.class).withSuffix("behavior_tree_status");
-
-      private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
-      private static final MessagerAPIFactory.Category RootCategory = apiFactory.createRootCategory("Root");
-      private static final MessagerAPIFactory.CategoryTheme BehaviorModuleTheme = apiFactory.createCategoryTheme("BehaviorModule");
-
-      public static final MessagerAPIFactory.Topic<BehaviorTreeControlFlowNode> BehaviorTreeStatus = topic("BehaviorTreeStatus");
-
-      private static <T> MessagerAPIFactory.Topic<T> topic(String name)
-      {
-         return RootCategory.child(BehaviorModuleTheme).topic(apiFactory.createTypedTopicTheme(name));
-      }
-
-      public static synchronized MessagerAPI create(MessagerAPI... behaviorAPIs) // TODO check threading
-      {
-         apiFactory.includeMessagerAPIs(behaviorAPIs);
-
-         return apiFactory.getAPIAndCloseFactory();
-      }
    }
 }

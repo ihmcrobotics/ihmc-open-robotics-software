@@ -40,13 +40,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorOldAPI.*;
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.REACHED_GOAL;
 
 public class BuildingExplorationBehaviorOld extends ResettingNode implements BehaviorInterface
 {
-   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Building Exploration",
-                                                                              BuildingExplorationBehaviorOld::new);
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Building Exploration", BuildingExplorationBehaviorOld::new);
 
    private static final int UPDATE_RATE_MILLIS = 50;
    private final static Pose3D NAN_POSE = new Pose3D();

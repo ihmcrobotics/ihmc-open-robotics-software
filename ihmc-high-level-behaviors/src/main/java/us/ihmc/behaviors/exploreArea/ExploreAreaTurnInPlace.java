@@ -25,8 +25,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI.CurrentState;
-
 public class ExploreAreaTurnInPlace extends AsynchronousActionNode
 {
    public static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

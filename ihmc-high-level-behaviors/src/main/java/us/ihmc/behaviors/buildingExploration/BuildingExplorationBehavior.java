@@ -24,8 +24,7 @@ import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorM
 
 public class BuildingExplorationBehavior extends ResettingNode implements BehaviorInterface
 {
-   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Building Exploration",
-                                                                              BuildingExplorationBehavior::new);
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Building Exploration", BuildingExplorationBehavior::new);
    private final BehaviorHelper helper;
    private final LookAndStepBehavior lookAndStepBehavior;
    private final DoorBehavior doorBehavior;

@@ -25,11 +25,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
-import static us.ihmc.behaviors.exploreArea.ExploreAreaBehavior.*;
-import static us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI.*;
-import static us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI.FoundBodyPath;
 
 public class ExploreAreaDetermineNextLocationsNode extends AsynchronousActionNode
 {
