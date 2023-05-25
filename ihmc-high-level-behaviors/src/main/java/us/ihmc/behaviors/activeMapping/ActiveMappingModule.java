@@ -59,7 +59,7 @@ public class ActiveMappingModule
    public ActiveMappingModule(DRCRobotModel robotModel, HumanoidReferenceFrames humanoidReferenceFrames)
    {
       this.referenceFrames = humanoidReferenceFrames;
-      this.planarRegionMap = new PlanarRegionMap(true);
+      this.planarRegionMap = new PlanarRegionMap();
       this.robotModel = robotModel;
 
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);

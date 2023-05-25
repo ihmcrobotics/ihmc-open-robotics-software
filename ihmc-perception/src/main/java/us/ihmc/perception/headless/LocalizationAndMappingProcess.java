@@ -76,7 +76,7 @@ public class LocalizationAndMappingProcess
                                         ROS2Node ros2Node,
                                         boolean smoothing)
    {
-      planarRegionMap = new PlanarRegionMap(true);
+      planarRegionMap = new PlanarRegionMap();
 
       this.terrainRegionsTopic = terrainRegionsTopic;
       this.structuralRegionsTopic = structuralRegionsTopic;
