@@ -50,9 +50,7 @@ public class RDXPerceptionUI
          @Override
          public void create()
          {
-            globalVisualizersUI.addVisualizer(new RDXROS2FramePlanarRegionsVisualizer("Rapid Regions",
-                                                                                 ros2Node,
-                                                                                 PerceptionAPI.PERSPECTIVE_RAPID_REGIONS));
+            globalVisualizersUI.addVisualizer(new RDXROS2FramePlanarRegionsVisualizer("Rapid Regions", ros2Node, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS));
 
             globalVisualizersUI.addVisualizer(new RDXROS2PlanarRegionsVisualizer("Rapid Regions",
                                                                                  ros2Node,
