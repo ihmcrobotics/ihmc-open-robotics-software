@@ -22,15 +22,6 @@ mainDependencies {
    api("us.ihmc:promp:source")
 }
 
-javafxDependencies {
-   api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.3")
-   api("us.ihmc:ihmc-graphics-javafx:source")
-   api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
-   api("us.ihmc:ihmc-path-planning-visualizers:source")
-   api("us.ihmc:robot-environment-awareness-visualizers:source")
-}
-
 missionControlDependencies {
    api("us.ihmc:ihmc-commons:0.32.0")
    api("us.ihmc:log-tools:0.6.3")
