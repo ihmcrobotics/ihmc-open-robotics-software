@@ -16,6 +16,8 @@ import static us.ihmc.perception.spinnaker.SpinnakerBlackflyTools.assertNoError;
 
 /**
  * Good reference: http://softwareservices.flir.com/BFS-U3-04S2/latest/Model/public/
+ *
+ * Confluence page: https://confluence.ihmc.us/display/PER/Blackfly+Cameras
  */
 public class SpinnakerBlackfly
 {
