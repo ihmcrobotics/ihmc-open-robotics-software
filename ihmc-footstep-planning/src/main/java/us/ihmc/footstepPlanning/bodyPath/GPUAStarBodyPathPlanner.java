@@ -325,15 +325,6 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       openCLManager.destroy();
    }
 
-   /**
-    * Sets the height map data for the path planner to use.
-    */
-   @Override
-   public void setHeightMapData(HeightMapData heightMapData)
-   {
-      this.heightMapData = heightMapData;
-   }
-
    private enum RejectionReason
    {
       INVALID_SNAP,
@@ -344,12 +335,12 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
    }
 
    /**
-    * Computes the body path plan using the information contained in {@param request}, and packs into the output {@param outputToPack}. For this to work,
-    * {@link #setHeightMapData(HeightMapData)} must be called first.
+    * Computes the body path plan using the information contained in {@param request}, and packs into the output {@param outputToPack}.
     */
    @Override
    public void handleRequest(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
    {
+      heightMapData = request.getHeightMapData();
       if (firstTick)
       {
          firstTickSetup();
