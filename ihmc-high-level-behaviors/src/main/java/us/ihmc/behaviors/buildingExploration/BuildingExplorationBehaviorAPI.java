@@ -5,7 +5,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.ros2.ROS2Topic;
 
 public class BuildingExplorationBehaviorAPI
@@ -25,15 +24,4 @@ public class BuildingExplorationBehaviorAPI
    public static final StoredPropertySetROS2TopicPair PARAMETERS = new StoredPropertySetROS2TopicPair(MODULE_NAME, "parameters");
    public static final ROS2Topic<std_msgs.msg.dds.String> LAST_TICKED_THING
                                                         = BASE_TOPIC.withType(std_msgs.msg.dds.String.class).withSuffix("last_ticked_thing");
-
-   private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
-   private static final MessagerAPIFactory.Category Root = apiFactory.createRootCategory("DemoCoordinatorRoot");
-   private static final MessagerAPIFactory.CategoryTheme DemoCoordinator = apiFactory.createCategoryTheme("DemoCoordinator");
-
-   public static final MessagerAPIFactory.MessagerAPI API = apiFactory.getAPIAndCloseFactory();
-
-   private static <T> MessagerAPIFactory.Topic<T> topic(String name)
-   {
-      return Root.child(DemoCoordinator).topic(apiFactory.createTypedTopicTheme(name));
-   }
 }
