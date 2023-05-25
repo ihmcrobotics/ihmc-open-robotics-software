@@ -6,6 +6,7 @@ import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import ihmc_common_msgs.msg.dds.Box3DMessage;
+import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import toolbox_msgs.msg.dds.FootstepPlannerRejectionReasonMessage;
@@ -49,6 +50,7 @@ import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -208,11 +210,13 @@ public class LookAndStepFootstepPlanningTask
          heightMapInput.set(HeightMapMessageTools.unpackMessage(heightMapMessage));
       }
 
-      public void acceptPlanarRegions(PlanarRegionsListMessage planarRegionsListMessage)
+      public void acceptPlanarRegions(FramePlanarRegionsListMessage framePlanarRegionsListMessage)
       {
-         planarRegionDelay.set(TimeTools.calculateDelay(planarRegionsListMessage.getLastUpdated().getSecondsSinceEpoch(),
-                                                        planarRegionsListMessage.getLastUpdated().getAdditionalNanos()));
-         acceptPlanarRegions(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
+         planarRegionDelay.set(TimeTools.calculateDelay(framePlanarRegionsListMessage.getPlanarRegions().getLastUpdated().getSecondsSinceEpoch(),
+                                                        framePlanarRegionsListMessage.getPlanarRegions().getLastUpdated().getAdditionalNanos()));
+         FramePlanarRegionsList framePlanarRegionsList = PlanarRegionMessageConverter.convertToFramePlanarRegionsList(framePlanarRegionsListMessage);
+         framePlanarRegionsList.changeFrameToWorld();
+         acceptPlanarRegions(framePlanarRegionsList.getPlanarRegionsList());
       }
 
       public void acceptPlanarRegions(PlanarRegionsList planarRegionsList)
