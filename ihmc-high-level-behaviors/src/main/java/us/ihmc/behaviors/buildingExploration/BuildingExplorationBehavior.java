@@ -34,7 +34,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
    private final TraverseStairsBehavior traverseStairsBehavior;
    private final BuildingExplorationBehaviorParameters parameters;
    private final ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor("CommsRelay", true);
-   private String lastTickedThing = "NONE";
+   private String lastTickedNode = "NONE";
 
    public BuildingExplorationBehavior(BehaviorHelper helper)
    {
@@ -83,7 +83,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
       syncedRobot.update();
 
       BehaviorTreeNodeStatus status = BehaviorTreeNodeStatus.RUNNING;
-      lastTickedThing = "NONE";
+      lastTickedNode = "NONE";
       BuildingExplorationBehaviorMode currentMode = mode.get();
       if (currentMode == AUTO)
       {
@@ -118,7 +118,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
          status = tickStairs();
       }
 
-      helper.publish(LAST_TICKED_THING, lastTickedThing);
+      helper.publish(LAST_TICKED_NODE, lastTickedNode);
 
       return status;
    }
@@ -127,19 +127,19 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
    {
       if (lookAndStepBehavior.isReset())
          lookAndStepBehavior.acceptGoal(goal.get());
-      lastTickedThing = "LOOK_AND_STEP";
+      lastTickedNode = "LOOK_AND_STEP";
       return lookAndStepBehavior.tick();
    }
 
    private BehaviorTreeNodeStatus tickDoor()
    {
-      lastTickedThing = "DOOR";
+      lastTickedNode = "DOOR";
       return doorBehavior.tick();
    }
 
    private BehaviorTreeNodeStatus tickStairs()
    {
-      lastTickedThing = "STAIRS";
+      lastTickedNode = "STAIRS";
       return traverseStairsBehavior.tick();
    }
 

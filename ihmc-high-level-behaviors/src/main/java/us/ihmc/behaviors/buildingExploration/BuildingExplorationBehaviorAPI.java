@@ -22,6 +22,6 @@ public class BuildingExplorationBehaviorAPI
    public static final ROS2Topic<Pose3D> GOAL_STATUS = GOAL.getStatusTopic();
 
    public static final StoredPropertySetROS2TopicPair PARAMETERS = new StoredPropertySetROS2TopicPair(MODULE_NAME, "parameters");
-   public static final ROS2Topic<std_msgs.msg.dds.String> LAST_TICKED_THING
-                                                        = BASE_TOPIC.withType(std_msgs.msg.dds.String.class).withSuffix("last_ticked_thing");
+   public static final ROS2Topic<std_msgs.msg.dds.String> LAST_TICKED_NODE
+                                                        = BASE_TOPIC.withType(std_msgs.msg.dds.String.class).withSuffix("last_ticked_node");
 }
