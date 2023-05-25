@@ -64,37 +64,37 @@ public class RDXImNodesTreeNode
       String nodeType;
 
       String name = behaviorNodeUI.getName();
-      if (behaviorNodeUI.getType().equals(SequenceNode.class))
+      if (behaviorNodeUI.getType().equals(SequenceNode.class.getSimpleName()))
       {
          nodeName = (name != null ? name : "Sequence Node");
          nodeType = "[->]";
       }
-      else if (behaviorNodeUI.getType().equals(FallbackNode.class))
+      else if (behaviorNodeUI.getType().equals(FallbackNode.class.getSimpleName()))
       {
          nodeName = (name != null ? name : "Fallback Node");
          nodeType = "[?]";
       }
-      else if (behaviorNodeUI.getType().equals(AsynchronousActionNode.class))
+      else if (behaviorNodeUI.getType().equals(AsynchronousActionNode.class.getSimpleName()))
       {
          nodeName = (name != null ? name : "Asynchronous Node");
          nodeType = "[Async]";
       }
-      else if (behaviorNodeUI.getType().equals(BehaviorTreeAction.class))
+      else if (behaviorNodeUI.getType().equals(BehaviorTreeAction.class.getSimpleName()))
       {
          nodeName = (name != null ? name : "Action");
          nodeType = "[Action]";
       }
-      else if (behaviorNodeUI.getType().equals(BehaviorTreeCondition.class))
+      else if (behaviorNodeUI.getType().equals(BehaviorTreeCondition.class.getSimpleName()))
       {
          nodeName = (name != null ? name : "Condition");
          nodeType = "[Condition]";
       }
-      else if (behaviorNodeUI.getType().equals(OneShotAction.class))
+      else if (behaviorNodeUI.getType().equals(OneShotAction.class.getSimpleName()))
       {
          nodeName = (name != null ? name : "One Shot Action");
          nodeType = "[OneShot]";
       }
-      else if (behaviorNodeUI.getType().equals(AlwaysSuccessfulAction.class))
+      else if (behaviorNodeUI.getType().equals(AlwaysSuccessfulAction.class.getSimpleName()))
       {
          nodeName = (name != null ? name : "Always Successful Action");
          nodeType = "[Success]";

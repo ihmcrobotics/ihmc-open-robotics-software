@@ -17,7 +17,7 @@ public class BehaviorMessageTools
       BehaviorTreeNodeMessage nodeMessage = behaviorTreeMessage.getNodes().add();
       MessageTools.toMessage(treeNode.getLastTickInstant(), nodeMessage.getLastTickInstant());
       nodeMessage.setNodeName(treeNode.getName());
-      nodeMessage.setNodeType(treeNode.getType().getSimpleName());
+      nodeMessage.setNodeType(treeNode.getType());
       nodeMessage.setPreviousStatus((byte) treeNode.getPreviousStatus().ordinal());
 
       if (treeNode instanceof BehaviorTreeControlFlowNodeBasics controlFlowTreeNode)
@@ -49,9 +49,10 @@ public class BehaviorMessageTools
    {
       BehaviorTreeNodeMessage treeNodeMessage = behaviorTreeMessage.getNodes().get(nodeIndex.getAndIncrement());
 
-      BehaviorTreeStatusNode behaviorTreeStatusNode = createBehaviorTreeNode(treeNodeMessage.getNodeTypeAsString());
+      BehaviorTreeStatusNode behaviorTreeStatusNode = new BehaviorTreeStatusNode();
       behaviorTreeStatusNode.setLastTickInstant(MessageTools.toInstant(treeNodeMessage.getLastTickInstant()));
       behaviorTreeStatusNode.setName(treeNodeMessage.getNodeNameAsString());
+      behaviorTreeStatusNode.setType(treeNodeMessage.getNodeTypeAsString());
       behaviorTreeStatusNode.setPreviousStatus(BehaviorTreeNodeStatus.fromByte(treeNodeMessage.getPreviousStatus()));
       behaviorTreeStatusNode.setHasBeenClocked(treeNodeMessage.getHasBeenClocked());
 
@@ -60,31 +61,6 @@ public class BehaviorMessageTools
          behaviorTreeStatusNode.getChildren().add(unpackBehaviorTreeMessage(behaviorTreeMessage, nodeIndex));
       }
 
-      return behaviorTreeStatusNode;
-   }
-
-   /**
-    * FIXME: The type should just be a String, then we don't have to have this.
-    */
-   private static BehaviorTreeStatusNode createBehaviorTreeNode(String typeName)
-   {
-      BehaviorTreeStatusNode behaviorTreeStatusNode = new BehaviorTreeStatusNode();
-      if (typeName.equals(SequenceNode.class.getSimpleName()))
-         behaviorTreeStatusNode.setType(SequenceNode.class);
-      else if (typeName.equals(FallbackNode.class.getSimpleName()))
-         behaviorTreeStatusNode.setType(FallbackNode.class);
-      else if (typeName.equals(AsynchronousActionNode.class.getSimpleName()))
-         behaviorTreeStatusNode.setType(AsynchronousActionNode.class);
-      else if (typeName.equals(BehaviorTreeAction.class.getSimpleName()))
-         behaviorTreeStatusNode.setType(BehaviorTreeAction.class);
-      else if (typeName.equals(BehaviorTreeCondition.class.getSimpleName()))
-         behaviorTreeStatusNode.setType(BehaviorTreeCondition.class);
-      else if (typeName.equals(OneShotAction.class.getSimpleName()))
-         behaviorTreeStatusNode.setType(OneShotAction.class);
-      else if (typeName.equals(AlwaysSuccessfulAction.class.getSimpleName()))
-         behaviorTreeStatusNode.setType(AlwaysSuccessfulAction.class);
-      else
-         behaviorTreeStatusNode.setType(BehaviorTreeNode.class);
       return behaviorTreeStatusNode;
    }
 }
