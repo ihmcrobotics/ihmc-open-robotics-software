@@ -376,6 +376,7 @@ public class RDXAffordanceEditorUI
    {
       handTransformToWorld.setToZero();
       handTransformToWorld.getTranslation().set(-0.5, 0, 0);
+      handTransformToWorld.getRotation().setYawPitchRoll(0.0, Math.toRadians(-90.0), 0.0);
       interactableHand.closeGripper();
 
       graspFrame.reset();
@@ -458,6 +459,14 @@ public class RDXAffordanceEditorUI
             var postGraspHandConfigurations = postGraspFrames.getHandConfigurations();
             for (int i = 0; i < preGraspPoses.size(); i++)
             {
+               if (preGraspHandConfigurations.get(i) != null)
+               {
+                  ObjectNode extraActionNode = actionsArrayNode.addObject();
+                  extraActionNode.put("type", "RDXHandConfigurationAction");
+                  extraActionNode.put("side", side.getLowerCaseName());
+                  extraActionNode.put("grip", preGraspHandConfigurations.get(i).toString());
+               }
+
                ObjectNode actionNode = actionsArrayNode.addObject();
                actionNode.put("type", "RDXHandPoseAction");
                actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
@@ -467,14 +476,6 @@ public class RDXAffordanceEditorUI
                LogTools.info(preGraspPoses.get(i));
                RigidBodyTransform transformToParent = new RigidBodyTransform(preGraspPoses.get(i));
                JSONTools.toJSON(actionNode, transformToParent);
-
-               if (preGraspHandConfigurations.get(i) != null)
-               {
-                  ObjectNode extraActionNode = actionsArrayNode.addObject();
-                  extraActionNode.put("type", "RDXHandConfigurationAction");
-                  extraActionNode.put("side", side.getLowerCaseName());
-                  extraActionNode.put("grip", preGraspHandConfigurations.get(i).toString());
-               }
             }
             if (graspFrame.isSet())
             {

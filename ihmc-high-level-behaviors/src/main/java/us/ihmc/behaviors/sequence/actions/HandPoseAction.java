@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.tools.Timer;
 
 public class HandPoseAction extends HandPoseActionData implements BehaviorAction
 {
@@ -16,6 +17,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private ReferenceFrame parentReferenceFrame;
    private final FramePose3D pose = new FramePose3D();
+   private final Timer timer = new Timer();
 
    public HandPoseAction(ROS2ControllerHelper ros2ControllerHelper, ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -35,6 +37,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    @Override
    public void executeAction()
    {
+      timer.reset();
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage();
       handTrajectoryMessage.setRobotSide(getSide().toByte());
       handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(FrameInformation.CHEST_FRAME);
@@ -46,5 +49,11 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
       trajectoryPoint.getLinearVelocity().set(EuclidCoreTools.zeroVector3D);
       trajectoryPoint.getAngularVelocity().set(EuclidCoreTools.zeroVector3D);
       ros2ControllerHelper.publishToController(handTrajectoryMessage);
+   }
+
+   @Override
+   public boolean isExecuting()
+   {
+      return timer.isRunning(getTrajectoryDuration());
    }
 }

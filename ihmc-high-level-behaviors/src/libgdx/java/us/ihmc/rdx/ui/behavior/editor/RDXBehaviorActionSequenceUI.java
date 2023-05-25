@@ -138,4 +138,9 @@ public class RDXBehaviorActionSequenceUI
    {
       return managerPanel;
    }
+
+   public TreeSet<RDXBehaviorActionSequenceEditor> getEditors()
+   {
+      return editors;
+   }
 }

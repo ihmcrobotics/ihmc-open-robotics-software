@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
-import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodesMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -19,10 +18,11 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.perception.sceneGraph.SceneGraphAPI;
-import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorActionSequenceEditor;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.visualizers.RDXEdgeDefinedShapeGraphic;
 import us.ihmc.rdx.visualizers.RDXSplineGraphic;
@@ -33,10 +33,7 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Class to pack a teleoperated referenceFrame and modify it by using some assistance from the robot.
@@ -70,6 +67,10 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private int replayPreviewCounter = 0;
    private int speedSplineAdjustmentFactor = 1;
 
+   private TreeSet<RDXBehaviorActionSequenceEditor> affordanceEditors;
+   private RDXBehaviorActionSequenceEditor affordanceEditor;
+   private double affordanceJoystickValue;
+
    public RDXVRSharedControl(DRCRobotModel robotModel, ROS2PublishSubscribeAPI ros2, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
    {
       this.ros2 = ros2;
@@ -95,13 +96,14 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    /**
     * Process the VR input to activate/deactivate shared control
     */
-   public void processInput(InputDigitalActionData triggerButton)
+   public void processInput(InputDigitalActionData triggerButton, double forwardJoystickValue)
    {
       // enable if trigger button has been pressed once. if button is pressed again shared control is stopped
       if (triggerButton.bChanged() && !triggerButton.bState())
       {
          setEnabled(!enabled.get());
       }
+      affordanceJoystickValue = forwardJoystickValue;
    }
 
    /**
@@ -182,7 +184,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    {
       if (stdDeviationGraphics.get(bodyPart) == null)
       {
-         Point3D[][] edges = createStdDeviationEdges(proMPAssistant.getInitialMean(bodyPart), proMPAssistant.getInitialStdDeviation(bodyPart));
+         Point3D[][] edges = createStdDeviationEdges(proMPAssistant.getPriorMean(bodyPart), proMPAssistant.getPriorStdDeviation(bodyPart));
          stdDeviationGraphics.put(bodyPart, new RDXEdgeDefinedShapeGraphic(edges, Color.GREEN, Color.FOREST, 0.3f));
          var stdDeviationGraphic = stdDeviationGraphics.get(bodyPart);
          stdDeviationGraphic.createMainShape();
@@ -243,6 +245,9 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       return edges;
    }
 
+   /**
+    * Observe pose of a bodyPart in order to recognize which task has to be executed and how
+    */
    @Override
    public void processFrameInformation(Pose3DReadOnly observedPose, String bodyPart)
    {
@@ -287,6 +292,9 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       return proMPAssistant.readyToPack();
    }
 
+   /**
+    * Generate assistance: update pose of a bodyPart
+    */
    @Override
    public void framePoseToPack(FramePose3D framePose, String bodyPart)
    {
@@ -316,12 +324,39 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       else // if user did not use the preview or preview has been validated
       {
          // exit promp assistance when the current task is over, reactivate it in VR or UI when you want to use it again
-         if (!enabledIKStreaming.get()) //prevent jump by first disabling streaming to controller and then shared control
+         if (!enabledIKStreaming.get() && !isAffordanceActive()) //prevent jump by first disabling streaming to controller below and then shared control here
             setEnabled(false);
-         if (proMPAssistant.isCurrentTaskDone())
-            enabledIKStreaming.set(false); // stop the ik streaming so that you can reposition according to the robot state to avoid jumps in poses
+         if (proMPAssistant.isCurrentTaskDone() && !isAffordanceActive())
+         {
+            enabledIKStreaming.set(false); // stop the ik streaming so that: 1. you can reposition according to the robot state to avoid jumps in poses
+            // 2. or you can execute the affordance through the actionSequenceEditor
+            for (RDXBehaviorActionSequenceEditor editor : affordanceEditors)
+            {
+               LogTools.info(editor.getName());
+               if (editor.getName().equals(objectName)) {
+                  LogTools.info(objectName);
+                  affordanceEditor = editor;
+                  affordanceEditor.sendToRobot();
+                  break;
+               }
+            }
+         }
       }
    }
+
+   public void updateAffordance()
+   {
+      if (affordanceJoystickValue > 0.0)
+         affordanceEditor.playActions(true);
+      else if (affordanceJoystickValue == 0.0)
+      {
+         affordanceEditor.playActions(false);
+         affordanceEditor.rewindActions(false);
+      }
+      else
+         affordanceEditor.rewindActions(true);
+   }
+
 
    public void renderWidgets(ImGuiUniqueLabelMap labels)
    {
@@ -369,8 +404,14 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             ghostRobotGraphic.setActive(previewSetToActive); // set it back to what it was (graphic is disabled when using assistance after validation)
             splineGraphics.clear();
             stdDeviationGraphics.clear();
+            affordanceEditor = null;
          }
       }
+   }
+
+   public void addAffordanceEditors(TreeSet<RDXBehaviorActionSequenceEditor> affordanceEditors)
+   {
+      this.affordanceEditors = affordanceEditors;
    }
 
    public RDXMultiBodyGraphic getGhostPreviewGraphic()
@@ -391,6 +432,11 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    public boolean isActive()
    {
       return this.enabled.get();
+   }
+
+   public boolean isAffordanceActive()
+   {
+      return affordanceEditor != null;
    }
 
    public boolean isPreviewActive()

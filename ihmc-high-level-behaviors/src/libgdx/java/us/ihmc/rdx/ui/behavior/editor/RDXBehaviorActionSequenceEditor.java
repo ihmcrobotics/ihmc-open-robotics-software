@@ -74,6 +74,7 @@ public class RDXBehaviorActionSequenceEditor
    private IHMCROS2Input<ActionSequenceUpdateMessage> sequenceStatusSubscription;
    private final Empty manuallyExecuteNextActionMessage = new Empty();
    private final Bool automaticExecutionCommandMessage = new Bool();
+   private final Bool playbackAutomaticExecutionCommandMessage = new Bool();
 
    public RDXBehaviorActionSequenceEditor(WorkspaceResourceFile fileToLoadFrom)
    {
@@ -290,88 +291,7 @@ public class RDXBehaviorActionSequenceEditor
       // TODO: Automatically sync between this UI and remote process
       if (ImGui.button("Send to robot"))
       {
-         long updateUUID = UUID.randomUUID().getLeastSignificantBits();
-         ActionSequenceUpdateMessage actionSequenceUpdateMessage = new ActionSequenceUpdateMessage();
-         actionSequenceUpdateMessage.setSequenceUpdateUuid(updateUUID);
-         actionSequenceUpdateMessage.setSequenceSize(actionSequence.size());
-         ros2.publish(BehaviorActionSequence.SEQUENCE_COMMAND_TOPIC, actionSequenceUpdateMessage);
-
-         for (int i = 0; i < actionSequence.size(); i++)
-         {
-            RDXBehaviorAction action = actionSequence.get(i);
-            if (action instanceof RDXArmJointAnglesAction armJointAnglesAction)
-            {
-               ArmJointAnglesActionMessage armJointAnglesActionMessage = new ArmJointAnglesActionMessage();
-               armJointAnglesActionMessage.getActionInformation().setActionIndex(i);
-               armJointAnglesActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
-               armJointAnglesAction.getActionData().toMessage(armJointAnglesActionMessage);
-               ros2.publish(BehaviorActionSequence.ARM_JOINT_ANGLES_UPDATE_TOPIC, armJointAnglesActionMessage);
-            }
-            else if (action instanceof RDXChestOrientationAction chestOrientationAction)
-            {
-               ChestOrientationActionMessage chestOrientationActionMessage = new ChestOrientationActionMessage();
-               chestOrientationActionMessage.getActionInformation().setActionIndex(i);
-               chestOrientationActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
-               chestOrientationAction.getActionData().toMessage(chestOrientationActionMessage);
-               ros2.publish(BehaviorActionSequence.CHEST_ORIENTATION_UPDATE_TOPIC, chestOrientationActionMessage);
-            }
-            else if (action instanceof RDXFootstepAction footstepAction)
-            {
-               FootstepActionMessage footstepActionMessage = new FootstepActionMessage();
-               footstepActionMessage.getActionInformation().setActionIndex(i);
-               footstepActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
-               footstepAction.getActionData().toMessage(footstepActionMessage);
-               ros2.publish(BehaviorActionSequence.FOOTSTEP_UPDATE_TOPIC, footstepActionMessage);
-            }
-            else if (action instanceof RDXHandConfigurationAction handConfigurationAction)
-            {
-               HandConfigurationActionMessage handConfigurationActionMessage = new HandConfigurationActionMessage();
-               handConfigurationActionMessage.getActionInformation().setActionIndex(i);
-               handConfigurationActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
-               handConfigurationAction.getActionData().toMessage(handConfigurationActionMessage);
-               ros2.publish(BehaviorActionSequence.HAND_CONFIGURATION_UPDATE_TOPIC, handConfigurationActionMessage);
-            }
-            else if (action instanceof RDXHandPoseAction handPoseAction)
-            {
-               HandPoseActionMessage handPoseActionMessage = new HandPoseActionMessage();
-               handPoseActionMessage.getActionInformation().setActionIndex(i);
-               handPoseActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
-               handPoseAction.getActionData().toMessage(handPoseActionMessage);
-               ros2.publish(BehaviorActionSequence.HAND_POSE_UPDATE_TOPIC, handPoseActionMessage);
-            }
-            else if (action instanceof RDXHandWrenchAction handWrenchAction)
-            {
-               HandWrenchActionMessage handWrenchActionMessage = new HandWrenchActionMessage();
-               handWrenchActionMessage.getActionInformation().setActionIndex(i);
-               handWrenchActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
-               handWrenchAction.getActionData().toMessage(handWrenchActionMessage);
-               ros2.publish(BehaviorActionSequence.HAND_WRENCH_UPDATE_TOPIC, handWrenchActionMessage);
-            }
-            else if (action instanceof RDXPelvisHeightAction pelvisHeightAction)
-            {
-               PelvisHeightActionMessage pelvisHeightActionMessage = new PelvisHeightActionMessage();
-               pelvisHeightActionMessage.getActionInformation().setActionIndex(i);
-               pelvisHeightActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
-               pelvisHeightAction.getActionData().toMessage(pelvisHeightActionMessage);
-               ros2.publish(BehaviorActionSequence.PELVIS_HEIGHT_UPDATE_TOPIC, pelvisHeightActionMessage);
-            }
-            else if (action instanceof RDXWaitDurationAction waitDurationAction)
-            {
-               WaitDurationActionMessage waitDurationActionMessage = new WaitDurationActionMessage();
-               waitDurationActionMessage.getActionInformation().setActionIndex(i);
-               waitDurationActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
-               waitDurationAction.getActionData().toMessage(waitDurationActionMessage);
-               ros2.publish(BehaviorActionSequence.WAIT_DURATION_UPDATE_TOPIC, waitDurationActionMessage);
-            }
-            else if (action instanceof RDXWalkAction walkAction)
-            {
-               WalkActionMessage walkActionMessage = new WalkActionMessage();
-               walkActionMessage.getActionInformation().setActionIndex(i);
-               walkActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
-               walkAction.getActionData().toMessage(walkActionMessage);
-               ros2.publish(BehaviorActionSequence.WALK_UPDATE_TOPIC, walkActionMessage);
-            }
-         }
+         sendToRobot();
       }
       ImGui.sameLine();
       ImGui.text("# " + receivedSequenceStatusMessageCount);
@@ -389,7 +309,6 @@ public class RDXBehaviorActionSequenceEditor
          ImGui.text("End of sequence.");
       else
          ImGui.text(actionSequence.get(executionNextIndexStatus).getNameForDisplay());
-
       ImGui.separator();
 
       // This, paired with the endChild call after, allows this area to scroll separately
@@ -524,6 +443,104 @@ public class RDXBehaviorActionSequenceEditor
          insertNewAction(newAction);
 
       ImGui.endChild();
+   }
+
+   public void sendToRobot()
+   {
+      long updateUUID = UUID.randomUUID().getLeastSignificantBits();
+      ActionSequenceUpdateMessage actionSequenceUpdateMessage = new ActionSequenceUpdateMessage();
+      actionSequenceUpdateMessage.setSequenceUpdateUuid(updateUUID);
+      actionSequenceUpdateMessage.setSequenceSize(actionSequence.size());
+      ros2.publish(BehaviorActionSequence.SEQUENCE_COMMAND_TOPIC, actionSequenceUpdateMessage);
+
+      for (int i = 0; i < actionSequence.size(); i++)
+      {
+         RDXBehaviorAction action = actionSequence.get(i);
+         if (action instanceof RDXArmJointAnglesAction armJointAnglesAction)
+         {
+            ArmJointAnglesActionMessage armJointAnglesActionMessage = new ArmJointAnglesActionMessage();
+            armJointAnglesActionMessage.getActionInformation().setActionIndex(i);
+            armJointAnglesActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
+            armJointAnglesAction.getActionData().toMessage(armJointAnglesActionMessage);
+            ros2.publish(BehaviorActionSequence.ARM_JOINT_ANGLES_UPDATE_TOPIC, armJointAnglesActionMessage);
+         }
+         else if (action instanceof RDXChestOrientationAction chestOrientationAction)
+         {
+            ChestOrientationActionMessage chestOrientationActionMessage = new ChestOrientationActionMessage();
+            chestOrientationActionMessage.getActionInformation().setActionIndex(i);
+            chestOrientationActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
+            chestOrientationAction.getActionData().toMessage(chestOrientationActionMessage);
+            ros2.publish(BehaviorActionSequence.CHEST_ORIENTATION_UPDATE_TOPIC, chestOrientationActionMessage);
+         }
+         else if (action instanceof RDXFootstepAction footstepAction)
+         {
+            FootstepActionMessage footstepActionMessage = new FootstepActionMessage();
+            footstepActionMessage.getActionInformation().setActionIndex(i);
+            footstepActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
+            footstepAction.getActionData().toMessage(footstepActionMessage);
+            ros2.publish(BehaviorActionSequence.FOOTSTEP_UPDATE_TOPIC, footstepActionMessage);
+         }
+         else if (action instanceof RDXHandConfigurationAction handConfigurationAction)
+         {
+            HandConfigurationActionMessage handConfigurationActionMessage = new HandConfigurationActionMessage();
+            handConfigurationActionMessage.getActionInformation().setActionIndex(i);
+            handConfigurationActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
+            handConfigurationAction.getActionData().toMessage(handConfigurationActionMessage);
+            ros2.publish(BehaviorActionSequence.HAND_CONFIGURATION_UPDATE_TOPIC, handConfigurationActionMessage);
+         }
+         else if (action instanceof RDXHandPoseAction handPoseAction)
+         {
+            HandPoseActionMessage handPoseActionMessage = new HandPoseActionMessage();
+            handPoseActionMessage.getActionInformation().setActionIndex(i);
+            handPoseActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
+            handPoseAction.getActionData().toMessage(handPoseActionMessage);
+            ros2.publish(BehaviorActionSequence.HAND_POSE_UPDATE_TOPIC, handPoseActionMessage);
+         }
+         else if (action instanceof RDXHandWrenchAction handWrenchAction)
+         {
+            HandWrenchActionMessage handWrenchActionMessage = new HandWrenchActionMessage();
+            handWrenchActionMessage.getActionInformation().setActionIndex(i);
+            handWrenchActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
+            handWrenchAction.getActionData().toMessage(handWrenchActionMessage);
+            ros2.publish(BehaviorActionSequence.HAND_WRENCH_UPDATE_TOPIC, handWrenchActionMessage);
+         }
+         else if (action instanceof RDXPelvisHeightAction pelvisHeightAction)
+         {
+            PelvisHeightActionMessage pelvisHeightActionMessage = new PelvisHeightActionMessage();
+            pelvisHeightActionMessage.getActionInformation().setActionIndex(i);
+            pelvisHeightActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
+            pelvisHeightAction.getActionData().toMessage(pelvisHeightActionMessage);
+            ros2.publish(BehaviorActionSequence.PELVIS_HEIGHT_UPDATE_TOPIC, pelvisHeightActionMessage);
+         }
+         else if (action instanceof RDXWaitDurationAction waitDurationAction)
+         {
+            WaitDurationActionMessage waitDurationActionMessage = new WaitDurationActionMessage();
+            waitDurationActionMessage.getActionInformation().setActionIndex(i);
+            waitDurationActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
+            waitDurationAction.getActionData().toMessage(waitDurationActionMessage);
+            ros2.publish(BehaviorActionSequence.WAIT_DURATION_UPDATE_TOPIC, waitDurationActionMessage);
+         }
+         else if (action instanceof RDXWalkAction walkAction)
+         {
+            WalkActionMessage walkActionMessage = new WalkActionMessage();
+            walkActionMessage.getActionInformation().setActionIndex(i);
+            walkActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
+            walkAction.getActionData().toMessage(walkActionMessage);
+            ros2.publish(BehaviorActionSequence.WALK_UPDATE_TOPIC, walkActionMessage);
+         }
+      }
+   }
+
+   public void playActions(boolean play)
+   {
+      automaticExecutionCommandMessage.setData(play);
+      ros2.publish(BehaviorActionSequence.AUTOMATIC_EXECUTION_COMMAND_TOPIC, automaticExecutionCommandMessage);
+   }
+
+   public void rewindActions(boolean play)
+   {
+      playbackAutomaticExecutionCommandMessage.setData(play);
+      ros2.publish(BehaviorActionSequence.PLAYBACK_AUTOMATIC_EXECUTION_COMMAND_TOPIC, playbackAutomaticExecutionCommandMessage);
    }
 
    private RDXFootstepAction findNextPreviousFootstepAction()

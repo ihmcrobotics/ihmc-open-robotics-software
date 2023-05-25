@@ -59,6 +59,8 @@ public class BehaviorActionSequence
    public static final ROS2Topic<Empty> MANUALLY_EXECUTE_NEXT_ACTION_TOPIC = COMMAND_TOPIC.withType(Empty.class).withSuffix("manually_execute_next_action");
    public static final ROS2Topic<Bool> AUTOMATIC_EXECUTION_COMMAND_TOPIC = COMMAND_TOPIC.withType(Bool.class).withSuffix("automatic_execution");
    public static final ROS2Topic<Bool> AUTOMATIC_EXECUTION_STATUS_TOPIC = STATUS_TOPIC.withType(Bool.class).withSuffix("automatic_execution");
+   public static final ROS2Topic<Bool> PLAYBACK_AUTOMATIC_EXECUTION_COMMAND_TOPIC = COMMAND_TOPIC.withType(Bool.class).withSuffix("playback_automatic_execution");
+   public static final ROS2Topic<Bool> PLAYBACK_AUTOMATIC_EXECUTION_STATUS_TOPIC = STATUS_TOPIC.withType(Bool.class).withSuffix("playback_automatic_execution");
    public static final ROS2Topic<Int32> EXECUTION_NEXT_INDEX_COMMAND_TOPIC = COMMAND_TOPIC.withType(Int32.class).withSuffix("execution_next_index");
    public static final ROS2Topic<Int32> EXECUTION_NEXT_INDEX_STATUS_TOPIC = STATUS_TOPIC.withType(Int32.class).withSuffix("execution_next_index");
 
@@ -72,8 +74,10 @@ public class BehaviorActionSequence
    private final LinkedList<BehaviorAction> actionSequence = new LinkedList<>();
    private final IHMCROS2Input<Empty> manuallyExecuteSubscription;
    private final IHMCROS2Input<Bool> automaticExecutionSubscription;
+   private final IHMCROS2Input<Bool> playbackAutomaticExecutionSubscription;
    private final IHMCROS2Input<Int32> executionNextIndexSubscription;
    private boolean automaticExecution = false;
+   private boolean playbackAutomaticexecution = false;
    private int excecutionNextIndex = 0;
    private BehaviorAction currentlyExecutingAction = null;
 
@@ -90,6 +94,7 @@ public class BehaviorActionSequence
    private final BehaviorActionReceiver<WalkActionMessage> walkMessageReceiver = new BehaviorActionReceiver<>();
    public final Int32 executionNextIndexStatusMessage = new Int32();
    public final Bool automaticExecutionStatusMessage = new Bool();
+   public final Bool playbackAutomaticExecutionStatusMessage = new Bool();
 
    private final Throttler oneHertzThrottler = new Throttler();
    private final ActionSequenceUpdateMessage actionSequenceUpdateMessage = new ActionSequenceUpdateMessage();
@@ -137,6 +142,7 @@ public class BehaviorActionSequence
                                 message -> walkMessageReceiver.receive(message, message.getActionInformation(), receivedMessagesForID));
       manuallyExecuteSubscription = ros2.subscribe(MANUALLY_EXECUTE_NEXT_ACTION_TOPIC);
       automaticExecutionSubscription = ros2.subscribe(AUTOMATIC_EXECUTION_COMMAND_TOPIC);
+      playbackAutomaticExecutionSubscription = ros2.subscribe(PLAYBACK_AUTOMATIC_EXECUTION_COMMAND_TOPIC);
       executionNextIndexSubscription = ros2.subscribe(EXECUTION_NEXT_INDEX_COMMAND_TOPIC);
    }
 
@@ -240,6 +246,8 @@ public class BehaviorActionSequence
          automaticExecution = automaticExecutionSubscription.getMessageNotification().read().getData();
       if (executionNextIndexSubscription.getMessageNotification().poll())
          excecutionNextIndex = executionNextIndexSubscription.getMessageNotification().read().getData();
+      if (playbackAutomaticExecutionSubscription.getMessageNotification().poll())
+         playbackAutomaticexecution = playbackAutomaticExecutionSubscription.getMessageNotification().read().getData();
 
       sendStatus();
 
@@ -251,9 +259,8 @@ public class BehaviorActionSequence
             automaticExecution = false;
             currentlyExecutingAction = null;
          }
-         else if (currentlyExecutingAction == null || !currentlyExecutingAction.isExecuting())
+         else if (currentlyExecutingAction == null || !currentlyExecutingAction.isExecuting()) // first action or current action finished executing
          {
-            LogTools.info("Automatically executing action: {}", actionSequence.get(excecutionNextIndex).getClass().getSimpleName());
             executeNextAction();
          }
       }
@@ -261,6 +268,19 @@ public class BehaviorActionSequence
       {
          LogTools.info("Manually executing action: {}", actionSequence.get(excecutionNextIndex).getClass().getSimpleName());
          executeNextAction();
+      }
+      else if (playbackAutomaticexecution)
+      {
+         boolean beginOfSequence = excecutionNextIndex <= 0;
+         if (beginOfSequence)
+         {
+            playbackAutomaticexecution = false;
+            currentlyExecutingAction = null;
+         }
+         else if (currentlyExecutingAction == null || !currentlyExecutingAction.isExecuting()) // last action or current action finished executing
+         {
+            executePreviousAction();
+         }
       }
    }
 
@@ -271,12 +291,22 @@ public class BehaviorActionSequence
       excecutionNextIndex++;
    }
 
+   private void executePreviousAction()
+   {
+      excecutionNextIndex--;
+      currentlyExecutingAction = actionSequence.get(excecutionNextIndex);
+      currentlyExecutingAction.executeAction();
+   }
+
+
    private void sendStatus()
    {
       executionNextIndexStatusMessage.setData(excecutionNextIndex);
       ros2.publish(EXECUTION_NEXT_INDEX_STATUS_TOPIC, executionNextIndexStatusMessage);
       automaticExecutionStatusMessage.setData(automaticExecution);
       ros2.publish(AUTOMATIC_EXECUTION_STATUS_TOPIC, automaticExecutionStatusMessage);
+      playbackAutomaticExecutionStatusMessage.setData(playbackAutomaticexecution);
+      ros2.publish(PLAYBACK_AUTOMATIC_EXECUTION_STATUS_TOPIC, playbackAutomaticExecutionStatusMessage);
 
       if (oneHertzThrottler.run(1.0))
       {

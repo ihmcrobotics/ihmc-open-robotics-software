@@ -178,7 +178,9 @@ public class RDXVRKinematicsStreamingMode
 
          // Check if left B button is pressed in order to trigger shared control assistance
          InputDigitalActionData bButton = controller.getBButtonActionData();
-         sharedControlAssistant.processInput(bButton);
+         // use left joystick values to control affordance in shared control assistance
+         double forwardJoystickValue = controller.getJoystickActionData().y();
+         sharedControlAssistant.processInput(bButton, forwardJoystickValue);
       });
 
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
@@ -281,6 +283,9 @@ public class RDXVRKinematicsStreamingMode
          streamToController.set(false);
       if (!enabled.get())
          streamToController.set(false);
+
+      if (!streamToController.get() && sharedControlAssistant.isActive() && sharedControlAssistant.isAffordanceActive())
+         sharedControlAssistant.updateAffordance();
 
       if (status.getMessageNotification().poll())
       {
@@ -485,5 +490,10 @@ public class RDXVRKinematicsStreamingMode
    public RestartableProcess getKinematicsStreamingToolboxProcess()
    {
       return kinematicsStreamingToolboxProcess;
+   }
+
+   public RDXVRSharedControl getSharedControlAssistant()
+   {
+      return sharedControlAssistant;
    }
 }
