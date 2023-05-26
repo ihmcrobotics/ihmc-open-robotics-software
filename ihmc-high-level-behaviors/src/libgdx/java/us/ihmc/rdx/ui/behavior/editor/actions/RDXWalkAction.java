@@ -80,7 +80,7 @@ public class RDXWalkAction extends RDXBehaviorAction
       if (!getSelected().get())
          editGoalFootPoses.forEach(imBoolean -> imBoolean.set(false));
 
-      footstepPlannerGoalGizmo.updateTransforms();
+      footstepPlannerGoalGizmo.update();
       for (RobotSide side : RobotSide.values)
       {
          editGoalFootGizmos.get(side).update();
