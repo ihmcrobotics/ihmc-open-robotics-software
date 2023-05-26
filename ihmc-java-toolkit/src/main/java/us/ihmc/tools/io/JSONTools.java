@@ -14,6 +14,9 @@ public class JSONTools
     * When saving we reduce the precision of the numbers so that infintesimal changes
     * do not show up as changes to the actions. We choose half a millimeter as the smallest
     * increment of translation you might care about and 1/50th of a degree for orientations.
+    *
+    * Additionally, we save the orientations in yaw-pitch-roll degrees so it is human
+    * understandable.
     */
    public static void toJSON(ObjectNode jsonNode, RigidBodyTransform rigidBodyTransform)
    {
