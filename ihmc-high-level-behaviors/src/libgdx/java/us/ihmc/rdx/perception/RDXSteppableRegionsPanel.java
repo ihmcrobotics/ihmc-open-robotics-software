@@ -10,7 +10,7 @@ import perception_msgs.msg.dds.SteppableRegionDebugImagesMessage;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsAPI;
+import us.ihmc.perception.steppableRegions.SteppableRegionsAPI;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersReadOnly;
