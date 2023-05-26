@@ -16,7 +16,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.ui.viewers.HeightMapVisualizer;
-import us.ihmc.ihmcPerception.depthData.PointCloudData;
+import us.ihmc.perception.depthData.PointCloudData;
 import us.ihmc.perception.heightMap.HeightMapInputData;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.ApplicationNoModule;
