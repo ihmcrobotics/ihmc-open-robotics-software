@@ -11,4 +11,15 @@ public interface BehaviorActionData
    void saveToFile(ObjectNode jsonNode);
 
    void loadFromFile(JsonNode jsonNode);
+
+   /**
+    * A description of the action to help the operator in understanding
+    * the purpose and context of the action.
+    */
+   String getDescription();
+
+   /**
+    * See {@link #getDescription()}.
+    */
+   void setDescription(String description);
 }
