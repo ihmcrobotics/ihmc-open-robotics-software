@@ -1,4 +1,4 @@
-package us.ihmc.ihmcPerception.steppableRegions;
+package us.ihmc.perception.steppableRegions;
 
 public class SteppableRegionsListCollection
 {

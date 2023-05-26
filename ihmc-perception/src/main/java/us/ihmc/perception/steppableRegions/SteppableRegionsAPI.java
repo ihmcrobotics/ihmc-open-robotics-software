@@ -1,4 +1,4 @@
-package us.ihmc.ihmcPerception.steppableRegions;
+package us.ihmc.perception.steppableRegions;
 
 import perception_msgs.msg.dds.SteppableRegionDebugImagesMessage;
 import perception_msgs.msg.dds.SteppableRegionsListCollectionMessage;
