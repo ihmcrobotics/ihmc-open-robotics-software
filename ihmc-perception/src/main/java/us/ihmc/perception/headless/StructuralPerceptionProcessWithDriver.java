@@ -17,7 +17,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.netty.NettyOuster;

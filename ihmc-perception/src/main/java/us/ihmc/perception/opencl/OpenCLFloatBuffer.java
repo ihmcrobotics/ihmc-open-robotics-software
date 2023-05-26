@@ -1,4 +1,4 @@
-package us.ihmc.perception;
+package us.ihmc.perception.opencl;
 
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencl._cl_mem;
