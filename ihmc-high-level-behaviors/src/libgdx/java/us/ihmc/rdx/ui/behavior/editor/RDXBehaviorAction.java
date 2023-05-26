@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.type.ImBoolean;
+import imgui.type.ImString;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 
@@ -16,6 +17,7 @@ public abstract class RDXBehaviorAction
    private String nameForDisplay = "";
    private final ImBoolean selected = new ImBoolean();
    private final ImBoolean expanded = new ImBoolean(true);
+   private final ImString description = new ImString();
 
    public RDXBehaviorAction()
    {
@@ -80,5 +82,10 @@ public abstract class RDXBehaviorAction
    public String getNameForDisplay()
    {
       return nameForDisplay;
+   }
+
+   public ImString getDescription()
+   {
+      return description;
    }
 }

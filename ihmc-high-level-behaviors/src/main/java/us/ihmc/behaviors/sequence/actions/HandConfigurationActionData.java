@@ -9,12 +9,14 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandConfigurationActionData implements BehaviorActionData
 {
+   private String description = "Hand configuration";
    private RobotSide side = RobotSide.LEFT;
    private int handConfigurationIndex = 6;
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
+      jsonNode.put("description", description);
       jsonNode.put("side", side.getLowerCaseName());
       jsonNode.put("grip", HandConfiguration.values[handConfigurationIndex].name());
    }
@@ -22,6 +24,7 @@ public class HandConfigurationActionData implements BehaviorActionData
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
+      description = jsonNode.get("description").textValue();
       side = RobotSide.getSideFromString(jsonNode.get("side").asText());
       handConfigurationIndex = HandConfiguration.valueOf(jsonNode.get("grip").asText()).ordinal();
    }
@@ -56,5 +59,17 @@ public class HandConfigurationActionData implements BehaviorActionData
    public void setHandConfigurationIndex(int handConfigurationIndex)
    {
       this.handConfigurationIndex = handConfigurationIndex;
+   }
+
+   @Override
+   public void setDescription(String description)
+   {
+      this.description = description;
+   }
+
+   @Override
+   public String getDescription()
+   {
+      return description;
    }
 }
