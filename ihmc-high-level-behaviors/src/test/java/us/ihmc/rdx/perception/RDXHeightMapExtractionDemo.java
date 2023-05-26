@@ -19,7 +19,7 @@ import us.ihmc.ihmcPerception.heightMap.HeightMapInputData;
 import us.ihmc.ihmcPerception.heightMap.HeightMapUpdater;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.tools.PerceptionDataTools;

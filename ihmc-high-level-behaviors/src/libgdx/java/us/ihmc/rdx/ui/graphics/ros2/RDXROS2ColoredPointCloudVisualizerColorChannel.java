@@ -7,7 +7,7 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.SwapReference;
 
