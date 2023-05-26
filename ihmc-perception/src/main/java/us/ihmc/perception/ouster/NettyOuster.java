@@ -1,4 +1,4 @@
-package us.ihmc.perception.netty;
+package us.ihmc.perception.ouster;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
