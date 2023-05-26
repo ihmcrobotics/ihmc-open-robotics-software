@@ -421,11 +421,11 @@ public class RDXPose3DGizmo implements RenderableProvider
       // The above Axis calculations actually end up on Z, so we don't have to recalculate this
       framePose3D.get(transformToWorld);
       updateGraphicTransforms();
+      LibGDXTools.toEuclid(camera3D.position, cameraPosition);
       distanceToCamera = cameraPosition.distance(framePose3D.getPosition());
 
       if (resizeAutomatically.get())
       {
-         LibGDXTools.toEuclid(camera3D.position, cameraPosition);
          if (!EuclidCoreTools.epsilonEquals(lastDistanceToCamera, distanceToCamera, RDXGizmoTools.ZOOM_RESIZE_EPSILON))
          {
             lastDistanceToCamera = distanceToCamera;
