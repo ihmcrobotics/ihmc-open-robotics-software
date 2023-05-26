@@ -4,9 +4,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opencv.core.Point;
 import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import perception_msgs.msg.dds.VideoPacket;
@@ -15,11 +13,8 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.JPEGCompressor;
 import us.ihmc.communication.producers.JPEGDecompressor;
-import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.ihmcPerception.OpenCVTools;
 import us.ihmc.ros2.ROS2Node;
 
 public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehaviorService
