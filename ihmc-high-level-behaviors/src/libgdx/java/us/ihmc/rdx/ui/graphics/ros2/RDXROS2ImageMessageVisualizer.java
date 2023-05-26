@@ -10,7 +10,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -141,8 +141,8 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
             {
                case DEPTH_PNG_16UC1 ->
                {
-                  BytedecoOpenCVTools.clampTo8BitUnsignedChar(decompressedImage, normalizedScaledImage, 0.0, 255.0);
-                  BytedecoOpenCVTools.convertGrayToRGBA(normalizedScaledImage, getRGBA8Mat());
+                  OpenCVTools.clampTo8BitUnsignedChar(decompressedImage, normalizedScaledImage, 0.0, 255.0);
+                  OpenCVTools.convertGrayToRGBA(normalizedScaledImage, getRGBA8Mat());
                }
                case COLOR_JPEG_YUVI420 ->
                {

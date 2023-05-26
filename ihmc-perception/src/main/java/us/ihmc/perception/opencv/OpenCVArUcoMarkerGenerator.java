@@ -1,4 +1,4 @@
-package us.ihmc.perception;
+package us.ihmc.perception.opencv;
 
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_objdetect;
