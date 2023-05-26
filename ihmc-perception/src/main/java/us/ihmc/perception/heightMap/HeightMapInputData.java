@@ -1,4 +1,4 @@
-package us.ihmc.ihmcPerception.heightMap;
+package us.ihmc.perception.heightMap;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;

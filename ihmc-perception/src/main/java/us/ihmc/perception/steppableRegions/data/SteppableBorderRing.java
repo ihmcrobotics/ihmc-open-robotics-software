@@ -1,4 +1,4 @@
-package us.ihmc.ihmcPerception.steppableRegions.data;
+package us.ihmc.perception.steppableRegions.data;
 
 import java.util.ArrayList;
 import java.util.Iterator;

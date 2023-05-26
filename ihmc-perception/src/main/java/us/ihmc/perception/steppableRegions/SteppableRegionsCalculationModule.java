@@ -1,4 +1,4 @@
-package us.ihmc.ihmcPerception.steppableRegions;
+package us.ihmc.perception.steppableRegions;
 
 import javafx.scene.paint.Color;
 import org.bytedeco.opencl._cl_kernel;
@@ -11,15 +11,13 @@ import perception_msgs.msg.dds.SteppableRegionsListCollectionMessage;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.ihmcPerception.steppableRegions.data.SteppableCell;
-import us.ihmc.ihmcPerception.steppableRegions.data.SteppableRegionDataHolder;
-import us.ihmc.ihmcPerception.steppableRegions.data.SteppableRegionsEnvironmentModel;
+import us.ihmc.perception.steppableRegions.data.SteppableCell;
+import us.ihmc.perception.steppableRegions.data.SteppableRegionDataHolder;
+import us.ihmc.perception.steppableRegions.data.SteppableRegionsEnvironmentModel;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
-import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
-import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersReadOnly;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
