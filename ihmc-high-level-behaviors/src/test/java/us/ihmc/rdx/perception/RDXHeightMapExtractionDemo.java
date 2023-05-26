@@ -14,7 +14,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.ihmcPerception.depthData.PointCloudData;
+import us.ihmc.perception.depthData.PointCloudData;
 import us.ihmc.perception.heightMap.HeightMapInputData;
 import us.ihmc.perception.heightMap.HeightMapUpdater;
 import us.ihmc.log.LogTools;

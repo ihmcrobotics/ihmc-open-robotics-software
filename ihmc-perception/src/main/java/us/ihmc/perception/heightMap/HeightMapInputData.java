@@ -2,7 +2,7 @@ package us.ihmc.perception.heightMap;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.ihmcPerception.depthData.PointCloudData;
+import us.ihmc.perception.depthData.PointCloudData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapManager;
 
 public class HeightMapInputData

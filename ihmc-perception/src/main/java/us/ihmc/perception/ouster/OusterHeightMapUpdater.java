@@ -15,7 +15,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
-import us.ihmc.ihmcPerception.depthData.PointCloudData;
+import us.ihmc.perception.depthData.PointCloudData;
 import us.ihmc.perception.heightMap.HeightMapAPI;
 import us.ihmc.perception.heightMap.HeightMapInputData;
 import us.ihmc.perception.heightMap.HeightMapUpdater;
