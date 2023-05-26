@@ -7,6 +7,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -16,18 +18,20 @@ import java.util.List;
 public class PerceptionFilterTools
 {
 
-   public static void applyCollisionFilter(PlanarRegionsList planarRegionsList, CollidingScanRegionFilter collisionFilter)
+   public static void applyCollisionFilter(FramePlanarRegionsList framePlanarRegionsList, CollidingScanRegionFilter collisionFilter)
    {
-      // Filter out regions that are colliding with the body
       collisionFilter.update();
-      int regionIndex = 0;
-      while (regionIndex < planarRegionsList.getNumberOfPlanarRegions())
-      {
-         if (!collisionFilter.test(regionIndex, planarRegionsList.getPlanarRegion(regionIndex)))
-            planarRegionsList.pollPlanarRegion(regionIndex);
-         else
-            ++regionIndex;
-      }
+      PlanarRegionsList planarRegionsList = framePlanarRegionsList.getPlanarRegionsList();
+
+      List<PlanarRegion> filteredPlanarRegions = planarRegionsList.getPlanarRegionsAsList().parallelStream()
+                                                                  .filter(region -> {
+                                                                     PlanarRegion regionInWorld = region.copy();
+                                                                     regionInWorld.applyTransform(framePlanarRegionsList.getSensorToWorldFrameTransform());
+                                                                     return !collisionFilter.test(0, regionInWorld);
+                                                                  }).toList();
+
+      framePlanarRegionsList.getPlanarRegionsList().clear();
+      framePlanarRegionsList.getPlanarRegionsList().addPlanarRegions(filteredPlanarRegions);
    }
 
    public static CollidingScanRegionFilter createHumanoidShinCollisionFilter(FullHumanoidRobotModel fullRobotModel, CollisionBoxProvider collisionBoxProvider)
