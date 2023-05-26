@@ -25,11 +25,13 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.RDXFocusBasedCamera;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
 import us.ihmc.rdx.input.ImGuiMouseDragData;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
@@ -38,8 +40,9 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    public static final Color DISC_COLOR = RDXGizmoTools.CENTER_DEFAULT_COLOR;
    public static final Color X_ARROW_COLOR = RDXGizmoTools.X_AXIS_DEFAULT_COLOR;
    public static final Color Y_ARROW_COLOR = RDXGizmoTools.Y_AXIS_DEFAULT_COLOR;
+   private static final double QUARTER_TURN = Math.PI / 2.0;
 
-   private final double QUARTER_TURN = Math.PI / 2.0;
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImFloat discOuterRadius = new ImFloat(0.426f);
    private final ImFloat discInnerRadius = new ImFloat(0.290f);
    private final ImFloat discThickness = new ImFloat(0.03f);
@@ -50,11 +53,11 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private final ImFloat arrowTailLengthRatio = new ImFloat(1.0f);
    private Material normalMaterial;
    private Material highlightedMaterial;
-   private DynamicLibGDXModel discModel = new DynamicLibGDXModel();
-   private DynamicLibGDXModel positiveXArrowModel = new DynamicLibGDXModel();
-   private DynamicLibGDXModel positiveYArrowModel = new DynamicLibGDXModel();
-   private DynamicLibGDXModel negativeXArrowModel = new DynamicLibGDXModel();
-   private DynamicLibGDXModel negativeYArrowModel = new DynamicLibGDXModel();
+   private final DynamicLibGDXModel discModel = new DynamicLibGDXModel();
+   private final DynamicLibGDXModel positiveXArrowModel = new DynamicLibGDXModel();
+   private final DynamicLibGDXModel positiveYArrowModel = new DynamicLibGDXModel();
+   private final DynamicLibGDXModel negativeXArrowModel = new DynamicLibGDXModel();
+   private final DynamicLibGDXModel negativeYArrowModel = new DynamicLibGDXModel();
    private final RigidBodyTransform xArrowTailTransform = new RigidBodyTransform();
    private final RigidBodyTransform yArrowTailTransform = new RigidBodyTransform();
    private final RigidBodyTransform temporaryTailTransform = new RigidBodyTransform();
@@ -96,6 +99,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private boolean highlightingEnabled = true;
    private boolean isNewlyModified;
    private final double translateSpeedFactor = 0.5;
+   private boolean queuePopupToOpen = false;
 
    public RDXPathControlRingGizmo()
    {
@@ -135,9 +139,10 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
    }
 
-   public void create(RDXFocusBasedCamera camera3D)
+   public void create(RDX3DPanel panel3D)
    {
-      this.camera3D = camera3D;
+      camera3D = panel3D.getCamera3D();
+      panel3D.addImGuiOverlayAddition(this::renderTooltipAndContextMenu);
 
       normalMaterial = createAlphaPaletteMaterial(RDXGizmoTools.X_AXIS_DEFAULT_COLOR.a);
       highlightedMaterial = createAlphaPaletteMaterial(RDXGizmoTools.X_AXIS_SELECTED_DEFAULT_COLOR.a);
@@ -245,6 +250,11 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
       if (allowUserInput)
       {
+         if (isGizmoHovered && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
+         {
+            queuePopupToOpen = true;
+         }
+
          if (isRingHovered)
          {
             if (yawDragData.getDragJustStarted())
@@ -364,6 +374,24 @@ public class RDXPathControlRingGizmo implements RenderableProvider
          lastDistanceToCamera = distanceToCamera;
          recreateGraphics();
          updateTransforms();
+      }
+   }
+
+   private void renderTooltipAndContextMenu()
+   {
+      if (queuePopupToOpen)
+      {
+         queuePopupToOpen = false;
+
+         ImGui.openPopup(labels.get("Popup"));
+      }
+
+      if (ImGui.beginPopup(labels.get("Popup")))
+      {
+         renderImGuiTuner();
+         if (ImGui.menuItem("Close"))
+            ImGui.closeCurrentPopup();
+         ImGui.endPopup();
       }
    }
 
@@ -489,21 +517,21 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    {
       ImGui.text("Use the right mouse button to manipulate the widget.");
 
-      if (ImGui.button("Reset"))
+      if (ImGui.button(labels.get("Reset")))
       {
          transformToParent.setToZero();
       }
 
       ImGui.pushItemWidth(100.00f);
       boolean proportionsChanged = false;
-      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Disc outer radius"), discOuterRadius.getData(), 0.001f, 0.0f, 1000.0f);
-      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Disc inner radius"), discInnerRadius.getData(), 0.001f, 0.0f, 1000.0f);
-      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Disc thickness"), discThickness.getData(), 0.001f, 0.0f, 1000.0f);
-      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow width"), arrowWidth.getData(), 0.001f, 0.0f, 1000.0f);
-      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow height"), arrowHeight.getData(), 0.001f, 0.0f, 1000.0f);
-      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow spacing"), arrowSpacing.getData(), 0.001f, 0.0f, 1000.0f);
-      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow tail width ratio"), arrowTailWidthRatio.getData(), 0.001f, 0.0f, 1000.0f);
-      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow tail length ratio"), arrowTailLengthRatio.getData(), 0.001f, 0.0f, 1000.0f);
+      proportionsChanged |= ImGui.dragFloat(labels.get("Disc outer radius"), discOuterRadius.getData(), 0.001f, 0.0f, 1000.0f);
+      proportionsChanged |= ImGui.dragFloat(labels.get("Disc inner radius"), discInnerRadius.getData(), 0.001f, 0.0f, 1000.0f);
+      proportionsChanged |= ImGui.dragFloat(labels.get("Disc thickness"), discThickness.getData(), 0.001f, 0.0f, 1000.0f);
+      proportionsChanged |= ImGui.dragFloat(labels.get("Arrow width"), arrowWidth.getData(), 0.001f, 0.0f, 1000.0f);
+      proportionsChanged |= ImGui.dragFloat(labels.get("Arrow height"), arrowHeight.getData(), 0.001f, 0.0f, 1000.0f);
+      proportionsChanged |= ImGui.dragFloat(labels.get("Arrow spacing"), arrowSpacing.getData(), 0.001f, 0.0f, 1000.0f);
+      proportionsChanged |= ImGui.dragFloat(labels.get("Arrow tail width ratio"), arrowTailWidthRatio.getData(), 0.001f, 0.0f, 1000.0f);
+      proportionsChanged |= ImGui.dragFloat(labels.get("Arrow tail length ratio"), arrowTailLengthRatio.getData(), 0.001f, 0.0f, 1000.0f);
       ImGui.popItemWidth();
 
       if (proportionsChanged)
