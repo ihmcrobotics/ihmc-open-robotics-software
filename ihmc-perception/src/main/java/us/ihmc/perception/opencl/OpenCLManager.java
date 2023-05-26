@@ -1,11 +1,10 @@
-package us.ihmc.perception;
+package us.ihmc.perception.opencl;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bytedeco.javacpp.*;
 import org.bytedeco.opencl.*;
 import org.bytedeco.opencl.global.OpenCL;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.opencl.OpenCLBooleanParameter;
 import us.ihmc.tools.string.StringTools;
 
 import java.nio.file.Path;

@@ -10,7 +10,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.steppableRegions.RemoteSteppableRegionsUpdater;
 import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsAPI;
-import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.netty.NettyOuster;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;

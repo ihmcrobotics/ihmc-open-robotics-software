@@ -1,4 +1,4 @@
-package us.ihmc.perception;
+package us.ihmc.perception.opencl;
 
 import com.google.common.io.Resources;
 import org.bytedeco.javacpp.CharPointer;
