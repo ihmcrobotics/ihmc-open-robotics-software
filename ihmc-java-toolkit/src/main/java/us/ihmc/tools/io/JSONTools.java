@@ -10,9 +10,15 @@ import java.util.function.Consumer;
 
 public class JSONTools
 {
+   /**
+    * When saving we reduce the precision of the numbers so that infintesimal changes
+    * do not show up as changes to the actions. We choose half a millimeter as the smallest
+    * increment of translation you might care about and 1/50th of a degree for orientations.
+    */
    public static void toJSON(ObjectNode jsonNode, RigidBodyTransform rigidBodyTransform)
    {
       // Round to half a millimeter
+      // Cast to float, otherwise you get numbers like 0.0200000001 showing up in the JSON
       jsonNode.put("x", (float) MathTools.roundToPrecision(rigidBodyTransform.getTranslation().getX(), 0.0005));
       jsonNode.put("y", (float) MathTools.roundToPrecision(rigidBodyTransform.getTranslation().getY(), 0.0005));
       jsonNode.put("z", (float) MathTools.roundToPrecision(rigidBodyTransform.getTranslation().getZ(), 0.0005));
