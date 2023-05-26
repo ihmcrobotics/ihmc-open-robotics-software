@@ -1,4 +1,4 @@
-package us.ihmc.ihmcPerception.heightMap;
+package us.ihmc.perception.heightMap;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import perception_msgs.msg.dds.HeightMapMessage;

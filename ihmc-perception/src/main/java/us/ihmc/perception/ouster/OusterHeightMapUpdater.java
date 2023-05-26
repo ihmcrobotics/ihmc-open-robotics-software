@@ -2,7 +2,6 @@ package us.ihmc.perception.ouster;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
-import org.apache.commons.lang3.tuple.Triple;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapStateRequestMessage;
 import us.ihmc.commons.thread.ThreadTools;
@@ -17,12 +16,11 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.ihmcPerception.depthData.PointCloudData;
-import us.ihmc.ihmcPerception.heightMap.HeightMapAPI;
-import us.ihmc.ihmcPerception.heightMap.HeightMapInputData;
-import us.ihmc.ihmcPerception.heightMap.HeightMapUpdater;
+import us.ihmc.perception.heightMap.HeightMapAPI;
+import us.ihmc.perception.heightMap.HeightMapInputData;
+import us.ihmc.perception.heightMap.HeightMapUpdater;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.nio.FloatBuffer;

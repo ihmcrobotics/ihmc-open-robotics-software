@@ -1,11 +1,11 @@
-package us.ihmc.ihmcPerception.steppableRegions.data;
+package us.ihmc.perception.steppableRegions.data;
 
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsCalculator;
+import us.ihmc.perception.steppableRegions.SteppableRegionsCalculator;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 

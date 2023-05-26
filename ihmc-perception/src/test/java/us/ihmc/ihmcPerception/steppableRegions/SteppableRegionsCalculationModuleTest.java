@@ -2,9 +2,9 @@ package us.ihmc.ihmcPerception.steppableRegions;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.steppableRegions.SteppableRegionsCalculationModule;
+import us.ihmc.perception.steppableRegions.SteppableRegionsListCollection;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-
-import java.util.List;
 
 import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;

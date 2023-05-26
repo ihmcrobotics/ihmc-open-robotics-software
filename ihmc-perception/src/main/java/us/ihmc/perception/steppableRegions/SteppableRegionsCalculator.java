@@ -1,4 +1,4 @@
-package us.ihmc.ihmcPerception.steppableRegions;
+package us.ihmc.perception.steppableRegions;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -10,12 +10,11 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.ihmcPerception.steppableRegions.data.SteppableBorderRing;
-import us.ihmc.ihmcPerception.steppableRegions.data.SteppableCell;
-import us.ihmc.ihmcPerception.steppableRegions.data.SteppableRegionDataHolder;
-import us.ihmc.ihmcPerception.steppableRegions.data.SteppableRegionsEnvironmentModel;
+import us.ihmc.perception.steppableRegions.data.SteppableBorderRing;
+import us.ihmc.perception.steppableRegions.data.SteppableCell;
+import us.ihmc.perception.steppableRegions.data.SteppableRegionDataHolder;
+import us.ihmc.perception.steppableRegions.data.SteppableRegionsEnvironmentModel;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersReadOnly;
 import us.ihmc.robotEnvironmentAwareness.geometry.*;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;

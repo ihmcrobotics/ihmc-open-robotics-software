@@ -1,7 +1,6 @@
-package us.ihmc.ihmcPerception.heightMap;
+package us.ihmc.perception.heightMap;
 
 import controller_msgs.msg.dds.WalkingStatusMessage;
-import org.apache.commons.lang3.tuple.Triple;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapStateRequestMessage;
 import perception_msgs.msg.dds.LidarScanMessage;

@@ -1,4 +1,4 @@
-package us.ihmc.ihmcPerception.steppableRegions.data;
+package us.ihmc.perception.steppableRegions.data;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
