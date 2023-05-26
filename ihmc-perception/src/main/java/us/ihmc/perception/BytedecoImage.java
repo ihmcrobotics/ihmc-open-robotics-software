@@ -6,6 +6,7 @@ import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.NativeMemoryTools;
 
 import java.nio.ByteBuffer;
@@ -39,8 +40,8 @@ public class BytedecoImage
 
    public BytedecoImage(Mat suppliedMat)
    {
-      this(BytedecoOpenCVTools.getImageWidth(suppliedMat),
-           BytedecoOpenCVTools.getImageHeight(suppliedMat),
+      this(OpenCVTools.getImageWidth(suppliedMat),
+           OpenCVTools.getImageHeight(suppliedMat),
            suppliedMat.type(),
            suppliedMat.data().asByteBuffer(),
            suppliedMat);
@@ -215,7 +216,7 @@ public class BytedecoImage
     */
    public void ensureDimensionsMatch(BytedecoImage other, OpenCLManager openCLManager)
    {
-      if (!BytedecoOpenCVTools.dimensionsMatch(this, other))
+      if (!OpenCVTools.dimensionsMatch(this, other))
       {
          resize(other.getImageWidth(), other.getImageHeight(), openCLManager, backingDirectByteBuffer);
       }

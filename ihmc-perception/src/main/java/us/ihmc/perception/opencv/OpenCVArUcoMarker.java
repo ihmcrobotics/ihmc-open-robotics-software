@@ -1,4 +1,4 @@
-package us.ihmc.perception;
+package us.ihmc.perception.opencv;
 
 public class OpenCVArUcoMarker
 {

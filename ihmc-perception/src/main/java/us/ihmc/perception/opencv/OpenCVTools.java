@@ -1,4 +1,4 @@
-package us.ihmc.perception;
+package us.ihmc.perception.opencv;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
@@ -8,10 +8,11 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoImage;
 
 import java.awt.image.BufferedImage;
 
-public class BytedecoOpenCVTools
+public class OpenCVTools
 {
    public static final IntPointer compressionParametersPNG = new IntPointer(opencv_imgcodecs.IMWRITE_PNG_COMPRESSION);
    public static final IntPointer compressionParametersJPG = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);

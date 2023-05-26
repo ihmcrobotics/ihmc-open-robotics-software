@@ -4,7 +4,7 @@ import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
@@ -104,10 +104,10 @@ public class RDXPlanarRegionsSimulationDemo
 
                if (rapidRegionsUI.getEnabled().get())
                {
-                  BytedecoOpenCVTools.convertFloatToShort(steppingL515Simulator.getLowLevelSimulator().getMetersDepthOpenCVMat(),
-                                                          bytedecoDepthImage.getBytedecoOpenCVMat(),
-                                                          1000.0,
-                                                          0.0);
+                  OpenCVTools.convertFloatToShort(steppingL515Simulator.getLowLevelSimulator().getMetersDepthOpenCVMat(),
+                                                  bytedecoDepthImage.getBytedecoOpenCVMat(),
+                                                  1000.0,
+                                                  0.0);
 
                   // Get the planar regions from the planar region extractor
                   FramePlanarRegionsList frameRegions = new FramePlanarRegionsList();
