@@ -11,7 +11,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.perception.zedDriver.ZEDOpenDriver;
@@ -132,7 +132,7 @@ public class ZED2ColorStereoPublisher
 
       if (valid)
       {
-         BytedecoOpenCVTools.compressRGBImageJPG(color8UC3CombinedImage, yuvCombinedImage, compressedColorPointer);
+         OpenCVTools.compressRGBImageJPG(color8UC3CombinedImage, yuvCombinedImage, compressedColorPointer);
          CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
          PerceptionMessageTools.publishJPGCompressedColorImage(compressedColorPointer,
                                                                colorTopic,
