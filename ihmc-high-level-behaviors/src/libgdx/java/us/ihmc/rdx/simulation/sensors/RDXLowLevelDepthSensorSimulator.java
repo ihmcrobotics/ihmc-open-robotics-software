@@ -18,6 +18,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -67,6 +68,8 @@ public class RDXLowLevelDepthSensorSimulator
    private final float noiseAmplitudeAtMinRange;
    private final float noiseAmplitudeAtMaxRange;
    private final float simulateL515Noise;
+
+   private final CameraIntrinsics cameraIntrinsics = new CameraIntrinsics();
 
    /** Simulated camera that observes the current GDX Scene **/
    private PerspectiveCamera camera;
@@ -436,5 +439,14 @@ public class RDXLowLevelDepthSensorSimulator
    public Texture getFrameBufferColorTexture()
    {
       return frameBuffer.getColorTexture();
+   }
+
+   public CameraIntrinsics getCameraIntrinsics()
+   {
+      cameraIntrinsics.setFx(focalLengthPixels.get());
+      cameraIntrinsics.setFy(focalLengthPixels.get());
+      cameraIntrinsics.setCx(principalOffsetXPixels.get());
+      cameraIntrinsics.setCy(principalOffsetYPixels.get());
+      return cameraIntrinsics;
    }
 }
