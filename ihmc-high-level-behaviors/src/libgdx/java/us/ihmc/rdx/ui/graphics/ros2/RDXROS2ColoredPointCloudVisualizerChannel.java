@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.comms.ImageMessageFormat;
-import us.ihmc.perception.netty.NettyOuster;
+import us.ihmc.perception.ouster.NettyOuster;
 import us.ihmc.perception.tools.ImageMessageDecompressionInput;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.pubsub.common.SampleInfo;
