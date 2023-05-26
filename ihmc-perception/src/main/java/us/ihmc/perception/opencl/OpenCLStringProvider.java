@@ -1,4 +1,4 @@
-package us.ihmc.perception;
+package us.ihmc.perception.opencl;
 
 import org.bytedeco.javacpp.CharPointer;
 import org.bytedeco.javacpp.SizeTPointer;

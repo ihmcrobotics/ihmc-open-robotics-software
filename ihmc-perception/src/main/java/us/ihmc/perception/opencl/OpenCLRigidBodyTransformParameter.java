@@ -5,7 +5,6 @@ import org.bytedeco.opencl._cl_mem;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.tools.NativeMemoryTools;
 
 import java.nio.ByteBuffer;

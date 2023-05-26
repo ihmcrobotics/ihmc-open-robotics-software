@@ -30,8 +30,8 @@ import us.ihmc.rdx.simulation.DepthSensorShaderProvider;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.visualizers.RDXFrustumGraphic;
 import us.ihmc.perception.BytedecoOpenCVTools;
-import us.ihmc.perception.OpenCLFloatBuffer;
-import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.opencl.OpenCLFloatBuffer;
+import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.UnitConversions;
 
