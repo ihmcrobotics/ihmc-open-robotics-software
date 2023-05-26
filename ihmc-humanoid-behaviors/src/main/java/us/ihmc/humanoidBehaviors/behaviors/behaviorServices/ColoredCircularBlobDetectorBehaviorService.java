@@ -4,9 +4,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opencv.core.Point;
 import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import perception_msgs.msg.dds.VideoPacket;
@@ -15,15 +13,8 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.JPEGCompressor;
 import us.ihmc.communication.producers.JPEGDecompressor;
-import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.ihmcPerception.OpenCVTools;
-import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
-import us.ihmc.ihmcPerception.vision.shapes.HoughCircleResult;
-import us.ihmc.ihmcPerception.vision.shapes.OpenCVColoredCircularBlobDetector;
-import us.ihmc.ihmcPerception.vision.shapes.OpenCVColoredCircularBlobDetectorFactory;
 import us.ihmc.ros2.ROS2Node;
 
 public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehaviorService
@@ -35,7 +26,7 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
    private final JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
    private final JPEGCompressor jpegCompressor = new JPEGCompressor();
 
-   private final OpenCVColoredCircularBlobDetector openCVColoredCircularBlobDetector;
+//   private final OpenCVColoredCircularBlobDetector openCVColoredCircularBlobDetector;
    private final Point2D latestBallPosition2d = new Point2D();
    private final List<Point2D> latestBallPositionSet = new ArrayList<>();
    private BufferedImage latestUnmodifiedCameraImage;
@@ -53,9 +44,9 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
 
       videoPublisher = createBehaviorOutputPublisher(VideoPacket.class, "/video");
 
-      OpenCVColoredCircularBlobDetectorFactory factory = new OpenCVColoredCircularBlobDetectorFactory();
-      factory.setCaptureSource(OpenCVColoredCircularBlobDetector.CaptureSource.JAVA_BUFFERED_IMAGES);
-      openCVColoredCircularBlobDetector = factory.buildBlobDetector();
+//      OpenCVColoredCircularBlobDetectorFactory factory = new OpenCVColoredCircularBlobDetectorFactory();
+//      factory.setCaptureSource(OpenCVColoredCircularBlobDetector.CaptureSource.JAVA_BUFFERED_IMAGES);
+//      openCVColoredCircularBlobDetector = factory.buildBlobDetector();
    }
 
    @Override
@@ -69,38 +60,38 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
 
          latestUnmodifiedCameraImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData().toArray());
 
-         openCVColoredCircularBlobDetector.updateFromBufferedImage(latestUnmodifiedCameraImage);
-         ArrayList<HoughCircleResult> circles = openCVColoredCircularBlobDetector.getCircles();
+//         openCVColoredCircularBlobDetector.updateFromBufferedImage(latestUnmodifiedCameraImage);
+//         ArrayList<HoughCircleResult> circles = openCVColoredCircularBlobDetector.getCircles();
+//
+//         for (int i = 0; i < circles.size(); i++)
+//         {
+//            Point2D vecCenter = circles.get(i).getCenter();
+//            Point openCvCenter = new Point(vecCenter.getX(), vecCenter.getY());
+//            int circleRadius = (int) circles.get(i).getRadius();
+//            Imgproc.circle(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR(), openCvCenter, circleRadius, circleColor, 1);
+//            Imgproc.circle(openCVColoredCircularBlobDetector.getThresholdMat(), openCvCenter, circleRadius, circleColor, 1);
+//         }
+//
+//         BufferedImage thresholdBufferedImageOpenCVEncoded = OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getThresholdMat());
+//         BufferedImage thresholdBufferedImage = OpenCVTools.convertToCompressableBufferedImage(thresholdBufferedImageOpenCVEncoded);
 
-         for (int i = 0; i < circles.size(); i++)
-         {
-            Point2D vecCenter = circles.get(i).getCenter();
-            Point openCvCenter = new Point(vecCenter.getX(), vecCenter.getY());
-            int circleRadius = (int) circles.get(i).getRadius();
-            Imgproc.circle(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR(), openCvCenter, circleRadius, circleColor, 1);
-            Imgproc.circle(openCVColoredCircularBlobDetector.getThresholdMat(), openCvCenter, circleRadius, circleColor, 1);
-         }
+//         byte[] jpegThresholdImage = jpegCompressor.convertBufferedImageToJPEGData(thresholdBufferedImage);
+//         VideoPacket circleBlobThresholdImagePacket = HumanoidMessageTools.createVideoPacket(VideoSource.CV_THRESHOLD, videoTimestamp, jpegThresholdImage,
+//                                                                                             videoPacket.getPosition(), videoPacket.getOrientation(),
+//                                                                                             HumanoidMessageTools.toIntrinsicParameters(videoPacket.getIntrinsicParameters()));
+//         videoPublisher.publish(circleBlobThresholdImagePacket);
 
-         BufferedImage thresholdBufferedImageOpenCVEncoded = OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getThresholdMat());
-         BufferedImage thresholdBufferedImage = OpenCVTools.convertToCompressableBufferedImage(thresholdBufferedImageOpenCVEncoded);
-
-         byte[] jpegThresholdImage = jpegCompressor.convertBufferedImageToJPEGData(thresholdBufferedImage);
-         VideoPacket circleBlobThresholdImagePacket = HumanoidMessageTools.createVideoPacket(VideoSource.CV_THRESHOLD, videoTimestamp, jpegThresholdImage,
-                                                                                             videoPacket.getPosition(), videoPacket.getOrientation(),
-                                                                                             HumanoidMessageTools.toIntrinsicParameters(videoPacket.getIntrinsicParameters()));
-         videoPublisher.publish(circleBlobThresholdImagePacket);
-
-         if (circles.size() > 0)
-            latestBallPosition2d.set(circles.get(0).getCenter());
-
-         synchronized (ballListConch)
-         {
-            latestBallPositionSet.clear();
-            for (HoughCircleResult houghCircleResult : circles)
-            {
-               latestBallPositionSet.add(new Point2D(houghCircleResult.getCenter()));
-            }
-         }
+//         if (circles.size() > 0)
+//            latestBallPosition2d.set(circles.get(0).getCenter());
+//
+//         synchronized (ballListConch)
+//         {
+//            latestBallPositionSet.clear();
+//            for (HoughCircleResult houghCircleResult : circles)
+//            {
+//               latestBallPositionSet.add(new Point2D(houghCircleResult.getCenter()));
+//            }
+//         }
       }
       else
       {
@@ -108,10 +99,10 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
       }
    }
 
-   public void addHSVRange(HSVRange hsvRange)
-   {
-      openCVColoredCircularBlobDetector.addHSVRange(hsvRange);
-   }
+//   public void addHSVRange(HSVRange hsvRange)
+//   {
+//      openCVColoredCircularBlobDetector.addHSVRange(hsvRange);
+//   }
 
    public List<Point2D> getLatestBallPositionSet()
    {
@@ -130,7 +121,7 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
 
    public void clearHSVRanges()
    {
-      openCVColoredCircularBlobDetector.resetRanges();
+//      openCVColoredCircularBlobDetector.resetRanges();
    }
 
    public Object getBallListConch()
