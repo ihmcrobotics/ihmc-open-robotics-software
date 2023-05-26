@@ -23,7 +23,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.perception.*;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoOpenCVTools;
-import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
