@@ -45,7 +45,7 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
    private final TargetFollowingBehaviorParameters targetFollowingParameters = new TargetFollowingBehaviorParameters();
    private final ImGuiStoredPropertySetTuner targetFollowingParameterTuner = new ImGuiStoredPropertySetTuner("Target Following Parameters");
    private final RDXBallAndArrowPosePlacement manualTargetAffordance = new RDXBallAndArrowPosePlacement();
-   private final RosTopicPublisher<PoseStamped> manualTargetPublisher;
+   private final RosTopicPublisher<PoseStamped> manualTargetPublisher = null;
    private int pointNumber;
    private final FramePose3D testLoopTargetPose = new FramePose3D();
    private final FramePose3D manualTargetPose = new FramePose3D();
@@ -64,8 +64,8 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
       lookAndStepUI = new RDXLookAndStepBehaviorUI(helper);
       addChild(lookAndStepUI);
 
-      manualTargetPublisher = helper.getROS1Helper().publishPose(RosTools.SEMANTIC_TARGET_POSE);
-      helper.subscribeViaCallback(TargetPose, latestTargetPoseFromBehaviorReference::set);
+//      manualTargetPublisher = helper.getROS1Helper().publishPose(RosTools.SEMANTIC_TARGET_POSE);
+//      helper.subscribeViaCallback(TargetPose, latestTargetPoseFromBehaviorReference::set);
 
       pointNumber = 0;
       int numberOfPoints = 20;
@@ -95,9 +95,12 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
    public void create(RDXBaseUI baseUI)
    {
       targetFollowingParameterTuner.create(targetFollowingParameters,
-                                           () -> helper.publish(TargetFollowingParameters, targetFollowingParameters.getAllAsStrings()));
+                                           () ->
+                                           {
+//                                              helper.publish(TargetFollowingParameters, targetFollowingParameters.getAllAsStrings());
+                                           });
       targetApproachPoseGraphic = RDXModelBuilder.createCoordinateFrameInstance(0.1);
-      targetApproachPoseReference = helper.subscribeViaReference(TargetApproachPose, BehaviorTools.createNaNPose());
+//      targetApproachPoseReference = helper.subscribeViaReference(TargetApproachPose, BehaviorTools.createNaNPose());
       manualTargetAffordance.create(placedTargetPose ->
       {
          syncedRobot.update();

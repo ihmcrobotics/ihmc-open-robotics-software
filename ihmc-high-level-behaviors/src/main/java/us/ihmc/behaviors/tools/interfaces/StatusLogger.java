@@ -1,9 +1,10 @@
 package us.ihmc.behaviors.tools.interfaces;
 
-import org.apache.commons.lang3.tuple.MutablePair;
+import behavior_msgs.msg.dds.StatusLogMessage;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.message.ParameterizedMessage;
 import us.ihmc.behaviors.BehaviorModule;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.log.LogToolsWriteOnly;
 
@@ -140,6 +141,9 @@ public class StatusLogger implements LogToolsWriteOnly
 
    private void publishToUI(Level level, String  message)
    {
-      uiPublisher.publishToUI(BehaviorModule.API.StatusLog, MutablePair.of(level.intLevel(), LocalDateTime.now().format(dateFormat) + " " + message));
+      StatusLogMessage statusLogMessage = new StatusLogMessage();
+      statusLogMessage.setLogLevel(level.intLevel());
+      MessageTools.packLongStringToByteSequence(LocalDateTime.now().format(dateFormat) + " " + message, statusLogMessage.getLogMessage());
+      uiPublisher.publishToUI(BehaviorModule.API.STATUS_LOG, statusLogMessage);
    }
 }

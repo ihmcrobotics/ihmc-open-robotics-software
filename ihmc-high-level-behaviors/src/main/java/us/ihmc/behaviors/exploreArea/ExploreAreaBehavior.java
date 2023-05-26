@@ -12,7 +12,6 @@ import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
-import us.ihmc.messager.Messager;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
@@ -25,12 +24,14 @@ import static us.ihmc.behaviors.exploreArea.ExploreAreaBehavior.ExploreAreaBehav
 import static us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI.*;
 import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
 
+/**
+ * An attempt mostly in simulation to explore a building.
+ * @deprecated Not supported right now. Being kept for reference or revival.
+ */
 public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Explore Area",
-                                                                              ExploreAreaBehavior::new,
-                                                                              create(),
-                                                                              LookAndStepBehavior.DEFINITION);
+                                                                              ExploreAreaBehavior::new, LookAndStepBehavior.DEFINITION);
    public static final double TICK_PERIOD = UnitConversions.hertzToSeconds(2);
 
    public enum ExploreAreaBehaviorState
@@ -39,7 +40,6 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
    }
 
    private final BehaviorHelper helper;
-   private final Messager messager;
    private final StatusLogger statusLogger;
    private final RemoteHumanoidRobotInterface robotInterface;
 
@@ -48,19 +48,18 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
    private final RestOfStatesNode restOfStatesNode;
    private final PausablePeriodicThread mainThread;
 
-   private final AtomicReference<Boolean> explore;
+   private final AtomicReference<Boolean> explore = null;
 
    private final Notification lookAndStepReachedGoal;
 
    public ExploreAreaBehavior(BehaviorHelper helper)
    {
       this.helper = helper;
-      messager = helper.getMessager();
       statusLogger = helper.getOrCreateStatusLogger();
       robotInterface = helper.getOrCreateRobotInterface();
 
-      explore = helper.subscribeViaReference(ExploreArea, false);
-      helper.subscribeViaCallback(Parameters, parameters::setAllFromStrings);
+//      explore = helper.subscribeViaReference(ExploreArea, false);
+//      helper.subscribeViaCallback(Parameters, parameters::setAllFromStrings);
       lookAndStepReachedGoal = helper.subscribeViaNotification(LookAndStepBehaviorAPI.REACHED_GOAL);
 
       statusLogger.info("Initializing explore area behavior");
@@ -90,7 +89,7 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
          }
          else
          {
-            helper.publish(CurrentState, Stop);
+//            helper.publish(CurrentState, Stop);
             robotInterface.pauseWalking();
             return SUCCESS;
          }
@@ -148,7 +147,7 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
             if (noWhereToExploreSupplier.get())
                return SUCCESS; // return failure?
 
-            helper.publish(CurrentState, LookAndStep);
+//            helper.publish(CurrentState, LookAndStep);
 
             List<Pose3DReadOnly> bestBodyPath = bestBodyPathSupplier.get();
             Pose3D goal = new Pose3D(bestBodyPath.get(bestBodyPath.size() - 1));
@@ -156,7 +155,7 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
             exploredGoalPosesSoFarSupplier.get().add(goal);
 
             statusLogger.info("Walking to {}", StringTools.zUpPoseString(goal));
-            helper.publish(WalkingToPose, goal);
+//            helper.publish(WalkingToPose, goal);
 
             helper.publish(LookAndStepBehaviorAPI.OPERATOR_REVIEW_ENABLED_COMMAND, false);
             helper.publish(LookAndStepBehaviorAPI.BODY_PATH_INPUT, MessageTools.createPoseListMessage(bestBodyPath));

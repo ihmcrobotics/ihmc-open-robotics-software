@@ -28,6 +28,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
@@ -39,6 +40,7 @@ import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1389,5 +1391,26 @@ public class MessageTools
       Bool bool = new Bool();
       bool.setData(data);
       return bool;
+   }
+
+   /**
+    * The regular string type in our DDS messages has a maximum length of 255.
+    * The get around this we declare `int8[] field_name` in the ".msg" file
+    * which creates a Byte sequence 25 MB in size.
+    * We use ASCII because UTF8 causes issues when publishing over DDS.
+    */
+   public static void packLongStringToByteSequence(String longString, IDLSequence.Byte byteSequence)
+   {
+      byte[] longStringBytes = longString.getBytes(StandardCharsets.US_ASCII);
+      byteSequence.addAll(longStringBytes);
+   }
+
+   /**
+    * See {@link #unpackLongStringFromByteSequence(IDLSequence.Byte)}.
+    */
+   public static String unpackLongStringFromByteSequence(IDLSequence.Byte byteSequence)
+   {
+      byte[] longStringData = byteSequence.toArray();
+      return new String(longStringData, StandardCharsets.US_ASCII);
    }
 }
