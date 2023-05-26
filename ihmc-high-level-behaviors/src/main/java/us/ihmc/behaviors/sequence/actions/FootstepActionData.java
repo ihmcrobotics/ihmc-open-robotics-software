@@ -11,6 +11,7 @@ import us.ihmc.tools.io.JSONTools;
 
 public class FootstepActionData implements BehaviorActionData
 {
+   private String description = "Footstep";
    private RobotSide side = RobotSide.LEFT;
    private String parentFrameName = "";
    private final RigidBodyTransform transformToParent = new RigidBodyTransform();
@@ -18,6 +19,7 @@ public class FootstepActionData implements BehaviorActionData
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
+      jsonNode.put("description", description);
       jsonNode.put("side", side.getLowerCaseName());
       jsonNode.put("parentFrame", parentFrameName);
       JSONTools.toJSON(jsonNode, transformToParent);
@@ -69,5 +71,17 @@ public class FootstepActionData implements BehaviorActionData
    public RigidBodyTransform getTransformToParent()
    {
       return transformToParent;
+   }
+
+   @Override
+   public void setDescription(String description)
+   {
+      this.description = description;
+   }
+
+   @Override
+   public String getDescription()
+   {
+      return description;
    }
 }

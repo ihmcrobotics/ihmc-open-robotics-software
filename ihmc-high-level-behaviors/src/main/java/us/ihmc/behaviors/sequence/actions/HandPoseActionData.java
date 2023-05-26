@@ -11,6 +11,7 @@ import us.ihmc.tools.io.JSONTools;
 
 public class HandPoseActionData implements BehaviorActionData
 {
+   private String description = "Hand pose";
    private RobotSide side = RobotSide.LEFT;
    private String parentFrameName = "";
    private final RigidBodyTransform transformToParent = new RigidBodyTransform();
@@ -19,6 +20,7 @@ public class HandPoseActionData implements BehaviorActionData
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
+      jsonNode.put("description", description);
       jsonNode.put("parentFrame", parentFrameName);
       jsonNode.put("side", side.getLowerCaseName());
       jsonNode.put("trajectoryDuration", trajectoryDuration);
@@ -28,6 +30,7 @@ public class HandPoseActionData implements BehaviorActionData
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
+      description = jsonNode.get("description").textValue();
       parentFrameName = jsonNode.get("parentFrame").asText();
       side = RobotSide.getSideFromString(jsonNode.get("side").asText());
       trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
@@ -84,5 +87,17 @@ public class HandPoseActionData implements BehaviorActionData
    public RigidBodyTransform getTransformToParent()
    {
       return transformToParent;
+   }
+
+   @Override
+   public void setDescription(String description)
+   {
+      this.description = description;
+   }
+
+   @Override
+   public String getDescription()
+   {
+      return description;
    }
 }
