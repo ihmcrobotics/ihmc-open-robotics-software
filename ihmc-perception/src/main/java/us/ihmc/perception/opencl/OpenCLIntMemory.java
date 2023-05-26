@@ -1,13 +1,13 @@
-package us.ihmc.perception;
+package us.ihmc.perception.opencl;
 
 import org.bytedeco.opencl._cl_mem;
 
-public class OpenCLFloatMemory
+public class OpenCLIntMemory
 {
-   private long numberOfFloats;
+   private long numberOfInts;
    private _cl_mem openCLBufferObject;
 
-   public OpenCLFloatMemory(int numberOfFloats)
+   public OpenCLIntMemory(int numberOfFloats)
    {
       resize(numberOfFloats, null);
    }
@@ -24,10 +24,10 @@ public class OpenCLFloatMemory
 
    public void resize(int numberOfFloats,  OpenCLManager openCLManager)
    {
-      if (numberOfFloats == this.numberOfFloats)
+      if (numberOfFloats == this.numberOfInts)
          return;
 
-      this.numberOfFloats = numberOfFloats;
+      this.numberOfInts = numberOfFloats;
 
       boolean openCLObjectCreated = openCLBufferObject != null;
       destroy(openCLManager);
@@ -40,7 +40,7 @@ public class OpenCLFloatMemory
 
    public void createOpenCLBufferObject(OpenCLManager openCLManager)
    {
-      openCLBufferObject = openCLManager.createBufferObject(numberOfFloats * Float.BYTES, null);
+      openCLBufferObject = openCLManager.createBufferObject(numberOfInts * Integer.BYTES, null);
    }
 
    public _cl_mem getOpenCLBufferObject()

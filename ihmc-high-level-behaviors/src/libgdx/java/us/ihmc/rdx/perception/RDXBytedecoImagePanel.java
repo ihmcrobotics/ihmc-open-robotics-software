@@ -9,7 +9,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.opencl.OpenCLManager;
 
 /**
  * Possible to render grayscale images directly? Pixmap format Alpha texture?

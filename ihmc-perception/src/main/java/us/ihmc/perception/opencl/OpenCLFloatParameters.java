@@ -3,8 +3,6 @@ package us.ihmc.perception.opencl;
 import gnu.trove.list.array.TFloatArrayList;
 import org.bytedeco.opencl._cl_mem;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.OpenCLFloatBuffer;
-import us.ihmc.perception.OpenCLManager;
 
 /**
  * Allocated the OpenCL buffer on the first time before it's written to the GPU.
