@@ -1,4 +1,4 @@
-package us.ihmc.perception;
+package us.ihmc.perception.opencv;
 
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.bytedeco.opencv.global.opencv_core;
@@ -6,6 +6,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_objdetect.DetectorParameters;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.perception.BytedecoImage;
 
 public class OpenCVArUcoMakerDetectionSwapData
 {

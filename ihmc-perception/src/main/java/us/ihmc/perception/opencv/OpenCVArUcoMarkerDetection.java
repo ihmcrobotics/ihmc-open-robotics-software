@@ -1,4 +1,4 @@
-package us.ihmc.perception;
+package us.ihmc.perception.opencv;
 
 import boofcv.struct.calib.CameraPinholeBrown;
 import gnu.trove.list.array.TIntArrayList;
@@ -24,11 +24,10 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoImage;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.thread.SwapReference;
 import us.ihmc.tools.thread.Throttler;
-
-import java.util.function.Consumer;
 
 public class OpenCVArUcoMarkerDetection
 {
@@ -259,10 +258,10 @@ public class OpenCVArUcoMarkerDetection
           * Third corner is bottom right of marker.
           * Fourth corner is bottom left of marker.
           */
-         BytedecoOpenCVTools.putFloat3(objectPointsDataPointer, 0, 0.0f, (float) -markerSize, (float) markerSize);
-         BytedecoOpenCVTools.putFloat3(objectPointsDataPointer, 1, 0.0f, 0.0f, (float) markerSize);
-         BytedecoOpenCVTools.putFloat3(objectPointsDataPointer, 2, 0.0f, 0.0f, 0.0f);
-         BytedecoOpenCVTools.putFloat3(objectPointsDataPointer, 3, 0.0f, (float) -markerSize, 0.0f);
+         OpenCVTools.putFloat3(objectPointsDataPointer, 0, 0.0f, (float) -markerSize, (float) markerSize);
+         OpenCVTools.putFloat3(objectPointsDataPointer, 1, 0.0f, 0.0f, (float) markerSize);
+         OpenCVTools.putFloat3(objectPointsDataPointer, 2, 0.0f, 0.0f, 0.0f);
+         OpenCVTools.putFloat3(objectPointsDataPointer, 3, 0.0f, (float) -markerSize, 0.0f);
 
          OpenCVArUcoMakerDetectionSwapData data = detectionSwapReference.getForThreadTwo();
          int cornersIndex = data.getMarkerIDToCornersIndexMap().get(markerID);

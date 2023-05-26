@@ -1,4 +1,4 @@
-package us.ihmc.perception;
+package us.ihmc.perception.opencv;
 
 import org.bytedeco.opencv.opencv_objdetect.DetectorParameters;
 
