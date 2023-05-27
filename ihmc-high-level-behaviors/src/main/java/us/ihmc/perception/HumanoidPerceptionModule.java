@@ -31,8 +31,9 @@ public class HumanoidPerceptionModule
 
    public HumanoidPerceptionModule(FullHumanoidRobotModel fullRobotModel, CollisionBoxProvider collisionBoxProvider, OpenCLManager openCLManager)
    {
-      this.mapHandler = new PlanarRegionMappingHandler();
       this.openCLManager = openCLManager;
+
+      this.mapHandler = new PlanarRegionMappingHandler();
       this.framePlanarRegionsList = new FramePlanarRegionsList();
 
       initializeBodyCollisionFilter(fullRobotModel, collisionBoxProvider);
@@ -57,9 +58,9 @@ public class HumanoidPerceptionModule
 
    public void initializePerspectiveRapidRegionsExtractor(CameraIntrinsics cameraIntrinsics)
    {
-      LogTools.info("Intrinsics: {}", cameraIntrinsics);
+      LogTools.info("Initialize Rapid Regions: {}", cameraIntrinsics);
 
-      this.bytedecoDepthImage = new BytedecoImage(cameraIntrinsics.getHeight(), cameraIntrinsics.getWidth(), opencv_core.CV_16UC1);
+      this.bytedecoDepthImage = new BytedecoImage(cameraIntrinsics.getWidth(), cameraIntrinsics.getHeight(), opencv_core.CV_16UC1);
       this.bytedecoDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
       this.rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor();
       this.rapidPlanarRegionsExtractor.create(openCLManager, cameraIntrinsics.getHeight(), cameraIntrinsics.getWidth(),
