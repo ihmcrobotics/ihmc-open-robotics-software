@@ -1,10 +1,10 @@
 package us.ihmc.perception.tools;
 
-import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
-import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.depthData.CollisionShapeTester;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;

@@ -3,17 +3,14 @@ package us.ihmc.perception;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
-import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.BytedecoOpenCVTools;
-import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
+import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.tools.PerceptionFilterTools;
-import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -42,9 +39,9 @@ public class HumanoidPerceptionModule
    {
       if (rapidRegions)
       {
-         BytedecoOpenCVTools.convertFloatToShort(depthImage, bytedecoDepthImage.getBytedecoOpenCVMat(),
-                 1000.0,
-                 0.0);
+         OpenCVTools.convertFloatToShort(depthImage, bytedecoDepthImage.getBytedecoOpenCVMat(),
+                                         1000.0,
+                                         0.0);
 
          extractFramePlanarRegionsList(cameraFrame);
 

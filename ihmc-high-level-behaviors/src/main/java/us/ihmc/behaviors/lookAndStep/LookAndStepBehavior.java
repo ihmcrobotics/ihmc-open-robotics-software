@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.lookAndStep;
 
 import controller_msgs.msg.dds.*;
-import std_msgs.msg.dds.Bool;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.communication.PerceptionAPI;
@@ -12,7 +11,6 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorInterface;
-import us.ihmc.avatar.sensors.realsense.DelayFixedPlanarRegionsSubscription;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBodyPathPlanningTask.LookAndStepBodyPathPlanning;
 import us.ihmc.behaviors.lookAndStep.LookAndStepFootstepPlanningTask.LookAndStepFootstepPlanning;
 import us.ihmc.behaviors.lookAndStep.LookAndStepLocalizationTask.LookAndStepBodyPathLocalization;
@@ -38,7 +36,7 @@ import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
 public class LookAndStepBehavior extends ResettingNode implements BehaviorInterface
 {
-   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Look and Step", LookAndStepBehavior::new, create());
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Look and Step", LookAndStepBehavior::new);
 
    final BehaviorHelper helper;
    final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
@@ -60,7 +58,6 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
    final LookAndStepImminentStanceTracker imminentStanceTracker;
    final ControllerStatusTracker controllerStatusTracker;
    final TypedNotification<Boolean> approvalNotification;
-   private DelayFixedPlanarRegionsSubscription delayFixedPlanarRegionsSubscription;
 
    /**
     * At any time the behavior will be executing on one of this tasks
@@ -141,13 +138,6 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
       helper.subscribeViaCallback(BODY_PATH_INPUT, message -> bodyPathPlanInput(MessageTools.unpackPoseListMessage(message)));
 
       footstepPlanning.initialize(this);
-      if (helper.getROS1Helper() != null)
-      {
-         delayFixedPlanarRegionsSubscription = helper.subscribeToPlanarRegionsViaCallback(REGIONS_FOR_FOOTSTEP_PLANNING, regions -> footstepPlanning.acceptPlanarRegions(regions.getRight()));
-         delayFixedPlanarRegionsSubscription.subscribe(helper.getROS1Helper());
-         delayFixedPlanarRegionsSubscription.setEnabled(true);
-         delayFixedPlanarRegionsSubscription.setPosePublisherEnabled(true);
-      }
       helper.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_OUTPUT, heightMapMessage ->
       {
          bodyPathPlanning.acceptHeightMap(heightMapMessage);
@@ -210,8 +200,6 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
 
    public void destroy()
    {
-      if (delayFixedPlanarRegionsSubscription != null)
-         delayFixedPlanarRegionsSubscription.destroy();
       bodyPathPlanning.destroy();
       footstepPlanning.destroy();
       reset.destroy();

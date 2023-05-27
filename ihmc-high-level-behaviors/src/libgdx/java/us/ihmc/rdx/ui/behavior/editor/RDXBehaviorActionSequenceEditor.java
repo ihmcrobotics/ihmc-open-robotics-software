@@ -201,6 +201,28 @@ public class RDXBehaviorActionSequenceEditor
 
    public void renderImGuiWidgets()
    {
+      renderMenuBar();
+
+      renderSequencePrimaryControlsArea();
+
+      ImGui.separator();
+
+      // This, paired with the endChild call after, allows this area to scroll separately
+      // from the rest, so the top controls are still available while editing later parts
+      // of the sequence.
+      ImGui.beginChild(labels.get("childRegion"));
+
+      renderInteractableActionListArea();
+
+      ImGui.separator();
+
+      renderActionCreationArea();
+
+      ImGui.endChild();
+   }
+
+   private void renderMenuBar()
+   {
       ImGui.beginMenuBar();
       if (ImGui.beginMenu(labels.get("File")))
       {
@@ -214,12 +236,15 @@ public class RDXBehaviorActionSequenceEditor
          }
          ImGui.endMenu();
       }
-//      if (ImGui.beginMenu(labels.get("View")))
-//      {
-//         ImGui.endMenu();
-//      }
+      //      if (ImGui.beginMenu(labels.get("View")))
+      //      {
+      //         ImGui.endMenu();
+      //      }
       ImGui.endMenuBar();
+   }
 
+   private void renderSequencePrimaryControlsArea()
+   {
       if (ImGui.button(labels.get("[+]")))
       {
          for (var action : actionSequence)
@@ -389,31 +414,43 @@ public class RDXBehaviorActionSequenceEditor
          ImGui.text("End of sequence.");
       else
          ImGui.text(actionSequence.get(executionNextIndexStatus).getNameForDisplay());
+   }
 
-      ImGui.separator();
-
-      // This, paired with the endChild call after, allows this area to scroll separately
-      // from the rest, so the top controls are still available while editing later parts
-      // of the sequence.
-      ImGui.beginChild(labels.get("childRegion"));
-
+   private void renderInteractableActionListArea()
+   {
       reorderRequest.setLeft(-1);
       for (int i = 0; i < actionSequence.size(); i++)
       {
          RDXBehaviorAction action = actionSequence.get(i);
+
+         if (!action.getExpanded().get())
+         {
+            if (ImGui.button(labels.get("[+]", "expand", i)))
+               action.getExpanded().set(true);
+            ImGuiTools.previousWidgetTooltip("Expand action settings");
+         }
+         else
+         {
+            if (ImGui.button(labels.get("[-]", "collapse", i)))
+               action.getExpanded().set(false);
+            ImGuiTools.previousWidgetTooltip("Collapse action settings");
+         }
+         ImGui.sameLine();
+
+         ImGui.sameLine();
+         ImGui.text("Index %d".formatted(i));
+         ImGui.sameLine();
          if (ImGui.radioButton(labels.get("", "playbackNextIndex", i), executionNextIndexStatus == i))
          {
             commandNextActionIndex(i);
          }
          ImGuiTools.previousWidgetTooltip("Next for excecution");
+         action.getDescription().set(action.getActionData().getDescription());
          ImGui.sameLine();
-         ImGui.checkbox(labels.get("", "selected", i), action.getSelected());
-         ImGuiTools.previousWidgetTooltip("Selected");
-         ImGui.sameLine();
-         ImGui.checkbox(labels.get("", "expanded", i), action.getExpanded());
-         ImGuiTools.previousWidgetTooltip("Expanded");
-         ImGui.sameLine();
-         ImGui.text(i + ": " + action.getNameForDisplay());
+         ImGui.pushItemWidth(9.0f + action.getActionData().getDescription().length() * 7.0f);
+         ImGuiTools.inputText(labels.get("", "description", i), action.getDescription());
+         action.getActionData().setDescription(action.getDescription().get());
+         ImGui.popItemWidth();
          ImGui.sameLine();
          if (i > 0)
          {
@@ -441,7 +478,17 @@ public class RDXBehaviorActionSequenceEditor
             commandNextActionIndex(actionSequence.size());
          }
 
+         if (action.getExpanded().get())
+         {
+            ImGui.checkbox(labels.get("Show gizmo", "selected", i), action.getSelected());
+            ImGuiTools.previousWidgetTooltip("Show gizmo");
+            ImGui.sameLine();
+            ImGui.text("Type: %s".formatted(action.getNameForDisplay()));
+         }
+
          action.renderImGuiWidgets();
+
+         ImGui.separator();
       }
 
       int indexToMove = reorderRequest.getLeft();
@@ -450,9 +497,10 @@ public class RDXBehaviorActionSequenceEditor
          int destinationIndex = reorderRequest.getRight() == 0 ? indexToMove - 1 : indexToMove + 1;
          actionSequence.add(destinationIndex, actionSequence.remove(indexToMove));
       }
+   }
 
-      ImGui.separator();
-
+   private void renderActionCreationArea()
+   {
       RDXBehaviorAction newAction = null;
       if (ImGui.button(labels.get("Add Walk")))
       {
@@ -522,8 +570,6 @@ public class RDXBehaviorActionSequenceEditor
 
       if (newAction != null)
          insertNewAction(newAction);
-
-      ImGui.endChild();
    }
 
    private RDXFootstepAction findNextPreviousFootstepAction()
@@ -562,7 +608,9 @@ public class RDXBehaviorActionSequenceEditor
 
    private RDXFootstepAction newFootstepAction(RDXFootstepAction possiblyNullPreviousFootstepAction)
    {
-      return new RDXFootstepAction(panel3D, robotModel, syncedRobot, referenceFrameLibrary, possiblyNullPreviousFootstepAction);
+      RDXFootstepAction footstepAction = new RDXFootstepAction(panel3D, robotModel, syncedRobot, referenceFrameLibrary, possiblyNullPreviousFootstepAction);
+      footstepAction.setSide(RobotSide.LEFT, false);
+      return footstepAction;
    }
 
    private RDXWalkAction newWalkAction()

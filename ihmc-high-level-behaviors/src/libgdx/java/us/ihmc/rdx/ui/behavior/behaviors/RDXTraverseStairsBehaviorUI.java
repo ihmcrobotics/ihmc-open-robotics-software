@@ -50,7 +50,7 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
    private String currentState = "";
    private String currentLifecycleState = "";
    private final ImBoolean operatorReviewEnabled = new ImBoolean(true);
-   private final AtomicReference<Double> distanceToStairs;
+   private final AtomicReference<Double> distanceToStairs = null;
    private final ImGuiEnumPlot currentLifecycleStatePlot = new ImGuiEnumPlot(1000, 250, 15);
    private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(1000, 250, 15);
    private final ImGuiMovingPlot pauseTimeLeft = new ImGuiMovingPlot("Pause time left", 1000, 250, 15);
@@ -72,11 +72,11 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
          footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, DEFINITION.getName()));
       });
       footstepPlanGraphic.setTransparency(0.5);
-      distanceToStairs = helper.subscribeViaReference(DistanceToStairs, Double.NaN);
-      helper.subscribeViaCallback(TraverseStairsBehaviorAPI.COMPLETED, completedStopwatch::reset);
-      helper.subscribeViaCallback(State, state -> currentState = state);
-      helper.subscribeViaCallback(LifecycleState, state -> currentLifecycleState = state);
-      helper.subscribeViaCallback(TimeLeftInPause, timeLeftInPause -> this.timeLeftInPause = timeLeftInPause);
+//      distanceToStairs = helper.subscribeViaReference(DistanceToStairs, Double.NaN);
+//      helper.subscribeViaCallback(TraverseStairsBehaviorAPI.COMPLETED, completedStopwatch::reset);
+//      helper.subscribeViaCallback(State, state -> currentState = state);
+//      helper.subscribeViaCallback(LifecycleState, state -> currentLifecycleState = state);
+//      helper.subscribeViaCallback(TimeLeftInPause, timeLeftInPause -> this.timeLeftInPause = timeLeftInPause);
       helper.subscribeViaCallback(PerceptionAPI.BIPEDAL_SUPPORT_REGIONS, regions ->
       {
          if (regions.getConvexPolygonsSize().size() > 0 && regions.getConvexPolygonsSize().get(0) > 0)
@@ -85,11 +85,11 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
             supportRegionsReceivedTimer.reset();
          }
       });
-      helper.subscribeViaCallback(PlanarRegionsForUI, regions ->
-      {
-         if (regions != null)
-            planarRegionsGraphic.generateMeshesAsync(regions);
-      });
+//      helper.subscribeViaCallback(PlanarRegionsForUI, regions ->
+//      {
+//         if (regions != null)
+//            planarRegionsGraphic.generateMeshesAsync(regions);
+//      });
    }
 
    public void setGoal(Pose3D goal)
@@ -105,10 +105,16 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
 
       FootstepPlannerParametersBasics footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("_Stairs");
       footstepPlannerParameterTuner.create(footstepPlannerParameters,
-                                           () -> helper.publish(FootstepPlannerParameters, footstepPlannerParameters.getAllAsStrings()));
+                                           () ->
+                                           {
+//                                              helper.publish(FootstepPlannerParameters, footstepPlannerParameters.getAllAsStrings());
+                                           });
       SwingPlannerParametersBasics swingPlannerParameters = helper.getRobotModel().getSwingPlannerParameters("_Stairs");
       swingPlannerParameterTuner.create(swingPlannerParameters,
-                                        () -> helper.publish(SwingPlannerParameters, swingPlannerParameters.getAllAsStrings()));
+                                        () ->
+                                        {
+//                                           helper.publish(SwingPlannerParameters, swingPlannerParameters.getAllAsStrings());
+                                        });
    }
 
    public void processImGui3DViewInput(ImGui3DViewInput input)
@@ -169,7 +175,7 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
       ImGui.text("Completed: " + FormattingTools.getFormattedDecimal2D(completedStopwatch.totalElapsed()) + " s ago.");
       if (ImGui.checkbox(labels.get("Operator review"), operatorReviewEnabled))
       {
-         helper.publish(OperatorReviewEnabled, operatorReviewEnabled.get());
+//         helper.publish(OperatorReviewEnabled, operatorReviewEnabled.get());
       }
       if (ImGui.button(labels.get("Start")))
       {

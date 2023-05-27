@@ -11,7 +11,7 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
-import us.ihmc.ihmcPerception.heightMap.HeightMapUpdater;
+import us.ihmc.perception.heightMap.HeightMapUpdater;
 import us.ihmc.messager.Messager;
 import us.ihmc.ros2.ROS2NodeInterface;
 

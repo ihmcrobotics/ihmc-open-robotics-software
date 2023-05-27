@@ -7,12 +7,14 @@ import us.ihmc.behaviors.sequence.BehaviorActionData;
 
 public class PelvisHeightActionData implements BehaviorActionData
 {
+   private String description = "Pelvis height";
    private double heightInWorld = 0.0;
    private double trajectoryDuration = 1000.0;
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
+      jsonNode.put("description", description);
       jsonNode.put("trajectoryDuration", trajectoryDuration);
       jsonNode.put("heightInWorld", heightInWorld);
    }
@@ -20,6 +22,7 @@ public class PelvisHeightActionData implements BehaviorActionData
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
+      description = jsonNode.get("description").textValue();
       trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
       heightInWorld = jsonNode.get("heightInWorld").asDouble();
    }
@@ -54,5 +57,17 @@ public class PelvisHeightActionData implements BehaviorActionData
    public void setHeightInWorld(double heightInWorld)
    {
       this.heightInWorld = heightInWorld;
+   }
+
+   @Override
+   public void setDescription(String description)
+   {
+      this.description = description;
+   }
+
+   @Override
+   public String getDescription()
+   {
+      return description;
    }
 }

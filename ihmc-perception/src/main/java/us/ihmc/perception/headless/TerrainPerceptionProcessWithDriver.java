@@ -16,9 +16,9 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.CameraModel;
-import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
@@ -235,7 +235,7 @@ public class TerrainPerceptionProcessWithDriver
 
          if (parameters.getPublishDepth())
          {
-            BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
+            OpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
             PerceptionMessageTools.setDepthIntrinsicsFromRealsense(realsense, depthImageMessage);
             CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
             PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer,
@@ -262,7 +262,7 @@ public class TerrainPerceptionProcessWithDriver
             // YUV I420 has 1.5 times the height of the image
             yuvColorImage = new Mat(realsense.getColorHeight() * 1.5, realsense.getColorWidth(), opencv_core.CV_8UC1); // deallocate later
 
-            BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
+            OpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
 
             PerceptionMessageTools.setColorIntrinsicsFromRealsense(realsense, colorImageMessage);
             CameraModel.PINHOLE.packMessageFormat(colorImageMessage);

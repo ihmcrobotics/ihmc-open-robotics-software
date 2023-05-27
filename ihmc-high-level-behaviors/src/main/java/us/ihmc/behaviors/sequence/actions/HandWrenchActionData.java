@@ -8,6 +8,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandWrenchActionData implements BehaviorActionData
 {
+   private String description = "Hand wrench";
    private RobotSide side = RobotSide.LEFT;
    private double trajectoryDuration = 1000.0;
    private double force = 20.0;
@@ -15,6 +16,7 @@ public class HandWrenchActionData implements BehaviorActionData
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
+      jsonNode.put("description", description);
       jsonNode.put("side", side.getLowerCaseName());
       jsonNode.put("trajectoryDuration", trajectoryDuration);
       jsonNode.put("force", force);
@@ -23,6 +25,7 @@ public class HandWrenchActionData implements BehaviorActionData
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
+      description = jsonNode.get("description").textValue();
       side = RobotSide.getSideFromString(jsonNode.get("side").asText());
       trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
       force = jsonNode.get("force").asDouble();
@@ -70,5 +73,17 @@ public class HandWrenchActionData implements BehaviorActionData
    public void setSide(RobotSide side)
    {
       this.side = side;
+   }
+
+   @Override
+   public void setDescription(String description)
+   {
+      this.description = description;
+   }
+
+   @Override
+   public String getDescription()
+   {
+      return description;
    }
 }
