@@ -447,6 +447,8 @@ public class RDXLowLevelDepthSensorSimulator
       cameraIntrinsics.setFy(focalLengthPixels.get());
       cameraIntrinsics.setCx(principalOffsetXPixels.get());
       cameraIntrinsics.setCy(principalOffsetYPixels.get());
+      cameraIntrinsics.setHeight(imageHeight);
+      cameraIntrinsics.setWidth(imageWidth);
       return cameraIntrinsics;
    }
 }
