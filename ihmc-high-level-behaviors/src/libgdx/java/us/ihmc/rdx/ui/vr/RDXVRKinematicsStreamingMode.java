@@ -232,17 +232,35 @@ public class RDXVRKinematicsStreamingMode
                   kinematicsRecorder.framePoseToPack(tempFramePose); //get values of tempFramePose from replay
                else if (sharedControlAssistant.isActive())
                {
-                  if(sharedControlAssistant.readyToPack())
+                  if(sharedControlAssistant.readyToPack() && (sharedControlAssistant.containsBodyPart(side.getCamelCaseName() + "Hand")))
+                  {
                      sharedControlAssistant.framePoseToPack(tempFramePose, side.getCamelCaseName() + "Hand");
+                  }
                   else
+                  {
                      sharedControlAssistant.processFrameInformation(tempFramePose, side.getCamelCaseName() + "Hand");
+                  }
                }
-               message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
-               message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
-               message.getControlFrameOrientationInEndEffector().setYawPitchRoll(0.0,
-                                                                                 side.negateIfLeftSide(Math.PI / 2.0),
-                                                                                 side.negateIfLeftSide(Math.PI / 2.0));
-               toolboxInputMessage.getInputs().add().set(message);
+               // do not update the body part pose if shared control is active and that part is not included in the shared autonomy
+               if(sharedControlAssistant.isActive() && sharedControlAssistant.readyToPack())
+               {
+                  if (sharedControlAssistant.containsBodyPart(side.getCamelCaseName() + "Hand"))
+                  {
+                     message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
+                     message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
+                     message.getControlFrameOrientationInEndEffector()
+                            .setYawPitchRoll(0.0, side.negateIfLeftSide(Math.PI / 2.0), side.negateIfLeftSide(Math.PI / 2.0));
+                     toolboxInputMessage.getInputs().add().set(message);
+                  }
+               }
+               else
+               {
+                  message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
+                  message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
+                  message.getControlFrameOrientationInEndEffector()
+                         .setYawPitchRoll(0.0, side.negateIfLeftSide(Math.PI / 2.0), side.negateIfLeftSide(Math.PI / 2.0));
+                  toolboxInputMessage.getInputs().add().set(message);
+               }
             });
          }
 
@@ -453,7 +471,7 @@ public class RDXVRKinematicsStreamingMode
 //         headsetFrameGraphic.getRenderables(renderables, pool);
          for (RobotSide side : RobotSide.values)
          {
-            controllerFrameGraphics.get(side).getRenderables(renderables, pool);
+//            controllerFrameGraphics.get(side).getRenderables(renderables, pool);
             handControlFrameGraphics.get(side).getRenderables(renderables, pool);
          }
       }

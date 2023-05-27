@@ -198,6 +198,16 @@ public enum RobotSide implements RobotSegment<RobotSide>
       return null;
    }
 
+   public static RobotSide getSideFromBodyPart(String bodyPart)
+   {
+      if (bodyPart.contains("left"))
+         return RobotSide.LEFT;
+      else if (bodyPart.contains("right"))
+         return RobotSide.RIGHT;
+      else
+         return null;
+   }
+
    public static void main(String[] args)
    {
       String testString = RobotSide.LEFT.toString();

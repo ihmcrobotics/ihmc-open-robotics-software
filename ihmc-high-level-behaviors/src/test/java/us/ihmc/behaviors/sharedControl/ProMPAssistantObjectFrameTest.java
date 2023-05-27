@@ -78,7 +78,7 @@ public class ProMPAssistantObjectFrameTest
             if (proMPAssistant.readyToPack())
             {
                if (!proMPAssistant.isCurrentTaskDone())
-                  proMPAssistant.framePoseToPack(framePose, bodyPart);  //change frame according to generated ProMP
+                  proMPAssistant.framePoseToPack(framePose, bodyPart, 0);  //change frame according to generated ProMP
             }
             else
             {

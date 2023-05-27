@@ -16,8 +16,11 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
+import us.ihmc.behaviors.sequence.actions.HandPoseActionData;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -612,5 +615,23 @@ public class RDXBehaviorActionSequenceEditor
    public WorkspaceResourceFile getWorkspaceFile()
    {
       return workspaceFile;
+   }
+
+   public RigidBodyTransform getInitialHandTransform(RobotSide side)
+   {
+      RigidBodyTransform initialHandTransform = new RigidBodyTransform();
+      for (var action : actionSequence)
+      {
+         if (action instanceof RDXHandPoseAction)
+         {
+            HandPoseActionData handPoseData = (HandPoseActionData) action.getActionData();
+            if (handPoseData.getSide() == side)
+            {
+               initialHandTransform.set(handPoseData.getTransformToParent());
+            }
+            break;
+         }
+      }
+      return initialHandTransform;
    }
 }

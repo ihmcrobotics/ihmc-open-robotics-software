@@ -27,7 +27,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ProMPAssistant
 {
-   private static final int INTERPOLATION_SAMPLES = 10;
+   private static final int INTERPOLATION_SAMPLES = 15;
+   public static final int AFFORDANCE_BLENDING_SAMPLES = 10;
    private final HashMap<String, ProMPManager> proMPManagers = new HashMap<>(); // proMPManagers stores a proMPManager for each task
    private final HashMap<String, List<String>> contextTasksMap = new HashMap<>(); // map to store all the tasks available for each context (object)
    private final List<Double> distanceCandidateTasks = new ArrayList<>();
@@ -47,6 +48,7 @@ public class ProMPAssistant
    private final HashMap<String, Integer> bodyPartTrajectorySampleCounter = new HashMap<>(); // to track the last used sample of a generated trajectory
    private boolean doneInitialProcessingTask = false;
    private boolean doneCurrentTask = false; // used to communicate to higher level classes that the task has been completed
+   private boolean inEndZone = false; // used for blending with affordance
    private final AtomicBoolean isLastViaPoint = new AtomicBoolean(false); // check if last observed viapoint before update
    private int testNumber = 0;
    private int numberOfInferredSpeeds = 0;
@@ -136,13 +138,18 @@ public class ProMPAssistant
       });
    }
 
-   public void framePoseToPack(FramePose3D framePose, String bodyPart)
+   public void framePoseToPack(FramePose3D framePose, String bodyPart, double joystickValue)
    {
-      if ((proMPManagers.get(currentTask).getBodyPartsGeometry()).containsKey(bodyPart))
+      if (containsBodyPart(bodyPart))
       { // if bodyPart is used in current task
          List<FramePose3D> generatedFramePoseTrajectory = bodyPartGeneratedTrajectoryMap.get(bodyPart);
 
          int sampleCounter = bodyPartTrajectorySampleCounter.get(bodyPart);
+         if (sampleCounter >= generatedFramePoseTrajectory.size() - AFFORDANCE_BLENDING_SAMPLES)
+            inEndZone = true;
+         else
+            inEndZone = false;
+         // -- Observing
          if (sampleCounter < numberObservations)
          {
             FramePose3D observedFramePose = bodyPartObservedTrajectoryMap.get(bodyPart).get(sampleCounter);
@@ -150,9 +157,14 @@ public class ProMPAssistant
                observedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
             framePose.getPosition().set(observedFramePose.getPosition());
             framePose.getOrientation().set(observedFramePose.getOrientation());
-            // take the next sample from the trajectory next time
-            bodyPartTrajectorySampleCounter.replace(bodyPart, sampleCounter + 1);
+
+            // update sample from the trajectory to take next time
+//            if (joystickValue > 0.0)
+               bodyPartTrajectorySampleCounter.replace(bodyPart, sampleCounter + 1);
+//            else if (joystickValue < 0.0 && sampleCounter > 0)
+//               bodyPartTrajectorySampleCounter.replace(bodyPart, sampleCounter - 1);
          }
+         // -- Get trajectory from ProMP
          else if (sampleCounter < generatedFramePoseTrajectory.size() - 1)
          {
             // pack the frame using the trajectory generated from prediction
@@ -185,11 +197,16 @@ public class ProMPAssistant
                framePose.getPosition().set(arbitratedFramePosition);
                framePose.getOrientation().set(arbitratedFrameOrientation);
             }
-            // take the next sample from the trajectory next time
-            bodyPartTrajectorySampleCounter.replace(bodyPart, sampleCounter + 1);
+
+            // update sample from the trajectory to take next time
+//            if (joystickValue > 0.0)
+               bodyPartTrajectorySampleCounter.replace(bodyPart, sampleCounter + 1);
+//            else if (joystickValue < 0.0)
+//               bodyPartTrajectorySampleCounter.replace(bodyPart, sampleCounter - 1);
          }
+         // -- Motion is over
          else
-         { // motion is over
+         {
             // check that inferred timesteps are not lower than the observed setpoints.
             if (generatedFramePoseTrajectory.size() < numberObservations)
             {
@@ -210,6 +227,13 @@ public class ProMPAssistant
             }
             // exit assistance mode
             doneCurrentTask = true;
+
+//            // update sample from the trajectory to take next time
+//            if (joystickValue < 0.0)
+//            {
+//               bodyPartTrajectorySampleCounter.replace(bodyPart, sampleCounter - 1);
+//               doneCurrentTask = false;
+//            }
          }
       }
    }
@@ -475,6 +499,7 @@ public class ProMPAssistant
          currentTask = "";
       }
       doneCurrentTask = false;
+      inEndZone = false;
       taskGoalPose = null;
       objectFrame = null;
       bodyPartObservedTrajectoryMap.clear();
@@ -500,9 +525,19 @@ public class ProMPAssistant
       isMovingThreshold = distance;
    }
 
+   public boolean containsBodyPart(String bodyPart)
+   {
+      return (proMPManagers.get(currentTask).getBodyPartsGeometry()).containsKey(bodyPart);
+   }
+
    public boolean isCurrentTaskDone()
    {
       return this.doneCurrentTask;
+   }
+
+   public boolean inEndZone()
+   {
+      return inEndZone;
    }
 
    public ProMPManager getProMPManager(String task)

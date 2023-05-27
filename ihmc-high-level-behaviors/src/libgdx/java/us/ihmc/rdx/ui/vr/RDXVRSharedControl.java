@@ -16,8 +16,11 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.perception.sceneGraph.SceneGraphAPI;
@@ -29,6 +32,7 @@ import us.ihmc.rdx.visualizers.RDXSplineGraphic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
@@ -44,6 +48,7 @@ import java.util.*;
  */
 public class RDXVRSharedControl implements TeleoperationAssistant
 {
+   private static final Tuple3DReadOnly AFFORDANCE_TO_KINEMATIC_HAND_TRANSFORM = new Point3D(-0.06441,0.0, 0.0);
    private final ROS2PublishSubscribeAPI ros2;
    private final IHMCROS2Input<DetectableSceneNodesMessage> detectableSceneObjectsSubscription;
    private final ImBoolean enabledReplay;
@@ -60,16 +65,19 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private final HashMap<String, RDXSplineGraphic> splineGraphics = new HashMap<>();
    private final HashMap<String, RDXEdgeDefinedShapeGraphic> stdDeviationGraphics = new HashMap<>();
    private final HashMap<String, List<Pose3DReadOnly>> bodyPartReplayMotionMap = new HashMap<>();
+   private final HashMap<String, Pose3DReadOnly> bodyPartInitialAffordancePoseMap = new HashMap<>();
    private final OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
    private boolean previewSetToActive = true; // once the validated motion is executed and preview disabled, activate ghostRobotGraphic based on this
    private final ArrayList<KinematicsToolboxOutputStatus> assistanceStatusList = new ArrayList<>();
    private boolean firstPreview = true;
    private int replayPreviewCounter = 0;
    private int speedSplineAdjustmentFactor = 1;
-
+   private double joystickValue;
    private TreeSet<RDXBehaviorActionSequenceEditor> affordanceEditors;
    private RDXBehaviorActionSequenceEditor affordanceEditor;
-   private double affordanceJoystickValue;
+   private boolean affordanceReady = false;
+   private int blendingCounter = 0;
+
 
    public RDXVRSharedControl(DRCRobotModel robotModel, ROS2PublishSubscribeAPI ros2, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
    {
@@ -96,14 +104,14 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    /**
     * Process the VR input to activate/deactivate shared control
     */
-   public void processInput(InputDigitalActionData triggerButton, double forwardJoystickValue)
+   public void processInput(InputDigitalActionData triggerButton, double joystickValue)
    {
       // enable if trigger button has been pressed once. if button is pressed again shared control is stopped
       if (triggerButton.bChanged() && !triggerButton.bState())
       {
          setEnabled(!enabled.get());
       }
-      affordanceJoystickValue = forwardJoystickValue;
+      this.joystickValue = joystickValue;
    }
 
    /**
@@ -213,7 +221,6 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private Point3D[][] createStdDeviationEdges(Point3D[] mean, Point3D[] stdDeviation)
    {
       Point3D[][] edges = new Point3D[8][mean.length];
-
       for (int edgeNumber = 0; edgeNumber < 8; edgeNumber++)
       {
          for (int i = 0; i < mean.length; i++)
@@ -241,7 +248,6 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             edges[edgeNumber][i] = new Point3D(x, y, z);
          }
       }
-
       return edges;
    }
 
@@ -266,7 +272,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          }
       }
 
-      if (proMPAssistant.startedProcessing())
+      if (proMPAssistant.startedProcessing() && containsBodyPart(bodyPart))
       {
          enableStdDeviationVisualization(bodyPart);
       }
@@ -277,11 +283,14 @@ public class RDXVRSharedControl implements TeleoperationAssistant
 
          if (previewSetToActive)
          {
-            // start storing current frames for replay preview with splines
-            if (!bodyPartReplayMotionMap.containsKey(bodyPart))
-               bodyPartReplayMotionMap.put(bodyPart, new ArrayList<>());
-            else
-               bodyPartReplayMotionMap.get(bodyPart).add(new Pose3D(observedPose));
+            if (containsBodyPart(bodyPart))
+            {
+               // start storing current frames for replay preview with splines
+               if (!bodyPartReplayMotionMap.containsKey(bodyPart))
+                  bodyPartReplayMotionMap.put(bodyPart, new ArrayList<>());
+               else
+                  bodyPartReplayMotionMap.get(bodyPart).add(new Pose3D(observedPose));
+            }
          }
       }
    }
@@ -298,57 +307,104 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    @Override
    public void framePoseToPack(FramePose3D framePose, String bodyPart)
    {
-      proMPAssistant.framePoseToPack(framePose, bodyPart);
+      proMPAssistant.framePoseToPack(framePose, bodyPart, joystickValue); // pack frame with proMP assistant
 
-      if (previewSetToActive && !previewValidated)  // preview active but not validated yet
+      if (containsBodyPart(bodyPart))
       {
-         ghostRobotGraphic.setActive(true); // show ghost robot of preview
-         if (proMPAssistant.isCurrentTaskDone()) // if first motion preview is over and not validated yet
-            firstPreview = false;
-         if (enabledIKStreaming.get()) // if streaming to controller has been activated again, it means the user validated the motion
+         // -- Preview active but not validated yet
+         if (previewSetToActive && !previewValidated)
          {
-            ghostRobotGraphic.setActive(false); // stop displaying preview ghost robot
-            splineGraphics.clear(); // stop displaying preview splines
-            stdDeviationGraphics.clear(); // stop displaying stdDeviation region
-            previewValidated = true;
-         }
-         if (!firstPreview) // if second replay or more, keep promp assistant in pause at beginning
-            proMPAssistant.setStartTrajectories(0);
-         else
-         { // if first preview
-            // keep storing current frames for replay preview with splines
-            if (bodyPartReplayMotionMap.containsKey(bodyPart))
-               bodyPartReplayMotionMap.get(bodyPart).add(new Pose3D(framePose));
-         }
-      }
-      else // if user did not use the preview or preview has been validated
-      {
-         // exit promp assistance when the current task is over, reactivate it in VR or UI when you want to use it again
-         if (!enabledIKStreaming.get() && !isAffordanceActive()) //prevent jump by first disabling streaming to controller below and then shared control here
-            setEnabled(false);
-         if (proMPAssistant.isCurrentTaskDone() && !isAffordanceActive())
-         {
-            enabledIKStreaming.set(false); // stop the ik streaming so that: 1. you can reposition according to the robot state to avoid jumps in poses
-            // 2. or you can execute the affordance through the actionSequenceEditor
-            for (RDXBehaviorActionSequenceEditor editor : affordanceEditors)
+            ghostRobotGraphic.setActive(true); // show ghost robot of preview
+            if (proMPAssistant.isCurrentTaskDone()) // if first motion preview is over and not validated yet
+               firstPreview = false;
+            if (enabledIKStreaming.get()) // if streaming to controller has been activated again, it means the user validated the motion
             {
-               LogTools.info(editor.getName());
-               if (editor.getName().equals(objectName)) {
-                  LogTools.info(objectName);
-                  affordanceEditor = editor;
+               ghostRobotGraphic.setActive(false); // stop displaying preview ghost robot
+               splineGraphics.clear(); // stop displaying preview splines
+               stdDeviationGraphics.clear(); // stop displaying stdDeviation region
+               previewValidated = true;
+            }
+            if (!firstPreview) // if second replay or more, keep promp assistant in pause at beginning
+               proMPAssistant.setStartTrajectories(0);
+            else
+            { // if first preview
+               // keep storing current frames for replay preview with splines
+               if (bodyPartReplayMotionMap.containsKey(bodyPart))
+                  bodyPartReplayMotionMap.get(bodyPart).add(new Pose3D(framePose));
+            }
+         }
+         else // -- If user did not use the preview or preview has been validated
+         {
+            // exit promp assistance when the current task is over, reactivate it in VR or UI when you want to use it again
+            if (!enabledIKStreaming.get() && !isAffordanceActive()) //prevent jump by first disabling streaming to controller below and then shared control here
+               setEnabled(false);
+            if (proMPAssistant.isCurrentTaskDone() && !isAffordanceActive())
+            {
+               enabledIKStreaming.set(false); // stop the ik streaming so that: 1. you can reposition according to the robot state to avoid jumps in poses
+               // 2. or you can execute the affordance through the actionSequenceEditor
+               if (affordanceEditor != null)
+               {
                   affordanceEditor.sendToRobot();
-                  break;
+                  affordanceReady = true;
                }
             }
+
+            if (proMPAssistant.inEndZone() && enabledIKStreaming.get())
+            {
+               if (affordanceEditor == null)
+               {
+                  for (RDXBehaviorActionSequenceEditor editor : affordanceEditors)
+                  {
+                     if (editor.getName().equals(objectName))
+                     {
+                        LogTools.info("Loading affordance: {}", objectName);
+                        affordanceEditor = editor;
+                        // TODO getInitialHandTransform edit this to include also other parts that are not the hands
+                        RobotSide side = RobotSide.getSideFromBodyPart(bodyPart);
+                        RigidBodyTransform initialBodyPartTransform = affordanceEditor.getInitialHandTransform(side);
+                        // change affordance hand origin to kinematics streaming hand origin
+                        initialBodyPartTransform.appendRollRotation(side.negateIfLeftSide(Math.PI / 2.0));
+                        initialBodyPartTransform.appendYawRotation(-side.negateIfLeftSide(Math.PI / 2.0));
+                        initialBodyPartTransform.appendTranslation(AFFORDANCE_TO_KINEMATIC_HAND_TRANSFORM);
+                        FramePose3D initialBodyPartPose = new FramePose3D(objectFrame, initialBodyPartTransform);
+                        initialBodyPartPose.changeFrame(ReferenceFrame.getWorldFrame());
+                        bodyPartInitialAffordancePoseMap.put(bodyPart, initialBodyPartPose);
+                        break;
+                     }
+                  }
+               }
+
+               double alpha = (double) (blendingCounter) / (proMPAssistant.AFFORDANCE_BLENDING_SAMPLES);
+               blendingCounter ++;
+               if (alpha <= 1.0)
+               {
+                  LogTools.info(alpha);
+                  // gradually interpolate last observation to prediction
+                  FixedFrameQuaternionBasics arbitratedFrameOrientation = framePose.getOrientation();
+                  arbitratedFrameOrientation.set((1 - alpha) * framePose.getOrientation().getX() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getX(),
+                                                 (1 - alpha) * framePose.getOrientation().getY() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getY(),
+                                                 (1 - alpha) * framePose.getOrientation().getZ() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getZ(),
+                                                 (1 - alpha) * framePose.getOrientation().getS() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getS());
+                  FixedFramePoint3DBasics arbitratedFramePosition = framePose.getPosition();
+                  arbitratedFramePosition.setX((1 - alpha) * framePose.getPosition().getX() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getPosition().getX());
+                  arbitratedFramePosition.setY((1 - alpha) * framePose.getPosition().getY() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getPosition().getY());
+                  arbitratedFramePosition.setZ((1 - alpha) * framePose.getPosition().getZ() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getPosition().getZ());
+//                  framePose.getPosition().set(arbitratedFramePosition);
+//                  framePose.getOrientation().set(arbitratedFrameOrientation);
+                  framePose.set(bodyPartInitialAffordancePoseMap.get(bodyPart));
+               }
+            }
+            else
+               blendingCounter = 0;
          }
       }
    }
 
    public void updateAffordance()
    {
-      if (affordanceJoystickValue > 0.0)
+      if (joystickValue > 0.0)
          affordanceEditor.playActions(true);
-      else if (affordanceJoystickValue == 0.0)
+      else if (joystickValue == 0.0)
       {
          affordanceEditor.playActions(false);
          affordanceEditor.rewindActions(false);
@@ -405,6 +461,8 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             splineGraphics.clear();
             stdDeviationGraphics.clear();
             affordanceEditor = null;
+            affordanceReady = false;
+            blendingCounter = 0;
          }
       }
    }
@@ -429,6 +487,11 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       return stdDeviationGraphics;
    }
 
+   public boolean containsBodyPart(String bodyPart)
+   {
+      return proMPAssistant.containsBodyPart(bodyPart);
+   }
+
    public boolean isActive()
    {
       return this.enabled.get();
@@ -436,7 +499,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
 
    public boolean isAffordanceActive()
    {
-      return affordanceEditor != null;
+      return affordanceEditor != null && affordanceReady;
    }
 
    public boolean isPreviewActive()
