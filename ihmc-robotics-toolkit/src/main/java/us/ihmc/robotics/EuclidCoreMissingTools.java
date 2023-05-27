@@ -41,6 +41,8 @@ import java.util.Random;
 
 public class EuclidCoreMissingTools
 {
+   public static final String DEGREE_SYMBOL = "\u00B0";
+
    public static void transform(Matrix3DReadOnly matrix, double xOriginal, double yOriginal, double zOriginal, Tuple3DBasics tupleTransformed)
    {
       double x = matrix.getM00() * xOriginal + matrix.getM01() * yOriginal + matrix.getM02() * zOriginal;
@@ -1355,12 +1357,11 @@ public class EuclidCoreMissingTools
     */
    public static String getYawPitchRollStringDegrees(Orientation3DBasics orientation3DBasics)
    {
-      String degreeSymbol = "\u00B0";
       // Degree symbol placed at the end so you don't have to remove it when copy and pasting
       return EuclidCoreIOTools.getYawPitchRollString(EuclidCoreIOTools.DEFAULT_FORMAT,
                                                      Math.toDegrees(orientation3DBasics.getYaw()),
                                                      Math.toDegrees(orientation3DBasics.getPitch()),
-                                                     Math.toDegrees(orientation3DBasics.getRoll())) + degreeSymbol;
+                                                     Math.toDegrees(orientation3DBasics.getRoll())) + DEGREE_SYMBOL;
    }
 
    /**
@@ -1369,13 +1370,12 @@ public class EuclidCoreMissingTools
     */
    public static String getYawPitchRollValuesStringDegrees(Orientation3DBasics orientation3DBasics)
    {
-      String degreeSymbol = "\u00B0";
       // Degree symbol placed at the end so you don't have to remove it when copy and pasting
       return EuclidCoreIOTools.getStringOf("(", ")", ", ",
                                            EuclidCoreIOTools.DEFAULT_FORMAT,
                                            Math.toDegrees(orientation3DBasics.getYaw()),
                                            Math.toDegrees(orientation3DBasics.getPitch()),
-                                           Math.toDegrees(orientation3DBasics.getRoll())) + degreeSymbol;
+                                           Math.toDegrees(orientation3DBasics.getRoll())) + DEGREE_SYMBOL;
    }
 
    /**

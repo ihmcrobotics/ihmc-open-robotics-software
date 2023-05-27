@@ -18,7 +18,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
@@ -174,7 +174,7 @@ public class PerceptionMessageTools
    {
       Mat colorImage = new Mat(videoPacket.getImageHeight(), videoPacket.getImageWidth(), opencv_core.CV_8UC3);
       byte[] compressedByteArray = videoPacket.getData().toArray();
-      BytedecoOpenCVTools.decompressJPG(compressedByteArray, colorImage);
+      OpenCVTools.decompressJPG(compressedByteArray, colorImage);
       PerceptionDebugTools.display("Color Image", colorImage, 1);
    }
 

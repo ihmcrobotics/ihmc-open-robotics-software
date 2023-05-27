@@ -1,7 +1,7 @@
 package us.ihmc.perception.filters;
 
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
+import us.ihmc.perception.depthData.CollisionShapeTester;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.ScanRegionFilter;
 import us.ihmc.robotics.geometry.PlanarRegion;
 

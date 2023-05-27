@@ -12,6 +12,7 @@ import us.ihmc.tools.io.JSONTools;
 
 public class WalkActionData implements BehaviorActionData
 {
+   private String description = "Walk";
    private String parentFrameName = "";
    private final RigidBodyTransform transformToParent = new RigidBodyTransform();
    private final SideDependentList<RigidBodyTransform> goalFootstepToGizmos = new SideDependentList<>(() -> new RigidBodyTransform());
@@ -21,6 +22,7 @@ public class WalkActionData implements BehaviorActionData
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
+      jsonNode.put("description", description);
       jsonNode.put("parentFrame", parentFrameName);
       JSONTools.toJSON(jsonNode, transformToParent);
       for (RobotSide side : RobotSide.values)
@@ -35,6 +37,7 @@ public class WalkActionData implements BehaviorActionData
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
+      description = jsonNode.get("description").textValue();
       parentFrameName = jsonNode.get("parentFrame").asText();
       JSONTools.toEuclid(jsonNode, transformToParent);
       for (RobotSide side : RobotSide.values)
@@ -109,5 +112,17 @@ public class WalkActionData implements BehaviorActionData
    public void setTransferDuration(double transferDuration)
    {
       this.transferDuration = transferDuration;
+   }
+
+   @Override
+   public void setDescription(String description)
+   {
+      this.description = description;
+   }
+
+   @Override
+   public String getDescription()
+   {
+      return description;
    }
 }

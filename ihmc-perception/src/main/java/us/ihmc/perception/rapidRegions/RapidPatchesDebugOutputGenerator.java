@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.nio.FloatBuffer;
@@ -256,8 +256,8 @@ public class RapidPatchesDebugOutputGenerator
          return;
 
       Mat depthDisplay = new Mat();
-      BytedecoOpenCVTools.clampTo8BitUnsignedChar(depth, depthDisplay, 0.0, 255.0);
-      BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(depthDisplay, depthDisplay);
+      OpenCVTools.clampTo8BitUnsignedChar(depth, depthDisplay, 0.0, 255.0);
+      OpenCVTools.convert8BitGrayTo8BitRGBA(depthDisplay, depthDisplay);
 
       imshow("Depth", depthDisplay);
       int code = waitKeyEx(delay);

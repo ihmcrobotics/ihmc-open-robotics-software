@@ -6,7 +6,7 @@ import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -105,11 +105,11 @@ public class RDXFFMPEGL515DepthLoggingDemo
 
             ffmpegLoggerDemoHelper.create(imageWidth, imageHeight, () ->
             {
-               BytedecoOpenCVTools.clampTo8BitUnsignedChar(l515.getLowLevelSimulator().getMetersDepthOpenCVMat(),
-                                                           normalizedDepthImage.getBytedecoOpenCVMat(),
-                                                           0.0,
-                                                           255.0);
-               BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(normalizedDepthImage.getBytedecoOpenCVMat(), rgbaDepthImage.getBytedecoOpenCVMat());
+               OpenCVTools.clampTo8BitUnsignedChar(l515.getLowLevelSimulator().getMetersDepthOpenCVMat(),
+                                                   normalizedDepthImage.getBytedecoOpenCVMat(),
+                                                   0.0,
+                                                   255.0);
+               OpenCVTools.convert8BitGrayTo8BitRGBA(normalizedDepthImage.getBytedecoOpenCVMat(), rgbaDepthImage.getBytedecoOpenCVMat());
 
                ffmpegLoggerDemoHelper.getLogger().put(rgbaDepthImage);
             });

@@ -9,7 +9,7 @@ import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
@@ -127,7 +127,7 @@ public class RealsenseColorAndDepthLogger
          cameraPose.setToZero(cameraFrame);
          cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-         BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthBytePointer);
+         OpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthBytePointer);
          perceptionDataLogger.storeBytesFromPointer(depthChannelName, compressedDepthBytePointer);
 
          PerceptionDebugTools.displayDepth("Depth", depth16UC1Image, 1);
