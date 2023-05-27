@@ -4,6 +4,7 @@ import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
@@ -28,11 +29,13 @@ public class HumanoidPerceptionModule
    private PlanarRegionsList regionsInWorldFrame;
    private PlanarRegionMappingHandler mapHandler;
 
-   public HumanoidPerceptionModule(OpenCLManager openCLManager)
+   public HumanoidPerceptionModule(FullHumanoidRobotModel fullRobotModel, CollisionBoxProvider collisionBoxProvider, OpenCLManager openCLManager)
    {
       this.mapHandler = new PlanarRegionMappingHandler();
       this.openCLManager = openCLManager;
       this.framePlanarRegionsList = new FramePlanarRegionsList();
+
+      initializeBodyCollisionFilter(fullRobotModel, collisionBoxProvider);
    }
 
    public void update(Mat depthImage, ReferenceFrame cameraFrame, boolean rapidRegions)
@@ -52,13 +55,18 @@ public class HumanoidPerceptionModule
       }
    }
 
-   public void initializeRapidPlanarRegionsExtractor(int depthHeight, int depthWidth, CameraIntrinsics cameraIntrinsics)
+   public void initializePerspectiveRapidRegionsExtractor(CameraIntrinsics cameraIntrinsics)
    {
-      this.bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
+      LogTools.info("Intrinsics: {}", cameraIntrinsics);
+
+      this.bytedecoDepthImage = new BytedecoImage(cameraIntrinsics.getHeight(), cameraIntrinsics.getWidth(), opencv_core.CV_16UC1);
       this.bytedecoDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
       this.rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor();
-      this.rapidPlanarRegionsExtractor.create(openCLManager, depthHeight, depthWidth, cameraIntrinsics.getFx(), cameraIntrinsics.getFy(), cameraIntrinsics.getCx(),
+      this.rapidPlanarRegionsExtractor.create(openCLManager, cameraIntrinsics.getHeight(), cameraIntrinsics.getWidth(),
+                                              cameraIntrinsics.getFx(), cameraIntrinsics.getFy(), cameraIntrinsics.getCx(),
                                               cameraIntrinsics.getCy());
+
+      this.rapidPlanarRegionsExtractor.getDebugger().setEnabled(true);
    }
 
    public void initializeBodyCollisionFilter(FullHumanoidRobotModel fullRobotModel, CollisionBoxProvider collisionBoxProvider)
@@ -72,6 +80,7 @@ public class HumanoidPerceptionModule
    {
       this.rapidPlanarRegionsExtractor.update(bytedecoDepthImage, cameraFrame, this.framePlanarRegionsList);
       this.rapidPlanarRegionsExtractor.setProcessing(false);
+
       this.regionsInSensorFrame = this.framePlanarRegionsList.getPlanarRegionsList();
       this.regionsInWorldFrame = this.regionsInSensorFrame.copy();
       this.regionsInWorldFrame.applyTransform(cameraFrame.getTransformToWorldFrame());
