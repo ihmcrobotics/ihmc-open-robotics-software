@@ -156,7 +156,7 @@ public class RDXBehaviorActionSequenceEditor
       commandNextActionIndex(0);
    }
 
-   private void commandNextActionIndex(int nextActionIndex)
+   public void commandNextActionIndex(int nextActionIndex)
    {
       currentActionIndexCommandMessage.setData(nextActionIndex);
       ros2.publish(BehaviorActionSequence.EXECUTION_NEXT_INDEX_COMMAND_TOPIC, currentActionIndexCommandMessage);

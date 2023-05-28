@@ -335,18 +335,12 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          }
          else // -- If user did not use the preview or preview has been validated
          {
-            // exit promp assistance when the current task is over, reactivate it in VR or UI when you want to use it again
+            // exit assistance when the current task is over, reactivate it in VR or UI when you want to use it again
             if (!enabledIKStreaming.get() && !isAffordanceActive()) //prevent jump by first disabling streaming to controller below and then shared control here
                setEnabled(false);
-            if (proMPAssistant.isCurrentTaskDone() && !isAffordanceActive())
+            if (proMPAssistant.isCurrentTaskDone() && affordanceEditor == null)
             {
-               enabledIKStreaming.set(false); // stop the ik streaming so that: 1. you can reposition according to the robot state to avoid jumps in poses
-               // 2. or you can execute the affordance through the actionSequenceEditor
-               if (affordanceEditor != null)
-               {
-                  affordanceEditor.sendToRobot();
-                  affordanceReady = true;
-               }
+               enabledIKStreaming.set(false); // stop the ik streaming so that you can reposition according to the robot state to avoid jumps in poses
             }
 
             if (proMPAssistant.inEndZone() && enabledIKStreaming.get())
@@ -374,25 +368,39 @@ public class RDXVRSharedControl implements TeleoperationAssistant
                   }
                }
 
-               //define a function alpha that goes from 0 to 1 smoothly, while getting to 1 before the end of the motion
-               double x = (double) (blendingCounter) / (proMPAssistant.AFFORDANCE_BLENDING_SAMPLES);
-               double alpha = 1.0 / (1 + 4 * Math.exp(-18 * (x - 0.2))); //sigmoid with [X:0,Y:~0],[X:0.6,Y:~1],[X>1,Y:1]
-               blendingCounter ++;
-               if (x <= 1)
+               if (affordanceEditor != null)
                {
-                  LogTools.info(alpha);
-                  // gradually interpolate last promp frame to first affordance frame
-                  FixedFrameQuaternionBasics arbitratedFrameOrientation = framePose.getOrientation();
-                  arbitratedFrameOrientation.set((1 - alpha) * framePose.getOrientation().getX() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getX(),
-                                                 (1 - alpha) * framePose.getOrientation().getY() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getY(),
-                                                 (1 - alpha) * framePose.getOrientation().getZ() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getZ(),
-                                                 (1 - alpha) * framePose.getOrientation().getS() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getS());
-                  FixedFramePoint3DBasics arbitratedFramePosition = framePose.getPosition();
-                  arbitratedFramePosition.setX((1 - alpha) * framePose.getPosition().getX() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getPosition().getX());
-                  arbitratedFramePosition.setY((1 - alpha) * framePose.getPosition().getY() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getPosition().getY());
-                  arbitratedFramePosition.setZ((1 - alpha) * framePose.getPosition().getZ() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getPosition().getZ());
-                  framePose.getPosition().set(arbitratedFramePosition);
-                  framePose.getOrientation().set(arbitratedFrameOrientation);
+                  //define a function alpha that goes from 0 to 1 smoothly, while getting to 1 before the end of the motion
+                  double x = (double) (blendingCounter) / (proMPAssistant.AFFORDANCE_BLENDING_SAMPLES);
+                  double alpha = 1.0 / (1 + 4 * Math.exp(-18 * (x - 0.2))); //sigmoid with [X:0,Y:~0],[X:0.6,Y:~1],[X>1,Y:1]
+                  if (alpha >= 0.999)
+                     alpha = 1;
+                  blendingCounter++;
+                  if (x <= 1)
+                  {
+                     LogTools.info(alpha);
+                     // gradually interpolate last promp frame to first affordance frame
+                     FixedFrameQuaternionBasics arbitratedFrameOrientation = framePose.getOrientation();
+                     arbitratedFrameOrientation.set((1 - alpha) * framePose.getOrientation().getX() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getX(),
+                                                    (1 - alpha) * framePose.getOrientation().getY() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getY(),
+                                                    (1 - alpha) * framePose.getOrientation().getZ() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getZ(),
+                                                    (1 - alpha) * framePose.getOrientation().getS() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getS());
+                     FixedFramePoint3DBasics arbitratedFramePosition = framePose.getPosition();
+                     arbitratedFramePosition.setX((1 - alpha) * framePose.getPosition().getX() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getPosition().getX());
+                     arbitratedFramePosition.setY((1 - alpha) * framePose.getPosition().getY() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getPosition().getY());
+                     arbitratedFramePosition.setZ((1 - alpha) * framePose.getPosition().getZ() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getPosition().getZ());
+                     framePose.getPosition().set(arbitratedFramePosition);
+                     framePose.getOrientation().set(arbitratedFrameOrientation);
+                  }
+                  else
+                  {
+                     enabledIKStreaming.set(false); // stop the ik streaming so that you can execute the affordance through the actionSequenceEditor
+                     if (affordanceEditor != null)
+                     {
+                        affordanceEditor.sendToRobot();
+                        affordanceReady = true;
+                     }
+                  }
                }
             }
          }
@@ -415,7 +423,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
 
    public void renderWidgets(ImGuiUniqueLabelMap labels)
    {
-      if (ImGui.checkbox(labels.get("Shared Control"), enabled))
+      if (ImGui.checkbox(labels.get("Assistance"), enabled))
       {
          setEnabled(enabled.get());
       }
@@ -459,7 +467,11 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             ghostRobotGraphic.setActive(previewSetToActive); // set it back to what it was (graphic is disabled when using assistance after validation)
             splineGraphics.clear();
             stdDeviationGraphics.clear();
-            affordanceEditor = null;
+            if(affordanceEditor != null)
+            {
+               affordanceEditor.commandNextActionIndex(0);
+               affordanceEditor = null;
+            }
             affordanceReady = false;
             blendingCounter = 0;
          }

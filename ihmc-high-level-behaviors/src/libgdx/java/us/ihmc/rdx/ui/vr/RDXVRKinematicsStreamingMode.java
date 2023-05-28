@@ -58,7 +58,8 @@ public class RDXVRKinematicsStreamingMode
    private FullHumanoidRobotModel ghostFullRobotModel;
    private OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean enabled = new ImBoolean(false);
+   private final ImBoolean enabled = new ImBoolean(true);
+   private final ImBoolean advanced = new ImBoolean(false);
    private IHMCROS2Input<KinematicsToolboxOutputStatus> status;
    private final double streamPeriod = UnitConversions.hertzToSeconds(10.0);
    private final Throttler toolboxInputStreamRateLimiter = new Throttler();
@@ -148,6 +149,9 @@ public class RDXVRKinematicsStreamingMode
 
       kinematicsRecorder = new KinematicsRecordReplay(ros2ControllerHelper, enabled, 2);
       sharedControlAssistant = new RDXVRSharedControl(robotModel, ros2ControllerHelper, streamToController, kinematicsRecorder.isReplayingEnabled());
+
+      if (!kinematicsStreamingToolboxProcess.isStarted())
+         kinematicsStreamingToolboxProcess.start();
    }
 
    public void processVRInput(RDXVRContext vrContext)
@@ -230,7 +234,7 @@ public class RDXVRKinematicsStreamingMode
                kinematicsRecorder.framePoseToRecord(tempFramePose);
                if (kinematicsRecorder.isReplaying())
                   kinematicsRecorder.framePoseToPack(tempFramePose); //get values of tempFramePose from replay
-               else if (sharedControlAssistant.isActive())
+               else if (sharedControlAssistant.isActive() && !sharedControlAssistant.isAffordanceActive())
                {
                   if(sharedControlAssistant.readyToPack() && (sharedControlAssistant.containsBodyPart(side.getCamelCaseName() + "Hand")))
                   {
@@ -242,7 +246,7 @@ public class RDXVRKinematicsStreamingMode
                   }
                }
                // do not update the body part pose if shared control is active and that part is not included in the shared autonomy
-               if(sharedControlAssistant.isActive() && sharedControlAssistant.readyToPack())
+               if(sharedControlAssistant.isActive() && sharedControlAssistant.readyToPack() && !sharedControlAssistant.isAffordanceActive())
                {
                   if (sharedControlAssistant.containsBodyPart(side.getCamelCaseName() + "Hand"))
                   {
@@ -303,7 +307,12 @@ public class RDXVRKinematicsStreamingMode
          streamToController.set(false);
 
       if (!streamToController.get() && sharedControlAssistant.isActive() && sharedControlAssistant.isAffordanceActive())
+      {
          sharedControlAssistant.updateAffordance();
+         ghostRobotGraphic.setActive(false);
+      }
+      else if (!ghostRobotGraphic.isActive())
+         ghostRobotGraphic.setActive(true);
 
       if (status.getMessageNotification().poll())
       {
@@ -358,66 +367,70 @@ public class RDXVRKinematicsStreamingMode
 
    public void renderImGuiWidgets()
    {
+      ImGui.separator();
       if (controllerModel == RDXVRControllerModel.FOCUS3)
-      {
-         ImGui.text("Toggle IK tracking enabled: A button");
-         ImGui.text("Toggle stream to controller: X button");
-      }
+         ImGui.text("X BUTTON");
       else
-      {
-         ImGui.text("Toggle IK tracking enabled: Right A button");
-         ImGui.text("Toggle stream to controller: Left A button");
-      }
-
-      kinematicsStreamingToolboxProcess.renderImGuiWidgets();
-      ghostRobotGraphic.renderImGuiWidgets();
-      if (ImGui.checkbox(labels.get("Kinematics streaming"), enabled))
-      {
-         setEnabled(enabled.get());
-      }
+         ImGui.text("LEFT A BUTTON");
       ImGui.sameLine();
-      if (ImGui.button(labels.get("Reinitialize")))
-      {
-         reinitializeToolbox();
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Wake up")))
-      {
-         wakeUpToolbox();
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Sleep")))
-      {
-         sleepToolbox();
-      }
-      // add widgets for recording/replaying motion in VR
-      ImGui.text("Start/Stop recording: Press Left Joystick");
-      kinematicsRecorder.renderRecordWidgets(labels);
-      ImGui.text("Start/Stop replay: Press Left Joystick (cannot stream/record if replay)");
-      kinematicsRecorder.renderReplayWidgets(labels);
+      ImGui.checkbox(labels.get("Control Robot"), streamToController);
       // add widget for using shared control assistance in VR
       if (controllerModel == RDXVRControllerModel.FOCUS3)
-         ImGui.text("Toggle shared control assistance: Y button");
+         ImGui.text("Y BUTTON");
       else
-         ImGui.text("Toggle shared control assistance: Left B button");
+         ImGui.text("LEFT B BUTTON");
+      ImGui.sameLine();
       sharedControlAssistant.renderWidgets(labels);
-      if (ImGui.checkbox(labels.get("Wake up thread"), wakeUpThreadRunning))
-      {
-         wakeUpThread.setRunning(wakeUpThreadRunning.get());
-      }
-      ImGui.checkbox(labels.get("Streaming to controller"), streamToController);
-      ImGui.text("Output:");
-      ImGui.sameLine();
-      outputFrequencyPlot.renderImGuiWidgets();
-      ImGui.text("Status:");
-      ImGui.sameLine();
-      statusFrequencyPlot.renderImGuiWidgets();
-      for (RobotSide side : RobotSide.values)
-      {
-         wristJointAnglePlots.get(side).render(wristJoints.get(side).getQ());
-      }
 
-      ImGui.checkbox(labels.get("Show reference frames"), showReferenceFrameGraphics);
+      ImGui.text("Advanced options");
+      ImGui.sameLine();
+      ImGui.checkbox(labels.get(""), advanced);
+      if (advanced.get())
+      {
+         ImGui.separator();
+         ghostRobotGraphic.renderImGuiWidgets();
+         // add widgets for recording/replaying motion in VR
+         ImGui.text("Left Joystick: Start/Stop recording");
+         kinematicsRecorder.renderRecordWidgets(labels);
+         ImGui.text("Left Joystick: Start/Stop replay");
+         kinematicsRecorder.renderReplayWidgets(labels);
+         ImGui.checkbox(labels.get("Show reference frames"), showReferenceFrameGraphics);
+         // add widgets for kinematics streaming management
+         kinematicsStreamingToolboxProcess.renderImGuiWidgets();
+         if (ImGui.checkbox(labels.get("Kinematics streaming"), enabled))
+         {
+            setEnabled(enabled.get());
+         }
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Reinitialize")))
+         {
+            reinitializeToolbox();
+         }
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Wake up")))
+         {
+            wakeUpToolbox();
+         }
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Sleep")))
+         {
+            sleepToolbox();
+         }
+         if (ImGui.checkbox(labels.get("Wake up thread"), wakeUpThreadRunning))
+         {
+            wakeUpThread.setRunning(wakeUpThreadRunning.get());
+         }
+         ImGui.text("Output:");
+         ImGui.sameLine();
+         outputFrequencyPlot.renderImGuiWidgets();
+         ImGui.text("Status:");
+         ImGui.sameLine();
+         statusFrequencyPlot.renderImGuiWidgets();
+         for (RobotSide side : RobotSide.values)
+         {
+            wristJointAnglePlots.get(side).render(wristJoints.get(side).getQ());
+         }
+      }
    }
 
    public void setEnabled(boolean enabled)
@@ -429,6 +442,11 @@ public class RDXVRKinematicsStreamingMode
          wakeUpToolbox();
          kinematicsRecorder.setReplay(false); //check no concurrency replay and streaming
       }
+   }
+
+   public boolean isEnabled()
+   {
+      return enabled.get();
    }
 
    private void reinitializeToolbox()

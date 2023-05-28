@@ -87,13 +87,16 @@ public class RDXVRModeManager
    public void update()
    {
       kinematicsStreamingMode.update(mode == RDXVRMode.WHOLE_BODY_IK_STREAMING);
+      if (mode != RDXVRMode.WHOLE_BODY_IK_STREAMING)
+         kinematicsStreamingMode.setEnabled(false);
       leftHandPanel.update();
       joystickBasedStepping.update(mode == RDXVRMode.JOYSTICK_WALKING);
    }
 
    private void renderImGuiWidgets()
    {
-      ImGui.text("Teleport: Right B button");
+      ImGui.text("Teleport to Robot: Click Right Joystick");
+      ImGui.text("Teleport around: Hold B Button and point to ground");
       ImGui.text("Adjust user Z height: Right touchpad up/down");
       ImGui.text("ImGui panels: Point and use right trigger to click and drag");
       if (ImGui.checkbox(labels.get("Floating video panel"), showFloatingVideoPanel))
@@ -126,8 +129,8 @@ public class RDXVRModeManager
       if (ImGui.radioButton(labels.get("Whole body IK streaming"), mode == RDXVRMode.WHOLE_BODY_IK_STREAMING))
       {
          mode = RDXVRMode.WHOLE_BODY_IK_STREAMING;
-//         if (!kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().isStarted())
-//            kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().start();
+         if (kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().isStarted() && !kinematicsStreamingMode.isEnabled())
+            kinematicsStreamingMode.setEnabled(true);
       }
       if (ImGui.radioButton(labels.get("Joystick walking"), mode == RDXVRMode.JOYSTICK_WALKING))
       {
