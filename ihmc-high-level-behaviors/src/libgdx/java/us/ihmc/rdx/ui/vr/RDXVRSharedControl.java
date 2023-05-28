@@ -48,7 +48,7 @@ import java.util.*;
  */
 public class RDXVRSharedControl implements TeleoperationAssistant
 {
-   private static final Tuple3DReadOnly AFFORDANCE_TO_KINEMATIC_HAND_TRANSFORM = new Point3D(-0.06441,0.0, 0.0);
+   private static final Tuple3DReadOnly AFFORDANCE_TO_KINEMATIC_HAND_TRANSFORM = new Point3D(-0.06441,-0.013019, 0.0);
    private final ROS2PublishSubscribeAPI ros2;
    private final IHMCROS2Input<DetectableSceneNodesMessage> detectableSceneObjectsSubscription;
    private final ImBoolean enabledReplay;
@@ -374,12 +374,14 @@ public class RDXVRSharedControl implements TeleoperationAssistant
                   }
                }
 
-               double alpha = (double) (blendingCounter) / (proMPAssistant.AFFORDANCE_BLENDING_SAMPLES);
+               //define a function alpha that goes from 0 to 1 smoothly, while getting to 1 before the end of the motion
+               double x = (double) (blendingCounter) / (proMPAssistant.AFFORDANCE_BLENDING_SAMPLES);
+               double alpha = 1.0 / (1 + 4 * Math.exp(-18 * (x - 0.2))); //sigmoid with [X:0,Y:~0],[X:0.6,Y:~1],[X>1,Y:1]
                blendingCounter ++;
-               if (alpha <= 1.0)
+               if (x <= 1)
                {
                   LogTools.info(alpha);
-                  // gradually interpolate last observation to prediction
+                  // gradually interpolate last promp frame to first affordance frame
                   FixedFrameQuaternionBasics arbitratedFrameOrientation = framePose.getOrientation();
                   arbitratedFrameOrientation.set((1 - alpha) * framePose.getOrientation().getX() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getX(),
                                                  (1 - alpha) * framePose.getOrientation().getY() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getY(),
@@ -389,13 +391,10 @@ public class RDXVRSharedControl implements TeleoperationAssistant
                   arbitratedFramePosition.setX((1 - alpha) * framePose.getPosition().getX() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getPosition().getX());
                   arbitratedFramePosition.setY((1 - alpha) * framePose.getPosition().getY() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getPosition().getY());
                   arbitratedFramePosition.setZ((1 - alpha) * framePose.getPosition().getZ() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getPosition().getZ());
-//                  framePose.getPosition().set(arbitratedFramePosition);
-//                  framePose.getOrientation().set(arbitratedFrameOrientation);
-                  framePose.set(bodyPartInitialAffordancePoseMap.get(bodyPart));
+                  framePose.getPosition().set(arbitratedFramePosition);
+                  framePose.getOrientation().set(arbitratedFrameOrientation);
                }
             }
-            else
-               blendingCounter = 0;
          }
       }
    }
