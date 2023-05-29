@@ -83,9 +83,6 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       edgeCost.add(Math.abs(pitchOffset * parameters.getPitchWeight()));
       edgeCost.add(Math.abs(rollOffset * parameters.getRollWeight()));
 
-      if (edgeCost.isNaN())
-         throw new RuntimeException("Crap.");
-
       if (heightMapData != null && !heightMapData.isEmpty() && candidateSnapData.getSnappedToHeightMap())
       {
          double rmsError = candidateSnapData.getRMSErrorHeightMap();
@@ -115,8 +112,6 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       }
 
       totalCost.set(edgeCost.getDoubleValue() + heuristicCost.getDoubleValue());
-      if (edgeCost.isNaN())
-         throw new RuntimeException("Crap.");
       return edgeCost.getValue();
    }
 
