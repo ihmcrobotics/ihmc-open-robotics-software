@@ -56,8 +56,7 @@ public class DiscreteFootstepTools
    public static void getSnappedStepTransform(DiscreteFootstep step, RigidBodyTransformReadOnly snapTransform, RigidBodyTransform transformToPack)
    {
       getStepTransform(step, transformToPack);
-      if (!snapTransform.containsNaN())
-         snapTransform.transform(transformToPack);
+      snapTransform.transform(transformToPack);
    }
 
    public static Point3DReadOnly getStepPositionInWorld(DiscreteFootstep step, RigidBodyTransform snapTransform)

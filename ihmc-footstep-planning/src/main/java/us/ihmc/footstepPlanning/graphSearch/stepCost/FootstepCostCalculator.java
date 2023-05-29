@@ -59,6 +59,8 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
 
       DiscreteFootstepTools.getSnappedStepTransform(stanceStep, snapper.snapFootstep(stanceStep).getSnapTransform(), stanceStepTransform);
       FootstepSnapDataReadOnly candidateSnapData = snapper.snapFootstep(candidateStep);
+      if (candidateSnapData.getSnapTransform().containsNaN())
+         throw new RuntimeException("How did we get here?");
       DiscreteFootstepTools.getSnappedStepTransform(candidateStep, candidateSnapData.getSnapTransform(), candidateStepTransform);
       idealStepTransform.getTranslation().set(idealStep.getX(), idealStep.getY(), stanceStepTransform.getTranslationZ());
       idealStepTransform.getRotation().setToYawOrientation(idealStep.getYaw());
