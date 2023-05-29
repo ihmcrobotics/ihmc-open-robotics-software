@@ -32,7 +32,7 @@ public class MeshBasedContactDetector
 
    private double contactThreshold = 0.02;
    private final BoundingBox3D shapeBoundingBoxInWorld = new BoundingBox3D();
-   private List<FrameShape3DBasics> environmentShapes = null;
+   private List<? extends FrameShape3DBasics> environmentShapes = null;
 
    private final List<RigidBodyBasics> contactableRigidBodies = new ArrayList<>();
    private final Map<RigidBodyBasics, List<Collidable>> collidableMap;
@@ -184,7 +184,7 @@ public class MeshBasedContactDetector
       return contactPointMap;
    }
 
-   public void setEnvironmentShapes(List<FrameShape3DBasics> environmentShapes)
+   public void setEnvironmentShapes(List<? extends FrameShape3DBasics> environmentShapes)
    {
       this.environmentShapes = environmentShapes;
    }
