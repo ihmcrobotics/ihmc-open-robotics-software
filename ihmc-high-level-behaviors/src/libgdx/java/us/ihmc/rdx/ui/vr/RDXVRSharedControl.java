@@ -72,6 +72,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private boolean firstPreview = true;
    private int replayPreviewCounter = 0;
    private int speedSplineAdjustmentFactor = 1;
+   private boolean play = false;
    private double joystickValue;
    private TreeSet<RDXBehaviorActionSequenceEditor> affordanceEditors;
    private RDXBehaviorActionSequenceEditor affordanceEditor;
@@ -112,6 +113,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          setEnabled(!enabled.get());
       }
       this.joystickValue = joystickValue;
+      play = joystickValue>0 || isPreviewGraphicActive();
    }
 
    /**
@@ -307,7 +309,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    @Override
    public void framePoseToPack(FramePose3D framePose, String bodyPart)
    {
-      proMPAssistant.framePoseToPack(framePose, bodyPart, joystickValue); // pack frame with proMP assistant
+      proMPAssistant.framePoseToPack(framePose, bodyPart, play); // pack frame with proMP assistant
 
       if (containsBodyPart(bodyPart))
       {

@@ -138,7 +138,7 @@ public class ProMPAssistant
       });
    }
 
-   public void framePoseToPack(FramePose3D framePose, String bodyPart, double joystickValue)
+   public void framePoseToPack(FramePose3D framePose, String bodyPart, boolean play)
    {
       if (containsBodyPart(bodyPart))
       { // if bodyPart is used in current task
@@ -159,10 +159,8 @@ public class ProMPAssistant
             framePose.getOrientation().set(observedFramePose.getOrientation());
 
             // update sample from the trajectory to take next time
-//            if (joystickValue > 0.0)
+            if (play)
                bodyPartTrajectorySampleCounter.replace(bodyPart, sampleCounter + 1);
-//            else if (joystickValue < 0.0 && sampleCounter > 0)
-//               bodyPartTrajectorySampleCounter.replace(bodyPart, sampleCounter - 1);
          }
          // -- Get trajectory from ProMP
          else if (sampleCounter < generatedFramePoseTrajectory.size() - 1)
@@ -199,10 +197,8 @@ public class ProMPAssistant
             }
 
             // update sample from the trajectory to take next time
-//            if (joystickValue > 0.0)
+            if (play)
                bodyPartTrajectorySampleCounter.replace(bodyPart, sampleCounter + 1);
-//            else if (joystickValue < 0.0)
-//               bodyPartTrajectorySampleCounter.replace(bodyPart, sampleCounter - 1);
          }
          // -- Motion is over
          else
@@ -227,13 +223,6 @@ public class ProMPAssistant
             }
             // exit assistance mode
             doneCurrentTask = true;
-
-//            // update sample from the trajectory to take next time
-//            if (joystickValue < 0.0)
-//            {
-//               bodyPartTrajectorySampleCounter.replace(bodyPart, sampleCounter - 1);
-//               doneCurrentTask = false;
-//            }
          }
       }
    }

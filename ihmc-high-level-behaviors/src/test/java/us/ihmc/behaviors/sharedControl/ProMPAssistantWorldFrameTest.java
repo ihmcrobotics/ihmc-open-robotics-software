@@ -71,7 +71,7 @@ public class ProMPAssistantWorldFrameTest
             if (proMPAssistant.readyToPack())
             {
                if (!proMPAssistant.isCurrentTaskDone())
-                  proMPAssistant.framePoseToPack(framePose, bodyPart, 0);  //change frame according to generated ProMP
+                  proMPAssistant.framePoseToPack(framePose, bodyPart, true);  //change frame according to generated ProMP
             }
             else
             {
