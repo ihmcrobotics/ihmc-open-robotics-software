@@ -1,11 +1,10 @@
-package us.ihmc.perception;
+package us.ihmc.perception.opencv;
 
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ArUcoMarkerPoses;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 /**
