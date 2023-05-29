@@ -129,11 +129,13 @@ public class FootstepSnapData implements FootstepSnapDataReadOnly
       this.snappedToHeightMap = snappedToHeightMap;
    }
 
+   @Override
    public boolean getSnappedToPlanarRegions()
    {
       return snappedToPlanarRegions;
    }
 
+   @Override
    public boolean getSnappedToHeightMap()
    {
       return snappedToHeightMap;
