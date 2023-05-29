@@ -29,7 +29,7 @@ import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.rdx.simulation.DepthSensorShaderProvider;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.visualizers.RDXFrustumGraphic;
-import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.tools.Timer;
@@ -238,10 +238,10 @@ public class RDXLowLevelDepthSensorSimulator
 
       // libGDX renders this stuff upside down, so let's flip them right side up.
       // TODO: Does it really? Sneaking suspicion that it doesn't and we end up flipping things again later on.
-      opencv_core.flip(rgba8888ColorImage.getBytedecoOpenCVMat(), rgba8888ColorImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_Y);
+      opencv_core.flip(rgba8888ColorImage.getBytedecoOpenCVMat(), rgba8888ColorImage.getBytedecoOpenCVMat(), OpenCVTools.FLIP_Y);
       opencv_core.flip(normalizedDeviceCoordinateDepthImage.getBytedecoOpenCVMat(),
                        normalizedDeviceCoordinateDepthImage.getBytedecoOpenCVMat(),
-                       BytedecoOpenCVTools.FLIP_Y);
+                       OpenCVTools.FLIP_Y);
 
       opencv_core.randu(noiseImage.getBytedecoOpenCVMat(), noiseLow, noiseHigh);
 

@@ -11,7 +11,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.ExecutorServiceTools;
@@ -140,7 +140,7 @@ public class PerceptionDataLoader
       Group group = hdf5Manager.openOrGetGroup(namespace);
       BytePointer bytePointer = new BytePointer(10);
       hdf5Tools.loadBytes(group, index, bytePointer);
-      mat.put(BytedecoOpenCVTools.decompressImageJPGUsingYUV(bytePointer));
+      mat.put(OpenCVTools.decompressImageJPGUsingYUV(bytePointer));
    }
 
    public void loadCompressedDepth(String namespace, int index, BytePointer bytePointer, Mat mat)
@@ -148,7 +148,7 @@ public class PerceptionDataLoader
       Group group = hdf5Manager.openOrGetGroup(namespace);
       hdf5Tools.loadBytes(group, index, bytePointer);
 
-      BytedecoOpenCVTools.decompressDepthPNG(bytePointer, mat);
+      OpenCVTools.decompressDepthPNG(bytePointer, mat);
    }
 
    public String getFilePath()
