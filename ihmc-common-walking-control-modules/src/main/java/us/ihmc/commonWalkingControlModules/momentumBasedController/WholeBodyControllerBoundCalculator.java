@@ -382,7 +382,91 @@ public class WholeBodyControllerBoundCalculator
       qDDotMinToPack.set(index, 0, filteredLowerLimits[index].getDoubleValue());
       qDDotMaxToPack.set(index, 0, filteredUpperLimits[index].getDoubleValue());
    }
-
+   
+//   // may need to remove
+//   public void computeJointTorqueLimits(double absoluteMaximumJointTorque, DMatrixRMaj tauMinToPack, DMatrixRMaj tauMaxToPack)
+//   {
+//      CommonOps_DDRM.fill(tauMinToPack, Double.NEGATIVE_INFINITY);
+//      CommonOps_DDRM.fill(tauMaxToPack, Double.POSITIVE_INFINITY);
+//
+//      for (OneDoFJointBasics joint : oneDoFJoints)
+//      {
+//         int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
+//
+//         switch (jointLimitTypes[jointIndex])
+//         {
+//            case DEFAULT:
+//               computeTorqueLimitDefault(joint, absoluteMaximumJointTorque, tauMinToPack, tauMaxToPack);
+//               break;
+////            case RESTRICTIVE:
+////               computeAccelerationLimitRestrictive(joint, absoluteMaximumJointTorque, tauMinToPack, tauMaxToPack);
+////               break;
+//            case NONE:
+//               break;
+//            default:
+//               throw new RuntimeException("Implement case!");
+//         }
+//      }
+//   }
+//
+//   // may need to remove
+//   private void computeTorqueLimitDefault(OneDoFJointBasics joint,
+//                                                double absoluteMaximumJointTorque,
+//                                                DMatrixRMaj tauMinToPack,
+//                                                DMatrixRMaj tauMaxToPack)
+//   {
+//      int index = jointIndexHandler.getOneDoFJointIndex(joint);
+//      double jointLimitLower = jointLowerLimits.get(index, 0);
+//      double jointLimitUpper = jointUpperLimits.get(index, 0);
+//
+//
+//      if(!Double.isInfinite(jointLimitUpper) && !Double.isInfinite(jointLimitLower))
+//      {
+//         double limitMargin = romMarginFractions[index].getDoubleValue() * (jointLimitUpper - jointLimitLower);
+//         jointLimitUpper -= limitMargin;
+//         jointLimitLower += limitMargin;
+//      }
+//
+//      double tauMin = Double.NEGATIVE_INFINITY;
+//      double tauMax = Double.POSITIVE_INFINITY;
+//
+////      double velocityLimitLower;
+////      double velocityLimitUpper;
+//
+////      if (areJointVelocityLimitsConsidered.getBooleanValue())
+////      {
+////         velocityLimitLower = joint.getVelocityLimitLower();
+////         velocityLimitUpper = joint.getVelocityLimitUpper();
+////      }
+////      else
+////      {
+////         velocityLimitLower = Double.NEGATIVE_INFINITY;
+////         velocityLimitUpper = Double.POSITIVE_INFINITY;
+////      }
+//
+//      double brakeVelocity = DeadbandTools.applyDeadband(velocityDeadbandSizes[index].getDoubleValue(), joint.getQd());
+//      if (!Double.isInfinite(jointLimitLower) || !Double.isInfinite(velocityLimitLower))
+//      {
+////         double qDotMinFromFD = (jointLimitLower - joint.getQ()) / controlDT;
+////         double qDotMin = MathTools.clamp(qDotMinFromFD, velocityLimitLower, velocityLimitUpper);
+//
+//         tauMin = 0.0;
+//         tauMin = MathTools.clamp(tauMin, -absoluteMaximumJointTorque, 0.0);
+//         tauMinToPack.set(index, 0, tauMin);
+//         lowerHardLimits[index].set(tauMin);
+//      }
+//      if (!Double.isInfinite(jointLimitUpper) || !Double.isInfinite(velocityLimitUpper))
+//      {
+//         double qDotMaxFromFD = (jointLimitUpper - joint.getQ()) / controlDT;
+//         double qDotMax = MathTools.clamp(qDotMaxFromFD, velocityLimitLower, velocityLimitUpper);
+//
+//         tauMax = 2.0 * (qDotMax - brakeVelocity) / controlDT;
+//         tauMax = MathTools.clamp(tauMax, -0.0, absoluteMaximumJointTorque);
+//         tauMaxToPack.set(index, 0, tauMax);
+//         upperHardLimits[index].set(tauMax);
+//      }
+//   }
+   
    public void enforceJointTorqueLimits(LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList)
    {
       for (OneDoFJointBasics joint : oneDoFJoints)
