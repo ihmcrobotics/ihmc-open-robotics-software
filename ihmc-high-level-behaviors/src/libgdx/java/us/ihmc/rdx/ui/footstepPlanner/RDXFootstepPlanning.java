@@ -44,7 +44,7 @@ public class RDXFootstepPlanning
    private final ROS2SyncedRobotModel syncedRobot;
    private final FootstepPlanningModule footstepPlanner;
    private final FootstepPlannerLogger footstepPlannerLogger;
-   private final FootstepPlannerRequest request;
+   private final FootstepPlannerRequest footstepPlannerRequest;
    private final ResettableExceptionHandlingExecutorService executor;
    private boolean isReadyToWalk = false;
    private final Notification plannedNotification = new Notification();
@@ -76,10 +76,11 @@ public class RDXFootstepPlanning
    {
       this.locomotionParameters = locomotionParameters;
       this.syncedRobot = syncedRobot;
+
       midFeetZUpFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
       footstepPlanner.addCustomTerminationCondition(((plannerTime, iterations, bestFinalStep, bestSecondToLastStep, bestPathSize) -> terminatePlan));
-      request = new FootstepPlannerRequest();
+      footstepPlannerRequest = new FootstepPlannerRequest();
       footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
 
       executor = MissingThreadTools.newSingleThreadExecutor("FootstepPlanning", true, 1);
@@ -102,14 +103,14 @@ public class RDXFootstepPlanning
 
    private void setGoalFootPosesFromMidFeetPose(FootstepPlannerParametersReadOnly footstepPlannerParameters, Pose3DReadOnly goalPose)
    {
-      request.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), goalPose);
+      footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), goalPose);
    }
 
    private void setStanceSideToClosestToGoal(Pose3DReadOnly goalPose)
    {
       RobotSide stanceSide;
-      if (request.getStartFootPoses().get(RobotSide.LEFT ).getPosition().distance(goalPose.getPosition())
-          <= request.getStartFootPoses().get(RobotSide.RIGHT).getPosition().distance(goalPose.getPosition()))
+      if (footstepPlannerRequest.getStartFootPoses().get(RobotSide.LEFT ).getPosition().distance(goalPose.getPosition())
+          <= footstepPlannerRequest.getStartFootPoses().get(RobotSide.RIGHT).getPosition().distance(goalPose.getPosition()))
       {
          stanceSide = RobotSide.LEFT;
       }
@@ -118,7 +119,7 @@ public class RDXFootstepPlanning
          stanceSide = RobotSide.RIGHT;
       }
 
-      request.setRequestedInitialStanceSide(stanceSide);
+      footstepPlannerRequest.setRequestedInitialStanceSide(stanceSide);
    }
    
    private void plan()
@@ -151,8 +152,8 @@ public class RDXFootstepPlanning
       setGoalFootPosesFromMidFeetPose(footstepPlannerParameters, goalPose);
       setStanceSideToClosestToGoal(goalPose);
 
-      request.setSwingPlannerType(SwingPlannerType.MULTI_WAYPOINT_POSITION);
-      request.getStartFootPoses().forEach((side, pose3D) ->
+      footstepPlannerRequest.setSwingPlannerType(SwingPlannerType.MULTI_WAYPOINT_POSITION);
+      footstepPlannerRequest.getStartFootPoses().forEach((side, pose3D) ->
       {
          FramePose3DReadOnly soleFramePose = syncedRobot.getFramePoseReadOnly(referenceFrames -> referenceFrames.getSoleFrame(side));
          soleFramePose.get(pose3D);
@@ -162,45 +163,45 @@ public class RDXFootstepPlanning
       if (heightMapMessage != null)
       {
          assumeFlatGround = false;
-         request.setHeightMapData(HeightMapMessageTools.unpackMessage(heightMapMessage));
+         footstepPlannerRequest.setHeightMapData(HeightMapMessageTools.unpackMessage(heightMapMessage));
       }
       if (planarRegionsListMessage != null)
       {
-         request.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
+         footstepPlannerRequest.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
          assumeFlatGround = false;
       }
       if (planarRegionsList != null)
       {
-         request.setPlanarRegionsList(planarRegionsList);
+         footstepPlannerRequest.setPlanarRegionsList(planarRegionsList);
          assumeFlatGround = false;
       }
 
-      request.setPlanBodyPath(locomotionParameters.getPlanWithBodyPath());
+      footstepPlannerRequest.setPlanBodyPath(locomotionParameters.getPlanWithBodyPath());
 
       // We are not planning the body path
       // For teleoperation we usually want to stay facing the direction of the goal pose
       // TODO: Add options and control over this
-      if (!request.getPlanBodyPath())
+      if (!footstepPlannerRequest.getPlanBodyPath())
       {
          midFeetZUpPose.setToZero(midFeetZUpFrame);
          midFeetZUpPose.changeFrame(ReferenceFrame.getWorldFrame());
          startPose.setToZero(midFeetZUpFrame);
          startPose.changeFrame(ReferenceFrame.getWorldFrame());
          startPose.getOrientation().set(goalPose.getOrientation());
-         request.getBodyPathWaypoints().add(midFeetZUpPose);
-         request.getBodyPathWaypoints().add(startPose);
-         request.getBodyPathWaypoints().add(goalPose);
+         footstepPlannerRequest.getBodyPathWaypoints().add(midFeetZUpPose);
+         footstepPlannerRequest.getBodyPathWaypoints().add(startPose);
+         footstepPlannerRequest.getBodyPathWaypoints().add(goalPose);
       }
 
       // TODO: Set start footholds!!
-      request.setAssumeFlatGround(assumeFlatGround);
+      footstepPlannerRequest.setAssumeFlatGround(assumeFlatGround);
       //      request.setTimeout(lookAndStepParameters.getFootstepPlannerTimeoutWhileStopped());
 
       FootstepPlannerOutput output = footstepPlanner.getOutput();
 
-      LogTools.info("Stance side: {}", request.getRequestedInitialStanceSide().name());
+      LogTools.info("Stance side: {}", footstepPlannerRequest.getRequestedInitialStanceSide().name());
       LogTools.info("Planning footsteps...");
-      footstepPlanner.handleRequest(request);
+      footstepPlanner.handleRequest(footstepPlannerRequest);
       LogTools.info("Footstep planner completed with body path {}, footstep planner {}, {} step(s)",
                     output.getBodyPathPlanningResult(),
                     output.getFootstepPlanningResult(),
