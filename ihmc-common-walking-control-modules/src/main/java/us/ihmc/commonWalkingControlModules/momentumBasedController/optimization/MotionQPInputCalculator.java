@@ -1122,7 +1122,10 @@ public class MotionQPInputCalculator
 
       qpInputToPack.reshape(taskSize);
       qpInputToPack.setUseWeightScalar(false);
-      qpInputToPack.setConstraintType(jointTorqueCommand.isHardConstraint() ? ConstraintType.EQUALITY : ConstraintType.OBJECTIVE);
+      if (jointTorqueCommand.getConstraintType() == ConstraintType.LEQ_INEQUALITY || jointTorqueCommand.getConstraintType() == ConstraintType.GEQ_INEQUALITY)
+         qpInputToPack.setConstraintType(jointTorqueCommand.getConstraintType());
+      else
+         qpInputToPack.setConstraintType(jointTorqueCommand.isHardConstraint() ? ConstraintType.EQUALITY : ConstraintType.OBJECTIVE);
       qpInputToPack.taskJacobian.zero();
       qpInputToPack.taskObjective.zero();
       qpInputToPack.taskWeightMatrix.zero();
