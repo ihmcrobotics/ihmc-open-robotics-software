@@ -30,13 +30,13 @@ public enum ValkyrieRobotVersion
       switch(this)
       {
          case DEFAULT:
-            return "models/val_description/urdf/valkyrie_sim.urdf";
+            return "models/valkyrie_sim.urdf";
          case FINGERLESS:
-            return "models/val_description/urdf/valkyrie_sim_no_fingers.urdf";
+            return "models/valkyrie_sim_no_fingers.urdf";
          case ARM_MASS_SIM:
-            return "models/val_description/urdf/valkyrie_sim_arm_mass_sim.urdf";
+            return "models/valkyrie_sim_arm_mass_sim.urdf";
          case ARMLESS:
-            return "models/val_description/urdf/valkyrie_sim_no_arms.urdf";
+            return "models/valkyrie_sim_no_arms.urdf";
          default:
             throw new RuntimeException("ValkyrieRobotVersion: Unimplemented enumeration case : " + this);
       }
@@ -47,13 +47,13 @@ public enum ValkyrieRobotVersion
       switch(this)
       {
          case DEFAULT:
-            return "models/val_description/urdf/valkyrie_sim.urdf";
+            return "models/valkyrie_sim.urdf";
          case FINGERLESS:
-            return "models/val_description/urdf/valkyrie_sim_no_fingers.urdf";
+            return "models/valkyrie_sim_no_fingers.urdf";
          case ARM_MASS_SIM:
-            return "models/val_description/urdf/valkyrie_sim_arm_mass_sim.urdf";
+            return "models/valkyrie_sim_arm_mass_sim.urdf";
          case ARMLESS:
-            return "models/val_description/urdf/valkyrie_sim_no_arms.urdf";
+            return "models/valkyrie_sim_no_arms.urdf";
          default:
             throw new RuntimeException("ValkyrieRobotVersion: Unimplemented enumeration case : " + this);
       }
