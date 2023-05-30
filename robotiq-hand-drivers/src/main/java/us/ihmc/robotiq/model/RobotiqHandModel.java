@@ -49,7 +49,6 @@ public class RobotiqHandModel implements HandModel
          }
       }
 
-      @Override
       public FingerName getFinger(RobotSide robotSide)
       {
          switch (this)
@@ -78,7 +77,6 @@ public class RobotiqHandModel implements HandModel
          return robotSide.getShortLowerCaseName() + "_" + this.toString().toLowerCase();
       }
 
-      @Override
       public HandJointName[] getValues()
       {
          return values;

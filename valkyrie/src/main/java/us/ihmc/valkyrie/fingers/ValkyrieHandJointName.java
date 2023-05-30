@@ -42,7 +42,6 @@ public enum ValkyrieHandJointName implements HandJointName
       return side.getPascalCaseName() + name();
    }
 
-   @Override
    public FingerName getFinger(RobotSide robotSide)
    {
       return getFingerName();
@@ -89,12 +88,6 @@ public enum ValkyrieHandJointName implements HandJointName
    public int getIndex(RobotSide robotSide)
    {
       return ordinal();
-   }
-
-   @Override
-   public ValkyrieHandJointName[] getValues()
-   {
-      return values;
    }
 
    public RevoluteJoint getRelatedRevoluteJoint(RobotSide robotSide, FullRobotModel fullRobotModel)
