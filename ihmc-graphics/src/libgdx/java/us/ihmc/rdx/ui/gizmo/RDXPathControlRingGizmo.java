@@ -1,6 +1,5 @@
 package us.ihmc.rdx.ui.gizmo;
 
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Material;
@@ -13,33 +12,52 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImFloat;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.RDXFocusBasedCamera;
-import us.ihmc.rdx.imgui.ImGuiPanel;
-import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
 import us.ihmc.rdx.input.ImGuiMouseDragData;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
+import java.util.Random;
+
+import static us.ihmc.rdx.ui.gizmo.RDXPathControlRingCollisionSelection.*;
+
+/**
+ * A gizmo designed for specifying the walk goals of bipedal robots.
+ * It is able to be manipulated by mouse and keyboard by clicking and
+ * dragging it around in the 3D scene. The control ring is not able
+ * to be pitched or rolled.
+ *
+ * It has arrows that can be used for various purposes.
+ *
+ * TODO: Add VR support. The user should be able to point the controller
+ * at it from a distance and move it around.
+ */
 public class RDXPathControlRingGizmo implements RenderableProvider
 {
    public static final Color DISC_COLOR = RDXGizmoTools.CENTER_DEFAULT_COLOR;
    public static final Color X_ARROW_COLOR = RDXGizmoTools.X_AXIS_DEFAULT_COLOR;
    public static final Color Y_ARROW_COLOR = RDXGizmoTools.Y_AXIS_DEFAULT_COLOR;
+   private static final double QUARTER_TURN = Math.PI / 2.0;
 
-   private final double QUARTER_TURN = Math.PI / 2.0;
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImFloat discOuterRadius = new ImFloat(0.426f);
    private final ImFloat discInnerRadius = new ImFloat(0.290f);
    private final ImFloat discThickness = new ImFloat(0.03f);
@@ -50,16 +68,16 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private final ImFloat arrowTailLengthRatio = new ImFloat(1.0f);
    private Material normalMaterial;
    private Material highlightedMaterial;
-   private DynamicLibGDXModel discModel = new DynamicLibGDXModel();
-   private DynamicLibGDXModel positiveXArrowModel = new DynamicLibGDXModel();
-   private DynamicLibGDXModel positiveYArrowModel = new DynamicLibGDXModel();
-   private DynamicLibGDXModel negativeXArrowModel = new DynamicLibGDXModel();
-   private DynamicLibGDXModel negativeYArrowModel = new DynamicLibGDXModel();
+   private final DynamicLibGDXModel discModel = new DynamicLibGDXModel();
+   private final DynamicLibGDXModel positiveXArrowModel = new DynamicLibGDXModel();
+   private final DynamicLibGDXModel positiveYArrowModel = new DynamicLibGDXModel();
+   private final DynamicLibGDXModel negativeXArrowModel = new DynamicLibGDXModel();
+   private final DynamicLibGDXModel negativeYArrowModel = new DynamicLibGDXModel();
    private final RigidBodyTransform xArrowTailTransform = new RigidBodyTransform();
    private final RigidBodyTransform yArrowTailTransform = new RigidBodyTransform();
    private final RigidBodyTransform temporaryTailTransform = new RigidBodyTransform();
    private final Point3D closestCollision = new Point3D();
-   private int closestCollisionSelection = -1;
+   private RDXPathControlRingCollisionSelection closestCollisionSelection = null;
    private double closestCollisionDistance;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private boolean isGizmoHovered = false;
@@ -69,33 +87,28 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private final DiscreteIsoscelesTriangularPrismRayIntersection positiveYArrowIntersection = new DiscreteIsoscelesTriangularPrismRayIntersection();
    private final BoxRayIntersection negativeXArrowIntersection = new BoxRayIntersection();
    private final BoxRayIntersection negativeYArrowIntersection = new BoxRayIntersection();
-   /**
-    * The main, source, true, base transform that this thing represents.
-    */
+   /** The main, source, true, base transform that this thing represents. */
    private RigidBodyTransform transformToParent;
+   /** This pose 3D should always be left in world frame and represent this gizmo's pose. */
+   private final FramePose3D framePose3D = new FramePose3D();
    private ReferenceFrame parentReferenceFrame;
    private ReferenceFrame gizmoFrame;
-   private final RigidBodyTransform controlRingTransformToWorld = new RigidBodyTransform();
-   private final FramePose3D controlRingPose = new FramePose3D();
-   private final FramePose3D tempFramePose3D = new FramePose3D();
+   /** Gizmo transform to world so it can be calculated once. */
+   private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
+   /** For being able to tell if the user moved the gizmo. */
+   private final Notification gizmoModifiedByUser = new Notification();
    private RDXFocusBasedCamera camera3D;
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private final RigidBodyTransform transformFromKeyboardTransformationToWorld = new RigidBodyTransform();
-   private ModifiableReferenceFrame keyboardTransformationFrame;
    private final Point3D cameraPosition = new Point3D();
    private double distanceToCamera;
-   private double lastDistanceToCamera = -1.0;
    private final Plane3DMouseDragAlgorithm planeDragAlgorithm = new Plane3DMouseDragAlgorithm();
    private final ClockFaceRotation3DMouseDragAlgorithm clockFaceDragAlgorithm = new ClockFaceRotation3DMouseDragAlgorithm();
-   private boolean hollowCylinderIntersects;
-   private boolean positiveXArrowIntersects;
-   private boolean positiveYArrowIntersects;
-   private boolean negativeXArrowIntersects;
-   private boolean negativeYArrowIntersects;
    private boolean showArrows = true;
    private boolean highlightingEnabled = true;
-   private boolean isNewlyModified;
    private final double translateSpeedFactor = 0.5;
+   private boolean queuePopupToOpen = false;
+   private final Random random = new Random();
+   private boolean proportionsNeedUpdate = false;
+   private FrameBasedGizmoModification frameBasedGizmoModification;
 
    public RDXPathControlRingGizmo()
    {
@@ -126,7 +139,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       this.parentReferenceFrame = gizmoFrame.getParent();
       this.transformToParent = gizmoTransformToParentFrameToModify;
       this.gizmoFrame = gizmoFrame;
-      keyboardTransformationFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
    }
 
    public void setParentFrame(ReferenceFrame parentReferenceFrame)
@@ -135,9 +147,20 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
    }
 
-   public void create(RDXFocusBasedCamera camera3D)
+   public void createAndSetupDefault(RDX3DPanel panel3D)
    {
-      this.camera3D = camera3D;
+      create(panel3D);
+      panel3D.addImGui3DViewPickCalculator(this::calculate3DViewPick);
+      panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
+      panel3D.getScene().addRenderableProvider(this, RDXSceneLevel.VIRTUAL);
+   }
+
+   public void create(RDX3DPanel panel3D)
+   {
+      camera3D = panel3D.getCamera3D();
+      boolean yawOnly = true;
+      frameBasedGizmoModification = new FrameBasedGizmoModification(this::getGizmoFrame, () -> parentReferenceFrame, camera3D, yawOnly);
+      panel3D.addImGuiOverlayAddition(this::renderTooltipAndContextMenu);
 
       normalMaterial = createAlphaPaletteMaterial(RDXGizmoTools.X_AXIS_DEFAULT_COLOR.a);
       highlightedMaterial = createAlphaPaletteMaterial(RDXGizmoTools.X_AXIS_SELECTED_DEFAULT_COLOR.a);
@@ -205,98 +228,107 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      updateTransforms();
-
+      boolean isWindowHovered = ImGui.isWindowHovered();
       ImGuiMouseDragData translateDragData = input.getMouseDragData(ImGuiMouseButton.Left);
       ImGuiMouseDragData yawDragData = input.getMouseDragData(ImGuiMouseButton.Right);
 
-      if (!translateDragData.isDragging() && !yawDragData.isDragging())
+      if (isWindowHovered)
       {
-         Line3DReadOnly pickRay = input.getPickRayInWorld();
-         determineCurrentSelectionFromPickRay(pickRay);
-      }
+         if (!translateDragData.isDragging() && !yawDragData.isDragging())
+         {
+            Line3DReadOnly pickRay = input.getPickRayInWorld();
+            determineCurrentSelectionFromPickRay(pickRay);
+         }
 
-      if (closestCollisionSelection > -1)
-      {
-         pickResult.setDistanceToCamera(closestCollisionDistance);
-         input.addPickResult(pickResult);
+         if (closestCollisionSelection != null)
+         {
+            pickResult.setDistanceToCamera(closestCollisionDistance);
+            input.addPickResult(pickResult);
+         }
       }
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      process3DViewInput(input, true);
+      calculateHovered(input);
+      process3DViewInputModification(input);
    }
 
-   public void process3DViewInput(ImGui3DViewInput input, boolean allowUserInput)
+   /**
+    * We separate the two so we can make decisions based on hover and clicks
+    * before we start allowing modification of the gizmo.
+    */
+   void calculateHovered(ImGui3DViewInput input)
    {
-      updateTransforms();
+      isGizmoHovered = input.isWindowHovered() && pickResult == input.getClosestPick();
+   }
 
+   void process3DViewInputModification(ImGui3DViewInput input)
+   {
       boolean isWindowHovered = input.isWindowHovered();
       int yawMouseButton = ImGuiMouseButton.Right;
       ImGuiMouseDragData translateDragData = input.getMouseDragData(ImGuiMouseButton.Left);
       ImGuiMouseDragData yawDragData = input.getMouseDragData(yawMouseButton);
 
-      isNewlyModified = false;
-      isGizmoHovered = input.isWindowHovered() && pickResult == input.getClosestPick();
-      boolean isRingHovered = isGizmoHovered && closestCollisionSelection == 0;
-      boolean leftButtonDown = ImGui.isMouseDown(ImGuiMouseButton.Left);
-      boolean rightButtonDown = ImGui.isMouseDown(yawMouseButton);
-
-      if (allowUserInput)
+      if (isGizmoHovered && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
       {
-         if (isRingHovered)
+         queuePopupToOpen = true;
+      }
+
+      boolean isRingHovered = isGizmoHovered && closestCollisionSelection == RING;
+      if (isRingHovered)
+      {
+         if (yawDragData.getDragJustStarted())
          {
-            if (yawDragData.getDragJustStarted())
+            clockFaceDragAlgorithm.reset();
+            yawDragData.setObjectBeingDragged(this);
+         }
+         else if (translateDragData.getDragJustStarted())
+         {
+            translateDragData.setObjectBeingDragged(this);
+         }
+      }
+
+      isBeingManipulated = (translateDragData.getObjectBeingDragged() == this) || (yawDragData.getObjectBeingDragged() == this);
+      if (isBeingManipulated)
+      {
+         Line3DReadOnly pickRay = input.getPickRayInWorld();
+
+         if (translateDragData.isDragging())
+         {
+            Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
+            frameBasedGizmoModification.translateInWorld(planarMotion);
+            closestCollision.add(planarMotion);
+         }
+         else // yaw dragging
+         {
+            if (clockFaceDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z, transformToWorld))
             {
-               clockFaceDragAlgorithm.reset();
-               yawDragData.setObjectBeingDragged(this);
-            }
-            else if (translateDragData.getDragJustStarted())
-            {
-               translateDragData.setObjectBeingDragged(this);
+               frameBasedGizmoModification.rotateInWorld(clockFaceDragAlgorithm.getMotion());
             }
          }
+      }
 
-         isBeingManipulated = (yawDragData.getObjectBeingDragged() == this && rightButtonDown)
-                           || (translateDragData.getObjectBeingDragged() == this && leftButtonDown);
-         if (isBeingManipulated)
+      if (isWindowHovered)
+      {
+         // Use mouse wheel to yaw when ctrl key is held
+         if (ImGui.getIO().getKeyCtrl() && input.getMouseWheelDelta() != 0.0f)
          {
-            isNewlyModified = true;
-            Line3DReadOnly pickRay = input.getPickRayInWorld();
-
-            if (translateDragData.isDragging())
-            {
-               Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
-               tempFramePose3D.setToZero(gizmoFrame);
-               tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
-               tempFramePose3D.getPosition().add(planarMotion);
-               tempFramePose3D.changeFrame(parentReferenceFrame);
-               tempFramePose3D.get(transformToParent);
-               closestCollision.add(planarMotion);
-            }
-            else // yaw dragging
-            {
-               if (clockFaceDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z, controlRingPose))
-               {
-                  tempFramePose3D.setToZero(gizmoFrame);
-                  tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
-                  clockFaceDragAlgorithm.getMotion().transform(tempFramePose3D.getOrientation());
-                  tempFramePose3D.changeFrame(parentReferenceFrame);
-                  tempFramePose3D.get(transformToParent);
-               }
-            }
+            float deltaScroll = input.getMouseWheelDelta();
+            // Add some noise to not get stuck in discrete space
+            double noise = random.nextDouble() * 0.005;
+            double speed = 0.012 + noise;
+            frameBasedGizmoModification.yawInWorld(Math.signum(deltaScroll) * speed * Math.PI);
          }
 
-         if (isWindowHovered)
+         // keyboard based controls
+         boolean upArrowHeld = ImGui.isKeyDown(ImGuiTools.getUpArrowKey());
+         boolean downArrowHeld = ImGui.isKeyDown(ImGuiTools.getDownArrowKey());
+         boolean leftArrowHeld = ImGui.isKeyDown(ImGuiTools.getLeftArrowKey());
+         boolean rightArrowHeld = ImGui.isKeyDown(ImGuiTools.getRightArrowKey());
+         boolean anyArrowHeld = upArrowHeld || downArrowHeld || leftArrowHeld || rightArrowHeld;
+         if (anyArrowHeld)
          {
-            // keyboard based controls
-            boolean upArrowHeld = ImGui.isKeyDown(ImGuiTools.getUpArrowKey());
-            boolean downArrowHeld = ImGui.isKeyDown(ImGuiTools.getDownArrowKey());
-            boolean leftArrowHeld = ImGui.isKeyDown(ImGuiTools.getLeftArrowKey());
-            boolean rightArrowHeld = ImGui.isKeyDown(ImGuiTools.getRightArrowKey());
-            boolean anyArrowHeld = upArrowHeld || downArrowHeld || leftArrowHeld || rightArrowHeld;
-            isNewlyModified |= anyArrowHeld;
             boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
             boolean altHeld = ImGui.getIO().getKeyAlt();
             boolean shiftHeld = ImGui.getIO().getKeyShift();
@@ -305,106 +337,119 @@ public class RDXPathControlRingGizmo implements RenderableProvider
             if (altHeld) // orientation
             {
                double amount = deltaTime * (shiftHeld ? 0.2 : 1.0);
+               Orientation3DBasics orientationToAdjust = frameBasedGizmoModification.beforeForRotationAdjustment();
                if (leftArrowHeld) // yaw +
                {
-                  transformToParent.getRotation().appendYawRotation(amount);
+                  orientationToAdjust.appendYawRotation(amount);
                }
                if (rightArrowHeld) // yaw -
                {
-                  transformToParent.getRotation().appendYawRotation(-amount);
+                  orientationToAdjust.appendYawRotation(-amount);
                }
+               frameBasedGizmoModification.afterRotationAdjustment(FrameBasedGizmoModification.PREPEND);
             }
-            else if (anyArrowHeld) // translation (only the arrow keys do the moving)
+            else // translation
             {
-               transformFromKeyboardTransformationToWorld.setToZero();
-               transformFromKeyboardTransformationToWorld.getRotation().setToYawOrientation(camera3D.getFocusPointPose().getYaw());
-               keyboardTransformationFrame.getReferenceFrame().update();
-               tempFramePose3D.setToZero(keyboardTransformationFrame.getReferenceFrame());
 
                double amount = deltaTime * (shiftHeld ? 0.05 : 0.4);
+               Point3DBasics positionToAdjust = frameBasedGizmoModification.beforeForTranslationAdjustment();
                if (upArrowHeld && !ctrlHeld) // x +
                {
-                  tempFramePose3D.getPosition().addX(getTranslateSpeedFactor() * amount);
+                  positionToAdjust.addX(getTranslateSpeedFactor() * amount);
                }
                if (downArrowHeld && !ctrlHeld) // x -
                {
-                  tempFramePose3D.getPosition().subX(getTranslateSpeedFactor() * amount);
+                  positionToAdjust.subX(getTranslateSpeedFactor() * amount);
                }
                if (leftArrowHeld) // y +
                {
-                  tempFramePose3D.getPosition().addY(getTranslateSpeedFactor() * amount);
+                  positionToAdjust.addY(getTranslateSpeedFactor() * amount);
                }
                if (rightArrowHeld) // y -
                {
-                  tempFramePose3D.getPosition().subY(getTranslateSpeedFactor() * amount);
+                  positionToAdjust.subY(getTranslateSpeedFactor() * amount);
                }
                if (upArrowHeld && ctrlHeld) // z +
                {
-                  tempFramePose3D.getPosition().addZ(getTranslateSpeedFactor() * amount);
+                  positionToAdjust.addZ(getTranslateSpeedFactor() * amount);
                }
                if (downArrowHeld && ctrlHeld) // z -
                {
-                  tempFramePose3D.getPosition().subZ(getTranslateSpeedFactor() * amount);
+                  positionToAdjust.subZ(getTranslateSpeedFactor() * amount);
                }
-
-               tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
-               tempFramePose3D.get(tempTransform);
-               transformToParent.getTranslation().add(tempTransform.getTranslation());
             }
+
+            frameBasedGizmoModification.setAdjustmentNeedsToBeApplied();
          }
       }
 
       // after things have been modified, update the derivative stuff
-      updateTransforms();
+      update();
+   }
 
-      LibGDXTools.toEuclid(camera3D.position, cameraPosition);
-      distanceToCamera = cameraPosition.distance(controlRingPose.getPosition());
-      if (lastDistanceToCamera != distanceToCamera)
+   private void renderTooltipAndContextMenu()
+   {
+      if (queuePopupToOpen)
       {
-         lastDistanceToCamera = distanceToCamera;
-         recreateGraphics();
-         updateTransforms();
+         queuePopupToOpen = false;
+
+         ImGui.openPopup(labels.get("Popup"));
+      }
+
+      if (ImGui.beginPopup(labels.get("Popup")))
+      {
+         renderImGuiTuner();
+         if (ImGui.menuItem("Close"))
+            ImGui.closeCurrentPopup();
+         ImGui.endPopup();
       }
    }
 
-   public void updateTransforms()
+   /** Call this instead of calculate3DViewPick and process3DViewInput if the gizmo is deactivated. */
+   public void update()
    {
+      if (frameBasedGizmoModification.applyAdjustmentIfNeeded(transformToParent))
+      {
+         gizmoModifiedByUser.set();
+      }
+
       gizmoFrame.update();
-      // keeping the gizmo on the X-Y plane
-      tempFramePose3D.setToZero(gizmoFrame);
-      tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
-      tempFramePose3D.getOrientation().setToYawOrientation(tempFramePose3D.getOrientation().getYaw());
-      tempFramePose3D.changeFrame(parentReferenceFrame);
-      tempFramePose3D.get(transformToParent);
-      gizmoFrame.update();
-      controlRingPose.setToZero(gizmoFrame);
-      controlRingPose.changeFrame(ReferenceFrame.getWorldFrame());
-      controlRingPose.get(controlRingTransformToWorld);
-      LibGDXTools.toLibGDX(controlRingTransformToWorld, discModel.getOrCreateModelInstance().transform);
-      LibGDXTools.toLibGDX(controlRingTransformToWorld, positiveXArrowModel.getOrCreateModelInstance().transform);
-      LibGDXTools.toLibGDX(controlRingTransformToWorld, positiveYArrowModel.getOrCreateModelInstance().transform);
-      LibGDXTools.toLibGDX(controlRingTransformToWorld, negativeXArrowModel.getOrCreateModelInstance().transform);
-      LibGDXTools.toLibGDX(controlRingTransformToWorld, negativeYArrowModel.getOrCreateModelInstance().transform);
+      frameBasedGizmoModification.setToZeroGizmoFrame();
+
+      framePose3D.setToZero(gizmoFrame);
+      framePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+      framePose3D.get(transformToWorld);
+      updateGraphicTransforms();
+      LibGDXTools.toEuclid(camera3D.position, cameraPosition);
+      distanceToCamera = cameraPosition.distance(framePose3D.getPosition());
+
+      if (proportionsNeedUpdate)
+      {
+         proportionsNeedUpdate = false;
+         recreateGraphics();
+      }
+   }
+
+   private void updateGraphicTransforms()
+   {
+      LibGDXTools.toLibGDX(transformToWorld, discModel.getOrCreateModelInstance().transform);
+      LibGDXTools.toLibGDX(transformToWorld, positiveXArrowModel.getOrCreateModelInstance().transform);
+      LibGDXTools.toLibGDX(transformToWorld, positiveYArrowModel.getOrCreateModelInstance().transform);
+      LibGDXTools.toLibGDX(transformToWorld, negativeXArrowModel.getOrCreateModelInstance().transform);
+      LibGDXTools.toLibGDX(transformToWorld, negativeYArrowModel.getOrCreateModelInstance().transform);
    }
 
    private void determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay)
    {
-      hollowCylinderIntersects = false;
-      positiveXArrowIntersects = false;
-      positiveYArrowIntersects = false;
-      negativeXArrowIntersects = false;
-      negativeYArrowIntersects = false;
-      closestCollisionSelection = -1;
+      closestCollisionSelection = null;
       closestCollisionDistance = Double.POSITIVE_INFINITY;
 
-      hollowCylinderIntersection.update(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), discThickness.get() / 2.0,
-                                        controlRingTransformToWorld);
+      hollowCylinderIntersection.update(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), discThickness.get() / 2.0, transformToWorld);
       double distance = hollowCylinderIntersection.intersect(pickRay);
       if (!Double.isNaN(distance) && distance < closestCollisionDistance)
       {
-         hollowCylinderIntersects = true;
          closestCollisionDistance = distance;
-         closestCollisionSelection = 0;
+         closestCollisionSelection = RING;
          closestCollision.set(hollowCylinderIntersection.getClosestIntersection());
       }
       if (showArrows)
@@ -413,30 +458,28 @@ public class RDXPathControlRingGizmo implements RenderableProvider
                                            arrowHeight.get(),
                                            discThickness.get(),
                                            new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, discThickness.get() / 2.0),
-                                           new YawPitchRoll(-QUARTER_TURN, 0.0, -QUARTER_TURN), controlRingTransformToWorld);
+                                           new YawPitchRoll(-QUARTER_TURN, 0.0, -QUARTER_TURN), transformToWorld);
          distance = positiveXArrowIntersection.intersect(pickRay, 100);
          if (!Double.isNaN(distance) && distance < closestCollisionDistance)
          {
-            positiveXArrowIntersects = true;
             closestCollisionDistance = distance;
-            closestCollisionSelection = 1;
+            closestCollisionSelection = POSITIVE_X_ARROW;
             closestCollision.set(positiveXArrowIntersection.getClosestIntersection());
          }
          positiveYArrowIntersection.update(arrowWidth.get(),
                                            arrowHeight.get(),
                                            discThickness.get(),
                                            new Point3D(0.0, discOuterRadius.get() + arrowSpacing.get(), discThickness.get() / 2.0),
-                                           new YawPitchRoll(0.0, 0.0, -QUARTER_TURN), controlRingTransformToWorld);
+                                           new YawPitchRoll(0.0, 0.0, -QUARTER_TURN), transformToWorld);
          distance = positiveYArrowIntersection.intersect(pickRay, 100);
          if (!Double.isNaN(distance) && distance < closestCollisionDistance)
          {
-            positiveYArrowIntersects = true;
             closestCollisionDistance = distance;
-            closestCollisionSelection = 2;
+            closestCollisionSelection = POSITIVE_Y_ARROW;
             closestCollision.set(positiveYArrowIntersection.getClosestIntersection());
          }
          temporaryTailTransform.set(xArrowTailTransform);
-         controlRingTransformToWorld.transform(temporaryTailTransform);
+         transformToWorld.transform(temporaryTailTransform);
          boolean intersects = negativeXArrowIntersection.intersect(arrowTailWidthRatio.get() * arrowWidth.get(),
                                                                    arrowTailLengthRatio.get() * arrowHeight.get(),
                                                                    discThickness.get(),
@@ -445,13 +488,12 @@ public class RDXPathControlRingGizmo implements RenderableProvider
          distance = negativeXArrowIntersection.getFirstIntersectionToPack().distance(pickRay.getPoint());
          if (intersects && distance < closestCollisionDistance)
          {
-            negativeXArrowIntersects = true;
             closestCollisionDistance = distance;
-            closestCollisionSelection = 3;
+            closestCollisionSelection = NEGATIVE_X_ARROW;
             closestCollision.set(negativeXArrowIntersection.getFirstIntersectionToPack());
          }
          temporaryTailTransform.set(yArrowTailTransform);
-         controlRingTransformToWorld.transform(temporaryTailTransform);
+         transformToWorld.transform(temporaryTailTransform);
          intersects = negativeYArrowIntersection.intersect(arrowTailWidthRatio.get() * arrowWidth.get(),
                                                            arrowTailLengthRatio.get() * arrowHeight.get(),
                                                            discThickness.get(),
@@ -460,9 +502,8 @@ public class RDXPathControlRingGizmo implements RenderableProvider
          distance = negativeYArrowIntersection.getFirstIntersectionToPack().distance(pickRay.getPoint());
          if (intersects && distance < closestCollisionDistance)
          {
-            negativeYArrowIntersects = true;
             closestCollisionDistance = distance;
-            closestCollisionSelection = 4;
+            closestCollisionSelection = NEGATIVE_Y_ARROW;
             closestCollision.set(negativeYArrowIntersection.getFirstIntersectionToPack());
          }
       }
@@ -473,11 +514,11 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private void updateMaterialHighlighting()
    {
       boolean prior = highlightingEnabled && isGizmoHovered;
-      discModel.setMaterial(prior && closestCollisionSelection == 0 ? highlightedMaterial : normalMaterial);
-      positiveXArrowModel.setMaterial(prior && closestCollisionSelection == 1 ? highlightedMaterial : normalMaterial);
-      positiveYArrowModel.setMaterial(prior && closestCollisionSelection == 2 ? highlightedMaterial : normalMaterial);
-      negativeXArrowModel.setMaterial(prior && closestCollisionSelection == 3 ? highlightedMaterial : normalMaterial);
-      negativeYArrowModel.setMaterial(prior && closestCollisionSelection == 4 ? highlightedMaterial : normalMaterial);
+      discModel.setMaterial(prior && closestCollisionSelection == RING ? highlightedMaterial : normalMaterial);
+      positiveXArrowModel.setMaterial(prior && closestCollisionSelection == POSITIVE_X_ARROW ? highlightedMaterial : normalMaterial);
+      positiveYArrowModel.setMaterial(prior && closestCollisionSelection == POSITIVE_Y_ARROW ? highlightedMaterial : normalMaterial);
+      negativeXArrowModel.setMaterial(prior && closestCollisionSelection == NEGATIVE_X_ARROW ? highlightedMaterial : normalMaterial);
+      negativeYArrowModel.setMaterial(prior && closestCollisionSelection == NEGATIVE_Y_ARROW ? highlightedMaterial : normalMaterial);
    }
 
    public ImGuiPanel createTunerPanel(String name)
@@ -487,29 +528,33 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    public void renderImGuiTuner()
    {
-      ImGui.text("Use the right mouse button to manipulate the widget.");
+      frameBasedGizmoModification.renderImGuiTunerWidgets();
 
-      if (ImGui.button("Reset"))
+      if (ImGui.collapsingHeader(labels.get("Controls")))
+      {
+         ImGui.text("Use the left mouse drag on the ring to move the gizmo around on its X-Y plane.");
+         ImGui.text("Use the right mouse drag on the ring to adjust the yaw.");
+         // TODO: Add keyboard & scroll wheel controls
+      }
+
+      if (ImGui.button(labels.get("Reset")))
       {
          transformToParent.setToZero();
       }
 
-      ImGui.pushItemWidth(100.00f);
-      boolean proportionsChanged = false;
-      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Disc outer radius"), discOuterRadius.getData(), 0.001f, 0.0f, 1000.0f);
-      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Disc inner radius"), discInnerRadius.getData(), 0.001f, 0.0f, 1000.0f);
-      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Disc thickness"), discThickness.getData(), 0.001f, 0.0f, 1000.0f);
-      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow width"), arrowWidth.getData(), 0.001f, 0.0f, 1000.0f);
-      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow height"), arrowHeight.getData(), 0.001f, 0.0f, 1000.0f);
-      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow spacing"), arrowSpacing.getData(), 0.001f, 0.0f, 1000.0f);
-      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow tail width ratio"), arrowTailWidthRatio.getData(), 0.001f, 0.0f, 1000.0f);
-      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow tail length ratio"), arrowTailLengthRatio.getData(), 0.001f, 0.0f, 1000.0f);
-      ImGui.popItemWidth();
-
-      if (proportionsChanged)
-         recreateGraphics();
-
-      updateTransforms();
+      if (ImGui.collapsingHeader(labels.get("Visual options")))
+      {
+         ImGui.pushItemWidth(100.00f);
+         proportionsNeedUpdate |= ImGui.dragFloat(labels.get("Disc outer radius"), discOuterRadius.getData(), 0.001f, 0.0f, 1000.0f);
+         proportionsNeedUpdate |= ImGui.dragFloat(labels.get("Disc inner radius"), discInnerRadius.getData(), 0.001f, 0.0f, 1000.0f);
+         proportionsNeedUpdate |= ImGui.dragFloat(labels.get("Disc thickness"), discThickness.getData(), 0.001f, 0.0f, 1000.0f);
+         proportionsNeedUpdate |= ImGui.dragFloat(labels.get("Arrow width"), arrowWidth.getData(), 0.001f, 0.0f, 1000.0f);
+         proportionsNeedUpdate |= ImGui.dragFloat(labels.get("Arrow height"), arrowHeight.getData(), 0.001f, 0.0f, 1000.0f);
+         proportionsNeedUpdate |= ImGui.dragFloat(labels.get("Arrow spacing"), arrowSpacing.getData(), 0.001f, 0.0f, 1000.0f);
+         proportionsNeedUpdate |= ImGui.dragFloat(labels.get("Arrow tail width ratio"), arrowTailWidthRatio.getData(), 0.001f, 0.0f, 1000.0f);
+         proportionsNeedUpdate |= ImGui.dragFloat(labels.get("Arrow tail length ratio"), arrowTailLengthRatio.getData(), 0.001f, 0.0f, 1000.0f);
+         ImGui.popItemWidth();
+      }
    }
 
    private void recreateGraphics()
@@ -520,6 +565,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       positiveYArrowModel.invalidateMesh();
       negativeXArrowModel.invalidateMesh();
       negativeYArrowModel.invalidateMesh();
+      updateGraphicTransforms();
    }
 
    @Override
@@ -537,7 +583,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    public Pose3DReadOnly getPose3D()
    {
-      return controlRingPose;
+      return framePose3D;
    }
 
    // TODO: Make this transform the ground truth and give the pose as needed only
@@ -551,40 +597,43 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       return gizmoFrame;
    }
 
-   public boolean getAnyPartPickSelected()
+   public boolean getAnyPartHovered()
    {
-      return isGizmoHovered
-             && (hollowCylinderIntersects || positiveXArrowIntersects || positiveYArrowIntersects || negativeXArrowIntersects || negativeYArrowIntersects);
+      return isGizmoHovered;
    }
 
-   public boolean getAnyArrowPickSelected()
+   public boolean getAnyArrowHovered()
    {
-      return isGizmoHovered && (positiveXArrowIntersects || positiveYArrowIntersects || negativeXArrowIntersects || negativeYArrowIntersects);
+      boolean anyArrowHovered = closestCollisionSelection == POSITIVE_X_ARROW;
+      anyArrowHovered |= closestCollisionSelection == POSITIVE_Y_ARROW;
+      anyArrowHovered |= closestCollisionSelection == NEGATIVE_X_ARROW;
+      anyArrowHovered |= closestCollisionSelection == NEGATIVE_Y_ARROW;
+      return isGizmoHovered && anyArrowHovered;
    }
 
-   public boolean getHollowCylinderPickSelected()
+   public boolean getRingHovered()
    {
-      return isGizmoHovered && hollowCylinderIntersects;
+      return isGizmoHovered && closestCollisionSelection == RING;
    }
 
-   public boolean getPositiveXArrowPickSelected()
+   public boolean getPositiveXArrowHovered()
    {
-      return isGizmoHovered && positiveXArrowIntersects;
+      return isGizmoHovered && closestCollisionSelection == POSITIVE_X_ARROW;
    }
 
-   public boolean getPositiveYArrowPickSelected()
+   public boolean getPositiveYArrowHovered()
    {
-      return isGizmoHovered && positiveYArrowIntersects;
+      return isGizmoHovered && closestCollisionSelection == POSITIVE_Y_ARROW;
    }
 
-   public boolean getNegativeXArrowPickSelected()
+   public boolean getNegativeXArrowHovered()
    {
-      return isGizmoHovered && negativeXArrowIntersects;
+      return isGizmoHovered && closestCollisionSelection == NEGATIVE_X_ARROW;
    }
 
-   public boolean getNegativeYArrowPickSelected()
+   public boolean getNegativeYArrowHovered()
    {
-      return isGizmoHovered && negativeYArrowIntersects;
+      return isGizmoHovered && closestCollisionSelection == NEGATIVE_Y_ARROW;
    }
 
    public void setShowArrows(boolean showArrows)
@@ -602,13 +651,8 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       this.highlightingEnabled = highlightingEnabled;
    }
 
-   public boolean isNewlyModified()
+   public Notification getGizmoModifiedByUser()
    {
-      return isNewlyModified;
-   }
-
-   public boolean getGizmoHovered()
-   {
-      return isGizmoHovered;
+      return gizmoModifiedByUser;
    }
 }
