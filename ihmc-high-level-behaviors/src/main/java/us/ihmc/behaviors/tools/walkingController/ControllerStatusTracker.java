@@ -146,11 +146,6 @@ public class ControllerStatusTracker
       return isWalking;
    }
 
-   public Notification getFinishedWalkingNotification()
-   {
-      return finishedWalkingNotification;
-   }
-
    public boolean isInWalkingState()
    {
       return capturabilityBasedStatusTimer.isRunning(CAPTURABILITY_BASED_STATUS_EXPIRATION_TIME);
@@ -176,5 +171,15 @@ public class ControllerStatusTracker
    public WalkingFootstepTracker getFootstepTracker()
    {
       return footstepTracker;
+   }
+
+   public void checkControllerIsRunning()
+   {
+      boolean controllerIsRunning = robotConfigurationDataTimer.isRunning(CAPTURABILITY_BASED_STATUS_EXPIRATION_TIME);
+
+      if (!controllerIsRunning)
+      {
+         reset();
+      }
    }
 }
