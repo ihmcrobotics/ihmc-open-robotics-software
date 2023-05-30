@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
+import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.controllerAPI.EndToEndHandFingerTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -25,10 +25,10 @@ import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimOneDoFJointBa
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.fingers.ValkyrieFingerControlParameters;
-import us.ihmc.valkyrie.fingers.ValkyrieFingerMotorName;
-import us.ihmc.valkyrie.fingers.ValkyrieHandFingerTrajectoryMessageConversion;
-import us.ihmc.valkyrie.fingers.ValkyrieHandJointName;
+import us.ihmc.valkyrie.fingers.valkyrieHand.ValkyrieFingerControlParameters;
+import us.ihmc.valkyrie.fingers.valkyrieHand.ValkyrieHandFingerTrajectoryMessageConversion;
+import us.ihmc.valkyrie.fingers.valkyrieHand.ValkyrieHandModel.ValkyrieFingerMotorName;
+import us.ihmc.valkyrie.fingers.valkyrieHand.ValkyrieHandModel.ValkyrieHandJointName;
 
 public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHandFingerTrajectoryMessageTest
 {

@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.drcRobot.SimulationLowLevelControllerFactory;
+import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityIOHelper;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
@@ -38,6 +39,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -53,7 +55,6 @@ import us.ihmc.valkyrie.behaviors.ValkyrieLookAndStepParameters;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.diagnostic.ValkyrieDiagnosticParameters;
 import us.ihmc.valkyrie.fingers.SimulatedValkyrieHandFingerControlThread;
-import us.ihmc.valkyrie.fingers.ValkyrieHandModel;
 import us.ihmc.valkyrie.parameters.ValkyrieCoPTrajectoryParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieCollisionBoxProvider;
 import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
@@ -79,6 +80,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private final String[] resourceDirectories = {"models/", "models/gazebo/", "models/val_description/", "models/val_description/urdf/"};
 
    private final ValkyrieRobotVersion robotVersion;
+   private final SideDependentList<HandModel> handModels = new SideDependentList<>();
    private final RobotTarget target;
 
    private double controllerDT;
@@ -123,6 +125,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       this.target = target;
       this.robotVersion = robotVersion;
+      handModels.set(side -> robotVersion.getDefaultHandModel(side));
 
       controllerDT = 0.004;
       estimatorDT = 0.002;
@@ -275,6 +278,13 @@ public class ValkyrieRobotModel implements DRCRobotModel
       }
    }
 
+   public void setCustomHandModels(SideDependentList<? extends HandModel> handModels)
+   {
+      if (robotDefinition != null)
+         throw new IllegalArgumentException("Cannot set customHandModel once robotDefinition has been created.");
+      this.handModels.set(side -> handModels.get(side));
+   }
+
    /**
     * Scale to apply to the robot mass.
     *
@@ -399,14 +409,10 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return valkyrieInitialSetup;
    }
 
-   public ValkyrieHandModel getHandModel()
+   @Override
+   public HandModel getHandModel(RobotSide side)
    {
-      return getHandModel(null);
-   }
-
-   public ValkyrieHandModel getHandModel(RobotSide side)
-   {
-      return new ValkyrieHandModel();
+      return handModels.get(side);
    }
 
    @Override
@@ -502,6 +508,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
          return null;
 
       return new SimulatedValkyrieHandFingerControlThread(createFullRobotModel(),
+                                                          handModels,
                                                           realtimeROS2Node,
                                                           ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
                                                           ROS2Tools.getControllerInputTopic(getSimpleRobotName()));

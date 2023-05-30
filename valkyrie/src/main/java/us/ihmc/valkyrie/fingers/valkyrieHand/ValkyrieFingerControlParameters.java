@@ -1,9 +1,11 @@
-package us.ihmc.valkyrie.fingers;
+package us.ihmc.valkyrie.fingers.valkyrieHand;
 
 import java.util.EnumMap;
 
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.valkyrie.fingers.valkyrieHand.ValkyrieHandModel.ValkyrieFingerMotorName;
+import us.ihmc.valkyrie.fingers.valkyrieHand.ValkyrieHandModel.ValkyrieHandJointName;
 
 public class ValkyrieFingerControlParameters
 {

@@ -1,10 +1,11 @@
-package us.ihmc.valkyrie.fingers;
+package us.ihmc.valkyrie.fingers.valkyrieHand;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.valkyrie.fingers.valkyrieHand.ValkyrieHandModel.ValkyrieFingerMotorName;
 
 /**
  * This class converts desired HandConfiguration into a ValkyrieHandFingerTrajectoryMessage.

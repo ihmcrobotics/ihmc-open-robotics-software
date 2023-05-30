@@ -1,11 +1,12 @@
 package us.ihmc.valkyrie.configuration;
 
+import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.valkyrie.fingers.ValkyrieHandVersion;
+
 public enum ValkyrieRobotVersion
 {
-   DEFAULT,
-   FINGERLESS,
-   ARM_MASS_SIM,
-   ARMLESS;
+   DEFAULT, FINGERLESS, ARM_MASS_SIM, ARMLESS;
 
    public static final String ROBOT_VERSION_ENVIRONMENT_VARIABLE_NAME = "IHMC_VALKYRIE_ROBOT_VERSION";
 
@@ -27,7 +28,7 @@ public enum ValkyrieRobotVersion
 
    public String getRealRobotURDFFile()
    {
-      switch(this)
+      switch (this)
       {
          case DEFAULT:
             return "models/valkyrie_sim.urdf";
@@ -44,7 +45,7 @@ public enum ValkyrieRobotVersion
 
    public String getSimURDFFile()
    {
-      switch(this)
+      switch (this)
       {
          case DEFAULT:
             return "models/valkyrie_sim.urdf";
@@ -61,7 +62,7 @@ public enum ValkyrieRobotVersion
 
    public boolean hasArms()
    {
-      switch(this)
+      switch (this)
       {
          case DEFAULT:
          case FINGERLESS:
@@ -76,7 +77,7 @@ public enum ValkyrieRobotVersion
 
    public boolean hasFingers()
    {
-      switch(this)
+      switch (this)
       {
          case DEFAULT:
             return true;
@@ -102,5 +103,21 @@ public enum ValkyrieRobotVersion
          default:
             throw new RuntimeException("ValkyrieRobotVersion: Unimplemented enumeration case : " + this);
       }
+   }
+
+   public ValkyrieHandVersion getHandVersion(RobotSide robotSide)
+   {
+      switch (this)
+      {
+         case DEFAULT:
+            return ValkyrieHandVersion.Valkyrie;
+         default:
+            return ValkyrieHandVersion.None;
+      }
+   }
+
+   public HandModel getDefaultHandModel(RobotSide robotSide)
+   {
+      return getHandVersion(robotSide).getHandModel();
    }
 }

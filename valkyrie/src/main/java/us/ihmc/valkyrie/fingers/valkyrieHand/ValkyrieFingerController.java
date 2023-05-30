@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie.fingers;
+package us.ihmc.valkyrie.fingers.valkyrieHand;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -17,6 +17,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.valkyrie.fingers.valkyrieHand.ValkyrieHandModel.ValkyrieFingerMotorName;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlFingerStateEstimator;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -33,8 +34,11 @@ public class ValkyrieFingerController implements RobotController
    private final SideDependentList<ValkyrieHandFingerTrajectoryMessageSubscriber> valkyrieHandFingerTrajectoryMessageSubscribers = new SideDependentList<>();
    private final SideDependentList<ValkyrieFingerSetController> fingerSetControllers = new SideDependentList<>();
 
-   public ValkyrieFingerController(YoDouble yoTime, double controlDT, ValkyrieRosControlFingerStateEstimator fingerStateEstimator,
-                                   List<YoEffortJointHandleHolder> jointHandles, YoRegistry parentRegistry)
+   public ValkyrieFingerController(YoDouble yoTime,
+                                   double controlDT,
+                                   ValkyrieRosControlFingerStateEstimator fingerStateEstimator,
+                                   List<YoEffortJointHandleHolder> jointHandles,
+                                   YoRegistry parentRegistry)
    {
       time = yoTime;
       YoPIDGains thumbRollGains = new YoPIDGains("HandThumbRoll", registry);
@@ -94,10 +98,12 @@ public class ValkyrieFingerController implements RobotController
       for (RobotSide robotSide : RobotSide.values)
       {
          ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
-                                                       HandDesiredConfigurationMessage.class, ROS2Tools.getControllerInputTopic(robotName),
+                                                       HandDesiredConfigurationMessage.class,
+                                                       ROS2Tools.getControllerInputTopic(robotName),
                                                        handDesiredConfigurationMessageSubscribers.get(robotSide));
          ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
-                                                       ValkyrieHandFingerTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName),
+                                                       ValkyrieHandFingerTrajectoryMessage.class,
+                                                       ROS2Tools.getControllerInputTopic(robotName),
                                                        valkyrieHandFingerTrajectoryMessageSubscribers.get(robotSide));
       }
    }
@@ -144,7 +150,8 @@ public class ValkyrieFingerController implements RobotController
       {
          if (handDesiredConfigurationMessageSubscribers.get(robotSide).isNewDesiredConfigurationAvailable())
          {
-            HandConfiguration handDesiredConfiguration = HandConfiguration.fromByte(handDesiredConfigurationMessageSubscribers.get(robotSide).pollMessage()
+            HandConfiguration handDesiredConfiguration = HandConfiguration.fromByte(handDesiredConfigurationMessageSubscribers.get(robotSide)
+                                                                                                                              .pollMessage()
                                                                                                                               .getDesiredHandConfiguration());
             ValkyrieFingerSetController controller = fingerSetControllers.get(robotSide);
             if (controller == null)

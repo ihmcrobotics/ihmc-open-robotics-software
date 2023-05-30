@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie.fingers;
+package us.ihmc.valkyrie.fingers.valkyrieHand;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -42,7 +42,10 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
       JOINTSPACE
    }
 
-   public ValkyrieFingerSetTrajectoryGenerator(Class<T> enumType, RobotSide robotSide, DoubleProvider yoTime, EnumMap<T, YoDouble> fingerControlSpaceMap,
+   public ValkyrieFingerSetTrajectoryGenerator(Class<T> enumType,
+                                               RobotSide robotSide,
+                                               DoubleProvider yoTime,
+                                               EnumMap<T, YoDouble> fingerControlSpaceMap,
                                                YoRegistry parentRegistry)
    {
       this.robotSide = robotSide;
@@ -111,11 +114,16 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
    }
 
    /**
-    *  setting up joint trajectory is in order of methods,
-    *  <p>clearTrajectories()
-    *  <p>setDelay() <- optional
-    *  <p>appendWayPoint() or appendStopPoint()
-    *  <p>executeTrajectories()
+    * setting up joint trajectory is in order of methods,
+    * <p>
+    * clearTrajectories()
+    * <p>
+    * setDelay() <- optional
+    * <p>
+    * appendWayPoint() or appendStopPoint()
+    * <p>
+    * executeTrajectories()
+    * 
     * @author shadylady
     */
    private class JointSpaceState implements State

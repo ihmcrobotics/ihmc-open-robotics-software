@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie.fingers;
+package us.ihmc.valkyrie.fingers.psyonicHand;
 
 import com.google.common.base.CaseFormat;
 

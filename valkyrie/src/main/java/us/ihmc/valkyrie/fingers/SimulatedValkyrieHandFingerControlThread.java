@@ -4,16 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.avatar.AvatarSimulatedHandControlThread;
+import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commons.Conversions;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.valkyrie.fingers.valkyrieHand.SimulatedValkyrieSingleHandFingerController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -36,6 +37,7 @@ public class SimulatedValkyrieHandFingerControlThread implements AvatarSimulated
    private final List<OneDoFJointBasics> controlledFingerJoints = new ArrayList<>();
 
    public SimulatedValkyrieHandFingerControlThread(FullHumanoidRobotModel fullRobotModel,
+                                                   SideDependentList<HandModel> handModels,
                                                    RealtimeROS2Node realtimeROS2Node,
                                                    ROS2Topic<?> outputTopic,
                                                    ROS2Topic<?> inputTopic)
@@ -44,7 +46,7 @@ public class SimulatedValkyrieHandFingerControlThread implements AvatarSimulated
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         SubtreeStreams.fromChildren(OneDoFJointBasics.class, fullRobotModel.getHand(robotSide)).forEach(controlledFingerJoints::add);
+         controlledFingerJoints.addAll(fullRobotModel.getHand(robotSide).subtreeJointList(OneDoFJointBasics.class));
       }
 
       humanoidRobotContextData = new HumanoidRobotContextData(controlledFingerJoints);

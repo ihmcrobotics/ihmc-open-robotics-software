@@ -35,8 +35,12 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
                                                                                       getRobotSidePrefix(RobotSide.RIGHT) + "Foot");
 
    private final ValkyrieRobotVersion robotVersion;
-   private final LegJointName[] legJoints = {LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE_PITCH,
-         LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL};
+   private final LegJointName[] legJoints = {LegJointName.HIP_YAW,
+                                             LegJointName.HIP_ROLL,
+                                             LegJointName.HIP_PITCH,
+                                             LegJointName.KNEE_PITCH,
+                                             LegJointName.ANKLE_PITCH,
+                                             LegJointName.ANKLE_ROLL};
    private final ArmJointName[] armJoints;
    private final SpineJointName[] spineJoints = {SpineJointName.SPINE_YAW, SpineJointName.SPINE_PITCH, SpineJointName.SPINE_ROLL};
    private final NeckJointName[] neckJoints = {NeckJointName.PROXIMAL_NECK_PITCH, NeckJointName.DISTAL_NECK_YAW, NeckJointName.DISTAL_NECK_PITCH};
@@ -72,8 +76,13 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
       {
          case DEFAULT:
          case FINGERLESS:
-            armJoints = new ArmJointName[] {ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.SHOULDER_YAW, ArmJointName.ELBOW_PITCH,
-                  ArmJointName.ELBOW_ROLL, ArmJointName.WRIST_ROLL, ArmJointName.FIRST_WRIST_PITCH};
+            armJoints = new ArmJointName[] {ArmJointName.SHOULDER_PITCH,
+                                            ArmJointName.SHOULDER_ROLL,
+                                            ArmJointName.SHOULDER_YAW,
+                                            ArmJointName.ELBOW_PITCH,
+                                            ArmJointName.ELBOW_ROLL,
+                                            ArmJointName.WRIST_ROLL,
+                                            ArmJointName.FIRST_WRIST_PITCH};
             break;
          case ARM_MASS_SIM:
             armJoints = new ArmJointName[] {ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.SHOULDER_YAW, ArmJointName.ELBOW_PITCH};
@@ -447,13 +456,16 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
    public String[] getNamesOfJointsUsingOutputEncoder()
    {
       String[] ret = new String[] {
-            //            getLegJointName(RobotSide.LEFT, LegJointName.ANKLE_PITCH),
-            //            getLegJointName(RobotSide.LEFT, LegJointName.ANKLE_ROLL),
-            //            getLegJointName(RobotSide.RIGHT, LegJointName.ANKLE_PITCH),
-            //            getLegJointName(RobotSide.RIGHT, LegJointName.ANKLE_ROLL),
-            getSpineJointName(SpineJointName.SPINE_PITCH), getSpineJointName(SpineJointName.SPINE_ROLL),
-            getArmJointName(RobotSide.LEFT, ArmJointName.WRIST_ROLL), getArmJointName(RobotSide.LEFT, ArmJointName.FIRST_WRIST_PITCH),
-            getArmJointName(RobotSide.RIGHT, ArmJointName.WRIST_ROLL), getArmJointName(RobotSide.RIGHT, ArmJointName.FIRST_WRIST_PITCH),};
+                                   //            getLegJointName(RobotSide.LEFT, LegJointName.ANKLE_PITCH),
+                                   //            getLegJointName(RobotSide.LEFT, LegJointName.ANKLE_ROLL),
+                                   //            getLegJointName(RobotSide.RIGHT, LegJointName.ANKLE_PITCH),
+                                   //            getLegJointName(RobotSide.RIGHT, LegJointName.ANKLE_ROLL),
+                                   getSpineJointName(SpineJointName.SPINE_PITCH),
+                                   getSpineJointName(SpineJointName.SPINE_ROLL),
+                                   getArmJointName(RobotSide.LEFT, ArmJointName.WRIST_ROLL),
+                                   getArmJointName(RobotSide.LEFT, ArmJointName.FIRST_WRIST_PITCH),
+                                   getArmJointName(RobotSide.RIGHT, ArmJointName.WRIST_ROLL),
+                                   getArmJointName(RobotSide.RIGHT, ArmJointName.FIRST_WRIST_PITCH),};
       return ret;
    }
 
