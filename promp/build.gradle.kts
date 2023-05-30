@@ -12,8 +12,10 @@ ihmc {
    configurePublications();
 }
 
+val javaCPPVersion = "1.5.9-20230530.103643-355"
+
 mainDependencies {
-   api("org.bytedeco:javacpp:1.5.9-20230222.151859-137")
+   api("org.bytedeco:javacpp:$javaCPPVersion")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-native-library-loader:2.0.2")
 }
