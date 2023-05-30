@@ -505,8 +505,6 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
    public void submitJointTorqueCommand(JointTorqueCommand command)
    {
-//      if (command.getConstraintType() == ConstraintType.OBJECTIVE || command.getConstraintType() == ConstraintType.EQUALITY)
-//      {
       boolean success = motionQPInputCalculator.convertJointTorqueCommand(command,
                                                                           hasFloatingBase,
                                                                           motionAndRhoQPInput,
@@ -515,24 +513,24 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
                                                                           dynamicsMatrixCalculator.getBodyGravityCoriolisMatrix());
       if (success)
          qpSolver.addQPInput(motionAndRhoQPInput, MOTION_AND_RHO);
-//      }
-//      else
-//      {
-//         DMatrixRMaj matToMod;
-//         if (command.getConstraintType() == ConstraintType.GEQ_INEQUALITY)
-//            matToMod = customTauMinMatrix;
-//         else
-//            matToMod = customTauMaxMatrix;
-//
-//         for (int jointIdx = 0; jointIdx < command.getNumberOfJoints(); jointIdx++)
-//         {
-//            JointBasics joint = command.getJoint(jointIdx);
-//            if (joint instanceof OneDoFJointBasics)
-//            {
-//               matToMod.set(jointIndexHandler.getOneDoFJointIndex((OneDoFJointBasics) joint), 0, command.getDesiredTorque(jointIdx).get(0, 0));
-//            }
-//         }
-////      }
+      
+      if (command.getConstraintType() == ConstraintType.LEQ_INEQUALITY || command.getConstraintType() == ConstraintType.GEQ_INEQUALITY)
+      {
+         DMatrixRMaj matToMod;
+         if (command.getConstraintType() == ConstraintType.GEQ_INEQUALITY)
+            matToMod = customTauMinMatrix;
+         else
+            matToMod = customTauMaxMatrix;
+
+         for (int jointIdx = 0; jointIdx < command.getNumberOfJoints(); jointIdx++)
+         {
+            JointBasics joint = command.getJoint(jointIdx);
+            if (joint instanceof OneDoFJointBasics)
+            {
+               matToMod.set(jointIndexHandler.getOneDoFJointIndex((OneDoFJointBasics) joint), 0, command.getDesiredTorque(jointIdx).get(0, 0));
+            }
+         }
+      }
    }
 
    public void submitMomentumRateCommand(MomentumRateCommand command)
