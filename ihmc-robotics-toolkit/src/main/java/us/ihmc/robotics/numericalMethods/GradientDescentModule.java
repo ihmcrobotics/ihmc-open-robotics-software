@@ -17,12 +17,17 @@ public class GradientDescentModule
    private SingleQueryFunction function;
    private final int dimension;
    private final TDoubleArrayList initialInput;
+   private long startTime;
+   private double pastQuery;
+   private double newQuery;
+   private TDoubleArrayList pastInput;
 
    // result
    private boolean solved;
    private TDoubleArrayList optimalInput;
    private double optimalQuery;
    private double computationTime;
+   private int iteration = 0;
 
    // params
    private TDoubleArrayList inputUpperLimit;
@@ -117,87 +122,112 @@ public class GradientDescentModule
       reducingStepSizeRatio = value;
    }
 
-   public int run()
+   public void initializeOptimizer()
    {
-      long startTime = System.nanoTime();
+      startTime = System.nanoTime();
       solved = false;
 
-      int iteration = 0;
-      TDoubleArrayList pastInput = new TDoubleArrayList();
+      iteration = 0;
+      pastInput = new TDoubleArrayList();
       for (int i = 0; i < dimension; i++)
          pastInput.add(initialInput.get(i));
 
       optimalQuery = function.getQuery(pastInput);
 
-      double pastQuery = 0;
-      double newQuery = 0;
+      pastQuery = 0;
+      newQuery = 0;
+   }
+
+   /**
+    *
+    * @return whether DeltaThreshold has been reached
+    */
+   public boolean takeOptimizationStep()
+   {
+      long curTime = System.nanoTime();
+      iteration++;
+      pastQuery = optimalQuery;
+
+      double tempSignForPerturb = 1.0;
+      TDoubleArrayList gradient = new TDoubleArrayList();
+      for (int j = 0; j < dimension; j++)
+      {
+         TDoubleArrayList perturbedInput = new TDoubleArrayList();
+         for (int k = 0; k < dimension; k++)
+            perturbedInput.add(pastInput.get(k));
+
+         if (perturbedInput.get(j) == inputUpperLimit.get(j))
+         {
+            tempSignForPerturb = -1.0;
+            if (DEBUG)
+               LogTools.debug("current input is meeting with upper limit");
+         }
+
+         double tempInput = perturbedInput.get(j) + perturb * tempSignForPerturb;
+
+         perturbedInput.replace(j, MathTools.clamp(tempInput, inputLowerLimit.get(j), inputUpperLimit.get(j)));
+
+         double perturbedQuery = function.getQuery(perturbedInput);
+
+         gradient.add((perturbedQuery - pastQuery) / (perturb * tempSignForPerturb));
+      }
+
+      optimalInput.clear();
+      for (int j = 0; j < dimension; j++)
+      {
+         double input = pastInput.get(j) + gradient.get(j) * alpha;
+         optimalInput.add(MathTools.clamp(input, inputLowerLimit.get(j), inputUpperLimit.get(j)));
+      }
+
+      newQuery = function.getQuery(optimalInput);
+      if (DEBUG)
+         LogTools.debug("cur Query " + pastQuery + " new Query " + newQuery);
+
+      if (newQuery > pastQuery)
+      {
+         reduceStepSize();
+         optimalInput.clear();
+         for (int j = 0; j < dimension; j++)
+            optimalInput.add(pastInput.get(j));
+      }
+      else
+      {
+         optimalQuery = newQuery;
+         double delta = Math.abs((pastQuery - optimalQuery) / optimalQuery);
+
+         if (DEBUG)
+         {
+            double iterationComputationTime = Conversions.nanosecondsToSeconds(System.nanoTime() - curTime);
+            LogTools.debug("iterations is " + iteration + " " + optimalQuery + " " + alpha + " " + delta + " " + iterationComputationTime);
+         }
+         if (delta < deltaThreshold)
+            return true;
+      }
+
+      pastInput.clear();
+      for (int j = 0; j < dimension; j++)
+         pastInput.add(optimalInput.get(j));
+
+      return false;
+
+   }
+
+   public boolean optimizerIsFinished()
+   {
+      return (iteration >= maximumIterations);
+   }
+
+
+
+   public int run()
+   {
+      initializeOptimizer();
 
       for (int i = 0; i < maximumIterations; i++)
       {
-         long curTime = System.nanoTime();
-         iteration++;
-         pastQuery = optimalQuery;
-
-         double tempSignForPerturb = 1.0;
-         TDoubleArrayList gradient = new TDoubleArrayList();
-         for (int j = 0; j < dimension; j++)
-         {
-            TDoubleArrayList perturbedInput = new TDoubleArrayList();
-            for (int k = 0; k < dimension; k++)
-               perturbedInput.add(pastInput.get(k));
-
-            if (perturbedInput.get(j) == inputUpperLimit.get(j))
-            {
-               tempSignForPerturb = -1.0;
-               if (DEBUG)
-                  LogTools.debug("current input is meeting with upper limit");
-            }
-
-            double tempInput = perturbedInput.get(j) + perturb * tempSignForPerturb;
-
-            perturbedInput.replace(j, MathTools.clamp(tempInput, inputLowerLimit.get(j), inputUpperLimit.get(j)));
-
-            double perturbedQuery = function.getQuery(perturbedInput);
-
-            gradient.add((perturbedQuery - pastQuery) / (perturb * tempSignForPerturb));
-         }
-
-         optimalInput.clear();
-         for (int j = 0; j < dimension; j++)
-         {
-            double input = pastInput.get(j) + gradient.get(j) * alpha;
-            optimalInput.add(MathTools.clamp(input, inputLowerLimit.get(j), inputUpperLimit.get(j)));
-         }
-
-         newQuery = function.getQuery(optimalInput);
-         if (DEBUG)
-            LogTools.debug("cur Query " + pastQuery + " new Query " + newQuery);
-
-         if (newQuery > pastQuery)
-         {
-            reduceStepSize();
-            optimalInput.clear();
-            for (int j = 0; j < dimension; j++)
-               optimalInput.add(pastInput.get(j));
-         }
-         else
-         {
-            optimalQuery = newQuery;
-            double delta = Math.abs((pastQuery - optimalQuery) / optimalQuery);
-
-            if (DEBUG)
-            {
-               double iterationComputationTime = Conversions.nanosecondsToSeconds(System.nanoTime() - curTime);
-               LogTools.debug("iterations is " + i + " " + optimalQuery + " " + alpha + " " + delta + " " + iterationComputationTime);
-            }
-
-            if (delta < deltaThreshold)
-               break;
-         }
-
-         pastInput.clear();
-         for (int j = 0; j < dimension; j++)
-            pastInput.add(optimalInput.get(j));
+         boolean completed = takeOptimizationStep();
+         if (completed)
+            break;
       }
 
       computationTime = Conversions.nanosecondsToSeconds(System.nanoTime() - startTime);
