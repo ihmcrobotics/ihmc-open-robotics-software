@@ -177,7 +177,7 @@ public class JointTorqueConstraintTest
          double desiredTorqueFromQP = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointTorque(joint);
          //         // Assert joint torque matches requested if it did not exceed the jointTorque Limit
          //                  if (desiredTorqueFromQP <= torqueLimit && desiredTorqueFromQP >= -torqueLimit)
-         Assertions.assertTrue(EuclidCoreTools.epsilonEquals(desiredTorqueFromQP, desiredTorque, 1e-12));
+         Assertions.assertEquals(desiredTorqueFromQP, desiredTorque, 1e-12);
 
          //         // Assert joint torque is less than torque limit
          //         if (desiredTorqueFromQP >= torqueLimit)
