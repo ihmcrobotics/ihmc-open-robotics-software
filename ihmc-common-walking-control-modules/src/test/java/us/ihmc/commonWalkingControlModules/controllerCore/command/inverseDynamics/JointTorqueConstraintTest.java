@@ -73,13 +73,6 @@ public class JointTorqueConstraintTest
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       PoseReferenceFrame controlFrame = new PoseReferenceFrame("controlFrame", link2.getBodyFixedFrame());
 
-//      SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
-//      spatialAccelerationCommand.getSelectionMatrix().setLinearAxisSelection(false, true, false);
-//      spatialAccelerationCommand.getSelectionMatrix().setAngularAxisSelection(false, false, false);
-////      spatialAccelerationCommand.setAsHardConstraint();
-//      spatialAccelerationCommand.setWeight(jointAccelerationWeight);
-//      spatialAccelerationCommand.getDesiredLinearAcceleration().setY(1.0);
-
       WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(0.01,
                                                                                        9.81,
                                                                                        null,
@@ -93,7 +86,6 @@ public class JointTorqueConstraintTest
       JointDesiredOutputList lowLevelControllerCoreOutput = new JointDesiredOutputList(controlledJoints);
 
       FeedbackControlCommandList allPossibleCommands = new FeedbackControlCommandList();
-//      spatialAccelerationCommand.set(elevator, link2);
 
       WholeBodyControllerCore controllerCore = new WholeBodyControllerCore(controlCoreToolbox,
                                                                            new FeedbackControllerTemplate(allPossibleCommands),
@@ -102,13 +94,6 @@ public class JointTorqueConstraintTest
 
       elevator.updateFramesRecursively();
       centerOfMassFrame.update();
-
-//      SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
-//      selectionMatrix.setLinearAxisSelection(false, true, false);
-//      selectionMatrix.setAngularAxisSelection(false, false, false);
-//      DefaultPID3DGains positionGains = new DefaultPID3DGains();
-//      positionGains.setProportionalGains(0.0, 1.0, 0.0);
-//      positionGains.setDerivativeGains(0.0, 1.0, 0.0);
 
       FramePose3D controlFramePose = new FramePose3D(link2.getBodyFixedFrame());
       controlFramePose.setZ(-linkLength / 2.0);
@@ -136,38 +121,32 @@ public class JointTorqueConstraintTest
          joint2.setQd(qd2);
          elevator.updateFramesRecursively();
          controlFrame.setPoseAndUpdate(controlFramePose);
-//         spatialAccelerationCommand.getControlFramePose().setIncludingFrame(controlFramePose);
          jacobianCalculator.reset();
          
          double desiredTorque = EuclidCoreRandomTools.nextDouble(random, 5.0);
          double torqueLimit = EuclidCoreRandomTools.nextDouble(random, 1.0, 10.0);
-         torqueLimit = 0.01;
          OneDoFJointBasics joint = random.nextBoolean() ? joint1 : joint2;
 
          controllerCoreCommand.clear();
          
          // Put an upper and lower bound on the allowable torque in the QP
          JointTorqueCommand jointTorqueConstraintUpper = new JointTorqueCommand();
-//         double jointTorqueConstraintWeight = Double.POSITIVE_INFINITY;
-//         jointTorqueConstraintUpper.addJoint(joint, torqueLimit, jointTorqueConstraintWeight);
          jointTorqueConstraintUpper.addJoint(joint, torqueLimit);
          jointTorqueConstraintUpper.setConstraintType(ConstraintType.LEQ_INEQUALITY);
          
          JointTorqueCommand jointTorqueConstraintLower = new JointTorqueCommand();
-//         jointTorqueConstraintLower.addJoint(joint, -1.0*torqueLimit, jointTorqueConstraintWeight);
          jointTorqueConstraintLower.addJoint(joint, -1.0*torqueLimit);
          jointTorqueConstraintLower.setConstraintType(ConstraintType.GEQ_INEQUALITY);
          
+         // Command a torque (QP should fail if weight is set to infinity)
          JointTorqueCommand jointTorqueCommand = new JointTorqueCommand();
-         double jointTorqueWeight = Double.POSITIVE_INFINITY;
-//         double jointTorqueWeight = 100;
+         // double jointTorqueWeight = Double.POSITIVE_INFINITY;
+         double jointTorqueWeight = 1000000;
          jointTorqueCommand.addJoint(joint, desiredTorque, jointTorqueWeight);
          
          controllerCoreCommand.addInverseDynamicsCommand(jointTorqueCommand);
          controllerCoreCommand.addInverseDynamicsCommand(jointTorqueConstraintLower);
          controllerCoreCommand.addInverseDynamicsCommand(jointTorqueConstraintUpper);
-         
-//         controllerCoreCommand.addInverseDynamicsCommand(spatialAccelerationCommand);
          
          controllerCore.initialize();
          controllerCore.compute(controllerCoreCommand);
@@ -175,26 +154,26 @@ public class JointTorqueConstraintTest
          JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();
          
          double desiredTorqueFromQP = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointTorque(joint);
-         //         // Assert joint torque matches requested if it did not exceed the jointTorque Limit
-         //                  if (desiredTorqueFromQP <= torqueLimit && desiredTorqueFromQP >= -torqueLimit)
-         Assertions.assertEquals(desiredTorqueFromQP, desiredTorque, 1e-12);
 
-         //         // Assert joint torque is less than torque limit
-         //         if (desiredTorqueFromQP >= torqueLimit)
-         //         {
-         //            System.out.println("Iter " + i + ". Upper bound violated. \t QP desired: " + desiredTorqueFromQP + ", \tTorque constraint: " + torqueLimit + ", \tTorque desired: " + desiredTorque);
-         //         }
-         //         if (desiredTorqueFromQP <= -1.0 * torqueLimit)
-         //         {
-         //            System.out.println("Iter " + i + ". Lower bound violated. \t QP desired: " + desiredTorqueFromQP + ", \tTorque constraint: " + -1.0*torqueLimit + ", \tTorque desired: " + desiredTorque);
-//         }
-
-//         Assertions.assertTrue(desiredTorqueFromQP <= torqueLimit);
-//         Assertions.assertTrue(desiredTorqueFromQP >= -1.0 * torqueLimit);
-
-         //         // Desired spatial linear acceleration Y is achievable, check that it's achieved
-         //         DMatrixRMaj spatialAcceleration = computeSpatialAcceleration(jacobianCalculator, lowLevelOneDoFJointDesiredDataHolder, controllerCore.getOutputForRootJoint());
-         //         Assertions.assertTrue(EuclidCoreTools.epsilonEquals(spatialAcceleration.get(4, 0), 1.0, 1e-12));
+         // Assert joint torque is less than torque limit
+         double epsilon = 1e-8; // epsilon 1e-12 is too restrictive, epsilon 1e-8 is really close, depends on jointTorqueWeight
+         if (desiredTorqueFromQP >= torqueLimit + epsilon)
+         {
+            System.out.println("Iter " + i + ". Upper bound violated. \t QP desired: " + desiredTorqueFromQP + ", \tTorque constraint: " + torqueLimit
+                               + ", \tTorque desired: " + desiredTorque);
+         }
+         if (desiredTorqueFromQP <= -1.0 * torqueLimit - epsilon)
+         {
+            System.out.println("Iter " + i + ". Lower bound violated. \t QP desired: " + desiredTorqueFromQP + ", \tTorque constraint: " + -1.0 * torqueLimit
+                               + ", \tTorque desired: " + desiredTorque);
+         }
+         Assertions.assertTrue(desiredTorqueFromQP <= torqueLimit + epsilon);
+         Assertions.assertTrue(desiredTorqueFromQP >= -1.0 * torqueLimit - epsilon);
+         
+         // Assert joint torque matches requested if it did not exceed the torqueLimit
+         double epsilon2 = 1e-5;
+         if (desiredTorque <= torqueLimit + epsilon && desiredTorque >= -torqueLimit - epsilon)
+            Assertions.assertTrue(EuclidCoreTools.epsilonEquals(desiredTorqueFromQP, desiredTorque, epsilon2));
       }
    }
 
