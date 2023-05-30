@@ -50,7 +50,7 @@ public class RDXWalkAction extends RDXBehaviorAction
       referenceFrameLibraryCombo = new ImGuiReferenceFrameLibraryCombo(referenceFrameLibrary);
 
       footstepPlannerGoalGizmo = new RDXPathControlRingGizmo(actionData.getTransformToParent(), ReferenceFrame.getWorldFrame());
-      footstepPlannerGoalGizmo.create(panel3D.getCamera3D());
+      footstepPlannerGoalGizmo.create(panel3D);
       FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
 
       for (RobotSide side : RobotSide.values)
@@ -80,7 +80,7 @@ public class RDXWalkAction extends RDXBehaviorAction
       if (!getSelected().get())
          editGoalFootPoses.forEach(imBoolean -> imBoolean.set(false));
 
-      footstepPlannerGoalGizmo.updateTransforms();
+      footstepPlannerGoalGizmo.update();
       for (RobotSide side : RobotSide.values)
       {
          editGoalFootGizmos.get(side).update();
