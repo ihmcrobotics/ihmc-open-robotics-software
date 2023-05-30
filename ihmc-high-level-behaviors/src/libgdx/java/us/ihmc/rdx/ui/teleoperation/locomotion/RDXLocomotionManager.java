@@ -8,7 +8,6 @@ import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import imgui.ImGui;
-import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -148,7 +147,7 @@ public class RDXLocomotionManager
             bodyPathPlanGraphic.clear();
       }
 
-      if (walkPathControlRing.pollIsNewlyModified())
+      if (walkPathControlRing.getBecomesModifiedNotification().poll())
       {
          legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
          interactableFootstepPlan.clear();

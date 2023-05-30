@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.affordances;
+package us.ihmc.rdx.ui.gizmo;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
@@ -12,7 +12,6 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
-import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 
 /**
  * Adds "selectedness" to a pose 3D gizmo. It's not included in the base class because
