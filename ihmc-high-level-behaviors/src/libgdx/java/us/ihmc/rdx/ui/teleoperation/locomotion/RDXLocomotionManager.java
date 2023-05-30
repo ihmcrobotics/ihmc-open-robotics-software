@@ -8,14 +8,12 @@ import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import imgui.ImGui;
-import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
-import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
@@ -44,7 +42,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  */
 public class RDXLocomotionManager
 {
-   private final IHMCROS2Input<HeightMapMessage> heightMapSubscription;
    private RDXBaseUI baseUI;
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -86,8 +83,6 @@ public class RDXLocomotionManager
 
       walkingParameters = new RDXLocomotionParameters(robotModel.getSimpleRobotName());
       walkingParameters.load();
-
-      heightMapSubscription = ros2Helper.subscribe(PerceptionAPI.HEIGHT_MAP_OUTPUT);
 
       footstepPlanning = new RDXFootstepPlanning(robotModel, walkingParameters, syncedRobot);
 
