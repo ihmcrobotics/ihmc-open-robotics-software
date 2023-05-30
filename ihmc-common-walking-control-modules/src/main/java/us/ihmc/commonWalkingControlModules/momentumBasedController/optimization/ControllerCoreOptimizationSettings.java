@@ -77,6 +77,22 @@ public interface ControllerCoreOptimizationSettings
    {
       return 200.0;
    }
+   
+   /**
+    * Gets the maximum value for the absolute joint torque in the optimization problem.
+    * <p>
+    * This parameter is used in {@link InverseDynamicsOptimizationControlModule} which itself is used
+    * when running the {@link WholeBodyControllerCore} in the
+    * {@link WholeBodyControllerCoreMode#INVERSE_DYNAMICS} mode.
+    * </p>
+    *
+    * @return the maximum joint torque, the returned value has to be in [0,
+    *         {@link Double#POSITIVE_INFINITY}].
+    */
+   default double getMaximumJointTorque()
+   {
+      return 1000.0;
+   }
 
    /**
     * Gets the weight specifying how much high joint jerk values should be penalized in the
@@ -126,6 +142,14 @@ public interface ControllerCoreOptimizationSettings
     *         is {@code false}.
     */
    default boolean areJointTorquesMinimized()
+   {
+      return false;
+   }
+   
+   /**
+    * Whether the given joint's torque limit should be enforced with inequality constraints in the QP.
+    */
+   default boolean isJointTorqueLimitEnforced(String jointName)
    {
       return false;
    }
