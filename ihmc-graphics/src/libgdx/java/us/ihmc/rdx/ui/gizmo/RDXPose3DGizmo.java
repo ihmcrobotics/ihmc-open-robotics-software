@@ -621,6 +621,7 @@ public class RDXPose3DGizmo implements RenderableProvider
       if (ImGui.collapsingHeader(labels.get("Controls")))
       {
          ImGui.text("Drag using the left mouse button to manipulate the gizmo.");
+         // TODO: Add keyboard & scroll wheel controls
       }
 
       if (ImGui.collapsingHeader(labels.get("Visual options")))
