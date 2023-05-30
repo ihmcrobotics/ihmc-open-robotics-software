@@ -24,6 +24,7 @@ public class FrameBasedGizmoModification
    public static final boolean PREPEND = true;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final boolean yawOnly;
    private final Supplier<ReferenceFrame> gizmoFrameSupplier;
    private final Supplier<ReferenceFrame> parentReferenceFrameSupplier;
    private final RDXFocusBasedCamera camera3D;
@@ -51,6 +52,15 @@ public class FrameBasedGizmoModification
                                       Supplier<ReferenceFrame> parentReferenceFrameSupplier,
                                       RDXFocusBasedCamera camera3D)
    {
+      this(gizmoFrameSupplier, parentReferenceFrameSupplier, camera3D, false);
+   }
+
+   public FrameBasedGizmoModification(Supplier<ReferenceFrame> gizmoFrameSupplier,
+                                      Supplier<ReferenceFrame> parentReferenceFrameSupplier,
+                                      RDXFocusBasedCamera camera3D,
+                                      boolean yawOnly)
+   {
+      this.yawOnly = yawOnly;
       this.gizmoFrameSupplier = gizmoFrameSupplier;
       this.parentReferenceFrameSupplier = parentReferenceFrameSupplier;
       this.camera3D = camera3D;
@@ -61,8 +71,16 @@ public class FrameBasedGizmoModification
       positionZImGuiInput = new ImGuiInputDouble("Z", "%.5f");
       rotationStepSizeInput = new ImGuiInputDouble("Rotation step size " + UnitConversions.DEGREE_SYMBOL, "%.5f", 0.5);
       yawImGuiInput = new ImGuiInputDoubleForRotations("Yaw " + UnitConversions.DEGREE_SYMBOL, "%.5f");
-      pitchImGuiInput = new ImGuiInputDoubleForRotations("Pitch " + UnitConversions.DEGREE_SYMBOL, "%.5f");
-      rollImGuiInput = new ImGuiInputDoubleForRotations("Roll " + UnitConversions.DEGREE_SYMBOL, "%.5f");
+      if (!yawOnly)
+      {
+         pitchImGuiInput = new ImGuiInputDoubleForRotations("Pitch " + UnitConversions.DEGREE_SYMBOL, "%.5f");
+         rollImGuiInput = new ImGuiInputDoubleForRotations("Roll " + UnitConversions.DEGREE_SYMBOL, "%.5f");
+      }
+      else
+      {
+         pitchImGuiInput = null;
+         rollImGuiInput = null;
+      }
    }
 
    public void translateInWorld(Vector3DReadOnly translation)
@@ -160,33 +178,45 @@ public class FrameBasedGizmoModification
       rotationStepSizeInput.render(RDXGizmoTools.INITIAL_FINE_ROTATION, RDXGizmoTools.INITIAL_COARSE_ROTATION);
       Orientation3DBasics orientationToPrint = getOrientationInAdjustmentFrame();
       yawImGuiInput.setDoubleValue(Math.toDegrees(orientationToPrint.getYaw()));
-      pitchImGuiInput.setDoubleValue(Math.toDegrees(orientationToPrint.getPitch()));
-      rollImGuiInput.setDoubleValue(Math.toDegrees(orientationToPrint.getRoll()));
+      if (!yawOnly)
+      {
+         pitchImGuiInput.setDoubleValue(Math.toDegrees(orientationToPrint.getPitch()));
+         rollImGuiInput.setDoubleValue(Math.toDegrees(orientationToPrint.getRoll()));
+      }
       yawImGuiInput.render(rotationStepSizeInput.getDoubleValue(), RDXGizmoTools.FINE_TO_COARSE_MULTIPLIER * rotationStepSizeInput.getDoubleValue());
-      pitchImGuiInput.render(rotationStepSizeInput.getDoubleValue(), RDXGizmoTools.FINE_TO_COARSE_MULTIPLIER * rotationStepSizeInput.getDoubleValue());
-      rollImGuiInput.render(rotationStepSizeInput.getDoubleValue(), RDXGizmoTools.FINE_TO_COARSE_MULTIPLIER * rotationStepSizeInput.getDoubleValue());
+      if (!yawOnly)
+      {
+         pitchImGuiInput.render(rotationStepSizeInput.getDoubleValue(), RDXGizmoTools.FINE_TO_COARSE_MULTIPLIER * rotationStepSizeInput.getDoubleValue());
+         rollImGuiInput.render(rotationStepSizeInput.getDoubleValue(), RDXGizmoTools.FINE_TO_COARSE_MULTIPLIER * rotationStepSizeInput.getDoubleValue());
+      }
       boolean inputChanged = yawImGuiInput.getInputChanged();
-      inputChanged |= pitchImGuiInput.getInputChanged();
-      inputChanged |= rollImGuiInput.getInputChanged();
+      if (!yawOnly)
+      {
+         inputChanged |= pitchImGuiInput.getInputChanged();
+         inputChanged |= rollImGuiInput.getInputChanged();
+      }
       adjustmentNeedsToBeApplied |= inputChanged;
       if (inputChanged)
       {
          Orientation3DBasics orientationToAdjust = beforeForRotationAdjustment();
          orientationToAdjust.setYawPitchRoll(Math.toRadians(yawImGuiInput.getDoubleValue()),
-                                             Math.toRadians(pitchImGuiInput.getDoubleValue()),
-                                             Math.toRadians(rollImGuiInput.getDoubleValue()));
+                                             yawOnly ? 0.0 : Math.toRadians(pitchImGuiInput.getDoubleValue()),
+                                             yawOnly ? 0.0 : Math.toRadians(rollImGuiInput.getDoubleValue()));
          afterRotationAdjustment(SET_ABSOLUTE);
       }
       boolean rotationStepped = yawImGuiInput.getStepButtonClicked();
-      rotationStepped |= pitchImGuiInput.getStepButtonClicked();
-      rotationStepped |= rollImGuiInput.getStepButtonClicked();
+      if (!yawOnly)
+      {
+         rotationStepped |= pitchImGuiInput.getStepButtonClicked();
+         rotationStepped |= rollImGuiInput.getStepButtonClicked();
+      }
       adjustmentNeedsToBeApplied |= rotationStepped;
       if (rotationStepped)
       {
          Orientation3DBasics orientationToAdjust = beforeForRotationAdjustment();
          orientationToAdjust.setYawPitchRoll(Math.toRadians(yawImGuiInput.getSteppedAmount()),
-                                             Math.toRadians(pitchImGuiInput.getSteppedAmount()),
-                                             Math.toRadians(rollImGuiInput.getSteppedAmount()));
+                                             yawOnly ? 0.0 : Math.toRadians(pitchImGuiInput.getSteppedAmount()),
+                                             yawOnly ? 0.0 : Math.toRadians(rollImGuiInput.getSteppedAmount()));
          afterRotationAdjustment(PREPEND);
       }
 

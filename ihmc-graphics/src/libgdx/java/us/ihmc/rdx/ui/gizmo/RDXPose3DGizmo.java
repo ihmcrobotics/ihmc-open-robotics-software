@@ -237,7 +237,6 @@ public class RDXPose3DGizmo implements RenderableProvider
                                                                         closestCollision,
                                                                         axisRotations.get(closestCollisionSelection.toAxis3D()),
                                                                         transformToWorld);
-
             frameBasedGizmoModification.translateInWorld(linearMotion);
             closestCollision.add(linearMotion);
          }
