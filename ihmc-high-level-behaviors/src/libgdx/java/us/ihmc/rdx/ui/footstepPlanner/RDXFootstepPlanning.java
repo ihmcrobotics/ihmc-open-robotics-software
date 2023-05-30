@@ -13,6 +13,8 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
@@ -25,13 +27,13 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
-import us.ihmc.tools.thread.Throttler;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -56,6 +58,9 @@ public class RDXFootstepPlanning
    private final AtomicReference<SwingPlannerParametersReadOnly> swingFootPlannerParametersReference = new AtomicReference<>();
    private final AtomicReference<FootstepPlannerOutput> outputReference = new AtomicReference<>();
 
+   private final MovingReferenceFrame midFeetZUpFrame;
+   private final FramePose3D midFeetZUpPose = new FramePose3D();
+   private final FramePose3D startPose = new FramePose3D();
    private final RDXLocomotionParameters locomotionParameters;
 
    private final AtomicBoolean hasNewPlanAvailable = new AtomicBoolean(false);
@@ -71,6 +76,7 @@ public class RDXFootstepPlanning
    {
       this.locomotionParameters = locomotionParameters;
       this.syncedRobot = syncedRobot;
+      midFeetZUpFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
       footstepPlanner.addCustomTerminationCondition(((plannerTime, iterations, bestFinalStep, bestSecondToLastStep, bestPathSize) -> terminatePlan));
       request = new FootstepPlannerRequest();
@@ -170,6 +176,22 @@ public class RDXFootstepPlanning
       }
 
       request.setPlanBodyPath(locomotionParameters.getPlanWithBodyPath());
+
+      // We are not planning the body path
+      // For teleoperation we usually want to stay facing the direction of the goal pose
+      // TODO: Add options and control over this
+      if (!request.getPlanBodyPath())
+      {
+         midFeetZUpPose.setToZero(midFeetZUpFrame);
+         midFeetZUpPose.changeFrame(ReferenceFrame.getWorldFrame());
+         startPose.setToZero(midFeetZUpFrame);
+         startPose.changeFrame(ReferenceFrame.getWorldFrame());
+         startPose.getOrientation().set(goalPose.getOrientation());
+         request.getBodyPathWaypoints().add(midFeetZUpPose);
+         request.getBodyPathWaypoints().add(startPose);
+         request.getBodyPathWaypoints().add(goalPose);
+      }
+
       // TODO: Set start footholds!!
       request.setAssumeFlatGround(assumeFlatGround);
       //      request.setTimeout(lookAndStepParameters.getFootstepPlannerTimeoutWhileStopped());
