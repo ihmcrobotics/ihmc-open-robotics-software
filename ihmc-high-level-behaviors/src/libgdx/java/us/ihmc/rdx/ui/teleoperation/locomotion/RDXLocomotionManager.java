@@ -393,4 +393,9 @@ public class RDXLocomotionManager
    {
       return locomotionParameters;
    }
+
+   public ImGuiStoredPropertySetTuner getLocomotionParametersTuner()
+   {
+      return locomotionParametersTuner;
+   }
 }
