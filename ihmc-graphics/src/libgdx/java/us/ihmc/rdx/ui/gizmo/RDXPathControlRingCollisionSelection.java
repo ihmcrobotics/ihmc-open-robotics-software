@@ -1,5 +1,9 @@
 package us.ihmc.rdx.ui.gizmo;
 
+/**
+ * Used to make the code more readable when doing checks
+ * about the parts of the control ring gizmo.
+ */
 public enum RDXPathControlRingCollisionSelection
 {
    RING,

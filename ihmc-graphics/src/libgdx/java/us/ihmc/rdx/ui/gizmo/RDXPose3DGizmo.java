@@ -49,6 +49,13 @@ import java.util.Random;
 import static us.ihmc.rdx.ui.gizmo.RDXGizmoTools.AXIS_COLORS;
 import static us.ihmc.rdx.ui.gizmo.RDXGizmoTools.AXIS_SELECTED_COLORS;
 
+/**
+ * A gizmo for manipulating a Pose3D in 3D space using
+ * mouse keyboard and monitor (KVM) by clicking and dragging on
+ * the parts of it.
+ *
+ * TODO: Support VR interaction.
+ */
 public class RDXPose3DGizmo implements RenderableProvider
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
