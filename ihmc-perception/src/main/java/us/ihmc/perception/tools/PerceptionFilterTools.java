@@ -1,5 +1,6 @@
 package us.ihmc.perception.tools;
 
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -17,6 +18,24 @@ import java.util.List;
 
 public class PerceptionFilterTools
 {
+   public static void filterCollidingPlanarRegions(FramePlanarRegionsList regionsInSensor, CollidingScanRegionFilter filter)
+   {
+      LogTools.info("Filtering planar regions: {}", regionsInSensor.getPlanarRegionsList().getNumberOfPlanarRegions());
+      int i = 0;
+      while (i < regionsInSensor.getPlanarRegionsList().getNumberOfPlanarRegions())
+      {
+         PlanarRegion regionInWorld = regionsInSensor.getPlanarRegionsList().getPlanarRegion(i).copy();
+         regionInWorld.applyTransform(regionsInSensor.getSensorToWorldFrameTransform());
+         boolean collision = !filter.test(i, regionInWorld);
+         LogTools.info("PlanarRegion {} test result: {}", i, collision);
+         if (collision)
+         {
+            regionsInSensor.getPlanarRegionsList().pollPlanarRegion(i);
+         }
+         else
+            i++;
+      }
+   }
 
    public static void applyCollisionFilter(FramePlanarRegionsList framePlanarRegionsList, CollidingScanRegionFilter collisionFilter)
    {
@@ -27,7 +46,7 @@ public class PerceptionFilterTools
                                                                   .filter(region -> {
                                                                      PlanarRegion regionInWorld = region.copy();
                                                                      regionInWorld.applyTransform(framePlanarRegionsList.getSensorToWorldFrameTransform());
-                                                                     return !collisionFilter.test(0, regionInWorld);
+                                                                     return collisionFilter.test(0, regionInWorld);
                                                                   }).toList();
 
       framePlanarRegionsList.getPlanarRegionsList().clear();
@@ -36,7 +55,7 @@ public class PerceptionFilterTools
 
    public static CollidingScanRegionFilter createHumanoidShinCollisionFilter(FullHumanoidRobotModel fullRobotModel, CollisionBoxProvider collisionBoxProvider)
    {
-         CollisionShapeTester shapeTester = new CollisionShapeTester();
+         CollisionShapeTester shapeTester = new CollisionShapeTester(fullRobotModel, collisionBoxProvider);
          for (RobotSide robotSide : RobotSide.values)
          {
             List<JointBasics> joints = new ArrayList<>();
