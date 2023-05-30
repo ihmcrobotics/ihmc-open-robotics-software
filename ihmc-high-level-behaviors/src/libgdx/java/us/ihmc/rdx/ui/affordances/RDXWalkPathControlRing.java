@@ -156,11 +156,11 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       latestInput = input;
       boolean leftMouseReleasedWithoutDrag = input.isWindowHovered() && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
 
-      boolean previouslyFocused = footstepPlannerGoalGizmo.getFocused();
+      boolean previouslySelected = footstepPlannerGoalGizmo.getSelected();
       footstepPlannerGoalGizmo.process3DViewInput(input);
-      boolean selected = footstepPlannerGoalGizmo.getFocused() && !previouslyFocused;
+      boolean newlySelected = footstepPlannerGoalGizmo.getSelected() && !previouslySelected;
 
-      if (selected)
+      if (newlySelected)
       {
          becomeModified(true);
       }
@@ -169,7 +169,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       {
          updateStuff();
       }
-      if (footstepPlannerGoalGizmo.getFocused() && leftMouseReleasedWithoutDrag)
+      if (footstepPlannerGoalGizmo.getSelected() && leftMouseReleasedWithoutDrag)
       {
          if (footstepPlannerGoalGizmo.getPathControlRingGizmo().getPositiveXArrowHovered())
          {
@@ -198,18 +198,18 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
             queueFootstepPlan();
          }
       }
-      if (footstepPlannerGoalGizmo.getFocused() && footstepPlannerGoalGizmo.getPathControlRingGizmo().getGizmoModifiedByUser().poll())
+      if (footstepPlannerGoalGizmo.getSelected() && footstepPlannerGoalGizmo.getPathControlRingGizmo().getGizmoModifiedByUser().poll())
       {
          queueFootstepPlan();
       }
 
-      if (footstepPlannerGoalGizmo.getModified() && footstepPlannerGoalGizmo.getFocused() && ImGui.isKeyReleased(ImGuiTools.getDeleteKey()))
+      if (footstepPlannerGoalGizmo.getModified() && footstepPlannerGoalGizmo.getSelected() && ImGui.isKeyReleased(ImGuiTools.getDeleteKey()))
       {
          delete();
       }
-      if (footstepPlannerGoalGizmo.getFocused() && ImGui.isKeyReleased(ImGuiTools.getEscapeKey()))
+      if (footstepPlannerGoalGizmo.getSelected() && ImGui.isKeyReleased(ImGuiTools.getEscapeKey()))
       {
-         footstepPlannerGoalGizmo.setFocused(false);
+         footstepPlannerGoalGizmo.setSelected(false);
       }
    }
 
@@ -333,17 +333,17 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
       ImGui.text("Control ring:");
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Deleted"), !footstepPlannerGoalGizmo.getFocused() && !footstepPlannerGoalGizmo.getModified()))
+      if (ImGui.radioButton(labels.get("Deleted"), !footstepPlannerGoalGizmo.getSelected() && !footstepPlannerGoalGizmo.getModified()))
       {
          delete();
       }
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Modified"), !footstepPlannerGoalGizmo.getFocused() && footstepPlannerGoalGizmo.getModified()))
+      if (ImGui.radioButton(labels.get("Modified"), !footstepPlannerGoalGizmo.getSelected() && footstepPlannerGoalGizmo.getModified()))
       {
          becomeModified(false);
       }
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Selected"), footstepPlannerGoalGizmo.getFocused() && footstepPlannerGoalGizmo.getModified()))
+      if (ImGui.radioButton(labels.get("Selected"), footstepPlannerGoalGizmo.getSelected() && footstepPlannerGoalGizmo.getModified()))
       {
          becomeModified(true);
       }
@@ -351,7 +351,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
    public void becomeModified(boolean selected)
    {
-      footstepPlannerGoalGizmo.setFocused(selected);
+      footstepPlannerGoalGizmo.setSelected(selected);
       if (!footstepPlannerGoalGizmo.getModified())
       {
          footstepPlannerGoalGizmo.setModified(true);
@@ -364,7 +364,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
    private void renderTooltips()
    {
-      if (footstepPlannerGoalGizmo.getFocused() && footstepPlannerGoalGizmo.getPathControlRingGizmo().getAnyPartHovered())
+      if (footstepPlannerGoalGizmo.getSelected() && footstepPlannerGoalGizmo.getPathControlRingGizmo().getAnyPartHovered())
       {
          float offsetX = 10.0f;
          float offsetY = 10.0f;
@@ -406,7 +406,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
    public void delete()
    {
-      footstepPlannerGoalGizmo.setFocused(false);
+      footstepPlannerGoalGizmo.setSelected(false);
       footstepPlannerGoalGizmo.setModified(false);
       clearGraphics();
    }
@@ -488,7 +488,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
    public boolean isSelected()
    {
-      return footstepPlannerGoalGizmo.getFocused();
+      return footstepPlannerGoalGizmo.getSelected();
    }
 
    public Notification getBecomesModifiedNotification()
