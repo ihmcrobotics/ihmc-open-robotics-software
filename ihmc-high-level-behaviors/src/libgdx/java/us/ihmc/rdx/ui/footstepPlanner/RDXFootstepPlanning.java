@@ -44,7 +44,6 @@ public class RDXFootstepPlanning
    private final ROS2SyncedRobotModel syncedRobot;
    private final FootstepPlanningModule footstepPlanner;
    private final FootstepPlannerLogger footstepPlannerLogger;
-   private final FootstepPlannerRequest footstepPlannerRequest;
    private final ResettableExceptionHandlingExecutorService executor;
    private boolean isReadyToWalk = false;
    private final Notification plannedNotification = new Notification();
@@ -80,7 +79,6 @@ public class RDXFootstepPlanning
       midFeetZUpFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
       footstepPlanner.addCustomTerminationCondition(((plannerTime, iterations, bestFinalStep, bestSecondToLastStep, bestPathSize) -> terminatePlan));
-      footstepPlannerRequest = new FootstepPlannerRequest();
       footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
 
       executor = MissingThreadTools.newSingleThreadExecutor("FootstepPlanning", true, 1);
@@ -88,47 +86,28 @@ public class RDXFootstepPlanning
 
    public void planAsync()
    {
-      // Set termination condition to terminate the running plan as soon as possible,
-      // in the case that there is one running.
-      terminatePlan = true;
+      if (goalPoseReference.get() != null)
+      {
+         // Set termination condition to terminate the running plan as soon as possible,
+         // in the case that there is one running.
+         terminatePlan = true;
 
-      if (checkAllInputsAreSet())
          executor.clearQueueAndExecute(this::plan);
-   }
-
-   private boolean checkAllInputsAreSet()
-   {
-      return goalPoseReference.get() != null;
-   }
-
-   private void setGoalFootPosesFromMidFeetPose(FootstepPlannerParametersReadOnly footstepPlannerParameters, Pose3DReadOnly goalPose)
-   {
-      footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), goalPose);
-   }
-
-   private void setStanceSideToClosestToGoal(Pose3DReadOnly goalPose)
-   {
-      RobotSide stanceSide;
-      if (footstepPlannerRequest.getStartFootPoses().get(RobotSide.LEFT ).getPosition().distance(goalPose.getPosition())
-          <= footstepPlannerRequest.getStartFootPoses().get(RobotSide.RIGHT).getPosition().distance(goalPose.getPosition()))
-      {
-         stanceSide = RobotSide.LEFT;
       }
-      else
-      {
-         stanceSide = RobotSide.RIGHT;
-      }
-
-      footstepPlannerRequest.setRequestedInitialStanceSide(stanceSide);
    }
-   
+
    private void plan()
    {
       // Set to false as soon as we start, so it can be set to true at any point now.
       terminatePlan = false;
 
       if (footstepPlanner.isPlanning())
+      {
          footstepPlanner.halt();
+      }
+
+      // For some reason this will grow unbounded unless we clear it
+      footstepPlanner.getOutput().getBodyPath().clear();
 
       PlanarRegionsListMessage planarRegionsListMessage = planarRegionsListMessageReference.get();
       HeightMapMessage heightMapMessage = heightMapDataReference.get();
@@ -149,8 +128,10 @@ public class RDXFootstepPlanning
       if (swingFootPlannerParameters != null)
          footstepPlanner.getSwingPlannerParameters().set(swingFootPlannerParameters);
 
-      setGoalFootPosesFromMidFeetPose(footstepPlannerParameters, goalPose);
-      setStanceSideToClosestToGoal(goalPose);
+      FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
+
+      footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), goalPose);
+      setStanceSideToClosestToGoal(footstepPlannerRequest, goalPose);
 
       footstepPlannerRequest.setSwingPlannerType(SwingPlannerType.MULTI_WAYPOINT_POSITION);
       footstepPlannerRequest.getStartFootPoses().forEach((side, pose3D) ->
@@ -175,6 +156,7 @@ public class RDXFootstepPlanning
          footstepPlannerRequest.setPlanarRegionsList(planarRegionsList);
          assumeFlatGround = false;
       }
+      footstepPlannerRequest.setAssumeFlatGround(assumeFlatGround);
 
       footstepPlannerRequest.setPlanBodyPath(locomotionParameters.getPlanWithBodyPath());
 
@@ -194,7 +176,6 @@ public class RDXFootstepPlanning
       }
 
       // TODO: Set start footholds!!
-      footstepPlannerRequest.setAssumeFlatGround(assumeFlatGround);
       //      request.setTimeout(lookAndStepParameters.getFootstepPlannerTimeoutWhileStopped());
 
       FootstepPlannerOutput output = footstepPlanner.getOutput();
@@ -237,6 +218,22 @@ public class RDXFootstepPlanning
       isReadyToWalk = !plannerFailed;
       plannedNotification.set();
       hasNewPlanAvailable.set(isReadyToWalk);
+   }
+
+   private void setStanceSideToClosestToGoal(FootstepPlannerRequest footstepPlannerRequest, Pose3DReadOnly goalPose)
+   {
+      RobotSide stanceSide;
+      if (footstepPlannerRequest.getStartFootPoses().get(RobotSide.LEFT ).getPosition().distance(goalPose.getPosition())
+       <= footstepPlannerRequest.getStartFootPoses().get(RobotSide.RIGHT).getPosition().distance(goalPose.getPosition()))
+      {
+         stanceSide = RobotSide.LEFT;
+      }
+      else
+      {
+         stanceSide = RobotSide.RIGHT;
+      }
+
+      footstepPlannerRequest.setRequestedInitialStanceSide(stanceSide);
    }
 
    public boolean pollHasNewPlanAvailable()
