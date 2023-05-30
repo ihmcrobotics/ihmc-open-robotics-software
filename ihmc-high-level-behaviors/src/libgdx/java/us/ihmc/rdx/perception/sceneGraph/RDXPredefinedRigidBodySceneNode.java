@@ -17,7 +17,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDX3DPanel;
-import us.ihmc.rdx.ui.affordances.RDXSelectablePose3DGizmo;
+import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
