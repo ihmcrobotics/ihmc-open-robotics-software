@@ -24,7 +24,7 @@ public class RDXSelectablePathControlRingGizmo
    private final RDXPathControlRingGizmo pathControlRingGizmo;
    private boolean selectable = true;
    private boolean modified = false;
-   private boolean focused = false;
+   private boolean selected = false;
 
    public RDXSelectablePathControlRingGizmo()
    {
@@ -75,19 +75,19 @@ public class RDXSelectablePathControlRingGizmo
          // Determine selectedness
          if (selectable && isClickedOn)
          {
-            focused = true;
+            selected = true;
          }
          if (somethingElseIsClickedOn)
          {
-            focused = false;
+            selected = false;
          }
       }
 
-      pathControlRingGizmo.setShowArrows(focused);
+      pathControlRingGizmo.setShowArrows(selected);
       pathControlRingGizmo.setHighlightingEnabled(modified);
 
       // Act
-      if (focused)
+      if (selected)
       {
          pathControlRingGizmo.process3DViewInputModification(input);
       }
@@ -99,7 +99,7 @@ public class RDXSelectablePathControlRingGizmo
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if ((selectable && isRingHovered()) || modified || focused)
+      if ((selectable && isRingHovered()) || modified || selected)
       {
          pathControlRingGizmo.getRenderables(renderables, pool);
       }
@@ -110,14 +110,14 @@ public class RDXSelectablePathControlRingGizmo
       return pathControlRingGizmo;
    }
 
-   public boolean getFocused()
+   public boolean getSelected()
    {
-      return focused;
+      return selected;
    }
 
-   public void setFocused(boolean focused)
+   public void setSelected(boolean selected)
    {
-      this.focused = focused;
+      this.selected = selected;
    }
 
    /**
