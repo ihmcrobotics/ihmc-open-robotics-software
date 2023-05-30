@@ -46,8 +46,8 @@ public class RDXLocomotionManager
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final CommunicationHelper communicationHelper;
-   private final RDXLocomotionParameters walkingParameters;
-   private final ImGuiStoredPropertySetTuner walkingParametersTuner = new ImGuiStoredPropertySetTuner("Walking Parameters");
+   private final RDXLocomotionParameters locomotionParameters;
+   private final ImGuiStoredPropertySetTuner locomotionParametersTuner = new ImGuiStoredPropertySetTuner("Locomotion Parameters");
    private ImGuiStoredPropertySetBooleanWidget areFootstepsAdjustableCheckbox;
    private ImGuiStoredPropertySetDoubleWidget swingTimeSlider;
    private ImGuiStoredPropertySetDoubleWidget transferTimeSlider;
@@ -81,10 +81,10 @@ public class RDXLocomotionManager
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;
 
-      walkingParameters = new RDXLocomotionParameters(robotModel.getSimpleRobotName());
-      walkingParameters.load();
+      locomotionParameters = new RDXLocomotionParameters(robotModel.getSimpleRobotName());
+      locomotionParameters.load();
 
-      footstepPlanning = new RDXFootstepPlanning(robotModel, walkingParameters, syncedRobot);
+      footstepPlanning = new RDXFootstepPlanning(robotModel, locomotionParameters, syncedRobot);
 
       // TODO remove ros from this module, and have it call from the higher level.
       ros2Helper.subscribeViaCallback(PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS, regions ->
@@ -108,17 +108,17 @@ public class RDXLocomotionManager
    {
       this.baseUI = baseUI;
 
-      walkingParametersTuner.create(walkingParameters);
+      locomotionParametersTuner.create(locomotionParameters);
 
-      areFootstepsAdjustableCheckbox = walkingParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.areFootstepsAdjustable);
-      swingTimeSlider = walkingParametersTuner.createDoubleSlider(RDXLocomotionParameters.swingTime, 0.3, 1.5);
-      transferTimeSlider = walkingParametersTuner.createDoubleSlider(RDXLocomotionParameters.transferTime, 0.3, 1.5);
-      turnAggressivenessSlider = walkingParametersTuner.createDoubleSlider(RDXLocomotionParameters.turnAggressiveness, 0.0, 10.0);
+      areFootstepsAdjustableCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.areFootstepsAdjustable);
+      swingTimeSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.swingTime, 0.3, 1.5);
+      transferTimeSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.transferTime, 0.3, 1.5);
+      turnAggressivenessSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.turnAggressiveness, 0.0, 10.0);
 
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
 
-      interactableFootstepPlan.create(baseUI, communicationHelper, syncedRobot, walkingParameters, footstepPlanning.getFootstepPlannerParameters());
+      interactableFootstepPlan.create(baseUI, communicationHelper, syncedRobot, locomotionParameters, footstepPlanning.getFootstepPlannerParameters());
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(interactableFootstepPlan::processImGui3DViewInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(interactableFootstepPlan::calculate3DViewPick);
 
@@ -126,7 +126,7 @@ public class RDXLocomotionManager
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(manualFootstepPlacement::processImGui3DViewInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(manualFootstepPlacement::calculate3DViewPick);
 
-      walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, walkingParameters, footstepPlanning);
+      walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, locomotionParameters, footstepPlanning);
    }
 
    public void update()
@@ -391,6 +391,11 @@ public class RDXLocomotionManager
 
    public RDXLocomotionParameters getLocomotionParameters()
    {
-      return walkingParameters;
+      return locomotionParameters;
+   }
+
+   public ImGuiStoredPropertySetTuner getLocomotionParametersTuner()
+   {
+      return locomotionParametersTuner;
    }
 }
