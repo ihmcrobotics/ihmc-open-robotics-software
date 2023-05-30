@@ -66,18 +66,21 @@ public class RDXSelectablePathControlRingGizmo
    {
       pathControlRingGizmo.calculateHovered(input);
 
-      boolean leftMouseReleasedWithoutDrag = input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
-      boolean isClickedOn = isRingHovered() && leftMouseReleasedWithoutDrag;
-      boolean somethingElseIsClickedOn = !isRingHovered() && leftMouseReleasedWithoutDrag;
+      if (input.isWindowHovered())
+      {
+         boolean leftMouseReleasedWithoutDrag = input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
+         boolean isClickedOn = isRingHovered() && leftMouseReleasedWithoutDrag;
+         boolean somethingElseIsClickedOn = !isRingHovered() && leftMouseReleasedWithoutDrag;
 
-      // Determine selectedness
-      if (selectable && isClickedOn)
-      {
-         focused = true;
-      }
-      if (somethingElseIsClickedOn)
-      {
-         focused = false;
+         // Determine selectedness
+         if (selectable && isClickedOn)
+         {
+            focused = true;
+         }
+         if (somethingElseIsClickedOn)
+         {
+            focused = false;
+         }
       }
 
       pathControlRingGizmo.setShowArrows(focused);

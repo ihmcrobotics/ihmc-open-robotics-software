@@ -351,7 +351,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
    public void becomeModified(boolean selected)
    {
-      footstepPlannerGoalGizmo.setFocused(true);
+      footstepPlannerGoalGizmo.setFocused(selected);
       if (!footstepPlannerGoalGizmo.getModified())
       {
          footstepPlannerGoalGizmo.setModified(true);
