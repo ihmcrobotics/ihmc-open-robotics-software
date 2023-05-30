@@ -18,6 +18,13 @@ import us.ihmc.tools.UnitConversions;
 
 import java.util.function.Supplier;
 
+/**
+ * This class provides functionality for modifying a pose gizmo
+ * with respect to several reference frames. It provides functionality
+ * needed to click and drag the gizmos in different ways,
+ * to set them to values using number input widgets, and to
+ * nudge them around by incremental amounts.
+ */
 public class FrameBasedGizmoModification
 {
    private static final boolean SET_ABSOLUTE = false;
