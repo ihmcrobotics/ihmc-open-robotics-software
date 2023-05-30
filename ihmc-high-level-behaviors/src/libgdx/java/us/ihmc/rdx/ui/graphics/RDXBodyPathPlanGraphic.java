@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -17,6 +18,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PathTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
@@ -75,6 +77,7 @@ public class RDXBodyPathPlanGraphic implements RenderableProvider
    {
       RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
 
+      int bodyPathVertices = bodyPath.size();
       double totalPathLength = PathTools.computePosePathLength(bodyPath);
       double currentLength = 0.0;
 
@@ -96,15 +99,25 @@ public class RDXBodyPathPlanGraphic implements RenderableProvider
       buildMeshAndCreateModelInstance = () ->
       {
          modelBuilder.begin();
-         Mesh mesh = meshBuilder.generateMesh();
-         MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
-         com.badlogic.gdx.graphics.g3d.Material material = new Material();
-         if (paletteTexture == null)
-            paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
-         material.set(TextureAttribute.createDiffuse(paletteTexture));
-         material.set(ColorAttribute.createDiffuse(new Color(0.7f, 0.7f, 0.7f, 1.0f)));
-         modelBuilder.part(meshPart, material);
-
+         Mesh mesh = null;
+         try
+         {
+            mesh = meshBuilder.generateMesh();
+         }
+         catch (GdxRuntimeException e)
+         {
+            LogTools.error("%s body path size: %d".formatted(e.getMessage(), bodyPathVertices));
+         }
+         if (mesh != null)
+         {
+            MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
+            com.badlogic.gdx.graphics.g3d.Material material = new Material();
+            if (paletteTexture == null)
+               paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
+            material.set(TextureAttribute.createDiffuse(paletteTexture));
+            material.set(ColorAttribute.createDiffuse(new Color(0.7f, 0.7f, 0.7f, 1.0f)));
+            modelBuilder.part(meshPart, material);
+         }
          if (lastModel != null)
             lastModel.dispose();
 
