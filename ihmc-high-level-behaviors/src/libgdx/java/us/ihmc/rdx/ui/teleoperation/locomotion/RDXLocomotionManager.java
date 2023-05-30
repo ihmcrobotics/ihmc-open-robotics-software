@@ -89,7 +89,7 @@ public class RDXLocomotionManager
 
       heightMapSubscription = ros2Helper.subscribe(PerceptionAPI.HEIGHT_MAP_OUTPUT);
 
-      footstepPlanning = new RDXFootstepPlanning(robotModel, walkingParameters, syncedRobot, heightMapSubscription);
+      footstepPlanning = new RDXFootstepPlanning(robotModel, walkingParameters, syncedRobot);
 
       // TODO remove ros from this module, and have it call from the higher level.
       ros2Helper.subscribeViaCallback(PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS, regions ->
@@ -152,7 +152,7 @@ public class RDXLocomotionManager
             bodyPathPlanGraphic.clear();
       }
 
-      if (walkPathControlRing.pollIsNewlyModified())
+      if (walkPathControlRing.getBecomesModifiedNotification().poll())
       {
          legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
          interactableFootstepPlan.clear();

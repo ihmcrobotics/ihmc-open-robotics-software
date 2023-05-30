@@ -40,6 +40,8 @@ import us.ihmc.tools.UnitConversions;
 
 import java.util.Random;
 
+import static us.ihmc.rdx.ui.gizmo.RDXPathControlRingCollisionSelection.*;
+
 public class RDXPathControlRingGizmo implements RenderableProvider
 {
    public static final Color DISC_COLOR = RDXGizmoTools.CENTER_DEFAULT_COLOR;
@@ -67,7 +69,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private final RigidBodyTransform yArrowTailTransform = new RigidBodyTransform();
    private final RigidBodyTransform temporaryTailTransform = new RigidBodyTransform();
    private final Point3D closestCollision = new Point3D();
-   private int closestCollisionSelection = -1;
+   private RDXPathControlRingCollisionSelection closestCollisionSelection = null;
    private double closestCollisionDistance;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private boolean isGizmoHovered = false;
@@ -98,11 +100,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private double distanceToCamera;
    private final Plane3DMouseDragAlgorithm planeDragAlgorithm = new Plane3DMouseDragAlgorithm();
    private final ClockFaceRotation3DMouseDragAlgorithm clockFaceDragAlgorithm = new ClockFaceRotation3DMouseDragAlgorithm();
-   private boolean hollowCylinderIntersects;
-   private boolean positiveXArrowIntersects;
-   private boolean positiveYArrowIntersects;
-   private boolean negativeXArrowIntersects;
-   private boolean negativeYArrowIntersects;
    private boolean showArrows = true;
    private boolean highlightingEnabled = true;
    private final double translateSpeedFactor = 0.5;
@@ -255,7 +252,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
             determineCurrentSelectionFromPickRay(pickRay);
          }
 
-         if (closestCollisionSelection > -1)
+         if (closestCollisionSelection != null)
          {
             pickResult.setDistanceToCamera(closestCollisionDistance);
             input.addPickResult(pickResult);
@@ -265,19 +262,32 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
+      calculateHovered(input);
+      process3DViewInputModification(input);
+   }
+
+   /**
+    * We separate the two so we can make decisions based on hover and clicks
+    * before we start allowing modification of the gizmo.
+    */
+   void calculateHovered(ImGui3DViewInput input)
+   {
+      isGizmoHovered = input.isWindowHovered() && pickResult == input.getClosestPick();
+   }
+
+   void process3DViewInputModification(ImGui3DViewInput input)
+   {
       boolean isWindowHovered = input.isWindowHovered();
       int yawMouseButton = ImGuiMouseButton.Right;
       ImGuiMouseDragData translateDragData = input.getMouseDragData(ImGuiMouseButton.Left);
       ImGuiMouseDragData yawDragData = input.getMouseDragData(yawMouseButton);
-
-      isGizmoHovered = isWindowHovered && pickResult == input.getClosestPick();
 
       if (isGizmoHovered && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
       {
          queuePopupToOpen = true;
       }
 
-      boolean isRingHovered = isGizmoHovered && closestCollisionSelection == 0;
+      boolean isRingHovered = isGizmoHovered && closestCollisionSelection == RING;
       if (isRingHovered)
       {
          if (yawDragData.getDragJustStarted())
@@ -452,21 +462,15 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    private void determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay)
    {
-      hollowCylinderIntersects = false;
-      positiveXArrowIntersects = false;
-      positiveYArrowIntersects = false;
-      negativeXArrowIntersects = false;
-      negativeYArrowIntersects = false;
-      closestCollisionSelection = -1;
+      closestCollisionSelection = null;
       closestCollisionDistance = Double.POSITIVE_INFINITY;
 
       hollowCylinderIntersection.update(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), discThickness.get() / 2.0, transformToWorld);
       double distance = hollowCylinderIntersection.intersect(pickRay);
       if (!Double.isNaN(distance) && distance < closestCollisionDistance)
       {
-         hollowCylinderIntersects = true;
          closestCollisionDistance = distance;
-         closestCollisionSelection = 0;
+         closestCollisionSelection = RING;
          closestCollision.set(hollowCylinderIntersection.getClosestIntersection());
       }
       if (showArrows)
@@ -479,9 +483,8 @@ public class RDXPathControlRingGizmo implements RenderableProvider
          distance = positiveXArrowIntersection.intersect(pickRay, 100);
          if (!Double.isNaN(distance) && distance < closestCollisionDistance)
          {
-            positiveXArrowIntersects = true;
             closestCollisionDistance = distance;
-            closestCollisionSelection = 1;
+            closestCollisionSelection = POSITIVE_X_ARROW;
             closestCollision.set(positiveXArrowIntersection.getClosestIntersection());
          }
          positiveYArrowIntersection.update(arrowWidth.get(),
@@ -492,9 +495,8 @@ public class RDXPathControlRingGizmo implements RenderableProvider
          distance = positiveYArrowIntersection.intersect(pickRay, 100);
          if (!Double.isNaN(distance) && distance < closestCollisionDistance)
          {
-            positiveYArrowIntersects = true;
             closestCollisionDistance = distance;
-            closestCollisionSelection = 2;
+            closestCollisionSelection = POSITIVE_Y_ARROW;
             closestCollision.set(positiveYArrowIntersection.getClosestIntersection());
          }
          temporaryTailTransform.set(xArrowTailTransform);
@@ -507,9 +509,8 @@ public class RDXPathControlRingGizmo implements RenderableProvider
          distance = negativeXArrowIntersection.getFirstIntersectionToPack().distance(pickRay.getPoint());
          if (intersects && distance < closestCollisionDistance)
          {
-            negativeXArrowIntersects = true;
             closestCollisionDistance = distance;
-            closestCollisionSelection = 3;
+            closestCollisionSelection = NEGATIVE_X_ARROW;
             closestCollision.set(negativeXArrowIntersection.getFirstIntersectionToPack());
          }
          temporaryTailTransform.set(yArrowTailTransform);
@@ -522,9 +523,8 @@ public class RDXPathControlRingGizmo implements RenderableProvider
          distance = negativeYArrowIntersection.getFirstIntersectionToPack().distance(pickRay.getPoint());
          if (intersects && distance < closestCollisionDistance)
          {
-            negativeYArrowIntersects = true;
             closestCollisionDistance = distance;
-            closestCollisionSelection = 4;
+            closestCollisionSelection = NEGATIVE_Y_ARROW;
             closestCollision.set(negativeYArrowIntersection.getFirstIntersectionToPack());
          }
       }
@@ -535,11 +535,11 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private void updateMaterialHighlighting()
    {
       boolean prior = highlightingEnabled && isGizmoHovered;
-      discModel.setMaterial(prior && closestCollisionSelection == 0 ? highlightedMaterial : normalMaterial);
-      positiveXArrowModel.setMaterial(prior && closestCollisionSelection == 1 ? highlightedMaterial : normalMaterial);
-      positiveYArrowModel.setMaterial(prior && closestCollisionSelection == 2 ? highlightedMaterial : normalMaterial);
-      negativeXArrowModel.setMaterial(prior && closestCollisionSelection == 3 ? highlightedMaterial : normalMaterial);
-      negativeYArrowModel.setMaterial(prior && closestCollisionSelection == 4 ? highlightedMaterial : normalMaterial);
+      discModel.setMaterial(prior && closestCollisionSelection == RING ? highlightedMaterial : normalMaterial);
+      positiveXArrowModel.setMaterial(prior && closestCollisionSelection == POSITIVE_X_ARROW ? highlightedMaterial : normalMaterial);
+      positiveYArrowModel.setMaterial(prior && closestCollisionSelection == POSITIVE_Y_ARROW ? highlightedMaterial : normalMaterial);
+      negativeXArrowModel.setMaterial(prior && closestCollisionSelection == NEGATIVE_X_ARROW ? highlightedMaterial : normalMaterial);
+      negativeYArrowModel.setMaterial(prior && closestCollisionSelection == NEGATIVE_Y_ARROW ? highlightedMaterial : normalMaterial);
    }
 
    public ImGuiPanel createTunerPanel(String name)
@@ -836,38 +836,41 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    public boolean getAnyPartHovered()
    {
-      return isGizmoHovered
-             && (hollowCylinderIntersects || positiveXArrowIntersects || positiveYArrowIntersects || negativeXArrowIntersects || negativeYArrowIntersects);
+      return isGizmoHovered;
    }
 
-   public boolean getAnyArrowPickSelected()
+   public boolean getAnyArrowHovered()
    {
-      return isGizmoHovered && (positiveXArrowIntersects || positiveYArrowIntersects || negativeXArrowIntersects || negativeYArrowIntersects);
+      boolean anyArrowHovered = closestCollisionSelection == POSITIVE_X_ARROW;
+      anyArrowHovered |= closestCollisionSelection == POSITIVE_Y_ARROW;
+      anyArrowHovered |= closestCollisionSelection == NEGATIVE_X_ARROW;
+      anyArrowHovered |= closestCollisionSelection == NEGATIVE_Y_ARROW;
+      return isGizmoHovered && anyArrowHovered;
    }
 
-   public boolean getHollowCylinderHovered()
+   public boolean getRingHovered()
    {
-      return isGizmoHovered && hollowCylinderIntersects;
+      return isGizmoHovered && closestCollisionSelection == RING;
    }
 
    public boolean getPositiveXArrowHovered()
    {
-      return isGizmoHovered && positiveXArrowIntersects;
+      return isGizmoHovered && closestCollisionSelection == POSITIVE_X_ARROW;
    }
 
    public boolean getPositiveYArrowHovered()
    {
-      return isGizmoHovered && positiveYArrowIntersects;
+      return isGizmoHovered && closestCollisionSelection == POSITIVE_Y_ARROW;
    }
 
    public boolean getNegativeXArrowHovered()
    {
-      return isGizmoHovered && negativeXArrowIntersects;
+      return isGizmoHovered && closestCollisionSelection == NEGATIVE_X_ARROW;
    }
 
    public boolean getNegativeYArrowHovered()
    {
-      return isGizmoHovered && negativeYArrowIntersects;
+      return isGizmoHovered && closestCollisionSelection == NEGATIVE_Y_ARROW;
    }
 
    public void setShowArrows(boolean showArrows)
@@ -883,11 +886,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    public void setHighlightingEnabled(boolean highlightingEnabled)
    {
       this.highlightingEnabled = highlightingEnabled;
-   }
-
-   public boolean getGizmoHovered()
-   {
-      return isGizmoHovered;
    }
 
    public Notification getGizmoModifiedByUser()

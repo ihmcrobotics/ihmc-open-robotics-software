@@ -74,7 +74,7 @@ public class RDXPose3DGizmo implements RenderableProvider
    private final DynamicLibGDXModel[] arrowModels = new DynamicLibGDXModel[3];
    private final DynamicLibGDXModel[] torusModels = new DynamicLibGDXModel[3];
    private final Point3D closestCollision = new Point3D();
-   private SixDoFSelection closestCollisionSelection;
+   private SixDoFSelection closestCollisionSelection = null;
    private double closestCollisionDistance;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private boolean isGizmoHovered = false;

@@ -4,23 +4,27 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
-import imgui.internal.ImGui;
-import imgui.type.ImBoolean;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 
 /**
- * Adds "selectedness" to a path control ring gizmo. It's not included in the base class because
- * there's a few different ways to do it.
+ * Adds "selectedness" to a path control ring gizmo.
+ * It's not included in the base class because there's a few different ways to do it.
+ *
+ * This control ring is selected by the user hovering over the ring
+ * and clicking on it to select it.
+ *
+ * The ring will start to show when the user hovers over it.
  */
 public class RDXSelectablePathControlRingGizmo
 {
    private final RDXPathControlRingGizmo pathControlRingGizmo;
-   private final ImBoolean selected = new ImBoolean(false);
+   private boolean selectable = true;
+   private boolean modified = false;
+   private boolean focused = false;
 
    public RDXSelectablePathControlRingGizmo()
    {
@@ -52,7 +56,7 @@ public class RDXSelectablePathControlRingGizmo
 
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      if (input.isWindowHovered() && selected.get())
+      if (input.isWindowHovered())
       {
          pathControlRingGizmo.calculate3DViewPick(input);
       }
@@ -60,38 +64,31 @@ public class RDXSelectablePathControlRingGizmo
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      process3DViewInput(input, selected.get());
-   }
+      pathControlRingGizmo.calculateHovered(input);
 
-   public void process3DViewInput(ImGui3DViewInput input, boolean isHovered)
-   {
-      if (input.isWindowHovered())
+      boolean leftMouseReleasedWithoutDrag = input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
+      boolean isClickedOn = isRingHovered() && leftMouseReleasedWithoutDrag;
+      boolean somethingElseIsClickedOn = !isRingHovered() && leftMouseReleasedWithoutDrag;
+
+      // Determine selectedness
+      if (selectable && isClickedOn)
       {
-         // Process input
-         boolean leftMouseReleasedWithoutDrag = input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
-         boolean isClickedOn = isHovered && leftMouseReleasedWithoutDrag;
-         boolean somethingElseIsClickedOn = !isHovered && leftMouseReleasedWithoutDrag;
-         boolean deselectionKeyPressed = ImGui.isKeyReleased(ImGuiTools.getDeleteKey()) || ImGui.isKeyReleased(ImGuiTools.getEscapeKey());
-
-         // Determine selectedness
-         if (isClickedOn)
-         {
-            selected.set(true);
-         }
-         if (somethingElseIsClickedOn || deselectionKeyPressed)
-         {
-            selected.set(false);
-         }
-
-         pathControlRingGizmo.setShowArrows(selected.get());
+         focused = true;
       }
+      if (somethingElseIsClickedOn)
+      {
+         focused = false;
+      }
+
+      pathControlRingGizmo.setShowArrows(focused);
+      pathControlRingGizmo.setHighlightingEnabled(modified);
 
       // Act
-      if (selected.get())
+      if (focused)
       {
-         pathControlRingGizmo.process3DViewInput(input);
+         pathControlRingGizmo.process3DViewInputModification(input);
       }
-      else
+      else if (selectable)
       {
          pathControlRingGizmo.update();
       }
@@ -99,7 +96,7 @@ public class RDXSelectablePathControlRingGizmo
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (selected.get())
+      if ((selectable && isRingHovered()) || modified || focused)
       {
          pathControlRingGizmo.getRenderables(renderables, pool);
       }
@@ -110,13 +107,37 @@ public class RDXSelectablePathControlRingGizmo
       return pathControlRingGizmo;
    }
 
-   public boolean isSelected()
+   public boolean getFocused()
    {
-      return selected.get();
+      return focused;
    }
 
-   public ImBoolean getSelected()
+   public void setFocused(boolean focused)
    {
-      return selected;
+      this.focused = focused;
+   }
+
+   /**
+    * Prevent the ring from appearing when hovering over it if it is not
+    * already selected.
+    */
+   public void setSelectable(boolean selectable)
+   {
+      this.selectable = selectable;
+   }
+
+   private boolean isRingHovered()
+   {
+      return pathControlRingGizmo.getRingHovered();
+   }
+
+   public boolean getModified()
+   {
+      return modified;
+   }
+
+   public void setModified(boolean modified)
+   {
+      this.modified = modified;
    }
 }
