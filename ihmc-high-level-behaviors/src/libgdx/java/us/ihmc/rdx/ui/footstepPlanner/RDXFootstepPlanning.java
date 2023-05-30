@@ -45,7 +45,6 @@ public class RDXFootstepPlanning
    private final FootstepPlannerRequest request;
    private final ResettableExceptionHandlingExecutorService executor;
    private boolean isReadyToWalk = false;
-   private final Throttler throttler = new Throttler();
    private final Notification plannedNotification = new Notification();
 
    private final AtomicReference<Pose3DReadOnly> goalPoseReference = new AtomicReference<>();
@@ -60,12 +59,20 @@ public class RDXFootstepPlanning
    private final RDXLocomotionParameters locomotionParameters;
 
    private final AtomicBoolean hasNewPlanAvailable = new AtomicBoolean(false);
+   /**
+    * We create this field so that we can terminate a running plan via
+    * a custom termination condition so we don't have to wait
+    * for plans to finish when we are going to replan anyway.
+    * This increase the response of the control ring plans.
+    */
+   private boolean terminatePlan = false;
 
    public RDXFootstepPlanning(DRCRobotModel robotModel, RDXLocomotionParameters locomotionParameters, ROS2SyncedRobotModel syncedRobot)
    {
       this.locomotionParameters = locomotionParameters;
       this.syncedRobot = syncedRobot;
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
+      footstepPlanner.addCustomTerminationCondition(((plannerTime, iterations, bestFinalStep, bestSecondToLastStep, bestPathSize) -> terminatePlan));
       request = new FootstepPlannerRequest();
       footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
 
@@ -74,6 +81,10 @@ public class RDXFootstepPlanning
 
    public void planAsync()
    {
+      // Set termination condition to terminate the running plan as soon as possible,
+      // in the case that there is one running.
+      terminatePlan = true;
+
       if (checkAllInputsAreSet())
          executor.clearQueueAndExecute(this::plan);
    }
@@ -106,6 +117,9 @@ public class RDXFootstepPlanning
    
    private void plan()
    {
+      // Set to false as soon as we start, so it can be set to true at any point now.
+      terminatePlan = false;
+
       if (footstepPlanner.isPlanning())
          footstepPlanner.halt();
 
@@ -157,11 +171,8 @@ public class RDXFootstepPlanning
 
       request.setPlanBodyPath(locomotionParameters.getPlanWithBodyPath());
       // TODO: Set start footholds!!
-      //      request.setPlanarRegionsList(...);
       request.setAssumeFlatGround(assumeFlatGround);
       //      request.setTimeout(lookAndStepParameters.getFootstepPlannerTimeoutWhileStopped());
-      //      request.setSwingPlannerType(swingPlannerType);
-      //      request.setSnapGoalSteps(true);
 
       FootstepPlannerOutput output = footstepPlanner.getOutput();
 
