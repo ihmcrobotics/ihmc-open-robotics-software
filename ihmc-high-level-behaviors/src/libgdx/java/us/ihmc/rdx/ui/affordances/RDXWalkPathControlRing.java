@@ -28,6 +28,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.footstepPlanner.RDXFootstepPlanning;
 import us.ihmc.rdx.ui.gizmo.RDXPathControlRingGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
@@ -86,11 +87,13 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    private SteppingParameters steppingParameters;
    private RDXWalkPathType walkPathType = RDXWalkPathType.STRAIGHT;
    private ImGui3DViewInput latestInput;
+   private RDXFootstepPlanning footstepPlanning;
 
    public void create(RDX3DPanel panel3D,
                       DRCRobotModel robotModel,
                       ROS2SyncedRobotModel syncedRobot,
-                      RDXLocomotionParameters locomotionParameters)
+                      RDXLocomotionParameters locomotionParameters,
+                      RDXFootstepPlanning footstepPlanning)
    {
       this.panel3D = panel3D;
       this.locomotionParameters = locomotionParameters;
@@ -98,6 +101,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       panel3D.addImGuiOverlayAddition(this::renderTooltips);
       midFeetZUpFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
       footFrames = syncedRobot.getReferenceFrames().getSoleFrames();
+      this.footstepPlanning = footstepPlanning;
 
       // periodic thread to footstep plan
       footstepPlanningThread = MissingThreadTools.newSingleThreadExecutor("WalkPathControlPlanning", true, 1);
@@ -237,10 +241,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
          {
             case A_STAR ->
             {
-               planFoostepsUsingAStarPlanner(new Pose3D(leftStanceFootPose),
-                                             new Pose3D(rightStanceFootPose),
-                                             new Pose3D(leftGoalFootPose),
-                                             new Pose3D(rightGoalFootPose));
+               planFoostepsUsingAStarPlanner();
 
             }
             case TURN_WALK_TURN ->
@@ -309,23 +310,10 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
    }
 
-   private void planFoostepsUsingAStarPlanner(Pose3DReadOnly leftStanceFootPose,
-                                              Pose3DReadOnly rightStanceFootPose,
-                                              Pose3DReadOnly leftGoalFootPose,
-                                              Pose3DReadOnly rightGoalFootPose)
+   private void planFoostepsUsingAStarPlanner()
    {
-      FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
-      footstepPlannerRequest.setPlanBodyPath(false);
-      footstepPlannerRequest.getBodyPathWaypoints().add(midFeetZUpPose);
-      footstepPlannerRequest.getBodyPathWaypoints().add(startPose);
-      footstepPlannerRequest.getBodyPathWaypoints().add(goalPose);
-      footstepPlannerRequest.setStartFootPoses(leftStanceFootPose, rightStanceFootPose);
-      footstepPlannerRequest.setGoalFootPoses(leftGoalFootPose, rightGoalFootPose);
-      footstepPlannerRequest.setAssumeFlatGround(true);
-      footstepPlannerRequest.setSnapGoalSteps(false);
-      footstepPlannerRequest.setRequestId(footstepPlannerId.getAndIncrement());
-      FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
-      footstepPlan = footstepPlanToGenerateMeshes = new FootstepPlan(footstepPlannerOutput.getFootstepPlan());
+      footstepPlanning.setMidFeetGoalPose(footstepPlannerGoalGizmo.getPose3D());
+      footstepPlanning.planAsync();
    }
 
    public void renderImGuiWidgets()
