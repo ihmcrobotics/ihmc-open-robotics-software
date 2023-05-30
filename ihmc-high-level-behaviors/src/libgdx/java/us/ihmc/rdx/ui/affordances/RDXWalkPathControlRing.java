@@ -8,13 +8,10 @@ import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -31,9 +28,7 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.footstepPlanner.RDXFootstepPlanning;
 import us.ihmc.rdx.ui.gizmo.RDXPathControlRingGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
-import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.PathTypeStepParameters;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnStraightTurnFootstepGenerator;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
@@ -44,7 +39,6 @@ import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class RDXWalkPathControlRing implements PathTypeStepParameters
 {
@@ -71,9 +65,6 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    private final FramePose3D midFeetZUpPose = new FramePose3D();
    private final FramePose3D startPose = new FramePose3D();
    private SideDependentList<MovingReferenceFrame> footFrames;
-   private final AtomicInteger footstepPlannerId = new AtomicInteger(0);
-   private FootstepPlanningModule footstepPlanner;
-   private RDXFootstepPlanGraphic foostepPlanGraphic;
    private double halfIdealFootstepWidth;
    private volatile FootstepPlan footstepPlan;
    private volatile FootstepPlan footstepPlanToGenerateMeshes;
@@ -83,7 +74,6 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    private TurnWalkTurnPlanner turnWalkTurnPlanner;
    private final FootstepPlannerGoal turnWalkTurnGoal = new FootstepPlannerGoal();
    private TurnStraightTurnFootstepGenerator turnStraightTurnFootstepGenerator;
-   private SimplePathParameters turnStraightTurnParameters;
    private SteppingParameters steppingParameters;
    private RDXWalkPathType walkPathType = RDXWalkPathType.STRAIGHT;
    private ImGui3DViewInput latestInput;
@@ -120,8 +110,6 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
       turnWalkTurnPlanner = new TurnWalkTurnPlanner(footstepPlannerParameters);
 
-      footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
-      foostepPlanGraphic = new RDXFootstepPlanGraphic(contactPoints);
       leftStanceFootstepGraphic.create();
       rightStanceFootstepGraphic.create();
       leftGoalFootstepGraphic.create();
@@ -147,16 +135,11 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
          footstepPlannerGoalGizmo.getTransformToParent().set(midFeetZUpFrame.getTransformToWorldFrame());
       }
 
-
       if (footstepPlanToGenerateMeshes != null)
-//      if (footstepPlan != null)
       {
          plannedFootstepPlacement.updateFromPlan(footstepPlan, null);
-//         foostepPlanGraphic.generateMeshes(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlanToGenerateMeshes,
-//                                                                                           "Walk Path Control Ring Plan"));
          footstepPlanToGenerateMeshes = null;
       }
-      foostepPlanGraphic.update();
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
@@ -242,7 +225,6 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
             case A_STAR ->
             {
                planFoostepsUsingAStarPlanner();
-
             }
             case TURN_WALK_TURN ->
             {
@@ -305,9 +287,8 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    public void planFootstepsUsingTurnStraightTurnFootstepGenerator()
    {
       turnStraightTurnFootstepGenerator.setStanceStartPreference(RobotSide.LEFT);
-      // TODO:
-//      turnStraightTurnFootstepGenerator.setFootstepPath(new TurnStraightTurnOverheadPath());
-
+      // TODO
+      //   turnStraightTurnFootstepGenerator.setFootstepPath(new TurnStraightTurnOverheadPath());
    }
 
    private void planFoostepsUsingAStarPlanner()
@@ -411,7 +392,6 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
          rightStanceFootstepGraphic.getRenderables(renderables, pool);
          leftGoalFootstepGraphic.getRenderables(renderables, pool);
          rightGoalFootstepGraphic.getRenderables(renderables, pool);
-         foostepPlanGraphic.getRenderables(renderables, pool);
       }
       if (modified || mouseRingPickSelected)
       {
@@ -432,13 +412,11 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       rightStanceFootstepGraphic.setPose(BehaviorTools.createNaNPose());
       leftGoalFootstepGraphic.setPose(BehaviorTools.createNaNPose());
       rightGoalFootstepGraphic.setPose(BehaviorTools.createNaNPose());
-      foostepPlanGraphic.clear();
    }
 
    public void destroy()
    {
       footstepPlanningThread.destroy();
-      foostepPlanGraphic.destroy();
    }
 
    @Override
