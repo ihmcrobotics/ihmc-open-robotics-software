@@ -141,20 +141,23 @@ public class RDXFootstepPlanning
       });
 
       boolean assumeFlatGround = true;
-      if (heightMapMessage != null)
+      if (!locomotionParameters.getAssumeFlatGround())
       {
-         assumeFlatGround = false;
-         footstepPlannerRequest.setHeightMapData(HeightMapMessageTools.unpackMessage(heightMapMessage));
-      }
-      if (planarRegionsListMessage != null)
-      {
-         footstepPlannerRequest.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
-         assumeFlatGround = false;
-      }
-      if (planarRegionsList != null)
-      {
-         footstepPlannerRequest.setPlanarRegionsList(planarRegionsList);
-         assumeFlatGround = false;
+         if (heightMapMessage != null)
+         {
+            assumeFlatGround = false;
+            footstepPlannerRequest.setHeightMapData(HeightMapMessageTools.unpackMessage(heightMapMessage));
+         }
+         if (planarRegionsListMessage != null)
+         {
+            footstepPlannerRequest.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
+            assumeFlatGround = false;
+         }
+         if (planarRegionsList != null)
+         {
+            footstepPlannerRequest.setPlanarRegionsList(planarRegionsList);
+            assumeFlatGround = false;
+         }
       }
       footstepPlannerRequest.setAssumeFlatGround(assumeFlatGround);
 
