@@ -21,6 +21,7 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
    private static final String pelvisName = "pelvis";
    private static final String fullPelvisNameInSdf = pelvisName;
    private static final String headName = "upperNeckPitchLink";
+   protected final SideDependentList<String> elbowNames = new SideDependentList<>();
    private static final SideDependentList<String> footNames = new SideDependentList<>(getRobotSidePrefix(RobotSide.LEFT) + "Foot",
                                                                                       getRobotSidePrefix(RobotSide.RIGHT) + "Foot");
 
@@ -274,6 +275,13 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
    {
       return handNames.get(robotSide);
    }
+
+   @Override
+   public String getElbowName(RobotSide robotSide)
+   {
+      return elbowNames.get(robotSide);
+   }
+
 
    @Override
    public String getFootName(RobotSide robotSide)

@@ -15,6 +15,7 @@ import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.Kinemat
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -79,6 +80,8 @@ public class RDXVRKinematicsStreamingMode
    private final Throttler messageThrottler = new Throttler();
    private KinematicsRecordReplay kinematicsRecorder;
    private RDXVRSharedControl sharedControlAssistant;
+//   private int start = 0;
+//   private final SideDependentList<KinematicsToolboxRigidBodyMessage> lastMessage = new SideDependentList<>();
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.OPEN, HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH};
    private int leftIndex = -1;
@@ -236,7 +239,7 @@ public class RDXVRKinematicsStreamingMode
                   kinematicsRecorder.framePoseToPack(tempFramePose); //get values of tempFramePose from replay
                else if (sharedControlAssistant.isActive() && !sharedControlAssistant.isAffordanceActive())
                {
-                  if(sharedControlAssistant.readyToPack() && (sharedControlAssistant.containsBodyPart(side.getCamelCaseName() + "Hand")))
+                  if (sharedControlAssistant.readyToPack() && (sharedControlAssistant.containsBodyPart(side.getCamelCaseName() + "Hand")))
                   {
                      sharedControlAssistant.framePoseToPack(tempFramePose, side.getCamelCaseName() + "Hand");
                   }
@@ -246,14 +249,13 @@ public class RDXVRKinematicsStreamingMode
                   }
                }
                // do not update the body part pose if shared control is active and that part is not included in the shared autonomy
-               if(sharedControlAssistant.isActive() && sharedControlAssistant.readyToPack() && !sharedControlAssistant.isAffordanceActive())
+               if (sharedControlAssistant.isActive() && sharedControlAssistant.readyToPack() && !sharedControlAssistant.isAffordanceActive())
                {
                   if (sharedControlAssistant.containsBodyPart(side.getCamelCaseName() + "Hand"))
                   {
                      message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
                      message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
-                     message.getControlFrameOrientationInEndEffector()
-                            .setYawPitchRoll(0.0, side.negateIfLeftSide(Math.PI / 2.0), side.negateIfLeftSide(Math.PI / 2.0));
+                     message.getControlFrameOrientationInEndEffector().setYawPitchRoll(0.0, side.negateIfLeftSide(Math.PI / 2.0), side.negateIfLeftSide(Math.PI / 2.0));
                      toolboxInputMessage.getInputs().add().set(message);
                   }
                }
@@ -261,10 +263,29 @@ public class RDXVRKinematicsStreamingMode
                {
                   message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
                   message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
-                  message.getControlFrameOrientationInEndEffector()
-                         .setYawPitchRoll(0.0, side.negateIfLeftSide(Math.PI / 2.0), side.negateIfLeftSide(Math.PI / 2.0));
+                  message.getControlFrameOrientationInEndEffector().setYawPitchRoll(0.0, side.negateIfLeftSide(Math.PI / 2.0), side.negateIfLeftSide(Math.PI / 2.0));
                   toolboxInputMessage.getInputs().add().set(message);
                }
+//               start ++;
+//               lastMessage.put(side, message);
+//                  KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
+//                  message.setEndEffectorHashCode(ghostFullRobotModel.getElbow(side).hashCode());
+//                  tempFramePose.setToZero(handDesiredControlFrames.get(side).getReferenceFrame());
+//                  tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+//                  controllerFrameGraphics.get(side).setToReferenceFrame(controller.getXForwardZUpControllerFrame());
+//                  handControlFrameGraphics.get(side).setToReferenceFrame(handDesiredControlFrames.get(side).getReferenceFrame());
+//                  message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
+//                  message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
+//                  message.getControlFrameOrientationInEndEffector().setYawPitchRoll(0.0, side.negateIfLeftSide(Math.PI / 2.0), side.negateIfLeftSide(Math.PI / 2.0));
+//                  message.getAngularSelectionMatrix().setXSelected(true);
+//                  message.getAngularSelectionMatrix().setYSelected(true);
+//                  message.getAngularSelectionMatrix().setZSelected(true);
+//                  message.getLinearSelectionMatrix().setXSelected(false);
+//                  message.getLinearSelectionMatrix().setYSelected(false);
+//                  message.getLinearSelectionMatrix().setZSelected(false);
+//                  message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(10));
+//                  toolboxInputMessage.getInputs().add().set(message);
+//                  toolboxInputMessage.getInputs().add().set(lastMessage.get(side));
             });
          }
 
