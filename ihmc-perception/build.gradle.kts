@@ -20,7 +20,8 @@ ihmc {
    configurePublications()
 }
 
-val javaCPPVersion = "1.5.9-SNAPSHOT"
+//val javaCPPVersion = "1.5.9-SNAPSHOT"
+val javaCPPVersion = "1.5.9-20230530.103643-355"
 
 mainDependencies {
    api(ihmc.sourceSetProject("slam-wrapper"))
@@ -42,7 +43,8 @@ mainDependencies {
 
    // https://oss.sonatype.org/content/repositories/snapshots/org/bytedeco/
    api("org.bytedeco:javacpp:$javaCPPVersion")
-   api("org.bytedeco:javacv:$javaCPPVersion")
+   val javacvVersion = "1.5.9-20230514.133937-17"
+   api("org.bytedeco:javacv:$javacvVersion")
    val openblasVersion = "0.3.23-1.5.9-20230404.015544-39"
    api("org.bytedeco:openblas:$openblasVersion")
    api("org.bytedeco:openblas:$openblasVersion:linux-x86_64")
@@ -51,7 +53,7 @@ mainDependencies {
    api("org.bytedeco:opencv:$opencvVersion")
    api("org.bytedeco:opencv:$opencvVersion:linux-x86_64")
    api("org.bytedeco:opencv:$opencvVersion:windows-x86_64")
-   val ffmpegVersion = "6.0-1.5.9-20230506.025210-104"
+   val ffmpegVersion = "6.0-1.5.9-20230528.134919-131"
    api("org.bytedeco:ffmpeg:$ffmpegVersion")
    api("org.bytedeco:ffmpeg:$ffmpegVersion:linux-x86_64")
    api("org.bytedeco:ffmpeg:$ffmpegVersion:windows-x86_64")
