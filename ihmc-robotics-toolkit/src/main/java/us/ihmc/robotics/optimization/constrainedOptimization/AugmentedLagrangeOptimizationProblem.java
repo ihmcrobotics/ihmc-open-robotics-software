@@ -2,8 +2,6 @@ package us.ihmc.robotics.optimization.constrainedOptimization;
 
 import org.ejml.data.DMatrixD1;
 import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.CommonOps_DDRM;
-import org.ejml.dense.row.mult.VectorVectorMult_DDRM;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,13 +30,10 @@ import java.util.List;
 public class AugmentedLagrangeOptimizationProblem
 {
    private CostFunction costFunction;
-   private List<ConstraintFunction> inequalityConstraints = new ArrayList<>();
-   private List<ConstraintFunction> equalityConstraints = new ArrayList<>();
+   private final List<ConstraintFunction> inequalityConstraints = new ArrayList<>();
+   private final List<ConstraintFunction> equalityConstraints = new ArrayList<>();
 
-   DMatrixD1 equalityMultiplier = new DMatrixRMaj(new double[] {}); // TODO starting value
-   DMatrixD1 inequalityMultiplier = new DMatrixRMaj(new double[] {});
-   double penalty;
-   private double penaltyIncreaseFactor;
+   private AugmentedLagrangeConstructor augmentedLagrangeConstructor;
 
    public AugmentedLagrangeOptimizationProblem(CostFunction costFunction)
    {
@@ -57,53 +52,28 @@ public class AugmentedLagrangeOptimizationProblem
 
    public void initialize(double initialPenalty, double penaltyIncreaseFactor)
    {
-      equalityMultiplier = new DMatrixRMaj(equalityConstraints.size(), 1);
-      inequalityMultiplier = new DMatrixRMaj(inequalityConstraints.size(), 1);
-
-      this.penalty = initialPenalty;
-      this.penaltyIncreaseFactor = penaltyIncreaseFactor;
+      augmentedLagrangeConstructor = new AugmentedLagrangeConstructor(initialPenalty,
+                                                                      penaltyIncreaseFactor,
+                                                                      equalityConstraints.size(),
+                                                                      inequalityConstraints.size());
    }
 
    public double calculateDualProblemCost(DMatrixD1 x)
    {
-      return calculateAugmentedLagrangian(equalityMultiplier, inequalityMultiplier, penalty, x);
-   }
-
-   private double calculateAugmentedLagrangian(DMatrixD1 equalityMultiplierK, DMatrixD1 inequalityMultiplierK, double penalty, DMatrixD1 x)
-   {
       double objectivesCost = calculateObjectives(x);
+      DMatrixD1 inequalityConstraintEvaluations = calculateInequalityConstraintVector(x);
+      DMatrixD1 equalityConstraintEvaluations = calculateEqualityConstraintVector(x);
 
-      // Inequalities Cost =
-      //    if H(x) >= multiplier / p (not violated barrier): -1/(2p) <multiplier, multiplier>
-      //    if H(x) <  multiplier / p (violated barrier)    : -<multiplier, H(x)> + p/2 ||H(x)||^2
-      // The below formula ends up being equivalent to above.
-      DMatrixD1 inequalityConstraintBarrierValue = calculateBarrierInequalityConstraintValue(x);
-      double inequalityConstraintCost = 1 / (2.0 * penalty) * (
-                                          VectorVectorMult_DDRM.innerProd(inequalityConstraintBarrierValue, inequalityConstraintBarrierValue) -
-                                          VectorVectorMult_DDRM.innerProd(inequalityMultiplierK, inequalityMultiplierK)
-                                       );
-
-      // Equalities Cost = p/2 * ||C(x)||^2 + <multiplier, C(x)>
-      DMatrixD1 equalityConstraintValue = calculateEqualityConstraintValue(x);
-      double equalityConstraintCost = penalty / 2.0 * VectorVectorMult_DDRM.innerProd(equalityConstraintValue, equalityConstraintValue) +
-                                      VectorVectorMult_DDRM.innerProd(equalityMultiplierK, equalityConstraintValue);
-
-      return objectivesCost + inequalityConstraintCost + equalityConstraintCost;
+      return augmentedLagrangeConstructor.getAugmentedLagrangeCost(objectivesCost,
+                                                                   equalityConstraintEvaluations,
+                                                                   inequalityConstraintEvaluations);
    }
 
    public void updateLagrangeMultipliers(DMatrixD1 xOptimal)
    {
-      // Inequalities Cost =
-      //    if H(x') >= multiplier / p (not violated barrier): multiplier = 0
-      //    if H(x') <  multiplier / p (violated barrier)    : multiplier += p * H(x')
-      inequalityMultiplier.set(calculateBarrierInequalityConstraintValue(xOptimal));
-
-      // multiplier += p * G(x')
-      DMatrixD1 copyEqualityMultiplier = new DMatrixRMaj(equalityMultiplier);
-      CommonOps_DDRM.add(copyEqualityMultiplier, penalty, calculateEqualityConstraintValue(xOptimal), equalityMultiplier);
-
-      // increase penalty
-      penalty *= penaltyIncreaseFactor;
+      augmentedLagrangeConstructor.updateLagrangeMultipliers(calculateEqualityConstraintVector(xOptimal),
+                                                             calculateInequalityConstraintVector(xOptimal)
+                                                             );
    }
 
    private double calculateObjectives(DMatrixD1 x)
@@ -114,7 +84,7 @@ public class AugmentedLagrangeOptimizationProblem
    /**
     * For constraints H(x) = [h1(x), h2(x), ...] >= 0, calculate [h1(x), h2(x), ...]
     */
-   private DMatrixD1 calculateInequalityConstraintValue(DMatrixD1 x)
+   private DMatrixD1 calculateInequalityConstraintVector(DMatrixD1 x)
    {
       int numConstraints = inequalityConstraints.size();
       double[] value = new double[numConstraints];
@@ -126,32 +96,10 @@ public class AugmentedLagrangeOptimizationProblem
    }
 
    /**
-    * For constraints H(x) = [h1(x), h2(x), ...] >= 0, calculate:
-    *    [max(0, mult1 - p h1(x)), max(0, mult2 - p h2(x)), ...]
-    *    aka max_elem(0_vec, multiplier - p H(x))
-    */
-   private DMatrixD1 calculateBarrierInequalityConstraintValue(DMatrixD1 x)
-   {
-      DMatrixD1 barrierInequalityValue = new DMatrixRMaj(inequalityMultiplier);
-      CommonOps_DDRM.add(inequalityMultiplier, -penalty, calculateInequalityConstraintValue(x), barrierInequalityValue);
-
-      // Perform the clamp
-      int numConstraints = inequalityConstraints.size();
-      for (int i = 0; i < numConstraints; i++)
-      {
-         if (barrierInequalityValue.get(i) < 0)
-         {
-            barrierInequalityValue.set(i, 0);
-         }
-      }
-      return barrierInequalityValue;
-   }
-
-   /**
     * For constraints H(x) = [h1(x), h2(x), ...] = 0, calculate [h1(x), h2(x), ...]
     * @return
     */
-   private DMatrixD1 calculateEqualityConstraintValue(DMatrixD1 x)
+   private DMatrixD1 calculateEqualityConstraintVector(DMatrixD1 x)
    {
       int numConstraints = equalityConstraints.size();
       double[] value = new double[numConstraints];
