@@ -300,7 +300,7 @@ public class SupportState extends AbstractFootControlState
       if (footRotationCalculationModule.applyShrunkenFoothold(contactState))
          contactState.notifyContactStateHasChanged();
 
-      if (footRotationCalculationModule.isRotating() && dampFootRotations.getValue())
+      if (!copOnEdge.getBooleanValue() && footRotationCalculationModule.isRotating() && dampFootRotations.getValue())
       {
          PID3DGainsReadOnly orientationGains = gains.getOrientationGains();
          PID3DGains localOrientationGains = localGains.getOrientationGains();
