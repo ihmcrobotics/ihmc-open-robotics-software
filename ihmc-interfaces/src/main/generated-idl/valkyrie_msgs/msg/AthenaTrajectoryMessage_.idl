@@ -1,15 +1,16 @@
-#ifndef __controller_msgs__msg__ValkyrieHandFingerTrajectoryMessage__idl__
-#define __controller_msgs__msg__ValkyrieHandFingerTrajectoryMessage__idl__
+#ifndef __valkyrie_msgs__msg__AthenaTrajectoryMessage__idl__
+#define __valkyrie_msgs__msg__AthenaTrajectoryMessage__idl__
 
 #include "controller_msgs/msg/./JointspaceTrajectoryMessage_.idl"
-module controller_msgs
+module valkyrie_msgs
 {
   module msg
   {
     module dds
     {
       /**
-       * This message commands the finger controller to move robot valkyrie finger.
+       * This message is Valkyrie specific and is to be used with an Athena hand (original hand).
+       * This message commands the finger controller to move the robot fingers.
        */
       const octet ROBOT_SIDE_LEFT =
       0;
@@ -36,8 +37,8 @@ module controller_msgs
       5;
 
 
-      @TypeCode(type="controller_msgs::msg::dds_::ValkyrieHandFingerTrajectoryMessage_")
-      struct ValkyrieHandFingerTrajectoryMessage
+      @TypeCode(type="valkyrie_msgs::msg::dds_::AthenaTrajectoryMessage_")
+      struct AthenaTrajectoryMessage
       {
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -51,7 +52,7 @@ module controller_msgs
         /**
          * Specifies the list of finger motor names that we want to control.
          */
-        sequence<octet, 6> valkyrie_finger_motor_names;
+        sequence<octet, 6> finger_motor_names;
         /**
          * The indexing for the joints refers the list of finger motor names.
          */

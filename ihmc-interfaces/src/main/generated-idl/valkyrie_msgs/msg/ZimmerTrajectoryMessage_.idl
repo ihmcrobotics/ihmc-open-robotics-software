@@ -1,0 +1,53 @@
+#ifndef __valkyrie_msgs__msg__ZimmerTrajectoryMessage__idl__
+#define __valkyrie_msgs__msg__ZimmerTrajectoryMessage__idl__
+
+#include "controller_msgs/msg/./JointspaceTrajectoryMessage_.idl"
+module valkyrie_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      /**
+       * This message is Valkyrie specific and is to be used with a Zimmer gripper.
+       * This message commands the finger controller to move the robot fingers.
+       */
+      const octet ROBOT_SIDE_LEFT =
+      0;
+
+      const octet ROBOT_SIDE_RIGHT =
+      1;
+
+      const octet FINGER_1 =
+      0;
+
+      const octet FINGER_2 =
+      1;
+
+
+      @TypeCode(type="valkyrie_msgs::msg::dds_::ZimmerTrajectoryMessage_")
+      struct ZimmerTrajectoryMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Specifies the side of the robot that will execute the trajectory.
+         */
+        @defaultValue(value=255)
+        octet robot_side;
+        /**
+         * Specifies the list of joints that we want to control.
+         */
+        sequence<octet, 2> joint_names;
+        /**
+         * The indexing for the joints refers the list of joint names.
+         */
+        controller_msgs::msg::dds::JointspaceTrajectoryMessage jointspace_trajectory;
+      };
+    };
+  };
+};
+
+#endif

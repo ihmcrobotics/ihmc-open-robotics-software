@@ -1,4 +1,5 @@
-# This message commands the finger controller to move robot valkyrie finger.
+# This message is Valkyrie specific and is to be used with an Athena hand (original hand).
+# This message commands the finger controller to move the robot fingers.
 byte ROBOT_SIDE_LEFT = 0
 byte ROBOT_SIDE_RIGHT = 1
 
@@ -16,7 +17,7 @@ uint32 sequence_id
 byte robot_side 255
 
 # Specifies the list of finger motor names that we want to control.
-byte[<=6] valkyrie_finger_motor_names
+byte[<=6] finger_motor_names
 
 # The indexing for the joints refers the list of finger motor names.
-JointspaceTrajectoryMessage jointspace_trajectory
+controller_msgs/JointspaceTrajectoryMessage jointspace_trajectory
