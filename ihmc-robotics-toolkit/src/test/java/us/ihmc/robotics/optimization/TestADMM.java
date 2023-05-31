@@ -15,19 +15,18 @@ public class TestADMM
 {
    // -------- This is the first isolated problem --------------
 
-   private int numLagrangeIterations = 10;
-   private double initialPenalty = 1.0;
-   private double penaltyIncreaseFactor = 1.5;
+   private int numLagrangeIterations = 15;
+   private double initialPenalty = 0.5;
+   private double penaltyIncreaseFactor = 1.1;
 
-   TDoubleArrayList initial1 = new TDoubleArrayList(new double[] {10.0});
-   TDoubleArrayList initial2 = new TDoubleArrayList(new double[] {10.0});
+   TDoubleArrayList initial1 = new TDoubleArrayList(new double[] {4.0});
+   TDoubleArrayList initial2 = new TDoubleArrayList(new double[] {0.0});
 
 
    // optimum is (0,0,0...)
    public static double costFunction(DMatrixD1 inputs)
    {
-      double cost = VectorVectorMult_DDRM.innerProd(inputs, inputs);
-      return cost;
+      return VectorVectorMult_DDRM.innerProd(inputs, inputs);
    }
 
    // x[1] == 5
@@ -42,13 +41,17 @@ public class TestADMM
       return inputs.get(0) - 6;
    }
 
-   public static double blockConstraint1(DMatrixD1... blocks)
+   // x[0] >= 1
+   public static double constraint3(DMatrixD1 inputs)
    {
-      return blocks[0].get(0) + blocks[1].get(0) - 4;
+      return inputs.get(0) - 1;
    }
 
+   public static double blockConstraint1(DMatrixD1... blocks)
+   {
+      return (blocks[0].get(0) + blocks[1].get(0) - 4);
+   }
 
-   // -------- This is the second isolated problem --------------
 
    public static void convertArrayToMatrix(DMatrixD1 vector, TDoubleArrayList list)
    {
@@ -88,13 +91,16 @@ public class TestADMM
 
    public TestADMM()
    {
-      AugmentedLagrangeOptimizationProblem augmentedLagrange1 = new AugmentedLagrangeOptimizationProblem(TestALM::costFunction);
-      AugmentedLagrangeOptimizationProblem augmentedLagrange2 = new AugmentedLagrangeOptimizationProblem(TestALM::costFunction);
+      AugmentedLagrangeOptimizationProblem augmentedLagrange1 = new AugmentedLagrangeOptimizationProblem(TestADMM::costFunction);
+//      augmentedLagrange1.addInequalityConstraint(TestADMM::constraint3);
+      AugmentedLagrangeOptimizationProblem augmentedLagrange2 = new AugmentedLagrangeOptimizationProblem(TestADMM::costFunction);
+//      augmentedLagrange2.addInequalityConstraint(TestADMM::constraint3);
+
 
       MultiblockAdmmProblem admm = new MultiblockAdmmProblem();
       admm.addIsolatedProblem(augmentedLagrange1);
       admm.addIsolatedProblem(augmentedLagrange2);
-      admm.addEqualityConstraint(TestADMM::blockConstraint1);
+      admm.addInequalityConstraint(TestADMM::blockConstraint1);
       admm.initialize(initialPenalty, penaltyIncreaseFactor);
 
       AugmentedLagrangeSolver optimizer1;
@@ -131,7 +137,7 @@ public class TestADMM
       // Repeat lagrange step multiple times
       while (iteration < numLagrangeIterations)
       {
-         System.out.println("===== Lagrange Iteration: " + iteration + "==========");
+         System.out.println("===== Lagrange Iteration: " + iteration + " ==========");
 
          // Run optimization
          optimum1 = optimizer1.solveOneRun();
@@ -149,7 +155,6 @@ public class TestADMM
 
       assertTrue("x1 arrived on desired value", MathTools.epsilonCompare(optimum1.get(0), 2, 1e-3));
       assertTrue("x2 arrived on desired value", MathTools.epsilonCompare(optimum2.get(0), 2, 1e-3));
-
    }
 
 
