@@ -163,9 +163,9 @@ public class RDXFootstepPlanning
 
       footstepPlannerRequest.setPlanBodyPath(locomotionParameters.getPlanWithBodyPath());
 
-      // We are not planning the body path
-      // For teleoperation we usually want to stay facing the direction of the goal pose
-      // TODO: Add options and control over this
+      // If we are not planning the body path,
+      // for teleoperation we usually want to stay facing the direction of the goal pose.
+      // TODO: Add options and control over this, ideally via the gizmo or context menu
       if (!footstepPlannerRequest.getPlanBodyPath())
       {
          midFeetZUpPose.setToZero(midFeetZUpFrame);
