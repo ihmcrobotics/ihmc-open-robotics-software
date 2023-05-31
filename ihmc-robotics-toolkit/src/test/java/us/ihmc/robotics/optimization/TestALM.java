@@ -50,6 +50,12 @@ public class TestALM
       return -inputs.get(2) + 3;
    }
 
+   // x[2] <= 3
+   public static double constraint4(DMatrixD1 inputs)
+   {
+      return inputs.get(0) + inputs.get(1) + inputs.get(2) - 6.0;
+   }
+
    public static void convertArrayToMatrix(DMatrixD1 vector, TDoubleArrayList list)
    {
       vector.setData(list.toArray());
@@ -62,6 +68,7 @@ public class TestALM
       augmentedLagrange.addEqualityConstraint(TestALM::constraint1);
       augmentedLagrange.addInequalityConstraint(TestALM::constraint2);
       augmentedLagrange.addInequalityConstraint(TestALM::constraint3);
+//      augmentedLagrange.addEqualityConstraint(TestALM::constraint4);
       augmentedLagrange.initialize(initialPenalty, penaltyIncreaseFactor);
 
       SingleQueryFunction lagrangeCostFunction = new SingleQueryFunction()
