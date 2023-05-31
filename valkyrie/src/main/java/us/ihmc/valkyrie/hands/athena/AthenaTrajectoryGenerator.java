@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie.fingers.valkyrieHand;
+package us.ihmc.valkyrie.hands.athena;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements RobotController
+public class AthenaTrajectoryGenerator<T extends Enum<T>> implements RobotController
 {
    private final String name;
    private final YoRegistry registry;
@@ -42,11 +42,11 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
       JOINTSPACE
    }
 
-   public ValkyrieFingerSetTrajectoryGenerator(Class<T> enumType,
-                                               RobotSide robotSide,
-                                               DoubleProvider yoTime,
-                                               EnumMap<T, YoDouble> fingerControlSpaceMap,
-                                               YoRegistry parentRegistry)
+   public AthenaTrajectoryGenerator(Class<T> enumType,
+                                    RobotSide robotSide,
+                                    DoubleProvider yoTime,
+                                    EnumMap<T, YoDouble> fingerControlSpaceMap,
+                                    YoRegistry parentRegistry)
    {
       this.robotSide = robotSide;
       this.name = robotSide.getLowerCaseName() + enumType.getSimpleName();

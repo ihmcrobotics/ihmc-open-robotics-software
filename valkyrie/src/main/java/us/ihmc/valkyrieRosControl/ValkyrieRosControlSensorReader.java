@@ -48,7 +48,7 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
 
    private final ValkyrieRosControlLowLevelController lowlLevelController;
 
-   private final ValkyrieRosControlFingerStateEstimator fingerStateEstimator;
+   private final ValkyrieRosControlAthenaStateEstimator fingerStateEstimator;
 
    public ValkyrieRosControlSensorReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions,
                                          SensorProcessingConfiguration sensorProcessingConfiguration, TimestampProvider wallTimeProvider,
@@ -60,7 +60,7 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
 
       if (ValkyrieRosControlController.ENABLE_FINGER_JOINTS)
       {
-         fingerStateEstimator = new ValkyrieRosControlFingerStateEstimator(yoEffortJointHandleHolders, yoPositionJointHandleHolders, yoJointStateHandleHolders,
+         fingerStateEstimator = new ValkyrieRosControlAthenaStateEstimator(yoEffortJointHandleHolders, yoPositionJointHandleHolders, yoJointStateHandleHolders,
                                                                            monotonicTimeProvider, stateEstimatorSensorDefinitions, sensorProcessingConfiguration,
                                                                            registry);
          this.sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, fingerStateEstimator, registry);

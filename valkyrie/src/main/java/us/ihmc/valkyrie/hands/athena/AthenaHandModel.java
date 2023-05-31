@@ -1,19 +1,19 @@
-package us.ihmc.valkyrie.fingers.valkyrieHand;
+package us.ihmc.valkyrie.hands.athena;
 
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
 import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class ValkyrieHandModel implements HandModel
+public class AthenaHandModel implements HandModel
 {
    @Override
-   public ValkyrieHandJointName[] getHandJointNames()
+   public AthenaJointName[] getHandJointNames()
    {
-      return ValkyrieHandJointName.values;
+      return AthenaJointName.values;
    }
 
-   public static enum ValkyrieHandJointName implements HandJointName
+   public static enum AthenaJointName implements HandJointName
    {
       ThumbRoll,
       ThumbPitch1,
@@ -29,7 +29,7 @@ public class ValkyrieHandModel implements HandModel
       PinkyPitch2,
       PinkyPitch3;
 
-      public static final ValkyrieHandJointName[] values = values();
+      public static final AthenaJointName[] values = values();
 
       @Override
       public String getJointName(RobotSide robotSide)
@@ -80,11 +80,11 @@ public class ValkyrieHandModel implements HandModel
       }
    }
 
-   public static enum ValkyrieFingerMotorName
+   public static enum AthenaFingerMotorName
    {
       ThumbMotorRoll, ThumbMotorPitch1, ThumbMotorPitch2, IndexFingerMotorPitch1, MiddleFingerMotorPitch1, PinkyMotorPitch1;
 
-      public static final ValkyrieFingerMotorName[] values = values();
+      public static final AthenaFingerMotorName[] values = values();
 
       public String getJointName(RobotSide robotSide)
       {
@@ -120,44 +120,44 @@ public class ValkyrieHandModel implements HandModel
          }
       }
 
-      public ValkyrieHandJointName getCorrespondingJointName(int depth)
+      public AthenaJointName getCorrespondingJointName(int depth)
       {
          switch (this)
          {
             case ThumbMotorRoll:
-               return ValkyrieHandJointName.ThumbRoll;
+               return AthenaJointName.ThumbRoll;
             case ThumbMotorPitch1:
             case ThumbMotorPitch2:
                if (depth == 1)
-                  return ValkyrieHandJointName.ThumbPitch1;
+                  return AthenaJointName.ThumbPitch1;
                else if (depth == 2)
-                  return ValkyrieHandJointName.ThumbPitch2;
+                  return AthenaJointName.ThumbPitch2;
                else
-                  return ValkyrieHandJointName.ThumbPitch3;
+                  return AthenaJointName.ThumbPitch3;
 
             case IndexFingerMotorPitch1:
                if (depth == 1)
-                  return ValkyrieHandJointName.IndexFingerPitch1;
+                  return AthenaJointName.IndexFingerPitch1;
                else if (depth == 2)
-                  return ValkyrieHandJointName.IndexFingerPitch2;
+                  return AthenaJointName.IndexFingerPitch2;
                else
-                  return ValkyrieHandJointName.IndexFingerPitch3;
+                  return AthenaJointName.IndexFingerPitch3;
 
             case MiddleFingerMotorPitch1:
                if (depth == 1)
-                  return ValkyrieHandJointName.MiddleFingerPitch1;
+                  return AthenaJointName.MiddleFingerPitch1;
                else if (depth == 2)
-                  return ValkyrieHandJointName.MiddleFingerPitch2;
+                  return AthenaJointName.MiddleFingerPitch2;
                else
-                  return ValkyrieHandJointName.MiddleFingerPitch3;
+                  return AthenaJointName.MiddleFingerPitch3;
 
             case PinkyMotorPitch1:
                if (depth == 1)
-                  return ValkyrieHandJointName.PinkyPitch1;
+                  return AthenaJointName.PinkyPitch1;
                else if (depth == 2)
-                  return ValkyrieHandJointName.PinkyPitch2;
+                  return AthenaJointName.PinkyPitch2;
                else
-                  return ValkyrieHandJointName.PinkyPitch3;
+                  return AthenaJointName.PinkyPitch3;
 
             default:
                return null;
@@ -169,7 +169,7 @@ public class ValkyrieHandModel implements HandModel
          return (byte) ordinal();
       }
 
-      public static ValkyrieFingerMotorName fromByte(byte enumAsByte)
+      public static AthenaFingerMotorName fromByte(byte enumAsByte)
       {
          if (enumAsByte == -1)
             return null;

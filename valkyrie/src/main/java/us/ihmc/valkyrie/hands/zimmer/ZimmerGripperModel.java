@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie.fingers.zimmerGripper;
+package us.ihmc.valkyrie.hands.zimmer;
 
 import com.google.common.base.CaseFormat;
 

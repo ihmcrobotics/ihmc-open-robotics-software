@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie.fingers.valkyrieHand;
+package us.ihmc.valkyrie.hands.athena;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -13,16 +13,16 @@ import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.valkyrie.fingers.valkyrieHand.ValkyrieHandModel.ValkyrieFingerMotorName;
-import us.ihmc.valkyrieRosControl.ValkyrieRosControlFingerStateEstimator;
+import us.ihmc.valkyrie.hands.athena.AthenaHandModel.AthenaFingerMotorName;
+import us.ihmc.valkyrieRosControl.ValkyrieRosControlAthenaStateEstimator;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class ValkyrieFingerSetController implements RobotController
+public class AthenaController implements RobotController
 {
-   private final double trajectoryTime = ValkyrieHandFingerTrajectoryMessageConversion.trajectoryTime;
-   private final double extendedTrajectoryTime = trajectoryTime * ValkyrieHandFingerTrajectoryMessageConversion.extendedTimeRatioForThumb;
+   private final double trajectoryTime = AthenaTrajectoryMessageConversion.trajectoryTime;
+   private final double extendedTrajectoryTime = trajectoryTime * AthenaTrajectoryMessageConversion.extendedTimeRatioForThumb;
 
    private static final double MIN_ACTUATOR_POSITION = 0.0;
    private static final double MAX_ACTUATOR_POSITION = 3.6;
@@ -34,21 +34,25 @@ public class ValkyrieFingerSetController implements RobotController
 
    private final RobotSide robotSide;
 
-   private final ValkyrieFingerSetTrajectoryGenerator<ValkyrieFingerMotorName> fingerSetTrajectoryGenerator;
-   private final EnumMap<ValkyrieFingerMotorName, YoDouble> desiredAngles = new EnumMap<>(ValkyrieFingerMotorName.class);
-   private final EnumMap<ValkyrieFingerMotorName, YoDouble> desiredVelocities = new EnumMap<>(ValkyrieFingerMotorName.class);
-   private final Map<ValkyrieFingerMotorName, PIDController> pidControllers = new EnumMap<>(ValkyrieFingerMotorName.class);
+   private final AthenaTrajectoryGenerator<AthenaFingerMotorName> fingerSetTrajectoryGenerator;
+   private final EnumMap<AthenaFingerMotorName, YoDouble> desiredAngles = new EnumMap<>(AthenaFingerMotorName.class);
+   private final EnumMap<AthenaFingerMotorName, YoDouble> desiredVelocities = new EnumMap<>(AthenaFingerMotorName.class);
+   private final Map<AthenaFingerMotorName, PIDController> pidControllers = new EnumMap<>(AthenaFingerMotorName.class);
 
-   private final EnumMap<ValkyrieFingerMotorName, YoEffortJointHandleHolder> jointHandles;
+   private final EnumMap<AthenaFingerMotorName, YoEffortJointHandleHolder> jointHandles;
 
    private final double controlDT;
 
-   private final ValkyrieRosControlFingerStateEstimator fingerStateEstimator;
-   private final EnumMap<ValkyrieFingerMotorName, PIDGainsReadOnly> gains;
+   private final ValkyrieRosControlAthenaStateEstimator fingerStateEstimator;
+   private final EnumMap<AthenaFingerMotorName, PIDGainsReadOnly> gains;
 
-   public ValkyrieFingerSetController(RobotSide robotSide, YoDouble yoTime, double controlDT, ValkyrieRosControlFingerStateEstimator fingerStateEstimator,
-                                      EnumMap<ValkyrieFingerMotorName, PIDGainsReadOnly> gains,
-                                      EnumMap<ValkyrieFingerMotorName, YoEffortJointHandleHolder> jointHandles, YoRegistry parentRegistry)
+   public AthenaController(RobotSide robotSide,
+                           YoDouble yoTime,
+                           double controlDT,
+                           ValkyrieRosControlAthenaStateEstimator fingerStateEstimator,
+                           EnumMap<AthenaFingerMotorName, PIDGainsReadOnly> gains,
+                           EnumMap<AthenaFingerMotorName, YoEffortJointHandleHolder> jointHandles,
+                           YoRegistry parentRegistry)
    {
       this.robotSide = robotSide;
       this.controlDT = controlDT;
@@ -60,14 +64,14 @@ public class ValkyrieFingerSetController implements RobotController
       registry = new YoRegistry(sidePrefix + name);
 
       mapJointsAndVariables();
-      fingerSetTrajectoryGenerator = new ValkyrieFingerSetTrajectoryGenerator<>(ValkyrieFingerMotorName.class, robotSide, yoTime, desiredAngles, registry);
+      fingerSetTrajectoryGenerator = new AthenaTrajectoryGenerator<>(AthenaFingerMotorName.class, robotSide, yoTime, desiredAngles, registry);
 
       parentRegistry.addChild(registry);
    }
 
    private void mapJointsAndVariables()
    {
-      for (ValkyrieFingerMotorName fingerMotorNameEnum : ValkyrieFingerMotorName.values)
+      for (AthenaFingerMotorName fingerMotorNameEnum : AthenaFingerMotorName.values)
       {
          String jointName = fingerMotorNameEnum.getJointName(robotSide);
 
@@ -90,14 +94,14 @@ public class ValkyrieFingerSetController implements RobotController
       fingerSetTrajectoryGenerator.doControl();
 
       // set desired values.
-      for (ValkyrieFingerMotorName fingerMotorNameEnum : ValkyrieFingerMotorName.values)
+      for (AthenaFingerMotorName fingerMotorNameEnum : AthenaFingerMotorName.values)
       {
          desiredAngles.get(fingerMotorNameEnum).set(fingerSetTrajectoryGenerator.getDesired(fingerMotorNameEnum));
          desiredVelocities.get(fingerMotorNameEnum).set(fingerSetTrajectoryGenerator.getDesiredVelocity(fingerMotorNameEnum));
       }
 
       // PID control.
-      for (ValkyrieFingerMotorName fingerMotorNameEnum : ValkyrieFingerMotorName.values)
+      for (AthenaFingerMotorName fingerMotorNameEnum : AthenaFingerMotorName.values)
       {
          PIDGainsReadOnly gainsToUse = gains.get(fingerMotorNameEnum);
          PIDController pidController = pidControllers.get(fingerMotorNameEnum);
@@ -158,25 +162,25 @@ public class ValkyrieFingerSetController implements RobotController
       switch (handConfiguration)
       {
          case CLOSE:
-            for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
+            for (AthenaFingerMotorName fingerMotorName : AthenaFingerMotorName.values)
             {
-               double desiredFingerMotor = ValkyrieFingerControlParameters.getDesiredFingerMotorPosition(robotSide, fingerMotorName, 1.0);
+               double desiredFingerMotor = AthenaFingerControlParameters.getDesiredFingerMotorPosition(robotSide, fingerMotorName, 1.0);
                double time = fingerMotorName.getFingerName() == FingerName.THUMB ? extendedTrajectoryTime : trajectoryTime;
                fingerSetTrajectoryGenerator.appendWayPoint(fingerMotorName, time, desiredFingerMotor);
             }
             break;
 
          case OPEN:
-            for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
+            for (AthenaFingerMotorName fingerMotorName : AthenaFingerMotorName.values)
             {
-               double desiredFingerMotor = ValkyrieFingerControlParameters.getDesiredFingerMotorPosition(robotSide, fingerMotorName, 0.0);
+               double desiredFingerMotor = AthenaFingerControlParameters.getDesiredFingerMotorPosition(robotSide, fingerMotorName, 0.0);
                double time = fingerMotorName.getFingerName() == FingerName.THUMB ? extendedTrajectoryTime : trajectoryTime;
                fingerSetTrajectoryGenerator.appendWayPoint(fingerMotorName, time, desiredFingerMotor);
             }
             break;
 
          case STOP:
-            for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
+            for (AthenaFingerMotorName fingerMotorName : AthenaFingerMotorName.values)
             {
                double currentEstimatedPosition = fingerStateEstimator.getFingerMotorPosition(robotSide, fingerMotorName);
                fingerSetTrajectoryGenerator.appendStopPoint(fingerMotorName, currentEstimatedPosition);
@@ -194,7 +198,7 @@ public class ValkyrieFingerSetController implements RobotController
    {
       fingerSetTrajectoryGenerator.clearTrajectories();
 
-      for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
+      for (AthenaFingerMotorName fingerMotorName : AthenaFingerMotorName.values)
       {
          int indexOfTrajectory = hasTrajectory(handFingerTrajectoryMessage.getValkyrieFingerMotorNames(), fingerMotorName);
 
@@ -211,9 +215,9 @@ public class ValkyrieFingerSetController implements RobotController
             {
                TrajectoryPoint1DMessage trajectoryPoint1DMessage = trajectoryPoints.get(i);
                double wayPointTime = trajectoryPoint1DMessage.getTime();
-               double wayPointPosition = ValkyrieFingerControlParameters.getDesiredFingerMotorPosition(robotSide,
-                                                                                                       fingerMotorName,
-                                                                                                       trajectoryPoint1DMessage.getPosition());
+               double wayPointPosition = AthenaFingerControlParameters.getDesiredFingerMotorPosition(robotSide,
+                                                                                                     fingerMotorName,
+                                                                                                     trajectoryPoint1DMessage.getPosition());
                fingerSetTrajectoryGenerator.appendWayPoint(fingerMotorName, wayPointTime, wayPointPosition);
             }
          }
@@ -223,16 +227,16 @@ public class ValkyrieFingerSetController implements RobotController
 
    public void initializeDesiredTrajectoryGenerator()
    {
-      for (ValkyrieFingerMotorName fingerMotorNameEnum : ValkyrieFingerMotorName.values)
+      for (AthenaFingerMotorName fingerMotorNameEnum : AthenaFingerMotorName.values)
       {
          desiredAngles.get(fingerMotorNameEnum).set(fingerStateEstimator.getFingerMotorPosition(robotSide, fingerMotorNameEnum));
       }
    }
 
-   private int hasTrajectory(us.ihmc.idl.IDLSequence.Byte namesInMessage, ValkyrieFingerMotorName fingerMotorName)
+   private int hasTrajectory(us.ihmc.idl.IDLSequence.Byte namesInMessage, AthenaFingerMotorName fingerMotorName)
    {
       for (int i = 0; i < namesInMessage.size(); i++)
-         if (fingerMotorName == ValkyrieFingerMotorName.fromByte(namesInMessage.get(i)))
+         if (fingerMotorName == AthenaFingerMotorName.fromByte(namesInMessage.get(i)))
             return i;
 
       return -1;

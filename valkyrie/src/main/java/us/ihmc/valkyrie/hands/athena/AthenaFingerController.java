@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie.fingers.valkyrieHand;
+package us.ihmc.valkyrie.hands.athena;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -17,13 +17,13 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.valkyrie.fingers.valkyrieHand.ValkyrieHandModel.ValkyrieFingerMotorName;
-import us.ihmc.valkyrieRosControl.ValkyrieRosControlFingerStateEstimator;
+import us.ihmc.valkyrie.hands.athena.AthenaHandModel.AthenaFingerMotorName;
+import us.ihmc.valkyrieRosControl.ValkyrieRosControlAthenaStateEstimator;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class ValkyrieFingerController implements RobotController
+public class AthenaFingerController implements RobotController
 {
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
@@ -32,13 +32,13 @@ public class ValkyrieFingerController implements RobotController
 
    private final SideDependentList<HandDesiredConfigurationMessageSubscriber> handDesiredConfigurationMessageSubscribers = new SideDependentList<>();
    private final SideDependentList<ValkyrieHandFingerTrajectoryMessageSubscriber> valkyrieHandFingerTrajectoryMessageSubscribers = new SideDependentList<>();
-   private final SideDependentList<ValkyrieFingerSetController> fingerSetControllers = new SideDependentList<>();
+   private final SideDependentList<AthenaController> fingerSetControllers = new SideDependentList<>();
 
-   public ValkyrieFingerController(YoDouble yoTime,
-                                   double controlDT,
-                                   ValkyrieRosControlFingerStateEstimator fingerStateEstimator,
-                                   List<YoEffortJointHandleHolder> jointHandles,
-                                   YoRegistry parentRegistry)
+   public AthenaFingerController(YoDouble yoTime,
+                                 double controlDT,
+                                 ValkyrieRosControlAthenaStateEstimator fingerStateEstimator,
+                                 List<YoEffortJointHandleHolder> jointHandles,
+                                 YoRegistry parentRegistry)
    {
       time = yoTime;
       YoPIDGains thumbRollGains = new YoPIDGains("HandThumbRoll", registry);
@@ -56,10 +56,10 @@ public class ValkyrieFingerController implements RobotController
       defaultGains.setIntegralLeakRatio(0.999);
       defaultGains.setMaximumIntegralError(0.5);
 
-      EnumMap<ValkyrieFingerMotorName, PIDGainsReadOnly> gains = new EnumMap<>(ValkyrieFingerMotorName.class);
-      for (ValkyrieFingerMotorName motorName : ValkyrieFingerMotorName.values)
+      EnumMap<AthenaFingerMotorName, PIDGainsReadOnly> gains = new EnumMap<>(AthenaFingerMotorName.class);
+      for (AthenaFingerMotorName motorName : AthenaFingerMotorName.values)
          gains.put(motorName, defaultGains);
-      gains.put(ValkyrieFingerMotorName.ThumbMotorRoll, thumbRollGains);
+      gains.put(AthenaFingerMotorName.ThumbMotorRoll, thumbRollGains);
 
       Map<String, YoEffortJointHandleHolder> jointHandleMap = jointHandles.stream().collect(Collectors.toMap(h -> h.getName(), h -> h));
 
@@ -70,8 +70,8 @@ public class ValkyrieFingerController implements RobotController
          ValkyrieHandFingerTrajectoryMessageSubscriber valkyrieHandFingerTrajectoryMessageSubscriber = new ValkyrieHandFingerTrajectoryMessageSubscriber(robotSide);
          valkyrieHandFingerTrajectoryMessageSubscribers.put(robotSide, valkyrieHandFingerTrajectoryMessageSubscriber);
 
-         EnumMap<ValkyrieFingerMotorName, YoEffortJointHandleHolder> jointHandleEnumMap = new EnumMap<>(ValkyrieFingerMotorName.class);
-         for (ValkyrieFingerMotorName jointEnum : ValkyrieFingerMotorName.values)
+         EnumMap<AthenaFingerMotorName, YoEffortJointHandleHolder> jointHandleEnumMap = new EnumMap<>(AthenaFingerMotorName.class);
+         for (AthenaFingerMotorName jointEnum : AthenaFingerMotorName.values)
          {
             YoEffortJointHandleHolder handle = jointHandleMap.get(jointEnum.getJointName(robotSide));
             if (handle != null)
@@ -80,13 +80,7 @@ public class ValkyrieFingerController implements RobotController
 
          if (!jointHandleEnumMap.isEmpty())
          {
-            ValkyrieFingerSetController controller = new ValkyrieFingerSetController(robotSide,
-                                                                                     time,
-                                                                                     controlDT,
-                                                                                     fingerStateEstimator,
-                                                                                     gains,
-                                                                                     jointHandleEnumMap,
-                                                                                     registry);
+            AthenaController controller = new AthenaController(robotSide, time, controlDT, fingerStateEstimator, gains, jointHandleEnumMap, registry);
             fingerSetControllers.put(robotSide, controller);
          }
       }
@@ -121,7 +115,7 @@ public class ValkyrieFingerController implements RobotController
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         ValkyrieFingerSetController controller = fingerSetControllers.get(robotSide);
+         AthenaController controller = fingerSetControllers.get(robotSide);
          if (controller != null)
             controller.doControl();
       }
@@ -135,7 +129,7 @@ public class ValkyrieFingerController implements RobotController
          {
             ValkyrieHandFingerTrajectoryMessage handFingerTrajectoryMessage = valkyrieHandFingerTrajectoryMessageSubscribers.get(robotSide).pollMessage();
 
-            ValkyrieFingerSetController controller = fingerSetControllers.get(robotSide);
+            AthenaController controller = fingerSetControllers.get(robotSide);
             if (controller == null)
                continue;
 
@@ -153,7 +147,7 @@ public class ValkyrieFingerController implements RobotController
             HandConfiguration handDesiredConfiguration = HandConfiguration.fromByte(handDesiredConfigurationMessageSubscribers.get(robotSide)
                                                                                                                               .pollMessage()
                                                                                                                               .getDesiredHandConfiguration());
-            ValkyrieFingerSetController controller = fingerSetControllers.get(robotSide);
+            AthenaController controller = fingerSetControllers.get(robotSide);
             if (controller == null)
                continue;
 
@@ -184,7 +178,7 @@ public class ValkyrieFingerController implements RobotController
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         ValkyrieFingerSetController controller = fingerSetControllers.get(robotSide);
+         AthenaController controller = fingerSetControllers.get(robotSide);
          controller.initializeDesiredTrajectoryGenerator();
       }
 
@@ -193,9 +187,9 @@ public class ValkyrieFingerController implements RobotController
          ValkyrieHandFingerTrajectoryMessage handFingerTrajectoryMessage = new ValkyrieHandFingerTrajectoryMessage();
 
          HandConfiguration handConfiguration = HandConfiguration.OPEN;
-         ValkyrieHandFingerTrajectoryMessageConversion.convertHandConfiguration(robotSide, handConfiguration, handFingerTrajectoryMessage);
+         AthenaTrajectoryMessageConversion.convertHandConfiguration(robotSide, handConfiguration, handFingerTrajectoryMessage);
 
-         ValkyrieFingerSetController controller = fingerSetControllers.get(robotSide);
+         AthenaController controller = fingerSetControllers.get(robotSide);
          if (controller == null)
             continue;
 

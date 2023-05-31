@@ -2,7 +2,7 @@ package us.ihmc.valkyrie.configuration;
 
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.valkyrie.fingers.ValkyrieHandVersion;
+import us.ihmc.valkyrie.hands.ValkyrieHandVersion;
 
 public enum ValkyrieRobotVersion
 {
@@ -110,7 +110,7 @@ public enum ValkyrieRobotVersion
       switch (this)
       {
          case DEFAULT:
-            return ValkyrieHandVersion.Valkyrie;
+            return ValkyrieHandVersion.Athena;
          default:
             return ValkyrieHandVersion.None;
       }

@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie.fingers;
+package us.ihmc.valkyrie.hands;
 
 import controller_msgs.msg.dds.HandJointAnglePacket;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
@@ -13,7 +13,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.valkyrie.fingers.valkyrieHand.ValkyrieHandModel.ValkyrieHandJointName;
+import us.ihmc.valkyrie.hands.athena.AthenaHandModel.AthenaJointName;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ValkyrieHandStateCommunicator implements RobotController
@@ -50,7 +50,7 @@ public class ValkyrieHandStateCommunicator implements RobotController
          }
       }
 
-      packet = HumanoidMessageTools.createHandJointAnglePacket(null, false, false, new double[ValkyrieHandJointName.values.length]);
+      packet = HumanoidMessageTools.createHandJointAnglePacket(null, false, false, new double[AthenaJointName.values.length]);
    }
 
    @Override

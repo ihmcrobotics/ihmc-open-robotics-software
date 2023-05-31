@@ -1,14 +1,14 @@
-package us.ihmc.valkyrie.fingers;
+package us.ihmc.valkyrie.hands;
 
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.valkyrie.fingers.psyonicHand.PsyonicHandModel;
-import us.ihmc.valkyrie.fingers.valkyrieHand.ValkyrieHandModel;
-import us.ihmc.valkyrie.fingers.zimmerGripper.ZimmerGripperModel;
+import us.ihmc.valkyrie.hands.athena.AthenaHandModel;
+import us.ihmc.valkyrie.hands.psyonic.PsyonicHandModel;
+import us.ihmc.valkyrie.hands.zimmer.ZimmerGripperModel;
 
 public enum ValkyrieHandVersion
 {
-   Valkyrie, Psyonic, Zimmer, None;
+   Athena, Psyonic, Zimmer, None;
 
    public static final String LEFT_HAND_VERSION_ENVIRONMENT_VARIABLE_NAME = "IHMC_VALKYRIE_LEFT_HAND_VERSION";
    public static final String RIGHT_HAND_VERSION_ENVIRONMENT_VARIABLE_NAME = "IHMC_VALKYRIE_RIGHT_HAND_VERSION";
@@ -20,8 +20,8 @@ public enum ValkyrieHandVersion
 
       if (valueFromEnvironment == null)
          return null;
-      else if (valueFromEnvironment.trim().toLowerCase().contains(Valkyrie.name().toLowerCase()))
-         return Valkyrie;
+      else if (valueFromEnvironment.trim().toLowerCase().contains(Athena.name().toLowerCase()))
+         return Athena;
       else if (valueFromEnvironment.trim().toLowerCase().contains(Psyonic.name().toLowerCase()))
          return Psyonic;
       else if (valueFromEnvironment.trim().toLowerCase().contains(Zimmer.name().toLowerCase()))
@@ -33,8 +33,8 @@ public enum ValkyrieHandVersion
    {
       switch (this)
       {
-         case Valkyrie:
-            return new ValkyrieHandModel();
+         case Athena:
+            return new AthenaHandModel();
          case Psyonic:
             return new PsyonicHandModel();
          case Zimmer:

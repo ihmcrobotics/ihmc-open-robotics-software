@@ -23,7 +23,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.tools.TimestampProvider;
-import us.ihmc.valkyrie.fingers.valkyrieHand.ValkyrieHandModel.ValkyrieFingerMotorName;
+import us.ihmc.valkyrie.hands.athena.AthenaHandModel.AthenaFingerMotorName;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
@@ -129,7 +129,7 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
       // Need to add the finger motors still as they actually do not have a corresponding joint
       for (RobotSide robotSide : RobotSide.values)
       {
-         for (ValkyrieFingerMotorName motorName : ValkyrieFingerMotorName.values)
+         for (AthenaFingerMotorName motorName : AthenaFingerMotorName.values)
          {
             EffortJointHandle handle = effortJointHandles.get(motorName.getJointName(robotSide));
             if (handle != null)

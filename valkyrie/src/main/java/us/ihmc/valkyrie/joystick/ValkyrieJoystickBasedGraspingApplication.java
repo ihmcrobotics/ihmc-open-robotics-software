@@ -11,7 +11,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
-import us.ihmc.valkyrie.fingers.valkyrieHand.ValkyrieFingerTrajectoryMessagePublisher;
+import us.ihmc.valkyrie.hands.ValkyrieFingerTrajectoryMessagePublisher;
 
 public class ValkyrieJoystickBasedGraspingApplication extends ApplicationNoModule
 {

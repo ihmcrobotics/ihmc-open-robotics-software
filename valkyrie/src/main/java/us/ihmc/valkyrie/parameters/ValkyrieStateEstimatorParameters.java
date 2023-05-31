@@ -26,7 +26,7 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.IMUBasedJointStateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.valkyrie.fingers.valkyrieHand.ValkyrieHandModel.ValkyrieHandJointName;
+import us.ihmc.valkyrie.hands.athena.AthenaHandModel.AthenaJointName;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -257,7 +257,7 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         for (ValkyrieHandJointName jointName : ValkyrieHandJointName.values)
+         for (AthenaJointName jointName : AthenaJointName.values)
          {
             nameList.add(jointName.getJointName(robotSide));
          }

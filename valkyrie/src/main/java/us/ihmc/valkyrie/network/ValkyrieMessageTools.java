@@ -6,12 +6,12 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.valkyrie.fingers.valkyrieHand.ValkyrieHandModel.ValkyrieFingerMotorName;
+import us.ihmc.valkyrie.hands.athena.AthenaHandModel.AthenaFingerMotorName;
 
 public class ValkyrieMessageTools
 {
    public static ValkyrieHandFingerTrajectoryMessage createValkyrieHandFingerTrajectoryMessage(RobotSide robotSide,
-                                                                                               ValkyrieFingerMotorName[] valkyrieFingerMotors,
+                                                                                               AthenaFingerMotorName[] valkyrieFingerMotors,
                                                                                                double trajectoryTime, double[] desiredJointPositions)
    {
       int dimension = valkyrieFingerMotors.length;
@@ -42,7 +42,7 @@ public class ValkyrieMessageTools
    }
 
    public static ValkyrieHandFingerTrajectoryMessage createValkyrieHandFingerTrajectoryMessage(RobotSide robotSide,
-                                                                                               ValkyrieFingerMotorName[] valkyrieFingerMotors,
+                                                                                               AthenaFingerMotorName[] valkyrieFingerMotors,
                                                                                                OneDoFTrajectoryPointList[] trajectoryData)
    {
       int dimension = valkyrieFingerMotors.length;
@@ -73,7 +73,7 @@ public class ValkyrieMessageTools
       return message;
    }
 
-   public static void appendDesiredFingerConfiguration(ValkyrieFingerMotorName motorNameToAppend, double time, double desiredConfiguration,
+   public static void appendDesiredFingerConfiguration(AthenaFingerMotorName motorNameToAppend, double time, double desiredConfiguration,
                                                        ValkyrieHandFingerTrajectoryMessage messageToAppend)
    {
       appendDesiredFingerConfiguration(motorNameToAppend.toByte(), time, desiredConfiguration, messageToAppend);
@@ -87,7 +87,7 @@ public class ValkyrieMessageTools
       jointTrajectoryMessages.add().set(HumanoidMessageTools.createOneDoFJointTrajectoryMessage(time, desiredConfiguration));
    }
 
-   public static void appendDesiredFingerConfiguration(ValkyrieFingerMotorName motorNameToAppend, OneDoFTrajectoryPointList trajectoryData,
+   public static void appendDesiredFingerConfiguration(AthenaFingerMotorName motorNameToAppend, OneDoFTrajectoryPointList trajectoryData,
                                                        ValkyrieHandFingerTrajectoryMessage messageToAppend)
    {
       appendDesiredFingerConfiguration(motorNameToAppend.toByte(), trajectoryData, messageToAppend);

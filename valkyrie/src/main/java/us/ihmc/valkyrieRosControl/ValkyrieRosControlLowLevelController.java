@@ -17,8 +17,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.TimestampProvider;
-import us.ihmc.valkyrie.fingers.valkyrieHand.ValkyrieFingerController;
-import us.ihmc.valkyrie.fingers.valkyrieHand.ValkyrieHandModel.ValkyrieHandJointName;
+import us.ihmc.valkyrie.hands.athena.AthenaFingerController;
+import us.ihmc.valkyrie.hands.athena.AthenaHandModel.AthenaJointName;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 import us.ihmc.valkyrieRosControl.dataHolders.YoPositionJointHandleHolder;
@@ -40,14 +40,14 @@ public class ValkyrieRosControlLowLevelController
    private final YoDouble yoTime = new YoDouble("lowLevelControlTime", registry);
    private final YoDouble wakeUpTime = new YoDouble("lowLevelControlWakeUpTime", registry);
 
-   private final ValkyrieFingerController fingerController;
+   private final AthenaFingerController fingerController;
 
    private final AtomicReference<HighLevelControllerName> currentHighLevelControllerState = new AtomicReference<HighLevelControllerName>(null);
 
    private JointTorqueOffsetEstimator jointTorqueOffsetEstimator;
 
    public ValkyrieRosControlLowLevelController(TimestampProvider monotonicTimeProvider, final double updateDT,
-                                               ValkyrieRosControlFingerStateEstimator fingerStateEstimator,
+                                               ValkyrieRosControlAthenaStateEstimator fingerStateEstimator,
                                                List<YoEffortJointHandleHolder> yoEffortJointHandleHolders,
                                                List<YoPositionJointHandleHolder> yoPositionJointHandleHolders, ValkyrieJointMap jointMap,
                                                YoRegistry parentRegistry)
@@ -57,7 +57,7 @@ public class ValkyrieRosControlLowLevelController
       wakeUpTime.set(Double.NaN);
 
       if (ValkyrieRosControlController.ENABLE_FINGER_JOINTS)
-         fingerController = new ValkyrieFingerController(yoTime, updateDT, fingerStateEstimator, yoEffortJointHandleHolders, registry);
+         fingerController = new AthenaFingerController(yoTime, updateDT, fingerStateEstimator, yoEffortJointHandleHolders, registry);
       else
          fingerController = null;
 
@@ -178,7 +178,7 @@ public class ValkyrieRosControlLowLevelController
     */
    private static boolean isFingerJoint(YoEffortJointHandleHolder handle)
    {
-      for (ValkyrieHandJointName valkyrieHandJointName : ValkyrieHandJointName.values)
+      for (AthenaJointName valkyrieHandJointName : AthenaJointName.values)
       {
          for (RobotSide robotSide : RobotSide.values)
          {

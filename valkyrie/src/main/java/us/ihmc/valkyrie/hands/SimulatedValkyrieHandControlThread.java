@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie.fingers;
+package us.ihmc.valkyrie.hands;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,13 +14,13 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.valkyrie.fingers.valkyrieHand.SimulatedValkyrieSingleHandFingerController;
+import us.ihmc.valkyrie.hands.athena.SimulatedAthenaController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
-public class SimulatedValkyrieHandFingerControlThread implements AvatarSimulatedHandControlThread
+public class SimulatedValkyrieHandControlThread implements AvatarSimulatedHandControlThread
 {
    private final YoRegistry registry = new YoRegistry("HandControlThread");
 
@@ -32,15 +32,15 @@ public class SimulatedValkyrieHandFingerControlThread implements AvatarSimulated
 
    private final FullHumanoidRobotModel fullRobotModel;
    private final HumanoidRobotContextData humanoidRobotContextData;
-   private final SideDependentList<SimulatedValkyrieSingleHandFingerController> controllers;
+   private final SideDependentList<SimulatedAthenaController> controllers;
 
    private final List<OneDoFJointBasics> controlledFingerJoints = new ArrayList<>();
 
-   public SimulatedValkyrieHandFingerControlThread(FullHumanoidRobotModel fullRobotModel,
-                                                   SideDependentList<HandModel> handModels,
-                                                   RealtimeROS2Node realtimeROS2Node,
-                                                   ROS2Topic<?> outputTopic,
-                                                   ROS2Topic<?> inputTopic)
+   public SimulatedValkyrieHandControlThread(FullHumanoidRobotModel fullRobotModel,
+                                             SideDependentList<HandModel> handModels,
+                                             RealtimeROS2Node realtimeROS2Node,
+                                             ROS2Topic<?> outputTopic,
+                                             ROS2Topic<?> inputTopic)
    {
       this.fullRobotModel = fullRobotModel;
 
@@ -51,13 +51,13 @@ public class SimulatedValkyrieHandFingerControlThread implements AvatarSimulated
 
       humanoidRobotContextData = new HumanoidRobotContextData(controlledFingerJoints);
       LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = humanoidRobotContextData.getJointDesiredOutputList();
-      controllers = new SideDependentList<>(side -> new SimulatedValkyrieSingleHandFingerController(side,
-                                                                                                    fullRobotModel,
-                                                                                                    jointDesiredOutputList,
-                                                                                                    controllerTime,
-                                                                                                    realtimeROS2Node,
-                                                                                                    outputTopic,
-                                                                                                    inputTopic));
+      controllers = new SideDependentList<>(side -> new SimulatedAthenaController(side,
+                                                                                  fullRobotModel,
+                                                                                  jointDesiredOutputList,
+                                                                                  controllerTime,
+                                                                                  realtimeROS2Node,
+                                                                                  outputTopic,
+                                                                                  inputTopic));
       controllers.values().forEach(controller -> registry.addChild(controller.getYoRegistry()));
 
       firstTick.set(true);
