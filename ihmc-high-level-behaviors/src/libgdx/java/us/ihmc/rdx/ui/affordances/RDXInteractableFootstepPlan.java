@@ -210,6 +210,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
          addedStep.updateFromPlannedStep(baseUI, plannedStep, swingTrajectory, i);
       }
 
+      stepChecker.checkValidStepList(footsteps);
       wasPlanUpdated = true;
    }
 
