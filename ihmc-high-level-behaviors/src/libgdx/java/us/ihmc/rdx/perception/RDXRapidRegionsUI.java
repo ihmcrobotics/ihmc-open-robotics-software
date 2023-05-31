@@ -200,6 +200,11 @@ public class RDXRapidRegionsUI implements RenderableProvider
       return enabled;
    }
 
+   public ImBoolean getRender3DPlanarRegionsEnabled()
+   {
+      return render3DPlanarRegions;
+   }
+
    public boolean getPointCloudRenderEnabled()
    {
       return renderPointCloud.get();
@@ -213,7 +218,10 @@ public class RDXRapidRegionsUI implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      sensorFrameGraphic.getRenderables(renderables, pool);
-      planarRegionsGraphic.getRenderables(renderables, pool);
+      if(render3DPlanarRegions.get())
+      {
+         sensorFrameGraphic.getRenderables(renderables, pool);
+         planarRegionsGraphic.getRenderables(renderables, pool);
+      }
    }
 }
