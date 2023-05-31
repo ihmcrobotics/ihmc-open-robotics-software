@@ -79,7 +79,7 @@ public class PlaneRegistrationTools
 
          if (transform.containsNaN())
          {
-            LogTools.warn("Transform contains NaNs, breaking out of IQA loop.");
+            LogTools.debug("Transform contains NaNs, breaking out of IQA loop.");
             break;
          }
 

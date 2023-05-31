@@ -67,6 +67,7 @@ public class LocalizationAndMappingProcess
 
    private ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic;
    private ROS2Topic<FramePlanarRegionsListMessage> structuralRegionsTopic;
+   private ScheduledFuture<?> updateMapFuture;
 
    private final PerceptionConfigurationParameters configurationParameters = new PerceptionConfigurationParameters();
 
@@ -76,7 +77,7 @@ public class LocalizationAndMappingProcess
                                         ROS2Node ros2Node,
                                         boolean smoothing)
    {
-      planarRegionMap = new PlanarRegionMap();
+      planarRegionMap = new PlanarRegionMap(smoothing);
 
       this.terrainRegionsTopic = terrainRegionsTopic;
       this.structuralRegionsTopic = structuralRegionsTopic;
@@ -99,7 +100,7 @@ public class LocalizationAndMappingProcess
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_PLANAR_REGION_MAPPING_PARAMETERS, planarRegionMap.getParameters());
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, configurationParameters);
 
-      executorService.scheduleAtFixedRate(this::statisticsCollectionThread, 0, STATISTICS_COLLECTION_PERIOD_MS, TimeUnit.MILLISECONDS);
+      updateMapFuture = executorService.scheduleAtFixedRate(this::statisticsCollectionThread, 0, STATISTICS_COLLECTION_PERIOD_MS, TimeUnit.MILLISECONDS);
    }
 
    private void statisticsCollectionThread()
@@ -118,7 +119,7 @@ public class LocalizationAndMappingProcess
    {
       if (latestIncomingRegions.get() == null)
       {
-         LogTools.warn("No regions received");
+         LogTools.debug("No regions received");
          return;
       }
 
@@ -126,7 +127,6 @@ public class LocalizationAndMappingProcess
 
       if (enableLiveMode)
       {
-         LogTools.info("Registering Regions: {}", framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions());
          updateMapWithNewRegions(framePlanarRegionsList);
       }
 
@@ -157,6 +157,14 @@ public class LocalizationAndMappingProcess
    {
       planarRegionMap.reset();
       planarRegionMap.setModified(true);
+   }
+
+   public void destroy()
+   {
+      if (updateMapFuture != null)
+         updateMapFuture.cancel(true);
+      executorService.shutdownNow();
+      planarRegionMap.destroy();
    }
 
    public void setEnableLiveMode(boolean enableLiveMode)

@@ -140,20 +140,17 @@ public class RDXRapidRegionsUI implements RenderableProvider
 
    public void render3DGraphics(FramePlanarRegionsList planarRegions)
    {
-      framePose.setToZero(ReferenceFrame.getWorldFrame());
-      framePose.set(planarRegions.getSensorToWorldFrameTransform());
-      LibGDXTools.toLibGDX(framePose, tempTransform, sensorFrameGraphic.transform);
-
-      PlanarRegionsList regionsToRender = planarRegions.getPlanarRegionsList().copy();
-      regionsToRender.applyTransform(planarRegions.getSensorToWorldFrameTransform());
-
-      synchronized (planarRegionsGraphic)
+      if (render3DPlanarRegions.get())
       {
-         if (render3DPlanarRegions.get())
-         {
-            planarRegionsGraphic.generateMeshes(regionsToRender);
-            planarRegionsGraphic.update();
-         }
+         framePose.setToZero(ReferenceFrame.getWorldFrame());
+         framePose.set(planarRegions.getSensorToWorldFrameTransform());
+         LibGDXTools.toLibGDX(framePose, tempTransform, sensorFrameGraphic.transform);
+
+         PlanarRegionsList regionsToRender = planarRegions.getPlanarRegionsList().copy();
+         regionsToRender.applyTransform(planarRegions.getSensorToWorldFrameTransform());
+
+         planarRegionsGraphic.generateMeshes(regionsToRender);
+         planarRegionsGraphic.update();
       }
    }
 
@@ -189,8 +186,6 @@ public class RDXRapidRegionsUI implements RenderableProvider
    public void destroy()
    {
       planarRegionsGraphic.destroy();
-      rapidPlanarRegionsExtractor.destroy();
-      // TODO: Destroy the rest
    }
 
    public ImGuiPanel getPanel()
@@ -201,6 +196,11 @@ public class RDXRapidRegionsUI implements RenderableProvider
    public ImBoolean getEnabled()
    {
       return enabled;
+   }
+
+   public ImBoolean getRender3DPlanarRegionsEnabled()
+   {
+      return render3DPlanarRegions;
    }
 
    public boolean getPointCloudRenderEnabled()
@@ -216,7 +216,10 @@ public class RDXRapidRegionsUI implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      sensorFrameGraphic.getRenderables(renderables, pool);
-      planarRegionsGraphic.getRenderables(renderables, pool);
+      if(render3DPlanarRegions.get())
+      {
+         sensorFrameGraphic.getRenderables(renderables, pool);
+         planarRegionsGraphic.getRenderables(renderables, pool);
+      }
    }
 }

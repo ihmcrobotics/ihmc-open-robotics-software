@@ -661,6 +661,9 @@ public class PlanarRegionMap
 
    public RigidBodyTransform registerRegions(PlanarRegionsList incomingRegions, RigidBodyTransform estimatedTransformToWorld)
    {
+      if (merger != MergingMode.SMOOTHING)
+         return null;
+
       wholeAlgorithmDurationStopwatch.resetLap();
 
       PlanarRegionsList regions = new PlanarRegionsList();
