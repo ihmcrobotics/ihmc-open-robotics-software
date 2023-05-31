@@ -467,7 +467,7 @@ public class FootstepPlannerRequest
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(requestPacket.getPlanarRegionsListMessage());
       setPlanarRegionsList(planarRegionsList);
       HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(requestPacket.getHeightMapMessage());
-      if (heightMapData.isEmpty())
+      if (!heightMapData.isEmpty())
          setHeightMapData(heightMapData);
       else
          setHeightMapData(null);

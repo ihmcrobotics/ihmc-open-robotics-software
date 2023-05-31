@@ -97,19 +97,8 @@ public class FootstepChecker implements FootstepCheckerInterface
       if (!doValidityCheckForHeightMap(candidateStep, snapData))
          return;
 
-      if (regionsForCollisionChecking == null || regionsForCollisionChecking.isEmpty())
-      {
-         return;
-      }
-
       // Check step placement
       if (!assumeFlatGround && !isStepPlacementValid(candidateStep, snapData))
-      {
-         return;
-      }
-
-      // Check collisions
-      if (!isCollisionFree(candidateStep, stanceStep, startOfSwing))
       {
          return;
       }
@@ -123,6 +112,14 @@ public class FootstepChecker implements FootstepCheckerInterface
             return;
          }
       }
+
+      if (regionsForCollisionChecking == null || regionsForCollisionChecking.isEmpty())
+      {
+         return;
+      }
+
+      // Check collisions
+      isCollisionFree(candidateStep, stanceStep, startOfSwing);
    }
 
    private boolean doValidityCheckForHeightMap(DiscreteFootstep candidateStep, FootstepSnapData snapData)
