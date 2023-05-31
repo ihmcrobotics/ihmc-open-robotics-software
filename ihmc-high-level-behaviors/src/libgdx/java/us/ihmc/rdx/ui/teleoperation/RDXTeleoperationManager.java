@@ -101,7 +101,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final RDXChestOrientationSlider chestPitchSlider;
    private final RDXChestOrientationSlider chestYawSlider;
    private final RDXDesiredRobot desiredRobot;
-   private final RDXHandConfigurationManager handManager = new RDXHandConfigurationManager();
+   private final RDXHandConfigurationManager handManager;
    private RDXRobotCollisionModel selfCollisionModel;
    private RDXRobotCollisionModel environmentCollisionModel;
    private RDXArmManager armManager;
@@ -124,12 +124,13 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final ControllerStatusTracker controllerStatusTracker;
    private final LogToolsLogger logToolsLogger = new LogToolsLogger();
 
+   private final boolean robotHasArms;
    /**
     * For use without interactables available. May crash if a YoVariableClient is needed.
     */
    public RDXTeleoperationManager(CommunicationHelper communicationHelper)
    {
-      this(communicationHelper, null, null, null);
+      this(communicationHelper, null, null, null, true);
    }
 
    /**
@@ -139,9 +140,12 @@ public class RDXTeleoperationManager extends ImGuiPanel
    public RDXTeleoperationManager(CommunicationHelper communicationHelper,
                                   RobotCollisionModel robotSelfCollisionModel,
                                   RobotCollisionModel robotEnvironmentCollisionModel,
-                                  YoVariableClientHelper yoVariableClientHelper)
+                                  YoVariableClientHelper yoVariableClientHelper,
+                                  boolean robotHasArms)
    {
       super("Teleoperation");
+
+      this.robotHasArms = robotHasArms;
 
       setRenderMethod(this::renderImGuiWidgets);
       addChild(teleoperationParametersTuner);
@@ -182,12 +186,16 @@ public class RDXTeleoperationManager extends ImGuiPanel
       {
          selfCollisionModel = new RDXRobotCollisionModel(robotSelfCollisionModel);
          environmentCollisionModel = new RDXRobotCollisionModel(robotEnvironmentCollisionModel);
-         armManager = new RDXArmManager(robotModel,
-                                        syncedRobot,
-                                        desiredRobot.getDesiredFullRobotModel(),
-                                        ros2Helper,
-                                        teleoperationParameters);
+         if (robotHasArms)
+         {
+            armManager = new RDXArmManager(robotModel, syncedRobot, desiredRobot.getDesiredFullRobotModel(), ros2Helper, teleoperationParameters);
+         }
       }
+
+      if (robotHasArms)
+         handManager = new RDXHandConfigurationManager();
+      else
+         handManager = null;
    }
 
    public void create(RDXBaseUI baseUI)
@@ -212,7 +220,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
          environmentCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkRed(), 0.4));
 
          // create the manager for the desired arm setpoints
-         armManager.create(baseUI);
+         if (armManager != null)
+            armManager.create(baseUI);
 
          for (RDXRobotCollidable robotCollidable : environmentCollisionModel.getRobotCollidables())
          {
@@ -260,7 +269,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
                      interactableFeet.get(side).addAdditionalRobotCollidable(robotCollidable);
                   }
                }
-               if (RDXInteractableHand.robotCollidableIsHand(side, robotCollidable, fullRobotModel))
+               if (robotHasArms && RDXInteractableHand.robotCollidableIsHand(side, robotCollidable, fullRobotModel))
                {
                   if (!interactableHands.containsKey(side))
                   {
@@ -293,7 +302,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
       standPrepButton.setOnPressed(robotLowLevelMessenger::sendStandRequest);
       standPrepButton.setTooltipText("Stand prep");
 
-      handManager.create(baseUI, communicationHelper);
+      if (robotHasArms)
+         handManager.create(baseUI, communicationHelper);
 
       baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
    }
