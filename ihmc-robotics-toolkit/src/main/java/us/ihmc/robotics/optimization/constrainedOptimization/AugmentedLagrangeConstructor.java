@@ -20,7 +20,7 @@ import org.ejml.dense.row.mult.VectorVectorMult_DDRM;
  */
 public class AugmentedLagrangeConstructor
 {
-   private DMatrixD1 equalityMultiplier; // TODO starting value
+   private DMatrixD1 equalityMultiplier;
    private DMatrixD1 inequalityMultiplier;
    private double penalty;
    private double penaltyIncreaseFactor;
@@ -38,10 +38,11 @@ public class AugmentedLagrangeConstructor
     *  For the constrained optimization problem:
     *     minimize f(x)
     *     st: Gi(x) == 0 for G[]
-    *         Hi(x) >= 0 for H[]
+    *         Hi(x) >= 0 for H[],
+    *     return the augmented lagrange F(x)
     * @param originalCost is f(x)
-    * @param inequalityConstraintEvaluations G[]
-    * @param equalityConstraintEvaluations G[]
+    * @param inequalityConstraintEvaluations G[](x)
+    * @param equalityConstraintEvaluations H[](x)
     * @return the augmented lagrangian cost
     */
    public double getAugmentedLagrangeCost(double originalCost, DMatrixD1 equalityConstraintEvaluations, DMatrixD1 inequalityConstraintEvaluations)
