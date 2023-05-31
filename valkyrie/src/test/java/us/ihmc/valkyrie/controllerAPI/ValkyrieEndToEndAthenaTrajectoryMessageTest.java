@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.controllerAPI.EndToEndHandFingerTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -26,11 +25,12 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.hands.athena.AthenaFingerControlParameters;
-import us.ihmc.valkyrie.hands.athena.AthenaTrajectoryMessageConversion;
 import us.ihmc.valkyrie.hands.athena.AthenaHandModel.AthenaFingerMotorName;
 import us.ihmc.valkyrie.hands.athena.AthenaHandModel.AthenaJointName;
+import us.ihmc.valkyrie.hands.athena.AthenaTrajectoryMessageConversion;
+import valkyrie_msgs.msg.dds.AthenaTrajectoryMessage;
 
-public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHandFingerTrajectoryMessageTest
+public class ValkyrieEndToEndAthenaTrajectoryMessageTest extends EndToEndHandFingerTrajectoryMessageTest
 {
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
 
@@ -71,9 +71,9 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
    }
 
    @Override
-   public ValkyrieHandFingerTrajectoryMessage createTrajectoryMessage(RobotSide robotSide, HandConfiguration handConfiguration)
+   public AthenaTrajectoryMessage createTrajectoryMessage(RobotSide robotSide, HandConfiguration handConfiguration)
    {
-      ValkyrieHandFingerTrajectoryMessage message = new ValkyrieHandFingerTrajectoryMessage();
+      AthenaTrajectoryMessage message = new AthenaTrajectoryMessage();
 
       AthenaTrajectoryMessageConversion.convertHandConfiguration(robotSide, handConfiguration, message);
 
@@ -83,16 +83,16 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
    @Override
    public void assertDesiredFingerJoint(RobotSide robotSide, HandConfiguration handConfiguration, double epsilon)
    {
-      ValkyrieHandFingerTrajectoryMessage valkyrieFingerTrajectoryMessage = createTrajectoryMessage(robotSide, handConfiguration);
+      AthenaTrajectoryMessage athenaTrajectoryMessage = createTrajectoryMessage(robotSide, handConfiguration);
 
-      int numberOfFingers = valkyrieFingerTrajectoryMessage.getValkyrieFingerMotorNames().size();
+      int numberOfFingers = athenaTrajectoryMessage.getFingerMotorNames().size();
 
       for (int i = 0; i < numberOfFingers; i++)
       {
-         double desiredPosition = getExpectedFingerMotorPosition(valkyrieFingerTrajectoryMessage, i);
+         double desiredPosition = getExpectedFingerMotorPosition(athenaTrajectoryMessage, i);
 
-         double[] expectedHandJointPositions = getExpectedHandJointPosition(valkyrieFingerTrajectoryMessage, i, desiredPosition);
-         double[] handJointPositions = getCurrentHandJointPosition(valkyrieFingerTrajectoryMessage, i);
+         double[] expectedHandJointPositions = getExpectedHandJointPosition(athenaTrajectoryMessage, i, desiredPosition);
+         double[] handJointPositions = getCurrentHandJointPosition(athenaTrajectoryMessage, i);
 
          for (int j = 0; j < handJointPositions.length; j++)
          {
@@ -101,9 +101,9 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
       }
    }
 
-   private double getExpectedFingerMotorPosition(ValkyrieHandFingerTrajectoryMessage valkyrieFingerTrajectoryMessage, int indexOfFinger)
+   private double getExpectedFingerMotorPosition(AthenaTrajectoryMessage athenaTrajectoryMessage, int indexOfFinger)
    {
-      Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = valkyrieFingerTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages();
+      Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = athenaTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages();
       Object<TrajectoryPoint1DMessage> trajectoryPoints = jointTrajectoryMessages.get(indexOfFinger).getTrajectoryPoints();
       TrajectoryPoint1DMessage trajectoryPoint1DMessage = trajectoryPoints.getLast();
       double desiredPosition = trajectoryPoint1DMessage.getPosition();
@@ -111,11 +111,10 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
       return desiredPosition;
    }
 
-   private double[] getExpectedHandJointPosition(ValkyrieHandFingerTrajectoryMessage valkyrieFingerTrajectoryMessage, int indexOfFinger, double desiredPosition)
+   private double[] getExpectedHandJointPosition(AthenaTrajectoryMessage athenaTrajectoryMessage, int indexOfFinger, double desiredPosition)
    {
-      AthenaFingerMotorName fingerMotorName = AthenaFingerMotorName.fromByte(valkyrieFingerTrajectoryMessage.getValkyrieFingerMotorNames()
-                                                                                                                .get(indexOfFinger));
-      RobotSide robotSide = RobotSide.fromByte(valkyrieFingerTrajectoryMessage.getRobotSide());
+      AthenaFingerMotorName fingerMotorName = AthenaFingerMotorName.fromByte(athenaTrajectoryMessage.getFingerMotorNames().get(indexOfFinger));
+      RobotSide robotSide = RobotSide.fromByte(athenaTrajectoryMessage.getRobotSide());
 
       List<? extends OneDoFJointReadOnly> handJoints = getAllHandJoints(robotSide, fingerMotorName);
 
@@ -129,11 +128,10 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
       return handJointPositions;
    }
 
-   private double[] getCurrentHandJointPosition(ValkyrieHandFingerTrajectoryMessage valkyrieFingerTrajectoryMessage, int indexOfFinger)
+   private double[] getCurrentHandJointPosition(AthenaTrajectoryMessage athenaTrajectoryMessage, int indexOfFinger)
    {
-      AthenaFingerMotorName fingerMotorName = AthenaFingerMotorName.fromByte(valkyrieFingerTrajectoryMessage.getValkyrieFingerMotorNames()
-                                                                                                                .get(indexOfFinger));
-      RobotSide robotSide = RobotSide.fromByte(valkyrieFingerTrajectoryMessage.getRobotSide());
+      AthenaFingerMotorName fingerMotorName = AthenaFingerMotorName.fromByte(athenaTrajectoryMessage.getFingerMotorNames().get(indexOfFinger));
+      RobotSide robotSide = RobotSide.fromByte(athenaTrajectoryMessage.getRobotSide());
 
       List<? extends OneDoFJointReadOnly> handJoints = getAllHandJoints(robotSide, fingerMotorName);
 

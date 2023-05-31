@@ -16,7 +16,7 @@ public class PsyonicHandModel implements HandModel
 
    public static enum PsyonicJointName implements HandJointName
    {
-      index_q1, index_q2, middle_q1, middle_q2, ring_q1, ring_q2, pinky_q1, pinky_q2, thumb_q1, thumb_q2;
+      thumb_q1, thumb_q2, index_q1, index_q2, middle_q1, middle_q2, ring_q1, ring_q2, pinky_q1, pinky_q2;
 
       public static final PsyonicJointName[] values = values();
 
@@ -34,6 +34,14 @@ public class PsyonicHandModel implements HandModel
       public String getPascalCaseJointName(RobotSide side)
       {
          return side.getPascalCaseName() + CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, name());
+      }
+
+      public static PsyonicJointName fromByte(byte jointNameByteValue)
+      {
+         if (jointNameByteValue < 0)
+            return null;
+         else
+            return values[jointNameByteValue];
       }
 
       @Override

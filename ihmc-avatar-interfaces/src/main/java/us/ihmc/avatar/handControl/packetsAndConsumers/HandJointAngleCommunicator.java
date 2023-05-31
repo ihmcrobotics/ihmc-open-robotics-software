@@ -29,7 +29,7 @@ public class HandJointAngleCommunicator
    {
       this.side = side;
       this.publisher = publisher;
-      packetCopier = new ConcurrentCopier<HandJointAnglePacket>(HandJointAngleCommunicator.builder);
+      packetCopier = new ConcurrentCopier<>(HandJointAngleCommunicator.builder);
       executor = startWriterThread();
    }
 

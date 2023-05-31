@@ -4,10 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import ihmc_common_msgs.msg.dds.MessageCollection;
-import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import ihmc_common_msgs.msg.dds.MessageCollection;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulationFactory;
@@ -27,6 +26,9 @@ import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAva
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.yoVariables.exceptions.IllegalOperationException;
+import valkyrie_msgs.msg.dds.AthenaTrajectoryMessage;
+import valkyrie_msgs.msg.dds.PsyonicTrajectoryMessage;
+import valkyrie_msgs.msg.dds.ZimmerTrajectoryMessage;
 
 public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFactory
 {
@@ -100,7 +102,9 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
       defaultControllerPublishers.put(WholeBodyStreamingMessage.class, createPublisherForController(WholeBodyStreamingMessage.class));
       defaultControllerPublishers.put(MessageCollection.class, createPublisherForController(MessageCollection.class));
 
-      defaultControllerPublishers.put(ValkyrieHandFingerTrajectoryMessage.class, createPublisherForController(ValkyrieHandFingerTrajectoryMessage.class));
+      defaultControllerPublishers.put(AthenaTrajectoryMessage.class, createPublisherForController(AthenaTrajectoryMessage.class));
+      defaultControllerPublishers.put(PsyonicTrajectoryMessage.class, createPublisherForController(PsyonicTrajectoryMessage.class));
+      defaultControllerPublishers.put(ZimmerTrajectoryMessage.class, createPublisherForController(ZimmerTrajectoryMessage.class));
    }
 
    public SCS2AvatarTestingSimulation createAvatarTestingSimulation()
