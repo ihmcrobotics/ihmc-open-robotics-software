@@ -85,11 +85,12 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    {
       this.panel3D = panel3D;
       this.locomotionParameters = locomotionParameters;
+      this.footstepPlanning = footstepPlanning;
+
       footstepPlannerGoalGizmo.create(panel3D);
       panel3D.addImGuiOverlayAddition(this::renderTooltips);
       midFeetZUpFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
       footFrames = syncedRobot.getReferenceFrames().getSoleFrames();
-      this.footstepPlanning = footstepPlanning;
 
       // periodic thread to footstep plan
       footstepPlanningThread = MissingThreadTools.newSingleThreadExecutor("WalkPathControlPlanning", true, 1);
