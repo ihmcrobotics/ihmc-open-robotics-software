@@ -180,15 +180,20 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
       RigidBodyTransform snapTransform;
 
+      boolean snappedToPlanarReigons = false;
+      boolean snappedToHeightMap = false;
       if (computeIfShouldUsePlanarRegions())
       {
          snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon,
                                                                                         planarRegionsList,
                                                                                         maximumRegionHeightToConsider,
                                                                                         planarRegionToPack);
+         if (snapTransform != null)
+            snappedToPlanarReigons = true;
       }
       else
       {
+         snappedToHeightMap = true;
          snapTransform = heightMapSnapper.snapPolygonToHeightMap(footPolygon, heightMapData, parameters.getHeightMapSnapThreshold());
       }
 
@@ -200,16 +205,18 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       {
          FootstepSnapData snapData = new FootstepSnapData(snapTransform);
 
-         if (planarRegionsList != null)
+         if (planarRegionsList != null && snappedToPlanarReigons)
          {
             snapData.setRegionIndex(getIndex(planarRegionToPack, planarRegionsList));
             computeCroppedFoothold(footstepToSnap, snapData);
          }
-         if (heightMapData != null)
+         if (snappedToHeightMap)
          {
             snapData.setRMSErrorHeightMap(heightMapSnapper.getNormalizedRMSError());
             snapData.setHeightMapArea(heightMapSnapper.getArea());
          }
+         snapData.setSnappedToHeightMap(snappedToHeightMap);
+         snapData.setSnappedToPlanarRegions(snappedToPlanarReigons);
 
          return snapData;
       }
@@ -217,7 +224,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
    private boolean computeIfShouldUsePlanarRegions()
    {
-      if (heightMapData == null)
+      if (heightMapData == null || heightMapData.isEmpty())
          return true;
 
       if (planarRegionsList == null)

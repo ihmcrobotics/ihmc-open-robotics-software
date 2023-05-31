@@ -184,6 +184,10 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       footstepPlannerParameters.setBodyBoxBaseZ(0.4);
       footstepPlannerParameters.setCheckForBodyBoxCollisions(false);
       footstepPlannerParameters.setCheckForPathCollisions(false);
+      footstepPlannerParameters.setMinimumFootholdPercent(0.99);
+      footstepPlannerParameters.setMaximumStepZ(0.32);
+      footstepPlannerParameters.setMinimumDistanceFromCliffBottoms(-1.0);
+      footstepPlannerParameters.setMinimumDistanceFromCliffTops(-1.0);
 
       ThreadTools.sleep(1000);
       simulationTestHelper.simulateNow(1.0);
@@ -429,10 +433,6 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       request.setFromPacket(requestPacket);
 
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
-      footstepPlanningModule.getFootstepPlannerParameters().setMinimumFootholdPercent(0.99);
-      footstepPlanningModule.getFootstepPlannerParameters().setMaximumStepZ(0.32);
-      footstepPlanningModule.getFootstepPlannerParameters().setMinimumDistanceFromCliffBottoms(-1.0);
-      footstepPlanningModule.getFootstepPlannerParameters().setMinimumDistanceFromCliffTops(-1.0);
       FootstepPlannerOutput plannerOutput = footstepPlanningModule.handleRequest(request);
 
       LogTools.info("output. " + plannerOutput.getFootstepPlanningResult());

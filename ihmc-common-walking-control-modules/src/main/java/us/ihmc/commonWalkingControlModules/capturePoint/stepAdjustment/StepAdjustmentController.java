@@ -14,9 +14,9 @@ public interface StepAdjustmentController extends SCS2YoGraphicHolder
 {
    void reset();
 
-   void setFootstepAfterTheCurrentOne(SimpleFootstep nextFootstep, FootstepTiming nextFootstepTiming);
+   void setFootstepQueueInformation(int numberOfStepsInQueue, double subsequentStepDuration);
 
-   void setFootstepToAdjust(SimpleFootstep footstep, double swingDuration, double nextTransferDuration);
+   void setFootstepToAdjust(SimpleFootstep footstep, double swingDuration);
 
    void submitSwingSpeedUpUnderDisturbance(double remainingTimeForSwing);
 
@@ -25,9 +25,11 @@ public interface StepAdjustmentController extends SCS2YoGraphicHolder
    void initialize(double initialTime, RobotSide supportSide);
 
    void compute(double currentTime,
-                       FramePoint2DReadOnly desiredICP,
-                       FramePoint2DReadOnly currentICP,
-                       double omega0);
+                FramePoint2DReadOnly desiredICP,
+                FramePoint2DReadOnly currentICP,
+                double omega0,
+                FramePoint2DReadOnly copToShrinkAbout,
+                double percentageToShrinkPolygon);
 
    FramePose3DReadOnly getFootstepSolution();
 
