@@ -46,12 +46,15 @@ public class RDXBehaviorActionSequenceUI
    private final ImString newSequenceName = new ImString(256);
    private final TreeSet<RDXBehaviorActionSequenceEditor> editors = new TreeSet<>(Comparator.comparing(RDXBehaviorActionSequenceEditor::getName));
 
+   private boolean robotHasArms;
+
    public void create(WorkspaceResourceDirectory behaviorSequenceStorageDirectory,
                       RDX3DPanel panel3D,
                       DRCRobotModel robotModel,
                       ROS2Node ros2Node,
                       ROS2SyncedRobotModel syncedRobot,
-                      ReferenceFrameLibrary referenceFrameLibrary)
+                      ReferenceFrameLibrary referenceFrameLibrary,
+                      boolean robotHasArms)
    {
       this.behaviorSequenceStorageDirectory = behaviorSequenceStorageDirectory;
       this.panel3D = panel3D;
@@ -59,6 +62,7 @@ public class RDXBehaviorActionSequenceUI
       this.ros2Node = ros2Node;
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
+      this.robotHasArms = robotHasArms;
 
       BehaviorActionSequence.addCommonFrames(referenceFrameLibrary, syncedRobot);
       referenceFrameLibrary.build();
@@ -86,7 +90,7 @@ public class RDXBehaviorActionSequenceUI
       ImGui.sameLine();
       if (ImGui.button("Create new sequence"))
       {
-         var editor = new RDXBehaviorActionSequenceEditor(newSequenceName.get(), behaviorSequenceStorageDirectory);
+         var editor = new RDXBehaviorActionSequenceEditor(newSequenceName.get(), behaviorSequenceStorageDirectory, robotHasArms);
          editor.saveToFile();
          addEditor(editor);
       }
@@ -102,7 +106,7 @@ public class RDXBehaviorActionSequenceUI
 
          if (!alreadyLoaded)
          {
-            var editor = new RDXBehaviorActionSequenceEditor(queryContainedFile);
+            var editor = new RDXBehaviorActionSequenceEditor(queryContainedFile, robotHasArms);
             addEditor(editor);
             editor.loadActionsFromFile();
          }

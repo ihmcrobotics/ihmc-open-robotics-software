@@ -321,7 +321,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
          if (interactablesAvailable)
          {
-            armManager.update(interactableHands);
+            if (robotHasArms)
+               armManager.update(interactableHands);
 
             selfCollisionModel.update();
             environmentCollisionModel.update();
@@ -335,9 +336,12 @@ public class RDXTeleoperationManager extends ImGuiPanel
       if (interactablesAvailable)
       {
          allAreDeleted &= interactablePelvis.isDeleted();
-         for (RobotSide side : interactableHands.sides())
+         if (robotHasArms)
          {
-            allAreDeleted &= interactableHands.get(side).isDeleted();
+            for (RobotSide side : interactableHands.sides())
+            {
+               allAreDeleted &= interactableHands.get(side).isDeleted();
+            }
          }
          for (RobotSide side : interactableFeet.sides())
          {
@@ -403,9 +407,12 @@ public class RDXTeleoperationManager extends ImGuiPanel
                }
             }
 
-            for (RobotSide side : interactableHands.sides())
+            if (robotHasArms)
             {
-               interactableHands.get(side).process3DViewInput(input);
+               for (RobotSide side : interactableHands.sides())
+               {
+                  interactableHands.get(side).process3DViewInput(input);
+               }
             }
          }
       }
@@ -445,17 +452,20 @@ public class RDXTeleoperationManager extends ImGuiPanel
       locomotionManager.renderImGuiWidgets();
       ImGui.separator();
 
-      handManager.renderImGuiWidgets();
+      if (robotHasArms)
+         handManager.renderImGuiWidgets();
 
       if (ImGui.button(labels.get("Set Desired To Current")))
       {
-         armManager.setDesiredToCurrent();
+         if (armManager != null)
+            armManager.setDesiredToCurrent();
          desiredRobot.setDesiredToCurrent();
       }
 
       if (interactablesAvailable)
       {
-         armManager.renderImGuiWidgets();
+         if (armManager != null)
+            armManager.renderImGuiWidgets();
 
          ImGui.text("Pelvis:");
          ImGuiTools.previousWidgetTooltip("Send with: Spacebar");
@@ -463,12 +473,15 @@ public class RDXTeleoperationManager extends ImGuiPanel
          interactablePelvis.renderImGuiWidgets();
 
          boolean handInteractablesAreDeleted = true;
-         for (RobotSide side : interactableHands.sides())
+         if (robotHasArms)
          {
-            ImGui.text(side.getPascalCaseName() + " hand:");
-            ImGui.sameLine();
-            interactableHands.get(side).renderImGuiWidgets();
-            handInteractablesAreDeleted &= interactableHands.get(side).isDeleted();
+            for (RobotSide side : interactableHands.sides())
+            {
+               ImGui.text(side.getPascalCaseName() + " hand:");
+               ImGui.sameLine();
+               interactableHands.get(side).renderImGuiWidgets();
+               handInteractablesAreDeleted &= interactableHands.get(side).isDeleted();
+            }
          }
          desiredRobot.setActive(!handInteractablesAreDeleted);
 
