@@ -86,7 +86,7 @@ public class AtlasFinalsWorldStairsTest
       ReferenceFrame rootFrame = simulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint();
       FramePoint3D pelvisPosition = new FramePoint3D(rootFrame);
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, pelvisPosition.getZ() + 0.025);
+      PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, pelvisPosition.getZ());// + 0.025);
       simulationTestHelper.publishToController(message);
 
       success = simulationTestHelper.simulateNow(0.5);
