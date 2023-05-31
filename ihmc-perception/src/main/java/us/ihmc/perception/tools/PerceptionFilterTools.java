@@ -1,6 +1,5 @@
 package us.ihmc.perception.tools;
 
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -20,14 +19,12 @@ public class PerceptionFilterTools
 {
    public static void filterCollidingPlanarRegions(FramePlanarRegionsList regionsInSensor, CollidingScanRegionFilter filter)
    {
-      LogTools.info("Filtering planar regions: {}", regionsInSensor.getPlanarRegionsList().getNumberOfPlanarRegions());
       int i = 0;
       while (i < regionsInSensor.getPlanarRegionsList().getNumberOfPlanarRegions())
       {
          PlanarRegion regionInWorld = regionsInSensor.getPlanarRegionsList().getPlanarRegion(i).copy();
          regionInWorld.applyTransform(regionsInSensor.getSensorToWorldFrameTransform());
          boolean collision = !filter.test(i, regionInWorld);
-         LogTools.info("PlanarRegion {} test result: {}", i, collision);
          if (collision)
          {
             regionsInSensor.getPlanarRegionsList().pollPlanarRegion(i);
