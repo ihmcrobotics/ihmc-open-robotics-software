@@ -4,28 +4,40 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
+import us.ihmc.perception.headless.LocalizationAndMappingProcess;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.tools.PerceptionFilterTools;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
 public class HumanoidPerceptionModule
 {
-   private final PlanarRegionMappingHandler mapHandler = new PlanarRegionMappingHandler();
+   private final AtomicReference<FramePlanarRegionsList> frameRegionsReference = new AtomicReference<>();
+   private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
 
    private BytedecoImage bytedecoDepthImage;
    private OpenCLManager openCLManager;
+   private LocalizationAndMappingProcess localizationAndMappingProcess;
    private RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor;
    private CollidingScanRegionFilter collidingScanRegionFilter;
    private FullHumanoidRobotModel fullRobotModel;
@@ -57,28 +69,28 @@ public class HumanoidPerceptionModule
                                                     });
    }
 
-   public void update(Mat depthImage, ReferenceFrame cameraFrame, boolean enabled)
+   public void update(ROS2Helper ros2Helper, Mat depthImage, ReferenceFrame cameraFrame, boolean enabled)
    {
       if (enabled)
       {
-         if (robotConfigurationData != null && robotConfigurationData.getJointNameHash() != 0)
-         {
-            robotConfigurationDataBuffer.update(robotConfigurationData);
-            long newestTimestamp = robotConfigurationDataBuffer.getNewestTimestamp();
-            long selectedTimestamp = robotConfigurationDataBuffer.updateFullRobotModel(waitIfNecessary, newestTimestamp, this.fullRobotModel, null);
-         }
+         executorService.submit(() -> {
 
-         OpenCVTools.convertFloatToShort(depthImage, bytedecoDepthImage.getBytedecoOpenCVMat(),
-                                         1000.0,
-                                         0.0);
+            if (robotConfigurationData != null && robotConfigurationData.getJointNameHash() != 0)
+            {
+               robotConfigurationDataBuffer.update(robotConfigurationData);
+               long newestTimestamp = robotConfigurationDataBuffer.getNewestTimestamp();
+               long selectedTimestamp = robotConfigurationDataBuffer.updateFullRobotModel(waitIfNecessary, newestTimestamp, this.fullRobotModel, null);
+            }
 
-         extractFramePlanarRegionsList(cameraFrame);
-         filterFramePlanarRegionsList();
+            OpenCVTools.convertFloatToShort(depthImage, bytedecoDepthImage.getBytedecoOpenCVMat(),
+                                            1000.0,
+                                            0.0);
 
-         if (mapHandler.isEnabled())
-         {
-            mapHandler.updateMapWithNewRegions(this.sensorFrameRegions);
-         }
+            extractFramePlanarRegionsList(cameraFrame);
+            filterFramePlanarRegionsList();
+
+            PerceptionMessageTools.publishFramePlanarRegionsList(this.sensorFrameRegions, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
+         });
       }
    }
 
@@ -102,6 +114,12 @@ public class HumanoidPerceptionModule
       this.fullRobotModel = fullRobotModel;
       this.collisionBoxProvider = collisionBoxProvider;
       this.collidingScanRegionFilter = PerceptionFilterTools.createHumanoidShinCollisionFilter(fullRobotModel, collisionBoxProvider);
+   }
+
+   public void initializeLocalizationAndMappingProcess(String robotName, ROS2Node ros2Node, boolean smoothing)
+   {
+      localizationAndMappingProcess = new LocalizationAndMappingProcess(robotName, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
+              PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE, ros2Node, smoothing);
    }
 
    public void extractFramePlanarRegionsList(ReferenceFrame cameraFrame)
@@ -150,8 +168,18 @@ public class HumanoidPerceptionModule
       return this.rapidPlanarRegionsExtractor;
    }
 
-   public PlanarRegionMappingHandler getMapHandler()
+   public void destroy()
    {
-      return this.mapHandler;
+      executorService.shutdownNow();
+
+      try {
+         boolean result = executorService.awaitTermination(1, TimeUnit.SECONDS);
+         Thread.sleep(1000);
+      } catch (InterruptedException e) {
+         throw new RuntimeException(e);
+      }
+
+      rapidPlanarRegionsExtractor.destroy();
+      localizationAndMappingProcess.destroy();
    }
 }

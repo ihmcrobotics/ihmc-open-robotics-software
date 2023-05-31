@@ -95,15 +95,23 @@ public class PlanarRegionMap
    private PlanarRegionsList finalMap;
 
 
-   public PlanarRegionMap()
+   public PlanarRegionMap(boolean useSmoothingMerger)
    {
-      this("");
+      this(useSmoothingMerger, "");
    }
 
-   public PlanarRegionMap(String version)
+   public PlanarRegionMap(boolean useSmoothingMerger, String version)
    {
-      this.merger = MergingMode.SMOOTHING;
-      factorGraph = new SlamWrapper.FactorGraphExternal();
+      if (useSmoothingMerger)
+      {
+         this.merger = MergingMode.SMOOTHING;
+
+         factorGraph = new SlamWrapper.FactorGraphExternal();
+      }
+      else
+      {
+         this.merger = MergingMode.FILTERING;
+      }
 
       parameters = new PlanarRegionMappingParameters(version);
       finalMap = new PlanarRegionsList();

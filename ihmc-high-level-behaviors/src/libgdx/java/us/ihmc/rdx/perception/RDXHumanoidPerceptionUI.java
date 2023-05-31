@@ -1,22 +1,22 @@
 package us.ihmc.rdx.perception;
 
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.perception.HumanoidPerceptionModule;
-import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
-import us.ihmc.robotics.geometry.FramePlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2PlanarRegionsVisualizer;
+import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
+import us.ihmc.ros2.ROS2Node;
 
 public class RDXHumanoidPerceptionUI
 {
    private HumanoidPerceptionModule humanoidPerception;
-   private RDXPlanarRegionsGraphic mapRegionsGraphic;
    private RDXRapidRegionsUI rapidRegionsUI;
-   private RDXPlanarRegionMappingUI terrainMappingUI;
+   private RDXROS2PlanarRegionsVisualizer rapidRegionsMapVisualizer;
+   private RDXROS2FramePlanarRegionsVisualizer rapidRegionsVisualizer;
 
    public RDXHumanoidPerceptionUI(HumanoidPerceptionModule humanoidPerception)
    {
       this.humanoidPerception = humanoidPerception;
-      this.terrainMappingUI = new RDXPlanarRegionMappingUI("Filtered Map", humanoidPerception.getMapHandler());
-      this.mapRegionsGraphic = new RDXPlanarRegionsGraphic();
       this.rapidRegionsUI = new RDXRapidRegionsUI();
       this.rapidRegionsUI.create(humanoidPerception.getRapidRegionsExtractor());
    }
@@ -24,33 +24,26 @@ public class RDXHumanoidPerceptionUI
    public void renderImGuiWidgets()
    {
       rapidRegionsUI.renderImGuiWidgets();
-      terrainMappingUI.renderImGuiWidgets();
    }
 
    public void render()
    {
       rapidRegionsUI.render();
-
-      FramePlanarRegionsList frameRegions = humanoidPerception.getFramePlanarRegionsResult();
-      PlanarRegionsList planarRegionsList = frameRegions.getPlanarRegionsList();
-
-      if (planarRegionsList != null && humanoidPerception.getRapidRegionsExtractor().isModified())
-      {
-         rapidRegionsUI.render3DGraphics(frameRegions);
-         humanoidPerception.getRapidRegionsExtractor().setProcessing(false);
-      }
-
-      if (humanoidPerception.getMapHandler().pollIsModified() && humanoidPerception.getMapHandler().hasPlanarRegionsToRender())
-      {
-         mapRegionsGraphic.clear();
-         mapRegionsGraphic.generateMeshes(humanoidPerception.getMapHandler().pollMapRegions());
-         mapRegionsGraphic.update();
-      }
    }
 
-   public RDXPlanarRegionMappingUI getTerrainMappingUI()
+   public void initializePerspectiveRegionsVisualizer(ROS2Node ros2Node, RDXGlobalVisualizersPanel globalVisualizersUI, boolean render) {
+      rapidRegionsMapVisualizer = new RDXROS2PlanarRegionsVisualizer("SLAM Rapid Regions",
+              ros2Node, PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS);
+      rapidRegionsMapVisualizer.setActive(render);
+      globalVisualizersUI.addVisualizer(rapidRegionsMapVisualizer);
+   }
+
+   public void initializeMapRegionsVisualizer(ROS2Node ros2Node, RDXGlobalVisualizersPanel globalVisualizersUI, boolean render)
    {
-      return terrainMappingUI;
+      rapidRegionsVisualizer = new RDXROS2FramePlanarRegionsVisualizer("Rapid Regions",
+              ros2Node, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS);
+      rapidRegionsVisualizer.setActive(render);
+      globalVisualizersUI.addVisualizer(rapidRegionsVisualizer);
    }
 
    public RDXRapidRegionsUI getRapidRegionsUI()
@@ -58,8 +51,10 @@ public class RDXHumanoidPerceptionUI
       return rapidRegionsUI;
    }
 
-   public RDXPlanarRegionsGraphic getMapRegionsGraphic()
+   public void destroy()
    {
-      return mapRegionsGraphic;
+      rapidRegionsUI.destroy();
+      rapidRegionsVisualizer.destroy();
+      rapidRegionsMapVisualizer.destroy();
    }
 }
