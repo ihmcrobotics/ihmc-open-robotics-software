@@ -225,15 +225,15 @@ public class RDXPose3DGizmo implements RenderableProvider
          queuePopupToOpen = true;
       }
 
-      updateMaterialHighlighting();
-
       if (isGizmoHovered && manipulationDragData.getDragJustStarted())
       {
          clockFaceDragAlgorithm.reset();
          manipulationDragData.setObjectBeingDragged(this);
       }
+      isBeingManipulated = manipulationDragData.isBeingDragged(this);
 
-      isBeingManipulated = manipulationDragData.getObjectBeingDragged() == this;
+      updateMaterialHighlighting();
+
       if (isBeingManipulated)
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
@@ -463,7 +463,7 @@ public class RDXPose3DGizmo implements RenderableProvider
 
    private void updateMaterialHighlighting()
    {
-      boolean prior = (isGizmoHovered || isBeingManipulated) && closestCollisionSelection != null;
+      boolean prior = isGizmoHovered || isBeingManipulated;
       // could only do this when selection changed
       for (Axis3D axis : Axis3D.values)
       {

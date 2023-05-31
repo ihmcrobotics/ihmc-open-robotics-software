@@ -239,7 +239,7 @@ public class RDXFocusBasedCamera extends Camera
       {
          orbitDragData.setObjectBeingDragged(this);
       }
-      if (orbitDragData.isDragging() && orbitDragData.getObjectBeingDragged() == this)
+      if (orbitDragData.isBeingDragged(this))
       {
          mouseDragged(orbitDragData.getMouseDraggedX(), orbitDragData.getMouseDraggedY());
       }
@@ -248,7 +248,7 @@ public class RDXFocusBasedCamera extends Camera
       {
          panDragData.setObjectBeingDragged(this);
       }
-      if (panDragData != null && panDragData.isDragging() && panDragData.getObjectBeingDragged() == this)
+      if (panDragData != null && panDragData.isBeingDragged(this))
       {
          mousePanned(panDragData.getMouseDraggedX(), panDragData.getMouseDraggedY());
       }
