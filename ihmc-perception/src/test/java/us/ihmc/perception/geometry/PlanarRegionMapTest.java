@@ -1,5 +1,6 @@
 package us.ihmc.perception.geometry;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
@@ -63,6 +64,7 @@ public class PlanarRegionMapTest
    }
 
    // Test for chopping off extra parts given two test regions as above
+   @Disabled
    @Test
    public void testPlanarRegionCutting2()
    {

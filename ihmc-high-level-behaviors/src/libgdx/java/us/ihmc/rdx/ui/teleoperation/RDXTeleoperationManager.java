@@ -196,6 +196,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       desiredRobot.create();
 
       locomotionManager.create(baseUI);
+      addChild(locomotionManager.getLocomotionParametersTuner());
 
       footstepPlanningParametersTuner.create(footstepPlannerParameters, false, () -> locomotionManager.setFootstepPlannerParameters(footstepPlannerParameters));
       bodyPathPlanningParametersTuner.create(bodyPathPlannerParameters, false, () -> locomotionManager.setBodyPathPlannerParameters(bodyPathPlannerParameters));
