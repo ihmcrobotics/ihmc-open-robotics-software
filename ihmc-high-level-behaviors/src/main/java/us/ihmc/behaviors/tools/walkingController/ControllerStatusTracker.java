@@ -146,6 +146,11 @@ public class ControllerStatusTracker
       return isWalking;
    }
 
+   public Notification getFinishedWalkingNotification()
+   {
+      return finishedWalkingNotification;
+   }
+
    public boolean isInWalkingState()
    {
       return capturabilityBasedStatusTimer.isRunning(CAPTURABILITY_BASED_STATUS_EXPIRATION_TIME);
