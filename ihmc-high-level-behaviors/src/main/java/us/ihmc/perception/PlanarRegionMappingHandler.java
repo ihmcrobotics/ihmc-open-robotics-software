@@ -123,13 +123,13 @@ public class PlanarRegionMappingHandler
    public PlanarRegionMappingHandler()
    {
       source = DataSource.SUBMIT_API;
-      planarRegionMap = new PlanarRegionMap();
+      planarRegionMap = new PlanarRegionMap(true);
    }
 
    public PlanarRegionMappingHandler(String simpleRobotName, ROS2Node ros2Node)
    {
       source = DataSource.ROS2_CALLBACK;
-      planarRegionMap = new PlanarRegionMap();
+      planarRegionMap = new PlanarRegionMap(true);
 
       if (ros2Node != null)
       {
@@ -175,7 +175,7 @@ public class PlanarRegionMappingHandler
 
    private void createTerrain(int depthHeight, int depthWidth, boolean simulation)
    {
-      planarRegionMap = new PlanarRegionMap("Fast");
+      planarRegionMap = new PlanarRegionMap(true, "Fast");
       sensorLogChannelName = PerceptionLoggerConstants.L515_DEPTH_NAME;
 
       String version = simulation ? "Simulation" : "";
@@ -193,7 +193,7 @@ public class PlanarRegionMappingHandler
 
    private void createOuster(int depthHeight, int depthWidth)
    {
-      planarRegionMap = new PlanarRegionMap("Spherical");
+      planarRegionMap = new PlanarRegionMap(true, "Spherical");
       sensorLogChannelName = PerceptionLoggerConstants.OUSTER_DEPTH_NAME;
       rapidRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth);
       rapidPatchesBasedICP.create(openCLManager, openCLProgram, depthHeight, depthWidth);
@@ -209,7 +209,7 @@ public class PlanarRegionMappingHandler
    public PlanarRegionMappingHandler(File planarRegionLogDirectory)
    {
       source = DataSource.PLANAR_REGIONS_LOG;
-      planarRegionMap = new PlanarRegionMap();
+      planarRegionMap = new PlanarRegionMap(true);
 
       for (File file : planarRegionLogDirectory.listFiles())
       {
