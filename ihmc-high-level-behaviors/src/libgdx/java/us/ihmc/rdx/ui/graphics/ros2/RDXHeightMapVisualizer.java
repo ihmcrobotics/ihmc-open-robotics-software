@@ -50,8 +50,6 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    public void create()
    {
       super.create();
-
-      setActive(true);
    }
 
    public void acceptHeightMapMessage(HeightMapMessage heightMapMessage)
