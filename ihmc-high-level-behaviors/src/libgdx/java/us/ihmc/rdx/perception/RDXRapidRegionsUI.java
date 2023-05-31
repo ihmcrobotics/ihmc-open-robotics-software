@@ -140,20 +140,17 @@ public class RDXRapidRegionsUI implements RenderableProvider
 
    public void render3DGraphics(FramePlanarRegionsList planarRegions)
    {
-      framePose.setToZero(ReferenceFrame.getWorldFrame());
-      framePose.set(planarRegions.getSensorToWorldFrameTransform());
-      LibGDXTools.toLibGDX(framePose, tempTransform, sensorFrameGraphic.transform);
-
-      PlanarRegionsList regionsToRender = planarRegions.getPlanarRegionsList().copy();
-      regionsToRender.applyTransform(planarRegions.getSensorToWorldFrameTransform());
-
-      synchronized (planarRegionsGraphic)
+      if (render3DPlanarRegions.get())
       {
-         if (render3DPlanarRegions.get())
-         {
-            planarRegionsGraphic.generateMeshes(regionsToRender);
-            planarRegionsGraphic.update();
-         }
+         framePose.setToZero(ReferenceFrame.getWorldFrame());
+         framePose.set(planarRegions.getSensorToWorldFrameTransform());
+         LibGDXTools.toLibGDX(framePose, tempTransform, sensorFrameGraphic.transform);
+
+         PlanarRegionsList regionsToRender = planarRegions.getPlanarRegionsList().copy();
+         regionsToRender.applyTransform(planarRegions.getSensorToWorldFrameTransform());
+
+         planarRegionsGraphic.generateMeshes(regionsToRender);
+         planarRegionsGraphic.update();
       }
    }
 
