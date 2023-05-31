@@ -3,6 +3,10 @@ package us.ihmc.robotModels;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -50,5 +54,25 @@ public class FullRobotModelUtils
          to.getOneDoFJoints()[i].setJointConfiguration(from.getOneDoFJoints()[i]);
       }
       to.updateFrames();
+   }
+
+   /**
+    * For IK solvers that solve for the CoM of the hand, this is used to
+    * specify the desired as the hand "control" frame, which is usually the
+    * center of the palm.
+    */
+   public static Point3D getHandCenterOfMassInControlFrame(FullHumanoidRobotModel model, RobotSide side, RigidBodyTransform handControlFrameToWristTransform)
+   {
+      RigidBodyBasics hand = model.getHand(side);
+      MovingReferenceFrame lastWristFrameAfterJoint = hand.getParentJoint().getFrameAfterJoint();
+
+      FramePoint3D frameHandCenterOfMass = new FramePoint3D();
+      hand.getCenterOfMass(frameHandCenterOfMass);
+      frameHandCenterOfMass.changeFrame(lastWristFrameAfterJoint);
+      frameHandCenterOfMass.applyTransform(handControlFrameToWristTransform);
+
+      Point3D handCenterOfMass = new Point3D();
+      handCenterOfMass.set(frameHandCenterOfMass);
+      return handCenterOfMass;
    }
 }
