@@ -51,6 +51,7 @@ public class RapidPlanarRegionsExtractor
    private BMatrixRMaj boundaryMatrix;
    private DMatrixRMaj regionMatrix;
 
+   private boolean enabled = true;
    private boolean patchSizeChanged = true;
    private boolean modified = true;
    private boolean processing = false;
@@ -172,7 +173,7 @@ public class RapidPlanarRegionsExtractor
 
    public void update(BytedecoImage input16UC1DepthImage, ReferenceFrame cameraFrame, FramePlanarRegionsList frameRegions)
    {
-      if (!processing)
+      if (!processing && enabled)
       {
          processing = true;
          debugger.clearDebugImage();
@@ -782,5 +783,15 @@ public class RapidPlanarRegionsExtractor
    {
       this.processing = processing;
    }
+
+   public boolean getEnabled()
+   {
+      return enabled;
+   }
+
+    public void setEnabled(boolean enabled)
+    {
+        this.enabled = enabled;
+    }
 }
 

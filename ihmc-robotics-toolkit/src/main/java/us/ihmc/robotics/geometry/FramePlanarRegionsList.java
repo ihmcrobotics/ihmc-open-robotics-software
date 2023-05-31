@@ -38,4 +38,15 @@ public class FramePlanarRegionsList
    {
       this.sensorToWorldFrameTransform = sensorToWorldFrameTransform;
    }
+
+   public FramePlanarRegionsList copy()
+   {
+      return new FramePlanarRegionsList(planarRegionsList.copy(), new RigidBodyTransform(sensorToWorldFrameTransform));
+   }
+
+   public void clear()
+   {
+      planarRegionsList.clear();
+      sensorToWorldFrameTransform.setIdentity();
+   }
 }
