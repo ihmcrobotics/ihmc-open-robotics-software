@@ -463,6 +463,10 @@ public class RDXVRKinematicsStreamingMode
          wakeUpToolbox();
          kinematicsRecorder.setReplay(false); //check no concurrency replay and streaming
       }
+      else
+      {
+         sharedControlAssistant.setEnabled(false);
+      }
    }
 
    public boolean isEnabled()

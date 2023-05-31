@@ -420,6 +420,9 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       }
       else
          affordanceEditor.rewindActions(true);
+
+      if (affordanceEditor.isAffordanceOver())
+         setEnabled(false);
    }
 
 
@@ -437,7 +440,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       ghostRobotGraphic.destroy();
    }
 
-   private void setEnabled(boolean enabled)
+   public void setEnabled(boolean enabled)
    {
       if (enabled != this.enabled.get())
       {

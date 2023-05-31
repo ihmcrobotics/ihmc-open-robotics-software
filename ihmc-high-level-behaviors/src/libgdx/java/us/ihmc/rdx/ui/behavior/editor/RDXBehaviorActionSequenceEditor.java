@@ -546,6 +546,11 @@ public class RDXBehaviorActionSequenceEditor
       ros2.publish(BehaviorActionSequence.PLAYBACK_AUTOMATIC_EXECUTION_COMMAND_TOPIC, playbackAutomaticExecutionCommandMessage);
    }
 
+   public boolean isAffordanceOver()
+   {
+      return executionNextIndexStatus >= actionSequence.size();
+   }
+
    private RDXFootstepAction findNextPreviousFootstepAction()
    {
       RDXFootstepAction previousAction = null;
