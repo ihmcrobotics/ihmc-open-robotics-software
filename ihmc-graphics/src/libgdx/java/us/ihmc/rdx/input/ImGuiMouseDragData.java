@@ -54,6 +54,11 @@ public class ImGuiMouseDragData
       return dragging;
    }
 
+   public boolean isBeingDragged(Object objectInQuestion)
+   {
+      return objectBeingDragged == objectInQuestion && dragging;
+   }
+
    public boolean getDragJustStarted()
    {
       return dragJustStarted;
@@ -72,10 +77,5 @@ public class ImGuiMouseDragData
    public void setObjectBeingDragged(Object objectBeingDragged)
    {
       this.objectBeingDragged = objectBeingDragged;
-   }
-
-   public Object getObjectBeingDragged()
-   {
-      return objectBeingDragged;
    }
 }

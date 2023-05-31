@@ -288,8 +288,8 @@ public class RDXPathControlRingGizmo implements RenderableProvider
             translateDragData.setObjectBeingDragged(this);
          }
       }
+      isBeingManipulated = translateDragData.isBeingDragged(this) || yawDragData.isBeingDragged(this);
 
-      isBeingManipulated = (translateDragData.getObjectBeingDragged() == this) || (yawDragData.getObjectBeingDragged() == this);
       if (isBeingManipulated)
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();

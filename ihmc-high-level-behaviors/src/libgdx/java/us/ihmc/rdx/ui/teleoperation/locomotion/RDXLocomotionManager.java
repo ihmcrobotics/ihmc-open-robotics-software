@@ -131,6 +131,8 @@ public class RDXLocomotionManager
 
    public void update()
    {
+      controllerStatusTracker.checkControllerIsRunning();
+
       if (ballAndArrowMidFeetPosePlacement.getPlacedNotification().poll())
       {
          footstepPlanning.setMidFeetGoalPose(ballAndArrowMidFeetPosePlacement.getGoalPose());
