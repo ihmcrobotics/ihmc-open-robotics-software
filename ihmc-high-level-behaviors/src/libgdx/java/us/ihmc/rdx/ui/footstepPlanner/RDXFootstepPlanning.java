@@ -106,9 +106,6 @@ public class RDXFootstepPlanning
          footstepPlanner.halt();
       }
 
-      // For some reason this will grow unbounded unless we clear it
-      footstepPlanner.getOutput().getBodyPath().clear();
-
       PlanarRegionsListMessage planarRegionsListMessage = planarRegionsListMessageReference.get();
       HeightMapMessage heightMapMessage = heightMapDataReference.get();
       PlanarRegionsList planarRegionsList = planarRegionsListReference.get();
