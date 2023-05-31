@@ -177,4 +177,14 @@ public class ControllerStatusTracker
    {
       return footstepTracker;
    }
+
+   public void checkControllerIsRunning()
+   {
+      boolean controllerIsRunning = robotConfigurationDataTimer.isRunning(CAPTURABILITY_BASED_STATUS_EXPIRATION_TIME);
+
+      if (!controllerIsRunning)
+      {
+         reset();
+      }
+   }
 }

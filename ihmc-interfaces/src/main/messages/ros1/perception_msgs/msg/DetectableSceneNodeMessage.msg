@@ -11,7 +11,8 @@ bool currently_detected
 controller_msgs/RigidBodyTransformMessage transform_to_world
 
 # If this node is trackable via an ArUco maker, this is the ArUco marker's
-# transform to world frame
+# transform to world frame. This is so we can reset overriden node
+# poses back to ArUco relative ones.
 controller_msgs/RigidBodyTransformMessage aruco_marker_transform_to_world
 
 # Keeps track of when the operator has overridden the pose of this node
