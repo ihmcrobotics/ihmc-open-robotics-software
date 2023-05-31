@@ -1,102 +1,110 @@
 package us.ihmc.valkyrie.network;
 
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.valkyrie.hands.athena.AthenaHandModel.AthenaFingerMotorName;
+import valkyrie_msgs.msg.dds.AthenaTrajectoryMessage;
 
 public class ValkyrieMessageTools
 {
-   public static ValkyrieHandFingerTrajectoryMessage createValkyrieHandFingerTrajectoryMessage(RobotSide robotSide,
-                                                                                               AthenaFingerMotorName[] valkyrieFingerMotors,
-                                                                                               double trajectoryTime, double[] desiredJointPositions)
+   public static AthenaTrajectoryMessage createAthenaTrajectoryMessage(RobotSide robotSide,
+                                                                       AthenaFingerMotorName[] athenaFingerMotors,
+                                                                       double trajectoryTime,
+                                                                       double[] desiredJointPositions)
    {
-      int dimension = valkyrieFingerMotors.length;
-      byte[] valkyrieFingerMotorNames = new byte[dimension];
+      int dimension = athenaFingerMotors.length;
+      byte[] fingerMotorNames = new byte[dimension];
       for (int i = 0; i < dimension; i++)
-         valkyrieFingerMotorNames[i] = valkyrieFingerMotors[i].toByte();
-      return createValkyrieHandFingerTrajectoryMessage(robotSide, valkyrieFingerMotorNames, trajectoryTime, desiredJointPositions);
+         fingerMotorNames[i] = athenaFingerMotors[i].toByte();
+      return createAthenaTrajectoryMessage(robotSide, fingerMotorNames, trajectoryTime, desiredJointPositions);
    }
 
-   public static ValkyrieHandFingerTrajectoryMessage createValkyrieHandFingerTrajectoryMessage(RobotSide robotSide, byte[] valkyrieFingerMotorNames,
-                                                                                               double trajectoryTime, double[] desiredJointPositions)
+   public static AthenaTrajectoryMessage createAthenaTrajectoryMessage(RobotSide robotSide,
+                                                                       byte[] fingerMotorNames,
+                                                                       double trajectoryTime,
+                                                                       double[] desiredJointPositions)
    {
-      if (valkyrieFingerMotorNames.length != desiredJointPositions.length)
-         throw new RuntimeException("number of fingers should be same with number of trajectory data " + valkyrieFingerMotorNames.length);
+      if (fingerMotorNames.length != desiredJointPositions.length)
+         throw new RuntimeException("number of fingers should be same with number of trajectory data " + fingerMotorNames.length);
 
-      ValkyrieHandFingerTrajectoryMessage message = new ValkyrieHandFingerTrajectoryMessage();
+      AthenaTrajectoryMessage message = new AthenaTrajectoryMessage();
 
       message.setRobotSide(robotSide.toByte());
 
-      int dimension = valkyrieFingerMotorNames.length;
+      int dimension = fingerMotorNames.length;
 
       for (int i = 0; i < dimension; i++)
-         message.getValkyrieFingerMotorNames().add(valkyrieFingerMotorNames[i]);
+         message.getFingerMotorNames().add(fingerMotorNames[i]);
 
       message.getJointspaceTrajectory().set(HumanoidMessageTools.createJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions));
 
       return message;
    }
 
-   public static ValkyrieHandFingerTrajectoryMessage createValkyrieHandFingerTrajectoryMessage(RobotSide robotSide,
-                                                                                               AthenaFingerMotorName[] valkyrieFingerMotors,
-                                                                                               OneDoFTrajectoryPointList[] trajectoryData)
+   public static AthenaTrajectoryMessage createAthenaTrajectoryMessage(RobotSide robotSide,
+                                                                       AthenaFingerMotorName[] athenaFingerMotors,
+                                                                       OneDoFTrajectoryPointList[] trajectoryData)
    {
-      int dimension = valkyrieFingerMotors.length;
+      int dimension = athenaFingerMotors.length;
       byte[] valkyrieFingerMotorNames = new byte[dimension];
       for (int i = 0; i < dimension; i++)
-         valkyrieFingerMotorNames[i] = valkyrieFingerMotors[i].toByte();
-      return createValkyrieHandFingerTrajectoryMessage(robotSide, valkyrieFingerMotorNames, trajectoryData);
+         valkyrieFingerMotorNames[i] = athenaFingerMotors[i].toByte();
+      return createAthenaTrajectoryMessage(robotSide, valkyrieFingerMotorNames, trajectoryData);
    }
 
-   public static ValkyrieHandFingerTrajectoryMessage createValkyrieHandFingerTrajectoryMessage(RobotSide robotSide, byte[] valkyrieFingerMotorNames,
-                                                                                               OneDoFTrajectoryPointList[] trajectoryData)
+   public static AthenaTrajectoryMessage createAthenaTrajectoryMessage(RobotSide robotSide, byte[] fingerMotorNames, OneDoFTrajectoryPointList[] trajectoryData)
    {
-      if (valkyrieFingerMotorNames.length != trajectoryData.length)
-         throw new RuntimeException("number of fingers should be same with number of trajectory data " + valkyrieFingerMotorNames.length);
+      if (fingerMotorNames.length != trajectoryData.length)
+         throw new RuntimeException("number of fingers should be same with number of trajectory data " + fingerMotorNames.length);
 
-      ValkyrieHandFingerTrajectoryMessage message = new ValkyrieHandFingerTrajectoryMessage();
+      AthenaTrajectoryMessage message = new AthenaTrajectoryMessage();
 
       message.setRobotSide(robotSide.toByte());
 
-      int dimension = valkyrieFingerMotorNames.length;
+      int dimension = fingerMotorNames.length;
 
       for (int i = 0; i < dimension; i++)
       {
-         message.getValkyrieFingerMotorNames().add(valkyrieFingerMotorNames[i]);
+         message.getFingerMotorNames().add(fingerMotorNames[i]);
          message.getJointspaceTrajectory().getJointTrajectoryMessages().add(HumanoidMessageTools.createOneDoFJointTrajectoryMessage(trajectoryData[i]));
       }
 
       return message;
    }
 
-   public static void appendDesiredFingerConfiguration(AthenaFingerMotorName motorNameToAppend, double time, double desiredConfiguration,
-                                                       ValkyrieHandFingerTrajectoryMessage messageToAppend)
+   public static void appendDesiredFingerConfiguration(AthenaFingerMotorName motorNameToAppend,
+                                                       double time,
+                                                       double desiredConfiguration,
+                                                       AthenaTrajectoryMessage messageToAppend)
    {
       appendDesiredFingerConfiguration(motorNameToAppend.toByte(), time, desiredConfiguration, messageToAppend);
    }
 
-   public static void appendDesiredFingerConfiguration(byte motorNameByteToAppend, double time, double desiredConfiguration,
-                                                       ValkyrieHandFingerTrajectoryMessage messageToAppend)
+   public static void appendDesiredFingerConfiguration(byte motorNameByteToAppend,
+                                                       double time,
+                                                       double desiredConfiguration,
+                                                       AthenaTrajectoryMessage messageToAppend)
    {
-      messageToAppend.getValkyrieFingerMotorNames().add(motorNameByteToAppend);
+      messageToAppend.getFingerMotorNames().add(motorNameByteToAppend);
       Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = messageToAppend.getJointspaceTrajectory().getJointTrajectoryMessages();
       jointTrajectoryMessages.add().set(HumanoidMessageTools.createOneDoFJointTrajectoryMessage(time, desiredConfiguration));
    }
 
-   public static void appendDesiredFingerConfiguration(AthenaFingerMotorName motorNameToAppend, OneDoFTrajectoryPointList trajectoryData,
-                                                       ValkyrieHandFingerTrajectoryMessage messageToAppend)
+   public static void appendDesiredFingerConfiguration(AthenaFingerMotorName motorNameToAppend,
+                                                       OneDoFTrajectoryPointList trajectoryData,
+                                                       AthenaTrajectoryMessage messageToAppend)
    {
       appendDesiredFingerConfiguration(motorNameToAppend.toByte(), trajectoryData, messageToAppend);
    }
 
-   public static void appendDesiredFingerConfiguration(byte motorNameByteToAppend, OneDoFTrajectoryPointList trajectoryData,
-                                                       ValkyrieHandFingerTrajectoryMessage messageToAppend)
+   public static void appendDesiredFingerConfiguration(byte motorNameByteToAppend,
+                                                       OneDoFTrajectoryPointList trajectoryData,
+                                                       AthenaTrajectoryMessage messageToAppend)
    {
-      messageToAppend.getValkyrieFingerMotorNames().add(motorNameByteToAppend);
+      messageToAppend.getFingerMotorNames().add(motorNameByteToAppend);
       Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = messageToAppend.getJointspaceTrajectory().getJointTrajectoryMessages();
       jointTrajectoryMessages.add().set(HumanoidMessageTools.createOneDoFJointTrajectoryMessage(trajectoryData));
    }

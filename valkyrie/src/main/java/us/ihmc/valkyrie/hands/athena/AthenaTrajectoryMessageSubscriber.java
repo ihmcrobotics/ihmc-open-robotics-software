@@ -1,29 +1,29 @@
-package us.ihmc.humanoidRobotics.communication.subscribers;
+package us.ihmc.valkyrie.hands.athena;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.NewMessageListener;
+import valkyrie_msgs.msg.dds.AthenaTrajectoryMessage;
 
-public class ValkyrieHandFingerTrajectoryMessageSubscriber implements NewMessageListener<ValkyrieHandFingerTrajectoryMessage>
+public class AthenaTrajectoryMessageSubscriber implements NewMessageListener<AthenaTrajectoryMessage>
 {
-   private final ConcurrentLinkedQueue<ValkyrieHandFingerTrajectoryMessage> messageQueue = new ConcurrentLinkedQueue<ValkyrieHandFingerTrajectoryMessage>();
+   private final ConcurrentLinkedQueue<AthenaTrajectoryMessage> messageQueue = new ConcurrentLinkedQueue<>();
    private RobotSide robotSide;
 
-   public ValkyrieHandFingerTrajectoryMessageSubscriber(RobotSide robotSide)
+   public AthenaTrajectoryMessageSubscriber(RobotSide robotSide)
    {
       this.robotSide = robotSide;
    }
 
    @Override
-   public void onNewDataMessage(Subscriber<ValkyrieHandFingerTrajectoryMessage> subscriber)
+   public void onNewDataMessage(Subscriber<AthenaTrajectoryMessage> subscriber)
    {
       receivedPacket(subscriber.takeNextData());
    }
 
-   public void receivedPacket(ValkyrieHandFingerTrajectoryMessage ihmcMessage)
+   public void receivedPacket(AthenaTrajectoryMessage ihmcMessage)
    {
       if (this.robotSide == null)
          messageQueue.add(ihmcMessage);
@@ -31,7 +31,7 @@ public class ValkyrieHandFingerTrajectoryMessageSubscriber implements NewMessage
          messageQueue.add(ihmcMessage);
    }
 
-   public ValkyrieHandFingerTrajectoryMessage pollMessage()
+   public AthenaTrajectoryMessage pollMessage()
    {
       return messageQueue.poll();
    }

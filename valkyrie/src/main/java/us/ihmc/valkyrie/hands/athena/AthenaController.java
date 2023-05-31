@@ -4,7 +4,6 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.idl.IDLSequence.Object;
@@ -18,6 +17,7 @@ import us.ihmc.valkyrieRosControl.ValkyrieRosControlAthenaStateEstimator;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import valkyrie_msgs.msg.dds.AthenaTrajectoryMessage;
 
 public class AthenaController implements RobotController
 {
@@ -194,13 +194,13 @@ public class AthenaController implements RobotController
       fingerSetTrajectoryGenerator.executeTrajectories();
    }
 
-   public void getHandFingerTrajectoryMessage(ValkyrieHandFingerTrajectoryMessage handFingerTrajectoryMessage)
+   public void getAthenaTrajectoryMessage(AthenaTrajectoryMessage athenaTrajectoryMessage)
    {
       fingerSetTrajectoryGenerator.clearTrajectories();
 
       for (AthenaFingerMotorName fingerMotorName : AthenaFingerMotorName.values)
       {
-         int indexOfTrajectory = hasTrajectory(handFingerTrajectoryMessage.getValkyrieFingerMotorNames(), fingerMotorName);
+         int indexOfTrajectory = hasTrajectory(athenaTrajectoryMessage.getFingerMotorNames(), fingerMotorName);
 
          if (indexOfTrajectory == -1)
          {
@@ -208,7 +208,7 @@ public class AthenaController implements RobotController
          }
          else
          {
-            Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = handFingerTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages();
+            Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = athenaTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages();
             Object<TrajectoryPoint1DMessage> trajectoryPoints = jointTrajectoryMessages.get(indexOfTrajectory).getTrajectoryPoints();
 
             for (int i = 0; i < trajectoryPoints.size(); i++)

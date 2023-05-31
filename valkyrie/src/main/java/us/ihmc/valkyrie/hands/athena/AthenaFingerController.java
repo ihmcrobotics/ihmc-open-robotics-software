@@ -6,11 +6,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
-import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
-import us.ihmc.humanoidRobotics.communication.subscribers.ValkyrieHandFingerTrajectoryMessageSubscriber;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -22,6 +20,7 @@ import us.ihmc.valkyrieRosControl.ValkyrieRosControlAthenaStateEstimator;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import valkyrie_msgs.msg.dds.AthenaTrajectoryMessage;
 
 public class AthenaFingerController implements RobotController
 {
@@ -31,7 +30,7 @@ public class AthenaFingerController implements RobotController
    private final YoDouble time;
 
    private final SideDependentList<HandDesiredConfigurationMessageSubscriber> handDesiredConfigurationMessageSubscribers = new SideDependentList<>();
-   private final SideDependentList<ValkyrieHandFingerTrajectoryMessageSubscriber> valkyrieHandFingerTrajectoryMessageSubscribers = new SideDependentList<>();
+   private final SideDependentList<AthenaTrajectoryMessageSubscriber> athenaTrajectoryMessageSubscribers = new SideDependentList<>();
    private final SideDependentList<AthenaController> fingerSetControllers = new SideDependentList<>();
 
    public AthenaFingerController(YoDouble yoTime,
@@ -67,8 +66,8 @@ public class AthenaFingerController implements RobotController
       {
          HandDesiredConfigurationMessageSubscriber subscriber = new HandDesiredConfigurationMessageSubscriber(robotSide);
          handDesiredConfigurationMessageSubscribers.put(robotSide, subscriber);
-         ValkyrieHandFingerTrajectoryMessageSubscriber valkyrieHandFingerTrajectoryMessageSubscriber = new ValkyrieHandFingerTrajectoryMessageSubscriber(robotSide);
-         valkyrieHandFingerTrajectoryMessageSubscribers.put(robotSide, valkyrieHandFingerTrajectoryMessageSubscriber);
+         AthenaTrajectoryMessageSubscriber valkyrieHandFingerTrajectoryMessageSubscriber = new AthenaTrajectoryMessageSubscriber(robotSide);
+         athenaTrajectoryMessageSubscribers.put(robotSide, valkyrieHandFingerTrajectoryMessageSubscriber);
 
          EnumMap<AthenaFingerMotorName, YoEffortJointHandleHolder> jointHandleEnumMap = new EnumMap<>(AthenaFingerMotorName.class);
          for (AthenaFingerMotorName jointEnum : AthenaFingerMotorName.values)
@@ -96,9 +95,9 @@ public class AthenaFingerController implements RobotController
                                                        ROS2Tools.getControllerInputTopic(robotName),
                                                        handDesiredConfigurationMessageSubscribers.get(robotSide));
          ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
-                                                       ValkyrieHandFingerTrajectoryMessage.class,
+                                                       AthenaTrajectoryMessage.class,
                                                        ROS2Tools.getControllerInputTopic(robotName),
-                                                       valkyrieHandFingerTrajectoryMessageSubscribers.get(robotSide));
+                                                       athenaTrajectoryMessageSubscribers.get(robotSide));
       }
    }
 
@@ -125,15 +124,15 @@ public class AthenaFingerController implements RobotController
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (valkyrieHandFingerTrajectoryMessageSubscribers.get(robotSide).isNewDesiredConfigurationAvailable())
+         if (athenaTrajectoryMessageSubscribers.get(robotSide).isNewDesiredConfigurationAvailable())
          {
-            ValkyrieHandFingerTrajectoryMessage handFingerTrajectoryMessage = valkyrieHandFingerTrajectoryMessageSubscribers.get(robotSide).pollMessage();
+            AthenaTrajectoryMessage handFingerTrajectoryMessage = athenaTrajectoryMessageSubscribers.get(robotSide).pollMessage();
 
             AthenaController controller = fingerSetControllers.get(robotSide);
             if (controller == null)
                continue;
 
-            controller.getHandFingerTrajectoryMessage(handFingerTrajectoryMessage);
+            controller.getAthenaTrajectoryMessage(handFingerTrajectoryMessage);
          }
       }
    }
@@ -184,16 +183,16 @@ public class AthenaFingerController implements RobotController
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         ValkyrieHandFingerTrajectoryMessage handFingerTrajectoryMessage = new ValkyrieHandFingerTrajectoryMessage();
+         AthenaTrajectoryMessage athenaTrajectoryMessage = new AthenaTrajectoryMessage();
 
          HandConfiguration handConfiguration = HandConfiguration.OPEN;
-         AthenaTrajectoryMessageConversion.convertHandConfiguration(robotSide, handConfiguration, handFingerTrajectoryMessage);
+         AthenaTrajectoryMessageConversion.convertHandConfiguration(robotSide, handConfiguration, athenaTrajectoryMessage);
 
          AthenaController controller = fingerSetControllers.get(robotSide);
          if (controller == null)
             continue;
 
-         controller.getHandFingerTrajectoryMessage(handFingerTrajectoryMessage);
+         controller.getAthenaTrajectoryMessage(athenaTrajectoryMessage);
       }
    }
 }

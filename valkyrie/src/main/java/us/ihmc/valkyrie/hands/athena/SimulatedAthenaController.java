@@ -5,7 +5,6 @@ import java.util.EnumMap;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.HandJointAnglePacket;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandSensorData;
@@ -13,7 +12,6 @@ import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
-import us.ihmc.humanoidRobotics.communication.subscribers.ValkyrieHandFingerTrajectoryMessageSubscriber;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
@@ -24,14 +22,15 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
-import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.valkyrie.hands.ValkyrieHandController;
 import us.ihmc.valkyrie.hands.athena.AthenaHandModel.AthenaFingerMotorName;
 import us.ihmc.valkyrie.hands.athena.AthenaHandModel.AthenaJointName;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import valkyrie_msgs.msg.dds.AthenaTrajectoryMessage;
 
-public class SimulatedAthenaController implements RobotController
+public class SimulatedAthenaController implements ValkyrieHandController
 {
    private final YoRegistry registry;
 
@@ -68,7 +67,7 @@ public class SimulatedAthenaController implements RobotController
    private final AthenaTrajectoryGenerator<AthenaFingerMotorName> fingerSetController;
 
    private final HandDesiredConfigurationMessageSubscriber handDesiredConfigurationSubscriber;
-   private final ValkyrieHandFingerTrajectoryMessageSubscriber handFingerTrajectorySubscriber;
+   private final AthenaTrajectoryMessageSubscriber athenaTrajectorySubscriber;
 
    private final EnumMap<AthenaJointName, YoDouble> handJointHandlers = new EnumMap<>(AthenaJointName.class);
    private final EnumMap<AthenaFingerMotorName, YoDouble> fingerMotorHandlers = new EnumMap<>(AthenaFingerMotorName.class);
@@ -128,14 +127,14 @@ public class SimulatedAthenaController implements RobotController
       if (realtimeROS2Node != null)
       {
          handDesiredConfigurationSubscriber = new HandDesiredConfigurationMessageSubscriber(robotSide);
-         handFingerTrajectorySubscriber = new ValkyrieHandFingerTrajectoryMessageSubscriber(robotSide);
+         athenaTrajectorySubscriber = new AthenaTrajectoryMessageSubscriber(robotSide);
          ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, HandDesiredConfigurationMessage.class, inputTopic, handDesiredConfigurationSubscriber);
-         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, ValkyrieHandFingerTrajectoryMessage.class, inputTopic, handFingerTrajectorySubscriber);
+         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, AthenaTrajectoryMessage.class, inputTopic, athenaTrajectorySubscriber);
       }
       else
       {
          handDesiredConfigurationSubscriber = null;
-         handFingerTrajectorySubscriber = null;
+         athenaTrajectorySubscriber = null;
       }
    }
 
@@ -273,16 +272,16 @@ public class SimulatedAthenaController implements RobotController
 
    private void checkForNewValkyrieHandFingerTrajectoryRequested()
    {
-      if (handFingerTrajectorySubscriber != null && handFingerTrajectorySubscriber.isNewDesiredConfigurationAvailable())
+      if (athenaTrajectorySubscriber != null && athenaTrajectorySubscriber.isNewDesiredConfigurationAvailable())
       {
-         ValkyrieHandFingerTrajectoryMessage handFingerTrajectoryMessage = handFingerTrajectorySubscriber.pollMessage();
+         AthenaTrajectoryMessage handFingerTrajectoryMessage = athenaTrajectorySubscriber.pollMessage();
 
          handJointFingerSetController.clearTrajectories();
          fingerSetController.clearTrajectories();
 
          for (AthenaFingerMotorName fingerMotorName : AthenaFingerMotorName.values)
          {
-            int indexOfTrajectory = hasTrajectory(handFingerTrajectoryMessage.getValkyrieFingerMotorNames(), fingerMotorName);
+            int indexOfTrajectory = hasTrajectory(handFingerTrajectoryMessage.getFingerMotorNames(), fingerMotorName);
 
             if (indexOfTrajectory == -1)
             {
@@ -327,8 +326,7 @@ public class SimulatedAthenaController implements RobotController
       return -1;
    }
 
-   private void setEstimatedDesiredValueOnHandJointFingerSetController(AthenaFingerMotorName fingerMotorName,
-                                                                       ValkyrieHandFingerTrajectoryMessage handFingerTrajectoryMessage)
+   private void setEstimatedDesiredValueOnHandJointFingerSetController(AthenaFingerMotorName fingerMotorName, AthenaTrajectoryMessage athenaTrajectoryMessage)
    {
       int numberOfHandJoints = 3;
       if (fingerMotorName == AthenaFingerMotorName.ThumbMotorRoll)
@@ -337,9 +335,9 @@ public class SimulatedAthenaController implements RobotController
       {
          AthenaJointName handJointName = fingerMotorName.getCorrespondingJointName(i);
 
-         int indexOfTrajectory = hasTrajectory(handFingerTrajectoryMessage.getValkyrieFingerMotorNames(), fingerMotorName);
+         int indexOfTrajectory = hasTrajectory(athenaTrajectoryMessage.getFingerMotorNames(), fingerMotorName);
 
-         Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = handFingerTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages();
+         Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = athenaTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages();
          Object<TrajectoryPoint1DMessage> trajectoryPoints = jointTrajectoryMessages.get(indexOfTrajectory).getTrajectoryPoints();
 
          for (TrajectoryPoint1DMessage trajectoryPoint1DMessage : trajectoryPoints)
@@ -363,6 +361,7 @@ public class SimulatedAthenaController implements RobotController
       }
    }
 
+   @Override
    public void cleanup()
    {
       if (jointAngleProducer != null)

@@ -1,11 +1,11 @@
 package us.ihmc.valkyrie.hands.athena;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
-import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.valkyrie.hands.athena.AthenaHandModel.AthenaFingerMotorName;
+import valkyrie_msgs.msg.dds.AthenaTrajectoryMessage;
 
 /**
  * This class converts desired HandConfiguration into a ValkyrieHandFingerTrajectoryMessage. Finger
@@ -26,7 +26,7 @@ public class AthenaTrajectoryMessageConversion
    public static double trajectoryTimeForSim = 0.5;
 
    public static final void convertHandDesiredConfigurationMessage(HandDesiredConfigurationMessage handDesiredConfigurationMessage,
-                                                                   ValkyrieHandFingerTrajectoryMessage messageToPack)
+                                                                   AthenaTrajectoryMessage messageToPack)
    {
       messageToPack.setRobotSide(handDesiredConfigurationMessage.getRobotSide());
       HandConfiguration desiredHandConfiguration = HandConfiguration.fromByte(handDesiredConfigurationMessage.getDesiredHandConfiguration());
@@ -35,13 +35,13 @@ public class AthenaTrajectoryMessageConversion
 
    public static final void convertHandConfiguration(RobotSide robotSide,
                                                      HandConfiguration desiredHandConfiguration,
-                                                     ValkyrieHandFingerTrajectoryMessage messageToPack)
+                                                     AthenaTrajectoryMessage messageToPack)
    {
       messageToPack.setRobotSide(robotSide.toByte());
       convertHandConfiguration(desiredHandConfiguration, messageToPack);
    }
 
-   public static final void convertHandConfiguration(HandConfiguration desiredHandConfiguration, ValkyrieHandFingerTrajectoryMessage messageToPack)
+   public static final void convertHandConfiguration(HandConfiguration desiredHandConfiguration, AthenaTrajectoryMessage messageToPack)
    {
       AthenaFingerMotorName[] valkyrieFingerMotorNames = null;
       double[] trajectoryTimes = null;
@@ -138,7 +138,7 @@ public class AthenaTrajectoryMessageConversion
          messageToPack.getJointspaceTrajectory().set(HumanoidMessageTools.createJointspaceTrajectoryMessage(trajectoryTimes, desiredJointPositions));
          for (int i = 0; i < dimension; i++)
          {
-            messageToPack.getValkyrieFingerMotorNames().add(valkyrieFingerMotorNames[i].toByte());
+            messageToPack.getFingerMotorNames().add(valkyrieFingerMotorNames[i].toByte());
          }
       }
    }
