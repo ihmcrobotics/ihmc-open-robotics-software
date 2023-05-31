@@ -1,0 +1,18 @@
+{
+  "title" : "Locomotion parameters",
+  "Are footsteps adjustable" : false,
+  "Swing time" : 0.84,
+  "Transfer time" : 0.45,
+  "Turn aggressiveness" : 0.5,
+  "Straight step length" : 0.4,
+  "Straight step width" : 0.25,
+  "Reverse step length" : 0.15,
+  "Reverse step width" : 0.25,
+  "Shuffle step length" : 0.25,
+  "Shuffle step width" : 0.21,
+  "Turning step width" : 0.2,
+  "Footstep length multiplier" : 1.0,
+  "Plan with body path" : true,
+  "Replan swing trajectories on change" : true,
+  "Assume flat ground" : true
+}
