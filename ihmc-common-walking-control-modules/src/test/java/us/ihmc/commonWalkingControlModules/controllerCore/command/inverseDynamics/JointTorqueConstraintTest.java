@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointTorqueCommandTest.JointTorqueTestOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
@@ -170,13 +171,208 @@ public class JointTorqueConstraintTest
          Assertions.assertTrue(desiredTorqueFromQP <= torqueLimit + epsilon);
          Assertions.assertTrue(desiredTorqueFromQP >= -1.0 * torqueLimit - epsilon);
          
-         // Assert joint torque matches requested if it did not exceed the torqueLimit
+         
          double epsilon2 = 1e-5;
          if (desiredTorque <= torqueLimit + epsilon && desiredTorque >= -torqueLimit - epsilon)
+         {
+            // Assert joint torque matches requested if it did not exceed the torqueLimit
             Assertions.assertTrue(EuclidCoreTools.epsilonEquals(desiredTorqueFromQP, desiredTorque, epsilon2));
+         }
+         else if (desiredTorque > torqueLimit + epsilon)
+         {
+            // Assert joint torque is at torqueLimit if desiredTorque exceeded the upper bound
+            Assertions.assertTrue(EuclidCoreTools.epsilonEquals(desiredTorqueFromQP, torqueLimit, epsilon2));
+         }
+         else if (desiredTorque < -torqueLimit - epsilon)
+         {
+            // Assert joint torque is at torqueLimit if desiredTorque subceeded the lower bound
+            Assertions.assertTrue(EuclidCoreTools.epsilonEquals(desiredTorqueFromQP, -torqueLimit, epsilon2));
+         }
+         else 
+         {
+            System.out.println("Unhandled case: How in the world did you end up here?");
+         }
+      }
+   }
+   
+   @Test
+   public void testJointTorqueCommandOnFloatingBaseMechanism()
+   {
+      String name = getClass().getSimpleName();
+      YoRegistry registry = new YoRegistry(name);
+
+      // Simple mechanism that has a point-foot and two vertical prismatic joints. The CoM is placed directly above the foot
+      double jointOffset = 1.0;
+      double linkMass = 1.0;
+      Axis3D jointAxes = Axis3D.Z;
+
+      RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
+      SixDoFJoint floatingJoint = new SixDoFJoint("floatingJoint", elevator);
+      RigidBody upperLink = new RigidBody("upperLink", floatingJoint, 0.1, 0.1, 0.1, linkMass, new Point3D());
+      PrismaticJoint upperJoint = new PrismaticJoint("upperJoint", upperLink, new Point3D(0.0, 0.0, -0.5 * jointOffset), jointAxes);
+      RigidBody middleLink = new RigidBody("middleLink", upperJoint, 0.1, 0.1, 0.1, linkMass, new Point3D(0.0, 0.0, -0.5 * jointOffset));
+      PrismaticJoint lowerJoint = new PrismaticJoint("lowerJoint", middleLink, new Point3D(0.0, 0.0, -0.5 * jointOffset), jointAxes);
+      RigidBody contactingLink = new RigidBody("contactingLink", lowerJoint, 0.1, 0.1, 0.1, linkMass, new Point3D(0.0, 0.0, -0.5 * jointOffset));
+      floatingJoint.getJointPose().setZ(2.0);
+      elevator.updateFramesRecursively();
+
+      // Acceleration/Rho regularization
+      double jointAccelerationRegularizationWeight = 0.1;
+      double rhoRegularizationWeight = 0.1;
+
+      // Setup single contact point
+      List<ContactablePlaneBody> contactableBodies = new ArrayList<>();
+      List<Point2D> contactPoints = new ArrayList<>();
+      contactPoints.add(new Point2D(0.0, 0.0));
+      contactableBodies.add(new ListOfPointsContactablePlaneBody(contactingLink, contactingLink.getBodyFixedFrame(), contactPoints));
+
+      // Setup whole body controller core
+      JointBasics[] controlledJoints = new JointBasics[] {floatingJoint, upperJoint, lowerJoint};
+      CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame(), elevator);
+
+      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(0.01, 9.81, floatingJoint, controlledJoints, centerOfMassFrame, new JointTorqueTestOptimizationSettings(jointAccelerationRegularizationWeight, 1), new YoGraphicsListRegistry(), registry);
+      controlCoreToolbox.setupForInverseDynamicsSolver(contactableBodies);
+      JointDesiredOutputList lowLevelControllerCoreOutput = new JointDesiredOutputList(new OneDoFJointReadOnly[]{upperJoint});
+      FeedbackControlCommandList allPossibleCommands = new FeedbackControlCommandList();
+      WholeBodyControllerCore controllerCore = new WholeBodyControllerCore(controlCoreToolbox, new FeedbackControllerTemplate(allPossibleCommands), lowLevelControllerCoreOutput, registry);
+      ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
+
+      // Contact state command
+      PlaneContactStateCommand planeContactStateCommand = new PlaneContactStateCommand();
+      planeContactStateCommand.setContactingRigidBody(contactingLink);
+      planeContactStateCommand.setCoefficientOfFriction(1.0);
+      planeContactStateCommand.setContactNormal(new FrameVector3D(contactingLink.getBodyFixedFrame(), 0.0, 0.0, 1.0));
+      planeContactStateCommand.setHasContactStateChanged(true);
+      planeContactStateCommand.addPointInContact(new FramePoint3D(contactingLink.getBodyFixedFrame(), 0.0, 0.0, 0.0));
+      planeContactStateCommand.setRhoWeight(0, rhoRegularizationWeight);
+
+      // Spatial acceleration commands - hard constraints
+      double stationaryWeight = Double.POSITIVE_INFINITY;
+      SpatialAccelerationCommand contactingLinkAccelerationCommand = new SpatialAccelerationCommand();
+      contactingLinkAccelerationCommand.set(elevator, contactingLink);
+      contactingLinkAccelerationCommand.getControlFramePose().setToZero(contactingLink.getBodyFixedFrame());
+      contactingLinkAccelerationCommand.getDesiredLinearAcceleration().setToZero();
+      contactingLinkAccelerationCommand.setWeight(stationaryWeight);
+      contactingLinkAccelerationCommand.getSelectionMatrix().getAngularPart().setAxisSelection(false, false, false);
+      contactingLinkAccelerationCommand.getSelectionMatrix().getLinearPart().setAxisSelection(false, false, true);
+
+      SpatialAccelerationCommand floatingLinkAccelerationCommand = new SpatialAccelerationCommand();
+      floatingLinkAccelerationCommand.set(elevator, upperLink);
+      floatingLinkAccelerationCommand.getDesiredLinearAcceleration().setToZero();
+      floatingLinkAccelerationCommand.getSelectionMatrix().getAngularPart().setAxisSelection(false, false, false);
+      floatingLinkAccelerationCommand.getSelectionMatrix().getLinearPart().setAxisSelection(false, false, true);
+      floatingLinkAccelerationCommand.getControlFramePose().setToZero(upperLink.getBodyFixedFrame());
+      floatingLinkAccelerationCommand.setWeight(stationaryWeight);
+
+      int numTests = 100;
+      Random random = new Random(23890);
+
+      for (int i = 0; i < numTests; i++)
+      {
+         // Set to random joint position/velocities
+         double q1 = EuclidCoreRandomTools.nextDouble(random, 0.3);
+         double q2 = EuclidCoreRandomTools.nextDouble(random, 0.3);
+         double qd1 = EuclidCoreRandomTools.nextDouble(random, 1.0);
+         double qd2 = EuclidCoreRandomTools.nextDouble(random, 1.0);
+         upperJoint.setQ(q1);
+         lowerJoint.setQ(q2);
+         upperJoint.setQd(qd1);
+         lowerJoint.setQd(qd2);
+         elevator.updateFramesRecursively();
+
+         // Joint force command - request specific downward force on one of the joints
+         double desiredTorqueWeight = 1000000; // increasing this will require an increase in epsilon
+         JointTorqueCommand jointForceCommand = new JointTorqueCommand();
+         double desiredActuatorForce = EuclidCoreRandomTools.nextDouble(random, -10.0, 0.0);
+         OneDoFJointBasics requestedJoint = lowerJoint;
+         jointForceCommand.addJoint(requestedJoint, desiredActuatorForce, desiredTorqueWeight);
+         
+         // Joint force constraints - Put an upper and lower bound on the allowable force in the QP
+         double forceLimit = EuclidCoreRandomTools.nextDouble(random, 1.0, 20.0);
+         JointTorqueCommand jointForceConstraintUpper = new JointTorqueCommand();
+         jointForceConstraintUpper.addJoint(requestedJoint, forceLimit);
+         jointForceConstraintUpper.setConstraintType(ConstraintType.LEQ_INEQUALITY);
+         
+         JointTorqueCommand jointForceConstraintLower = new JointTorqueCommand();
+         jointForceConstraintLower.addJoint(requestedJoint, -1.0*forceLimit);
+         jointForceConstraintLower.setConstraintType(ConstraintType.GEQ_INEQUALITY);
+         
+         // Setup jacobians for validating controller output
+         GeometricJacobianCalculator contactingLinkJacobian = new GeometricJacobianCalculator();
+         contactingLinkJacobian.setKinematicChain(elevator, contactingLink);
+         contactingLinkJacobian.setJacobianFrame(contactingLink.getBodyFixedFrame());
+
+         GeometricJacobianCalculator upperLinkJacobian = new GeometricJacobianCalculator();
+         upperLinkJacobian.setKinematicChain(elevator, upperLink);
+         upperLinkJacobian.setJacobianFrame(upperLink.getBodyFixedFrame());
+
+         // Run controller core twice - contact state, dynamic matrices and joint torque task aren't processed in order of dependency
+         controllerCore.initialize();
+         
+         for (int j = 0; j < 2; j++)
+         {
+            controllerCoreCommand.addInverseDynamicsCommand(jointForceConstraintLower);
+            controllerCoreCommand.addInverseDynamicsCommand(jointForceConstraintUpper);
+            controllerCoreCommand.addInverseDynamicsCommand(planeContactStateCommand);
+            controllerCoreCommand.addInverseDynamicsCommand(contactingLinkAccelerationCommand);
+            controllerCoreCommand.addInverseDynamicsCommand(floatingLinkAccelerationCommand);
+            controllerCoreCommand.addInverseDynamicsCommand(jointForceCommand);
+            controllerCore.compute(controllerCoreCommand);
+         }
+
+         JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = controllerCore.getOutputForLowLevelController();
+         RootJointDesiredConfigurationDataReadOnly rootJointDesiredData = controllerCore.getOutputForRootJoint();
+         double desiredForceFromQP = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointTorque(requestedJoint);
+         double epsilon = 1e-7;
+
+         // Check that force limits are respected
+         Assertions.assertTrue(desiredForceFromQP <= forceLimit + epsilon);
+         Assertions.assertTrue(desiredForceFromQP >= -1.0 * forceLimit - epsilon);
+         
+         double epsilon2 = 1e-5;
+         if (desiredActuatorForce <= forceLimit + epsilon2 && desiredActuatorForce >= -forceLimit - epsilon2)
+         {
+            DMatrixRMaj contactingLinkAcceleration = computeSpatialAcceleration(contactingLinkJacobian,
+                                                                                lowLevelOneDoFJointDesiredDataHolder,
+                                                                                rootJointDesiredData);
+            DMatrixRMaj upperLinkAcceleration = computeSpatialAcceleration(upperLinkJacobian, lowLevelOneDoFJointDesiredDataHolder, rootJointDesiredData);
+            
+            // Check that achieved spatial accelerations are zero if force limit was not hit
+            Assertions.assertTrue(EuclidCoreTools.epsilonEquals(contactingLinkAcceleration.get(5, 0), 0.0, epsilon2));
+            Assertions.assertTrue(EuclidCoreTools.epsilonEquals(upperLinkAcceleration.get(5, 0), 0.0, epsilon2));
+
+            // Check that achieved force matches requested if force limit was not hit
+            Assertions.assertTrue(EuclidCoreTools.epsilonEquals(desiredForceFromQP, desiredActuatorForce, epsilon2));
+         }    
       }
    }
 
+   private static DMatrixRMaj computeSpatialAcceleration(GeometricJacobianCalculator jacobianCalculator,
+                                                         JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder,
+                                                         RootJointDesiredConfigurationDataReadOnly rootJointDesiredData)
+   {
+      List<JointReadOnly> jointChain = jacobianCalculator.getJointsFromBaseToEndEffector();
+      DMatrixRMaj jacobianMatrix = jacobianCalculator.getJacobianMatrix();
+      DMatrixRMaj convectiveTermMatrix = jacobianCalculator.getConvectiveTermMatrix();
+      DMatrixRMaj qdd = new DMatrixRMaj(jacobianCalculator.getNumberOfDegreesOfFreedom(), 1);
+
+      int row = 0;
+      for (int i = 0; i < jointChain.size(); i++)
+      {
+         JointReadOnly joint = jointChain.get(i);
+         if (joint instanceof FloatingJointReadOnly)
+            MatrixTools.setMatrixBlock(qdd, row, 0, rootJointDesiredData.getDesiredAcceleration(), 0, 0, 6, 1, 1.0);
+         else
+            qdd.set(row, 0, lowLevelOneDoFJointDesiredDataHolder.getDesiredJointAcceleration((OneDoFJointReadOnly) joint));
+         row += joint.getDegreesOfFreedom();
+      }
+
+      DMatrixRMaj spatialAcceleration = new DMatrixRMaj(6, 1);
+      CommonOps_DDRM.mult(jacobianMatrix, qdd, spatialAcceleration);
+      CommonOps_DDRM.addEquals(spatialAcceleration, convectiveTermMatrix);
+      return spatialAcceleration;
+   }
+   
    public class JointTorqueTestOptimizationSettings implements ControllerCoreOptimizationSettings
    {
       private final double jointAccelerationWeight;
