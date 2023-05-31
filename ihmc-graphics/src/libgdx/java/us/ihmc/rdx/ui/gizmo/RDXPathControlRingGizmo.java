@@ -300,7 +300,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
             frameBasedGizmoModification.translateInWorld(planarMotion);
             closestCollision.add(planarMotion);
          }
-         else // yaw dragging
+         else if (yawDragData.isDragging()) // yaw dragging
          {
             if (clockFaceDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z, transformToWorld))
             {
