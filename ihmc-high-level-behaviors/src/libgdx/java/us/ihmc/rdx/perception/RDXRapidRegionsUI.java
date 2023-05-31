@@ -186,8 +186,6 @@ public class RDXRapidRegionsUI implements RenderableProvider
    public void destroy()
    {
       planarRegionsGraphic.destroy();
-      rapidPlanarRegionsExtractor.destroy();
-      // TODO: Destroy the rest
    }
 
    public ImGuiPanel getPanel()
