@@ -24,6 +24,7 @@ import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DBasics;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonToolsTest;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
@@ -32,6 +33,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
@@ -956,6 +958,33 @@ public class ConvexPolygonToolsTest
 
       epsilonEquals = intersection.epsilonEquals(convexPolygon2dA, 1e-14);
       assertTrue(epsilonEquals);
+   }
+
+   @Test
+   public void testIntersectTwoPolygonsWhereOneIsALine()
+   {
+      ConvexPolygon2D simpleSquare = new ConvexPolygon2D();
+      simpleSquare.addVertex(0.5, 0.5);
+      simpleSquare.addVertex(0.5, -0.5);
+      simpleSquare.addVertex(-0.5, -0.5);
+      simpleSquare.addVertex(-0.5, 0.5);
+      simpleSquare.update();
+
+      ConvexPolygon2D simpleLine = new ConvexPolygon2D();
+      simpleLine.addVertex(0.25, 0.25);
+      simpleLine.addVertex(-0.75, 0.25);
+      simpleLine.update();
+
+      ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
+      ConvexPolygon2D simplerLine = new ConvexPolygon2D();
+      ConvexPolygon2D simplerLineExpected = new ConvexPolygon2D();
+      simplerLineExpected.addVertex(0.25, 0.25);
+      simplerLineExpected.addVertex(-0.5, 0.25);
+      simplerLineExpected.update();
+
+      convexPolygonTools.computeIntersectionOfPolygons(simpleSquare, simpleLine, simplerLine);
+
+      EuclidCoreTestTools.assertEquals(simplerLineExpected, simplerLine, 1e-5);
    }
 
    @Disabled("Broken. Have a smoking gun test to fix.")

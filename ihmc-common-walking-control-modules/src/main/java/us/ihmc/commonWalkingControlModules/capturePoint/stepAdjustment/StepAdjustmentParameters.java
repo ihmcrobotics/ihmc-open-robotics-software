@@ -77,7 +77,7 @@ public abstract class StepAdjustmentParameters
     */
    public double getCoPDistanceFromOutsideOfFoot()
    {
-      return 0.035;
+      return 0.03;
    }
 
    /**
