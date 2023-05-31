@@ -32,6 +32,8 @@ import us.ihmc.tools.io.*;
 
 import java.util.LinkedList;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This class is primarily an interactable sequence/list of robot actions.
@@ -75,15 +77,21 @@ public class RDXBehaviorActionSequenceEditor
    private final Empty manuallyExecuteNextActionMessage = new Empty();
    private final Bool automaticExecutionCommandMessage = new Bool();
 
-   public RDXBehaviorActionSequenceEditor(WorkspaceResourceFile fileToLoadFrom)
+   private final AtomicBoolean successfullyLoadedActions = new AtomicBoolean(true);
+
+   private final boolean robotHasArms;
+
+   public RDXBehaviorActionSequenceEditor(WorkspaceResourceFile fileToLoadFrom, boolean robotHasArms)
    {
       this.workspaceFile = fileToLoadFrom;
+      this.robotHasArms = robotHasArms;
       loadNameFromFile();
       afterNameDetermination();
    }
 
-   public RDXBehaviorActionSequenceEditor(String name, WorkspaceResourceDirectory storageDirectory)
+   public RDXBehaviorActionSequenceEditor(String name, WorkspaceResourceDirectory storageDirectory, boolean robotHasArms)
    {
+      this.robotHasArms = robotHasArms;
       this.name = name;
       afterNameDetermination();
       this.workspaceFile = new WorkspaceResourceFile(storageDirectory, pascalCasedName + ".json");
@@ -118,38 +126,84 @@ public class RDXBehaviorActionSequenceEditor
       JSONFileTools.load(workspaceFile, jsonNode -> name = jsonNode.get("name").asText());
    }
 
-   public void loadActionsFromFile()
+   public boolean loadActionsFromFile()
    {
       actionSequence.clear();
       executionNextIndexStatus = 0;
       loading = true;
       LogTools.info("Loading from {}", workspaceFile.getClasspathResource().toString());
+      successfullyLoadedActions.set(true);
       JSONFileTools.load(workspaceFile.getClasspathResourceAsStream(), jsonNode ->
       {
          JSONTools.forEachArrayElement(jsonNode, "actions", actionNode ->
          {
             String actionType = actionNode.get("type").asText();
-            RDXBehaviorAction action = switch (actionType)
+            RDXBehaviorAction action = getAction(actionType);
+            if (action != null)
             {
-               case "RDXArmJointAnglesAction" -> new RDXArmJointAnglesAction();
-               case "RDXChestOrientationAction" -> new RDXChestOrientationAction();
-               case "RDXFootstepAction" -> newFootstepAction(null);
-               case "RDXHandConfigurationAction" -> new RDXHandConfigurationAction();
-               case "RDXHandPoseAction" -> newHandPoseAction();
-               case "RDXHandWrenchAction" -> new RDXHandWrenchAction();
-               case "RDXPelvisHeightAction" -> new RDXPelvisHeightAction();
-               case "RDXWaitDurationAction" -> new RDXWaitDurationAction();
-               case "RDXWalkAction" -> newWalkAction();
-               default -> null;
-            };
-
-            action.getActionData().loadFromFile(actionNode);
-            action.updateAfterLoading();
-            insertNewAction(action);
+               action.getActionData().loadFromFile(actionNode);
+               action.updateAfterLoading();
+               insertNewAction(action);
+            }
+            else
+            {
+               successfullyLoadedActions.set(false);
+            }
          });
       });
       loading = false;
-      commandNextActionIndex(0);
+      if (successfullyLoadedActions.get())
+      {
+         commandNextActionIndex(0);
+         return true;
+      }
+
+      return false;
+   }
+
+   private RDXBehaviorAction getAction(String actionType)
+   {
+      switch (actionType)
+      {
+         case "RDXArmJointAnglesAction" ->
+         {
+            return robotHasArms ? new RDXArmJointAnglesAction() : null;
+         }
+         case "RDXChestOrientationAction" ->
+         {
+            return new RDXChestOrientationAction();
+         }
+         case "RDXFootstepAction" ->
+         {
+            return newFootstepAction(null);
+         }
+         case "RDXHandConfigurationAction" ->
+         {
+            return robotHasArms ? new RDXHandConfigurationAction() : null;
+         }
+         case "RDXHandPoseAction" ->
+         {
+            return robotHasArms ? newHandPoseAction() : null;
+         }
+         case "RDXHandWrenchAction" ->
+         {
+            return robotHasArms ? new RDXHandWrenchAction() : null;
+         }
+         case "RDXPelvisHeightAction" ->
+         {
+            return new RDXPelvisHeightAction();
+         }
+         case "RDXWaitDurationAction" ->
+         {
+            return new RDXWaitDurationAction();
+         }
+         case "RDXWalkAction" ->
+         {
+            return newWalkAction();
+         }
+      };
+
+      return null;
    }
 
    private void commandNextActionIndex(int nextActionIndex)
@@ -232,7 +286,11 @@ public class RDXBehaviorActionSequenceEditor
          }
          if (ImGui.menuItem("Load from JSON"))
          {
-            loadActionsFromFile();
+            if (!loadActionsFromFile())
+            {
+               LogTools.warn("Invalid action!");
+               actionSequence.clear();
+            }
          }
          ImGui.endMenu();
       }
