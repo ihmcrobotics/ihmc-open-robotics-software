@@ -155,7 +155,8 @@ public class RDXFootstepPlanning
 
       footstepPlanner.handleRequest(footstepPlannerRequest);
 
-      FootstepPlannerOutput output = footstepPlanner.getOutput();
+      // Deep copy because we are handing this off to another thread
+      FootstepPlannerOutput output = new FootstepPlannerOutput(footstepPlanner.getOutput());
       LogTools.info("Footstep planner completed with body path {}, footstep planner {}, {} step(s)",
                     output.getBodyPathPlanningResult(),
                     output.getFootstepPlanningResult(),
