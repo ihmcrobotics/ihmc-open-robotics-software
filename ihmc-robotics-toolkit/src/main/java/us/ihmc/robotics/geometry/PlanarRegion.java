@@ -1181,7 +1181,9 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       updateBoundingBox();
       convexHull.set(other.convexHull);
 
-      updateArea();
+      this.area = other.area;
+      this.numberOfTimesMatched = other.numberOfTimesMatched;
+      this.tickOfLastMeasurement = other.tickOfLastMeasurement;
    }
 
    public void setTransformOnly(PlanarRegion other)

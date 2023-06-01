@@ -91,9 +91,8 @@ public class PlanarRegionMap
    private final PlanarLandmarkList previousLandmarks = new PlanarLandmarkList();
    private final PlanarRegionsList previousRegions = new PlanarRegionsList();
 
-
    private PlanarRegionsList finalMap;
-
+   private PlanarRegionsList processedMap;
 
    public PlanarRegionMap(boolean useSmoothingMerger)
    {
@@ -115,6 +114,7 @@ public class PlanarRegionMap
 
       parameters = new PlanarRegionMappingParameters(version);
       finalMap = new PlanarRegionsList();
+      processedMap = new PlanarRegionsList();
    }
 
    public void reset()
@@ -203,7 +203,7 @@ public class PlanarRegionMap
       }
       else
       {
-//         PerceptionPrintTools.printRegionIDs("Map", finalMap);
+         //         PerceptionPrintTools.printRegionIDs("Map", finalMap);
 
          PlanarRegionSLAMTools.findPlanarRegionMatches(finalMap,
                                                        priorRegionsInWorld,
@@ -213,7 +213,7 @@ public class PlanarRegionMap
                                                        (float) parameters.getOrthogonalDistanceThreshold(),
                                                        (float) parameters.getMinimumBoundingBoxSize());
 
-//         PerceptionPrintTools.printMatches("Cross Matches", finalMap, priorRegionsInWorld, incomingToMapMatches);
+         //         PerceptionPrintTools.printMatches("Cross Matches", finalMap, priorRegionsInWorld, incomingToMapMatches);
 
          if (merger == MergingMode.SMOOTHING)
          {
@@ -542,7 +542,7 @@ public class PlanarRegionMap
       LogTools.debug("Solving factor graph");
       factorGraph.optimizeISAM2((byte) 4);
 
-//      factorGraph.printResults();
+      //      factorGraph.printResults();
 
       LogTools.debug("+++++++++ --------- +++++++++ Done (Smoothing) +++++++++ --------- +++++++++");
    }
@@ -707,7 +707,7 @@ public class PlanarRegionMap
             region.setRegionId(-uniqueIDtracker++);
       }
 
-      if(!initialized)
+      if (!initialized)
       {
          initialTransformToWorld.set(estimatedTransformToWorld);
 
@@ -728,12 +728,15 @@ public class PlanarRegionMap
 
          LogTools.debug("Computing ICP transform [{} <- {}]", keyframes.get(keyframes.size() - 1).getTimeIndex(), currentTimeIndex);
 
-         boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(previousLandmarks, landmarks.copy(), transformToPrevious, parameters);
+         boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(previousLandmarks,
+                                                                                                     landmarks.copy(),
+                                                                                                     transformToPrevious,
+                                                                                                     parameters);
 
          if (!valid)
          {
-//            LogTools.warn("[FAILED] Last Index: {}, Current Index: {}", keyframes.get(keyframes.size() - 1).getTimeIndex(), currentTimeIndex);
-//            return null;
+            //            LogTools.warn("[FAILED] Last Index: {}, Current Index: {}", keyframes.get(keyframes.size() - 1).getTimeIndex(), currentTimeIndex);
+            //return null;
          }
 
          // Compute state estimator based odometry
@@ -746,6 +749,8 @@ public class PlanarRegionMap
 
       if (isKeyframe)
       {
+         LogTools.debug("Keyframe Insertion: {}", currentTimeIndex);
+
          previousRegions.clear();
          previousRegions.addPlanarRegionsList(regions.copy());
 
@@ -758,7 +763,10 @@ public class PlanarRegionMap
          regions.applyTransform(transformToWorld);
 
          RigidBodyTransform residualTransform = new RigidBodyTransform();
-         boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(mapLandmarks, landmarks.copy(), residualTransform, parameters);
+         boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(mapLandmarks,
+                                                                                                     landmarks.copy(),
+                                                                                                     residualTransform,
+                                                                                                     parameters);
 
          if (valid)
          {
@@ -803,10 +811,10 @@ public class PlanarRegionMap
          // Transform the incoming regions to the map frame with the optimal transform
          PlanarRegionsList posteriorRegionsInWorld = new PlanarRegionsList();
          graphRegions.getPlanarRegionsAsList().forEach(region ->
-          {
-             region.applyTransform(transformToWorld);
-             posteriorRegionsInWorld.addPlanarRegion(region);
-          });
+                                                       {
+                                                          region.applyTransform(transformToWorld);
+                                                          posteriorRegionsInWorld.addPlanarRegion(region);
+                                                       });
 
          factorGraphStopwatch.lap();
          //factorGraphStopwatch.suspend();
@@ -816,7 +824,7 @@ public class PlanarRegionMap
          finalMap = crossReduceRegionsIteratively(finalMap, graphRegions);
          processUniqueRegions(finalMap);
 
-         performMapCleanUp(false, true);
+         //performMapCleanUp(false, true);
 
          mapLandmarks.clear();
          mapLandmarks.addAll(finalMap);
@@ -850,23 +858,26 @@ public class PlanarRegionMap
 
    public void performMapCleanUp(boolean cleanIntersectionsEnabled, boolean mapCullingEnabled)
    {
-      if (cleanIntersectionsEnabled)
-      {
-         PlanarRegionCuttingTools.chopOffExtraPartsFromIntersectingPairs(finalMap);
-      }
+      processedMap.clear();
 
       if (mapCullingEnabled)
       {
          for (PlanarRegion region : finalMap.getPlanarRegionsAsList())
          {
-            LogTools.info("Removing region -> id: {} dt:{} nc:{}", region.getRegionId(),
-                          currentTimeIndex - region.getTickOfLastMeasurement(), region.getNumberOfTimesMatched());
-            if ((currentTimeIndex - region.getTickOfLastMeasurement() > 5) // Region has not been matched enough in a while. Not good region.
-                && (region.getNumberOfTimesMatched() < parameters.getMinimumNumberOfTimesMatched())) // Region has not been matched enough
+            // Region has not been matched enough in a while. Not good region.
+            // Region has not been matched enough
+            boolean regionIsBad = (currentTimeIndex - region.getTickOfLastMeasurement() > 3)
+                                   && (region.getNumberOfTimesMatched() < 2) && (region.getRegionId() > 1);
+            if (!regionIsBad)
             {
-               finalMap.getPlanarRegionsAsList().remove(region);
+               processedMap.addPlanarRegion(region);
             }
          }
+      }
+
+      if (cleanIntersectionsEnabled)
+      {
+         PlanarRegionCuttingTools.chopOffExtraPartsFromIntersectingPairs(processedMap);
       }
    }
 
@@ -875,9 +886,12 @@ public class PlanarRegionMap
       LogTools.debug("------------------------------- Processing Unique Region IDs ---------------------------------");
       for (PlanarRegion region : map.getPlanarRegionsAsList())
       {
-         region.setRegionId(Math.abs(region.getRegionId()));
-         region.incrementNumberOfTimesMatched();
-         region.setTickOfLastMeasurement(currentTimeIndex);
+         if (region.getRegionId() < 0)
+         {
+            region.incrementNumberOfTimesMatched();
+            region.setTickOfLastMeasurement(currentTimeIndex);
+            region.setRegionId(Math.abs(region.getRegionId()));
+         }
       }
       LogTools.debug("+++++++++ --------- +++++++++ Done (Processing Unique Region IDs) +++++++++ --------- +++++++++");
    }
@@ -885,6 +899,11 @@ public class PlanarRegionMap
    public PlanarRegionsList getMapRegions()
    {
       return finalMap;
+   }
+
+   public PlanarRegionsList getProcessedMapRegions()
+   {
+      return processedMap;
    }
 
    public boolean isModified()
@@ -929,7 +948,7 @@ public class PlanarRegionMap
 
    public void printStatistics(boolean average)
    {
-      if(average)
+      if (average)
       {
          LogTools.info(String.format("Whole Algorithm: %.3f, Quaternion Averaging: %.3f, Factor Graph: %.3f, Region Merging: %.3f",
                                      wholeAlgorithmDurationStopwatch.averageLap(),
