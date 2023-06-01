@@ -29,6 +29,8 @@ public class MultiblockADMMOptimizer
 
    public DMatrixD1[] solveOverNIterations(int numLagrangeIterations, DMatrixD1[] initialValues)
    {
+      // TODO ensure size of initialValues is same as num blocks
+
       int numBlocks = admm.getNumBlocks();
       DMatrixD1[] optima = new DMatrixD1[numBlocks];
 
