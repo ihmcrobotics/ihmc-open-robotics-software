@@ -90,6 +90,10 @@ public class LocalizationAndMappingProcess
       this.ros2Node = ros2Node;
       this.ros2Helper = new ROS2Helper(ros2Node);
 
+      ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
+      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_PLANAR_REGION_MAPPING_PARAMETERS, planarRegionMap.getParameters());
+      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, configurationParameters);
+
       controllerRegionsPublisher = ROS2Tools.createPublisher(ros2Node, StepGeneratorAPIDefinition.getTopic(PlanarRegionsListMessage.class, simpleRobotName));
       slamOutputRegionsPublisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS);
       ros2Helper.subscribeViaCallback(terrainRegionsTopic, this::onPlanarRegionsReceived);
@@ -100,10 +104,6 @@ public class LocalizationAndMappingProcess
          setEnableLiveMode(false);
          resetMap();
       });
-
-      ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
-      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_PLANAR_REGION_MAPPING_PARAMETERS, planarRegionMap.getParameters());
-      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, configurationParameters);
 
       updateMapFuture = executorService.scheduleAtFixedRate(this::statisticsCollectionThread, 0, STATISTICS_COLLECTION_PERIOD_MS, TimeUnit.MILLISECONDS);
    }
@@ -122,6 +122,8 @@ public class LocalizationAndMappingProcess
 
    public synchronized void updateMap()
    {
+      ros2PropertySetGroup.update();
+
       if (latestIncomingRegions.get() == null)
       {
          LogTools.debug("No regions received");
