@@ -14,6 +14,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameConvexPolygon2DBasics;
@@ -27,7 +28,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
-import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -69,17 +69,17 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final DoubleProvider minICPErrorForStepAdjustment;
    private final BooleanProvider allowCrossOverSteps;
 
-   private SimpleFootstep nextFootstep;
-   private FootstepTiming nextFootstepTiming;
-
    private final YoBoolean useStepAdjustment = new YoBoolean(yoNamePrefix + "UseStepAdjustment", registry);
    private final YoBoolean footstepIsAdjustable = new YoBoolean(yoNamePrefix + "FootstepIsAdjustable", registry);
    private final YoBoolean shouldCheckForReachability = new YoBoolean(yoNamePrefix + "ShouldCheckForReachability", registry);
    private final YoBoolean hasPlanarRegionBeenAssigned = new YoBoolean(yoNamePrefix + "HasPlanarRegionBeenAssigned", registry);
 
+   private final YoDouble percentageToShrinkPolygon = new YoDouble(yoNamePrefix + "PercentageToShrinkPolygon", registry);
    private final YoDouble swingDuration = new YoDouble(yoNamePrefix + "SwingDuration", registry);
-   private final YoDouble nextTransferDuration = new YoDouble(yoNamePrefix + "NextTransferDuration", registry);
+
    private final YoInteger controlTicksIntoStep = new YoInteger(yoNamePrefix + "TicksIntoStep", registry);
+   private final YoInteger stepsInQueue = new YoInteger(yoNamePrefix + "StepsInQueue", registry);
+   private final YoDouble subsequentStepDuration = new YoDouble(yoNamePrefix + "SubsequentStepDuration", registry);
 
    private final YoFramePose3D upcomingFootstep = new YoFramePose3D(yoNamePrefix + "UpcomingFootstepPose", worldFrame, registry);
    private final YoEnum<RobotSide> upcomingFootstepSide = new YoEnum<>(yoNamePrefix + "UpcomingFootstepSide", registry, RobotSide.class);
@@ -116,6 +116,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final DoubleParameter supportDistanceFromOutside;
 
    private final SideDependentList<FixedFrameConvexPolygon2DBasics> allowableAreasForCoP = new SideDependentList<>();
+   private final YoFrameConvexPolygon2D allowableAreaForCoP = new YoFrameConvexPolygon2D(yoNamePrefix + "AllowableAreaForCoP", worldFrame, 4, registry);
 
    private final StepAdjustmentReachabilityConstraint reachabilityConstraintHandler;
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
@@ -134,7 +135,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
    private final FramePoint3D vertexInWorld = new FramePoint3D();
    private final FrameConvexPolygon2D allowableAreaForCoPInFoot = new FrameConvexPolygon2D();
-   private final FrameConvexPolygon2D allowableAreaForCoP = new FrameConvexPolygon2D();
 
    public ErrorBasedStepAdjustmentController(WalkingControllerParameters walkingControllerParameters,
                                              SideDependentList<? extends ReferenceFrame> soleZUpFrames,
@@ -222,9 +222,10 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                                    false,
                                                                    yoNamePrefix,
                                                                    registry,
-                                                                   null);
+                                                                   yoGraphicsListRegistry);
       oneStepSafetyHeuristics = new CaptureRegionSafetyHeuristics(lengthLimit, registry, null);
-      multiStepCaptureRegionCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraintHandler,
+      multiStepCaptureRegionCalculator = new MultiStepCaptureRegionCalculator(soleZUpFrames,
+                                                                              reachabilityConstraintHandler,
                                                                               allowCrossOverSteps,
                                                                               registry,
                                                                               yoGraphicsListRegistry);
@@ -285,19 +286,20 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       multiStepCaptureRegionCalculator.reset();
       environmentConstraintProvider.reset();
       controlTicksIntoStep.set(0);
-      nextFootstep = null;
-      nextFootstepTiming = null;
+      this.stepsInQueue.set(0);
+      this.subsequentStepDuration.set(Double.NaN);
    }
 
    @Override
-   public void setFootstepAfterTheCurrentOne(SimpleFootstep nextFootstep, FootstepTiming nextFootstepTiming)
+   public void setFootstepQueueInformation(int numberOfStepsInQueue, double subsequentStepDuration)
    {
-      this.nextFootstep = nextFootstep;
-      this.nextFootstepTiming = nextFootstepTiming;
+      stepsInQueue.set(numberOfStepsInQueue);
+      this.subsequentStepDuration.set(subsequentStepDuration);
    }
 
+
    @Override
-   public void setFootstepToAdjust(SimpleFootstep footstep, double swingDuration, double nextTransferDuration)
+   public void setFootstepToAdjust(SimpleFootstep footstep, double swingDuration)
    {
       FramePose3DReadOnly footstepPose = footstep.getSoleFramePose();
       footstepPose.checkReferenceFrameMatch(worldFrame);
@@ -319,7 +321,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
          footstepIsAdjustable.set(footstep.getIsAdjustable());
          shouldCheckForReachability.set(footstep.getShouldCheckReachability());
          useStepAdjustment.set(allowStepAdjustment.getValue() && footstepIsAdjustable.getBooleanValue());
-         this.nextTransferDuration.set(nextTransferDuration);
       }
       else
       {
@@ -355,8 +356,15 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    }
 
    @Override
-   public void compute(double currentTime, FramePoint2DReadOnly desiredICP, FramePoint2DReadOnly currentICP, double omega0)
+   public void compute(double currentTime,
+                       FramePoint2DReadOnly desiredICP,
+                       FramePoint2DReadOnly currentICP,
+                       double omega0,
+                       FramePoint2DReadOnly copToShrinkAbout,
+                       double percentageToShrinkPolygon)
    {
+      this.percentageToShrinkPolygon.set(percentageToShrinkPolygon);
+
       if (!isInSwing.getBooleanValue())
          return;
 
@@ -369,7 +377,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       if (timeRemainingInState.getValue() < minimumTimeForStepAdjustment.getValue())
          return;
 
-      computeLimitedAreaForCoP();
+      computeLimitedAreaForCoP(copToShrinkAbout, percentageToShrinkPolygon);
       RobotSide swingSide = upcomingFootstepSide.getEnumValue();
       RobotSide stanceSide = swingSide.getOppositeSide();
       captureRegionCalculator.calculateCaptureRegion(swingSide, Math.max(timeRemainingInState.getDoubleValue(), 0.0), currentICP, omega0, allowableAreaForCoP);
@@ -377,12 +385,14 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                                        currentICP,
                                                                        allowableAreaForCoP.getCentroid(),
                                                                        captureRegionCalculator.getCaptureRegion());
+      FrameConvexPolygon2DReadOnly singleStepRegion = oneStepSafetyHeuristics.getCaptureRegionWithSafetyMargin().getNumberOfVertices() < 3 ? captureRegionCalculator.getCaptureRegion() :
+            oneStepSafetyHeuristics.getCaptureRegionWithSafetyMargin();
+      // Steps in queue accounts for the current step, so for it to hold value, it has to be at least 2.
       multiStepCaptureRegionCalculator.compute(stanceSide,
-                                               oneStepSafetyHeuristics.getCaptureRegionWithSafetyMargin(),
-                                               //                                               captureRegionCalculator.getCaptureRegion(),
-                                               nextFootstepTiming == null ? Double.NaN : nextFootstepTiming.getStepTime(),
+                                               singleStepRegion,
+                                               stepsInQueue.getIntegerValue() < 2 ? Double.NaN : subsequentStepDuration.getDoubleValue(),
                                                omega0,
-                                               nextFootstep == null ? 1 : 2); // fixme hardcoded.
+                                               stepsInQueue.getIntegerValue());
 
       if (!useStepAdjustment.getBooleanValue())
       {
@@ -437,37 +447,86 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
          upcomingFootstep.set(footstepSolution);
    }
 
-   private void computeLimitedAreaForCoP()
+   private final FramePoint2D finalInFoot = new FramePoint2D();
+
+   private void computeLimitedAreaForCoP(FramePoint2DReadOnly copToShrinkAbout, double percentageToShrinkPolygon)
    {
       RobotSide supportSide = upcomingFootstepSide.getEnumValue().getOppositeSide();
       FixedFrameConvexPolygon2DBasics shrunkSupport = allowableAreasForCoP.get(supportSide);
-      shrunkSupport.setMatchingFrame(bipedSupportPolygons.getFootPolygonInSoleFrame(supportSide), false);
+      FrameConvexPolygon2DReadOnly supportPolygon = bipedSupportPolygons.getFootPolygonInSoleZUpFrame(supportSide);
+      finalInFoot.setMatchingFrame(copToShrinkAbout);
+      finalInFoot.changeFrame(shrunkSupport.getReferenceFrame());
 
-      for (int i = 0; i < shrunkSupport.getNumberOfVertices(); i++)
+      if (!Double.isNaN(percentageToShrinkPolygon) && percentageToShrinkPolygon <= 1e-5)
       {
-         FixedFramePoint2DBasics point = shrunkSupport.getVertexUnsafe(i);
-         if (point.getX() > 0.0)
-            point.setX(Math.max(point.getX() - supportDistanceFromFront.getValue(), 0.0));
-         else
-            point.setX(Math.min(point.getX() + supportDistanceFromBack.getValue(), 0.0));
-
-         if (supportSide == RobotSide.LEFT)
-         {
-            if (point.getY() > 0)
-               point.setY(Math.max(point.getY() - supportDistanceFromOutside.getValue(), 0.0));
-            else
-               point.setY(Math.min(point.getY() + supportDistanceFromInside.getValue(), 0.0));
-         }
-         else
-         {
-            if (point.getY() > 0)
-               point.setY(Math.max(point.getY() - supportDistanceFromInside.getValue(), 0.0));
-            else
-               point.setY(Math.min(point.getY() + supportDistanceFromOutside.getValue(), 0.0));
-         }
+         shrunkSupport.clear();
+         shrunkSupport.addVertex(finalInFoot);
+         shrunkSupport.update();
+         allowableAreaForCoPInFoot.setIncludingFrame(shrunkSupport);
       }
+      else
+      {
+         shrunkSupport.set(supportPolygon);
+         if (!Double.isNaN(percentageToShrinkPolygon))
+            shrunkSupport.scale(finalInFoot, percentageToShrinkPolygon);
 
-      allowableAreaForCoPInFoot.setIncludingFrame(shrunkSupport);
+         for (int i = 0; i < shrunkSupport.getNumberOfVertices(); i++)
+         {
+            FixedFramePoint2DBasics shrunkPoint = shrunkSupport.getVertexUnsafe(i);
+            FramePoint2DReadOnly supportPoint = supportPolygon.getVertexUnsafe(i);
+            if (supportPoint.getX() > 0.0)
+            {
+               // This point is towards the toe
+               double maxToeX = Math.max(supportPoint.getX() - supportDistanceFromFront.getValue(), finalInFoot.getX());
+               if (maxToeX < shrunkPoint.getX())
+                  shrunkPoint.setX(maxToeX);
+            }
+            else
+            {
+               // This point is towards the heel
+               double minHeelX = Math.min(supportPoint.getX() + supportDistanceFromBack.getValue(), finalInFoot.getX());
+               if (minHeelX > shrunkPoint.getX())
+                  shrunkPoint.setX(minHeelX);
+            }
+
+            if (supportSide == RobotSide.LEFT)
+            {
+               if (supportPoint.getY() > 0)
+               {
+                  // This point is towards the outside
+                  double maxOutsideY = Math.max(supportPoint.getY() - supportDistanceFromOutside.getValue(), finalInFoot.getY());
+                  if (maxOutsideY < shrunkPoint.getY())
+                     shrunkPoint.setY(maxOutsideY);
+               }
+               else
+               {
+                  // This point is towards the inside
+                  double minInsideY = Math.min(supportPoint.getY() + supportDistanceFromInside.getValue(), finalInFoot.getY());
+                  if (minInsideY > shrunkPoint.getY())
+                     shrunkPoint.setY(minInsideY);
+               }
+            }
+            else
+            {
+               if (supportPoint.getY() > 0)
+               {
+                  // This point is towards the inside
+                  double maxInsideY = Math.max(supportPoint.getY() - supportDistanceFromInside.getValue(), finalInFoot.getY());
+                  if (maxInsideY < shrunkPoint.getY())
+                     shrunkPoint.setY(maxInsideY);
+               }
+               else
+               {
+                  // This point is towards the outside
+                  double minOutsideY = Math.min(supportPoint.getY() + supportDistanceFromOutside.getValue(), finalInFoot.getY());
+                  if (minOutsideY > shrunkPoint.getY())
+                     shrunkPoint.setY(minOutsideY);
+               }
+            }
+         }
+
+         allowableAreaForCoPInFoot.setIncludingFrame(shrunkSupport);
+      }
 
       if (useICPControlPlaneInStepAdjustment.getValue())
       {
@@ -664,11 +723,16 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(reachabilityConstraintHandler.getSCS2YoGraphics());
       group.addChild(environmentConstraintProvider.getSCS2YoGraphics());
+//      group.addChild(captureRegionCalculator.getSCS2YoGraphics());
+//      group.addChild(oneStepSafetyHeuristics.getSCS2YoGraphics());
+      group.addChild(multiStepCaptureRegionCalculator.getSCS2YoGraphics());
       group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D(yoNamePrefix + "FootstepSolution",
                                                                     footstepSolution.getPosition(),
                                                                     0.01,
                                                                     ColorDefinitions.DarkRed(),
                                                                     DefaultPoint2DGraphic.CIRCLE));
+//      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D("Allowable Area for CoP", allowableAreaForCoP, ColorDefinitions.Red()));
+
       group.setVisible(VISUALIZE);
       return group;
    }

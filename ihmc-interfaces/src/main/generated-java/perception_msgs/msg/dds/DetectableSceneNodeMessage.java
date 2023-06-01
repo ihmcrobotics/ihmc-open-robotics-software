@@ -26,7 +26,8 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
    public controller_msgs.msg.dds.RigidBodyTransformMessage transform_to_world_;
    /**
             * If this node is trackable via an ArUco maker, this is the ArUco marker's
-            * transform to world frame
+            * transform to world frame. This is so we can reset overriden node
+            * poses back to ArUco relative ones.
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage aruco_marker_transform_to_world_;
    /**
@@ -111,7 +112,8 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
 
    /**
             * If this node is trackable via an ArUco maker, this is the ArUco marker's
-            * transform to world frame
+            * transform to world frame. This is so we can reset overriden node
+            * poses back to ArUco relative ones.
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage getArucoMarkerTransformToWorld()
    {

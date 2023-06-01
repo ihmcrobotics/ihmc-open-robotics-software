@@ -30,7 +30,8 @@ module perception_msgs
         controller_msgs::msg::dds::RigidBodyTransformMessage transform_to_world;
         /**
          * If this node is trackable via an ArUco maker, this is the ArUco marker's
-         * transform to world frame
+         * transform to world frame. This is so we can reset overriden node
+         * poses back to ArUco relative ones.
          */
         controller_msgs::msg::dds::RigidBodyTransformMessage aruco_marker_transform_to_world;
         /**

@@ -1,4 +1,4 @@
-package us.ihmc.atlas.ObstacleCourseTests;
+package us.ihmc.atlas.obstacleCourseTests;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -7,13 +7,12 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseTrialsWalkingTaskTest;
+import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseSteppingStonesTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 
-@Tag("humanoid-obstacle-slow")
-public class AtlasObstacleCourseTrialsWalkingTaskTest extends DRCObstacleCourseTrialsWalkingTaskTest
+// this test is flaky because toe off is not triggered properly - the toe off condition needs to be fixed
+public class AtlasObstacleCourseSteppingStonesTest extends DRCObstacleCourseSteppingStonesTest
 {
-
    @Override
    public DRCRobotModel getRobotModel()
    {
@@ -26,24 +25,11 @@ public class AtlasObstacleCourseTrialsWalkingTaskTest extends DRCObstacleCourseT
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
-   @Test
+   @Tag("humanoid-obstacle-slow")
    @Override
-   public void testStepOnAndOffCinderBlocks()
-   {
-      super.testStepOnAndOffCinderBlocks();
-   }
-
    @Test
-   @Override
-   public void testStepOnCinderBlocks()
+   public void testWalkingOverEasySteppingStones()
    {
-      super.testStepOnCinderBlocks();
-   }
-
-   @Test
-   @Override
-   public void testStepOnCinderBlocksSlowlyWithDisturbance()
-   {
-      super.testStepOnCinderBlocksSlowlyWithDisturbance();
+      super.testWalkingOverEasySteppingStones();
    }
 }
