@@ -404,7 +404,7 @@ public class RDXLocomotionManager
       manualFootstepPlacement.getRenderables(renderables, pool);
       interactableFootstepPlan.getRenderables(renderables, pool);
       // Only render when planning with body path
-      if(locomotionParameters.getPlanWithBodyPath())
+      if (locomotionParameters.getPlanWithBodyPath())
          bodyPathPlanGraphic.getRenderables(renderables, pool);
    }
 
