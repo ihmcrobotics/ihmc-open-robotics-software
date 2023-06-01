@@ -9,8 +9,8 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -36,8 +36,6 @@ import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class RDXFootstepPlanning
 {
@@ -50,14 +48,10 @@ public class RDXFootstepPlanning
    private final FootstepPlannerLogger footstepPlannerLogger;
    private final ResettableExceptionHandlingExecutorService executor;
    private final FramePose3D midFeetZUpPose = new FramePose3D();
-   private boolean isReadyToWalk = false;
-   private final Notification plannedNotification = new Notification();
    private volatile PlanarRegionsListMessage planarRegionsListMessage = null;
    private volatile HeightMapMessage heightMapMessage = null;
-   private final AtomicReference<FootstepPlannerOutput> outputReference = new AtomicReference<>();
    private final FramePose3D startPose = new FramePose3D();
    private final RDXLocomotionParameters locomotionParameters;
-   private final AtomicBoolean hasNewPlanAvailable = new AtomicBoolean(false);
    /**
     * We create this field so that we can terminate a running plan via
     * a custom termination condition so we don't have to wait
@@ -65,6 +59,7 @@ public class RDXFootstepPlanning
     * This increase the response of the control ring plans.
     */
    private boolean terminatePlan = false;
+   private final TypedNotification<FootstepPlannerOutput> plannerOutputNotification = new TypedNotification<>();
 
    public RDXFootstepPlanning(DRCRobotModel robotModel,
                               ROS2SyncedRobotModel syncedRobot,
@@ -93,10 +88,10 @@ public class RDXFootstepPlanning
       // in the case that there is one running.
       terminatePlan = true;
 
-      executor.clearQueueAndExecute(() -> plan(new Pose3D(goalPoseInWorld)));
+      executor.clearQueueAndExecute(() -> plan(new Pose3D(goalPoseInWorld), planarRegionsListMessage, heightMapMessage));
    }
 
-   private void plan(Pose3DReadOnly goalPose)
+   private void plan(Pose3DReadOnly goalPose, PlanarRegionsListMessage planarRegionsListMessage, HeightMapMessage heightMapMessage)
    {
       // Set to false as soon as we start, so it can be set to true at any point now.
       terminatePlan = false;
@@ -125,13 +120,11 @@ public class RDXFootstepPlanning
       boolean assumeFlatGround = true;
       if (!locomotionParameters.getAssumeFlatGround())
       {
-         HeightMapMessage heightMapMessage = this.heightMapMessage;
          if (heightMapMessage != null)
          {
             assumeFlatGround = false;
             footstepPlannerRequest.setHeightMapData(HeightMapMessageTools.unpackMessage(heightMapMessage));
          }
-         PlanarRegionsListMessage planarRegionsListMessage = this.planarRegionsListMessage;
          if (planarRegionsListMessage != null)
          {
             footstepPlannerRequest.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
@@ -160,9 +153,9 @@ public class RDXFootstepPlanning
       // TODO: Set start footholds!!
       //      request.setTimeout(lookAndStepParameters.getFootstepPlannerTimeoutWhileStopped());
 
-      FootstepPlannerOutput output = footstepPlanner.getOutput();
-
       footstepPlanner.handleRequest(footstepPlannerRequest);
+
+      FootstepPlannerOutput output = footstepPlanner.getOutput();
       LogTools.info("Footstep planner completed with body path {}, footstep planner {}, {} step(s)",
                     output.getBodyPathPlanningResult(),
                     output.getFootstepPlanningResult(),
@@ -188,16 +181,13 @@ public class RDXFootstepPlanning
          }
          LogTools.info("Footstep planning failure...");
 
-         outputReference.set(null);
+         // Clears the notification
+         plannerOutputNotification.poll();
       }
       else
       {
-         outputReference.set(output);
+         plannerOutputNotification.set(output);
       }
-
-      isReadyToWalk = !plannerFailed;
-      plannedNotification.set();
-      hasNewPlanAvailable.set(isReadyToWalk);
    }
 
    private void setStanceSideToClosestToGoal(FootstepPlannerRequest footstepPlannerRequest, Pose3DReadOnly goalPose)
@@ -216,16 +206,6 @@ public class RDXFootstepPlanning
       footstepPlannerRequest.setRequestedInitialStanceSide(stanceSide);
    }
 
-   public boolean pollHasNewPlanAvailable()
-   {
-      return hasNewPlanAvailable.getAndSet(false);
-   }
-
-   public FootstepPlannerOutput pollOutput()
-   {
-      return outputReference.getAndSet(null);
-   }
-
    public void setPlanarRegionsListMessage(PlanarRegionsListMessage planarRegionsListMessage)
    {
       this.planarRegionsListMessage = planarRegionsListMessage;
@@ -236,19 +216,9 @@ public class RDXFootstepPlanning
       this.heightMapMessage = heightMapMessage;
    }
 
-   public boolean isReadyToWalk()
+   public TypedNotification<FootstepPlannerOutput> getPlannerOutputNotification()
    {
-      return isReadyToWalk;
-   }
-
-   public void setReadyToWalk(boolean readyToWalk)
-   {
-      isReadyToWalk = readyToWalk;
-   }
-
-   public Notification getPlannedNotification()
-   {
-      return plannedNotification;
+      return plannerOutputNotification;
    }
 
    public void destroy()
