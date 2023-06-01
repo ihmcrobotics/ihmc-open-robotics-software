@@ -27,7 +27,7 @@ public class RDXRemotePerceptionUI
    private final RapidRegionsExtractorParameters sphericalRegionExtractorParameters = new RapidRegionsExtractorParameters("Spherical");
    private final PolygonizerParameters sphericalPolygonizerParameters = new PolygonizerParameters("ForSphericalRapidRegions");
    private final ConcaveHullFactoryParameters sphericalConcaveHullFactoryParameters = new ConcaveHullFactoryParameters("ForSphericalRapidRegions");
-   private final PlanarRegionMappingParameters sphericalRegionMappingParameters = new PlanarRegionMappingParameters();
+   private final PlanarRegionMappingParameters sphericalRegionMappingParameters = new PlanarRegionMappingParameters("Spherical");
    private final IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsOnRobot();
 
    private final ImGuiRemoteROS2StoredPropertySetGroup remotePropertySets;
