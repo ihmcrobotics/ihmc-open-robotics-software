@@ -79,8 +79,8 @@ public class ControllerAPIDefinition
       commands.add(ClearDelayQueueCommand.class);
       commands.add(MomentumTrajectoryCommand.class);
       commands.add(CenterOfMassTrajectoryCommand.class);
-      commands.add(StepConstraintRegionCommand.class);
-      commands.add(StepConstraintsListCommand.class);
+//      commands.add(StepConstraintRegionCommand.class);
+//      commands.add(StepConstraintsListCommand.class);
       commands.add(HandWrenchTrajectoryCommand.class);
 
       /** Commands supported by the fast-walking controller, not in this repo */

@@ -579,8 +579,8 @@ public class WalkingCommandConsumer
 
    public void consumeEnvironmentalModelingCommands()
    {
-      consumePlanarRegionStepConstraintCommand();
-      consumePlanarRegionStepConstraintsListCommand();
+//      consumePlanarRegionStepConstraintCommand();
+//      consumePlanarRegionStepConstraintsListCommand();
    }
 
    public void consumePlanarRegionStepConstraintCommand()
