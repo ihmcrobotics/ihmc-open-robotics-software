@@ -69,8 +69,10 @@ public class RDXSelectablePathControlRingGizmo
       if (input.isWindowHovered())
       {
          boolean leftMouseReleasedWithoutDrag = input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
-         boolean isClickedOn = isRingHovered() && leftMouseReleasedWithoutDrag;
-         boolean somethingElseIsClickedOn = !isRingHovered() && leftMouseReleasedWithoutDrag;
+         // To select, click on the ring. The arrows are not showing up at this time.
+         boolean isClickedOn = pathControlRingGizmo.getRingHovered() && leftMouseReleasedWithoutDrag;
+         // To deselect, click on anything other than the ring and the arrows
+         boolean somethingElseIsClickedOn = !pathControlRingGizmo.getAnyPartHovered() && leftMouseReleasedWithoutDrag;
 
          // Determine selectedness
          if (selectable && isClickedOn)
@@ -99,7 +101,7 @@ public class RDXSelectablePathControlRingGizmo
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if ((selectable && isRingHovered()) || modified || selected)
+      if ((selectable && pathControlRingGizmo.getRingHovered()) || modified || selected)
       {
          pathControlRingGizmo.getRenderables(renderables, pool);
       }
@@ -127,11 +129,6 @@ public class RDXSelectablePathControlRingGizmo
    public void setSelectable(boolean selectable)
    {
       this.selectable = selectable;
-   }
-
-   private boolean isRingHovered()
-   {
-      return pathControlRingGizmo.getRingHovered();
    }
 
    public boolean getModified()

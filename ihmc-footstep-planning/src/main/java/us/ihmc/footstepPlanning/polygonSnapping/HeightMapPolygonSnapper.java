@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.polygonSnapping;
 
+import com.esotericsoftware.minlog.Log;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
@@ -9,6 +10,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
@@ -92,6 +94,8 @@ public class HeightMapPolygonSnapper
          return null;
       }
 
+      // FIXME It's worth noting that if a single point is significantly far enough above all the other points, this will remove the other points, making it an
+      // FIXME invalid snap. That may or may not be what we actually want.
       double maxZ = pointsInsidePolyon.stream().mapToDouble(Point3D::getZ).max().getAsDouble();
       double minZ = maxZ - snapHeightThreshold;
       pointsInsidePolyon.removeIf(point -> point.getZ() < minZ);
