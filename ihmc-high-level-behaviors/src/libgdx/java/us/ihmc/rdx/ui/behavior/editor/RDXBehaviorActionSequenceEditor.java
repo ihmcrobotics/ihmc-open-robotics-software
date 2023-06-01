@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.tuple.MutablePair;
 import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
@@ -32,7 +33,6 @@ import us.ihmc.tools.io.*;
 
 import java.util.LinkedList;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This class is primarily an interactable sequence/list of robot actions.
@@ -75,8 +75,6 @@ public class RDXBehaviorActionSequenceEditor
    private IHMCROS2Input<ActionSequenceUpdateMessage> sequenceStatusSubscription;
    private final Empty manuallyExecuteNextActionMessage = new Empty();
    private final Bool automaticExecutionCommandMessage = new Bool();
-
-   private final AtomicBoolean successfullyLoadedActions = new AtomicBoolean(true);
 
    public RDXBehaviorActionSequenceEditor(WorkspaceResourceFile fileToLoadFrom)
    {
@@ -127,7 +125,7 @@ public class RDXBehaviorActionSequenceEditor
       executionNextIndexStatus = 0;
       loading = true;
       LogTools.info("Loading from {}", workspaceFile.getClasspathResource().toString());
-      successfullyLoadedActions.set(true);
+      MutableBoolean successfullyLoadedActions = new MutableBoolean(true);
       JSONFileTools.load(workspaceFile.getClasspathResourceAsStream(), jsonNode ->
       {
          JSONTools.forEachArrayElement(jsonNode, "actions", actionNode ->
@@ -142,12 +140,12 @@ public class RDXBehaviorActionSequenceEditor
             }
             else
             {
-               successfullyLoadedActions.set(false);
+               successfullyLoadedActions.setValue(false);
             }
          });
       });
       loading = false;
-      if (successfullyLoadedActions.get())
+      if (successfullyLoadedActions.getValue())
       {
          commandNextActionIndex(0);
          return true;
