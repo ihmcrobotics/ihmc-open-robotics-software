@@ -302,7 +302,7 @@ public class TerrainPerceptionProcessWithDriver
 
             PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, frameRegionsTopic, ros2Helper);
 
-            LogTools.info("Total Planar Regions: " + framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions());
+//            LogTools.info("Total Planar Regions: " + framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions());
          }
 
          if (parameters.getPublishDepth() || parameters.getRapidRegionsEnabled())
