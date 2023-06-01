@@ -158,6 +158,14 @@ public class StepConstraintRegion implements RegionInWorldInterface<StepConstrai
       updateBoundingBox();
    }
 
+   public void addOffset(Vector3DReadOnly offset)
+   {
+      fromLocalToWorldTransform.prependTranslation(offset);
+      fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
+
+      updateBoundingBox();
+   }
+
    private void checkConcaveHullRepeatVertices()
    {
       if (concaveHull.getNumberOfVertices() < 2)

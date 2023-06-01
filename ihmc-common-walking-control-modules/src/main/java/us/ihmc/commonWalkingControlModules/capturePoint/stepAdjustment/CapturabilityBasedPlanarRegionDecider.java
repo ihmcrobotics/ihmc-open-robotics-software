@@ -232,15 +232,12 @@ public class CapturabilityBasedPlanarRegionDecider
       return stepIsFarEnoughInsideToIgnoreConstraint.getBooleanValue();
    }
 
-   private final StepConstraintRegion highestRegionUnderFoot = new StepConstraintRegion();
    private final FramePoint3D projectedFoothold = new FramePoint3D();
    private final FramePoint2D tempPoint = new FramePoint2D();
 
    private StepConstraintRegion findPlanarRegionUnderFoothold(FramePoint3DReadOnly foothold)
    {
-      if (!PlanarRegionTools.projectPointToPlanesVertically(foothold, stepConstraintRegions, projectedFoothold, highestRegionUnderFoot))
-         return null;
-
+      StepConstraintRegion highestRegionUnderFoot = PlanarRegionTools.projectPointToPlanesVertically(foothold, stepConstraintRegions, projectedFoothold, null);
       return highestRegionUnderFoot;
    }
 
