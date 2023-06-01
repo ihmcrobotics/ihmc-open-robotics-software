@@ -401,7 +401,9 @@ public class RDXLocomotionManager
       ballAndArrowMidFeetPosePlacement.getRenderables(renderables, pool);
       manualFootstepPlacement.getRenderables(renderables, pool);
       interactableFootstepPlan.getRenderables(renderables, pool);
-      bodyPathPlanGraphic.getRenderables(renderables, pool);
+      // Only render when planning with body path
+      if(locomotionParameters.getPlanWithBodyPath())
+         bodyPathPlanGraphic.getRenderables(renderables, pool);
    }
 
    public RDXLocomotionParameters getLocomotionParameters()
