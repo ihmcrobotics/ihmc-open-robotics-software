@@ -152,6 +152,7 @@ public class SimulatedZimmerController implements ValkyrieHandController
          }
 
          trajectory.initialize();
+         trajectoryStartTime.set(time);
       }
 
       public void initialize()

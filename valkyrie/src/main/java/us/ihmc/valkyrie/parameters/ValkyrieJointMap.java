@@ -78,6 +78,8 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
       {
          case DEFAULT:
          case FINGERLESS:
+         case DUAL_PSYONIC:
+         case DUAL_ZIMMER:
             armJoints = new ArmJointName[] {ArmJointName.SHOULDER_PITCH,
                                             ArmJointName.SHOULDER_ROLL,
                                             ArmJointName.SHOULDER_YAW,
@@ -116,6 +118,8 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
                break;
             case DEFAULT:
             case FINGERLESS:
+            case DUAL_PSYONIC:
+            case DUAL_ZIMMER:
                armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftForearmYaw],
                                  new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.ELBOW_ROLL));
                armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristRoll],
@@ -139,6 +143,11 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
             case DEFAULT:
             case FINGERLESS:
                String endEffectorName = prefix + "Palm";
+               handNames.put(robotSide, endEffectorName);
+               break;
+            case DUAL_PSYONIC:
+            case DUAL_ZIMMER:
+               endEffectorName = prefix + "WristPitchFrame";
                handNames.put(robotSide, endEffectorName);
                break;
             case DUAL_ARM_MASS_SIM:
@@ -359,6 +368,8 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
       switch (robotVersion)
       {
          case DEFAULT:
+         case DUAL_PSYONIC:
+         case DUAL_ZIMMER:
             HashSet<String> lastSimulatedJoints = new HashSet<>();
             for (RobotSide robotSide : RobotSide.values)
                lastSimulatedJoints.add(armJointStrings.get(robotSide).get(ArmJointName.FIRST_WRIST_PITCH));
@@ -389,10 +400,13 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
    @Override
    public RigidBodyTransform getHandControlFrameToWristTransform(RobotSide robotSide)
    {
+      // TODO Need to handle this using the hand model somehow
       switch (robotVersion)
       {
          case DEFAULT:
          case FINGERLESS:
+         case DUAL_PSYONIC:
+         case DUAL_ZIMMER:
             return physicalProperties.getHandControlFrameToWristTransform(robotSide);
          case DUAL_ARM_MASS_SIM:
             return physicalProperties.getHandControlFrameToArmMassSimTransform(robotSide);

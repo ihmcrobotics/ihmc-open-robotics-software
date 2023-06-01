@@ -152,6 +152,7 @@ public class SimulatedPsyonicController implements ValkyrieHandController
          }
 
          trajectory.initialize();
+         trajectoryStartTime.set(time);
       }
 
       public void initialize()

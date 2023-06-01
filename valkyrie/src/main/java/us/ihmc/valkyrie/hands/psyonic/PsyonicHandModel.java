@@ -53,6 +53,8 @@ public class PsyonicHandModel implements ValkyrieHandModel
       thumb_q1, thumb_q2, index_q1, index_q2, middle_q1, middle_q2, ring_q1, ring_q2, pinky_q1, pinky_q2;
 
       public static final PsyonicJointName[] values = values();
+      public static final PsyonicJointName[] fingerJoints = {index_q1, index_q2, middle_q1, middle_q2, ring_q1, ring_q2, pinky_q1, pinky_q2};
+      public static final PsyonicJointName[] thumbJoints = {thumb_q1, thumb_q2};
 
       @Override
       public String getJointName(RobotSide robotSide)
@@ -76,6 +78,11 @@ public class PsyonicHandModel implements ValkyrieHandModel
             return null;
          else
             return values[jointNameByteValue];
+      }
+
+      public byte toByte()
+      {
+         return (byte) ordinal();
       }
 
       @Override

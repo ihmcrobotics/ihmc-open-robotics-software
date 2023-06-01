@@ -45,7 +45,7 @@ public class ValkyrieModelFileLoadingDemoSCS2
 
    public ValkyrieModelFileLoadingDemoSCS2()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.DUAL_ARM_MASS_SIM);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.DUAL_PSYONIC);
       //    robotModel.setCustomModel("models/valkyrie_A_zimmer.urdf");
 //      robotModel.setCustomModel("models/valkyrie_A_psyonic.urdf");
       RobotDefinition robotDefinition = robotModel.getRobotDefinition();
