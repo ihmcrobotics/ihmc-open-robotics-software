@@ -216,7 +216,7 @@ public class TerrainPerceptionProcessWithDriver
                     realsense.getDepthPrincipalOffsetXPixels(),
                     realsense.getDepthPrincipalOffsetYPixels());
 
-            rapidRegionsExtractor.getDebugger().setEnabled(true);
+//            rapidRegionsExtractor.getDebugger().setEnabled(true);
 
             ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
             ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
@@ -303,7 +303,7 @@ public class TerrainPerceptionProcessWithDriver
 
             PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, frameRegionsTopic, ros2Helper);
 
-            LogTools.info("Total Planar Regions: " + framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions());
+//            LogTools.info("Total Planar Regions: " + framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions());
          }
 
          if (parameters.getPublishDepth() || parameters.getRapidRegionsEnabled())
