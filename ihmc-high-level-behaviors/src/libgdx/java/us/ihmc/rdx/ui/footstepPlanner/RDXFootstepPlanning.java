@@ -180,8 +180,6 @@ public class RDXFootstepPlanning
 
       FootstepPlannerOutput output = footstepPlanner.getOutput();
 
-      LogTools.info("Stance side: {}", footstepPlannerRequest.getRequestedInitialStanceSide().name());
-      LogTools.info("Planning footsteps...");
       footstepPlanner.handleRequest(footstepPlannerRequest);
       LogTools.info("Footstep planner completed with body path {}, footstep planner {}, {} step(s)",
                     output.getBodyPathPlanningResult(),
