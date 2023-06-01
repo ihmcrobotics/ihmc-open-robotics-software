@@ -60,6 +60,7 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
 
    private final YoFrameConvexPolygon2D yoConvexHullConstraint;
+   private final FrameConvexPolygon2D convexHullConstraint = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D reachabilityRegionInConstraintPlane = new FrameConvexPolygon2D();
 
    private final List<StepConstraintRegion> stepConstraintRegions = new ArrayList<>();
@@ -111,7 +112,7 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
 
    public boolean hasStepConstraintRegion()
    {
-      return planarRegionDecider.getConstraintRegion() != null;
+      return planarRegionDecider.getConstraintRegion() != null && planarRegionDecider.isStepFarEnoughInsideToIgnoreConstraint();
    }
 
    public void reset()
@@ -119,6 +120,7 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
       foundSolution.set(false);
       stepConstraintRegions.clear();
       yoConvexHullConstraint.clear();
+      convexHullConstraint.clearAndUpdate();
       isEnvironmentConstraintValid.set(false);
       stepConstraintOptimizer.reset();
       planarRegionDecider.reset();
@@ -175,14 +177,19 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
 
       computeFootstepPolygon(upcomingFootstepSide, predictedContactPoints, footstepPoseToPack.getOrientation());
 
-      yoConvexHullConstraint.set(stepConstraintRegion.getConvexHullInConstraintRegion());
-      yoConvexHullConstraint.applyTransform(stepConstraintRegion.getTransformToWorld(), false);
+      convexHullConstraint.set(stepConstraintRegion.getConvexHullInConstraintRegion());
+      convexHullConstraint.applyTransform(stepConstraintRegion.getTransformToWorld(), false);
+
+      if (convexHullConstraint.getNumberOfVertices() <= yoConvexHullConstraint.getMaxNumberOfVertices())
+         yoConvexHullConstraint.set(convexHullConstraint);
+      else
+         yoConvexHullConstraint.clearAndUpdate();
 
       stepXY.set(footstepPoseToPack.getPosition());
       // do a simple orthogonal projection first.
-      if (!yoConvexHullConstraint.isPointInside(stepXY))
+      if (!convexHullConstraint.isPointInside(stepXY))
       {
-         yoConvexHullConstraint.orthogonalProjection(stepXY);
+         convexHullConstraint.orthogonalProjection(stepXY);
          footstepPoseToPack.getPosition().set(stepXY);
       }
 
@@ -190,7 +197,7 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
       footstepPolygon.applyTransform(footstepTransform, false);
       parameters.setDesiredDistanceInside(desiredDistanceInsideConstraint.getValue());
 
-      RigidBodyTransformReadOnly wiggleTransform = stepConstraintOptimizer.findConstraintTransform(footstepPolygon, yoConvexHullConstraint, parameters);
+      RigidBodyTransformReadOnly wiggleTransform = stepConstraintOptimizer.findConstraintTransform(footstepPolygon, convexHullConstraint, parameters);
       originalPose.set(footstepPoseToPack);
 
       if (wiggleTransform != null)
