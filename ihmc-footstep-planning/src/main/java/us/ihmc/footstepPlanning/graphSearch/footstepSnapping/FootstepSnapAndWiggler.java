@@ -116,6 +116,11 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       updateWiggleParameters(wiggleParameters, parameters);
    }
 
+   public PlanarRegionsList getPlanarRegionsList()
+   {
+      return planarRegionsList;
+   }
+
    private boolean flatGroundMode()
    {
       return (planarRegionsList == null || planarRegionsList.isEmpty()) && (heightMapData == null || heightMapData.isEmpty());
