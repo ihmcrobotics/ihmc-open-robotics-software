@@ -205,12 +205,11 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       }
       ImGuiTools.previousWidgetTooltip("Keybind: Escape");
       ImGui.sameLine();
-      if (imgui.ImGui.button(labels.get("Delete Last"))
-          || imgui.ImGui.isKeyPressed(ImGuiTools.getDeleteKey()) || (ImGui.getIO().getKeyCtrl() && ImGui.isKeyPressed('Z')))
+      if (imgui.ImGui.button(labels.get("Delete Last")) || (ImGui.getIO().getKeyCtrl() && ImGui.isKeyPressed('Z')))
       {
          footstepPlan.removeLastStep();
       }
-      ImGuiTools.previousWidgetTooltip("Keybind: Delete");
+      ImGuiTools.previousWidgetTooltip("Keybind: Ctrl + Z");
    }
 
    private void renderTooltips()
