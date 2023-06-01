@@ -12,6 +12,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -29,7 +30,6 @@ import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -50,13 +50,9 @@ public class RDXFootstepPlanning
    private final ResettableExceptionHandlingExecutorService executor;
    private boolean isReadyToWalk = false;
    private final Notification plannedNotification = new Notification();
-
-   private final AtomicReference<Pose3DReadOnly> goalPoseReference = new AtomicReference<>();
    private final AtomicReference<PlanarRegionsListMessage> planarRegionsListMessageReference = new AtomicReference<>();
-   private final AtomicReference<PlanarRegionsList> planarRegionsListReference = new AtomicReference<>();
    private final AtomicReference<HeightMapMessage> heightMapDataReference = new AtomicReference<>();
    private final AtomicReference<FootstepPlannerOutput> outputReference = new AtomicReference<>();
-
    private final MovingReferenceFrame midFeetZUpFrame;
    private final FramePose3D midFeetZUpPose = new FramePose3D();
    private final FramePose3D startPose = new FramePose3D();
@@ -92,19 +88,16 @@ public class RDXFootstepPlanning
       executor = MissingThreadTools.newSingleThreadExecutor("FootstepPlanning", true, 1);
    }
 
-   public void planAsync()
+   public void planAsync(Pose3DReadOnly goalPoseInWorld)
    {
-      if (goalPoseReference.get() != null)
-      {
-         // Set termination condition to terminate the running plan as soon as possible,
-         // in the case that there is one running.
-         terminatePlan = true;
+      // Set termination condition to terminate the running plan as soon as possible,
+      // in the case that there is one running.
+      terminatePlan = true;
 
-         executor.clearQueueAndExecute(this::plan);
-      }
+      executor.clearQueueAndExecute(() -> plan(new Pose3D(goalPoseInWorld)));
    }
 
-   private void plan()
+   private void plan(Pose3DReadOnly goalPose)
    {
       // Set to false as soon as we start, so it can be set to true at any point now.
       terminatePlan = false;
@@ -113,13 +106,6 @@ public class RDXFootstepPlanning
       {
          footstepPlanner.halt();
       }
-
-      PlanarRegionsListMessage planarRegionsListMessage = planarRegionsListMessageReference.get();
-      HeightMapMessage heightMapMessage = heightMapDataReference.get();
-      PlanarRegionsList planarRegionsList = planarRegionsListReference.get();
-      Pose3DReadOnly goalPose = goalPoseReference.getAndSet(null);
-      if (goalPose == null)
-         return;
 
       footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
       footstepPlanner.getAStarBodyPathPlannerParameters().set(bodyPathPlannerParameters);
@@ -140,19 +126,16 @@ public class RDXFootstepPlanning
       boolean assumeFlatGround = true;
       if (!locomotionParameters.getAssumeFlatGround())
       {
+         HeightMapMessage heightMapMessage = heightMapDataReference.get();
          if (heightMapMessage != null)
          {
             assumeFlatGround = false;
             footstepPlannerRequest.setHeightMapData(HeightMapMessageTools.unpackMessage(heightMapMessage));
          }
+         PlanarRegionsListMessage planarRegionsListMessage = planarRegionsListMessageReference.get();
          if (planarRegionsListMessage != null)
          {
             footstepPlannerRequest.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
-            assumeFlatGround = false;
-         }
-         if (planarRegionsList != null)
-         {
-            footstepPlannerRequest.setPlanarRegionsList(planarRegionsList);
             assumeFlatGround = false;
          }
       }
@@ -244,19 +227,9 @@ public class RDXFootstepPlanning
       return outputReference.getAndSet(null);
    }
 
-   public void setMidFeetGoalPose(Pose3DReadOnly midFeetGoalPose)
-   {
-      this.goalPoseReference.set(midFeetGoalPose);
-   }
-
    public void setPlanarRegionsListMessage(PlanarRegionsListMessage planarRegionsListMessage)
    {
       this.planarRegionsListMessageReference.set(planarRegionsListMessage);
-   }
-
-   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
-   {
-      this.planarRegionsListReference.set(planarRegionsList);
    }
 
    public void setHeightMapData(HeightMapMessage heightMapMessage)
