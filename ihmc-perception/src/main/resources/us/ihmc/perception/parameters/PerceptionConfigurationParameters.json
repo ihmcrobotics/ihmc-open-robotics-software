@@ -19,5 +19,6 @@
   "SLAM enabled" : false,
   "SLAM reset" : false,
   "Support square enabled" : true,
+  "Bounding box filter" : true,
   "Active mapping" : false
 }

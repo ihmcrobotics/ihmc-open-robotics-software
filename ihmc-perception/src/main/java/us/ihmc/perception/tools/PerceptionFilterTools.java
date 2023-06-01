@@ -1,5 +1,9 @@
 package us.ihmc.perception.tools;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -61,5 +65,25 @@ public class PerceptionFilterTools
          joints.forEach(joint -> shapeTester.addJoint(collisionBoxProvider, joint));
       }
       return new CollidingScanRegionFilter(shapeTester);
+   }
+
+   public static void applyBoundingBoxFilter(PlanarRegionsList planarRegionsList, BoundingBox3D boundingBox)
+   {
+      PlanarRegionsList result = null;
+
+      Plane3D plane = new Plane3D(new Point3D(boundingBox.getMinX(), 0, 0), new Vector3D(1, 0, 0));
+      result = PlanarRegionCuttingTools.cutByPlane(plane, planarRegionsList);
+
+      plane = new Plane3D(new Point3D(boundingBox.getMaxX(), 0, 0), new Vector3D(-1, 0, 0));
+      result = PlanarRegionCuttingTools.cutByPlane(plane, result);
+
+      plane = new Plane3D(new Point3D(0, boundingBox.getMinY(), 0), new Vector3D(0, 1, 0));
+      result = PlanarRegionCuttingTools.cutByPlane(plane, result);
+
+      plane = new Plane3D(new Point3D(0, boundingBox.getMaxY(), 0), new Vector3D(0, -1, 0));
+      result = PlanarRegionCuttingTools.cutByPlane(plane, result);
+
+      planarRegionsList.clear();
+      planarRegionsList.addPlanarRegions(result.getPlanarRegionsAsList());
    }
 }

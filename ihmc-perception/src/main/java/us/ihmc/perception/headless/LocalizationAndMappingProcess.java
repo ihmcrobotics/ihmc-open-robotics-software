@@ -12,6 +12,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -19,6 +20,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
+import us.ihmc.perception.tools.PerceptionFilterTools;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
@@ -170,11 +172,20 @@ public class LocalizationAndMappingProcess {
                 regions.getPlanarRegionsList(),
                 regions.getSensorToWorldFrameTransform(),
                 midFootTransform);
-        PlanarRegionsList resultMap = planarRegionMap.getMapRegions();
 
-        synchronized (resultMap) {
-            latestPlanarRegionsForPublishing.set(resultMap.copy());
+        PlanarRegionsList resultMap = planarRegionMap.getMapRegions().copy();
+        if (perceptionConfigurationParameters.getBoundingBoxFilter())
+        {
+            BoundingBox3D boundingBox = new BoundingBox3D(midFootTransform.getTranslationX() - 2.0f,
+                    midFootTransform.getTranslationY() - 2.0f,
+                    -2.0f,
+                    midFootTransform.getTranslationX() + 2.0f,
+                    midFootTransform.getTranslationY() + 2.0f,
+                    2.0f);
+            PerceptionFilterTools.applyBoundingBoxFilter(resultMap, boundingBox);
         }
+
+        latestPlanarRegionsForPublishing.set(resultMap);
     }
 
     public void resetMap() {
