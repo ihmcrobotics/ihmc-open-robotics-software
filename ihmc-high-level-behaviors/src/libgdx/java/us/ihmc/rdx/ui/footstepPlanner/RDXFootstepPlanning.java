@@ -28,7 +28,6 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
