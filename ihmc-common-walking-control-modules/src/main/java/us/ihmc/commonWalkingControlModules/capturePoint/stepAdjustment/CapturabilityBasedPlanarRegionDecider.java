@@ -35,7 +35,7 @@ public class CapturabilityBasedPlanarRegionDecider
    private static final double defaultMinimumCaptureAreaForSearch = 0.015;
    private static final double defaultCaptureAreaImprovementToSwitch = 0.015;
    private static final double defaultWeightToCurrentCaptureArea = 1.1;
-   private static final double defaultDistanceInsideToRemoveRegionConstraint = 0.3;
+   private static final double defaultDistanceInsideToRemoveRegionConstraint = 0.75;
 
    private final List<StepConstraintRegion> stepConstraintRegions = new ArrayList<>();
 
@@ -61,7 +61,6 @@ public class CapturabilityBasedPlanarRegionDecider
    private final ConvexPolygon2D candidateConvexHullConstraint = new ConvexPolygon2D();
 
    private final FrameConvexPolygon2D captureRegion = new FrameConvexPolygon2D();
-   private final YoFrameConvexPolygon2D yoConvexHullConstraint;
 
    private final BooleanProvider useControlPlane;
    private final ICPControlPlane icpControlPlane;
@@ -105,15 +104,7 @@ public class CapturabilityBasedPlanarRegionDecider
       distanceInsideToRemoveRegionConstraint.set(defaultDistanceInsideToRemoveRegionConstraint);
 
       switchPlanarRegionConstraintsAutomatically = new YoBoolean("switchPlanarRegionConstraintsAutomatically", registry);
-      switchPlanarRegionConstraintsAutomatically.set(true);
-
-      yoConvexHullConstraint = new YoFrameConvexPolygon2D("convexHullConstraint", "", worldFrame, 12, registry);
-
-      if (yoGraphicsListRegistry != null)
-      {
-         YoArtifactPolygon activePlanarRegionViz = new YoArtifactPolygon("ConvexHullConstraint", yoConvexHullConstraint, Color.RED, false);
-         yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), activePlanarRegionViz);
-      }
+      switchPlanarRegionConstraintsAutomatically.set(false);
    }
 
    public void setConstraintRegions(List<StepConstraintRegion> constraintRegions)
@@ -144,7 +135,6 @@ public class CapturabilityBasedPlanarRegionDecider
       planarRegionToConstrainTo = null;
       stepConstraintRegions.clear();
       captureAreaWithCurrentRegion.set(0.0);
-      yoConvexHullConstraint.clear();
       convexHullConstraint.clearAndUpdate();
    }
 
@@ -207,7 +197,6 @@ public class CapturabilityBasedPlanarRegionDecider
       hasConstraintRegion.set(planarRegionToConstrainTo != null);
       constraintRegionId.set(planarRegionToConstrainTo == null ? -1 : planarRegionToConstrainTo.getRegionId());
       checkDistanceInsideOfRegion(footstepPose.getPosition());
-      updateTheVisualizedRegion();
 
       return planarRegionToConstrainTo;
    }
@@ -352,17 +341,5 @@ public class CapturabilityBasedPlanarRegionDecider
    {
       tempPoint.set(stepPosition);
       stepIsFarEnoughInsideToIgnoreConstraint.set(convexHullConstraint.signedDistance(tempPoint) < distanceInsideToRemoveRegionConstraint.getDoubleValue());
-   }
-
-   private void updateTheVisualizedRegion()
-   {
-      if (planarRegionToConstrainTo != null && convexHullConstraint.getNumberOfVertices() <= yoConvexHullConstraint.getMaxNumberOfVertices())
-      {
-         yoConvexHullConstraint.set(convexHullConstraint);
-      }
-      else
-      {
-         yoConvexHullConstraint.setToNaN();
-      }
    }
 }
