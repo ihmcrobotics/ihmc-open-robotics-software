@@ -164,9 +164,9 @@ public class RDXLocomotionManager
          footstepPlanning.planAsync(ballAndArrowMidFeetPosePlacement.getGoalPose());
       }
 
-      if (footstepPlanning.pollHasNewPlanAvailable())
+      if (footstepPlanning.getPlannerOutputNotification().poll())
       {
-         FootstepPlannerOutput output = footstepPlanning.pollOutput();
+         FootstepPlannerOutput output = footstepPlanning.getPlannerOutputNotification().read();
          interactableFootstepPlan.updateFromPlan(output.getFootstepPlan(), output.getSwingTrajectories());
          if (output.getBodyPath().size() > 0)
             bodyPathPlanGraphic.generateMeshesAsync(output.getBodyPath());
@@ -216,7 +216,6 @@ public class RDXLocomotionManager
 
       if (interactableFootstepPlan.getNumberOfFootsteps() > 0)
       {
-         footstepPlanning.setReadyToWalk(false);
          footstepsSentToControllerGraphic.clear();
       }
 
