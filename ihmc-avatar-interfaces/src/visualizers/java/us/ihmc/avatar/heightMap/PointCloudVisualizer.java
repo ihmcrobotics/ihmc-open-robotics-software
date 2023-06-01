@@ -7,17 +7,14 @@ import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
-import us.ihmc.ihmcPerception.depthData.PointCloudData;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.ihmcPerception.heightMap.HeightMapInputData;
+import us.ihmc.perception.heightMap.HeightMapInputData;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.Messager;
@@ -30,8 +27,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.ihmcPerception.heightMap.HeightMapUpdater.APPROX_OUSTER_TRANSFORM;
-import static us.ihmc.ihmcPerception.heightMap.HeightMapUpdater.USE_OUSTER_FRAME;
+import static us.ihmc.perception.heightMap.HeightMapUpdater.APPROX_OUSTER_TRANSFORM;
+import static us.ihmc.perception.heightMap.HeightMapUpdater.USE_OUSTER_FRAME;
 
 public class PointCloudVisualizer extends AnimationTimer
 {

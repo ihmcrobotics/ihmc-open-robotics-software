@@ -9,16 +9,19 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Hea
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
+import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.tools.thread.StatelessNotification;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class RDXSCS2HumanoidSimulationManager
 {
@@ -34,7 +37,7 @@ public class RDXSCS2HumanoidSimulationManager
    private int recordFrequency;
    private DRCRobotModel robotModel;
    private CommunicationMode ros2CommunicationMode;
-   private final ArrayList<RDXSCS2SecondaryRobot> secondaryRobots = new ArrayList<>();
+   private final ArrayList<Function<ReferenceFrame, Robot>> secondaryRobots = new ArrayList<>();
    private final ArrayList<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
    private final ArrayList<String> robotsToHide = new ArrayList<>();
    private volatile boolean starting = false;
@@ -122,9 +125,9 @@ public class RDXSCS2HumanoidSimulationManager
          {
             avatarSimulationFactory.addTerrainObjectDefinition(terrainObjectDefinition);
          }
-         for (RDXSCS2SecondaryRobot secondaryRobot : secondaryRobots)
+         for (Function<ReferenceFrame, Robot> secondaryRobot : secondaryRobots)
          {
-            avatarSimulationFactory.addSecondaryRobot(secondaryRobot.create());
+            avatarSimulationFactory.addSecondaryRobot(secondaryRobot.apply(scs2SimulationSession.getSession().getInertialFrame()));
          }
          avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
          avatarSimulationFactory.setSimulationDataRecordTickPeriod(recordFrequency);
@@ -184,7 +187,7 @@ public class RDXSCS2HumanoidSimulationManager
       }
    }
 
-   public ArrayList<RDXSCS2SecondaryRobot> getSecondaryRobots()
+   public ArrayList<Function<ReferenceFrame, Robot>> getSecondaryRobots()
    {
       return secondaryRobots;
    }

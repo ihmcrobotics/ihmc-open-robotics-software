@@ -42,6 +42,7 @@ cp ../lib/libslam-wrapper.so ../../resources/slamWrapper/linux-x86_64
 cp /usr/local/lib/libgtsam.so ../../resources/slamWrapper/linux-x86_64
 cp /usr/local/lib/libmetis-gtsam.so ../../resources/slamWrapper/linux-x86_64
 cp /usr/lib/x86_64-linux-gnu/libtbb.so ../../resources/slamWrapper/linux-x86_64
+cp /usr/lib/x86_64-linux-gnu/libtbbmalloc.so ../../resources/slamWrapper/linux-x86_64
 cp /usr/lib/x86_64-linux-gnu/libboost_filesystem.so ../../resources/slamWrapper/linux-x86_64
 cp /usr/lib/x86_64-linux-gnu/libboost_serialization.so ../../resources/slamWrapper/linux-x86_64
 cp /usr/lib/x86_64-linux-gnu/libboost_timer.so ../../resources/slamWrapper/linux-x86_64

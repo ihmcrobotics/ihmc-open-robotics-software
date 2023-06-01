@@ -7,17 +7,20 @@ import us.ihmc.behaviors.sequence.BehaviorActionData;
 
 public class WaitDurationActionData implements BehaviorActionData
 {
+   private String description = "Wait";
    private double waitDuration = 4.0;
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
+      jsonNode.put("description", description);
       jsonNode.put("waitDuration", waitDuration);
    }
 
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
+      description = jsonNode.get("description").textValue();
       waitDuration = jsonNode.get("waitDuration").asDouble();
    }
 
@@ -39,5 +42,17 @@ public class WaitDurationActionData implements BehaviorActionData
    public void setWaitDuration(double waitDuration)
    {
       this.waitDuration = waitDuration;
+   }
+
+   @Override
+   public void setDescription(String description)
+   {
+      this.description = description;
+   }
+
+   @Override
+   public String getDescription()
+   {
+      return description;
    }
 }

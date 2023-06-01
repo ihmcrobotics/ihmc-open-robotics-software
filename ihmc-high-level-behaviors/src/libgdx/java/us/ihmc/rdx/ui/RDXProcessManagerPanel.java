@@ -70,7 +70,7 @@ public abstract class RDXProcessManagerPanel
       RDXBehaviorUIRegistry behaviorRegistry = RDXBehaviorUIRegistry.DEFAULT_BEHAVIORS;
 
       ros1MasterProcess = new ROS1MasterProcess();
-      behaviorModuleProcess = new BehaviorModuleProcess(this::createRobotModel, ros2Mode, messagerMode, enableROS1, behaviorRegistry);
+      behaviorModuleProcess = new BehaviorModuleProcess(this::createRobotModel, ros2Mode, behaviorRegistry);
       behaviorManagerProcess = new BehaviorManagerProcess(this::createRobotModel);
       footstepPlanningModuleProcess = new FootstepPlanningModuleProcess(this::createRobotModel, this::getROS2Mode);
       mapsenseHeadlessProcess = new MapSenseHeadlessProcess();

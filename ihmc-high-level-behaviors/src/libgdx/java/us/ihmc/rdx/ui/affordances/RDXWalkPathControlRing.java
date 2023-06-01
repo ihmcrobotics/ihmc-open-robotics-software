@@ -11,6 +11,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -28,9 +29,8 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
-import us.ihmc.rdx.ui.gizmo.RDXPathControlRingGizmo;
+import us.ihmc.rdx.ui.gizmo.RDXSelectablePathControlRingGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
-import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.PathTypeStepParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnStraightTurnFootstepGenerator;
@@ -47,11 +47,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class RDXWalkPathControlRing implements PathTypeStepParameters
 {
-   private final RDXPathControlRingGizmo footstepPlannerGoalGizmo = new RDXPathControlRingGizmo();
-   private boolean selected = false;
-   private boolean modified = false;
-   private boolean newlyModified = false;
-   private boolean mouseRingPickSelected;
+   private final RDXSelectablePathControlRingGizmo footstepPlannerGoalGizmo = new RDXSelectablePathControlRingGizmo();
+   private final Notification becomesModifiedNotification = new Notification();
    private RDX3DPanel panel3D;
    private RDXLocomotionParameters locomotionParameters;
    private MovingReferenceFrame midFeetZUpFrame;
@@ -72,7 +69,6 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    private SideDependentList<MovingReferenceFrame> footFrames;
    private final AtomicInteger footstepPlannerId = new AtomicInteger(0);
    private FootstepPlanningModule footstepPlanner;
-   private RDXFootstepPlanGraphic foostepPlanGraphic;
    private double halfIdealFootstepWidth;
    private volatile FootstepPlan footstepPlan;
    private volatile FootstepPlan footstepPlanToGenerateMeshes;
@@ -94,7 +90,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    {
       this.panel3D = panel3D;
       this.locomotionParameters = locomotionParameters;
-      footstepPlannerGoalGizmo.create(panel3D.getCamera3D());
+      footstepPlannerGoalGizmo.create(panel3D);
       panel3D.addImGuiOverlayAddition(this::renderTooltips);
       midFeetZUpFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
       footFrames = syncedRobot.getReferenceFrames().getSoleFrames();
@@ -112,12 +108,11 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
       goalFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("goalPose",
                                                                                   ReferenceFrame.getWorldFrame(),
-                                                                                  footstepPlannerGoalGizmo.getTransformToParent());
+                                                                                  footstepPlannerGoalGizmo.getPathControlRingGizmo().getTransformToParent());
 
       turnWalkTurnPlanner = new TurnWalkTurnPlanner(footstepPlannerParameters);
 
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
-      foostepPlanGraphic = new RDXFootstepPlanGraphic(contactPoints);
       leftStanceFootstepGraphic.create();
       rightStanceFootstepGraphic.create();
       leftGoalFootstepGraphic.create();
@@ -138,21 +133,16 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
    public void update(RDXInteractableFootstepPlan plannedFootstepPlacement)
    {
-      if (!modified)
+      if (!footstepPlannerGoalGizmo.getModified())
       {
-         footstepPlannerGoalGizmo.getTransformToParent().set(midFeetZUpFrame.getTransformToWorldFrame());
+         footstepPlannerGoalGizmo.getPathControlRingGizmo().getTransformToParent().set(midFeetZUpFrame.getTransformToWorldFrame());
       }
-
 
       if (footstepPlanToGenerateMeshes != null)
-//      if (footstepPlan != null)
       {
          plannedFootstepPlacement.updateFromPlan(footstepPlan, null);
-//         foostepPlanGraphic.generateMeshes(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlanToGenerateMeshes,
-//                                                                                           "Walk Path Control Ring Plan"));
          footstepPlanToGenerateMeshes = null;
       }
-      foostepPlanGraphic.update();
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
@@ -166,67 +156,61 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       latestInput = input;
       boolean leftMouseReleasedWithoutDrag = input.isWindowHovered() && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
 
-      footstepPlannerGoalGizmo.process3DViewInput(input, selected);
-      mouseRingPickSelected = footstepPlannerGoalGizmo.getHollowCylinderPickSelected();
+      boolean previouslySelected = footstepPlannerGoalGizmo.getSelected();
+      footstepPlannerGoalGizmo.process3DViewInput(input);
+      boolean newlySelected = footstepPlannerGoalGizmo.getSelected() && !previouslySelected;
 
-      if (mouseRingPickSelected && leftMouseReleasedWithoutDrag)
+      if (newlySelected)
       {
          becomeModified(true);
       }
-      if (selected && !footstepPlannerGoalGizmo.getAnyPartPickSelected() && leftMouseReleasedWithoutDrag)
-      {
-         selected = false;
-      }
 
-      if (modified)
+      if (footstepPlannerGoalGizmo.getModified())
       {
          updateStuff();
       }
-      if (selected && leftMouseReleasedWithoutDrag)
+      if (footstepPlannerGoalGizmo.getSelected() && leftMouseReleasedWithoutDrag)
       {
-         if (footstepPlannerGoalGizmo.getPositiveXArrowPickSelected())
+         if (footstepPlannerGoalGizmo.getPathControlRingGizmo().getPositiveXArrowHovered())
          {
             walkPathType = RDXWalkPathType.STRAIGHT;
             walkFacingDirection.set(Axis3D.Z, 0.0);
          }
-         else if (footstepPlannerGoalGizmo.getPositiveYArrowPickSelected())
+         else if (footstepPlannerGoalGizmo.getPathControlRingGizmo().getPositiveYArrowHovered())
          {
             walkPathType = RDXWalkPathType.LEFT_SHUFFLE;
             walkFacingDirection.set(Axis3D.Z, Math.PI / 2.0);
          }
-         else if (footstepPlannerGoalGizmo.getNegativeXArrowPickSelected())
+         else if (footstepPlannerGoalGizmo.getPathControlRingGizmo().getNegativeXArrowHovered())
          {
             walkPathType = RDXWalkPathType.REVERSE;
             walkFacingDirection.set(Axis3D.Z, Math.PI);
          }
-         else if (footstepPlannerGoalGizmo.getNegativeYArrowPickSelected())
+         else if (footstepPlannerGoalGizmo.getPathControlRingGizmo().getNegativeYArrowHovered())
          {
             walkPathType = RDXWalkPathType.RIGHT_SHUFFLE;
             walkFacingDirection.set(Axis3D.Z, -Math.PI / 2.0);
          }
-         if (footstepPlannerGoalGizmo.getAnyArrowPickSelected())
+         if (footstepPlannerGoalGizmo.getPathControlRingGizmo().getAnyArrowHovered())
          {
-            footstepPlannerGoalGizmo.getTransformToParent().appendOrientation(walkFacingDirection);
+            footstepPlannerGoalGizmo.getPathControlRingGizmo().getTransformToParent().appendOrientation(walkFacingDirection);
             updateStuff();
             queueFootstepPlan();
          }
       }
-      if (selected && footstepPlannerGoalGizmo.isNewlyModified())
+      if (footstepPlannerGoalGizmo.getSelected() && footstepPlannerGoalGizmo.getPathControlRingGizmo().getGizmoModifiedByUser().poll())
       {
          queueFootstepPlan();
       }
 
-      if (modified && selected && ImGui.isKeyReleased(ImGuiTools.getDeleteKey()))
+      if (footstepPlannerGoalGizmo.getModified() && footstepPlannerGoalGizmo.getSelected() && ImGui.isKeyReleased(ImGuiTools.getDeleteKey()))
       {
          delete();
       }
-      if (selected && ImGui.isKeyReleased(ImGuiTools.getEscapeKey()))
+      if (footstepPlannerGoalGizmo.getSelected() && ImGui.isKeyReleased(ImGuiTools.getEscapeKey()))
       {
-         selected = false;
+         footstepPlannerGoalGizmo.setSelected(false);
       }
-
-      footstepPlannerGoalGizmo.setShowArrows(selected);
-      footstepPlannerGoalGizmo.setHighlightingEnabled(modified);
    }
 
    private void queueFootstepPlan()
@@ -330,6 +314,8 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
    public void renderImGuiWidgets()
    {
+      ImGui.text("Walk path control ring planner:");
+
       if (ImGui.radioButton(labels.get("A* Planner"), footstepPlanningAlgorithm == RDXFootstepPlanningAlgorithm.A_STAR))
       {
          footstepPlanningAlgorithm = RDXFootstepPlanningAlgorithm.A_STAR;
@@ -347,17 +333,17 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
       ImGui.text("Control ring:");
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Deleted"), !selected && !modified))
+      if (ImGui.radioButton(labels.get("Deleted"), !footstepPlannerGoalGizmo.getSelected() && !footstepPlannerGoalGizmo.getModified()))
       {
          delete();
       }
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Modified"), !selected && modified))
+      if (ImGui.radioButton(labels.get("Modified"), !footstepPlannerGoalGizmo.getSelected() && footstepPlannerGoalGizmo.getModified()))
       {
          becomeModified(false);
       }
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Selected"), selected && modified))
+      if (ImGui.radioButton(labels.get("Selected"), footstepPlannerGoalGizmo.getSelected() && footstepPlannerGoalGizmo.getModified()))
       {
          becomeModified(true);
       }
@@ -365,27 +351,20 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
    public void becomeModified(boolean selected)
    {
-      this.selected = selected;
-      if (!modified)
+      footstepPlannerGoalGizmo.setSelected(selected);
+      if (!footstepPlannerGoalGizmo.getModified())
       {
-         modified = true;
-         newlyModified = true;
+         footstepPlannerGoalGizmo.setModified(true);
+         becomesModifiedNotification.set();
          walkFacingDirection.set(Axis3D.Z, 0.0);
          updateStuff();
          queueFootstepPlan();
       }
    }
 
-   public boolean pollIsNewlyModified()
-   {
-      boolean newlyModifiedReturn = newlyModified;
-      newlyModified = false;
-      return newlyModifiedReturn;
-   }
-
    private void renderTooltips()
    {
-      if (selected && footstepPlannerGoalGizmo.getGizmoHovered())
+      if (footstepPlannerGoalGizmo.getSelected() && footstepPlannerGoalGizmo.getPathControlRingGizmo().getAnyPartHovered())
       {
          float offsetX = 10.0f;
          float offsetY = 10.0f;
@@ -415,24 +394,20 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (modified)
+      if (footstepPlannerGoalGizmo.getModified())
       {
          leftStanceFootstepGraphic.getRenderables(renderables, pool);
          rightStanceFootstepGraphic.getRenderables(renderables, pool);
          leftGoalFootstepGraphic.getRenderables(renderables, pool);
          rightGoalFootstepGraphic.getRenderables(renderables, pool);
-         foostepPlanGraphic.getRenderables(renderables, pool);
       }
-      if (modified || mouseRingPickSelected)
-      {
-         footstepPlannerGoalGizmo.getRenderables(renderables, pool);
-      }
+      footstepPlannerGoalGizmo.getVirtualRenderables(renderables, pool);
    }
 
    public void delete()
    {
-      selected = false;
-      modified = false;
+      footstepPlannerGoalGizmo.setSelected(false);
+      footstepPlannerGoalGizmo.setModified(false);
       clearGraphics();
    }
 
@@ -442,13 +417,11 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       rightStanceFootstepGraphic.setPose(BehaviorTools.createNaNPose());
       leftGoalFootstepGraphic.setPose(BehaviorTools.createNaNPose());
       rightGoalFootstepGraphic.setPose(BehaviorTools.createNaNPose());
-      foostepPlanGraphic.clear();
    }
 
    public void destroy()
    {
       footstepPlanningThread.destroy();
-      foostepPlanGraphic.destroy();
    }
 
    @Override
@@ -515,6 +488,11 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
    public boolean isSelected()
    {
-      return selected;
+      return footstepPlannerGoalGizmo.getSelected();
+   }
+
+   public Notification getBecomesModifiedNotification()
+   {
+      return becomesModifiedNotification;
    }
 }

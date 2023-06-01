@@ -196,17 +196,13 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
          ImGui.setTooltip("Hold Ctrl and scroll the mouse wheel while placing to adjust Z.");
       }
       ImGui.sameLine();
-      if (!isPlaced())
+      ImGui.beginDisabled(!isPlaced());
+      if (ImGui.button(labels.get("Clear")))
       {
-         ImGui.text("Not placed.");
+         clear();
       }
-      else
-      {
-         if (ImGui.button(labels.get("Clear")))
-         {
-            clear();
-         }
-      }
+      ImGui.endDisabled();
+
       return placementStarted;
    }
 

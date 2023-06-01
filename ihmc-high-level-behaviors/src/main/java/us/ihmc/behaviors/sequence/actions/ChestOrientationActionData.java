@@ -8,12 +8,14 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 
 public class ChestOrientationActionData implements BehaviorActionData
 {
+   private String description = "Chest orientation";
    private final YawPitchRoll yawPitchRoll = new YawPitchRoll();
    private double trajectoryDuration = 4.0;
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
+      jsonNode.put("description", description);
       jsonNode.put("trajectoryDuration", trajectoryDuration);
       jsonNode.put("yaw", yawPitchRoll.getYaw());
       jsonNode.put("pitch", yawPitchRoll.getPitch());
@@ -23,6 +25,7 @@ public class ChestOrientationActionData implements BehaviorActionData
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
+      description = jsonNode.get("description").textValue();
       trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
       yawPitchRoll.setYaw(jsonNode.get("yaw").asDouble());
       yawPitchRoll.setPitch(jsonNode.get("pitch").asDouble());
@@ -58,5 +61,17 @@ public class ChestOrientationActionData implements BehaviorActionData
    public void setTrajectoryDuration(double trajectoryDuration)
    {
       this.trajectoryDuration = trajectoryDuration;
+   }
+
+   @Override
+   public void setDescription(String description)
+   {
+      this.description = description;
+   }
+
+   @Override
+   public String getDescription()
+   {
+      return description;
    }
 }

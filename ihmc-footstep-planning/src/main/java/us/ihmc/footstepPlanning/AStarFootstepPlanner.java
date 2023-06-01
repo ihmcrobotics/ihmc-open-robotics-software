@@ -16,7 +16,6 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnappingTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepChecker;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostCalculator;
@@ -33,7 +32,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -149,9 +147,13 @@ public class AStarFootstepPlanner
       result = FootstepPlanningResult.PLANNING;
 
       // Update planar regions
-      boolean flatGroundMode = request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty();
+      boolean hasPlanarRegions = request.getPlanarRegionsList() != null && !request.getPlanarRegionsList().isEmpty();
+      boolean hasHeightMap = request.getHeightMapData() != null && !request.getHeightMapData().isEmpty();
+      boolean flatGroundMode = request.getAssumeFlatGround() || (!hasPlanarRegions && !hasHeightMap);
+
       PlanarRegionsList planarRegionsListForStepping = flatGroundMode ? null : request.getPlanarRegionsList();
       PlanarRegionsList planarRegionsListForCollisionChecking = request.getPlanarRegionsList();
+      HeightMapData heightMapData = flatGroundMode ? null : request.getHeightMapData();
 
       if (flatGroundMode)
       {
@@ -162,6 +164,10 @@ public class AStarFootstepPlanner
       snapper.setPlanarRegions(planarRegionsListForStepping);
       idealStepCalculator.setPlanarRegionsList(planarRegionsListForStepping);
       checker.setPlanarRegions(planarRegionsListForCollisionChecking);
+
+      snapper.setHeightMapData(heightMapData);
+      checker.setHeightMapData(heightMapData);
+      stepCostCalculator.setHeightMapData(heightMapData);
 
       double pathLength = bodyPathPlanHolder.computePathLength(0.0);
       boolean imposeHorizonLength = request.getPlanBodyPath() && request.getHorizonLength() > 0.0 && !MathTools.intervalContains(pathLength, 0.0, request.getHorizonLength());
@@ -296,14 +302,13 @@ public class AStarFootstepPlanner
             edgeDataMap.get(new GraphEdge<>(path.get(i - 1), path.get(i))).getEndStepSnapData().set(snapData);
          }
 
-         footstep.getFoothold().set(snapData.getCroppedFoothold());
          outputToPack.getFootstepPlan().addFootstep(footstep);
       }
 
       if (!request.getAssumeFlatGround())
       {
          swingPlanningModule.computeSwingWaypoints(request.getPlanarRegionsList(),
-                                                   HeightMapMessageTools.unpackMessage(request.getHeightMapMessage()),
+                                                   request.getHeightMapData(),
                                                    outputToPack.getFootstepPlan(),
                                                    request.getStartFootPoses(),
                                                    request.getSwingPlannerType());
@@ -524,13 +529,6 @@ public class AStarFootstepPlanner
    public SwingPlanningModule getSwingPlanningModule()
    {
       return swingPlanningModule;
-   }
-
-   public void setHeightMapData(HeightMapData heightMapData)
-   {
-      snapper.setHeightMapData(heightMapData);
-      checker.setHeightMapData(heightMapData);
-      stepCostCalculator.setHeightMapData(heightMapData);
    }
 
    public ReferenceBasedIdealStepCalculator getReferenceBasedIdealStepCalculator()

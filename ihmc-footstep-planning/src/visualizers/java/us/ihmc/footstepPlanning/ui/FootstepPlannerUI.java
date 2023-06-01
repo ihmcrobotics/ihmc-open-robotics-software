@@ -78,7 +78,7 @@ import us.ihmc.footstepPlanning.ui.viewers.HeightMapVisualizer;
 import us.ihmc.footstepPlanning.ui.viewers.RobotIKVisualizer;
 import us.ihmc.footstepPlanning.ui.viewers.StartGoalPositionViewer;
 import us.ihmc.footstepPlanning.ui.viewers.SwingPlanMeshViewer;
-import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
 import us.ihmc.javafx.JavaFXRobotVisualizer;

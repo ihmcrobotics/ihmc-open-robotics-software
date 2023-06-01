@@ -15,7 +15,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0812da413b8d0ba150aa2e4a0ff99e479efe261b078b378618d4f54c266676ef";
+   		return "113cb1092f291e43474bbcbcd016d7458dbda49cd37a4150fb7b8db577d195b4";
    }
    
    @Override
@@ -57,6 +57,10 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -77,6 +81,11 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getTransformToWorld(), current_alignment);
 
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getArucoMarkerTransformToWorld(), current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -90,6 +99,9 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
       cdr.write_type_7(data.getCurrentlyDetected());
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToWorld(), cdr);
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getArucoMarkerTransformToWorld(), cdr);
+      cdr.write_type_7(data.getIsPoseOverriddenByOperator());
+
    }
 
    public static void read(perception_msgs.msg.dds.DetectableSceneNodeMessage data, us.ihmc.idl.CDR cdr)
@@ -98,6 +110,9 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
       data.setCurrentlyDetected(cdr.read_type_7());
       	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToWorld(), cdr);	
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getArucoMarkerTransformToWorld(), cdr);	
+      data.setIsPoseOverriddenByOperator(cdr.read_type_7());
+      	
 
    }
 
@@ -108,6 +123,9 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
       ser.write_type_7("currently_detected", data.getCurrentlyDetected());
       ser.write_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
 
+      ser.write_type_a("aruco_marker_transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getArucoMarkerTransformToWorld());
+
+      ser.write_type_7("is_pose_overridden_by_operator", data.getIsPoseOverriddenByOperator());
    }
 
    @Override
@@ -117,6 +135,9 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
       data.setCurrentlyDetected(ser.read_type_7("currently_detected"));
       ser.read_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
 
+      ser.read_type_a("aruco_marker_transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getArucoMarkerTransformToWorld());
+
+      data.setIsPoseOverriddenByOperator(ser.read_type_7("is_pose_overridden_by_operator"));
    }
 
    public static void staticCopy(perception_msgs.msg.dds.DetectableSceneNodeMessage src, perception_msgs.msg.dds.DetectableSceneNodeMessage dest)
