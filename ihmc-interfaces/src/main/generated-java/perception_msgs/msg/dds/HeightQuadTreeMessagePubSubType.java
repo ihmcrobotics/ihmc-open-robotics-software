@@ -15,7 +15,7 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e9c8fc88b0c4cb06af8bbbad29ac66e6322ce1d78625fef548edf154fa8f3f6b";
+   		return "ff69e4e482d0b055934da62ab1b8c7072461f69f614e9bbc620f7f0e325da386";
    }
    
    @Override

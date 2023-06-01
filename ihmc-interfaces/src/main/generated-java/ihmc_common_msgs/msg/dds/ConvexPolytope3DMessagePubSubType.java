@@ -15,7 +15,7 @@ public class ConvexPolytope3DMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "df3c7d24c250fa50ac6aae2d98d23c71661c2bf9dceba78b175372ed94736b62";
+   		return "8a78292af56cbefa0b7f32a44cfc873a8aaccf4157866c7b83735f244a77bf41";
    }
    
    @Override

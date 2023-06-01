@@ -15,7 +15,7 @@ public class ActionInformationMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "db4d4d203b52b57dded59502151d83bf75b4555752e769ab8cd8f5f894cdb89d";
+   		return "7109314ff76e544f3cb423d72b0ce327dd9c714128360d55c13fd076c9406d9b";
    }
    
    @Override

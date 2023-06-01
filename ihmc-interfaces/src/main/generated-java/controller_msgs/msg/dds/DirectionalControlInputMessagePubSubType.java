@@ -15,7 +15,7 @@ public class DirectionalControlInputMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c53de5f8c8f27ad7bdb15ed2238238f61cb8cc9d340fc4a8a140760bfa632ba8";
+   		return "f1a322021c64a69824923d45e5e0f51a4d18e6e8b7c2cefcab47905f5a4a0400";
    }
    
    @Override

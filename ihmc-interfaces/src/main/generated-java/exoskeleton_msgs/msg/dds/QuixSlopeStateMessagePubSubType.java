@@ -15,7 +15,7 @@ public class QuixSlopeStateMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "08f9443e35c499125e3772f35ed913789b5b044ba6b5051ff29c2f1f96727e40";
+   		return "a68b9b3486c074d715cf7c0ec5d524914455c2019c1a30ab07f78141a40c7f49";
    }
    
    @Override

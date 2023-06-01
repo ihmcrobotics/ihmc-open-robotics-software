@@ -15,7 +15,7 @@ public class HeadTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f090d2c8b70923b661bb129398f951f65248011995fd8cdeec6de2c729d45c76";
+   		return "adf1626896e5dde3296a452f86764bfdbd0f7fdc92b0ef9f44d66f5a8103f473";
    }
    
    @Override

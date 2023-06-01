@@ -15,7 +15,7 @@ public class QuixSideStepSwingOutMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ea53806a76f96470ea9c21d7cf965adf7c222db9421f80f1d360ef6a79db0d01";
+   		return "b6e55faa3330e3bd13e699e18af6ef1d67d884b9c8dfc134c4fdc27aef52a3b8";
    }
    
    @Override

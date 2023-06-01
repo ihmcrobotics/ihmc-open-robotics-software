@@ -15,7 +15,7 @@ public class AutomaticManipulationAbortMessagePubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "24f07964c480a64c6897e8e37f119c0d54cb881280f21a2cf9ae49f8e14878dd";
+   		return "64fee1886d3f2e1bc048105af0e6e256eb88eb0d372d33e469e65edb656d37bb";
    }
    
    @Override

@@ -15,7 +15,7 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a93f1e1d80e18e5e944d0bbc19e4cec9e8ea2836cfa4e65ea8804733ce3e68ed";
+   		return "6512aa88f4426fd8c16698b23731ae3332f3046fc86a8c2a5b11061996fb474a";
    }
    
    @Override

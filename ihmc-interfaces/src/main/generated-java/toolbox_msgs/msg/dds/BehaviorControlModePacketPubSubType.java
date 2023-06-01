@@ -15,7 +15,7 @@ public class BehaviorControlModePacketPubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "172d7dd416075dc94e868e7b24b8612964b3ea51b0c83352a150d123b4aa44d7";
+   		return "ffc9f2cbabaddcff5c7a2aa48f984a263666db96741783fcfa172f915d057e13";
    }
    
    @Override

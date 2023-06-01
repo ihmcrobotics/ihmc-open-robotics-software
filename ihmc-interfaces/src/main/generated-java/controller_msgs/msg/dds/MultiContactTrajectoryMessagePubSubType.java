@@ -15,7 +15,7 @@ public class MultiContactTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "da7ebefb3542bf97b0a7c5c0d8beaf52b6d48c1b770746d52641f735c68b75a1";
+   		return "8836af9d6d8df8b988914822ebcd75a203e1dc26e1efb8bf17b57d0f3335af4b";
    }
    
    @Override

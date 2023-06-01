@@ -15,7 +15,7 @@ public class Box3DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "fed53923070b6ad8684532f97e6e24652568aecbd7a5118d94d57ffc2c5f9042";
+   		return "3a32893f5cd589724d43946b6cb793d3a683535bdd7286cf5f12e3b95c2c03fb";
    }
    
    @Override
