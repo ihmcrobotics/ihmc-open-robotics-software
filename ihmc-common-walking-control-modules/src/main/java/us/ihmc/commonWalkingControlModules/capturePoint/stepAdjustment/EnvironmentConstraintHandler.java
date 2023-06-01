@@ -9,16 +9,13 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
-import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
@@ -45,6 +42,7 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private static final int constraintRegionPointsThatCanBeVisualized = 40;
    private static final double defaultDesiredDistanceInside = 0.06;
    private static final boolean defaultUsePredictedContactPoints = false;
    private static final double defaultMaxConcaveEstimateRatio = 1.1;
@@ -95,7 +93,8 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
       isEnvironmentConstraintValid = new YoBoolean("isEnvironmentConstraintValid", registry);
       isBoundingBoxVisualized = new YoBoolean("isBoundingBoxVisualized", registry);
 
-      yoConvexHullConstraint = new YoFrameConvexPolygon2D(yoNamePrefix + "ConvexHullConstraint", "", worldFrame, 12, registry);
+      yoConvexHullConstraint = new YoFrameConvexPolygon2D(yoNamePrefix + "ConvexHullConstraint", "", worldFrame,
+                                                          constraintRegionPointsThatCanBeVisualized, registry);
       foundSolution = new YoBoolean("foundSolutionToStepConstraint", registry);
       isTransformedFootstepInRegion = new YoBoolean("isTransformedFootstepInRegion", registry);
 
