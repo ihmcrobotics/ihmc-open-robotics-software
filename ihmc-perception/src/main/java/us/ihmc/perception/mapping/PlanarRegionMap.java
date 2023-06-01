@@ -687,6 +687,7 @@ public class PlanarRegionMap
       {
          PlanarRegion initialSupportSquareRegion = PlanarRegionTools.createSquarePlanarRegion(1.0f, new Point3D(), new Quaternion());
          initialSupportSquareRegion.setRegionId(uniqueIDtracker++);
+         initialSupportSquareRegion.incrementNumberOfTimesMatched();
          finalMap.addPlanarRegion(initialSupportSquareRegion);
       }
 
@@ -815,6 +816,8 @@ public class PlanarRegionMap
          finalMap = crossReduceRegionsIteratively(finalMap, graphRegions);
          processUniqueRegions(finalMap);
 
+         performMapCleanUp(false, true);
+
          mapLandmarks.clear();
          mapLandmarks.addAll(finalMap);
 
@@ -845,16 +848,24 @@ public class PlanarRegionMap
       return (translation.norm() > parameters.getKeyframeDistanceThreshold()) || (euler.norm() > parameters.getKeyframeAngularThreshold());
    }
 
-   public void performMapCleanUp()
+   public void performMapCleanUp(boolean cleanIntersectionsEnabled, boolean mapCullingEnabled)
    {
-      PlanarRegionCuttingTools.chopOffExtraPartsFromIntersectingPairs(finalMap);
-
-      for (PlanarRegion region : finalMap.getPlanarRegionsAsList())
+      if (cleanIntersectionsEnabled)
       {
-         if ((currentTimeIndex - region.getTickOfLastMeasurement() > 5) // Region has not been matched enough in a while. Not good region.
-             && (region.getNumberOfTimesMatched() < parameters.getMinimumNumberOfTimesMatched())) // Region has not been matched enough
+         PlanarRegionCuttingTools.chopOffExtraPartsFromIntersectingPairs(finalMap);
+      }
+
+      if (mapCullingEnabled)
+      {
+         for (PlanarRegion region : finalMap.getPlanarRegionsAsList())
          {
-            finalMap.getPlanarRegionsAsList().remove(region);
+            LogTools.info("Removing region -> id: {} dt:{} nc:{}", region.getRegionId(),
+                          currentTimeIndex - region.getTickOfLastMeasurement(), region.getNumberOfTimesMatched());
+            if ((currentTimeIndex - region.getTickOfLastMeasurement() > 5) // Region has not been matched enough in a while. Not good region.
+                && (region.getNumberOfTimesMatched() < parameters.getMinimumNumberOfTimesMatched())) // Region has not been matched enough
+            {
+               finalMap.getPlanarRegionsAsList().remove(region);
+            }
          }
       }
    }
