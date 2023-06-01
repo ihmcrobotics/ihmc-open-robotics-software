@@ -497,7 +497,8 @@ public class BalanceManager implements SCS2YoGraphicHolder
                                        yoEquivalentRemainingCoP,
                                        1.0 - feedbackAlpha);
       boolean footstepWasAdjusted = stepAdjustmentController.wasFootstepAdjusted();
-      footstep.setPose(stepAdjustmentController.getFootstepSolution());
+      if (footstepWasAdjusted)
+         footstep.setPose(stepAdjustmentController.getFootstepSolution());
 
       return footstepWasAdjusted;
    }
