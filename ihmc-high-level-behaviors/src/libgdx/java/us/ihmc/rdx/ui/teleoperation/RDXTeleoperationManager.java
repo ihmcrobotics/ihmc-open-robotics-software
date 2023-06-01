@@ -130,7 +130,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
     */
    public RDXTeleoperationManager(CommunicationHelper communicationHelper)
    {
-      this(communicationHelper, null, null, null, true);
+      this(communicationHelper, null, null, null);
    }
 
    /**
@@ -140,12 +140,9 @@ public class RDXTeleoperationManager extends ImGuiPanel
    public RDXTeleoperationManager(CommunicationHelper communicationHelper,
                                   RobotCollisionModel robotSelfCollisionModel,
                                   RobotCollisionModel robotEnvironmentCollisionModel,
-                                  YoVariableClientHelper yoVariableClientHelper,
-                                  boolean robotHasArms)
+                                  YoVariableClientHelper yoVariableClientHelper)
    {
       super("Teleoperation");
-
-      this.robotHasArms = robotHasArms;
 
       setRenderMethod(this::renderImGuiWidgets);
       addChild(teleoperationParametersTuner);
@@ -154,6 +151,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       addChild(swingFootPlanningParametersTuner);
       this.communicationHelper = communicationHelper;
       robotModel = communicationHelper.getRobotModel();
+      robotHasArms = robotModel.getRobotVersion().hasArms();
       ros2Helper = communicationHelper.getControllerHelper();
       this.yoVariableClientHelper = yoVariableClientHelper;
 
