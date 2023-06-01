@@ -13,11 +13,13 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
@@ -44,6 +46,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class LocalizationAndMappingProcess
 {
    private final static long STATISTICS_COLLECTION_PERIOD_MS = 100;
+
+   private static final double maxAngleFromNormalToFilterAsShadow = 10.0;
 
    private ROS2Node ros2Node;
    private ROS2Helper ros2Helper;
@@ -125,6 +129,7 @@ public class LocalizationAndMappingProcess
       }
 
       FramePlanarRegionsList framePlanarRegionsList = PlanarRegionMessageConverter.convertToFramePlanarRegionsList(latestIncomingRegions.getAndSet(null));
+      filterShadowRegions(framePlanarRegionsList);
 
       if (enableLiveMode)
       {
@@ -143,6 +148,28 @@ public class LocalizationAndMappingProcess
       {
          resetMap();
          configurationParameters.setSLAMReset(false);
+      }
+   }
+
+   private static void filterShadowRegions(FramePlanarRegionsList framePlanarRegionsList)
+   {
+      int i = 0;
+      double angleFromNormal = Math.toRadians(maxAngleFromNormalToFilterAsShadow);
+      double minDot = Math.cos(Math.PI / 2.0 - angleFromNormal);
+      while (i < framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions())
+      {
+         PlanarRegion regionInSensorFrame = framePlanarRegionsList.getPlanarRegionsList().getPlanarRegion(i);
+         Vector3D vectorToRegion = new Vector3D(regionInSensorFrame.getPoint());
+         vectorToRegion.normalize();
+
+         if (Math.abs(vectorToRegion.dot(regionInSensorFrame.getNormal())) < minDot)
+         {
+            framePlanarRegionsList.getPlanarRegionsList().getPlanarRegionsAsList().remove(i);
+         }
+         else
+         {
+            i++;
+         }
       }
    }
 
