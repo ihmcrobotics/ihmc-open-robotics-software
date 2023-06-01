@@ -134,7 +134,7 @@ public class RDXFootstepPlanning
       if (locomotionParameters.getPlanSwingTrajectories())
          footstepPlannerRequest.setSwingPlannerType(SwingPlannerType.MULTI_WAYPOINT_POSITION);
       else
-         footstepPlannerRequest.setSwingPlannerType(null);
+         footstepPlannerRequest.setSwingPlannerType(SwingPlannerType.NONE);
 
       footstepPlannerRequest.getStartFootPoses().forEach((side, pose3D) ->
       {
