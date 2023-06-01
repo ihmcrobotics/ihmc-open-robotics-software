@@ -69,7 +69,7 @@ public class StepConstraintsListMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 500; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50000; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
 
@@ -152,7 +152,7 @@ public class StepConstraintsListMessagePubSubType implements us.ihmc.pubsub.Topi
       cdr.write_type_e(data.getHolePolygonsSize());else
           throw new RuntimeException("hole_polygons_size field exceeds the maximum length");
 
-      if(data.getVertexBuffer().size() <= 500)
+      if(data.getVertexBuffer().size() <= 50000)
       cdr.write_type_e(data.getVertexBuffer());else
           throw new RuntimeException("vertex_buffer field exceeds the maximum length");
 
