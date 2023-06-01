@@ -186,16 +186,23 @@ public class RapidPlanarRegionsExtractor
 
    public void initializeBodyCollisionFilter(FullHumanoidRobotModel robotModel, CollisionBoxProvider collisionBoxProvider)
    {
-      this.fullRobotModel = robotModel;
-      this.collisionBoxProvider = collisionBoxProvider;
-
-      if (fullRobotModel == null || collisionBoxProvider == null)
+      if (robotModel == null)
       {
-         LogTools.warn("Cannot initialize body collision filter. Robot model or collision box provider is null.");
+         LogTools.warn("Cannot initialize body collision filter. Robot model is null.");
          return;
       }
 
-      this.collidingScanRegionFilter = PerceptionFilterTools.createHumanoidShinCollisionFilter(fullRobotModel, collisionBoxProvider);
+      if (collisionBoxProvider == null)
+      {
+         LogTools.warn("Cannot initialize body collision filter. Robot collision box provider is null.");
+         return;
+      }
+
+      this.fullRobotModel = robotModel;
+      this.collisionBoxProvider = collisionBoxProvider;
+
+
+      this.collidingScanRegionFilter = PerceptionFilterTools.createHumanoidShinCollisionFilter(fullRobotModel, this.collisionBoxProvider);
    }
 
    public void filterFramePlanarRegionsList(FramePlanarRegionsList frameRegionsToFilter)

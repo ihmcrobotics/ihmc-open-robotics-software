@@ -84,8 +84,8 @@ public class TerrainPerceptionProcessWithDriver
    private CollidingScanRegionFilter collisionFilter;
    private BytedecoImage depthBytedecoImage;
    private RobotConfigurationData robotConfigurationData;
-   private FullHumanoidRobotModel fullRobotModel;
-   private CollisionBoxProvider collisionBoxProvider;
+   private final FullHumanoidRobotModel fullRobotModel;
+   private final CollisionBoxProvider collisionBoxProvider;
 
    private Mat depth16UC1Image;
    private Mat color8UC3Image;
@@ -116,17 +116,24 @@ public class TerrainPerceptionProcessWithDriver
       this.colorTopic = colorTopic;
       this.frameRegionsTopic = frameRegionsTopic;
       this.sensorFrameUpdater = sensorFrameUpdater;
+      this.fullRobotModel = fullRobotModel;
+      this.collisionBoxProvider = collisionBoxProvider;
+
+      if (fullRobotModel == null)
+         LogTools.info("Creating terrain process with no robot model.");
+      if (collisionBoxProvider == null)
+         LogTools.info("Creating terrain process with no collision provider.");
 
       this.robotConfigurationData = new RobotConfigurationData();
 
       this.outputPeriod = UnitConversions.hertzToSeconds(31.0f);
 
-      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_videopub");
-      realtimeROS2Node.spin();
-
       openCLManager = new OpenCLManager();
       rapidRegionsExtractor = new RapidPlanarRegionsExtractor();
       rapidRegionsExtractor.initializeBodyCollisionFilter(fullRobotModel, collisionBoxProvider);
+
+      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_videopub");
+      realtimeROS2Node.spin();
 
       realSenseHardwareManager = new RealSenseHardwareManager();
 
@@ -348,18 +355,19 @@ public class TerrainPerceptionProcessWithDriver
       destroyedNotification.blockingPoll();
    }
 
-   public static void main(String[] args)
-   {
-      // Benchtop L515: F1120592, Tripod: F1121365, Local: F0245563, Nadia: F112114, D435: 108522071219, D435: 213522252883, 215122254074
-      String realsenseSerialNumber = System.getProperty("d455.serial.number", "213522252883");
-      TerrainPerceptionProcessWithDriver process = new TerrainPerceptionProcessWithDriver(realsenseSerialNumber,
-                                                                                          "Nadia", null, null,
-                                                                                          RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
-                                                                                          PerceptionAPI.D455_DEPTH_IMAGE,
-                                                                                          PerceptionAPI.D455_COLOR_IMAGE,
-                                                                                          PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
-                                                                                          ReferenceFrame::getWorldFrame);
-      process.run();
-      ThreadTools.sleepForever();
-   }
+//   public static void main(String[] args)
+//   {
+//       Benchtop L515: F1120592, Tripod: F1121365, Local: F0245563, Nadia: F112114, D435: 108522071219, D435: 213522252883, 215122254074
+//      String realsenseSerialNumber = System.getProperty("d455.serial.number", "213522252883");
+//      TerrainPerceptionProcessWithDriver process = new TerrainPerceptionProcessWithDriver(realsenseSerialNumber,
+//                                                                                          "Nadia",
+//                                                                                          null, null,
+//                                                                                          RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
+//                                                                                          PerceptionAPI.D455_DEPTH_IMAGE,
+//                                                                                          PerceptionAPI.D455_COLOR_IMAGE,
+//                                                                                          PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
+//                                                                                          ReferenceFrame::getWorldFrame);
+//      process.run();
+//      ThreadTools.sleepForever();
+//   }
 }
