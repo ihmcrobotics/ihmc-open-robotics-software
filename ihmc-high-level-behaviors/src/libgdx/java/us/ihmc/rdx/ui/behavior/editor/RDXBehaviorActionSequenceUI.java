@@ -46,15 +46,12 @@ public class RDXBehaviorActionSequenceUI
    private final ImString newSequenceName = new ImString(256);
    private final TreeSet<RDXBehaviorActionSequenceEditor> editors = new TreeSet<>(Comparator.comparing(RDXBehaviorActionSequenceEditor::getName));
 
-   private boolean robotHasArms;
-
    public void create(WorkspaceResourceDirectory behaviorSequenceStorageDirectory,
                       RDX3DPanel panel3D,
                       DRCRobotModel robotModel,
                       ROS2Node ros2Node,
                       ROS2SyncedRobotModel syncedRobot,
-                      ReferenceFrameLibrary referenceFrameLibrary,
-                      boolean robotHasArms)
+                      ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.behaviorSequenceStorageDirectory = behaviorSequenceStorageDirectory;
       this.panel3D = panel3D;
@@ -62,7 +59,6 @@ public class RDXBehaviorActionSequenceUI
       this.ros2Node = ros2Node;
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
-      this.robotHasArms = robotHasArms;
 
       BehaviorActionSequence.addCommonFrames(referenceFrameLibrary, syncedRobot);
       referenceFrameLibrary.build();
