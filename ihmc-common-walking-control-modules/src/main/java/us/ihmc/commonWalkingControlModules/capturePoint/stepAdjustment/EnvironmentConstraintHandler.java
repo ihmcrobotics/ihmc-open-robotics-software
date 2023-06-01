@@ -6,6 +6,8 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -52,8 +54,10 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
    private final DoubleProvider maxConcaveEstimateRatio;
 
    private final YoBoolean foundSolution;
+   private final YoBoolean isTransformedFootstepInRegion;
 
    private final YoBoolean isEnvironmentConstraintValid;
+   private final YoBoolean isBoundingBoxVisualized;
 
    private final YoConstraintOptimizerParameters parameters;
 
@@ -65,10 +69,7 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
 
    private final List<StepConstraintRegion> stepConstraintRegions = new ArrayList<>();
 
-   private final FramePoint3D projectedReachablePoint = new FramePoint3D();
-
    private final ConvexPolygon2D footstepPolygon = new ConvexPolygon2D();
-   private final RigidBodyTransform footOrientationTransform = new RigidBodyTransform();
    private final FramePoint2D stepXY = new FramePoint2D();
 
    private final CapturabilityBasedPlanarRegionDecider planarRegionDecider;
@@ -92,9 +93,11 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
       maxConcaveEstimateRatio = new DoubleParameter("maxConcaveEstimateRatio", registry, defaultMaxConcaveEstimateRatio);
 
       isEnvironmentConstraintValid = new YoBoolean("isEnvironmentConstraintValid", registry);
+      isBoundingBoxVisualized = new YoBoolean("isBoundingBoxVisualized", registry);
 
       yoConvexHullConstraint = new YoFrameConvexPolygon2D(yoNamePrefix + "ConvexHullConstraint", "", worldFrame, 12, registry);
       foundSolution = new YoBoolean("foundSolutionToStepConstraint", registry);
+      isTransformedFootstepInRegion = new YoBoolean("isTransformedFootstepInRegion", registry);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -118,6 +121,7 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
    public void reset()
    {
       foundSolution.set(false);
+      isTransformedFootstepInRegion.set(false);
       stepConstraintRegions.clear();
       yoConvexHullConstraint.clear();
       convexHullConstraint.clearAndUpdate();
@@ -161,7 +165,6 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
    }
 
    private final FramePose3D originalPose = new FramePose3D();
-   private final RigidBodyTransform footstepTransform = new RigidBodyTransform();
 
    public boolean applyEnvironmentConstraintToFootstep(RobotSide upcomingFootstepSide,
                                                        FixedFramePose3DBasics footstepPoseToPack,
@@ -171,19 +174,31 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
 
       if (stepConstraintRegion == null)
       {
+         isTransformedFootstepInRegion.set(true);
          foundSolution.set(true);
          return false;
       }
-
-      computeFootstepPolygon(upcomingFootstepSide, predictedContactPoints, footstepPoseToPack.getOrientation());
 
       convexHullConstraint.set(stepConstraintRegion.getConvexHullInConstraintRegion());
       convexHullConstraint.applyTransform(stepConstraintRegion.getTransformToWorld(), false);
 
       if (convexHullConstraint.getNumberOfVertices() <= yoConvexHullConstraint.getMaxNumberOfVertices())
+      {
          yoConvexHullConstraint.set(convexHullConstraint);
+         isBoundingBoxVisualized.set(false);
+      }
       else
-         yoConvexHullConstraint.clearAndUpdate();
+      {
+         // we don't have enough yo variables to view the convex hull, so instead let's view it's bounding box
+         yoConvexHullConstraint.clear();
+         BoundingBox3DReadOnly boundingBox = stepConstraintRegion.getBoundingBox3dInWorld();
+         yoConvexHullConstraint.addVertex(boundingBox.getMaxX(), boundingBox.getMaxY());
+         yoConvexHullConstraint.addVertex(boundingBox.getMaxX(), boundingBox.getMinY());
+         yoConvexHullConstraint.addVertex(boundingBox.getMinY(), boundingBox.getMinY());
+         yoConvexHullConstraint.addVertex(boundingBox.getMinY(), boundingBox.getMaxY());
+         yoConvexHullConstraint.update();
+         isBoundingBoxVisualized.set(true);
+      }
 
       stepXY.set(footstepPoseToPack.getPosition());
       // do a simple orthogonal projection first.
@@ -193,8 +208,8 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
          footstepPoseToPack.getPosition().set(stepXY);
       }
 
-      footstepPoseToPack.get(footstepTransform);
-      footstepPolygon.applyTransform(footstepTransform, false);
+      computeFootstepPolygon(upcomingFootstepSide, predictedContactPoints, footstepPoseToPack);
+
       parameters.setDesiredDistanceInside(desiredDistanceInsideConstraint.getValue());
 
       RigidBodyTransformReadOnly wiggleTransform = stepConstraintOptimizer.findConstraintTransform(footstepPolygon, convexHullConstraint, parameters);
@@ -214,6 +229,8 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
       // TODO need to rotate to match the surface normal
       //      footstepPoseToPack.getOrientation().set(stepConstraintRegion.getTransformToWorld().getRotation());
 
+      isTransformedFootstepInRegion.set(checkPolygonIsWithinConstraint(upcomingFootstepSide, predictedContactPoints, footstepPoseToPack));
+
       return originalPose.getPositionDistance(footstepPoseToPack) > 1e-5 || originalPose.getOrientationDistance(footstepPoseToPack) > 1e-5;
    }
 
@@ -222,7 +239,7 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
       return foundSolution.getBooleanValue();
    }
 
-   private void computeFootstepPolygon(RobotSide upcomingFootstepSide, List<? extends Point2DBasics> predictedContactPoints, Orientation3DReadOnly orientation)
+   private void computeFootstepPolygon(RobotSide upcomingFootstepSide, List<? extends Point2DBasics> predictedContactPoints, Pose3DReadOnly footPose)
    {
       if (predictedContactPoints.isEmpty() || !usePredictedContactPoints.getValue())
          predictedContactPoints = contactableFeet.get(upcomingFootstepSide).getContactPoints2d();
@@ -232,9 +249,21 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
          footstepPolygon.addVertex(predictedContactPoints.get(i));
       footstepPolygon.update();
 
-      footOrientationTransform.getRotation().set(orientation);
+      footstepPolygon.applyTransform(footPose, false);
+   }
 
-      footstepPolygon.applyTransform(footOrientationTransform, false);
+   private boolean checkPolygonIsWithinConstraint(RobotSide upcomingFootstepSide, List<? extends Point2DBasics> predictedContactPoints, Pose3DReadOnly footPose)
+   {
+      computeFootstepPolygon(upcomingFootstepSide, predictedContactPoints, footPose);
+
+      for (int i = 0; i < footstepPolygon.getNumberOfVertices(); i++)
+      {
+         // TODO check if it's inside by the right distance
+         if (!convexHullConstraint.isPointInside(footstepPolygon.getVertex(i)))
+            return false;
+      }
+
+      return false;
    }
 
    @Override
