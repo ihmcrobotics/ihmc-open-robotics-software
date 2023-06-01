@@ -4,15 +4,20 @@ import org.ejml.data.DMatrixD1;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.robotics.optimization.Optimizer;
 
+/**
+ * Solves an {@link AugmentedLagrangeOptimizationProblem} iteratively
+ * Each iteration updates the lagrange multipliers to better satisfy the constraints
+ *
+ * The optimizer used to solve the unconstrained lagrangian problem needs to be specified separately
+ */
 public class AugmentedLagrangeOptimizer
 {
    private final AugmentedLagrangeOptimizationProblem problem;
    private final CostFunction lagrangeCostFunction;
    private final Optimizer optimizer;
 
-   private int iteration = 0;
-   private DMatrixD1 optimumParameters = new DMatrixRMaj();
    private double optimumCost;
+   private DMatrixD1 optimumParameters = new DMatrixRMaj();
 
    private boolean verbose = true;
 
@@ -24,22 +29,18 @@ public class AugmentedLagrangeOptimizer
       this.optimizer = optimizer;
    }
 
+   /**
+    * Print diagnostic information during optimization
+    */
    public void setVerbose(boolean verbose)
    {
       this.verbose = verbose;
    }
 
-   public DMatrixD1 solveOneIteration(DMatrixD1 initial)
-   {
-
-
-      return optimumParameters;
-   }
-
    public DMatrixD1 optimize(int numLagrangeIterations, DMatrixD1 initialParam)
    {
       DMatrixD1 initial = new DMatrixRMaj(initialParam);
-      iteration = 0;
+      int iteration = 0;
       while (iteration < numLagrangeIterations)
       {
          optimizer.setCostFunction(lagrangeCostFunction);

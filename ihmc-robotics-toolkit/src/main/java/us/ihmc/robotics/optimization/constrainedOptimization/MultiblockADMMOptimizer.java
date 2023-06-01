@@ -3,6 +3,12 @@ package us.ihmc.robotics.optimization.constrainedOptimization;
 import org.ejml.data.DMatrixD1;
 import us.ihmc.robotics.optimization.Optimizer;
 
+/**
+ * Solves a {@link MultiblockAdmmProblem} iteratively using the augmented lagrangian method
+ * Each iteration updates the lagrange multipliers to better satisfy the constraints
+ *
+ * The optimizers used to solve each unconstrained lagrangian subproblem need to be specified separately
+ */
 public class MultiblockADMMOptimizer
 {
    private final MultiblockAdmmProblem admm;
@@ -13,6 +19,7 @@ public class MultiblockADMMOptimizer
    {
       this.admm = admm;
       this.optimizers = optimizers;
+      // TODO ensure size of optimizers is same as num blocks
    }
 
    public void setVerbose(boolean verbose)
