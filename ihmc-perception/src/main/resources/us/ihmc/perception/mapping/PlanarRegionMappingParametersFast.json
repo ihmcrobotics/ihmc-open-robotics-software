@@ -19,5 +19,5 @@
   "ICP min matches" : 3,
   "ICP termination ratio" : 0.000001,
   "ICP error cutoff" : 0.03,
-  "Minimum number of times matched" : 4
+  "Minimum number of times matched" : 2
 }
