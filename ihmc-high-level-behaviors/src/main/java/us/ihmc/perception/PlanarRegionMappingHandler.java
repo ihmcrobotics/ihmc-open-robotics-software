@@ -331,7 +331,7 @@ public class PlanarRegionMappingHandler
 
    public void performMapCleanUp()
    {
-      planarRegionMap.performMapCleanUp();
+      planarRegionMap.performMapCleanUp(true, true);
       latestPlanarRegionsForRendering.set(planarRegionMap.getMapRegions().copy());
       planarRegionMap.setModified(true);
    }
