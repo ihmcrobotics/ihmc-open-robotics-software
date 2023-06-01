@@ -27,6 +27,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegionsList;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
@@ -61,8 +62,8 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
    private static final int maxNumberOfFootsteps = 100;
    private final RecyclingArrayList<Footstep> upcomingFootsteps = new RecyclingArrayList<>(maxNumberOfFootsteps, Footstep.class);
    private final RecyclingArrayList<FootstepTiming> upcomingFootstepTimings = new RecyclingArrayList<>(maxNumberOfFootsteps, FootstepTiming.class);
-   private final RecyclingArrayList<StepConstraintsListCommand> upcomingStepConstraints = new RecyclingArrayList<>(maxNumberOfFootsteps,
-                                                                                                                   StepConstraintsListCommand::new);
+   private final RecyclingArrayList<StepConstraintRegionsList> upcomingStepConstraints = new RecyclingArrayList<>(maxNumberOfFootsteps,
+                                                                                                                  StepConstraintRegionsList::new);
 
    private final RecyclingArrayList<MutableDouble> pauseDurationAfterStep = new RecyclingArrayList<>(maxNumberOfFootsteps, MutableDouble.class);
 
@@ -290,9 +291,9 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
                            command.getExecutionMode());
          setFootstep(command.getFootstep(i), trustHeightOfFootsteps, areFootstepsAdjustable, shouldCheckStepForReachability, upcomingFootsteps.add());
          if (command.getFootstep(i).getStepConstraints().getNumberOfConstraints() > 0)
-            upcomingStepConstraints.add().set(command.getFootstep(i).getStepConstraints());
+            command.getFootstep(i).getStepConstraints().get(upcomingStepConstraints.add());
          else
-            upcomingStepConstraints.add().set(command.getDefaultStepConstraints());
+            command.getDefaultStepConstraints().get(upcomingStepConstraints.add());
          currentNumberOfFootsteps.increment();
       }
 
@@ -463,7 +464,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       upcomingFootsteps.remove(0);
    }
 
-   public void pollStepConstraints(StepConstraintsListCommand commandToPack)
+   public void pollStepConstraints(StepConstraintRegionsList commandToPack)
    {
       commandToPack.set(upcomingStepConstraints.get(0));
       upcomingStepConstraints.remove(0);
@@ -1101,7 +1102,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       {
          Footstep footstep = upcomingFootsteps.get(stepIdx);
          footstep.addOffset(footstepUpdateVector);
-         StepConstraintsListCommand stepConstraints = upcomingStepConstraints.get(stepIdx);
+         StepConstraintRegionsList stepConstraints = upcomingStepConstraints.get(stepIdx);
          stepConstraints.addOffset(footstepUpdateVector);
       }
 
