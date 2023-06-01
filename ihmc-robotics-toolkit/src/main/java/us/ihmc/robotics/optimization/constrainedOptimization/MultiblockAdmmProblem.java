@@ -75,6 +75,20 @@ public class MultiblockAdmmProblem
       return calculateDualCostForBlock(blockIndex, blocksCopy);
    }
 
+   public CostFunction getAugmentedCostFunctionForBlock(int blockIndex)
+   {
+      return new CostFunction()
+      {
+         @Override
+         public double calculate(DMatrixD1 x)
+         {
+            DMatrixD1[] blocksCopy = lastOptimalBlocks.clone();
+            blocksCopy[blockIndex] = x;
+            return calculateDualCostForBlock(blockIndex, blocksCopy);
+         }
+      };
+   }
+
    public double calculateDualCostForBlock(int blockIndex, DMatrixD1... blocks)
    {
       double isolatedCost = isolatedOptimizationProblems.get(blockIndex).calculateDualProblemCost(blocks[blockIndex]);
@@ -132,5 +146,15 @@ public class MultiblockAdmmProblem
          value[i] = equalityConstraints.get(i).calculate(blocks);
       }
       return new DMatrixRMaj(value);
+   }
+
+   public List<AugmentedLagrangeOptimizationProblem> getIsolatedOptimizationProblems()
+   {
+      return isolatedOptimizationProblems;
+   }
+
+   public int getNumBlocks()
+   {
+      return isolatedOptimizationProblems.size();
    }
 }

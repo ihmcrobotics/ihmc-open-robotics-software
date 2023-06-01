@@ -1,71 +1,70 @@
 package us.ihmc.robotics.optimization;
 
-import gnu.trove.list.array.TDoubleArrayList;
 import org.ejml.data.DMatrixD1;
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.robotics.numericalMethods.GradientDescentModule;
-import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
+import us.ihmc.robotics.optimization.constrainedOptimization.CostFunction;
 
 public class AugmentedLagrangeSolver
 {
-   SingleQueryFunction lagrangeCostFunction;
-   int iteration = 0;
-   DMatrixD1 optimumMatrixX = new DMatrixRMaj();
-   TDoubleArrayList optimumX = new TDoubleArrayList();
-   TDoubleArrayList initial = new TDoubleArrayList(); // do a copu
-   String name;
+   private final String name;
 
-   double optimumCost;
+//   private final AugmentedLagrangeOptimizationProblem problem;
+   private final CostFunction lagrangeCostFunction;
+   private final Optimizer optimizer;
 
-   public AugmentedLagrangeSolver(SingleQueryFunction lagrangeCostFunction, TDoubleArrayList initial, String name)
+   private int iteration = 0;
+   private DMatrixD1 initial = new DMatrixRMaj();
+   private DMatrixD1 optimumParameters = new DMatrixRMaj();
+   private double optimumCost;
+
+   public AugmentedLagrangeSolver(Optimizer optimizer, CostFunction costFunction, DMatrixD1 initial, String name)
    {
-      this.lagrangeCostFunction = lagrangeCostFunction;
-      this.initial.addAll(initial);
+//      this.problem = problem;
+//      this.lagrangeCostFunction = problem.getAugmentedCostFunction();
+      this.lagrangeCostFunction = costFunction;
+
+      this.initial = new DMatrixRMaj(initial);
       this.name = name;
+
+      this.optimizer = optimizer;
    }
 
-
-
-   public DMatrixD1 solveOneRun()
+   public DMatrixD1 solveOneIteration()
    {
       if (iteration > 0)
       {
-         initial.reset();
-         initial.addAll(optimumX);
+         initial.set(optimumParameters);
       }
 
-      GradientDescentModule optimizer = new GradientDescentModule(lagrangeCostFunction, initial);
-      optimizer.run();
+      optimizer.setCostFunction(lagrangeCostFunction);
+      optimumParameters = optimizer.optimize(initial);
+      optimumCost = optimizer.getOptimumCost();
 
-      // Update lagrange multipliers
-      optimumX = optimizer.getOptimalInput();
-      convertArrayToMatrix(optimumMatrixX, optimumX);
-
+//      problem.updateLagrangeMultipliers(optimumParameters);
       iteration += 1;
 
-      optimumCost = optimizer.getOptimalQuery();
-      return optimumMatrixX;
+      return optimumParameters;
    }
+
+//   public DMatrixD1 optimize(int numLagrangeIterations)
+//   {
+//      iteration = 0;
+//      while (iteration < numLagrangeIterations)
+//      {
+//         solveOneIteration();
+//      }
+//      return optimumParameters;
+//   }
 
    public double getOptimumCost()
    {
       return optimumCost;
    }
-   public TDoubleArrayList getOptimumAsArray()
-   {
-      return optimumX;
-   }
-
-   public static void convertArrayToMatrix(DMatrixD1 vector, TDoubleArrayList list)
-   {
-      vector.setData(list.toArray());
-      vector.reshape(list.size(), 1);
-   }
 
    public void printOutput()
    {
-      for (int i = 0; i < optimumMatrixX.getNumElements(); i++)
-         System.out.println(name + ": solution is " + optimumMatrixX.get(i));
+      for (int i = 0; i < optimumParameters.getNumElements(); i++)
+         System.out.println(name + ": solution is " + optimumParameters.get(i));
       System.out.println("optimal cost is " + getOptimumCost());
    }
 }

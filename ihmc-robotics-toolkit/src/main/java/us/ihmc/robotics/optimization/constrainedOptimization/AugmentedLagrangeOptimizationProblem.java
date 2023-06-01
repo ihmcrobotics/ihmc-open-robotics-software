@@ -69,6 +69,18 @@ public class AugmentedLagrangeOptimizationProblem
                                                                    inequalityConstraintEvaluations);
    }
 
+   public CostFunction getAugmentedCostFunction()
+   {
+      return new CostFunction()
+      {
+         @Override
+         public double calculate(DMatrixD1 x)
+         {
+            return calculateDualProblemCost(x);
+         }
+      };
+   }
+
    public void updateLagrangeMultipliers(DMatrixD1 xOptimal)
    {
       augmentedLagrangeConstructor.updateLagrangeMultipliers(calculateEqualityConstraintVector(xOptimal),
