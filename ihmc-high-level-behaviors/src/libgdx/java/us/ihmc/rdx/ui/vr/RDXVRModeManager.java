@@ -43,14 +43,13 @@ public class RDXVRModeManager
    public void create(RDXBaseUI baseUI,
                       ROS2SyncedRobotModel syncedRobot,
                       ROS2ControllerHelper controllerHelper,
-                      RestartableJavaProcess kinematicsStreamingToolboxProcess,
-                      boolean robotHasArms)
+                      RestartableJavaProcess kinematicsStreamingToolboxProcess)
    {
       this.syncedRobot = syncedRobot;
       handPlacedFootstepMode = new RDXVRHandPlacedFootstepMode();
       handPlacedFootstepMode.create(syncedRobot.getRobotModel(), controllerHelper);
 
-      if (robotHasArms)
+      if (syncedRobot.getRobotModel().getRobotVersion().hasArms())
       {
          kinematicsStreamingMode = new RDXVRKinematicsStreamingMode(syncedRobot.getRobotModel(), controllerHelper, kinematicsStreamingToolboxProcess);
          kinematicsStreamingMode.create(baseUI.getVRManager().getContext());
