@@ -209,7 +209,7 @@ public class ConcavePolygon2D implements ConcavePolygon2DBasics
          Point2DReadOnly vertex = getVertex(i);
          Point2DReadOnly nextVertex = getVertex(EuclidGeometryPolygonTools.next(i, getNumberOfVertices()));
 
-         if (EuclidGeometryTools.areLine2DsCollinear(previousVertex, vertex, vertex, nextVertex, 1e-2, 1e-4))
+         if (EuclidGeometryTools.areLine2DsCollinear(previousVertex, vertex, vertex, nextVertex, 1e-3, 1e-4))
             removeVertex(i);
          else
             i++;

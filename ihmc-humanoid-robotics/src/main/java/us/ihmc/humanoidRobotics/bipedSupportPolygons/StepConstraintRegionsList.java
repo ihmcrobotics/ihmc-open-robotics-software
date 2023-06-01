@@ -17,7 +17,9 @@ public class StepConstraintRegionsList
 
    public StepConstraintRegion getNextConstraintRegion()
    {
-      return stepConstraintRegions.add();
+      StepConstraintRegion region = stepConstraintRegions.add();
+      region.clear();
+      return region;
    }
 
    public void set(StepConstraintRegionsList other)
