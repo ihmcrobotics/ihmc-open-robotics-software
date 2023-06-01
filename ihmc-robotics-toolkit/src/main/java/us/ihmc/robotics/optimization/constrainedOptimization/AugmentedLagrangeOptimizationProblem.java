@@ -16,16 +16,25 @@ import java.util.List;
  * using the Augmented Lagrangian method:
  *    Lagrangian: f(x) + <l, G(x)>
  *    Penalty: f(x) + p/2 <G(x), G(x)>
- * The actual optimizer is implemented separately.
+ *
+ * This problem gets solved by {@link AugmentedLagrangeOptimizer}
  *
  * An example use case is:
- *    ALOP lagrangian = new ALOP(costFunction, inequalityConstraints, equalityConstraints)
+ *    AugmentedLagrangeOptimizationProblem lagrangian = new AugmentedLagrangeOptimizationProblem(costFunction);
+ *    lagrangian.addInequalityConstraint(inequalityConstraint);
+ *    lagrangian.addEqualityConstraint(equalityConstraints);
+ *    lagrangian.initialize(penalty, initialPenalty);
+ *
  *    CostFunction augmentedCostFunction = lagrangian.calculateDualProblemCost
  *
  *    Optimizer optimizer = new Optimizer(augmentedCostFunction)
  *    for (n lagrangian steps)
- *       optimum = optimizer.doRun()
+ *       initialSeed = lastOptimum
+ *       optimum = optimizer.doRun(initialSeed)
  *       lagrangian.updateLagrangeMultipliers(optimum)
+ *    return optimum
+ *
+ * The unconstrained optimizer is implemented separately.
  */
 public class AugmentedLagrangeOptimizationProblem
 {
@@ -40,16 +49,26 @@ public class AugmentedLagrangeOptimizationProblem
       this.costFunction = costFunction;
    }
 
+   /**
+    * @param constraint h(x) >= 0
+    */
    public void addInequalityConstraint(ConstraintFunction constraint)
    {
       inequalityConstraints.add(constraint);
    }
 
+   /**
+    * @param constraint g(x) == 0
+    */
    public void addEqualityConstraint(ConstraintFunction constraint)
    {
       equalityConstraints.add(constraint);
    }
 
+   /**
+    * @param initialPenalty Keep the initial penalty small
+    * @param penaltyIncreaseFactor
+    */
    public void initialize(double initialPenalty, double penaltyIncreaseFactor)
    {
       augmentedLagrangeConstructor = new AugmentedLagrangeConstructor(initialPenalty,
@@ -58,17 +77,10 @@ public class AugmentedLagrangeOptimizationProblem
                                                                       inequalityConstraints.size());
    }
 
-   public double calculateDualProblemCost(DMatrixD1 x)
-   {
-      double objectivesCost = calculateObjectives(x);
-      DMatrixD1 inequalityConstraintEvaluations = calculateInequalityConstraintVector(x);
-      DMatrixD1 equalityConstraintEvaluations = calculateEqualityConstraintVector(x);
-
-      return augmentedLagrangeConstructor.getAugmentedLagrangeCost(objectivesCost,
-                                                                   equalityConstraintEvaluations,
-                                                                   inequalityConstraintEvaluations);
-   }
-
+   /**
+    * Returns F(x), the unconstrained augmented cost function
+    * Use a separate optimizer to solve this unconstrained problem
+    */
    public CostFunction getAugmentedCostFunction()
    {
       return new CostFunction()
@@ -81,22 +93,33 @@ public class AugmentedLagrangeOptimizationProblem
       };
    }
 
-   public void updateLagrangeMultipliers(DMatrixD1 xOptimal)
+   /**
+    * Evaluates F(x) the unconstrained augmented cost function
+    */
+   public double calculateDualProblemCost(DMatrixD1 x)
    {
-      augmentedLagrangeConstructor.updateLagrangeMultipliers(calculateEqualityConstraintVector(xOptimal),
-                                                             calculateInequalityConstraintVector(xOptimal)
-                                                             );
+      double objectivesCost = calculateCost(x);
+      DMatrixD1 inequalityConstraintEvaluations = evaluateInequalityConstraints(x);
+      DMatrixD1 equalityConstraintEvaluations = evaluateEqualityConstraints(x);
+
+      return augmentedLagrangeConstructor.getAugmentedLagrangeCost(objectivesCost,
+                                                                   equalityConstraintEvaluations,
+                                                                   inequalityConstraintEvaluations);
    }
 
-   private double calculateObjectives(DMatrixD1 x)
+   /**
+    * The unaugmented cost function
+    */
+   private double calculateCost(DMatrixD1 x)
    {
       return costFunction.calculate(x);
    }
 
    /**
-    * For constraints H(x) = [h1(x), h2(x), ...] >= 0, calculate [h1(x), h2(x), ...]
+    * For constraints H(x) = [h1(x), h2(x), ...] >= 0,
+    * calculate [h1(x), h2(x), ...]
     */
-   private DMatrixD1 calculateInequalityConstraintVector(DMatrixD1 x)
+   private DMatrixD1 evaluateInequalityConstraints(DMatrixD1 x)
    {
       int numConstraints = inequalityConstraints.size();
       double[] value = new double[numConstraints];
@@ -108,10 +131,10 @@ public class AugmentedLagrangeOptimizationProblem
    }
 
    /**
-    * For constraints H(x) = [h1(x), h2(x), ...] = 0, calculate [h1(x), h2(x), ...]
-    * @return
+    * For constraints G(x) = [g1(x), g2(x), ...] = 0,
+    * calculate [g1(x), g2(x), ...]
     */
-   private DMatrixD1 calculateEqualityConstraintVector(DMatrixD1 x)
+   private DMatrixD1 evaluateEqualityConstraints(DMatrixD1 x)
    {
       int numConstraints = equalityConstraints.size();
       double[] value = new double[numConstraints];
@@ -121,4 +144,13 @@ public class AugmentedLagrangeOptimizationProblem
       }
       return new DMatrixRMaj(value);
    }
+
+
+   public void updateLagrangeMultipliers(DMatrixD1 xOptimal)
+   {
+      augmentedLagrangeConstructor.updateLagrangeMultipliers(evaluateEqualityConstraints(xOptimal),
+                                                             evaluateInequalityConstraints(xOptimal));
+   }
+
+
 }

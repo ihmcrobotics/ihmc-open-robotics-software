@@ -17,13 +17,16 @@ import org.ejml.dense.row.mult.VectorVectorMult_DDRM;
  *    Penalty: f(x) + p/2 <G(x), G(x)>
  *
  * This class performs the conversion of f(x), G[](x), and H[](x) -> F(x)
+ * An augmented lagrange problem gets solved over multiple iterations of optimizations in which the lagrange
+ * multipliers, l, are updated by the optima found in each iteration.
  */
 public class AugmentedLagrangeConstructor
 {
-   private DMatrixD1 equalityMultiplier;
-   private DMatrixD1 inequalityMultiplier;
    private double penalty;
    private double penaltyIncreaseFactor;
+
+   private final DMatrixD1 equalityMultiplier;
+   private final DMatrixD1 inequalityMultiplier;
 
    public AugmentedLagrangeConstructor(double initialPenalty, double penaltyIncreaseFactor, int numEqualityConstraints, int numInequalityConstraints)
    {
@@ -64,7 +67,6 @@ public class AugmentedLagrangeConstructor
    }
 
    /**
-    *
     * @param equalityConstraintValue The value G(x) = [g1(x), g2(x), ...]
     * @param equalityMultiplierK Lagrange multiplier
     * @param penalty penalty term
@@ -79,7 +81,6 @@ public class AugmentedLagrangeConstructor
    }
 
    /**
-    *
     * @param inequalityConstraintValues The value H(x) = [h1(x), h2(x), ...]
     * @param inequalityMultiplier Lagrange multiplier
     * @param penalty penalty term
@@ -102,6 +103,7 @@ public class AugmentedLagrangeConstructor
     * For constraints H(x) = [h1(x), h2(x), ...] >= 0, calculate:
     *    [max(0, mult1 - p h1(x)), max(0, mult2 - p h2(x)), ...]
     *    aka max_elem(0_vec, multiplier - p H(x))
+    * @param inequalityConstraintValue The value H(x) = [h1(x), h2(x), ...]
     */
    private static DMatrixD1 calculateBarrierInequalityConstraintValue(DMatrixD1 inequalityConstraintValue,
                                                                      DMatrixD1 inequalityMultiplier,
@@ -122,6 +124,16 @@ public class AugmentedLagrangeConstructor
       return barrierInequalityValue;
    }
 
+   /**
+    * For constraints
+    *    H(x) = [h1(x), h2(x), ...] >= 0,
+    *    G(x) = [g1(x), g2(x), ...] == 0
+    * and the optimal results x* from minimizing F(x) in the last iteration,
+    * updates the lagrange multiplier terms
+    *
+    * @param optimalEqualityConstraintEvaluations G(x*)
+    * @param optimalInequalityConstraintEvaluations H(x*)
+    */
    public void updateLagrangeMultipliers(DMatrixD1 optimalEqualityConstraintEvaluations,
                                          DMatrixD1 optimalInequalityConstraintEvaluations)
    {

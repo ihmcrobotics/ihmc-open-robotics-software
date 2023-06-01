@@ -10,21 +10,41 @@ import java.util.List;
  * Solves the optimization problem:
  *    minimize f1(x1) + f2(x2) + ...
  *    st:
+ *       G1[](x1) == 0, G2[](x2) == 0, ...
+ *       H1[](x1) >= 0, H2[](x2) >= 0, ...
  *
- *       Gi(xi,...) >= 0 for G[]
- *       Hi(xi,...) == 0 for H[]
- *    where xi are vectors ("blocks")
+ *       J[](x1, x2,...) == 0
+ *       K[](x1, x2,...) >= 0
  *
- * The actual optimizer is implemented separately.
+ * which can be considered the isolated blocks / subproblems:
+ *    minimize fi(i)
+ *    st:
+ *       Gi[](xi) == 0
+ *       Hi[](xi) >= 0
+ * that must satisfy the global constraints
+ *    J[](x1, x2,...) == 0
+ *    K[](x1, x2,...) >= 0
  *
- * An example use case is: TODO
- *    ALOP lagrangian = new ALOP(costFunction, inequalityConstraints, equalityConstraints)
- *    CostFunction augmentedCostFunction = lagrangian.calculateDualProblemCost
+ * We solve the constrained problems using the augmented lagrange method by creating
+ * for each isolated problem the augmented cost:
+ *    Fi(xi) = fi(xi) + augmentations(Hi[](xi), Gi[](xi))
+ * the global augmented cost that incorporates global constraints:
+ *    Li(xi, x_other*) = Fi(xi) + augmentations(J[](xi, x_other*), K[](xi, x_other*))
  *
- *    Optimizer optimizer = new Optimizer(augmentedCostFunction)
- *    for (n lagrangian steps)
- *       optimum = optimizer.doRun()
- *       lagrangian.updateLagrangeMultipliers(optimum)
+ * The global constraints are solved using the Alternating Direction Method of Multipliers
+ * within {@link MultiblockADMMOptimizer} through the algorithm
+ *    for each block xi,
+ *       initialize xi* = optimize(Fi(xi)) for xi
+ *    to obtain x*
+ *
+ *    for n iterations
+ *       for each block xi,
+ *          solve xi* = optimize(Li(xi, x_other*...)) for xi
+ *       to obtain x*
+ *       update the lagrange multipliers with x*
+ *    return x*
+ *
+ * The optimizers for the unconstrained optimization Fi(xi) and Li(xi, x_other) are implemented separately.
  */
 public class MultiblockAdmmProblem
 {
@@ -33,23 +53,37 @@ public class MultiblockAdmmProblem
    List<BlockConstraintFunction> equalityConstraints = new ArrayList<>();
 
    private AugmentedLagrangeConstructor multiblockAugmentedLagrangeConstructor;
-
    private DMatrixD1[] lastOptimalBlocks;
 
    public MultiblockAdmmProblem()
    {
    }
 
+   /**
+    * An isolated block / subproblem:
+    *    minimize fi(i)
+    *    st:
+    *       Gi[](xi) == 0
+    *       Hi[](xi) >= 0
+    */
    public void addIsolatedProblem(AugmentedLagrangeOptimizationProblem isolatedProblem)
    {
       isolatedOptimizationProblems.add(isolatedProblem);
    }
 
+   /**
+    * A global constraint
+    *    K(x1, x2,...) >= 0
+    */
    public void addInequalityConstraint(BlockConstraintFunction constraint)
    {
       inequalityConstraints.add(constraint);
    }
 
+   /**
+    * A global constraint
+    *    J(x1, x2,...) == 0
+    */
    public void addEqualityConstraint(BlockConstraintFunction constraint)
    {
       equalityConstraints.add(constraint);
@@ -68,13 +102,12 @@ public class MultiblockAdmmProblem
                                                                                 inequalityConstraints.size());
    }
 
-   public double calculateDualCostForBlock(int blockIndex, DMatrixD1 x)
-   {
-      DMatrixD1[] blocksCopy = lastOptimalBlocks.clone();
-      blocksCopy[blockIndex] = x;
-      return calculateDualCostForBlock(blockIndex, blocksCopy);
-   }
-
+   /**
+    * Returns Li(xi) == Li(xi, x_other*), the unconstrained augmented cost function
+    * x_other* is stored implicitely in this class by updating {@link #updateLastOptimalBlocks(DMatrixD1...)}
+    *
+    * Use a separate optimizer to solve this unconstrained problem
+    */
    public CostFunction getAugmentedCostFunctionForBlock(int blockIndex)
    {
       return new CostFunction()
@@ -82,40 +115,37 @@ public class MultiblockAdmmProblem
          @Override
          public double calculate(DMatrixD1 x)
          {
-            DMatrixD1[] blocksCopy = lastOptimalBlocks.clone();
-            blocksCopy[blockIndex] = x;
-            return calculateDualCostForBlock(blockIndex, blocksCopy);
+            return calculateDualCostForBlock(blockIndex, x);
          }
       };
    }
 
-   public double calculateDualCostForBlock(int blockIndex, DMatrixD1... blocks)
+   /**
+    * evaluates Li(xi) == Li(xi, x_other*)
+    * @param blockIndex i
+    * @param x xi
+    */
+   public double calculateDualCostForBlock(int blockIndex, DMatrixD1 x)
    {
-      double isolatedCost = isolatedOptimizationProblems.get(blockIndex).calculateDualProblemCost(blocks[blockIndex]);
-      DMatrixD1 inequalityConstraintEvaluations = calculateInequalityConstraintVector(blocks);
-      DMatrixD1 equalityConstraintEvaluations = calculateEqualityConstraintVector(blocks);
+      DMatrixD1[] blocksCopy = lastOptimalBlocks.clone();
+      blocksCopy[blockIndex] = x;
+      return calculateDualCostForBlock(blockIndex, blocksCopy);
+   }
+
+   /**
+    * evaluates Li(xi, x_other*)
+    * @param blockIndex i
+    * @param lastOptimalblocks x*, which contains [xi*, x_other*] in normal order [x1*, x2*, ...]
+    */
+   private double calculateDualCostForBlock(int blockIndex, DMatrixD1... lastOptimalblocks)
+   {
+      double isolatedCost = isolatedOptimizationProblems.get(blockIndex).calculateDualProblemCost(lastOptimalblocks[blockIndex]);
+      DMatrixD1 inequalityConstraintEvaluations = calculateInequalityConstraintVector(lastOptimalblocks);
+      DMatrixD1 equalityConstraintEvaluations = calculateEqualityConstraintVector(lastOptimalblocks);
 
       return multiblockAugmentedLagrangeConstructor.getAugmentedLagrangeCost(isolatedCost,
                                                                    equalityConstraintEvaluations,
                                                                    inequalityConstraintEvaluations);
-   }
-
-   public void updateLagrangeMultipliers(DMatrixD1... optimalBlocks)
-   {
-      multiblockAugmentedLagrangeConstructor.updateLagrangeMultipliers(calculateEqualityConstraintVector(optimalBlocks),
-                                                                       calculateInequalityConstraintVector(optimalBlocks));
-
-      for (int i = 0; i < isolatedOptimizationProblems.size(); i++)
-      {
-         AugmentedLagrangeOptimizationProblem problem = isolatedOptimizationProblems.get(i);
-         // rho = rho + p * c_i(x'_i)
-         problem.updateLagrangeMultipliers(optimalBlocks[i]);
-      }
-   }
-
-   public void updateLastOptimalBlocks(DMatrixD1... optimalBlocks)
-   {
-      lastOptimalBlocks = optimalBlocks;
    }
 
    /**
@@ -146,6 +176,27 @@ public class MultiblockAdmmProblem
          value[i] = equalityConstraints.get(i).calculate(blocks);
       }
       return new DMatrixRMaj(value);
+   }
+
+   public void updateLagrangeMultipliers(DMatrixD1... optimalBlocks)
+   {
+      multiblockAugmentedLagrangeConstructor.updateLagrangeMultipliers(calculateEqualityConstraintVector(optimalBlocks),
+                                                                       calculateInequalityConstraintVector(optimalBlocks));
+
+      for (int i = 0; i < isolatedOptimizationProblems.size(); i++)
+      {
+         AugmentedLagrangeOptimizationProblem problem = isolatedOptimizationProblems.get(i);
+         // rho = rho + p * c_i(x'_i)
+         problem.updateLagrangeMultipliers(optimalBlocks[i]);
+      }
+   }
+
+   /**
+    * Saves the optimal blocks from the last iteration x* = [x1*, x2*, ...]
+    */
+   public void updateLastOptimalBlocks(DMatrixD1... optimalBlocks)
+   {
+      lastOptimalBlocks = optimalBlocks;
    }
 
    public List<AugmentedLagrangeOptimizationProblem> getIsolatedOptimizationProblems()
