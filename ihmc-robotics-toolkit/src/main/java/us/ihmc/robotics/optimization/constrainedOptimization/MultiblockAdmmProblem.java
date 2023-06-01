@@ -15,7 +15,7 @@ import java.util.List;
  *
  *       J[](x1, x2,...) == 0
  *       K[](x1, x2,...) >= 0
- *
+ * ------
  * which can be considered the isolated blocks / subproblems:
  *    minimize fi(i)
  *    st:
@@ -24,7 +24,7 @@ import java.util.List;
  * that must satisfy the global constraints
  *    J[](x1, x2,...) == 0
  *    K[](x1, x2,...) >= 0
- *
+ * ------
  * We solve the constrained problems using the augmented lagrange method by creating
  * for each isolated problem the augmented cost:
  *    Fi(xi) = fi(xi) + augmentations(Hi[](xi), Gi[](xi))
@@ -35,15 +35,13 @@ import java.util.List;
  * within {@link MultiblockADMMOptimizer} through the algorithm
  *    for each block xi,
  *       initialize xi* = optimize(Fi(xi)) for xi
- *    to obtain x*
  *
  *    for n iterations
  *       for each block xi,
  *          solve xi* = optimize(Li(xi, x_other*...)) for xi
- *       to obtain x*
  *       update the lagrange multipliers with x*
  *    return x*
- *
+ * ------
  * The optimizers for the unconstrained optimization Fi(xi) and Li(xi, x_other) are implemented separately.
  */
 public class MultiblockAdmmProblem
