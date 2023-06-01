@@ -9,6 +9,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
 
@@ -92,6 +93,11 @@ public class StepConstraintRegionCommand implements Command<StepConstraintRegion
       regionNormal.set(normal);
       EuclidGeometryTools.orientation3DFromZUpToVector3D(regionNormal, regionOrientation);
 
+      updateTransformsFromOrigin();
+   }
+
+   private void updateTransformsFromOrigin()
+   {
       fromLocalToWorldTransform.set(regionOrientation, regionOrigin);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
    }
@@ -138,6 +144,11 @@ public class StepConstraintRegionCommand implements Command<StepConstraintRegion
       return concaveHullsVertices;
    }
 
+   public void addOffset(Vector3DReadOnly offset)
+   {
+      regionOrigin.add(offset);
+      updateTransformsFromOrigin();
+   }
 
    public void getStepConstraintRegion(StepConstraintRegion stepConstraintRegion)
    {

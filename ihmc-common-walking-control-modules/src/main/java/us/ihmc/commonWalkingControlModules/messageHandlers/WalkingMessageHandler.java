@@ -1101,6 +1101,8 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       {
          Footstep footstep = upcomingFootsteps.get(stepIdx);
          footstep.addOffset(footstepUpdateVector);
+         StepConstraintsListCommand stepConstraints = upcomingStepConstraints.get(stepIdx);
+         stepConstraints.addOffset(footstepUpdateVector);
       }
 
       setPlanOffsetInternal(planOffsetInWorld);
