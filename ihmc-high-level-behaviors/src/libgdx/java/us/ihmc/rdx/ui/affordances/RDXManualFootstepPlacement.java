@@ -185,8 +185,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
    public void renderImGuiWidgets()
    {
-//      ImGui.text("Manual footstep placement:");
-//      ImGui.image(feetIcon.getTexture().getTextureObjectHandle(), 22.0f, 22.0f);
       ImGui.text("Footstep plan:");
       ImGui.sameLine();
       if (ImGui.button(labels.get("Left")) || ImGui.isKeyPressed('R'))
@@ -207,7 +205,8 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       }
       ImGuiTools.previousWidgetTooltip("Keybind: Escape");
       ImGui.sameLine();
-      if (imgui.ImGui.button(labels.get("Delete Last")) || imgui.ImGui.isKeyPressed(ImGuiTools.getDeleteKey()))
+      if (imgui.ImGui.button(labels.get("Delete Last"))
+          || imgui.ImGui.isKeyPressed(ImGuiTools.getDeleteKey()) || (ImGui.getIO().getKeyCtrl() && ImGui.isKeyPressed('Z')))
       {
          footstepPlan.removeLastStep();
       }
