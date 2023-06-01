@@ -6,6 +6,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegionsList;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
@@ -42,8 +43,8 @@ public class StepConstraintsListCommand implements Command<StepConstraintsListCo
       {
          StepConstraintRegionCommand planarRegionCommand = stepsConstraints.add();
          Point3D origin = message.getRegionOrigin().get(regionIndex);
-         Vector3D normal = message.getRegionNormal().get(regionIndex);
-         planarRegionCommand.setRegionProperties(origin, normal);
+         Quaternion orientation = message.getRegionOrientation().get(regionIndex);
+         planarRegionCommand.setRegionTransformProperties(origin, orientation);
 
          upperBound += message.getConcaveHullsSize().get(regionIndex);
 
