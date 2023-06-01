@@ -28,6 +28,7 @@ public class PerceptionConfigurationParameters extends StoredPropertySet impleme
    public static final BooleanStoredPropertyKey logDepth = keys.addBooleanKey("Log depth");
    public static final BooleanStoredPropertyKey slamEnabled = keys.addBooleanKey("SLAM enabled");
    public static final BooleanStoredPropertyKey slamReset = keys.addBooleanKey("SLAM reset");
+   public static final BooleanStoredPropertyKey supportSquareEnabled = keys.addBooleanKey("Support square enabled");
    public static final BooleanStoredPropertyKey activeMapping = keys.addBooleanKey("Active mapping");
 
    /**
