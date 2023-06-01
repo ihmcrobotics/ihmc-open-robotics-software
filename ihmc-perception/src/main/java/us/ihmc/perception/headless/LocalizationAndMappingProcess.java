@@ -177,10 +177,13 @@ public class LocalizationAndMappingProcess
 
    public void updateMapWithNewRegions(FramePlanarRegionsList regions)
    {
-      latestPlanarRegionsForPublishing.set(planarRegionMap.getMapRegions().copy());
       RigidBodyTransform keyframePose = planarRegionMap.registerRegions(regions.getPlanarRegionsList(), regions.getSensorToWorldFrameTransform());
+      PlanarRegionsList resultMap = planarRegionMap.getMapRegions();
 
-      latestPlanarRegionsForPublishing.set(planarRegionMap.getMapRegions().copy());
+      synchronized (resultMap)
+      {
+         latestPlanarRegionsForPublishing.set(resultMap.copy());
+      }
    }
 
    public void resetMap()
