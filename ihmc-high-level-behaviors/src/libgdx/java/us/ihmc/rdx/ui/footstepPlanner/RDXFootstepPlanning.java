@@ -34,6 +34,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
+import us.ihmc.tools.thread.Throttler;
 
 import java.util.ArrayList;
 
@@ -47,6 +48,8 @@ public class RDXFootstepPlanning
    private final MovingReferenceFrame midFeetZUpFrame;
    private final FootstepPlannerLogger footstepPlannerLogger;
    private final ResettableExceptionHandlingExecutorService executor;
+   private final Throttler planningThrottler = new Throttler().setFrequency(5.0);
+   private final TypedNotification<Pose3DReadOnly> planningRequestNotification = new TypedNotification<>();
    private final FramePose3D midFeetZUpPose = new FramePose3D();
    private volatile PlanarRegionsListMessage planarRegionsListMessage = null;
    private volatile HeightMapMessage heightMapMessage = null;
@@ -82,16 +85,34 @@ public class RDXFootstepPlanning
       executor = MissingThreadTools.newSingleThreadExecutor("FootstepPlanning", true, 1);
    }
 
-   public void planAsync(Pose3DReadOnly goalPoseInWorld)
+   public void update()
+   {
+      // Throttle the planning submission so we don't plan way too much.
+      // We use a notification that we don't check until we're ready to submit.
+      // This makes sure the latest planning goal submitted eventually gets
+      // planned. It's easy to miss this case and the last submitted plan
+      // could get ignored because the throttler wasn't ready yet.
+      if (planningThrottler.run())
+      {
+         if (planningRequestNotification.poll())
+         {
+            Pose3DReadOnly goalPoseInWorld = planningRequestNotification.read();
+            executor.clearQueueAndExecute(() -> planOnAsynchronousThread(goalPoseInWorld, planarRegionsListMessage, heightMapMessage));
+         }
+      }
+   }
+
+   public void queueAsynchronousPlanning(Pose3DReadOnly goalPoseInWorld)
    {
       // Set termination condition to terminate the running plan as soon as possible,
       // in the case that there is one running.
       terminatePlan = true;
 
-      executor.clearQueueAndExecute(() -> plan(new Pose3D(goalPoseInWorld), planarRegionsListMessage, heightMapMessage));
+      // Copy the goal pose so we don't modify the sender's copy later
+      planningRequestNotification.set(new Pose3D(goalPoseInWorld));
    }
 
-   private void plan(Pose3DReadOnly goalPose, PlanarRegionsListMessage planarRegionsListMessage, HeightMapMessage heightMapMessage)
+   private void planOnAsynchronousThread(Pose3DReadOnly goalPose, PlanarRegionsListMessage planarRegionsListMessage, HeightMapMessage heightMapMessage)
    {
       // Set to false as soon as we start, so it can be set to true at any point now.
       terminatePlan = false;
