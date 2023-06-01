@@ -28,6 +28,7 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -295,6 +296,11 @@ public class AStarFootstepPlanner
          FootstepSnapData snapData = snapper.snapFootstep(footstepNode.getSecondStep(), footstepNode.getFirstStep(), true);
          PlannedFootstep footstep = new PlannedFootstep(footstepNode.getSecondStepSide());
          footstep.getFootstepPose().set(snapData.getSnappedStepTransform(footstepNode.getSecondStep()));
+         if (snapData.getRegionIndex() > 0)
+         {
+            PlanarRegion regionSnappedTo = snapper.getPlanarRegionsList().getPlanarRegion(snapData.getRegionIndex());
+            footstep.setRegionSnappedTo(regionSnappedTo.copy());
+         }
 
          if (!footstepPlannerParameters.getWiggleWhilePlanning())
          {
