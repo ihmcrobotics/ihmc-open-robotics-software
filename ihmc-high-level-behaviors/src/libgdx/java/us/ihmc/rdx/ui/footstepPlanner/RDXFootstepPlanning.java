@@ -131,7 +131,11 @@ public class RDXFootstepPlanning
       setGoalFootPosesFromMidFeetPose(footstepPlannerParameters, goalPose);
       setStanceSideToClosestToGoal(goalPose);
 
-      request.setSwingPlannerType(SwingPlannerType.MULTI_WAYPOINT_POSITION);
+      if (locomotionParameters.getPlanSwingTrajectories())
+         request.setSwingPlannerType(SwingPlannerType.MULTI_WAYPOINT_POSITION);
+      else
+         request.setSwingPlannerType(null);
+
       request.getStartFootPoses().forEach((side, pose3D) ->
       {
          FramePose3DReadOnly soleFramePose = syncedRobot.getFramePoseReadOnly(referenceFrames -> referenceFrames.getSoleFrame(side));
