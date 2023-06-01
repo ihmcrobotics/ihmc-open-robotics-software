@@ -85,6 +85,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final ROS2ControllerHelper ros2Helper;
    private final YoVariableClientHelper yoVariableClientHelper;
    private final DRCRobotModel robotModel;
+   private final boolean robotHasArms;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final RDXTeleoperationParameters teleoperationParameters;
@@ -124,7 +125,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final ControllerStatusTracker controllerStatusTracker;
    private final LogToolsLogger logToolsLogger = new LogToolsLogger();
 
-   private final boolean robotHasArms;
    /**
     * For use without interactables available. May crash if a YoVariableClient is needed.
     */

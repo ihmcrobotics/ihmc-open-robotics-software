@@ -90,7 +90,7 @@ public class RDXBehaviorActionSequenceUI
       ImGui.sameLine();
       if (ImGui.button("Create new sequence"))
       {
-         var editor = new RDXBehaviorActionSequenceEditor(newSequenceName.get(), behaviorSequenceStorageDirectory, robotHasArms);
+         var editor = new RDXBehaviorActionSequenceEditor(newSequenceName.get(), behaviorSequenceStorageDirectory);
          editor.saveToFile();
          addEditor(editor);
       }
@@ -106,7 +106,7 @@ public class RDXBehaviorActionSequenceUI
 
          if (!alreadyLoaded)
          {
-            var editor = new RDXBehaviorActionSequenceEditor(queryContainedFile, robotHasArms);
+            var editor = new RDXBehaviorActionSequenceEditor(queryContainedFile);
             addEditor(editor);
             editor.loadActionsFromFile();
          }
