@@ -165,8 +165,7 @@ public class RDXWalkPathControlRing
 
    private void queueFootstepPlan()
    {
-      footstepPlanning.setMidFeetGoalPose(footstepPlannerGoalGizmo.getPathControlRingGizmo().getPose3D());
-      footstepPlanning.planAsync();
+      footstepPlanning.planAsync(footstepPlannerGoalGizmo.getPathControlRingGizmo().getPose3D());
    }
 
    private void updateStuff()
