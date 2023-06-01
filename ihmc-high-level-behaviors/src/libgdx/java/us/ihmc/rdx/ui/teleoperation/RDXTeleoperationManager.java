@@ -182,11 +182,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
       {
          selfCollisionModel = new RDXRobotCollisionModel(robotSelfCollisionModel);
          environmentCollisionModel = new RDXRobotCollisionModel(robotEnvironmentCollisionModel);
-         armManager = new RDXArmManager(robotModel,
-                                        syncedRobot,
-                                        desiredRobot.getDesiredFullRobotModel(),
-                                        ros2Helper,
-                                        teleoperationParameters);
       }
    }
 
@@ -210,9 +205,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
       {
          selfCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkGreen(), 0.4));
          environmentCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkRed(), 0.4));
-
-         // create the manager for the desired arm setpoints
-         armManager.create(baseUI);
 
          for (RDXRobotCollidable robotCollidable : environmentCollisionModel.getRobotCollidables())
          {
@@ -267,9 +259,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
                      RDXInteractableHand interactableHand = new RDXInteractableHand(side, baseUI, robotCollidable, robotModel, syncedRobot, yoVariableClientHelper);
                      interactableHands.put(side, interactableHand);
                      allInteractableRobotLinks.add(interactableHand);
-                     // TODO this should probably not handle the space event!
-                     // This sends a command to the controller.
-                     interactableHand.setOnSpacePressed(armManager.getSubmitDesiredArmSetpointsCallback(side));
                   }
                   else
                   {
@@ -277,6 +266,21 @@ public class RDXTeleoperationManager extends ImGuiPanel
                   }
                }
             }
+         }
+
+         // create the manager for the desired arm setpoints
+         armManager = new RDXArmManager(robotModel,
+                                        syncedRobot,
+                                        desiredRobot.getDesiredFullRobotModel(),
+                                        ros2Helper,
+                                        teleoperationParameters,
+                                        interactableHands);
+         armManager.create(baseUI);
+         for (RobotSide side : interactableHands.sides())
+         {
+            // TODO this should probably not handle the space event!
+            // This sends a command to the controller.
+            interactableHands.get(side).setOnSpacePressed(armManager.getSubmitDesiredArmSetpointsCallback(side));
          }
 
          baseUI.getVRManager().getContext().addVRPickCalculator(this::calculateVRPick);
@@ -311,7 +315,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
          if (interactablesAvailable)
          {
-            armManager.update(interactableHands);
+            armManager.update();
 
             selfCollisionModel.update();
             environmentCollisionModel.update();
