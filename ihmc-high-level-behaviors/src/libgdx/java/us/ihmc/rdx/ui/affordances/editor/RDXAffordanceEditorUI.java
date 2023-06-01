@@ -30,6 +30,9 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.*;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -66,6 +69,7 @@ public class RDXAffordanceEditorUI
    private final ImGuiInputText textInput = new ImGuiInputText("Enter file name to save/load");
    private String fileName = "";
    private final WorkspaceResourceDirectory configurationsDirectory = new WorkspaceResourceDirectory(getClass(), "/affordances");
+   private final ArrayList<double[]> csvDataMatrix = new ArrayList<>();
 
    public RDXAffordanceEditorUI()
 
@@ -298,7 +302,7 @@ public class RDXAffordanceEditorUI
          {
             try
             {
-               Thread.sleep(300);
+               Thread.sleep(112); // about 9Hz
             }
             catch (InterruptedException e)
             {
@@ -473,9 +477,13 @@ public class RDXAffordanceEditorUI
                actionNode.put("side", side.getLowerCaseName());
                actionNode.put("trajectoryDuration", trajectoryDurations.get(i));
                preGraspPoses.get(i).changeFrame(affordanceFrame.getReferenceFrame());
-               LogTools.info(preGraspPoses.get(i));
                RigidBodyTransform transformToParent = new RigidBodyTransform(preGraspPoses.get(i));
                JSONTools.toJSON(actionNode, transformToParent);
+
+               double[] dataTrajectories = new double[7];
+               preGraspPoses.get(i).getOrientation().get(dataTrajectories);
+               preGraspPoses.get(i).getPosition().get(4, dataTrajectories);
+               csvDataMatrix.add(dataTrajectories);
             }
             if (graspFrame.isSet())
             {
@@ -561,6 +569,31 @@ public class RDXAffordanceEditorUI
       else
       {
          LogTools.warn("Could not save extra info to {}", extraFile.getFileName());
+      }
+
+      saveToCSVFiles(fileName);
+   }
+
+   public void saveToCSVFiles(String fileName)
+   {
+      Path filePath = Paths.get(configurationsDirectory.getFilesystemDirectory().toString(), fileName + ".csv");
+      File csvFile = new File(filePath.toString());
+      try (PrintWriter writer = new PrintWriter(csvFile))
+      {
+         for (double[] dataLine : csvDataMatrix)
+         {
+            for (int i = 0; i < dataLine.length; i++)
+            {
+               writer.print(dataLine[i]);
+               if (i < dataLine.length - 1)
+                  writer.append(",");
+            }
+            writer.println();
+         }
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
       }
    }
 

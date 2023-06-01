@@ -548,7 +548,7 @@ public class RDXBehaviorActionSequenceEditor
 
    public boolean isAffordanceOver()
    {
-      return executionNextIndexStatus >= actionSequence.size();
+      return executionNextIndexStatus >= actionSequence.size() - 1;
    }
 
    private RDXFootstepAction findNextPreviousFootstepAction()

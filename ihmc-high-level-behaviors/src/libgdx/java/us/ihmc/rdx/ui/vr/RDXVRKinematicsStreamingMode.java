@@ -47,6 +47,7 @@ import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.Throttler;
+import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.util.Set;
 
@@ -82,6 +83,7 @@ public class RDXVRKinematicsStreamingMode
    private RDXVRSharedControl sharedControlAssistant;
 //   private int start = 0;
 //   private final SideDependentList<KinematicsToolboxRigidBodyMessage> lastMessage = new SideDependentList<>();
+   private final FrequencyCalculator pw = new FrequencyCalculator();
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.OPEN, HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH};
    private int leftIndex = -1;
@@ -161,6 +163,7 @@ public class RDXVRKinematicsStreamingMode
    {
       if (controllerModel == RDXVRControllerModel.UNKNOWN)
          controllerModel = vrContext.getControllerModel();
+
       vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
       {
          InputDigitalActionData aButton = controller.getAButtonActionData();
@@ -182,12 +185,6 @@ public class RDXVRKinematicsStreamingMode
          kinematicsRecorder.processRecordReplayInput(joystickButton);
          if(kinematicsRecorder.isReplayingEnabled().get())
             wakeUpToolbox();
-
-         // Check if left B button is pressed in order to trigger shared control assistance
-         InputDigitalActionData bButton = controller.getBButtonActionData();
-         // use left joystick values to control affordance in shared control assistance
-         double forwardJoystickValue = controller.getJoystickActionData().y();
-         sharedControlAssistant.processInput(bButton, forwardJoystickValue);
       });
 
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
@@ -207,6 +204,8 @@ public class RDXVRKinematicsStreamingMode
          }
       });
 
+      sharedControlAssistant.processInput(vrContext);
+
       for (RobotSide side : RobotSide.values)
       {
          vrContext.getController(side).runIfConnected(controller ->
@@ -223,6 +222,8 @@ public class RDXVRKinematicsStreamingMode
 
       if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
+         pw.ping();
+         LogTools.info(pw.getFrequency());
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          for (RobotSide side : RobotSide.values)
          {
@@ -327,13 +328,11 @@ public class RDXVRKinematicsStreamingMode
       if (!enabled.get())
          streamToController.set(false);
 
+      sharedControlAssistant.update();
       if (!streamToController.get() && sharedControlAssistant.isActive() && sharedControlAssistant.isAffordanceActive())
       {
-         sharedControlAssistant.updateAffordance();
          ghostRobotGraphic.setActive(false);
       }
-      else if (!ghostRobotGraphic.isActive())
-         ghostRobotGraphic.setActive(true);
 
       if (status.getMessageNotification().poll())
       {
@@ -381,7 +380,8 @@ public class RDXVRKinematicsStreamingMode
             }
          }
       }
-      ghostRobotGraphic.update();
+      if (ghostRobotGraphic.isActive())
+         ghostRobotGraphic.update();
       if(sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive()) // if graphic active update also graphic
          sharedControlAssistant.getGhostPreviewGraphic().update();
    }
@@ -508,6 +508,7 @@ public class RDXVRKinematicsStreamingMode
             for (var stdDeviationRegion : sharedControlAssistant.getStdDeviationGraphic().entrySet())
                stdDeviationRegion.getValue().getRenderables(renderables, pool);
          }
+         sharedControlAssistant.getMenuPanel().getRenderables(renderables, pool);
       }
       if (showReferenceFrameGraphics.get())
       {

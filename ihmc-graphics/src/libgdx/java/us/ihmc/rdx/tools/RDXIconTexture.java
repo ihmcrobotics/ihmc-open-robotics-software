@@ -41,7 +41,7 @@ public class RDXIconTexture
       BytePointer bytePointer = new BytePointer(directByteBuffer);
       Mat encodedDataMat = new Mat(bytes.length, 1, opencv_core.CV_8UC1, bytePointer);
 
-      Mat readImage = opencv_imgcodecs.imdecode(encodedDataMat, opencv_imgcodecs.IMREAD_COLOR);
+      Mat readImage = opencv_imgcodecs.imdecode(encodedDataMat, opencv_imgcodecs.IMREAD_UNCHANGED);
       texture = initialize(readImage);
    }
 

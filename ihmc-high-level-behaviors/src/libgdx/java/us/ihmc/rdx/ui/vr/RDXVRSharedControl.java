@@ -25,10 +25,13 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.perception.sceneGraph.SceneGraphAPI;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.RDX3DSituatedImGuiTransparentPanel;
+import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorActionSequenceEditor;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.visualizers.RDXEdgeDefinedShapeGraphic;
 import us.ihmc.rdx.visualizers.RDXSplineGraphic;
+import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
@@ -78,6 +81,8 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private RDXBehaviorActionSequenceEditor affordanceEditor;
    private boolean affordanceReady = false;
    private int blendingCounter = 0;
+   private RDXVRAssistanceMenu menu;
+   private final VRMenuGuideMode[] menuMode;
 
 
    public RDXVRSharedControl(DRCRobotModel robotModel, ROS2PublishSubscribeAPI ros2, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
@@ -100,20 +105,40 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       ghostRobotGraphic.create();
 
       detectableSceneObjectsSubscription = ros2.subscribe(SceneGraphAPI.DETECTABLE_SCENE_NODES);
+      menuMode = new VRMenuGuideMode[1];
+      menuMode[0] = VRMenuGuideMode.OFF;
+   }
+
+   public void createMenuWindow(RDXImGuiWindowAndDockSystem window)
+   {
+      menu = new RDXVRAssistanceMenu(window, menuMode);
    }
 
    /**
     * Process the VR input to activate/deactivate shared control
     */
-   public void processInput(InputDigitalActionData triggerButton, double joystickValue)
+   public void processInput(RDXVRContext vrContext)
    {
-      // enable if trigger button has been pressed once. if button is pressed again shared control is stopped
-      if (triggerButton.bChanged() && !triggerButton.bState())
+      vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
       {
-         setEnabled(!enabled.get());
-      }
-      this.joystickValue = joystickValue;
-      play = joystickValue>0 || isPreviewGraphicActive();
+         // Check if left B button is pressed in order to trigger shared control assistance
+         InputDigitalActionData bButton = controller.getBButtonActionData();
+         // use left joystick values to control affordance in shared control assistance
+         double forwardJoystickValue = controller.getJoystickActionData().y();
+         // enable if trigger button has been pressed once. if button is pressed again shared control is stopped
+         if (bButton.bChanged() && !bButton.bState())
+         {
+          setEnabled(!enabled.get());
+         }
+         joystickValue = forwardJoystickValue;
+         play = joystickValue > 0 || isPreviewGraphicActive();
+      });
+
+      vrContext.getHeadset().runIfConnected(headset ->
+      {
+        if (menu != null)
+           menu.update(headset.getXForwardZUpHeadsetFrame());
+      });
    }
 
    /**
@@ -259,22 +284,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    @Override
    public void processFrameInformation(Pose3DReadOnly observedPose, String bodyPart)
    {
-      if (detectableSceneObjectsSubscription.getMessageNotification().poll() && !proMPAssistant.startedProcessing())
-      {
-         DetectableSceneNodesMessage detectableSceneNodeMessage = detectableSceneObjectsSubscription.getMessageNotification().read();
-         for (var sceneNodeMessage : detectableSceneNodeMessage.getDetectableSceneNodes())
-         {
-            // TODO. update this once Panel and LeverHandle are unified into single detectable "Door"
-            if (sceneNodeMessage.currently_detected_ && !sceneNodeMessage.name_.toString().contains("Panel") && !sceneNodeMessage.name_.toString().contains("Frame"))
-            {
-               objectName = sceneNodeMessage.getNameAsString();
-               MessageTools.toEuclid(sceneNodeMessage.getTransformToWorld(), objectTransformToWorld);
-               objectFrame.update();
-            }
-         }
-      }
-
-      if (proMPAssistant.startedProcessing() && containsBodyPart(bodyPart))
+      if (proMPAssistant.startedProcessing() && containsBodyPart(bodyPart) && previewSetToActive)
       {
          enableStdDeviationVisualization(bodyPart);
       }
@@ -380,7 +390,6 @@ public class RDXVRSharedControl implements TeleoperationAssistant
                   blendingCounter++;
                   if (x <= 1)
                   {
-                     LogTools.info(alpha);
                      // gradually interpolate last promp frame to first affordance frame
                      FixedFrameQuaternionBasics arbitratedFrameOrientation = framePose.getOrientation();
                      arbitratedFrameOrientation.set((1 - alpha) * framePose.getOrientation().getX() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getX(),
@@ -409,7 +418,38 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       }
    }
 
-   public void updateAffordance()
+   public void update()
+   {
+      if (detectableSceneObjectsSubscription.getMessageNotification().poll() && !proMPAssistant.startedProcessing())
+      {
+         DetectableSceneNodesMessage detectableSceneNodeMessage = detectableSceneObjectsSubscription.getMessageNotification().read();
+         for (var sceneNodeMessage : detectableSceneNodeMessage.getDetectableSceneNodes())
+         {
+            // TODO. update this once Panel and LeverHandle are unified into single detectable "Door"
+            if (sceneNodeMessage.currently_detected_ && !sceneNodeMessage.name_.toString().contains("Panel") && !sceneNodeMessage.name_.toString().contains("Frame"))
+            {
+               objectName = sceneNodeMessage.getNameAsString();
+               MessageTools.toEuclid(sceneNodeMessage.getTransformToWorld(), objectTransformToWorld);
+               objectFrame.update();
+            }
+         }
+      }
+      if (!enabledIKStreaming.get() && isActive() && isAffordanceActive())
+         updateAffordance();
+      //update menu
+      if (!enabled.get() && !objectName.isEmpty())
+         menuMode[0] = VRMenuGuideMode.PRESS_LEFT_B;
+      else if (!enabled.get())
+         menuMode[0] = VRMenuGuideMode.OFF;
+      else if (enabled.get() && proMPAssistant.startedProcessing() && !proMPAssistant.readyToPack())
+         menuMode[0] = VRMenuGuideMode.MOVE_RIGHT;
+      else if (!previewSetToActive || (previewSetToActive && previewValidated))
+         menuMode[0] = VRMenuGuideMode.PUSH_LEFT_JOYSTICK;
+      else
+         menuMode[0] = VRMenuGuideMode.IDLE;
+   }
+
+   private void updateAffordance()
    {
       if (joystickValue > 0.0)
          affordanceEditor.playActions(true);
@@ -421,10 +461,10 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       else
          affordanceEditor.rewindActions(true);
 
-      if (affordanceEditor.isAffordanceOver())
-         setEnabled(false);
+      // TODO SERIOUS BUG IN THIS EDITOR. It s alwyas over if not opening panel affordance, it this.enabled-> false but keep playing affordance with joystick
+//      if (affordanceEditor.isAffordanceOver())
+//         setEnabled(false);
    }
-
 
    public void renderWidgets(ImGuiUniqueLabelMap labels)
    {
@@ -453,7 +493,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
                this.enabled.set(false); // check no concurrency with replay
 
             if (!enabledIKStreaming.get() && !isPreviewGraphicActive())
-               this.enabled.set(false);  // if preview disabled we do not want to start the assistance while we're not streaming to the controller
+               this.enabledIKStreaming.set(true);  // if preview disabled we do not want to start the assistance while we're not streaming to the controller
             else if (isPreviewGraphicActive())
                enabledIKStreaming.set(false); // if preview is enabled we do not want to stream to the controller
             previewSetToActive = isPreviewGraphicActive();
@@ -474,6 +514,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             stdDeviationGraphics.clear();
             if(affordanceEditor != null)
             {
+               LogTools.info("HELLOOO");
                affordanceEditor.commandNextActionIndex(0);
                affordanceEditor = null;
             }
@@ -541,5 +582,10 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    public boolean isFirstPreview()
    {
       return firstPreview;
+   }
+
+   public RDX3DSituatedImGuiTransparentPanel getMenuPanel()
+   {
+      return menu.getPanel();
    }
 }
