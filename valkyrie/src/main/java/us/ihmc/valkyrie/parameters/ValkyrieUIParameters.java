@@ -116,7 +116,7 @@ public class ValkyrieUIParameters implements UIParameters
    @Override
    public RigidBodyTransform getHandControlFramePose(RobotSide side)
    {
-      if (jointMap.getRobotVersion() == ValkyrieRobotVersion.ARM_MASS_SIM)
+      if (jointMap.getRobotVersion() == ValkyrieRobotVersion.DUAL_ARM_MASS_SIM)
       {
          RigidBodyTransform pose = new RigidBodyTransform();
          pose.getTranslation().set(0.0, side.negateIfRightSide(0.30), 0.0);

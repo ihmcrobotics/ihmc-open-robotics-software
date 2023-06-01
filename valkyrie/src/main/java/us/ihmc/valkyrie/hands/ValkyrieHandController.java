@@ -4,5 +4,4 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 
 public interface ValkyrieHandController extends RobotController
 {
-   void cleanup();
 }

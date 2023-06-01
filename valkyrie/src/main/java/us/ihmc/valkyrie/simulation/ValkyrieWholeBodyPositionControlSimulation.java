@@ -57,7 +57,7 @@ public class ValkyrieWholeBodyPositionControlSimulation
    {
       groundPlaneMessage.getRegionNormal().set(Axis3D.Z);
 
-      robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.ARM_MASS_SIM);
+      robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.DUAL_ARM_MASS_SIM);
       if (REMOVE_JOINT_LIMITS)
       {
          robotModel.setRobotDefinitionMutator(robotModel.getRobotDefinitionMutator().andThen(RobotDefinitionTools.jointLimitRemover()));

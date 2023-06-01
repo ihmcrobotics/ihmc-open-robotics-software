@@ -1,12 +1,8 @@
 package us.ihmc.valkyrie.configuration;
 
-import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.valkyrie.hands.ValkyrieHandVersion;
-
 public enum ValkyrieRobotVersion
 {
-   DEFAULT, FINGERLESS, ARM_MASS_SIM, ARMLESS;
+   DEFAULT, FINGERLESS, ARMLESS, DUAL_ARM_MASS_SIM, DUAL_PSYONIC, DUAL_ZIMMER;
 
    public static final String ROBOT_VERSION_ENVIRONMENT_VARIABLE_NAME = "IHMC_VALKYRIE_ROBOT_VERSION";
 
@@ -16,45 +12,32 @@ public enum ValkyrieRobotVersion
 
       if (valueFromEnvironment == null)
          return DEFAULT;
-      else if (valueFromEnvironment.trim().toLowerCase().contains(FINGERLESS.name().toLowerCase()))
-         return FINGERLESS;
-      else if (valueFromEnvironment.trim().toLowerCase().contains(ARM_MASS_SIM.name().toLowerCase()))
-         return ARM_MASS_SIM;
-      else if (valueFromEnvironment.trim().toLowerCase().contains(ARMLESS.name().toLowerCase()))
-         return ARMLESS;
-      else
-         return DEFAULT;
-   }
 
-   public String getRealRobotURDFFile()
-   {
-      switch (this)
+      for (ValkyrieRobotVersion version : values())
       {
-         case DEFAULT:
-            return "models/valkyrie_sim.urdf";
-         case FINGERLESS:
-            return "models/valkyrie_sim_no_fingers.urdf";
-         case ARM_MASS_SIM:
-            return "models/valkyrie_sim_arm_mass_sim.urdf";
-         case ARMLESS:
-            return "models/valkyrie_sim_no_arms.urdf";
-         default:
-            throw new RuntimeException("ValkyrieRobotVersion: Unimplemented enumeration case : " + this);
+         if (valueFromEnvironment.trim().toLowerCase().contains(version.name().toLowerCase()))
+            return version;
       }
+
+      return DEFAULT;
    }
 
-   public String getSimURDFFile()
+   public String getURDFFile()
    {
       switch (this)
       {
          case DEFAULT:
-            return "models/valkyrie_sim.urdf";
+            return "models/valkyrie_dual_athena.urdf";
          case FINGERLESS:
-            return "models/valkyrie_sim_no_fingers.urdf";
-         case ARM_MASS_SIM:
-            return "models/valkyrie_sim_arm_mass_sim.urdf";
+            return "models/valkyrie_dual_athena_no_fingers.urdf";
          case ARMLESS:
-            return "models/valkyrie_sim_no_arms.urdf";
+            return "models/valkyrie_no_arms.urdf";
+         case DUAL_ARM_MASS_SIM:
+            return "models/valkyrie_dual_arm_mass_sim.urdf";
+         case DUAL_PSYONIC:
+            return "models/valkyrie_dual_psyonic.urdf";
+         case DUAL_ZIMMER:
+            return "models/valkyrie_dual_zimmer.urdf";
          default:
             throw new RuntimeException("ValkyrieRobotVersion: Unimplemented enumeration case : " + this);
       }
@@ -66,7 +49,9 @@ public enum ValkyrieRobotVersion
       {
          case DEFAULT:
          case FINGERLESS:
-         case ARM_MASS_SIM:
+         case DUAL_ARM_MASS_SIM:
+         case DUAL_PSYONIC:
+         case DUAL_ZIMMER:
             return true;
          case ARMLESS:
             return false;
@@ -75,49 +60,39 @@ public enum ValkyrieRobotVersion
       }
    }
 
+   @Deprecated // Shoulder be looking at the actual robot definition
    public boolean hasFingers()
    {
       switch (this)
       {
          case DEFAULT:
+         case DUAL_PSYONIC:
+         case DUAL_ZIMMER:
             return true;
          case FINGERLESS:
-         case ARM_MASS_SIM:
          case ARMLESS:
+         case DUAL_ARM_MASS_SIM:
             return false;
          default:
             throw new RuntimeException("ValkyrieRobotVersion: Unimplemented enumeration case : " + this);
       }
    }
 
+   @Deprecated // Shoulder be looking at the actual robot definition
    public boolean hasHands()
    {
       switch (this)
       {
          case DEFAULT:
          case FINGERLESS:
+         case DUAL_PSYONIC:
+         case DUAL_ZIMMER:
             return true;
-         case ARM_MASS_SIM:
+         case DUAL_ARM_MASS_SIM:
          case ARMLESS:
             return false;
          default:
             throw new RuntimeException("ValkyrieRobotVersion: Unimplemented enumeration case : " + this);
       }
-   }
-
-   public ValkyrieHandVersion getHandVersion(RobotSide robotSide)
-   {
-      switch (this)
-      {
-         case DEFAULT:
-            return ValkyrieHandVersion.Athena;
-         default:
-            return ValkyrieHandVersion.None;
-      }
-   }
-
-   public HandModel getDefaultHandModel(RobotSide robotSide)
-   {
-      return getHandVersion(robotSide).getHandModel();
    }
 }

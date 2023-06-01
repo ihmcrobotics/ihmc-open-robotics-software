@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.function.Consumer;
 
+import javax.xml.bind.JAXBException;
+
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.drcRobot.SimulationLowLevelControllerFactory;
@@ -27,12 +29,13 @@ import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.log.LogTools;
+import us.ihmc.modelFileLoaders.RobotDefinitionLoader;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
@@ -55,6 +58,8 @@ import us.ihmc.valkyrie.behaviors.ValkyrieLookAndStepParameters;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.diagnostic.ValkyrieDiagnosticParameters;
 import us.ihmc.valkyrie.hands.SimulatedValkyrieHandControlThread;
+import us.ihmc.valkyrie.hands.ValkyrieHandModel;
+import us.ihmc.valkyrie.hands.ValkyrieHandVersion;
 import us.ihmc.valkyrie.parameters.ValkyrieCoPTrajectoryParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieCollisionBoxProvider;
 import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
@@ -77,11 +82,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private static final boolean PRINT_MODEL = false;
    public static final String CUSTOM_ROBOT_PATH_ENVIRONMENT_VARIABLE_NAME = "IHMC_CUSTOM_VALKYRIE_ROBOT_PATH";
 
-   private final String[] resourceDirectories = {"models/", "models/gazebo/", "models/val_description/", "models/val_description/urdf/"};
+   private final String[] resourceDirectories = {"models/"};
 
    private final ValkyrieRobotVersion robotVersion;
-   private final SideDependentList<HandModel> handModels = new SideDependentList<>();
    private final RobotTarget target;
+
+   private SideDependentList<ValkyrieHandModel> handModels;
 
    private double controllerDT;
    private double estimatorDT;
@@ -125,7 +131,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       this.target = target;
       this.robotVersion = robotVersion;
-      handModels.set(side -> robotVersion.getDefaultHandModel(side));
 
       controllerDT = 0.004;
       estimatorDT = 0.002;
@@ -278,11 +283,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
       }
    }
 
-   public void setCustomHandModels(SideDependentList<? extends HandModel> handModels)
+   public void setCustomHandModels(SideDependentList<? extends ValkyrieHandModel> handModels)
    {
       if (robotDefinition != null)
          throw new IllegalArgumentException("Cannot set customHandModel once robotDefinition has been created.");
-      this.handModels.set(side -> handModels.get(side));
+      this.handModels = new SideDependentList<>(side -> handModels.get(side));
    }
 
    /**
@@ -340,21 +345,44 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       if (robotDefinition == null)
       {
-         robotDefinition = RobotDefinitionTools.loadURDFModel(getURDFModelInputStream(),
-                                                              Arrays.asList(getResourceDirectories()),
-                                                              getClass().getClassLoader(),
-                                                              getJointMap().getModelName(),
-                                                              getContactPointParameters(),
-                                                              getJointMap(),
-                                                              true);
-         // For backward compatibility w.r.t. when we were using SDF file.
-         // The URDF to SDF conversion appeared to sort the joints by alphabetical order.
-         // The ordering matters when serializing messages such as RobotConfigurationData.
-         robotDefinition.forEachRigidBodyDefinition(body -> Collections.sort(body.getChildrenJoints(), (j1, j2) -> j1.getName().compareTo(j2.getName())));
+         try
+         {
+            robotDefinition = URDFTools.toFloatingRobotDefinition(URDFTools.loadURDFModel(getURDFModelInputStream(),
+                                                                                          Arrays.asList(getResourceDirectories()),
+                                                                                          getClass().getClassLoader()));
+            // By default SDFTools names the root body "rootBody", for backward compatibility it is renamed "elevator".
+            robotDefinition.getRootBodyDefinition().setName(RobotDefinitionLoader.DEFAULT_ROOT_BODY_NAME);
 
-         if (robotMaterial != null)
-            RobotDefinitionTools.setRobotDefinitionMaterial(robotDefinition, robotMaterial);
-         getRobotDefinitionMutator().accept(robotDefinition);
+            if (getContactPointParameters() != null)
+               RobotDefinitionLoader.addGroundContactPoints(robotDefinition, getContactPointParameters());
+
+            if (getJointMap() != null)
+            {
+               getJointMap().adjustArmsVersion(robotDefinition);
+
+               for (String jointName : getJointMap().getLastSimulatedJoints())
+                  robotDefinition.addSubtreeJointsToIgnore(jointName);
+               RobotDefinitionLoader.adjustJointLimitStops(robotDefinition, getJointMap());
+            }
+            RobotDefinitionLoader.adjustRigidBodyInterias(robotDefinition);
+
+            RobotDefinitionLoader.removeCollisionShapeDefinitions(robotDefinition);
+
+            // For backward compatibility w.r.t. when we were using SDF file.
+            // The URDF to SDF conversion appeared to sort the joints by alphabetical order.
+            // The ordering matters when serializing messages such as RobotConfigurationData.
+            robotDefinition.forEachRigidBodyDefinition(body -> Collections.sort(body.getChildrenJoints(), (j1, j2) -> j1.getName().compareTo(j2.getName())));
+
+            if (robotMaterial != null)
+               RobotDefinitionTools.setRobotDefinitionMaterial(robotDefinition, robotMaterial);
+            getRobotDefinitionMutator().accept(robotDefinition);
+
+            return robotDefinition;
+         }
+         catch (JAXBException e)
+         {
+            throw new RuntimeException(e);
+         }
       }
 
       return robotDefinition;
@@ -388,13 +416,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
       }
       else
       {
-         String sdfFile = null;
-
-         if (target == RobotTarget.REAL_ROBOT)
-            sdfFile = robotVersion.getRealRobotURDFFile();
-         else
-            sdfFile = robotVersion.getSimURDFFile();
-
+         String sdfFile = robotVersion.getURDFFile();
          inputStream = getClass().getClassLoader().getResourceAsStream(sdfFile);
       }
 
@@ -410,9 +432,27 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
+   public SideDependentList<ValkyrieHandModel> getHandModels()
+   {
+      if (handModels == null)
+      {
+         handModels = new SideDependentList<>();
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            ValkyrieHandVersion handVersion = ValkyrieHandVersion.getHandVersion(robotSide, getRobotDefinition());
+            if (handVersion != null)
+               handModels.put(robotSide, handVersion.getHandModel());
+         }
+      }
+
+      return handModels;
+   }
+
+   @Override
    public HandModel getHandModel(RobotSide side)
    {
-      return handModels.get(side);
+      return getHandModels().get(side);
    }
 
    @Override
@@ -504,14 +544,14 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public SimulatedValkyrieHandControlThread createSimulatedHandController(RealtimeROS2Node realtimeROS2Node)
    {
-      if (!robotVersion.hasFingers())
+      if (getHandModel(RobotSide.LEFT) == null && getHandModel(RobotSide.RIGHT) == null)
          return null;
 
       return new SimulatedValkyrieHandControlThread(createFullRobotModel(),
-                                                          handModels,
-                                                          realtimeROS2Node,
-                                                          ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
-                                                          ROS2Tools.getControllerInputTopic(getSimpleRobotName()));
+                                                    getHandModels(),
+                                                    realtimeROS2Node,
+                                                    ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
+                                                    ROS2Tools.getControllerInputTopic(getSimpleRobotName()));
    }
 
    @Override
@@ -718,7 +758,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public RobotCollisionModel getSimulationRobotCollisionModel(CollidableHelper helper, String robotCollisionMask, String... environmentCollisionMasks)
    {
-      if (robotVersion == ValkyrieRobotVersion.ARM_MASS_SIM)
+      if (robotVersion == ValkyrieRobotVersion.DUAL_ARM_MASS_SIM)
       {
          ValkyrieArmMassSimCollisionModel collisionModel = new ValkyrieArmMassSimCollisionModel(getJointMap(), getContactPointParameters(), true);
          collisionModel.setCollidableHelper(helper, robotCollisionMask, environmentCollisionMasks);

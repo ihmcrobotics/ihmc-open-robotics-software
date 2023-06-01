@@ -43,7 +43,6 @@ public class RobotDefinitionLoader
    public static RobotDefinition loadURDFModel(InputStream stream,
                                                Collection<String> resourceDirectories,
                                                ClassLoader classLoader,
-                                               String modelName,
                                                ContactPointDefinitionHolder contactPointDefinitionHolder,
                                                JointNameMap<?> jointNameMap,
                                                boolean removeCollisionMeshes)

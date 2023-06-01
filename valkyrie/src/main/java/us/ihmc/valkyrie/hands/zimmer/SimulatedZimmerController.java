@@ -4,12 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.HandJointAnglePacket;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
-import us.ihmc.avatar.handControl.packetsAndConsumers.HandJointAngleCommunicator;
-import us.ihmc.avatar.handControl.packetsAndConsumers.HandSensorData;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.idl.IDLSequence.Byte;
 import us.ihmc.idl.IDLSequence.Object;
@@ -38,24 +34,16 @@ public class SimulatedZimmerController implements ValkyrieHandController
    private final AtomicReference<ZimmerTrajectoryMessage> trajectoryMessageReference = new AtomicReference<>();
    private final List<JointHandler> jointHandlers = new ArrayList<>();
 
-   private final JointStatePublisher jointStatePublisher;
-
    public SimulatedZimmerController(RobotSide robotSide,
                                     FullHumanoidRobotModel fullRobotModel,
                                     JointDesiredOutputListBasics jointDesiredOutputList,
                                     DoubleProvider yoTime,
                                     RealtimeROS2Node realtimeROS2Node,
-                                    ROS2Topic<?> outputTopic,
                                     ROS2Topic<?> inputTopic)
    {
       this.yoTime = yoTime;
 
       registry = new YoRegistry(robotSide.getCamelCaseName() + getClass().getSimpleName());
-      // TODO Consider moving up
-      if (realtimeROS2Node != null)
-         jointStatePublisher = new JointStatePublisher(robotSide, fullRobotModel, realtimeROS2Node, outputTopic);
-      else
-         jointStatePublisher = null;
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, ZimmerTrajectoryMessage.class, inputTopic, s ->
       {
@@ -86,8 +74,6 @@ public class SimulatedZimmerController implements ValkyrieHandController
       if (newMessage != null)
          handleTrajectoryMessage(newMessage);
 
-      jointStatePublisher.update();
-
       for (int i = 0; i < jointHandlers.size(); i++)
       {
          jointHandlers.get(i).doControl(yoTime.getValue());
@@ -113,13 +99,6 @@ public class SimulatedZimmerController implements ValkyrieHandController
    public YoRegistry getYoRegistry()
    {
       return registry;
-   }
-
-   @Override
-   public void cleanup()
-   {
-      if (jointStatePublisher != null)
-         jointStatePublisher.cleanup();
    }
 
    private static class JointHandler
@@ -189,59 +168,6 @@ public class SimulatedZimmerController implements ValkyrieHandController
          jointDesiredOutput.setControlMode(JointDesiredControlMode.POSITION);
          jointDesiredOutput.setDesiredPosition(trajectory.getValue());
          jointDesiredOutput.setDesiredVelocity(trajectory.getValue());
-      }
-   }
-
-   private static class JointStatePublisher
-   {
-      private final HandJointAngleCommunicator jointAngleProducer;
-      private final OneDoFJointBasics[] joints;
-      private final double[] jointAngles;
-      private final HandSensorData handSensorData = new HandSensorData()
-      {
-         @Override
-         public boolean isConnected()
-         {
-            return true;
-         }
-
-         @Override
-         public boolean isCalibrated()
-         {
-            return true;
-         }
-
-         @Override
-         public double[] getFingerJointAngles(RobotSide robotSide)
-         {
-            return jointAngles;
-         }
-      };
-
-      public JointStatePublisher(RobotSide robotSide, FullHumanoidRobotModel fullRobotModel, RealtimeROS2Node realtimeROS2Node, ROS2Topic<?> outputTopic)
-      {
-         joints = fullRobotModel.getHand(robotSide).subtreeJointList(OneDoFJointBasics.class).toArray(OneDoFJointBasics[]::new);
-         jointAngles = new double[joints.length];
-
-         IHMCRealtimeROS2Publisher<HandJointAnglePacket> publisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node,
-                                                                                                        HandJointAnglePacket.class,
-                                                                                                        outputTopic);
-         jointAngleProducer = new HandJointAngleCommunicator(robotSide, publisher);
-      }
-
-      public void update()
-      {
-         for (int i = 0; i < joints.length; i++)
-         {
-            jointAngles[i] = joints[i].getQ();
-         }
-         jointAngleProducer.updateHandAngles(handSensorData);
-         jointAngleProducer.write();
-      }
-
-      public void cleanup()
-      {
-         jointAngleProducer.cleanup();
       }
    }
 }

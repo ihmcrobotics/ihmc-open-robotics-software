@@ -97,7 +97,7 @@ public class ValkyrieExternalForceEstimationTest
 
    public DRCRobotModel newRobotModel()
    {
-      return new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.ARM_MASS_SIM);
+      return new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.DUAL_ARM_MASS_SIM);
    }
 
    @Test

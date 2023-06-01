@@ -1,16 +1,50 @@
 package us.ihmc.valkyrie.hands.athena;
 
-import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
+import us.ihmc.valkyrie.hands.ValkyrieHandModel;
+import us.ihmc.valkyrie.hands.ValkyrieHandVersion;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
-public class AthenaHandModel implements HandModel
+public class AthenaHandModel implements ValkyrieHandModel
 {
    @Override
    public AthenaJointName[] getHandJointNames()
    {
       return AthenaJointName.values;
+   }
+
+   @Override
+   public ValkyrieHandVersion getHandVersion()
+   {
+      return ValkyrieHandVersion.Athena;
+   }
+
+   @Override
+   public SimulatedAthenaController newSimulatedHandController(RobotSide robotSide,
+                                                               FullHumanoidRobotModel fullRobotModel,
+                                                               JointDesiredOutputListBasics jointDesiredOutputList,
+                                                               DoubleProvider yoTime,
+                                                               RealtimeROS2Node realtimeROS2Node,
+                                                               ROS2Topic<?> inputTopic)
+   {
+      return new SimulatedAthenaController(robotSide, fullRobotModel, jointDesiredOutputList, yoTime, realtimeROS2Node, inputTopic);
+   }
+
+   public static boolean hasAthenaHand(RobotSide robotSide, RobotDefinition robotDefinition)
+   {
+      for (AthenaJointName jointName : AthenaJointName.values)
+      {
+         if (robotDefinition.getOneDoFJointDefinition(jointName.getJointName(robotSide)) == null)
+            return false;
+      }
+      return true;
    }
 
    public static enum AthenaJointName implements HandJointName

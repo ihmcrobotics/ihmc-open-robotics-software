@@ -29,7 +29,7 @@ public abstract class CommunicationsSyncedRobotModel
 {
    private DRCRobotModel robotModel;
    private final FullHumanoidRobotModel fullRobotModel;
-   private final SideDependentList<HandModel> handModels;
+   private final SideDependentList<? extends HandModel> handModels;
    private final Timer dataReceptionTimer;
    protected RobotConfigurationData robotConfigurationData;
    protected SideDependentList<HandJointAnglePacket> handJointAnglePackets = new SideDependentList<>();
@@ -42,7 +42,7 @@ public abstract class CommunicationsSyncedRobotModel
 
    public CommunicationsSyncedRobotModel(DRCRobotModel robotModel,
                                          FullHumanoidRobotModel fullRobotModel,
-                                         SideDependentList<HandModel> handModels,
+                                         SideDependentList<? extends HandModel> handModels,
                                          HumanoidRobotSensorInformation sensorInformation)
    {
       this.robotModel = robotModel;

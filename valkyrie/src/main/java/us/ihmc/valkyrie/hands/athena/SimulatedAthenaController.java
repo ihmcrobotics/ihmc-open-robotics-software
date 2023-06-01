@@ -3,12 +3,8 @@ package us.ihmc.valkyrie.hands.athena;
 import java.util.EnumMap;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
-import controller_msgs.msg.dds.HandJointAnglePacket;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
-import us.ihmc.avatar.handControl.packetsAndConsumers.HandJointAngleCommunicator;
-import us.ihmc.avatar.handControl.packetsAndConsumers.HandSensorData;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
@@ -37,29 +33,6 @@ public class SimulatedAthenaController implements ValkyrieHandController
    private final RobotSide robotSide;
    private final JointDesiredOutputListBasics jointDesiredOutputList;
 
-   private final HandJointAngleCommunicator jointAngleProducer;
-   private double[] jointAngles;
-   private final HandSensorData handSensorData = new HandSensorData()
-   {
-      @Override
-      public boolean isConnected()
-      {
-         return true;
-      }
-
-      @Override
-      public boolean isCalibrated()
-      {
-         return true;
-      }
-
-      @Override
-      public double[] getFingerJointAngles(RobotSide robotSide)
-      {
-         return jointAngles;
-      }
-   };
-
    private final double trajectoryTime = AthenaTrajectoryMessageConversion.trajectoryTimeForSim;
    private final double extendedTrajectoryTime = trajectoryTime * AthenaTrajectoryMessageConversion.extendedTimeRatioForThumb;
 
@@ -79,25 +52,12 @@ public class SimulatedAthenaController implements ValkyrieHandController
                                     JointDesiredOutputListBasics jointDesiredOutputList,
                                     DoubleProvider yoTime,
                                     RealtimeROS2Node realtimeROS2Node,
-                                    ROS2Topic<?> outputTopic,
                                     ROS2Topic<?> inputTopic)
    {
       this.robotSide = robotSide;
       this.jointDesiredOutputList = jointDesiredOutputList;
 
       registry = new YoRegistry(robotSide.getCamelCaseName() + getClass().getSimpleName());
-      // TODO Consider moving up
-      if (realtimeROS2Node != null)
-      {
-         IHMCRealtimeROS2Publisher<HandJointAnglePacket> publisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node,
-                                                                                                        HandJointAnglePacket.class,
-                                                                                                        outputTopic);
-         jointAngleProducer = new HandJointAngleCommunicator(robotSide, publisher);
-      }
-      else
-      {
-         jointAngleProducer = null;
-      }
 
       for (AthenaJointName valkyrieHandJointName : AthenaJointName.values())
       {
@@ -146,19 +106,8 @@ public class SimulatedAthenaController implements ValkyrieHandController
    @Override
    public void doControl()
    {
-      read();
       execute();
       write();
-   }
-
-   public void read()
-   {
-      if (jointAngleProducer != null)
-      {
-         jointAngles = jointsNameToJointsMap.values().stream().mapToDouble(j -> j.getQ()).toArray();
-         jointAngleProducer.updateHandAngles(handSensorData);
-         jointAngleProducer.write();
-      }
    }
 
    public void execute()
@@ -358,15 +307,6 @@ public class SimulatedAthenaController implements ValkyrieHandController
       {
          AthenaJointName handJointName = fingerMotorName.getCorrespondingJointName(i);
          handJointFingerSetController.appendStopPoint(handJointName, handJointHandlers.get(handJointName).getDoubleValue());
-      }
-   }
-
-   @Override
-   public void cleanup()
-   {
-      if (jointAngleProducer != null)
-      {
-         jointAngleProducer.cleanup();
       }
    }
 }

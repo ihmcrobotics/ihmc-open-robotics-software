@@ -11,24 +11,24 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.valkyrie.hands.athena.AthenaHandModel.AthenaJointName;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ValkyrieHandStateCommunicator implements RobotController
 {
    private final SideDependentList<OneDoFJointBasics[]> handJointsInOrder = new SideDependentList<>();
 
-   private final HandJointAnglePacket packet;
+   private final SideDependentList<HandJointAnglePacket> packets = new SideDependentList<>();
    private final IHMCRealtimeROS2Publisher<HandJointAnglePacket> publisher;
 
-   public ValkyrieHandStateCommunicator(String robotName,
-                                        FullHumanoidRobotModel fullRobotModel,
-                                        SideDependentList<HandModel> handModels,
-                                        RealtimeROS2Node realtimeROS2Node)
+   public ValkyrieHandStateCommunicator(FullHumanoidRobotModel fullRobotModel,
+                                        SideDependentList<? extends HandModel> handModels,
+                                        RealtimeROS2Node realtimeROS2Node,
+                                        ROS2Topic<?> outputTopic)
    {
-      publisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, HandJointAnglePacket.class, ROS2Tools.getControllerOutputTopic(robotName));
+      publisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, HandJointAnglePacket.class, outputTopic);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -48,9 +48,10 @@ public class ValkyrieHandStateCommunicator implements RobotController
          {
             joints[i] = fullRobotModel.getOneDoFJointByName(handJointNames[i].getJointName(robotSide));
          }
-      }
+         handJointsInOrder.put(robotSide, joints);
 
-      packet = HumanoidMessageTools.createHandJointAnglePacket(null, false, false, new double[AthenaJointName.values.length]);
+         packets.put(robotSide, HumanoidMessageTools.createHandJointAnglePacket(null, false, false, new double[joints.length]));
+      }
    }
 
    @Override
@@ -63,6 +64,7 @@ public class ValkyrieHandStateCommunicator implements RobotController
    {
       for (RobotSide robotSide : RobotSide.values)
       {
+         HandJointAnglePacket packet = packets.get(robotSide);
          packet.setRobotSide(robotSide.toByte());
          packet.getJointAngles().reset();
 

@@ -99,7 +99,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
          case FINGERLESS:
             jointList.addAll(Arrays.asList("leftForearmYaw", "leftWristRoll", "leftWristPitch"));
             jointList.addAll(Arrays.asList("rightForearmYaw", "rightWristRoll", "rightWristPitch"));
-         case ARM_MASS_SIM:
+         case DUAL_ARM_MASS_SIM:
             jointList.addAll(Arrays.asList("leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch"));
             jointList.addAll(Arrays.asList("rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch"));
       }
@@ -422,10 +422,10 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 
       if (ENABLE_FINGER_JOINTS)
       {
-         ValkyrieHandStateCommunicator handStateCommunicator = new ValkyrieHandStateCommunicator(robotName,
-                                                                                                 threadDataSynchronizer.getEstimatorFullRobotModel(),
+         ValkyrieHandStateCommunicator handStateCommunicator = new ValkyrieHandStateCommunicator(threadDataSynchronizer.getEstimatorFullRobotModel(),
                                                                                                  robotModel.getHandModels(),
-                                                                                                 estimatorRealtimeROS2Node);
+                                                                                                 estimatorRealtimeROS2Node,
+                                                                                                 ROS2Tools.getControllerOutputTopic(robotName));
          estimatorThread.addRobotController(handStateCommunicator);
       }
 

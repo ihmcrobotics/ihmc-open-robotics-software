@@ -2,16 +2,50 @@ package us.ihmc.valkyrie.hands.psyonic;
 
 import com.google.common.base.CaseFormat;
 
-import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
+import us.ihmc.valkyrie.hands.ValkyrieHandModel;
+import us.ihmc.valkyrie.hands.ValkyrieHandVersion;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
-public class PsyonicHandModel implements HandModel
+public class PsyonicHandModel implements ValkyrieHandModel
 {
    @Override
    public PsyonicJointName[] getHandJointNames()
    {
       return PsyonicJointName.values;
+   }
+
+   @Override
+   public ValkyrieHandVersion getHandVersion()
+   {
+      return ValkyrieHandVersion.Psyonic;
+   }
+
+   @Override
+   public SimulatedPsyonicController newSimulatedHandController(RobotSide robotSide,
+                                                                FullHumanoidRobotModel fullRobotModel,
+                                                                JointDesiredOutputListBasics jointDesiredOutputList,
+                                                                DoubleProvider yoTime,
+                                                                RealtimeROS2Node realtimeROS2Node,
+                                                                ROS2Topic<?> inputTopic)
+   {
+      return new SimulatedPsyonicController(robotSide, fullRobotModel, jointDesiredOutputList, yoTime, realtimeROS2Node, inputTopic);
+   }
+
+   public static boolean hasPsyonicHand(RobotSide robotSide, RobotDefinition robotDefinition)
+   {
+      for (PsyonicJointName jointName : PsyonicJointName.values)
+      {
+         if (robotDefinition.getOneDoFJointDefinition(jointName.getJointName(robotSide)) == null)
+            return false;
+      }
+      return true;
    }
 
    public static enum PsyonicJointName implements HandJointName

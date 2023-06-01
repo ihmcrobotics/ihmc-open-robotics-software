@@ -163,7 +163,6 @@ public class RobotDefinitionTools
       return RobotDefinitionLoader.loadURDFModel(stream,
                                                  resourceDirectories,
                                                  classLoader,
-                                                 modelName,
                                                  contactPointDefinitionHolder,
                                                  jointNameMap,
                                                  removeCollisionMeshes);

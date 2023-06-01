@@ -94,7 +94,7 @@ public class ValkyrieKinematicsStreamingToolboxModule extends KinematicsStreamin
       if (NetworkProcessorVersion.fromEnvironment() == NetworkProcessorVersion.IHMC)
       {
          parameters.setCenterOfMassSafeMargin(0.05);
-         if (robotModel.getRobotVersion() == ValkyrieRobotVersion.ARM_MASS_SIM)
+         if (robotModel.getRobotVersion() == ValkyrieRobotVersion.DUAL_ARM_MASS_SIM)
          {
             defaultConfiguration.setEnableLeftHandTaskspace(false);
             defaultConfiguration.setEnableRightHandTaskspace(false);

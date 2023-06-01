@@ -645,7 +645,7 @@ public class SCS2AvatarSimulationFactory
    private void setupLidarController()
    {
       AvatarRobotLidarParameters lidarParameters = robotModel.get().getSensorInformation().getLidarParameters(0);
-      if (lidarParameters != null && lidarParameters.getLidarSpindleJointName() != null)
+      if (lidarParameters != null && lidarParameters.getLidarSpindleJointName() != null && robot.findJoint(lidarParameters.getLidarSpindleJointName()) != null)
       {
          ControllerInput controllerInput = robot.getControllerManager().getControllerInput();
          ControllerOutput controllerOutput = robot.getControllerManager().getControllerOutput();

@@ -49,7 +49,7 @@ public class ValkyrieModelComparisonTest
    @Test
    public void testArmMassSimModel()
    {
-      testURDFAgainsSDF(ValkyrieRobotVersion.ARM_MASS_SIM, "models/val_description/urdf/valkyrie_sim_arm_mass_sim.urdf", "models/val_description/sdf/valkyrie_sim_arm_mass_sim.sdf");
+      testURDFAgainsSDF(ValkyrieRobotVersion.DUAL_ARM_MASS_SIM, "models/val_description/urdf/valkyrie_sim_arm_mass_sim.urdf", "models/val_description/sdf/valkyrie_sim_arm_mass_sim.sdf");
    }
    
    @Test
@@ -71,7 +71,6 @@ public class ValkyrieModelComparisonTest
          urdfRobotDefinition = RobotDefinitionLoader.loadURDFModel(classLoader.getResourceAsStream(urdfPath),
                                                                    resourceDirectories,
                                                                    classLoader,
-                                                                   modelName,
                                                                    null,
                                                                    jointMap,
                                                                    true);

@@ -13,7 +13,7 @@ import java.util.HashMap;
 
 public class HandModelUtils
 {
-   public static void getHandJoints(SideDependentList<HandModel> handModels,
+   public static void getHandJoints(SideDependentList<? extends HandModel> handModels,
                                     FullHumanoidRobotModel fullRobotModel,
                                     SideDependentList<HashMap<HandJointName, OneDoFJointBasics>> handJoints)
    {
@@ -30,7 +30,7 @@ public class HandModelUtils
       }
    }
 
-   public static void copyHandJointAnglesFromMessagesToOneDoFJoints(SideDependentList<HandModel> handModels,
+   public static void copyHandJointAnglesFromMessagesToOneDoFJoints(SideDependentList<? extends HandModel> handModels,
                                                                     SideDependentList<HashMap<HandJointName, OneDoFJointBasics>> handJoints,
                                                                     SideDependentList<HandJointAnglePacket> handJointAnglePackets)
    {
