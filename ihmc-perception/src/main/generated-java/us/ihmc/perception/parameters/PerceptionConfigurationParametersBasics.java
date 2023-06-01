@@ -63,6 +63,11 @@ public interface PerceptionConfigurationParametersBasics extends PerceptionConfi
       set(PerceptionConfigurationParameters.supportSquareEnabled, supportSquareEnabled);
    }
 
+   default void setBoundingBoxFilter(boolean boundingBoxFilter)
+   {
+      set(PerceptionConfigurationParameters.boundingBoxFilter, boundingBoxFilter);
+   }
+
    default void setActiveMapping(boolean activeMapping)
    {
       set(PerceptionConfigurationParameters.activeMapping, activeMapping);

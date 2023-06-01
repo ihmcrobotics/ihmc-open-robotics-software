@@ -65,6 +65,11 @@ public interface PerceptionConfigurationParametersReadOnly extends StoredPropert
       return get(supportSquareEnabled);
    }
 
+   default boolean getBoundingBoxFilter()
+   {
+      return get(boundingBoxFilter);
+   }
+
    default boolean getActiveMapping()
    {
       return get(activeMapping);
