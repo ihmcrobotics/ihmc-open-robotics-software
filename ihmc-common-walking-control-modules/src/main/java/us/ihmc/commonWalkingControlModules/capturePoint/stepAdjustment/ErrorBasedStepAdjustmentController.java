@@ -39,10 +39,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.*;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -59,6 +56,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
    private static final boolean VISUALIZE = true;
    private static final boolean CONTINUOUSLY_UPDATE_DESIRED_POSITION = true;
+   private static final int minTicksIntoStep = 5;
 
    private static final String yoNamePrefix = "controller";
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -84,6 +82,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final YoFramePose3D upcomingFootstep = new YoFramePose3D(yoNamePrefix + "UpcomingFootstepPose", worldFrame, registry);
    private final YoEnum<RobotSide> upcomingFootstepSide = new YoEnum<>(yoNamePrefix + "UpcomingFootstepSide", registry, RobotSide.class);
    private final RecyclingArrayList<Point2D> upcomingFootstepContactPoints = new RecyclingArrayList<>(Point2D.class);
+   private final YoFramePoint3D referenceFootstepPosition = new YoFramePoint3D(yoNamePrefix + "ReferenceFootstepPosition", worldFrame, registry);
 
    private final FramePoint3D referencePositionInControlPlane = new FramePoint3D();
    private final FramePoint3D tempPoint = new FramePoint3D();
@@ -314,6 +313,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
             upcomingFootstepContactPoints.add().set(foothold.getVertex(i));
          }
 
+         referenceFootstepPosition.set(footstepPose.getPosition());
          footstepSolution.set(footstepPose);
 
          this.swingDuration.set(swingDuration);
@@ -353,6 +353,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       footstepSolution.set(upcomingFootstep);
       totalStepAdjustment.setToZero();
       controlTicksIntoStep.set(0);
+      referenceFootstepPosition.setToNaN();
    }
 
    @Override
@@ -373,6 +374,9 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
       computeTimeInCurrentState(currentTime);
       computeTimeRemainingInState();
+
+      if (controlTicksIntoStep.getIntegerValue() <= minTicksIntoStep)
+         upcomingFootstep.getPosition().set(referenceFootstepPosition);
 
       if (timeRemainingInState.getValue() < minimumTimeForStepAdjustment.getValue())
          return;
@@ -403,8 +407,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
             if (wasAdjusted)
             {
-               tempPoint.set(adjustedSolutionInControlPlane, upcomingFootstep.getPosition().getZ());
-               footstepSolution.getPosition().set(tempPoint);
+               footstepSolution.getPosition().set(adjustedSolutionInControlPlane, upcomingFootstep.getPosition().getZ());
 
                if (CONTINUOUSLY_UPDATE_DESIRED_POSITION)
                   upcomingFootstep.set(footstepSolution);
@@ -443,7 +446,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
       // Don't update the "upcoming footstep" if we're at the start of the control state. At this point, we haven't had our swing duration adjusted, so we want
       // to converge down to an intelligent time
-      if (wasFootstepAdjusted() && CONTINUOUSLY_UPDATE_DESIRED_POSITION && controlTicksIntoStep.getIntegerValue() > 5)
+      if (wasFootstepAdjusted() && CONTINUOUSLY_UPDATE_DESIRED_POSITION && controlTicksIntoStep.getIntegerValue() > minTicksIntoStep)
          upcomingFootstep.set(footstepSolution);
    }
 
