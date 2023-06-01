@@ -5,6 +5,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
 
@@ -95,6 +96,12 @@ public class StepConstraintsListCommand implements Command<StepConstraintsListCo
    public StepConstraintRegionCommand getStepConstraint(int index)
    {
       return stepsConstraints.get(index);
+   }
+
+   public void addOffset(Vector3DReadOnly offset)
+   {
+      for (int i = 0; i < stepsConstraints.size(); i++)
+         stepsConstraints.get(i).addOffset(offset);
    }
 
    @Override
