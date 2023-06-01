@@ -231,6 +231,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       {
          PlanarRegionsListMessage planarRegionsListMessage = planarRegionsListMessageReference.getAndSet(null);
          PlanarRegionsList planarRegionsList = planarRegionsListReference.getAndSet(null);
+
          if (planarRegionsListMessage != null)
             swingPlanningModule.setPlanarRegionList(planarRegionsList);
          if (planarRegionsList != null)
@@ -238,11 +239,9 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
          HeightMapMessage heightMapMessage = heightMapReference.getAndSet(null);
          if (heightMapMessage != null)
             swingPlanningModule.setHeightMapData(heightMapMessage);
-         if (swingFootPlannerParameters != null)
-         {
-            swingPlanningModule.setSwingPlannerParameters(swingFootPlannerParameters);
-            swingPlanningModule.updateAysnc(footsteps, SwingPlannerType.MULTI_WAYPOINT_POSITION);
-         }
+
+         swingPlanningModule.setSwingPlannerParameters(swingFootPlannerParameters);
+         swingPlanningModule.updateAysnc(footsteps, SwingPlannerType.MULTI_WAYPOINT_POSITION);
 
          wasPlanUpdated = false;
       }
