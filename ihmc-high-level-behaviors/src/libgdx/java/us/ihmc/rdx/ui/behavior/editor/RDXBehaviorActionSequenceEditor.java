@@ -33,7 +33,6 @@ import us.ihmc.tools.io.*;
 import java.util.LinkedList;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This class is primarily an interactable sequence/list of robot actions.
@@ -79,19 +78,15 @@ public class RDXBehaviorActionSequenceEditor
 
    private final AtomicBoolean successfullyLoadedActions = new AtomicBoolean(true);
 
-   private final boolean robotHasArms;
-
-   public RDXBehaviorActionSequenceEditor(WorkspaceResourceFile fileToLoadFrom, boolean robotHasArms)
+   public RDXBehaviorActionSequenceEditor(WorkspaceResourceFile fileToLoadFrom)
    {
       this.workspaceFile = fileToLoadFrom;
-      this.robotHasArms = robotHasArms;
       loadNameFromFile();
       afterNameDetermination();
    }
 
-   public RDXBehaviorActionSequenceEditor(String name, WorkspaceResourceDirectory storageDirectory, boolean robotHasArms)
+   public RDXBehaviorActionSequenceEditor(String name, WorkspaceResourceDirectory storageDirectory)
    {
-      this.robotHasArms = robotHasArms;
       this.name = name;
       afterNameDetermination();
       this.workspaceFile = new WorkspaceResourceFile(storageDirectory, pascalCasedName + ".json");
@@ -163,6 +158,7 @@ public class RDXBehaviorActionSequenceEditor
 
    private RDXBehaviorAction getAction(String actionType)
    {
+      boolean robotHasArms = robotModel.getRobotVersion().hasArms();
       switch (actionType)
       {
          case "RDXArmJointAnglesAction" ->
