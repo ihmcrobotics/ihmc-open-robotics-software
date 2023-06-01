@@ -6,6 +6,7 @@ import org.ejml.dense.row.mult.VectorVectorMult_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.optimization.constrainedOptimization.AugmentedLagrangeOptimizationProblem;
+import us.ihmc.robotics.optimization.constrainedOptimization.AugmentedLagrangeOptimizer;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
@@ -15,7 +16,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
  */
 public class TestALM
 {
-   private AugmentedLagrangeOptimizationProblem augmentedLagrange;
+   private AugmentedLagrangeOptimizationProblem augmentedLagrangeProblem;
    private DMatrixD1 lagrangeInputVector = new DMatrixRMaj();
    private int numLagrangeIterations = 10;
    private double initialPenalty = 1.0;
@@ -58,37 +59,22 @@ public class TestALM
    public void test()
    {
       // Set up the optimization problem
-      augmentedLagrange = new AugmentedLagrangeOptimizationProblem(TestALM::costFunction);
-      augmentedLagrange.addEqualityConstraint(TestALM::constraint1);
-      augmentedLagrange.addInequalityConstraint(TestALM::constraint2);
-      augmentedLagrange.addInequalityConstraint(TestALM::constraint3);
+      augmentedLagrangeProblem = new AugmentedLagrangeOptimizationProblem(TestALM::costFunction);
+      augmentedLagrangeProblem.addEqualityConstraint(TestALM::constraint1);
+      augmentedLagrangeProblem.addInequalityConstraint(TestALM::constraint2);
+      augmentedLagrangeProblem.addInequalityConstraint(TestALM::constraint3);
 //      augmentedLagrange.addEqualityConstraint(TestALM::constraint4);
-      augmentedLagrange.initialize(initialPenalty, penaltyIncreaseFactor);
+      augmentedLagrangeProblem.initialize(initialPenalty, penaltyIncreaseFactor);
 
       // Set up the optimizer
       Optimizer optimizer = new WrappedGradientDescent();
+      AugmentedLagrangeOptimizer aloOptimizer = new AugmentedLagrangeOptimizer(optimizer, augmentedLagrangeProblem);
+      aloOptimizer.setVerbose(true);
+      DMatrixD1 optimumX = aloOptimizer.optimize(numLagrangeIterations, initial);
 
-      // Repeat lagrange step multiple times
-      int iteration = 0;
-      DMatrixD1 optimumX = new DMatrixRMaj();
-      optimizer.setCostFunction(augmentedLagrange.getAugmentedCostFunction());
-      while (iteration < numLagrangeIterations)
-      {
-         System.out.println("===== Lagrange Iteration: " + iteration + "==========");
-
-         // Run optimization
-         optimumX = optimizer.optimize(initial);
-         augmentedLagrange.updateLagrangeMultipliers(optimumX);
-         initial.set(optimumX);
-
-         iteration += 1;
-
-         optimizer.printOutput();
-      }
       assertTrue("x1 arrived on desired value", MathTools.epsilonCompare(optimumX.get(0), 6, 1e-3));
       assertTrue("x2 arrived on desired value", MathTools.epsilonCompare(optimumX.get(1), 5, 1e-3));
       assertTrue("x3 arrived on desired value", MathTools.epsilonCompare(optimumX.get(2), 0, 1e-3));
-
    }
 
 

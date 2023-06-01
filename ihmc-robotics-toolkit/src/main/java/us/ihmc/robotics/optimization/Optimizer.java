@@ -31,7 +31,7 @@ public interface Optimizer
       System.out.println("solution is: ");
       for (int i = 0; i < getOptimalParameters().getNumElements(); i++)
       {
-         System.out.println(getOptimalParameters().get(i) + ",");
+         System.out.println("\t" + getOptimalParameters().get(i) + ",");
       }
       System.out.println("optimal cost is " + getOptimumCost());
    }
