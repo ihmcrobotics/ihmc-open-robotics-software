@@ -463,14 +463,6 @@ public class RDXAffordanceEditorUI
             var postGraspHandConfigurations = postGraspFrames.getHandConfigurations();
             for (int i = 0; i < preGraspPoses.size(); i++)
             {
-               if (preGraspHandConfigurations.get(i) != null)
-               {
-                  ObjectNode extraActionNode = actionsArrayNode.addObject();
-                  extraActionNode.put("type", "RDXHandConfigurationAction");
-                  extraActionNode.put("side", side.getLowerCaseName());
-                  extraActionNode.put("grip", preGraspHandConfigurations.get(i).toString());
-               }
-
                ObjectNode actionNode = actionsArrayNode.addObject();
                actionNode.put("type", "RDXHandPoseAction");
                actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
@@ -484,6 +476,20 @@ public class RDXAffordanceEditorUI
                preGraspPoses.get(i).getOrientation().get(dataTrajectories);
                preGraspPoses.get(i).getPosition().get(4, dataTrajectories);
                csvDataMatrix.add(dataTrajectories);
+
+               if (preGraspHandConfigurations.get(i) != null)
+               {
+                  dataTrajectories = new double[7];
+                  for (int data = 0; data < dataTrajectories.length; data++)
+                     dataTrajectories[data] = 0.0;
+                  dataTrajectories[0] = HandConfiguration.valueOf(preGraspHandConfigurations.get(i).toString()).ordinal();
+                  csvDataMatrix.add(dataTrajectories);
+
+                  ObjectNode extraActionNode = actionsArrayNode.addObject();
+                  extraActionNode.put("type", "RDXHandConfigurationAction");
+                  extraActionNode.put("side", side.getLowerCaseName());
+                  extraActionNode.put("grip", preGraspHandConfigurations.get(i).toString());
+               }
             }
             if (graspFrame.isSet())
             {
@@ -495,12 +501,24 @@ public class RDXAffordanceEditorUI
                graspPose.changeFrame(affordanceFrame.getReferenceFrame());
                RigidBodyTransform transformToParent = new RigidBodyTransform(graspPose);
                JSONTools.toJSON(actionNode, transformToParent);
+
+               double[] dataTrajectories = new double[7];
+               graspPose.getOrientation().get(dataTrajectories);
+               graspPose.getPosition().get(4, dataTrajectories);
+               csvDataMatrix.add(dataTrajectories);
+
                if (graspFrame.getHandConfiguration() != null)
                {
                   ObjectNode extraActionNode = actionsArrayNode.addObject();
                   extraActionNode.put("type", "RDXHandConfigurationAction");
                   extraActionNode.put("side", side.getLowerCaseName());
                   extraActionNode.put("grip", graspFrame.getHandConfiguration().toString());
+
+                  dataTrajectories = new double[7];
+                  for (int data = 0; data < dataTrajectories.length; data++)
+                     dataTrajectories[data] = 0.0;
+                  dataTrajectories[0] = HandConfiguration.valueOf(graspFrame.getHandConfiguration().toString()).ordinal();
+                  csvDataMatrix.add(dataTrajectories);
                }
             }
             for (int i = 0; i < postGraspPoses.size(); i++)
@@ -514,8 +532,19 @@ public class RDXAffordanceEditorUI
                RigidBodyTransform transformToParent = new RigidBodyTransform(postGraspPoses.get(i));
                JSONTools.toJSON(actionNode, transformToParent);
 
+               double[] dataTrajectories = new double[7];
+               postGraspPoses.get(i).getOrientation().get(dataTrajectories);
+               postGraspPoses.get(i).getPosition().get(4, dataTrajectories);
+               csvDataMatrix.add(dataTrajectories);
+
                if (postGraspHandConfigurations.get(i) != null)
                {
+                  dataTrajectories = new double[7];
+                  for (int data = 0; data < dataTrajectories.length; data++)
+                     dataTrajectories[data] = 0.0;
+                  dataTrajectories[0] = HandConfiguration.valueOf(postGraspHandConfigurations.get(i).toString()).ordinal();
+                  csvDataMatrix.add(dataTrajectories);
+                  
                   ObjectNode extraActionNode = actionsArrayNode.addObject();
                   extraActionNode.put("type", "RDXHandConfigurationAction");
                   extraActionNode.put("side", side.getLowerCaseName());
@@ -571,25 +600,30 @@ public class RDXAffordanceEditorUI
          LogTools.warn("Could not save extra info to {}", extraFile.getFileName());
       }
 
-      saveToCSVFiles(fileName);
+      generateCSVFiles(fileName);
    }
 
-   public void saveToCSVFiles(String fileName)
+   public void generateCSVFiles(String fileName)
    {
       Path filePath = Paths.get(configurationsDirectory.getFilesystemDirectory().toString(), fileName + ".csv");
       File csvFile = new File(filePath.toString());
       try (PrintWriter writer = new PrintWriter(csvFile))
       {
-         for (double[] dataLine : csvDataMatrix)
+         for (int row = 0; row < csvDataMatrix.size(); row++)
          {
-            for (int i = 0; i < dataLine.length; i++)
+            double[] dataLine = csvDataMatrix.get(row);
+            for (int col = 0; col < dataLine.length; col++)
             {
-               writer.print(dataLine[i]);
-               if (i < dataLine.length - 1)
+               writer.print(dataLine[col]);
+               if (col < dataLine.length - 1)
                   writer.append(",");
             }
-            writer.println();
+            if (row < csvDataMatrix.size() - 1)
+            {
+               writer.println();
+            }
          }
+         LogTools.info("SAVED to file {}", csvFile.getName());
       }
       catch (IOException e)
       {

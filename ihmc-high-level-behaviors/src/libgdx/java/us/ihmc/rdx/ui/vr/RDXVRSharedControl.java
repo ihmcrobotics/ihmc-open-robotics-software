@@ -514,7 +514,6 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             stdDeviationGraphics.clear();
             if(affordanceEditor != null)
             {
-               LogTools.info("HELLOOO");
                affordanceEditor.commandNextActionIndex(0);
                affordanceEditor = null;
             }
