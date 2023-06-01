@@ -46,18 +46,17 @@ public class RDXFootstepPlanning
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final AStarBodyPathPlannerParametersBasics bodyPathPlannerParameters;
    private final SwingPlannerParametersBasics swingFootPlannerParameters;
+   private final MovingReferenceFrame midFeetZUpFrame;
    private final FootstepPlannerLogger footstepPlannerLogger;
    private final ResettableExceptionHandlingExecutorService executor;
+   private final FramePose3D midFeetZUpPose = new FramePose3D();
    private boolean isReadyToWalk = false;
    private final Notification plannedNotification = new Notification();
-   private final AtomicReference<PlanarRegionsListMessage> planarRegionsListMessageReference = new AtomicReference<>();
-   private final AtomicReference<HeightMapMessage> heightMapDataReference = new AtomicReference<>();
+   private volatile PlanarRegionsListMessage planarRegionsListMessage = null;
+   private volatile HeightMapMessage heightMapMessage = null;
    private final AtomicReference<FootstepPlannerOutput> outputReference = new AtomicReference<>();
-   private final MovingReferenceFrame midFeetZUpFrame;
-   private final FramePose3D midFeetZUpPose = new FramePose3D();
    private final FramePose3D startPose = new FramePose3D();
    private final RDXLocomotionParameters locomotionParameters;
-
    private final AtomicBoolean hasNewPlanAvailable = new AtomicBoolean(false);
    /**
     * We create this field so that we can terminate a running plan via
@@ -126,13 +125,13 @@ public class RDXFootstepPlanning
       boolean assumeFlatGround = true;
       if (!locomotionParameters.getAssumeFlatGround())
       {
-         HeightMapMessage heightMapMessage = heightMapDataReference.get();
+         HeightMapMessage heightMapMessage = this.heightMapMessage;
          if (heightMapMessage != null)
          {
             assumeFlatGround = false;
             footstepPlannerRequest.setHeightMapData(HeightMapMessageTools.unpackMessage(heightMapMessage));
          }
-         PlanarRegionsListMessage planarRegionsListMessage = planarRegionsListMessageReference.get();
+         PlanarRegionsListMessage planarRegionsListMessage = this.planarRegionsListMessage;
          if (planarRegionsListMessage != null)
          {
             footstepPlannerRequest.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
@@ -229,12 +228,12 @@ public class RDXFootstepPlanning
 
    public void setPlanarRegionsListMessage(PlanarRegionsListMessage planarRegionsListMessage)
    {
-      this.planarRegionsListMessageReference.set(planarRegionsListMessage);
+      this.planarRegionsListMessage = planarRegionsListMessage;
    }
 
    public void setHeightMapData(HeightMapMessage heightMapMessage)
    {
-      this.heightMapDataReference.set(heightMapMessage);
+      this.heightMapMessage = heightMapMessage;
    }
 
    public boolean isReadyToWalk()
