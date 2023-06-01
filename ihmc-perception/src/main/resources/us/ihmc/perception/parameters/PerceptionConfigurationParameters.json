@@ -18,5 +18,6 @@
   "Log depth" : false,
   "SLAM enabled" : false,
   "SLAM reset" : false,
+  "Support square enabled" : true,
   "Active mapping" : false
 }
