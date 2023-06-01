@@ -161,8 +161,10 @@ public class RDXLocomotionManager
 
       if (ballAndArrowMidFeetPosePlacement.getPlacedNotification().poll())
       {
-         footstepPlanning.planAsync(ballAndArrowMidFeetPosePlacement.getGoalPose());
+         footstepPlanning.queueAsynchronousPlanning(ballAndArrowMidFeetPosePlacement.getGoalPose());
       }
+
+      footstepPlanning.update();
 
       if (footstepPlanning.getPlannerOutputNotification().poll())
       {
