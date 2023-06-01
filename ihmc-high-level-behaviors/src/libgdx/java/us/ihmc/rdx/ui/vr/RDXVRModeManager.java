@@ -82,14 +82,11 @@ public class RDXVRModeManager
 
       switch (mode)
       {
-         case FOOTSTEP_PLACEMENT:
-            handPlacedFootstepMode.processVRInput(vrContext);
-            break;
-         case WHOLE_BODY_IK_STREAMING :
+         case FOOTSTEP_PLACEMENT -> handPlacedFootstepMode.processVRInput(vrContext);
+         case WHOLE_BODY_IK_STREAMING ->
          {
             if (kinematicsStreamingMode != null)
                kinematicsStreamingMode.processVRInput(vrContext);
-            break;
          }
       }
    }
