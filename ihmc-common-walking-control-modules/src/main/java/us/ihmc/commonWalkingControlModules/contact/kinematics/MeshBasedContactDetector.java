@@ -15,6 +15,7 @@ import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,10 +32,12 @@ public class MeshBasedContactDetector
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private double contactThreshold = 0.02;
+   private final YoBoolean isContactDetected = new YoBoolean("isContactDetected", registry);
    private final BoundingBox3D shapeBoundingBoxInWorld = new BoundingBox3D();
    private List<? extends FrameShape3DBasics> environmentShapes = null;
 
    private final List<RigidBodyBasics> contactableRigidBodies = new ArrayList<>();
+   private final Map<RigidBodyBasics, YoBoolean> contactDetectedMap = new HashMap<>();
    private final Map<RigidBodyBasics, List<Collidable>> collidableMap;
    private final Map<RigidBodyBasics, List<YoDetectedContactPoint>> contactPointMap = new HashMap<>();
 
@@ -65,15 +68,20 @@ public class MeshBasedContactDetector
          }
 
          this.contactPointMap.put(rigidBody, contactPoints);
+         this.contactDetectedMap.put(rigidBody, new YoBoolean("contactDetected" + rigidBody.getName(), registry));
       }
    }
 
    public void update()
    {
       /* Reset all contact points */
+      isContactDetected.set(false);
+
       for (int i = 0; i < contactableRigidBodies.size(); i++)
       {
          RigidBodyBasics rigidBody = contactableRigidBodies.get(i);
+
+         contactDetectedMap.get(rigidBody).set(false);
          List<YoDetectedContactPoint> visualization = contactPointMap.get(rigidBody);
          for (int j = 0; j < visualization.size(); j++)
          {
@@ -97,6 +105,7 @@ public class MeshBasedContactDetector
          for (int j = 0; j < collidables.size(); j++)
          {
             Collidable robotCollidable = collidables.get(j);
+            RigidBodyBasics rigidBody = robotCollidable.getRigidBody();
 
             robotCollidable.getShape().getReferenceFrame().update();
             robotCollidable.getShape().getBoundingBox(ReferenceFrame.getWorldFrame(), shapeBoundingBoxInWorld);
@@ -113,6 +122,8 @@ public class MeshBasedContactDetector
                if (doCollisionCheck(robotCollidable.getShape(), environmentShape, contactPoints.get(contactPointsDetected)))
                { // full collision check
                   contactPointsDetected++;
+                  isContactDetected.set(true);
+                  contactDetectedMap.get(rigidBody).set(true);
                   break;
                }
             }
@@ -172,6 +183,16 @@ public class MeshBasedContactDetector
       }
 
       return group;
+   }
+
+   public boolean isContactDetected()
+   {
+      return isContactDetected.getValue();
+   }
+
+   public boolean isContactDetected(RigidBodyBasics rigidBody)
+   {
+      return contactDetectedMap.get(rigidBody).getValue();
    }
 
    public List<RigidBodyBasics> getContactableRigidBodies()
