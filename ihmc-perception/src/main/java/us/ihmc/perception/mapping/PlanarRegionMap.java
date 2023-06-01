@@ -9,12 +9,12 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.slamWrapper.SlamWrapper;
 import us.ihmc.perception.slamWrapper.SlamWrapperNativeLibrary;
+import us.ihmc.perception.tools.PerceptionDebugTools;
+import us.ihmc.perception.tools.PerceptionEuclidTools;
 import us.ihmc.perception.tools.PlanarRegionCuttingTools;
 import us.ihmc.perception.tools.PlaneRegistrationTools;
-import us.ihmc.perception.slamWrapper.SlamWrapper;
-import us.ihmc.perception.tools.PerceptionEuclidTools;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
 import us.ihmc.robotics.geometry.*;
 
@@ -56,6 +56,7 @@ public class PlanarRegionMap
    private final float[] odomNoiseArray = new float[] {odomNoise, odomNoise, odomNoise, odomNoise, odomNoise, odomNoise};
 
    private boolean initialized = false;
+   private boolean initialSupportSquareEnabled = false;
    private boolean modified = false;
    private int uniqueRegionsFound = 0;
    private int currentTimeIndex = 0;
@@ -115,13 +116,6 @@ public class PlanarRegionMap
       parameters = new PlanarRegionMappingParameters(version);
       finalMap = new PlanarRegionsList();
       processedMap = new PlanarRegionsList();
-   }
-
-   public void reset()
-   {
-      initialized = false;
-      finalMap.clear();
-      factorGraph = new SlamWrapper.FactorGraphExternal();
    }
 
    /**
@@ -667,7 +661,9 @@ public class PlanarRegionMap
       return idToReturn;
    }
 
-   public RigidBodyTransform registerRegions(PlanarRegionsList incomingRegions, RigidBodyTransform estimatedTransformToWorld)
+   public RigidBodyTransform registerRegions(PlanarRegionsList incomingRegions,
+                                             RigidBodyTransform estimatedTransformToWorld,
+                                             RigidBodyTransform midFootTransform)
    {
       if (merger != MergingMode.SMOOTHING)
          return null;
@@ -683,9 +679,11 @@ public class PlanarRegionMap
             regions.addPlanarRegion(region);
       }
 
-      if (!initialized)
+      if (!initialized && initialSupportSquareEnabled)
       {
-         PlanarRegion initialSupportSquareRegion = PlanarRegionTools.createSquarePlanarRegion(1.0f, new Point3D(), new Quaternion());
+         LogTools.warn("Initializing Planar Region Map");
+         PlanarRegion initialSupportSquareRegion = PlanarRegionTools.createSquarePlanarRegion(0.6f,
+                 new Point3D(midFootTransform.getTranslation()), new Quaternion(midFootTransform.getRotation()));
          initialSupportSquareRegion.setRegionId(uniqueIDtracker++);
          initialSupportSquareRegion.incrementNumberOfTimesMatched();
          finalMap.addPlanarRegion(initialSupportSquareRegion);
@@ -990,5 +988,10 @@ public class PlanarRegionMap
    {
       return keyframes.size();
    }
+
+   public void setInitialSupportSquareEnabled(boolean supportSquareEnabled)
+    {
+        initialSupportSquareEnabled = supportSquareEnabled;
+    }
 }
 
