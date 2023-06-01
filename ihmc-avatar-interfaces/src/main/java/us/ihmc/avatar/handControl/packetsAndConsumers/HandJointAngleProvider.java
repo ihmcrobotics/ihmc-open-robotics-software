@@ -22,9 +22,9 @@ public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePack
 
    private final SideDependentList<AtomicReference<HandJointAnglePacket>> packets = new SideDependentList<AtomicReference<HandJointAnglePacket>>();
    private ArrayList<GraphicsUpdatable> graphicsToUpdate = new ArrayList<GraphicsUpdatable>();
-   private SideDependentList<HandModel> handModels;
+   private SideDependentList<? extends HandModel> handModels;
 
-   public HandJointAngleProvider(FullRobotModel fullRobotModel, SideDependentList<HandModel> handModels)
+   public HandJointAngleProvider(FullRobotModel fullRobotModel, SideDependentList<? extends HandModel> handModels)
    {
       this.handModels = handModels;
 
