@@ -8,8 +8,9 @@ import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.*;
-import us.ihmc.perception.netty.NettyOuster;
+import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
+import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencl.OpenCLRigidBodyTransformParameter;
 import us.ihmc.perception.tools.NativeMemoryTools;
 

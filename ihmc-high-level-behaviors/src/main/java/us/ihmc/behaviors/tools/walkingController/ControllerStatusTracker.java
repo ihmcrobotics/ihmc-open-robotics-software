@@ -126,7 +126,10 @@ public class ControllerStatusTracker
       }
       else if (walkingStatus == WalkingStatus.ABORT_REQUESTED)
       {
+         isWalking = false;
+         footstepTracker.reset();
 
+         LogTools.info("Walking Aborted.");
       }
       else
       {
@@ -173,5 +176,15 @@ public class ControllerStatusTracker
    public WalkingFootstepTracker getFootstepTracker()
    {
       return footstepTracker;
+   }
+
+   public void checkControllerIsRunning()
+   {
+      boolean controllerIsRunning = robotConfigurationDataTimer.isRunning(CAPTURABILITY_BASED_STATUS_EXPIRATION_TIME);
+
+      if (!controllerIsRunning)
+      {
+         reset();
+      }
    }
 }

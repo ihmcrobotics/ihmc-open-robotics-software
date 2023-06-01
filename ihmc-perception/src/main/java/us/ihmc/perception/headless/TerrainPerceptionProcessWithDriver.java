@@ -6,44 +6,53 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.ImageMessage;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import us.ihmc.commons.Conversions;
+import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.depthData.CollisionShapeTester;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.perception.*;
+import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.comms.PerceptionComms;
+import us.ihmc.perception.filters.CollidingScanRegionFilter;
+import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.thread.Activator;
-import us.ihmc.tools.thread.PausablePeriodicThread;
+import us.ihmc.tools.thread.Throttler;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
-
-import static org.bytedeco.opencv.global.opencv_highgui.imshow;
-import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
 
 /**
  * TerrainPerceptionProcessWithDriver is a headless process that runs the perception frontend for terrain-specific measurements such as planar regions.
  * color, depth, and point cloud data using the depth data obtained from the terrain sensor on the robot. (L515 currently). This class may be extended
  * in the future to support height map extraction, iterative-closest point based registration, LidarScanMessage publisher, and more.
- *
+ * <p>
  * Primary responsibilities include (but are not limited to):
  * 1. Loads depth data from the sensor.
  * 2. Loads color data from the sensor.
@@ -54,39 +63,41 @@ import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
  */
 public class TerrainPerceptionProcessWithDriver
 {
-   private final PausablePeriodicThread thread;
-   private final Activator nativesLoadedActivator;
    private final RealtimeROS2Node realtimeROS2Node;
 
-   private final BytePointer compressedColorPointer = new BytePointer();
-   private final BytePointer compressedDepthPointer = new BytePointer();;
-
-   private BytedecoImage debugExtractionImage;
+   private final PerceptionConfigurationParameters parameters = new PerceptionConfigurationParameters();
+   private final Notification destroyedNotification = new Notification();
+   private final FramePose3D colorPoseInDepthFrame = new FramePose3D();
    private final ImageMessage depthImageMessage = new ImageMessage();
    private final ImageMessage colorImageMessage = new ImageMessage();
-   private final ROS2Helper ros2Helper;
-
-   private ROS2StoredPropertySetGroup ros2PropertySetGroup;
-   private RealSenseHardwareManager realSenseHardwareManager;
-   private BytedecoRealsense sensor;
-   private Mat depth16UC1Image;
-   private Mat color8UC3Image;
-   private Mat yuvColorImage = new Mat();
-   private BytedecoImage depthBytedecoImage;
-   private final RapidPlanarRegionsExtractor rapidRegionsExtractor;
-
-   private final OpenCLManager openCLManager;
-   private _cl_program openCLProgram;
-
-   private RealsenseConfiguration realsenseConfiguration;
-   private final Supplier<ReferenceFrame> sensorFrameUpdater;
    private final FramePose3D cameraPose = new FramePose3D();
+   private final Throttler throttler = new Throttler();
+
+   private final ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic;
+   private final Supplier<ReferenceFrame> sensorFrameUpdater;
    private final ROS2Topic<ImageMessage> colorTopic;
    private final ROS2Topic<ImageMessage> depthTopic;
-   private final ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic;
-   private final ROS2Topic<PlanarRegionsListMessage> regionsTopic;
 
-   private String serialNumber;
+   private final RapidPlanarRegionsExtractor rapidRegionsExtractor;
+   private final OpenCLManager openCLManager;
+   private final ROS2Helper ros2Helper;
+   private final RealSenseHardwareManager realSenseHardwareManager;
+   private final RealsenseConfiguration realsenseConfiguration;
+   private final _cl_program openCLProgram;
+   private final BytedecoRealsense realsense;
+
+   private ROS2StoredPropertySetGroup ros2PropertySetGroup;
+   private CollidingScanRegionFilter collisionFilter;
+   private BytedecoImage depthBytedecoImage;
+
+   private Mat depth16UC1Image;
+   private Mat color8UC3Image;
+   private Mat yuvColorImage;
+
+   private final double outputPeriod;
+   private boolean initialized = false;
+   private volatile boolean running = true;
+
    private int depthWidth;
    private int depthHeight;
    private int colorWidth;
@@ -94,168 +105,215 @@ public class TerrainPerceptionProcessWithDriver
    private long depthSequenceNumber = 0;
    private long colorSequenceNumber = 0;
 
-   public TerrainPerceptionProcessWithDriver(String serialNumber, RealsenseConfiguration realsenseConfiguration,
+   public TerrainPerceptionProcessWithDriver(String serialNumber,
+                                             RealsenseConfiguration realsenseConfiguration,
                                              ROS2Topic<ImageMessage> depthTopic,
                                              ROS2Topic<ImageMessage> colorTopic,
                                              ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic,
-                                             ROS2Topic<PlanarRegionsListMessage> regionsTopic,
                                              Supplier<ReferenceFrame> sensorFrameUpdater)
    {
-      this.serialNumber = serialNumber;
       this.realsenseConfiguration = realsenseConfiguration;
       this.depthTopic = depthTopic;
       this.colorTopic = colorTopic;
       this.frameRegionsTopic = frameRegionsTopic;
       this.sensorFrameUpdater = sensorFrameUpdater;
-      this.regionsTopic = regionsTopic;
 
-      nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
+      this.outputPeriod = UnitConversions.hertzToSeconds(31.0f);
 
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_videopub");
       realtimeROS2Node.spin();
 
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_node");
-      ros2Helper = new ROS2Helper(ros2Node);
-
       openCLManager = new OpenCLManager();
       rapidRegionsExtractor = new RapidPlanarRegionsExtractor();
 
-      thread = new PausablePeriodicThread("L515Node", UnitConversions.hertzToSeconds(31.0), 1, false, this::update);
-      Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "L515Shutdown"));
-      LogTools.info("Starting loop.");
-      thread.start();
+      realSenseHardwareManager = new RealSenseHardwareManager();
+
+      LogTools.info("Creating Bytedeco Realsense Using: {}", serialNumber);
+      realsense = realSenseHardwareManager.createBytedecoRealsenseDevice(serialNumber, realsenseConfiguration);
+      if (realsense.getDevice() == null)
+      {
+         destroy();
+         throw new RuntimeException("Realsense device not found. Set -D<model>.serial.number=00000000000");
+      }
+      realsense.enableColor(realsenseConfiguration);
+      realsense.initialize();
+
+      depthWidth = realsense.getDepthWidth();
+      depthHeight = realsense.getDepthHeight();
+      colorWidth = realsense.getColorWidth();
+      colorHeight = realsense.getColorHeight();
+
+      LogTools.info("Depth width: " + depthWidth + ", height: " + depthHeight);
+      LogTools.info("Color width: " + colorWidth + ", height: " + colorHeight);
+
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "realsense_color_and_depth_publisher");
+      ros2Helper = new ROS2Helper(ros2Node);
+
+      openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
+
+      depthBytedecoImage = new BytedecoImage(realsense.getDepthWidth(), realsense.getDepthHeight(), opencv_core.CV_16UC1);
+
+      LogTools.info(String.format("Sensor Fx: %.2f, Sensor Fy: %.2f, Sensor Cx: %.2f, Sensor Cy: %.2f", realsense.getDepthFocalLengthPixelsX(),
+              realsense.getDepthFocalLengthPixelsY(), realsense.getDepthPrincipalOffsetXPixels(), realsense.getDepthPrincipalOffsetYPixels()));
+
+      Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
    }
 
+   /**
+    * Must be called from the sensor-specific calling class, after the sensor and logger initialization have succeeded.
+    * We run in a daemon thread, because otherwise it will get killed on Ctrl+C before the shutdown hooks are finished running.
+    * See {@link Runtime#addShutdownHook(Thread)} for details.
+    */
+   public void run()
+   {
+      ThreadTools.startAsDaemon(this::updateThread, getClass().getSimpleName() + "UpdateThread");
+   }
+
+   private void updateThread()
+   {
+      while (running)
+      {
+         update();
+         throttler.waitAndRun(outputPeriod); // do the waiting after we send to remove unnecessary latency
+      }
+
+      // Make sure the Realsense
+      ThreadTools.sleep(100);
+
+      if (realsense != null)
+         realsense.deleteDevice();
+      realSenseHardwareManager.deleteContext();
+
+      destroyedNotification.set();
+   }
+
+   /**
+    * Update the sensor and logger, and publish the data to ROS2
+    */
    private void update()
    {
-      if (nativesLoadedActivator.poll())
+      parameters.setRapidRegionsEnabled(true);
+      if (realsense.readFrameData())
       {
-         if (nativesLoadedActivator.isNewlyActivated())
+         realsense.updateDataBytePointers();
+
+         Instant acquisitionTime = Instant.now();
+
+         if (!initialized)
          {
-            LogTools.info("Natives loaded.");
-
-            realSenseHardwareManager = new RealSenseHardwareManager();
-            sensor = realSenseHardwareManager.createBytedecoRealsenseDevice(serialNumber,
-                                                                            realsenseConfiguration.getDepthWidth(),
-                                                                            realsenseConfiguration.getDepthHeight(),
-                                                                            realsenseConfiguration.getDepthFPS());
-
-            if (sensor.getDevice() == null)
+            if (realsense.getDepthFocalLengthPixelsX() == 0.0)
             {
-               thread.stop();
-               throw new RuntimeException("Device not found. Set -Dl515.serial.number=F0000000");
+               LogTools.warn("Realsense focal length is 0.0, not publishing data");
+               return;
             }
-            sensor.enableColor(realsenseConfiguration.getColorWidth(), realsenseConfiguration.getColorHeight(), realsenseConfiguration.getColorFPS());
-            sensor.initialize();
 
-            depthWidth = sensor.getDepthWidth();
-            depthHeight = sensor.getDepthHeight();
-            colorWidth = sensor.getColorWidth();
-            colorHeight = sensor.getColorHeight();
+            rapidRegionsExtractor.create(openCLManager,
+                    openCLProgram,
+                    depthHeight,
+                    depthWidth,
+                    realsense.getDepthFocalLengthPixelsX(),
+                    realsense.getDepthFocalLengthPixelsY(),
+                    realsense.getDepthPrincipalOffsetXPixels(),
+                    realsense.getDepthPrincipalOffsetYPixels());
 
-            LogTools.info("Depth width: " + depthWidth + ", height: " + depthHeight);
-            LogTools.info("Color width: " + colorWidth + ", height: " + colorHeight);
+            rapidRegionsExtractor.getDebugger().setEnabled(true);
+
+            ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
+            ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
+            ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS, rapidRegionsExtractor.getParameters());
+            ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS,
+                    rapidRegionsExtractor.getRapidPlanarRegionsCustomizer().getPolygonizerParameters());
+            ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_CONVEX_HULL_FACTORY_PARAMETERS,
+                    rapidRegionsExtractor.getRapidPlanarRegionsCustomizer().getConcaveHullFactoryParameters());
+
+            initialized = true;
          }
 
-         if (sensor.readFrameData())
+         // Important not to store as a field, as update() needs to be called each frame
+         ReferenceFrame cameraFrame = sensorFrameUpdater.get();
+         cameraPose.setToZero(cameraFrame);
+         cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+         BytePointer compressedDepthPointer = new BytePointer(); // deallocate later
+         BytePointer compressedColorPointer = new BytePointer(); // deallocate later
+
+         if (parameters.getPublishDepth() || parameters.getRapidRegionsEnabled())
          {
+            depth16UC1Image = new Mat(realsense.getDepthHeight(),
+                    realsense.getDepthWidth(),
+                    opencv_core.CV_16UC1,
+                    realsense.getDepthFrameData()); // deallocate later
+         }
 
-            Instant now = Instant.now();
-            double dataAquisitionTime = Conversions.nanosecondsToSeconds(System.nanoTime());
-
-            sensor.updateDataBytePointers();
-
-            if (depth16UC1Image == null)
-            {
-               LogTools.info("Is now reading frames.");
-
-               MutableBytePointer depthFrameData = sensor.getDepthFrameData();
-               MutableBytePointer colorFrameData = sensor.getColorFrameData();
-
-               depth16UC1Image = new Mat(depthHeight, depthWidth, opencv_core.CV_16UC1, depthFrameData);
-               depthBytedecoImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
-               color8UC3Image = new Mat(colorHeight, colorWidth, opencv_core.CV_8UC3, colorFrameData);
-
-               PerceptionMessageTools.setDepthIntrinsicsFromRealsense(sensor, depthImageMessage);
-               PerceptionMessageTools.setColorIntrinsicsFromRealsense(sensor, colorImageMessage);
-
-               // Important not to store as a field, as update() needs to be called each frame
-               ReferenceFrame cameraFrame = sensorFrameUpdater.get();
-               cameraPose.setToZero(cameraFrame);
-               cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-               MessageTools.toMessage(now, depthImageMessage.getAcquisitionTime());
-               MessageTools.toMessage(now, colorImageMessage.getAcquisitionTime());
-
-               openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
-               rapidRegionsExtractor.create(openCLManager,
-                                            openCLProgram,
-                                            depthHeight,
-                                            depthWidth,
-                                            sensor.getDepthFocalLengthPixelsX(),
-                                            sensor.getDepthFocalLengthPixelsY(),
-                                            sensor.getDepthPrincipalOffsetXPixels(),
-                                            sensor.getDepthPrincipalOffsetYPixels());
-
-               ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
-               ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS, rapidRegionsExtractor.getParameters());
-               ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS,
-                                                              rapidRegionsExtractor.getRapidPlanarRegionsCustomizer().getPolygonizerParameters());
-               ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_CONVEX_HULL_FACTORY_PARAMETERS,
-                                                              rapidRegionsExtractor.getRapidPlanarRegionsCustomizer().getConcaveHullFactoryParameters());
-
-               onPatchSizeResized();
-
-               LogTools.info("Initialized.");
-            }
-
-            //            LogTools.info("New Iteration: {}", dataAquisitionTime);
-            ros2PropertySetGroup.update();
-
-            depth16UC1Image.convertTo(depthBytedecoImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1, 1, 0);
-
-            FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
-            extractFramePlanarRegionsList(depthBytedecoImage, ReferenceFrame.getWorldFrame(), framePlanarRegionsList);
-            PlanarRegionsList planarRegionsList = framePlanarRegionsList.getPlanarRegionsList();
-
-            //            LogTools.info("Planar regions: {}", planarRegionsList.getNumberOfPlanarRegions());
-
-            BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
-            BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
-
-            // TODO:  Filter out regions that are colliding with the body before publishing
-            PerceptionMessageTools.publishPlanarRegionsList(planarRegionsList, regionsTopic, ros2Helper);
+         if (parameters.getPublishDepth())
+         {
+            OpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
+            PerceptionMessageTools.setDepthIntrinsicsFromRealsense(realsense, depthImageMessage);
+            CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
             PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer,
-                                                                   depthTopic,
-                                                                   depthImageMessage,
-                                                                   ros2Helper,
-                                                                   cameraPose,
-                                                                   now,
-                                                                   depthSequenceNumber,
-                                                                   depthHeight,
-                                                                   depthWidth,
-                                                               (float) sensor.getDepthDiscretization());
-
-            PerceptionMessageTools.publishJPGCompressedColorImage(compressedColorPointer,
-                                                           colorTopic,
-                                                           colorImageMessage,
-                                                           ros2Helper,
-                                                           cameraPose,
-                                                           now,
-                                                           colorSequenceNumber,
-                                                           colorHeight,
-                                                           colorWidth, (float) sensor.getDepthDiscretization());
-
-            //            display(depthU16C1Image, color8UC3Image, 1);
+                                                               depthTopic,
+                                                               depthImageMessage,
+                                                               ros2Helper,
+                                                               cameraPose,
+                                                               acquisitionTime,
+                                                               depthSequenceNumber++,
+                                                               realsense.getDepthHeight(),
+                                                               realsense.getDepthWidth(),
+                                                               (float) realsense.getDepthDiscretization());
          }
-      }
-   }
 
-   private void onPatchSizeResized()
-   {
-      int patchImageWidth = rapidRegionsExtractor.getPatchImageWidth();
-      int patchImageHeight = rapidRegionsExtractor.getPatchImageHeight();
-      debugExtractionImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_8UC4);
+         if (parameters.getPublishColor())
+         {
+            colorPoseInDepthFrame.set(realsense.getDepthToColorTranslation(), realsense.getDepthToColorRotation());
+
+            color8UC3Image = new Mat(realsense.getColorHeight(),
+                    realsense.getColorWidth(),
+                    opencv_core.CV_8UC3,
+                    realsense.getColorFrameData()); // deallocate later
+
+            // YUV I420 has 1.5 times the height of the image
+            yuvColorImage = new Mat(realsense.getColorHeight() * 1.5, realsense.getColorWidth(), opencv_core.CV_8UC1); // deallocate later
+
+            OpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
+
+            PerceptionMessageTools.setColorIntrinsicsFromRealsense(realsense, colorImageMessage);
+            CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
+            PerceptionMessageTools.publishJPGCompressedColorImage(compressedColorPointer,
+                    colorTopic,
+                    colorImageMessage,
+                    ros2Helper,
+                    colorPoseInDepthFrame,
+                    acquisitionTime,
+                    colorSequenceNumber++,
+                    realsense.getColorHeight(),
+                    realsense.getColorWidth(),
+                    (float) realsense.getDepthDiscretization());
+
+            color8UC3Image.deallocate();
+            yuvColorImage.deallocate();
+            compressedColorPointer.deallocate();
+         }
+
+         if (parameters.getRapidRegionsEnabled())
+         {
+//            PerceptionDebugTools.displayDepth("Depth", depth16UC1Image, 1);
+            depth16UC1Image.convertTo(depthBytedecoImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1, 1, 0);
+            FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
+            extractFramePlanarRegionsList(depthBytedecoImage, cameraFrame, framePlanarRegionsList);
+
+            PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, frameRegionsTopic, ros2Helper);
+
+            LogTools.info("Total Planar Regions: " + framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions());
+         }
+
+         if (parameters.getPublishDepth() || parameters.getRapidRegionsEnabled())
+         {
+            depth16UC1Image.deallocate();
+            compressedDepthPointer.deallocate();
+         }
+
+         ros2PropertySetGroup.update();
+      }
    }
 
    private void extractFramePlanarRegionsList(BytedecoImage depthImage, ReferenceFrame cameraFrame, FramePlanarRegionsList framePlanarRegionsList)
@@ -264,47 +322,56 @@ public class TerrainPerceptionProcessWithDriver
       rapidRegionsExtractor.setProcessing(false);
    }
 
-   private void destroy()
+   /**
+    * Must be called in the shutdown hook from the sensor-specific calling class. Handles Ctrl + C based closing gracefully.
+    */
+   public void destroy()
    {
-      thread.destroy();
-      realtimeROS2Node.destroy();
+      running = false;
       rapidRegionsExtractor.destroy();
-      sensor.deleteDevice();
       depthBytedecoImage.destroy(openCLManager);
       openCLManager.destroy();
-      realSenseHardwareManager.deleteContext();
+      destroyedNotification.blockingPoll();
    }
 
-   private void display(Mat depth, Mat color, int delay)
+   public void setupCollisionFilter(FullHumanoidRobotModel fullRobotModel, CollisionBoxProvider collisionBoxProvider)
    {
-      Mat depthDisplay = new Mat();
-      BytedecoOpenCVTools.clampTo8BitUnsignedChar(depth, depthDisplay, 0.0, 255.0);
-      BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(depthDisplay, depthDisplay);
-
-      imshow("Depth", depthDisplay);
-      imshow("Color", color);
-      int code = waitKeyEx(delay);
-      if (code == 113)
+      CollisionShapeTester shapeTester = new CollisionShapeTester();
+      for (RobotSide robotSide : RobotSide.values)
       {
-         thread.stop();
-         System.exit(0);
+         List<JointBasics> joints = new ArrayList<>();
+         RigidBodyBasics shin = fullRobotModel.getFoot(robotSide).getParentJoint().getPredecessor().getParentJoint().getPredecessor();
+         MultiBodySystemTools.collectJointPath(fullRobotModel.getPelvis(), shin, joints);
+         joints.forEach(joint -> shapeTester.addJoint(collisionBoxProvider, joint));
+      }
+      collisionFilter = new CollidingScanRegionFilter(shapeTester);
+   }
+
+   public void applyCollisionFilter(PlanarRegionsList planarRegionsList)
+   {
+      // Filter out regions that are colliding with the body
+      collisionFilter.update();
+      int regionIndex = 0;
+      while (regionIndex < planarRegionsList.getNumberOfPlanarRegions())
+      {
+         if (!collisionFilter.test(regionIndex, planarRegionsList.getPlanarRegion(regionIndex)))
+            planarRegionsList.pollPlanarRegion(regionIndex);
+         else
+            ++regionIndex;
       }
    }
 
    public static void main(String[] args)
    {
-      /*
-         Color: [fx:901.3026, fy:901.8400, cx:635.2337, cy:350.9427, h:720, w:1280]
-         Depth: [fx:730.7891, fy:731.0859, cx:528.6094, cy:408.1602, h:768, w:1024]
-      */
-
-      String l515SerialNumber = System.getProperty("l515.serial.number", "F1121365"); // Benchtop L515: F1120592, Tripod: F1121365, Local: F0245563
-      new TerrainPerceptionProcessWithDriver(l515SerialNumber,
-                                             RealsenseConfiguration.L515_COLOR_720P_DEPTH_768P_30HZ,
-                                             PerceptionAPI.L515_DEPTH_IMAGE,
-                                             PerceptionAPI.L515_COLOR_IMAGE,
-                                             PerceptionAPI.PERSPECTIVE_RAPID_REGIONS_WITH_POSE,
-                                             PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
-                                             ReferenceFrame::getWorldFrame);
+      // Benchtop L515: F1120592, Tripod: F1121365, Local: F0245563, Nadia: F112114, D435: 108522071219, D435: 213522252883, 215122254074
+      String realsenseSerialNumber = System.getProperty("d455.serial.number", "213522252883");
+      TerrainPerceptionProcessWithDriver process = new TerrainPerceptionProcessWithDriver(realsenseSerialNumber,
+                                                                                          RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
+                                                                                          PerceptionAPI.D455_DEPTH_IMAGE,
+                                                                                          PerceptionAPI.D455_COLOR_IMAGE,
+                                                                                          PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
+                                                                                          ReferenceFrame::getWorldFrame);
+      process.run();
+      ThreadTools.sleepForever();
    }
 }

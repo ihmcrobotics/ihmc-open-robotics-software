@@ -15,8 +15,8 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.OpenCLFloatBuffer;
-import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.opencl.OpenCLFloatBuffer;
+import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 
@@ -51,6 +51,7 @@ public class RapidPlanarRegionsExtractor
    private BMatrixRMaj boundaryMatrix;
    private DMatrixRMaj regionMatrix;
 
+   private boolean enabled = true;
    private boolean patchSizeChanged = true;
    private boolean modified = true;
    private boolean processing = false;
@@ -73,7 +74,7 @@ public class RapidPlanarRegionsExtractor
    private int filterPatchImageHeight;
    private int filterPatchImageWidth;
 
-   private final RapidRegionsDebutOutputGenerator debugger = new RapidRegionsDebutOutputGenerator();
+   private final RapidPatchesDebugOutputGenerator debugger = new RapidPatchesDebugOutputGenerator();
    private final Stack<PatchGraphRecursionBlock> depthFirstSearchStack = new Stack<>();
    private final RecyclingArrayList<RapidPlanarRegion> rapidPlanarRegions = new RecyclingArrayList<>(RapidPlanarRegion::new);
    private final Comparator<RapidRegionRing> boundaryLengthComparator = Comparator.comparingInt(regionRing -> regionRing.getBoundaryIndices().size());
@@ -172,7 +173,7 @@ public class RapidPlanarRegionsExtractor
 
    public void update(BytedecoImage input16UC1DepthImage, ReferenceFrame cameraFrame, FramePlanarRegionsList frameRegions)
    {
-      if (!processing)
+      if (!processing && enabled)
       {
          processing = true;
          debugger.clearDebugImage();
@@ -663,7 +664,7 @@ public class RapidPlanarRegionsExtractor
       return planarRegionsList;
    }
 
-   public RapidRegionsDebutOutputGenerator getDebugger()
+   public RapidPatchesDebugOutputGenerator getDebugger()
    {
       return debugger;
    }
@@ -782,5 +783,15 @@ public class RapidPlanarRegionsExtractor
    {
       this.processing = processing;
    }
+
+   public boolean getEnabled()
+   {
+      return enabled;
+   }
+
+    public void setEnabled(boolean enabled)
+    {
+        this.enabled = enabled;
+    }
 }
 

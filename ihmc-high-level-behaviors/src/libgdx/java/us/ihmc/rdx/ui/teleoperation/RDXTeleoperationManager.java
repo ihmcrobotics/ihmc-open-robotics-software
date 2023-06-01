@@ -3,7 +3,6 @@ package us.ihmc.rdx.ui.teleoperation;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.FootstepDataListMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImBoolean;
@@ -12,7 +11,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.CommunicationHelper;
-import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
@@ -20,25 +18,24 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
-import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetDoubleWidget;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
+import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.*;
 import us.ihmc.rdx.ui.collidables.RDXRobotCollisionModel;
-import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.interactable.RDXChestOrientationSlider;
 import us.ihmc.rdx.ui.interactable.RDXPelvisHeightSlider;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionManager;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.YawPitchRollAxis;
@@ -46,7 +43,6 @@ import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.tools.gui.YoAppearanceTools;
 
@@ -55,7 +51,30 @@ import java.util.List;
 import java.util.Set;
 
 /**
- *  Possibly extract simple controller controls to a smaller panel class, like remote safety controls or something.
+ * The teleoperation manager is the top level class for managing UI for
+ * teleoperation of a humanoid robot. It should contain a bunch of additional
+ * "sub managers" and UI tools with clear sub-domains.
+ * <br/>
+ * This class manages the communications with the robot which include ROS 2
+ * and YoVariable Client-Server protocols. It should strive to allow field
+ * members access to these communications in order not to duplicate
+ * network traffic or overhead. This is not always possible or easy due
+ * to threading constraints.
+ * <br/>
+ * The interactable robot parts are all in this class so they can be shared
+ * by the sub managers.
+ * <br/>
+ * Sub managers:
+ * <ul>
+ * <li>{@link RDXHandConfigurationManager Hand manager} TODO: Perhaps this should go in arm manager?</li>
+ * <li>{@link RDXArmManager Arm manager}</li>
+ * <li>{@link RDXLocomotionManager Locomotion manager}</li>
+ * </ul>
+ *
+ * TODO:
+ * <ul>
+ * <li>Possibly extract simple controller controls to a smaller panel class, like remote safety controls or something.</li>
+ * </ul>
  */
 public class RDXTeleoperationManager extends ImGuiPanel
 {
@@ -70,7 +89,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final RDXTeleoperationParameters teleoperationParameters;
    private final ImGuiStoredPropertySetTuner teleoperationParametersTuner = new ImGuiStoredPropertySetTuner("Teleoperation Parameters");
-   private final RDXFootstepPlanGraphic footstepsSentToControllerGraphic;
    private final RDXRobotLowLevelMessenger robotLowLevelMessenger;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final AStarBodyPathPlannerParametersBasics bodyPathPlannerParameters;
@@ -102,19 +120,23 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final boolean interactablesAvailable;
    private ImGuiStoredPropertySetDoubleWidget trajectoryTimeSlider;
 
+   /** This tracker should be shared with the sub-managers to keep the state consistent. */
    private final ControllerStatusTracker controllerStatusTracker;
    private final LogToolsLogger logToolsLogger = new LogToolsLogger();
 
-   public RDXTeleoperationManager(String robotRepoName,
-                                  String robotSubsequentPathToResourceFolder,
-                                  CommunicationHelper communicationHelper)
+   /**
+    * For use without interactables available. May crash if a YoVariableClient is needed.
+    */
+   public RDXTeleoperationManager(CommunicationHelper communicationHelper)
    {
-      this(robotRepoName, robotSubsequentPathToResourceFolder, communicationHelper, null, null, null);
+      this(communicationHelper, null, null, null);
    }
 
-   public RDXTeleoperationManager(String robotRepoName,
-                                  String robotSubsequentPathToResourceFolder,
-                                  CommunicationHelper communicationHelper,
+   /**
+    * Enable interactables and use a YoVariable client to show wrist force arrows on
+    * some robots.
+    */
+   public RDXTeleoperationManager(CommunicationHelper communicationHelper,
                                   RobotCollisionModel robotSelfCollisionModel,
                                   RobotCollisionModel robotEnvironmentCollisionModel,
                                   YoVariableClientHelper yoVariableClientHelper)
@@ -127,7 +149,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
       addChild(bodyPathPlanningParametersTuner);
       addChild(swingFootPlanningParametersTuner);
       this.communicationHelper = communicationHelper;
-      ROS2NodeInterface ros2Node = communicationHelper.getROS2Node();
       robotModel = communicationHelper.getRobotModel();
       ros2Helper = communicationHelper.getControllerHelper();
       this.yoVariableClientHelper = yoVariableClientHelper;
@@ -146,20 +167,15 @@ public class RDXTeleoperationManager extends ImGuiPanel
       desiredRobot = new RDXDesiredRobot(robotModel, syncedRobot);
       desiredRobot.setSceneLevels(RDXSceneLevel.VIRTUAL);
 
-      ROS2ControllerHelper slidersROS2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
-      pelvisHeightSlider = new RDXPelvisHeightSlider(syncedRobot, slidersROS2ControllerHelper, teleoperationParameters);
+      pelvisHeightSlider = new RDXPelvisHeightSlider(syncedRobot, ros2Helper, teleoperationParameters);
       // TODO this should update the GDX desired Robot
-      chestPitchSlider = new RDXChestOrientationSlider(syncedRobot, YawPitchRollAxis.PITCH, slidersROS2ControllerHelper, teleoperationParameters);
+      chestPitchSlider = new RDXChestOrientationSlider(syncedRobot, YawPitchRollAxis.PITCH, ros2Helper, teleoperationParameters);
       // TODO this should update the GDX desired robot.
-      chestYawSlider = new RDXChestOrientationSlider(syncedRobot, YawPitchRollAxis.YAW, slidersROS2ControllerHelper, teleoperationParameters);
+      chestYawSlider = new RDXChestOrientationSlider(syncedRobot, YawPitchRollAxis.YAW, ros2Helper, teleoperationParameters);
 
-      footstepsSentToControllerGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
-      communicationHelper.subscribeToControllerViaCallback(FootstepDataListMessage.class, footsteps ->
-      {
-         footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, "Teleoperation Panel Controller Spy"));
-      });
+      controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2Helper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
 
-      locomotionManager = new RDXLocomotionManager(robotModel, communicationHelper, syncedRobot, ros2Helper);
+      locomotionManager = new RDXLocomotionManager(robotModel, communicationHelper, syncedRobot, ros2Helper, controllerStatusTracker);
 
       interactablesAvailable = robotSelfCollisionModel != null;
       if (interactablesAvailable)
@@ -172,8 +188,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
                                         ros2Helper,
                                         teleoperationParameters);
       }
-
-      controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2Helper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
    }
 
    public void create(RDXBaseUI baseUI)
@@ -182,6 +196,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       desiredRobot.create();
 
       locomotionManager.create(baseUI);
+      addChild(locomotionManager.getLocomotionParametersTuner());
 
       footstepPlanningParametersTuner.create(footstepPlannerParameters, false, () -> locomotionManager.setFootstepPlannerParameters(footstepPlannerParameters));
       bodyPathPlanningParametersTuner.create(bodyPathPlannerParameters, false, () -> locomotionManager.setBodyPathPlannerParameters(bodyPathPlannerParameters));
@@ -344,7 +359,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    {
       if (interactablesEnabled.get())
       {
-         locomotionManager.caculateWalkPathControlRing3DViewPick(input);
+         locomotionManager.calculateWalkPathControlRing3DViewPick(input);
 
          if (interactablesAvailable)
          {
@@ -394,7 +409,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       chestPitchSlider.renderImGuiWidgets();
       chestYawSlider.renderImGuiWidgets();
 
-      trajectoryTimeSlider.render();
+      trajectoryTimeSlider.renderImGuiWidget();
 
       ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
       ImGui.checkbox(labels.get("Show body path planner parameter tuner"), bodyPathPlanningParametersTuner.getIsShowing());
@@ -413,8 +428,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
             for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
                robotPartInteractable.delete();
-
-            footstepsSentToControllerGraphic.clear();
          }
       }
 

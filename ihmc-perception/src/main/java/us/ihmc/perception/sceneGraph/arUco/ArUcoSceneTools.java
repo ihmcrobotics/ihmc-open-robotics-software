@@ -1,7 +1,7 @@
 package us.ihmc.perception.sceneGraph.arUco;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.perception.OpenCVArUcoMarkerDetection;
+import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticArUcoRelativeDetectableSceneNode;
 import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
 
@@ -14,6 +14,7 @@ public class ArUcoSceneTools
    public static void updateLibraryPosesFromDetectionResults(OpenCVArUcoMarkerDetection arUcoMarkerDetection,
                                                              PredefinedSceneNodeLibrary predefinedSceneNodeLibrary)
    {
+      predefinedSceneNodeLibrary.storeOverriddenPoses();
       synchronized (arUcoMarkerDetection.getSyncObject())
       {
          for (ArUcoDetectableNode arUcoDetectableNode : predefinedSceneNodeLibrary.getArUcoDetectableNodes())
@@ -47,5 +48,6 @@ public class ArUcoSceneTools
             }
          }
       }
+      predefinedSceneNodeLibrary.restoreOverriddenPoses();
    }
 }

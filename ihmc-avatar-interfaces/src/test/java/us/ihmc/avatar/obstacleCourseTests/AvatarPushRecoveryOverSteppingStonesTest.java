@@ -81,7 +81,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   private void setupTest()
+   private void setupTestEnvironment()
    {
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.EASY_STEPPING_STONES;
 
@@ -118,17 +118,13 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       simulationTestHelper.addYoGraphicDefinition(pushRobotController.getForceVizDefinition());
 
       swingTime = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime();
-      double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
       totalMass = fullRobotModel.getTotalMass();
 
       assertTrue(simulationTestHelper.simulateNow(0.25));
-
    }
 
-   @Test
-   public void testWalkingOverSteppingStonesForwardPush()
+   private FootstepDataListMessage startTest()
    {
-      setupTest();
       simulationTestHelper.setKeepSCSUp(true);
       double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
 
@@ -140,17 +136,15 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       footstepDataList.getDefaultStepConstraints().set(StepConstraintMessageConverter.convertToStepConstraintsListMessage(steppableRegionsCalculator.computeSteppableRegions()));
       simulationTestHelper.publishToController(footstepDataList);
 
+      return footstepDataList;
+   }
 
-      StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
-      double delay = 0.5 * swingTime;
-      Vector3D firstForceDirection = new Vector3D(-1.0, 0.0, 0.0);
-      double percentWeight = 0.35;
-      double magnitude = percentWeight * totalMass * 9.81;
-      double duration = 0.1;
-      pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
+   private void simulateAndAssertComplete(int numberOfSteps)
+   {
+      double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
 
       double stepDuration = swingTime + transferTime;
-      boolean success = simulationTestHelper.simulateNow(footstepDataList.getFootstepDataList().size() * stepDuration + 1.5);
+      boolean success = simulationTestHelper.simulateNow(numberOfSteps * stepDuration + 1.5);
 
       simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
@@ -163,6 +157,42 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       assertTrue(success);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+
+   @Test
+   public void testWalkingOverSteppingStonesBackwardPush()
+   {
+      setupTestEnvironment();
+      FootstepDataListMessage footstepDataList =  startTest();
+
+
+      StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+      double delay = 0.5 * swingTime;
+      Vector3D firstForceDirection = new Vector3D(1.0, 0.0, 0.0);
+      double percentWeight = 0.35;
+      double magnitude = percentWeight * totalMass * 9.81;
+      double duration = 0.1;
+      pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
+
+      simulateAndAssertComplete(footstepDataList.getFootstepDataList().size());
+   }
+
+   @Test
+   public void testWalkingOverSteppingStonesForwardPush()
+   {
+      setupTestEnvironment();
+      FootstepDataListMessage footstepDataList = startTest();
+
+      StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+      double delay = 0.5 * swingTime;
+      Vector3D firstForceDirection = new Vector3D(-1.0, 0.0, 0.0);
+      double percentWeight = 0.35;
+      double magnitude = percentWeight * totalMass * 9.81;
+      double duration = 0.1;
+      pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
+
+      simulateAndAssertComplete(footstepDataList.getFootstepDataList().size());
    }
 
    protected double getForcePointOffsetZInChestFrame()

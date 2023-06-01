@@ -10,7 +10,12 @@ import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -30,7 +35,7 @@ import java.util.List;
  * that are visible to the stance foot are projected further by {@link #extraDistanceToStepFromStanceFoot}. This forces the robot to take longer steps,
  * rather than just taking the shortest step.
  */
-public class CaptureRegionSafetyHeuristics
+public class CaptureRegionSafetyHeuristics implements SCS2YoGraphicHolder
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -319,5 +324,13 @@ public class CaptureRegionSafetyHeuristics
    public FrameLine2DReadOnly getLineOfMinimalAction()
    {
       return yoLineOfMinimalAction;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D("Safety Biased Capture Region", yoSafetyBiasedCaptureRegion, ColorDefinitions.RoyalBlue()));
+      return group;
    }
 }

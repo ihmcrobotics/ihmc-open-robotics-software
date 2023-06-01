@@ -9,18 +9,22 @@ import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 
+/**
+ * This is a door panel with optional ArUco markers.
+ * ArUco marker ID 0 on the pull side and ID 1 on the push side.
+ */
 public class DoorPanelDefinition extends RigidBodyDefinition
 {
-   private boolean addFiducials = false;
+   private boolean addArUcoMarkers = false;
 
    public DoorPanelDefinition()
    {
       super("panelBody");
    }
 
-   public void setAddFiducials(boolean addFiducials)
+   public void setAddArUcoMarkers(boolean addFiducials)
    {
-      this.addFiducials = addFiducials;
+      this.addArUcoMarkers = addFiducials;
    }
 
    public void build()
@@ -48,7 +52,7 @@ public class DoorPanelDefinition extends RigidBodyDefinition
       modelVisualDefinition.setGeometryDefinition(geometryDefinition);
       addVisualDefinition(modelVisualDefinition);
 
-      if (addFiducials)
+      if (addArUcoMarkers)
       {
          VisualDefinition fiducialModelVisualDefinition = new VisualDefinition();
          ModelFileGeometryDefinition fiducialGeometryDefinition = new ModelFileGeometryDefinition("environmentObjects/door/doorPanel/DoorPanelFiducials.g3dj");

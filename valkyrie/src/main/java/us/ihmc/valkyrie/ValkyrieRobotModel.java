@@ -26,7 +26,7 @@ import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -713,7 +713,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       if (robotVersion == ValkyrieRobotVersion.ARM_MASS_SIM)
       {
-         ValkyrieArmMassSimCollisionModel collisionModel = new ValkyrieArmMassSimCollisionModel(getJointMap(), true);
+         ValkyrieArmMassSimCollisionModel collisionModel = new ValkyrieArmMassSimCollisionModel(getJointMap(), getContactPointParameters(), true);
          collisionModel.setCollidableHelper(helper, robotCollisionMask, environmentCollisionMasks);
          return collisionModel;
       }

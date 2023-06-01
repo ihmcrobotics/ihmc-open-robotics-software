@@ -83,7 +83,7 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       edgeCost.add(Math.abs(pitchOffset * parameters.getPitchWeight()));
       edgeCost.add(Math.abs(rollOffset * parameters.getRollWeight()));
 
-      if (heightMapData != null)
+      if (heightMapData != null && !heightMapData.isEmpty() && candidateSnapData.getSnappedToHeightMap())
       {
          double rmsError = candidateSnapData.getRMSErrorHeightMap();
          double rmsAlpha = EuclidCoreTools.clamp(
@@ -121,7 +121,7 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       if (snapData != null)
       {
          double area;
-         if (heightMapData == null)
+         if (heightMapData == null || heightMapData.isEmpty() || !snapData.getSnappedToHeightMap())
          {
             ConvexPolygon2DReadOnly footholdAfterSnap = snapData.getCroppedFoothold();
             if(footholdAfterSnap.isEmpty() || footholdAfterSnap.containsNaN())

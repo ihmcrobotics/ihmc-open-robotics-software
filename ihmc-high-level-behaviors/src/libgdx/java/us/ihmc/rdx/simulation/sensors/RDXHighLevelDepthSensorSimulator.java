@@ -45,8 +45,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.*;
 import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
+import us.ihmc.perception.opencl.OpenCLFloatBuffer;
+import us.ihmc.perception.opencl.OpenCLIntBuffer;
+import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.RDXPointCloudRenderer;
@@ -671,8 +674,8 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
       {
          depthExecutor.execute(() -> {
 
-            BytedecoOpenCVTools.convertFloatToShort(depthSensorSimulator.getMetersDepthOpenCVMat(),
-                                                    depthImageMat, 1000.0, 0.0);
+            OpenCVTools.convertFloatToShort(depthSensorSimulator.getMetersDepthOpenCVMat(),
+                                            depthImageMat, 1000.0, 0.0);
 
             depthImageMessage.setImageHeight(depthSensorSimulator.getImageHeight());
             depthImageMessage.setImageWidth(depthSensorSimulator.getImageWidth());
@@ -684,7 +687,7 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
             Instant now = Instant.now();
             sensorPose.setToZero(sensorFrame);
             sensorPose.changeFrame(ReferenceFrame.getWorldFrame());
-            BytedecoOpenCVTools.compressImagePNG(depthImageMat, compressedDepthPointer);
+            OpenCVTools.compressImagePNG(depthImageMat, compressedDepthPointer);
             PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer, ros2DepthTopic, depthImageMessage, ros2Helper, sensorPose, now, depthSequenceNumber++,
                                                                    depthSensorSimulator.getImageHeight(), depthSensorSimulator.getImageWidth(), 0.001f);
 
@@ -708,7 +711,7 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
             opencv_imgproc.cvtColor(rgba8Mat, rgb8Mat, opencv_imgproc.COLOR_RGBA2RGB);
 
             Instant now = Instant.now();
-            BytedecoOpenCVTools.compressRGBImageJPG(rgb8Mat, yuv420Image, compressedColorPointer);
+            OpenCVTools.compressRGBImageJPG(rgb8Mat, yuv420Image, compressedColorPointer);
             PerceptionMessageTools.publishJPGCompressedColorImage(compressedColorPointer, ros2ColorTopic, colorImageMessage, ros2Helper, sensorPose, now, colorSequenceNumber++,
                                                                   depthSensorSimulator.getImageHeight(), depthSensorSimulator.getImageWidth(), 0.001f);
          });
