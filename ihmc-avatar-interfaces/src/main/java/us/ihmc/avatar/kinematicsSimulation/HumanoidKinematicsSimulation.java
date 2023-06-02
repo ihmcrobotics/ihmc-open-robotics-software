@@ -598,7 +598,8 @@ public class HumanoidKinematicsSimulation
    public void destroy()
    {
       LogTools.info("Shutting down...");
-      simulatedHandKinematicController.cleanup();
+      if (simulatedHandKinematicController != null)
+         simulatedHandKinematicController.cleanup();
       controlThread.destroy();
       ros2Node.destroy();
       realtimeROS2Node.destroy();

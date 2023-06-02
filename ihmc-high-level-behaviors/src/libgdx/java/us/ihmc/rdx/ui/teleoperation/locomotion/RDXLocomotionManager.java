@@ -309,7 +309,6 @@ public class RDXLocomotionManager
          legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
 
       walkPathControlRing.renderImGuiWidgets();
-      interactableFootstepPlan.renderImGuiWidgets();
 
       // Handles all shortcuts for when the spacebar key is pressed
       if (ImGui.isKeyReleased(ImGuiTools.getSpaceKey()))
