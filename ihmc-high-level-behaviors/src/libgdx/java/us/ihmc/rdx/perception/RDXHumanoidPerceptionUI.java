@@ -1,6 +1,7 @@
 package us.ihmc.rdx.perception;
 
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.HumanoidPerceptionModule;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2PlanarRegionsVisualizer;
@@ -10,13 +11,15 @@ import us.ihmc.ros2.ROS2Node;
 public class RDXHumanoidPerceptionUI
 {
    private HumanoidPerceptionModule humanoidPerception;
+   private RDXRemotePerceptionUI remotePerceptionUI;
    private RDXRapidRegionsUI rapidRegionsUI;
    private RDXROS2PlanarRegionsVisualizer rapidRegionsMapVisualizer;
    private RDXROS2FramePlanarRegionsVisualizer rapidRegionsVisualizer;
 
-   public RDXHumanoidPerceptionUI(HumanoidPerceptionModule humanoidPerception)
+   public RDXHumanoidPerceptionUI(HumanoidPerceptionModule humanoidPerception, ROS2Helper ros2Helper)
    {
       this.humanoidPerception = humanoidPerception;
+      this.remotePerceptionUI = new RDXRemotePerceptionUI(ros2Helper);
       this.rapidRegionsUI = new RDXRapidRegionsUI();
       this.rapidRegionsUI.create(humanoidPerception.getRapidRegionsExtractor());
    }
@@ -49,6 +52,11 @@ public class RDXHumanoidPerceptionUI
    public RDXRapidRegionsUI getRapidRegionsUI()
    {
       return rapidRegionsUI;
+   }
+
+   public RDXRemotePerceptionUI getRemotePerceptionUI()
+   {
+      return remotePerceptionUI;
    }
 
    public void destroy()
