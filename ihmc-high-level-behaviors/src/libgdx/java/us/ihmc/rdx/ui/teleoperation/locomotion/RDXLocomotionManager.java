@@ -93,6 +93,9 @@ public class RDXLocomotionManager
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;
 
+//      addChild(swingFootPlanningParametersTuner);
+
+
       locomotionParameters = new RDXLocomotionParameters(robotModel.getSimpleRobotName());
       locomotionParameters.load();
       lastAssumeFlatGroundState = locomotionParameters.getAssumeFlatGround();
@@ -137,7 +140,7 @@ public class RDXLocomotionManager
       locomotionParametersTuner.create(locomotionParameters);
       footstepPlanningParametersTuner.create(footstepPlannerParameters, false);
       bodyPathPlanningParametersTuner.create(bodyPathPlannerParameters, false);
-      swingFootPlanningParametersTuner.create(swingFootPlannerParameters, false);
+      swingFootPlanningParametersTuner.create(swingFootPlannerParameters, false, () -> setSwingParameters(swingFootPlannerParameters));
 
       areFootstepsAdjustableCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.areFootstepsAdjustable);
       assumeFlatGroundCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.assumeFlatGround);
@@ -164,6 +167,9 @@ public class RDXLocomotionManager
    public void update()
    {
       controllerStatusTracker.checkControllerIsRunning();
+
+      swingFootPlannerParameters.setMinimumSwingTime(locomotionParameters.getSwingTime());
+      setSwingParameters(swingFootPlannerParameters);
 
       if (ballAndArrowMidFeetPosePlacement.getPlacedNotification().poll() || (lastAssumeFlatGroundState != locomotionParameters.getAssumeFlatGround()
                                                                               && ballAndArrowMidFeetPosePlacement.isPlaced()))
@@ -255,6 +261,10 @@ public class RDXLocomotionManager
       assumeFlatGroundCheckbox.renderImGuiWidget();
       planSwingTrajectoriesCheckbox.renderImGuiWidget();
       replanSwingTrajectoriesOnChangeCheckbox.renderImGuiWidget();
+
+      ImGui.checkbox(labels.get("Show swing planner parameter tuner"), swingFootPlanningParametersTuner.getIsShowing());
+
+
       swingTimeSlider.renderImGuiWidget();
       transferTimeSlider.renderImGuiWidget();
       turnAggressivenessSlider.renderImGuiWidget();
@@ -426,5 +436,15 @@ public class RDXLocomotionManager
    public RDXLocomotionParameters getLocomotionParameters()
    {
       return locomotionParameters;
+   }
+
+   public ImGuiStoredPropertySetTuner getLocomotionParametersTuner()
+   {
+      return locomotionParametersTuner;
+   }
+
+   public ImGuiStoredPropertySetTuner getSwingFootPlanningParametersTuner()
+   {
+      return swingFootPlanningParametersTuner;
    }
 }
