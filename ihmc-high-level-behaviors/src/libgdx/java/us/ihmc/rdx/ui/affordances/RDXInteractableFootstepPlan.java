@@ -160,18 +160,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       }
    }
 
-   public void renderImGuiWidgets()
-   {
-      ImGui.text("Footstep plan:");
-      ImGui.sameLine();
-
-      if (ImGui.button(labels.get("Delete Last")) || ImGui.isKeyPressed(ImGuiTools.getDeleteKey()))
-      {
-         removeLastStep();
-      }
-      ImGuiTools.previousWidgetTooltip("Keybind: Delete");
-   }
-
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
