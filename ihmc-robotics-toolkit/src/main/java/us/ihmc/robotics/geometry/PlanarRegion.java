@@ -881,7 +881,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       return containsNaN;
    }
 
-   public List<? extends Point2DReadOnly> getConcaveHull()
+   public List<Point2D> getConcaveHull()
    {
       return concaveHullsVertices;
    }

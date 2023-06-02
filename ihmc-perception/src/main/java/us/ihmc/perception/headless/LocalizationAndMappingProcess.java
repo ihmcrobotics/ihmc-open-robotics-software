@@ -2,8 +2,8 @@ package us.ihmc.perception.headless;
 
 import controller_msgs.msg.dds.HighLevelStateMessage;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -14,7 +14,6 @@ import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
@@ -22,8 +21,8 @@ import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.tools.PerceptionFilterTools;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
@@ -63,6 +62,7 @@ public class LocalizationAndMappingProcess {
     private final AtomicReference<FramePlanarRegionsListMessage> latestIncomingRegions = new AtomicReference<>(null);
     private final AtomicReference<PlanarRegionsList> latestPlanarRegionsForPublishing = new AtomicReference<>(null);
     private final PerceptionConfigurationParameters perceptionConfigurationParameters = new PerceptionConfigurationParameters();
+    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters("ForGPURegions");
 
     private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
 
@@ -149,7 +149,7 @@ public class LocalizationAndMappingProcess {
       }
 
       FramePlanarRegionsList framePlanarRegionsList = PlanarRegionMessageConverter.convertToFramePlanarRegionsList(latestIncomingRegions.getAndSet(null));
-      filterShadowRegions(framePlanarRegionsList);
+      PerceptionFilterTools.filterShadowRegions(framePlanarRegionsList, maxAngleFromNormalToFilterAsShadow);
 
       if (enableLiveMode) {
          updateMapWithNewRegions(framePlanarRegionsList);
@@ -178,6 +178,7 @@ public class LocalizationAndMappingProcess {
             midFootTransform);
 
       PlanarRegionsList resultMap = planarRegionMap.getMapRegions().copy();
+
       if (perceptionConfigurationParameters.getBoundingBoxFilter())
       {
          BoundingBox3D boundingBox = new BoundingBox3D(midFootTransform.getTranslationX() - 2.0f,
@@ -189,29 +190,12 @@ public class LocalizationAndMappingProcess {
          PerceptionFilterTools.applyBoundingBoxFilter(resultMap, boundingBox);
       }
 
-      latestPlanarRegionsForPublishing.set(resultMap);
-   }
-
-   private static void filterShadowRegions(FramePlanarRegionsList framePlanarRegionsList)
-   {
-      int i = 0;
-      double angleFromNormal = Math.toRadians(maxAngleFromNormalToFilterAsShadow);
-      double minDot = Math.cos(Math.PI / 2.0 - angleFromNormal);
-      while (i < framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions())
+      if (perceptionConfigurationParameters.getConcaveHullFilters())
       {
-         PlanarRegion regionInSensorFrame = framePlanarRegionsList.getPlanarRegionsList().getPlanarRegion(i);
-         Vector3D vectorToRegion = new Vector3D(regionInSensorFrame.getPoint());
-         vectorToRegion.normalize();
-
-         if (Math.abs(vectorToRegion.dot(regionInSensorFrame.getNormal())) < minDot)
-         {
-            framePlanarRegionsList.getPlanarRegionsList().getPlanarRegionsAsList().remove(i);
-         }
-         else
-         {
-            i++;
-         }
+         PerceptionFilterTools.applyConcaveHullFilters(resultMap, polygonizerParameters);
       }
+
+      latestPlanarRegionsForPublishing.set(resultMap);
    }
 
     public void resetMap() {
