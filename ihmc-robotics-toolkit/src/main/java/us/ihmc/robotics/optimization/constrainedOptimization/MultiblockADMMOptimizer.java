@@ -44,12 +44,8 @@ public class MultiblockADMMOptimizer
 
       if (verbose)
       {
-         System.out.println("Initial Seed");
-         for (int i = 0; i < numBlocks; i++)
-         {
-            System.out.print(i + ": ");
-            optimizers[i].printOutput();
-         }
+         System.out.println("===== Initial Seed ===============");
+         admm.printResults(optima);
       }
 
       admm.updateLagrangeMultipliers(optima);
@@ -80,14 +76,8 @@ public class MultiblockADMMOptimizer
          if (verbose)
          {
             System.out.println("===== Lagrange Iteration: " + iteration + " ==========");
-            for (int i = 0; i < numBlocks; i++)
-            {
-               System.out.print(i + ": ");
-               optimizers[i].printOutput();
-            }
+            admm.printResults(optima);
          }
-
-//         System.out.println("Constraint: " + blockConstraint1(optima));
       }
       return optima;
    }

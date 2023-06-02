@@ -44,6 +44,8 @@ public class AugmentedLagrangeOptimizationProblem
 
    private AugmentedLagrangeConstructor augmentedLagrangeConstructor;
 
+   // ============= Setup =======================
+
    public AugmentedLagrangeOptimizationProblem(CostFunction costFunction)
    {
       this.costFunction = costFunction;
@@ -65,6 +67,17 @@ public class AugmentedLagrangeOptimizationProblem
       equalityConstraints.add(constraint);
    }
 
+   public void clearConstraints()
+   {
+      equalityConstraints.clear();
+      inequalityConstraints.clear();
+   }
+
+   public void setCostFunction(CostFunction costFunction)
+   {
+      this.costFunction = costFunction;
+   }
+
    /**
     * @param initialPenalty Keep the initial penalty small
     * @param penaltyIncreaseFactor
@@ -76,6 +89,8 @@ public class AugmentedLagrangeOptimizationProblem
                                                                       equalityConstraints.size(),
                                                                       inequalityConstraints.size());
    }
+
+   // ============= Solving =======================
 
    /**
     * Returns F(x), the unconstrained augmented cost function
@@ -150,6 +165,43 @@ public class AugmentedLagrangeOptimizationProblem
    {
       augmentedLagrangeConstructor.updateLagrangeMultipliers(evaluateEqualityConstraints(xOptimal),
                                                              evaluateInequalityConstraints(xOptimal));
+   }
+
+   // ================================ Getter/Setter ========================================
+
+   public void printResults(DMatrixD1 x)
+   {
+      printResults(x, costFunction.calculate(x), evaluateEqualityConstraints(x), evaluateInequalityConstraints(x));
+   }
+
+   public void printResults(DMatrixD1 x, double cost, DMatrixD1 equalityEvaluations, DMatrixD1 inequalityEvaluations)
+   {
+      System.out.println("Solution x:");
+      for (int i = 0; i < x.getNumElements(); i++)
+      {
+         System.out.println("\t" + x.get(i) + ",");
+      }
+
+      System.out.println("Cost f(x):");
+      System.out.println("\t" + cost);
+
+      if (equalityEvaluations.getNumElements() > 0)
+      {
+         System.out.println("Equality Constraints G(x):");
+         for (int i = 0; i < equalityEvaluations.getNumElements(); i++)
+         {
+            System.out.println("\t" + equalityEvaluations.get(i) + " == 0");
+         }
+      }
+
+      if (inequalityEvaluations.getNumElements() > 0)
+      {
+         System.out.println("Inquality Constraints H(x):");
+         for (int i = 0; i < inequalityEvaluations.getNumElements(); i++)
+         {
+            System.out.println("\t" + inequalityEvaluations.get(i) + " >= 0");
+         }
+      }
    }
 
 

@@ -17,6 +17,8 @@ public class WrappedGradientDescent implements Optimizer
 
    private final DMatrixD1 vectorInputToCostFunction = new DMatrixRMaj();
    private final DMatrixD1 optimalInput = new DMatrixRMaj();
+   private double stepSize = 10.0;
+   private double learningRate = 0.9;
 
    public WrappedGradientDescent()
    {
@@ -55,6 +57,16 @@ public class WrappedGradientDescent implements Optimizer
       list.addAll(vector.data);
    }
 
+   public void setInitialStepSize(double stepSize)
+   {
+      this.stepSize = stepSize;
+   }
+
+   public void setLearningRate(double learningRate)
+   {
+      this.learningRate = learningRate;
+   }
+
    /**
     * Not implemented
     * @return
@@ -71,6 +83,8 @@ public class WrappedGradientDescent implements Optimizer
       TDoubleArrayList initialArray = new TDoubleArrayList();
       convertMatrixToArray(initial, initialArray);
       gradientDescentModule = new GradientDescentModule(createUnwrappedCostFunction(costFunction), initialArray);
+      gradientDescentModule.setStepSize(stepSize);
+      gradientDescentModule.setReducingStepSizeRatio(1.0/learningRate);
 
       gradientDescentModule.run();
       return getOptimalParameters();
@@ -89,8 +103,8 @@ public class WrappedGradientDescent implements Optimizer
       return gradientDescentModule.getOptimalQuery();
    }
 
-   public GradientDescentModule getGradientDescentModule()
-   {
-      return gradientDescentModule;
-   }
+//   public GradientDescentModule getGradientDescentModule()
+//   {
+//      return gradientDescentModule;
+//   }
 }

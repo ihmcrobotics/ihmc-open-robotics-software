@@ -58,9 +58,9 @@ public class TestADMM
    {
       // ======= Specify the ADMM problem =============
       AugmentedLagrangeOptimizationProblem augmentedLagrange1 = new AugmentedLagrangeOptimizationProblem(TestADMM::costFunction);
-//      augmentedLagrange1.addInequalityConstraint(TestADMM::constraint3);
+      augmentedLagrange1.addInequalityConstraint(TestADMM::constraint3);
       AugmentedLagrangeOptimizationProblem augmentedLagrange2 = new AugmentedLagrangeOptimizationProblem(TestADMM::costFunction);
-//      augmentedLagrange2.addInequalityConstraint(TestADMM::constraint3);
+      augmentedLagrange2.addInequalityConstraint(TestADMM::constraint3);
 
       MultiblockAdmmProblem admm = new MultiblockAdmmProblem();
       admm.addIsolatedProblem(augmentedLagrange1);

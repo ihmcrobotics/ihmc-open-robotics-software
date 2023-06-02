@@ -52,8 +52,8 @@ public class AugmentedLagrangeOptimizer
 
          if (verbose)
          {
-            System.out.println("===== Lagrange Iteration: " + iteration + "==========");
-            optimizer.printOutput();
+            System.out.println("===== Lagrange Iteration: " + iteration + " ==========");
+            problem.printResults(optimumParameters);
          }
          iteration += 1;
       }
