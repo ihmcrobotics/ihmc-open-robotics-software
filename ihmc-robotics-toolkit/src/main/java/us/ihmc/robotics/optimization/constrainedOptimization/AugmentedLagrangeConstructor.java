@@ -23,7 +23,7 @@ import org.ejml.dense.row.mult.VectorVectorMult_DDRM;
 public class AugmentedLagrangeConstructor
 {
    private double penalty;
-   private double penaltyIncreaseFactor;
+   private final double penaltyIncreaseFactor;
 
    private final DMatrixD1 equalityMultiplier;
    private final DMatrixD1 inequalityMultiplier;
@@ -93,7 +93,7 @@ public class AugmentedLagrangeConstructor
       DMatrixD1 inequalityConstraintBarrierValue = calculateBarrierInequalityConstraintValue(inequalityConstraintValues,
                                                                                              inequalityMultiplier,
                                                                                              penalty);
-      return 1 / (2.0 * penalty) * (
+      return 1.0 / (2.0 * penalty) * (
             VectorVectorMult_DDRM.innerProd(inequalityConstraintBarrierValue, inequalityConstraintBarrierValue) -
             VectorVectorMult_DDRM.innerProd(inequalityMultiplier, inequalityMultiplier)
       );
@@ -111,14 +111,13 @@ public class AugmentedLagrangeConstructor
    {
       DMatrixD1 barrierInequalityValue = new DMatrixRMaj(inequalityMultiplier);
       CommonOps_DDRM.add(inequalityMultiplier, -penalty, inequalityConstraintValue, barrierInequalityValue);
-
       // Perform the clamp
       int numConstraints = inequalityConstraintValue.getNumElements();
       for (int i = 0; i < numConstraints; i++)
       {
-         if (barrierInequalityValue.get(i) < 0)
+         if (barrierInequalityValue.get(i) < 0.0)
          {
-            barrierInequalityValue.set(i, 0);
+            barrierInequalityValue.set(i, 0.0);
          }
       }
       return barrierInequalityValue;
@@ -145,8 +144,7 @@ public class AugmentedLagrangeConstructor
                                                                          penalty));
 
       // multiplier += p * G(x')
-      DMatrixD1 copyEqualityMultiplier = new DMatrixRMaj(equalityMultiplier);
-      CommonOps_DDRM.add(copyEqualityMultiplier, penalty, optimalEqualityConstraintEvaluations, equalityMultiplier);
+      CommonOps_DDRM.addEquals(equalityMultiplier, penalty, optimalEqualityConstraintEvaluations);
 
       // increase penalty
       penalty *= penaltyIncreaseFactor;

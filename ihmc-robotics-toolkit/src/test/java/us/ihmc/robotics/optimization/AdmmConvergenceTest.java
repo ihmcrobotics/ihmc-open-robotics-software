@@ -5,16 +5,28 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.mult.VectorVectorMult_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.optimization.constrainedOptimization.AugmentedLagrangeOptimizationProblem;
-import us.ihmc.robotics.optimization.constrainedOptimization.MultiblockADMMOptimizer;
+import us.ihmc.robotics.optimization.constrainedOptimization.MultiblockAdmmOptimizer;
 import us.ihmc.robotics.optimization.constrainedOptimization.MultiblockAdmmProblem;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
-public class TestADMM
+/**
+ * ADMM (Alternating Direction Method of Multipliers) is used to solve
+ * problems given by:
+ *    minimize f1(x1) + f2(x2) + ...
+ *    st:
+ *       G1[](x1) == 0, G2[](x2) == 0, ...
+ *       H1[](x1) >= 0, H2[](x2) >= 0, ...
+ *
+ *       J[](x1, x2,...) == 0
+ *       K[](x1, x2,...) >= 0
+ *
+ * This test ensures that the algorithm works correctly
+ */
+public class AdmmConvergenceTest
 {
-   // -------- This is the first isolated problem --------------
-
    private int numLagrangeIterations = 15;
    private double initialPenalty = 0.5;
    private double penaltyIncreaseFactor = 1.1;
@@ -23,8 +35,7 @@ public class TestADMM
    DMatrixD1 initial2 = new DMatrixRMaj(new double[] {0.0});
    DMatrixD1[] initialValues = {initial1, initial2};
 
-
-   // optimum is (0,0,0...)
+   // unconstrained optimum is (0,0,0...)
    public static double costFunction(DMatrixD1 inputs)
    {
       return VectorVectorMult_DDRM.innerProd(inputs, inputs);
@@ -54,18 +65,18 @@ public class TestADMM
    }
 
    @Test
-   public void test()
+   public void simpleBlockConstraintTest()
    {
       // ======= Specify the ADMM problem =============
-      AugmentedLagrangeOptimizationProblem augmentedLagrange1 = new AugmentedLagrangeOptimizationProblem(TestADMM::costFunction);
-      augmentedLagrange1.addInequalityConstraint(TestADMM::constraint3);
-      AugmentedLagrangeOptimizationProblem augmentedLagrange2 = new AugmentedLagrangeOptimizationProblem(TestADMM::costFunction);
-      augmentedLagrange2.addInequalityConstraint(TestADMM::constraint3);
+      AugmentedLagrangeOptimizationProblem augmentedLagrange1 = new AugmentedLagrangeOptimizationProblem(AdmmConvergenceTest::costFunction);
+      augmentedLagrange1.addInequalityConstraint(AdmmConvergenceTest::constraint3);
+      AugmentedLagrangeOptimizationProblem augmentedLagrange2 = new AugmentedLagrangeOptimizationProblem(AdmmConvergenceTest::costFunction);
+      augmentedLagrange2.addInequalityConstraint(AdmmConvergenceTest::constraint3);
 
       MultiblockAdmmProblem admm = new MultiblockAdmmProblem();
       admm.addIsolatedProblem(augmentedLagrange1);
       admm.addIsolatedProblem(augmentedLagrange2);
-      admm.addEqualityConstraint(TestADMM::blockConstraint1);
+      admm.addEqualityConstraint(AdmmConvergenceTest::blockConstraint1);
       admm.initialize(initialPenalty, penaltyIncreaseFactor);
 
       // ========= Everything below is for solving ==============
@@ -76,14 +87,14 @@ public class TestADMM
          optimizers[i] = new WrappedGradientDescent();
       }
 
-      MultiblockADMMOptimizer admmOptimizer = new MultiblockADMMOptimizer(admm, optimizers);
+      MultiblockAdmmOptimizer admmOptimizer = new MultiblockAdmmOptimizer(admm, optimizers);
       admmOptimizer.setVerbose(true);
       DMatrixD1[] optima = admmOptimizer.solveOverNIterations(numLagrangeIterations, initialValues);
 
       assertTrue("x1 arrived on desired value", MathTools.epsilonCompare(optima[0].get(0), 2, 1e-3));
       assertTrue("x2 arrived on desired value", MathTools.epsilonCompare(optima[1].get(0), 2, 1e-3));
 
-      System.out.println("Test completed successfully");
+      LogTools.debug("Test completed successfully");
    }
 
 }

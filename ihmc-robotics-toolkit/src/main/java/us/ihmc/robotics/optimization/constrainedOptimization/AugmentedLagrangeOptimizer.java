@@ -16,8 +16,8 @@ public class AugmentedLagrangeOptimizer
    private final CostFunction lagrangeCostFunction;
    private final Optimizer optimizer;
 
-   private double optimumCost;
-   private DMatrixD1 optimumParameters = new DMatrixRMaj();
+   private double optimumCost = Double.POSITIVE_INFINITY;
+   private DMatrixD1 optimumParameters = null;
 
    private boolean verbose = true;
 
@@ -37,9 +37,9 @@ public class AugmentedLagrangeOptimizer
       this.verbose = verbose;
    }
 
-   public DMatrixD1 optimize(int numLagrangeIterations, DMatrixD1 initialParam)
+   public DMatrixD1 optimize(int numLagrangeIterations, DMatrixD1 seedParameters)
    {
-      DMatrixD1 initial = new DMatrixRMaj(initialParam);
+      DMatrixD1 initial = new DMatrixRMaj(seedParameters);
       int iteration = 0;
       while (iteration < numLagrangeIterations)
       {
