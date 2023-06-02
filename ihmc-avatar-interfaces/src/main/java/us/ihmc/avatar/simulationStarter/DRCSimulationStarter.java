@@ -7,6 +7,7 @@ import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLev
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Consumer;
 
 import controller_msgs.msg.dds.HighLevelStateMessage;
 import us.ihmc.avatar.DRCLidar;
@@ -95,6 +96,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    private PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber;
    private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters;
+   private Consumer<HumanoidFloatingRootJointRobot> robotGraphicsMutator;
 
    private RealtimeROS2Node realtimeROS2Node;
 
@@ -297,6 +299,12 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    {
       checkIfSimulationIsAlreadyCreated();
       this.externalPelvisCorrectorSubscriber = externalPelvisCorrectorSubscriber;
+   }
+
+   public void setRobotGraphicsMutator(Consumer<HumanoidFloatingRootJointRobot> robotGraphicsMutator)
+   {
+      checkIfSimulationIsAlreadyCreated();
+      this.robotGraphicsMutator = robotGraphicsMutator;
    }
 
    /**
@@ -547,6 +555,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       if (externalPelvisCorrectorSubscriber != null)
          avatarSimulationFactory.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
+      if (robotGraphicsMutator != null)
+         avatarSimulationFactory.setRobotGraphicsMutator(robotGraphicsMutator);
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
 
       HighLevelHumanoidControllerToolbox highLevelHumanoidControllerToolbox = controllerFactory.getHighLevelHumanoidControllerToolbox();
