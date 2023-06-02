@@ -126,12 +126,8 @@ public class PerceptionFilterTools
          double peakAngleThreshold = polygonizerParameters.getPeakAngleThreshold();
          double lengthThreshold = polygonizerParameters.getLengthThreshold();
 
-         LogTools.info("Count Before: {}", concaveHull.getConcaveHullVertices().size());
-
          ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHull);
          ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHull);
-
-         LogTools.info("Count After: {}", concaveHull.getConcaveHullVertices().size());
 
          double depthThreshold = polygonizerParameters.getDepthThreshold();
          List<ConvexPolygon2D> decomposedPolygons = new ArrayList<>();
@@ -142,11 +138,6 @@ public class PerceptionFilterTools
          filteredRegion.setRegionId(region.getRegionId());
 
          region.set(filteredRegion);
-
-         //if (polygonizerParameters.getCutNarrowPassage())
-         //    ConcaveHull hull = ConcaveHullPruningFilteringTools.concaveHullNarrowPassageCutter(lengthThreshold, concaveHull).getConcaveHulls().stream().toList().get(0);
-         //else
-         //   return concaveHulls;
       }
    }
 }
