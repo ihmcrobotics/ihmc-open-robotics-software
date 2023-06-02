@@ -71,7 +71,7 @@ public class LocalizationAndMappingProcess {
      * Live Mode refers to being active and accepting new planar regions for updating the map. It can be overridden by the PerceptionConfigurationParameters
      * parameter for enabling SLAM.
      */
-    private boolean enableLiveMode = false;
+    private boolean enableLiveMode = true;
     private boolean smoothingEnabled = false;
 
     private HumanoidReferenceFrames referenceFrames;
@@ -165,7 +165,6 @@ public class LocalizationAndMappingProcess {
     }
 
     public void updateMapWithNewRegions(FramePlanarRegionsList regions) {
-        referenceFramesUpdater.run();
 
         RigidBodyTransform midFootTransform = referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame();
         planarRegionMap.registerRegions(
