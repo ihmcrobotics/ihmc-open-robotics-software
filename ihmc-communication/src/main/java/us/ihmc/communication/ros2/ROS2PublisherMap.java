@@ -45,8 +45,7 @@ public class ROS2PublisherMap
 
    public <T> void publish(ROS2Topic<T> topic, T message)
    {
-      IHMCROS2Publisher publisher = getOrCreatePublisher(topic);
-      publisher.publish(message);
+      getOrCreatePublisher(topic).publish(message);
    }
 
    public void publish(ROS2Topic<Pose3D> topic, Pose3D message)
