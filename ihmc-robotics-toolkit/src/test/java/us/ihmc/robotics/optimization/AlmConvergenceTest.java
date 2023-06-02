@@ -11,10 +11,15 @@ import us.ihmc.robotics.optimization.constrainedOptimization.AugmentedLagrangeOp
 import static us.ihmc.robotics.Assert.assertTrue;
 
 /**
- * Unconstrained optimum is (0,0,0)
- * Constrained optimum is (6, 5, 0)
+ * Augmented Lagrangian Multipliers is used to solve
+ * problems given by:
+ *    minimize f(x)
+ *    st: Gi(x) == 0 for G[]
+ *        Hi(x) >= 0 for H[]
+ *
+ * This test ensures that the algorithm works correctly
  */
-public class TestALM
+public class AlmTest
 {
    private AugmentedLagrangeOptimizationProblem augmentedLagrangeProblem;
 
@@ -68,7 +73,7 @@ public class TestALM
    }
 
    @Test
-   public void testIsolatedConstraints()
+   public void isolatedConstraintsTest()
    {
       DMatrixD1 initial = new DMatrixRMaj(new double[] {10.0, 14.5, 16.0});
       int numLagrangeIterations = 10;
@@ -76,10 +81,10 @@ public class TestALM
       double penaltyIncreaseFactor = 1.5;
 
       // Set up the optimization problem
-      augmentedLagrangeProblem = new AugmentedLagrangeOptimizationProblem(TestALM::costFunctionQuadratic);
-      augmentedLagrangeProblem.addEqualityConstraint(TestALM::constraint1);
-      augmentedLagrangeProblem.addInequalityConstraint(TestALM::constraint2);
-      augmentedLagrangeProblem.addInequalityConstraint(TestALM::constraint3);
+      augmentedLagrangeProblem = new AugmentedLagrangeOptimizationProblem(AlmTest::costFunctionQuadratic);
+      augmentedLagrangeProblem.addEqualityConstraint(AlmTest::constraint1);
+      augmentedLagrangeProblem.addInequalityConstraint(AlmTest::constraint2);
+      augmentedLagrangeProblem.addInequalityConstraint(AlmTest::constraint3);
 //      augmentedLagrange.addEqualityConstraint(TestALM::constraint4);
       augmentedLagrangeProblem.initialize(initialPenalty, penaltyIncreaseFactor);
 
@@ -95,7 +100,7 @@ public class TestALM
    }
 
    @Test
-   public void testJointConstraints()
+   public void jointConstraintsTest()
    {
       DMatrixD1 initial = new DMatrixRMaj(new double[] {10.0, 14.5, 16.0});
       int numLagrangeIterations = 10;
@@ -103,8 +108,8 @@ public class TestALM
       double penaltyIncreaseFactor = 1.5;
 
       // Set up the optimization problem
-      augmentedLagrangeProblem = new AugmentedLagrangeOptimizationProblem(TestALM::costFunctionQuadratic);
-      augmentedLagrangeProblem.addEqualityConstraint(TestALM::constraint4);
+      augmentedLagrangeProblem = new AugmentedLagrangeOptimizationProblem(AlmTest::costFunctionQuadratic);
+      augmentedLagrangeProblem.addEqualityConstraint(AlmTest::constraint4);
       augmentedLagrangeProblem.initialize(initialPenalty, penaltyIncreaseFactor);
 
       // Set up the optimizer
@@ -119,7 +124,7 @@ public class TestALM
    }
 
    @Test
-   public void testNonconvex()
+   public void nonconvexTest()
    {
       DMatrixD1 initial = new DMatrixRMaj(new double[] {13, 14});
       int numLagrangeIterations = 10;
@@ -127,8 +132,8 @@ public class TestALM
       double penaltyIncreaseFactor = 1.5;
 
       // Set up the optimization problem
-      augmentedLagrangeProblem = new AugmentedLagrangeOptimizationProblem(TestALM::costFunctionNonconvex);
-      augmentedLagrangeProblem.addEqualityConstraint(TestALM::constraintNonconvex);
+      augmentedLagrangeProblem = new AugmentedLagrangeOptimizationProblem(AlmTest::costFunctionNonconvex);
+      augmentedLagrangeProblem.addEqualityConstraint(AlmTest::constraintNonconvex);
       augmentedLagrangeProblem.initialize(initialPenalty, penaltyIncreaseFactor);
 
       // Set up the optimizer
