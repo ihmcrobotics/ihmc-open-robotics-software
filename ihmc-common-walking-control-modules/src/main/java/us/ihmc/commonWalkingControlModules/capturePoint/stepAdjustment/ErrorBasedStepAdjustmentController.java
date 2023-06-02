@@ -86,6 +86,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
    private final FramePoint3D referencePositionInControlPlane = new FramePoint3D();
    private final FramePoint3D tempPoint = new FramePoint3D();
+   private final FramePoint2D tempPoint2D = new FramePoint2D();
 
    private final YoFrameVector2D footstepAdjustmentInControlPlane = new YoFrameVector2D(yoNamePrefix + "footstepAdjustmentInControlPlane",
                                                                                         worldFrame,
@@ -423,7 +424,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
       icpError.sub(desiredICP, currentICP);
 
-      boolean errorAboveThreshold = icpError.lengthSquared() > MathTools.square(minICPErrorForStepAdjustment.getValue());
+      boolean errorAboveThreshold = icpError.normSquared() > MathTools.square(minICPErrorForStepAdjustment.getValue());
 
       if (useICPControlPlaneInStepAdjustment.getValue())
          icpControlPlane.projectPointOntoControlPlane(worldFrame, upcomingFootstep.getPosition(), referencePositionInControlPlane);
@@ -440,10 +441,19 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       {
          if (environmentConstraintProvider.validateConvexityOfPlanarRegion())
          {
-            wasAdjusted |= environmentConstraintProvider.applyEnvironmentConstraintToFootstep(upcomingFootstepSide.getEnumValue(),
-                                                                                              footstepSolution,
-                                                                                              upcomingFootstepContactPoints);
+            boolean environmentallyConstrained = environmentConstraintProvider.applyEnvironmentConstraintToFootstep(upcomingFootstepSide.getEnumValue(),
+                                                                                                                    footstepSolution,
+                                                                                                                    upcomingFootstepContactPoints);
+            wasAdjusted |= environmentallyConstrained;
             hasPlanarRegionBeenAssigned.set(environmentConstraintProvider.foundSolution());
+
+            // ok, force it back to be reachable
+            if (environmentallyConstrained)
+            {
+               tempPoint2D.set(footstepSolution.getPosition());
+               getBestReachabilityConstraintToUseWhenNotIntersecting().orthogonalProjection(tempPoint2D);
+               footstepSolution.getPosition().set(tempPoint2D);
+            }
          }
       }
 
