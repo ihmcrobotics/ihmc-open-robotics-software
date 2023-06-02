@@ -1,6 +1,7 @@
 package us.ihmc.robotics.optimization.constrainedOptimization;
 
 import org.ejml.data.DMatrixD1;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.optimization.Optimizer;
 
 /**
@@ -9,17 +10,19 @@ import us.ihmc.robotics.optimization.Optimizer;
  *
  * The optimizers used to solve each unconstrained lagrangian subproblem need to be specified separately
  */
-public class MultiblockADMMOptimizer
+public class MultiblockAdmmOptimizer
 {
    private final MultiblockAdmmProblem admm;
    private final Optimizer[] optimizers;
    private boolean verbose = true;
 
-   public MultiblockADMMOptimizer(MultiblockAdmmProblem admm, Optimizer[] optimizers)
+   public MultiblockAdmmOptimizer(MultiblockAdmmProblem admm, Optimizer[] optimizers)
    {
       this.admm = admm;
       this.optimizers = optimizers;
-      // TODO ensure size of optimizers is same as num blocks
+      if (optimizers.length != admm.getNumBlocks())
+         throw new RuntimeException("Not enough optimizers "  + optimizers.length +
+                                    " were provided for all blocks of the problem " + admm.getNumBlocks());
    }
 
    public void setVerbose(boolean verbose)
@@ -29,8 +32,9 @@ public class MultiblockADMMOptimizer
 
    public DMatrixD1[] solveOverNIterations(int numLagrangeIterations, DMatrixD1[] initialValues)
    {
-      // TODO ensure size of initialValues is same as num blocks
-
+      if (initialValues.length != admm.getNumBlocks())
+         throw new RuntimeException("Not enough initial values "  + initialValues.length +
+                                    " were provided for all blocks of the problem " + admm.getNumBlocks());
       int numBlocks = admm.getNumBlocks();
       DMatrixD1[] optima = new DMatrixD1[numBlocks];
 
@@ -44,12 +48,12 @@ public class MultiblockADMMOptimizer
 
       if (verbose)
       {
-         System.out.println("===== Initial Seed ===============");
+         LogTools.debug("===== Initial Seed ===============");
          admm.printResults(optima);
       }
 
       admm.updateLagrangeMultipliers(optima);
-      admm.updateLastOptimalBlocks(optima);
+      admm.saveOptimalBlocksForLastIteration(optima);
 
       // Do the main lagrange loop
       int iteration = 0;
@@ -64,18 +68,17 @@ public class MultiblockADMMOptimizer
          // Run optimization
          for (int i = 0; i < numBlocks; i++)
          {
-            initialValues[i].set(optima[i]);
-            optima[i] = optimizers[i].optimize(initialValues[i]);
+            optima[i] = optimizers[i].optimize(optima[i]);
          }
 
          admm.updateLagrangeMultipliers(optima);
-         admm.updateLastOptimalBlocks(optima);
+         admm.saveOptimalBlocksForLastIteration(optima);
 
          iteration += 1;
 
          if (verbose)
          {
-            System.out.println("===== Lagrange Iteration: " + iteration + " ==========");
+            LogTools.debug("===== Lagrange Iteration: " + iteration + " ==========");
             admm.printResults(optima);
          }
       }

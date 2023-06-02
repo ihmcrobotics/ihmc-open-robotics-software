@@ -2,12 +2,13 @@ package us.ihmc.robotics.optimization.constrainedOptimization;
 
 import org.ejml.data.DMatrixD1;
 import org.ejml.data.DMatrixRMaj;
+import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Converts the constrained optimization problem:
+ * Converts the constrained optimization problem on parameters x:
  *    minimize f(x)
  *    st: Gi(x) == 0 for G[]
  *        Hi(x) >= 0 for H[]
@@ -38,7 +39,7 @@ import java.util.List;
  */
 public class AugmentedLagrangeOptimizationProblem
 {
-   private CostFunction costFunction;
+   private final CostFunction costFunction;
    private final List<ConstraintFunction> inequalityConstraints = new ArrayList<>();
    private final List<ConstraintFunction> equalityConstraints = new ArrayList<>();
 
@@ -73,11 +74,6 @@ public class AugmentedLagrangeOptimizationProblem
       inequalityConstraints.clear();
    }
 
-   public void setCostFunction(CostFunction costFunction)
-   {
-      this.costFunction = costFunction;
-   }
-
    /**
     * @param initialPenalty Keep the initial penalty small
     * @param penaltyIncreaseFactor
@@ -98,14 +94,7 @@ public class AugmentedLagrangeOptimizationProblem
     */
    public CostFunction getAugmentedCostFunction()
    {
-      return new CostFunction()
-      {
-         @Override
-         public double calculate(DMatrixD1 x)
-         {
-            return calculateDualProblemCost(x);
-         }
-      };
+      return this::calculateDualProblemCost;
    }
 
    /**
@@ -132,30 +121,34 @@ public class AugmentedLagrangeOptimizationProblem
 
    /**
     * For constraints H(x) = [h1(x), h2(x), ...] >= 0,
-    * calculate [h1(x), h2(x), ...]
+    * calculate [h1(x), h2(x), ...] the residual values
+    *
+    * If all constraints are satisfied, all returned values will be (tolerant) >= to 0.0
     */
    private DMatrixD1 evaluateInequalityConstraints(DMatrixD1 x)
    {
       int numConstraints = inequalityConstraints.size();
-      double[] value = new double[numConstraints];
+      DMatrixRMaj value = new DMatrixRMaj(numConstraints, 1);
       for (int i = 0; i < numConstraints; i++)
       {
-         value[i] = inequalityConstraints.get(i).calculate(x);
+         value.set(i, inequalityConstraints.get(i).calculate(x));
       }
-      return new DMatrixRMaj(value);
+      return value;
    }
 
    /**
     * For constraints G(x) = [g1(x), g2(x), ...] = 0,
-    * calculate [g1(x), g2(x), ...]
+    * calculate [g1(x), g2(x), ...] the residual values
+    *
+    * If all constraints are satisfied, all returned values will be (tolerant) equal to 0.0
     */
    private DMatrixD1 evaluateEqualityConstraints(DMatrixD1 x)
    {
       int numConstraints = equalityConstraints.size();
-      double[] value = new double[numConstraints];
+      DMatrixRMaj value = new DMatrixRMaj(numConstraints, 1);
       for (int i = 0; i < numConstraints; i++)
       {
-         value[i] = equalityConstraints.get(i).calculate(x);
+         value.set(i, equalityConstraints.get(i).calculate(x));
       }
       return new DMatrixRMaj(value);
    }
@@ -176,30 +169,30 @@ public class AugmentedLagrangeOptimizationProblem
 
    public void printResults(DMatrixD1 x, double cost, DMatrixD1 equalityEvaluations, DMatrixD1 inequalityEvaluations)
    {
-      System.out.println("Solution x:");
+      LogTools.debug("Solution x:");
       for (int i = 0; i < x.getNumElements(); i++)
       {
-         System.out.println("\t" + x.get(i) + ",");
+         LogTools.debug("\t" + x.get(i) + ",");
       }
 
-      System.out.println("Cost f(x):");
-      System.out.println("\t" + cost);
+      LogTools.debug("Cost f(x):");
+      LogTools.debug("\t" + cost);
 
       if (equalityEvaluations.getNumElements() > 0)
       {
-         System.out.println("Equality Constraints G(x):");
+         LogTools.debug("Equality Constraints G(x):");
          for (int i = 0; i < equalityEvaluations.getNumElements(); i++)
          {
-            System.out.println("\t" + equalityEvaluations.get(i) + " == 0");
+            LogTools.debug("\t" + equalityEvaluations.get(i) + " == 0");
          }
       }
 
       if (inequalityEvaluations.getNumElements() > 0)
       {
-         System.out.println("Inquality Constraints H(x):");
+         LogTools.debug("Inquality Constraints H(x):");
          for (int i = 0; i < inequalityEvaluations.getNumElements(); i++)
          {
-            System.out.println("\t" + inequalityEvaluations.get(i) + " >= 0");
+            LogTools.debug("\t" + inequalityEvaluations.get(i) + " >= 0");
          }
       }
    }

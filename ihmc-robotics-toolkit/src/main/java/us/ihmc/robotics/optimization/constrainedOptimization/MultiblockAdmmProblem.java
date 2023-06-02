@@ -2,12 +2,13 @@ package us.ihmc.robotics.optimization.constrainedOptimization;
 
 import org.ejml.data.DMatrixD1;
 import org.ejml.data.DMatrixRMaj;
+import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Solves the optimization problem:
+ * Solves the optimization problem for blocks of parameters x[] = [x1, x2, ...]:
  *    minimize f1(x1) + f2(x2) + ...
  *    st:
  *       G1[](x1) == 0, G2[](x2) == 0, ...
@@ -16,8 +17,8 @@ import java.util.List;
  *       J[](x1, x2,...) == 0
  *       K[](x1, x2,...) >= 0
  * ------
- * which can be considered the isolated blocks / subproblems:
- *    minimize fi(i)
+ * which can be considered the isolated subproblems for each block xi:
+ *    minimize fi(xi)
  *    st:
  *       Gi[](xi) == 0
  *       Hi[](xi) >= 0
@@ -32,7 +33,7 @@ import java.util.List;
  *    Li(xi, x_other*) = Fi(xi) + augmentations(J[](xi, x_other*), K[](xi, x_other*))
  *
  * The global constraints are solved using the Alternating Direction Method of Multipliers
- * within {@link MultiblockADMMOptimizer} through the algorithm
+ * within {@link MultiblockAdmmOptimizer} through the algorithm
  *    for each block xi,
  *       initialize xi* = optimize(Fi(xi)) for xi
  *
@@ -46,12 +47,12 @@ import java.util.List;
  */
 public class MultiblockAdmmProblem
 {
-   private List<AugmentedLagrangeOptimizationProblem> isolatedOptimizationProblems = new ArrayList<>(); // size = numblocks
-   List<BlockConstraintFunction> inequalityConstraints = new ArrayList<>();
-   List<BlockConstraintFunction> equalityConstraints = new ArrayList<>();
+   private final List<AugmentedLagrangeOptimizationProblem> isolatedOptimizationProblems = new ArrayList<>(); // size = numblocks
+   private final List<BlockConstraintFunction> inequalityConstraints = new ArrayList<>();
+   private final List<BlockConstraintFunction> equalityConstraints = new ArrayList<>();
 
    private AugmentedLagrangeConstructor multiblockAugmentedLagrangeConstructor;
-   private DMatrixD1[] lastOptimalBlocks;
+   private DMatrixD1[] optimalBlocksFromLastIteration;
 
    // =========================== Setup ===================================
 
@@ -117,7 +118,7 @@ public class MultiblockAdmmProblem
 
    /**
     * Returns Li(xi) == Li(xi, x_other*), the unconstrained augmented cost function
-    * x_other* is stored implicitely in this class by updating {@link #updateLastOptimalBlocks(DMatrixD1...)}
+    * x_other* is stored implicitely in this class by updating {@link #saveOptimalBlocksForLastIteration(DMatrixD1[])}
     *
     * Use a separate optimizer to solve this unconstrained problem
     */
@@ -128,7 +129,7 @@ public class MultiblockAdmmProblem
          @Override
          public double calculate(DMatrixD1 x)
          {
-            return calculateDualCostForBlock(blockIndex, x);
+            return calculateDualCostForBlock(blockIndex, x, optimalBlocksFromLastIteration);
          }
       };
    }
@@ -138,9 +139,9 @@ public class MultiblockAdmmProblem
     * @param blockIndex i
     * @param x xi
     */
-   public double calculateDualCostForBlock(int blockIndex, DMatrixD1 x)
+   public double calculateDualCostForBlock(int blockIndex, DMatrixD1 x, DMatrixD1[] optimalBlocksForLastIteration)
    {
-      DMatrixD1[] blocksCopy = lastOptimalBlocks.clone();
+      DMatrixD1[] blocksCopy = optimalBlocksForLastIteration.clone();
       blocksCopy[blockIndex] = x;
       return calculateDualCostForBlock(blockIndex, blocksCopy);
    }
@@ -148,13 +149,13 @@ public class MultiblockAdmmProblem
    /**
     * evaluates Li(xi, x_other*)
     * @param blockIndex i
-    * @param lastOptimalblocks x*, which contains [xi*, x_other*] in normal order [x1*, x2*, ...]
+    * @param blocks x*, which contains [xi*, x_other*] in normal order [x1*, x2*, ...]
     */
-   private double calculateDualCostForBlock(int blockIndex, DMatrixD1... lastOptimalblocks)
+   private double calculateDualCostForBlock(int blockIndex, DMatrixD1[] blocks)
    {
-      double isolatedCost = isolatedOptimizationProblems.get(blockIndex).calculateDualProblemCost(lastOptimalblocks[blockIndex]);
-      DMatrixD1 inequalityConstraintEvaluations = evaluateInequalityConstraints(lastOptimalblocks);
-      DMatrixD1 equalityConstraintEvaluations = evaluateEqualityConstraints(lastOptimalblocks);
+      double isolatedCost = isolatedOptimizationProblems.get(blockIndex).calculateDualProblemCost(blocks[blockIndex]);
+      DMatrixD1 inequalityConstraintEvaluations = evaluateGlobalInequalityConstraints(blocks);
+      DMatrixD1 equalityConstraintEvaluations = evaluateEqualityConstraints(blocks);
 
       return multiblockAugmentedLagrangeConstructor.getAugmentedLagrangeCost(isolatedCost,
                                                                    equalityConstraintEvaluations,
@@ -162,39 +163,43 @@ public class MultiblockAdmmProblem
    }
 
    /**
-    * For constraints G(x) = [g1(x), g2(x), ...] >= 0, calculate [g1(x), g2(x), ...]
-    * @return
+    * For constraints K(x[]) = [k1(x[]), k2(x[]), ...] >= 0,
+    * calculate [k1(x[]), k2(x[]), ...] the residual values
+    *
+    * If all constraints are satisfied, all returned values will be (tolerant) >= to 0.0
     */
-   private DMatrixD1 evaluateInequalityConstraints(DMatrixD1... blocks)
+   private DMatrixD1 evaluateGlobalInequalityConstraints(DMatrixD1[] blocks)
    {
       int numConstraints = inequalityConstraints.size();
-      double[] value = new double[numConstraints];
+      DMatrixD1 value = new DMatrixRMaj(numConstraints, 1);
       for (int i = 0; i < numConstraints; i++)
       {
-         value[i] = inequalityConstraints.get(i).calculate(blocks);
+         value.set(i, inequalityConstraints.get(i).calculate(blocks));
       }
-      return new DMatrixRMaj(value);
+      return value;
    }
 
    /**
-    * For constraints H(x) = [h1(x), h2(x), ...] = 0, calculate [h1(x), h2(x), ...]
-    * @return
+    * For constraints J(x[]) = [j1(x[]), j2(x[]), ...] = 0,
+    * calculate [j1(x[]), j2(x[]), ...] the residual values
+    *
+    * If all constraints are satisfied, all returned values will be (tolerant) equal to 0.0
     */
-   private DMatrixD1 evaluateEqualityConstraints(DMatrixD1... blocks)
+   private DMatrixD1 evaluateEqualityConstraints(DMatrixD1[] blocks)
    {
       int numConstraints = equalityConstraints.size();
-      double[] value = new double[numConstraints];
+      DMatrixD1 value = new DMatrixRMaj(numConstraints, 1);
       for (int i = 0; i < numConstraints; i++)
       {
-         value[i] = equalityConstraints.get(i).calculate(blocks);
+         value.set(i, equalityConstraints.get(i).calculate(blocks));
       }
-      return new DMatrixRMaj(value);
+      return value;
    }
 
-   public void updateLagrangeMultipliers(DMatrixD1... optimalBlocks)
+   public void updateLagrangeMultipliers(DMatrixD1[] optimalBlocks)
    {
       multiblockAugmentedLagrangeConstructor.updateLagrangeMultipliers(evaluateEqualityConstraints(optimalBlocks),
-                                                                       evaluateInequalityConstraints(optimalBlocks));
+                                                                       evaluateGlobalInequalityConstraints(optimalBlocks));
 
       for (int i = 0; i < isolatedOptimizationProblems.size(); i++)
       {
@@ -207,9 +212,9 @@ public class MultiblockAdmmProblem
    /**
     * Saves the optimal blocks from the last iteration x* = [x1*, x2*, ...]
     */
-   public void updateLastOptimalBlocks(DMatrixD1... optimalBlocks)
+   public void saveOptimalBlocksForLastIteration(DMatrixD1[] optimalBlocks)
    {
-      lastOptimalBlocks = optimalBlocks;
+      optimalBlocksFromLastIteration = optimalBlocks;
    }
 
    // ================================ Getter/Setter ========================================
@@ -224,34 +229,34 @@ public class MultiblockAdmmProblem
       return isolatedOptimizationProblems.size();
    }
 
-   public void printResults(DMatrixD1... blocks)
+   public void printResults(DMatrixD1[] blocks)
    {
-      printResults(evaluateEqualityConstraints(blocks), evaluateInequalityConstraints(blocks), blocks);
+      printResults(evaluateEqualityConstraints(blocks), evaluateGlobalInequalityConstraints(blocks), blocks);
    }
 
-   public void printResults(DMatrixD1 equalityEvaluations, DMatrixD1 inequalityEvaluations, DMatrixD1... blocks)
+   public void printResults(DMatrixD1 equalityEvaluations, DMatrixD1 inequalityEvaluations, DMatrixD1[] blocks)
    {
       for (int i = 0; i < isolatedOptimizationProblems.size(); i++)
       {
-         System.out.println("-- Isolated Problem " + i + ": --");
+         LogTools.debug("-- Isolated Problem " + i + ": --");
          isolatedOptimizationProblems.get(i).printResults(blocks[i]);
       }
 
       if (equalityEvaluations.getNumElements() > 0)
       {
-         System.out.println("-- Global Equality Constraints J(x[]): --");
+         LogTools.debug("-- Global Equality Constraints J(x[]): --");
          for (int i = 0; i < equalityEvaluations.getNumElements(); i++)
          {
-            System.out.println("\t" + equalityEvaluations.get(i) + " == 0");
+            LogTools.debug("\t" + equalityEvaluations.get(i) + " == 0");
          }
       }
 
       if (inequalityEvaluations.getNumElements() > 0)
       {
-         System.out.println("-- Global Inquality Constraints K(x[]): --");
+         LogTools.debug("-- Global Inquality Constraints K(x[]): --");
          for (int i = 0; i < inequalityEvaluations.getNumElements(); i++)
          {
-            System.out.println("\t" + inequalityEvaluations.get(i) + " >= 0");
+            LogTools.debug("\t" + inequalityEvaluations.get(i) + " >= 0");
          }
       }
 

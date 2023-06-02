@@ -19,7 +19,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
  *
  * This test ensures that the algorithm works correctly
  */
-public class AlmTest
+public class AlmConvergenceTest
 {
    private AugmentedLagrangeOptimizationProblem augmentedLagrangeProblem;
 
@@ -81,10 +81,10 @@ public class AlmTest
       double penaltyIncreaseFactor = 1.5;
 
       // Set up the optimization problem
-      augmentedLagrangeProblem = new AugmentedLagrangeOptimizationProblem(AlmTest::costFunctionQuadratic);
-      augmentedLagrangeProblem.addEqualityConstraint(AlmTest::constraint1);
-      augmentedLagrangeProblem.addInequalityConstraint(AlmTest::constraint2);
-      augmentedLagrangeProblem.addInequalityConstraint(AlmTest::constraint3);
+      augmentedLagrangeProblem = new AugmentedLagrangeOptimizationProblem(AlmConvergenceTest::costFunctionQuadratic);
+      augmentedLagrangeProblem.addEqualityConstraint(AlmConvergenceTest::constraint1);
+      augmentedLagrangeProblem.addInequalityConstraint(AlmConvergenceTest::constraint2);
+      augmentedLagrangeProblem.addInequalityConstraint(AlmConvergenceTest::constraint3);
 //      augmentedLagrange.addEqualityConstraint(TestALM::constraint4);
       augmentedLagrangeProblem.initialize(initialPenalty, penaltyIncreaseFactor);
 
@@ -108,8 +108,8 @@ public class AlmTest
       double penaltyIncreaseFactor = 1.5;
 
       // Set up the optimization problem
-      augmentedLagrangeProblem = new AugmentedLagrangeOptimizationProblem(AlmTest::costFunctionQuadratic);
-      augmentedLagrangeProblem.addEqualityConstraint(AlmTest::constraint4);
+      augmentedLagrangeProblem = new AugmentedLagrangeOptimizationProblem(AlmConvergenceTest::costFunctionQuadratic);
+      augmentedLagrangeProblem.addEqualityConstraint(AlmConvergenceTest::constraint4);
       augmentedLagrangeProblem.initialize(initialPenalty, penaltyIncreaseFactor);
 
       // Set up the optimizer
@@ -132,8 +132,8 @@ public class AlmTest
       double penaltyIncreaseFactor = 1.5;
 
       // Set up the optimization problem
-      augmentedLagrangeProblem = new AugmentedLagrangeOptimizationProblem(AlmTest::costFunctionNonconvex);
-      augmentedLagrangeProblem.addEqualityConstraint(AlmTest::constraintNonconvex);
+      augmentedLagrangeProblem = new AugmentedLagrangeOptimizationProblem(AlmConvergenceTest::costFunctionNonconvex);
+      augmentedLagrangeProblem.addEqualityConstraint(AlmConvergenceTest::constraintNonconvex);
       augmentedLagrangeProblem.initialize(initialPenalty, penaltyIncreaseFactor);
 
       // Set up the optimizer
