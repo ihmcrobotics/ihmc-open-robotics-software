@@ -70,6 +70,11 @@ public interface PerceptionConfigurationParametersReadOnly extends StoredPropert
       return get(boundingBoxFilter);
    }
 
+   default boolean getConcaveHullFilters()
+   {
+      return get(concaveHullFilters);
+   }
+
    default boolean getActiveMapping()
    {
       return get(activeMapping);
