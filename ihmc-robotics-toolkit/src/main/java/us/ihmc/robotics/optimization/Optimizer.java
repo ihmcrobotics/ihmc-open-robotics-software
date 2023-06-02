@@ -20,19 +20,20 @@ public interface Optimizer
     * Optimizes until end conditions are reached
     * @return the optimum that was found
     */
-   public DMatrixD1 optimize(DMatrixD1 initial);
+   DMatrixD1 optimize(DMatrixD1 initial);
 
-   public DMatrixD1 getOptimalParameters();
+   DMatrixD1 getOptimalParameters();
 
-   public double getOptimumCost();
+   double getOptimumCost();
 
-   default public void printOutput()
+   default void printResults()
    {
-      System.out.println("solution is: ");
+      System.out.println("Solution x*: ");
       for (int i = 0; i < getOptimalParameters().getNumElements(); i++)
       {
          System.out.println("\t" + getOptimalParameters().get(i) + ",");
       }
-      System.out.println("optimal cost is " + getOptimumCost());
+      System.out.println("Local Optimum f(x*): " + getOptimumCost());
    }
+
 }
