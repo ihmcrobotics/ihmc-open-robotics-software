@@ -45,8 +45,6 @@ public class RDXWalkPathControlRing
    private final FramePose3D rightStanceFootPose = new FramePose3D();
    private final FramePose3D leftGoalFootPose = new FramePose3D();
    private final FramePose3D rightGoalFootPose = new FramePose3D();
-   private ReferenceFrame goalFrame;
-   private final FramePose3D goalPose = new FramePose3D();
    private final FramePose3D midFeetZUpPose = new FramePose3D();
    private SideDependentList<MovingReferenceFrame> footFrames;
    private double halfIdealFootstepWidth;
@@ -74,10 +72,6 @@ public class RDXWalkPathControlRing
       rightStanceFootstepGraphic = new RDXFootstepGraphic(contactPoints, RobotSide.RIGHT);
       leftGoalFootstepGraphic = new RDXFootstepGraphic(contactPoints, RobotSide.LEFT);
       rightGoalFootstepGraphic = new RDXFootstepGraphic(contactPoints, RobotSide.RIGHT);
-
-      goalFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("goalPose",
-                                                                                  ReferenceFrame.getWorldFrame(),
-                                                                                  footstepPlannerGoalGizmo.getPathControlRingGizmo().getTransformToParent());
 
       leftStanceFootstepGraphic.create();
       rightStanceFootstepGraphic.create();
@@ -165,7 +159,7 @@ public class RDXWalkPathControlRing
 
    private void queueFootstepPlan()
    {
-      footstepPlanning.queueAsynchronousPlanning(goalPose);
+      footstepPlanning.queueAsynchronousPlanning(footstepPlannerGoalGizmo.getPathControlRingGizmo().getPose3D());
    }
 
    private void updateStuff()
@@ -179,20 +173,14 @@ public class RDXWalkPathControlRing
       leftStanceFootPose.setZ(lowestStanceZ);
       rightStanceFootPose.setZ(lowestStanceZ);
 
-      goalFrame.update();
-      goalPose.setToZero(goalFrame);
-
-      leftGoalFootPose.setIncludingFrame(goalPose);
+      leftGoalFootPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), footstepPlannerGoalGizmo.getPathControlRingGizmo().getPose3D());
       leftGoalFootPose.getPosition().addY(halfIdealFootstepWidth);
       leftGoalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
       leftGoalFootPose.setZ(lowestStanceZ);
-      rightGoalFootPose.setIncludingFrame(goalPose);
+      rightGoalFootPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), footstepPlannerGoalGizmo.getPathControlRingGizmo().getPose3D());
       rightGoalFootPose.getPosition().subY(halfIdealFootstepWidth);
       rightGoalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
       rightGoalFootPose.setZ(lowestStanceZ);
-
-      goalPose.changeFrame(ReferenceFrame.getWorldFrame());
-      goalPose.setZ(lowestStanceZ);
 
       midFeetZUpPose.setToZero(midFeetZUpFrame);
       midFeetZUpPose.changeFrame(ReferenceFrame.getWorldFrame());
