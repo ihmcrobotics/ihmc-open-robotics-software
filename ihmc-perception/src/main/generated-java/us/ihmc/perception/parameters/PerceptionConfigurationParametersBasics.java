@@ -68,6 +68,11 @@ public interface PerceptionConfigurationParametersBasics extends PerceptionConfi
       set(PerceptionConfigurationParameters.boundingBoxFilter, boundingBoxFilter);
    }
 
+   default void setConcaveHullFilters(boolean concaveHullFilters)
+   {
+      set(PerceptionConfigurationParameters.concaveHullFilters, concaveHullFilters);
+   }
+
    default void setActiveMapping(boolean activeMapping)
    {
       set(PerceptionConfigurationParameters.activeMapping, activeMapping);

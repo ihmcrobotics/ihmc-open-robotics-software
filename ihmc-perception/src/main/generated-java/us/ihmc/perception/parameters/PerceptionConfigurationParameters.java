@@ -30,6 +30,7 @@ public class PerceptionConfigurationParameters extends StoredPropertySet impleme
    public static final BooleanStoredPropertyKey slamReset = keys.addBooleanKey("SLAM reset");
    public static final BooleanStoredPropertyKey supportSquareEnabled = keys.addBooleanKey("Support square enabled");
    public static final BooleanStoredPropertyKey boundingBoxFilter = keys.addBooleanKey("Bounding box filter");
+   public static final BooleanStoredPropertyKey concaveHullFilters = keys.addBooleanKey("Concave hull filters");
    public static final BooleanStoredPropertyKey activeMapping = keys.addBooleanKey("Active mapping");
 
    /**
