@@ -93,6 +93,27 @@ public class Polynomial implements PolynomialBasics
       }
    }
 
+   /** Deep copy constructor */
+   public Polynomial(Polynomial other)
+   {
+      maximumNumberOfCoefficients = other.maximumNumberOfCoefficients;
+      coefficients = other.coefficients.clone();
+      coefficientsCopy = other.coefficientsCopy.clone();
+      constraintMatrix = new DMatrixRMaj(other.constraintMatrix);
+      constraintVector = new DMatrixRMaj(other.constraintVector);
+      coefficientVector = new DMatrixRMaj(other.coefficientVector);
+      solver = LinearSolverFactory_DDRM.general(other.maximumNumberOfCoefficients, other.maximumNumberOfCoefficients);
+      timeInterval.setInterval(other.timeInterval.getStartTime(), other.timeInterval.getEndTime());
+      currentTime = other.currentTime;
+      numberOfCoefficients = other.numberOfCoefficients;
+      f = other.f;
+      df = other.df;
+      ddf = other.ddf;
+      xPowers = other.xPowers.clone();
+      xPowersDerivativeVector = new DMatrixRMaj(other.xPowersDerivativeVector);
+      isConstraintMatrixUpToDate = other.isConstraintMatrixUpToDate;
+   }
+
    @Override
    public void compute(double x)
    {
