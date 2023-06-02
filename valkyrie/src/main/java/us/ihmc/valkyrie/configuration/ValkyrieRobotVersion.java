@@ -1,6 +1,8 @@
 package us.ihmc.valkyrie.configuration;
 
-public enum ValkyrieRobotVersion
+import us.ihmc.avatar.drcRobot.RobotVersion;
+
+public enum ValkyrieRobotVersion implements RobotVersion
 {
    DEFAULT, FINGERLESS, ARMLESS, DUAL_ARM_MASS_SIM, DUAL_PSYONIC, DUAL_ZIMMER;
 

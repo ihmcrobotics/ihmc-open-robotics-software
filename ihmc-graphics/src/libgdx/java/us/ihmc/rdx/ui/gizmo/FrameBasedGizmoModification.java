@@ -92,24 +92,33 @@ public class FrameBasedGizmoModification
 
    public void translateInWorld(Vector3DReadOnly translation)
    {
-      adjustmentPose3D.changeFrame(ReferenceFrame.getWorldFrame());
-      adjustmentPose3D.getPosition().add(translation);
-      adjustmentNeedsToBeApplied = true;
+      if (translation.normSquared() > 0.0)
+      {
+         adjustmentPose3D.changeFrame(ReferenceFrame.getWorldFrame());
+         adjustmentPose3D.getPosition().add(translation);
+         adjustmentNeedsToBeApplied = true;
+      }
    }
 
    public void rotateInWorld(AxisAngleReadOnly rotationInWorld)
    {
-      adjustmentPose3D.changeFrame(ReferenceFrame.getWorldFrame());
-      rotationInWorld.transform(adjustmentPose3D.getOrientation());
-      adjustmentNeedsToBeApplied = true;
+      if (!rotationInWorld.isZeroOrientation(0.0))
+      {
+         adjustmentPose3D.changeFrame(ReferenceFrame.getWorldFrame());
+         rotationInWorld.transform(adjustmentPose3D.getOrientation());
+         adjustmentNeedsToBeApplied = true;
+      }
    }
 
    public void yawInWorld(double yaw)
    {
-      Orientation3DBasics orientationToAdjust = beforeForRotationAdjustment();
-      orientationToAdjust.appendYawRotation(yaw);
-      afterRotationAdjustment(PREPEND);
-      adjustmentNeedsToBeApplied = true;
+      if (Math.abs(yaw) > 0.0)
+      {
+         Orientation3DBasics orientationToAdjust = beforeForRotationAdjustment();
+         orientationToAdjust.appendYawRotation(yaw);
+         afterRotationAdjustment(PREPEND);
+         adjustmentNeedsToBeApplied = true;
+      }
    }
 
    /**

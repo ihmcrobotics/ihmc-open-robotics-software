@@ -35,8 +35,8 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
    private final RobotSide side;
    private final ROS2SyncedRobotModel syncedRobot;
    private RDXSpatialVectorArrows sensorWristWrenchArrows;
-   private RDXSpatialVectorArrows estimatedHandWrenchArrows;
-   private String contextMenuName;
+   private final RDXSpatialVectorArrows estimatedHandWrenchArrows;
+   private final String contextMenuName;
 
    public static boolean robotCollidableIsHand(RobotSide side, RDXRobotCollidable robotCollidable, FullHumanoidRobotModel fullRobotModel)
    {
@@ -58,12 +58,12 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
       FullHumanoidRobotModel fullRobotModel = syncedRobot.getFullRobotModel();
       String modelFileName = RDXInteractableTools.getModelFileName(robotDefinition.getRigidBodyDefinition(robotCollidable.getRigidBodyName()));
 
-      ReferenceFrame handFrame = fullRobotModel.getEndEffectorFrame(side, LimbName.ARM);
-      ReferenceFrame collisionFrame = handFrame;
+      ReferenceFrame afterLastWristJointFrame = fullRobotModel.getEndEffectorFrame(side, LimbName.ARM);
+      ReferenceFrame collisionFrame = afterLastWristJointFrame;
       ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(side);
       ReferenceFrame handGraphicFrame
             = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(robotSidePrefix + "graphicFrame",
-                                                                                handFrame,
+                                                                                afterLastWristJointFrame,
                                                                                 robotModel.getUIParameters().getHandGraphicToHandFrameTransform(side));
       super.create(robotCollidable, handGraphicFrame, collisionFrame, handControlFrame, modelFileName, baseUI.getPrimary3DPanel());
 
@@ -80,7 +80,7 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
                                                                  side.getLowerCaseName() + "WristSensor");
          }
       }
-      estimatedHandWrenchArrows = new RDXSpatialVectorArrows(handFrame);
+      estimatedHandWrenchArrows = new RDXSpatialVectorArrows(afterLastWristJointFrame);
       estimatedHandWrenchArrows.setAngularPartScale(0.05);
       contextMenuName = side + " Hand Context Menu";
    }

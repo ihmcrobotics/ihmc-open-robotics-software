@@ -143,6 +143,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
       setModelMassScale(0.925170);
    }
 
+   @Override
    public ValkyrieRobotVersion getRobotVersion()
    {
       return robotVersion;

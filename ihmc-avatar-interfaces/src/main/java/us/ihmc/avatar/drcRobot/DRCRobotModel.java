@@ -307,4 +307,9 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    {
       return null;
    }
+
+   default RobotVersion getRobotVersion()
+   {
+      return null;
+   }
 }
