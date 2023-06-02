@@ -195,6 +195,11 @@ public class CapturabilityBasedPlanarRegionDecider implements SCS2YoGraphicHolde
       return stepConstraintPolygon;
    }
 
+   public ConvexPolygon2DReadOnly getEnvironmentConvexHull()
+   {
+      return environmentConvexHull;
+   }
+
    public boolean isStepFarEnoughInsideToIgnoreConstraint()
    {
       return stepIsFarEnoughInsideToIgnoreConstraint.getBooleanValue();
