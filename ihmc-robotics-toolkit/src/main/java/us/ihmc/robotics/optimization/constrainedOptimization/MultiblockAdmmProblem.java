@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * reference: https://arxiv.org/pdf/1802.09592.pdf
  * Solves the optimization problem for blocks of parameters x[] = [x1, x2, ...]:
  *    minimize f1(x1) + f2(x2) + ...
  *    st:
@@ -34,6 +35,7 @@ import java.util.List;
  *
  * The global constraints are solved using the Alternating Direction Method of Multipliers
  * within {@link MultiblockAdmmOptimizer} through the algorithm
+ *
  *    for each block xi,
  *       initialize xi* = optimize(Fi(xi)) for xi
  *

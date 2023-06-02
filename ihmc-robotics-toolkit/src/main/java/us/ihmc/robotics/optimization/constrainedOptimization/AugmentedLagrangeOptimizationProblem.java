@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Reference: Numerical Optimization by Jorge Nocedal, Stephen J. Write
  * Converts the constrained optimization problem on parameters x:
  *    minimize f(x)
  *    st: Gi(x) == 0 for G[]

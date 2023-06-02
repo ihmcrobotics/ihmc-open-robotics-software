@@ -7,6 +7,8 @@ import org.ejml.dense.row.mult.VectorVectorMult_DDRM;
 import us.ihmc.robotics.linearAlgebra.careSolvers.MatrixToolsLocal;
 
 /**
+ * Reference: Numerical Optimization by Jorge Nocedal, Stephen J. Write
+ *
  * Converts the constrained optimization problem:
  *    minimize f(x)
  *    st: Gi(x) == 0 for G[](x)
