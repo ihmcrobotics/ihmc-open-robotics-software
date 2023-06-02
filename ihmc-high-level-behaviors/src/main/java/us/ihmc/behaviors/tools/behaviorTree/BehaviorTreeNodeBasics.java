@@ -30,6 +30,10 @@ public interface BehaviorTreeNodeBasics
 
    public abstract BehaviorTreeNodeStatus tickInternal();
 
+   /**
+    * @return The node's status from the last time it was ticked.
+    *         This will be null if the node hasn't been ticked yet.
+    */
    public abstract BehaviorTreeNodeStatus getPreviousStatus();
 
    public abstract void setPreviousStatus(BehaviorTreeNodeStatus status);
@@ -41,6 +45,7 @@ public interface BehaviorTreeNodeBasics
 
    /**
     * @return The Instant at which this node was last ticked.
+    *         This will be null if the node has never been ticked.
     */
    public abstract Instant getLastTickInstant();
 
