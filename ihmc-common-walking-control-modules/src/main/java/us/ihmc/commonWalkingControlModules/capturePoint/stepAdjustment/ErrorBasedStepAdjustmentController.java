@@ -93,6 +93,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final YoFrameVector2D deadbandedAdjustment = new YoFrameVector2D(yoNamePrefix + "DeadbandedAdjustment", worldFrame, registry);
    private final YoFrameVector2D totalStepAdjustment = new YoFrameVector2D(yoNamePrefix + "TotalStepAdjustment", worldFrame, registry);
 
+   private final YoFramePoint3D previousFootstepSolution = new YoFramePoint3D(yoNamePrefix + "PreviousFootstepSolutionLocation", worldFrame, registry);
    private final YoFramePose3D footstepSolution = new YoFramePose3D(yoNamePrefix + "FootstepSolutionLocation", worldFrame, registry);
    private final YoFramePoint2D adjustedSolutionInControlPlane = new YoFramePoint2D(yoNamePrefix + "adjustedSolutionInControlPlane", worldFrame, registry);
 
@@ -278,6 +279,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       isInSwing.set(false);
       upcomingFootstep.setToNaN();
       footstepSolution.setToNaN();
+      previousFootstepSolution.setToNaN();
       footstepWasAdjusted.set(false);
       hasPlanarRegionBeenAssigned.set(false);
       captureRegionCalculator.hideCaptureRegion();
@@ -315,6 +317,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
          referenceFootstepPosition.set(footstepPose.getPosition());
          footstepSolution.set(footstepPose);
+         previousFootstepSolution.set(footstepSolution.getPosition());
 
          this.swingDuration.set(swingDuration);
 
@@ -351,9 +354,9 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       reachabilityConstraintHandler.initializeReachabilityConstraint(supportSide, upcomingFootstep);
       speedUpTime.set(0.0);
       footstepSolution.set(upcomingFootstep);
+      previousFootstepSolution.set(footstepSolution.getPosition());
       totalStepAdjustment.setToZero();
       controlTicksIntoStep.set(0);
-      referenceFootstepPosition.setToNaN();
    }
 
    @Override
@@ -374,6 +377,8 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
       computeTimeInCurrentState(currentTime);
       computeTimeRemainingInState();
+
+      previousFootstepSolution.set(footstepSolution.getPosition());
 
       if (controlTicksIntoStep.getIntegerValue() <= minTicksIntoStep)
          upcomingFootstep.getPosition().set(referenceFootstepPosition);
@@ -442,7 +447,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
          }
       }
 
-      footstepWasAdjusted.set(wasAdjusted);
+      footstepWasAdjusted.set(wasAdjusted || previousFootstepSolution.distance(footstepSolution.getPosition()) > 1e-3);
 
       // Don't update the "upcoming footstep" if we're at the start of the control state. At this point, we haven't had our swing duration adjusted, so we want
       // to converge down to an intelligent time
@@ -666,7 +671,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private boolean deadbandAndApplyStepAdjustment()
    {
       boolean adjusted;
-      if (footstepAdjustmentInControlPlane.length() < footstepDeadband.getValue())
+      if (footstepAdjustmentInControlPlane.containsNaN() || footstepAdjustmentInControlPlane.norm() < footstepDeadband.getValue())
       {
          adjusted = false;
          deadbandedAdjustment.setToZero();
