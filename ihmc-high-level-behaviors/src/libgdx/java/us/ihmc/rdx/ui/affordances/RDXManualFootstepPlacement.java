@@ -185,7 +185,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
    public void renderImGuiWidgets()
    {
-      ImGui.text("Footstep plan:");
+      ImGui.text("Footstep Planning:");
       ImGui.sameLine();
       if (ImGui.button(labels.get("Left")) || ImGui.isKeyPressed('R'))
       {
