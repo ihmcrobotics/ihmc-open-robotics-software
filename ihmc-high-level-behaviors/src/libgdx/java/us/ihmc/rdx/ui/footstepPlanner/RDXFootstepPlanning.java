@@ -129,7 +129,6 @@ public class RDXFootstepPlanning
          footstepPlanner.getSwingPlannerParameters().set(swingFootPlannerParameters);
 
       setGoalFootPosesFromMidFeetPose(footstepPlannerParameters, goalPose);
-      setStanceSideToClosestToGoal(goalPose);
 
       if (locomotionParameters.getPlanSwingTrajectories())
          request.setSwingPlannerType(SwingPlannerType.MULTI_WAYPOINT_POSITION);
@@ -141,6 +140,7 @@ public class RDXFootstepPlanning
          FramePose3DReadOnly soleFramePose = syncedRobot.getFramePoseReadOnly(referenceFrames -> referenceFrames.getSoleFrame(side));
          soleFramePose.get(pose3D);
       });
+      setStanceSideToClosestToGoal(goalPose);
 
       boolean assumeFlatGround = true;
       if (heightMapMessage != null)
