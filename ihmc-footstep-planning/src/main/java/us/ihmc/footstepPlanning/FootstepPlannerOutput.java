@@ -100,23 +100,30 @@ public class FootstepPlannerOutput
       plannerTimings.set(other.plannerTimings);
       if (other.swingTrajectories != null)
       {
+         swingTrajectories = new ArrayList<>();
          for (EnumMap<Axis3D, List<PolynomialReadOnly>> otherSwingTrajectory : other.swingTrajectories)
          {
-            EnumMap<Axis3D, List<PolynomialReadOnly>> swingTrajectory = new EnumMap<>(Axis3D.class);
-
-            for (Map.Entry<Axis3D, List<PolynomialReadOnly>> axis3DListEntry : otherSwingTrajectory.entrySet())
+            if (otherSwingTrajectory != null)
             {
-               List<PolynomialReadOnly> polynomials = new ArrayList<>();
-               for (PolynomialReadOnly polynomialReadOnly : axis3DListEntry.getValue())
-               {
-                  Polynomial polynomial = new Polynomial(polynomialReadOnly.getNumberOfCoefficients());
-                  // TODO: Create deep copy constructor for polynomial
-                  polynomials.add(polynomial);
-               }
-               swingTrajectory.put(axis3DListEntry.getKey(), polynomials);
-            }
+               EnumMap<Axis3D, List<PolynomialReadOnly>> swingTrajectory = new EnumMap<>(Axis3D.class);
 
-            swingTrajectories.add(swingTrajectory);
+               for (Map.Entry<Axis3D, List<PolynomialReadOnly>> axis3DListEntry : otherSwingTrajectory.entrySet())
+               {
+                  List<PolynomialReadOnly> polynomials = new ArrayList<>();
+                  for (PolynomialReadOnly polynomialReadOnly : axis3DListEntry.getValue())
+                  {
+                     Polynomial polynomial = new Polynomial((Polynomial) polynomialReadOnly);
+                     polynomials.add(polynomial);
+                  }
+                  swingTrajectory.put(axis3DListEntry.getKey(), polynomials);
+               }
+
+               swingTrajectories.add(swingTrajectory);
+            }
+            else
+            {
+               swingTrajectories.add(null);
+            }
          }
       }
    }
