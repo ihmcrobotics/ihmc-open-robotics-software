@@ -143,6 +143,9 @@ public class MultiblockAdmmProblem
     */
    public double calculateDualCostForBlock(int blockIndex, DMatrixD1 x, DMatrixD1[] optimalBlocksForLastIteration)
    {
+      if (optimalBlocksForLastIteration.length != getNumBlocks())
+         throw new RuntimeException(
+               "Not enough blocks " + optimalBlocksForLastIteration.length + " were provided for all blocks of the problem " + getNumBlocks());
       DMatrixD1[] blocksCopy = optimalBlocksForLastIteration.clone();
       blocksCopy[blockIndex] = x;
       return calculateDualCostForBlock(blockIndex, blocksCopy);
@@ -198,6 +201,10 @@ public class MultiblockAdmmProblem
 
    public void updateLagrangeMultipliers(DMatrixD1[] optimalBlocks)
    {
+      if (optimalBlocks.length != getNumBlocks())
+         throw new RuntimeException(
+               "Not enough values " + optimalBlocks.length + " were provided for all blocks of the problem " + getNumBlocks());
+
       multiblockAugmentedLagrangeConstructor.updateLagrangeMultipliers(evaluateEqualityConstraints(optimalBlocks),
                                                                        evaluateGlobalInequalityConstraints(optimalBlocks));
 
@@ -214,6 +221,10 @@ public class MultiblockAdmmProblem
     */
    public void saveOptimalBlocksForLastIteration(DMatrixD1[] optimalBlocks)
    {
+      if (optimalBlocks.length != getNumBlocks())
+         throw new RuntimeException(
+               "Not enough values " + optimalBlocks.length + " were provided for all blocks of the problem " + getNumBlocks());
+
       optimalBlocksFromLastIteration = optimalBlocks;
    }
 
