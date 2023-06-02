@@ -106,9 +106,7 @@ public class AugmentedLagrangeOptimizationProblem
       DMatrixD1 inequalityConstraintEvaluations = evaluateInequalityConstraints(x);
       DMatrixD1 equalityConstraintEvaluations = evaluateEqualityConstraints(x);
 
-      return augmentedLagrangeConstructor.getAugmentedLagrangeCost(objectivesCost,
-                                                                   equalityConstraintEvaluations,
-                                                                   inequalityConstraintEvaluations);
+      return augmentedLagrangeConstructor.getAugmentedLagrangeCost(objectivesCost, equalityConstraintEvaluations, inequalityConstraintEvaluations);
    }
 
    /**
@@ -153,11 +151,9 @@ public class AugmentedLagrangeOptimizationProblem
       return new DMatrixRMaj(value);
    }
 
-
    public void updateLagrangeMultipliers(DMatrixD1 xOptimal)
    {
-      augmentedLagrangeConstructor.updateLagrangeMultipliers(evaluateEqualityConstraints(xOptimal),
-                                                             evaluateInequalityConstraints(xOptimal));
+      augmentedLagrangeConstructor.updateLagrangeMultipliers(evaluateEqualityConstraints(xOptimal), evaluateInequalityConstraints(xOptimal));
    }
 
    // ================================ Getter/Setter ========================================
@@ -169,33 +165,32 @@ public class AugmentedLagrangeOptimizationProblem
 
    public void printResults(DMatrixD1 x, double cost, DMatrixD1 equalityEvaluations, DMatrixD1 inequalityEvaluations)
    {
-      LogTools.debug("Solution x:");
+      LogTools.info("");
+      System.out.println("Solution x:");
       for (int i = 0; i < x.getNumElements(); i++)
       {
          LogTools.debug("\t" + x.get(i) + ",");
       }
 
-      LogTools.debug("Cost f(x):");
-      LogTools.debug("\t" + cost);
+      System.out.println("Cost f(x):");
+      System.out.println("\t" + cost);
 
       if (equalityEvaluations.getNumElements() > 0)
       {
-         LogTools.debug("Equality Constraints G(x):");
+         System.out.println("Equality Constraints G(x):");
          for (int i = 0; i < equalityEvaluations.getNumElements(); i++)
          {
-            LogTools.debug("\t" + equalityEvaluations.get(i) + " == 0");
+            System.out.println("\t" + equalityEvaluations.get(i) + " == 0");
          }
       }
 
       if (inequalityEvaluations.getNumElements() > 0)
       {
-         LogTools.debug("Inquality Constraints H(x):");
+         System.out.println("Inquality Constraints H(x):");
          for (int i = 0; i < inequalityEvaluations.getNumElements(); i++)
          {
-            LogTools.debug("\t" + inequalityEvaluations.get(i) + " >= 0");
+            System.out.println("\t" + inequalityEvaluations.get(i) + " >= 0");
          }
       }
    }
-
-
 }

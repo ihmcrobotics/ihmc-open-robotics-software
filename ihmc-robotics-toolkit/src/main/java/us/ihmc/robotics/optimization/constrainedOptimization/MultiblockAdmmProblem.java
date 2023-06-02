@@ -157,9 +157,7 @@ public class MultiblockAdmmProblem
       DMatrixD1 inequalityConstraintEvaluations = evaluateGlobalInequalityConstraints(blocks);
       DMatrixD1 equalityConstraintEvaluations = evaluateEqualityConstraints(blocks);
 
-      return multiblockAugmentedLagrangeConstructor.getAugmentedLagrangeCost(isolatedCost,
-                                                                   equalityConstraintEvaluations,
-                                                                   inequalityConstraintEvaluations);
+      return multiblockAugmentedLagrangeConstructor.getAugmentedLagrangeCost(isolatedCost, equalityConstraintEvaluations, inequalityConstraintEvaluations);
    }
 
    /**
@@ -236,29 +234,29 @@ public class MultiblockAdmmProblem
 
    public void printResults(DMatrixD1 equalityEvaluations, DMatrixD1 inequalityEvaluations, DMatrixD1[] blocks)
    {
+      LogTools.info("");
       for (int i = 0; i < isolatedOptimizationProblems.size(); i++)
       {
-         LogTools.debug("-- Isolated Problem " + i + ": --");
+         System.out.println("-- Isolated Problem " + i + ": --");
          isolatedOptimizationProblems.get(i).printResults(blocks[i]);
       }
 
       if (equalityEvaluations.getNumElements() > 0)
       {
-         LogTools.debug("-- Global Equality Constraints J(x[]): --");
+         System.out.println("-- Global Equality Constraints J(x[]): --");
          for (int i = 0; i < equalityEvaluations.getNumElements(); i++)
          {
-            LogTools.debug("\t" + equalityEvaluations.get(i) + " == 0");
+            System.out.println("\t" + equalityEvaluations.get(i) + " == 0");
          }
       }
 
       if (inequalityEvaluations.getNumElements() > 0)
       {
-         LogTools.debug("-- Global Inquality Constraints K(x[]): --");
+         System.out.println("-- Global Inquality Constraints K(x[]): --");
          for (int i = 0; i < inequalityEvaluations.getNumElements(); i++)
          {
-            LogTools.debug("\t" + inequalityEvaluations.get(i) + " >= 0");
+            System.out.println("\t" + inequalityEvaluations.get(i) + " >= 0");
          }
       }
-
    }
 }

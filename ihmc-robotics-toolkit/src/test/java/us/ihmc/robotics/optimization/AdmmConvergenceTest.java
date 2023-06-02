@@ -96,5 +96,4 @@ public class AdmmConvergenceTest
 
       LogTools.debug("Test completed successfully");
    }
-
 }

@@ -23,8 +23,6 @@ public class AlmConvergenceTest
 {
    private AugmentedLagrangeOptimizationProblem augmentedLagrangeProblem;
 
-
-
    // optimum is (0,0,0...)
    public static double costFunctionQuadratic(DMatrixD1 inputs)
    {
@@ -39,7 +37,7 @@ public class AlmConvergenceTest
       {
          return -5.0;
       }
-      return -5.0 * Math.sin(norm)/norm;
+      return -5.0 * Math.sin(norm) / norm;
    }
 
    // x[1] == 5
@@ -69,7 +67,6 @@ public class AlmConvergenceTest
    public static double constraintNonconvex(DMatrixD1 inputs)
    {
       return inputs.get(0) + inputs.get(1) - 6.354061535;
-//      return inputs.get(0)  - 4.493;
    }
 
    @Test
@@ -85,7 +82,6 @@ public class AlmConvergenceTest
       augmentedLagrangeProblem.addEqualityConstraint(AlmConvergenceTest::constraint1);
       augmentedLagrangeProblem.addInequalityConstraint(AlmConvergenceTest::constraint2);
       augmentedLagrangeProblem.addInequalityConstraint(AlmConvergenceTest::constraint3);
-//      augmentedLagrange.addEqualityConstraint(TestALM::constraint4);
       augmentedLagrangeProblem.initialize(initialPenalty, penaltyIncreaseFactor);
 
       // Set up the optimizer
@@ -147,6 +143,4 @@ public class AlmConvergenceTest
       assertTrue("x1 arrived on desired value", MathTools.epsilonCompare(optimumX.get(0), 3.1770307678, 1e-3));
       assertTrue("x2 arrived on desired value", MathTools.epsilonCompare(optimumX.get(1), 3.1770307678, 1e-3));
    }
-
-
 }

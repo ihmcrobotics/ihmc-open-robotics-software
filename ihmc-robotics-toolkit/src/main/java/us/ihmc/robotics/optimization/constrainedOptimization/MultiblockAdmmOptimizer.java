@@ -21,8 +21,7 @@ public class MultiblockAdmmOptimizer
       this.admm = admm;
       this.optimizers = optimizers;
       if (optimizers.length != admm.getNumBlocks())
-         throw new RuntimeException("Not enough optimizers "  + optimizers.length +
-                                    " were provided for all blocks of the problem " + admm.getNumBlocks());
+         throw new RuntimeException("Not enough optimizers " + optimizers.length + " were provided for all blocks of the problem " + admm.getNumBlocks());
    }
 
    public void setVerbose(boolean verbose)
@@ -33,8 +32,8 @@ public class MultiblockAdmmOptimizer
    public DMatrixD1[] solveOverNIterations(int numLagrangeIterations, DMatrixD1[] initialValues)
    {
       if (initialValues.length != admm.getNumBlocks())
-         throw new RuntimeException("Not enough initial values "  + initialValues.length +
-                                    " were provided for all blocks of the problem " + admm.getNumBlocks());
+         throw new RuntimeException(
+               "Not enough initial values " + initialValues.length + " were provided for all blocks of the problem " + admm.getNumBlocks());
       int numBlocks = admm.getNumBlocks();
       DMatrixD1[] optima = new DMatrixD1[numBlocks];
 
@@ -48,7 +47,8 @@ public class MultiblockAdmmOptimizer
 
       if (verbose)
       {
-         LogTools.debug("===== Initial Seed ===============");
+         LogTools.info("");
+         System.out.println("===== Initial Seed ===============");
          admm.printResults(optima);
       }
 
@@ -78,7 +78,8 @@ public class MultiblockAdmmOptimizer
 
          if (verbose)
          {
-            LogTools.debug("===== Lagrange Iteration: " + iteration + " ==========");
+            LogTools.info("");
+            System.out.println("===== Lagrange Iteration: " + iteration + " ==========");
             admm.printResults(optima);
          }
       }
