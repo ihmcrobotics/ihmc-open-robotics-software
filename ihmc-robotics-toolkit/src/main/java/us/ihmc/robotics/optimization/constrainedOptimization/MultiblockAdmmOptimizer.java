@@ -34,6 +34,7 @@ public class MultiblockAdmmOptimizer
       if (initialValues.length != admm.getNumBlocks())
          throw new RuntimeException(
                "Not enough initial values " + initialValues.length + " were provided for all blocks of the problem " + admm.getNumBlocks());
+
       int numBlocks = admm.getNumBlocks();
       DMatrixD1[] optima = new DMatrixD1[numBlocks];
 
