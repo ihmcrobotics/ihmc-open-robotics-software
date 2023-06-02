@@ -1,7 +1,7 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers;
 
+import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
-
 import us.ihmc.commons.MathTools;
 
 public class MatrixToolsLocal
@@ -63,5 +63,37 @@ public class MatrixToolsLocal
    static boolean isZero(DMatrixRMaj P, double epsilon)
    {
       return normSquared(P) < epsilon;
+   }
+
+   public static void elementWiseMin(DMatrix matrixToClamp, double minValue)
+   {
+      int numRow = matrixToClamp.getNumRows();
+      int numCol = matrixToClamp.getNumCols();
+      for (int r = 0; r < numRow; r++)
+      {
+         for (int c = 0; c < numCol; c++)
+         {
+            if (matrixToClamp.get(r, c) < minValue)
+            {
+               matrixToClamp.set(r, c, minValue);
+            }
+         }
+      }
+   }
+
+   public static void elementWiseMax(DMatrix matrixToClamp, double maxValue)
+   {
+      int numRow = matrixToClamp.getNumRows();
+      int numCol = matrixToClamp.getNumCols();
+      for (int r = 0; r < numRow; r++)
+      {
+         for (int c = 0; c < numCol; c++)
+         {
+            if (matrixToClamp.get(r, c) > maxValue)
+            {
+               matrixToClamp.set(r, c, maxValue);
+            }
+         }
+      }
    }
 }

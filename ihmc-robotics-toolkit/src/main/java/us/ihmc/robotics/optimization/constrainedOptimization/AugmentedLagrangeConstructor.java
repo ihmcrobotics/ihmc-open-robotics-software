@@ -4,6 +4,7 @@ import org.ejml.data.DMatrixD1;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.mult.VectorVectorMult_DDRM;
+import us.ihmc.robotics.linearAlgebra.careSolvers.MatrixToolsLocal;
 
 /**
  * Converts the constrained optimization problem:
@@ -112,14 +113,7 @@ public class AugmentedLagrangeConstructor
       DMatrixD1 barrierInequalityValue = new DMatrixRMaj(inequalityMultiplier);
       CommonOps_DDRM.add(inequalityMultiplier, -penalty, inequalityConstraintValue, barrierInequalityValue);
       // Perform the clamp
-      int numConstraints = inequalityConstraintValue.getNumElements();
-      for (int i = 0; i < numConstraints; i++)
-      {
-         if (barrierInequalityValue.get(i) < 0.0)
-         {
-            barrierInequalityValue.set(i, 0.0);
-         }
-      }
+      MatrixToolsLocal.elementWiseMin(barrierInequalityValue, 0.0);
       return barrierInequalityValue;
    }
 
