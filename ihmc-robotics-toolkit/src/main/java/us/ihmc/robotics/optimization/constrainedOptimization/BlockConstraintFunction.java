@@ -17,5 +17,5 @@ import org.ejml.data.DMatrixD1;
  */
 public interface BlockConstraintFunction
 {
-   public double calculate(DMatrixD1[] blocks);
+   double calculate(DMatrixD1[] blocks);
 }

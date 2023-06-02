@@ -55,14 +55,10 @@ public class AugmentedLagrangeConstructor
       //    if H(x) >= multiplier / p (not violated barrier): -1/(2p) <multiplier, multiplier>
       //    if H(x) <  multiplier / p (violated barrier)    : -<multiplier, H(x)> + p/2 ||H(x)||^2
       // The below formula ends up being equivalent to above.
-      double inequalityConstraintCost = getInequalityConstraintCost(inequalityConstraintEvaluations,
-                                                                    inequalityMultiplier,
-                                                                    penalty);
+      double inequalityConstraintCost = getInequalityConstraintCost(inequalityConstraintEvaluations, inequalityMultiplier, penalty);
 
       // Equalities Cost = p/2 * ||C(x)||^2 + <multiplier, C(x)>
-      double equalityConstraintCost = getEqualityConstraintCost(equalityConstraintEvaluations,
-                                                                equalityMultiplier,
-                                                                penalty);
+      double equalityConstraintCost = getEqualityConstraintCost(equalityConstraintEvaluations, equalityMultiplier, penalty);
 
       return originalCost + inequalityConstraintCost + equalityConstraintCost;
    }
@@ -73,9 +69,7 @@ public class AugmentedLagrangeConstructor
     * @param penalty penalty term
     * @return
     */
-   private static double getEqualityConstraintCost(DMatrixD1 equalityConstraintValue,
-                                                  DMatrixD1 equalityMultiplierK,
-                                                  double penalty)
+   private static double getEqualityConstraintCost(DMatrixD1 equalityConstraintValue, DMatrixD1 equalityMultiplierK, double penalty)
    {
       return penalty / 2.0 * VectorVectorMult_DDRM.innerProd(equalityConstraintValue, equalityConstraintValue) +
              VectorVectorMult_DDRM.innerProd(equalityMultiplierK, equalityConstraintValue);
@@ -87,13 +81,9 @@ public class AugmentedLagrangeConstructor
     * @param penalty penalty term
     * @return
     */
-   private static double getInequalityConstraintCost(DMatrixD1 inequalityConstraintValues,
-                                                    DMatrixD1 inequalityMultiplier,
-                                                    double penalty)
+   private static double getInequalityConstraintCost(DMatrixD1 inequalityConstraintValues, DMatrixD1 inequalityMultiplier, double penalty)
    {
-      DMatrixD1 inequalityConstraintBarrierValue = calculateBarrierInequalityConstraintValue(inequalityConstraintValues,
-                                                                                             inequalityMultiplier,
-                                                                                             penalty);
+      DMatrixD1 inequalityConstraintBarrierValue = calculateBarrierInequalityConstraintValue(inequalityConstraintValues, inequalityMultiplier, penalty);
       return 1.0 / (2.0 * penalty) * (
             VectorVectorMult_DDRM.innerProd(inequalityConstraintBarrierValue, inequalityConstraintBarrierValue) -
             VectorVectorMult_DDRM.innerProd(inequalityMultiplier, inequalityMultiplier)
@@ -127,15 +117,12 @@ public class AugmentedLagrangeConstructor
     * @param optimalEqualityConstraintEvaluations G(x*)
     * @param optimalInequalityConstraintEvaluations H(x*)
     */
-   public void updateLagrangeMultipliers(DMatrixD1 optimalEqualityConstraintEvaluations,
-                                         DMatrixD1 optimalInequalityConstraintEvaluations)
+   public void updateLagrangeMultipliers(DMatrixD1 optimalEqualityConstraintEvaluations, DMatrixD1 optimalInequalityConstraintEvaluations)
    {
       // Inequalities Cost =
       //    if H(x') >= multiplier / p (not violated barrier): multiplier = 0
       //    if H(x') <  multiplier / p (violated barrier)    : multiplier += p * H(x')
-      inequalityMultiplier.set(calculateBarrierInequalityConstraintValue(optimalInequalityConstraintEvaluations,
-                                                                         inequalityMultiplier,
-                                                                         penalty));
+      inequalityMultiplier.set(calculateBarrierInequalityConstraintValue(optimalInequalityConstraintEvaluations, inequalityMultiplier, penalty));
 
       // multiplier += p * G(x')
       CommonOps_DDRM.addEquals(equalityMultiplier, penalty, optimalEqualityConstraintEvaluations);

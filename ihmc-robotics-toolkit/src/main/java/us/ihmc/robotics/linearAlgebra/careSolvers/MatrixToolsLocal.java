@@ -19,7 +19,9 @@ public class MatrixToolsLocal
       }
    }
 
-   /** Computes the distance between two matrices, which is defined as the L2 normSquared of their difference. */
+   /**
+    * Computes the distance between two matrices, which is defined as the L2 normSquared of their difference.
+    */
    public static double distance(DMatrixRMaj A, DMatrixRMaj B)
    {
       MatrixChecking.assertRowDimensionsMatch(A, B);
