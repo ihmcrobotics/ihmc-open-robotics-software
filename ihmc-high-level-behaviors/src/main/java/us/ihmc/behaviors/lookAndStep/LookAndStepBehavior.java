@@ -143,6 +143,7 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
          bodyPathPlanning.acceptHeightMap(heightMapMessage);
          footstepPlanning.acceptHeightMap(heightMapMessage);
       });
+      LogTools.info("Subscribing to {}", ROS2_REGIONS_FOR_FOOTSTEP_PLANNING.getName());
       helper.subscribeViaCallback(ROS2_REGIONS_FOR_FOOTSTEP_PLANNING, footstepPlanning::acceptPlanarRegions);
       helper.subscribeViaCallback(ROS2Tools.getRobotConfigurationDataTopic(helper.getRobotModel().getSimpleRobotName()),
                                   footstepPlanning::acceptRobotConfigurationData);

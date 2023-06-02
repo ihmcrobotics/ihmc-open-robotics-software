@@ -15,10 +15,12 @@ public class BehaviorMessageTools
    public static void packBehaviorTreeMessage(BehaviorTreeNodeBasics treeNode, BehaviorTreeMessage behaviorTreeMessage)
    {
       BehaviorTreeNodeMessage nodeMessage = behaviorTreeMessage.getNodes().add();
-      MessageTools.toMessage(treeNode.getLastTickInstant(), nodeMessage.getLastTickInstant());
+      if (treeNode.getLastTickInstant()  != null)
+         MessageTools.toMessage(treeNode.getLastTickInstant(), nodeMessage.getLastTickInstant());
       nodeMessage.setNodeName(treeNode.getName());
       nodeMessage.setNodeType(treeNode.getType().getSimpleName());
-      nodeMessage.setPreviousStatus((byte) treeNode.getPreviousStatus().ordinal());
+      if (treeNode.getPreviousStatus() != null)
+         nodeMessage.setPreviousStatus((byte) treeNode.getPreviousStatus().ordinal());
 
       if (treeNode instanceof BehaviorTreeControlFlowNodeBasics controlFlowTreeNode)
       {

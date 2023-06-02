@@ -118,6 +118,8 @@ public class LocalizationAndMappingProcess
 
    public synchronized void updateMap()
    {
+      ros2PropertySetGroup.update();
+
       if (latestIncomingRegions.get() == null)
       {
          LogTools.debug("No regions received");

@@ -216,7 +216,7 @@ public class TerrainPerceptionProcessWithDriver
                     realsense.getDepthPrincipalOffsetXPixels(),
                     realsense.getDepthPrincipalOffsetYPixels());
 
-            rapidRegionsExtractor.getDebugger().setEnabled(true);
+            rapidRegionsExtractor.getDebugger().setEnabled(false);
 
             ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
             ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
