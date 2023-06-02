@@ -7,6 +7,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -19,6 +20,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
@@ -53,16 +55,16 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
 
    private final YoBoolean foundSolution;
    private final YoBoolean isTransformedFootstepInRegion;
+   private final YoBoolean adjustedFootstepForRegion;
 
    private final YoBoolean isEnvironmentConstraintValid;
-   private final YoBoolean isBoundingBoxVisualized;
 
    private final YoConstraintOptimizerParameters parameters;
 
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
 
-   private final YoFrameConvexPolygon2D yoConvexHullConstraint;
-   private final FrameConvexPolygon2D convexHullConstraint = new FrameConvexPolygon2D();
+   private final YoFrameConvexPolygon2D yoStepConstraintPolygon;
+   private final FrameConvexPolygon2D stepConstraintPolygon = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D reachabilityRegionInConstraintPlane = new FrameConvexPolygon2D();
 
    private final List<StepConstraintRegion> stepConstraintRegions = new ArrayList<>();
@@ -91,16 +93,16 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
       maxConcaveEstimateRatio = new DoubleParameter("maxConcaveEstimateRatio", registry, defaultMaxConcaveEstimateRatio);
 
       isEnvironmentConstraintValid = new YoBoolean("isEnvironmentConstraintValid", registry);
-      isBoundingBoxVisualized = new YoBoolean("isBoundingBoxVisualized", registry);
 
-      yoConvexHullConstraint = new YoFrameConvexPolygon2D(yoNamePrefix + "ConvexHullConstraint", "", worldFrame,
-                                                          constraintRegionPointsThatCanBeVisualized, registry);
+      yoStepConstraintPolygon = new YoFrameConvexPolygon2D(yoNamePrefix + "StepConstraintPolygon", "", worldFrame,
+                                                           constraintRegionPointsThatCanBeVisualized, registry);
       foundSolution = new YoBoolean("foundSolutionToStepConstraint", registry);
       isTransformedFootstepInRegion = new YoBoolean("isTransformedFootstepInRegion", registry);
+      adjustedFootstepForRegion = new YoBoolean("adjustedFootstepForRegion", registry);
 
       if (yoGraphicsListRegistry != null)
       {
-         YoArtifactPolygon activePlanarRegionViz = new YoArtifactPolygon("Environmental Convex Hull Constraint", yoConvexHullConstraint, Color.RED, false);
+         YoArtifactPolygon activePlanarRegionViz = new YoArtifactPolygon("Step Constraint Region", yoStepConstraintPolygon, YoAppearance.DarkGreen().getAwtColor(), false);
 
          yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), activePlanarRegionViz);
       }
@@ -114,7 +116,7 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
 
    public boolean hasStepConstraintRegion()
    {
-      return planarRegionDecider.getConstraintRegion() != null && planarRegionDecider.isStepFarEnoughInsideToIgnoreConstraint();
+      return planarRegionDecider.getConstraintRegion() != null && !planarRegionDecider.isStepFarEnoughInsideToIgnoreConstraint();
    }
 
    public void reset()
@@ -122,11 +124,12 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
       foundSolution.set(false);
       isTransformedFootstepInRegion.set(false);
       stepConstraintRegions.clear();
-      yoConvexHullConstraint.clear();
-      convexHullConstraint.clearAndUpdate();
+      yoStepConstraintPolygon.clear();
+      stepConstraintPolygon.clearAndUpdate();
       isEnvironmentConstraintValid.set(false);
       stepConstraintOptimizer.reset();
       planarRegionDecider.reset();
+      adjustedFootstepForRegion.set(false);
    }
 
    public void setReachabilityRegion(FrameConvexPolygon2DReadOnly reachabilityRegion)
@@ -144,6 +147,9 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
 
    private final Point2DBasics centroidToThrowAway = new Point2D();
 
+   /**
+    * This is a check that is performed directly on the constraining regoin to ensure it's valid to use.
+    */
    public boolean validateConvexityOfPlanarRegion()
    {
       if (stepConstraintRegions.isEmpty())
@@ -169,7 +175,10 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
                                                        FixedFramePose3DBasics footstepPoseToPack,
                                                        List<Point2D> predictedContactPoints)
    {
+      ConvexPolygon2DReadOnly stepConstraintPolygon = planarRegionDecider.getStepConstraintPolygon();
       StepConstraintRegion stepConstraintRegion = planarRegionDecider.getConstraintRegion();
+
+      adjustedFootstepForRegion.set(false);
 
       if (stepConstraintRegion == null)
       {
@@ -178,46 +187,41 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
          return false;
       }
 
-      convexHullConstraint.set(stepConstraintRegion.getConvexHullInConstraintRegion());
-      convexHullConstraint.applyTransform(stepConstraintRegion.getTransformToWorld(), false);
+      this.stepConstraintPolygon.set(stepConstraintPolygon);
+      if (this.stepConstraintPolygon.getNumberOfVertices() <= yoStepConstraintPolygon.getMaxNumberOfVertices())
+         yoStepConstraintPolygon.set(this.stepConstraintPolygon);
 
-      if (convexHullConstraint.getNumberOfVertices() <= yoConvexHullConstraint.getMaxNumberOfVertices())
-      {
-         yoConvexHullConstraint.set(convexHullConstraint);
-         isBoundingBoxVisualized.set(false);
-      }
-      else
-      {
-         // we don't have enough yo variables to view the convex hull, so instead let's view it's bounding box
-         yoConvexHullConstraint.clear();
-         BoundingBox3DReadOnly boundingBox = stepConstraintRegion.getBoundingBox3dInWorld();
-         yoConvexHullConstraint.addVertex(boundingBox.getMaxX(), boundingBox.getMaxY());
-         yoConvexHullConstraint.addVertex(boundingBox.getMaxX(), boundingBox.getMinY());
-         yoConvexHullConstraint.addVertex(boundingBox.getMinY(), boundingBox.getMinY());
-         yoConvexHullConstraint.addVertex(boundingBox.getMinY(), boundingBox.getMaxY());
-         yoConvexHullConstraint.update();
-         isBoundingBoxVisualized.set(true);
-      }
-
+      // do a simple orthogonal projection first to make the computation easier on the optimizer
       stepXY.set(footstepPoseToPack.getPosition());
-      // do a simple orthogonal projection first.
-      if (!convexHullConstraint.isPointInside(stepXY))
+      double originalDistanceInside = this.stepConstraintPolygon.signedDistance(stepXY);
+      if (originalDistanceInside > 0.0)
       {
-         convexHullConstraint.orthogonalProjection(stepXY);
+         this.stepConstraintPolygon.orthogonalProjection(stepXY);
          footstepPoseToPack.getPosition().set(stepXY);
+         adjustedFootstepForRegion.set(true);
       }
 
       computeFootstepPolygon(upcomingFootstepSide, predictedContactPoints, footstepPoseToPack);
 
       parameters.setDesiredDistanceInside(desiredDistanceInsideConstraint.getValue());
 
-      RigidBodyTransformReadOnly wiggleTransform = stepConstraintOptimizer.findConstraintTransform(footstepPolygon, convexHullConstraint, parameters);
+      RigidBodyTransformReadOnly wiggleTransform = stepConstraintOptimizer.findConstraintTransform(footstepPolygon, this.stepConstraintPolygon, parameters);
       originalPose.set(footstepPoseToPack);
 
-      if (wiggleTransform != null)
+      if (wiggleTransform != null && wiggleTransform.hasTranslation())
       {
          foundSolution.set(true);
          footstepPoseToPack.applyTransform(wiggleTransform);
+         stepXY.set(footstepPoseToPack.getPosition());
+
+         // This is an idiot check on the transform, since there's some errors in the constraint optimizer.
+         if (this.stepConstraintPolygon.signedDistance(stepXY) > originalDistanceInside)
+         {
+            this.stepConstraintPolygon.orthogonalProjection(stepXY);
+            footstepPoseToPack.getPosition().set(stepXY);
+         }
+
+         adjustedFootstepForRegion.set(true);
       }
       else
       {
@@ -258,7 +262,7 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
       for (int i = 0; i < footstepPolygon.getNumberOfVertices(); i++)
       {
          // TODO check if it's inside by the right distance
-         if (!convexHullConstraint.isPointInside(footstepPolygon.getVertex(i)))
+         if (!stepConstraintPolygon.isPointInside(footstepPolygon.getVertex(i)))
             return false;
       }
 
@@ -269,7 +273,9 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
-      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D("Environmental Convex Hull Constraint", yoConvexHullConstraint, ColorDefinitions.Red()));
+      group.addChild(planarRegionDecider.getSCS2YoGraphics());
+
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D("Environmental Convex Hull Constraint", yoStepConstraintPolygon, ColorDefinitions.DarkGreen()));
       return group;
    }
 }

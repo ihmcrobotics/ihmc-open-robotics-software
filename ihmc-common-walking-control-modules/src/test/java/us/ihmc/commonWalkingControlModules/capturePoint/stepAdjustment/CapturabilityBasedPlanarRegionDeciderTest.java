@@ -82,7 +82,8 @@ public class CapturabilityBasedPlanarRegionDeciderTest
       constraintCalculator.reset();
       constraintCalculator.setCaptureRegion(captureRegion);
 
-      assertNull(constraintCalculator.updatePlanarRegionConstraintForStep(stepPose, null));
+      constraintCalculator.updatePlanarRegionConstraintForStep(stepPose, null);
+      assertNull(constraintCalculator.getConstraintRegion());
    }
 
 
