@@ -15,7 +15,7 @@ public class Image32PubSubType implements us.ihmc.pubsub.TopicDataType<perceptio
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c3b25a243e311484cd182784f136614652d46d47c4336dd564c7c61fe1ce93ca";
+   		return "77bcf2dfcb29fffe2f39e0da366122577dea06b74f79a8899065232b0301bc51";
    }
    
    @Override

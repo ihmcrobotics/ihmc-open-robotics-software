@@ -15,7 +15,7 @@ public class StatusLogMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "af0056a165d40e96e3ad9a1097b7ca821cceb883168ff24fe4c0cd4369db4fa8";
+   		return "bc0bc5eb97d8d2cc635abf27122cbaa351b9c6d044dd6f46da5f54b8d6a526e1";
    }
    
    @Override

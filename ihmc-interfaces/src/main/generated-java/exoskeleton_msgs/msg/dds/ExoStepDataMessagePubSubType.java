@@ -15,7 +15,7 @@ public class ExoStepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6d0973be2918a97c58b0f07fdb00b9dcf48363c599c06acfcfa256294daeda1e";
+   		return "df2aa8733d7bd99e783e70fe1847ee42456a77ce4c1fdb445dc2f9500a0d0615";
    }
    
    @Override

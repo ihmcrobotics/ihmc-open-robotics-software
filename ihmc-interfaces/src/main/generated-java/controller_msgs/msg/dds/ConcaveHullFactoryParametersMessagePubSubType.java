@@ -15,7 +15,7 @@ public class ConcaveHullFactoryParametersMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ddfb8cd2092fa39e032d33b27fedbbe83c3bde574b51625f1b2bd2cacf6f31b4";
+   		return "2cc65b3d4fc5c0a5d19a50a8180bd8ac1c789b9825ebc88233b8733f0825ba15";
    }
    
    @Override

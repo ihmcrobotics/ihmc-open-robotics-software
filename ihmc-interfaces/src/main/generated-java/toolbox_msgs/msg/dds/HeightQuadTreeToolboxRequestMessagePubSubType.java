@@ -15,7 +15,7 @@ public class HeightQuadTreeToolboxRequestMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4fa2cccd44405d77dedb11331932b9f932d4f9f14f5d7801c4f79b2624621c8b";
+   		return "4b5c2c3b448b5b00e83014bfbaa25ee4792cf1a730300ba6beab4498caa79652";
    }
    
    @Override

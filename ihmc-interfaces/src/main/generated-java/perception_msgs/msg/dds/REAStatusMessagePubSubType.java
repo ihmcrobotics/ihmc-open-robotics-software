@@ -15,7 +15,7 @@ public class REAStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9c5a87170878d8e821779ddff49cc322bddada1c8120bd1e10b6b38ed46641c9";
+   		return "8e1522d422aa9e514732d86c45f9f018d12575c41d6e954f4d57d6b5c2c2329c";
    }
    
    @Override

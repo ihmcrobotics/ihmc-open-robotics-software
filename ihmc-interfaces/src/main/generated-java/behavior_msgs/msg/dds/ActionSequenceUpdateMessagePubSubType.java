@@ -15,7 +15,7 @@ public class ActionSequenceUpdateMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d817755a22149add68c8b7d18abf240b3cfbffddfbc9e28568b29be51434b3bb";
+   		return "6c86a3cc1022c2c5ad692130df0492b8e49bafcba2847b1a5991ce6b23fcba0c";
    }
    
    @Override

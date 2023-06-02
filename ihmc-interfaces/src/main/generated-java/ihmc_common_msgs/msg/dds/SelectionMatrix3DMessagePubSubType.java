@@ -15,7 +15,7 @@ public class SelectionMatrix3DMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "da90d7902a6f833183dbf6674196d888bdcbb64779920d10c4b7090397244801";
+   		return "36bf816d7fed910df388841dff66fb6d0db3751b1fa7ccfac1eb1a67b0cddc7d";
    }
    
    @Override

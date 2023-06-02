@@ -15,7 +15,7 @@ public class DoorParameterPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "cff4f610ed068517c094a8f4dd52096f2661841571b188333f12aab8bee2fdfc";
+   		return "8336879cd268f2a50c8f597cbbc522106cd93ad28a169e16e0e6d47ea20ff8f2";
    }
    
    @Override

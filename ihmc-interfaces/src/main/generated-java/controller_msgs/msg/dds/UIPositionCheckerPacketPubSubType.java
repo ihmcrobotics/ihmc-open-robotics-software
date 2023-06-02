@@ -15,7 +15,7 @@ public class UIPositionCheckerPacketPubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e7eaaebcb399d57a75017f4630e3db59ce911d2ea4cd68bda6334f8347547e3c";
+   		return "032aae24b8572463dd74a74ffd00073a8857f780e4d1ffb297f994e485a68aa5";
    }
    
    @Override

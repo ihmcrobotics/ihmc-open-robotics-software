@@ -15,7 +15,7 @@ public class SystemServiceLogRefreshMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "984e8d346c98fbb0b63d22b371294fef7df7b60fd47612151698b7e52da69ac8";
+   		return "9ddf4354678770fe854c4eb484487941a93bfae6de4a0cc626d2f233b1d9c24a";
    }
    
    @Override
