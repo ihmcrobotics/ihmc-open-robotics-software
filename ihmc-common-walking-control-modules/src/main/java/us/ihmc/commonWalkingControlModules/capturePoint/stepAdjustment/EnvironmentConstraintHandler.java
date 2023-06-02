@@ -175,7 +175,7 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
                                                        FixedFramePose3DBasics footstepPoseToPack,
                                                        List<Point2D> predictedContactPoints)
    {
-      ConvexPolygon2DReadOnly stepConstraintPolygon = planarRegionDecider.getStepConstraintPolygon();
+      ConvexPolygon2DReadOnly stepConstraintPolygon = planarRegionDecider.getEnvironmentConvexHull();
       StepConstraintRegion stepConstraintRegion = planarRegionDecider.getConstraintRegion();
 
       adjustedFootstepForRegion.set(false);
