@@ -32,7 +32,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -530,13 +529,6 @@ public class AStarFootstepPlanner
    public SwingPlanningModule getSwingPlanningModule()
    {
       return swingPlanningModule;
-   }
-
-   public void setHeightMapData(HeightMapData heightMapData)
-   {
-      snapper.setHeightMapData(heightMapData);
-      checker.setHeightMapData(heightMapData);
-      stepCostCalculator.setHeightMapData(heightMapData);
    }
 
    public ReferenceBasedIdealStepCalculator getReferenceBasedIdealStepCalculator()

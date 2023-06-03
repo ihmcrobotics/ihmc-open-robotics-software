@@ -70,11 +70,11 @@ public abstract class RDXProcessManagerPanel
       RDXBehaviorUIRegistry behaviorRegistry = RDXBehaviorUIRegistry.DEFAULT_BEHAVIORS;
 
       ros1MasterProcess = new ROS1MasterProcess();
-      behaviorModuleProcess = new BehaviorModuleProcess(this::createRobotModel, ros2Mode, behaviorRegistry);
-      behaviorManagerProcess = new BehaviorManagerProcess(this::createRobotModel);
-      footstepPlanningModuleProcess = new FootstepPlanningModuleProcess(this::createRobotModel, this::getROS2Mode);
+      behaviorModuleProcess = new BehaviorModuleProcess(this::getRobotModel, ros2Mode, behaviorRegistry);
+      behaviorManagerProcess = new BehaviorManagerProcess(this::getRobotModel);
+      footstepPlanningModuleProcess = new FootstepPlanningModuleProcess(this::getRobotModel, this::getROS2Mode);
       mapsenseHeadlessProcess = new MapSenseHeadlessProcess();
-      objectDetectionProcess = new ObjectDetectionProcess(this::createRobotModel, this::getROS2Mode, this::getRobotTarget);
+      objectDetectionProcess = new ObjectDetectionProcess(this::getRobotModel, this::getROS2Mode, this::getRobotTarget);
       lidarREAProcess = new LidarREAProcess();
 
       processes.add(ros1MasterProcess);
@@ -139,7 +139,7 @@ public abstract class RDXProcessManagerPanel
 
    protected abstract String[] getRobotVersions();
 
-   protected abstract DRCRobotModel createRobotModel();
+   protected abstract DRCRobotModel getRobotModel();
 
    public void dispose()
    {
