@@ -1,12 +1,16 @@
 package us.ihmc.behaviors.sharedControl;
 
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.behaviors.tools.TrajectoryRecordReplay;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.io.File;
@@ -16,40 +20,46 @@ import java.util.HashMap;
 
 public class AffordanceAssistant
 {
-   private final WorkspaceResourceDirectory configurationsDirectory = new WorkspaceResourceDirectory(getClass(), "/us/ihmc/behaviors/sharedControl/affordances");
+   private final WorkspaceResourceDirectory configurationsDirectory = new WorkspaceResourceDirectory(getClass(),
+                                                                                                     "/us/ihmc/behaviors/sharedControl/affordances");
    private TrajectoryRecordReplay affordancePlayer;
    private boolean isActive = false;
    private final HashMap<String, Pose3DReadOnly> bodyPartInitialPoseMap = new HashMap<>();
+   private final HashMap<String, Pose3DReadOnly> bodyPartPreviousFrameMap = new HashMap<>();
    private static final Tuple3DReadOnly AFFORDANCE_TO_HAND_COM_TRANSFORM = new Point3D(0.0, 0.0, 0.06441);
+   private boolean isHandConfigurationCommand = false;
+   private Pair<RobotSide, HandConfiguration> handConfigurationToSend;
+   private ReferenceFrame objectFrame;
+   private boolean affordanceStarted = false;
 
    public void loadAffordance(String fileName, ReferenceFrame objectFrame)
    {
+      this.objectFrame = objectFrame;
       Path filePath = Paths.get(configurationsDirectory.getFilesystemDirectory().toString(), fileName + ".csv");
-      LogTools.info(filePath.toString());
       affordancePlayer = new TrajectoryRecordReplay(filePath.toString(), 1);
 
-      double[] initialPose = affordancePlayer.play();
-      FramePose3D initialBodyPartPose = new FramePose3D(objectFrame);
-      initialBodyPartPose.getOrientation().set(initialPose);
-      initialBodyPartPose.getPosition().set(4, initialPose);
+      double[] initialData = affordancePlayer.play();
+      RigidBodyTransform initialTransform = new RigidBodyTransform(initialData);
+      FramePose3D initialBodyPartPose = new FramePose3D(objectFrame, initialTransform);
       initialBodyPartPose.appendTranslation(AFFORDANCE_TO_HAND_COM_TRANSFORM);
       initialBodyPartPose.changeFrame(ReferenceFrame.getWorldFrame());
       // pre-apply rotation of VR controllers to cancel out the rotation in the VRKinematicsStreaming
       initialBodyPartPose.appendPitchRotation(Math.PI / 2.0);
       initialBodyPartPose.appendRollRotation(Math.PI / 2.0);
       bodyPartInitialPoseMap.put("rightHand", initialBodyPartPose);
+      bodyPartPreviousFrameMap.put("rightHand", initialBodyPartPose);
 
-//      for (RobotSide side : RobotSide.values)
-//      {
-//         RigidBodyTransform initialBodyPartTransform = new RigidBodyTransform();
-//
-//         initialBodyPartTransform.appendRollRotation(side.negateIfLeftSide(Math.PI / 2.0));
-//         initialBodyPartTransform.appendYawRotation(-side.negateIfLeftSide(Math.PI / 2.0));
-//         initialBodyPartTransform.appendTranslation(AFFORDANCE_TO_HAND_COM_TRANSFORM);
-//         FramePose3D initialBodyPartPose = new FramePose3D(objectFrame, initialBodyPartTransform);
-//         initialBodyPartPose.changeFrame(ReferenceFrame.getWorldFrame());
-//         bodyPartInitialPoseMap.put(side.getCamelCaseName() + "Hand", initialBodyPartPose);
-//      }
+      //      for (RobotSide side : RobotSide.values)
+      //      {
+      //         RigidBodyTransform initialBodyPartTransform = new RigidBodyTransform();
+      //
+      //         initialBodyPartTransform.appendRollRotation(side.negateIfLeftSide(Math.PI / 2.0));
+      //         initialBodyPartTransform.appendYawRotation(-side.negateIfLeftSide(Math.PI / 2.0));
+      //         initialBodyPartTransform.appendTranslation(AFFORDANCE_TO_HAND_COM_TRANSFORM);
+      //         FramePose3D initialBodyPartPose = new FramePose3D(objectFrame, initialBodyPartTransform);
+      //         initialBodyPartPose.changeFrame(ReferenceFrame.getWorldFrame());
+      //         bodyPartInitialPoseMap.put(side.getCamelCaseName() + "Hand", initialBodyPartPose);
+      //      }
 
       isActive = true;
    }
@@ -62,12 +72,39 @@ public class AffordanceAssistant
          {
             // Read file with stored trajectories: read set point per timestep until file is over
             double[] dataPoint = affordancePlayer.play(false); //play split data (a body part per time)
-            // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
-            framePose.getOrientation().set(dataPoint);
-            framePose.getPosition().set(4, dataPoint);
-            framePose.appendTranslation(AFFORDANCE_TO_HAND_COM_TRANSFORM);
-            framePose.changeFrame(ReferenceFrame.getWorldFrame());
+            isHandConfigurationCommand = true;
+            for (int i = 1; i < dataPoint.length; i++)
+               isHandConfigurationCommand &= dataPoint[i] == 0.0;
+
+            if (!isHandConfigurationCommand)
+            {
+               affordanceStarted = true;
+               RigidBodyTransform transform = new RigidBodyTransform(dataPoint);
+               FramePose3D affordancePose = new FramePose3D(objectFrame, transform);
+               affordancePose.appendTranslation(AFFORDANCE_TO_HAND_COM_TRANSFORM);
+               affordancePose.changeFrame(ReferenceFrame.getWorldFrame());
+               framePose.set(affordancePose);
+
+               bodyPartPreviousFrameMap.replace(bodyPart, new FramePose3D(framePose));
+            }
+            else
+            {
+               framePose.set(bodyPartPreviousFrameMap.get(bodyPart));
+               handConfigurationToSend = Pair.of(RobotSide.getSideFromBodyPart(bodyPart), HandConfiguration.values[(int) dataPoint[0]]);
+            }
          }
+         else
+            isHandConfigurationCommand = false;
+      }
+   }
+
+   public void checkForHandConfigurationUpdates(HandConfigurationListener handConfigurationListener)
+   {
+      if (isHandConfigurationCommand)
+      {
+         // send notification to listener
+         if (handConfigurationListener != null)
+            handConfigurationListener.onNotification();
       }
    }
 
@@ -95,11 +132,19 @@ public class AffordanceAssistant
    {
       isActive = false;
       affordancePlayer = null;
+      isHandConfigurationCommand = false;
+      handConfigurationToSend = null;
+      affordanceStarted = false;
    }
 
-   public HashMap<String,Pose3DReadOnly> getInitialHandPoseMap()
+   public HashMap<String, Pose3DReadOnly> getInitialHandPoseMap()
    {
       return bodyPartInitialPoseMap;
+   }
+
+   public boolean hasAffordanceStarted()
+   {
+      return affordanceStarted;
    }
 
    public boolean isAffordanceOver()
@@ -110,5 +155,10 @@ public class AffordanceAssistant
    public boolean containsBodyPart(String bodyPart)
    {
       return bodyPart.equals("rightHand");
+   }
+
+   public Pair<RobotSide, HandConfiguration> getHandConfigurationToSend()
+   {
+      return handConfigurationToSend;
    }
 }

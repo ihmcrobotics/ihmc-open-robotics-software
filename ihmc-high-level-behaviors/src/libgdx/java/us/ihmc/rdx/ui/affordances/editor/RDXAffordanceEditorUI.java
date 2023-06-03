@@ -472,14 +472,13 @@ public class RDXAffordanceEditorUI
                RigidBodyTransform transformToParent = new RigidBodyTransform(preGraspPoses.get(i));
                JSONTools.toJSON(actionNode, transformToParent);
 
-               double[] dataTrajectories = new double[7];
-               preGraspPoses.get(i).getOrientation().get(dataTrajectories);
-               preGraspPoses.get(i).getPosition().get(4, dataTrajectories);
+               double[] dataTrajectories = new double[16];
+               transformToParent.get(dataTrajectories);
                csvDataMatrix.add(dataTrajectories);
 
                if (preGraspHandConfigurations.get(i) != null)
                {
-                  dataTrajectories = new double[7];
+                  dataTrajectories = new double[16];
                   for (int data = 0; data < dataTrajectories.length; data++)
                      dataTrajectories[data] = 0.0;
                   dataTrajectories[0] = HandConfiguration.valueOf(preGraspHandConfigurations.get(i).toString()).ordinal();
@@ -502,9 +501,8 @@ public class RDXAffordanceEditorUI
                RigidBodyTransform transformToParent = new RigidBodyTransform(graspPose);
                JSONTools.toJSON(actionNode, transformToParent);
 
-               double[] dataTrajectories = new double[7];
-               graspPose.getOrientation().get(dataTrajectories);
-               graspPose.getPosition().get(4, dataTrajectories);
+               double[] dataTrajectories = new double[16];
+               transformToParent.get(dataTrajectories);
                csvDataMatrix.add(dataTrajectories);
 
                if (graspFrame.getHandConfiguration() != null)
@@ -514,7 +512,7 @@ public class RDXAffordanceEditorUI
                   extraActionNode.put("side", side.getLowerCaseName());
                   extraActionNode.put("grip", graspFrame.getHandConfiguration().toString());
 
-                  dataTrajectories = new double[7];
+                  dataTrajectories = new double[16];
                   for (int data = 0; data < dataTrajectories.length; data++)
                      dataTrajectories[data] = 0.0;
                   dataTrajectories[0] = HandConfiguration.valueOf(graspFrame.getHandConfiguration().toString()).ordinal();
@@ -532,14 +530,13 @@ public class RDXAffordanceEditorUI
                RigidBodyTransform transformToParent = new RigidBodyTransform(postGraspPoses.get(i));
                JSONTools.toJSON(actionNode, transformToParent);
 
-               double[] dataTrajectories = new double[7];
-               postGraspPoses.get(i).getOrientation().get(dataTrajectories);
-               postGraspPoses.get(i).getPosition().get(4, dataTrajectories);
+               double[] dataTrajectories = new double[16];
+               transformToParent.get(dataTrajectories);
                csvDataMatrix.add(dataTrajectories);
 
                if (postGraspHandConfigurations.get(i) != null)
                {
-                  dataTrajectories = new double[7];
+                  dataTrajectories = new double[16];
                   for (int data = 0; data < dataTrajectories.length; data++)
                      dataTrajectories[data] = 0.0;
                   dataTrajectories[0] = HandConfiguration.valueOf(postGraspHandConfigurations.get(i).toString()).ordinal();

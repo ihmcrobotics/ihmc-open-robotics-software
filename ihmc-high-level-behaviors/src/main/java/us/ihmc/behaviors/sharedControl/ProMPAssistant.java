@@ -166,7 +166,7 @@ public class ProMPAssistant
          else if (sampleCounter < generatedFramePoseTrajectory.size() - 1)
          {
             // pack the frame using the trajectory generated from prediction
-            FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(sampleCounter + 1); // +1 to avoid discontinuity due to imprecision in conditioning
+            FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(sampleCounter);
             List<FramePose3D> observations = bodyPartObservedTrajectoryMap.get(bodyPart);
             FramePose3D lastObservedFramePose = observations.get(observations.size() - 1);
             if (objectFrame != null) // change back to world frame if before it was changed to object frame

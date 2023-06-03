@@ -1,30 +1,26 @@
 package us.ihmc.rdx.ui.vr;
 
 import com.badlogic.gdx.graphics.Color;
-import com.esotericsoftware.minlog.Log;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.openvr.InputDigitalActionData;
 import perception_msgs.msg.dds.DetectableSceneNodesMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.sharedControl.AffordanceAssistant;
-import us.ihmc.behaviors.sharedControl.AssistancePhase;
-import us.ihmc.behaviors.sharedControl.ProMPAssistant;
-import us.ihmc.behaviors.sharedControl.TeleoperationAssistant;
+import us.ihmc.behaviors.sharedControl.*;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.perception.sceneGraph.SceneGraphAPI;
@@ -377,6 +373,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
          if (!affordanceAssistant.isActive())
          {
             affordanceAssistant.loadAffordance(objectName, objectFrame);
+            LogTools.info("Affordance ready");
             bodyPartInitialAffordancePoseMap = affordanceAssistant.getInitialHandPoseMap();
          }
          if (containsBodyPart(bodyPart))
@@ -384,13 +381,13 @@ public class RDXVRAssistance implements TeleoperationAssistant
             //define a function alpha that goes from 0 to 1 smoothly, while getting to 1 before the end of the motion
             double x = (double) (blendingCounter) / (proMPAssistant.AFFORDANCE_BLENDING_SAMPLES);
             double alpha = 1.0 / (1 + 4 * Math.exp(-18 * (x - 0.2))); //sigmoid with [X:0,Y:~0],[X:0.6,Y:~1],[X>1,Y:1]
-            if (alpha > 0.999)
-               alpha = 1;
             if(play)
                blendingCounter++;
             proMPAssistant.framePoseToPack(framePose, bodyPart, play); // pack frame with proMP assistant
-            if (x <= 1)
+            if (alpha <= 0.9999)
             {
+               if (alpha >= 0.998)
+                  alpha = 1;
                // gradually interpolate last promp frame to first affordance frame
                FixedFrameQuaternionBasics arbitratedFrameOrientation = framePose.getOrientation();
                // Perform slerp for quaternion blending
@@ -405,19 +402,27 @@ public class RDXVRAssistance implements TeleoperationAssistant
                assistancePhase = AssistancePhase.AFFORDANCE;
             }
          }
+
       }
       else if (assistancePhase.equals(AssistancePhase.AFFORDANCE))
       {
-         LogTools.info("AFFORDANCE");
-//         if(!affordanceAssistant.isAffordanceOver())
-//            if (containsBodyPart(bodyPart))
-//               affordanceAssistant.framePoseToPack(framePose, bodyPart, play); // pack frame with affordance assistant
-//         else
-//         {
-//            enabledIKStreaming.set(false);
-//            setEnabled(false);
-//         }
+         if(!affordanceAssistant.isAffordanceOver())
+         {
+            if (containsBodyPart(bodyPart))
+               affordanceAssistant.framePoseToPack(framePose, bodyPart, play); // pack frame with affordance assistant
+         }
+         else
+         {
+            enabledIKStreaming.set(false);
+            setEnabled(false);
+         }
       }
+   }
+
+   public void checkForHandConfigurationUpdates(HandConfigurationListener listener)
+   {
+      if (assistancePhase.equals(AssistancePhase.AFFORDANCE))
+         affordanceAssistant.checkForHandConfigurationUpdates(listener);
    }
 
    public void update()
@@ -545,7 +550,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
 
    public boolean isAffordancePhase()
    {
-      return assistancePhase == AssistancePhase.AFFORDANCE;
+      return assistancePhase.equals(AssistancePhase.AFFORDANCE) && affordanceAssistant.hasAffordanceStarted();
    }
 
    public void saveStatusForPreview(KinematicsToolboxOutputStatus status)
@@ -561,6 +566,16 @@ public class RDXVRAssistance implements TeleoperationAssistant
    public boolean isFirstPreview()
    {
       return firstPreview;
+   }
+
+   public Pair<RobotSide, HandConfiguration> getHandConfiguration()
+   {
+      return affordanceAssistant.getHandConfigurationToSend();
+   }
+
+   public boolean isPlaying()
+   {
+      return play || !readyToPack();
    }
 
    public RDX3DSituatedImGuiTransparentPanel getMenuPanel()

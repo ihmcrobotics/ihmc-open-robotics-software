@@ -13,7 +13,7 @@ import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.sharedControl.AssistancePhase;
+import us.ihmc.behaviors.sharedControl.HandConfigurationListener;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
@@ -47,11 +47,10 @@ import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.Throttler;
-import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.util.Set;
 
-public class RDXVRKinematicsStreamingMode
+public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
 {
    private final DRCRobotModel robotModel;
    private final ROS2ControllerHelper ros2ControllerHelper;
@@ -237,7 +236,10 @@ public class RDXVRKinematicsStreamingMode
                else if (vrAssistant.isActive())
                {
                   if (vrAssistant.readyToPack())
+                  {
                      vrAssistant.framePoseToPack(tempFramePose, side.getCamelCaseName() + "Hand");
+                     vrAssistant.checkForHandConfigurationUpdates(this);
+                  }
                   else
                      vrAssistant.processFrameInformation(tempFramePose, side.getCamelCaseName() + "Hand");
                }
@@ -248,7 +250,7 @@ public class RDXVRKinematicsStreamingMode
                   message.getControlFrameOrientationInEndEffector().setYawPitchRoll(0.0, side.negateIfLeftSide(Math.PI / 2.0), side.negateIfLeftSide(Math.PI / 2.0));
                   toolboxInputMessage.getInputs().add().set(message);
                }
-               else if (vrAssistant.containsBodyPart(side.getCamelCaseName() + "Hand"))
+               else if (vrAssistant.isPlaying() && vrAssistant.containsBodyPart(side.getCamelCaseName() + "Hand"))
                {
                   message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
                   message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
@@ -514,6 +516,12 @@ public class RDXVRKinematicsStreamingMode
       {
          controllerFrameGraphics.get(side).dispose();
       }
+   }
+
+   @Override
+   public void onNotification() {
+      var configuration = vrAssistant.getHandConfiguration();
+      sendHandCommand(configuration.getLeft(), configuration.getRight());
    }
 
    public void sendHandCommand(RobotSide robotSide, HandConfiguration desiredHandConfiguration)
