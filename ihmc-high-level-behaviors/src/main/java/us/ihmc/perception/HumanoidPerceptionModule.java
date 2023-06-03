@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -69,9 +70,11 @@ public class HumanoidPerceptionModule
                                                     });
    }
 
-   public void update(ROS2Helper ros2Helper, Mat depthImage, ReferenceFrame cameraFrame, boolean enabled)
+   public void update(ROS2Helper ros2Helper, Mat depthImage, ReferenceFrame cameraFrame, boolean rapidRegionsEnabled, boolean mappingEnabled)
    {
-      if (enabled)
+      localizationAndMappingProcess.setEnableLiveMode(mappingEnabled);
+
+      if (rapidRegionsEnabled)
       {
          executorService.submit(() -> {
 
@@ -111,15 +114,17 @@ public class HumanoidPerceptionModule
 
    public void initializeBodyCollisionFilter(FullHumanoidRobotModel fullRobotModel, CollisionBoxProvider collisionBoxProvider)
    {
+      LogTools.info("Initializing Body Collision Filter");
       this.fullRobotModel = fullRobotModel;
       this.collisionBoxProvider = collisionBoxProvider;
       this.collidingScanRegionFilter = PerceptionFilterTools.createHumanoidShinCollisionFilter(fullRobotModel, collisionBoxProvider);
    }
 
-   public void initializeLocalizationAndMappingProcess(String robotName, ROS2Node ros2Node, boolean smoothing)
+   public void initializeLocalizationAndMappingProcess(ROS2SyncedRobotModel syncedRobot, String robotName, ROS2Node ros2Node, boolean smoothing)
    {
+      LogTools.info("Initializing Localization and Mapping Process (Smoothing: {})", smoothing);
       localizationAndMappingProcess = new LocalizationAndMappingProcess(robotName, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
-              PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE, ros2Node, smoothing);
+              PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE, ros2Node, syncedRobot.getReferenceFrames(), () -> {}, smoothing);
    }
 
    public void extractFramePlanarRegionsList(ReferenceFrame cameraFrame)
