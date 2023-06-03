@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui.vr;
 
 import com.badlogic.gdx.graphics.Color;
+import com.esotericsoftware.minlog.Log;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
@@ -17,9 +18,11 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
@@ -381,40 +384,39 @@ public class RDXVRAssistance implements TeleoperationAssistant
             //define a function alpha that goes from 0 to 1 smoothly, while getting to 1 before the end of the motion
             double x = (double) (blendingCounter) / (proMPAssistant.AFFORDANCE_BLENDING_SAMPLES);
             double alpha = 1.0 / (1 + 4 * Math.exp(-18 * (x - 0.2))); //sigmoid with [X:0,Y:~0],[X:0.6,Y:~1],[X>1,Y:1]
-            blendingCounter++;
+            if (alpha > 0.999)
+               alpha = 1;
+            if(play)
+               blendingCounter++;
+            proMPAssistant.framePoseToPack(framePose, bodyPart, play); // pack frame with proMP assistant
             if (x <= 1)
             {
-               LogTools.info(x);
                // gradually interpolate last promp frame to first affordance frame
                FixedFrameQuaternionBasics arbitratedFrameOrientation = framePose.getOrientation();
-               arbitratedFrameOrientation.set((1 - alpha) * framePose.getOrientation().getX() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getX(),
-                                              (1 - alpha) * framePose.getOrientation().getY() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getY(),
-                                              (1 - alpha) * framePose.getOrientation().getZ() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getZ(),
-                                              (1 - alpha) * framePose.getOrientation().getS() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getS());
+               // Perform slerp for quaternion blending
+               arbitratedFrameOrientation.interpolate(bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation(), alpha);
                FixedFramePoint3DBasics arbitratedFramePosition = framePose.getPosition();
-               arbitratedFramePosition.setX((1 - alpha) * framePose.getPosition().getX() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getPosition().getX());
-               arbitratedFramePosition.setY((1 - alpha) * framePose.getPosition().getY() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getPosition().getY());
-               arbitratedFramePosition.setZ((1 - alpha) * framePose.getPosition().getZ() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getPosition().getZ());
+               arbitratedFramePosition.interpolate(bodyPartInitialAffordancePoseMap.get(bodyPart).getPosition(), alpha);
                framePose.getPosition().set(arbitratedFramePosition);
                framePose.getOrientation().set(arbitratedFrameOrientation);
             }
-//            else
-               //            assistancePhase = AssistancePhase.AFFORDANCE;
-            framePose.getPosition().set(bodyPartInitialAffordancePoseMap.get(bodyPart).getPosition());
-            framePose.getOrientation().set(bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation());
-
+            else
+            {
+               assistancePhase = AssistancePhase.AFFORDANCE;
+            }
          }
       }
       else if (assistancePhase.equals(AssistancePhase.AFFORDANCE))
       {
-         if(!affordanceAssistant.isAffordanceOver())
-            if (containsBodyPart(bodyPart))
-               affordanceAssistant.framePoseToPack(framePose, bodyPart, play); // pack frame with affordance assistant
-         else
-         {
-            enabledIKStreaming.set(false);
-            setEnabled(false);
-         }
+         LogTools.info("AFFORDANCE");
+//         if(!affordanceAssistant.isAffordanceOver())
+//            if (containsBodyPart(bodyPart))
+//               affordanceAssistant.framePoseToPack(framePose, bodyPart, play); // pack frame with affordance assistant
+//         else
+//         {
+//            enabledIKStreaming.set(false);
+//            setEnabled(false);
+//         }
       }
    }
 
@@ -541,9 +543,9 @@ public class RDXVRAssistance implements TeleoperationAssistant
       return affordanceAssistant.isActive();
    }
 
-   public AssistancePhase getAssistancePhase()
+   public boolean isAffordancePhase()
    {
-      return assistancePhase;
+      return assistancePhase == AssistancePhase.AFFORDANCE;
    }
 
    public void saveStatusForPreview(KinematicsToolboxOutputStatus status)

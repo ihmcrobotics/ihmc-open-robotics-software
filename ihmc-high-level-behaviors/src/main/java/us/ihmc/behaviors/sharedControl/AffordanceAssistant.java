@@ -4,12 +4,9 @@ import us.ihmc.behaviors.tools.TrajectoryRecordReplay;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.io.File;
@@ -32,12 +29,14 @@ public class AffordanceAssistant
       affordancePlayer = new TrajectoryRecordReplay(filePath.toString(), 1);
 
       double[] initialPose = affordancePlayer.play();
-      LogTools.info(" {}, {}, {}", initialPose[4], initialPose[5], initialPose[6]);
       FramePose3D initialBodyPartPose = new FramePose3D(objectFrame);
       initialBodyPartPose.getOrientation().set(initialPose);
       initialBodyPartPose.getPosition().set(4, initialPose);
       initialBodyPartPose.appendTranslation(AFFORDANCE_TO_HAND_COM_TRANSFORM);
       initialBodyPartPose.changeFrame(ReferenceFrame.getWorldFrame());
+      // pre-apply rotation of VR controllers to cancel out the rotation in the VRKinematicsStreaming
+      initialBodyPartPose.appendPitchRotation(Math.PI / 2.0);
+      initialBodyPartPose.appendRollRotation(Math.PI / 2.0);
       bodyPartInitialPoseMap.put("rightHand", initialBodyPartPose);
 
 //      for (RobotSide side : RobotSide.values)
@@ -66,6 +65,7 @@ public class AffordanceAssistant
             // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
             framePose.getOrientation().set(dataPoint);
             framePose.getPosition().set(4, dataPoint);
+            framePose.appendTranslation(AFFORDANCE_TO_HAND_COM_TRANSFORM);
             framePose.changeFrame(ReferenceFrame.getWorldFrame());
          }
       }

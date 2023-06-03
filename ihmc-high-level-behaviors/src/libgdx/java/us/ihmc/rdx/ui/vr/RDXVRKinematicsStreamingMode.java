@@ -252,7 +252,7 @@ public class RDXVRKinematicsStreamingMode
                {
                   message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
                   message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
-                  if(!vrAssistant.isAffordanceActive())
+                  if(!vrAssistant.isAffordancePhase())
                      message.getControlFrameOrientationInEndEffector().setYawPitchRoll(0.0, side.negateIfLeftSide(Math.PI / 2.0), side.negateIfLeftSide(Math.PI / 2.0));
                   toolboxInputMessage.getInputs().add().set(message);
                }

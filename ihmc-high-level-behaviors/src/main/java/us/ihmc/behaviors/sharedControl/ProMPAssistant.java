@@ -183,15 +183,11 @@ public class ProMPAssistant
             }
             else
             { // gradually interpolate last observation to prediction
-               FixedFrameQuaternionBasics arbitratedFrameOrientation = framePose.getOrientation();
-               arbitratedFrameOrientation.set((1 - alpha) * lastObservedFramePose.getOrientation().getX() + alpha * generatedFramePose.getOrientation().getX(),
-                                              (1 - alpha) * lastObservedFramePose.getOrientation().getY() + alpha * generatedFramePose.getOrientation().getY(),
-                                              (1 - alpha) * lastObservedFramePose.getOrientation().getZ() + alpha * generatedFramePose.getOrientation().getZ(),
-                                              (1 - alpha) * lastObservedFramePose.getOrientation().getS() + alpha * generatedFramePose.getOrientation().getS());
-               FixedFramePoint3DBasics arbitratedFramePosition = framePose.getPosition();
-               arbitratedFramePosition.setX((1 - alpha) * lastObservedFramePose.getPosition().getX() + alpha * generatedFramePose.getPosition().getX());
-               arbitratedFramePosition.setY((1 - alpha) * lastObservedFramePose.getPosition().getY() + alpha * generatedFramePose.getPosition().getY());
-               arbitratedFramePosition.setZ((1 - alpha) * lastObservedFramePose.getPosition().getZ() + alpha * generatedFramePose.getPosition().getZ());
+               FixedFrameQuaternionBasics arbitratedFrameOrientation = lastObservedFramePose.getOrientation();
+               // Perform slerp for quaternion blending
+               arbitratedFrameOrientation.interpolate(generatedFramePose.getOrientation(), alpha);
+               FixedFramePoint3DBasics arbitratedFramePosition = lastObservedFramePose.getPosition();
+               arbitratedFramePosition.interpolate(generatedFramePose.getPosition(), alpha);
                framePose.getPosition().set(arbitratedFramePosition);
                framePose.getOrientation().set(arbitratedFrameOrientation);
             }
