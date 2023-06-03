@@ -92,7 +92,7 @@ public class ProMPManager
       for (int i = 0; i < listOfFiles.length; i++) //get training files
          fileListTraining.add(demoTrainingDirAbs + "/" + (i + 1) + ".csv");
 
-      // This is how the dofs are stored in the csv training files (generated using KinematicsRecordReplay in GDXVRKinematicsStreaming)
+      // This is how the dofs are stored in the csv files (generated RDX framework, see RDXVRKinematicsStreaming, RDXAffordanceEditorUI)
       // 0,1,2,3: left hand quaternion; 4,5,6: left hand X,Y,Z;
       // 7,8,9,10: right hand quaternion; 11,12,13: right hand X,Y,Z;
       for (Map.Entry<String, String> entry : bodyPartsGeometry.entrySet())

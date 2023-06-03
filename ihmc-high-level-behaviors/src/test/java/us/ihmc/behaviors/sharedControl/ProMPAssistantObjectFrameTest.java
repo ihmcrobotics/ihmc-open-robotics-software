@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.promp.ProMPUtil;
-import us.ihmc.rdx.ui.tools.TrajectoryRecordReplay;
+import us.ihmc.behaviors.tools.TrajectoryRecordReplay;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 import java.io.IOException;
@@ -51,7 +51,6 @@ public class ProMPAssistantObjectFrameTest
 
       // replay that file
       TrajectoryRecordReplay trajectoryPlayer = new TrajectoryRecordReplay(testFilePath, 2); //2 body parts: the hands
-      trajectoryPlayer.setDoneReplay(false);
       // start parsing data immedediately, assuming user is moving from beginning of recorded test trajectory
       proMPAssistant.setIsMovingThreshold(0.00001);
 

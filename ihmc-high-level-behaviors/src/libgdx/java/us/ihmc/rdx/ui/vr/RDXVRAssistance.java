@@ -7,6 +7,8 @@ import org.lwjgl.openvr.InputDigitalActionData;
 import perception_msgs.msg.dds.DetectableSceneNodesMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.behaviors.sharedControl.AffordanceAssistant;
+import us.ihmc.behaviors.sharedControl.AssistancePhase;
 import us.ihmc.behaviors.sharedControl.ProMPAssistant;
 import us.ihmc.behaviors.sharedControl.TeleoperationAssistant;
 import us.ihmc.communication.IHMCROS2Input;
@@ -20,22 +22,22 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.perception.sceneGraph.SceneGraphAPI;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDX3DSituatedImGuiTransparentPanel;
 import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
-import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorActionSequenceEditor;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.visualizers.RDXEdgeDefinedShapeGraphic;
 import us.ihmc.rdx.visualizers.RDXSplineGraphic;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
@@ -49,15 +51,17 @@ import java.util.*;
  * 2. spline trajectories for end-effectors
  * 3. std deviation colored region of the autonomy used for assistance
  */
-public class RDXVRSharedControl implements TeleoperationAssistant
+public class RDXVRAssistance implements TeleoperationAssistant
 {
-   private static final Tuple3DReadOnly AFFORDANCE_TO_KINEMATIC_HAND_TRANSFORM = new Point3D(-0.06441,-0.013019, 0.0);
+   private AssistancePhase assistancePhase = AssistancePhase.PROMP;
+   private final SideDependentList<RigidBodyTransform> affordanceToCOMHandTransform = new SideDependentList<>(); // fixed offset hand CoM - link after last wrist joint
    private final ROS2PublishSubscribeAPI ros2;
    private final IHMCROS2Input<DetectableSceneNodesMessage> detectableSceneObjectsSubscription;
    private final ImBoolean enabledReplay;
    private final ImBoolean enabledIKStreaming;
    private final ImBoolean enabled = new ImBoolean(false);
    private final ProMPAssistant proMPAssistant = new ProMPAssistant();
+   private final AffordanceAssistant affordanceAssistant = new AffordanceAssistant();
    private String objectName = "";
    private RigidBodyTransform objectTransformToWorld = new RigidBodyTransform();
    private ReferenceFrame objectFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
@@ -68,24 +72,21 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private final HashMap<String, RDXSplineGraphic> splineGraphics = new HashMap<>();
    private final HashMap<String, RDXEdgeDefinedShapeGraphic> stdDeviationGraphics = new HashMap<>();
    private final HashMap<String, List<Pose3DReadOnly>> bodyPartReplayMotionMap = new HashMap<>();
-   private final HashMap<String, Pose3DReadOnly> bodyPartInitialAffordancePoseMap = new HashMap<>();
+   private HashMap<String, Pose3DReadOnly> bodyPartInitialAffordancePoseMap;
    private final OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
-   private boolean previewSetToActive = true; // once the validated motion is executed and preview disabled, activate ghostRobotGraphic based on this
+   private boolean previewSetToActive = false; // once the validated motion is executed and preview disabled, activate ghostRobotGraphic based on this
    private final ArrayList<KinematicsToolboxOutputStatus> assistanceStatusList = new ArrayList<>();
    private boolean firstPreview = true;
    private int replayPreviewCounter = 0;
    private int speedSplineAdjustmentFactor = 1;
    private boolean play = false;
    private double joystickValue;
-   private TreeSet<RDXBehaviorActionSequenceEditor> affordanceEditors;
-   private RDXBehaviorActionSequenceEditor affordanceEditor;
-   private boolean affordanceReady = false;
    private int blendingCounter = 0;
    private RDXVRAssistanceMenu menu;
    private final VRMenuGuideMode[] menuMode;
 
 
-   public RDXVRSharedControl(DRCRobotModel robotModel, ROS2PublishSubscribeAPI ros2, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
+   public RDXVRAssistance(DRCRobotModel robotModel, ROS2PublishSubscribeAPI ros2, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
    {
       this.ros2 = ros2;
       this.enabledIKStreaming = enabledIKStreaming;
@@ -101,12 +102,19 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       ghostOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(ghostRobotModel);
       ghostRobotGraphic = new RDXMultiBodyGraphic(robotModel.getSimpleRobotName() + " (Assistance Preview Ghost)");
       ghostRobotGraphic.loadRobotModelAndGraphics(ghostRobotDefinition, ghostRobotModel.getElevator());
-      ghostRobotGraphic.setActive(true);
+      ghostRobotGraphic.setActive(false);
       ghostRobotGraphic.create();
 
       detectableSceneObjectsSubscription = ros2.subscribe(SceneGraphAPI.DETECTABLE_SCENE_NODES);
       menuMode = new VRMenuGuideMode[1];
       menuMode[0] = VRMenuGuideMode.OFF;
+
+      for (RobotSide side: RobotSide.values)
+      {
+         ReferenceFrame afterLastWristJointFrame = ghostRobotModel.getEndEffectorFrame(side, LimbName.ARM);
+         ReferenceFrame comFrame = ghostRobotModel.getHand(side).getBodyFixedFrame();
+         affordanceToCOMHandTransform.put(side, comFrame.getTransformToDesiredFrame(afterLastWristJointFrame));
+      }
    }
 
    public void createMenuWindow(RDXImGuiWindowAndDockSystem window)
@@ -319,101 +327,93 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    @Override
    public void framePoseToPack(FramePose3D framePose, String bodyPart)
    {
-      proMPAssistant.framePoseToPack(framePose, bodyPart, play); // pack frame with proMP assistant
-
-      if (containsBodyPart(bodyPart))
+      if (assistancePhase.equals(AssistancePhase.PROMP))
       {
-         // -- Preview active but not validated yet
-         if (previewSetToActive && !previewValidated)
+         proMPAssistant.framePoseToPack(framePose, bodyPart, play); // pack frame with proMP assistant
+         if (containsBodyPart(bodyPart))
          {
-            ghostRobotGraphic.setActive(true); // show ghost robot of preview
-            if (proMPAssistant.isCurrentTaskDone()) // if first motion preview is over and not validated yet
-               firstPreview = false;
-            if (enabledIKStreaming.get()) // if streaming to controller has been activated again, it means the user validated the motion
+            // -- Preview active but not validated yet
+            if (previewSetToActive && !previewValidated)
             {
-               ghostRobotGraphic.setActive(false); // stop displaying preview ghost robot
-               splineGraphics.clear(); // stop displaying preview splines
-               stdDeviationGraphics.clear(); // stop displaying stdDeviation region
-               previewValidated = true;
+               ghostRobotGraphic.setActive(true); // show ghost robot of preview
+               if (proMPAssistant.isCurrentTaskDone()) // if first motion preview is over and not validated yet
+                  firstPreview = false;
+               if (enabledIKStreaming.get()) // if streaming to controller has been activated again, it means the user validated the motion
+               {
+                  ghostRobotGraphic.setActive(false); // stop displaying preview ghost robot
+                  splineGraphics.clear(); // stop displaying preview splines
+                  stdDeviationGraphics.clear(); // stop displaying stdDeviation region
+                  previewValidated = true;
+               }
+               if (!firstPreview) // if second replay or more, keep promp assistant in pause at beginning
+                  proMPAssistant.setStartTrajectories(0);
+               else
+               { // if first preview
+                  // keep storing current frames for replay preview with splines
+                  if (bodyPartReplayMotionMap.containsKey(bodyPart))
+                     bodyPartReplayMotionMap.get(bodyPart).add(new Pose3D(framePose));
+               }
             }
-            if (!firstPreview) // if second replay or more, keep promp assistant in pause at beginning
-               proMPAssistant.setStartTrajectories(0);
-            else
-            { // if first preview
-               // keep storing current frames for replay preview with splines
-               if (bodyPartReplayMotionMap.containsKey(bodyPart))
-                  bodyPartReplayMotionMap.get(bodyPart).add(new Pose3D(framePose));
+            else // -- If user did not use the preview or preview has been validated
+            {
+               // exit assistance when the current task is over, reactivate it in VR or UI when you want to use it again
+               if (!enabledIKStreaming.get() && !isAffordanceActive()) //prevent jump by first disabling streaming to controller below and then shared control here
+                  setEnabled(false);
+               if (proMPAssistant.isCurrentTaskDone())
+                  enabledIKStreaming.set(false); // stop the ik streaming so that you can reposition according to the robot state to avoid jumps in poses
+               if (proMPAssistant.inEndZone())
+               {
+                  if (affordanceAssistant.hasAffordance(objectName))
+                     assistancePhase = AssistancePhase.BLENDING;
+               }
             }
          }
-         else // -- If user did not use the preview or preview has been validated
+      }
+      else if (assistancePhase.equals(AssistancePhase.BLENDING))
+      {
+         if (!affordanceAssistant.isActive())
          {
-            // exit assistance when the current task is over, reactivate it in VR or UI when you want to use it again
-            if (!enabledIKStreaming.get() && !isAffordanceActive()) //prevent jump by first disabling streaming to controller below and then shared control here
-               setEnabled(false);
-            if (proMPAssistant.isCurrentTaskDone() && affordanceEditor == null)
+            affordanceAssistant.loadAffordance(objectName, objectFrame);
+            bodyPartInitialAffordancePoseMap = affordanceAssistant.getInitialHandPoseMap();
+         }
+         if (containsBodyPart(bodyPart))
+         {
+            //define a function alpha that goes from 0 to 1 smoothly, while getting to 1 before the end of the motion
+            double x = (double) (blendingCounter) / (proMPAssistant.AFFORDANCE_BLENDING_SAMPLES);
+            double alpha = 1.0 / (1 + 4 * Math.exp(-18 * (x - 0.2))); //sigmoid with [X:0,Y:~0],[X:0.6,Y:~1],[X>1,Y:1]
+            blendingCounter++;
+            if (x <= 1)
             {
-               enabledIKStreaming.set(false); // stop the ik streaming so that you can reposition according to the robot state to avoid jumps in poses
+               LogTools.info(x);
+               // gradually interpolate last promp frame to first affordance frame
+               FixedFrameQuaternionBasics arbitratedFrameOrientation = framePose.getOrientation();
+               arbitratedFrameOrientation.set((1 - alpha) * framePose.getOrientation().getX() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getX(),
+                                              (1 - alpha) * framePose.getOrientation().getY() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getY(),
+                                              (1 - alpha) * framePose.getOrientation().getZ() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getZ(),
+                                              (1 - alpha) * framePose.getOrientation().getS() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getS());
+               FixedFramePoint3DBasics arbitratedFramePosition = framePose.getPosition();
+               arbitratedFramePosition.setX((1 - alpha) * framePose.getPosition().getX() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getPosition().getX());
+               arbitratedFramePosition.setY((1 - alpha) * framePose.getPosition().getY() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getPosition().getY());
+               arbitratedFramePosition.setZ((1 - alpha) * framePose.getPosition().getZ() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getPosition().getZ());
+               framePose.getPosition().set(arbitratedFramePosition);
+               framePose.getOrientation().set(arbitratedFrameOrientation);
             }
+//            else
+               //            assistancePhase = AssistancePhase.AFFORDANCE;
+            framePose.getPosition().set(bodyPartInitialAffordancePoseMap.get(bodyPart).getPosition());
+            framePose.getOrientation().set(bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation());
 
-            if (proMPAssistant.inEndZone() && enabledIKStreaming.get())
-            {
-               if (affordanceEditor == null)
-               {
-                  for (RDXBehaviorActionSequenceEditor editor : affordanceEditors)
-                  {
-                     if (editor.getName().equals(objectName))
-                     {
-                        LogTools.info("Loading affordance: {}", objectName);
-                        affordanceEditor = editor;
-                        // TODO getInitialHandTransform edit this to include also other parts that are not the hands
-                        RobotSide side = RobotSide.getSideFromBodyPart(bodyPart);
-                        RigidBodyTransform initialBodyPartTransform = affordanceEditor.getInitialHandTransform(side);
-                        // change affordance hand origin to kinematics streaming hand origin
-                        initialBodyPartTransform.appendRollRotation(side.negateIfLeftSide(Math.PI / 2.0));
-                        initialBodyPartTransform.appendYawRotation(-side.negateIfLeftSide(Math.PI / 2.0));
-                        initialBodyPartTransform.appendTranslation(AFFORDANCE_TO_KINEMATIC_HAND_TRANSFORM);
-                        FramePose3D initialBodyPartPose = new FramePose3D(objectFrame, initialBodyPartTransform);
-                        initialBodyPartPose.changeFrame(ReferenceFrame.getWorldFrame());
-                        bodyPartInitialAffordancePoseMap.put(bodyPart, initialBodyPartPose);
-                        break;
-                     }
-                  }
-               }
-
-               if (affordanceEditor != null)
-               {
-                  //define a function alpha that goes from 0 to 1 smoothly, while getting to 1 before the end of the motion
-                  double x = (double) (blendingCounter) / (proMPAssistant.AFFORDANCE_BLENDING_SAMPLES);
-                  double alpha = 1.0 / (1 + 4 * Math.exp(-18 * (x - 0.2))); //sigmoid with [X:0,Y:~0],[X:0.6,Y:~1],[X>1,Y:1]
-                  if (alpha >= 0.999)
-                     alpha = 1;
-                  blendingCounter++;
-                  if (x <= 1)
-                  {
-                     // gradually interpolate last promp frame to first affordance frame
-                     FixedFrameQuaternionBasics arbitratedFrameOrientation = framePose.getOrientation();
-                     arbitratedFrameOrientation.set((1 - alpha) * framePose.getOrientation().getX() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getX(),
-                                                    (1 - alpha) * framePose.getOrientation().getY() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getY(),
-                                                    (1 - alpha) * framePose.getOrientation().getZ() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getZ(),
-                                                    (1 - alpha) * framePose.getOrientation().getS() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation().getS());
-                     FixedFramePoint3DBasics arbitratedFramePosition = framePose.getPosition();
-                     arbitratedFramePosition.setX((1 - alpha) * framePose.getPosition().getX() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getPosition().getX());
-                     arbitratedFramePosition.setY((1 - alpha) * framePose.getPosition().getY() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getPosition().getY());
-                     arbitratedFramePosition.setZ((1 - alpha) * framePose.getPosition().getZ() + alpha * bodyPartInitialAffordancePoseMap.get(bodyPart).getPosition().getZ());
-                     framePose.getPosition().set(arbitratedFramePosition);
-                     framePose.getOrientation().set(arbitratedFrameOrientation);
-                  }
-                  else
-                  {
-                     enabledIKStreaming.set(false); // stop the ik streaming so that you can execute the affordance through the actionSequenceEditor
-                     if (affordanceEditor != null)
-                     {
-                        affordanceEditor.sendToRobot();
-                        affordanceReady = true;
-                     }
-                  }
-               }
-            }
+         }
+      }
+      else if (assistancePhase.equals(AssistancePhase.AFFORDANCE))
+      {
+         if(!affordanceAssistant.isAffordanceOver())
+            if (containsBodyPart(bodyPart))
+               affordanceAssistant.framePoseToPack(framePose, bodyPart, play); // pack frame with affordance assistant
+         else
+         {
+            enabledIKStreaming.set(false);
+            setEnabled(false);
          }
       }
    }
@@ -434,8 +434,6 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             }
          }
       }
-      if (!enabledIKStreaming.get() && isActive() && isAffordanceActive())
-         updateAffordance();
       //update menu
       if (!enabled.get() && !objectName.isEmpty())
          menuMode[0] = VRMenuGuideMode.PRESS_LEFT_B;
@@ -447,23 +445,6 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          menuMode[0] = VRMenuGuideMode.PUSH_LEFT_JOYSTICK;
       else
          menuMode[0] = VRMenuGuideMode.IDLE;
-   }
-
-   private void updateAffordance()
-   {
-      if (joystickValue > 0.0)
-         affordanceEditor.playActions(true);
-      else if (joystickValue == 0.0)
-      {
-         affordanceEditor.playActions(false);
-         affordanceEditor.rewindActions(false);
-      }
-      else
-         affordanceEditor.rewindActions(true);
-
-      // TODO SERIOUS BUG IN THIS EDITOR. It s alwyas over if not opening panel affordance, it this.enabled-> false but keep playing affordance with joystick
-//      if (affordanceEditor.isAffordanceOver())
-//         setEnabled(false);
    }
 
    public void renderWidgets(ImGuiUniqueLabelMap labels)
@@ -512,20 +493,11 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             ghostRobotGraphic.setActive(previewSetToActive); // set it back to what it was (graphic is disabled when using assistance after validation)
             splineGraphics.clear();
             stdDeviationGraphics.clear();
-            if(affordanceEditor != null)
-            {
-               affordanceEditor.commandNextActionIndex(0);
-               affordanceEditor = null;
-            }
-            affordanceReady = false;
+            assistancePhase = AssistancePhase.PROMP;
             blendingCounter = 0;
+            affordanceAssistant.reset();
          }
       }
-   }
-
-   public void addAffordanceEditors(TreeSet<RDXBehaviorActionSequenceEditor> affordanceEditors)
-   {
-      this.affordanceEditors = affordanceEditors;
    }
 
    public RDXMultiBodyGraphic getGhostPreviewGraphic()
@@ -545,17 +517,13 @@ public class RDXVRSharedControl implements TeleoperationAssistant
 
    public boolean containsBodyPart(String bodyPart)
    {
-      return proMPAssistant.containsBodyPart(bodyPart);
+      return ((proMPAssistant.startedProcessing() && proMPAssistant.containsBodyPart(bodyPart)) ||
+              (affordanceAssistant.isActive() && affordanceAssistant.containsBodyPart(bodyPart)));
    }
 
    public boolean isActive()
    {
       return this.enabled.get();
-   }
-
-   public boolean isAffordanceActive()
-   {
-      return affordanceEditor != null && affordanceReady;
    }
 
    public boolean isPreviewActive()
@@ -566,6 +534,16 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    public boolean isPreviewGraphicActive()
    {
       return ghostRobotGraphic.isActive();
+   }
+
+   public boolean isAffordanceActive()
+   {
+      return affordanceAssistant.isActive();
+   }
+
+   public AssistancePhase getAssistancePhase()
+   {
+      return assistancePhase;
    }
 
    public void saveStatusForPreview(KinematicsToolboxOutputStatus status)

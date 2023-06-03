@@ -6,6 +6,7 @@ import imgui.type.ImString;
 import org.lwjgl.openvr.InputDigitalActionData;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodesMessage;
+import us.ihmc.behaviors.tools.TrajectoryRecordReplay;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
@@ -52,6 +53,7 @@ public class KinematicsRecordReplay
          framesToRecordHistory.add(new ArrayList<>());
 
       detectableSceneObjectsSubscription = ros2.subscribe(SceneGraphAPI.DETECTABLE_SCENE_NODES);
+      trajectoryRecorder.setDoneReplay(true);
    }
 
    public void processRecordReplayInput(InputDigitalActionData triggerButton)
@@ -152,8 +154,8 @@ public class KinematicsRecordReplay
       // Read file with stored trajectories: read set point per timestep until file is over
       double[] dataPoint = trajectoryRecorder.play(true); //play split data (a body part per time)
       // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
-      framePose.getOrientation().set(dataPoint[0], dataPoint[1], dataPoint[2], dataPoint[3]);
-      framePose.getPosition().set(dataPoint[4], dataPoint[5], dataPoint[6]);
+      framePose.getOrientation().set(dataPoint);
+      framePose.getPosition().set(4, dataPoint);
       if (trajectoryRecorder.hasDoneReplay())
       {
          isReplaying = false;

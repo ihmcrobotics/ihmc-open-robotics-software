@@ -231,7 +231,7 @@ public class ProMPAssistant
    {
       if (taskDetected(observedPose, bodyPart, objectName, objectFrame))
       {
-         if ((proMPManagers.get(currentTask).getBodyPartsGeometry()).containsKey(bodyPart)) // if bodyPart is used in current task
+         if (containsBodyPart(bodyPart)) // if bodyPart is used in current task
          {
             FramePose3D lastObservedPose = new FramePose3D();
             lastObservedPose.getPosition().set(observedPose.getPosition().getX(), observedPose.getPosition().getY(), observedPose.getPosition().getZ());
@@ -268,7 +268,7 @@ public class ProMPAssistant
    {
       if (taskDetected(observedPose, bodyPart, objectName, null))
       {
-         if ((proMPManagers.get(currentTask).getBodyPartsGeometry()).containsKey(bodyPart)) // if bodyPart is used in current task
+         if (containsBodyPart(bodyPart)) // if bodyPart is used in current task
          {
             FramePose3D lastObservedPose = new FramePose3D();
             lastObservedPose.getPosition().set(observedPose.getPosition().getX(), observedPose.getPosition().getY(), observedPose.getPosition().getZ());

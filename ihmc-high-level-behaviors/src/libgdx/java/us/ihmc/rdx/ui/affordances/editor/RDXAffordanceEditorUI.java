@@ -544,7 +544,7 @@ public class RDXAffordanceEditorUI
                      dataTrajectories[data] = 0.0;
                   dataTrajectories[0] = HandConfiguration.valueOf(postGraspHandConfigurations.get(i).toString()).ordinal();
                   csvDataMatrix.add(dataTrajectories);
-                  
+
                   ObjectNode extraActionNode = actionsArrayNode.addObject();
                   extraActionNode.put("type", "RDXHandConfigurationAction");
                   extraActionNode.put("side", side.getLowerCaseName());

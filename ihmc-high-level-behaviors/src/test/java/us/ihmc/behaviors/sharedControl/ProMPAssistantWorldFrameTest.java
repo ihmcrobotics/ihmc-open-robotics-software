@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.promp.ProMPUtil;
-import us.ihmc.rdx.ui.tools.TrajectoryRecordReplay;
+import us.ihmc.behaviors.tools.TrajectoryRecordReplay;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -44,7 +44,6 @@ public class ProMPAssistantWorldFrameTest
 
       // replay that file
       TrajectoryRecordReplay trajectoryPlayer = new TrajectoryRecordReplay(testFilePath, 2); //2 body parts: the hands
-      trajectoryPlayer.setDoneReplay(false);
       // start parsing data immedediately, assuming user is moving from beginning of recorded test trajectory
       proMPAssistant.setIsMovingThreshold(0.00001);
 
@@ -64,9 +63,8 @@ public class ProMPAssistantWorldFrameTest
             framePose.setFromReferenceFrame(ReferenceFrame.getWorldFrame());
             // Read file with stored trajectories: read set point per timestep until file is over
             double[] dataPoint = trajectoryPlayer.play(true);
-            // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
-            framePose.getOrientation().set(dataPoint[0], dataPoint[1], dataPoint[2], dataPoint[3]);
-            framePose.getPosition().set(dataPoint[4], dataPoint[5], dataPoint[6]);
+            framePose.getOrientation().get(dataPoint);
+            framePose.getPosition().get(4, dataPoint);
 
             if (proMPAssistant.readyToPack())
             {
