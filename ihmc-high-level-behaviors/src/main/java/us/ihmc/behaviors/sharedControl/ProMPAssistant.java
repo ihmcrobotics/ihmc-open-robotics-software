@@ -2,7 +2,9 @@ package us.ihmc.behaviors.sharedControl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
@@ -27,7 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ProMPAssistant
 {
-   private static final int INTERPOLATION_SAMPLES = 15;
+   private static final int INTERPOLATION_SAMPLES = 5;
    public static final int AFFORDANCE_BLENDING_SAMPLES = 25;
    private final HashMap<String, ProMPManager> proMPManagers = new HashMap<>(); // proMPManagers stores a proMPManager for each task
    private final HashMap<String, List<String>> contextTasksMap = new HashMap<>(); // map to store all the tasks available for each context (object)
@@ -152,7 +154,7 @@ public class ProMPAssistant
          // -- Observing
          if (sampleCounter < numberObservations)
          {
-            FramePose3D observedFramePose = bodyPartObservedTrajectoryMap.get(bodyPart).get(sampleCounter);
+            FramePose3D observedFramePose = new FramePose3D(bodyPartObservedTrajectoryMap.get(bodyPart).get(sampleCounter));
             if (objectFrame != null)
                observedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
             framePose.getPosition().set(observedFramePose.getPosition());
@@ -166,7 +168,7 @@ public class ProMPAssistant
          else if (sampleCounter < generatedFramePoseTrajectory.size() - 1)
          {
             // pack the frame using the trajectory generated from prediction
-            FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(sampleCounter);
+            FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(sampleCounter + 1);
             List<FramePose3D> observations = bodyPartObservedTrajectoryMap.get(bodyPart);
             FramePose3D lastObservedFramePose = observations.get(observations.size() - 1);
             if (objectFrame != null) // change back to world frame if before it was changed to object frame
@@ -174,7 +176,6 @@ public class ProMPAssistant
                generatedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
                lastObservedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
             }
-
             double alpha = (double) (sampleCounter - numberObservations) / (INTERPOLATION_SAMPLES);
             if (alpha > 1.0)
             {
@@ -183,10 +184,10 @@ public class ProMPAssistant
             }
             else
             { // gradually interpolate last observation to prediction
-               FixedFrameQuaternionBasics arbitratedFrameOrientation = lastObservedFramePose.getOrientation();
+               FixedFrameQuaternionBasics arbitratedFrameOrientation = new FrameQuaternion(lastObservedFramePose.getOrientation());
                // Perform slerp for quaternion blending
                arbitratedFrameOrientation.interpolate(generatedFramePose.getOrientation(), alpha);
-               FixedFramePoint3DBasics arbitratedFramePosition = lastObservedFramePose.getPosition();
+               FixedFramePoint3DBasics arbitratedFramePosition = new FramePoint3D(lastObservedFramePose.getPosition());
                arbitratedFramePosition.interpolate(generatedFramePose.getPosition(), alpha);
                framePose.getPosition().set(arbitratedFramePosition);
                framePose.getOrientation().set(arbitratedFrameOrientation);
@@ -229,14 +230,7 @@ public class ProMPAssistant
       {
          if (containsBodyPart(bodyPart)) // if bodyPart is used in current task
          {
-            FramePose3D lastObservedPose = new FramePose3D();
-            lastObservedPose.getPosition().set(observedPose.getPosition().getX(), observedPose.getPosition().getY(), observedPose.getPosition().getZ());
-            lastObservedPose.getOrientation()
-                            .set(observedPose.getOrientation().getX(),
-                                 observedPose.getOrientation().getY(),
-                                 observedPose.getOrientation().getZ(),
-                                 observedPose.getOrientation().getS());
-
+            FramePose3D lastObservedPose = new FramePose3D(observedPose);
             if (!bodyPartGoal.isEmpty()) // if there is an observable object and goal
             {
                // change observed pose in object frame
@@ -246,7 +240,7 @@ public class ProMPAssistant
             if (userIsMoving(lastObservedPose, bodyPart)) // check if user has started moving after activating the assistance (after pressing the button)
             {
                // store observed pose
-               bodyPartObservedTrajectoryMap.get(bodyPart).add(lastObservedPose);
+               bodyPartObservedTrajectoryMap.get(bodyPart).add(new FramePose3D(lastObservedPose));
                // update the proMP prediction according to observations and generate mean trajectory
                if (bodyPartObservedTrajectoryMap.get(bodyPart).size() > numberObservations) // if observed a sufficient number of poses
                {
@@ -266,13 +260,7 @@ public class ProMPAssistant
       {
          if (containsBodyPart(bodyPart)) // if bodyPart is used in current task
          {
-            FramePose3D lastObservedPose = new FramePose3D();
-            lastObservedPose.getPosition().set(observedPose.getPosition().getX(), observedPose.getPosition().getY(), observedPose.getPosition().getZ());
-            lastObservedPose.getOrientation()
-                            .set(observedPose.getOrientation().getX(),
-                                 observedPose.getOrientation().getY(),
-                                 observedPose.getOrientation().getZ(),
-                                 observedPose.getOrientation().getS());
+            FramePose3D lastObservedPose = new FramePose3D(observedPose);
             if (userIsMoving(lastObservedPose, bodyPart)) // check if user has started moving after activating the assistance (pressed the button)
             {
                // store observed pose

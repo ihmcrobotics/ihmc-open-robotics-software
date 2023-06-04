@@ -14,7 +14,9 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
@@ -343,6 +345,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
                   splineGraphics.clear(); // stop displaying preview splines
                   stdDeviationGraphics.clear(); // stop displaying stdDeviation region
                   previewValidated = true;
+                  proMPAssistant.setStartTrajectories(0);
                }
                if (!firstPreview) // if second replay or more, keep promp assistant in pause at beginning
                   proMPAssistant.setStartTrajectories(0);
@@ -388,10 +391,10 @@ public class RDXVRAssistance implements TeleoperationAssistant
                if (alpha >= 0.998)
                   alpha = 1;
                // gradually interpolate last promp frame to first affordance frame
-               FixedFrameQuaternionBasics arbitratedFrameOrientation = framePose.getOrientation();
+               FixedFrameQuaternionBasics arbitratedFrameOrientation = new FrameQuaternion(framePose.getOrientation());
                // Perform slerp for quaternion blending
                arbitratedFrameOrientation.interpolate(bodyPartInitialAffordancePoseMap.get(bodyPart).getOrientation(), alpha);
-               FixedFramePoint3DBasics arbitratedFramePosition = framePose.getPosition();
+               FixedFramePoint3DBasics arbitratedFramePosition = new FramePoint3D(framePose.getPosition());
                arbitratedFramePosition.interpolate(bodyPartInitialAffordancePoseMap.get(bodyPart).getPosition(), alpha);
                framePose.getPosition().set(arbitratedFramePosition);
                framePose.getOrientation().set(arbitratedFrameOrientation);
@@ -423,7 +426,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
 
    public void checkForHandConfigurationUpdates(HandConfigurationListener listener)
    {
-      if (assistancePhase.equals(AssistancePhase.AFFORDANCE))
+      if (!assistancePhase.equals(AssistancePhase.PROMP))
          affordanceAssistant.checkForHandConfigurationUpdates(listener);
    }
 
@@ -505,6 +508,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
             assistancePhase = AssistancePhase.PROMP;
             blendingCounter = 0;
             affordanceAssistant.reset();
+            this.enabledIKStreaming.set(false);
          }
       }
    }
@@ -578,7 +582,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
    public boolean isPlaying()
    {
       // avoid last frame when affordance is over and do not to stream controller value before deactivating
-      return (!assistancePhase.equals(AssistancePhase.AFFORDANCE) || !affordanceAssistant.isAffordanceOver());
+      return (!assistancePhase.equals(AssistancePhase.AFFORDANCE) || (affordanceAssistant.hasAffordanceStarted() && !affordanceAssistant.isAffordanceOver()));
    }
 
    public RDX3DSituatedImGuiTransparentPanel getMenuPanel()

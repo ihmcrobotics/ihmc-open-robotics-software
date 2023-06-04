@@ -31,7 +31,6 @@ public class AffordanceAssistant
    private Pair<RobotSide, HandConfiguration> handConfigurationToSend;
    private ReferenceFrame objectFrame;
    private boolean affordanceStarted = false;
-   private int i =0;
 
    public void loadAffordance(String fileName, ReferenceFrame objectFrame)
    {
@@ -49,6 +48,8 @@ public class AffordanceAssistant
       initialBodyPartPose.appendPitchRotation(Math.PI / 2.0);
       initialBodyPartPose.appendRollRotation(Math.PI / 2.0);
       bodyPartInitialPoseMap.put("rightHand", initialBodyPartPose);
+      handConfigurationToSend = Pair.of(RobotSide.getSideFromBodyPart("rightHand"), HandConfiguration.OPEN);
+      isHandConfigurationCommand = true;
 
       //      for (RobotSide side : RobotSide.values)
       //      {
@@ -69,11 +70,8 @@ public class AffordanceAssistant
    {
       if (bodyPart.equals("rightHand"))
       {
-         affordanceStarted = true;
-         i++;
-         if (playForward && i<0)
+         if (playForward)
          {
-            LogTools.info("NEXT");
             // Read file with stored trajectories: read set point per timestep until file is over
             double[] dataPoint = affordancePlayer.play(false); //play split data (a body part per time)
             isHandConfigurationCommand = true;
@@ -82,6 +80,7 @@ public class AffordanceAssistant
 
             if (!isHandConfigurationCommand)
             {
+               affordanceStarted = true;
                RigidBodyTransform transform = new RigidBodyTransform(dataPoint);
                FramePose3D affordancePose = new FramePose3D(objectFrame, transform);
                affordancePose.appendTranslation(AFFORDANCE_TO_HAND_COM_TRANSFORM);
@@ -111,6 +110,7 @@ public class AffordanceAssistant
          // send notification to listener
          if (handConfigurationListener != null)
             handConfigurationListener.onNotification();
+         isHandConfigurationCommand = false;
       }
    }
 
