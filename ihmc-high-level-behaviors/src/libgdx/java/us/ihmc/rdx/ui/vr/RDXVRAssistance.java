@@ -373,7 +373,6 @@ public class RDXVRAssistance implements TeleoperationAssistant
          if (!affordanceAssistant.isActive())
          {
             affordanceAssistant.loadAffordance(objectName, objectFrame);
-            LogTools.info("Affordance ready");
             bodyPartInitialAffordancePoseMap = affordanceAssistant.getInitialHandPoseMap();
          }
          if (containsBodyPart(bodyPart))
@@ -399,6 +398,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
             }
             else
             {
+               framePose.set(bodyPartInitialAffordancePoseMap.get(bodyPart));
                assistancePhase = AssistancePhase.AFFORDANCE;
             }
          }
@@ -409,7 +409,9 @@ public class RDXVRAssistance implements TeleoperationAssistant
          if(!affordanceAssistant.isAffordanceOver())
          {
             if (containsBodyPart(bodyPart))
+            {
                affordanceAssistant.framePoseToPack(framePose, bodyPart, play); // pack frame with affordance assistant
+            }
          }
          else
          {
@@ -550,7 +552,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
 
    public boolean isAffordancePhase()
    {
-      return assistancePhase.equals(AssistancePhase.AFFORDANCE) && affordanceAssistant.hasAffordanceStarted();
+      return affordanceAssistant.hasAffordanceStarted();
    }
 
    public void saveStatusForPreview(KinematicsToolboxOutputStatus status)
@@ -575,7 +577,8 @@ public class RDXVRAssistance implements TeleoperationAssistant
 
    public boolean isPlaying()
    {
-      return play || !readyToPack();
+      // avoid last frame when affordance is over and do not to stream controller value before deactivating
+      return (!assistancePhase.equals(AssistancePhase.AFFORDANCE) || !affordanceAssistant.isAffordanceOver());
    }
 
    public RDX3DSituatedImGuiTransparentPanel getMenuPanel()

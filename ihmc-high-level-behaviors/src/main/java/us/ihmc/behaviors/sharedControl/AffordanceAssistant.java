@@ -31,6 +31,7 @@ public class AffordanceAssistant
    private Pair<RobotSide, HandConfiguration> handConfigurationToSend;
    private ReferenceFrame objectFrame;
    private boolean affordanceStarted = false;
+   private int i =0;
 
    public void loadAffordance(String fileName, ReferenceFrame objectFrame)
    {
@@ -43,11 +44,11 @@ public class AffordanceAssistant
       FramePose3D initialBodyPartPose = new FramePose3D(objectFrame, initialTransform);
       initialBodyPartPose.appendTranslation(AFFORDANCE_TO_HAND_COM_TRANSFORM);
       initialBodyPartPose.changeFrame(ReferenceFrame.getWorldFrame());
+      bodyPartPreviousFrameMap.put("rightHand", new FramePose3D(initialBodyPartPose));
       // pre-apply rotation of VR controllers to cancel out the rotation in the VRKinematicsStreaming
       initialBodyPartPose.appendPitchRotation(Math.PI / 2.0);
       initialBodyPartPose.appendRollRotation(Math.PI / 2.0);
       bodyPartInitialPoseMap.put("rightHand", initialBodyPartPose);
-      bodyPartPreviousFrameMap.put("rightHand", initialBodyPartPose);
 
       //      for (RobotSide side : RobotSide.values)
       //      {
@@ -68,8 +69,11 @@ public class AffordanceAssistant
    {
       if (bodyPart.equals("rightHand"))
       {
-         if (playForward)
+         affordanceStarted = true;
+         i++;
+         if (playForward && i<0)
          {
+            LogTools.info("NEXT");
             // Read file with stored trajectories: read set point per timestep until file is over
             double[] dataPoint = affordancePlayer.play(false); //play split data (a body part per time)
             isHandConfigurationCommand = true;
@@ -78,7 +82,6 @@ public class AffordanceAssistant
 
             if (!isHandConfigurationCommand)
             {
-               affordanceStarted = true;
                RigidBodyTransform transform = new RigidBodyTransform(dataPoint);
                FramePose3D affordancePose = new FramePose3D(objectFrame, transform);
                affordancePose.appendTranslation(AFFORDANCE_TO_HAND_COM_TRANSFORM);
@@ -94,7 +97,10 @@ public class AffordanceAssistant
             }
          }
          else
+         {
+            framePose.set(bodyPartPreviousFrameMap.get(bodyPart));
             isHandConfigurationCommand = false;
+         }
       }
    }
 
@@ -160,5 +166,10 @@ public class AffordanceAssistant
    public Pair<RobotSide, HandConfiguration> getHandConfigurationToSend()
    {
       return handConfigurationToSend;
+   }
+
+   public Pose3DReadOnly getPreviousFrame(String bodyPart)
+   {
+      return bodyPartPreviousFrameMap.get(bodyPart);
    }
 }
