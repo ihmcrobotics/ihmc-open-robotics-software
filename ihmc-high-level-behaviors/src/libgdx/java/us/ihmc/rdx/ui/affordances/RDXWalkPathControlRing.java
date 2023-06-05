@@ -150,11 +150,9 @@ public class RDXWalkPathControlRing
       leftGoalFootPose.setToZero(footstepPlannerGoalGizmo.getPathControlRingGizmo().getGizmoFrame());
       leftGoalFootPose.getPosition().addY(halfIdealFootstepWidth);
       leftGoalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-      leftGoalFootPose.setZ(footstepPlannerGoalGizmo.getPathControlRingGizmo().getPose3D().getZ());
       rightGoalFootPose.setToZero(footstepPlannerGoalGizmo.getPathControlRingGizmo().getGizmoFrame());
       rightGoalFootPose.getPosition().subY(halfIdealFootstepWidth);
       rightGoalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-      rightGoalFootPose.setZ(footstepPlannerGoalGizmo.getPathControlRingGizmo().getPose3D().getZ());
 
       leftGoalFootstepGraphic.setPose(leftGoalFootPose);
       rightGoalFootstepGraphic.setPose(rightGoalFootPose);
