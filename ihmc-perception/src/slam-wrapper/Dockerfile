@@ -1,4 +1,4 @@
-# Current version: 0.3
+# Current version: 0.4
 FROM ubuntu:20.04
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -30,12 +30,11 @@ RUN apt-get --quiet 2 --yes update  \
     > /dev/null \
  && rm -rf /var/lib/apt/lists/*
 
-# Clone and checkout GTSAM to a specific commit; using the develop branch of GTSAM
-# Should periodically update the commit as needed
+# Clone and checkout GTSAM to a specific release
 WORKDIR /root/dev
-RUN git clone --depth 1 --branch develop https://github.com/borglab/gtsam.git gtsam
+RUN git clone https://github.com/borglab/gtsam.git gtsam
 WORKDIR /root/dev/gtsam
-RUN git checkout 0909c46339e0c604b0f26c8a67c7144c1358db4c
+RUN git checkout 4.2a9
 
 WORKDIR /root/dev/gtsam/build
 

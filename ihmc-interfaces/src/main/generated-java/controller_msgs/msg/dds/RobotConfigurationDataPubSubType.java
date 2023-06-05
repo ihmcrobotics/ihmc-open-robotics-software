@@ -15,7 +15,7 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "22b0638f93702bfcbe063cc4b3e8678f6974a281007a5264a8fba0011de30a72";
+   		return "766d26581e6e9df5c06bf4cf8a7bb4d227ea2b5ac5d7322aa75cc0753f2c384b";
    }
    
    @Override

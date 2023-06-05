@@ -15,7 +15,7 @@ public class SoleTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d90fbddfe79a9fb12bf59a312d2c979806812bea043f155e81d9aac4476a54c8";
+   		return "19bf059703923a503f9504ac0cdbc3721953241df3ddbce88e70f4b4950bcac7";
    }
    
    @Override

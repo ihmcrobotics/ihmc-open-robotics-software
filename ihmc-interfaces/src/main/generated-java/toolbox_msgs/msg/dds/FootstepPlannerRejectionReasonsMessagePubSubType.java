@@ -15,7 +15,7 @@ public class FootstepPlannerRejectionReasonsMessagePubSubType implements us.ihmc
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a36e15f2f3b8637ac1e730a4ab8f46c6ff11eb2e92899240c9354d55a160c8e4";
+   		return "1a31795c88c2b4cb91cc732ce6d8f3d4bbbb351047c340a57c990640600743d1";
    }
    
    @Override

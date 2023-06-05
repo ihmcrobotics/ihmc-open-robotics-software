@@ -15,7 +15,7 @@ public class QuadrupedBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b48f1e5bbe372e0aac40cd5a66287e9669f681b756c43bdaa8b8287cbd0cd45a";
+   		return "bd1f1cabbcaa1ca029536df3fa180b73a01437d59d21d931965543dbb3ee6efb";
    }
    
    @Override

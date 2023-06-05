@@ -1,4 +1,4 @@
-package us.ihmc.ihmcPerception.depthData.collisionShapes;
+package us.ihmc.perception.collisionShapes;
 
 import static us.ihmc.robotics.Assert.*;
 

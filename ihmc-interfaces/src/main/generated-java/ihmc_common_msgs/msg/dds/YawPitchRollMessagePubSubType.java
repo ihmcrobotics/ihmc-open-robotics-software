@@ -15,7 +15,7 @@ public class YawPitchRollMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "235a473c7dd0af4c6db556780c8dc48ace3f572c1ff5295b39cbf4fa6af97c23";
+   		return "f134fc6f5b293fab59b2ca517b8b71fe4d63137691fc476c36f764d8412d12da";
    }
    
    @Override

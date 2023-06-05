@@ -15,7 +15,7 @@ public class DetectableSceneNodesMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "473f3e24a515691db7e8f0e03c33afe976e2da4042082108ee395850b7c75b48";
+   		return "dbd4df7fa67eaf5bac28dc96cbf8e8e1fd82ae3ca7ae7d850645171c4e790261";
    }
    
    @Override

@@ -15,7 +15,7 @@ public class VideoPacketPubSubType implements us.ihmc.pubsub.TopicDataType<perce
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4438410dc0641e736eeaef770d845f018437315dcceee951e080af7867a1244d";
+   		return "29eb8376824cf749c44df155025afcd403646dc1e1cdbefdaa6b07a4bcd739e9";
    }
    
    @Override

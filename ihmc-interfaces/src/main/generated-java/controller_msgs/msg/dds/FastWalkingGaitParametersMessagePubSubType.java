@@ -15,7 +15,7 @@ public class FastWalkingGaitParametersMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a700094f00d9649b699da38182151b1eb9301a0015e3e837f66024f142564eea";
+   		return "29671946aba735f933e750cecf15daac83cb189208613e78d101390e89ceb7fe";
    }
    
    @Override
