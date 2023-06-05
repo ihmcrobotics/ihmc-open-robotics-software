@@ -216,6 +216,13 @@ public class LookAndStepFootstepPlanningTask
          acceptPlanarRegions(PlanarRegionMessageConverter.convertToPlanarRegionsListInWorld(framePlanarRegionsListMessage));
       }
 
+      public void acceptPlanarRegions(PlanarRegionsListMessage planarRegionsListMessage)
+      {
+         planarRegionDelay.set(TimeTools.calculateDelay(planarRegionsListMessage.getLastUpdated().getSecondsSinceEpoch(),
+                                                        planarRegionsListMessage.getLastUpdated().getAdditionalNanos()));
+         acceptPlanarRegions(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
+      }
+
       public void acceptPlanarRegions(PlanarRegionsList planarRegionsList)
       {
          helper.publish(RECEIVED_PLANAR_REGIONS_FOR_UI, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
