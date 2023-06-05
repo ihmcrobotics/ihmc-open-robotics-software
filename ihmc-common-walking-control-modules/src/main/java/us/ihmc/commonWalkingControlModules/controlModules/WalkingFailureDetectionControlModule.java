@@ -114,7 +114,7 @@ public class WalkingFailureDetectionControlModule
 
       nextFootstepPolygon.setReferenceFrame(referenceFrame);
       nextFootstepPolygon.set((Vertex2DSupplier) footPolygons.get(nextFootstepSide));
-      nextFootstepPolygon.applyTransform(nextFootstepPose);
+      nextFootstepPolygon.applyTransform(nextFootstepPose, false);
       nextFootstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
    }
 
