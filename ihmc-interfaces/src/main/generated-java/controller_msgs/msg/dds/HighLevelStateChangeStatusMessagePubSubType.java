@@ -15,7 +15,7 @@ public class HighLevelStateChangeStatusMessagePubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ceafd6b3d4d5c43e01e10f5624e312c82b003060c90f7c724bc34a722e1ac065";
+   		return "76f792f00cedfc7fa8facb3e14f2317bd1c78460969d6de5e4f318a96031524d";
    }
    
    @Override

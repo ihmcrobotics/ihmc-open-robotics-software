@@ -15,7 +15,7 @@ public class StopAllTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f7b1060cecda4a88551808ab6a68584148a10b2939a1fc13c3917646e8ec770b";
+   		return "0294c1f4b8ba684815dd33e43210414c5e6613b7cba92138d93c532d1117dd28";
    }
    
    @Override

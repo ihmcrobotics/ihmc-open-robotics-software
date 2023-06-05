@@ -15,7 +15,7 @@ public class StampedPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c3a04e4df7ff9c70ca784bc5d6e43cb84ad8cd7dce9faec10183db3a40c27214";
+   		return "07b2f9602ed28e2a49bfa6bf0f99735df171bbd39632c357667b5bc761ceda44";
    }
    
    @Override

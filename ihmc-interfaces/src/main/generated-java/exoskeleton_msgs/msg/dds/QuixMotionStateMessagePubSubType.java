@@ -15,7 +15,7 @@ public class QuixMotionStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a869c21f812d49e97fd14da9273bc597c063c7c8ca1de6f5f37ad8fb468653a9";
+   		return "307932a57b3b3026ba1e48c66db2a7c347ff1b55a9de5e9a471fa29e53bc3ea4";
    }
    
    @Override

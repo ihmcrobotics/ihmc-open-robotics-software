@@ -15,7 +15,7 @@ public class HeatMapPacketPubSubType implements us.ihmc.pubsub.TopicDataType<per
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "7c65e13b5009baf4e73fbfa080c2bf70dee9bfb43d9301a9898d5ebe33cdcf4a";
+   		return "aae496385281ab6b21d2efb8c4c1831cbf31627b42244e6163879dff2dfb4e17";
    }
    
    @Override

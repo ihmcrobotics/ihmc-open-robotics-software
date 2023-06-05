@@ -15,7 +15,7 @@ public class LoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d051d600ce5c65af17cdb1ca32c8119cdf0291ecf3342959d672b406b1cf8944";
+   		return "226cf52750125eb94523c0916c9e6bfa6b7f5810058ae5aac70bc3afe1303383";
    }
    
    @Override

@@ -15,7 +15,7 @@ public class GroundPlaneMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2bb1bf400df1dcb951e6dff46d44056024c2162e88456baec3ebf315d8938c16";
+   		return "67927594212499fc39f360c4aea32359ae72befcb1712ba427eb6a8405441aeb";
    }
    
    @Override

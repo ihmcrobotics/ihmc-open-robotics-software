@@ -15,7 +15,7 @@ public class ComPositionPacketPubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9ded710a8b7cd21cb6453adbe793b0b68beba5e85b93a796ffd52a6aa11701ea";
+   		return "fe2c3845346bc7a0f75dcac73c2cc11f871a594bf7cb39b83bdf0f9fa975f5d7";
    }
    
    @Override

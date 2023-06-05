@@ -15,7 +15,7 @@ public class ComVelocityPacketPubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "18fa8f8cbcfe5afbe1a48a522d91765101efa76915d2e1607a0ee428b021a2a2";
+   		return "50114ecb1ea7e8d76e55e8161b6a7e4b127c65a29920e62f65acd0267eed9ab8";
    }
    
    @Override

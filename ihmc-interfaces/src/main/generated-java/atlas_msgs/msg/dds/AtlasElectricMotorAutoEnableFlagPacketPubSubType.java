@@ -15,7 +15,7 @@ public class AtlasElectricMotorAutoEnableFlagPacketPubSubType implements us.ihmc
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c46c40eb4817d594a5999df98532b53da2ddcf1c0e20b5ca5102adae991adca5";
+   		return "4d7746286febb34f581ff74f6f9d9474cc40fdeb92b66749e3d9c738d2284509";
    }
    
    @Override

@@ -15,7 +15,7 @@ public class InstantMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ih
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "fff873d9e7ad207d611dfb79b3f885eef4a21dff7f88238f84e66551c4cc76f5";
+   		return "0078a3cb392fa1f63923b9d292ab68b2e9d8be5db4c12938be6183875c9b7ada";
    }
    
    @Override

@@ -15,7 +15,7 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d39bccaea60e793083be3952696d834c1561c22526c2649ebc0dcab148833e05";
+   		return "5b4d3a9d77139297ccf174eb997452d75616a9104024f8e0f102a9b69960f05c";
    }
    
    @Override

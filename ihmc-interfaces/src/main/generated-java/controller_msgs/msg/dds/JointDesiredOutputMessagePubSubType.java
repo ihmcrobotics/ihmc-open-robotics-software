@@ -15,7 +15,7 @@ public class JointDesiredOutputMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "32e9c713d0811b6d9ccad2e65bf8030a1df231927140bd717e62882c40761d0b";
+   		return "87af4c98bba6a9e00e5d1563ffd0f13acb1cd4f155c9bf62695dad8e1131c68a";
    }
    
    @Override

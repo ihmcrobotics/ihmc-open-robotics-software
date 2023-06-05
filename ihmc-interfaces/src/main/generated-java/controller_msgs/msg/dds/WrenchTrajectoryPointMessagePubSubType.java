@@ -15,7 +15,7 @@ public class WrenchTrajectoryPointMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "527ac10e9eaa4213d8eb30462edd65e21684718b992633f56d62e137e9949445";
+   		return "18dc205a31af7af26ce0b2e342990960911e652e11813c318883f7c8088f582b";
    }
    
    @Override

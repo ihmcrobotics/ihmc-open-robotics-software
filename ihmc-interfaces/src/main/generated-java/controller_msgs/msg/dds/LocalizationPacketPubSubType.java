@@ -15,7 +15,7 @@ public class LocalizationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6be4ea31925f09052d78443225cec1542e557817a3c949c800ba56793589c4d7";
+   		return "b71d847c76800cbf85d298d6a1be72cbe89771bb732b283fc2aa9207b5b4ba08";
    }
    
    @Override

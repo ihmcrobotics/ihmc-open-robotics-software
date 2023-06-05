@@ -15,7 +15,7 @@ public class QuixFlatGroundStateMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1483b0849859a5c24b634dcb88ed5b1ada89ec83782e7af32f4c23fe28ee931f";
+   		return "0292bb6f67875735254bd906a421a218bf2e069744ef55c1cd1fcb85bc587ddc";
    }
    
    @Override

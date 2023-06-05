@@ -15,7 +15,7 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b7920c52c68443c928ce53a80c8abe6aa7bfbc86b6440090ef464727376d3970";
+   		return "83afc30ad6dcf2a9e280adbb5d5324e81d5869c055425e37b855f54e1d0d8075";
    }
    
    @Override

@@ -15,7 +15,7 @@ public class HumanoidBehaviorTypePacketPubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "14caac02b72ce1204c62841b59a4be6f233c818650b811798c41475fa471babd";
+   		return "8e3f4b71a414e7910774543d4f0a64536b7dedcb926ab422d478815982a1ea44";
    }
    
    @Override

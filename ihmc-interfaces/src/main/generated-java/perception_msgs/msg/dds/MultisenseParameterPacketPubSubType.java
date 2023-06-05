@@ -15,7 +15,7 @@ public class MultisenseParameterPacketPubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e5e9aea49a0b1f113541484833deb7c8989672d6b24eaa6c5e72d02f9bbf716f";
+   		return "827c38ab60c8962138107ac445664ded247d81ede6df6050154d13b51162c4ee";
    }
    
    @Override

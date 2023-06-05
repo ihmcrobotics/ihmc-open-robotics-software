@@ -15,7 +15,7 @@ public class WeightMatrix3DMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "09f63649abbafdbd5407e6164adad38e90da4e66a70bad932dd8279f3afa1919";
+   		return "d5d065f6548b9270d683f9e67028763de09ec51c3bf4d9a13bdcba301459fe8c";
    }
    
    @Override
