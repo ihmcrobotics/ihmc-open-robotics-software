@@ -38,9 +38,6 @@ mainDependencies {
    api("org.boofcv:boofcv-calibration:0.36")
    api("org.ddogleg:ddogleg:0.18")
 
-   // TODO: re-release under us.ihmc?
-   api("org.bytedeco:javacv:1.5.8")
-
    api("us.ihmc:javacpp:1.5.9")
    val openblasVersion = "0.3.23-1.5.9"
    api("us.ihmc:openblas:$openblasVersion")
