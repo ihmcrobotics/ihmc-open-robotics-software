@@ -33,7 +33,6 @@ public abstract class RDXProcessManagerPanel
    protected final ImInt robotTarget = new ImInt(1);
    protected final String[] robotTargets = new String[] {"Real robot", "Simulation"};
    protected final ImInt ros2Mode = new ImInt(0);
-   protected final ImInt messagerMode = new ImInt(0);
    protected final ImBoolean enableROS1 = new ImBoolean(true);
    protected final ImBoolean logToFile = new ImBoolean(false);
 
@@ -121,7 +120,6 @@ public abstract class RDXProcessManagerPanel
       ImGui.combo(labels.get("ROS2Mode"), ros2Mode, CommunicationMode.ROS2_NAMES, CommunicationMode.VALUES.length);
       ImGui.text("Messager Mode: ");
       ImGui.sameLine();
-      ImGui.combo(labels.get("MessagerMode"), messagerMode, CommunicationMode.MESSAGER_NAMES, CommunicationMode.VALUES.length);
       ImGui.checkbox(labels.get("Enable ROS 1"), enableROS1);
       ImGui.popItemWidth();
 
@@ -162,11 +160,6 @@ public abstract class RDXProcessManagerPanel
    public void setRobotTarget(RobotTarget robotTarget)
    {
       this.robotTarget.set(robotTarget.ordinal());
-   }
-
-   public void setMessagerMode(CommunicationMode communicationMode)
-   {
-      messagerMode.set(communicationMode.ordinal());
    }
 
    public void setROS2Mode(CommunicationMode communicationMode)
