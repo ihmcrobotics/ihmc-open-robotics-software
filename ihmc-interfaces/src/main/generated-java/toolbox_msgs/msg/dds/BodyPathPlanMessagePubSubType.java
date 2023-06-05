@@ -15,7 +15,7 @@ public class BodyPathPlanMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f31c48ff409faa904d1ee48b15d28450c32a5a9791510878adef90fc4e471709";
+   		return "6099868899ff4ccfe577dfa0df9e83936302d8538971321d127aa260b46bc755";
    }
    
    @Override

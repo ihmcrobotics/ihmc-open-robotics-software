@@ -15,7 +15,7 @@ public class HandSakeDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "89da09252a48ce8490e41953034203982210ee78bce46a6e4c0217b92c66dbc3";
+   		return "c2b020a592730e863c4bf1d7f7977c0e2dee5a12496c9894b0fd010701c6af77";
    }
    
    @Override

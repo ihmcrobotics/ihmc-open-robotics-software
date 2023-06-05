@@ -15,7 +15,7 @@ public class PelvisOrientationTrajectoryMessagePubSubType implements us.ihmc.pub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0df2319df8beedb8ad1882832cb5cd5528de5540c02bc17907038ada38a1a832";
+   		return "05d0de73ca859681291bb27535fccb1fae7b2aa8843f250307d64e554f07d1e4";
    }
    
    @Override

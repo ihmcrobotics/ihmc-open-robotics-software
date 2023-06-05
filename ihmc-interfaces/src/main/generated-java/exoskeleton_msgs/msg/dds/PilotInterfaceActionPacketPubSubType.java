@@ -15,7 +15,7 @@ public class PilotInterfaceActionPacketPubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "54d92efe6f294713a558ee5601fcafdce8a107647af3aa9681b83d43eab47639";
+   		return "f576cf9f90906b78303512e58f7adeafb8eff2891caa7b1b7faff9446339d4fe";
    }
    
    @Override

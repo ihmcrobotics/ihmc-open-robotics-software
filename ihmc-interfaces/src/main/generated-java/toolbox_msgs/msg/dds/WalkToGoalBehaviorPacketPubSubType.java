@@ -15,7 +15,7 @@ public class WalkToGoalBehaviorPacketPubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a0db3ba02e5db9571a554b4d5bcf4caaa46cc533d3156d153cdac1270e7fcb5a";
+   		return "4d5c693f4030f9f0e323c55acc820d75f4773fef6248048cdd54c9d898aa8f2e";
    }
    
    @Override

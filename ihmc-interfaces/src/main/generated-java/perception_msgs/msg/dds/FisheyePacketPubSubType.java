@@ -15,7 +15,7 @@ public class FisheyePacketPubSubType implements us.ihmc.pubsub.TopicDataType<per
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "75e0f47877e2cbf38dd12811028aac0d10c5549f47828ceee0a83950d69af0d9";
+   		return "8826de9c0fa5378e1025cdc1d7350798a9b0c40ec772dc805b909c01a3891d95";
    }
    
    @Override

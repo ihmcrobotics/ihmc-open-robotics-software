@@ -15,7 +15,7 @@ public class StepConstraintMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "25d1d60802fb0ab73d6219f54582134f1f8c68be642de3d0963c4c6ccecc0643";
+   		return "cfa98f55cdb4e73e0d89aa49547a2c717cf4a7d5bea141acb6ebe7dcb2d02771";
    }
    
    @Override

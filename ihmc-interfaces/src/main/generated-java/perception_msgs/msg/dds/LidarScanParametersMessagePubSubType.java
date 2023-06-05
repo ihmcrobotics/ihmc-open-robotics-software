@@ -15,7 +15,7 @@ public class LidarScanParametersMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f1bbb4a71f50d2bf72ed6f64232ec713a3e0916222ad1bfbf4ed38eb237cce20";
+   		return "0fcd46071d17b9375c9daf26133e3f2412404607115e484421fe9f07bfca5b3e";
    }
    
    @Override

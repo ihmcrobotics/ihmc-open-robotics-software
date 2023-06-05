@@ -15,7 +15,7 @@ public class HandSakeStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e519e23555a825a75fc91a827751bbd7e90192f1d0919898ecebc64afbef6356";
+   		return "6bb08caea12d1db576d1dda27378858cef10e4d0115ec27ed33012d7e1fd2bc6";
    }
    
    @Override

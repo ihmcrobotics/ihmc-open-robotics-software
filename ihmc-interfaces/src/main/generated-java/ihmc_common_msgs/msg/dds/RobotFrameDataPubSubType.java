@@ -15,7 +15,7 @@ public class RobotFrameDataPubSubType implements us.ihmc.pubsub.TopicDataType<ih
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b41d8dab5f9af47c89a975e551e78b7c24bb438f8f3d807cc5ea1d88dce616dd";
+   		return "f8687a6bdf55a343feeae8c83a08f2182249a27a2f4b84e6c0d33229533e0f4e";
    }
    
    @Override
