@@ -34,7 +34,7 @@ import org.bytedeco.javacpp.tools.InfoMapper;
                 includepath = {"..\\include",
                         "C:\\Program Files (x86)\\Eigen3\\include\\eigen3",
                         "C:\\Program Files\\GTSAM\\include",
-                        "C:\\local\\boost_1_75_0"},
+                        "C:\\local\\boost_1_72_0"},
                 linkpath = {"..\\lib", "C:\\Program Files\\GTSAM\\lib"},
                 preload = {"gtsam", "slam-wrapper", "jniSlamWrapper"})
 },
