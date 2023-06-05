@@ -23,7 +23,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.perception.sceneGraph.SceneGraphAPI;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -448,15 +447,40 @@ public class RDXVRAssistance implements TeleoperationAssistant
       }
       //update menu
       if (!enabled.get() && !objectName.isEmpty())
+      {
+         if(menuMode[0] != VRMenuGuideMode.PRESS_LEFT_B)
+            menu.resetTimer();
          menuMode[0] = VRMenuGuideMode.PRESS_LEFT_B;
+      }
       else if (!enabled.get())
          menuMode[0] = VRMenuGuideMode.OFF;
       else if (enabled.get() && proMPAssistant.startedProcessing() && !proMPAssistant.readyToPack())
+      {
+         if(menuMode[0] != VRMenuGuideMode.MOVE_RIGHT)
+            menu.resetTimer();
          menuMode[0] = VRMenuGuideMode.MOVE_RIGHT;
+      }
       else if (!previewSetToActive || (previewSetToActive && previewValidated))
+      {
+         if(menuMode[0] != VRMenuGuideMode.PUSH_LEFT_JOYSTICK)
+            menu.resetTimer();
          menuMode[0] = VRMenuGuideMode.PUSH_LEFT_JOYSTICK;
+         menu.setJoystickPressed(play);
+
+      }
       else
          menuMode[0] = VRMenuGuideMode.IDLE;
+
+      if (assistancePhase.equals(AssistancePhase.PROMP) || assistancePhase.equals(AssistancePhase.BLENDING) )
+      {
+         if(!menu.hasProMPSamples())
+            menu.setProMPSamples(proMPAssistant.getNumberOfSamples());
+         menu.setCurrentProMPSample(proMPAssistant.getCurrentSample());
+      }
+      else if (assistancePhase.equals(AssistancePhase.AFFORDANCE))
+      {
+
+      }
    }
 
    public void renderWidgets(ImGuiUniqueLabelMap labels)

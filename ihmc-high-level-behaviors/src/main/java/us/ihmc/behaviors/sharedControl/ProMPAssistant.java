@@ -513,6 +513,22 @@ public class ProMPAssistant
       return inEndZone;
    }
 
+   public int getNumberOfSamples()
+   {
+      if(bodyPartGeneratedTrajectoryMap.containsKey(bodyPartGoal))
+         return bodyPartGeneratedTrajectoryMap.get(bodyPartGoal).size() - numberObservations;
+      else
+         return -1;
+   }
+
+   public int getCurrentSample()
+   {
+      if(bodyPartTrajectorySampleCounter.containsKey(bodyPartGoal))
+         return bodyPartTrajectorySampleCounter.get(bodyPartGoal);
+      else
+         return -1;
+   }
+
    public ProMPManager getProMPManager(String task)
    {
       return proMPManagers.get(task);
