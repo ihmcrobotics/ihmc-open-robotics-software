@@ -74,6 +74,10 @@ public class RDXWalkPathControlRing
       {
          footstepPlannerGoalGizmo.getPathControlRingGizmo().getTransformToParent().set(midFeetZUpFrame.getTransformToWorldFrame());
       }
+      else
+      {
+         updateStuff();
+      }
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
@@ -96,10 +100,6 @@ public class RDXWalkPathControlRing
          becomeModified(true);
       }
 
-      if (footstepPlannerGoalGizmo.getModified())
-      {
-         updateStuff();
-      }
       if (footstepPlannerGoalGizmo.getSelected() && leftMouseReleasedWithoutDrag)
       {
          if (footstepPlannerGoalGizmo.getPathControlRingGizmo().getPositiveXArrowHovered())
@@ -121,8 +121,9 @@ public class RDXWalkPathControlRing
          if (footstepPlannerGoalGizmo.getPathControlRingGizmo().getAnyArrowHovered())
          {
             footstepPlannerGoalGizmo.getPathControlRingGizmo().getTransformToParent().appendOrientation(walkFacingDirection);
-            updateStuff();
-            queueFootstepPlan();
+            footstepPlannerGoalGizmo.getPathControlRingGizmo().getGizmoModifiedByUser().set();
+            footstepPlannerGoalGizmo.getPathControlRingGizmo().update();
+            footstepPlannerGoalGizmo.getPathControlRingGizmo().getGizmoModifiedByUser().set();
          }
       }
       if (footstepPlannerGoalGizmo.getSelected() && footstepPlannerGoalGizmo.getPathControlRingGizmo().getGizmoModifiedByUser().poll())
@@ -186,7 +187,6 @@ public class RDXWalkPathControlRing
          footstepPlannerGoalGizmo.setModified(true);
          becomesModifiedNotification.set();
          walkFacingDirection.set(Axis3D.Z, 0.0);
-         updateStuff();
          queueFootstepPlan();
       }
    }
