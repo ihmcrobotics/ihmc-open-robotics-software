@@ -1,4 +1,4 @@
-package us.ihmc.ihmcPerception.fiducial;
+package us.ihmc.perception.fiducial;
 
 import static us.ihmc.robotics.Assert.assertEquals;
 
