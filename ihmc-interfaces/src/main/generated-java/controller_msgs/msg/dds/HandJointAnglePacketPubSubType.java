@@ -15,7 +15,7 @@ public class HandJointAnglePacketPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a75cf0776c40e79b5b897fcf611a4d5decc3af0698917fb912d9386bbc324b02";
+   		return "b843cc260e12d058f3306bb21a6cf59ff0f29705c92bee9dea8564e7ce3eb019";
    }
    
    @Override

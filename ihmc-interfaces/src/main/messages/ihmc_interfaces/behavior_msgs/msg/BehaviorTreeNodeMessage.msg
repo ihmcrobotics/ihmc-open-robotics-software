@@ -12,7 +12,7 @@ string node_name
 string node_type
 
 # Previous node status
-uint8 previous_status
+int8 previous_status
 
 # Whether this node has been clocked
 # This field is only for control flow nodes.

@@ -15,7 +15,7 @@ public class RequestPlanarRegionsListMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "82e15a763345535fac7abe0de9bd226d40cb5a4a831e47aad5b5c23cc7a48ed1";
+   		return "7fd1566eb3b630fbeefff0dabf686d7f82f8e5e1acb9e54b388b1e058962c261";
    }
    
    @Override

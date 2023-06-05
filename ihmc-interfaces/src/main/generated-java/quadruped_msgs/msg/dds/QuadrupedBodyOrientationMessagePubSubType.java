@@ -15,7 +15,7 @@ public class QuadrupedBodyOrientationMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0b6fd836c8b8b1f55ad040d23bd422ed002e8e8784a2c6a9e9eeedb42f15dde1";
+   		return "d569bfab9abc5618610d5ff801087067b32869f3f1f6a54419654f2585b783af";
    }
    
    @Override

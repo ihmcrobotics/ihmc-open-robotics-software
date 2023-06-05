@@ -15,7 +15,7 @@ public class MultiContactTrajectorySequenceMessagePubSubType implements us.ihmc.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a3bb07122c594a1623e077ec97bdfca22fefbae1cd590ddf8a06e69b93095a26";
+   		return "da3215438011e9b5d8226c7590686f1ce307b4c3efd6e538e531f0439cf52a0d";
    }
    
    @Override

@@ -15,7 +15,7 @@ public class PlanOffsetStatusPubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "8a534e7d2738753f1bf54c3b78fd95bc872e34497386e4c65d6c53ea574790be";
+   		return "7d0a2501019247e3f75792b074dd654689aefb9d2f77a9b28b8cd36bdbcb8590";
    }
    
    @Override

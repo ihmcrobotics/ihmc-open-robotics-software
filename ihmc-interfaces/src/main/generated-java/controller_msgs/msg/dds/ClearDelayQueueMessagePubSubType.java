@@ -15,7 +15,7 @@ public class ClearDelayQueueMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ba67b647c6fd1d7e282bd78ae41bb6851db709ee0127e9430f2f2c10a2ce99d3";
+   		return "a6766df5dc9d2a1de8975947e742fcbefdf3e606c21d7f81288a2c36761882d7";
    }
    
    @Override

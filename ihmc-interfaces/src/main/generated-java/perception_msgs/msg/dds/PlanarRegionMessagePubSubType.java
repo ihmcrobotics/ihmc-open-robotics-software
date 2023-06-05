@@ -15,7 +15,7 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4c5554d4e45130535c1cbc392ecbcccf8179a66736b578da79717aeeb83e66ab";
+   		return "2eeffa08c9fd016f7f07b17a8a575b8fe464988d11ca47ae518d886ebfefde88";
    }
    
    @Override

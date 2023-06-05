@@ -15,7 +15,7 @@ public class PlanarVelocityPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6c80a414acb1ea02093da3307d621a6236a8d3f3ff162e0aebbef4fbdc5d754e";
+   		return "60be9474a084f9aa07d53a0266f0c307807a524ec4feac182a8108dd594be5a0";
    }
    
    @Override
