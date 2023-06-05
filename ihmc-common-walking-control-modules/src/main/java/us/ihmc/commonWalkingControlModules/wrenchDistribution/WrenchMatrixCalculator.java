@@ -245,9 +245,10 @@ public class WrenchMatrixCalculator implements SCS2YoGraphicHolder
          CenterOfPressureCommand command = centerOfPressureCommands.get(i);
          RigidBodyBasics rigidBody = command.getContactingRigidBody();
          if (rigidBody != null)
+         {
             rigidBodies.add(rigidBody);
-
-         commandedCoPs.get(rigidBody).setMatchingFrame(command.getDesiredCoP(), 0.0);
+            commandedCoPs.get(rigidBody).setMatchingFrame(command.getDesiredCoP(), 0.0);
+         }
       }
    }
 
