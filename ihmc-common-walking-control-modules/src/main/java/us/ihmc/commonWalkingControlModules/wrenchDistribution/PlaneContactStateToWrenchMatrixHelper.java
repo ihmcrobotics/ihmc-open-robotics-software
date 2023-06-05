@@ -551,6 +551,11 @@ public class PlaneContactStateToWrenchMatrixHelper
       return copRateRegularizationWeightMatrix;
    }
 
+   public FramePoint2DReadOnly getDesiredCoP()
+   {
+      return desiredCoP;
+   }
+
    public FramePoint3D[] getBasisVectorsOrigin()
    {
       return basisVectorsOrigin;
