@@ -15,10 +15,14 @@ public class BehaviorMessageTools
    public static void packBehaviorTreeMessage(BehaviorTreeNodeBasics treeNode, BehaviorTreeMessage behaviorTreeMessage)
    {
       BehaviorTreeNodeMessage nodeMessage = behaviorTreeMessage.getNodes().add();
-      MessageTools.toMessage(treeNode.getLastTickInstant(), nodeMessage.getLastTickInstant());
+      if (treeNode.getLastTickInstant()  != null)
+         MessageTools.toMessage(treeNode.getLastTickInstant(), nodeMessage.getLastTickInstant());
       nodeMessage.setNodeName(treeNode.getName());
       nodeMessage.setNodeType(treeNode.getType().getSimpleName());
-      nodeMessage.setPreviousStatus((byte) treeNode.getPreviousStatus().ordinal());
+      if (treeNode.getPreviousStatus() != null)
+         nodeMessage.setPreviousStatus((byte) treeNode.getPreviousStatus().ordinal());
+      else
+         nodeMessage.setPreviousStatus((byte) -1);
 
       if (treeNode instanceof BehaviorTreeControlFlowNodeBasics controlFlowTreeNode)
       {
@@ -50,9 +54,13 @@ public class BehaviorMessageTools
       BehaviorTreeNodeMessage treeNodeMessage = behaviorTreeMessage.getNodes().get(nodeIndex.getAndIncrement());
 
       BehaviorTreeStatusNode behaviorTreeStatusNode = createBehaviorTreeNode(treeNodeMessage.getNodeTypeAsString());
-      behaviorTreeStatusNode.setLastTickInstant(MessageTools.toInstant(treeNodeMessage.getLastTickInstant()));
+      // The message will have 0s for a node that has not yet been ticked
+      if (treeNodeMessage.getLastTickInstant().getSecondsSinceEpoch() != 0)
+         behaviorTreeStatusNode.setLastTickInstant(MessageTools.toInstant(treeNodeMessage.getLastTickInstant()));
       behaviorTreeStatusNode.setName(treeNodeMessage.getNodeNameAsString());
-      behaviorTreeStatusNode.setPreviousStatus(BehaviorTreeNodeStatus.fromByte(treeNodeMessage.getPreviousStatus()));
+      // Previous status will be -1 if the node has not been ticked yet
+      if (treeNodeMessage.getPreviousStatus() >= 0)
+         behaviorTreeStatusNode.setPreviousStatus(BehaviorTreeNodeStatus.fromByte(treeNodeMessage.getPreviousStatus()));
       behaviorTreeStatusNode.setHasBeenClocked(treeNodeMessage.getHasBeenClocked());
 
       for (int i = 0; i < treeNodeMessage.getNumberOfChildren(); i++)
