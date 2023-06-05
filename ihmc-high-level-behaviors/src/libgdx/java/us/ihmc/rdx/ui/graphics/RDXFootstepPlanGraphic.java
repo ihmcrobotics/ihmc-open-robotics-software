@@ -38,7 +38,7 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
    RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
    // visualization options
    private final Function<Integer, Color> colorFunction = new RDXIDMappedColorFunction();
-   public static final SideDependentList<Color> footstepColors = new SideDependentList<>();
+   private final SideDependentList<Color> footstepColors = new SideDependentList<>();
    {
       footstepColors.set(RobotSide.LEFT, new Color(RDXFootstepGraphic.LEFT_FOOT_RED_COLOR));
       footstepColors.set(RobotSide.RIGHT, new Color(RDXFootstepGraphic.RIGHT_FOOT_GREEN_COLOR));
@@ -73,7 +73,7 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
    {
    }
 
-   public void setTransparency(double opacity)
+   public void setOpacity(double opacity)
    {
       footstepColors.get(RobotSide.LEFT).a = (float) opacity;
       footstepColors.get(RobotSide.RIGHT).a = (float) opacity;
@@ -207,6 +207,7 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
             lastModel.dispose();
 
          lastModel = RDXModelBuilder.buildModelFromMesh(modelBuilder, meshBuilder);
+         LibGDXTools.setOpacity(lastModel, footstepColors.get(RobotSide.LEFT).a);
          modelInstance = new ModelInstance(lastModel); // TODO: Clean up garbage and look into reusing the Model
       };
    }

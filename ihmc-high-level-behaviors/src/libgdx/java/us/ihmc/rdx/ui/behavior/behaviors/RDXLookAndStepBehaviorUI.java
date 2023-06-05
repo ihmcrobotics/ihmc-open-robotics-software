@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.*;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import imgui.type.ImString;
-import org.apache.commons.lang3.tuple.Pair;
 import perception_msgs.msg.dds.HeightMapMessage;
 import std_msgs.msg.dds.Bool;
 import toolbox_msgs.msg.dds.FootstepPlannerRejectionReasonMessage;
@@ -46,7 +45,6 @@ import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.rdx.visualizers.RDXSphereAndArrowGraphic;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.util.ArrayList;
 import java.util.Set;
 
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
@@ -126,7 +124,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       footstepPlanGraphic = new RDXFootstepPlanGraphic(helper.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints());
       commandedFootstepsGraphic = new RDXFootstepPlanGraphic(helper.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints());
       startAndGoalFootstepsGraphic = new RDXFootstepPlanGraphic(helper.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints());
-      footstepPlanGraphic.setTransparency(0.2);
+      footstepPlanGraphic.setOpacity(0.2);
       helper.subscribeViaCallback(PLANNED_FOOTSTEPS_FOR_UI, footsteps ->
       {
          reviewingBodyPath = false;
@@ -139,7 +137,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       });
       startAndGoalFootstepsGraphic.setColor(RobotSide.LEFT, Color.BLUE);
       startAndGoalFootstepsGraphic.setColor(RobotSide.RIGHT, Color.BLUE);
-      startAndGoalFootstepsGraphic.setTransparency(0.4);
+      startAndGoalFootstepsGraphic.setOpacity(0.4);
       helper.subscribeViaCallback(IMMINENT_FOOT_POSES_FOR_UI, message ->
             startAndGoalFootstepsGraphic.generateMeshesAsync(MinimalFootstep.convertMinimalFootstepListMessage(message)));
       footstepPlanningDurationPlot = new ImPlotYoHelperDoublePlotLine("LookAndStepBehavior.footstepPlanningDuration", 10.0, helper);
