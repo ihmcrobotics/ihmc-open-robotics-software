@@ -22,7 +22,6 @@ add_library(slam-wrapper SHARED ${SW_SOURCES})
 
 target_link_libraries(slam-wrapper
     gtsam
- #   eigen
 )
 
 target_include_directories(slam-wrapper PUBLIC
