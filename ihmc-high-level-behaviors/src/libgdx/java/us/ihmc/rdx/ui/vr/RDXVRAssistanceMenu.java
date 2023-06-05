@@ -30,6 +30,9 @@ public class RDXVRAssistanceMenu
 
    private int proMPSamples = -1;
    private int currentProMPSample = -1;
+   private boolean hasProMP = false;
+   private int affordanceSamples = -1;
+   private int currentAffordanceSample = -1;
 
    public RDXVRAssistanceMenu(RDXImGuiWindowAndDockSystem window, VRMenuGuideMode[] mode)
    {
@@ -49,7 +52,7 @@ public class RDXVRAssistanceMenu
       iconsJoysticksHighlighted.add(new RDXIconTexture("icons/vrAssistance/" + "moveRightHighlight.png"));
       iconsJoysticksHighlighted.add(new RDXIconTexture("icons/vrAssistance/" + "pushLeftJoystickHighlight.png"));
 
-      for (int i = 0; i < 100; i += 5)
+      for (int i = 0; i <= 100; i += 5)
          iconsAssistanceProgress.add(new RDXIconTexture("icons/vrAssistance/progressBar/" + i + "-01.png"));
 
       this.mode = mode;
@@ -81,11 +84,22 @@ public class RDXVRAssistanceMenu
 
       if (!(mode[0].equals(VRMenuGuideMode.OFF) || mode[0].equals(VRMenuGuideMode.PRESS_LEFT_B))) // assistance on
       {
-         if(mode[0].equals(VRMenuGuideMode.PUSH_LEFT_JOYSTICK))
+         if (mode[0].equals(VRMenuGuideMode.PUSH_LEFT_JOYSTICK))
          {
             if (hasProMPSamples())
             {
+               hasProMP = true;
                int percentageProgress = currentProMPSample < 0 ? 0 : Math.round((currentProMPSample * 50.0f) / proMPSamples / 5.0f);
+               ImGui.sameLine(ImGui.getCursorPosX() + 10.0f);
+               ImGui.image(iconsAssistanceProgress.get(percentageProgress).getTexture().getTextureObjectHandle(), 250.1f, 121.3f);
+            }
+            else if (hasAffordanceSamples())
+            {
+               int start = hasProMP ? 50 : 0;
+               float maxPercentage = hasProMP ? 50.0f : 100.0f;
+               int percentageProgress =
+                     currentAffordanceSample < 0 ? start : Math.round((start + (currentAffordanceSample * (maxPercentage)) / affordanceSamples) / 5.0f);
+               LogTools.info(percentageProgress);
                ImGui.sameLine(ImGui.getCursorPosX() + 10.0f);
                ImGui.image(iconsAssistanceProgress.get(percentageProgress).getTexture().getTextureObjectHandle(), 250.1f, 121.3f);
             }
@@ -97,6 +111,7 @@ public class RDXVRAssistanceMenu
       {
          ImGui.sameLine(ImGui.getCursorPosX() + ImGui.getContentRegionAvail().x - 92.7f - 45f);
          ImGui.image(iconsAssistanceMode.get(0).getTexture().getTextureObjectHandle(), 112.0f, 135.6f);
+         hasProMP = false;
       }
       ImGui.newLine();
       ImGui.newLine();
@@ -147,5 +162,22 @@ public class RDXVRAssistanceMenu
    public void setCurrentProMPSample(int sample)
    {
       currentProMPSample = sample;
+   }
+
+   public boolean hasAffordanceSamples()
+   {
+      return affordanceSamples >= 0;
+   }
+
+   public void setAffordanceSamples(int samples)
+   {
+      affordanceSamples = samples;
+      if (samples == -1)
+         currentAffordanceSample = -1;
+   }
+
+   public void setCurrentAffordanceSample(int sample)
+   {
+      currentAffordanceSample = sample;
    }
 }

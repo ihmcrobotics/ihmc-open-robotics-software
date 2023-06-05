@@ -479,7 +479,12 @@ public class RDXVRAssistance implements TeleoperationAssistant
       }
       else if (assistancePhase.equals(AssistancePhase.AFFORDANCE))
       {
-
+         if(!menu.hasAffordanceSamples())
+         {
+            menu.setProMPSamples(-1);
+            menu.setAffordanceSamples(affordanceAssistant.getNumberOfSamples());
+         }
+         menu.setCurrentAffordanceSample(affordanceAssistant.getCurrentSample());
       }
    }
 
@@ -533,6 +538,8 @@ public class RDXVRAssistance implements TeleoperationAssistant
             blendingCounter = 0;
             affordanceAssistant.reset();
             this.enabledIKStreaming.set(false);
+            menu.setProMPSamples(-1);
+            menu.setAffordanceSamples(-1);
          }
       }
    }

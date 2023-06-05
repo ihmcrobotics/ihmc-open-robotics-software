@@ -258,6 +258,11 @@ public class TrajectoryRecordReplay
       return concatenatedDataMatrix;
    }
 
+   public int getTimeStepReplay()
+   {
+      return timeStepReplay;
+   }
+
    public String getRecordFileName()
    {
       return recordFileName;

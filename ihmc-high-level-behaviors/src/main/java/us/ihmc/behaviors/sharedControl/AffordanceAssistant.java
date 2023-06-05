@@ -168,8 +168,19 @@ public class AffordanceAssistant
       return handConfigurationToSend;
    }
 
-   public Pose3DReadOnly getPreviousFrame(String bodyPart)
+   public int getNumberOfSamples()
    {
-      return bodyPartPreviousFrameMap.get(bodyPart);
+      if(isActive)
+         return affordancePlayer.getData().size();
+      else
+         return -1;
+   }
+
+   public int getCurrentSample()
+   {
+      if(isActive)
+         return affordancePlayer.getTimeStepReplay();
+      else
+         return -1;
    }
 }
