@@ -199,7 +199,8 @@ public class RDXFootstepPlanning
          {
             double rejectionPercentage = rejectionReasonReport.getRejectionReasonPercentage(reason);
             LogTools.info("Rejection {}%: {}", FormattingTools.getFormattedToSignificantFigures(rejectionPercentage, 3), reason);
-            rejectionReasonsMessage.add(MutablePair.of(reason.ordinal(), MathTools.roundToSignificantFigures(rejectionPercentage, 3)));
+            rejectionReasonsMessage.add(MutablePair.of(reason == null ? -1 : reason.ordinal(),
+                                                       MathTools.roundToSignificantFigures(rejectionPercentage, 3)));
          }
          LogTools.info("Footstep planning failure...");
 
