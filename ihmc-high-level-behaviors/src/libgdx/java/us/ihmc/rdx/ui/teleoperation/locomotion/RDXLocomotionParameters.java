@@ -24,6 +24,7 @@ public class RDXLocomotionParameters extends StoredPropertySet
    public static final DoubleStoredPropertyKey footstepLengthMultiplier = keys.addDoubleKey("Footstep length multiplier");
    public static final BooleanStoredPropertyKey planWidthBodyPath = keys.addBooleanKey("Plan with body path");
    public static final BooleanStoredPropertyKey replanSwingTrajectoriesOnChange = keys.addBooleanKey("Replan swing trajectories on change");
+   public static final BooleanStoredPropertyKey assumeFlatGround = keys.addBooleanKey("Assume flat ground");
 
    public RDXLocomotionParameters(String robotName)
    {
@@ -98,5 +99,10 @@ public class RDXLocomotionParameters extends StoredPropertySet
    public double getFootstepLengthMultiplier()
    {
       return get(footstepLengthMultiplier);
+   }
+
+   public boolean getAssumeFlatGround()
+   {
+      return get(assumeFlatGround);
    }
 }
