@@ -115,7 +115,6 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    private final FixedFramePoint2DBasics desiredCMP = new FramePoint2D();
    private final FixedFramePoint2DBasics desiredCoP = new FramePoint2D();
    private final FixedFramePoint2DBasics achievedCMP = new FramePoint2D();
-   private final FramePoint2D desiredCoPFootFrame;
 
    private boolean controlHeightWithMomentum;
 
@@ -135,7 +134,6 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    private final ICPControlPlane icpControlPlane;
    private final BipedSupportPolygons bipedSupportPolygons;
    private final ICPControlPolygons icpControlPolygons;
-   private final SideDependentList<ContactableFoot> contactableFeet;
 
    private final FixedFrameVector2DBasics perfectCMPDelta = new FrameVector2D();
 
@@ -148,9 +146,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    private final FilteredVelocityYoFrameVector2d capturePointVelocity;
    private final DoubleProvider capturePointVelocityBreakFrequency = new DoubleParameter("capturePointVelocityBreakFrequency", registry, 26.5);
 
-   private final DoubleParameter centerOfPressureWeight = new DoubleParameter("CenterOfPressureObjectiveWeight", registry, 0.0);
    private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
-   private final ReferenceFrame midFootZUpFrame;
 
    private boolean initializeOnStateChange;
    private boolean keepCoPInsideSupportPolygon;
@@ -189,7 +185,6 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    {
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       this.gravityZ = gravityZ;
-      this.contactableFeet = contactableFeet;
 
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), registry);
@@ -210,10 +205,8 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
                                                                      worldFrame);
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      midFootZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
       centerOfMass = new FramePoint3D(centerOfMassFrame);
       controlledCoMAcceleration = new YoFrameVector3D("ControlledCoMAcceleration", "", centerOfMassFrame, registry);
-      desiredCoPFootFrame = new FramePoint2D(midFootZUpFrame);
 
       capturePointCalculator = new CapturePointCalculator(centerOfMassStateProvider);
       centerOfPressureCommandCalculator = new CenterOfPressureCommandCalculator(referenceFrames.getMidFeetZUpFrame(), contactableFeet, registry);
