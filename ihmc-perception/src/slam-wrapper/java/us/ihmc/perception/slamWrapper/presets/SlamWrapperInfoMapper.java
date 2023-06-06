@@ -31,11 +31,18 @@ import org.bytedeco.javacpp.tools.InfoMapper;
                 }),
         @Platform(
                 value = "windows",
-                includepath = {"..\\include",
+                includepath = {
+                        "..\\include",
                         "C:\\Program Files (x86)\\Eigen3\\include\\eigen3",
                         "C:\\Program Files\\GTSAM\\include",
-                        "C:\\local\\boost_1_72_0"},
-                linkpath = {"..\\lib", "C:\\Program Files\\GTSAM\\lib"},
+                        "C:\\local\\boost_1_72_0"
+                },
+                linkpath = {
+                        "..\\lib",
+                        "C:\\Program Files\\GTSAM\\lib",
+                        "C:\\local\\boost_1_72_0\\lib64-msvc-14.2"
+                },
+                link = {"slam-wrapper", "gtsam"},
                 preload = {"gtsam", "slam-wrapper", "jniSlamWrapper"})
 },
         target = "us.ihmc.perception.slamWrapper.SlamWrapper"
