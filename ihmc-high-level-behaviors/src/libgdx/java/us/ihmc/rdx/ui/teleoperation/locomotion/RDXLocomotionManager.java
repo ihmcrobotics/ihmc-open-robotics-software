@@ -77,6 +77,7 @@ public class RDXLocomotionManager
    private final PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
    private final AbortWalkingMessage abortWalkingMessage = new AbortWalkingMessage();
    private final ControllerStatusTracker controllerStatusTracker;
+   private boolean lastAssumeFlatGroundState;
 
    public RDXLocomotionManager(DRCRobotModel robotModel,
                                CommunicationHelper communicationHelper,
@@ -92,6 +93,7 @@ public class RDXLocomotionManager
 
       locomotionParameters = new RDXLocomotionParameters(robotModel.getSimpleRobotName());
       locomotionParameters.load();
+      lastAssumeFlatGroundState = locomotionParameters.getAssumeFlatGround();
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       bodyPathPlannerParameters = robotModel.getAStarBodyPathPlannerParameters();
       swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
@@ -159,7 +161,8 @@ public class RDXLocomotionManager
    {
       controllerStatusTracker.checkControllerIsRunning();
 
-      if (ballAndArrowMidFeetPosePlacement.getPlacedNotification().poll())
+      if (ballAndArrowMidFeetPosePlacement.getPlacedNotification().poll() || (lastAssumeFlatGroundState != locomotionParameters.getAssumeFlatGround()
+                                                                              && ballAndArrowMidFeetPosePlacement.isPlaced()))
       {
          footstepPlanning.queueAsynchronousPlanning(ballAndArrowMidFeetPosePlacement.getGoalPose());
       }
@@ -174,6 +177,11 @@ public class RDXLocomotionManager
             bodyPathPlanGraphic.generateMeshesAsync(output.getBodyPath());
          else
             bodyPathPlanGraphic.clear();
+      }
+
+      if (lastAssumeFlatGroundState != locomotionParameters.getAssumeFlatGround() && walkPathControlRing.isSelected())
+      {
+         walkPathControlRing.becomeModified(walkPathControlRing.isSelected());
       }
 
       if (walkPathControlRing.getBecomesModifiedNotification().poll())
@@ -227,6 +235,8 @@ public class RDXLocomotionManager
       if (isPlacingFootstep != isCurrentlyPlacingFootstep)
          baseUI.setModelSceneMouseCollisionEnabled(isCurrentlyPlacingFootstep);
       isPlacingFootstep = isCurrentlyPlacingFootstep;
+
+      lastAssumeFlatGroundState = locomotionParameters.getAssumeFlatGround();
    }
 
    public void renderImGuiWidgets()

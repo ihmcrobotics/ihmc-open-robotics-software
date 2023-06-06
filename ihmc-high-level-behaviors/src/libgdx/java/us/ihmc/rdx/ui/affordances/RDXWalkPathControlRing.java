@@ -182,7 +182,7 @@ public class RDXWalkPathControlRing
    public void becomeModified(boolean selected)
    {
       footstepPlannerGoalGizmo.setSelected(selected);
-      if (!footstepPlannerGoalGizmo.getModified())
+      if (!footstepPlannerGoalGizmo.getModified() || isSelected())
       {
          footstepPlannerGoalGizmo.setModified(true);
          becomesModifiedNotification.set();
