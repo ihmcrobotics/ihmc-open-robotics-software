@@ -456,7 +456,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    public void setupTorqueConstraintCommand()
    {
       //TODO alter this method to actually constrain torque
-      qpSolver.addTorqueConstraint(dynamicsMatrixCalculator.getBodyMassMatrix(),
+      qpSolver.addTorqueLimitConstraints(dynamicsMatrixCalculator.getBodyMassMatrix(),
                                               dynamicsMatrixCalculator.getBodyContactForceJacobianTranspose(),
                                               dynamicsMatrixCalculator.getTorqueMinimizationObjective());
    }
