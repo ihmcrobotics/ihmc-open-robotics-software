@@ -228,6 +228,9 @@ public class RDXLocomotionManager
       if (isPlacingFootstep != isCurrentlyPlacingFootstep)
          baseUI.setModelSceneMouseCollisionEnabled(isCurrentlyPlacingFootstep);
       isPlacingFootstep = isCurrentlyPlacingFootstep;
+
+      if (!controllerStatusTracker.isInWalkingState() || interactableFootstepPlan.getFootsteps().size() > 0)
+         interactableFootstepPlan.findLastFootsteps();
    }
 
    public void renderImGuiWidgets()
@@ -254,6 +257,9 @@ public class RDXLocomotionManager
       if (ImGui.button(labels.get("Abort")))
       {
          sendAbortWalkingMessage();
+         interactableFootstepPlan.clear();
+         interactableFootstepPlan.findLastFootsteps();
+         footstepsSentToControllerGraphic.clear();
       }
       ImGui.sameLine();
 

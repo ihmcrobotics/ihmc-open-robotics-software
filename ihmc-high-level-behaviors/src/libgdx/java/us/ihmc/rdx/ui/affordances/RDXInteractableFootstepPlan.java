@@ -22,7 +22,6 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -61,6 +60,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
    private int previousPlanLength;
    private boolean wasPlanUpdated = false;
+   private EnumMap<RobotSide, RDXInteractableFootstep> lastFootsteps = new EnumMap<>(RobotSide.class);
 
    public void create(RDXBaseUI baseUI,
                       CommunicationHelper communicationHelper,
@@ -349,6 +349,31 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    public RDXFootstepChecker getStepChecker()
    {
       return stepChecker;
+   }
+
+   public void findLastFootsteps()
+   {
+      lastFootsteps.clear();
+      int i = footsteps.size() - 1;
+
+      while (i >= 0 && (lastFootsteps.get(RobotSide.LEFT) == null || lastFootsteps.get(RobotSide.RIGHT) == null))
+      {
+         if (footsteps.get(i).getFootstepSide() == RobotSide.LEFT && lastFootsteps.get(RobotSide.LEFT) == null)
+         {
+            lastFootsteps.put(RobotSide.LEFT, footsteps.get(i));
+         }
+         else if (footsteps.get(i).getFootstepSide() == RobotSide.RIGHT && lastFootsteps.get(RobotSide.RIGHT) == null)
+         {
+            lastFootsteps.put(RobotSide.RIGHT, footsteps.get(i));
+         }
+
+         --i;
+      }
+   }
+
+   public EnumMap<RobotSide, RDXInteractableFootstep> getLastFootsteps()
+   {
+      return lastFootsteps;
    }
 
    public void destroy()

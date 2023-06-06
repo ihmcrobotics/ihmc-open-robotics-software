@@ -299,15 +299,11 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    private boolean isFootstepBeingPlacedReachable()
    {
       FramePose3D previousFootstepPose = new FramePose3D();
-      // Find the previous footstep of the opposite side of the footstep being placed
-      int i = footstepPlan.getNumberOfFootsteps() - 1;
-      while (i >= 0 && footstepPlan.getFootsteps().get(i).getFootstepSide() == footstepBeingPlaced.getFootstepSide())
+
+      RDXInteractableFootstep lastFootstep = footstepPlan.getLastFootsteps().get(currentFootStepSide.getOppositeSide());
+      if (lastFootstep != null)
       {
-         --i;
-      }
-      if (i >= 0)
-      {
-         previousFootstepPose.setIncludingFrame(footstepPlan.getFootsteps().get(i).getFootPose());
+         previousFootstepPose.setIncludingFrame(lastFootstep.getFootPose());
       }
       else
       {
