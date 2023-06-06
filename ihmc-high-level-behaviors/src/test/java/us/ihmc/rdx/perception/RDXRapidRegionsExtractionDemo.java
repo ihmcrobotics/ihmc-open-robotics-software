@@ -140,7 +140,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
 
             pointCloudRenderer.create(depthHeight * depthWidth);
-            rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth);
+            rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager, openCLProgram, depthHeight, depthWidth);
             rapidPlanarRegionsExtractor.getDebugger().setEnabled(true);
             rapidPlanarRegionsExtractor.getDebugger().setShowPointCloud(false);
 
