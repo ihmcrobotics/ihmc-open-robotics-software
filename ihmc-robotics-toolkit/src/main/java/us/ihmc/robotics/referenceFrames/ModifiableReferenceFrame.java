@@ -12,6 +12,11 @@ public class ModifiableReferenceFrame
    private final String frameName;
    private ReferenceFrame referenceFrame;
 
+   public ModifiableReferenceFrame()
+   {
+      this(ReferenceFrame.getWorldFrame());
+   }
+
    public ModifiableReferenceFrame(ReferenceFrame parentFrame)
    {
       this(ReferenceFrameMissingTools.computeFrameName(), parentFrame);
@@ -39,6 +44,7 @@ public class ModifiableReferenceFrame
     */
    public void changeParentFrame(ReferenceFrame parentFrame)
    {
+      referenceFrame.remove();
       referenceFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(frameName, parentFrame, transformToParent);
    }
 
@@ -53,6 +59,7 @@ public class ModifiableReferenceFrame
    {
       RigidBodyTransform newTransformToParent = new RigidBodyTransform();
       referenceFrame.getTransformToDesiredFrame(newTransformToParent, parentFrame);
+      referenceFrame.remove();
       transformToParent.set(newTransformToParent);
       referenceFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(frameName, parentFrame, transformToParent);
    }
