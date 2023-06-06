@@ -155,6 +155,8 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    private boolean initializeOnStateChange;
    private boolean keepCoPInsideSupportPolygon;
 
+   private final CenterOfPressureCommandCalculator centerOfPressureCommandCalculator;
+
    private final SideDependentList<PlaneContactStateCommand> contactStateCommands = new SideDependentList<>(new PlaneContactStateCommand(),
                                                                                                             new PlaneContactStateCommand());
 
@@ -214,6 +216,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       desiredCoPFootFrame = new FramePoint2D(midFootZUpFrame);
 
       capturePointCalculator = new CapturePointCalculator(centerOfMassStateProvider);
+      centerOfPressureCommandCalculator = new CenterOfPressureCommandCalculator(referenceFrames.getMidFeetZUpFrame(), contactableFeet, registry);
 
       pelvisHeightController = new PelvisHeightController(referenceFrames.getPelvisFrame(), elevator.getBodyFixedFrame(), registry);
       comHeightController = new CoMHeightController(centerOfMassStateProvider, registry);
@@ -393,60 +396,13 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       momentumRateCommand.setSelectionMatrix(selectionMatrix);
       momentumRateCommand.setWeights(angularMomentumRateWeight, desiredLinearMomentumRateWeight);
 
-      computeCenterOfPressureCommand();
+      centerOfPressureCommandCalculator.computeCenterOfPressureCommand(desiredCoP,
+                                                                       contactStateCommands,
+                                                                       bipedSupportPolygons.getFootPolygonsInSoleFrame());
 
       return success;
    }
 
-   private void computeCenterOfPressureCommand()
-   {
-      boolean leftInContact = contactStateCommands.get(RobotSide.LEFT).getNumberOfContactPoints() > 0;
-      boolean rightInContact = contactStateCommands.get(RobotSide.RIGHT).getNumberOfContactPoints() > 0;
-
-      if (leftInContact != rightInContact)
-      {
-         if (leftInContact)
-            centerOfPressureCommand.setContactingRigidBody(contactableFeet.get(RobotSide.LEFT).getRigidBody());
-         else
-            centerOfPressureCommand.setContactingRigidBody(contactableFeet.get(RobotSide.RIGHT).getRigidBody());
-
-         desiredCoPFootFrame.setIncludingFrame(desiredCoP);
-         desiredCoPFootFrame.changeFrame(midFootZUpFrame);
-         centerOfPressureCommand.setDesiredCoP(desiredCoPFootFrame);
-         centerOfPressureCommand.setWeight(midFootZUpFrame, centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
-      }
-      else if (leftInContact)
-      {
-         // check if it's to the outside of the foot
-         boolean setCommand = false;
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            desiredCoPFootFrame.setIncludingFrame(desiredCoP);
-            desiredCoPFootFrame.changeFrameAndProjectToXYPlane(contactableFeet.get(robotSide).getSoleFrame());
-            if (robotSide.negateIfRightSide(desiredCoPFootFrame.getY()) > 0.0)
-            {
-               // it is to the outside of the foot, so add the command
-               centerOfPressureCommand.setContactingRigidBody(contactableFeet.get(robotSide).getRigidBody());
-               centerOfPressureCommand.setDesiredCoP(desiredCoPFootFrame);
-               centerOfPressureCommand.setWeight(contactableFeet.get(robotSide).getSoleFrame(), centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
-               setCommand = true;
-               break;
-            }
-         }
-
-         if (!setCommand)
-         {
-            centerOfPressureCommand.setContactingRigidBody(null);
-            centerOfPressureCommand.setDesiredCoP(desiredCoP);
-            centerOfPressureCommand.setWeight(midFootZUpFrame, centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
-         }
-      }
-      else
-      {
-         centerOfPressureCommand.setContactingRigidBody(null);
-         centerOfPressureCommand.setWeight(midFootZUpFrame, 0.0, 0.0);
-      }
-   }
 
    /**
     * Computes the achieved CMP location.
