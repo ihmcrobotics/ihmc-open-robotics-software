@@ -31,6 +31,7 @@ public class FootControlHelper implements SCS2YoGraphicHolder
 
    private final FrameVector3D fullyConstrainedNormalContactVector;
    private final YoBoolean isDesiredCoPOnEdge;
+   private final YoBoolean isCurrentCoPOnEdge;
 
    private final BipedSupportPolygons bipedSupportPolygons;
 
@@ -90,6 +91,7 @@ public class FootControlHelper implements SCS2YoGraphicHolder
       }
 
       isDesiredCoPOnEdge = new YoBoolean(namePrefix + "IsDesiredCoPOnEdge", registry);
+      isCurrentCoPOnEdge = new YoBoolean(namePrefix + "IsCurrentCoPOnEdge", registry);
 
       fullyConstrainedNormalContactVector = new FrameVector3D(contactableFoot.getSoleFrame(), 0.0, 0.0, 1.0);
 
@@ -124,13 +126,17 @@ public class FootControlHelper implements SCS2YoGraphicHolder
    }
 
    private final FramePoint2D desiredCoP = new FramePoint2D();
+   private final FramePoint2D currentCoP = new FramePoint2D();
 
    public void update()
    {
       controllerToolbox.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
+      currentCoP.set(controllerToolbox.getFootSwitches().get(robotSide).getCenterOfPressure());
 
       if (desiredCoP.containsNaN())
+      {
          isDesiredCoPOnEdge.set(false);
+      }
       else
       {
          double epsilon = isDesiredCoPOnEdge.getBooleanValue() ? supportStateParameters.getCopOnEdgeEpsilonWithHysteresis()
@@ -138,11 +144,27 @@ public class FootControlHelper implements SCS2YoGraphicHolder
          FrameConvexPolygon2DReadOnly footSupportPolygon = bipedSupportPolygons.getFootPolygonInSoleFrame(robotSide);
          isDesiredCoPOnEdge.set(!footSupportPolygon.isPointInside(desiredCoP, -epsilon)); // Minus means that the check is done with a smaller polygon
       }
+      if (currentCoP.containsNaN())
+      {
+         isCurrentCoPOnEdge.set(false);
+      }
+      else
+      {
+         double epsilon = isCurrentCoPOnEdge.getBooleanValue() ? supportStateParameters.getCopOnEdgeEpsilonWithHysteresis()
+               : supportStateParameters.getCopOnEdgeEpsilon();
+         FrameConvexPolygon2DReadOnly footSupportPolygon = bipedSupportPolygons.getFootPolygonInSoleFrame(robotSide);
+         isCurrentCoPOnEdge.set(!footSupportPolygon.isPointInside(currentCoP, -epsilon)); // Minus means that the check is done with a smaller polygon
+      }
    }
 
-   public boolean isCoPOnEdge()
+   public boolean isDesiredCoPOnEdge()
    {
       return isDesiredCoPOnEdge.getBooleanValue();
+   }
+
+   public boolean isCurrentCoPOnEdge()
+   {
+      return isCurrentCoPOnEdge.getBooleanValue();
    }
 
    public RobotSide getRobotSide()
