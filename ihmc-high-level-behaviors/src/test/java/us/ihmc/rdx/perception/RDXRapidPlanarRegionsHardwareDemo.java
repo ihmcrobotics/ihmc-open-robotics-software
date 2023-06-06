@@ -27,7 +27,7 @@ public class RDXRapidPlanarRegionsHardwareDemo
    private BytedecoImage bytedecoDepthImage;
    private RDXPose3DGizmo l515PoseGizmo = new RDXPose3DGizmo();
    private RDXRapidRegionsUI rapidRegionsUI = new RDXRapidRegionsUI();
-   private RapidPlanarRegionsExtractor rapidRegionsExtractor = new RapidPlanarRegionsExtractor();
+   private RapidPlanarRegionsExtractor rapidRegionsExtractor;
    private OpenCLManager openCLManager;
    private _cl_program openCLProgram;
 
@@ -87,15 +87,14 @@ public class RDXRapidPlanarRegionsHardwareDemo
 
                      bytedecoDepthImage = new BytedecoImage(l515.getDepthWidth(), l515.getDepthHeight(), opencv_core.CV_16UC1);
 
-
-                     rapidRegionsExtractor.create(openCLManager,
-                                                  openCLProgram,
-                                                  l515.getDepthWidth(),
-                                                  l515.getDepthHeight(),
-                                                  l515.getDepthIntrinsicParameters().fx(),
-                                                  l515.getDepthIntrinsicParameters().fy(),
-                                                  l515.getDepthIntrinsicParameters().ppx(),
-                                                  l515.getDepthIntrinsicParameters().ppy());
+                     rapidRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager,
+                                                                             openCLProgram,
+                                                                             l515.getDepthWidth(),
+                                                                             l515.getDepthHeight(),
+                                                                             l515.getDepthIntrinsicParameters().fx(),
+                                                                             l515.getDepthIntrinsicParameters().fy(),
+                                                                             l515.getDepthIntrinsicParameters().ppx(),
+                                                                             l515.getDepthIntrinsicParameters().ppy());
 
                      rapidRegionsUI.getEnabled().set(true);
                      baseUI.getImGuiPanelManager().addPanel(rapidRegionsUI.getPanel());

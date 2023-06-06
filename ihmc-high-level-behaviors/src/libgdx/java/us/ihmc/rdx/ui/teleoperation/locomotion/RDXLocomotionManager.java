@@ -77,6 +77,7 @@ public class RDXLocomotionManager
    private final PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
    private final AbortWalkingMessage abortWalkingMessage = new AbortWalkingMessage();
    private final ControllerStatusTracker controllerStatusTracker;
+   private boolean lastAssumeFlatGroundState;
 
    public RDXLocomotionManager(DRCRobotModel robotModel,
                                CommunicationHelper communicationHelper,
@@ -92,6 +93,7 @@ public class RDXLocomotionManager
 
       locomotionParameters = new RDXLocomotionParameters(robotModel.getSimpleRobotName());
       locomotionParameters.load();
+      lastAssumeFlatGroundState = locomotionParameters.getAssumeFlatGround();
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       bodyPathPlannerParameters = robotModel.getAStarBodyPathPlannerParameters();
       swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
@@ -152,16 +154,23 @@ public class RDXLocomotionManager
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(manualFootstepPlacement::processImGui3DViewInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(manualFootstepPlacement::calculate3DViewPick);
 
-      walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, footstepPlannerParameters, footstepPlanning);
+      walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, footstepPlannerParameters);
    }
 
    public void update()
    {
       controllerStatusTracker.checkControllerIsRunning();
 
-      if (ballAndArrowMidFeetPosePlacement.getPlacedNotification().poll())
+      if (ballAndArrowMidFeetPosePlacement.getPlacedNotification().poll() || (lastAssumeFlatGroundState != locomotionParameters.getAssumeFlatGround()
+                                                                              && ballAndArrowMidFeetPosePlacement.isPlaced()))
       {
          footstepPlanning.queueAsynchronousPlanning(ballAndArrowMidFeetPosePlacement.getGoalPose());
+      }
+
+      if (walkPathControlRing.getGoalUpdatedNotification().poll() || (lastAssumeFlatGroundState != locomotionParameters.getAssumeFlatGround()
+                                                                    && walkPathControlRing.isSelected()))
+      {
+         footstepPlanning.queueAsynchronousPlanning(walkPathControlRing.getGoalPose());
       }
 
       footstepPlanning.update();
@@ -179,8 +188,6 @@ public class RDXLocomotionManager
       if (walkPathControlRing.getBecomesModifiedNotification().poll())
       {
          legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
-         interactableFootstepPlan.clear();
-         bodyPathPlanGraphic.clear();
       }
 
       if (manualFootstepPlacement.pollIsModeNewlyActivated())
@@ -223,10 +230,13 @@ public class RDXLocomotionManager
 
       footstepsSentToControllerGraphic.update();
 
-      boolean isCurrentlyPlacingFootstep = getManualFootstepPlacement().isPlacingFootstep() || ballAndArrowMidFeetPosePlacement.isPlacingGoal();
+      boolean isCurrentlyPlacingFootstep =
+            getManualFootstepPlacement().isPlacingFootstep() || ballAndArrowMidFeetPosePlacement.isPlacingGoal() || walkPathControlRing.isSelected();
       if (isPlacingFootstep != isCurrentlyPlacingFootstep)
          baseUI.setModelSceneMouseCollisionEnabled(isCurrentlyPlacingFootstep);
       isPlacingFootstep = isCurrentlyPlacingFootstep;
+
+      lastAssumeFlatGroundState = locomotionParameters.getAssumeFlatGround();
    }
 
    public void renderImGuiWidgets()

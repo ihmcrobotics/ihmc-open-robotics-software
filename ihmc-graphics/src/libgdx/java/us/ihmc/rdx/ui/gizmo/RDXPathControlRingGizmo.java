@@ -22,6 +22,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.RDXFocusBasedCamera;
@@ -302,6 +303,9 @@ public class RDXPathControlRingGizmo implements RenderableProvider
             Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
             frameBasedGizmoModification.translateInWorld(planarMotion);
             closestCollision.add(planarMotion);
+
+            Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
+            transformToParent.getTranslation().setZ(pickPointInWorld.getZ());
          }
          else // yaw dragging
          {
@@ -353,7 +357,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
             }
             else // translation
             {
-
                double amount = deltaTime * (shiftHeld ? 0.05 : 0.4);
                Point3DBasics positionToAdjust = frameBasedGizmoModification.beforeForTranslationAdjustment();
                if (upArrowHeld && !ctrlHeld) // x +
