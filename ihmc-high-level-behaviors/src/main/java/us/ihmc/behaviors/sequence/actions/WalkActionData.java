@@ -18,7 +18,7 @@ public class WalkActionData implements BehaviorActionData
    private String description = "Walk";
    private ReferenceFrameLibrary referenceFrameLibrary;
    private final ModifiableReferenceFrame modifiableReferenceFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
-   private final SideDependentList<RigidBodyTransform> goalFootstepToGizmos = new SideDependentList<>(() -> new RigidBodyTransform());
+   private final SideDependentList<RigidBodyTransform> goalFootstepToParentTransforms = new SideDependentList<>(() -> new RigidBodyTransform());
    private double swingDuration = 1.2;
    private double transferDuration = 0.8;
 
@@ -37,7 +37,7 @@ public class WalkActionData implements BehaviorActionData
       for (RobotSide side : RobotSide.values)
       {
          ObjectNode goalFootNode = jsonNode.putObject(side.getCamelCaseName() + "GoalFootTransform");
-         JSONTools.toJSON(goalFootNode, goalFootstepToGizmos.get(side));
+         JSONTools.toJSON(goalFootNode, goalFootstepToParentTransforms.get(side));
       }
       jsonNode.put("swingDuration", swingDuration);
       jsonNode.put("transferDuration", transferDuration);
@@ -52,7 +52,7 @@ public class WalkActionData implements BehaviorActionData
       for (RobotSide side : RobotSide.values)
       {
          JsonNode goalFootNode = jsonNode.get(side.getCamelCaseName() + "GoalFootTransform");
-         JSONTools.toEuclid(goalFootNode, goalFootstepToGizmos.get(side));
+         JSONTools.toEuclid(goalFootNode, goalFootstepToParentTransforms.get(side));
       }
       JsonNode swingDurationNode = jsonNode.get("swingDuration");
       if (swingDurationNode != null)
@@ -67,8 +67,8 @@ public class WalkActionData implements BehaviorActionData
       message.getParentFrame().resetQuick();
       message.getParentFrame().add(getParentReferenceFrame().getName());
       MessageTools.toMessage(modifiableReferenceFrame.getTransformToParent(), message.getTransformToParent());
-      MessageTools.toMessage(goalFootstepToGizmos.get(RobotSide.LEFT), message.getLeftGoalFootTransformToGizmo());
-      MessageTools.toMessage(goalFootstepToGizmos.get(RobotSide.RIGHT), message.getRightGoalFootTransformToGizmo());
+      MessageTools.toMessage(goalFootstepToParentTransforms.get(RobotSide.LEFT), message.getLeftGoalFootTransformToGizmo());
+      MessageTools.toMessage(goalFootstepToParentTransforms.get(RobotSide.RIGHT), message.getRightGoalFootTransformToGizmo());
       message.setSwingDuration(swingDuration);
       message.setTransferDuration(transferDuration);
    }
@@ -77,8 +77,8 @@ public class WalkActionData implements BehaviorActionData
    {
       modifiableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(message.getParentFrame().getString(0)));
       modifiableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
-      MessageTools.toEuclid(message.getLeftGoalFootTransformToGizmo(), goalFootstepToGizmos.get(RobotSide.LEFT));
-      MessageTools.toEuclid(message.getRightGoalFootTransformToGizmo(), goalFootstepToGizmos.get(RobotSide.RIGHT));
+      MessageTools.toEuclid(message.getLeftGoalFootTransformToGizmo(), goalFootstepToParentTransforms.get(RobotSide.LEFT));
+      MessageTools.toEuclid(message.getRightGoalFootTransformToGizmo(), goalFootstepToParentTransforms.get(RobotSide.RIGHT));
       swingDuration = message.getSwingDuration();
       transferDuration = message.getTransferDuration();
    }
@@ -103,9 +103,9 @@ public class WalkActionData implements BehaviorActionData
       return modifiableReferenceFrame.getTransformToParent();
    }
 
-   public SideDependentList<RigidBodyTransform> getGoalFootstepToGizmos()
+   public SideDependentList<RigidBodyTransform> getGoalFootstepToParentTransforms()
    {
-      return goalFootstepToGizmos;
+      return goalFootstepToParentTransforms;
    }
 
    public double getSwingDuration()

@@ -48,7 +48,7 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    {
       for (RobotSide side : RobotSide.values)
       {
-         goalFeetPoses.get(side).setIncludingFrame(getReferenceFrame(), getGoalFootstepToGizmos().get(side));
+         goalFeetPoses.get(side).setIncludingFrame(getReferenceFrame(), getGoalFootstepToParentTransforms().get(side));
          goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
       }
    }
