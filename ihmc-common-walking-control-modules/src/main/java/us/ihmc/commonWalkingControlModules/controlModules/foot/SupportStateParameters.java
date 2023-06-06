@@ -40,8 +40,8 @@ public class SupportStateParameters
 
       assumeCopOnEdge = new BooleanParameter(prefix + "AssumeCopOnEdge", registry, false);
       assumeFootBarelyLoaded = new BooleanParameter(prefix + "AssumeFootBarelyLoaded", registry, false);
-      neverHoldRotation = new BooleanParameter(prefix + "NeverHoldRotation", registry, false);
-      neverHoldPosition = new BooleanParameter(prefix + "NeverHoldPosition", registry, false);
+      neverHoldRotation = new BooleanParameter(prefix + "NeverHoldRotation", registry, true);
+      neverHoldPosition = new BooleanParameter(prefix + "NeverHoldPosition", registry, true);
       holdFootOrientationFlat = new BooleanParameter(prefix + "HoldFlatOrientation", registry, false);
 
       footLoadThreshold = new YoDouble(prefix + "LoadThreshold", registry);
