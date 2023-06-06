@@ -32,7 +32,7 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
-import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
+import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.visualizers.RDXPolynomial;
 import us.ihmc.robotics.math.trajectories.core.Polynomial;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
@@ -141,7 +141,7 @@ public class RDXInteractableFootstep
 
       if (setCustomFoothold)
       {
-         Color regionColor = RDXFootstepPlanGraphic.footstepColors.get(plannedFootstep.getRobotSide());
+         Color regionColor = RDXFootstepGraphic.FOOT_COLORS.get(plannedFootstep.getRobotSide());
          List<Point3DReadOnly> points = new ArrayList<>();
          for (int i = 0; i < plannedFootstep.getFoothold().getNumberOfVertices(); i++)
          {
