@@ -26,7 +26,7 @@ public class RDXPlanarRegionsSimulationDemo
    private RDXPose3DGizmo l515PoseGizmo = new RDXPose3DGizmo();
    private RDXEnvironmentBuilder environmentBuilder;
    private RDXRapidRegionsUI rapidRegionsUI = new RDXRapidRegionsUI();
-   private RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor();
+   private RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor;
    private BytedecoImage bytedecoDepthImage;
 
    private boolean initialized = false;
@@ -83,13 +83,7 @@ public class RDXPlanarRegionsSimulationDemo
                                                          steppingL515Simulator.getLowLevelSimulator().getImageHeight(),
                                                          opencv_core.CV_16UC1);
                   bytedecoDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-                  rapidPlanarRegionsExtractor.create(openCLManager,
-                                                     steppingL515Simulator.getLowLevelSimulator().getImageHeight(),
-                                                     steppingL515Simulator.getLowLevelSimulator().getImageWidth(),
-                                                     steppingL515Simulator.getLowLevelSimulator().getFocalLengthPixels().get(),
-                                                     steppingL515Simulator.getLowLevelSimulator().getFocalLengthPixels().get(),
-                                                     steppingL515Simulator.getLowLevelSimulator().getPrincipalOffsetXPixels().get(),
-                                                     steppingL515Simulator.getLowLevelSimulator().getPrincipalOffsetYPixels().get());
+                  rapidPlanarRegionsExtractor = RDXPlanarRegionsExtractorTools.create(openCLManager, steppingL515Simulator);
 
                   rapidRegionsUI.create(rapidPlanarRegionsExtractor);
                   baseUI.getImGuiPanelManager().addPanel(rapidRegionsUI.getPanel());
