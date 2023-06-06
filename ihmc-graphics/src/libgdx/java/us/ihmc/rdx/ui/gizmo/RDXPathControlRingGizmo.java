@@ -91,7 +91,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private RigidBodyTransform transformToParent;
    /** This pose 3D should always be left in world frame and represent this gizmo's pose. */
    private final FramePose3D framePose3D = new FramePose3D();
-   private ReferenceFrame parentReferenceFrame;
    private ReferenceFrame gizmoFrame;
    /** Gizmo transform to world so it can be calculated once. */
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
@@ -136,14 +135,18 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    private void initialize(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify)
    {
-      this.parentReferenceFrame = gizmoFrame.getParent();
       this.transformToParent = gizmoTransformToParentFrameToModify;
+      this.gizmoFrame = gizmoFrame;
+   }
+
+   public void setGizmoFrame(ReferenceFrame gizmoFrame)
+   {
       this.gizmoFrame = gizmoFrame;
    }
 
    public void setParentFrame(ReferenceFrame parentReferenceFrame)
    {
-      this.parentReferenceFrame = parentReferenceFrame;
+      gizmoFrame.remove();
       gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
    }
 
@@ -159,7 +162,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    {
       camera3D = panel3D.getCamera3D();
       boolean yawOnly = true;
-      frameBasedGizmoModification = new FrameBasedGizmoModification(this::getGizmoFrame, () -> parentReferenceFrame, camera3D, yawOnly);
+      frameBasedGizmoModification = new FrameBasedGizmoModification(this::getGizmoFrame, () -> gizmoFrame.getParent(), camera3D, yawOnly);
       panel3D.addImGuiOverlayAddition(this::renderTooltipAndContextMenu);
 
       normalMaterial = createAlphaPaletteMaterial(RDXGizmoTools.X_AXIS_DEFAULT_COLOR.a);
