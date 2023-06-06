@@ -149,7 +149,7 @@ public interface ControllerCoreOptimizationSettings
    /**
     * Whether the given joint's torque limit should be enforced with inequality constraints in the QP.
     */
-   default boolean isJointTorqueLimitEnforced(String jointName)
+   default boolean areJointTorqueLimitsEnforced()
    {
       return false;
    }
@@ -167,6 +167,7 @@ public interface ControllerCoreOptimizationSettings
     */
    default boolean areJointTorqueLimitsConsidered()
    {
+      // change to enum to handle whether joint torque limits are handled before or after the QP
       return false;
    }
 

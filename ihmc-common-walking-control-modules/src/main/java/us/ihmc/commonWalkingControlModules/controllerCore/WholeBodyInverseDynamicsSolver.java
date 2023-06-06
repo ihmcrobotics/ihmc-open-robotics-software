@@ -103,9 +103,13 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
     */
    private final YoBoolean minimizeJointTorques;
    /**
-    * Whether the desired joint torques should be clamped to each joint min and max torque.
+    * Whether the desired joint torques should be clamped (AFTER the QP) to each joint min and max torque.
     */
    private final YoBoolean areJointTorqueLimitsConsidered;
+   /**
+    * Whether the desired joint torques should be clamped (INSIDE the QP) to each joint min and max torque.
+    */
+   private final YoBoolean areJointTorqueLimitsEnforced;
    /**
     * Whether {@link #dynamicsMatrixCalculator} is used for inverse dynamics.
     */
@@ -158,6 +162,8 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
       minimizeJointTorques.set(toolbox.getOptimizationSettings().areJointTorquesMinimized());
       areJointTorqueLimitsConsidered = new YoBoolean("areJointTorqueLimitsConsidered", registry);
       areJointTorqueLimitsConsidered.set(toolbox.getOptimizationSettings().areJointTorqueLimitsConsidered());
+      areJointTorqueLimitsEnforced = new YoBoolean("areJointTorqueLimitsEnforced", registry);
+      areJointTorqueLimitsEnforced.set(toolbox.getOptimizationSettings().areJointTorqueLimitsEnforced());
       useDynamicMatrixCalculatorForInverseDynamics = new YoBoolean("useDynamicMatrixCalculator", registry);
       useDynamicMatrixCalculatorForInverseDynamics.set(toolbox.getOptimizationSettings().useDynamicMatrixCalculatorForInverseDynamics());
       updateDynamicMatrixCalculator = new YoBoolean("updateDynamicMatrixCalculator", registry);
@@ -215,6 +221,11 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
       if (minimizeJointTorques.getValue())
       {
          optimizationControlModule.setupTorqueMinimizationCommand();
+      }
+      if (areJointTorqueLimitsEnforced.getValue())
+      {
+         //TODO 
+         optimizationControlModule.setupTorqueConstraintCommand();
       }
 
       setupTimer.stopMeasurement();

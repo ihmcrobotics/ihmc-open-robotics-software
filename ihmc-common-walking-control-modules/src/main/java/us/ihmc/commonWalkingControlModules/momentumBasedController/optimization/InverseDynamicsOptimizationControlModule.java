@@ -255,6 +255,9 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       if (COMPUTE_TORQUE_LIMIT_CONSTRAINTS)
       {
          computeJointTorqueLimits();
+         // TODO convert torque limits to accelerations via dynamics inside computeJointTorqueLimits? would need state and maybe rho
+         // edit qDDotMin and Max with accelerations from torque limits ONLY if they are more constraining
+         // some sort of flag to say whether trajectory was constrained by accel limit or by torque limit?
       }
 
       for (int i = 0; i < kinematicLoopFunctions.size(); i++)
@@ -446,6 +449,14 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    public void setupTorqueMinimizationCommand()
    {
       qpSolver.addTorqueMinimizationObjective(dynamicsMatrixCalculator.getBodyMassMatrix(),
+                                              dynamicsMatrixCalculator.getBodyContactForceJacobianTranspose(),
+                                              dynamicsMatrixCalculator.getTorqueMinimizationObjective());
+   }
+   
+   public void setupTorqueConstraintCommand()
+   {
+      //TODO alter this method to actually constrain torque
+      qpSolver.addTorqueConstraint(dynamicsMatrixCalculator.getBodyMassMatrix(),
                                               dynamicsMatrixCalculator.getBodyContactForceJacobianTranspose(),
                                               dynamicsMatrixCalculator.getTorqueMinimizationObjective());
    }
