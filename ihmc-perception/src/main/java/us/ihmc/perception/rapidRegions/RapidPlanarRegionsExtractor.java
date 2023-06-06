@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.PinholeCameraParameters;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -95,6 +96,18 @@ public class RapidPlanarRegionsExtractor
    private final FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
    private final RapidPlanarRegionIsland tempIsland = new RapidPlanarRegionIsland();
    private boolean firstRun = true;
+
+   public RapidPlanarRegionsExtractor(OpenCLManager openCLManager, PinholeCameraParameters pinholeCameraParameters)
+   {
+      this(openCLManager,
+           openCLManager.loadProgram("RapidRegionsExtractor"),
+           pinholeCameraParameters.getImageHeight(),
+           pinholeCameraParameters.getImageWidth(),
+           pinholeCameraParameters.getFocalLengthX(),
+           pinholeCameraParameters.getFocalLengthY(),
+           pinholeCameraParameters.getPrincipalPointX(),
+           pinholeCameraParameters.getPrincipalPointY());
+   }
 
    public RapidPlanarRegionsExtractor(OpenCLManager openCLManager, int imageHeight, int imageWidth, double fx, double fy, double cx, double cy)
    {
