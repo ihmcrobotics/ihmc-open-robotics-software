@@ -36,9 +36,9 @@ public class JSONTools
       rigidBodyTransform.getTranslation().setX(jsonNode.get("x").asDouble());
       rigidBodyTransform.getTranslation().setY(jsonNode.get("y").asDouble());
       rigidBodyTransform.getTranslation().setZ(jsonNode.get("z").asDouble());
-      rigidBodyTransform.getRotation().setYawPitchRoll(Math.toRadians(jsonNode.get("rollInDegrees").asDouble()),
+      rigidBodyTransform.getRotation().setYawPitchRoll(Math.toRadians(jsonNode.get("yawInDegrees").asDouble()),
                                                        Math.toRadians(jsonNode.get("pitchInDegrees").asDouble()),
-                                                       Math.toRadians(jsonNode.get("yawInDegrees").asDouble()));
+                                                       Math.toRadians(jsonNode.get("rollInDegrees").asDouble()));
    }
 
    /**
