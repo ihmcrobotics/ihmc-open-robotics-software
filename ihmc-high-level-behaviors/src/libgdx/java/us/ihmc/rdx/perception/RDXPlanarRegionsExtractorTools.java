@@ -8,14 +8,12 @@ public class RDXPlanarRegionsExtractorTools
 {
    public static RapidPlanarRegionsExtractor create(OpenCLManager openCLManager, RDXHighLevelDepthSensorSimulator depthSensorSimulator)
    {
-      RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor();
-      rapidPlanarRegionsExtractor.create(openCLManager,
-                                         depthSensorSimulator.getLowLevelSimulator().getImageHeight(),
-                                         depthSensorSimulator.getLowLevelSimulator().getImageWidth(),
-                                         depthSensorSimulator.getLowLevelSimulator().getFocalLengthPixels().get(),
-                                         depthSensorSimulator.getLowLevelSimulator().getFocalLengthPixels().get(),
-                                         depthSensorSimulator.getLowLevelSimulator().getPrincipalOffsetXPixels().get(),
-                                         depthSensorSimulator.getLowLevelSimulator().getPrincipalOffsetYPixels().get());
-      return rapidPlanarRegionsExtractor;
+      return new RapidPlanarRegionsExtractor(openCLManager,
+                                             depthSensorSimulator.getLowLevelSimulator().getImageHeight(),
+                                             depthSensorSimulator.getLowLevelSimulator().getImageWidth(),
+                                             depthSensorSimulator.getLowLevelSimulator().getFocalLengthPixels().get(),
+                                             depthSensorSimulator.getLowLevelSimulator().getFocalLengthPixels().get(),
+                                             depthSensorSimulator.getLowLevelSimulator().getPrincipalOffsetXPixels().get(),
+                                             depthSensorSimulator.getLowLevelSimulator().getPrincipalOffsetYPixels().get());
    }
 }
