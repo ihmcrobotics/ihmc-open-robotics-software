@@ -839,7 +839,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       if (Double.isNaN(transferDuration) || transferDuration <= 0.0)
       {
          // There are no upcoming steps, we are not walking, and this is an overwrite message:
-         if (stepsInQueue == 0 && !isWalking.getBooleanValue() && executionMode == ExecutionMode.OVERRIDE)
+         if (stepsInQueue == 0 && !isWalking.getBooleanValue())
             transferDuration = defaultInitialTransferTime.getDoubleValue();
          else
             transferDuration = defaultTransferTime.getDoubleValue();
