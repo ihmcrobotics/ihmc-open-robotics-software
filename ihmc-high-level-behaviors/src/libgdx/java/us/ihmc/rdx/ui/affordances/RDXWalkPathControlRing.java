@@ -12,6 +12,7 @@ import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -20,7 +21,6 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
-import us.ihmc.rdx.ui.footstepPlanner.RDXFootstepPlanning;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePathControlRingGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -33,6 +33,7 @@ public class RDXWalkPathControlRing
 {
    private final RDXSelectablePathControlRingGizmo footstepPlannerGoalGizmo = new RDXSelectablePathControlRingGizmo();
    private final Notification becomesModifiedNotification = new Notification();
+   private final Notification goalUpdatedNotification = new Notification();
    private RDX3DPanel panel3D;
    private MovingReferenceFrame midFeetZUpFrame;
    private RDXFootstepGraphic leftGoalFootstepGraphic;
@@ -43,16 +44,13 @@ public class RDXWalkPathControlRing
    private final AxisAngle walkFacingDirection = new AxisAngle();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private ImGui3DViewInput latestInput;
-   private RDXFootstepPlanning footstepPlanning;
 
    public void create(RDX3DPanel panel3D,
                       DRCRobotModel robotModel,
                       ROS2SyncedRobotModel syncedRobot,
-                      FootstepPlannerParametersBasics footstepPlannerParameters,
-                      RDXFootstepPlanning footstepPlanning)
+                      FootstepPlannerParametersBasics footstepPlannerParameters)
    {
       this.panel3D = panel3D;
-      this.footstepPlanning = footstepPlanning;
 
       footstepPlannerGoalGizmo.create(panel3D);
       panel3D.addImGuiOverlayAddition(this::renderTooltips);
@@ -128,7 +126,7 @@ public class RDXWalkPathControlRing
       }
       if (footstepPlannerGoalGizmo.getSelected() && footstepPlannerGoalGizmo.getPathControlRingGizmo().getGizmoModifiedByUser().poll())
       {
-         queueFootstepPlan();
+         goalUpdatedNotification.set();
       }
 
       if (footstepPlannerGoalGizmo.getModified() && footstepPlannerGoalGizmo.getSelected() && ImGui.isKeyReleased(ImGuiTools.getDeleteKey()))
@@ -139,11 +137,6 @@ public class RDXWalkPathControlRing
       {
          footstepPlannerGoalGizmo.setSelected(false);
       }
-   }
-
-   private void queueFootstepPlan()
-   {
-      footstepPlanning.queueAsynchronousPlanning(footstepPlannerGoalGizmo.getPathControlRingGizmo().getPose3D());
    }
 
    private void updateStuff()
@@ -182,12 +175,12 @@ public class RDXWalkPathControlRing
    public void becomeModified(boolean selected)
    {
       footstepPlannerGoalGizmo.setSelected(selected);
-      if (!footstepPlannerGoalGizmo.getModified() || isSelected())
+      if (!footstepPlannerGoalGizmo.getModified())
       {
          footstepPlannerGoalGizmo.setModified(true);
          becomesModifiedNotification.set();
          walkFacingDirection.set(Axis3D.Z, 0.0);
-         queueFootstepPlan();
+         goalUpdatedNotification.set();
       }
    }
 
@@ -252,5 +245,15 @@ public class RDXWalkPathControlRing
    public Notification getBecomesModifiedNotification()
    {
       return becomesModifiedNotification;
+   }
+
+   public Notification getGoalUpdatedNotification()
+   {
+      return goalUpdatedNotification;
+   }
+
+   public Pose3DReadOnly getGoalPose()
+   {
+      return footstepPlannerGoalGizmo.getPathControlRingGizmo().getPose3D();
    }
 }
