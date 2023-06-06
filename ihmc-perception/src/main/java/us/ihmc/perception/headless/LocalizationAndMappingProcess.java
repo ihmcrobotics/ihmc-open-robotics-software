@@ -169,6 +169,11 @@ public class LocalizationAndMappingProcess {
    public void updateMapWithNewRegions(FramePlanarRegionsList regions) {
       referenceFramesUpdater.run();
 
+      if (perceptionConfigurationParameters.getShadowFilter())
+      {
+         PerceptionFilterTools.filterShadowRegions(regions, 10.0);
+      }
+
       RigidBodyTransform midFootTransform = referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame();
       planarRegionMap.registerRegions(
             regions.getPlanarRegionsList(),
