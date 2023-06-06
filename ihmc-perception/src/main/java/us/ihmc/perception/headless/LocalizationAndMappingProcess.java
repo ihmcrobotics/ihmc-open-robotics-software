@@ -96,7 +96,7 @@ public class LocalizationAndMappingProcess {
         this.referenceFrames = referenceFrames;
         this.smoothingEnabled = smoothing;
 
-        this.planarRegionMap = new PlanarRegionMap(smoothing);
+        this.planarRegionMap = new PlanarRegionMap(smoothing, "Fast");
         planarRegionMap.setInitialSupportSquareEnabled(perceptionConfigurationParameters.getSupportSquareEnabled());
 
         this.ros2Node = ros2Node;
@@ -203,7 +203,7 @@ public class LocalizationAndMappingProcess {
         latestPlanarRegionsForPublishing.set(null);
 
         planarRegionMap.destroy();
-        planarRegionMap = new PlanarRegionMap(this.smoothingEnabled);
+        planarRegionMap = new PlanarRegionMap(this.smoothingEnabled, "Fast");
         planarRegionMap.setInitialSupportSquareEnabled(perceptionConfigurationParameters.getSupportSquareEnabled());
     }
 
