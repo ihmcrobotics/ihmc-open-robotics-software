@@ -18,6 +18,16 @@ public class World
    private final int gridWidth;
    private final int goalMargin;
 
+   public World(int goalMargin, int gridHeight, int gridWidth)
+   {
+      this.obstacles = new ArrayList<>();
+      this.gridHeight = gridHeight;
+      this.gridWidth = gridWidth;
+      this.goalMargin = goalMargin;
+      this.goal = new Point2D();
+      this.grid = new Mat(gridHeight, gridWidth, opencv_core.CV_8UC1);
+   }
+
    public World(ArrayList<Vector4D32> obstacles, Point2D goal, int goalMargin, int gridHeight, int gridWidth)
    {
       this.obstacles = obstacles;
