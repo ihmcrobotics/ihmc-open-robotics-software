@@ -23,9 +23,10 @@ public class TrackingCollisionShape
 
    public TrackingCollisionShape(ReferenceFrame frame, List<CollisionShape> collisionMesh)
    {
-      for (CollisionShape shape : collisionMesh)
+      for (int index = 0; index < collisionMesh.size(); index++)
       {
-         geometries.add(new TrackingCollisionShapeImpl(frame, shape));
+         CollisionShape shape = collisionMesh.get(index);
+         geometries.add(new TrackingCollisionShapeImpl(frame, shape, frame.getName() + index));
       }
    }
 
@@ -71,9 +72,9 @@ public class TrackingCollisionShape
       private final Shape3DReadOnly shape3D;
       private final BoundingBox3DReadOnly boundingBox;
 
-      private TrackingCollisionShapeImpl(ReferenceFrame frame, CollisionShape shape)
+      private TrackingCollisionShapeImpl(ReferenceFrame frame, CollisionShape shape, String nameSuffix)
       {
-         this.frame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("CollisionFrame", frame, shape.getPose());
+         this.frame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("Collision_" + nameSuffix, frame, shape.getPose());
          this.shape = shape;
          this.shape3D = shape.getOrCreateShape3D();
          boundingBox = shape3D.getBoundingBox();
