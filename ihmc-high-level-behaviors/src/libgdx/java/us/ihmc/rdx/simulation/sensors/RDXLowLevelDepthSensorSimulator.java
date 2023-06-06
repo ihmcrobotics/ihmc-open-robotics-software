@@ -429,16 +429,6 @@ public class RDXLowLevelDepthSensorSimulator
       return imageHeight;
    }
 
-   public CameraIntrinsics getCopyOfCameraParameters()
-   {
-      return new CameraIntrinsics(imageHeight,
-                                  imageWidth,
-                                  focalLengthPixels.get(),
-                                  focalLengthPixels.get(),
-                                  principalOffsetXPixels.get(),
-                                  principalOffsetYPixels.get());
-   }
-
    public int getNumberOfPoints()
    {
       return numberOfPoints;
