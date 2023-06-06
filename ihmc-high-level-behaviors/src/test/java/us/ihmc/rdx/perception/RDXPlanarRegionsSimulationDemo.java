@@ -83,7 +83,8 @@ public class RDXPlanarRegionsSimulationDemo
                                                          steppingL515Simulator.getLowLevelSimulator().getImageHeight(),
                                                          opencv_core.CV_16UC1);
                   bytedecoDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-                  rapidPlanarRegionsExtractor = RDXPlanarRegionsExtractorTools.create(openCLManager, steppingL515Simulator);
+                  rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager,
+                                                                                steppingL515Simulator.getLowLevelSimulator().getCopyOfCameraParameters());
 
                   rapidRegionsUI.create(rapidPlanarRegionsExtractor);
                   baseUI.getImGuiPanelManager().addPanel(rapidRegionsUI.getPanel());
