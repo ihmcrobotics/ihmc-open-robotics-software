@@ -43,7 +43,7 @@ public class RDXFootstepGraphic implements RenderableProvider
 
    public RDXFootstepGraphic(SegmentDependentList<RobotSide, ArrayList<Point2D>> controllerFootGroundContactPoints, RobotSide side)
    {
-      this(controllerFootGroundContactPoints.get(side), FOOT_COLORS.get(side));
+      this(controllerFootGroundContactPoints.get(side), new Color(FOOT_COLORS.get(side)));
    }
 
    public RDXFootstepGraphic(ArrayList<Point2D> controllerFootGroundContactPoints, Color color)
@@ -67,6 +67,7 @@ public class RDXFootstepGraphic implements RenderableProvider
       {
          meshBuilder.addMultiLine(vertices, 0.01, color, true);
       }, "footstepGraphic" + INDEX.getAndIncrement()));
+      LibGDXTools.setOpacity(modelInstance, color.a);
    }
 
    public void setupTooltip(RDX3DPanel panel3D, String text)
@@ -98,9 +99,9 @@ public class RDXFootstepGraphic implements RenderableProvider
          tooltip.setInput(input);
    }
 
-   public void setTransparency(double opacity)
+   public void setOpacity(double opacity)
    {
-      color.a = (float) opacity; // TODO: Add blending mode attribute
+      color.a = (float) opacity;
    }
 
    public void setColor(Color color)
