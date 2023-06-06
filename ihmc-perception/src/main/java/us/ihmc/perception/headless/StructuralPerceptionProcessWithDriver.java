@@ -63,6 +63,7 @@ public class StructuralPerceptionProcessWithDriver
    private int depthHeight;
    private int numberOfPointsPerFullScan;
    private OusterDepthExtractionKernel depthExtractionKernel;
+   private RapidPlanarRegionsExtractor rapidRegionsExtractor;
    private OpenCLManager openCLManager;
    private _cl_program openCLProgram;
    private IntPointer compressionParameters;
@@ -75,8 +76,6 @@ public class StructuralPerceptionProcessWithDriver
    private ROS2Topic<ImageMessage> depthTopic;
    private ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic;
    private ROS2StoredPropertySetGroup ros2PropertySetGroup;
-
-   private final RapidPlanarRegionsExtractor rapidRegionsExtractor;
 
    public StructuralPerceptionProcessWithDriver(ROS2Topic<ImageMessage> depthTopic,
                                                 ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic,
@@ -97,8 +96,6 @@ public class StructuralPerceptionProcessWithDriver
       ros2DepthImagePublisher = ROS2Tools.createPublisher(realtimeROS2Node, depthTopic, ROS2QosProfile.BEST_EFFORT());
       LogTools.info("Spinning Realtime ROS 2 node");
       realtimeROS2Node.spin();
-
-      rapidRegionsExtractor = new RapidPlanarRegionsExtractor();
 
       extractCompressAndPublishThread = MissingThreadTools.newSingleThreadExecutor("CopyAndPublish", true, 1);
       // Using incoming Ouster UDP Netty events as the thread scheduler. Only called on last datagram of frame.
@@ -132,7 +129,7 @@ public class StructuralPerceptionProcessWithDriver
          pngImageBuffer = NativeMemoryTools.allocate(depthWidth * depthHeight * 2);
          pngImageBytePointer = new BytePointer(pngImageBuffer);
 
-         rapidRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth);
+         rapidRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager, openCLProgram, depthHeight, depthWidth);
          rapidRegionsExtractor.setPatchSizeChanged(false);
 
          ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
