@@ -224,7 +224,7 @@ public class RDXLocomotionManager
       // This ensures that when the spacebar key is pressed it executes the correct action.
       boolean pauseAvailable = controllerStatusTracker.isWalking();
       boolean continueAvailable = !pauseAvailable && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0;
-      boolean walkAvailable = !continueAvailable && interactableFootstepPlan.getNumberOfFootsteps() > 0;
+      boolean walkAvailable = true;//!continueAvailable && interactableFootstepPlan.getNumberOfFootsteps() > 0;
 
       areFootstepsAdjustableCheckbox.renderImGuiWidget();
       planSwingTrajectoriesCheckbox.renderImGuiWidget();

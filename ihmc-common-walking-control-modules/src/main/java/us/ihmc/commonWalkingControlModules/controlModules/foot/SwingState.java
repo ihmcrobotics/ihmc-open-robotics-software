@@ -856,6 +856,7 @@ public class SwingState extends AbstractFootControlState
          return false;
 
       double timeToSwitchToLoadBearing = swingDuration.getValue() * (1.0 - fractionOfSwingToSwitchToLoaded.getValue());
-      return currentTimeWithSwingSpeedUp.getDoubleValue() > timeToSwitchToLoadBearing;
+      double time = currentTimeWithSwingSpeedUp.isNaN() ? currentTime.getValue() : currentTimeWithSwingSpeedUp.getDoubleValue();
+      return time > timeToSwitchToLoadBearing;
    }
 }
