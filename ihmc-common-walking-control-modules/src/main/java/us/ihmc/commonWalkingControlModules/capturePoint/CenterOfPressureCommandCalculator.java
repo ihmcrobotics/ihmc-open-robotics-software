@@ -2,8 +2,10 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
@@ -43,7 +45,8 @@ public class CenterOfPressureCommandCalculator
    }
 
    public void computeCenterOfPressureCommand(FramePoint2DReadOnly desiredCoP,
-                                              SideDependentList<PlaneContactStateCommand> contactStateCommands)
+                                              SideDependentList<PlaneContactStateCommand> contactStateCommands,
+                                              SideDependentList<? extends FrameConvexPolygon2DReadOnly> footSupportPolygonsInSoleFrame)
    {
       boolean leftInContact = contactStateCommands.get(RobotSide.LEFT).getNumberOfContactPoints() > 0;
       boolean rightInContact = contactStateCommands.get(RobotSide.RIGHT).getNumberOfContactPoints() > 0;
@@ -68,7 +71,7 @@ public class CenterOfPressureCommandCalculator
          {
             desiredCoPFootFrame.setIncludingFrame(desiredCoP);
             desiredCoPFootFrame.changeFrameAndProjectToXYPlane(contactableFeet.get(robotSide).getSoleFrame());
-            if (robotSide.negateIfRightSide(desiredCoPFootFrame.getY()) > 0.0)
+            if (robotSide.negateIfRightSide(desiredCoPFootFrame.getY()) > 0.0 && footSupportPolygonsInSoleFrame.get(robotSide).isPointInside(desiredCoPFootFrame))
             {
                // it is to the outside of the foot, so add the command
                centerOfPressureCommand.setContactingRigidBody(contactableFeet.get(robotSide).getRigidBody());
