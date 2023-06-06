@@ -18,7 +18,7 @@ cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release -DBoost_USE_S
 cmake --build . --config Release || exit /b 1
 cmake --install . || exit /b 1
 
-xcopy /Y .\bin\slam-wrapper.dll ..\resources\slamWrapper\windows-x86_64
+copy /Y .\bin\slam-wrapper.dll ..\resources\slamWrapper\windows-x86_64
 
 :: Use the latest release on GitHub
 :: https://github.com/bytedeco/javacpp/releases
@@ -26,7 +26,7 @@ set JAVACPP_VERSION=1.5.8
 
 :: Most closely resembles "cp -r" on *nix
 mkdir .\java\us\ihmc\perception\slamWrapper\presets
-xcopy /Y ..\java\us\ihmc\perception\slamWrapper\presets\SlamWrapperInfoMapper.java .\java\us\ihmc\perception\slamWrapper\presets
+copy /Y ..\java\us\ihmc\perception\slamWrapper\presets\SlamWrapperInfoMapper.java .\java\us\ihmc\perception\slamWrapper\presets
 
 :: Move into the java directory; javacpp.jar needs to reside here
 cd java
@@ -40,7 +40,7 @@ java -jar javacpp.jar us\ihmc\perception\slamWrapper\presets\SlamWrapperInfoMapp
 :: This will generate the jni shared library and place it into the classpath resources dir
 java -jar javacpp.jar -Dplatform.compiler.cpp17=/std:c++17 "us\ihmc\perception\slamWrapper\**.java" -d . || exit /b 1
 
-xcopy /Y jniSlamWrapper.dll ..\resources\slamWrapper\windows-x86_64
+copy /Y .\jniSlamWrapper.dll ..\..\resources\slamWrapper\windows-x86_64
 
 :: Clean old generated Java code
 rd /s /q ..\..\src\main\generated-java
@@ -51,5 +51,8 @@ robocopy us ..\generated-java\us /e /xf *.class* SlamWrapperInfoMapper.java
 :: I couldn't get robocopy to exclude a directory by name like this
 :: So, just delete it afterwards
 rd /s /q ..\generated-java\us\ihmc\perception\slamWrapper\presets
+
+copy /Y "C:\Program Files\GTSAM\bin\gtsam.dll" ..\..\resources\slamWrapper\windows-x86_64
+copy /Y "C:\Program Files\GTSAM\bin\metis-gtsam.dll" ..\..\resources\slamWrapper\windows-x86_64
 
 pause
