@@ -71,7 +71,7 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
       {
          footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, DEFINITION.getName()));
       });
-      footstepPlanGraphic.setTransparency(0.5);
+      footstepPlanGraphic.setOpacity(0.5);
 //      distanceToStairs = helper.subscribeViaReference(DistanceToStairs, Double.NaN);
 //      helper.subscribeViaCallback(TraverseStairsBehaviorAPI.COMPLETED, completedStopwatch::reset);
 //      helper.subscribeViaCallback(State, state -> currentState = state);
