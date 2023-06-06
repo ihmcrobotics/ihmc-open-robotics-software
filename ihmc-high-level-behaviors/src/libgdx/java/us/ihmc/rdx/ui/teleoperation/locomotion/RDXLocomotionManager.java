@@ -223,7 +223,8 @@ public class RDXLocomotionManager
 
       footstepsSentToControllerGraphic.update();
 
-      boolean isCurrentlyPlacingFootstep = getManualFootstepPlacement().isPlacingFootstep() || ballAndArrowMidFeetPosePlacement.isPlacingGoal();
+      boolean isCurrentlyPlacingFootstep =
+            getManualFootstepPlacement().isPlacingFootstep() || ballAndArrowMidFeetPosePlacement.isPlacingGoal() || walkPathControlRing.isSelected();
       if (isPlacingFootstep != isCurrentlyPlacingFootstep)
          baseUI.setModelSceneMouseCollisionEnabled(isCurrentlyPlacingFootstep);
       isPlacingFootstep = isCurrentlyPlacingFootstep;
