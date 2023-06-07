@@ -51,6 +51,5 @@ robocopy us ..\generated-java\us /e /xf *.class* SlamWrapperInfoMapper.java
 rd /s /q ..\generated-java\us\ihmc\perception\slamWrapper\presets
 
 copy /Y "C:\Program Files\GTSAM\bin\gtsam.dll" ..\..\resources\slamWrapper\windows-x86_64
-copy /Y "C:\Program Files\GTSAM\bin\metis-gtsam.dll" ..\..\resources\slamWrapper\windows-x86_64
 
 pause
