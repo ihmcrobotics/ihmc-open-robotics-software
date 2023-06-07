@@ -76,12 +76,14 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    {
       actionData.changeParentFrame(parentFrame);
       actionData.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(transformToParent));
+      update();
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
    {
       actionData.changeParentFrame(ReferenceFrame.getWorldFrame());
-      actionData.setTransformToParent(transformToParent -> referenceFrame.getTransformToWorldFrame());
+      actionData.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(referenceFrame.getTransformToWorldFrame()));
+      update();
    }
 
    @Override

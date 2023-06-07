@@ -628,7 +628,7 @@ public class RDXBehaviorActionSequenceEditor
             }
             else // set to current robot's foot pose
             {
-               footstepAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getHandFrame(side));
+               footstepAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
             }
             newAction = footstepAction;
          }
@@ -647,7 +647,7 @@ public class RDXBehaviorActionSequenceEditor
    private RDXFootstepAction findNextPreviousFootstepAction()
    {
       RDXFootstepAction previousAction = null;
-      for (int i = 0; i < executionNextIndexStatus; i++)
+      for (int i = 0; i < executionNextIndexStatus - 1; i++)
          if (actionSequence.get(i) instanceof RDXFootstepAction)
             previousAction = (RDXFootstepAction) actionSequence.get(i);
       return previousAction;
