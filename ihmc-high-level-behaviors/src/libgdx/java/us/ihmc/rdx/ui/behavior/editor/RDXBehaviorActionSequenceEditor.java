@@ -669,7 +669,11 @@ public class RDXBehaviorActionSequenceEditor
 
    private void insertNewAction(RDXBehaviorAction action)
    {
-      actionSequence.add(executionNextIndexStatus, action);
+      if (executionNextIndexStatus == actionSequence.size()) // No actions left to execute
+         actionSequence.add(action);
+      else
+         actionSequence.add(executionNextIndexStatus + 1, action);
+
       for (int i = 0; i < actionSequence.size(); i++)
       {
          // When loading, we want to deselect all the actions, otherwise the last one ends up being selected.
