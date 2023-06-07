@@ -519,7 +519,7 @@ public class RDXBehaviorActionSequenceEditor
    private RDXFootstepAction findNextPreviousFootstepAction()
    {
       RDXFootstepAction previousAction = null;
-      for (int i = 0; i < executionNextIndexStatus - 1; i++)
+      for (int i = 0; i < executionNextIndexStatus + 1 && i < actionSequence.size(); i++)
          if (actionSequence.get(i) instanceof RDXFootstepAction)
             previousAction = (RDXFootstepAction) actionSequence.get(i);
       return previousAction;
@@ -528,7 +528,7 @@ public class RDXBehaviorActionSequenceEditor
    private RDXHandPoseAction findNextPreviousHandPoseAction(RobotSide side)
    {
       RDXHandPoseAction previousAction = null;
-      for (int i = 0; i < executionNextIndexStatus - 1; i++)
+      for (int i = 0; i < executionNextIndexStatus + 1 && i < actionSequence.size(); i++)
       {
          if (actionSequence.get(i) instanceof RDXHandPoseAction
              && ((RDXHandPoseAction) actionSequence.get(i)).getActionData().getSide() == side)
@@ -541,17 +541,15 @@ public class RDXBehaviorActionSequenceEditor
 
    private void insertNewAction(RDXBehaviorAction action)
    {
-      if (executionNextIndexStatus == actionSequence.size()) // No actions left to execute
-         actionSequence.add(action);
-      else
-         actionSequence.add(executionNextIndexStatus + 1, action);
+      int insertionIndex = executionNextIndexStatus == actionSequence.size() ? executionNextIndexStatus : executionNextIndexStatus + 1;
+      actionSequence.add(insertionIndex, action);
 
       for (int i = 0; i < actionSequence.size(); i++)
       {
          // When loading, we want to deselect all the actions, otherwise the last one ends up being selected.
-         actionSequence.get(i).getSelected().set(!loading && i == executionNextIndexStatus);
+         actionSequence.get(i).getSelected().set(!loading && i == insertionIndex);
       }
-      executionNextIndexStatus++;
+      commandNextActionIndex(executionNextIndexStatus + 1);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
