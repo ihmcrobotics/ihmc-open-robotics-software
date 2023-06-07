@@ -187,12 +187,12 @@ public class LocalizationAndMappingProcess {
                                                        midFootTransform.getTranslationX() + 2.0f,
                                                        midFootTransform.getTranslationY() + 2.0f,
                                                        2.0f);
-         PerceptionFilterTools.applyBoundingBoxFilter(resultMap, boundingBox);
+         PerceptionFilterTools.filterByBoundingBox(resultMap, boundingBox);
       }
 
       if (perceptionConfigurationParameters.getConcaveHullFilters())
       {
-         PerceptionFilterTools.applyConcaveHullFilters(resultMap, polygonizerParameters);
+         PerceptionFilterTools.applyConcaveHullReduction(resultMap, polygonizerParameters);
       }
 
       latestPlanarRegionsForPublishing.set(resultMap);
@@ -205,6 +205,7 @@ public class LocalizationAndMappingProcess {
         planarRegionMap.destroy();
         planarRegionMap = new PlanarRegionMap(this.smoothingEnabled, "Fast");
         planarRegionMap.setInitialSupportSquareEnabled(perceptionConfigurationParameters.getSupportSquareEnabled());
+        enableLiveMode = true;
     }
 
     public void destroy() {
