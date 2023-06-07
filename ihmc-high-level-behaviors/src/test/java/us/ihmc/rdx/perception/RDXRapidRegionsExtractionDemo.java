@@ -47,7 +47,6 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230517_114430_PerceptionLog_900_ms.hdf5").toString();
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
    private final TypedNotification<PlanarRegionsList> planarRegionsListToRenderNotification = new TypedNotification<>();
-   private final RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor();
    private final RDXLineGraphic rootJointGraphic = new RDXLineGraphic(0.02f, Color.RED);
    private final RDXLineGraphic mocapGraphic = new RDXLineGraphic(0.02f, Color.YELLOW);
    private final RDXRapidRegionsUI rapidRegionsUIPanel = new RDXRapidRegionsUI();
@@ -68,6 +67,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private String sensorTopicName;
 
    private PerceptionDataLoader perceptionDataLoader;
+   private RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor;
    private OpenCLManager openCLManager;
    private _cl_program openCLProgram;
 
@@ -140,7 +140,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
 
             pointCloudRenderer.create(depthHeight * depthWidth);
-            rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth);
+            rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager, openCLProgram, depthHeight, depthWidth);
             rapidPlanarRegionsExtractor.getDebugger().setEnabled(true);
             rapidPlanarRegionsExtractor.getDebugger().setShowPointCloud(false);
 
@@ -166,7 +166,15 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 //            perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
 
             String version = simulation ? "Simulation" : "";
-            rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth, 654.29, 654.29, 651.14, 361.89, version);
+            rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager,
+                                                                          openCLProgram,
+                                                                          depthHeight,
+                                                                          depthWidth,
+                                                                          654.29,
+                                                                          654.29,
+                                                                          651.14,
+                                                                          361.89,
+                                                                          version);
             rapidPlanarRegionsExtractor.getDebugger().setEnabled(true);
 
             pointCloudRenderer.create(depthHeight * depthWidth);
