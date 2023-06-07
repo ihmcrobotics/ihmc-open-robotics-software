@@ -1,4 +1,4 @@
-# Current version: 0.6
+# Current version: 0.5
 FROM ubuntu:20.04
 
 ARG DEBIAN_FRONTEND=noninteractive
