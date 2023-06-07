@@ -31,7 +31,6 @@ public class SlamWrapperNativeLibrary implements NativeLibraryDescription
       {
          case WIN64:
             return NativeLibraryWithDependencies.fromFilename("jniSlamWrapper.dll",
-                                                              "metis-gtsam.dll",
                                                               "gtsam.dll",
                                                               "slam-wrapper.dll");
          case LINUX64:
