@@ -466,11 +466,12 @@ public class RDXPose3DGizmo implements RenderableProvider
 
    private void updateMaterialHighlighting()
    {
-      boolean prior = isGizmoHovered || isBeingManipulated;
+      // closestCollisionSelection can be null if the the 3D panel is zoomed in or out without the mouse hovering
+      boolean highlightingPrior = (isGizmoHovered || isBeingManipulated) && closestCollisionSelection != null;
       // could only do this when selection changed
       for (Axis3D axis : Axis3D.values)
       {
-         if (prior && closestCollisionSelection.isAngular() && closestCollisionSelection.toAxis3D() == axis)
+         if (highlightingPrior && closestCollisionSelection.isAngular() && closestCollisionSelection.toAxis3D() == axis)
          {
             torusModels[axis.ordinal()].setMaterial(highlightedMaterials[axis.ordinal()]);
          }
@@ -479,7 +480,7 @@ public class RDXPose3DGizmo implements RenderableProvider
             torusModels[axis.ordinal()].setMaterial(normalMaterials[axis.ordinal()]);
          }
 
-         if (prior && closestCollisionSelection.isLinear() && closestCollisionSelection.toAxis3D() == axis)
+         if (highlightingPrior && closestCollisionSelection.isLinear() && closestCollisionSelection.toAxis3D() == axis)
          {
             arrowModels[axis.ordinal()].setMaterial(highlightedMaterials[axis.ordinal()]);
          }
