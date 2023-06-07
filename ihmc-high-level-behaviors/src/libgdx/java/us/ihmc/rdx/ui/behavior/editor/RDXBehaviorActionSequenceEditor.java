@@ -131,7 +131,7 @@ public class RDXBehaviorActionSequenceEditor
          JSONTools.forEachArrayElement(jsonNode, "actions", actionNode ->
          {
             String actionTypeName = actionNode.get("type").asText();
-            RDXBehaviorAction action = createBlankAction(actionTypeName);
+            RDXBehaviorAction action = RDXActionSequenceTools.createBlankAction(actionTypeName, robotModel, syncedRobot, panel3D, referenceFrameLibrary);
             if (action != null)
             {
                action.getActionData().loadFromFile(actionNode);
@@ -152,52 +152,6 @@ public class RDXBehaviorActionSequenceEditor
       }
 
       return false;
-   }
-
-   private RDXBehaviorAction createBlankAction(String actionType)
-   {
-      boolean robotHasArms = robotModel.getRobotVersion().hasArms();
-      switch (actionType)
-      {
-         case "RDXArmJointAnglesAction" ->
-         {
-            return robotHasArms ? new RDXArmJointAnglesAction() : null;
-         }
-         case "RDXChestOrientationAction" ->
-         {
-            return new RDXChestOrientationAction();
-         }
-         case "RDXFootstepAction" ->
-         {
-            return newFootstepAction();
-         }
-         case "RDXHandConfigurationAction" ->
-         {
-            return robotHasArms ? new RDXHandConfigurationAction() : null;
-         }
-         case "RDXHandPoseAction" ->
-         {
-            return robotHasArms ? newHandPoseAction() : null;
-         }
-         case "RDXHandWrenchAction" ->
-         {
-            return robotHasArms ? new RDXHandWrenchAction() : null;
-         }
-         case "RDXPelvisHeightAction" ->
-         {
-            return new RDXPelvisHeightAction();
-         }
-         case "RDXWaitDurationAction" ->
-         {
-            return new RDXWaitDurationAction();
-         }
-         case "RDXWalkAction" ->
-         {
-            return newWalkAction();
-         }
-      };
-
-      return null;
    }
 
    private void commandNextActionIndex(int nextActionIndex)
@@ -556,7 +510,7 @@ public class RDXBehaviorActionSequenceEditor
       RDXBehaviorAction newAction = null;
       if (ImGui.button(labels.get("Add Walk")))
       {
-         newAction = newWalkAction();
+         newAction = new RDXWalkAction(panel3D, robotModel, referenceFrameLibrary);
       }
       ImGui.text("Add Hand Pose:");
       ImGui.sameLine();
@@ -564,7 +518,7 @@ public class RDXBehaviorActionSequenceEditor
       {
          if (ImGui.button(labels.get(side.getPascalCaseName(), "HandPose")))
          {
-            RDXHandPoseAction handPoseAction = newHandPoseAction();
+            RDXHandPoseAction handPoseAction = new RDXHandPoseAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), referenceFrameLibrary);
             // Set the new action to where the last one was for faster authoring
             handPoseAction.setSide(side);
             RDXHandPoseAction nextPreviousHandPoseAction = findNextPreviousHandPoseAction(side);
@@ -617,7 +571,7 @@ public class RDXBehaviorActionSequenceEditor
       {
          if (ImGui.button(labels.get(side.getPascalCaseName(), 1)))
          {
-            RDXFootstepAction footstepAction = newFootstepAction();
+            RDXFootstepAction footstepAction = new RDXFootstepAction(panel3D, robotModel, syncedRobot, referenceFrameLibrary);
             // Set the new action to where the last one was for faster authoring
             footstepAction.setSide(side);
             RDXFootstepAction nextPreviousFootstepAction = findNextPreviousFootstepAction();
@@ -680,21 +634,6 @@ public class RDXBehaviorActionSequenceEditor
          actionSequence.get(i).getSelected().set(!loading && i == executionNextIndexStatus);
       }
       executionNextIndexStatus++;
-   }
-
-   private RDXFootstepAction newFootstepAction()
-   {
-      return new RDXFootstepAction(panel3D, robotModel, syncedRobot, referenceFrameLibrary);
-   }
-
-   private RDXWalkAction newWalkAction()
-   {
-      return new RDXWalkAction(panel3D, robotModel, referenceFrameLibrary);
-   }
-
-   private RDXHandPoseAction newHandPoseAction()
-   {
-      return new RDXHandPoseAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), referenceFrameLibrary);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
