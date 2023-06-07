@@ -165,6 +165,7 @@ public class AStarFootstepPlanner
          snapper.setFlatGroundHeight(flatGroundHeight);
       }
 
+      snapper.clearSnapData();
       plannerEnvironmentHandler.setPrimaryPlanarRegions(planarRegionsListForStepping);
       plannerEnvironmentHandler.setFallbackHeightMap(heightMapData);
 

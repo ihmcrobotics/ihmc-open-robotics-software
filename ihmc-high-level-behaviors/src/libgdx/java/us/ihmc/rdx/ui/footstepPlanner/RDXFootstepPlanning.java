@@ -58,6 +58,11 @@ public class RDXFootstepPlanning
    private final FramePose3D startPose = new FramePose3D();
 
    private final RDXLocomotionParameters locomotionParameters;
+
+   public enum StartStanceSide
+   {LEFT, RIGHT, AUTO}
+
+   private StartStanceSide startStanceSide;
    /**
     * We create this field so that we can terminate a running plan via
     * a custom termination condition so we don't have to wait
@@ -143,7 +148,13 @@ public class RDXFootstepPlanning
          FramePose3DReadOnly soleFramePose = syncedRobot.getFramePoseReadOnly(referenceFrames -> referenceFrames.getSoleFrame(side));
          soleFramePose.get(pose3D);
       });
-      setStanceSideToClosestToGoal(footstepPlannerRequest, goalPose);
+
+      if (startStanceSide == StartStanceSide.AUTO)
+         footstepPlannerRequest.setRequestedInitialStanceSide(getStanceSideToClosestToGoal(footstepPlannerRequest, goalPose));
+      else if (startStanceSide == StartStanceSide.LEFT)
+         footstepPlannerRequest.setRequestedInitialStanceSide(RobotSide.LEFT);
+      else
+         footstepPlannerRequest.setRequestedInitialStanceSide(RobotSide.RIGHT);
 
       boolean assumeFlatGround = true;
       if (!locomotionParameters.getAssumeFlatGround())
@@ -190,6 +201,7 @@ public class RDXFootstepPlanning
 
       // Deep copy because we are handing this off to another thread
       FootstepPlannerOutput output = new FootstepPlannerOutput(footstepPlanner.getOutput());
+
       LogTools.info("Footstep planner completed with body path {}, footstep planner {}, {} step(s)",
                     output.getBodyPathPlanningResult(),
                     output.getFootstepPlanningResult(),
@@ -225,20 +237,17 @@ public class RDXFootstepPlanning
       }
    }
 
-   private void setStanceSideToClosestToGoal(FootstepPlannerRequest footstepPlannerRequest, Pose3DReadOnly goalPose)
+   private RobotSide getStanceSideToClosestToGoal(FootstepPlannerRequest request, Pose3DReadOnly goalPose)
    {
-      RobotSide stanceSide;
-      if (footstepPlannerRequest.getStartFootPoses().get(RobotSide.LEFT ).getPosition().distance(goalPose.getPosition())
-       <= footstepPlannerRequest.getStartFootPoses().get(RobotSide.RIGHT).getPosition().distance(goalPose.getPosition()))
+      if (request.getStartFootPoses().get(RobotSide.LEFT ).getPosition().distance(goalPose.getPosition())
+          <= request.getStartFootPoses().get(RobotSide.RIGHT).getPosition().distance(goalPose.getPosition()))
       {
-         stanceSide = RobotSide.LEFT;
+         return RobotSide.LEFT;
       }
       else
       {
-         stanceSide = RobotSide.RIGHT;
+         return RobotSide.RIGHT;
       }
-
-      footstepPlannerRequest.setRequestedInitialStanceSide(stanceSide);
    }
 
    public void setPlanarRegionsListMessage(PlanarRegionsListMessage planarRegionsListMessage)
@@ -269,5 +278,10 @@ public class RDXFootstepPlanning
    public void destroy()
    {
       executor.destroy();
+   }
+
+   public void setStartStanceSide(StartStanceSide startStanceSide)
+   {
+      this.startStanceSide = startStanceSide;
    }
 }
