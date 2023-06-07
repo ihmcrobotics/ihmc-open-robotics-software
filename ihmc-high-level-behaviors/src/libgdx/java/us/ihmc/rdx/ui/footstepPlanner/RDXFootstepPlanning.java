@@ -61,6 +61,11 @@ public class RDXFootstepPlanning
 
    private final AtomicBoolean hasNewPlanAvailable = new AtomicBoolean(false);
 
+   public enum StartStanceSide
+   {LEFT, RIGHT, AUTO}
+
+   private StartStanceSide startStanceSide;
+
    public RDXFootstepPlanning(DRCRobotModel robotModel, RDXLocomotionParameters locomotionParameters, ROS2SyncedRobotModel syncedRobot)
    {
       this.locomotionParameters = locomotionParameters;
@@ -88,20 +93,17 @@ public class RDXFootstepPlanning
       request.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), goalPose);
    }
 
-   private void setStanceSideToClosestToGoal(Pose3DReadOnly goalPose)
+   private RobotSide getStanceSideToClosestToGoal(Pose3DReadOnly goalPose)
    {
-      RobotSide stanceSide;
       if (request.getStartFootPoses().get(RobotSide.LEFT ).getPosition().distance(goalPose.getPosition())
           <= request.getStartFootPoses().get(RobotSide.RIGHT).getPosition().distance(goalPose.getPosition()))
       {
-         stanceSide = RobotSide.LEFT;
+         return RobotSide.LEFT;
       }
       else
       {
-         stanceSide = RobotSide.RIGHT;
+         return RobotSide.RIGHT;
       }
-
-      request.setRequestedInitialStanceSide(stanceSide);
    }
    
    private void plan()
@@ -140,7 +142,13 @@ public class RDXFootstepPlanning
          FramePose3DReadOnly soleFramePose = syncedRobot.getFramePoseReadOnly(referenceFrames -> referenceFrames.getSoleFrame(side));
          soleFramePose.get(pose3D);
       });
-      setStanceSideToClosestToGoal(goalPose);
+      if (startStanceSide == StartStanceSide.AUTO)
+         request.setRequestedInitialStanceSide(getStanceSideToClosestToGoal(goalPose));
+      else if (startStanceSide == StartStanceSide.LEFT)
+         request.setRequestedInitialStanceSide(RobotSide.LEFT);
+      else
+         request.setRequestedInitialStanceSide(RobotSide.RIGHT);
+
 
       boolean assumeFlatGround = true;
       if (heightMapMessage != null)
@@ -150,7 +158,7 @@ public class RDXFootstepPlanning
       }
       if (planarRegionsList != null)
       {
-         request.setPlanarRegionsList(planarRegionsList);
+         request.setPlanarRegionsList(planarRegionsList.copy());
          assumeFlatGround = false;
       }
       if (fallbackPlanarRegionsListMessage != null)
@@ -167,11 +175,11 @@ public class RDXFootstepPlanning
       //      request.setSwingPlannerType(swingPlannerType);
       //      request.setSnapGoalSteps(true);
 
-      FootstepPlannerOutput output = footstepPlanner.getOutput();
 
       LogTools.info("Stance side: {}", request.getRequestedInitialStanceSide().name());
       LogTools.info("Planning footsteps...");
-      footstepPlanner.handleRequest(request);
+      FootstepPlannerOutput output = footstepPlanner.handleRequest(request);
+
       LogTools.info("Footstep planner completed with body path {}, footstep planner {}, {} step(s)",
                     output.getBodyPathPlanningResult(),
                     output.getFootstepPlanningResult(),
@@ -277,5 +285,10 @@ public class RDXFootstepPlanning
    public Notification getPlannedNotification()
    {
       return plannedNotification;
+   }
+
+   public void setStartStanceSide(StartStanceSide startStanceSide)
+   {
+      this.startStanceSide = startStanceSide;
    }
 }

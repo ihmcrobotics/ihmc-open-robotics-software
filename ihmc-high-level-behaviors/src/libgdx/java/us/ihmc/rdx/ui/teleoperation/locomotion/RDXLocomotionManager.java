@@ -79,6 +79,8 @@ public class RDXLocomotionManager
    private final AbortWalkingMessage abortWalkingMessage = new AbortWalkingMessage();
    private final ControllerStatusTracker controllerStatusTracker;
 
+   private RDXFootstepPlanning.StartStanceSide startStanceSide = RDXFootstepPlanning.StartStanceSide.AUTO;
+
    public RDXLocomotionManager(DRCRobotModel robotModel,
                                CommunicationHelper communicationHelper,
                                ROS2SyncedRobotModel syncedRobot,
@@ -121,9 +123,9 @@ public class RDXLocomotionManager
 
    private PlanarRegionsList getPlanarRegionListInWorld(FramePlanarRegionsListMessage message)
    {
-      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(message.getPlanarRegions());
-      RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform(message.getSensorOrientation(), message.getSensorPosition());
-      planarRegionsList.applyTransform(sensorToWorldTransform);
+      FramePlanarRegionsList framePlanarRegionsList = PlanarRegionMessageConverter.convertToFramePlanarRegionsList(message);
+      PlanarRegionsList planarRegionsList = framePlanarRegionsList.getPlanarRegionsList().copy();
+      planarRegionsList.applyTransform(framePlanarRegionsList.getSensorToWorldFrameTransform());
 
       return planarRegionsList;
    }
@@ -220,6 +222,8 @@ public class RDXLocomotionManager
       bodyPathPlanGraphic.update();
       interactableFootstepPlan.update();
 
+      footstepPlanning.setStartStanceSide(startStanceSide);
+
       if (interactableFootstepPlan.getNumberOfFootsteps() > 0)
       {
          footstepPlanning.setReadyToWalk(false);
@@ -310,6 +314,23 @@ public class RDXLocomotionManager
       }
 
       manualFootstepPlacement.renderImGuiWidgets();
+
+      ImGui.text("First stance side for planner:");
+
+      if (ImGui.radioButton(labels.get("Auto"), startStanceSide == RDXFootstepPlanning.StartStanceSide.AUTO))
+      {
+         startStanceSide = RDXFootstepPlanning.StartStanceSide.AUTO;
+      }
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Left"), startStanceSide == RDXFootstepPlanning.StartStanceSide.LEFT))
+      {
+         startStanceSide = RDXFootstepPlanning.StartStanceSide.LEFT;
+      }
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Right"), startStanceSide == RDXFootstepPlanning.StartStanceSide.RIGHT))
+      {
+         startStanceSide = RDXFootstepPlanning.StartStanceSide.RIGHT;
+      }
 
       if (ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton())
          legControlMode = RDXLegControlMode.PATH_CONTROL_RING;

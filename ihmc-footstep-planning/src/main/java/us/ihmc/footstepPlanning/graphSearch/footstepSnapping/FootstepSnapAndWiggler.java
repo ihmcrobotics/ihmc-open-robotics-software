@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
 import us.ihmc.commonWalkingControlModules.polygonWiggling.*;
-import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -21,7 +20,6 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -89,6 +87,11 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    public void initialize()
    {
       updateWiggleParameters(wiggleParameters, parameters);
+   }
+
+   public void clearSnapData()
+   {
+      snapDataHolder.clear();
    }
 
    public FootstepSnapData snapFootstep(DiscreteFootstep footstep)
