@@ -53,6 +53,7 @@ public class CapturabilityBasedPlanarRegionDecider implements SCS2YoGraphicHolde
    private final YoBoolean constraintRegionChanged;
    private final YoBoolean hasConstraintRegion;
    private final YoInteger constraintRegionId;
+   private final YoInteger numberOfConstraintRegions;
    private final YoBoolean stepIsFarEnoughInsideToIgnoreConstraint;
    private final YoDouble captureAreaWithNextBestRegion;
    private final YoDouble captureAreaWithCurrentRegion;
@@ -115,6 +116,7 @@ public class CapturabilityBasedPlanarRegionDecider implements SCS2YoGraphicHolde
       constraintRegionChanged = new YoBoolean("constraintRegionChanged", registry);
       hasConstraintRegion = new YoBoolean("hasConstraintRegion", registry);
       constraintRegionId = new YoInteger("constraintRegionId", registry);
+      numberOfConstraintRegions = new YoInteger("numberOfConstraintRegions", registry);
       stepIsFarEnoughInsideToIgnoreConstraint = new YoBoolean("stepIsFarEnoughInsideToIgnoreConstraint", registry);
       captureAreaWithCurrentRegion = new YoDouble("captureAreaWithCurrentRegion", registry);
       captureAreaWithNextBestRegion = new YoDouble("captureAreaWithNextBestRegion", registry);
@@ -166,6 +168,10 @@ public class CapturabilityBasedPlanarRegionDecider implements SCS2YoGraphicHolde
       stepConstraintRegions.clear();
       captureAreaWithCurrentRegion.set(0.0);
       stepConstraintPolygon.clearAndUpdate();
+
+      constraintRegionId.set(-1);
+      hasConstraintRegion.set(false);
+      numberOfConstraintRegions.set(-1);
    }
 
    public void setConstraintRegions(List<StepConstraintRegion> constraintRegions)
@@ -173,6 +179,7 @@ public class CapturabilityBasedPlanarRegionDecider implements SCS2YoGraphicHolde
       reset();
       for (int i = 0; i < constraintRegions.size(); i++)
          stepConstraintRegions.add(constraintRegions.get(i));
+      numberOfConstraintRegions.set(stepConstraintRegions.size());
    }
 
    public void setConstraintRegionChanged(boolean constraintRegionChanged)
