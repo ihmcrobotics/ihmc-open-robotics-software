@@ -169,7 +169,7 @@ public class RDXBehaviorActionSequenceEditor
          }
          case "RDXFootstepAction" ->
          {
-            return newFootstepAction(null);
+            return newFootstepAction();
          }
          case "RDXHandConfigurationAction" ->
          {
@@ -617,9 +617,19 @@ public class RDXBehaviorActionSequenceEditor
       {
          if (ImGui.button(labels.get(side.getPascalCaseName(), 1)))
          {
+            RDXFootstepAction footstepAction = newFootstepAction();
             // Set the new action to where the last one was for faster authoring
-            RDXFootstepAction footstepAction = newFootstepAction(findNextPreviousFootstepAction());
-            footstepAction.setSide(side, true);
+            footstepAction.setSide(side);
+            RDXFootstepAction nextPreviousFootstepAction = findNextPreviousFootstepAction();
+            if (nextPreviousFootstepAction != null)
+            {
+               footstepAction.setIncludingFrame(nextPreviousFootstepAction.getReferenceFrame().getParent(),
+                                                nextPreviousFootstepAction.getReferenceFrame().getTransformToParent());
+            }
+            else // set to current robot's foot pose
+            {
+               footstepAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getHandFrame(side));
+            }
             newAction = footstepAction;
          }
          if (side.ordinal() < 1)
@@ -668,11 +678,9 @@ public class RDXBehaviorActionSequenceEditor
       executionNextIndexStatus++;
    }
 
-   private RDXFootstepAction newFootstepAction(RDXFootstepAction possiblyNullPreviousFootstepAction)
+   private RDXFootstepAction newFootstepAction()
    {
-      RDXFootstepAction footstepAction = new RDXFootstepAction(panel3D, robotModel, syncedRobot, referenceFrameLibrary, possiblyNullPreviousFootstepAction);
-      footstepAction.setSide(RobotSide.LEFT, false);
-      return footstepAction;
+      return new RDXFootstepAction(panel3D, robotModel, syncedRobot, referenceFrameLibrary);
    }
 
    private RDXWalkAction newWalkAction()

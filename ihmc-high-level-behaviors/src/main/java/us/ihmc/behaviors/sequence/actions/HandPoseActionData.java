@@ -32,20 +32,20 @@ public class HandPoseActionData implements BehaviorActionData
    public void saveToFile(ObjectNode jsonNode)
    {
       jsonNode.put("description", description);
-      jsonNode.put("parentFrame", modifiableReferenceFrame.getReferenceFrame().getParent().getName());
-      JSONTools.toJSON(jsonNode, modifiableReferenceFrame.getTransformToParent());
       jsonNode.put("side", side.getLowerCaseName());
       jsonNode.put("trajectoryDuration", trajectoryDuration);
+      jsonNode.put("parentFrame", modifiableReferenceFrame.getReferenceFrame().getParent().getName());
+      JSONTools.toJSON(jsonNode, modifiableReferenceFrame.getTransformToParent());
    }
 
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
       description = jsonNode.get("description").textValue();
-      modifiableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()));
-      modifiableReferenceFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
       side = RobotSide.getSideFromString(jsonNode.get("side").asText());
       trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
+      modifiableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()));
+      modifiableReferenceFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
    }
 
    public void toMessage(HandPoseActionMessage message)
