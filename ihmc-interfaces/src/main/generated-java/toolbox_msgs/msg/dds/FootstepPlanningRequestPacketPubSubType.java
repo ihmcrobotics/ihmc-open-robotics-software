@@ -15,7 +15,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1d6bd90ba0fcec4f73ae6a893b8fc9c14fd811d3ef459c18cab8050cdfa716cb";
+   		return "9ab6049c3c9cf41682ab4fc0f6a4ab25f71c6bb3258595e486807fb5d79d900b";
    }
    
    @Override
@@ -88,6 +88,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -172,6 +174,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       current_alignment += perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getCdrSerializedSize(data.getPlanarRegionsListMessage(), current_alignment);
 
+      current_alignment += perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getCdrSerializedSize(data.getFallbackPlanarRegionsListMessage(), current_alignment);
+
       current_alignment += perception_msgs.msg.dds.HeightMapMessagePubSubType.getCdrSerializedSize(data.getHeightMapMessage(), current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -232,6 +236,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       cdr.write_type_6(data.getHorizonLength());
 
       perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.write(data.getPlanarRegionsListMessage(), cdr);
+      perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.write(data.getFallbackPlanarRegionsListMessage(), cdr);
       perception_msgs.msg.dds.HeightMapMessagePubSubType.write(data.getHeightMapMessage(), cdr);
       cdr.write_type_7(data.getAssumeFlatGround());
 
@@ -280,6 +285,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       data.setHorizonLength(cdr.read_type_6());
       	
       perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.read(data.getPlanarRegionsListMessage(), cdr);	
+      perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.read(data.getFallbackPlanarRegionsListMessage(), cdr);	
       perception_msgs.msg.dds.HeightMapMessagePubSubType.read(data.getHeightMapMessage(), cdr);	
       data.setAssumeFlatGround(cdr.read_type_7());
       	
@@ -322,6 +328,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       ser.write_type_6("horizon_length", data.getHorizonLength());
       ser.write_type_a("planar_regions_list_message", new perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsListMessage());
 
+      ser.write_type_a("fallback_planar_regions_list_message", new perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getFallbackPlanarRegionsListMessage());
+
       ser.write_type_a("height_map_message", new perception_msgs.msg.dds.HeightMapMessagePubSubType(), data.getHeightMapMessage());
 
       ser.write_type_7("assume_flat_ground", data.getAssumeFlatGround());
@@ -359,6 +367,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       data.setMaxIterations(ser.read_type_2("max_iterations"));
       data.setHorizonLength(ser.read_type_6("horizon_length"));
       ser.read_type_a("planar_regions_list_message", new perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsListMessage());
+
+      ser.read_type_a("fallback_planar_regions_list_message", new perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getFallbackPlanarRegionsListMessage());
 
       ser.read_type_a("height_map_message", new perception_msgs.msg.dds.HeightMapMessagePubSubType(), data.getHeightMapMessage());
 
