@@ -32,9 +32,9 @@ public class HandPoseActionData implements BehaviorActionData
    public void saveToFile(ObjectNode jsonNode)
    {
       jsonNode.put("description", description);
+      jsonNode.put("parentFrame", modifiableReferenceFrame.getReferenceFrame().getParent().getName());
       jsonNode.put("side", side.getLowerCaseName());
       jsonNode.put("trajectoryDuration", trajectoryDuration);
-      jsonNode.put("parentFrame", modifiableReferenceFrame.getReferenceFrame().getParent().getName());
       JSONTools.toJSON(jsonNode, modifiableReferenceFrame.getTransformToParent());
    }
 
