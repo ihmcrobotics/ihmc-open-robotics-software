@@ -12,8 +12,6 @@ rd /s /q build
 mkdir build
 cd build
 
-:: cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=. .. || exit /b 1
-
 cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release -DBoost_USE_STATIC_LIBS=ON -DCMAKE_INSTALL_PREFIX=. .. || exit /b 1
 cmake --build . --config Release || exit /b 1
 cmake --install . || exit /b 1
