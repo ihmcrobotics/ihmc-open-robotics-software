@@ -5,11 +5,10 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionData;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -20,91 +19,85 @@ import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.wholeBodyController.HandTransformTools;
 
 public class RDXHandPoseAction extends RDXBehaviorAction
 {
    private final HandPoseActionData actionData = new HandPoseActionData();
-   private RDXInteractableHighlightModel highlightModel;
+   private final SideDependentList<RDXInteractableHighlightModel> highlightModels = new SideDependentList<>();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    /** Gizmo is control frame */
-   private final RDXPose3DGizmo poseGizmo;
+   private final RDXPose3DGizmo poseGizmo = new RDXPose3DGizmo(actionData.getReferenceFrame(), actionData.getTransformToParent());
    private final SideDependentList<String> handNames = new SideDependentList<>();
-   private final SideDependentList<RigidBodyTransform> handControlTransformToHandFrames = new SideDependentList<>();
-   private final SideDependentList<RigidBodyTransform> handGraphicTransformToHandFrames = new SideDependentList<>();
-   private final ModifiableReferenceFrame handFrame;
-   private final ModifiableReferenceFrame graphicFrame;
-   private final DRCRobotModel robotModel;
+   private final SideDependentList<RigidBodyTransform> handGraphicTransformToControlFrames = new SideDependentList<>();
+   private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
    private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
-   private final ROS2SyncedRobotModel syncedRobot;
    private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(actionData::getTrajectoryDuration,
                                                                                 actionData::setTrajectoryDuration,
                                                                                 imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
 
-   public RDXHandPoseAction(RDX3DPanel panel3D,
-                            DRCRobotModel robotModel,
-                            ROS2SyncedRobotModel syncedRobot,
-                            FullHumanoidRobotModel fullRobotModel,
-                            ReferenceFrameLibrary referenceFrameLibrary)
+   public RDXHandPoseAction(RDX3DPanel panel3D, DRCRobotModel robotModel, FullHumanoidRobotModel fullRobotModel, ReferenceFrameLibrary referenceFrameLibrary)
    {
-      this.robotModel = robotModel;
-      this.syncedRobot = syncedRobot;
+      actionData.setReferenceFrameLibrary(referenceFrameLibrary);
 
       for (RobotSide side : RobotSide.values)
       {
          handNames.put(side, fullRobotModel.getHand(side).getName());
-         handControlTransformToHandFrames.put(side, fullRobotModel.getHandControlFrame(side).getTransformToParent());
-         handGraphicTransformToHandFrames.put(side, robotModel.getUIParameters().getHandGraphicToHandFrameTransform(side));
+
+         RigidBodyTransform graphicToControlFrameTransform = new RigidBodyTransform();
+         HandTransformTools.getHandGraphicToControlFrameTransform(fullRobotModel, robotModel.getUIParameters(), side, graphicToControlFrameTransform);
+         handGraphicTransformToControlFrames.put(side, graphicToControlFrameTransform);
+
+         LogTools.info("%s".formatted(EuclidCoreMissingTools.getYawPitchRollStringDegrees(graphicToControlFrameTransform.getRotation())));
+
+         String handBodyName = handNames.get(side);
+         String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(handBodyName));
+         highlightModels.put(side, new RDXInteractableHighlightModel(modelFileName));
       }
       referenceFrameLibraryCombo = new ImGuiReferenceFrameLibraryCombo(referenceFrameLibrary);
-      poseGizmo = new RDXPose3DGizmo(actionData.getTransformToParent(), ReferenceFrame.getWorldFrame());
       poseGizmo.create(panel3D);
-
-      handFrame = new ModifiableReferenceFrame(poseGizmo.getGizmoFrame());
-      graphicFrame = new ModifiableReferenceFrame(handFrame.getReferenceFrame());
    }
 
    @Override
    public void updateAfterLoading()
    {
-      setSide(actionData.getSide(), false, null);
-      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getParentFrameName());
-      poseGizmo.setParentFrame(referenceFrameLibraryCombo.getSelectedReferenceFrame());
-      changeDerivativeFrames();
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getParentReferenceFrame().getName());
    }
 
-   public void setSide(RobotSide side, boolean authoring, RDXHandPoseAction possiblyNullPreviousAction)
+   public void setSide(RobotSide side)
    {
       actionData.setSide(side);
-      handFrame.getTransformToParent().set(handControlTransformToHandFrames.get(side));
-      handFrame.getTransformToParent().invert(); // We actually need hand to control
-      handFrame.getReferenceFrame().update();
-      graphicFrame.getTransformToParent().set(handGraphicTransformToHandFrames.get(side));
-      graphicFrame.getReferenceFrame().update();
+   }
 
-      String handBodyName = handNames.get(side);
-      String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(handBodyName));
-      highlightModel = new RDXInteractableHighlightModel(modelFileName);
+   public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
+   {
+      actionData.changeParentFrame(parentFrame);
+      actionData.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(transformToParent));
+   }
 
-      if (possiblyNullPreviousAction != null)
-      {
-         setToReferenceFrame(possiblyNullPreviousAction.getReferenceFrame());
-      }
-      else if (authoring)
-      {
-         setToReferenceFrame(syncedRobot.getReferenceFrames().getHandFrame(side));
-      }
+   public void setToReferenceFrame(ReferenceFrame referenceFrame)
+   {
+      actionData.changeParentFrame(ReferenceFrame.getWorldFrame());
+      actionData.setTransformToParent(transformToParent -> referenceFrame.getTransformToWorldFrame());
    }
 
    @Override
    public void update()
    {
+      if (poseGizmo.getGizmoFrame() != actionData.getReferenceFrame())
+      {
+         poseGizmo.setGizmoFrame(actionData.getReferenceFrame());
+         graphicFrame.changeParentFrame(actionData.getReferenceFrame());
+         graphicFrame.update(transformToParent -> transformToParent.set(handGraphicTransformToControlFrames.get(actionData.getSide())));
+      }
+
       poseGizmo.update();
-      highlightModel.setPose(graphicFrame.getReferenceFrame());
-      actionData.setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().getName());
+      highlightModels.get(actionData.getSide()).setPose(graphicFrame.getReferenceFrame());
    }
 
    @Override
@@ -130,12 +123,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    {
       if (referenceFrameLibraryCombo.render())
       {
-         FramePose3D poseToKeep = new FramePose3D();
-         poseToKeep.setToZero(poseGizmo.getGizmoFrame());
-         poseGizmo.setParentFrame(referenceFrameLibraryCombo.getSelectedReferenceFrame());
-         poseToKeep.changeFrame(poseGizmo.getGizmoFrame().getParent());
-         poseToKeep.get(poseGizmo.getTransformToParent());
-         changeDerivativeFrames();
+         actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame());
       }
       ImGui.pushItemWidth(80.0f);
       trajectoryDurationWidget.renderImGuiWidget();
@@ -145,36 +133,9 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      highlightModel.getRenderables(renderables, pool);
+      highlightModels.get(actionData.getSide()).getRenderables(renderables, pool);
       if (getSelected().get())
          poseGizmo.getRenderables(renderables, pool);
-   }
-
-   private void setToReferenceFrame(ReferenceFrame referenceFrame)
-   {
-      if (referenceFrameLibraryCombo.setSelectedReferenceFrame(referenceFrame.getName()))
-      {
-         poseGizmo.setParentFrame(referenceFrameLibraryCombo.getSelectedReferenceFrame());
-         poseGizmo.getTransformToParent().set(referenceFrame.getTransformToParent());
-         changeDerivativeFrames();
-      }
-      else
-      {
-         poseGizmo.setParentFrame(ReferenceFrame.getWorldFrame());
-         poseGizmo.getTransformToParent().set(referenceFrame.getTransformToWorldFrame());
-         changeDerivativeFrames();
-      }
-   }
-
-   /**
-    * This must be done when the gizmo is reattached to different frames,
-    * because ReferenceFrames have to entirely recreated when changing parent
-    * frames.
-    */
-   private void changeDerivativeFrames()
-   {
-      handFrame.changeParentFrame(poseGizmo.getGizmoFrame());
-      graphicFrame.changeParentFrame(handFrame.getReferenceFrame());
    }
 
    @Override
