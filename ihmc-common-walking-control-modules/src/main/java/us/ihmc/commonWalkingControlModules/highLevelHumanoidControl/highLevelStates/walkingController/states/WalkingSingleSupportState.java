@@ -200,7 +200,6 @@ public class WalkingSingleSupportState extends SingleSupportState
       if (walkingMessageHandler.getCurrentNumberOfFootsteps() > 0)
          walkingMessageHandler.peekFootstep(0, nextNextFootstep);
 
-      walkingMessageHandler.pollStepConstraints(stepConstraints);
 
       /**
        * 1/08/2018 RJG this has to be done before calling #updateFootstepParameters() to make sure the
@@ -213,7 +212,6 @@ public class WalkingSingleSupportState extends SingleSupportState
       balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringSwing.getValue());
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
-      balanceManager.setCurrentStepConstraints(stepConstraints);
 
       int stepsToAdd = Math.min(additionalFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
       for (int i = 0; i < stepsToAdd; i++)
@@ -225,6 +223,10 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       balanceManager.setICPPlanSupportSide(supportSide);
       balanceManager.initializeICPPlanForSingleSupport();
+
+      /** This has to be called after calling initialize ICP Plan, as that resets the step constraints **/
+      walkingMessageHandler.pollStepConstraints(stepConstraints);
+      balanceManager.setCurrentStepConstraints(stepConstraints);
 
       updateHeightManager();
 
