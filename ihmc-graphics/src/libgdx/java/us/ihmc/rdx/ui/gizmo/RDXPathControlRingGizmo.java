@@ -519,12 +519,12 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    private void updateMaterialHighlighting()
    {
-      boolean prior = highlightingEnabled && isGizmoHovered;
-      discModel.setMaterial(prior && closestCollisionSelection == RING ? highlightedMaterial : normalMaterial);
-      positiveXArrowModel.setMaterial(prior && closestCollisionSelection == POSITIVE_X_ARROW ? highlightedMaterial : normalMaterial);
-      positiveYArrowModel.setMaterial(prior && closestCollisionSelection == POSITIVE_Y_ARROW ? highlightedMaterial : normalMaterial);
-      negativeXArrowModel.setMaterial(prior && closestCollisionSelection == NEGATIVE_X_ARROW ? highlightedMaterial : normalMaterial);
-      negativeYArrowModel.setMaterial(prior && closestCollisionSelection == NEGATIVE_Y_ARROW ? highlightedMaterial : normalMaterial);
+      boolean highlightingPrior = highlightingEnabled && isGizmoHovered;
+      discModel.setMaterial(highlightingPrior && closestCollisionSelection == RING ? highlightedMaterial : normalMaterial);
+      positiveXArrowModel.setMaterial(highlightingPrior && closestCollisionSelection == POSITIVE_X_ARROW ? highlightedMaterial : normalMaterial);
+      positiveYArrowModel.setMaterial(highlightingPrior && closestCollisionSelection == POSITIVE_Y_ARROW ? highlightedMaterial : normalMaterial);
+      negativeXArrowModel.setMaterial(highlightingPrior && closestCollisionSelection == NEGATIVE_X_ARROW ? highlightedMaterial : normalMaterial);
+      negativeYArrowModel.setMaterial(highlightingPrior && closestCollisionSelection == NEGATIVE_Y_ARROW ? highlightedMaterial : normalMaterial);
    }
 
    public ImGuiPanel createTunerPanel(String name)
