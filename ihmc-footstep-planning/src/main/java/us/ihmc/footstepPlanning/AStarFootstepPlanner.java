@@ -10,6 +10,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.graphSearch.AStarFootstepPlannerIterationConductor;
 import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
@@ -49,6 +50,7 @@ public class AStarFootstepPlanner
 
    private final AStarFootstepPlannerIterationConductor iterationConductor;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final FootstepPlannerEnvironmentHandler plannerEnvironmentHandler;
    private final FootstepSnapAndWiggler snapper;
    private final ParameterBasedStepExpansion expansion;
    private final FootstepChecker checker;
@@ -92,17 +94,18 @@ public class AStarFootstepPlanner
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.bodyPathPlanHolder = bodyPathPlanHolder;
       this.footPolygons = footPolygons;
-      this.snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters);
+      this.plannerEnvironmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
+      this.snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters, plannerEnvironmentHandler);
       this.stopwatch = stopwatch;
       this.statusCallbacks = statusCallbacks;
 
       this.checker = new FootstepChecker(footstepPlannerParameters, footPolygons, snapper, stepReachabilityData, registry);
-      this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker, bodyPathPlanHolder, registry);
+      this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker, bodyPathPlanHolder, plannerEnvironmentHandler, registry);
       this.referenceBasedIdealStepCalculator = new ReferenceBasedIdealStepCalculator(footstepPlannerParameters, idealStepCalculator, registry);
       this.expansion = new ParameterBasedStepExpansion(footstepPlannerParameters, referenceBasedIdealStepCalculator, footPolygons);
 
       this.distanceAndYawHeuristics = new FootstepPlannerHeuristicCalculator(footstepPlannerParameters, bodyPathPlanHolder, registry);
-      stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, referenceBasedIdealStepCalculator, distanceAndYawHeuristics::compute, footPolygons, registry);
+      stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, referenceBasedIdealStepCalculator, distanceAndYawHeuristics::compute, footPolygons, plannerEnvironmentHandler, registry);
 
 
       this.iterationConductor = new AStarFootstepPlannerIterationConductor(expansion, checker, stepCostCalculator, distanceAndYawHeuristics::compute);
@@ -162,13 +165,11 @@ public class AStarFootstepPlanner
          snapper.setFlatGroundHeight(flatGroundHeight);
       }
 
-      snapper.setPlanarRegions(planarRegionsListForStepping);
-      idealStepCalculator.setPlanarRegionsList(planarRegionsListForStepping);
-      checker.setPlanarRegions(planarRegionsListForCollisionChecking);
+      plannerEnvironmentHandler.setPrimaryPlanarRegions(planarRegionsListForStepping);
+      plannerEnvironmentHandler.setFallbackHeightMap(heightMapData);
 
-      snapper.setHeightMapData(heightMapData);
+      checker.setPlanarRegions(planarRegionsListForCollisionChecking);
       checker.setHeightMapData(heightMapData);
-      stepCostCalculator.setHeightMapData(heightMapData);
 
       double pathLength = bodyPathPlanHolder.computePathLength(0.0);
       boolean imposeHorizonLength = request.getPlanBodyPath() && request.getHorizonLength() > 0.0 && !MathTools.intervalContains(pathLength, 0.0, request.getHorizonLength());
@@ -298,7 +299,8 @@ public class AStarFootstepPlanner
          footstep.getFootstepPose().set(snapData.getSnappedStepTransform(footstepNode.getSecondStep()));
          if (snapData.getRegionIndex() > 0)
          {
-            PlanarRegion regionSnappedTo = snapper.getPlanarRegionsList().getPlanarRegion(snapData.getRegionIndex());
+            PlanarRegionsList planarRegionsList = plannerEnvironmentHandler.getPlanarRegionsForFootstep(footstepNode.getSecondStep());
+            PlanarRegion regionSnappedTo = planarRegionsList.getPlanarRegion(snapData.getRegionIndex());
             footstep.setRegionSnappedTo(regionSnappedTo.copy());
          }
 

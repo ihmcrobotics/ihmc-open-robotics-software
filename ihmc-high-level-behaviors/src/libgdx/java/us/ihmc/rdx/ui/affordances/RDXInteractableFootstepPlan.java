@@ -13,6 +13,7 @@ import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningMo
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -100,7 +101,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
    public void setPlanarRegionsListMessage(PlanarRegionsListMessage planarRegionsListMessage)
    {
-      planarRegionsListMessageReference.set(planarRegionsListMessage);
+      setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
    }
 
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)

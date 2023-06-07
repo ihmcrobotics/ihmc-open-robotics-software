@@ -49,8 +49,8 @@ public class RDXFootstepPlanning
    private final Notification plannedNotification = new Notification();
 
    private final AtomicReference<Pose3DReadOnly> goalPoseReference = new AtomicReference<>();
-   private final AtomicReference<PlanarRegionsListMessage> planarRegionsListMessageReference = new AtomicReference<>();
    private final AtomicReference<PlanarRegionsList> planarRegionsListReference = new AtomicReference<>();
+   private final AtomicReference<PlanarRegionsListMessage> fallbackPlanarRegionsListMessageReference = new AtomicReference<>();
    private final AtomicReference<HeightMapMessage> heightMapDataReference = new AtomicReference<>();
    private final AtomicReference<FootstepPlannerParametersReadOnly> footstepPlannerParametersReference = new AtomicReference<>();
    private final AtomicReference<AStarBodyPathPlannerParametersReadOnly> bodyPathPlannerParametersReference = new AtomicReference<>();
@@ -109,9 +109,9 @@ public class RDXFootstepPlanning
       if (footstepPlanner.isPlanning())
          footstepPlanner.halt();
 
-      PlanarRegionsListMessage planarRegionsListMessage = planarRegionsListMessageReference.get();
-      HeightMapMessage heightMapMessage = heightMapDataReference.get();
       PlanarRegionsList planarRegionsList = planarRegionsListReference.get();
+      PlanarRegionsListMessage fallbackPlanarRegionsListMessage = fallbackPlanarRegionsListMessageReference.get();
+      HeightMapMessage heightMapMessage = heightMapDataReference.get();
       Pose3DReadOnly goalPose = goalPoseReference.getAndSet(null);
       if (goalPose == null)
          return;
@@ -148,14 +148,14 @@ public class RDXFootstepPlanning
          assumeFlatGround = false;
          request.setHeightMapData(HeightMapMessageTools.unpackMessage(heightMapMessage));
       }
-      if (planarRegionsListMessage != null)
-      {
-         request.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
-         assumeFlatGround = false;
-      }
       if (planarRegionsList != null)
       {
          request.setPlanarRegionsList(planarRegionsList);
+         assumeFlatGround = false;
+      }
+      if (fallbackPlanarRegionsListMessage != null)
+      {
+         request.setFallbackPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(fallbackPlanarRegionsListMessage));
          assumeFlatGround = false;
       }
 
@@ -231,12 +231,17 @@ public class RDXFootstepPlanning
 
    public void setPlanarRegionsListMessage(PlanarRegionsListMessage planarRegionsListMessage)
    {
-      this.planarRegionsListMessageReference.set(planarRegionsListMessage);
+      setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
    }
 
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsListReference.set(planarRegionsList);
+   }
+
+   public void setFallbackPlanarRegionsListMessage(PlanarRegionsListMessage planarRegionsListMessage)
+   {
+      this.fallbackPlanarRegionsListMessageReference.set(planarRegionsListMessage);
    }
 
    public void setHeightMapData(HeightMapMessage heightMapMessage)

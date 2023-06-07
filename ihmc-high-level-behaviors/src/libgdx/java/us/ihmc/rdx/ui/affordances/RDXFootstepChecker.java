@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.footstepPlanning.SwingPlanningModule;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
@@ -59,7 +60,8 @@ public class RDXFootstepChecker
       primary3DPanel = baseUI.getPrimary3DPanel();
       primary3DPanel.addImGuiOverlayAddition(this::renderTooltips);
       this.footstepPlannerParameters = footstepPlannerParameters;
-      snapper = new FootstepSnapAndWiggler(footPolygons, this.footstepPlannerParameters);
+      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
+      snapper = new FootstepSnapAndWiggler(footPolygons, this.footstepPlannerParameters, environmentHandler);
       stepChecker = new FootstepPoseHeuristicChecker(this.footstepPlannerParameters, snapper, registry);
       setInitialFeet();
    }

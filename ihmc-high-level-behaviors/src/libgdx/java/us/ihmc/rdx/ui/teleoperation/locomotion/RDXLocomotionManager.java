@@ -8,6 +8,7 @@ import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import imgui.ImGui;
+import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -15,6 +16,8 @@ import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -32,6 +35,8 @@ import us.ihmc.rdx.ui.footstepPlanner.RDXFootstepPlanning;
 import us.ihmc.rdx.ui.graphics.RDXBodyPathPlanGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXLegControlMode;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -95,11 +100,13 @@ public class RDXLocomotionManager
       footstepPlanning = new RDXFootstepPlanning(robotModel, locomotionParameters, syncedRobot);
 
       // TODO remove ros from this module, and have it call from the higher level.
-      ros2Helper.subscribeViaCallback(PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS, regions ->
+      ros2Helper.subscribeViaCallback(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, regions ->
       {
-         footstepPlanning.setPlanarRegionsListMessage(regions);
-         interactableFootstepPlan.setPlanarRegionsListMessage(regions);
+         PlanarRegionsList planarRegionsList = getPlanarRegionListInWorld(regions);
+         footstepPlanning.setPlanarRegionsList(planarRegionsList);
+         interactableFootstepPlan.setPlanarRegionsList(planarRegionsList);
       });
+//      ros2Helper.subscribeViaCallback(PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS, footstepPlanning::setFallbackPlanarRegionsListMessage);
       ros2Helper.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_OUTPUT, heightMap ->
       {
          footstepPlanning.setHeightMapData(heightMap);
@@ -110,6 +117,15 @@ public class RDXLocomotionManager
       communicationHelper.subscribeToControllerViaCallback(FootstepDataListMessage.class, footsteps ->
             footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps,
                                                                                                                 "Teleoperation Panel Controller Spy")));
+   }
+
+   private PlanarRegionsList getPlanarRegionListInWorld(FramePlanarRegionsListMessage message)
+   {
+      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(message.getPlanarRegions());
+      RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform(message.getSensorOrientation(), message.getSensorPosition());
+      planarRegionsList.applyTransform(sensorToWorldTransform);
+
+      return planarRegionsList;
    }
 
    public void create(RDXBaseUI baseUI)
