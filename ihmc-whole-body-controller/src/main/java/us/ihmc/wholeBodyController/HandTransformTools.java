@@ -29,4 +29,10 @@ public class HandTransformTools
       controlFrame.remove();
       graphicFrame.remove();
    }
+
+   public static void getHandLinkToControlFrameTransform(FullHumanoidRobotModel fullRobotModel, RobotSide side, RigidBodyTransform linkToControlFrameTransform)
+   {
+      linkToControlFrameTransform.set(fullRobotModel.getHandControlFrame(side).getTransformToParent());
+      linkToControlFrameTransform.invert();
+   }
 }
