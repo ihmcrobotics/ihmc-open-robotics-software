@@ -219,7 +219,7 @@ public class RDX3DPanel
          }
          toolbar.render(windowSizeX, windowPositionX, windowPositionY);
 
-         if (ImGui.isMouseDoubleClicked(ImGuiMouseButton.Right))
+         if (ImGui.isWindowHovered() && ImGui.isMouseDoubleClicked(ImGuiMouseButton.Right))
          {
             camera3D.setCameraFocusPoint(inputCalculator.getPickPointInWorld());
          }
