@@ -52,8 +52,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          RigidBodyTransform graphicToControlFrameTransform = new RigidBodyTransform();
          HandTransformTools.getHandGraphicToControlFrameTransform(fullRobotModel, robotModel.getUIParameters(), side, graphicToControlFrameTransform);
          handGraphicTransformToControlFrames.put(side, graphicToControlFrameTransform);
-
-         LogTools.info("%s".formatted(EuclidCoreMissingTools.getYawPitchRollStringDegrees(graphicToControlFrameTransform.getRotation())));
+         graphicFrame.update(transformToParent -> transformToParent.set(handGraphicTransformToControlFrames.get(side)));
 
          String handBodyName = handNames.get(side);
          String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(handBodyName));
@@ -93,7 +92,6 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       {
          poseGizmo.setGizmoFrame(actionData.getReferenceFrame());
          graphicFrame.changeParentFrame(actionData.getReferenceFrame());
-         graphicFrame.update(transformToParent -> transformToParent.set(handGraphicTransformToControlFrames.get(actionData.getSide())));
       }
 
       poseGizmo.update();
