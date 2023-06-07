@@ -96,6 +96,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public perception_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_message_;
    /**
+            * Fallback planar regions to use, if you don't want to assume flat ground. Optional
+            */
+   public perception_msgs.msg.dds.PlanarRegionsListMessage fallback_planar_regions_list_message_;
+   /**
             * Height map data, optional
             */
    public perception_msgs.msg.dds.HeightMapMessage height_map_message_;
@@ -134,6 +138,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       goal_right_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       body_path_waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (50, new geometry_msgs.msg.dds.PosePubSubType());
       planar_regions_list_message_ = new perception_msgs.msg.dds.PlanarRegionsListMessage();
+      fallback_planar_regions_list_message_ = new perception_msgs.msg.dds.PlanarRegionsListMessage();
       height_map_message_ = new perception_msgs.msg.dds.HeightMapMessage();
       reference_plan_ = new controller_msgs.msg.dds.FootstepDataListMessage();
 
@@ -179,6 +184,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       horizon_length_ = other.horizon_length_;
 
       perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.staticCopy(other.planar_regions_list_message_, planar_regions_list_message_);
+      perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.staticCopy(other.fallback_planar_regions_list_message_, fallback_planar_regions_list_message_);
       perception_msgs.msg.dds.HeightMapMessagePubSubType.staticCopy(other.height_map_message_, height_map_message_);
       assume_flat_ground_ = other.assume_flat_ground_;
 
@@ -445,6 +451,15 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
+            * Fallback planar regions to use, if you don't want to assume flat ground. Optional
+            */
+   public perception_msgs.msg.dds.PlanarRegionsListMessage getFallbackPlanarRegionsListMessage()
+   {
+      return fallback_planar_regions_list_message_;
+   }
+
+
+   /**
             * Height map data, optional
             */
    public perception_msgs.msg.dds.HeightMapMessage getHeightMapMessage()
@@ -596,6 +611,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.horizon_length_, other.horizon_length_, epsilon)) return false;
 
       if (!this.planar_regions_list_message_.epsilonEquals(other.planar_regions_list_message_, epsilon)) return false;
+      if (!this.fallback_planar_regions_list_message_.epsilonEquals(other.fallback_planar_regions_list_message_, epsilon)) return false;
       if (!this.height_map_message_.epsilonEquals(other.height_map_message_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.assume_flat_ground_, other.assume_flat_ground_, epsilon)) return false;
 
@@ -653,6 +669,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       if(this.horizon_length_ != otherMyClass.horizon_length_) return false;
 
       if (!this.planar_regions_list_message_.equals(otherMyClass.planar_regions_list_message_)) return false;
+      if (!this.fallback_planar_regions_list_message_.equals(otherMyClass.fallback_planar_regions_list_message_)) return false;
       if (!this.height_map_message_.equals(otherMyClass.height_map_message_)) return false;
       if(this.assume_flat_ground_ != otherMyClass.assume_flat_ground_) return false;
 
@@ -713,6 +730,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.horizon_length_);      builder.append(", ");
       builder.append("planar_regions_list_message=");
       builder.append(this.planar_regions_list_message_);      builder.append(", ");
+      builder.append("fallback_planar_regions_list_message=");
+      builder.append(this.fallback_planar_regions_list_message_);      builder.append(", ");
       builder.append("height_map_message=");
       builder.append(this.height_map_message_);      builder.append(", ");
       builder.append("assume_flat_ground=");

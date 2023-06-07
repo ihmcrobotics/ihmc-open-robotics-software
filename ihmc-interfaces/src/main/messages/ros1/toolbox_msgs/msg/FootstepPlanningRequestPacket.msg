@@ -80,6 +80,9 @@ float64 horizon_length
 # Planar regions to use, if you don't want to assume flat ground
 perception_msgs/PlanarRegionsListMessage planar_regions_list_message
 
+# Fallback planar regions to use, if you don't want to assume flat ground. Optional
+perception_msgs/PlanarRegionsListMessage fallback_planar_regions_list_message
+
 # Height map data, optional
 perception_msgs/HeightMapMessage height_map_message
 
