@@ -24,7 +24,6 @@ import org.bytedeco.javacpp.tools.InfoMapper;
                         "boost_chrono",
                         "boost_timer",
                         "boost_serialization",
-                        "metis-gtsam",
                         "gtsam",
                         "slam-wrapper",
                         "jniSlamWrapper"

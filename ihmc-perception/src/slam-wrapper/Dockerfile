@@ -1,4 +1,4 @@
-# Current version: 0.5
+# Current version: 0.6
 FROM ubuntu:20.04
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -26,9 +26,21 @@ RUN apt-get --quiet 2 --yes update  \
     cmake \
     libtbb-dev \
     openjdk-17-jdk \
-    libeigen3-dev \
     > /dev/null \
  && rm -rf /var/lib/apt/lists/*
+
+# Install Eigen 3.4.0
+WORKDIR /root/eigen
+RUN wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+RUN tar -xvf eigen-3.4.0.tar.gz
+WORKDIR /root/eigen/eigen-3.4.0
+RUN mkdir build
+WORKDIR /root/eigen/eigen-3.4.0/build
+RUN cmake ..
+RUN make install
+# Ensure eigen is available at /usr/include/Eigen
+# By default, the eigen headers are installed at /usr/local/include/eigen3/Eigen
+RUN ln -s /usr/local/include/eigen3/Eigen /usr/include/Eigen
 
 # Clone and checkout GTSAM to a specific commit; should update periodically
 WORKDIR /root/dev
@@ -51,10 +63,6 @@ RUN make -j$(nproc) install
 
 # Needed to link with GTSAM
 RUN echo 'export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH' >> /root/.bashrc
-
-# Ensure eigen is available at /usr/include/Eigen
-# Ubuntu installs the headers at /usr/include/eigen3/Eigen
-RUN ln -s /usr/include/eigen3/Eigen /usr/include/Eigen
 
 RUN useradd robotlab
 # Switch to our robotlab user last because prior tasks need to run as root

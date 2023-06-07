@@ -41,7 +41,6 @@ public class SlamWrapperNativeLibrary implements NativeLibraryDescription
                                                               "libboost_chrono.so",
                                                               "libboost_timer.so",
                                                               "libboost_serialization.so",
-                                                              "libmetis-gtsam.so",
                                                               "libgtsam.so",
                                                               "libslam-wrapper.so");
          default:
