@@ -45,7 +45,7 @@ public class PlaneContactStateToWrenchMatrixHelper
     */
    private static final double minFootholdSizeForCoPObjectives = 1.0e-3;
 
-   public static final boolean useOldCoPObjectiveFormulation = false;
+   public static final boolean useOldCoPObjectiveFormulation = true;
 
    private final int maxNumberOfContactPoints;
    private final int numberOfBasisVectorsPerContactPoint;

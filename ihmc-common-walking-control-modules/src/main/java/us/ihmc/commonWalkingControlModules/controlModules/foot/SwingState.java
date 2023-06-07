@@ -322,7 +322,9 @@ public class SwingState extends AbstractFootControlState
       replanTrajectory.set(false);
 
       if (workspaceLimiterControlModule != null)
-         workspaceLimiterControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
+      {
+         workspaceLimiterControlModule.initialize(true);
+      }
 
       YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
       contactState.notifyContactStateHasChanged();
