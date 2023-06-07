@@ -566,7 +566,17 @@ public class RDXBehaviorActionSequenceEditor
          {
             RDXHandPoseAction handPoseAction = newHandPoseAction();
             // Set the new action to where the last one was for faster authoring
-            handPoseAction.setSide(side, true, findNextPreviousHandPoseAction(side));
+            handPoseAction.setSide(side);
+            RDXHandPoseAction nextPreviousHandPoseAction = findNextPreviousHandPoseAction(side);
+            if (nextPreviousHandPoseAction != null)
+            {
+               handPoseAction.setIncludingFrame(nextPreviousHandPoseAction.getReferenceFrame().getParent(),
+                                                nextPreviousHandPoseAction.getReferenceFrame().getTransformToParent());
+            }
+            else // set to current robot's hand pose
+            {
+               handPoseAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getHandFrame(side));
+            }
             newAction = handPoseAction;
          }
          if (side.ordinal() < 1)
@@ -672,7 +682,7 @@ public class RDXBehaviorActionSequenceEditor
 
    private RDXHandPoseAction newHandPoseAction()
    {
-      return new RDXHandPoseAction(panel3D, robotModel, syncedRobot, syncedRobot.getFullRobotModel(), referenceFrameLibrary);
+      return new RDXHandPoseAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), referenceFrameLibrary);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
