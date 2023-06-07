@@ -27,24 +27,20 @@ import java.util.List;
 
 public class PerceptionFilterTools
 {
-   public static void filterCollidingPlanarRegions(FramePlanarRegionsList regionsInSensor, CollidingScanRegionFilter filter)
+   public static CollidingScanRegionFilter createHumanoidShinCollisionFilter(FullHumanoidRobotModel fullRobotModel, CollisionBoxProvider collisionBoxProvider)
    {
-      int i = 0;
-      while (i < regionsInSensor.getPlanarRegionsList().getNumberOfPlanarRegions())
+      CollisionShapeTester shapeTester = new CollisionShapeTester(fullRobotModel, collisionBoxProvider);
+      for (RobotSide robotSide : RobotSide.values)
       {
-         PlanarRegion regionInWorld = regionsInSensor.getPlanarRegionsList().getPlanarRegion(i).copy();
-         regionInWorld.applyTransform(regionsInSensor.getSensorToWorldFrameTransform());
-         boolean collision = !filter.test(i, regionInWorld);
-         if (collision)
-         {
-            regionsInSensor.getPlanarRegionsList().pollPlanarRegion(i);
-         }
-         else
-            i++;
+         List<JointBasics> joints = new ArrayList<>();
+         RigidBodyBasics shin = fullRobotModel.getFoot(robotSide).getParentJoint().getPredecessor().getParentJoint().getPredecessor();
+         MultiBodySystemTools.collectJointPath(fullRobotModel.getPelvis(), shin, joints);
+         joints.forEach(joint -> shapeTester.addJoint(collisionBoxProvider, joint));
       }
+      return new CollidingScanRegionFilter(shapeTester);
    }
 
-   public static void applyCollisionFilter(FramePlanarRegionsList framePlanarRegionsList, CollidingScanRegionFilter collisionFilter)
+   public static void filterCollidingPlanarRegions(FramePlanarRegionsList framePlanarRegionsList, CollidingScanRegionFilter collisionFilter)
    {
       collisionFilter.update();
       PlanarRegionsList planarRegionsList = framePlanarRegionsList.getPlanarRegionsList();
@@ -60,20 +56,7 @@ public class PerceptionFilterTools
       framePlanarRegionsList.getPlanarRegionsList().addPlanarRegions(filteredPlanarRegions);
    }
 
-   public static CollidingScanRegionFilter createHumanoidShinCollisionFilter(FullHumanoidRobotModel fullRobotModel, CollisionBoxProvider collisionBoxProvider)
-   {
-      CollisionShapeTester shapeTester = new CollisionShapeTester(fullRobotModel, collisionBoxProvider);
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         List<JointBasics> joints = new ArrayList<>();
-         RigidBodyBasics shin = fullRobotModel.getFoot(robotSide).getParentJoint().getPredecessor().getParentJoint().getPredecessor();
-         MultiBodySystemTools.collectJointPath(fullRobotModel.getPelvis(), shin, joints);
-         joints.forEach(joint -> shapeTester.addJoint(collisionBoxProvider, joint));
-      }
-      return new CollidingScanRegionFilter(shapeTester);
-   }
-
-   public static void applyBoundingBoxFilter(PlanarRegionsList planarRegionsList, BoundingBox3D boundingBox)
+   public static void filterByBoundingBox(PlanarRegionsList planarRegionsList, BoundingBox3D boundingBox)
    {
       PlanarRegionsList result = null;
 
@@ -95,49 +78,46 @@ public class PerceptionFilterTools
 
    public static void filterShadowRegions(FramePlanarRegionsList framePlanarRegionsList, double maxAngleFromNormal)
    {
-      int i = 0;
       double angleFromNormal = Math.toRadians(maxAngleFromNormal);
       double minDot = Math.cos(Math.PI / 2.0 - angleFromNormal);
-      while (i < framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions())
-      {
-         PlanarRegion regionInSensorFrame = framePlanarRegionsList.getPlanarRegionsList().getPlanarRegion(i);
-         Vector3D vectorToRegion = new Vector3D(regionInSensorFrame.getPoint());
-         vectorToRegion.normalize();
 
-         if (Math.abs(vectorToRegion.dot(regionInSensorFrame.getNormal())) < minDot)
-         {
-            framePlanarRegionsList.getPlanarRegionsList().getPlanarRegionsAsList().remove(i);
-         }
-         else
-         {
-            i++;
-         }
-      }
+      List<PlanarRegion> filteredList = framePlanarRegionsList.getPlanarRegionsList().getPlanarRegionsAsList().parallelStream().filter(region ->
+       {
+          Vector3D vectorToRegion = new Vector3D(region.getPoint());
+          vectorToRegion.normalize();
+
+          return Math.abs(vectorToRegion.dot(region.getNormal())) > minDot;
+       }).toList();
+
+      framePlanarRegionsList.getPlanarRegionsList().clear();
+      framePlanarRegionsList.getPlanarRegionsList().addPlanarRegions(filteredList);
    }
 
-   public static void applyConcaveHullFilters(PlanarRegionsList planarRegionsList, PolygonizerParameters polygonizerParameters)
+   public static void applyConcaveHullReduction(PlanarRegionsList planarRegionsList, PolygonizerParameters polygonizerParameters)
    {
-      for (PlanarRegion region : planarRegionsList.getPlanarRegionsAsList())
-      {
-         ConcaveHull concaveHull = new ConcaveHull(region.getConcaveHull());
+      // Apply some simple filtering to reduce the number of vertices and hopefully the number of convex polygons.
+      double shallowAngleThreshold = polygonizerParameters.getShallowAngleThreshold();
+      double peakAngleThreshold = polygonizerParameters.getPeakAngleThreshold();
+      double lengthThreshold = polygonizerParameters.getLengthThreshold();
+      double depthThreshold = polygonizerParameters.getDepthThreshold();
 
-         // Apply some simple filtering to reduce the number of vertices and hopefully the number of convex polygons.
-         double shallowAngleThreshold = polygonizerParameters.getShallowAngleThreshold();
-         double peakAngleThreshold = polygonizerParameters.getPeakAngleThreshold();
-         double lengthThreshold = polygonizerParameters.getLengthThreshold();
+      planarRegionsList.getPlanarRegionsAsList().parallelStream().forEach(
+            region ->
+            {
+               ConcaveHull concaveHull = new ConcaveHull(region.getConcaveHull());
 
-         ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHull);
-         ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHull);
+               ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHull);
+               ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHull);
 
-         double depthThreshold = polygonizerParameters.getDepthThreshold();
-         List<ConvexPolygon2D> decomposedPolygons = new ArrayList<>();
-         ConcaveHullDecomposition.recursiveApproximateDecomposition(concaveHull, depthThreshold, decomposedPolygons);
+               List<ConvexPolygon2D> decomposedPolygons = new ArrayList<>();
+               ConcaveHullDecomposition.recursiveApproximateDecomposition(concaveHull, depthThreshold, decomposedPolygons);
 
-         // Pack the data in PlanarRegion
-         PlanarRegion filteredRegion = new PlanarRegion(region.getTransformToWorld(), concaveHull.getConcaveHullVertices(), decomposedPolygons);
-         filteredRegion.setRegionId(region.getRegionId());
+               // Pack the data in PlanarRegion
+               PlanarRegion filteredRegion = new PlanarRegion(region.getTransformToWorld(), concaveHull.getConcaveHullVertices(), decomposedPolygons);
+               filteredRegion.setRegionId(region.getRegionId());
 
-         region.set(filteredRegion);
-      }
+               region.set(filteredRegion);
+            }
+      );
    }
 }
