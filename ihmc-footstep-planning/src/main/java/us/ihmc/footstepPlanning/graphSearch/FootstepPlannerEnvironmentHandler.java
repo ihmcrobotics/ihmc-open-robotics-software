@@ -67,6 +67,7 @@ public class FootstepPlannerEnvironmentHandler
    public void setPrimaryPlanarRegions(PlanarRegionsList primaryPlanarRegions)
    {
       this.primaryPlanarRegions = primaryPlanarRegions;
+      environmentDataHolder.clear();
 
       computeHullOfRegions(primaryPlanarRegions, primaryPlanarRegionModeledWorld, primaryPlanarRegionModeledBoundingBox);
    }
@@ -74,6 +75,7 @@ public class FootstepPlannerEnvironmentHandler
    public void setFallbackPlanarRegions(PlanarRegionsList fallbackPlanarRegions)
    {
       this.fallbackPlanarRegions = fallbackPlanarRegions;
+      environmentDataHolder.clear();
 
       computeHullOfRegions(fallbackPlanarRegions, fallbackPlanarRegionModeledWorld, fallbackPlanarRegionModeledBoundingBox);
    }
@@ -81,6 +83,7 @@ public class FootstepPlannerEnvironmentHandler
    public void setFallbackHeightMap(HeightMapData fallbackHeightMap)
    {
       this.fallbackHeightMap = fallbackHeightMap;
+      environmentDataHolder.clear();
    }
 
    public boolean flatGroundMode()

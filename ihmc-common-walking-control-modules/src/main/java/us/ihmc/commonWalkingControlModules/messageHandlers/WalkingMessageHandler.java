@@ -108,7 +108,6 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
 
    private final MomentumTrajectoryHandler momentumTrajectoryHandler;
    private final CenterOfMassTrajectoryHandler comTrajectoryHandler;
-   private final StepConstraintRegionHandler stepConstraintRegionHandler;
 
    private final YoBoolean offsettingXYPlanWithFootstepError = new YoBoolean("offsettingXYPlanWithFootstepError", registry);
    private final YoBoolean offsettingHeightPlanWithFootstepError = new YoBoolean("offsettingHeightPlanWithFootstepError", registry);
@@ -152,7 +151,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       }
 
       for (int i = 0; i < numberOfFootstepsToVisualize; i++)
-         upcomingFoostepSide[i] = new YoEnum<>("upcomingFoostepSide" + i, registry, RobotSide.class, true);
+         upcomingFoostepSide[i] = new YoEnum<>("upcomingFootstepSide" + i, registry, RobotSide.class, true);
 
       if (yoGraphicsListRegistry != null)
          footstepListVisualizer = new FootstepListVisualizer(contactableFeet, yoGraphicsListRegistry, registry);
@@ -162,7 +161,6 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
 
       momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime, registry);
       comTrajectoryHandler = new CenterOfMassTrajectoryHandler(yoTime, registry);
-      stepConstraintRegionHandler = new StepConstraintRegionHandler(registry);
 
       parentRegistry.addChild(registry);
    }
@@ -316,21 +314,6 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       checkForPause();
 
       updateVisualization();
-   }
-
-   public void handleStepConstraintRegionCommand(StepConstraintRegionCommand stepConstraintRegionCommand)
-   {
-      stepConstraintRegionHandler.handleStepConstraintRegionCommand(stepConstraintRegionCommand);
-   }
-
-   public void handleStepConstraintsListCommand(StepConstraintsListCommand stepConstraintsListCommand)
-   {
-      stepConstraintRegionHandler.handleStepConstraintsListCommand(stepConstraintsListCommand);
-   }
-
-   public StepConstraintRegionHandler getStepConstraintRegionHandler()
-   {
-      return stepConstraintRegionHandler;
    }
 
    public void handlePauseWalkingCommand(PauseWalkingCommand command)
