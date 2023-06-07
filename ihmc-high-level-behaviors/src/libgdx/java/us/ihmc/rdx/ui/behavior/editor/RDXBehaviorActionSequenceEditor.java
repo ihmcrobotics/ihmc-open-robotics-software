@@ -130,8 +130,8 @@ public class RDXBehaviorActionSequenceEditor
       {
          JSONTools.forEachArrayElement(jsonNode, "actions", actionNode ->
          {
-            String actionType = actionNode.get("type").asText();
-            RDXBehaviorAction action = getAction(actionType);
+            String actionTypeName = actionNode.get("type").asText();
+            RDXBehaviorAction action = createBlankAction(actionTypeName);
             if (action != null)
             {
                action.getActionData().loadFromFile(actionNode);
@@ -154,7 +154,7 @@ public class RDXBehaviorActionSequenceEditor
       return false;
    }
 
-   private RDXBehaviorAction getAction(String actionType)
+   private RDXBehaviorAction createBlankAction(String actionType)
    {
       boolean robotHasArms = robotModel.getRobotVersion().hasArms();
       switch (actionType)
