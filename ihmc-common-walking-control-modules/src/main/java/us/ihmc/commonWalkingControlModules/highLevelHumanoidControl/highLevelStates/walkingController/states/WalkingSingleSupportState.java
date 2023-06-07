@@ -40,6 +40,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final Footstep nextFootstep = new Footstep();
    private final Footstep nextNextFootstep = new Footstep();
    private final FootstepTiming footstepTiming = new FootstepTiming();
+   private final StepConstraintRegionsList nextStepConstraints = new StepConstraintRegionsList();
    private double swingTime;
 
    private final Footstep[] footsteps;
@@ -200,7 +201,6 @@ public class WalkingSingleSupportState extends SingleSupportState
          walkingMessageHandler.peekFootstep(0, nextNextFootstep);
 
       walkingMessageHandler.pollStepConstraints(stepConstraints);
-      walkingMessageHandler.getStepConstraintRegionHandler().handleStepConstraintsList(stepConstraints.getAsList());
 
       /**
        * 1/08/2018 RJG this has to be done before calling #updateFootstepParameters() to make sure the
@@ -213,6 +213,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringSwing.getValue());
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
+      balanceManager.setCurrentStepConstraints(stepConstraints);
 
       int stepsToAdd = Math.min(additionalFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
       for (int i = 0; i < stepsToAdd; i++)
