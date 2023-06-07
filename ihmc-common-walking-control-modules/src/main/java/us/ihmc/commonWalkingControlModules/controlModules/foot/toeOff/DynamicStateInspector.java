@@ -11,6 +11,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.EuclidCoreMissingTools;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -61,7 +62,7 @@ public class DynamicStateInspector
    private final YoBoolean isCurrentICPOKForToeOff = new YoBoolean("isCurrentICPOKForToeOff", registry);
 
    private final YoBoolean dynamicsAreOkForToeOff = new YoBoolean("dynamicsAreOKForToeOff", registry);
-   private final YoBoolean dynamicsAreDefinitelyNotOKForToeOff = new YoBoolean("dynamicsAreDefinitelyNotOKForToeOff", registry);
+   private final GlitchFilteredYoBoolean dynamicsAreDefinitelyNotOKForToeOff = new GlitchFilteredYoBoolean("dynamicsAreDefinitelyNotOKForToeOff", registry, 4);
 
    private final FrameConvexPolygon2D leadingFootPolygon = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D trailingFootPolygon = new FrameConvexPolygon2D();
@@ -161,11 +162,11 @@ public class DynamicStateInspector
 
       if (supportPolygon.isPointInside(currentICP) && supportPolygon.isPointInside(desiredICP))
       {
-         dynamicsAreDefinitelyNotOKForToeOff.set(!dynamicsAreOkForToeOff.getBooleanValue());
+         dynamicsAreDefinitelyNotOKForToeOff.update(!dynamicsAreOkForToeOff.getBooleanValue());
       }
       else
       {
-         dynamicsAreDefinitelyNotOKForToeOff.set(
+         dynamicsAreDefinitelyNotOKForToeOff.update(
                currentOrthogonalDistanceToInsideEdge.getDoubleValue() < 0.0 && desiredOrthogonalDistanceToInsideEdge.getDoubleValue() < 0.0);
       }
    }

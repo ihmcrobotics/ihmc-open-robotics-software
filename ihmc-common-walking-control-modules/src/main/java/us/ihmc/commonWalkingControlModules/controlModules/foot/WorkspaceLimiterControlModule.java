@@ -125,6 +125,9 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
    private final YoBoolean doSmoothTransitionOutOfSingularityAvoidance;
    private final YoBoolean doSmoothTransitionOutOfUnreachableStep;
 
+   private final YoBoolean isLegLengthening;
+   private final YoBoolean isLegShortening;
+
    private final YoDouble alphaSupportSingularityAvoidance;
 
    private final BooleanParameter useSingularityAvoidanceInSupport;
@@ -276,6 +279,9 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
       doSmoothTransitionOutOfSingularityAvoidance = new YoBoolean(namePrefix + "DoSmoothTransitionSingularityAvoidance", registry);
       doSmoothTransitionOutOfUnreachableStep = new YoBoolean(namePrefix + "DoSmoothTransitionUnreachableStep", registry);
 
+      isLegLengthening = new YoBoolean(namePrefix + "IsLegLengthening", registry);
+      isLegShortening = new YoBoolean(namePrefix + "IsLegShortening", registry);
+
       isSupportSingularityAvoidanceUsed = new YoBoolean(namePrefix + "IsSupportSingularityAvoidanceUsed", registry);
       useSingularityAvoidanceInSupport = new BooleanParameter(namePrefix + "UseSingularityAvoidanceInSupport",
                                                               registry,
@@ -388,9 +394,11 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
       unachievedSwingAcceleration.setToZero();
    }
 
-   public void setCheckVelocityForSwingSingularityAvoidance(boolean value)
+   public void initialize(boolean checkVelocityForSwingSingularityAvoidance)
    {
-      checkVelocityForSwingSingularityAvoidance.set(value);
+      isLegLengthening.set(false);
+      isLegShortening.set(false);
+      this.checkVelocityForSwingSingularityAvoidance.set(checkVelocityForSwingSingularityAvoidance);
    }
 
    public void correctSwingFootTrajectory(FixedFramePoint3DBasics desiredFootPositionToCorrect,
@@ -439,6 +447,10 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
 
          if (desiredPercentOfLegLength.getDoubleValue() > upperBoundToStartFootCorrection)
          {
+            // update if the leg is lengthening
+            if (!isLegLengthening.getBooleanValue())
+               isLegLengthening.set(isLegLengthening());
+
             correctSwingFootTrajectoryOverExtensionForSingularityAvoidance(desiredFootPositionToCorrect,
                                                                            desiredFootLinearVelocityToCorrect,
                                                                            desiredFootLinearAccelerationToCorrect);
@@ -494,7 +506,10 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
 
       // foot's being picked up more quickly than the pelvis is.
       if (checkVelocityForSwingSingularityAvoidance.getBooleanValue() && isLegShortening())
+      {
+         isLegLengthening.set(false);
          return;
+      }
 
       checkVelocityForSwingSingularityAvoidance.set(false);
 
@@ -553,7 +568,7 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
       // Mix the desired leg extension velocity to progressively follow the pelvis velocity as the the leg is more straight
       double desiredLinearVelocityZ = desiredFootLinearVelocity.getZ();
       double desiredLinearAccelerationZ = desiredFootLinearAcceleration.getZ();
-      if (isLegLengthening())
+      if (isLegLengthening.getBooleanValue())
       {
          desiredLinearVelocityZ = InterpolationTools.linearInterpolate(desiredFootLinearVelocity.getZ(),
                                                                        pelvisLinearVelocity.getZ(),
@@ -579,13 +594,15 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
    private boolean isLegLengthening()
    {
       pelvisLinearVelocity.checkReferenceFrameMatch(desiredFootLinearVelocity);
-      return pelvisLinearVelocity.getZ() - desiredFootLinearVelocity.getZ() > velocityDifferenceForLengthening.getValue();
+      isLegLengthening.set(pelvisLinearVelocity.getZ() - desiredFootLinearVelocity.getZ() > velocityDifferenceForLengthening.getValue());
+      return isLegLengthening.getBooleanValue();
    }
 
    private boolean isLegShortening()
    {
       pelvisLinearVelocity.checkReferenceFrameMatch(desiredFootLinearVelocity);
-      return desiredFootLinearVelocity.getZ() - pelvisLinearVelocity.getZ() > velocityDifferenceForLengthening.getValue();
+      isLegShortening.set(desiredFootLinearVelocity.getZ() - pelvisLinearVelocity.getZ() > velocityDifferenceForLengthening.getValue());
+      return isLegShortening.getBooleanValue();
    }
 
    public boolean correctCoMHeightTrajectoryForUnreachableFootStep(CoMHeightTimeDerivativesDataBasics comHeightDataToCorrect, ConstraintType constraintType)
