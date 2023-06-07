@@ -54,7 +54,6 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
       FullHumanoidRobotModel fullRobotModel = syncedRobot.getFullRobotModel();
       String modelFileName = RDXInteractableTools.getModelFileName(robotDefinition.getRigidBodyDefinition(robotCollidable.getRigidBodyName()));
 
-      ReferenceFrame afterLastWristJointFrame = fullRobotModel.getEndEffectorFrame(side, LimbName.ARM);
       ReferenceFrame syncedControlFrame = fullRobotModel.getHandControlFrame(side);
       RigidBodyTransform graphicToControlFrameTransform = new RigidBodyTransform();
       RigidBodyTransform linkToControlFrameTransform = new RigidBodyTransform();
@@ -75,6 +74,7 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
                                                                  side.getLowerCaseName() + "WristSensor");
          }
       }
+      ReferenceFrame afterLastWristJointFrame = fullRobotModel.getEndEffectorFrame(side, LimbName.ARM);
       estimatedHandWrenchArrows = new RDXSpatialVectorArrows(afterLastWristJointFrame);
       estimatedHandWrenchArrows.setAngularPartScale(0.05);
       contextMenuName = side + " Hand Context Menu";
