@@ -30,6 +30,7 @@ import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -51,9 +52,11 @@ public class RDXFootstepPlanning
    private final Throttler planningThrottler = new Throttler().setFrequency(5.0);
    private final TypedNotification<Pose3DReadOnly> planningRequestNotification = new TypedNotification<>();
    private final FramePose3D midFeetZUpPose = new FramePose3D();
-   private volatile PlanarRegionsListMessage planarRegionsListMessage = null;
+   private volatile PlanarRegionsList planarRegionsList = null;
+   private volatile PlanarRegionsList fallbackPlanarRegionsList = null;
    private volatile HeightMapMessage heightMapMessage = null;
    private final FramePose3D startPose = new FramePose3D();
+
    private final RDXLocomotionParameters locomotionParameters;
    /**
     * We create this field so that we can terminate a running plan via
@@ -97,7 +100,7 @@ public class RDXFootstepPlanning
          if (planningRequestNotification.poll())
          {
             Pose3DReadOnly goalPoseInWorld = planningRequestNotification.read();
-            executor.clearQueueAndExecute(() -> planOnAsynchronousThread(goalPoseInWorld, planarRegionsListMessage, heightMapMessage));
+            executor.clearQueueAndExecute(() -> planOnAsynchronousThread(goalPoseInWorld, planarRegionsList, heightMapMessage));
          }
       }
    }
@@ -112,7 +115,7 @@ public class RDXFootstepPlanning
       planningRequestNotification.set(new Pose3D(goalPoseInWorld));
    }
 
-   private void planOnAsynchronousThread(Pose3DReadOnly goalPose, PlanarRegionsListMessage planarRegionsListMessage, HeightMapMessage heightMapMessage)
+   private void planOnAsynchronousThread(Pose3DReadOnly goalPose, PlanarRegionsList planarRegionsList, HeightMapMessage heightMapMessage)
    {
       // Set to false as soon as we start, so it can be set to true at any point now.
       terminatePlan = false;
@@ -150,9 +153,14 @@ public class RDXFootstepPlanning
             assumeFlatGround = false;
             footstepPlannerRequest.setHeightMapData(HeightMapMessageTools.unpackMessage(heightMapMessage));
          }
-         if (planarRegionsListMessage != null)
+         if (planarRegionsList != null)
          {
-            footstepPlannerRequest.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
+            footstepPlannerRequest.setPlanarRegionsList(planarRegionsList);
+            assumeFlatGround = false;
+         }
+         if (fallbackPlanarRegionsList != null)
+         {
+            footstepPlannerRequest.setFallbackPlanarRegionsList(fallbackPlanarRegionsList);
             assumeFlatGround = false;
          }
       }
@@ -235,7 +243,17 @@ public class RDXFootstepPlanning
 
    public void setPlanarRegionsListMessage(PlanarRegionsListMessage planarRegionsListMessage)
    {
-      this.planarRegionsListMessage = planarRegionsListMessage;
+      setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
+   }
+
+   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
+   {
+      this.planarRegionsList = planarRegionsList;
+   }
+
+   public void setFallbackPlanarRegionsListMessage(PlanarRegionsList planarRegionsList)
+   {
+      this.fallbackPlanarRegionsList = planarRegionsList;
    }
 
    public void setHeightMapData(HeightMapMessage heightMapMessage)
