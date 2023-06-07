@@ -38,6 +38,10 @@ import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
 
 import java.time.Instant;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
@@ -65,6 +69,8 @@ public class TerrainPerceptionProcessWithDriver
    private final FramePose3D cameraPose = new FramePose3D();
    private final Throttler throttler = new Throttler();
 
+   private final ExecutorService executorService = Executors.newFixedThreadPool(16);
+
    private final ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic;
    private final Supplier<ReferenceFrame> sensorFrameUpdater;
    private final ROS2Topic<ImageMessage> colorTopic;
@@ -87,6 +93,8 @@ public class TerrainPerceptionProcessWithDriver
    private Mat depth16UC1Image;
    private Mat color8UC3Image;
    private Mat yuvColorImage;
+   private Mat sourceDepthImage;
+   private Mat sourceColorImage;
 
    private final double outputPeriod;
    private boolean initialized = false;
@@ -248,76 +256,87 @@ public class TerrainPerceptionProcessWithDriver
 
          if (parameters.getPublishDepth() || parameters.getRapidRegionsEnabled())
          {
-            depth16UC1Image = new Mat(realsense.getDepthHeight(),
+            sourceDepthImage = new Mat(realsense.getDepthHeight(),
                     realsense.getDepthWidth(),
                     opencv_core.CV_16UC1,
                     realsense.getDepthFrameData()); // deallocate later
+            depth16UC1Image = sourceDepthImage.clone();
          }
 
          if (parameters.getPublishDepth())
          {
-            OpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
-            PerceptionMessageTools.setDepthIntrinsicsFromRealsense(realsense, depthImageMessage);
-            CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
-            PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer,
-                                                               depthTopic,
-                                                               depthImageMessage,
-                                                               ros2Helper,
-                                                               cameraPose,
-                                                               acquisitionTime,
-                                                               depthSequenceNumber++,
-                                                               realsense.getDepthHeight(),
-                                                               realsense.getDepthWidth(),
-                                                               (float) realsense.getDepthDiscretization());
+            executorService.submit(() -> {
+               OpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
+               PerceptionMessageTools.setDepthIntrinsicsFromRealsense(realsense, depthImageMessage);
+               CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
+               PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer,
+                       depthTopic,
+                       depthImageMessage,
+                       ros2Helper,
+                       cameraPose,
+                       acquisitionTime,
+                       depthSequenceNumber++,
+                       realsense.getDepthHeight(),
+                       realsense.getDepthWidth(),
+                       (float) realsense.getDepthDiscretization());
+            });
          }
 
          if (parameters.getPublishColor())
          {
-            colorPoseInDepthFrame.set(realsense.getDepthToColorTranslation(), realsense.getDepthToColorRotation());
 
-            color8UC3Image = new Mat(realsense.getColorHeight(),
-                    realsense.getColorWidth(),
-                    opencv_core.CV_8UC3,
-                    realsense.getColorFrameData()); // deallocate later
+               colorPoseInDepthFrame.set(realsense.getDepthToColorTranslation(), realsense.getDepthToColorRotation());
 
-            // YUV I420 has 1.5 times the height of the image
-            yuvColorImage = new Mat(realsense.getColorHeight() * 1.5, realsense.getColorWidth(), opencv_core.CV_8UC1); // deallocate later
+               sourceColorImage = new Mat(realsense.getColorHeight(),
+                       realsense.getColorWidth(),
+                       opencv_core.CV_8UC3,
+                       realsense.getColorFrameData()); // deallocate later
+               color8UC3Image = sourceColorImage.clone();
 
-            OpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
+               // YUV I420 has 1.5 times the height of the image
+               yuvColorImage = new Mat(realsense.getColorHeight() * 1.5, realsense.getColorWidth(), opencv_core.CV_8UC1); // deallocate later
 
-            PerceptionMessageTools.setColorIntrinsicsFromRealsense(realsense, colorImageMessage);
-            CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
-            PerceptionMessageTools.publishJPGCompressedColorImage(compressedColorPointer,
-                    colorTopic,
-                    colorImageMessage,
-                    ros2Helper,
-                    colorPoseInDepthFrame,
-                    acquisitionTime,
-                    colorSequenceNumber++,
-                    realsense.getColorHeight(),
-                    realsense.getColorWidth(),
-                    (float) realsense.getDepthDiscretization());
+            executorService.submit(() -> {
 
-            color8UC3Image.deallocate();
-            yuvColorImage.deallocate();
-            compressedColorPointer.deallocate();
+               OpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
+
+               PerceptionMessageTools.setColorIntrinsicsFromRealsense(realsense, colorImageMessage);
+               CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
+               PerceptionMessageTools.publishJPGCompressedColorImage(compressedColorPointer,
+                       colorTopic,
+                       colorImageMessage,
+                       ros2Helper,
+                       colorPoseInDepthFrame,
+                       acquisitionTime,
+                       colorSequenceNumber++,
+                       realsense.getColorHeight(),
+                       realsense.getColorWidth(),
+                       (float) realsense.getDepthDiscretization());
+
+               color8UC3Image.deallocate();
+               yuvColorImage.deallocate();
+               compressedColorPointer.deallocate();
+            });
          }
 
          if (parameters.getRapidRegionsEnabled())
          {
-            rapidRegionsExtractor.updateRobotConfigurationData(robotConfigurationData);
+            executorService.submit(() -> {
+
+               rapidRegionsExtractor.updateRobotConfigurationData(robotConfigurationData);
 
 //            PerceptionDebugTools.displayDepth("Depth", depth16UC1Image, 1);
-            depth16UC1Image.convertTo(depthBytedecoImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1, 1, 0);
-            FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
-            extractFramePlanarRegionsList(depthBytedecoImage, cameraFrame, framePlanarRegionsList);
+               depth16UC1Image.convertTo(depthBytedecoImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1, 1, 0);
+               FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
+               extractFramePlanarRegionsList(depthBytedecoImage, cameraFrame, framePlanarRegionsList);
 
-            PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, frameRegionsTopic, ros2Helper);
+               PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, frameRegionsTopic, ros2Helper);
+            });
          }
 
          if (parameters.getPublishDepth() || parameters.getRapidRegionsEnabled())
          {
-            depth16UC1Image.deallocate();
+            sourceDepthImage.deallocate();
             compressedDepthPointer.deallocate();
          }
 
@@ -337,6 +356,14 @@ public class TerrainPerceptionProcessWithDriver
    public void destroy()
    {
       running = false;
+
+      executorService.shutdownNow();
+      try {
+         boolean result = executorService.awaitTermination(200, TimeUnit.MILLISECONDS);
+      } catch (InterruptedException e) {
+         throw new RuntimeException(e);
+      }
+
       rapidRegionsExtractor.destroy();
       depthBytedecoImage.destroy(openCLManager);
       openCLManager.destroy();
@@ -346,10 +373,10 @@ public class TerrainPerceptionProcessWithDriver
    public static void main(String[] args)
    {
       // Benchtop L515: F1120592, Tripod: F1121365, Local: F0245563, Nadia: F112114, D435: 108522071219, D455: 213522252883, 215122254074
-      String realsenseSerialNumber = System.getProperty("d455.serial.number", "108522071219");
+      String realsenseSerialNumber = System.getProperty("d455.serial.number", "213522252883");
       TerrainPerceptionProcessWithDriver process = new TerrainPerceptionProcessWithDriver(realsenseSerialNumber,
                                                                                           "Nadia", null, null,
-                                                                                          RealsenseConfiguration.D435_COLOR_480P_DEPTH_480P_30HZ,
+                                                                                          RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
                                                                                           PerceptionAPI.D455_DEPTH_IMAGE,
                                                                                           PerceptionAPI.D455_COLOR_IMAGE,
                                                                                           PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
