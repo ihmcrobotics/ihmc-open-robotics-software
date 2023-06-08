@@ -15,7 +15,7 @@ public class HandCollisionDetectedPacketPubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c7f68bad464d01415158ad9611b40763e854857717d1249d5cab9424e5d3e9e4";
+   		return "eeb6cab32ca40a2e7ad17704bc7c41734e636fd4041d8ac1d18e575f490093dc";
    }
    
    @Override

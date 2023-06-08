@@ -1,6 +1,6 @@
 @echo on
 
-:: Requires: cmake, msvc2022, JDK 17
+:: Requires: cmake, msvc2019, JDK 17
 :: Assumes msbuild is in the Path. For VC2022, it's in: C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin
 :: Assumes this is also in the Path: C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.33.31629\bin\Hostx64\x64
 

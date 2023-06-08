@@ -15,7 +15,7 @@ public class IntrinsicParametersMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "96aae1ca0e8c1253ec04bc4d71c84ed7c58326bf3a6474ee74b3f9b1acab906a";
+   		return "17f6d71477efdfc35bc1ae412c2e7ffd5a772f8959a3f1c5ef4997ec6635a66a";
    }
    
    @Override

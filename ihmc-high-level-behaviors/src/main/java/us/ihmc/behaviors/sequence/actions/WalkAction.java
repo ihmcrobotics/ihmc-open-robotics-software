@@ -15,7 +15,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -26,9 +25,6 @@ public class WalkAction extends WalkActionData implements BehaviorAction
 {
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
-   private ReferenceFrame parentReferenceFrame;
-   private final ModifiableReferenceFrame gizmoFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
    private final SideDependentList<FramePose3D> goalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
    private final FootstepPlanningModule footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
@@ -44,25 +40,15 @@ public class WalkAction extends WalkActionData implements BehaviorAction
       this.syncedRobot = syncedRobot;
       this.footstepPlanner = footstepPlanner;
       this.footstepPlannerParameters = footstepPlannerParameters;
-      this.referenceFrameLibrary = referenceFrameLibrary;
+      setReferenceFrameLibrary(referenceFrameLibrary);
    }
 
    @Override
    public void update()
    {
-      ReferenceFrame previousParentReferenceFrame = parentReferenceFrame;
-      parentReferenceFrame = referenceFrameLibrary.findFrameByName(getParentFrameName());
-      if (parentReferenceFrame != previousParentReferenceFrame)
-      {
-         gizmoFrame.changeParentFrame(parentReferenceFrame);
-      }
-
-      gizmoFrame.getTransformToParent().set(getTransformToParent());
-      gizmoFrame.getReferenceFrame().update();
-
       for (RobotSide side : RobotSide.values)
       {
-         goalFeetPoses.get(side).setIncludingFrame(gizmoFrame.getReferenceFrame(), getGoalFootstepToGizmos().get(side));
+         goalFeetPoses.get(side).setIncludingFrame(getReferenceFrame(), getGoalFootstepToParentTransforms().get(side));
          goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
       }
    }

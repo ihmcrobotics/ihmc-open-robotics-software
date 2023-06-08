@@ -15,7 +15,7 @@ public class CenterOfMassTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6cf859e76eb6c1bdecdab11f41522ae8b9edd6e2bdff40d22ac29cc1b89e84df";
+   		return "97e37ee12ab68ba5198a281360ebcd9414be279a1d39574ef79e04ea5daeec69";
    }
    
    @Override

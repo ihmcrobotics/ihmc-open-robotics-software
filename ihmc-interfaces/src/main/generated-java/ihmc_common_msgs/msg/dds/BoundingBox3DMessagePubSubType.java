@@ -15,7 +15,7 @@ public class BoundingBox3DMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "51826a49e697091c5173d66584449ca71d6ff4a57a58e0e24cea56de355c2282";
+   		return "46f6e3471d2b029d0d4fd451637ded176e73de5a3caaa5ae8289bfcafc503c0c";
    }
    
    @Override

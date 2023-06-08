@@ -15,7 +15,7 @@ public class MinimalFootstepListMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "16a5c79b79718290095f40de6b63076d76084e69b137fde718c0fd91af092b5a";
+   		return "8f15b71e8940f26bd7aee5941da5c5ff13a2e676e39258798ed3109288d56ea4";
    }
    
    @Override

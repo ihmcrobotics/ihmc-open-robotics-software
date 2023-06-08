@@ -1,4 +1,4 @@
-package us.ihmc.ihmcPerception.steppableRegions;
+package us.ihmc.perception.steppableRegions;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;

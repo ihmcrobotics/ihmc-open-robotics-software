@@ -15,7 +15,7 @@ public class ManipulationAbortedStatusPubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "76da356b8c4a517e6e4fedccf7b45304534797a0743f54a03e13ce6e6b49affc";
+   		return "ce87265039b48691e26405fb0e0c0f9bcabafec0fb5853a23949dd053bc11575";
    }
    
    @Override

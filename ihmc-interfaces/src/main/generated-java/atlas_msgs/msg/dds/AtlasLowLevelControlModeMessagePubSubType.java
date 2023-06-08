@@ -15,7 +15,7 @@ public class AtlasLowLevelControlModeMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b4861d7b49980f2d2a258e5cf00dc6f453350169796e3b7dbc98359e4f21e4d9";
+   		return "6af844017477affde7140e9f6a124b7ff8d13801b54abef4a082e3c9c82e7c89";
    }
    
    @Override

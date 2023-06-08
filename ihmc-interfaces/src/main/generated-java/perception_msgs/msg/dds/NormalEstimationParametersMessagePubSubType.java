@@ -15,7 +15,7 @@ public class NormalEstimationParametersMessagePubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "97ab83bde6c833df59d6219bf383d79d6d2eec1572af133a7e508500544857e2";
+   		return "7e830427ab34fb514c34a8eef7ae7cfb20f5a8cd4739a8557991b56a0b20e506";
    }
    
    @Override

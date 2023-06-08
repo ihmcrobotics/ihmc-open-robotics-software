@@ -15,7 +15,7 @@ public class Ramp3DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihm
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2f77805093c5e698d005848133dcd780ffa843e27cd9341334ae3e502abb2841";
+   		return "0195e81208809ea3d7cedec8f2f544b9c0087d1eeab971b738a3e44faa46ad23";
    }
    
    @Override
