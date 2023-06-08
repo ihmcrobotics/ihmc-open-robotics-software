@@ -61,7 +61,7 @@ public class DynamicStateInspector
    private final YoBoolean isDesiredICPOKForToeOff = new YoBoolean("isDesiredICPOKForToeOff", registry);
    private final YoBoolean isCurrentICPOKForToeOff = new YoBoolean("isCurrentICPOKForToeOff", registry);
 
-   private final YoBoolean dynamicsAreOkForToeOff = new YoBoolean("dynamicsAreOKForToeOff", registry);
+   private final GlitchFilteredYoBoolean dynamicsAreOkForToeOff = new GlitchFilteredYoBoolean("dynamicsAreOKForToeOff", registry, 4);
    private final GlitchFilteredYoBoolean dynamicsAreDefinitelyNotOKForToeOff = new GlitchFilteredYoBoolean("dynamicsAreDefinitelyNotOKForToeOff", registry, 4);
 
    private final FrameConvexPolygon2D leadingFootPolygon = new FrameConvexPolygon2D();
@@ -158,7 +158,7 @@ public class DynamicStateInspector
       this.isCurrentICPOKForToeOff.set(isCurrentICPOKForToeOff);
       this.isDesiredICPOKForToeOff.set(isDesiredICPOKForToeOff);
 
-      dynamicsAreOkForToeOff.set(isCurrentICPOKForToeOff && isDesiredICPOKForToeOff);
+      dynamicsAreOkForToeOff.update(isCurrentICPOKForToeOff && isDesiredICPOKForToeOff);
 
       if (supportPolygon.isPointInside(currentICP) && supportPolygon.isPointInside(desiredICP))
       {
