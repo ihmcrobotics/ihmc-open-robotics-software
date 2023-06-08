@@ -10,7 +10,6 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.shape.primitives.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -28,6 +27,7 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.physics.Collidable;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -39,15 +39,17 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  */
 public class RDXRobotCollidable implements RenderableProvider
 {
+   /** This link frame can be changed by the user to "detach" the collidable from the synced robot link. */
+   private ReferenceFrame linkFrame;
+   private final MovingReferenceFrame syncedLinkFrame;
+   private final ModifiableReferenceFrame collisionShapeFrame;
    private final RDXModelInstance collisionModelInstance;
-   private final RigidBodyTransform shapeTransformToParentFrameAfterJoint;
-   private final ReferenceFrame collisionShapeFrame;
+   private final RDXModelInstance collisionShapeCoordinateFrameGraphic;
    private final FramePose3D boxPose = new FramePose3D();
    private final RigidBodyTransform boxCenterToWorldTransform = new RigidBodyTransform();
    private final FrameShape3DBasics shape;
    private final FramePose3D vrPickPose = new FramePose3D();
-   private final MovingReferenceFrame frameAfterJoint;
-   private String rigidBodyName;
+   private final String rigidBodyName;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
    private SphereRayIntersection sphereRayIntersection;
@@ -55,18 +57,6 @@ public class RDXRobotCollidable implements RenderableProvider
    private CylinderRayIntersection cylinderRayIntersection;
    private EllipsoidRayIntersection ellipsoidRayIntersection;
    private BoxRayIntersection boxRayIntersection;
-   private RDXModelInstance collisionShapeCoordinateFrameGraphic;
-   /**
-    * A robot collision link is either taking the pose of the link that
-    * it's representing, or it's detached, as in, it's taking the pose
-    * of some desired of the operator. When you select the hand for instance
-    * and move it, that is "detaching" it. This link's parent frame
-    * will be different based on detached state.
-    */
-   private boolean isDetached = false;
-   private final RigidBodyTransform detachedTransformToWorld = new RigidBodyTransform();
-   private final ReferenceFrame detachedFrameAfterJoint;
-   private final ReferenceFrame detachedShapeFrame;
    private boolean pickSelected = false;
    private boolean mousePickSelected = false;
    private final SideDependentList<Boolean> vrPickSelected = new SideDependentList<>(false, false);
@@ -91,24 +81,18 @@ public class RDXRobotCollidable implements RenderableProvider
 
    public RDXRobotCollidable(FrameShape3DBasics shape,
                              ReferenceFrame shapeFrame,
-                             MovingReferenceFrame frameAfterJoint,
+                             MovingReferenceFrame syncedLinkFrame,
                              String rigidBodyName,
                              Color color)
    {
       this.shape = shape;
-      this.frameAfterJoint = frameAfterJoint;
+      this.syncedLinkFrame = syncedLinkFrame;
       this.rigidBodyName = rigidBodyName;
-      // TODO update every frame
-      shapeTransformToParentFrameAfterJoint = new RigidBodyTransform(shapeFrame.getTransformToDesiredFrame(frameAfterJoint));
-      collisionShapeFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("collisionMeshFrame" + rigidBodyName,
-                                                                                            frameAfterJoint,
-                                                                                            shapeTransformToParentFrameAfterJoint);
-      detachedFrameAfterJoint = ReferenceFrameTools.constructFrameWithChangingTransformToParent("overrideFrame" + rigidBodyName,
-                                                                                                ReferenceFrame.getWorldFrame(),
-                                                                                                detachedTransformToWorld);
-      detachedShapeFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("overrideMeshFrame" + rigidBodyName,
-                                                                                           detachedFrameAfterJoint,
-                                                                                           shapeTransformToParentFrameAfterJoint);
+
+      linkFrame = syncedLinkFrame;
+      RigidBodyTransform collisionToLinkFrameTransform = new RigidBodyTransform(shapeFrame.getTransformToDesiredFrame(syncedLinkFrame));
+      collisionShapeFrame = new ModifiableReferenceFrame("collisionShapeFrame" + rigidBodyName, linkFrame);
+      collisionShapeFrame.update(transformToParent -> transformToParent.set(collisionToLinkFrameTransform));
 
       collisionModelInstance = new RDXModelInstance(RDXModelBuilder.buildModel(meshBuilder ->
       {
@@ -121,8 +105,8 @@ public class RDXRobotCollidable implements RenderableProvider
          {
             Quaternion orientation = new Quaternion();
             EuclidGeometryTools.orientation3DFromZUpToVector3D(capsule.getAxis(), orientation);
-            shapeTransformToParentFrameAfterJoint.appendTranslation(capsule.getPosition());
-            shapeTransformToParentFrameAfterJoint.appendOrientation(orientation);
+            collisionToLinkFrameTransform.appendTranslation(capsule.getPosition());
+            collisionToLinkFrameTransform.appendOrientation(orientation);
             meshBuilder.addCapsule(capsule.getLength(),
                                    capsule.getRadius(),
                                    capsule.getRadius(),
@@ -134,8 +118,8 @@ public class RDXRobotCollidable implements RenderableProvider
          }
          else if (shape instanceof FrameBox3DReadOnly box)
          {
-            shapeTransformToParentFrameAfterJoint.appendTranslation(box.getPosition());
-            shapeTransformToParentFrameAfterJoint.appendOrientation(box.getOrientation());
+            collisionToLinkFrameTransform.appendTranslation(box.getPosition());
+            collisionToLinkFrameTransform.appendOrientation(box.getOrientation());
             meshBuilder.addBox(box.getSizeX(),
                                box.getSizeY(),
                                box.getSizeZ(),
@@ -149,16 +133,16 @@ public class RDXRobotCollidable implements RenderableProvider
          else if (shape instanceof FrameCylinder3DReadOnly cylinder)
          {
             Quaternion orientation = new Quaternion();
-            shapeTransformToParentFrameAfterJoint.appendTranslation(cylinder.getPosition());
+            collisionToLinkFrameTransform.appendTranslation(cylinder.getPosition());
             EuclidGeometryTools.orientation3DFromZUpToVector3D(cylinder.getAxis(), orientation);
-            shapeTransformToParentFrameAfterJoint.appendOrientation(orientation);
+            collisionToLinkFrameTransform.appendOrientation(orientation);
             meshBuilder.addCylinder(cylinder.getLength(), cylinder.getRadius(), new Point3D(0.0, 0.0, -cylinder.getHalfLength()), color);
             cylinderRayIntersection = new CylinderRayIntersection();
          }
          else if (shape instanceof FrameEllipsoid3DReadOnly ellipsoid)
          {
-            shapeTransformToParentFrameAfterJoint.appendTranslation(ellipsoid.getPosition());
-            shapeTransformToParentFrameAfterJoint.appendOrientation(ellipsoid.getOrientation());
+            collisionToLinkFrameTransform.appendTranslation(ellipsoid.getPosition());
+            collisionToLinkFrameTransform.appendOrientation(ellipsoid.getOrientation());
             meshBuilder.addEllipsoid(ellipsoid.getRadiusX(),
                                      ellipsoid.getRadiusY(),
                                      ellipsoid.getRadiusZ(),
@@ -178,39 +162,30 @@ public class RDXRobotCollidable implements RenderableProvider
 
    public void update()
    {
+      if (collisionShapeFrame.getReferenceFrame().getParent() != linkFrame)
+      {
+         collisionShapeFrame.changeParentFrame(linkFrame);
+      }
+
       pickSelected = mousePickSelected;
       for (RobotSide side : RobotSide.values)
          pickSelected |= vrPickSelected.get(side);
 
       collisionModelInstance.setOpacity(pickSelected ? 1.0f : 0.4f);
-
-      if (isDetached)
-      {
-         detachedFrameAfterJoint.update();
-         detachedShapeFrame.update();
-         collisionModelInstance.setTransformToReferenceFrame(detachedShapeFrame);
-         collisionShapeCoordinateFrameGraphic.setTransformToReferenceFrame(detachedShapeFrame);
-      }
-      else
-      {
-         collisionShapeFrame.update();
-         collisionModelInstance.setTransformToReferenceFrame(collisionShapeFrame);
-         collisionShapeCoordinateFrameGraphic.setTransformToReferenceFrame(collisionShapeFrame);
-      }
+      collisionModelInstance.setTransformToReferenceFrame(collisionShapeFrame.getReferenceFrame());
+      collisionShapeCoordinateFrameGraphic.setTransformToReferenceFrame(collisionShapeFrame.getReferenceFrame());
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
    {
-      // The frame after joint, or parent frame, is dynamic based on detached state
-      ReferenceFrame frameAfterJointToUse = isDetached ? detachedShapeFrame : frameAfterJoint;
       for (RobotSide side : RobotSide.values)
       {
          vrPickResult.get(side).reset();
          vrContext.getController(side).runIfConnected(controller ->
          {
             vrPickPose.setIncludingFrame(controller.getPickPointPose());
-            vrPickPose.changeFrame(frameAfterJointToUse);
-            shape.setReferenceFrame(frameAfterJointToUse);
+            vrPickPose.changeFrame(collisionShapeFrame.getReferenceFrame());
+            shape.setReferenceFrame(collisionShapeFrame.getReferenceFrame());
             if (shape.isPointInside(vrPickPose.getPosition())) // Check if the operator's pick is intersecting the link
             {
                vrPickResult.get(side).addPickCollision(shape.getCentroid().distance(vrPickPose.getPosition()));
@@ -234,11 +209,10 @@ public class RDXRobotCollidable implements RenderableProvider
    public void calculatePick(ImGui3DViewInput input)
    {
       Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
-      ReferenceFrame frameAfterJointToUse = isDetached ? detachedShapeFrame : frameAfterJoint;
       pickResult.reset();
       if (shape instanceof Sphere3DReadOnly sphere)
       {
-         sphereRayIntersection.update(sphere.getRadius(), sphere.getPosition(), frameAfterJointToUse);
+         sphereRayIntersection.update(sphere.getRadius(), sphere.getPosition(), collisionShapeFrame.getReferenceFrame());
          if (sphereRayIntersection.intersect(input.getPickRayInWorld()))
          {
             pickResult.addPickCollision(input.getPickRayInWorld().getPoint().distance(sphereRayIntersection.getFirstIntersectionToPack()));
@@ -250,7 +224,7 @@ public class RDXRobotCollidable implements RenderableProvider
          Point3DReadOnly position = capsule.getPosition();
          double length = capsule.getLength();
          double radius = capsule.getRadius();
-         capsuleIntersection.update(radius, length, position, axis, frameAfterJointToUse);
+         capsuleIntersection.update(radius, length, position, axis, collisionShapeFrame.getReferenceFrame());
          if (capsuleIntersection.intersect(pickRayInWorld))
          {
             pickResult.addPickCollision(capsuleIntersection.getDistanceToCollision(input.getPickRayInWorld()));
@@ -258,9 +232,7 @@ public class RDXRobotCollidable implements RenderableProvider
       }
       else if (shape instanceof Box3DReadOnly box)
       {
-         boxPose.setToZero(frameAfterJointToUse);
-         if (!isDetached)
-            boxPose.set(box.getPose());
+         boxPose.setToZero(collisionShapeFrame.getReferenceFrame());
          boxPose.changeFrame(ReferenceFrame.getWorldFrame());
          boxPose.get(boxCenterToWorldTransform);
          if (boxRayIntersection.intersect(box.getSizeX(), box.getSizeY(), box.getSizeZ(), boxCenterToWorldTransform, pickRayInWorld))
@@ -274,7 +246,11 @@ public class RDXRobotCollidable implements RenderableProvider
       }
       else if (shape instanceof Cylinder3DReadOnly cylinder)
       {
-         cylinderRayIntersection.update(cylinder.getLength(), cylinder.getRadius(), cylinder.getPosition(), cylinder.getAxis(), frameAfterJointToUse);
+         cylinderRayIntersection.update(cylinder.getLength(),
+                                        cylinder.getRadius(),
+                                        cylinder.getPosition(),
+                                        cylinder.getAxis(),
+                                        collisionShapeFrame.getReferenceFrame());
          double intersection = cylinderRayIntersection.intersect(input.getPickRayInWorld());
          if (!Double.isNaN(intersection))
          {
@@ -288,7 +264,7 @@ public class RDXRobotCollidable implements RenderableProvider
                                          ellipsoid.getRadiusZ(),
                                          ellipsoid.getPosition(),
                                          ellipsoid.getOrientation(),
-                                         frameAfterJointToUse);
+                                         collisionShapeFrame.getReferenceFrame());
          if (ellipsoidRayIntersection.intersect(input.getPickRayInWorld()))
          {
             pickResult.addPickCollision(ellipsoidRayIntersection.getFirstIntersectionToPack().distance(input.getPickRayInWorld().getPoint()));
@@ -317,10 +293,14 @@ public class RDXRobotCollidable implements RenderableProvider
       collisionShapeCoordinateFrameGraphic.getRenderables(renderables, pool);
    }
 
-   public RigidBodyTransform setDetachedTransform(boolean isDetached)
+   public void setDetached(ReferenceFrame detachedLinkFrame)
    {
-      this.isDetached = isDetached;
-      return detachedTransformToWorld;
+      linkFrame = detachedLinkFrame;
+   }
+
+   public void setAttachedToSyncedLink()
+   {
+      linkFrame = syncedLinkFrame;
    }
 
    public boolean getAnyPickSelected()

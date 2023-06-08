@@ -13,22 +13,18 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 public class HandPoseAction extends HandPoseActionData implements BehaviorAction
 {
    private final ROS2ControllerHelper ros2ControllerHelper;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
-   private ReferenceFrame parentReferenceFrame;
    private final FramePose3D pose = new FramePose3D();
 
    public HandPoseAction(ROS2ControllerHelper ros2ControllerHelper, ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
-      this.referenceFrameLibrary = referenceFrameLibrary;
+      setReferenceFrameLibrary(referenceFrameLibrary);
    }
 
    @Override
    public void update()
    {
-      parentReferenceFrame = referenceFrameLibrary.findFrameByName(getParentFrameName());
-
-      pose.setIncludingFrame(parentReferenceFrame, getTransformToParent());
+      pose.setToZero(getReferenceFrame());
       pose.changeFrame(ReferenceFrame.getWorldFrame());
    }
 

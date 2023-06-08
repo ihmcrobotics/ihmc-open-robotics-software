@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -16,24 +15,18 @@ import java.util.UUID;
 public class FootstepAction extends FootstepActionData implements BehaviorAction
 {
    private final ROS2ControllerHelper ros2ControllerHelper;
-   private final ROS2SyncedRobotModel syncedRobot;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
-   private ReferenceFrame parentReferenceFrame;
    private final FramePose3D pose = new FramePose3D();
 
-   public FootstepAction(ROS2ControllerHelper ros2ControllerHelper, ROS2SyncedRobotModel syncedRobot, ReferenceFrameLibrary referenceFrameLibrary)
+   public FootstepAction(ROS2ControllerHelper ros2ControllerHelper, ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
-      this.syncedRobot = syncedRobot;
-      this.referenceFrameLibrary = referenceFrameLibrary;
+      setReferenceFrameLibrary(referenceFrameLibrary);
    }
 
    @Override
    public void update()
    {
-      parentReferenceFrame = referenceFrameLibrary.findFrameByName(getParentFrameName());
-
-      pose.setIncludingFrame(parentReferenceFrame, getTransformToParent());
+      pose.setToZero(getReferenceFrame());
       pose.changeFrame(ReferenceFrame.getWorldFrame());
    }
 

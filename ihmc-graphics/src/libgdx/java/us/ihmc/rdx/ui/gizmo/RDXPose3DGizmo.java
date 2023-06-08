@@ -91,7 +91,6 @@ public class RDXPose3DGizmo implements RenderableProvider
    private RigidBodyTransform transformToParent;
    /** This pose 3D should always be left in world frame and represent this gizmo's pose. */
    private final FramePose3D framePose3D = new FramePose3D();
-   private ReferenceFrame parentReferenceFrame;
    private ReferenceFrame gizmoFrame;
    /** Gizmo transform to world so it can be calculated once. */
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
@@ -138,14 +137,18 @@ public class RDXPose3DGizmo implements RenderableProvider
 
    private void initialize(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify)
    {
-      this.parentReferenceFrame = gizmoFrame.getParent();
       this.transformToParent = gizmoTransformToParentFrameToModify;
+      this.gizmoFrame = gizmoFrame;
+   }
+
+   public void setGizmoFrame(ReferenceFrame gizmoFrame)
+   {
       this.gizmoFrame = gizmoFrame;
    }
 
    public void setParentFrame(ReferenceFrame parentReferenceFrame)
    {
-      this.parentReferenceFrame = parentReferenceFrame;
+      gizmoFrame.remove();
       gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
    }
 
@@ -160,7 +163,7 @@ public class RDXPose3DGizmo implements RenderableProvider
    public void create(RDX3DPanel panel3D)
    {
       camera3D = panel3D.getCamera3D();
-      frameBasedGizmoModification = new FrameBasedGizmoModification(this::getGizmoFrame, () -> parentReferenceFrame, camera3D);
+      frameBasedGizmoModification = new FrameBasedGizmoModification(this::getGizmoFrame, () -> gizmoFrame.getParent(), camera3D);
       panel3D.addImGuiOverlayAddition(this::renderTooltipAndContextMenu);
 
       for (Axis3D axis : Axis3D.values)
