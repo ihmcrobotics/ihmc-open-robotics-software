@@ -32,7 +32,6 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.io.*;
 
 import java.util.LinkedList;
-import java.util.UUID;
 
 /**
  * This class is primarily an interactable sequence/list of robot actions.
@@ -130,8 +129,8 @@ public class RDXBehaviorActionSequenceEditor
       {
          JSONTools.forEachArrayElement(jsonNode, "actions", actionNode ->
          {
-            String actionType = actionNode.get("type").asText();
-            RDXBehaviorAction action = getAction(actionType);
+            String actionTypeName = actionNode.get("type").asText();
+            RDXBehaviorAction action = RDXActionSequenceTools.createBlankAction(actionTypeName, robotModel, syncedRobot, panel3D, referenceFrameLibrary);
             if (action != null)
             {
                action.getActionData().loadFromFile(actionNode);
@@ -152,52 +151,6 @@ public class RDXBehaviorActionSequenceEditor
       }
 
       return false;
-   }
-
-   private RDXBehaviorAction getAction(String actionType)
-   {
-      boolean robotHasArms = robotModel.getRobotVersion().hasArms();
-      switch (actionType)
-      {
-         case "RDXArmJointAnglesAction" ->
-         {
-            return robotHasArms ? new RDXArmJointAnglesAction() : null;
-         }
-         case "RDXChestOrientationAction" ->
-         {
-            return new RDXChestOrientationAction();
-         }
-         case "RDXFootstepAction" ->
-         {
-            return newFootstepAction();
-         }
-         case "RDXHandConfigurationAction" ->
-         {
-            return robotHasArms ? new RDXHandConfigurationAction() : null;
-         }
-         case "RDXHandPoseAction" ->
-         {
-            return robotHasArms ? newHandPoseAction() : null;
-         }
-         case "RDXHandWrenchAction" ->
-         {
-            return robotHasArms ? new RDXHandWrenchAction() : null;
-         }
-         case "RDXPelvisHeightAction" ->
-         {
-            return new RDXPelvisHeightAction();
-         }
-         case "RDXWaitDurationAction" ->
-         {
-            return new RDXWaitDurationAction();
-         }
-         case "RDXWalkAction" ->
-         {
-            return newWalkAction();
-         }
-      };
-
-      return null;
    }
 
    private void commandNextActionIndex(int nextActionIndex)
@@ -367,88 +320,7 @@ public class RDXBehaviorActionSequenceEditor
       // TODO: Automatically sync between this UI and remote process
       if (ImGui.button("Send to robot"))
       {
-         long updateUUID = UUID.randomUUID().getLeastSignificantBits();
-         ActionSequenceUpdateMessage actionSequenceUpdateMessage = new ActionSequenceUpdateMessage();
-         actionSequenceUpdateMessage.setSequenceUpdateUuid(updateUUID);
-         actionSequenceUpdateMessage.setSequenceSize(actionSequence.size());
-         ros2.publish(BehaviorActionSequence.SEQUENCE_COMMAND_TOPIC, actionSequenceUpdateMessage);
-
-         for (int i = 0; i < actionSequence.size(); i++)
-         {
-            RDXBehaviorAction action = actionSequence.get(i);
-            if (action instanceof RDXArmJointAnglesAction armJointAnglesAction)
-            {
-               ArmJointAnglesActionMessage armJointAnglesActionMessage = new ArmJointAnglesActionMessage();
-               armJointAnglesActionMessage.getActionInformation().setActionIndex(i);
-               armJointAnglesActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
-               armJointAnglesAction.getActionData().toMessage(armJointAnglesActionMessage);
-               ros2.publish(BehaviorActionSequence.ARM_JOINT_ANGLES_UPDATE_TOPIC, armJointAnglesActionMessage);
-            }
-            else if (action instanceof RDXChestOrientationAction chestOrientationAction)
-            {
-               ChestOrientationActionMessage chestOrientationActionMessage = new ChestOrientationActionMessage();
-               chestOrientationActionMessage.getActionInformation().setActionIndex(i);
-               chestOrientationActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
-               chestOrientationAction.getActionData().toMessage(chestOrientationActionMessage);
-               ros2.publish(BehaviorActionSequence.CHEST_ORIENTATION_UPDATE_TOPIC, chestOrientationActionMessage);
-            }
-            else if (action instanceof RDXFootstepAction footstepAction)
-            {
-               FootstepActionMessage footstepActionMessage = new FootstepActionMessage();
-               footstepActionMessage.getActionInformation().setActionIndex(i);
-               footstepActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
-               footstepAction.getActionData().toMessage(footstepActionMessage);
-               ros2.publish(BehaviorActionSequence.FOOTSTEP_UPDATE_TOPIC, footstepActionMessage);
-            }
-            else if (action instanceof RDXHandConfigurationAction handConfigurationAction)
-            {
-               HandConfigurationActionMessage handConfigurationActionMessage = new HandConfigurationActionMessage();
-               handConfigurationActionMessage.getActionInformation().setActionIndex(i);
-               handConfigurationActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
-               handConfigurationAction.getActionData().toMessage(handConfigurationActionMessage);
-               ros2.publish(BehaviorActionSequence.HAND_CONFIGURATION_UPDATE_TOPIC, handConfigurationActionMessage);
-            }
-            else if (action instanceof RDXHandPoseAction handPoseAction)
-            {
-               HandPoseActionMessage handPoseActionMessage = new HandPoseActionMessage();
-               handPoseActionMessage.getActionInformation().setActionIndex(i);
-               handPoseActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
-               handPoseAction.getActionData().toMessage(handPoseActionMessage);
-               ros2.publish(BehaviorActionSequence.HAND_POSE_UPDATE_TOPIC, handPoseActionMessage);
-            }
-            else if (action instanceof RDXHandWrenchAction handWrenchAction)
-            {
-               HandWrenchActionMessage handWrenchActionMessage = new HandWrenchActionMessage();
-               handWrenchActionMessage.getActionInformation().setActionIndex(i);
-               handWrenchActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
-               handWrenchAction.getActionData().toMessage(handWrenchActionMessage);
-               ros2.publish(BehaviorActionSequence.HAND_WRENCH_UPDATE_TOPIC, handWrenchActionMessage);
-            }
-            else if (action instanceof RDXPelvisHeightAction pelvisHeightAction)
-            {
-               PelvisHeightActionMessage pelvisHeightActionMessage = new PelvisHeightActionMessage();
-               pelvisHeightActionMessage.getActionInformation().setActionIndex(i);
-               pelvisHeightActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
-               pelvisHeightAction.getActionData().toMessage(pelvisHeightActionMessage);
-               ros2.publish(BehaviorActionSequence.PELVIS_HEIGHT_UPDATE_TOPIC, pelvisHeightActionMessage);
-            }
-            else if (action instanceof RDXWaitDurationAction waitDurationAction)
-            {
-               WaitDurationActionMessage waitDurationActionMessage = new WaitDurationActionMessage();
-               waitDurationActionMessage.getActionInformation().setActionIndex(i);
-               waitDurationActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
-               waitDurationAction.getActionData().toMessage(waitDurationActionMessage);
-               ros2.publish(BehaviorActionSequence.WAIT_DURATION_UPDATE_TOPIC, waitDurationActionMessage);
-            }
-            else if (action instanceof RDXWalkAction walkAction)
-            {
-               WalkActionMessage walkActionMessage = new WalkActionMessage();
-               walkActionMessage.getActionInformation().setActionIndex(i);
-               walkActionMessage.getActionInformation().setSequenceUpdateUuid(updateUUID);
-               walkAction.getActionData().toMessage(walkActionMessage);
-               ros2.publish(BehaviorActionSequence.WALK_UPDATE_TOPIC, walkActionMessage);
-            }
-         }
+         RDXActionSequenceTools.publishActionSequenceUpdateMessage(actionSequence, ros2);
       }
       ImGui.sameLine();
       ImGui.text("# " + receivedSequenceStatusMessageCount);
@@ -556,7 +428,7 @@ public class RDXBehaviorActionSequenceEditor
       RDXBehaviorAction newAction = null;
       if (ImGui.button(labels.get("Add Walk")))
       {
-         newAction = newWalkAction();
+         newAction = new RDXWalkAction(panel3D, robotModel, referenceFrameLibrary);
       }
       ImGui.text("Add Hand Pose:");
       ImGui.sameLine();
@@ -564,7 +436,7 @@ public class RDXBehaviorActionSequenceEditor
       {
          if (ImGui.button(labels.get(side.getPascalCaseName(), "HandPose")))
          {
-            RDXHandPoseAction handPoseAction = newHandPoseAction();
+            RDXHandPoseAction handPoseAction = new RDXHandPoseAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), referenceFrameLibrary);
             // Set the new action to where the last one was for faster authoring
             handPoseAction.setSide(side);
             RDXHandPoseAction nextPreviousHandPoseAction = findNextPreviousHandPoseAction(side);
@@ -617,7 +489,7 @@ public class RDXBehaviorActionSequenceEditor
       {
          if (ImGui.button(labels.get(side.getPascalCaseName(), 1)))
          {
-            RDXFootstepAction footstepAction = newFootstepAction();
+            RDXFootstepAction footstepAction = new RDXFootstepAction(panel3D, robotModel, syncedRobot, referenceFrameLibrary);
             // Set the new action to where the last one was for faster authoring
             footstepAction.setSide(side);
             RDXFootstepAction nextPreviousFootstepAction = findNextPreviousFootstepAction();
@@ -647,7 +519,7 @@ public class RDXBehaviorActionSequenceEditor
    private RDXFootstepAction findNextPreviousFootstepAction()
    {
       RDXFootstepAction previousAction = null;
-      for (int i = 0; i < executionNextIndexStatus - 1; i++)
+      for (int i = 0; i < executionNextIndexStatus + 1 && i < actionSequence.size(); i++)
          if (actionSequence.get(i) instanceof RDXFootstepAction)
             previousAction = (RDXFootstepAction) actionSequence.get(i);
       return previousAction;
@@ -656,7 +528,7 @@ public class RDXBehaviorActionSequenceEditor
    private RDXHandPoseAction findNextPreviousHandPoseAction(RobotSide side)
    {
       RDXHandPoseAction previousAction = null;
-      for (int i = 0; i < executionNextIndexStatus - 1; i++)
+      for (int i = 0; i < executionNextIndexStatus + 1 && i < actionSequence.size(); i++)
       {
          if (actionSequence.get(i) instanceof RDXHandPoseAction
              && ((RDXHandPoseAction) actionSequence.get(i)).getActionData().getSide() == side)
@@ -669,28 +541,15 @@ public class RDXBehaviorActionSequenceEditor
 
    private void insertNewAction(RDXBehaviorAction action)
    {
-      actionSequence.add(executionNextIndexStatus, action);
+      int insertionIndex = executionNextIndexStatus == actionSequence.size() ? executionNextIndexStatus : executionNextIndexStatus + 1;
+      actionSequence.add(insertionIndex, action);
+
       for (int i = 0; i < actionSequence.size(); i++)
       {
          // When loading, we want to deselect all the actions, otherwise the last one ends up being selected.
-         actionSequence.get(i).getSelected().set(!loading && i == executionNextIndexStatus);
+         actionSequence.get(i).getSelected().set(!loading && i == insertionIndex);
       }
-      executionNextIndexStatus++;
-   }
-
-   private RDXFootstepAction newFootstepAction()
-   {
-      return new RDXFootstepAction(panel3D, robotModel, syncedRobot, referenceFrameLibrary);
-   }
-
-   private RDXWalkAction newWalkAction()
-   {
-      return new RDXWalkAction(panel3D, robotModel, referenceFrameLibrary);
-   }
-
-   private RDXHandPoseAction newHandPoseAction()
-   {
-      return new RDXHandPoseAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), referenceFrameLibrary);
+      commandNextActionIndex(executionNextIndexStatus + 1);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
