@@ -104,8 +104,7 @@ public class HumanoidPerceptionModule
       this.sensorFrameRegions = new FramePlanarRegionsList();
       this.bytedecoDepthImage = new BytedecoImage(cameraIntrinsics.getWidth(), cameraIntrinsics.getHeight(), opencv_core.CV_16UC1);
       this.bytedecoDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      this.rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor();
-      this.rapidPlanarRegionsExtractor.create(openCLManager, cameraIntrinsics.getHeight(), cameraIntrinsics.getWidth(),
+      this.rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager, cameraIntrinsics.getHeight(), cameraIntrinsics.getWidth(),
                                               cameraIntrinsics.getFx(), cameraIntrinsics.getFy(), cameraIntrinsics.getCx(),
                                               cameraIntrinsics.getCy());
 

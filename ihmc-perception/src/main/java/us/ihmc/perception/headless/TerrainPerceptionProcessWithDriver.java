@@ -130,8 +130,6 @@ public class TerrainPerceptionProcessWithDriver
       realtimeROS2Node.spin();
 
       openCLManager = new OpenCLManager();
-      rapidRegionsExtractor = new RapidPlanarRegionsExtractor();
-      rapidRegionsExtractor.initializeBodyCollisionFilter(fullRobotModel, collisionBoxProvider);
 
       realSenseHardwareManager = new RealSenseHardwareManager();
 
@@ -230,7 +228,6 @@ public class TerrainPerceptionProcessWithDriver
                                                                     realsense.getDepthFocalLengthPixelsY(),
                                                                     realsense.getDepthPrincipalOffsetXPixels(),
                                                                     realsense.getDepthPrincipalOffsetYPixels());
-
             rapidRegionsExtractor.initializeBodyCollisionFilter(fullRobotModel, collisionBoxProvider);
 
             rapidRegionsExtractor.getDebugger().setEnabled(true);
