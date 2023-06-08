@@ -13,6 +13,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONTools;
 
+import java.util.function.Consumer;
+
 public class WalkActionData implements BehaviorActionData
 {
    private String description = "Walk";
@@ -96,6 +98,16 @@ public class WalkActionData implements BehaviorActionData
    public void changeParentFrameWithoutMoving(ReferenceFrame parentFrame)
    {
       modifiableReferenceFrame.changeParentFrameWithoutMoving(parentFrame);
+   }
+
+   public void changeParentFrame(ReferenceFrame parentFrame)
+   {
+      modifiableReferenceFrame.changeParentFrame(parentFrame);
+   }
+
+   public void setTransformToParent(Consumer<RigidBodyTransform> transformToParentConsumer)
+   {
+      modifiableReferenceFrame.update(transformToParentConsumer);
    }
 
    public RigidBodyTransform getTransformToParent()
