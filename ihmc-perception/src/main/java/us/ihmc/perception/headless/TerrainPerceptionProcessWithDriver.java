@@ -40,7 +40,6 @@ import us.ihmc.tools.thread.Throttler;
 import java.time.Instant;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -108,8 +107,6 @@ public class TerrainPerceptionProcessWithDriver
    private long colorSequenceNumber = 0;
 
    public TerrainPerceptionProcessWithDriver(String serialNumber, String robotName,
-                                             CollisionBoxProvider collisionBoxProvider,
-                                             FullHumanoidRobotModel fullRobotModel,
                                              RealsenseConfiguration realsenseConfiguration,
                                              ROS2Topic<ImageMessage> depthTopic,
                                              ROS2Topic<ImageMessage> colorTopic,
@@ -371,7 +368,7 @@ public class TerrainPerceptionProcessWithDriver
       // Benchtop L515: F1120592, Tripod: F1121365, Local: F0245563, Nadia: F112114, D435: 108522071219, D455: 213522252883, 215122254074
       String realsenseSerialNumber = System.getProperty("d455.serial.number", "213522252883");
       TerrainPerceptionProcessWithDriver process = new TerrainPerceptionProcessWithDriver(realsenseSerialNumber,
-                                                                                          "Nadia", null, null,
+                                                                                          "Nadia",
                                                                                           RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
                                                                                           PerceptionAPI.D455_DEPTH_IMAGE,
                                                                                           PerceptionAPI.D455_COLOR_IMAGE,
