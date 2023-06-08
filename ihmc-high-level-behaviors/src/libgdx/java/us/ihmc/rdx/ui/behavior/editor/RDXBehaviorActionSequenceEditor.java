@@ -16,6 +16,7 @@ import std_msgs.msg.dds.Int32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.sequence.BehaviorActionData;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Input;
@@ -31,6 +32,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.io.*;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
@@ -64,7 +66,6 @@ public class RDXBehaviorActionSequenceEditor
    private ReferenceFrameLibrary referenceFrameLibrary;
    private ROS2ControllerHelper ros2;
    private final MutablePair<Integer, Integer> reorderRequest = MutablePair.of(-1, 0);
-   private boolean loading = false;
    private volatile long receivedSequenceStatusMessageCount = 0;
    private long receivedStatusMessageCount = 0;
    private int executionNextIndexStatus;
@@ -74,6 +75,8 @@ public class RDXBehaviorActionSequenceEditor
    private IHMCROS2Input<ActionSequenceUpdateMessage> sequenceStatusSubscription;
    private final Empty manuallyExecuteNextActionMessage = new Empty();
    private final Bool automaticExecutionCommandMessage = new Bool();
+   private final ArrayList<BehaviorActionData> actionDataForMessage = new ArrayList<>();
+   private final ActionSequenceUpdateMessage actionSequenceUpdateMessage = new ActionSequenceUpdateMessage();
 
    public RDXBehaviorActionSequenceEditor(WorkspaceResourceFile fileToLoadFrom)
    {
@@ -122,7 +125,6 @@ public class RDXBehaviorActionSequenceEditor
    {
       actionSequence.clear();
       executionNextIndexStatus = 0;
-      loading = true;
       LogTools.info("Loading from {}", workspaceFile.getClasspathResource().toString());
       MutableBoolean successfullyLoadedActions = new MutableBoolean(true);
       JSONFileTools.load(workspaceFile.getClasspathResourceAsStream(), jsonNode ->
@@ -135,7 +137,8 @@ public class RDXBehaviorActionSequenceEditor
             {
                action.getActionData().loadFromFile(actionNode);
                action.updateAfterLoading();
-               insertNewAction(action);
+               actionSequence.add(action);
+               action.getSelected().set(false);
             }
             else
             {
@@ -143,7 +146,6 @@ public class RDXBehaviorActionSequenceEditor
             }
          });
       });
-      loading = false;
       if (successfullyLoadedActions.getValue())
       {
          commandNextActionIndex(0);
@@ -320,7 +322,7 @@ public class RDXBehaviorActionSequenceEditor
       // TODO: Automatically sync between this UI and remote process
       if (ImGui.button("Send to robot"))
       {
-         RDXActionSequenceTools.publishActionSequenceUpdateMessage(actionSequence, ros2);
+         RDXActionSequenceTools.publishActionSequenceUpdateMessage(actionSequence, actionDataForMessage, actionSequenceUpdateMessage, ros2);
       }
       ImGui.sameLine();
       ImGui.text("# " + receivedSequenceStatusMessageCount);
@@ -547,7 +549,7 @@ public class RDXBehaviorActionSequenceEditor
       for (int i = 0; i < actionSequence.size(); i++)
       {
          // When loading, we want to deselect all the actions, otherwise the last one ends up being selected.
-         actionSequence.get(i).getSelected().set(!loading && i == insertionIndex);
+         actionSequence.get(i).getSelected().set(i == insertionIndex);
       }
       commandNextActionIndex(executionNextIndexStatus + 1);
    }
