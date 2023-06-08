@@ -9,10 +9,6 @@ import us.ihmc.pubsub.TopicDataType;
 public class ActionInformationMessage extends Packet<ActionInformationMessage> implements Settable<ActionInformationMessage>, EpsilonComparable<ActionInformationMessage>
 {
    /**
-            * Unique identifier of the sequence update used to make sure we got complete data
-            */
-   public long sequence_update_uuid_;
-   /**
             * Index of the action within the sequence
             */
    public long action_index_;
@@ -29,25 +25,8 @@ public class ActionInformationMessage extends Packet<ActionInformationMessage> i
 
    public void set(ActionInformationMessage other)
    {
-      sequence_update_uuid_ = other.sequence_update_uuid_;
-
       action_index_ = other.action_index_;
 
-   }
-
-   /**
-            * Unique identifier of the sequence update used to make sure we got complete data
-            */
-   public void setSequenceUpdateUuid(long sequence_update_uuid)
-   {
-      sequence_update_uuid_ = sequence_update_uuid;
-   }
-   /**
-            * Unique identifier of the sequence update used to make sure we got complete data
-            */
-   public long getSequenceUpdateUuid()
-   {
-      return sequence_update_uuid_;
    }
 
    /**
@@ -83,10 +62,7 @@ public class ActionInformationMessage extends Packet<ActionInformationMessage> i
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_update_uuid_, other.sequence_update_uuid_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.action_index_, other.action_index_, epsilon)) return false;
-
 
       return true;
    }
@@ -100,8 +76,6 @@ public class ActionInformationMessage extends Packet<ActionInformationMessage> i
 
       ActionInformationMessage otherMyClass = (ActionInformationMessage) other;
 
-      if(this.sequence_update_uuid_ != otherMyClass.sequence_update_uuid_) return false;
-
       if(this.action_index_ != otherMyClass.action_index_) return false;
 
 
@@ -114,8 +88,6 @@ public class ActionInformationMessage extends Packet<ActionInformationMessage> i
       StringBuilder builder = new StringBuilder();
 
       builder.append("ActionInformationMessage {");
-      builder.append("sequence_update_uuid=");
-      builder.append(this.sequence_update_uuid_);      builder.append(", ");
       builder.append("action_index=");
       builder.append(this.action_index_);
       builder.append("}");

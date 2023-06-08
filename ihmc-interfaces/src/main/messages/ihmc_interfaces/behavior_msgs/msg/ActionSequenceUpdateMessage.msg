@@ -1,5 +1,20 @@
-# Unique identifier of the sequence update used to make sure we got complete data
-uint64 sequence_update_uuid
-
 # Number of actions within the sequence
-uint32 sequence_size
+uint16 sequence_size
+
+behavior_msgs/ArmJointAnglesActionMessage[<=200] arm_joint_angles_actions
+
+behavior_msgs/ChestOrientationActionMessage[<=200] chest_orientation_actions
+
+behavior_msgs/FootstepActionMessage[<=200] footstep_actions
+
+behavior_msgs/HandConfigurationActionMessage[<=200] hand_configuration_actions
+
+behavior_msgs/HandPoseActionMessage[<=200] hand_pose_actions
+
+behavior_msgs/HandWrenchActionMessage[<=200] hand_wrench_actions
+
+behavior_msgs/PelvisHeightActionMessage[<=200] pelvis_height_actions
+
+behavior_msgs/WaitDurationActionMessage[<=200] wait_duration_actions
+
+behavior_msgs/WalkActionMessage[<=200] walk_actions
