@@ -9,6 +9,7 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
+import org.bytedeco.opencv.opencv_core.UMat;
 import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -80,12 +81,14 @@ public class DualBlackflyCamera
    private int imageHeight = 0;
    private long numberOfBytesInFrame = 0;
    private BytedecoImage blackflySourceImage;
-   private Mat yuv420Image;
-   private Mat rgbaMat;
+   private UMat blackflySourceImageUMat;
+   private UMat yuv420ImageUMat;
+   private UMat rgbaUMat;
    private BytedecoImage undistortedImage;
-   private Mat distortedRGBImage;
-   private Mat undistortionMap1;
-   private Mat undistortionMap2;
+   private UMat undistortedImageUMat;
+   private UMat distortedRGBImageUMat;
+   private UMat undistortionMap1UMat;
+   private UMat undistortionMap2UMat;
    private Scalar undistortionRemapBorderValue;
 
    private volatile boolean destroyed = false;
@@ -162,15 +165,16 @@ public class DualBlackflyCamera
       // Setup basic color images
       {
          blackflySourceImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
-         yuv420Image = new Mat(imageHeight * 1.5, imageWidth, opencv_core.CV_8UC1);
-         rgbaMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4); // Mat for color conversion
+         blackflySourceImageUMat = new UMat(); // UMat copy of the source image
+         yuv420ImageUMat = new UMat((int)(imageHeight * 1.5), imageHeight, opencv_core.CV_8UC1);
+         rgbaUMat = new UMat(imageHeight, imageWidth, opencv_core.CV_8UC4); // UMat for color conversion
       }
 
       // Setup distortion images
       {
          undistortedImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
-         distortedRGBImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
-
+         undistortedImageUMat = new UMat(); // UMat copy of undistorted image
+         distortedRGBImageUMat = new UMat(imageHeight, imageWidth, opencv_core.CV_8UC3);
          Mat cameraMatrix = new Mat(3, 3, opencv_core.CV_64F);
          opencv_core.setIdentity(cameraMatrix);
          cameraMatrix.ptr(0, 0).putDouble(SensorHeadParameters.FOCAL_LENGTH_X_FOR_UNDISORTION);
@@ -189,8 +193,8 @@ public class DualBlackflyCamera
          Mat rectificationTransformation = new Mat(3, 3, opencv_core.CV_64F);
          opencv_core.setIdentity(rectificationTransformation);
 
-         undistortionMap1 = new Mat();
-         undistortionMap2 = new Mat();
+         undistortionMap1UMat = new UMat();
+         undistortionMap2UMat = new UMat();
          undistortionRemapBorderValue = new Scalar();
 
          double balanceNewFocalLength = 0.0;
@@ -206,14 +210,21 @@ public class DualBlackflyCamera
                                                                           fovScaleFocalLengthDivisor);
          // Fisheye undistortion
          // https://docs.opencv.org/4.7.0/db/d58/group__calib3d__fisheye.html#ga167df4b00a6fd55287ba829fbf9913b9
+         // Use temporary Mat as there is no undistortion for UMat (as of June 2023)
+         Mat tempUndistortionMap1 = new Mat();
+         Mat tempUndistortionMap2 = new Mat();
          opencv_calib3d.fisheyeInitUndistortRectifyMap(cameraMatrix,
                                                        distortionCoefficients,
                                                        rectificationTransformation,
                                                        newCameraMatrixEstimate,
                                                        undistortedImageSize,
                                                        opencv_core.CV_16SC2,
-                                                       undistortionMap1,
-                                                       undistortionMap2);
+                                                       tempUndistortionMap1,
+                                                       tempUndistortionMap2);
+
+         // Copy undistortion map Mat to UMat version
+         tempUndistortionMap1.copyTo(undistortionMap1UMat);
+         tempUndistortionMap2.copyTo(undistortionMap2UMat);
 
          // Create arUco marker detection
          ReferenceFrame blackflyCameraFrame = syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame();
@@ -271,12 +282,16 @@ public class DualBlackflyCamera
 
       blackflySourceImage.rewind();
       blackflySourceImage.changeAddress(spinImageData.address());
+      blackflySourceImage.getBytedecoOpenCVMat().copyTo(blackflySourceImageUMat);
 
-      opencv_imgproc.cvtColor(blackflySourceImage.getBytedecoOpenCVMat(), distortedRGBImage, opencv_imgproc.COLOR_BayerBG2RGB);
-      opencv_imgproc.remap(distortedRGBImage,
-                           undistortedImage.getBytedecoOpenCVMat(),
-                           undistortionMap1,
-                           undistortionMap2,
+      // FIXME: sometimes blackflySourceImageUMat is empty and cvtColor fails
+      opencv_imgproc.cvtColor(blackflySourceImageUMat, distortedRGBImageUMat, opencv_imgproc.COLOR_BayerBG2RGB);
+
+      undistortedImage.getBytedecoOpenCVMat().copyTo(undistortedImageUMat);
+      opencv_imgproc.remap(distortedRGBImageUMat,
+                           undistortedImageUMat,
+                           undistortionMap1UMat,
+                           undistortionMap2UMat,
                            opencv_imgproc.INTER_LINEAR,
                            opencv_core.BORDER_CONSTANT,
                            undistortionRemapBorderValue);
@@ -307,11 +322,11 @@ public class DualBlackflyCamera
       // Converting BayerRG8 -> RGBA -> YUV
       // Here we use COLOR_BayerBG2RGBA opencv conversion. The Blackfly cameras are set to use BayerRG pixel format.
       // But, for some reason, it's actually BayerBG. Changing to COLOR_BayerRG2RGBA will result in the wrong colors.
-      opencv_imgproc.cvtColor(blackflySourceImage.getBytedecoOpenCVMat(), rgbaMat, opencv_imgproc.COLOR_BayerBG2RGBA);
-      opencv_imgproc.cvtColor(rgbaMat, yuv420Image, opencv_imgproc.COLOR_RGBA2YUV_I420);
+      opencv_imgproc.cvtColor(blackflySourceImageUMat, rgbaUMat, opencv_imgproc.COLOR_BayerBG2RGBA);
+      opencv_imgproc.cvtColor(rgbaUMat, yuv420ImageUMat, opencv_imgproc.COLOR_RGBA2YUV_I420);
 
       // TODO: speed this up, it uses a lot of CPU
-      opencv_imgcodecs.imencode(".jpg", yuv420Image, jpegImageBytePointer, COMPRESSION_PARAMETERS);
+      opencv_imgcodecs.imencode(".jpg", yuv420ImageUMat, jpegImageBytePointer, COMPRESSION_PARAMETERS);
 
       ousterFisheyeColoringIntrinsicsROS2.updateAndPublishThrottledStatus();
 
