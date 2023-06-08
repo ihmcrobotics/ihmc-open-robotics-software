@@ -11,19 +11,19 @@ import org.bytedeco.javacpp.annotation.*;
 public class promp extends us.ihmc.promp.presets.ProMPInfoMapper {
     static { Loader.load(); }
 
-// Targeting ../StringVector.java
+// Targeting ..\TrajectoryVector.java
 
 
-// Targeting ../SizeTVector.java
+// Targeting ..\StringVector.java
 
 
-// Targeting ../TrajectoryVector.java
+// Targeting ..\SizeTVector.java
 
 
-// Targeting ../VectorVectorPair.java
+// Targeting ..\VectorVectorPair.java
 
 
-// Targeting ../IntVectorMatrixTuple.java
+// Targeting ..\IntVectorMatrixTuple.java
 
 
 // Parsed from promp/trajectory.hpp
@@ -49,7 +49,7 @@ public class promp extends us.ihmc.promp.presets.ProMPInfoMapper {
 // #include <vector>
 
 // #include <Eigen/Core>
-// Targeting ../Trajectory.java
+// Targeting ..\Trajectory.java
 
 
 
@@ -86,7 +86,7 @@ public class promp extends us.ihmc.promp.presets.ProMPInfoMapper {
 
 // #include <promp/io/csv_reader.hpp>
 // #include <promp/trajectory.hpp>
-// Targeting ../TrajectoryGroup.java
+// Targeting ..\TrajectoryGroup.java
 
 
 
@@ -121,7 +121,7 @@ public class promp extends us.ihmc.promp.presets.ProMPInfoMapper {
 // #include <vector>
 
 // #include <promp/trajectory_group.hpp>
-// Targeting ../ProMP.java
+// Targeting ..\ProMP.java
 
 
 
