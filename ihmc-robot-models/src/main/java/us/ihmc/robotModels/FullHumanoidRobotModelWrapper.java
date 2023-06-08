@@ -23,7 +23,7 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
    private RigidBodyBasics chest;
    private SideDependentList<RigidBodyBasics> feet;
    private SideDependentList<RigidBodyBasics> hands;
-   private SideDependentList<RigidBodyBasics> elbows;
+   private SideDependentList<RigidBodyBasics> forearms;
    private SideDependentList<EnumMap<LegJointName, OneDoFJointBasics>> legJointMaps;
    private SideDependentList<EnumMap<ArmJointName, OneDoFJointBasics>> armJointMaps;
    private SideDependentList<MovingReferenceFrame> soleFrames;
@@ -82,7 +82,7 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
 
       feet = new SideDependentList<>();
       hands = new SideDependentList<>();
-      elbows = new SideDependentList<>();
+      forearms = new SideDependentList<>();
       soleFrames = new SideDependentList<>();
       handControlFrames = new SideDependentList<>();
 
@@ -90,7 +90,7 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
       {
          feet.put(robotSide, MultiBodySystemTools.findRigidBody(getElevator(), jointNameMap.getFootName(robotSide)));
          hands.put(robotSide, MultiBodySystemTools.findRigidBody(chest, jointNameMap.getHandName(robotSide)));
-         elbows.put(robotSide, MultiBodySystemTools.findRigidBody(chest, jointNameMap.getElbowName(robotSide)));
+         forearms.put(robotSide, MultiBodySystemTools.findRigidBody(chest, jointNameMap.getForearmName(robotSide)));
 
          RigidBodyTransform soleFrameTransform = jointNameMap.getSoleToParentFrameTransform(robotSide);
          if (soleFrameTransform != null)
@@ -191,9 +191,9 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
    }
 
    @Override
-   public RigidBodyBasics getElbow(RobotSide robotSide)
+   public RigidBodyBasics getForearm(RobotSide robotSide)
    {
-      return elbows.get(robotSide);
+      return forearms.get(robotSide);
    }
 
    @Override

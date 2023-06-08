@@ -402,7 +402,7 @@ public class FullRobotModelTestTools
       }
 
       @Override
-      public RigidBodyBasics getElbow(RobotSide robotSide)
+      public RigidBodyBasics getForearm(RobotSide robotSide)
       {
          return elbows.get(robotSide);
       }

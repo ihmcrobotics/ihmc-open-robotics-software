@@ -44,12 +44,12 @@ public interface FullHumanoidRobotModel extends FullLeggedRobotModel<RobotSide>
    RigidBodyBasics getHand(RobotSide robotSide);
 
    /**
-    * Returns the {@link RigidBodyBasics} describing the left or right elbow of this robot.
+    * Returns the {@link RigidBodyBasics} describing the left or right forearm of this robot.
     *
-    * @param robotSide Refers to which side the elbow belongs to (assuming there is only one left elbow
-    *                  and one right elbow).
+    * @param robotSide Refers to which side the forearm belongs to (assuming there is only one left forearm
+    *                  and one right forearm).
     */
-   RigidBodyBasics getElbow(RobotSide robotSide);
+   RigidBodyBasics getForearm(RobotSide robotSide);
 
    /**
     * Returns a control frame attached to the right or left hand that the controller uses to control

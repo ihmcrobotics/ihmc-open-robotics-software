@@ -268,7 +268,7 @@ public class RDXVRManager
             context.getHeadsetRenderable(renderables, pool);
          }
          context.getControllerRenderables(renderables, pool);
-         context.getBaseStationRenderables(renderables, pool);
+         context.getTrackerRenderables(renderables, pool);
          if (showScenePoseGizmo.get())
             scenePoseGizmo.getRenderables(renderables, pool);
       }

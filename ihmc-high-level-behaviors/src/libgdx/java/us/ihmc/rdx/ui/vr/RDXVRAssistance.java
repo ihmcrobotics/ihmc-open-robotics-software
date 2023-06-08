@@ -378,6 +378,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
             bodyPartInitialAffordancePoseMap = affordanceAssistant.getInitialHandPoseMap();
          }
          if (containsBodyPart(bodyPart))
+
          {
             //define a function alpha that goes from 0 to 1 smoothly, while getting to 1 before the end of the motion
             double x = (double) (blendingCounter) / (proMPAssistant.AFFORDANCE_BLENDING_SAMPLES);

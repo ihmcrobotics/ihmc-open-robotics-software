@@ -87,6 +87,7 @@ public class RDXVRContext
    private final SideDependentList<RDXVRController> controllers = new SideDependentList<>(new RDXVRController(RobotSide.LEFT, vrPlayAreaYUpZBackFrame),
                                                                                           new RDXVRController(RobotSide.RIGHT, vrPlayAreaYUpZBackFrame));
    private final HashMap<Integer, RDXVRBaseStation> baseStations = new HashMap<>();
+   private final HashMap<Integer, RDXVRTracker> trackers = new HashMap<>();
    private final SideDependentList<ArrayList<RDXVRPickResult>> pickResults = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
    private SideDependentList<RDXVRPickResult> selectedPick = new SideDependentList<>(null, null);
 
@@ -188,22 +189,16 @@ public class RDXVRContext
       while (VRSystem.VRSystem_PollNextEvent(event))
       {
          int deviceIndex = event.trackedDeviceIndex();
-         if (event.eventType() == VR.EVREventType_VREvent_TrackedDeviceActivated)
+         int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
+         if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker)
          {
-            int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
-            if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_TrackingReference)
-            {
-               baseStations.put(deviceIndex, new RDXVRBaseStation(vrPlayAreaYUpZBackFrame, deviceIndex));
-            }
+            trackers.put(deviceIndex, new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex));
          }
-         else if (event.eventType() == VR.EVREventType_VREvent_TrackedDeviceDeactivated)
-         {
-            int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
-            if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_TrackingReference)
-            {
-               baseStations.remove(deviceIndex);
-            }
-         }
+      }
+
+      for (Map.Entry<Integer, RDXVRTracker> entryTracker : trackers.entrySet())
+      {
+         entryTracker.getValue().update(trackedDevicePoses);
       }
 
       for (RobotSide side : RobotSide.values)
@@ -311,6 +306,18 @@ public class RDXVRContext
       }
    }
 
+   public void getTrackerRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      for (RDXVRTracker tracker : trackers.values())
+      {
+         ModelInstance modelInstance = tracker.getModelInstance();
+         if (modelInstance != null)
+         {
+            modelInstance.getRenderables(renderables, pool);
+         }
+      }
+   }
+
    public void getBaseStationRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       for (RDXVRBaseStation baseStation : baseStations.values())
@@ -331,6 +338,21 @@ public class RDXVRContext
    public RDXVRHeadset getHeadset()
    {
       return headset;
+   }
+
+   public Collection<RDXVRTracker> getTrackers()
+   {
+      return trackers.values();
+   }
+
+   public RDXVRTracker getTracker(int index)
+   {
+      return trackers.get(index);
+   }
+
+   public Set<Integer> getTrackerIndices()
+   {
+      return trackers.keySet();
    }
 
    public Collection<RDXVRBaseStation> getBaseStations()

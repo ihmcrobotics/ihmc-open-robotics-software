@@ -75,7 +75,7 @@ public class AtlasJointMap implements HumanoidJointNameMap
    public static final String pelvisName = "pelvis";
    public static final String headName = "head";
    public static final SideDependentList<String> handNames = new SideDependentList<>();
-   protected final SideDependentList<String> elbowNames = new SideDependentList<>();
+   protected final SideDependentList<String> forearmNames = new SideDependentList<>();
    public static final SideDependentList<String> footNames = new SideDependentList<>(getRobotSidePrefix(RobotSide.LEFT) + "foot",
                                                                                      getRobotSidePrefix(RobotSide.RIGHT) + "foot");
 
@@ -278,9 +278,9 @@ public class AtlasJointMap implements HumanoidJointNameMap
    }
 
    @Override
-   public String getElbowName(RobotSide robotSide)
+   public String getForearmName(RobotSide robotSide)
    {
-      return elbowNames.get(robotSide);
+      return forearmNames.get(robotSide);
    }
 
    @Override
