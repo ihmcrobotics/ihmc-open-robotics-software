@@ -399,6 +399,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       basisVectorOrigin.setToZero(centerOfMassFrame);
       basisVector.setToZero(centerOfMassFrame);
 
+      rhoMatrix.set(rhoIndex, 0, 0.0);
       rhoMaxMatrix.set(rhoIndex, 0, Double.POSITIVE_INFINITY);
       rhoWeightMatrix.set(rhoIndex, rhoIndex, 1.0); // FIXME why is this setting to 1.0????
       rhoRateWeightMatrix.set(rhoIndex, rhoIndex, 0.0);

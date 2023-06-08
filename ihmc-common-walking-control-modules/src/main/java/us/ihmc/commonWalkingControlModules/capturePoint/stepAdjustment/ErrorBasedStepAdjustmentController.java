@@ -451,7 +451,9 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
             if (environmentallyConstrained)
             {
                tempPoint2D.set(footstepSolution.getPosition());
-               getBestReachabilityConstraintToUseWhenNotIntersecting().orthogonalProjection(tempPoint2D);
+               FrameConvexPolygon2DReadOnly reachability = getBestReachabilityConstraintToUseWhenNotIntersecting();
+               if (!reachability.isPointInside(tempPoint2D))
+                  reachability.orthogonalProjection(tempPoint2D);
                footstepSolution.getPosition().set(tempPoint2D);
             }
          }
