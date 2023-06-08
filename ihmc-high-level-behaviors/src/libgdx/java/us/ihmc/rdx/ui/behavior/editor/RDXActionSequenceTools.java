@@ -4,9 +4,7 @@ import behavior_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
-import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.behavior.editor.actions.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -66,18 +64,15 @@ public class RDXActionSequenceTools
       return null;
    }
 
-   public static void publishActionSequenceUpdateMessage(List<RDXBehaviorAction> actionSequence,
-                                                         ArrayList<BehaviorActionData> actionDataForMessage,
-                                                         ActionSequenceUpdateMessage actionSequenceUpdateMessage, ROS2PublishSubscribeAPI ros2)
+   public static void packActionSequenceUpdateMessage(List<RDXBehaviorAction> actionSequence,
+                                                      ArrayList<BehaviorActionData> actionDataForMessage,
+                                                      ActionSequenceUpdateMessage actionSequenceUpdateMessage)
    {
       actionDataForMessage.clear();
       for (RDXBehaviorAction behaviorAction : actionSequence)
       {
          actionDataForMessage.add(behaviorAction.getActionData());
       }
-      BehaviorActionSequenceTools.publishActionSequenceUpdateMessage(actionDataForMessage,
-                                                                     actionSequenceUpdateMessage,
-                                                                     ros2,
-                                                                     BehaviorActionSequence.SEQUENCE_COMMAND_TOPIC);
+      BehaviorActionSequenceTools.packActionSequenceUpdateMessage(actionDataForMessage, actionSequenceUpdateMessage);
    }
 }

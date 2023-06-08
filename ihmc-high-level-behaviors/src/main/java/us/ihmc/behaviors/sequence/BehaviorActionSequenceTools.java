@@ -2,17 +2,13 @@ package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.*;
 import us.ihmc.behaviors.sequence.actions.*;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.ros2.ROS2Topic;
 
 import java.util.List;
 
 public class BehaviorActionSequenceTools
 {
-   public static <T extends BehaviorActionData> void publishActionSequenceUpdateMessage(List<T> actionSequence,
-                                                                                        ActionSequenceUpdateMessage actionSequenceUpdateMessage,
-                                                                                        ROS2PublishSubscribeAPI ros2,
-                                                                                        ROS2Topic<ActionSequenceUpdateMessage> topic)
+   public static <T extends BehaviorActionData> void packActionSequenceUpdateMessage(List<T> actionSequence,
+                                                                                     ActionSequenceUpdateMessage actionSequenceUpdateMessage)
    {
       actionSequenceUpdateMessage.setSequenceSize(actionSequence.size());
       actionSequenceUpdateMessage.getArmJointAnglesActions().clear();
@@ -83,6 +79,5 @@ public class BehaviorActionSequenceTools
             walkActionData.toMessage(walkActionMessage);
          }
       }
-      ros2.publish(topic, actionSequenceUpdateMessage);
    }
 }

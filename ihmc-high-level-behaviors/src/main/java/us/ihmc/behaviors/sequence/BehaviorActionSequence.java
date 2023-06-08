@@ -11,6 +11,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -220,10 +221,8 @@ public class BehaviorActionSequence
 
       if (oneHertzThrottler.run(1.0))
       {
-         BehaviorActionSequenceTools.publishActionSequenceUpdateMessage(actionSequence,
-                                                                        actionSequenceStatusMessage,
-                                                                        ros2,
-                                                                        BehaviorActionSequence.SEQUENCE_STATUS_TOPIC);
+         BehaviorActionSequenceTools.packActionSequenceUpdateMessage(actionSequence, actionSequenceStatusMessage);
+         ros2.publish(BehaviorActionSequence.SEQUENCE_STATUS_TOPIC, actionSequenceStatusMessage);
       }
    }
 }

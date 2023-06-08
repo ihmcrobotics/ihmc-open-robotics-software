@@ -20,6 +20,7 @@ import us.ihmc.behaviors.sequence.BehaviorActionData;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -77,6 +78,7 @@ public class RDXBehaviorActionSequenceEditor
    private final Bool automaticExecutionCommandMessage = new Bool();
    private final ArrayList<BehaviorActionData> actionDataForMessage = new ArrayList<>();
    private final ActionSequenceUpdateMessage actionSequenceUpdateMessage = new ActionSequenceUpdateMessage();
+   private boolean outOfSync = true;
 
    public RDXBehaviorActionSequenceEditor(WorkspaceResourceFile fileToLoadFrom)
    {
@@ -292,7 +294,18 @@ public class RDXBehaviorActionSequenceEditor
       ImGuiTools.previousWidgetTooltip("Go to next action");
 
       long remoteSequenceSize = sequenceStatusSubscription.getLatest().getSequenceSize();
-      boolean outOfSync = remoteSequenceSize != actionSequence.size();
+      if (sequenceStatusSubscription.getMessageNotification().poll())
+      {
+         RDXActionSequenceTools.packActionSequenceUpdateMessage(actionSequence, actionDataForMessage, actionSequenceUpdateMessage);
+         outOfSync = !sequenceStatusSubscription.getMessageNotification().read().equals(actionSequenceUpdateMessage);
+
+         if (outOfSync)
+         {
+            // Automatically attempt to get back in sync
+            RDXActionSequenceTools.packActionSequenceUpdateMessage(actionSequence, actionDataForMessage, actionSequenceUpdateMessage);
+            ros2.publish(BehaviorActionSequence.SEQUENCE_COMMAND_TOPIC, actionSequenceUpdateMessage);
+         }
+      }
 
       boolean endOfSequence = executionNextIndexStatus >= actionSequence.size();
       if (!endOfSequence && !outOfSync)
@@ -319,12 +332,6 @@ public class RDXBehaviorActionSequenceEditor
          }
       }
 
-      // TODO: Automatically sync between this UI and remote process
-      if (ImGui.button("Send to robot"))
-      {
-         RDXActionSequenceTools.publishActionSequenceUpdateMessage(actionSequence, actionDataForMessage, actionSequenceUpdateMessage, ros2);
-      }
-      ImGui.sameLine();
       ImGui.text("# " + receivedSequenceStatusMessageCount);
       if (outOfSync)
       {
