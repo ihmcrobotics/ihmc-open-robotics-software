@@ -120,6 +120,7 @@ public class RDXLocomotionManager
       {
          footstepPlanning.setHeightMapData(heightMap);
          interactableFootstepPlan.setHeightMapMessage(heightMap);
+         walkPathControlRing.setHeightMapMessage(heightMap);
       });
 
       footstepsSentToControllerGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());

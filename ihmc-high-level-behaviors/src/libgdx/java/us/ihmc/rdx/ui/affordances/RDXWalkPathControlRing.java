@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
+import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.BehaviorTools;
@@ -26,8 +27,11 @@ import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class RDXWalkPathControlRing
 {
@@ -44,6 +48,7 @@ public class RDXWalkPathControlRing
    private final AxisAngle walkFacingDirection = new AxisAngle();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private ImGui3DViewInput latestInput;
+   private final AtomicReference<HeightMapMessage> heightMapMessageReference = new AtomicReference<>();
 
    public void create(RDX3DPanel panel3D,
                       DRCRobotModel robotModel,
@@ -74,6 +79,18 @@ public class RDXWalkPathControlRing
       }
       else
       {
+         double x = footstepPlannerGoalGizmo.getPathControlRingGizmo().getPose3D().getX();
+         double y = footstepPlannerGoalGizmo.getPathControlRingGizmo().getPose3D().getY();
+
+         HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessageReference.get());
+         if (heightMapData != null)
+         {
+            footstepPlannerGoalGizmo.getPathControlRingGizmo().setHeightMapZ(heightMapData.getHeightAt(x, y));
+         }
+         else
+         {
+            footstepPlannerGoalGizmo.getPathControlRingGizmo().setHeightMapZ(Double.NaN);
+         }
          updateStuff();
       }
    }
@@ -255,5 +272,10 @@ public class RDXWalkPathControlRing
    public Pose3DReadOnly getGoalPose()
    {
       return footstepPlannerGoalGizmo.getPathControlRingGizmo().getPose3D();
+   }
+
+   public void setHeightMapMessage(HeightMapMessage heightMapMessage)
+   {
+      heightMapMessageReference.set(heightMapMessage);
    }
 }

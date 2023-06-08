@@ -109,6 +109,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private final Random random = new Random();
    private boolean proportionsNeedUpdate = false;
    private FrameBasedGizmoModification frameBasedGizmoModification;
+   private double heightMapZ = Double.NaN;
 
    public RDXPathControlRingGizmo()
    {
@@ -304,8 +305,15 @@ public class RDXPathControlRingGizmo implements RenderableProvider
             frameBasedGizmoModification.translateInWorld(planarMotion);
             closestCollision.add(planarMotion);
 
-            Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
-            transformToParent.getTranslation().setZ(pickPointInWorld.getZ());
+            if (!Double.isNaN(heightMapZ))
+            {
+               transformToParent.getTranslation().setZ(heightMapZ);
+            }
+            else
+            {
+               Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
+               transformToParent.getTranslation().setZ(pickPointInWorld.getZ());
+            }
          }
          else // yaw dragging
          {
@@ -660,5 +668,10 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    public Notification getGizmoModifiedByUser()
    {
       return gizmoModifiedByUser;
+   }
+
+   public void setHeightMapZ(double Z)
+   {
+      heightMapZ = Z;
    }
 }
