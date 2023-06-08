@@ -40,7 +40,6 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final Footstep nextFootstep = new Footstep();
    private final Footstep nextNextFootstep = new Footstep();
    private final FootstepTiming footstepTiming = new FootstepTiming();
-   private final StepConstraintRegionsList nextStepConstraints = new StepConstraintRegionsList();
    private double swingTime;
 
    private final Footstep[] footsteps;
