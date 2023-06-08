@@ -15,7 +15,7 @@ public class InvalidPacketNotificationPacketPubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6d157e563849f0890ee67595a5b3c1001fc8ee660a8a7dacec8c4b3e5fe18c47";
+   		return "9e38233cb0fb3bfc9183e0c41cce0d0a8e12f9bdde32e8dfb504b92f6698dc3c";
    }
    
    @Override

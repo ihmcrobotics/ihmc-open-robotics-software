@@ -15,7 +15,7 @@ public class TaskspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1cc9676efddb672f92c2073edfd1d5d82a26713f05c9f4dadf90057888494a65";
+   		return "30ec2d2d9bc44f9da4b10da58b4bc9511c2c11fa2f5515190dadcb06d93c2bf9";
    }
    
    @Override

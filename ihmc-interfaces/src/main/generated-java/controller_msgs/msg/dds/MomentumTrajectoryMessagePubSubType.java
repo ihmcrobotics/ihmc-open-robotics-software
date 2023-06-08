@@ -15,7 +15,7 @@ public class MomentumTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "da2a2038c27db87b28290df9359fb5f1579e5c7be94274fef4ab27ae4d54bff5";
+   		return "ef33d7e2899c6011ed51665da3f7d02463cdaf0b99a25a20fcbf53559315b81b";
    }
    
    @Override

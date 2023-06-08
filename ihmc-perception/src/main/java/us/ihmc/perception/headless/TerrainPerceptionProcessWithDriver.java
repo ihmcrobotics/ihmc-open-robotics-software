@@ -76,7 +76,6 @@ public class TerrainPerceptionProcessWithDriver
    private final ROS2Topic<ImageMessage> colorTopic;
    private final ROS2Topic<ImageMessage> depthTopic;
 
-   private final RapidPlanarRegionsExtractor rapidRegionsExtractor;
    private final OpenCLManager openCLManager;
    private final ROS2Helper ros2Helper;
    private final RealSenseHardwareManager realSenseHardwareManager;
@@ -85,6 +84,7 @@ public class TerrainPerceptionProcessWithDriver
    private final BytedecoRealsense realsense;
 
    private ROS2StoredPropertySetGroup ros2PropertySetGroup;
+   private RapidPlanarRegionsExtractor rapidRegionsExtractor;
    private BytedecoImage depthBytedecoImage;
    private RobotConfigurationData robotConfigurationData;
    private FullHumanoidRobotModel fullRobotModel;
@@ -222,14 +222,14 @@ public class TerrainPerceptionProcessWithDriver
                return;
             }
 
-            rapidRegionsExtractor.create(openCLManager,
-                    openCLProgram,
-                    depthHeight,
-                    depthWidth,
-                    realsense.getDepthFocalLengthPixelsX(),
-                    realsense.getDepthFocalLengthPixelsY(),
-                    realsense.getDepthPrincipalOffsetXPixels(),
-                    realsense.getDepthPrincipalOffsetYPixels());
+            rapidRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager,
+                                                                    openCLProgram,
+                                                                    depthHeight,
+                                                                    depthWidth,
+                                                                    realsense.getDepthFocalLengthPixelsX(),
+                                                                    realsense.getDepthFocalLengthPixelsY(),
+                                                                    realsense.getDepthPrincipalOffsetXPixels(),
+                                                                    realsense.getDepthPrincipalOffsetYPixels());
 
             rapidRegionsExtractor.initializeBodyCollisionFilter(fullRobotModel, collisionBoxProvider);
 
@@ -284,17 +284,16 @@ public class TerrainPerceptionProcessWithDriver
 
          if (parameters.getPublishColor())
          {
+            colorPoseInDepthFrame.set(realsense.getDepthToColorTranslation(), realsense.getDepthToColorRotation());
 
-               colorPoseInDepthFrame.set(realsense.getDepthToColorTranslation(), realsense.getDepthToColorRotation());
+            sourceColorImage = new Mat(realsense.getColorHeight(),
+                    realsense.getColorWidth(),
+                    opencv_core.CV_8UC3,
+                    realsense.getColorFrameData()); // deallocate later
+            color8UC3Image = sourceColorImage.clone();
 
-               sourceColorImage = new Mat(realsense.getColorHeight(),
-                       realsense.getColorWidth(),
-                       opencv_core.CV_8UC3,
-                       realsense.getColorFrameData()); // deallocate later
-               color8UC3Image = sourceColorImage.clone();
-
-               // YUV I420 has 1.5 times the height of the image
-               yuvColorImage = new Mat(realsense.getColorHeight() * 1.5, realsense.getColorWidth(), opencv_core.CV_8UC1); // deallocate later
+            // YUV I420 has 1.5 times the height of the image
+            yuvColorImage = new Mat(realsense.getColorHeight() * 1.5, realsense.getColorWidth(), opencv_core.CV_8UC1); // deallocate later
 
             executorService.submit(() -> {
 

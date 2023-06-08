@@ -109,14 +109,33 @@ public class RapidPlanarRegionsExtractor
    private boolean firstRun = true;
    boolean waitIfNecessary = false; // dangerous if true! need a timeout
 
-   public void create(OpenCLManager openCLManager, int imageHeight, int imageWidth, double fx, double fy, double cx, double cy)
+   public RapidPlanarRegionsExtractor(OpenCLManager openCLManager, CameraIntrinsics cameraIntrinsics)
    {
-      create(openCLManager, openCLManager.loadProgram("RapidRegionsExtractor"), imageHeight, imageWidth, fx, fy, cx, cy);
+      this(openCLManager,
+           openCLManager.loadProgram("RapidRegionsExtractor"),
+           cameraIntrinsics.getHeight(),
+           cameraIntrinsics.getWidth(),
+           cameraIntrinsics.getFx(),
+           cameraIntrinsics.getFy(),
+           cameraIntrinsics.getCx(),
+           cameraIntrinsics.getCy());
    }
 
-   public void create(OpenCLManager openCLManager, _cl_program program, int imageHeight, int imageWidth, double fx, double fy, double cx, double cy)
+   public RapidPlanarRegionsExtractor(OpenCLManager openCLManager, int imageHeight, int imageWidth, double fx, double fy, double cx, double cy)
    {
-      create(openCLManager, program, imageHeight, imageWidth, fx, fy, cx, cy, "");
+      this(openCLManager, openCLManager.loadProgram("RapidRegionsExtractor"), imageHeight, imageWidth, fx, fy, cx, cy);
+   }
+
+   public RapidPlanarRegionsExtractor(OpenCLManager openCLManager,
+                                      _cl_program program,
+                                      int imageHeight,
+                                      int imageWidth,
+                                      double fx,
+                                      double fy,
+                                      double cx,
+                                      double cy)
+   {
+      this(openCLManager, program, imageHeight, imageWidth, fx, fy, cx, cy, "");
    }
 
    /**
@@ -125,15 +144,15 @@ public class RapidPlanarRegionsExtractor
     * @param imageWidth  width of the input depth image
     * @param imageHeight height of the input depth image
     */
-   public void create(OpenCLManager openCLManager,
-                      _cl_program program,
-                      int imageHeight,
-                      int imageWidth,
-                      double fx,
-                      double fy,
-                      double cx,
-                      double cy,
-                      String version)
+   public RapidPlanarRegionsExtractor(OpenCLManager openCLManager,
+                                      _cl_program program,
+                                      int imageHeight,
+                                      int imageWidth,
+                                      double fx,
+                                      double fy,
+                                      double cx,
+                                      double cy,
+                                      String version)
    {
       this.sensorModel = SensorModel.PERSPECTIVE;
       this.openCLManager = openCLManager;
@@ -152,7 +171,7 @@ public class RapidPlanarRegionsExtractor
       this.create();
    }
 
-   public void create(OpenCLManager openCLManager, _cl_program program, int imageHeight, int imageWidth)
+   public RapidPlanarRegionsExtractor(OpenCLManager openCLManager, _cl_program program, int imageHeight, int imageWidth)
    {
       this.sensorModel = SensorModel.SPHERICAL;
       this.openCLManager = openCLManager;
@@ -164,10 +183,11 @@ public class RapidPlanarRegionsExtractor
 
       rapidPlanarRegionsCustomizer = new RapidPlanarRegionsCustomizer("ForSphericalRapidRegions");
       sphericalBackProjectionKernel = openCLManager.createKernel(planarRegionExtractionProgram, "sphericalBackProjectionKernel");
-      this.create();
+
+      create();
    }
 
-   public void create()
+   private void create()
    {
       calculateDerivativeParameters();
 
@@ -459,90 +479,90 @@ public class RapidPlanarRegionsExtractor
       boundaryVisitedMatrix.zero();
       boundaryMaxSearchDepth = 0;
       rapidPlanarRegions.parallelStream().forEach(planarRegion ->
-                                                  {
-                                                     int leafPatchIndex = 0;
-                                                     int regionRingIndex = 0;
-                                                     planarRegion.getRegionsRingsBySize().clear();
-                                                     for (Point2D leafPatch : planarRegion.getBorderIndices())
-                                                     {
-                                                        RapidRegionRing regionRing = planarRegion.getRegionRings().add();
-                                                        regionRing.reset();
-                                                        regionRing.setIndex(regionRingIndex);
-                                                        int numberOfBoundaryPatches = boundaryDepthFirstSearch((int) leafPatch.getY(),
-                                                                                                               (int) leafPatch.getX(),
-                                                                                                               planarRegion.getId(),
-                                                                                                               regionRing,
-                                                                                                               leafPatchIndex,
-                                                                                                               1);
-                                                        if (numberOfBoundaryPatches >= parameters.getBoundaryMinPatches())
-                                                        {
-                                                           //debugger.drawRegionRing(regionRing, patchHeight, patchWidth);
+      {
+         int leafPatchIndex = 0;
+         int regionRingIndex = 0;
+         planarRegion.getRegionsRingsBySize().clear();
+         for (Point2D leafPatch : planarRegion.getBorderIndices())
+         {
+            RapidRegionRing regionRing = planarRegion.getRegionRings().add();
+            regionRing.reset();
+            regionRing.setIndex(regionRingIndex);
+            int numberOfBoundaryPatches = boundaryDepthFirstSearch((int) leafPatch.getY(),
+                                                                   (int) leafPatch.getX(),
+                                                                   planarRegion.getId(),
+                                                                   regionRing,
+                                                                   leafPatchIndex,
+                                                                   1);
+            if (numberOfBoundaryPatches >= parameters.getBoundaryMinPatches())
+            {
+               //debugger.drawRegionRing(regionRing, patchHeight, patchWidth);
 
-                                                           ++regionRingIndex;
-                                                           regionRing.updateConvexPolygon();
-                                                           planarRegion.getRegionsRingsBySize().add(regionRing);
-                                                        }
-                                                        else
-                                                        {
-                                                           planarRegion.getRegionRings().remove(planarRegion.getRegionRings().size() - 1);
-                                                        }
-                                                        ++leafPatchIndex;
-                                                     }
+               ++regionRingIndex;
+               regionRing.updateConvexPolygon();
+               planarRegion.getRegionsRingsBySize().add(regionRing);
+            }
+            else
+            {
+               planarRegion.getRegionRings().remove(planarRegion.getRegionRings().size() - 1);
+            }
+            ++leafPatchIndex;
+         }
 
-                                                     // remove holes
-                                                     for (RapidRegionRing regionRing : planarRegion.getRegionsRingsBySize())
-                                                     {
-                                                        planarRegion.getHoleRingsToRemove().clear();
-                                                        for (RapidRegionRing otherRegionRing : planarRegion.getRegionRings())
-                                                        {
-                                                           if (otherRegionRing != regionRing)
-                                                           {
-                                                              // We probably only need to check one
-                                                              Vector2D boundaryIndex = otherRegionRing.getBoundaryIndices().get(0);
-                                                              if (regionRing.getConvexPolygon().isPointInside(boundaryIndex.getX(), boundaryIndex.getY()))
-                                                              {
-                                                                 planarRegion.getHoleRingsToRemove().add(otherRegionRing);
-                                                              }
-                                                           }
-                                                        }
-                                                        for (RapidRegionRing regionRingToRemove : planarRegion.getHoleRingsToRemove())
-                                                        {
-                                                           planarRegion.getRegionRings().remove(regionRingToRemove);
-                                                        }
-                                                     }
+         // remove holes
+         for (RapidRegionRing regionRing : planarRegion.getRegionsRingsBySize())
+         {
+            planarRegion.getHoleRingsToRemove().clear();
+            for (RapidRegionRing otherRegionRing : planarRegion.getRegionRings())
+            {
+               if (otherRegionRing != regionRing)
+               {
+                  // We probably only need to check one
+                  Vector2D boundaryIndex = otherRegionRing.getBoundaryIndices().get(0);
+                  if (regionRing.getConvexPolygon().isPointInside(boundaryIndex.getX(), boundaryIndex.getY()))
+                  {
+                     planarRegion.getHoleRingsToRemove().add(otherRegionRing);
+                  }
+               }
+            }
+            for (RapidRegionRing regionRingToRemove : planarRegion.getHoleRingsToRemove())
+            {
+               planarRegion.getRegionRings().remove(regionRingToRemove);
+            }
+         }
 
-                                                     planarRegion.getRegionRings().sort(boundaryLengthComparator);
-                                                  });
+         planarRegion.getRegionRings().sort(boundaryLengthComparator);
+      });
    }
 
    public void growRegionBoundaries()
    {
       rapidPlanarRegions.forEach(planarRegion ->
-                                 {
-                                    if (!planarRegion.getRegionRings().isEmpty())
-                                    {
-                                       RapidRegionRing firstRing = planarRegion.getRegionRings().get(0);
-                                       for (Vector2D boundaryIndex : firstRing.getBoundaryIndices())
-                                       {
-                                          // kernel coordinates is in left-handed frame, so lets flip it to IHMC Z up
+      {
+         if (!planarRegion.getRegionRings().isEmpty())
+         {
+            RapidRegionRing firstRing = planarRegion.getRegionRings().get(0);
+            for (Vector2D boundaryIndex : firstRing.getBoundaryIndices())
+            {
+               // kernel coordinates is in left-handed frame, so lets flip it to IHMC Z up
 
-                                          //float vertexX = czImage.getFloat((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
-                                          //float vertexY = -cxImage.getFloat((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
-                                          //float vertexZ = cyImage.getFloat((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+               //float vertexX = czImage.getFloat((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+               //float vertexY = -cxImage.getFloat((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+               //float vertexZ = cyImage.getFloat((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
 
-                                          float vertexX = currentFeatureGrid.getCxImage().getFloat((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
-                                          float vertexY = currentFeatureGrid.getCyImage().getFloat((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
-                                          float vertexZ = currentFeatureGrid.getCzImage().getFloat((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+               float vertexX = currentFeatureGrid.getCxImage().getFloat((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+               float vertexY = currentFeatureGrid.getCyImage().getFloat((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+               float vertexZ = currentFeatureGrid.getCzImage().getFloat((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
 
-                                          Point3D boundaryVertex = planarRegion.getBoundaryVertices().add();
-                                          boundaryVertex.set(vertexX, vertexY, vertexZ);
-                                          boundaryVertex.sub(planarRegion.getCenter());
-                                          boundaryVertex.normalize();
-                                          boundaryVertex.scale(parameters.getRegionGrowthFactor());
-                                          boundaryVertex.add(vertexX, vertexY, vertexZ);
-                                       }
-                                    }
-                                 });
+               Point3D boundaryVertex = planarRegion.getBoundaryVertices().add();
+               boundaryVertex.set(vertexX, vertexY, vertexZ);
+               boundaryVertex.sub(planarRegion.getCenter());
+               boundaryVertex.normalize();
+               boundaryVertex.scale(parameters.getRegionGrowthFactor());
+               boundaryVertex.add(vertexX, vertexY, vertexZ);
+            }
+         }
+      });
    }
 
    private int boundaryDepthFirstSearch(int row, int column, int planarRegionId, RapidRegionRing regionRing, int leafPatchIndex, int searchDepth)

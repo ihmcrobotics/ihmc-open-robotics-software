@@ -15,7 +15,7 @@ public class NoraxonFootWrenchMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c5da5d96eff87c0f7dd9dad2178418297456efb531a7f5169a327a97180a9ddf";
+   		return "d88952e1ec7deabbaddc65d71b83b42f3caadaacf65a0914922040b9dfa5a4ea";
    }
    
    @Override

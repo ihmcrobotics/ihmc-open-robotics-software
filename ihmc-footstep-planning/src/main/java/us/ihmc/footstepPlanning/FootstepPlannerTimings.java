@@ -49,6 +49,16 @@ public class FootstepPlannerTimings
       stepPlanningIterations = -1;
    }
 
+   public void set(FootstepPlannerTimings other)
+   {
+      totalElapsedSeconds = other.totalElapsedSeconds;
+      timeBeforePlanningSeconds = other.timeBeforePlanningSeconds;
+      timePlanningBodyPathSeconds = other.timePlanningBodyPathSeconds;
+      timePlanningStepsSeconds = other.timePlanningStepsSeconds;
+      pathPlanningIterations = other.pathPlanningIterations;
+      stepPlanningIterations = other.stepPlanningIterations;
+   }
+
    public void setTotalElapsedSeconds(double totalElapsedSeconds)
    {
       this.totalElapsedSeconds = totalElapsedSeconds;

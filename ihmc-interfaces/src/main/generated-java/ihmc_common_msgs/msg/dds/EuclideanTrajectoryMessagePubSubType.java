@@ -15,7 +15,7 @@ public class EuclideanTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "af8eeafa047831a538a4ca63fa2d0d11c5b63af5892b8d149d3caa395f37517f";
+   		return "eeaeee32e4ddbd6caa6a93f0c239e736b8da8e21654caabaa2c6ab5798d71579";
    }
    
    @Override

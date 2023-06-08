@@ -15,7 +15,7 @@ public class BipedalSupportPlanarRegionParametersMessagePubSubType implements us
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "17c3725ad40d4b1f083ba47de39be9f8e27a69e76ae2d45d196b205fdf6aaa35";
+   		return "c54e8346144f4a2aaadae56765f1dd72ce6ce346524b4abdd6661803b8e094b1";
    }
    
    @Override

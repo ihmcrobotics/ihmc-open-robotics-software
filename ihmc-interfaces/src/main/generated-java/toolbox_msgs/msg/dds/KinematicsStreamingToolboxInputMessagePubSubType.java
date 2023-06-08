@@ -15,7 +15,7 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e43a3a99040d6a0be48320a30fe992db3ad7226e0e2f19fe07c3e71c3586913b";
+   		return "51513861d92c491d19219a7635ba788631ab8431b30e2d70b5770029a6373308";
    }
    
    @Override

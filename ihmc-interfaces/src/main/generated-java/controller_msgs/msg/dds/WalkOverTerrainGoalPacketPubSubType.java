@@ -15,7 +15,7 @@ public class WalkOverTerrainGoalPacketPubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "04a1f723886fbdb2d2460087c04de72711d33da2397508632c1e325184447e4c";
+   		return "c6fc765f431bac1b5318f5319578cf1130fe44bb9887195acf97930cf21d82b6";
    }
    
    @Override
