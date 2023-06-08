@@ -69,10 +69,6 @@ mainDependencies {
    api("org.bytedeco:hdf5:$hdf5Version")
    api("org.bytedeco:hdf5:$hdf5Version:linux-x86_64")
    api("org.bytedeco:hdf5:$hdf5Version:windows-x86_64")
-   val cudaVersion = "12.1-8.9-1.5.9"
-   api("org.bytedeco:cuda:$cudaVersion")
-   api("org.bytedeco:cuda:$cudaVersion:linux-x86_64")
-   api("org.bytedeco:cuda:$cudaVersion:windows-x86_64")
 
    api("us.ihmc:euclid:0.20.0")
    api("us.ihmc:simulation-construction-set:0.23.4")
