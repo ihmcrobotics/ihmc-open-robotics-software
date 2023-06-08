@@ -162,11 +162,7 @@ public class BehaviorActionSequence
          actionSequence.clear();
          for (BehaviorAction action : actionArray)
          {
-            if (action == null)
-               LogTools.info("oops");
-            else
-               actionSequence.add(action);
-
+            actionSequence.add(action);
          }
 
          if (excecutionNextIndex > latestUpdateMessage.getSequenceSize())
