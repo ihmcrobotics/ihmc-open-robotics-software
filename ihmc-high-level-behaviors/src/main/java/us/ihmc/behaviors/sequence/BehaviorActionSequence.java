@@ -177,7 +177,7 @@ public class BehaviorActionSequence
          }
          for (FootstepActionMessage message : footstepMessageReceiver.removeActionList(sequenceUpdateUUID))
          {
-            FootstepAction action = new FootstepAction(ros2, syncedRobot, referenceFrameLibrary);
+            FootstepAction action = new FootstepAction(ros2, referenceFrameLibrary);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
