@@ -8,6 +8,8 @@ import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.actions.WalkActionData;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
@@ -83,11 +85,34 @@ public class RDXWalkAction extends RDXBehaviorAction
       }
    }
 
+   public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
+   {
+      actionData.changeParentFrame(parentFrame);
+      actionData.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(transformToParent));
+      update();
+   }
+
+   public void setToReferenceFrame(ReferenceFrame referenceFrame)
+   {
+      actionData.changeParentFrame(ReferenceFrame.getWorldFrame());
+      actionData.setTransformToParent(transformToParentToPack -> transformToParentToPack.set(referenceFrame.getTransformToWorldFrame()));
+      update();
+   }
+
    @Override
    public void update()
    {
       if (!getSelected().get())
          goalFeetPosesSelected.forEach(imBoolean -> imBoolean.set(false));
+
+      if (footstepPlannerGoalGizmo.getGizmoFrame() != actionData.getReferenceFrame())
+      {
+         footstepPlannerGoalGizmo.setGizmoFrame(actionData.getReferenceFrame());
+         for (RobotSide side : RobotSide.values)
+         {
+            goalFeetGizmos.get(side).setParentFrame(actionData.getReferenceFrame());
+         }
+      }
 
       footstepPlannerGoalGizmo.update();
       for (RobotSide side : RobotSide.values)
