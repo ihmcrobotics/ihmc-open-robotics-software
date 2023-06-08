@@ -46,9 +46,7 @@ mainDependencies {
    val opencvVersion = "4.7.0-1.5.9"
    api("org.bytedeco:opencv:$opencvVersion")
    api("org.bytedeco:opencv:$opencvVersion:linux-x86_64")
-   api("org.bytedeco:opencv:$opencvVersion:linux-x86_64-gpu")
    api("org.bytedeco:opencv:$opencvVersion:windows-x86_64")
-   api("org.bytedeco:opencv:$opencvVersion:windows-x86_64-gpu")
    val ffmpegVersion = "6.0-1.5.9"
    api("org.bytedeco:ffmpeg:$ffmpegVersion")
    api("org.bytedeco:ffmpeg:$ffmpegVersion:linux-x86_64")
