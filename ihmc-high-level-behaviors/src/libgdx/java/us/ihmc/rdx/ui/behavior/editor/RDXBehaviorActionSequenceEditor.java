@@ -437,7 +437,9 @@ public class RDXBehaviorActionSequenceEditor
       RDXBehaviorAction newAction = null;
       if (ImGui.button(labels.get("Add Walk")))
       {
-         newAction = new RDXWalkAction(panel3D, robotModel, referenceFrameLibrary);
+         RDXWalkAction walkAction = new RDXWalkAction(panel3D, robotModel, referenceFrameLibrary);
+         walkAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
+         newAction = walkAction;
       }
       ImGui.text("Add Hand Pose:");
       ImGui.sameLine();
