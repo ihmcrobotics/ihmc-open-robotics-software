@@ -1,9 +1,7 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import us.ihmc.commons.InterpolationTools;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
@@ -48,9 +46,9 @@ public class CaptureRegionSafetyHeuristics implements SCS2YoGraphicHolder
                                                                                                  30,
                                                                                                  registry);
 
-   private final DoubleParameter distanceIntoCaptureRegionForInside = new DoubleParameter("distanceIntoCaptureRegionForInside", registry, 0.05);
+   final DoubleParameter distanceIntoCaptureRegionForInside = new DoubleParameter("distanceIntoCaptureRegionForInside", registry, 0.05);
    private final DoubleParameter distanceIntoCaptureRegionForEverywhere = new DoubleParameter("distanceIntoCaptureRegionForEverywhere", registry, 0.02);
-   private final DoubleParameter extraDistanceToStepFromStanceFoot = new DoubleParameter("extraDistanceToStepFromStanceFoot", registry, 0.05);
+   final DoubleParameter extraDistanceToStepFromStanceFoot = new DoubleParameter("extraDistanceToStepFromStanceFoot", registry, 0.05);
 
    private final List<FixedFramePoint2DBasics> verticesVisibleFromStance = new ArrayList<>();
    private final FramePoint2D stancePosition = new FramePoint2D();
@@ -113,12 +111,24 @@ public class CaptureRegionSafetyHeuristics implements SCS2YoGraphicHolder
 
       projectVerticesTowardsTheMiddle(stanceSide, captureRegion);
 
-      if (computeVisibiltyOfVerticesFromStance(saferCaptureRegion))
-         projectVerticesVisibleToStanceAwayFromTheFoot();
+      moveCaptureRegionAwayFromStanceFoot();
 
       saferCaptureRegion.update();
 
       yoSafetyBiasedCaptureRegion.setMatchingFrame(saferCaptureRegion, false);
+   }
+
+   private void moveCaptureRegionAwayFromStanceFoot()
+   {
+      if (saferCaptureRegion.getNumberOfVertices() > 3)
+      {
+         if (computeVisibiltyOfVerticesFromStance(saferCaptureRegion))
+            projectVerticesVisibleToStanceAwayFromTheFoot();
+      }
+      else if (saferCaptureRegion.getNumberOfVertices() == 2)
+      {
+         projectClosestVertexAlongLine();
+      }
    }
 
    /**
@@ -230,6 +240,28 @@ public class CaptureRegionSafetyHeuristics implements SCS2YoGraphicHolder
          saferCaptureRegion.notifyVerticesChanged();
    }
 
+   private void projectClosestVertexAlongLine()
+   {
+      double totalLength = saferCaptureRegion.getVertex(0).distance(saferCaptureRegion.getVertex(1));
+      double maxScaleDistance = Math.min(extraDistanceToStepFromStanceFoot.getValue(), totalLength);
+
+      int indexToModify;
+      if (saferCaptureRegion.getVertex(0).distanceSquared(stancePosition) < saferCaptureRegion.getVertex(1).distanceSquared(stancePosition))
+      {
+         indexToModify = 0;
+      }
+      else
+      {
+         indexToModify = 1;
+      }
+      tempVector.setReferenceFrame(saferCaptureRegion.getReferenceFrame());
+      tempVector.sub(saferCaptureRegion.getVertex(indexToModify), stancePosition);
+      tempVector.scale(maxScaleDistance / tempVector.norm());
+
+      saferCaptureRegion.getVertexUnsafe(indexToModify).add(tempVector);
+      saferCaptureRegion.notifyVerticesChanged();
+   }
+
    private static boolean checkIfClockWiseOrdered(List<? extends Point2DReadOnly> points, ConvexPolygon2DReadOnly captureRegion)
    {
       if (points.size() < 2)
@@ -266,6 +298,10 @@ public class CaptureRegionSafetyHeuristics implements SCS2YoGraphicHolder
     */
    private void projectVerticesTowardsTheMiddle(RobotSide stanceSide, FrameConvexPolygon2DReadOnly originalCaptureRegion)
    {
+      // do nothing here if it's a line
+      if (originalCaptureRegion.getNumberOfVertices() < 3)
+         return;
+
       // first, figure out which side the "inside" of the line of action is. This is the side of the line that faces the stance foot.
       RobotSide insideSideOfLine;
       if (lineOfMinimalAction.getDirectionX() > 0.0)
