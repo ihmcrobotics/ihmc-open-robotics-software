@@ -64,7 +64,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final BooleanProvider allowStepAdjustment;
    private final DoubleProvider footstepDeadband;
 
-   private final DoubleProvider minICPErrorForStepAdjustment;
    private final BooleanProvider allowCrossOverSteps;
 
    private final YoBoolean useStepAdjustment = new YoBoolean(yoNamePrefix + "UseStepAdjustment", registry);
@@ -106,7 +105,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final YoBoolean swingSpeedUpEnabled = new YoBoolean(yoNamePrefix + "SwingSpeedUpEnabled", registry);
    private final YoDouble speedUpTime = new YoDouble(yoNamePrefix + "SpeedUpTime", registry);
 
-   private final YoFrameVector2D icpError = new YoFrameVector2D(yoNamePrefix + "ICPError", "", worldFrame, registry);
    private final YoBoolean footstepWasAdjusted = new YoBoolean(yoNamePrefix + "FootstepWasAdjusted", registry);
 
    private final BooleanProvider useICPControlPlaneInStepAdjustment;
@@ -168,10 +166,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       this.bipedSupportPolygons = bipedSupportPolygons;
 
       allowStepAdjustment = new BooleanParameter(yoNamePrefix + "AllowStepAdjustment", registry, stepAdjustmentParameters.allowStepAdjustment());
-
-      minICPErrorForStepAdjustment = new DoubleParameter(yoNamePrefix + "MinICPErrorForStepAdjustment",
-                                                         registry,
-                                                         stepAdjustmentParameters.getMinICPErrorForStepAdjustment());
 
       useICPControlPlaneInStepAdjustment = new BooleanParameter(yoNamePrefix + "useICPControlPlaneInStepAdjustment",
                                                                 registry,
@@ -404,6 +398,11 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                omega0,
                                                stepsInQueue.getIntegerValue());
 
+      if (useICPControlPlaneInStepAdjustment.getValue())
+         icpControlPlane.projectPointOntoControlPlane(worldFrame, referenceFootstepPosition, referencePositionInControlPlane);
+      else
+         referencePositionInControlPlane.set(referenceFootstepPosition);
+
       if (!useStepAdjustment.getBooleanValue())
       {
          if (shouldCheckForReachability.getValue())
@@ -422,15 +421,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
          return;
       }
 
-      icpError.sub(desiredICP, currentICP);
-
-      boolean errorAboveThreshold = icpError.normSquared() > MathTools.square(minICPErrorForStepAdjustment.getValue());
-
-      if (useICPControlPlaneInStepAdjustment.getValue())
-         icpControlPlane.projectPointOntoControlPlane(worldFrame, upcomingFootstep.getPosition(), referencePositionInControlPlane);
-      else
-         referencePositionInControlPlane.set(upcomingFootstep.getPosition());
-
+      // actually apply the adjustment
       projectAdjustedStepIntoCaptureRegion();
       boolean wasAdjusted = deadbandAndApplyStepAdjustment();
 
