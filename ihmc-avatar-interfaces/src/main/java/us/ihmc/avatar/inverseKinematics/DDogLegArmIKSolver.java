@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.affordances;
+package us.ihmc.avatar.inverseKinematics;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -11,7 +11,7 @@ import us.ihmc.robotics.kinematics.DdoglegInverseKinematicsCalculator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 
-public class RDXDDogLegArmIKSolver
+public class DDogLegArmIKSolver
 {
    private static final int INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE = 5;
 
@@ -29,11 +29,11 @@ public class RDXDDogLegArmIKSolver
    private final FramePose3D lastDesiredHandCoMPose = new FramePose3D();
    private boolean ikFoundASolution = false;
 
-   public RDXDDogLegArmIKSolver(RobotSide side,
-                                DRCRobotModel robotModel,
-                                FullHumanoidRobotModel actualRobot,
-                                FullHumanoidRobotModel desiredRobot,
-                                ReferenceFrame handControlDesiredFrame)
+   public DDogLegArmIKSolver(RobotSide side,
+                             DRCRobotModel robotModel,
+                             FullHumanoidRobotModel actualRobot,
+                             FullHumanoidRobotModel desiredRobot,
+                             ReferenceFrame handControlDesiredFrame)
    {
       this.desiredRobot = desiredRobot;
       this.handControlDesiredFrame = handControlDesiredFrame;
