@@ -15,5 +15,8 @@ RUN cd gtsam-develop; \
     cmake -G \"Visual Studio 17 2022\" -A x64 -DGTSAM_BUILD_EXAMPLES_ALWAYS=OFF -DGTSAM_BUILD_UNSTABLE=OFF -DGTSAM_BUILD_PYTHON=OFF -DGTSAM_USE_SYSTEM_EIGEN=ON ..; \
     cmake --build . --config Release; \
     cmake --install .
+# TODO: this doesn't work fully, so we have to exit with code 0
+RUN Remove-Item -LiteralPath '.\gtsam-develop\' -Recurse -ErrorAction Ignore; exit 0
+RUN Remove-Item '.\gtsam-develop.zip' -ErrorAction Ignore
 
 ENTRYPOINT ["powershell.exe"]
