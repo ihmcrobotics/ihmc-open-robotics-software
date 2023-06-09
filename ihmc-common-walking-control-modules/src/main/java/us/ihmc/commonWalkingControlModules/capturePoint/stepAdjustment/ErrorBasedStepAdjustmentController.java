@@ -17,11 +17,7 @@ import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameConvexPolygon2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -107,6 +103,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
    private final YoBoolean footstepWasAdjusted = new YoBoolean(yoNamePrefix + "FootstepWasAdjusted", registry);
 
+   private final BooleanProvider resetFootstepProjectionEachTick;
    private final BooleanProvider useICPControlPlaneInStepAdjustment;
    private final DoubleProvider minimumTimeForStepAdjustment;
    private final DoubleProvider extraTimeToProjectDynamics;
@@ -168,6 +165,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
       allowStepAdjustment = new BooleanParameter(yoNamePrefix + "AllowStepAdjustment", registry, stepAdjustmentParameters.allowStepAdjustment());
 
+      resetFootstepProjectionEachTick = new BooleanParameter(yoNamePrefix + "ResetFootstepProjectionEachTick", registry, true);
       useICPControlPlaneInStepAdjustment = new BooleanParameter(yoNamePrefix + "useICPControlPlaneInStepAdjustment",
                                                                 registry,
                                                                 stepAdjustmentParameters.useICPControlPlane());
@@ -402,10 +400,11 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                omega0,
                                                stepsInQueue.getIntegerValue());
 
+      FramePoint3DReadOnly pointToProject = resetFootstepProjectionEachTick.getValue() ? referenceFootstepPosition : upcomingFootstep.getPosition();
       if (useICPControlPlaneInStepAdjustment.getValue())
-         icpControlPlane.projectPointOntoControlPlane(worldFrame, referenceFootstepPosition, referencePositionInControlPlane);
+         icpControlPlane.projectPointOntoControlPlane(worldFrame, pointToProject, referencePositionInControlPlane);
       else
-         referencePositionInControlPlane.set(referenceFootstepPosition);
+         referencePositionInControlPlane.set(pointToProject);
 
       if (!useStepAdjustment.getBooleanValue())
       {
