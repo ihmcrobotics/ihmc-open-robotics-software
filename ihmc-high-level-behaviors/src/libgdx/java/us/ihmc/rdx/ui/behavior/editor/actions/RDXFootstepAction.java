@@ -111,6 +111,7 @@ public class RDXFootstepAction extends RDXBehaviorAction
       if (referenceFrameLibraryCombo.render())
       {
          actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame());
+         update();
       }
    }
 
