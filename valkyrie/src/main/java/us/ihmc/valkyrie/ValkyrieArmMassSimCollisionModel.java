@@ -209,8 +209,8 @@ public class ValkyrieArmMassSimCollisionModel implements RobotCollisionModel
             JointBasics ankleRoll = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), multiBodySystem);
             MovingReferenceFrame ankleRollFrame = ankleRoll.getFrameAfterJoint();
 
-            boolean addFootBox = false;
-            boolean addFootPoints = true;
+            boolean addFootBox = true;
+            boolean addFootPoints = false;
 
             ArrayList<Point2D> footContactPointsInSoleFrame = contactPointParameters.getFootContactPoints().get(robotSide);
             RigidBodyTransform soleToAnkleFrameTransform = jointMap.getSoleToParentFrameTransform(robotSide);
