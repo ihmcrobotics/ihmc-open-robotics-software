@@ -173,7 +173,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                          registry,
                                                          stepAdjustmentParameters.getMinimumTimeForStepAdjustment());
 
-      extraTimeToProjectDynamics = new DoubleParameter(yoNamePrefix + "ExtraTimeToProjectDynamics", registry, 0.1);
+      extraTimeToProjectDynamics = new DoubleParameter(yoNamePrefix + "ExtraTimeToProjectDynamics", registry, 0.0);
       supportDistanceFromFront = new DoubleParameter(yoNamePrefix + "supportDistanceFromFront",
                                                      registry,
                                                      stepAdjustmentParameters.getCoPDistanceFromFrontOfFoot());

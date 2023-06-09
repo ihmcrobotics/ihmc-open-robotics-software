@@ -133,7 +133,7 @@ public class CapturabilityBasedPlanarRegionDecider implements SCS2YoGraphicHolde
       distanceInsideToRemoveRegionConstraint.set(defaultDistanceInsideToRemoveRegionConstraint);
 
       switchPlanarRegionConstraintsAutomatically = new YoBoolean("switchPlanarRegionConstraintsAutomatically", registry);
-      switchPlanarRegionConstraintsAutomatically.set(false);
+      switchPlanarRegionConstraintsAutomatically.set(true);
 
       isBoundingBoxVisualized = new YoBoolean("isBoundingBoxVisualized", registry);
 
