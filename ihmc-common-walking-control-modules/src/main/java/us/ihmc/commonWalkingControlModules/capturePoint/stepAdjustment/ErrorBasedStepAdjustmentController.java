@@ -109,6 +109,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
    private final BooleanProvider useICPControlPlaneInStepAdjustment;
    private final DoubleProvider minimumTimeForStepAdjustment;
+   private final DoubleProvider extraTimeToProjectDynamics;
    private final DoubleParameter supportDistanceFromFront;
    private final DoubleParameter supportDistanceFromBack;
    private final DoubleParameter supportDistanceFromInside;
@@ -173,6 +174,8 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       minimumTimeForStepAdjustment = new DoubleParameter(yoNamePrefix + "minimumTimeForStepAdjustment",
                                                          registry,
                                                          stepAdjustmentParameters.getMinimumTimeForStepAdjustment());
+
+      extraTimeToProjectDynamics = new DoubleParameter(yoNamePrefix + "ExtraTimeToProjectDynamics", registry, 0.1);
       supportDistanceFromFront = new DoubleParameter(yoNamePrefix + "supportDistanceFromFront",
                                                      registry,
                                                      stepAdjustmentParameters.getCoPDistanceFromFrontOfFoot());
@@ -384,7 +387,8 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       computeLimitedAreaForCoP(copToShrinkAbout, percentageToShrinkPolygon);
       RobotSide swingSide = upcomingFootstepSide.getEnumValue();
       RobotSide stanceSide = swingSide.getOppositeSide();
-      captureRegionCalculator.calculateCaptureRegion(swingSide, Math.max(timeRemainingInState.getDoubleValue(), 0.0), currentICP, omega0, allowableAreaForCoP);
+      double timeToPrject = Math.max(timeRemainingInState.getDoubleValue(), 0.0) + extraTimeToProjectDynamics.getValue();
+      captureRegionCalculator.calculateCaptureRegion(swingSide, timeToPrject, currentICP, omega0, allowableAreaForCoP);
       oneStepSafetyHeuristics.computeCaptureRegionWithSafetyHeuristics(stanceSide,
                                                                        currentICP,
                                                                        allowableAreaForCoP.getCentroid(),
