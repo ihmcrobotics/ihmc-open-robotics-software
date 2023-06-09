@@ -326,6 +326,50 @@ public class CaptureRegionSafetyHeuristicsTest
       }
    }
 
+   @Test
+   public void testCaptureRegionIsALine()
+   {
+      // do not change parameters
+      // expected results are pre-calculated
+      double footWidth = 0.5;
+      double kinematicsStepRange = 3.0;
+
+      RobotSide swingSide = RobotSide.RIGHT;
+      double swingTimeRemaining = 0.01;
+      double omega0 = 3.0;
+
+      OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicsStepRange,
+                                                                                                  ankleZUpFrames, registry, null);
+      CaptureRegionSafetyHeuristics heuristics = new CaptureRegionSafetyHeuristics(() -> kinematicsStepRange, registry);
+
+      new DefaultParameterReader().readParametersInRegistry(registry);
+
+      ArrayList<Point2D> listOfPoints = new ArrayList<Point2D>();
+      listOfPoints.add(new Point2D());
+      FrameConvexPolygon2D supportFootPolygon = new FrameConvexPolygon2D(ankleZUpFrames.get(swingSide.getOppositeSide()), Vertex2DSupplier.asVertex2DSupplier(listOfPoints));
+      supportFootPolygon.changeFrameAndProjectToXYPlane(worldFrame);
+
+      FramePoint2D icp = new FramePoint2D(worldFrame, 0.6, -0.5);
+      captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, icp, omega0, supportFootPolygon);
+      FrameConvexPolygon2D captureRegion = captureRegionCalculator.getCaptureRegion();
+
+      heuristics.computeCaptureRegionWithSafetyHeuristics(swingSide.getOppositeSide(), icp, supportFootPolygon.getCentroid(), captureRegion);
+
+      assertTrue(heuristics.getCaptureRegionWithSafetyMargin().signedDistance(icp) > heuristics.extraDistanceToStepFromStanceFoot.getValue());
+
+      if (PLOT_RESULTS)
+      {
+         FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(-5, 5, -5, 5);
+         FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
+         plotter.setDrawPointsLarge();
+         plotter.addPolygon(supportFootPolygon, Color.black);
+         plotter.addPolygon(heuristics.getCaptureRegionWithSafetyMargin(), Color.green);
+         plotter.addFramePoint2d(icp, Color.blue);
+
+         waitForButtonOrPause(testFrame);
+      }
+   }
+
    private static void assertTheShrunkenRegionIsInTheUnshrunkenRegion(FrameConvexPolygon2DReadOnly unshrunkenRegion, FrameConvexPolygon2DReadOnly shrunkenRegion, double epsilon)
    {
       FrameConvexPolygon2D regionToCheck = new FrameConvexPolygon2D(shrunkenRegion);
