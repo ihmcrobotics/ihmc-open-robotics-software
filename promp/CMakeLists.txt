@@ -24,7 +24,6 @@ set(SOURCE_FILES ${SOURCE_FILES}
 	src/main/cpp/trajectory_group.cpp
 )
 
-
 # compile promp lib
 add_library(${PROJECTNAME} SHARED ${SOURCE_FILES})
 
@@ -83,5 +82,3 @@ add_subdirectory(doc)
 if(${BUILD_PYTHON_MODULE})
 	add_subdirectory(python)
 endif()
-
-
