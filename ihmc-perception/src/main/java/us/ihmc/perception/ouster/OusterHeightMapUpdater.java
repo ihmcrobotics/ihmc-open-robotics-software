@@ -44,9 +44,8 @@ public class OusterHeightMapUpdater
 
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
 
-   private final ScheduledExecutorService executorService
-         = ExecutorServiceTools.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()),
-                                                                 ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
+   private ScheduledExecutorService executorService;
+
 
    public OusterHeightMapUpdater(ROS2ControllerPublishSubscribeAPI ros2)
    {
@@ -71,6 +70,8 @@ public class OusterHeightMapUpdater
 
    public void start()
    {
+      executorService = ExecutorServiceTools.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()),
+                                                                               ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
       executorService.scheduleAtFixedRate(this::update, 0, updateDTMillis, TimeUnit.MILLISECONDS);
    }
 
