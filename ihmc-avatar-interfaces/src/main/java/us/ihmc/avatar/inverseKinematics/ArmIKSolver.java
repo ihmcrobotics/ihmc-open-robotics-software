@@ -54,8 +54,7 @@ public class ArmIKSolver
 
       RigidBodyBasics chest = MultiBodySystemTools.findRigidBody(detachedArmOnlyRobot, robotModel.getJointMap().getChestName());
 
-      JointBasics[] controlledJoints = MultiBodySystemTools.createJointPath(detachedArmOnlyRobot, hand);
-
+      JointBasics[] controlledJoints = MultiBodySystemMissingTools.getSubtreeJointArray(JointBasics.class, detachedArmOnlyRobot);
 
       ReferenceFrame centerOfMassFrame = chest.getBodyFixedFrame(); // TODO: FIXME
       YoGraphicsListRegistry yoGraphicsListRegistry = null; // opt out
@@ -76,7 +75,7 @@ public class ArmIKSolver
       controllableRigidBodies.add(chest);
       controllableRigidBodies.add(hand);
 
-      OneDoFJointBasics[] oneDoFJoints = (OneDoFJointBasics[]) MultiBodySystemTools.createJointPath(chest, hand);
+      OneDoFJointBasics[] oneDoFJoints = MultiBodySystemMissingTools.getSubtreeJointArray(OneDoFJointBasics.class, detachedArmOnlyRobot);
 
       FeedbackControllerTemplate controllerCoreTemplate = new FeedbackControllerTemplate();
       controllerCoreTemplate.setAllowDynamicControllerConstruction(true);

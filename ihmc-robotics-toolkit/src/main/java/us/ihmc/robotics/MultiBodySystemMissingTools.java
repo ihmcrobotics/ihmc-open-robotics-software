@@ -3,11 +3,13 @@ package us.ihmc.robotics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 public class MultiBodySystemMissingTools
 {
@@ -38,5 +40,12 @@ public class MultiBodySystemMissingTools
       RigidBodyBasics clonedFirstShoulderLink = MultiBodySystemFactories.cloneSubtree(childJointToFollow.getSuccessor(), "");
       clonedFirstShoulderJoint.setSuccessor(clonedFirstShoulderLink);
       return elevator;
+   }
+
+   public static <J extends JointReadOnly> J[] getSubtreeJointArray(Class<J> jointTypeFilter, RigidBodyReadOnly start)
+   {
+      ArrayList<J> joints = new ArrayList<>();
+      SubtreeStreams.fromChildren(jointTypeFilter, start).forEach(joints::add);
+      return joints.toArray((J[]) Array.newInstance(jointTypeFilter, 0));
    }
 }
