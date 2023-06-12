@@ -28,7 +28,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
