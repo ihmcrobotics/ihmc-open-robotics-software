@@ -26,6 +26,12 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * An attempt to use the WholeBodyControllerCore directly to get IK solutions for
+ * a humanoid robot arm.
+ *
+ * @author Duncan Calvert
+ */
 public class ArmIKSolver
 {
    /** The gains of the solver depend on this dt, it shouldn't change based on the actual thread scheduled period. */
@@ -35,6 +41,7 @@ public class ArmIKSolver
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    // TODO: Mess with these settings
    private final KinematicsToolboxOptimizationSettings optimizationSettings = new KinematicsToolboxOptimizationSettings();
+   private final WholeBodyControllerCore controllerCore;
 
    public ArmIKSolver(RobotSide side,
                       DRCRobotModel robotModel,
@@ -87,8 +94,13 @@ public class ArmIKSolver
       SubtreeStreams.fromChildren(OneDoFJointBasics.class, chest).forEach(controllerCoreTemplate::enableOneDoFJointFeedbackController);
 
       JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(oneDoFJoints);
-      WholeBodyControllerCore wholeBodyControllerCore =  new WholeBodyControllerCore(toolbox, controllerCoreTemplate, lowLevelControllerOutput, registry);
+      controllerCore = new WholeBodyControllerCore(toolbox, controllerCoreTemplate, lowLevelControllerOutput, registry);
 
       LogTools.info("Created WBCC!");
+   }
+
+   public void update()
+   {
+//      controllerCore.compute(controllerCoreCommand);
    }
 }
