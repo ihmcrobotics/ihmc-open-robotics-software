@@ -54,10 +54,10 @@ public class DoorSceneNodeDefinitions
    public static final RigidBodyTransform PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER = new RigidBodyTransform();
    static
    {
-      PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER.getTranslation().add(0.03, -0.09, -0.287);
-      EuclidCoreMissingTools.setYawPitchRollDegrees(PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER.getRotation(), 180.0, 0.0, 180.0);
-//      PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER.getTranslation().add(0.03, -0.07, -0.135);
+//      PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER.getTranslation().add(0.03, -0.09, -0.287);
 //      EuclidCoreMissingTools.setYawPitchRollDegrees(PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER.getRotation(), 180.0, 0.0, 180.0);
+      PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER.getTranslation().add(0.03, -0.07, -0.135);
+      EuclidCoreMissingTools.setYawPitchRollDegrees(PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER.getRotation(), 180.0, 0.0, 180.0);
    }
 
    // TODO: These transforms need to be verified.
