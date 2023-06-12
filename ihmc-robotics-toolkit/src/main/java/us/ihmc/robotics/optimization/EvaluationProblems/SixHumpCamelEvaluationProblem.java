@@ -55,6 +55,11 @@ public class SixHumpCamelEvaluationProblem implements EvaluationProblem
       return new DMatrixRMaj(new double[]{0.0898, -0.7126});
    }
 
+   public DMatrixD1 getOptimumParameters2()
+   {
+      return new DMatrixRMaj(new double[]{-0.0898, 0.7126});
+   }
+
    @Override
    public double getOptimumCost()
    {
