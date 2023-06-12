@@ -1,7 +1,9 @@
 package us.ihmc.avatar.colorVision;
 
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.cuda.cudart.CUctx_st;
+import org.bytedeco.cuda.cudart.CUstream_st;
+import org.bytedeco.cuda.nvjpeg.*;
+import org.bytedeco.javacpp.*;
 import org.bytedeco.opencv.global.opencv_calib3d;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
@@ -41,15 +43,24 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.tools.processManagement.ProcessTools;
 import us.ihmc.tools.thread.Throttler;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static org.bytedeco.cuda.global.cudart.*;
+import static org.bytedeco.cuda.global.nvjpeg.*;
 
 public class DualBlackflyCamera
 {
    private static final IntPointer COMPRESSION_PARAMETERS = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
    private static final double PUBLISH_RATE = 15.0;
+   private static boolean cudaAvailable = true;
 
    private final RobotSide side;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -73,7 +84,7 @@ public class DualBlackflyCamera
    private final IHMCROS2Publisher<ImageMessage> ros2ImagePublisher;
    private long imageMessageSequenceNumber = 0;
    private final BytePointer jpegImageBytePointer = new BytePointer(imageMessage.getData().capacity());
-   private final ImageMessageDataPacker compressedImageDataPacker = new ImageMessageDataPacker(jpegImageBytePointer.capacity());
+   private /*final*/ ImageMessageDataPacker compressedImageDataPacker;
 
    // These update when a camera image resolution change is detected
    private int imageWidth = 0;
@@ -103,6 +114,15 @@ public class DualBlackflyCamera
       this.spinnakerBlackfly = spinnakerBlackfly;
       this.ousterFisheyeColoringIntrinsics = ousterFisheyeColoringIntrinsics;
       this.predefinedSceneNodeLibrary = predefinedSceneNodeLibrary;
+
+      try
+      {
+         ProcessTools.execSimpleCommand("nvidia-smi");
+      }
+      catch (IOException | InterruptedException ignored)
+      {
+         cudaAvailable = false;
+      }
 
       ROS2Topic<ImageMessage> imageTopic = PerceptionAPI.BLACKFLY_FISHEYE_COLOR_IMAGE.get(side);
       ros2ImagePublisher = ROS2Tools.createPublisher(ros2Node, imageTopic, ROS2QosProfile.BEST_EFFORT());
@@ -310,11 +330,98 @@ public class DualBlackflyCamera
       opencv_imgproc.cvtColor(blackflySourceImage.getBytedecoOpenCVMat(), rgbaMat, opencv_imgproc.COLOR_BayerBG2RGBA);
       opencv_imgproc.cvtColor(rgbaMat, yuv420Image, opencv_imgproc.COLOR_RGBA2YUV_I420);
 
-      // TODO: speed this up, it uses a lot of CPU
-      opencv_imgcodecs.imencode(".jpg", yuv420Image, jpegImageBytePointer, COMPRESSION_PARAMETERS);
+      /* When an Nvidia GPU is available, use CUDA to encode image on the GPU
+       * Good reference: https://docs.nvidia.com/cuda/nvjpeg/index.html#jpeg-encoding
+       * Sample code: https://github.com/bytedeco/javacpp-presets/blob/master/cuda/samples/SampleJpegEncoder.java
+       */
+      if (cudaAvailable)
+      {
+         // Initialize cuda
+         CUctx_st context = new CUctx_st();
+         cuInit(0);
+         cuCtxCreate(context, CU_CTX_SCHED_AUTO, 0);
+
+         // Create cuda stream
+         CUstream_st stream = new CUstream_st();
+         cuStreamCreate(stream, 0);
+
+         // Create handle
+         nvjpegHandle nvjpegHandle = new nvjpegHandle();
+         nvjpegCreateSimple(nvjpegHandle);
+
+         // Create encoder components
+         nvjpegEncoderState nvjpegEncoderState = new nvjpegEncoderState();
+         nvjpegEncoderParams nvjpegEncoderParams = new nvjpegEncoderParams();
+         nvjpegEncoderParamsCreate(nvjpegHandle, nvjpegEncoderParams, stream);
+         nvjpegEncoderStateCreate(nvjpegHandle, nvjpegEncoderState, stream);
+         nvjpegEncoderParamsSetSamplingFactors(nvjpegEncoderParams, NVJPEG_CSS_420, stream);
+
+         // Create jpeg image
+         nvjpegImage_t nvjpegImage = new nvjpegImage_t();
+
+         // Set a pointer pointing to the beginning of planes
+         BytePointer planeStartPointer = yuv420Image.datastart();
+
+         // Get Y plane data
+         BytePointer YPlanePointer = new BytePointer();                                                  // create a pointer for the Y plane
+         cudaMalloc(YPlanePointer, numberOfBytesInFrame);                                                // allocate Y plane memory
+         cudaMemcpy(YPlanePointer, planeStartPointer, numberOfBytesInFrame, cudaMemcpyHostToDevice);     // copy Y plane data to device memory
+         nvjpegImage.pitch(0, imageWidth);                                                               // set the pitch
+         nvjpegImage.channel(0, YPlanePointer);                                                          //set the channel
+         planeStartPointer.position(planeStartPointer.position() + numberOfBytesInFrame);                // move plane start pointer to start of U plane
+
+         // Get U plane data
+         BytePointer UMemory = new BytePointer();                                                        // repeat above
+         cudaMalloc(UMemory, numberOfBytesInFrame / 4);
+         cudaMemcpy(UMemory, planeStartPointer, numberOfBytesInFrame / 4, cudaMemcpyHostToDevice);
+         nvjpegImage.pitch(1, imageWidth);
+         nvjpegImage.channel(1, UMemory);
+         planeStartPointer.position(planeStartPointer.position() + numberOfBytesInFrame / 4);
+
+         // Get V plane data
+         BytePointer VMemory = new BytePointer();
+         cudaMalloc(VMemory, numberOfBytesInFrame / 4);
+         cudaMemcpy(VMemory, planeStartPointer, numberOfBytesInFrame / 4, cudaMemcpyHostToDevice);
+         nvjpegImage.pitch(2, imageWidth);
+         nvjpegImage.channel(2, VMemory);
+
+         // Compress image
+         nvjpegEncodeYUV(nvjpegHandle, nvjpegEncoderState, nvjpegEncoderParams, nvjpegImage, NVJPEG_CSS_420, imageWidth, imageHeight, stream);
+
+         // Get compressed size
+         SizeTPointer jpegSize = new SizeTPointer(1);
+         nvjpegEncodeRetrieveBitstream(nvjpegHandle, nvjpegEncoderState, (BytePointer) null, jpegSize, stream);
+
+         // Retrieve bitstream
+         nvjpegEncodeRetrieveBitstream(nvjpegHandle, nvjpegEncoderState, jpegImageBytePointer, jpegSize, stream);
+
+         // Synchronize cuda stream
+         cudaStreamSynchronize(stream);
+
+         // Get bitstream to java side array
+         byte[] bytes = new byte[(int) jpegSize.get()];
+         jpegImageBytePointer.get(bytes);
+
+         // Write
+         try
+         {
+            Files.write(new File("hello.jpg").toPath(), bytes);
+            System.out.println("Wrote to hello.jpg!");
+         }
+         catch (IOException e)
+         {
+            throw new RuntimeException(e);
+         }
+      }
+      else
+      {
+         System.out.println(yuv420Image);
+         opencv_imgcodecs.imencode(".jpg", yuv420Image, jpegImageBytePointer, COMPRESSION_PARAMETERS);
+      }
 
       ousterFisheyeColoringIntrinsicsROS2.updateAndPublishThrottledStatus();
 
+      compressedImageDataPacker = new ImageMessageDataPacker(jpegImageBytePointer.capacity());
       compressedImageDataPacker.pack(imageMessage, jpegImageBytePointer);
       MessageTools.toMessage(spinImageAcquisitionTime, imageMessage.getAcquisitionTime());
       imageMessage.setImageWidth(imageWidth);
