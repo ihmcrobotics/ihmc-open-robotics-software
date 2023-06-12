@@ -20,8 +20,6 @@ ihmc {
    configurePublications()
 }
 
-val javaCPPVersion = "1.5.9-SNAPSHOT"
-
 mainDependencies {
    api(ihmc.sourceSetProject("slam-wrapper"))
    api(ihmc.sourceSetProject("mapsense-wrapper"))
@@ -40,36 +38,41 @@ mainDependencies {
    api("org.boofcv:boofcv-calibration:0.36")
    api("org.ddogleg:ddogleg:0.18")
 
-   // https://oss.sonatype.org/content/repositories/snapshots/org/bytedeco/
-   api("org.bytedeco:javacpp:$javaCPPVersion")
-   api("org.bytedeco:javacv:$javaCPPVersion")
-   val openblasVersion = "0.3.23-1.5.9-20230404.015544-39"
+   api("org.bytedeco:javacpp:1.5.9")
+   val openblasVersion = "0.3.23-1.5.9"
    api("org.bytedeco:openblas:$openblasVersion")
    api("org.bytedeco:openblas:$openblasVersion:linux-x86_64")
+   api("org.bytedeco:openblas:$openblasVersion:linux-arm64")
    api("org.bytedeco:openblas:$openblasVersion:windows-x86_64")
-   val opencvVersion = "4.7.0-1.5.9-20230516.151940-290"
+   val opencvVersion = "4.7.0-1.5.9"
    api("org.bytedeco:opencv:$opencvVersion")
    api("org.bytedeco:opencv:$opencvVersion:linux-x86_64")
+   api("org.bytedeco:opencv:$opencvVersion:linux-arm64")
    api("org.bytedeco:opencv:$opencvVersion:windows-x86_64")
-   val ffmpegVersion = "6.0-1.5.9-20230506.025210-104"
+   val ffmpegVersion = "6.0-1.5.9"
    api("org.bytedeco:ffmpeg:$ffmpegVersion")
    api("org.bytedeco:ffmpeg:$ffmpegVersion:linux-x86_64")
+   api("org.bytedeco:ffmpeg:$ffmpegVersion:linux-arm64")
    api("org.bytedeco:ffmpeg:$ffmpegVersion:windows-x86_64")
-   val openclVersion = "3.0-1.5.9-20230508.065821-15"
+   val openclVersion = "3.0-1.5.9"
    api("org.bytedeco:opencl:$openclVersion")
    api("org.bytedeco:opencl:$openclVersion:linux-x86_64")
+   api("org.bytedeco:opencl:$openclVersion:linux-arm64")
    api("org.bytedeco:opencl:$openclVersion:windows-x86_64")
-   val librealsense2Version = "2.53.1-1.5.9-20230108.102552-8"
+   val librealsense2Version = "2.53.1-1.5.9"
    api("org.bytedeco:librealsense2:$librealsense2Version")
    api("org.bytedeco:librealsense2:$librealsense2Version:linux-x86_64")
+   api("org.bytedeco:librealsense2:$librealsense2Version:linux-arm64")
    api("org.bytedeco:librealsense2:$librealsense2Version:windows-x86_64")
-   val spinnakerVersion = "3.0.0.118-1.5.9-20230218.091411-11"
+   val spinnakerVersion = "3.0.0.118-1.5.9"
    api("org.bytedeco:spinnaker:$spinnakerVersion")
    api("org.bytedeco:spinnaker:$spinnakerVersion:linux-x86_64")
+   // No arm64 version
    api("org.bytedeco:spinnaker:$spinnakerVersion:windows-x86_64")
-   val hdf5Version = "1.14.0-1.5.9-20230320.102117-24"
+   val hdf5Version = "1.14.1-1.5.9"
    api("org.bytedeco:hdf5:$hdf5Version")
    api("org.bytedeco:hdf5:$hdf5Version:linux-x86_64")
+   // No arm64 version
    api("org.bytedeco:hdf5:$hdf5Version:windows-x86_64")
 
    api("us.ihmc:euclid:0.20.0")
@@ -94,11 +97,11 @@ testDependencies {
 }
 
 slamWrapperDependencies {
-   api("org.bytedeco:javacpp:$javaCPPVersion")
+   api("org.bytedeco:javacpp:1.5.9")
    api("us.ihmc:ihmc-java-toolkit:source")
 }
 
 mapsenseWrapperDependencies {
-   api("org.bytedeco:javacpp:$javaCPPVersion")
+   api("org.bytedeco:javacpp:1.5.9")
    api("us.ihmc:ihmc-java-toolkit:source")
 }

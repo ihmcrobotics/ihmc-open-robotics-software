@@ -77,16 +77,16 @@ libgdxDependencies {
    val javaFXVersion = "17.0.2"
    api(ihmc.javaFXModule("graphics", javaFXVersion)) // JFX Color
 
-   // https://oss.sonatype.org/content/repositories/snapshots/org/bytedeco/
-   val javaCPPVersion = "1.5.9-SNAPSHOT"
-   api("org.bytedeco:javacpp:$javaCPPVersion")
-   val openblasVersion = "0.3.23-1.5.9-20230404.015544-39"
+   api("org.bytedeco:javacpp:1.5.9")
+   val openblasVersion = "0.3.23-1.5.9"
    api("org.bytedeco:openblas:$openblasVersion")
    api("org.bytedeco:openblas:$openblasVersion:linux-x86_64")
+   api("org.bytedeco:openblas:$openblasVersion:linux-arm64")
    api("org.bytedeco:openblas:$openblasVersion:windows-x86_64")
-   val opencvVersion = "4.7.0-1.5.9-20230516.151940-290"
+   val opencvVersion = "4.7.0-1.5.9"
    api("org.bytedeco:opencv:$opencvVersion")
    api("org.bytedeco:opencv:$opencvVersion:linux-x86_64")
+   api("org.bytedeco:opencv:$opencvVersion:linux-arm64")
    api("org.bytedeco:opencv:$opencvVersion:windows-x86_64")
 }
 
