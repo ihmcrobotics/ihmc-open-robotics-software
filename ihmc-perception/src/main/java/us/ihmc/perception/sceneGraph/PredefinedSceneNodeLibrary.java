@@ -51,7 +51,7 @@ public class PredefinedSceneNodeLibrary
       pullDoorPanel = DoorSceneNodeDefinitions.createPullDoorPanel();
       pushDoorLeverHandle = DoorSceneNodeDefinitions.createPushDoorLeverHandle();
       pullDoorLeverHandle = DoorSceneNodeDefinitions.createPullDoorLeverHandle();
-      registerArUcoDetectableSceneNode(pushDoorPanel);
+//      registerArUcoDetectableSceneNode(pushDoorPanel);
       registerArUcoDetectableSceneNode(pullDoorPanel);
       registerArUcoDetectableSceneNode(pushDoorLeverHandle);
       registerArUcoDetectableSceneNode(pullDoorLeverHandle);
@@ -60,7 +60,7 @@ public class PredefinedSceneNodeLibrary
       // The frames stay in place after being seen
       pushDoorFrame = DoorSceneNodeDefinitions.createPushDoorFrame();
       pullDoorFrame = DoorSceneNodeDefinitions.createPullDoorFrame();
-      registerStaticArUcoRelativeDetectableSceneNode(pushDoorFrame);
+//      registerStaticArUcoRelativeDetectableSceneNode(pushDoorFrame);
       registerStaticArUcoRelativeDetectableSceneNode(pullDoorFrame);
 
       box = RigidBodySceneObjectDefinitions.createBox();
