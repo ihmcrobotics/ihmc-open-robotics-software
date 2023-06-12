@@ -19,18 +19,18 @@ import static us.ihmc.robotics.Assert.assertTrue;
  *
  * This test ensures that the algorithm works correctly
  */
-public class AlmConvergenceTest
+public class AugmentedLagrangeOptimizerTest
 {
    private AugmentedLagrangeOptimizationProblem augmentedLagrangeProblem;
 
    // optimum is (0,0,0...)
-   public static double costFunctionQuadratic(DMatrixD1 inputs)
+   private static double costFunctionQuadratic(DMatrixD1 inputs)
    {
       double cost = VectorVectorMult_DDRM.innerProd(inputs, inputs);
       return cost;
    }
 
-   public static double costFunctionNonconvex(DMatrixD1 inputs)
+   private static double costFunctionNonconvex(DMatrixD1 inputs)
    {
       double norm = Math.sqrt(VectorVectorMult_DDRM.innerProd(inputs, inputs));
       if (norm == 0)
@@ -41,36 +41,36 @@ public class AlmConvergenceTest
    }
 
    // x[1] == 5
-   public static double constraint1(DMatrixD1 inputs)
+   private static double constraint1(DMatrixD1 inputs)
    {
       return inputs.get(1) - 5;
    }
 
    // x[0] >= 6
-   public static double constraint2(DMatrixD1 inputs)
+   private static double constraint2(DMatrixD1 inputs)
    {
       return inputs.get(0) - 6;
    }
 
    // x[2] <= 3
-   public static double constraint3(DMatrixD1 inputs)
+   private static double constraint3(DMatrixD1 inputs)
    {
       return -inputs.get(2) + 3;
    }
 
    // x[2] <= 3
-   public static double constraint4(DMatrixD1 inputs)
+   private static double constraint4(DMatrixD1 inputs)
    {
       return inputs.get(0) + inputs.get(1) + inputs.get(2) - 6.0;
    }
 
-   public static double constraintNonconvex(DMatrixD1 inputs)
+   private static double constraintNonconvex(DMatrixD1 inputs)
    {
       return inputs.get(0) + inputs.get(1) - 6.354061535;
    }
 
    @Test
-   public void isolatedConstraintsTest()
+   public void testIsolatedConstraints()
    {
       DMatrixD1 initial = new DMatrixRMaj(new double[] {10.0, 14.5, 16.0});
       int numLagrangeIterations = 10;
@@ -78,10 +78,10 @@ public class AlmConvergenceTest
       double penaltyIncreaseFactor = 1.5;
 
       // Set up the optimization problem
-      augmentedLagrangeProblem = new AugmentedLagrangeOptimizationProblem(AlmConvergenceTest::costFunctionQuadratic);
-      augmentedLagrangeProblem.addEqualityConstraint(AlmConvergenceTest::constraint1);
-      augmentedLagrangeProblem.addInequalityConstraint(AlmConvergenceTest::constraint2);
-      augmentedLagrangeProblem.addInequalityConstraint(AlmConvergenceTest::constraint3);
+      augmentedLagrangeProblem = new AugmentedLagrangeOptimizationProblem(AugmentedLagrangeOptimizerTest::costFunctionQuadratic);
+      augmentedLagrangeProblem.addEqualityConstraint(AugmentedLagrangeOptimizerTest::constraint1);
+      augmentedLagrangeProblem.addInequalityConstraint(AugmentedLagrangeOptimizerTest::constraint2);
+      augmentedLagrangeProblem.addInequalityConstraint(AugmentedLagrangeOptimizerTest::constraint3);
       augmentedLagrangeProblem.initialize(initialPenalty, penaltyIncreaseFactor);
 
       // Set up the optimizer
@@ -96,7 +96,7 @@ public class AlmConvergenceTest
    }
 
    @Test
-   public void jointConstraintsTest()
+   public void testJointConstraints()
    {
       DMatrixD1 initial = new DMatrixRMaj(new double[] {10.0, 14.5, 16.0});
       int numLagrangeIterations = 10;
@@ -104,8 +104,8 @@ public class AlmConvergenceTest
       double penaltyIncreaseFactor = 1.5;
 
       // Set up the optimization problem
-      augmentedLagrangeProblem = new AugmentedLagrangeOptimizationProblem(AlmConvergenceTest::costFunctionQuadratic);
-      augmentedLagrangeProblem.addEqualityConstraint(AlmConvergenceTest::constraint4);
+      augmentedLagrangeProblem = new AugmentedLagrangeOptimizationProblem(AugmentedLagrangeOptimizerTest::costFunctionQuadratic);
+      augmentedLagrangeProblem.addEqualityConstraint(AugmentedLagrangeOptimizerTest::constraint4);
       augmentedLagrangeProblem.initialize(initialPenalty, penaltyIncreaseFactor);
 
       // Set up the optimizer
@@ -120,7 +120,7 @@ public class AlmConvergenceTest
    }
 
    @Test
-   public void nonconvexTest()
+   public void testNonconvex()
    {
       DMatrixD1 initial = new DMatrixRMaj(new double[] {13, 14});
       int numLagrangeIterations = 10;
@@ -128,8 +128,8 @@ public class AlmConvergenceTest
       double penaltyIncreaseFactor = 1.5;
 
       // Set up the optimization problem
-      augmentedLagrangeProblem = new AugmentedLagrangeOptimizationProblem(AlmConvergenceTest::costFunctionNonconvex);
-      augmentedLagrangeProblem.addEqualityConstraint(AlmConvergenceTest::constraintNonconvex);
+      augmentedLagrangeProblem = new AugmentedLagrangeOptimizationProblem(AugmentedLagrangeOptimizerTest::costFunctionNonconvex);
+      augmentedLagrangeProblem.addEqualityConstraint(AugmentedLagrangeOptimizerTest::constraintNonconvex);
       augmentedLagrangeProblem.initialize(initialPenalty, penaltyIncreaseFactor);
 
       // Set up the optimizer

@@ -5,7 +5,6 @@ import org.ejml.data.DMatrixD1;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.robotics.numericalMethods.GradientDescentModule;
 import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
-import us.ihmc.robotics.optimization.constrainedOptimization.CostFunction;
 
 /**
  * Gradient descent with finite difference
