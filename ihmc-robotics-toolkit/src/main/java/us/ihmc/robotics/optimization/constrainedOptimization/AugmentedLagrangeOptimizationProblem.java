@@ -3,6 +3,7 @@ package us.ihmc.robotics.optimization.constrainedOptimization;
 import org.ejml.data.DMatrixD1;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.optimization.CostFunction;
 
 import java.util.ArrayList;
 import java.util.List;

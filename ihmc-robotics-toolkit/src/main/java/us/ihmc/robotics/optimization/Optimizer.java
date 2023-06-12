@@ -1,7 +1,6 @@
 package us.ihmc.robotics.optimization;
 
 import org.ejml.data.DMatrixD1;
-import us.ihmc.robotics.optimization.constrainedOptimization.CostFunction;
 
 /**
  * Interface for a R^n -> R optimizer

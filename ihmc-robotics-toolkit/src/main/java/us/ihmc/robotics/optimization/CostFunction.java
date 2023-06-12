@@ -1,4 +1,4 @@
-package us.ihmc.robotics.optimization.constrainedOptimization;
+package us.ihmc.robotics.optimization;
 
 import org.ejml.data.DMatrixD1;
 

@@ -3,6 +3,7 @@ package us.ihmc.robotics.optimization.constrainedOptimization;
 import org.ejml.data.DMatrixD1;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.optimization.CostFunction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +35,7 @@ import java.util.List;
  *    Li(xi, x_other*) = Fi(xi) + augmentations(J[](xi, x_other*), K[](xi, x_other*))
  *
  * The global constraints are solved using the Alternating Direction Method of Multipliers
- * within {@link MultiblockAdmmOptimizer} through the algorithm
+ * within {@link MultiblockADMMOptimizer} through the algorithm
  *
  *    for each block xi,
  *       initialize xi* = optimize(Fi(xi)) for xi
@@ -47,7 +48,7 @@ import java.util.List;
  * ------
  * The optimizers for the unconstrained optimization Fi(xi) and Li(xi, x_other) are implemented separately.
  */
-public class MultiblockAdmmProblem
+public class MultiblockADMMProblem
 {
    private final List<AugmentedLagrangeOptimizationProblem> isolatedOptimizationProblems = new ArrayList<>(); // size = numblocks
    private final List<BlockConstraintFunction> inequalityConstraints = new ArrayList<>();
@@ -58,7 +59,7 @@ public class MultiblockAdmmProblem
 
    // =========================== Setup ===================================
 
-   public MultiblockAdmmProblem()
+   public MultiblockADMMProblem()
    {
    }
 
