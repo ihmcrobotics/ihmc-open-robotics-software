@@ -374,7 +374,7 @@ public class DualBlackflyCamera
          BytePointer UMemory = new BytePointer();                                                        // repeat above
          cudaMalloc(UMemory, numberOfBytesInFrame / 4);
          cudaMemcpy(UMemory, planeStartPointer, numberOfBytesInFrame / 4, cudaMemcpyHostToDevice);
-         nvjpegImage.pitch(1, imageWidth);
+         nvjpegImage.pitch(1, imageWidth / 2);
          nvjpegImage.channel(1, UMemory);
          planeStartPointer.position(planeStartPointer.position() + numberOfBytesInFrame / 4);
 
@@ -382,7 +382,7 @@ public class DualBlackflyCamera
          BytePointer VMemory = new BytePointer();
          cudaMalloc(VMemory, numberOfBytesInFrame / 4);
          cudaMemcpy(VMemory, planeStartPointer, numberOfBytesInFrame / 4, cudaMemcpyHostToDevice);
-         nvjpegImage.pitch(2, imageWidth);
+         nvjpegImage.pitch(2, imageWidth / 2);
          nvjpegImage.channel(2, VMemory);
 
          // Compress image
