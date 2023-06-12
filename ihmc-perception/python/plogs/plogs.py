@@ -239,6 +239,8 @@ if __name__ == '__main__':
     parser.add_argument("--plot", help="file name to plot", type=str)
     parser.add_argument("--fix", help="file name to fix", type=str)
     parser.add_argument("--dst", help="destination file name", type=str)
+    parser.add_argument("--rename", help="rename file to include sensors used", type=str)
+    parser.add_argument("--renameAll", help="renames ALL files in the logs/perception directory", action="store_true")
 
     args = parser.parse_args()
     home = os.path.expanduser('~')
@@ -262,3 +264,11 @@ if __name__ == '__main__':
 
     if args.fix:
         convert_main(path, args.fix, args.dst)
+
+    if args.rename:
+        data = h5py.File(path + args.rename, 'r')
+        rename_file(path, data, args.rename)
+    
+    if args.renameAll:
+        files = sorted(os.listdir(path))
+        rename_all_files(path, files)

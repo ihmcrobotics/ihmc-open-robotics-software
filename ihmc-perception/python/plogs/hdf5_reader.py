@@ -50,7 +50,6 @@ def print_file_info(h5, h5_filename):
     print('File: {}\n'.format(h5_filename))
     print(f"{'Group ':<45} {'Total Groups ':<20} {'Total Datasets ':<25} {'Data Type ':<10}")
     print()
-
     groups = collect_groups(h5)
 
     for group in groups:
@@ -58,6 +57,53 @@ def print_file_info(h5, h5_filename):
 
     print('------------------------------------------------------------------------------------------------------')
     print()
+
+def rename_file(path, h5, h5_filename):
+    # ensures the only modded files are the old 20230207 file names
+    if(h5_filename[0].isdigit() and h5_filename[1].isdigit() and h5_filename[2].isdigit()):
+        print("Old file name: " + h5_filename)
+        unique_set = set({}) # unique set of all base groups in the HD5F file
+        groups = collect_groups(h5)
+
+        # collect the unique base groups 
+        for group in groups:
+            stringSplit = group.split("/") # split into individual group names
+            unique_set.add(stringSplit[0]) # only the base groups are important for file name identification
+
+        # replace file name using unique groups
+        newFileName = h5_filename.replace("PerceptionLog", "plog") #shorten PerceptonLog to plog
+        stringSplit = newFileName.split("_") # split file name by underscore
+        newFileName = stringSplit[0] + "_" + stringSplit[1] + "_"
+        newFileName += ''.join( s.capitalize()+"_" for s in unique_set) # replace time stamp with sensor usage info
+        newFileName += stringSplit[2]
+
+        # rename the file if user likes the change
+        print("New file name: " + newFileName)
+        answer = input("Confirm the name change?: [y/n]")
+        if(answer == 'y' or 'Y' or 'yes' or 'Yes'):
+            oldFile = path + h5_filename
+            newFileName = path + newFileName
+            os.rename(src=oldFile, dst=newFileName) # rename file
+        else:
+            print("Name unchanged.")
+        print()
+        return True
+    else:
+        return False
+
+# rename all files in .ihmc/logs/perception that use the old date_time_Perceptionlog.hd5f format
+def rename_all_files(path, filenames):
+    unTouchedFiles = []
+
+    for filename in filenames:
+        if filename.endswith('.hdf5'):
+            h5= h5py.File(path + filename, 'r')
+            if(not rename_file(path, h5, filename)):
+                unTouchedFiles.append(filename)
+    
+    print("Files that were not changed:")
+    print(unTouchedFiles)
+
 
 def print_file_size(path, filename):
     print(f"{'  ' + filename:<45} {os.path.getsize(path + filename) / (1024 * 1024):<8.3f} MB")
@@ -121,11 +167,10 @@ def print_group_info(data, group):
 
 def get_data(data, namespace):
     ds = []
-
+    
     # print(data[namespace].keys())
 
     keys = list(map(str, sorted(list(map(int, data[namespace].keys())))))
-
     for key in keys:
         # print('Appending: {}'.format(namespace + key))
         array = data[namespace + key][:]

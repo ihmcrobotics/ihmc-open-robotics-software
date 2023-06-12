@@ -17,6 +17,7 @@ Install the python scripts into the binaries of your system using the install sc
     matplotlib
     python3-opencv
     seaborn
+    scipy
 
 ### Features and Usage
 
