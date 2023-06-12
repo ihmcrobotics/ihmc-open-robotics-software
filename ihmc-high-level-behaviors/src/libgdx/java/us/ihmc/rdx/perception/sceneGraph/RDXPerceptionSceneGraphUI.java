@@ -72,7 +72,8 @@ public class RDXPerceptionSceneGraphUI
       {
          for (RDXPredefinedRigidBodySceneNode predefinedRigidBodySceneNode : predefinedRigidBodySceneNodes)
          {
-            predefinedRigidBodySceneNode.getRenderables(renderables, pool, sceneLevels);
+            if (!predefinedRigidBodySceneNode.getSceneNode().getName().contains("Frame") && !predefinedRigidBodySceneNode.getSceneNode().getName().contains("Panel"))
+               predefinedRigidBodySceneNode.getRenderables(renderables, pool, sceneLevels);
          }
       }
    }
