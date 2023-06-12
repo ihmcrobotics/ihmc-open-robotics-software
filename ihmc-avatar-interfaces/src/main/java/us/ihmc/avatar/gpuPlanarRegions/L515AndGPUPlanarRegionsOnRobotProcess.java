@@ -152,7 +152,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
                                                      gpuPlanarRegionExtraction.getConcaveHullFactoryParameters());
       ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.RECONNECT_ROS1_NODE, reconnectROS1Notification::set);
 
-      CollisionBoxProvider collisionBoxProvider = robotModel.getCollisionBoxProvider();
+      CollisionBoxProvider collisionBoxProvider = (CollisionBoxProvider) robotModel.getCollisionBoxProvider();
       CollisionShapeTester shapeTester = new CollisionShapeTester();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       for (RobotSide robotSide : RobotSide.values)

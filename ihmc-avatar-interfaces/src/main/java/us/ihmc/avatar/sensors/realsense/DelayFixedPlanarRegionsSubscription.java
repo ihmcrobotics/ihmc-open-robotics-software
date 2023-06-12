@@ -98,7 +98,7 @@ public class DelayFixedPlanarRegionsSubscription
 
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel, robotModel.getSensorInformation());
 
-      collisionBoxProvider = robotModel.getCollisionBoxProvider();
+      collisionBoxProvider = (CollisionBoxProvider) robotModel.getCollisionBoxProvider();
       CollisionShapeTester shapeTester = new CollisionShapeTester();
       for (RobotSide robotSide : RobotSide.values)
       {
