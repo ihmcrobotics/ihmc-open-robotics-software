@@ -46,6 +46,10 @@ public class MultiBodySystemMissingTools
       return clonedChest;
    }
 
+   /**
+    * Sad to have to copy all this over, but it was private :(
+    * https://github.com/ihmcrobotics/mecano/issues/12
+    */
    private static void cloneSubtree(RigidBodyReadOnly originalStart, RigidBodyBasics cloneStart, String cloneSuffix)
    {
       MultiBodySystemFactories.RigidBodyBuilder rigidBodyBuilder = MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER;
