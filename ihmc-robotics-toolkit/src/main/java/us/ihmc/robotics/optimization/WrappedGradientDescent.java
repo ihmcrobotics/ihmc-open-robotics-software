@@ -102,7 +102,22 @@ public class WrappedGradientDescent implements Optimizer
       return gradientDescentModule.getOptimalQuery();
    }
 
-//   public GradientDescentModule getGradientDescentModule()
+   @Override
+   public void setRealDomain(RealDomainBounds[] bounds)
+   {
+      TDoubleArrayList lower = new TDoubleArrayList();
+      TDoubleArrayList upper = new TDoubleArrayList();
+      for (RealDomainBounds bound : bounds)
+      {
+         lower.add(bound.min());
+         upper.add(bound.max());
+      }
+
+      gradientDescentModule.setInputLowerLimit(lower);
+      gradientDescentModule.setInputUpperLimit(upper);
+   }
+
+   //   public GradientDescentModule getGradientDescentModule()
 //   {
 //      return gradientDescentModule;
 //   }

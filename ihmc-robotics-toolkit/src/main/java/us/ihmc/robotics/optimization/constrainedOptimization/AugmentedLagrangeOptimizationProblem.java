@@ -62,6 +62,11 @@ public class AugmentedLagrangeOptimizationProblem
       inequalityConstraints.add(constraint);
    }
 
+   public void addInequalityConstraints(List<ConstraintFunction> constraints)
+   {
+      inequalityConstraints.addAll(constraints);
+   }
+
    /**
     * @param constraint g(x) == 0
     */
@@ -69,6 +74,12 @@ public class AugmentedLagrangeOptimizationProblem
    {
       equalityConstraints.add(constraint);
    }
+
+   public void addEqualityConstraints(List<ConstraintFunction> constraints)
+   {
+      equalityConstraints.addAll(constraints);
+   }
+
 
    public void clearConstraints()
    {
@@ -171,7 +182,7 @@ public class AugmentedLagrangeOptimizationProblem
       System.out.println("Solution x:");
       for (int i = 0; i < x.getNumElements(); i++)
       {
-         LogTools.debug("\t" + x.get(i) + ",");
+         System.out.println("\t" + x.get(i) + ",");
       }
 
       System.out.println("Cost f(x):");

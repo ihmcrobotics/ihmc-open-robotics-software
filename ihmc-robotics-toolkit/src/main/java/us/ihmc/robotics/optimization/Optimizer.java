@@ -25,6 +25,8 @@ public interface Optimizer
 
    double getOptimumCost();
 
+   void setRealDomain(RealDomainBounds[] bounds);
+
    default void printResults()
    {
       System.out.println("Solution x*: ");

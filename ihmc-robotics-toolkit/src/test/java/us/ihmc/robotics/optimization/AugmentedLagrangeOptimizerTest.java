@@ -5,6 +5,8 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.mult.VectorVectorMult_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.optimization.EvaluationProblems.EvaluationProblem;
+import us.ihmc.robotics.optimization.EvaluationProblems.GomezLeveyConstrainedEvaluationProblem;
 import us.ihmc.robotics.optimization.constrainedOptimization.AugmentedLagrangeOptimizationProblem;
 import us.ihmc.robotics.optimization.constrainedOptimization.AugmentedLagrangeOptimizer;
 
@@ -143,4 +145,35 @@ public class AugmentedLagrangeOptimizerTest
       assertTrue("x1 arrived on desired value", MathTools.epsilonCompare(optimumX.get(0), 3.1770307678, 1e-3));
       assertTrue("x2 arrived on desired value", MathTools.epsilonCompare(optimumX.get(1), 3.1770307678, 1e-3));
    }
+
+   @Test
+   public void testGomezLevy()
+   {
+      EvaluationProblem problem = new GomezLeveyConstrainedEvaluationProblem();
+      DMatrixD1 initial = new DMatrixRMaj(new double[] {0, 0});
+      int numLagrangeIterations = 10;
+      double initialPenalty = 1;
+      double penaltyIncreaseFactor = 1.5;
+
+      // Set up the optimization problem
+      augmentedLagrangeProblem = new AugmentedLagrangeOptimizationProblem(problem.getCostFunction());
+      augmentedLagrangeProblem.addInequalityConstraints(problem.getInequalityConstraints());
+      augmentedLagrangeProblem.initialize(initialPenalty, penaltyIncreaseFactor);
+
+      // Set up the optimizer
+      WrappedGradientDescent optimizer = new WrappedGradientDescent();
+      optimizer.setInitialStepSize(10.0);
+      optimizer.setLearningRate(0.9);
+      AugmentedLagrangeOptimizer aloOptimizer = new AugmentedLagrangeOptimizer(optimizer, augmentedLagrangeProblem);
+      aloOptimizer.setVerbose(true);
+      DMatrixD1 optimumX = aloOptimizer.optimize(numLagrangeIterations, initial);
+
+      int dimensions = 2;
+      DMatrixD1 actualOptimumX = problem.getOptimumParameters();
+      for (int i = 0; i < dimensions; i++)
+      {
+         assertTrue("x" + i + " arrived on desired value", MathTools.epsilonCompare(optimumX.get(i), actualOptimumX.get(i), 1e-3));
+      }
+   }
+
 }
