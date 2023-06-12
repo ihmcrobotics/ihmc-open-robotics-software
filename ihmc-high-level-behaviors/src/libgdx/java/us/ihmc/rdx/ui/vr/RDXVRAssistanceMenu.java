@@ -53,7 +53,7 @@ public class RDXVRAssistanceMenu
       iconsJoysticksHighlighted.add(new RDXIconTexture("icons/vrAssistance/" + "pushLeftJoystickHighlight.png"));
 
       for (int i = 0; i <= 100; i += 5)
-         iconsAssistanceProgress.add(new RDXIconTexture("icons/vrAssistance/progressBar/" + i + "-01.png"));
+         iconsAssistanceProgress.add(new RDXIconTexture("icons/vrAssistance/progressBar/" + i + ".png"));
 
       this.mode = mode;
    }

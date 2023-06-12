@@ -13,6 +13,7 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
+import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
@@ -57,7 +58,7 @@ public class ValkyrieFootstepPlannerUI extends ApplicationNoModule
                                       model.getContactPointParameters(),
                                       model.getWalkingControllerParameters(),
                                       new ValkyrieUIAuxiliaryData(),
-                                      model.getCollisionBoxProvider());
+              (CollisionBoxProvider) model.getCollisionBoxProvider());
       ui.show();
 
       if(!ValkyrieNetworkProcessor.isFootstepPlanningModuleStarted())
