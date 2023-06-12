@@ -15,8 +15,8 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -88,16 +88,18 @@ public class ArmIKSolver
       OneDoFJointBasics syncedFirstArmJoint = syncedRobot.getArmJoint(side, robotModel.getJointMap().getArmJointNames()[0]);
       solutionOneDoFJoints = FullRobotModelUtils.getArmJoints(syncedRobot, side, robotModel.getJointMap().getArmJointNames());
 
-      RigidBody detachedArmOnlyRobot = MultiBodySystemMissingTools.getDetachedCopyOfSubtree(syncedChest, syncedFirstArmJoint);
-      SixDoFJoint rootSixDoFJoint = (SixDoFJoint) detachedArmOnlyRobot.getChildrenJoints().get(0);
+      chest = MultiBodySystemMissingTools.getDetachedCopyOfSubtree(syncedChest, syncedFirstArmJoint);
+      FloatingJointBasics rootSixDoFJoint = null; // TODO: Need an elevator and 6 DoF joint?
 
       // Remove fingers
-      hand = MultiBodySystemTools.findRigidBody(detachedArmOnlyRobot, robotModel.getJointMap().getHandName(side));
+      hand = MultiBodySystemTools.findRigidBody(chest, robotModel.getJointMap().getHandName(side));
       hand.getChildrenJoints().clear();
 
-      chest = MultiBodySystemTools.findRigidBody(detachedArmOnlyRobot, robotModel.getJointMap().getChestName());
+//      MultiBodySystemViewer viewer = new MultiBodySystemViewer(chest);
+//      viewer.view("arm");
 
-      JointBasics[] controlledJoints = MultiBodySystemMissingTools.getSubtreeJointArray(JointBasics.class, detachedArmOnlyRobot);
+
+      JointBasics[] controlledJoints = MultiBodySystemMissingTools.getSubtreeJointArray(JointBasics.class, chest);
 
       centerOfMassFrame = new ModifiableReferenceFrame();
       YoGraphicsListRegistry yoGraphicsListRegistry = null; // opt out
@@ -118,7 +120,7 @@ public class ArmIKSolver
       controllableRigidBodies.add(chest);
       controllableRigidBodies.add(hand);
 
-      oneDoFJoints = MultiBodySystemMissingTools.getSubtreeJointArray(OneDoFJointBasics.class, detachedArmOnlyRobot);
+      oneDoFJoints = MultiBodySystemMissingTools.getSubtreeJointArray(OneDoFJointBasics.class, chest);
 
       FeedbackControllerTemplate controllerCoreTemplate = new FeedbackControllerTemplate();
       controllerCoreTemplate.setAllowDynamicControllerConstruction(true);
