@@ -88,7 +88,7 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
 //   private int start = 0;
 //   private final SideDependentList<KinematicsToolboxRigidBodyMessage> lastMessage = new SideDependentList<>();
 
-   private final HandConfiguration[] handConfigurations = {HandConfiguration.OPEN, HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH};
+   private final HandConfiguration[] handConfigurations = {HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH, HandConfiguration.CLOSE};
    private int leftIndex = -1;
    private int rightIndex = -1;
    private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
@@ -159,8 +159,8 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
       kinematicsRecorder = new KinematicsRecordReplay(ros2ControllerHelper, enabled, 2);
       vrAssistant = new RDXVRAssistance(robotModel, ros2ControllerHelper, streamToController, kinematicsRecorder.isReplayingEnabled());
 
-      if (!kinematicsStreamingToolboxProcess.isStarted())
-         kinematicsStreamingToolboxProcess.start();
+//      if (!kinematicsStreamingToolboxProcess.isStarted())
+//         kinematicsStreamingToolboxProcess.start();
    }
 
    public void processVRInput(RDXVRContext vrContext)

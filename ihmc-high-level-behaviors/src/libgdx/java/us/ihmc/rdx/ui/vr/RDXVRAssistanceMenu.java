@@ -99,7 +99,6 @@ public class RDXVRAssistanceMenu
                float maxPercentage = hasProMP ? 50.0f : 100.0f;
                int percentageProgress =
                      currentAffordanceSample < 0 ? start : Math.round((start + (currentAffordanceSample * (maxPercentage)) / affordanceSamples) / 5.0f);
-               LogTools.info(percentageProgress);
                ImGui.sameLine(ImGui.getCursorPosX() + 10.0f);
                ImGui.image(iconsAssistanceProgress.get(percentageProgress).getTexture().getTextureObjectHandle(), 250.1f, 121.3f);
             }

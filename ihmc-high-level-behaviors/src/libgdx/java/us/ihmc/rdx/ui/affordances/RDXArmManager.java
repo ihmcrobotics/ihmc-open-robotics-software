@@ -52,7 +52,7 @@ public class RDXArmManager
    private volatile boolean readyToCopySolution = false;
 
    private final HandWrenchCalculator handWrenchCalculator;
-   private final ImBoolean indicateWrenchOnScreen = new ImBoolean(true);
+   private final ImBoolean indicateWrenchOnScreen = new ImBoolean(false);
    private RDX3DPanelToolbarButton wrenchToolbarButton;
    private RDX3DPanelHandWrenchIndicator panelHandWrenchIndicator;
 

@@ -22,6 +22,7 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
+import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
@@ -74,7 +75,7 @@ public class AtlasFootstepPlannerUI extends ApplicationNoModule
                                       drcRobotModel.getContactPointParameters(),
                                       drcRobotModel.getWalkingControllerParameters(),
                                       new AtlasUIAuxiliaryData(),
-                                      drcRobotModel.getCollisionBoxProvider());
+              (CollisionBoxProvider) drcRobotModel.getCollisionBoxProvider());
       ui.setRobotLowLevelMessenger(robotLowLevelMessenger);
       ui.setREAStateRequestPublisher(reaStateRequestPublisher);
       ui.show();

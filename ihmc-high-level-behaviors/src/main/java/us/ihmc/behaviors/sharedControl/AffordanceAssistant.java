@@ -48,7 +48,7 @@ public class AffordanceAssistant
       initialBodyPartPose.appendPitchRotation(Math.PI / 2.0);
       initialBodyPartPose.appendRollRotation(Math.PI / 2.0);
       bodyPartInitialPoseMap.put("rightHand", initialBodyPartPose);
-      handConfigurationToSend = Pair.of(RobotSide.getSideFromBodyPart("rightHand"), HandConfiguration.OPEN);
+      handConfigurationToSend = Pair.of(RobotSide.getSideFromBodyPart("rightHand"), HandConfiguration.HALF_CLOSE);
       isHandConfigurationCommand = true;
 
       //      for (RobotSide side : RobotSide.values)
