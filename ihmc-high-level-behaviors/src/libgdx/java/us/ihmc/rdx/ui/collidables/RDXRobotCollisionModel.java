@@ -6,7 +6,6 @@ import com.badlogic.gdx.utils.Pool;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.affordances.RDXRobotCollidable;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -41,12 +40,6 @@ public class RDXRobotCollisionModel
          RDXRobotCollidable robotCollidable = new RDXRobotCollidable(collidable, LibGDXTools.toLibGDX(color));
          robotCollidables.add(robotCollidable);
       }
-   }
-
-   public void attachTo3DPanel(RDX3DPanel panel3D)
-   {
-      panel3D.addImGui3DViewPickCalculator(this::calculate3DViewPick);
-      panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
    }
 
    public void update()
