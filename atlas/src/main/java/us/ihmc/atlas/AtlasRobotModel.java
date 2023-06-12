@@ -52,7 +52,7 @@ import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFModelLoader;
@@ -524,7 +524,7 @@ public class AtlasRobotModel implements DRCRobotModel
       {
          sensorSuiteManager = new AtlasSensorSuiteManager(getSimpleRobotName(),
                                                           this,
-                                                          getCollisionBoxProvider(),
+                 (us.ihmc.ihmcPerception.depthData.CollisionBoxProvider) getCollisionBoxProvider(),
                                                           getROSClockCalculator(),
                                                           sensorInformation,
                                                           getJointMap(),
@@ -633,7 +633,7 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public CollisionBoxProvider getCollisionBoxProvider()
    {
-      return new AtlasCollisionBoxProvider(getRobotDefinitionWithSDFCollision(), getJointMap());
+      return (CollisionBoxProvider) new AtlasCollisionBoxProvider(getRobotDefinitionWithSDFCollision(), getJointMap());
    }
 
    @Override

@@ -11,6 +11,7 @@ import com.martiansoftware.jsap.JSAPException;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessor;
 import us.ihmc.communication.producers.VideoControlSettings;
+import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
@@ -65,7 +66,7 @@ public class ValkyrieNetworkProcessor
       sensorModule.getLidarScanPublisher().setPublisherPeriodInMillisecond(25L);
       sensorModule.getMultiSenseSensorManager().setVideoSettings(VideoControlSettings.configureJPEGServer(35, 20));
       sensorModule.getStereoVisionPointCloudPublisher().setRangeFilter(0.2, 2.5);
-      sensorModule.getStereoVisionPointCloudPublisher().setSelfCollisionFilter(robotModel.getCollisionBoxProvider());
+      sensorModule.getStereoVisionPointCloudPublisher().setSelfCollisionFilter((CollisionBoxProvider) robotModel.getCollisionBoxProvider());
       sensorModule.getStereoVisionPointCloudPublisher().setPublisherPeriodInMillisecond(750L);
       sensorModule.getStereoVisionPointCloudPublisher().setMaximumNumberOfPoints(500000);
       sensorModule.getStereoVisionPointCloudPublisher().setMinimumResolution(0.005);

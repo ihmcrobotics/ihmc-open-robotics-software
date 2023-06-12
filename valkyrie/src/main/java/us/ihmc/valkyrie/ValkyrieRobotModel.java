@@ -26,7 +26,7 @@ import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -485,7 +485,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
       {
          sensorSuiteManager = new ValkyrieSensorSuiteManager(getSimpleRobotName(),
                                                              this,
-                                                             getCollisionBoxProvider(),
+                 (us.ihmc.ihmcPerception.depthData.CollisionBoxProvider) getCollisionBoxProvider(),
                                                              getROSClockCalculator(),
                                                              getSensorInformation(),
                                                              getJointMap(),
@@ -529,7 +529,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public CollisionBoxProvider getCollisionBoxProvider()
    {
-      return new ValkyrieCollisionBoxProvider(createFullRobotModel());
+      return (CollisionBoxProvider) new ValkyrieCollisionBoxProvider(createFullRobotModel());
    }
 
    @Override
