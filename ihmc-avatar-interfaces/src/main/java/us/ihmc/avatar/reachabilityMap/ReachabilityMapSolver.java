@@ -295,15 +295,15 @@ public class ReachabilityMapSolver
 
       if (isSolutionGood && solutionValidityChecker != null)
       {
-         isSolutionGood = solutionValidityChecker.test(kinematicsToolboxController.getDesiredOneDoFJoint());
+         isSolutionGood = solutionValidityChecker.test(kinematicsToolboxController.getDesiredOneDoFJoints());
       }
 
       if (isSolutionGood)
       {
          for (int i = 0; i < robotArmJoints.length; i++)
          {
-            robotArmJoints[i].setQ(kinematicsToolboxController.getDesiredOneDoFJoint()[i].getQ());
-            robotArmJoints[i].setTau(kinematicsToolboxController.getDesiredOneDoFJoint()[i].getTau());
+            robotArmJoints[i].setQ(kinematicsToolboxController.getDesiredOneDoFJoints()[i].getQ());
+            robotArmJoints[i].setTau(kinematicsToolboxController.getDesiredOneDoFJoints()[i].getTau());
          }
       }
 
