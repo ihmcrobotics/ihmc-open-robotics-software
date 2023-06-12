@@ -6,6 +6,8 @@ import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigu
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointTorqueSoftLimitWeightCalculator;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -42,6 +44,7 @@ public class ArmIKSolver
    // TODO: Mess with these settings
    private final KinematicsToolboxOptimizationSettings optimizationSettings = new KinematicsToolboxOptimizationSettings();
    private final WholeBodyControllerCore controllerCore;
+   private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand();
 
    public ArmIKSolver(RobotSide side,
                       DRCRobotModel robotModel,
@@ -96,11 +99,15 @@ public class ArmIKSolver
       JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(oneDoFJoints);
       controllerCore = new WholeBodyControllerCore(toolbox, controllerCoreTemplate, lowLevelControllerOutput, registry);
 
+      controllerCoreCommand.setControllerCoreMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
+
       LogTools.info("Created WBCC!");
    }
 
    public void update()
    {
-//      controllerCore.compute(controllerCoreCommand);
+      controllerCoreCommand.clear();
+
+      controllerCore.compute(controllerCoreCommand);
    }
 }
