@@ -38,14 +38,21 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.ArrayList;
 
+/*
+ * RDXRapidRegionsExtractionDemo is a test script for the Regions Extraction calculations on a GPU. It uses logged perception data from the L515/D435/D455
+ *
+ * Region Extraction is the process of using depth data to figure out where planes are. For example, depth data of a box fed through this demo
+ *    would extract the squares on the surface of the box
+ */
+
 public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 {
 
    private final ResettableExceptionHandlingExecutorService loadAndDecompressThreadExecutor = MissingThreadTools.newSingleThreadExecutor("LoadAndDecompress",
                                                                                                                                          true,
                                                                                                                                          1);
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230517_114430_PerceptionLog_900_ms.hdf5").toString();
-   private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20221216_143619_L515_plog.hdf5").toString(); // "20230517_114430_PerceptionLog_900_ms.hdf5"
+   private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame()); // World frame is what robot refers to for position/orientation
    private final TypedNotification<PlanarRegionsList> planarRegionsListToRenderNotification = new TypedNotification<>();
    private final RDXLineGraphic rootJointGraphic = new RDXLineGraphic(0.02f, Color.RED);
    private final RDXLineGraphic mocapGraphic = new RDXLineGraphic(0.02f, Color.YELLOW);
@@ -84,7 +91,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
     */
    public RDXRapidRegionsExtractionDemo()
    {
-      perceptionDataLoader = new PerceptionDataLoader();
+      perceptionDataLoader = new PerceptionDataLoader(); // reads depth data from log
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -96,10 +103,10 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             openCLManager = new OpenCLManager();
             openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
 
-            navigationPanel = new ImGuiPanel("Dataset Navigation Panel");
+            navigationPanel = new ImGuiPanel("Dataset Navigation Panel"); // parameters visualization
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
 
-            createForPerspective(720, 1280, false); // Real D455
+            createForPerspective(720, 1280, true); // Real D455
             //createForPerspective(768, 1024, false); // Real L515
             //createForPerspective(768, 1280, true); // Simulated L515
 
@@ -247,9 +254,10 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    }
 
    private void updateRapidRegionsExtractor()
-   {
+   {  // if the extractor isn't processing depth data, we can extract the regions it's found
       if (!rapidPlanarRegionsExtractor.isProcessing())
       {
+         // depth sensors give data as point clouds
          rapidPlanarRegionsExtractor.getDebugger().setShowPointCloud(rapidRegionsUIPanel.getPointCloudRenderEnabled());
          ThreadTools.startAsDaemon(() ->
          {
@@ -281,13 +289,14 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 
    public synchronized void generateMesh(PlanarRegionsList regionsList)
    {
-      if (rapidPlanarRegionsExtractor.isModified())
+      if (rapidPlanarRegionsExtractor.isModified()) // if there are new/moved planes, generate the region meshes in 3D
       {
+         // Collects the planar regions in the current frame and uses the world frame transform to know where the regions go
          FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList(regionsList, cameraFrame.getTransformToWorldFrame());
-         rapidRegionsUIPanel.render3DGraphics(framePlanarRegionsList);
-         rapidRegionsUIPanel.render();
-         rapidPlanarRegionsExtractor.setModified(false);
-         rapidPlanarRegionsExtractor.setProcessing(false);
+         rapidRegionsUIPanel.render3DGraphics(framePlanarRegionsList); // create the mesh
+         rapidRegionsUIPanel.render(); // update the 3D visualizer
+         rapidPlanarRegionsExtractor.setModified(false); // regions were modified
+         rapidPlanarRegionsExtractor.setProcessing(false); // done processing/generating the found meshes
       }
    }
 

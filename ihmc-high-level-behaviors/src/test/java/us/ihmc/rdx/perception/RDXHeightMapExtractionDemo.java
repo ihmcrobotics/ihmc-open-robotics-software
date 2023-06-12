@@ -40,9 +40,14 @@ import java.nio.FloatBuffer;
 import java.time.Instant;
 import java.util.ArrayList;
 
+/*
+ * RDXHeightMapExtractionDemo tests the Height Map calculation by running a demo from logged perception data.
+ * This Demo requires logged data of the Ouster Lidar cam and RealSense D435/D455/L515 depth camera
+ */
+
 public class RDXHeightMapExtractionDemo
 {
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230117_161540_GoodPerceptionLog.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230207_214209_Ouster_plog.hdf5").toString();
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private ImGuiPanel navigationPanel;
@@ -63,31 +68,31 @@ public class RDXHeightMapExtractionDemo
                                                                                                                                          true,
                                                                                                                                          1);
 
-   private final ImInt frameIndex = new ImInt(0);
-   private final ImFloat planeHeight = new ImFloat(1.5f); // 2.133f
+   private final ImInt frameIndex = new ImInt(0); // variable slider in GUI to scroll through time I think
+   private final ImFloat planeHeight = new ImFloat(1.5f); // 2.133f // GUI variable for camera height
    private final ImBoolean autoAdvance = new ImBoolean(false);
 
-   private final Pose3D previousPose = new Pose3D();
+   private final Pose3D previousPose = new Pose3D(); // Pose3D tracks the position/ orientation
    private final Pose3D cameraPose = new Pose3D();
-   private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
+   private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame()); // world frame pose is bsed off
 
    private final Notification heightMapUpdateNotification = new Notification();
 
-   private BytedecoImage loadedDepthImage;
+   private BytedecoImage loadedDepthImage; // depth image decoded from camera (ouster or D435?)
    private final BytePointer depthBytePointer = new BytePointer(1000000);
    private double translation = Double.NaN;
 
    private OpenCLManager openCLManager;
-   private PerceptionDataLoader perceptionDataLoader;
+   private PerceptionDataLoader perceptionDataLoader; // Gets the plog data
 
    private boolean initialized = false;
 
    public RDXHeightMapExtractionDemo()
    {
-      perceptionDataLoader = new PerceptionDataLoader();
+      perceptionDataLoader = new PerceptionDataLoader(); // reads the plog data
       previousPose.setToNaN();
 
-      heightMapParameters = new ImGuiStoredPropertySetTuner("heightMapParameters");
+      heightMapParameters = new ImGuiStoredPropertySetTuner("heightMapParameters"); // UI parameters saved... somewhere
       heightMapFitlerParameters = new ImGuiStoredPropertySetTuner("Filter Parameters");
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
@@ -101,37 +106,39 @@ public class RDXHeightMapExtractionDemo
 
             heightMapVisualizer.create();
             heightMapVisualizer.setActive(true);
-            heightMapUpdater.attachHeightMapConsumer(heightMapVisualizer::acceptHeightMapMessage);
+            heightMapUpdater.attachHeightMapConsumer(heightMapVisualizer::acceptHeightMapMessage); // Updater seems important
 
             heightMapParameters.create(heightMapUpdater.getHeightMapParameters());
-            heightMapFitlerParameters.create(heightMapUpdater.getHeightMapFilterParameters());
+            heightMapFitlerParameters.create(heightMapUpdater.getHeightMapFilterParameters()); // configure height map calc based on parameters
 
-            navigationPanel = new ImGuiPanel("Dataset Navigation Panel");
+            navigationPanel = new ImGuiPanel("Dataset Navigation Panel"); // display parameters on UI panel to be modded
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
             baseUI.getImGuiPanelManager().addPanel(heightMapParameters);
             baseUI.getImGuiPanelManager().addPanel(heightMapFitlerParameters);
 
-            baseUI.getPrimaryScene().addRenderableProvider(heightMapVisualizer);
+            baseUI.getPrimaryScene().addRenderableProvider(heightMapVisualizer); // show the 3D visualization
 
             createForOuster(128, 2048);
 
-            updateHeightMap();
+            updateHeightMap(); // called every tick I think
 
             // testProjection(loadedDepthImage.getBytedecoOpenCVMat());
 
             navigationPanel.setRenderMethod(this::renderNavigationPanel);
          }
 
-         private void createForOuster(int depthHeight, int depthWidth)
+         private void createForOuster(int depthHeight, int depthWidth) // rectangle view of the Ouster
          {
             sensorTopicName = PerceptionLoggerConstants.OUSTER_DEPTH_NAME;
             perceptionDataLoader.openLogFile(perceptionLogFile);
 
-            loadedDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
+            loadedDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1); // get decoded depth data from Ouster
 
+            // load position/orientation data from Ouster
             perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION, sensorPositionBuffer);
             perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, sensorOrientationBuffer);
 
+            // compressed depth data
             perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME,
                                                      frameIndex.get(),
                                                      depthBytePointer,
