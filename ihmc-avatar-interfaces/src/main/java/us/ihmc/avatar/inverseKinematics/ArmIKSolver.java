@@ -1,22 +1,22 @@
 package us.ihmc.avatar.inverseKinematics;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsSolutionQualityCalculator;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointTorqueSoftLimitWeightCalculator;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -31,6 +31,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
@@ -55,13 +56,16 @@ public class ArmIKSolver
    /** The gains of the solver depend on this dt, it shouldn't change based on the actual thread scheduled period. */
    public static final double CONTROL_DT = 0.001;
    public static final double GRAVITY = 9.81;
-   private static final int INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE = 5;
+   private static final int INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE = 100;
+   private static final double GLOBAL_PROPORTIONAL_GAIN = 1200.0;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final RigidBodyBasics workChest;
    private final RigidBodyBasics workHand;
    // TODO: Mess with these settings
    private final KinematicsToolboxOptimizationSettings optimizationSettings = new KinematicsToolboxOptimizationSettings();
+   private final InverseKinematicsOptimizationSettingsCommand activeOptimizationSettings = new InverseKinematicsOptimizationSettingsCommand();
+   private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final WholeBodyControllerCore controllerCore;
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand();
@@ -80,6 +84,10 @@ public class ArmIKSolver
    private final FramePose3D desiredHandCoMPose = new FramePose3D();
    private final FramePose3D lastDesiredHandCoMPose = new FramePose3D();
    private final Point3D handCenterOfMassInControlFrame;
+   private final KinematicsSolutionQualityCalculator solutionQualityCalculator = new KinematicsSolutionQualityCalculator();
+   private final FeedbackControllerDataHolderReadOnly feedbackControllerDataHolder;
+   private final double totalRobotMass;
+   private final RigidBodyBasics syncedChest;
 
    public ArmIKSolver(RobotSide side,
                       DRCRobotModel robotModel,
@@ -89,13 +97,18 @@ public class ArmIKSolver
    {
       this.solutionRobot = solutionRobot;
       this.handControlDesiredFrame = handControlDesiredFrame;
-      RigidBodyBasics syncedChest = syncedRobot.getChest();
+      syncedChest = syncedRobot.getChest();
       OneDoFJointBasics syncedFirstArmJoint = syncedRobot.getArmJoint(side, robotModel.getJointMap().getArmJointNames()[0]);
       syncedOneDoFJoints = FullRobotModelUtils.getArmJoints(syncedRobot, side, robotModel.getJointMap().getArmJointNames());
       solutionOneDoFJoints = FullRobotModelUtils.getArmJoints(solutionRobot, side, robotModel.getJointMap().getArmJointNames());
 
+      // TODO: Need an elevator and 6 DoF joint?
+//      RigidBody rootBody = (SixDoFJoint) MultiBodySystemMissingTools.getDetachedCopyOfSubtree(syncedChest, syncedFirstArmJoint);
+//      SixDoFJoint rootSixDoFJoint = (SixDoFJoint) MultiBodySystemMissingTools.getDetachedCopyOfSubtree(syncedChest, syncedFirstArmJoint);
+//      workChest = rootSixDoFJoint.getSuccessor();
       workChest = MultiBodySystemMissingTools.getDetachedCopyOfSubtree(syncedChest, syncedFirstArmJoint);
-      FloatingJointBasics rootSixDoFJoint = null; // TODO: Need an elevator and 6 DoF joint?
+      SixDoFJoint rootSixDoFJoint = null;
+      totalRobotMass = TotalMassCalculator.computeSubTreeMass(workChest);
 
       // Remove fingers
       workHand = MultiBodySystemTools.findRigidBody(workChest, robotModel.getJointMap().getHandName(side));
@@ -143,8 +156,24 @@ public class ArmIKSolver
 
       JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(workingOneDoFJoints);
       controllerCore = new WholeBodyControllerCore(toolbox, controllerCoreTemplate, lowLevelControllerOutput, registry);
+      feedbackControllerDataHolder = controllerCore.getWholeBodyFeedbackControllerDataHolder();
 
       controllerCoreCommand.setControllerCoreMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
+
+      gains.setPositionProportionalGains(1200.0);
+      weightMatrix.setLinearWeights(20.0, 20.0, 20.0);
+      weightMatrix.setAngularWeights(20.0, 20.0, 20.0);
+      selectionMatrix.setLinearAxisSelection(true, true, true);
+      selectionMatrix.setAngularAxisSelection(true, true, true);
+
+      privilegedConfigurationCommand.setDefaultWeight(0.025);
+      privilegedConfigurationCommand.setDefaultConfigurationGain(50.0);
+
+      for (OneDoFJointBasics workingOneDoFJoint : workingOneDoFJoints)
+      {
+         privilegedConfigurationCommand.addJoint(workingOneDoFJoint, workingOneDoFJoint.getName().contains("ELBOW") ? 1.04 : 0.0);
+      }
+
 
       LogTools.info("Created WBCC!");
    }
@@ -179,33 +208,44 @@ public class ArmIKSolver
 
    public void solve()
    {
-      controllerCoreCommand.clear();
-      spatialFeedbackControlCommand.set(workChest, workHand);
-      spatialFeedbackControlCommand.setGains(gains);
-      spatialFeedbackControlCommand.setSelectionMatrix(selectionMatrix);
-      spatialFeedbackControlCommand.setWeightMatrixForSolver(weightMatrix);
-      spatialFeedbackControlCommand.setInverseKinematics(handControlDesiredPose, zeroVector6D);
-      spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(controlFramePose);
-      spatialFeedbackControlCommand.setPrimaryBase(workChest);
-      controllerCoreCommand.addFeedbackControlCommand(spatialFeedbackControlCommand);
-
-      controllerCore.compute(controllerCoreCommand);
-
-      // TODO: Calculate solution quality
-
-      ControllerCoreOutput controllerCoreOutput = controllerCore.getControllerCoreOutput();
-
-      JointDesiredOutputListReadOnly output = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();
-      for (int i = 0; i < workingOneDoFJoints.length; i++)
+      for (int i = 0; i < INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE; i++)
       {
-         if (output.hasDataForJoint(workingOneDoFJoints[i]))
-         {
-            JointDesiredOutputReadOnly jointDesiredOutput = output.getJointDesiredOutput(workingOneDoFJoints[i]);
-            solutionOneDoFJoints[i].setQ(jointDesiredOutput.getDesiredPosition());
-            if (workingOneDoFJoints[i].getQ() != solutionOneDoFJoints[i].getQ())
-               LogTools.info("%.8f   %.8f".formatted(workingOneDoFJoints[i].getQ(), solutionOneDoFJoints[i].getQ()));
+         controllerCoreCommand.clear();
 
+         controllerCoreCommand.addInverseKinematicsCommand(activeOptimizationSettings);
+
+         controllerCoreCommand.addInverseKinematicsCommand(privilegedConfigurationCommand);
+
+         spatialFeedbackControlCommand.set(workChest, workHand);
+         spatialFeedbackControlCommand.setGains(gains);
+         spatialFeedbackControlCommand.setSelectionMatrix(selectionMatrix);
+         spatialFeedbackControlCommand.setWeightMatrixForSolver(weightMatrix);
+         spatialFeedbackControlCommand.setInverseKinematics(handControlDesiredPose, zeroVector6D);
+         spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(controlFramePose);
+         spatialFeedbackControlCommand.setPrimaryBase(workChest);
+         controllerCoreCommand.addFeedbackControlCommand(spatialFeedbackControlCommand);
+
+         controllerCore.compute(controllerCoreCommand);
+
+         // TODO: Calculate solution quality
+         double quality = solutionQualityCalculator.calculateSolutionQuality(feedbackControllerDataHolder, totalRobotMass, 1.0 / GLOBAL_PROPORTIONAL_GAIN);
+         LogTools.info("Quality: {}", quality);
+
+         ControllerCoreOutput controllerCoreOutput = controllerCore.getControllerCoreOutput();
+
+         JointDesiredOutputListReadOnly output = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();
+         for (int j = 0; j < workingOneDoFJoints.length; j++)
+         {
+            if (output.hasDataForJoint(workingOneDoFJoints[j]))
+            {
+               JointDesiredOutputReadOnly jointDesiredOutput = output.getJointDesiredOutput(workingOneDoFJoints[j]);
+               solutionOneDoFJoints[j].setQ(jointDesiredOutput.getDesiredPosition());
+               if (workingOneDoFJoints[j].getQ() != solutionOneDoFJoints[j].getQ())
+                  LogTools.info("%.8f   %.8f".formatted(workingOneDoFJoints[j].getQ(), solutionOneDoFJoints[j].getQ()));
+               workingOneDoFJoints[j].setQ(jointDesiredOutput.getDesiredPosition());
+            }
          }
+         solutionRobot.updateFrames();
       }
    }
 
