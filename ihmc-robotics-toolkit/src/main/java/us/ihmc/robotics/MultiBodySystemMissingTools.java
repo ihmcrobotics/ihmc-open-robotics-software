@@ -1,6 +1,7 @@
 package us.ihmc.robotics;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
@@ -102,5 +103,24 @@ public class MultiBodySystemMissingTools
       ArrayList<J> joints = new ArrayList<>();
       SubtreeStreams.fromChildren(jointTypeFilter, start).forEach(joints::add);
       return joints.toArray((J[]) Array.newInstance(jointTypeFilter, 0));
+   }
+
+   public static List<JointBasics> getSubtreeJointsIncludingFourBars(RigidBodyBasics rootBody)
+   {
+      List<JointBasics> joints = new ArrayList<>();
+
+      for (JointBasics joint : rootBody.childrenSubtreeIterable())
+      {
+         if (joint instanceof CrossFourBarJoint)
+         {
+            joints.addAll(((CrossFourBarJoint) joint).getFourBarFunction().getLoopJoints());
+         }
+         else
+         {
+            joints.add(joint);
+         }
+      }
+
+      return joints;
    }
 }
