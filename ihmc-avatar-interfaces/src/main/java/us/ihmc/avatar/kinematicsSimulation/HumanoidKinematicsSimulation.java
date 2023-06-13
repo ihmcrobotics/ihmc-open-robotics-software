@@ -58,6 +58,7 @@ import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -335,7 +336,10 @@ public class HumanoidKinematicsSimulation
       {
          LogTools.info("Starting YoVariable server...");
          yoVariableServer = new YoVariableServer(getClass().getSimpleName(), robotModel.getLogModelProvider(), new DataServerSettings(false), 0.01);
-         yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), yoGraphicsListRegistry);
+         // Some robots have four bar linkages and need the `getSubtreeJointsIncludingFourBars` call
+         yoVariableServer.setMainRegistry(registry,
+                                          MultiBodySystemMissingTools.getSubtreeJointsIncludingFourBars(fullRobotModel.getElevator()),
+                                          yoGraphicsListRegistry);
          yoVariableServer.start();
          LogTools.info("YoVariable server started.");
       }
