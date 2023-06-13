@@ -165,6 +165,8 @@ public class MeshBasedContactDetector
          contactPointToSet.getContactPointNormal().set(robotSurfaceNormal);
          contactPointToSet.getEnvironmentProjectionPoint().set(contactPointOnEnvironmentSurface);
          contactPointToSet.setRobotEnvironmentSignedDistance(collisionResult.getSignedDistance());
+         contactPointToSet.setRobotShape(robotShape);
+         contactPointToSet.setEnvironmentShape(environmentShape);
       }
 
       environmentShape.applyTransform(robotToEnvironmentTransform);

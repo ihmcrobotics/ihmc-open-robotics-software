@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.contact.kinematics;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
@@ -22,6 +24,9 @@ public class YoDetectedContactPoint
 
    private final YoFramePoint3D environmentProjectionPoint;
    private final YoDouble robotEnvironmentSignedDistance;
+
+   private FrameShape3DReadOnly robotShape;
+   private FrameShape3DBasics environmentShape;
 
    public YoDetectedContactPoint(String name, YoRegistry registry)
    {
@@ -74,6 +79,26 @@ public class YoDetectedContactPoint
    public double getRobotEnvironmentSignedDistance()
    {
       return robotEnvironmentSignedDistance.getDoubleValue();
+   }
+
+   public void setRobotShape(FrameShape3DReadOnly robotShape)
+   {
+      this.robotShape = robotShape;
+   }
+
+   public void setEnvironmentShape(FrameShape3DBasics environmentShape)
+   {
+      this.environmentShape = environmentShape;
+   }
+
+   public FrameShape3DReadOnly getRobotShape()
+   {
+      return robotShape;
+   }
+
+   public FrameShape3DReadOnly getEnvironmentShape()
+   {
+      return environmentShape;
    }
 
    public YoGraphicDefinition getSCS2Graphic()
