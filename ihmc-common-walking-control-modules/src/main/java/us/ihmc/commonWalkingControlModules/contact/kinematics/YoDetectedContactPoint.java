@@ -1,10 +1,7 @@
 package us.ihmc.commonWalkingControlModules.contact.kinematics;
 
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
@@ -12,18 +9,28 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoDetectedContactPoint
 {
+   private static final double CONTACT_POINT_GRAPHIC_DIAMETER = 0.01;
+   private static final double SURFACE_NORMAL_GRAPHIC_SCALE = 0.2;
+
    private final String name;
    private final YoFramePoint3D contactPointPosition;
    private final YoFrameVector3D contactPointNormal;
+
+   private final YoFramePoint3D environmentProjectionPoint;
+   private final YoDouble robotEnvironmentSignedDistance;
 
    public YoDetectedContactPoint(String name, YoRegistry registry)
    {
       this.name = name;
       contactPointPosition = new YoFramePoint3D("contactPosition_" + name, ReferenceFrame.getWorldFrame(), registry);
       contactPointNormal = new YoFrameVector3D("contactNormal_" + name, ReferenceFrame.getWorldFrame(), registry);
+
+      environmentProjectionPoint = new YoFramePoint3D("environmentProjectionPosition_" + name, ReferenceFrame.getWorldFrame(), registry);
+      robotEnvironmentSignedDistance = new YoDouble("robotEnvironmentSignedDistance_" + name, registry);
    }
 
    public void setVerticalContactNormal()
@@ -31,15 +38,12 @@ public class YoDetectedContactPoint
       contactPointNormal.set(Axis3D.Z);
    }
 
-   public void update(Tuple3DReadOnly position, Tuple3DReadOnly normal)
-   {
-      contactPointPosition.set(position);
-      contactPointNormal.set(normal);
-   }
-
    public void clearContact()
    {
       contactPointPosition.setToNaN();
+      environmentProjectionPoint.setToNaN();
+      contactPointNormal.setToNaN();
+
    }
 
    public boolean isInContact()
@@ -57,12 +61,28 @@ public class YoDetectedContactPoint
       return contactPointNormal;
    }
 
+   public YoFramePoint3D getEnvironmentProjectionPoint()
+   {
+      return environmentProjectionPoint;
+   }
+
+   public void setRobotEnvironmentSignedDistance(double robotEnvironmentSignedDistance)
+   {
+      this.robotEnvironmentSignedDistance.set(robotEnvironmentSignedDistance);
+   }
+
+   public double getRobotEnvironmentSignedDistance()
+   {
+      return robotEnvironmentSignedDistance.getDoubleValue();
+   }
+
    public YoGraphicDefinition getSCS2Graphic()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(name);
-      group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D(name + "Normal", contactPointPosition, contactPointNormal, 0.2, ColorDefinitions.Red()));
-      group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D(name + "InverseNormal", contactPointPosition, contactPointNormal, -0.2, ColorDefinitions.LightSeaGreen()));
-      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D(name + "Position", contactPointPosition, 0.03, ColorDefinitions.Red()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D(name + "Normal", contactPointPosition, contactPointNormal, SURFACE_NORMAL_GRAPHIC_SCALE, ColorDefinitions.Red()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D(name + "InverseNormal", contactPointPosition, contactPointNormal, -SURFACE_NORMAL_GRAPHIC_SCALE, ColorDefinitions.LightSeaGreen()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D(name + "Position", contactPointPosition, CONTACT_POINT_GRAPHIC_DIAMETER, ColorDefinitions.Red()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D(name + "EnvironmentPosition", environmentProjectionPoint, CONTACT_POINT_GRAPHIC_DIAMETER, ColorDefinitions.Yellow()));
       return group;
    }
 }

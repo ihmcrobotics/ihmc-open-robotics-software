@@ -46,9 +46,9 @@ public class MeshBasedContactDetector
    private final RigidBodyTransform robotToEnvironmentTransform = new RigidBodyTransform();
    private final RigidBodyTransform environmentToRobotTransform = new RigidBodyTransform();
 
-   private final FramePoint3D tempContactPointA = new FramePoint3D();
-   private final FramePoint3D tempContactPointB = new FramePoint3D();
-   private final FrameVector3D tempSurfaceNormal = new FrameVector3D();
+   private final FramePoint3D contactPointOnRobotSurface = new FramePoint3D();
+   private final FramePoint3D contactPointOnEnvironmentSurface = new FramePoint3D();
+   private final FrameVector3D robotSurfaceNormal = new FrameVector3D();
 
    public MeshBasedContactDetector(List<Collidable> robotCollidables)
    {
@@ -146,21 +146,25 @@ public class MeshBasedContactDetector
       environmentShape.applyTransform(environmentToRobotTransform);
       environmentShape.setReferenceFrame(robotShapeFrame);
 
-      collisionDetector.evaluateCollision(environmentShape, robotShape, collisionResult);
+      FrameShape3DReadOnly shapeA = environmentShape;
+      FrameShape3DReadOnly shapeB = robotShape;
+      collisionDetector.evaluateCollision(shapeA, shapeB, collisionResult);
 
       boolean contactDetected = collisionResult.getSignedDistance() < contactThreshold;
       if (contactDetected)
       {
-         tempContactPointA.setIncludingFrame(robotShapeFrame, collisionResult.getPointOnB());
-         environmentShape.evaluatePoint3DCollision(tempContactPointA, tempContactPointB, tempSurfaceNormal);
+         contactPointOnEnvironmentSurface.setIncludingFrame(robotShapeFrame, collisionResult.getPointOnA());
+         contactPointOnRobotSurface.setIncludingFrame(robotShapeFrame, collisionResult.getPointOnB());
+         robotSurfaceNormal.setIncludingFrame(robotShapeFrame, collisionResult.getNormalOnB());
 
-         tempContactPointA.setReferenceFrame(robotShapeFrame);
-         tempSurfaceNormal.setReferenceFrame(robotShapeFrame);
-         tempContactPointA.changeFrame(ReferenceFrame.getWorldFrame());
-         tempSurfaceNormal.changeFrame(ReferenceFrame.getWorldFrame());
+         contactPointOnRobotSurface.changeFrame(ReferenceFrame.getWorldFrame());
+         contactPointOnEnvironmentSurface.changeFrame(ReferenceFrame.getWorldFrame());
+         robotSurfaceNormal.changeFrame(ReferenceFrame.getWorldFrame());
 
-         contactPointToSet.getContactPointPosition().set(tempContactPointA);
-         contactPointToSet.getContactPointNormal().set(tempSurfaceNormal);
+         contactPointToSet.getContactPointPosition().set(contactPointOnRobotSurface);
+         contactPointToSet.getContactPointNormal().set(robotSurfaceNormal);
+         contactPointToSet.getEnvironmentProjectionPoint().set(contactPointOnEnvironmentSurface);
+         contactPointToSet.setRobotEnvironmentSignedDistance(collisionResult.getSignedDistance());
       }
 
       environmentShape.applyTransform(robotToEnvironmentTransform);
