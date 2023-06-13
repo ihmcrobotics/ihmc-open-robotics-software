@@ -19,6 +19,11 @@ public class AckleyEvaluationProblem implements EvaluationProblem
    private final DMatrixD1 optimumParameters;
    private final double optimumValue = 0;
 
+   public AckleyEvaluationProblem(int parameterDimensions)
+   {
+      this(20.0, 0.2, 2.0 * Math.PI, parameterDimensions);
+   }
+
    public AckleyEvaluationProblem(double a, double b, double c, int parameterDimensions)
    {
       this.a = a;
@@ -26,13 +31,17 @@ public class AckleyEvaluationProblem implements EvaluationProblem
       this.c = c;
       this.parameterDimensions = parameterDimensions;
       optimumParameters = new DMatrixRMaj(parameterDimensions, 1);
-
    }
 
    @Override
    public RealDomainBounds[] getDomain()
    {
-      return null;
+      RealDomainBounds[] bounds = new RealDomainBounds[parameterDimensions];
+      for (int i = 0; i < parameterDimensions; i++)
+      {
+         bounds[i] = new RealDomainBounds(-32.768, 32.768);
+      }
+      return bounds;
    }
 
    @Override

@@ -105,6 +105,8 @@ public class WrappedGradientDescent implements Optimizer
    @Override
    public void setRealDomain(RealDomainBounds[] bounds)
    {
+      // assert that bounds is correct size
+
       TDoubleArrayList lower = new TDoubleArrayList();
       TDoubleArrayList upper = new TDoubleArrayList();
       for (RealDomainBounds bound : bounds)
@@ -116,9 +118,4 @@ public class WrappedGradientDescent implements Optimizer
       gradientDescentModule.setInputLowerLimit(lower);
       gradientDescentModule.setInputUpperLimit(upper);
    }
-
-   //   public GradientDescentModule getGradientDescentModule()
-//   {
-//      return gradientDescentModule;
-//   }
 }
