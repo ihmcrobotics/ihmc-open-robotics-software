@@ -7,10 +7,6 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.SizeTPointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvjpeg.*;
 
@@ -89,7 +85,7 @@ public class CUDAImageEncoder
 
       // Set params to correct sampling factor
       CHECK_NVJPEG("nvjpegEncoderParamsSetSamplingFactors", nvjpegEncoderParamsSetSamplingFactors(encoderParameters, NVJPEG_CSS_420, cudaStream));
-      CHECK_NVJPEG("nvjpegEncoderParamsSetQuality", nvjpegEncoderParamsSetQuality(encoderParameters, 75, cudaStream));
+//      CHECK_NVJPEG("nvjpegEncoderParamsSetQuality", nvjpegEncoderParamsSetQuality(encoderParameters, 50, cudaStream));
 
       // Set pointer to start of Y plane
       BytePointer planeStartPointer = sourceImage.datastart();
@@ -118,7 +114,6 @@ public class CUDAImageEncoder
       nvjpegImage.channel(2, VPlanePointer);
 
       // Encode image (mem)
-      System.out.println("Encoding image");
       CHECK_NVJPEG("nvjpegEncodeYUV",
                    nvjpegEncodeYUV(nvjpegHandle, encoderState, encoderParameters, nvjpegImage, NVJPEG_CSS_420, imageWidth, imageHeight, cudaStream));
 
@@ -127,10 +122,17 @@ public class CUDAImageEncoder
       CHECK_NVJPEG("nvjpegEncodeRetrieveBitstream", nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, (BytePointer) null, jpegSize, cudaStream));
 
       // Retrieve bitstream
-      CHECK_NVJPEG("nvjpegEncodeRetrieveBitstream", nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, compressedImagePointer, jpegSize, cudaStream));
+      BytePointer jpegBytePointer = new BytePointer(jpegSize.get());
+      CHECK_NVJPEG("nvjpegEncodeRetrieveBitstream", nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, jpegBytePointer, jpegSize, cudaStream));
 
       // Synchronize cuda stream
       CHECK_CUDA("cudaStreamSynchronize", cudaStreamSynchronize(cudaStream));
+
+      //copy data into output pointer
+      byte[] bytes = new byte[(int) jpegBytePointer.limit()];
+      jpegBytePointer.get(bytes, 0, (int) jpegBytePointer.limit());
+      compressedImagePointer.put(bytes, 0, (int) jpegBytePointer.limit());
+      compressedImagePointer.limit(jpegBytePointer.limit());
 
       // Free GPU memory
       CHECK_CUDA("cudaFree", cudaFree(YPlanePointer));
@@ -141,7 +143,6 @@ public class CUDAImageEncoder
       YPlanePointer.close();
       UPlanePointer.close();
       VPlanePointer.close();
-      planeStartPointer.close();
       jpegSize.close();
    }
 
