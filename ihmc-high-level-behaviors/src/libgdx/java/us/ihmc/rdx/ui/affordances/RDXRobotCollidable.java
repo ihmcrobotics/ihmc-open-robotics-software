@@ -45,8 +45,6 @@ public class RDXRobotCollidable implements RenderableProvider
    private final ModifiableReferenceFrame collisionShapeFrame;
    private final RDXModelInstance collisionModelInstance;
    private final RDXModelInstance collisionShapeCoordinateFrameGraphic;
-   private final FramePose3D boxPose = new FramePose3D();
-   private final RigidBodyTransform boxCenterToWorldTransform = new RigidBodyTransform();
    private final FrameShape3DBasics shape;
    private final FramePose3D vrPickPose = new FramePose3D();
    private final String rigidBodyName;
@@ -63,8 +61,7 @@ public class RDXRobotCollidable implements RenderableProvider
 
    public RDXRobotCollidable(us.ihmc.scs2.simulation.collision.Collidable collidable, Color color)
    {
-      this((FrameShape3DBasics) collidable.getShape(), // Need to setReferenceFrame
-           collidable.getShape().getReferenceFrame(),
+      this((FrameShape3DBasics) collidable.getShape(),
            collidable.getRigidBody().getParentJoint().getFrameAfterJoint(),
            collidable.getRigidBody().getName(),
            color);
@@ -72,15 +69,13 @@ public class RDXRobotCollidable implements RenderableProvider
 
    public RDXRobotCollidable(Collidable collidable, Color color)
    {
-      this((FrameShape3DBasics) collidable.getShape(), // Need to setReferenceFrame
-           collidable.getShape().getReferenceFrame(),
+      this((FrameShape3DBasics) collidable.getShape(),
            collidable.getRigidBody().getParentJoint().getFrameAfterJoint(),
            collidable.getRigidBody().getName(),
            color);
    }
 
    public RDXRobotCollidable(FrameShape3DBasics shape,
-                             ReferenceFrame shapeFrame,
                              MovingReferenceFrame syncedLinkFrame,
                              String rigidBodyName,
                              Color color)
@@ -90,9 +85,9 @@ public class RDXRobotCollidable implements RenderableProvider
       this.rigidBodyName = rigidBodyName;
 
       linkFrame = syncedLinkFrame;
-      RigidBodyTransform collisionToLinkFrameTransform = new RigidBodyTransform(shapeFrame.getTransformToDesiredFrame(syncedLinkFrame));
+
+      RigidBodyTransform collisionToLinkFrameTransform = new RigidBodyTransform();
       collisionShapeFrame = new ModifiableReferenceFrame("collisionShapeFrame" + rigidBodyName, linkFrame);
-      collisionShapeFrame.update(transformToParent -> transformToParent.set(collisionToLinkFrameTransform));
 
       collisionModelInstance = new RDXModelInstance(RDXModelBuilder.buildModel(meshBuilder ->
       {
@@ -156,6 +151,8 @@ public class RDXRobotCollidable implements RenderableProvider
          }
       }, rigidBodyName));
       LibGDXTools.setOpacity(collisionModelInstance, color.a);
+
+      collisionShapeFrame.update(transformToParent -> transformToParent.set(collisionToLinkFrameTransform));
 
       collisionShapeCoordinateFrameGraphic = new RDXModelInstance(RDXModelBuilder.createCoordinateFrame(0.15));
    }
@@ -224,7 +221,7 @@ public class RDXRobotCollidable implements RenderableProvider
          Point3DReadOnly position = capsule.getPosition();
          double length = capsule.getLength();
          double radius = capsule.getRadius();
-         capsuleIntersection.update(radius, length, position, axis, collisionShapeFrame.getReferenceFrame());
+         capsuleIntersection.update(radius, length, position, axis, linkFrame);
          if (capsuleIntersection.intersect(pickRayInWorld))
          {
             pickResult.addPickCollision(capsuleIntersection.getDistanceToCollision(input.getPickRayInWorld()));
@@ -232,10 +229,11 @@ public class RDXRobotCollidable implements RenderableProvider
       }
       else if (shape instanceof Box3DReadOnly box)
       {
-         boxPose.setToZero(collisionShapeFrame.getReferenceFrame());
-         boxPose.changeFrame(ReferenceFrame.getWorldFrame());
-         boxPose.get(boxCenterToWorldTransform);
-         if (boxRayIntersection.intersect(box.getSizeX(), box.getSizeY(), box.getSizeZ(), boxCenterToWorldTransform, pickRayInWorld))
+         if (boxRayIntersection.intersect(box.getSizeX(),
+                                          box.getSizeY(),
+                                          box.getSizeZ(),
+                                          collisionShapeFrame.getReferenceFrame().getTransformToRoot(),
+                                          pickRayInWorld))
          {
             pickResult.addPickCollision(boxRayIntersection.getFirstIntersectionToPack().distance(input.getPickRayInWorld().getPoint()));
          }
@@ -250,7 +248,7 @@ public class RDXRobotCollidable implements RenderableProvider
                                         cylinder.getRadius(),
                                         cylinder.getPosition(),
                                         cylinder.getAxis(),
-                                        collisionShapeFrame.getReferenceFrame());
+                                        linkFrame);
          double intersection = cylinderRayIntersection.intersect(input.getPickRayInWorld());
          if (!Double.isNaN(intersection))
          {
@@ -264,7 +262,7 @@ public class RDXRobotCollidable implements RenderableProvider
                                          ellipsoid.getRadiusZ(),
                                          ellipsoid.getPosition(),
                                          ellipsoid.getOrientation(),
-                                         collisionShapeFrame.getReferenceFrame());
+                                         linkFrame);
          if (ellipsoidRayIntersection.intersect(input.getPickRayInWorld()))
          {
             pickResult.addPickCollision(ellipsoidRayIntersection.getFirstIntersectionToPack().distance(input.getPickRayInWorld().getPoint()));
