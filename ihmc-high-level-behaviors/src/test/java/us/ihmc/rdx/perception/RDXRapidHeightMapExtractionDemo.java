@@ -1,6 +1,7 @@
 package us.ihmc.rdx.perception;
 
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.bytedeco.javacpp.BytePointer;
@@ -34,10 +35,10 @@ import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.ArrayList;
-
+// Rapid height map extraction demo needs atleast the Ouster camera with depth/sensor data
 public class RDXRapidHeightMapExtractionDemo
 {
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230117_161540_Mocap_Ouster_L515_plog.hdf5").toString(); // 20230117_161540_GoodPerceptionLog.hdf5
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230117_162417_Mocap_Ouster_L515_plogFixed.hdf5").toString(); // 20230117_161540_GoodPerceptionLog.hdf5
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private ImGuiPanel navigationPanel;
@@ -58,13 +59,15 @@ public class RDXRapidHeightMapExtractionDemo
    private ImInt frameIndex = new ImInt(0);
    private ImFloat planeHeight = new ImFloat(1.5f); // 2.133f
 
+   private final ImBoolean autoAdvance = new ImBoolean(false);
+
    private final Pose3D cameraPose = new Pose3D();
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
 
    private final Notification heightMapUpdateNotification = new Notification();
 
    private BytedecoImage loadedDepthImage;
-   private final BytePointer depthBytePointer = new BytePointer(1000000);
+   private final BytePointer depthBytePointer = new BytePointer(1000000); // holds the depth bytes in the current frame
 
    private OpenCLManager openCLManager;
    private _cl_program openCLProgram;
@@ -72,11 +75,11 @@ public class RDXRapidHeightMapExtractionDemo
 
    private boolean initialized = false;
 
-   public RDXRapidHeightMapExtractionDemo()
+   public RDXRapidHeightMapExtractionDemo() // Constructor
    {
-      perceptionDataLoader = new PerceptionDataLoader();
+      perceptionDataLoader = new PerceptionDataLoader(); // used to decode ouster depth data
 
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter() //ApplicationAdapter implements create(), createForOuster(), render(), renderNavigationPanel(), and dispose()
       {
          @Override
          public void create()
@@ -84,20 +87,20 @@ public class RDXRapidHeightMapExtractionDemo
             baseUI.create();
 
             openCLManager = new OpenCLManager();
-            openCLProgram = openCLManager.loadProgram("RapidHeightMapExtractor");
+            openCLProgram = openCLManager.loadProgram("RapidHeightMapExtractor"); // load the kernel program
 
-            navigationPanel = new ImGuiPanel("Dataset Navigation Panel");
-            baseUI.getImGuiPanelManager().addPanel(navigationPanel);
+            navigationPanel = new ImGuiPanel("Dataset Navigation Panel"); // shows parameters/ variables
+            baseUI.getImGuiPanelManager().addPanel(navigationPanel); // add panel to window
 
-            baseUI.getPrimaryScene().addRenderableProvider(heightMapRenderer, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(heightMapRenderer, RDXSceneLevel.VIRTUAL); // heightMapRenderer displays the 3D stuff in the Primary Scene
 
-            createForOuster(128, 2048);
+            createForOuster(128, 2048); // frame size of ouster
 
-            updateHeightMap();
+            updateHeightMap(); // update height map image based on calculations from the log data. This just loads the starting frame
 
             // testProjection(loadedDepthImage.getBytedecoOpenCVMat());
 
-            navigationPanel.setRenderMethod(this::renderNavigationPanel);
+            navigationPanel.setRenderMethod(this::renderNavigationPanel); // navigation panel seems to runs on its own thread
          }
 
          private void createForOuster(int depthHeight, int depthWidth)
@@ -105,52 +108,68 @@ public class RDXRapidHeightMapExtractionDemo
             sensorTopicName = PerceptionLoggerConstants.OUSTER_DEPTH_NAME;
             perceptionDataLoader.openLogFile(perceptionLogFile);
 
-            loadedDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
+            loadedDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1); // object to store each frame pulled from the plogs
 
-            perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION, sensorPositionBuffer);
-            perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, sensorOrientationBuffer);
+            perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION, sensorPositionBuffer); // tracks the ouster position in each frame
+            perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, sensorOrientationBuffer); // tracks ouster orientation
 
-            perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME,
-                                                     frameIndex.get(),
-                                                     depthBytePointer,
-                                                     loadedDepthImage.getBytedecoOpenCVMat());
-            loadedDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+            perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, // load the first depth frame
+                                                     frameIndex.get(), // initialized to 0
+                                                     depthBytePointer, // save bytes to this pointer
+                                                     loadedDepthImage.getBytedecoOpenCVMat()); // then compress that pointer into PNG and save as matrix in loadedDepthImage object
+            loadedDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY); // *************************
 
-            rapidHeightMapUpdater.create(openCLManager, openCLProgram, loadedDepthImage);
-            heightMapRenderer.create(rapidHeightMapUpdater.getGridLength() * rapidHeightMapUpdater.getGridWidth());
+            rapidHeightMapUpdater.create(openCLManager, openCLProgram, loadedDepthImage); // object that manages bulk of calculation (only has create() and update() functions)
+            heightMapRenderer.create(rapidHeightMapUpdater.getGridLength() * rapidHeightMapUpdater.getGridWidth()); // object that displays height map
          }
 
          @Override
-         public void render()
+         public void render() // doesn't seem to be called
          {
-            if (userChangedIndex.poll())
+            if (autoAdvance.get())
             {
-               loadAndDecompressThreadExecutor.clearQueueAndExecute(() -> perceptionDataLoader.loadCompressedDepth(sensorTopicName,
-                                                                                                                   frameIndex.get(),
-                                                                                                                   depthBytePointer,
-                                                                                                                   loadedDepthImage.getBytedecoOpenCVMat()));
-               updateHeightMap();
+               frameIndex.set(frameIndex.get() + 1);
+               userChangedIndex.set();
+               // if frame index is unsynced with height map rendering, stop auto advancing (I think)
+               if (frameIndex.get() == (perceptionDataLoader.getHDF5Manager().getCount(sensorTopicName) - 1))
+                  autoAdvance.set(false);
             }
 
-            baseUI.renderBeforeOnScreenUI();
+            if (userChangedIndex.poll()) // when user interacts with panel
+            {
+               // load the depth data using the new frame the user indexed to
+               loadAndDecompressThreadExecutor.clearQueueAndExecute(() -> perceptionDataLoader.loadCompressedDepth(sensorTopicName, // OUSTER depth data
+                                                                                                                   frameIndex.get(), // frame to use
+                                                                                                                   depthBytePointer, // pointer to load initial frame byte data to
+                                                                                                                   loadedDepthImage.getBytedecoOpenCVMat())); // decoded and compressed PNG depth image stored in a matrix
+               updateHeightMap(); // update height map now that the new data is loaded
+            }
+
+            baseUI.renderBeforeOnScreenUI(); // load panel window
             baseUI.renderEnd();
          }
 
-         private void renderNavigationPanel()
+         private void renderNavigationPanel() // layout of buttons and actions to perform when the panel is interacted with
          {
+            // checks if the slider is moved
             boolean changed = ImGui.sliderInt("Frame Index",
                                               frameIndex.getData(),
                                               0, perceptionDataLoader.getHDF5Manager().getCount(sensorTopicName) - 1);
-
+            // slider could be a float ..?
             changed |= ImGui.sliderFloat("Plane Height", planeHeight.getData(), -3.0f, 3.0f);
 
-            if (ImGui.button("Load Previous"))
+            if (ImGui.button("AutoAdvance"))
+               autoAdvance.set(true);
+            if (ImGui.button("Stop Advancing"))
+               autoAdvance.set(false);
+
+            if (ImGui.button("Load Previous")) // if load previous is pressed, decriment frame index
             {
                frameIndex.set(Math.max(0, frameIndex.get() - 1));
                changed = true;
             }
-            ImGui.sameLine();
-            if (ImGui.button("Load Next"))
+            ImGui.sameLine(); // put prev/ next buttons next to each other
+            if (ImGui.button("Load Next")) // increment index
             {
                frameIndex.set(frameIndex.get() + 1);
                changed = true;
@@ -158,12 +177,13 @@ public class RDXRapidHeightMapExtractionDemo
 
             if (changed)
             {
-               userChangedIndex.set();
+               userChangedIndex.set(); // if index was changed, signal to the thread that calculates height map
             }
+
          }
 
          @Override
-         public void dispose()
+         public void dispose() // dump threads and resources when exiting program (might need more dumping)
          {
             rapidHeightMapUpdater.setProcessing(false);
             perceptionDataLoader.closeLogFile();
@@ -174,21 +194,21 @@ public class RDXRapidHeightMapExtractionDemo
       });
    }
 
-   private void updateHeightMap()
+   private void updateHeightMap() // First function in RDXRapidHeightMapExtractionDemo class
    {
       if (!rapidHeightMapUpdater.isProcessing())
       {
-         ThreadTools.startAsDaemon(() ->
+         ThreadTools.startAsDaemon(() -> // seperate thread that updates height map when processing is done (Daemon basically means it's not as important)
          {
             LogTools.info("Update Height Map: " + frameIndex.get());
-            Point3D position = sensorPositionBuffer.get(frameIndex.get());
-            Quaternion orientation = sensorOrientationBuffer.get(frameIndex.get());
+            Point3D position = sensorPositionBuffer.get(frameIndex.get()); // get position (of camera ..? is this in reference to world frame?)
+            Quaternion orientation = sensorOrientationBuffer.get(frameIndex.get()); // get orientation
             cameraPose.set(position, orientation);
-            cameraFrame.setPoseAndUpdate(cameraPose);
+            cameraFrame.setPoseAndUpdate(cameraPose); // camera has a specific position/rotation that it's in
 
             long begin = System.nanoTime();
 
-            RigidBodyTransform transform = new RigidBodyTransform(sensorOrientationBuffer.get(frameIndex.get()),
+            RigidBodyTransform transform = new RigidBodyTransform(sensorOrientationBuffer.get(frameIndex.get()), // get the transform based on the new camera position/ orientation
                                                                   sensorPositionBuffer.get(frameIndex.get()));
 
             // Point3D euler = new Point3D();
@@ -197,16 +217,17 @@ public class RDXRapidHeightMapExtractionDemo
 
             // LogTools.info("Rotation: " + euler);
 
-            rapidHeightMapUpdater.update(transform, planeHeight.get());
-            heightMapUpdateNotification.set();
+            rapidHeightMapUpdater.update(transform, planeHeight.get()); // update the height map by applying the transform found using the ouster position/ orientation
+            heightMapUpdateNotification.set(); // send a msg from this thread to main thread that height map processing is done?
 
             long end = System.nanoTime();
-            LogTools.info("Update Height Map: {} ms", (end - begin) / 1e6);
+            LogTools.info("Update Height Map: {} ms", (end - begin) / 1e6); // how long it took to update height map
          }, getClass().getSimpleName() + "RapidHeightMap");
       }
 
-      if (heightMapUpdateNotification.poll())
+      if (heightMapUpdateNotification.poll()) // main thread: when notification occurs that means the 3D sim can be updated
       {
+         // update the 3D sim using the new height map and other reference parameters
          heightMapRenderer.update(rapidHeightMapUpdater.getOutputHeightMapImage().getPointerForAccessSpeed(),
                                   rapidHeightMapUpdater.getGridLength(),
                                   rapidHeightMapUpdater.getGridWidth(),
@@ -222,11 +243,11 @@ public class RDXRapidHeightMapExtractionDemo
       }
    }
 
-   public Point2D sphericalProject(Point3D cellCenter, int INPUT_HEIGHT, int INPUT_WIDTH)
+   public Point2D sphericalProject(Point3D cellCenter, int INPUT_HEIGHT, int INPUT_WIDTH) // this for spherical/curved planar regions?
    {
       Point2D proj = new Point2D();
 
-      int count = 0;
+      // int count = 0; UNUSED ?
       double pitchUnit = Math.PI / (2 * INPUT_HEIGHT);
       double yawUnit = 2 * Math.PI / (INPUT_WIDTH);
 
@@ -253,7 +274,7 @@ public class RDXRapidHeightMapExtractionDemo
       return proj;
    }
 
-   public void testProjection(Mat depth)
+   public void testProjection(Mat depth) // unused test function
    {
       double radius = 4.0f;
       double height = 2.0f;
