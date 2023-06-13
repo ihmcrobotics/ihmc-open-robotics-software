@@ -50,7 +50,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.bytedeco.cuda.global.cudart.*;
@@ -83,8 +82,7 @@ public class DualBlackflyCamera
    private final ImageMessage imageMessage = new ImageMessage();
    private final IHMCROS2Publisher<ImageMessage> ros2ImagePublisher;
    private long imageMessageSequenceNumber = 0;
-   private final BytePointer jpegImageBytePointer = new BytePointer(imageMessage.getData().capacity());
-   private /*final*/ ImageMessageDataPacker compressedImageDataPacker;
+   private ImageMessageDataPacker compressedImageDataPacker;
 
    // These update when a camera image resolution change is detected
    private int imageWidth = 0;
@@ -98,6 +96,8 @@ public class DualBlackflyCamera
    private Mat undistortionMap1;
    private Mat undistortionMap2;
    private Scalar undistortionRemapBorderValue;
+
+   private CUDAImageEncoder cudaImageEncoder;
 
    private volatile boolean destroyed = false;
 
@@ -118,6 +118,7 @@ public class DualBlackflyCamera
       try
       {
          ProcessTools.execSimpleCommand("nvidia-smi");
+         cudaImageEncoder = new CUDAImageEncoder();
       }
       catch (IOException | InterruptedException ignored)
       {
@@ -285,14 +286,20 @@ public class DualBlackflyCamera
    {
       BytePointer spinImageData = this.spinImageData.get();
       Instant spinImageAcquisitionTime = this.spinImageAcquisitionTime.get();
+      BytePointer jpegImageBytePointer = new BytePointer(imageMessage.getData().capacity());
 
       if (spinImageData == null || spinImageAcquisitionTime == null)
          return;
 
       blackflySourceImage.rewind();
       blackflySourceImage.changeAddress(spinImageData.address());
+      Mat sourceImageMat = blackflySourceImage.getBytedecoOpenCVMat();
+      if (sourceImageMat.isNull() || sourceImageMat.empty())
+      {
+         return;
+      }
 
-      opencv_imgproc.cvtColor(blackflySourceImage.getBytedecoOpenCVMat(), distortedRGBImage, opencv_imgproc.COLOR_BayerBG2RGB);
+      opencv_imgproc.cvtColor(sourceImageMat, distortedRGBImage, opencv_imgproc.COLOR_BayerBG2RGB);
       opencv_imgproc.remap(distortedRGBImage,
                            undistortedImage.getBytedecoOpenCVMat(),
                            undistortionMap1,
@@ -327,7 +334,7 @@ public class DualBlackflyCamera
       // Converting BayerRG8 -> RGBA -> YUV
       // Here we use COLOR_BayerBG2RGBA opencv conversion. The Blackfly cameras are set to use BayerRG pixel format.
       // But, for some reason, it's actually BayerBG. Changing to COLOR_BayerRG2RGBA will result in the wrong colors.
-      opencv_imgproc.cvtColor(blackflySourceImage.getBytedecoOpenCVMat(), rgbaMat, opencv_imgproc.COLOR_BayerBG2RGBA);
+      opencv_imgproc.cvtColor(sourceImageMat, rgbaMat, opencv_imgproc.COLOR_BayerBG2RGBA);
       opencv_imgproc.cvtColor(rgbaMat, yuv420Image, opencv_imgproc.COLOR_RGBA2YUV_I420);
 
       /* When an Nvidia GPU is available, use CUDA to encode image on the GPU
@@ -336,86 +343,10 @@ public class DualBlackflyCamera
        */
       if (cudaAvailable)
       {
-         // Initialize cuda
-         CUctx_st context = new CUctx_st();
-         cuInit(0);
-         cuCtxCreate(context, CU_CTX_SCHED_AUTO, 0);
-
-         // Create cuda stream
-         CUstream_st stream = new CUstream_st();
-         cuStreamCreate(stream, 0);
-
-         // Create handle
-         nvjpegHandle nvjpegHandle = new nvjpegHandle();
-         nvjpegCreateSimple(nvjpegHandle);
-
-         // Create encoder components
-         nvjpegEncoderState nvjpegEncoderState = new nvjpegEncoderState();
-         nvjpegEncoderParams nvjpegEncoderParams = new nvjpegEncoderParams();
-         nvjpegEncoderParamsCreate(nvjpegHandle, nvjpegEncoderParams, stream);
-         nvjpegEncoderStateCreate(nvjpegHandle, nvjpegEncoderState, stream);
-         nvjpegEncoderParamsSetSamplingFactors(nvjpegEncoderParams, NVJPEG_CSS_420, stream);
-
-         // Create jpeg image
-         nvjpegImage_t nvjpegImage = new nvjpegImage_t();
-
-         // Set a pointer pointing to the beginning of planes
-         BytePointer planeStartPointer = yuv420Image.datastart();
-
-         // Get Y plane data
-         BytePointer YPlanePointer = new BytePointer();                                                  // create a pointer for the Y plane
-         cudaMalloc(YPlanePointer, numberOfBytesInFrame);                                                // allocate Y plane memory
-         cudaMemcpy(YPlanePointer, planeStartPointer, numberOfBytesInFrame, cudaMemcpyHostToDevice);     // copy Y plane data to device memory
-         nvjpegImage.pitch(0, imageWidth);                                                               // set the pitch
-         nvjpegImage.channel(0, YPlanePointer);                                                          //set the channel
-         planeStartPointer.position(planeStartPointer.position() + numberOfBytesInFrame);                // move plane start pointer to start of U plane
-
-         // Get U plane data
-         BytePointer UMemory = new BytePointer();                                                        // repeat above
-         cudaMalloc(UMemory, numberOfBytesInFrame / 4);
-         cudaMemcpy(UMemory, planeStartPointer, numberOfBytesInFrame / 4, cudaMemcpyHostToDevice);
-         nvjpegImage.pitch(1, imageWidth / 2);
-         nvjpegImage.channel(1, UMemory);
-         planeStartPointer.position(planeStartPointer.position() + numberOfBytesInFrame / 4);
-
-         // Get V plane data
-         BytePointer VMemory = new BytePointer();
-         cudaMalloc(VMemory, numberOfBytesInFrame / 4);
-         cudaMemcpy(VMemory, planeStartPointer, numberOfBytesInFrame / 4, cudaMemcpyHostToDevice);
-         nvjpegImage.pitch(2, imageWidth / 2);
-         nvjpegImage.channel(2, VMemory);
-
-         // Compress image
-         nvjpegEncodeYUV(nvjpegHandle, nvjpegEncoderState, nvjpegEncoderParams, nvjpegImage, NVJPEG_CSS_420, imageWidth, imageHeight, stream);
-
-         // Get compressed size
-         SizeTPointer jpegSize = new SizeTPointer(1);
-         nvjpegEncodeRetrieveBitstream(nvjpegHandle, nvjpegEncoderState, (BytePointer) null, jpegSize, stream);
-
-         // Retrieve bitstream
-         nvjpegEncodeRetrieveBitstream(nvjpegHandle, nvjpegEncoderState, jpegImageBytePointer, jpegSize, stream);
-
-         // Synchronize cuda stream
-         cudaStreamSynchronize(stream);
-
-         // Get bitstream to java side array
-         byte[] bytes = new byte[(int) jpegSize.get()];
-         jpegImageBytePointer.get(bytes);
-
-         // Write
-         try
-         {
-            Files.write(new File("hello.jpg").toPath(), bytes);
-            System.out.println("Wrote to hello.jpg!");
-         }
-         catch (IOException e)
-         {
-            throw new RuntimeException(e);
-         }
+         cudaImageEncoder.encodeYUV420(yuv420Image, jpegImageBytePointer, imageWidth, imageHeight);
       }
       else
       {
-         System.out.println(yuv420Image);
          opencv_imgcodecs.imencode(".jpg", yuv420Image, jpegImageBytePointer, COMPRESSION_PARAMETERS);
       }
 
@@ -436,6 +367,8 @@ public class DualBlackflyCamera
       imageMessage.getPosition().set(ousterToBlackflyTransfrom.getTranslation());
       imageMessage.getOrientation().set(ousterToBlackflyTransfrom.getRotation());
       ros2ImagePublisher.publish(imageMessage);
+
+      jpegImageBytePointer.close();
    }
 
    public void destroy()
