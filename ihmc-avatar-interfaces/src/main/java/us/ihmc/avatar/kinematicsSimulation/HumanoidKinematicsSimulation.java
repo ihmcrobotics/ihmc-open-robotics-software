@@ -6,11 +6,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -60,6 +58,7 @@ import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -70,7 +69,6 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -338,7 +336,10 @@ public class HumanoidKinematicsSimulation
       {
          LogTools.info("Starting YoVariable server...");
          yoVariableServer = new YoVariableServer(getClass().getSimpleName(), robotModel.getLogModelProvider(), new DataServerSettings(false), 0.01);
-         yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), yoGraphicsListRegistry);
+         // Some robots have four bar linkages and need the `getSubtreeJointsIncludingFourBars` call
+         yoVariableServer.setMainRegistry(registry,
+                                          MultiBodySystemMissingTools.getSubtreeJointsIncludingFourBars(fullRobotModel.getElevator()),
+                                          yoGraphicsListRegistry);
          yoVariableServer.start();
          LogTools.info("YoVariable server started.");
       }
@@ -552,21 +553,6 @@ public class HumanoidKinematicsSimulation
       }
    }
 
-   public static RobotConfigurationData extractRobotConfigurationData(FullHumanoidRobotModel fullRobotModel)
-   {
-      fullRobotModel.updateFrames();
-      OneDoFJointBasics[] joints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
-      RobotConfigurationData robotConfigurationData = RobotConfigurationDataFactory.create(joints,
-                                                                                           fullRobotModel.getForceSensorDefinitions(),
-                                                                                           fullRobotModel.getIMUDefinitions());
-      RobotConfigurationDataFactory.packJointState(robotConfigurationData, Arrays.stream(joints).collect(Collectors.toList()));
-      robotConfigurationData.getRootPosition().set(fullRobotModel.getRootJoint().getJointPose().getPosition());
-      robotConfigurationData.getRootOrientation().set(fullRobotModel.getRootJoint().getJointPose().getOrientation());
-      while (robotConfigurationData.getForceSensorData().size() < fullRobotModel.getForceSensorDefinitions().length) // pack empty force data
-         robotConfigurationData.getForceSensorData().add();
-      return robotConfigurationData;
-   }
-
    private void processFootstepStatus(FootstepStatusMessage statusMessage)
    {
       RobotSide side = RobotSide.fromByte(statusMessage.getRobotSide());
@@ -598,7 +584,8 @@ public class HumanoidKinematicsSimulation
    public void destroy()
    {
       LogTools.info("Shutting down...");
-      simulatedHandKinematicController.cleanup();
+      if (simulatedHandKinematicController != null)
+         simulatedHandKinematicController.cleanup();
       controlThread.destroy();
       ros2Node.destroy();
       realtimeROS2Node.destroy();

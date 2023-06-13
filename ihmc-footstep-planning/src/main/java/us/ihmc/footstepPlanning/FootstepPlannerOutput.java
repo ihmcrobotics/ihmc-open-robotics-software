@@ -7,11 +7,13 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.math.trajectories.core.Polynomial;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 public class FootstepPlannerOutput
 {
@@ -73,6 +75,57 @@ public class FootstepPlannerOutput
    public FootstepPlannerOutput()
    {
       clear();
+   }
+
+   /** Deep copy constructor */
+   public FootstepPlannerOutput(FootstepPlannerOutput other)
+   {
+      requestId = other.requestId;
+      footstepPlan.set(other.footstepPlan);
+      bodyPathPlanningResult = other.bodyPathPlanningResult;
+      footstepPlanningResult = other.footstepPlanningResult;
+      if (other.planarRegionsList != null)
+         planarRegionsList = new PlanarRegionsList(other.planarRegionsList);
+      for (Pose3D pose3D : other.bodyPath)
+      {
+         bodyPath.add(new Pose3D(pose3D));
+      }
+      for (Point3D point3D : other.bodyPathUnsmoothed)
+      {
+         bodyPathUnsmoothed.add(new Point3D(point3D));
+      }
+      goalPose.set(other.goalPose);
+      if (other.exception != null)
+         exception = new Exception(other.exception);
+      plannerTimings.set(other.plannerTimings);
+      if (other.swingTrajectories != null)
+      {
+         swingTrajectories = new ArrayList<>();
+         for (EnumMap<Axis3D, List<PolynomialReadOnly>> otherSwingTrajectory : other.swingTrajectories)
+         {
+            if (otherSwingTrajectory != null)
+            {
+               EnumMap<Axis3D, List<PolynomialReadOnly>> swingTrajectory = new EnumMap<>(Axis3D.class);
+
+               for (Map.Entry<Axis3D, List<PolynomialReadOnly>> axis3DListEntry : otherSwingTrajectory.entrySet())
+               {
+                  List<PolynomialReadOnly> polynomials = new ArrayList<>();
+                  for (PolynomialReadOnly polynomialReadOnly : axis3DListEntry.getValue())
+                  {
+                     Polynomial polynomial = new Polynomial((Polynomial) polynomialReadOnly);
+                     polynomials.add(polynomial);
+                  }
+                  swingTrajectory.put(axis3DListEntry.getKey(), polynomials);
+               }
+
+               swingTrajectories.add(swingTrajectory);
+            }
+            else
+            {
+               swingTrajectories.add(null);
+            }
+         }
+      }
    }
 
    public void clear()

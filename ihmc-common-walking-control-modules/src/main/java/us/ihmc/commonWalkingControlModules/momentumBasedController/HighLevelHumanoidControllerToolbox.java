@@ -160,7 +160,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final YoFramePoint2D yoCenterOfPressure = new YoFramePoint2D("CenterOfPressure", worldFrame, registry);
 
    private WalkingMessageHandler walkingMessageHandler;
-   private WalkingTrajectoryPath walkingTrajectoryPath;
+   private final WalkingTrajectoryPath walkingTrajectoryPath;
 
    private final YoBoolean controllerFailed = new YoBoolean("controllerFailed", registry);
 

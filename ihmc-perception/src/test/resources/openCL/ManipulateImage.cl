@@ -1,4 +1,4 @@
-kernel void manipulateImage(read_write image2d_t image)
+kernel void manipulateImage(write_only image2d_t image)
 {
    int x = get_global_id(0);
    int y = get_global_id(1);

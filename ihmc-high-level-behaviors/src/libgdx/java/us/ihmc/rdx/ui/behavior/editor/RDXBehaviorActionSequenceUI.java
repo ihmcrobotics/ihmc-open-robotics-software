@@ -18,8 +18,8 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.TreeSet;
 
 /**
  * This panel renders a list of available action sequences found as JSON on disk,
@@ -44,7 +44,8 @@ public class RDXBehaviorActionSequenceUI
    private ROS2SyncedRobotModel syncedRobot;
    private ReferenceFrameLibrary referenceFrameLibrary;
    private final ImString newSequenceName = new ImString(256);
-   private final TreeSet<RDXBehaviorActionSequenceEditor> editors = new TreeSet<>(Comparator.comparing(RDXBehaviorActionSequenceEditor::getName));
+   private final ArrayList<RDXBehaviorActionSequenceEditor> editors = new ArrayList<>();
+   private RDXBehaviorActionSequenceEditor selectedEditor = null;
 
    public void create(WorkspaceResourceDirectory behaviorSequenceStorageDirectory,
                       RDX3DPanel panel3D,
@@ -79,8 +80,24 @@ public class RDXBehaviorActionSequenceUI
       if (reindexClicked)
          reindexSequences();
 
+      if (ImGui.radioButton(labels.get("None"), selectedEditor == null))
+      {
+         selectedEditor.getPanel().getIsShowing().set(false);
+         selectedEditor = null;
+      }
       for (var editor : editors)
-         ImGui.checkbox(labels.get(editor.getName()), editor.getPanel().getIsShowing());
+      {
+         if (ImGui.radioButton(labels.get(editor.getName()), selectedEditor == editor))
+         {
+            // Deselect previous one
+            if (selectedEditor != null)
+               selectedEditor.getPanel().getIsShowing().set(false);
+
+            // Select new one
+            selectedEditor = editor;
+            selectedEditor.getPanel().getIsShowing().set(true);
+         }
+      }
 
       ImGuiTools.inputText(labels.getHidden("newSequenceName"), newSequenceName);
       ImGui.sameLine();
@@ -107,6 +124,9 @@ public class RDXBehaviorActionSequenceUI
             editor.loadActionsFromFile();
          }
       }
+
+      // Keep them in alphabetical order
+      editors.sort(Comparator.comparing(RDXBehaviorActionSequenceEditor::getName));
    }
 
    private void addEditor(RDXBehaviorActionSequenceEditor editor)

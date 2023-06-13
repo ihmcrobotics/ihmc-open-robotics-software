@@ -15,7 +15,7 @@ public class ActionInformationMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "7109314ff76e544f3cb423d72b0ce327dd9c714128360d55c13fd076c9406d9b";
+   		return "60732c46af74ea8f3961bdf40f0a250605fe182a62c13469abf952e318e62ca7";
    }
    
    @Override
@@ -52,8 +52,6 @@ public class ActionInformationMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -69,9 +67,6 @@ public class ActionInformationMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -81,16 +76,12 @@ public class ActionInformationMessagePubSubType implements us.ihmc.pubsub.TopicD
 
    public static void write(behavior_msgs.msg.dds.ActionInformationMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_12(data.getSequenceUpdateUuid());
-
       cdr.write_type_4(data.getActionIndex());
 
    }
 
    public static void read(behavior_msgs.msg.dds.ActionInformationMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceUpdateUuid(cdr.read_type_12());
-      	
       data.setActionIndex(cdr.read_type_4());
       	
 
@@ -99,16 +90,13 @@ public class ActionInformationMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void serialize(behavior_msgs.msg.dds.ActionInformationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_12("sequence_update_uuid", data.getSequenceUpdateUuid());
       ser.write_type_4("action_index", data.getActionIndex());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.ActionInformationMessage data)
    {
-      data.setSequenceUpdateUuid(ser.read_type_12("sequence_update_uuid"));
-      data.setActionIndex(ser.read_type_4("action_index"));
-   }
+      data.setActionIndex(ser.read_type_4("action_index"));   }
 
    public static void staticCopy(behavior_msgs.msg.dds.ActionInformationMessage src, behavior_msgs.msg.dds.ActionInformationMessage dest)
    {

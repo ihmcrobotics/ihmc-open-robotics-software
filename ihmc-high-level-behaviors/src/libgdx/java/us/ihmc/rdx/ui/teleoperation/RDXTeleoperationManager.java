@@ -15,9 +15,6 @@ import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
-import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
@@ -85,23 +82,18 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final ROS2ControllerHelper ros2Helper;
    private final YoVariableClientHelper yoVariableClientHelper;
    private final DRCRobotModel robotModel;
+   private final boolean robotHasArms;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final RDXTeleoperationParameters teleoperationParameters;
    private final ImGuiStoredPropertySetTuner teleoperationParametersTuner = new ImGuiStoredPropertySetTuner("Teleoperation Parameters");
    private final RDXRobotLowLevelMessenger robotLowLevelMessenger;
-   private final FootstepPlannerParametersBasics footstepPlannerParameters;
-   private final AStarBodyPathPlannerParametersBasics bodyPathPlannerParameters;
-   private final SwingPlannerParametersBasics swingFootPlannerParameters;
-   private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
-   private final ImGuiStoredPropertySetTuner bodyPathPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Body Path Planner Parameters (Teleoperation)");
-   private final ImGuiStoredPropertySetTuner swingFootPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Swing Foot Planning Parameters (Teleoperation)");
 
    private final RDXPelvisHeightSlider pelvisHeightSlider;
    private final RDXChestOrientationSlider chestPitchSlider;
    private final RDXChestOrientationSlider chestYawSlider;
    private final RDXDesiredRobot desiredRobot;
-   private final RDXHandConfigurationManager handManager = new RDXHandConfigurationManager();
+   private final RDXHandConfigurationManager handManager;
    private RDXRobotCollisionModel selfCollisionModel;
    private RDXRobotCollisionModel environmentCollisionModel;
    private RDXArmManager armManager;
@@ -145,17 +137,11 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       setRenderMethod(this::renderImGuiWidgets);
       addChild(teleoperationParametersTuner);
-      addChild(footstepPlanningParametersTuner);
-      addChild(bodyPathPlanningParametersTuner);
-      addChild(swingFootPlanningParametersTuner);
       this.communicationHelper = communicationHelper;
       robotModel = communicationHelper.getRobotModel();
+      robotHasArms = robotModel.getRobotVersion().hasArms();
       ros2Helper = communicationHelper.getControllerHelper();
       this.yoVariableClientHelper = yoVariableClientHelper;
-
-      this.footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
-      this.bodyPathPlannerParameters = robotModel.getAStarBodyPathPlannerParameters();
-      this.swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
 
       teleoperationParameters = new RDXTeleoperationParameters(robotModel.getSimpleRobotName());
       teleoperationParameters.load();
@@ -175,19 +161,19 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2Helper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
 
-      locomotionManager = new RDXLocomotionManager(robotModel, communicationHelper, syncedRobot, ros2Helper, controllerStatusTracker);
+      locomotionManager = new RDXLocomotionManager(robotModel, communicationHelper, syncedRobot, ros2Helper, controllerStatusTracker, this);
 
       interactablesAvailable = robotSelfCollisionModel != null;
       if (interactablesAvailable)
       {
          selfCollisionModel = new RDXRobotCollisionModel(robotSelfCollisionModel);
          environmentCollisionModel = new RDXRobotCollisionModel(robotEnvironmentCollisionModel);
-         armManager = new RDXArmManager(robotModel,
-                                        syncedRobot,
-                                        desiredRobot.getDesiredFullRobotModel(),
-                                        ros2Helper,
-                                        teleoperationParameters);
       }
+
+      if (robotHasArms)
+         handManager = new RDXHandConfigurationManager();
+      else
+         handManager = null;
    }
 
    public void create(RDXBaseUI baseUI)
@@ -197,10 +183,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       locomotionManager.create(baseUI);
 
-      footstepPlanningParametersTuner.create(footstepPlannerParameters, false, () -> locomotionManager.setFootstepPlannerParameters(footstepPlannerParameters));
-      bodyPathPlanningParametersTuner.create(bodyPathPlannerParameters, false, () -> locomotionManager.setBodyPathPlannerParameters(bodyPathPlannerParameters));
-      swingFootPlanningParametersTuner.create(swingFootPlannerParameters, false, () -> locomotionManager.setSwingParameters(swingFootPlannerParameters));
-
       teleoperationParametersTuner.create(teleoperationParameters);
 
       trajectoryTimeSlider = teleoperationParametersTuner.createDoubleSlider(RDXTeleoperationParameters.trajectoryTime, 0.1, 0.5, "s", "%.2f");
@@ -209,9 +191,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
       {
          selfCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkGreen(), 0.4));
          environmentCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkRed(), 0.4));
-
-         // create the manager for the desired arm setpoints
-         armManager.create(baseUI);
 
          for (RDXRobotCollidable robotCollidable : environmentCollisionModel.getRobotCollidables())
          {
@@ -259,22 +238,37 @@ public class RDXTeleoperationManager extends ImGuiPanel
                      interactableFeet.get(side).addAdditionalRobotCollidable(robotCollidable);
                   }
                }
-               if (RDXInteractableHand.robotCollidableIsHand(side, robotCollidable, fullRobotModel))
+               if (robotHasArms && RDXInteractableHand.robotCollidableIsHand(side, robotCollidable, fullRobotModel))
                {
                   if (!interactableHands.containsKey(side))
                   {
                      RDXInteractableHand interactableHand = new RDXInteractableHand(side, baseUI, robotCollidable, robotModel, syncedRobot, yoVariableClientHelper);
                      interactableHands.put(side, interactableHand);
                      allInteractableRobotLinks.add(interactableHand);
-                     // TODO this should probably not handle the space event!
-                     // This sends a command to the controller.
-                     interactableHand.setOnSpacePressed(armManager.getSubmitDesiredArmSetpointsCallback(side));
                   }
                   else
                   {
                      interactableHands.get(side).addAdditionalRobotCollidable(robotCollidable);
                   }
                }
+            }
+         }
+
+         if (robotHasArms)
+         {
+            // create the manager for the desired arm setpoints
+            armManager = new RDXArmManager(robotModel,
+                                           syncedRobot,
+                                           desiredRobot.getDesiredFullRobotModel(),
+                                           ros2Helper,
+                                           teleoperationParameters,
+                                           interactableHands);
+            armManager.create(baseUI);
+            for (RobotSide side : interactableHands.sides())
+            {
+               // TODO this should probably not handle the space event!
+               // This sends a command to the controller.
+               interactableHands.get(side).setOnSpacePressed(armManager.getSubmitDesiredArmSetpointsCallback(side));
             }
          }
 
@@ -292,7 +286,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
       standPrepButton.setOnPressed(robotLowLevelMessenger::sendStandRequest);
       standPrepButton.setTooltipText("Stand prep");
 
-      handManager.create(baseUI, communicationHelper);
+      if (robotHasArms)
+         handManager.create(baseUI, communicationHelper);
 
       baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
    }
@@ -310,7 +305,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
          if (interactablesAvailable)
          {
-            armManager.update(interactableHands);
+            if (robotHasArms)
+               armManager.update();
 
             selfCollisionModel.update();
             environmentCollisionModel.update();
@@ -324,9 +320,12 @@ public class RDXTeleoperationManager extends ImGuiPanel
       if (interactablesAvailable)
       {
          allAreDeleted &= interactablePelvis.isDeleted();
-         for (RobotSide side : interactableHands.sides())
+         if (robotHasArms)
          {
-            allAreDeleted &= interactableHands.get(side).isDeleted();
+            for (RobotSide side : interactableHands.sides())
+            {
+               allAreDeleted &= interactableHands.get(side).isDeleted();
+            }
          }
          for (RobotSide side : interactableFeet.sides())
          {
@@ -392,9 +391,12 @@ public class RDXTeleoperationManager extends ImGuiPanel
                }
             }
 
-            for (RobotSide side : interactableHands.sides())
+            if (robotHasArms)
             {
-               interactableHands.get(side).process3DViewInput(input);
+               for (RobotSide side : interactableHands.sides())
+               {
+                  interactableHands.get(side).process3DViewInput(input);
+               }
             }
          }
       }
@@ -410,9 +412,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       trajectoryTimeSlider.renderImGuiWidget();
 
-      ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
-      ImGui.checkbox(labels.get("Show body path planner parameter tuner"), bodyPathPlanningParametersTuner.getIsShowing());
-      ImGui.checkbox(labels.get("Show swing planner parameter tuner"), swingFootPlanningParametersTuner.getIsShowing());
       ImGui.checkbox(labels.get("Show teleoperation parameter tuner"), teleoperationParametersTuner.getIsShowing());
 
       ImGui.separator();
@@ -434,17 +433,20 @@ public class RDXTeleoperationManager extends ImGuiPanel
       locomotionManager.renderImGuiWidgets();
       ImGui.separator();
 
-      handManager.renderImGuiWidgets();
+      if (robotHasArms)
+         handManager.renderImGuiWidgets();
 
       if (ImGui.button(labels.get("Set Desired To Current")))
       {
-         armManager.setDesiredToCurrent();
+         if (armManager != null)
+            armManager.setDesiredToCurrent();
          desiredRobot.setDesiredToCurrent();
       }
 
       if (interactablesAvailable)
       {
-         armManager.renderImGuiWidgets();
+         if (armManager != null)
+            armManager.renderImGuiWidgets();
 
          ImGui.text("Pelvis:");
          ImGuiTools.previousWidgetTooltip("Send with: Spacebar");
@@ -452,12 +454,15 @@ public class RDXTeleoperationManager extends ImGuiPanel
          interactablePelvis.renderImGuiWidgets();
 
          boolean handInteractablesAreDeleted = true;
-         for (RobotSide side : interactableHands.sides())
+         if (robotHasArms)
          {
-            ImGui.text(side.getPascalCaseName() + " hand:");
-            ImGui.sameLine();
-            interactableHands.get(side).renderImGuiWidgets();
-            handInteractablesAreDeleted &= interactableHands.get(side).isDeleted();
+            for (RobotSide side : interactableHands.sides())
+            {
+               ImGui.text(side.getPascalCaseName() + " hand:");
+               ImGui.sameLine();
+               interactableHands.get(side).renderImGuiWidgets();
+               handInteractablesAreDeleted &= interactableHands.get(side).isDeleted();
+            }
          }
          desiredRobot.setActive(!handInteractablesAreDeleted);
 
