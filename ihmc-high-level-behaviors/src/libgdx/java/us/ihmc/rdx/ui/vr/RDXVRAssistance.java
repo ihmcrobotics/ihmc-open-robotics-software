@@ -84,6 +84,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
    private int blendingCounter = 0;
    private RDXVRAssistanceMenu menu;
    private final VRMenuGuideMode[] menuMode;
+   boolean sentInitialHandConfiguration = false;
 
 
    public RDXVRAssistance(DRCRobotModel robotModel, ROS2PublishSubscribeAPI ros2, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
@@ -428,6 +429,11 @@ public class RDXVRAssistance implements TeleoperationAssistant
    {
       if (!assistancePhase.equals(AssistancePhase.PROMP))
          affordanceAssistant.checkForHandConfigurationUpdates(listener);
+      else if (assistancePhase.equals(AssistancePhase.PROMP) && !sentInitialHandConfiguration)
+      {
+         if (listener != null)
+            listener.onNotification();
+      }
    }
 
    public void update()
@@ -541,6 +547,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
             this.enabledIKStreaming.set(false);
             menu.setProMPSamples(-1);
             menu.setAffordanceSamples(-1);
+            sentInitialHandConfiguration = false;
          }
       }
    }
@@ -608,7 +615,14 @@ public class RDXVRAssistance implements TeleoperationAssistant
 
    public Pair<RobotSide, HandConfiguration> getHandConfiguration()
    {
-      return affordanceAssistant.getHandConfigurationToSend();
+      if (!sentInitialHandConfiguration)
+      {
+         sentInitialHandConfiguration = true;
+         var initialHandConfiguration = Pair.of(RobotSide.getSideFromBodyPart("rightHand"), HandConfiguration.HALF_CLOSE);
+         return initialHandConfiguration;
+      }
+      else
+         return affordanceAssistant.getHandConfigurationToSend();
    }
 
    public boolean isPlaying()
