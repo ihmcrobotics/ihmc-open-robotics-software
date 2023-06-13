@@ -578,11 +578,6 @@ public class InverseDynamicsQPSolver
 
       addTorqueMinimizationObjective(tempJtW, tempObjective);
    }
-   
-   public void addTorqueLimitConstraints(DMatrixRMaj torqueQddotJacobian, DMatrixRMaj torqueRhoJacobian, DMatrixRMaj torqueObjective)
-   {
-      //TODO constrain torque here using submitJointTorqueCommand?
-   }
 
    /**
     * Need to be called before {@link #solve()}. It sets up the constraint that ensures that the
