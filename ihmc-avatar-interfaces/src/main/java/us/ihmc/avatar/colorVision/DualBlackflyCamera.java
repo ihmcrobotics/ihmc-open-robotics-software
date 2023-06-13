@@ -1,8 +1,5 @@
 package us.ihmc.avatar.colorVision;
 
-import org.bytedeco.cuda.cudart.CUctx_st;
-import org.bytedeco.cuda.cudart.CUstream_st;
-import org.bytedeco.cuda.nvjpeg.*;
 import org.bytedeco.javacpp.*;
 import org.bytedeco.opencv.global.opencv_calib3d;
 import org.bytedeco.opencv.global.opencv_core;
@@ -46,14 +43,9 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.processManagement.ProcessTools;
 import us.ihmc.tools.thread.Throttler;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static org.bytedeco.cuda.global.cudart.*;
-import static org.bytedeco.cuda.global.nvjpeg.*;
 
 public class DualBlackflyCamera
 {
@@ -293,13 +285,8 @@ public class DualBlackflyCamera
 
       blackflySourceImage.rewind();
       blackflySourceImage.changeAddress(spinImageData.address());
-      Mat sourceImageMat = blackflySourceImage.getBytedecoOpenCVMat();
-      if (sourceImageMat.isNull() || sourceImageMat.empty())
-      {
-         return;
-      }
 
-      opencv_imgproc.cvtColor(sourceImageMat, distortedRGBImage, opencv_imgproc.COLOR_BayerBG2RGB);
+      opencv_imgproc.cvtColor(blackflySourceImage.getBytedecoOpenCVMat(), distortedRGBImage, opencv_imgproc.COLOR_BayerBG2RGB);
       opencv_imgproc.remap(distortedRGBImage,
                            undistortedImage.getBytedecoOpenCVMat(),
                            undistortionMap1,
@@ -334,7 +321,7 @@ public class DualBlackflyCamera
       // Converting BayerRG8 -> RGBA -> YUV
       // Here we use COLOR_BayerBG2RGBA opencv conversion. The Blackfly cameras are set to use BayerRG pixel format.
       // But, for some reason, it's actually BayerBG. Changing to COLOR_BayerRG2RGBA will result in the wrong colors.
-      opencv_imgproc.cvtColor(sourceImageMat, rgbaMat, opencv_imgproc.COLOR_BayerBG2RGBA);
+      opencv_imgproc.cvtColor(blackflySourceImage.getBytedecoOpenCVMat(), rgbaMat, opencv_imgproc.COLOR_BayerBG2RGBA);
       opencv_imgproc.cvtColor(rgbaMat, yuv420Image, opencv_imgproc.COLOR_RGBA2YUV_I420);
 
       /* When an Nvidia GPU is available, use CUDA to encode image on the GPU
@@ -343,6 +330,7 @@ public class DualBlackflyCamera
        */
       if (cudaAvailable)
       {
+         // TODO: Make this have 1 channel
          cudaImageEncoder.encodeYUV420(yuv420Image, jpegImageBytePointer, imageWidth, imageHeight);
       }
       else
