@@ -29,6 +29,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJ
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings.TorqueConstraintsInQP;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DynamicsMatrixCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsOptimizationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointAccelerationIntegrationCalculator;
@@ -48,9 +50,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
-import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
@@ -59,6 +61,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
 {
@@ -109,7 +112,7 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
    /**
     * Whether the desired joint torques should be clamped (INSIDE the QP) to each joint min and max torque.
     */
-   private final YoBoolean areJointTorqueLimitsEnforced;
+   private final YoEnum<TorqueConstraintsInQP> areJointTorqueLimitsEnforced;
    /**
     * Whether {@link #dynamicsMatrixCalculator} is used for inverse dynamics.
     */
@@ -162,7 +165,7 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
       minimizeJointTorques.set(toolbox.getOptimizationSettings().areJointTorquesMinimized());
       areJointTorqueLimitsConsidered = new YoBoolean("areJointTorqueLimitsConsidered", registry);
       areJointTorqueLimitsConsidered.set(toolbox.getOptimizationSettings().areJointTorqueLimitsConsidered());
-      areJointTorqueLimitsEnforced = new YoBoolean("areJointTorqueLimitsEnforced", registry);
+      areJointTorqueLimitsEnforced = new YoEnum<>("areJointTorqueLimitsEnforced", registry, TorqueConstraintsInQP.class);
       areJointTorqueLimitsEnforced.set(toolbox.getOptimizationSettings().areJointTorqueLimitsEnforced());
       useDynamicMatrixCalculatorForInverseDynamics = new YoBoolean("useDynamicMatrixCalculator", registry);
       useDynamicMatrixCalculatorForInverseDynamics.set(toolbox.getOptimizationSettings().useDynamicMatrixCalculatorForInverseDynamics());
@@ -222,9 +225,8 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
       {
          optimizationControlModule.setupTorqueMinimizationCommand();
       }
-      if (areJointTorqueLimitsEnforced.getValue())
+      if (areJointTorqueLimitsEnforced.getValue() != TorqueConstraintsInQP.NO_JOINTS_CONSTRAINED )
       {
-         //TODO 
          optimizationControlModule.setupTorqueConstraintCommand();
       }
 
