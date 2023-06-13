@@ -6,6 +6,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.inverseKinematics.DDogLegArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.HandWrenchCalculator;
@@ -44,7 +45,7 @@ public class RDXArmManager
    private final SideDependentList<double[]> armHomes = new SideDependentList<>();
    private final SideDependentList<double[]> doorAvoidanceArms = new SideDependentList<>();
 
-   private final SideDependentList<DDogLegArmIKSolver> armIKSolvers = new SideDependentList<>();
+   private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
 
    private volatile boolean readyToSolve = true;
    private volatile boolean readyToCopySolution = false;
@@ -87,11 +88,11 @@ public class RDXArmManager
       for (RobotSide side : RobotSide.values)
       {
          armIKSolvers.put(side,
-                          new DDogLegArmIKSolver(side,
-                                                 robotModel,
-                                                 syncedRobot.getFullRobotModel(),
-                                                 desiredRobot,
-                                                 interactableHands.get(side).getControlReferenceFrame()));
+                          new ArmIKSolver(side,
+                                          robotModel,
+                                          syncedRobot.getFullRobotModel(),
+                                          desiredRobot,
+                                          interactableHands.get(side).getControlReferenceFrame()));
       }
    }
 
