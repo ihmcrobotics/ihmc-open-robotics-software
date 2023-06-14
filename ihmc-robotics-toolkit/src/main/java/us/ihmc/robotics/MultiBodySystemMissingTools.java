@@ -1,5 +1,6 @@
 package us.ihmc.robotics;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
@@ -33,11 +34,11 @@ public class MultiBodySystemMissingTools
     * @param rootBodyToDetach not the elevator, but like the chest, or the pelvis
     * @param childJointToFollow for the chest, like one of the shoulders or something
     */
-   public static RigidBodyBasics getDetachedCopyOfSubtree(RigidBodyBasics rootBodyToDetach, OneDoFJointBasics childJointToFollow)
+   public static RigidBodyBasics getDetachedCopyOfSubtree(RigidBodyBasics rootBodyToDetach,
+                                                          ReferenceFrame cloneStationaryFrame,
+                                                          OneDoFJointBasics childJointToFollow)
    {
-//      RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
-//      SixDoFJoint floatingJoint = new SixDoFJoint(rootBodyToDetach.getName(), elevator);
-      RigidBodyBasics clonedChest = MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER.cloneRigidBody(rootBodyToDetach, null, "", null);
+      RigidBodyBasics clonedChest = MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER.cloneRigidBody(rootBodyToDetach, cloneStationaryFrame, "", null);
       JointBasics clonedFirstShoulderJoint = MultiBodySystemFactories.DEFAULT_JOINT_BUILDER.cloneJoint(childJointToFollow, "", clonedChest);
       RigidBodyBasics clonedFirstShoulderLink = MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER.cloneRigidBody(childJointToFollow.getSuccessor(),
                                                                                                                    null,
