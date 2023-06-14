@@ -823,6 +823,10 @@ public class KinematicsToolboxController extends ToolboxController
 
       // Calculating the solution quality based on sum of all the active feedback controllers' output velocity.
       solutionQuality.set(solutionQualityCalculator.calculateSolutionQuality(feedbackControllerDataHolder, totalRobotMass, 1.0 / GLOBAL_PROPORTIONAL_GAIN));
+      if (solutionQuality.getDoubleValue() != 0.0)
+      {
+         LogTools.info("quality {}", solutionQuality);
+      }
 
       if (!isUserControllingCenterOfMass())
       {
@@ -1464,6 +1468,7 @@ public class KinematicsToolboxController extends ToolboxController
 
    public void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
    {
+      LogTools.info("joint anges {}", newConfigurationData.getJointAngles().toArray());
       concurrentRobotConfigurationDataCopier.getCopyForWriting().set(newConfigurationData);
       concurrentRobotConfigurationDataCopier.commit();
    }
