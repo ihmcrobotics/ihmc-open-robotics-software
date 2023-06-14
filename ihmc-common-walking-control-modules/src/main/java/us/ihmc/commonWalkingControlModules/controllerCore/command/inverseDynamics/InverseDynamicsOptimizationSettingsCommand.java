@@ -19,7 +19,6 @@ public class InverseDynamicsOptimizationSettingsCommand implements InverseDynami
    private int commandId;
    private double rhoMin = Double.NaN;
    private double jointAccelerationMax = Double.NaN;
-   private double jointTorqueMax = Double.NaN;
    private double rhoWeight = Double.NaN;
    private double rhoRateWeight = Double.NaN;
    private final Vector2D centerOfPressureWeight = new Vector2D(Double.NaN, Double.NaN);
@@ -64,18 +63,6 @@ public class InverseDynamicsOptimizationSettingsCommand implements InverseDynami
    {
       MathTools.checkPositive(jointAccelerationMax);
       this.jointAccelerationMax = jointAccelerationMax;
-   }
-   
-   /**
-    * Sets the maximum value for the absolute joint torques in the optimization problem.
-    *
-    * @param jointTorqueMax the maximum joint torque, the value has to be in [0,
-    *                             {@link Double#POSITIVE_INFINITY}].
-    */
-   public void setJointTorqueMax(double jointTorqueMax)
-   {
-      MathTools.checkPositive(jointTorqueMax);
-      this.jointTorqueMax = jointTorqueMax;
    }
 
    /**
@@ -264,16 +251,6 @@ public class InverseDynamicsOptimizationSettingsCommand implements InverseDynami
    {
       return !Double.isNaN(jointAccelerationMax);
    }
-   
-   /**
-    * Whether this command holds onto a new value for {@code jointTorqueMax} or not.
-    * 
-    * @return {@code true} if this command carries an actual value for this field.
-    */
-   public boolean hasJointTorqueMax()
-   {
-      return !Double.isNaN(jointTorqueMax);
-   }
 
    /**
     * Whether this command holds onto a new value for {@code rhoWeight} or not.
@@ -373,21 +350,6 @@ public class InverseDynamicsOptimizationSettingsCommand implements InverseDynami
    public double getJointAccelerationMax()
    {
       return jointAccelerationMax;
-   }
-   
-   /**
-    * Gets the value for {@code jointTorqueMax}.
-    * <p>
-    * It is equal to {@code Double#NaN} if this command does not hold onto a new value for this field.
-    * </p>
-    * 
-    * @return the new value for {@code jointTorqueMax}.
-    * @see #hasJointTorqueMax()
-    * @see #setJointTorqueMax(double)
-    */
-   public double getJointTorqueMax()
-   {
-      return jointTorqueMax;
    }
 
    /**
