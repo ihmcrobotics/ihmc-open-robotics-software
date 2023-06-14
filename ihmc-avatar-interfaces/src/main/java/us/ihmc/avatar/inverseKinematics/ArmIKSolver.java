@@ -30,7 +30,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
@@ -63,7 +62,6 @@ public class ArmIKSolver
    private static final double GLOBAL_PROPORTIONAL_GAIN = 1200.0;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-//   private final ReferenceFrame armWorldFrame = ReferenceFrameTools.constructARootFrame(ReferenceFrameMissingTools.computeFrameName() + "-World");
    private final ReferenceFrame armWorldFrame = ReferenceFrame.getWorldFrame();
    private final RigidBodyBasics workChest;
    private final RigidBodyBasics workHand;
@@ -79,14 +77,12 @@ public class ArmIKSolver
    private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
    private final ReferenceFrame handControlDesiredFrame;
    private final FramePose3D handControlDesiredPose = new FramePose3D();
-   private final RigidBodyTransform handControlDesiredPoseToChestTransform = new RigidBodyTransform();
+   private final RigidBodyTransform handControlDesiredPoseToChestCoMTransform = new RigidBodyTransform();
    private final SpatialVectorReadOnly zeroVector6D = new SpatialVector(armWorldFrame);
    private final FramePose3D controlFramePose = new FramePose3D();
-   private final FullHumanoidRobotModel solutionRobot;
    private final OneDoFJointBasics[] syncedOneDoFJoints;
    private final OneDoFJointBasics[] workingOneDoFJoints;
    private final OneDoFJointBasics[] solutionOneDoFJoints;
-   private final CenterOfMassReferenceFrame centerOfMassFrame;
    private final KinematicsSolutionQualityCalculator solutionQualityCalculator = new KinematicsSolutionQualityCalculator();
    private final FeedbackControllerDataHolderReadOnly feedbackControllerDataHolder;
    private final double totalRobotMass;
@@ -98,7 +94,6 @@ public class ArmIKSolver
                       FullHumanoidRobotModel solutionRobot,
                       ReferenceFrame handControlDesiredFrame)
    {
-      this.solutionRobot = solutionRobot;
       this.handControlDesiredFrame = handControlDesiredFrame;
       syncedChest = syncedRobot.getChest();
       OneDoFJointBasics syncedFirstArmJoint = syncedRobot.getArmJoint(side, robotModel.getJointMap().getArmJointNames()[0]);
@@ -120,8 +115,7 @@ public class ArmIKSolver
 
       JointBasics[] controlledJoints = MultiBodySystemMissingTools.getSubtreeJointArray(JointBasics.class, workChest);
 
-      centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass" + side.getPascalCaseName() + ReferenceFrameMissingTools.computeFrameName(),
-                                                         armWorldFrame, workChest);
+      CenterOfMassReferenceFrame centerOfMassFrame = null; // we don't need this
       YoGraphicsListRegistry yoGraphicsListRegistry = null; // opt out
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(CONTROL_DT,
                                                                             GRAVITY,
@@ -157,7 +151,8 @@ public class ArmIKSolver
 
       controllerCoreCommand.setControllerCoreMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
 
-      gains.setPositionProportionalGains(1200.0);
+      gains.setPositionProportionalGains(50.0);
+      gains.setOrientationProportionalGains(50.0);
       weightMatrix.setLinearWeights(20.0, 20.0, 20.0);
       weightMatrix.setAngularWeights(20.0, 20.0, 20.0);
       selectionMatrix.setLinearAxisSelection(true, true, true);
@@ -177,25 +172,27 @@ public class ArmIKSolver
       MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(syncedOneDoFJoints, workingOneDoFJoints);
    }
 
-   public void update()
-   {
-
-   }
-
    public void solve()
    {
+      double gain = 1200.0;
+      double weight = 20.0;
+      gains.setPositionProportionalGains(gain);
+      gains.setOrientationProportionalGains(gain);
+      weightMatrix.setLinearWeights(weight, weight, weight);
+      weightMatrix.setAngularWeights(weight, weight, weight);
+
       // Get the hand desired pose, but put it in the world of the detached arm
       handControlDesiredPose.setToZero(handControlDesiredFrame);
       handControlDesiredPose.changeFrame(syncedChest.getParentJoint().getFrameAfterJoint());
-      handControlDesiredPose.get(handControlDesiredPoseToChestTransform);
-      handControlDesiredPose.setToZero(armWorldFrame);
-      handControlDesiredPose.set(handControlDesiredPoseToChestTransform);
+      handControlDesiredPose.get(handControlDesiredPoseToChestCoMTransform);
 
-      centerOfMassFrame.update();
+      workChest.getBodyFixedFrame().getTransformToParent().transform(handControlDesiredPoseToChestCoMTransform);
+
+      handControlDesiredPose.setToZero(armWorldFrame);
+      handControlDesiredPose.set(handControlDesiredPoseToChestCoMTransform);
 
       copyActualToWork();
       workChest.updateFramesRecursively();
-
 
       double quality = 0.0;
       for (int i = 0; i < INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE; i++)
@@ -212,15 +209,9 @@ public class ArmIKSolver
          spatialFeedbackControlCommand.setWeightMatrixForSolver(weightMatrix);
          spatialFeedbackControlCommand.setInverseKinematics(handControlDesiredPose, zeroVector6D);
          spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(controlFramePose);
-         spatialFeedbackControlCommand.setControlBaseFrame(workChest.getBodyFixedFrame());
-//         // Necessary to do this in our separate root frame to avoid verify same roots crashes
-//         spatialFeedbackControlCommand.getSpatialAccelerationCommand().getControlFramePose().setToZero(armWorldFrame);
-//         spatialFeedbackControlCommand.setPrimaryBase(workChest);
          controllerCoreCommand.addFeedbackControlCommand(spatialFeedbackControlCommand);
 
          controllerCore.compute(controllerCoreCommand);
-
-         centerOfMassFrame.update();
 
          quality = solutionQualityCalculator.calculateSolutionQuality(feedbackControllerDataHolder, totalRobotMass, 1.0 / GLOBAL_PROPORTIONAL_GAIN);
 
@@ -237,15 +228,13 @@ public class ArmIKSolver
                solutionOneDoFJoints[j].setQ(jointDesiredOutput.getDesiredPosition());
                angles.add(jointDesiredOutput.getDesiredPosition());
                solutionOneDoFJoints[j].setQd(jointDesiredOutput.getDesiredVelocity());
-                              workingOneDoFJoints[j].setQ(jointDesiredOutput.getDesiredPosition());
-                              workingOneDoFJoints[j].setQd(jointDesiredOutput.getDesiredVelocity());
+               workingOneDoFJoints[j].setQ(jointDesiredOutput.getDesiredPosition());
+               workingOneDoFJoints[j].setQd(jointDesiredOutput.getDesiredVelocity());
                if (jointDesiredOutput.hasDesiredTorque())
                {
                   solutionOneDoFJoints[j].setTau(jointDesiredOutput.getDesiredTorque());
-                                    workingOneDoFJoints[j].setTau(jointDesiredOutput.getDesiredTorque());
+                  workingOneDoFJoints[j].setTau(jointDesiredOutput.getDesiredTorque());
                }
-               //               if (workingOneDoFJoints[j].getQ() != solutionOneDoFJoints[j].getQ())
-               //                  LogTools.info("%.8f   %.8f".formatted(workingOneDoFJoints[j].getQ(), solutionOneDoFJoints[j].getQ()));
             }
          }
          workChest.updateFramesRecursively();
@@ -253,7 +242,6 @@ public class ArmIKSolver
          LogTools.info("Quality: {}", quality);
       }
       LogTools.info("Final Quality: {}", quality);
-
    }
 
    public void copyWorkToDesired()
