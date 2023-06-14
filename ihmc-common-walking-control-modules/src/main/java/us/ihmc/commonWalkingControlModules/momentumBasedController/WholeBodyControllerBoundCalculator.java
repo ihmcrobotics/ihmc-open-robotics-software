@@ -382,7 +382,7 @@ public class WholeBodyControllerBoundCalculator
       qDDotMinToPack.set(index, 0, filteredLowerLimits[index].getDoubleValue());
       qDDotMaxToPack.set(index, 0, filteredUpperLimits[index].getDoubleValue());
    }
-   
+
    public void enforceJointTorqueLimits(LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList)
    {
       for (OneDoFJointBasics joint : oneDoFJoints)
