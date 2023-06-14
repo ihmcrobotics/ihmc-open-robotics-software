@@ -73,7 +73,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public final class KinematicsToolboxControllerTest
 {
-   private static final boolean VERBOSE = true;
+   private static final boolean VERBOSE = false;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final MaterialDefinition ghostAppearance = new MaterialDefinition(ColorDefinitions.Yellow().derive(0.0, 1.0, 1.0, 0.75));

@@ -16,7 +16,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -49,7 +48,6 @@ import java.util.List;
  *
  * TODO:
  *   - Collision constraints
- *   - Resetting from updated synced robot
  *
  * @author Duncan Calvert
  */
@@ -238,10 +236,7 @@ public class ArmIKSolver
             }
          }
          workChest.updateFramesRecursively();
-         LogTools.info("output angles {}", angles.toArray());
-         LogTools.info("Quality: {}", quality);
       }
-      LogTools.info("Final Quality: {}", quality);
    }
 
    public void copyWorkToDesired()
