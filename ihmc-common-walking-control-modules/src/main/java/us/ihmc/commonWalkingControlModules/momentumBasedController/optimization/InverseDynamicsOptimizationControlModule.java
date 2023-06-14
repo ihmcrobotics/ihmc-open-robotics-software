@@ -191,7 +191,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
             torqueConstrainedJoints.add(joint);
          }
       }
-      else if (torqueConstraintInQPEnum == TorqueConstraintsInQP.SPECIFIC_JOINTS_CONSTRAINED) 
+      if (torqueConstraintInQPEnum == TorqueConstraintsInQP.SPECIFIC_JOINTS_CONSTRAINED) 
       {
          if (torqueConstrainedJointNames != null)
          {
@@ -208,10 +208,10 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
                }
             }
          }
-      }
-      else 
-      {
-         // Do nothing here since there are no torque constraints for the QP.
+         else 
+         {
+            throw new RuntimeException("TorqueConstraintsInQP was set to SPECIFIC_JOINTS_CONSTRAINED but no joints were specified.");
+         }
       }
 
       absoluteMaximumJointTorque.set(optimizationSettings.getMaximumJointTorque());
@@ -276,6 +276,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
    public boolean compute()
    {
+//      System.out.println("Begin compute()");
       optimizationTimer.startMeasurement();
       wrenchMatrixCalculator.collectRigidBodiesWithCoPCommands(rigidBodiesWithCoPCommands);
       wrenchMatrixCalculator.computeMatrices(rigidBodiesWithCoPCommands);
@@ -314,10 +315,8 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       }
       if (COMPUTE_TORQUE_LIMIT_CONSTRAINTS)
       {
+       //TODO this doesn't show torque limits correctly because it is computed before we add the constraints
          computeJointTorqueLimits();
-         // TODO convert torque limits to accelerations via dynamics inside computeJointTorqueLimits? would need state and maybe rho
-         // edit qDDotMin and Max with accelerations from torque limits ONLY if they are more constraining
-         // some sort of flag to say whether trajectory was constrained by accel limit or by torque limit?
       }
 
       for (int i = 0; i < kinematicLoopFunctions.size(); i++)
@@ -371,7 +370,8 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
       resetCustomBounds();
       optimizationTimer.stopMeasurement();
-
+      
+//      System.out.println("End compute()");
       return hasConverged;
    }
 
@@ -421,7 +421,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    private void computeJointTorqueLimits()
    {
       // boundCalculator.computeJointTorqueLimits(absoluteMaximumJointTorque.getDoubleValue(), tauMinMatrix, tauMaxMatrix);
-
+//      System.out.println("Begin computeJointTorqueLimits()");
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJointBasics joint = oneDoFJoints[i];
@@ -431,9 +431,12 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
          boolean hasCustomMax = Double.isFinite(customTauMaxMatrix.get(jointIndex, 0));
          double tauMin = tauMinMatrix.get(jointIndex, 0);
          double tauMax = tauMaxMatrix.get(jointIndex, 0);
+//         System.out.println("Iter: " + i + "\ttauMax:" + tauMax);
          // maybe replace absoluteMaximumJointTorque with the effortMax and effortMin
          double customTauMin = MathTools.clamp(customTauMinMatrix.get(jointIndex, 0), absoluteMaximumJointTorque.getDoubleValue() - 5.0);
          double customTauMax = MathTools.clamp(customTauMaxMatrix.get(jointIndex, 0), absoluteMaximumJointTorque.getDoubleValue() - 5.0);
+//         System.out.println("Iter: " + i + "\tcustomTauMaxMatrixValue:" + customTauMaxMatrix.get(jointIndex, 0));
+//         System.out.println("Iter: " + i + "\tcustomTauMax:" + customTauMax);
 
          if (hasCustomMin != hasCustomMax)
          {
@@ -442,6 +445,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
                tauMin = Math.max(tauMin, customTauMin);
                // TODO adjust these scalars (0.5) for torque
                tauMax = Math.max(tauMax, customTauMin + 5.0);
+//               System.out.println("Iter: " + i + "\ttauMax:" + tauMax);
             }
             else
             {
@@ -455,9 +459,9 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
          tauMinMatrix.set(jointIndex, 0, tauMin);
          tauMaxMatrix.set(jointIndex, 0, tauMax);
-
          // maybe populate a boolean array in here which determines which constraints are the least upper bound and greatest lower bound
       }
+//      System.out.println("End computeJointTorqueLimits()");
    }
 
    private void computePrivilegedJointAccelerations()
@@ -522,6 +526,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
     */
    public void setupTorqueConstraintCommand()
    {
+//      System.out.println("Begin setupTorqueConstraintCommand()");
       if (torqueConstrainedJoints.isEmpty())
          return;
 
@@ -536,12 +541,15 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
          OneDoFJointBasics joint = torqueConstrainedJoints.get(i);
          torqueConstraintMinimumCommand.addJoint(joint, joint.getEffortLimitLower());
          torqueConstraintMaximumCommand.addJoint(joint, joint.getEffortLimitUpper());
-//         torqueConstraintMinimumCommand.addJoint(joint, -80.0);
-//         torqueConstraintMaximumCommand.addJoint(joint, 80.0);
+//         double torqueLimit = 15;
+//         torqueConstraintMinimumCommand.addJoint(joint, -torqueLimit);
+//         torqueConstraintMaximumCommand.addJoint(joint, torqueLimit); 
       }
 
       submitJointTorqueCommand(torqueConstraintMinimumCommand);
       submitJointTorqueCommand(torqueConstraintMaximumCommand);
+      
+//      System.out.println("End setupTorqueConstraintCommand()");
    }
 
    public void submitQPObjectiveCommand(QPObjectiveCommand command)
@@ -611,16 +619,25 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       if (command.getConstraintType() == ConstraintType.LEQ_INEQUALITY || command.getConstraintType() == ConstraintType.GEQ_INEQUALITY)
       {
          DMatrixRMaj matToMod;
-         if (command.getConstraintType() == ConstraintType.GEQ_INEQUALITY)
+         if (command.getConstraintType() == ConstraintType.GEQ_INEQUALITY) 
+         {
+            System.out.println("d");
             matToMod = customTauMinMatrix;
-         else
+         }
+            
+         else 
+         {
+            System.out.println("e");
             matToMod = customTauMaxMatrix;
+         }
+            
 
          for (int jointIdx = 0; jointIdx < command.getNumberOfJoints(); jointIdx++)
          {
             JointBasics joint = command.getJoint(jointIdx);
             if (joint instanceof OneDoFJointBasics)
             {
+//               System.out.println("Torque Limit = " + command.getDesiredTorque(jointIdx).get(0, 0) + ", Joint index = " + jointIndexHandler.getOneDoFJointIndex((OneDoFJointBasics) joint));
                matToMod.set(jointIndexHandler.getOneDoFJointIndex((OneDoFJointBasics) joint), 0, command.getDesiredTorque(jointIdx).get(0, 0));
             }
          }
@@ -719,16 +736,6 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
          if (!inactiveJointIndices.contains(jointIndex))
             inactiveJointIndices.add(jointIndex);
       }
-      
-//      // this is probably unnecessary, its not used anywhere yet
-//      for (int i = 0; i < command.getJointsToConstrainTorque().size(); i++)
-//      {
-//         OneDoFJointBasics joint = command.getJointsToConstrainTorque().get(i);
-//         int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
-//         // Prevent duplicates in the list.
-//         if (!torqueConstrainedJointIndices.contains(jointIndex))
-//            torqueConstrainedJointIndices.add(jointIndex);
-//      }
    }
 
    @Override
