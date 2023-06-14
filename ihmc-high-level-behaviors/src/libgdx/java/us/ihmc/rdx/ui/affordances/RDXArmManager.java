@@ -132,7 +132,7 @@ public class RDXArmManager
          // Otherwise, we will not notice the desired changed while the solver was still solving
          if (readyToSolve)
          {
-            desiredHandPoseChanged |= armIKSolvers.get(side).getDesiredHandControlPoseChanged();
+            desiredHandPoseChanged |= interactableHands.get(side).getGizmoModifiedByUser().poll();
          }
 
          panelHandWrenchIndicator.update(side,
@@ -176,9 +176,7 @@ public class RDXArmManager
       }
 
       desiredRobot.getRootJoint().setJointConfiguration(syncedRobot.getFullRobotModel().getRootJoint().getJointPose());
-
-      // TODO Update the spine joints
-      desiredRobot.getRootJoint().updateFramesRecursively();
+      desiredRobot.updateFrames();
    }
 
    public void renderImGuiWidgets()
