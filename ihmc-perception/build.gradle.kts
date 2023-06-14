@@ -47,6 +47,8 @@ mainDependencies {
    api("us.ihmc:opencv:$opencvVersion")
    api("us.ihmc:opencv:$opencvVersion:linux-x86_64")
    api("us.ihmc:opencv:$opencvVersion:windows-x86_64")
+   api("org.bytedeco:opencv:$opencvVersion:linux-x86_64-gpu")
+   api("org.bytedeco:opencv:$opencvVersion:windows-x86_64-gpu")
    val ffmpegVersion = "6.1-1.5.9"
    api("us.ihmc:ffmpeg:$ffmpegVersion")
    api("us.ihmc:ffmpeg:$ffmpegVersion:linux-x86_64")
