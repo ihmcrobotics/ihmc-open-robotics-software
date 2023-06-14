@@ -4,7 +4,6 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.lwjgl.openvr.InputDigitalActionData;
-import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodesMessage;
 import us.ihmc.behaviors.tools.TrajectoryRecordReplay;
 import us.ihmc.communication.IHMCROS2Input;
@@ -14,7 +13,6 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.SceneGraphAPI;
@@ -40,8 +38,8 @@ public class KinematicsRecordReplay
    private int partId = 0; // identifier of current frame, used to now what body part among numberOfParts we are currently handling
    private final ROS2PublishSubscribeAPI ros2;
    private final IHMCROS2Input<DetectableSceneNodesMessage> detectableSceneObjectsSubscription;
-   private boolean objectLocked = false;
-   private ReferenceFrame objectFrame;
+   private boolean sceneNodeLocked = false;
+   private ReferenceFrame sceneNodeFrame;
 
 
    public KinematicsRecordReplay(ROS2PublishSubscribeAPI ros2, ImBoolean enabledKinematicsStreaming, int numberOfParts)
@@ -62,16 +60,7 @@ public class KinematicsRecordReplay
       if (enabledKinematicsStreaming.get() && enablerRecording.get() && triggerButton.bChanged() && !triggerButton.bState())
       {
          isRecording = !isRecording;
-         if (detectableSceneObjectsSubscription.getMessageNotification().poll() && !objectLocked)
-         {
-            DetectableSceneNodesMessage detectableSceneNodeMessage = detectableSceneObjectsSubscription.getMessageNotification().read();
-            DetectableSceneNodeMessage selectedObject = null; // TODO: Search for desired object
-            RigidBodyTransform objectTransformToWorld = new RigidBodyTransform();
-            MessageTools.toEuclid(selectedObject.getTransformToWorld(), objectTransformToWorld);
-            ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
-                                                                                   objectTransformToWorld);
-            objectLocked = true;
-         }
+         checkIfSceneNodeIsAvailable();
 
          // check if recording file path has been set to a different one from previous recording. In case update file path.
          if (trajectoryRecorder.hasSavedRecording() && !(trajectoryRecorder.getPath().equals(recordPath.get())))
@@ -81,9 +70,32 @@ public class KinematicsRecordReplay
       if (enablerReplay.get() && triggerButton.bChanged() && !triggerButton.bState())
       {
          isReplaying = !isReplaying;
+         checkIfSceneNodeIsAvailable();
+
          // check if replay file has been set to a different one from previous replay. In case update file path.
          if (trajectoryRecorder.hasDoneReplay() && !(trajectoryRecorder.getPath().equals(replayPath.get())))
             trajectoryRecorder.setPath(replayPath.get()); // replayer is reset when changing path
+      }
+   }
+
+   private void checkIfSceneNodeIsAvailable()
+   {
+      if (detectableSceneObjectsSubscription.getMessageNotification().poll() && !sceneNodeLocked)
+      {
+         DetectableSceneNodesMessage detectableSceneNodeMessage = detectableSceneObjectsSubscription.getMessageNotification().read();
+         for (var sceneNodeMessage : detectableSceneNodeMessage.getDetectableSceneNodes())
+         {
+            // TODO. update this once Panel and LeverHandle are unified into single detectable "Door"
+            if (sceneNodeMessage.currently_detected_ && !sceneNodeMessage.name_.toString().contains("Panel") && !sceneNodeMessage.name_.toString().contains("Frame"))
+            {
+               RigidBodyTransform objectTransformToWorld = new RigidBodyTransform();
+               MessageTools.toEuclid(sceneNodeMessage.getTransformToWorld(), objectTransformToWorld);
+               sceneNodeFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                         objectTransformToWorld);
+               break;
+            }
+         }
+         sceneNodeLocked = true;
       }
    }
 
@@ -96,8 +108,8 @@ public class KinematicsRecordReplay
             framePose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
             FramePose3D frameToRecord = new FramePose3D(framePose);
             // transform to object reference frame if using object detection
-            if (objectFrame != null)
-               frameToRecord.changeFrame(objectFrame);
+            if (sceneNodeFrame != null)
+               frameToRecord.changeFrame(sceneNodeFrame);
 
             // Store trajectories in file: store a setpoint per timestep until trigger button is pressed again
             double[] dataTrajectories = new double[7];
@@ -111,8 +123,8 @@ public class KinematicsRecordReplay
          trajectoryRecorder.concatenateData();
          trajectoryRecorder.saveRecording();
          isUserMoving = false;
-         objectLocked = false;
-         objectFrame = null;
+         sceneNodeLocked = false;
+         sceneNodeFrame = null;
       }
    }
 
@@ -148,14 +160,18 @@ public class KinematicsRecordReplay
       return isUserMoving && partId == 0;
    }
 
-   public void framePoseToPack(FixedFramePose3DBasics framePose)
+   public void framePoseToPack(FramePose3D framePose)
    {
       framePose.setFromReferenceFrame(ReferenceFrame.getWorldFrame());
       // Read file with stored trajectories: read set point per timestep until file is over
       double[] dataPoint = trajectoryRecorder.play(true); //play split data (a body part per time)
+      if (sceneNodeFrame != null)
+         framePose.changeFrame(sceneNodeFrame);
       // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
       framePose.getOrientation().set(dataPoint);
       framePose.getPosition().set(4, dataPoint);
+      if (sceneNodeFrame != null)
+         framePose.changeFrame(ReferenceFrame.getWorldFrame());
       if (trajectoryRecorder.hasDoneReplay())
       {
          isReplaying = false;

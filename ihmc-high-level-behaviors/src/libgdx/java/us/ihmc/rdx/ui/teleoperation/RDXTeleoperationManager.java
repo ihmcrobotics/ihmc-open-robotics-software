@@ -111,6 +111,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private RDXRobotCollisionModel environmentCollisionModel;
    private RDXArmManager armManager;
    private final RDXLocomotionManager locomotionManager;
+   private final RDXFightingAvatarManager fightingAvatarManager;
    private final ImBoolean showSelfCollisionMeshes = new ImBoolean();
    private final ImBoolean showEnvironmentCollisionMeshes = new ImBoolean();
    private final ImBoolean interactablesEnabled = new ImBoolean(false);
@@ -199,6 +200,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
                                         ros2Helper,
                                         teleoperationParameters);
       }
+      fightingAvatarManager = new RDXFightingAvatarManager(robotModel, syncedRobot, ros2Helper, teleoperationParameters);
 
       controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2Helper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
    }
@@ -504,6 +506,10 @@ public class RDXTeleoperationManager extends ImGuiPanel
          ImGui.sameLine();
          ImGui.checkbox("Avoidance", showSelfCollisionMeshes);
       }
+
+      ImGui.separator();
+
+      fightingAvatarManager.renderImGuiWidgets();
 
       // TODO: Add transparency sliders
       // TODO: Add motion previews

@@ -54,6 +54,7 @@ import java.util.Set;
 
 public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
 {
+   private static final int NUMBER_OF_PARTS_TO_RECORD = 4;
    private final DRCRobotModel robotModel;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final RestartableJavaProcess kinematicsStreamingToolboxProcess;
@@ -85,8 +86,6 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
    private final Throttler messageThrottler = new Throttler();
    private KinematicsRecordReplay kinematicsRecorder;
    private RDXVRAssistance vrAssistant;
-//   private int start = 0;
-//   private final SideDependentList<KinematicsToolboxRigidBodyMessage> lastMessage = new SideDependentList<>();
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH, HandConfiguration.CLOSE};
    private int leftIndex = -1;
@@ -156,7 +155,7 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
 
       wakeUpThread = new PausablePeriodicThread(getClass().getSimpleName() + "WakeUpThread", 1.0, true, this::wakeUpToolbox);
 
-      kinematicsRecorder = new KinematicsRecordReplay(ros2ControllerHelper, enabled, 2);
+      kinematicsRecorder = new KinematicsRecordReplay(ros2ControllerHelper, enabled, NUMBER_OF_PARTS_TO_RECORD);
       vrAssistant = new RDXVRAssistance(robotModel, ros2ControllerHelper, streamToController, kinematicsRecorder.isReplayingEnabled());
 
 //      if (!kinematicsStreamingToolboxProcess.isStarted())
@@ -311,6 +310,7 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
       tempFramePose.setToZero(desiredControlFrame.getReferenceFrame());
       tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
+      kinematicsRecorder.framePoseToRecord(tempFramePose);
       message.getAngularSelectionMatrix().setXSelected(true);
       message.getAngularSelectionMatrix().setYSelected(true);
       message.getAngularSelectionMatrix().setZSelected(true);
