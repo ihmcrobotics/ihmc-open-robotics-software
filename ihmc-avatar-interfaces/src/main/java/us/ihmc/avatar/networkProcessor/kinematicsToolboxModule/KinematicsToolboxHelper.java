@@ -1,7 +1,9 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import org.ejml.data.DMatrixRMaj;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
@@ -21,6 +23,7 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxOneDoFJointCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -123,6 +126,8 @@ public class KinematicsToolboxHelper
          rootJoint.setJointVelocity(0, outputForRootJoint.getDesiredVelocity());
       }
 
+      TDoubleArrayList  angles = new TDoubleArrayList();
+
       JointDesiredOutputListReadOnly output = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();
       for (OneDoFJointBasics joint : oneDoFJoints)
       {
@@ -130,12 +135,15 @@ public class KinematicsToolboxHelper
          {
             JointDesiredOutputReadOnly data = output.getJointDesiredOutput(joint);
 
+            angles.add(data.getDesiredPosition());
             joint.setQ(data.getDesiredPosition());
             joint.setQd(data.getDesiredVelocity());
             if (data.hasDesiredTorque())
                joint.setTau(data.getDesiredTorque());
          }
       }
+
+      LogTools.info("output angles {}", angles.toArray());
 
       if (rootJoint != null)
          rootJoint.getPredecessor().updateFramesRecursively();
