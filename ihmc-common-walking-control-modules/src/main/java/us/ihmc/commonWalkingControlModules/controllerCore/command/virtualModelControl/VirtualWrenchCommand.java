@@ -16,7 +16,6 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
@@ -110,13 +109,6 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
       endEffector = command.getEndEffector();
 
       command.getControlFramePoseIncludingFrame(controlFramePose);
-
-      ReferenceFrame rootFrame = controlFramePose.getReferenceFrame().getRootFrame();
-      ReferenceFrame rootFrame1 = endEffector.getBodyFixedFrame().getRootFrame();
-      if (rootFrame != rootFrame1)
-      {
-         LogTools.info("What");
-      }
 
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
    }
