@@ -64,7 +64,6 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 {
    private static final boolean VISUALIZE_RHO_BASIS_VECTORS = false;
    private static final boolean SETUP_JOINT_LIMIT_CONSTRAINTS = true;
-   private static final boolean COMPUTE_TORQUE_LIMIT_CONSTRAINTS = true;
    private static final boolean SETUP_RHO_TASKS = true;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -258,7 +257,6 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
    public boolean compute()
    {
-//      System.out.println("Begin compute()");
       optimizationTimer.startMeasurement();
       wrenchMatrixCalculator.collectRigidBodiesWithCoPCommands(rigidBodiesWithCoPCommands);
       wrenchMatrixCalculator.computeMatrices(rigidBodiesWithCoPCommands);
@@ -348,7 +346,6 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       resetCustomBounds();
       optimizationTimer.stopMeasurement();
       
-//      System.out.println("End compute()");
       return hasConverged;
    }
 
