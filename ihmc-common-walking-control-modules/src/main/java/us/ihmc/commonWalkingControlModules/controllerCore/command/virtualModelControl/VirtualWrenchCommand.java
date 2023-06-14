@@ -109,7 +109,6 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
       endEffector = command.getEndEffector();
 
       command.getControlFramePoseIncludingFrame(controlFramePose);
-
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
    }
 
