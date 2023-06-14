@@ -118,6 +118,8 @@ public class RDXArmManager
 
       for (RobotSide side : interactableHands.sides())
       {
+         armIKSolvers.get(side).update();
+
          // wrench expressed in wrist pitch body fixed-frame
          boolean showWrench = indicateWrenchOnScreen.get();
          if (interactableHands.get(side).getEstimatedHandWrenchArrows().getShow() != showWrench)
@@ -129,7 +131,7 @@ public class RDXArmManager
          // Otherwise, we will not notice the desired changed while the solver was still solving
          if (readyToSolve)
          {
-            desiredHandPoseChanged |= interactableHands.get(side).getGizmoModifiedByUser().poll();
+            desiredHandPoseChanged |= armIKSolvers.get(side).getDesiredHandControlPoseChanged();
          }
 
          panelHandWrenchIndicator.update(side,
