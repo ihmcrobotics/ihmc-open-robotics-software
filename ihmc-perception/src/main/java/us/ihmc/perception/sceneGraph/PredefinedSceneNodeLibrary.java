@@ -32,6 +32,7 @@ public class PredefinedSceneNodeLibrary
    private final StaticArUcoRelativeDetectableSceneNode pullDoorFrame;
    private final ArUcoDetectableNode box;
    private final ArUcoDetectableNode canOfSoup;
+   private final ArUcoDetectableNode target;
 
    private final ArrayList<DetectableSceneNode> detectableSceneNodes = new ArrayList<>();
    private final ArrayList<ArUcoDetectableNode> arUcoDetectableNodes = new ArrayList<>();
@@ -65,8 +66,10 @@ public class PredefinedSceneNodeLibrary
 
       box = RigidBodySceneObjectDefinitions.createBox();
       canOfSoup = RigidBodySceneObjectDefinitions.createCanOfSoup();
+      target = RigidBodySceneObjectDefinitions.createTarget();
       registerArUcoDetectableSceneNode(box);
       registerArUcoDetectableSceneNode(canOfSoup);
+      registerArUcoDetectableSceneNode(target);
 
       // TODO: Remove aruco detectables and use non-ArUco objects -- detected by neural net
 

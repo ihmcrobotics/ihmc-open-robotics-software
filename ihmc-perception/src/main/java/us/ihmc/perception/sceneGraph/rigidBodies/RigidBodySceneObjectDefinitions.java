@@ -15,6 +15,7 @@ public class RigidBodySceneObjectDefinitions
     * to IT to get new ones printed.
     */
    public static final double LARGE_MARKER_WIDTH = 0.1982;
+   public static final double SMALL_MARKER_WIDTH = 0.0996;
 
    public static final int BOX_MARKER_ID = 2;
    public static final double BOX_MARKER_WIDTH = LARGE_MARKER_WIDTH;
@@ -31,7 +32,7 @@ public class RigidBodySceneObjectDefinitions
    public static final String BOX_VISUAL_MODEL_FILE_PATH = "environmentObjects/box/box.g3dj";
    public static final RigidBodyTransform BOX_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
 
-   public static final int CAN_OF_SOUP_MARKER_ID = 0;
+   public static final int CAN_OF_SOUP_MARKER_ID = 3;
    public static final double CAN_OF_SOUP_MARKER_SIZE = LARGE_MARKER_WIDTH;
    public static final double CAN_OF_SOUP_RADIUS = 0.0329375;
    public static final double CAN_OF_SOUP_HEIGHT = 0.082388;
@@ -48,6 +49,13 @@ public class RigidBodySceneObjectDefinitions
       EuclidCoreMissingTools.setYawPitchRollDegrees(MARKER_TO_CAN_OF_SOUP_TRANSFORM.getRotation(), 0.0, -90.0, 0.0);
       MARKER_TO_CAN_OF_SOUP_TRANSFORM.getTranslation().set(0.0, -MARKER_TO_CAN_OF_SOUP_X, 0.0);
    }
+
+   public static final int TARGET_MARKER_ID = 4;
+   public static final double TARGET_MARKER_SIZE = SMALL_MARKER_WIDTH;
+   public static final String TARGET_VISUAL_MODEL_FILE_PATH = "environmentObjects/target/target.g3dj";
+   public static final RigidBodyTransform TARGET_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   public static final RigidBodyTransform MARKER_TO_TARGET_TRANSFORM = new RigidBodyTransform();
+
 
    public static ArUcoDetectableNode createBox()
    {
@@ -71,5 +79,18 @@ public class RigidBodySceneObjectDefinitions
                                      MARKER_TO_CAN_OF_SOUP_TRANSFORM,
                                      CAN_OF_SOUP_VISUAL_MODEL_FILE_PATH,
                                      CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+   }
+
+   /**
+    * Represents a target to hit
+    */
+   public static ArUcoDetectableNode createTarget()
+   {
+      return new ArUcoDetectableNode("Target",
+                                     TARGET_MARKER_ID,
+                                     TARGET_MARKER_SIZE,
+                                     MARKER_TO_TARGET_TRANSFORM,
+                                     TARGET_VISUAL_MODEL_FILE_PATH,
+                                     TARGET_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
    }
 }
