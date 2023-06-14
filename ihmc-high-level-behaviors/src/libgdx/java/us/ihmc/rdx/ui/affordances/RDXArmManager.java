@@ -118,8 +118,6 @@ public class RDXArmManager
 
       for (RobotSide side : interactableHands.sides())
       {
-         armIKSolvers.get(side).update();
-
          // wrench expressed in wrist pitch body fixed-frame
          boolean showWrench = indicateWrenchOnScreen.get();
          if (interactableHands.get(side).getEstimatedHandWrenchArrows().getShow() != showWrench)
