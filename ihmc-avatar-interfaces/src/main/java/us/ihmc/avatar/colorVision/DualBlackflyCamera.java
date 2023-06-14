@@ -5,6 +5,7 @@ import org.bytedeco.opencv.global.opencv_calib3d;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
@@ -74,19 +75,16 @@ public class DualBlackflyCamera
    private final ImageMessage imageMessage = new ImageMessage();
    private final IHMCROS2Publisher<ImageMessage> ros2ImagePublisher;
    private long imageMessageSequenceNumber = 0;
-   private ImageMessageDataPacker compressedImageDataPacker;
 
    // These update when a camera image resolution change is detected
    private int imageWidth = 0;
    private int imageHeight = 0;
    private long numberOfBytesInFrame = 0;
-   private BytedecoImage blackflySourceImage;
-   private Mat yuv420Image;
-   private Mat rgbaMat;
+   private GpuMat blackflySourceImage;
+   private GpuMat distortedRGBImage;
    private BytedecoImage undistortedImage;
-   private Mat distortedRGBImage;
-   private Mat undistortionMap1;
-   private Mat undistortionMap2;
+   private GpuMat undistortionMap1;
+   private GpuMat undistortionMap2;
    private Scalar undistortionRemapBorderValue;
 
    private CUDAImageEncoder cudaImageEncoder;
@@ -170,19 +168,17 @@ public class DualBlackflyCamera
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
 
-      numberOfBytesInFrame = (long) imageWidth * imageHeight; // BayerRG8
+      numberOfBytesInFrame = (long) imageWidth * imageHeight; // BGR8
 
       // Setup basic color images
       {
-         blackflySourceImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
-         yuv420Image = new Mat(imageHeight * 1.5, imageWidth, opencv_core.CV_8UC1);
-         rgbaMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4); // Mat for color conversion
+         blackflySourceImage = new GpuMat(imageWidth, imageHeight, opencv_core.CV_8UC3);
+         distortedRGBImage = new GpuMat(imageWidth, imageHeight, opencv_core.CV_8UC3);
       }
 
       // Setup distortion images
       {
          undistortedImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
-         distortedRGBImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
 
          Mat cameraMatrix = new Mat(3, 3, opencv_core.CV_64F);
          opencv_core.setIdentity(cameraMatrix);
@@ -202,8 +198,8 @@ public class DualBlackflyCamera
          Mat rectificationTransformation = new Mat(3, 3, opencv_core.CV_64F);
          opencv_core.setIdentity(rectificationTransformation);
 
-         undistortionMap1 = new Mat();
-         undistortionMap2 = new Mat();
+         undistortionMap1 = new GpuMat();
+         undistortionMap2 = new GpuMat();
          undistortionRemapBorderValue = new Scalar();
 
          double balanceNewFocalLength = 0.0;
@@ -219,14 +215,22 @@ public class DualBlackflyCamera
                                                                           fovScaleFocalLengthDivisor);
          // Fisheye undistortion
          // https://docs.opencv.org/4.7.0/db/d58/group__calib3d__fisheye.html#ga167df4b00a6fd55287ba829fbf9913b9
+         Mat temporaryUndistortionMat1 = new Mat();
+         Mat temporaryUndistortionMat2 = new Mat();
+
          opencv_calib3d.fisheyeInitUndistortRectifyMap(cameraMatrix,
                                                        distortionCoefficients,
                                                        rectificationTransformation,
                                                        newCameraMatrixEstimate,
                                                        undistortedImageSize,
                                                        opencv_core.CV_16SC2,
-                                                       undistortionMap1,
-                                                       undistortionMap2);
+                                                       temporaryUndistortionMat1,
+                                                       temporaryUndistortionMat2);
+
+         temporaryUndistortionMat1.copyTo(undistortionMap1);
+         temporaryUndistortionMat2.copyTo(undistortionMap2);
+         temporaryUndistortionMat1.close();
+         temporaryUndistortionMat2.close();
 
          // Create arUco marker detection
          ReferenceFrame blackflyCameraFrame = syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame();
@@ -283,17 +287,20 @@ public class DualBlackflyCamera
       if (spinImageData == null || spinImageAcquisitionTime == null)
          return;
 
-      blackflySourceImage.rewind();
-      blackflySourceImage.changeAddress(spinImageData.address());
+      blackflySourceImage.data(spinImageData);
 
-      opencv_imgproc.cvtColor(blackflySourceImage.getBytedecoOpenCVMat(), distortedRGBImage, opencv_imgproc.COLOR_BayerBG2RGB);
+      GpuMat temporaryUndistortionImageGpuMat = new GpuMat(undistortedImage.getImageWidth(), undistortedImage.getImageHeight(), opencv_core.CV_8UC3);
+
+      opencv_imgproc.cvtColor(blackflySourceImage, distortedRGBImage, opencv_imgproc.COLOR_BGR2RGB);
       opencv_imgproc.remap(distortedRGBImage,
-                           undistortedImage.getBytedecoOpenCVMat(),
+                           temporaryUndistortionImageGpuMat,
                            undistortionMap1,
                            undistortionMap2,
                            opencv_imgproc.INTER_LINEAR,
                            opencv_core.BORDER_CONSTANT,
                            undistortionRemapBorderValue);
+
+      temporaryUndistortionImageGpuMat.copyTo(undistortedImage.getBytedecoOpenCVMat());
 
       ReferenceFrame ousterLidarFrame = syncedRobot.getReferenceFrames().getOusterLidarFrame();
       RigidBodyTransform ousterToBlackflyTransfrom = new RigidBodyTransform();
@@ -318,29 +325,22 @@ public class DualBlackflyCamera
       remoteTunableCameraTransform.update();
       syncedRobot.update();
 
-      // Converting BayerRG8 -> RGBA -> YUV
-      // Here we use COLOR_BayerBG2RGBA opencv conversion. The Blackfly cameras are set to use BayerRG pixel format.
-      // But, for some reason, it's actually BayerBG. Changing to COLOR_BayerRG2RGBA will result in the wrong colors.
-      opencv_imgproc.cvtColor(blackflySourceImage.getBytedecoOpenCVMat(), rgbaMat, opencv_imgproc.COLOR_BayerBG2RGBA);
-      opencv_imgproc.cvtColor(rgbaMat, yuv420Image, opencv_imgproc.COLOR_RGBA2YUV_I420);
-
       /* When an Nvidia GPU is available, use CUDA to encode image on the GPU
        * Good reference: https://docs.nvidia.com/cuda/nvjpeg/index.html#jpeg-encoding
        * Sample code: https://github.com/bytedeco/javacpp-presets/blob/master/cuda/samples/SampleJpegEncoder.java
        */
       if (cudaAvailable)
       {
-         // TODO: Make this have 1 channel
-         cudaImageEncoder.encodeYUV420(yuv420Image, jpegImageBytePointer, imageWidth, imageHeight);
+         cudaImageEncoder.encodeBGR(blackflySourceImage.data(), jpegImageBytePointer, imageWidth, imageHeight);
       }
       else
       {
-         opencv_imgcodecs.imencode(".jpg", yuv420Image, jpegImageBytePointer, COMPRESSION_PARAMETERS);
+         opencv_imgcodecs.imencode(".jpg", blackflySourceImage, jpegImageBytePointer, COMPRESSION_PARAMETERS);
       }
 
       ousterFisheyeColoringIntrinsicsROS2.updateAndPublishThrottledStatus();
 
-      compressedImageDataPacker = new ImageMessageDataPacker(jpegImageBytePointer.capacity());
+      ImageMessageDataPacker compressedImageDataPacker = new ImageMessageDataPacker(jpegImageBytePointer.capacity());
       compressedImageDataPacker.pack(imageMessage, jpegImageBytePointer);
       MessageTools.toMessage(spinImageAcquisitionTime, imageMessage.getAcquisitionTime());
       imageMessage.setImageWidth(imageWidth);
@@ -351,7 +351,7 @@ public class DualBlackflyCamera
       imageMessage.setPrincipalPointYPixels((float) ousterFisheyeColoringIntrinsics.getPrinciplePointY());
       CameraModel.EQUIDISTANT_FISHEYE.packMessageFormat(imageMessage);
       imageMessage.setSequenceNumber(imageMessageSequenceNumber++);
-      ImageMessageFormat.COLOR_JPEG_YUVI420.packMessageFormat(imageMessage);
+      ImageMessageFormat.COLOR_JPEG_BGR8.packMessageFormat(imageMessage);
       imageMessage.getPosition().set(ousterToBlackflyTransfrom.getTranslation());
       imageMessage.getOrientation().set(ousterToBlackflyTransfrom.getRotation());
       ros2ImagePublisher.publish(imageMessage);
