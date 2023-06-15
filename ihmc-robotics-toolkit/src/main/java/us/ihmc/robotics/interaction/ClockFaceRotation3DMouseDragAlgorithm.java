@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.gizmo;
+package us.ihmc.robotics.interaction;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -97,7 +97,7 @@ public class ClockFaceRotation3DMouseDragAlgorithm
       return axisAngleToRotateBy;
    }
 
-   Point3DReadOnly getClockHandTipInWorld()
+   public Point3DReadOnly getClockHandTipInWorld()
    {
       return clockHandTipInWorld;
    }

@@ -14,7 +14,6 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
  */
 public abstract class RDXBehaviorAction
 {
-   private String nameForDisplay = "";
    private final ImBoolean selected = new ImBoolean();
    private final ImBoolean expanded = new ImBoolean(true);
    private final ImString description = new ImString();
@@ -22,11 +21,6 @@ public abstract class RDXBehaviorAction
    public RDXBehaviorAction()
    {
 
-   }
-
-   public RDXBehaviorAction(String nameForDisplay)
-   {
-      this.nameForDisplay = nameForDisplay;
    }
 
    public void update()
@@ -79,10 +73,7 @@ public abstract class RDXBehaviorAction
       return expanded;
    }
 
-   public String getNameForDisplay()
-   {
-      return nameForDisplay;
-   }
+   public abstract String getActionTypeTitle();
 
    public ImString getDescription()
    {

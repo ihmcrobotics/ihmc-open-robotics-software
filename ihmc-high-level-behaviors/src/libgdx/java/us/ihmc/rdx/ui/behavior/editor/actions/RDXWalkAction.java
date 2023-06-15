@@ -212,7 +212,7 @@ public class RDXWalkAction extends RDXBehaviorAction
    }
 
    @Override
-   public String getNameForDisplay()
+   public String getActionTypeTitle()
    {
       return "Walk Goal";
    }
