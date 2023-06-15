@@ -2,10 +2,13 @@ package us.ihmc.avatar.colorVision;
 
 import org.bytedeco.cuda.cudart.CUctx_st;
 import org.bytedeco.cuda.cudart.CUstream_st;
-import org.bytedeco.cuda.nvjpeg.*;
+import org.bytedeco.cuda.nvjpeg.nvjpegEncoderParams;
+import org.bytedeco.cuda.nvjpeg.nvjpegEncoderState;
+import org.bytedeco.cuda.nvjpeg.nvjpegHandle;
+import org.bytedeco.cuda.nvjpeg.nvjpegImage_t;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.SizeTPointer;
-import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.GpuMat;
 
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvjpeg.*;
@@ -64,8 +67,6 @@ public class CUDAImageEncoder
 
       // Initialize nvjpeg image
       nvjpegImage = new nvjpegImage_t();
-
-      Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, getClass().getSimpleName() + "Shutdown"));
    }
 
    /**
@@ -145,9 +146,11 @@ public class CUDAImageEncoder
       jpegSize.close();
    }
 
-   public void encodeBGR(BytePointer sourceImage, BytePointer outputImagePointer, int imageWidth, int imageHeight)
+   public void encodeBGR(GpuMat sourceImage, BytePointer outputImagePointer, int imageWidth, int imageHeight)
    {
-      int numberOfBytesInImage = imageWidth * imageHeight * 3;
+      // TODO: Make this work with GpuMat
+      long rowSize = 3L * imageWidth;
+      long frameSize = 3L * imageWidth * imageHeight;
 
       CHECK_CUDA("cuCtxSetCurrent", cuCtxSetCurrent(cudaContext));
 
@@ -156,9 +159,9 @@ public class CUDAImageEncoder
 
       // Get B plane data
       BytePointer devicePointer = new BytePointer();
-      CHECK_CUDA("cudaMalloc", cudaMalloc(devicePointer, numberOfBytesInImage)); // allocate GPU memory
-      CHECK_CUDA("cudaMemcpy", cudaMemcpy(devicePointer, sourceImage, numberOfBytesInImage, cudaMemcpyHostToDevice));
-      nvjpegImage.pitch(0, (long) imageWidth * 3);
+      CHECK_CUDA("cudaMalloc", cudaMalloc(devicePointer, frameSize)); // allocate GPU memory
+      CHECK_CUDA("cudaMemcpy2D", cudaMemcpy2D(devicePointer, rowSize, sourceImage.data(), sourceImage.step(), rowSize, imageHeight, cudaMemcpyDeviceToDevice));
+      nvjpegImage.pitch(0, rowSize);
       nvjpegImage.channel(0, devicePointer);
 
       // Encode the image
@@ -209,7 +212,7 @@ public class CUDAImageEncoder
    {
       if (result != CUDA_SUCCESS)
       {
-         throw new IllegalStateException(String.format("%s returned '%d'", functionName, result));
+         throw new RuntimeException(String.format("%s returned '%d'", functionName, result));
       }
    }
 
@@ -224,7 +227,7 @@ public class CUDAImageEncoder
    {
       if (result != NVJPEG_STATUS_SUCCESS)
       {
-         throw new IllegalStateException(String.format("%s returned '%d'", functionName, result));
+         throw new RuntimeException(String.format("%s returned '%d'", functionName, result));
       }
    }
 }
