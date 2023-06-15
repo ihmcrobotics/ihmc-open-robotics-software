@@ -21,7 +21,7 @@ import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
-import us.ihmc.rdx.ui.gizmo.CylinderRayIntersection;
+import us.ihmc.robotics.interaction.CylinderRayIntersection;
 import us.ihmc.rdx.visualizers.RDXFrustumGraphic;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
