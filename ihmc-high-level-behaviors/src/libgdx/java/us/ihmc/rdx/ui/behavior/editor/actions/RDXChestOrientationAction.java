@@ -25,7 +25,7 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
 
    public RDXChestOrientationAction()
    {
-      super("Chest Orientation");
+
    }
 
    @Override
@@ -45,5 +45,11 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    public ChestOrientationActionData getActionData()
    {
       return actionData;
+   }
+
+   @Override
+   public String getActionTypeTitle()
+   {
+      return "Chest Orientation";
    }
 }
