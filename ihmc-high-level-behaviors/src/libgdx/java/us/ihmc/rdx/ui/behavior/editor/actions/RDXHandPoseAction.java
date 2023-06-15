@@ -31,7 +31,6 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    /** Gizmo is control frame */
    private final RDXPose3DGizmo poseGizmo = new RDXPose3DGizmo(actionData.getReferenceFrame(), actionData.getTransformToParent());
    private final SideDependentList<String> handNames = new SideDependentList<>();
-   private final SideDependentList<RigidBodyTransform> handGraphicTransformToControlFrames = new SideDependentList<>();
    private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
    private final SideDependentList<RDXInteractableHighlightModel> highlightModels = new SideDependentList<>();
    private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
@@ -49,7 +48,6 @@ public class RDXHandPoseAction extends RDXBehaviorAction
 
          RigidBodyTransform graphicToControlFrameTransform = new RigidBodyTransform();
          HandTransformTools.getHandGraphicToControlFrameTransform(fullRobotModel, robotModel.getUIParameters(), side, graphicToControlFrameTransform);
-         handGraphicTransformToControlFrames.put(side, graphicToControlFrameTransform);
          graphicFrame.update(transformToParent -> transformToParent.set(graphicToControlFrameTransform));
 
          String handBodyName = handNames.get(side);
