@@ -40,7 +40,12 @@ public class RDX3DPanelTooltip
       {
          float lineHeight = 15.0f;
 
+         // Calculate exact rendered dimensions of the text considering the font.
+         ImFont font = ImGuiTools.getSmallFont();
+         ImGui.pushFont(font);
          ImGui.calcTextSize(textSize, text);
+         ImGui.popFont();
+
          float marginLeft = 10.0f;
          float marginRight = 10.0f;
          float marginTop = 10.0f;
@@ -54,7 +59,6 @@ public class RDX3DPanelTooltip
 
          ImGui.getWindowDrawList().addRectFilled(drawStartX, drawStartY, drawEndX, drawEndY, color.toIntBits());
 
-         ImFont font = ImGuiTools.getSmallFont();
          float textPositionX = drawStartX + 5.0f;
          float textPositionY = drawStartY + 2.0f;
          ImGui.getWindowDrawList().addText(font, font.getFontSize(), textPositionX, textPositionY, Color.WHITE.toIntBits(), text);
