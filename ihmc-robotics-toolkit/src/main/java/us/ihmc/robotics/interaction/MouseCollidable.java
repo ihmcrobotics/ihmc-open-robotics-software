@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.affordances;
+package us.ihmc.robotics.interaction;
 
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -7,7 +7,6 @@ import us.ihmc.euclid.shape.primitives.interfaces.*;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.log.LogTools;
-import us.ihmc.rdx.ui.gizmo.*;
 import us.ihmc.robotics.physics.Collidable;
 
 /**
@@ -31,27 +30,27 @@ public class MouseCollidable
    {
       this.shape = shape;
 
-      if (shape instanceof FrameSphere3DReadOnly sphere)
+      if (shape instanceof FrameSphere3DReadOnly)
       {
          sphereRayIntersection = new SphereRayIntersection();
       }
-      else if (shape instanceof FrameCapsule3DReadOnly capsule)
+      else if (shape instanceof FrameCapsule3DReadOnly)
       {
          capsuleIntersection = new CapsuleRayIntersection();
       }
-      else if (shape instanceof FrameBox3DReadOnly box)
+      else if (shape instanceof FrameBox3DReadOnly)
       {
          boxRayIntersection = new BoxRayIntersection();
       }
-      else if (shape instanceof FramePointShape3DReadOnly pointShape)
+      else if (shape instanceof FramePointShape3DReadOnly)
       {
          // We're not colliding with points as they have no volume
       }
-      else if (shape instanceof FrameCylinder3DReadOnly cylinder)
+      else if (shape instanceof FrameCylinder3DReadOnly)
       {
          cylinderRayIntersection = new CylinderRayIntersection();
       }
-      else if (shape instanceof FrameEllipsoid3DReadOnly ellipsoid)
+      else if (shape instanceof FrameEllipsoid3DReadOnly)
       {
          ellipsoidRayIntersection = new EllipsoidRayIntersection();
       }
