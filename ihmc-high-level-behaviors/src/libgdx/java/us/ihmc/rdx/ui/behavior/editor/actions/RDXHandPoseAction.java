@@ -16,10 +16,7 @@ import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
-import us.ihmc.rdx.ui.affordances.RDXInteractableHand;
-import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
-import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
-import us.ihmc.rdx.ui.affordances.RDXRobotCollidable;
+import us.ihmc.rdx.ui.affordances.*;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
 import us.ihmc.rdx.ui.collidables.RDXRobotCollisionModel;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
@@ -47,8 +44,9 @@ public class RDXHandPoseAction extends RDXBehaviorAction
                                                                          imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
    private final SideDependentList<String> handNames = new SideDependentList<>();
    private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
+   private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
    private boolean isMouseHovering = false;
-   private final ArrayList<RDXRobotCollidable> robotCollidables = new ArrayList<>();
+   private final ArrayList<MouseCollidable> mouseCollidables = new ArrayList<>();
    private final SideDependentList<RDXInteractableHighlightModel> highlightModels = new SideDependentList<>();
    private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
    private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(actionData::getTrajectoryDuration,
@@ -77,17 +75,16 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(handBodyName));
          highlightModels.put(side, new RDXInteractableHighlightModel(modelFileName));
 
-//         selectionCollisionModel.
-
          MultiBodySystemBasics handOnlySystem = MultiBodySystemMissingTools.createSingleBodySystem(fullRobotModel.getHand(side));
          List<Collidable> handCollidables = selectionCollisionModel.getRobotCollidables(handOnlySystem);
 
-         for (RDXRobotCollidable robotCollidable : robotCollisionModel.getRobotCollidables())
-         {
-            if (RDXInteractableHand.robotCollidableIsHand(side, robotCollidable, fullRobotModel))
-            {
+         RigidBodyTransform linkToControlFrameTransform = new RigidBodyTransform();
+         HandTransformTools.getHandLinkToControlFrameTransform(fullRobotModel, side, linkToControlFrameTransform);
+         collisionShapeFrame.update(transformToParent -> transformToParent.set(linkToControlFrameTransform));
 
-            }
+         for (Collidable handCollidable : handCollidables)
+         {
+            mouseCollidables.add(new MouseCollidable(handCollidable));
          }
       }
 
@@ -127,6 +124,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       {
          poseGizmo.getPoseGizmo().setGizmoFrame(actionData.getReferenceFrame());
          graphicFrame.changeParentFrame(actionData.getReferenceFrame());
+         collisionShapeFrame.changeParentFrame(actionData.getReferenceFrame());
       }
 
       poseGizmo.getPoseGizmo().update();
@@ -165,9 +163,9 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    public void process3DViewInput(ImGui3DViewInput input)
    {
       isMouseHovering = false;
-      for (RDXRobotCollidable robotCollidable : robotCollidables)
+      for (MouseCollidable mouseCollidable : mouseCollidables)
       {
-         isMouseHovering |= robotCollidable.getMousePickSelected();
+         isMouseHovering |= !Double.isNaN(mouseCollidable.collide(input.getPickRayInWorld(), collisionShapeFrame.getReferenceFrame()));
       }
 
       boolean isClickedOn = isMouseHovering && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
