@@ -139,7 +139,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    }
 
    @Override
-   public String getNameForDisplay()
+   public String getActionTypeTitle()
    {
       return actionData.getSide().getPascalCaseName() + " Hand Pose";
    }

@@ -20,7 +20,6 @@ import us.ihmc.behaviors.sequence.BehaviorActionData;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Input;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -346,7 +345,10 @@ public class RDXBehaviorActionSequenceEditor
       if (endOfSequence)
          ImGui.text("End of sequence.");
       else
-         ImGui.text(actionSequence.get(executionNextIndexStatus).getNameForDisplay());
+      {
+         RDXBehaviorAction nextExecutionAction = actionSequence.get(executionNextIndexStatus);
+         ImGui.text("%s (%s)".formatted(nextExecutionAction.getDescription(), nextExecutionAction.getActionTypeTitle()));
+      }
    }
 
    private void renderInteractableActionListArea()
@@ -416,7 +418,7 @@ public class RDXBehaviorActionSequenceEditor
             ImGui.checkbox(labels.get("Show gizmo", "selected", i), action.getSelected());
             ImGuiTools.previousWidgetTooltip("Show gizmo");
             ImGui.sameLine();
-            ImGui.text("Type: %s".formatted(action.getNameForDisplay()));
+            ImGui.text("Type: %s".formatted(action.getActionTypeTitle()));
          }
 
          action.renderImGuiWidgets();
