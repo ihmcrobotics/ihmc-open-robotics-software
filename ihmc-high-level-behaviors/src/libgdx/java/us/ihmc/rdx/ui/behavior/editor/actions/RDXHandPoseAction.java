@@ -15,6 +15,7 @@ import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.input.ImGui3DViewPickResult;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.affordances.*;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
@@ -46,6 +47,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
    private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
    private boolean isMouseHovering = false;
+   private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private final ArrayList<MouseCollidable> mouseCollidables = new ArrayList<>();
    private final SideDependentList<RDXInteractableHighlightModel> highlightModels = new SideDependentList<>();
    private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
@@ -157,16 +159,22 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
       poseGizmo.calculate3DViewPick(input);
+
+      pickResult.reset();
+      for (MouseCollidable mouseCollidable : mouseCollidables)
+      {
+         double collision = mouseCollidable.collide(input.getPickRayInWorld(), collisionShapeFrame.getReferenceFrame());
+         if (!Double.isNaN(collision))
+            pickResult.addPickCollision(collision);
+      }
+      if (pickResult.getPickCollisionWasAddedSinceReset())
+         input.addPickResult(pickResult);
    }
 
    @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      isMouseHovering = false;
-      for (MouseCollidable mouseCollidable : mouseCollidables)
-      {
-         isMouseHovering |= !Double.isNaN(mouseCollidable.collide(input.getPickRayInWorld(), collisionShapeFrame.getReferenceFrame()));
-      }
+      isMouseHovering = input.getClosestPick() == pickResult;
 
       boolean isClickedOn = isMouseHovering && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
       if (isClickedOn)
