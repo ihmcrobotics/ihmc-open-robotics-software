@@ -415,8 +415,8 @@ public class RDXBehaviorActionSequenceEditor
 
          if (action.getExpanded().get())
          {
-            ImGui.checkbox(labels.get("Show gizmo", "selected", i), action.getSelected());
-            ImGuiTools.previousWidgetTooltip("Show gizmo");
+            action.getSelected().renderImGuiWidget();
+            ImGuiTools.previousWidgetTooltip("(Show gizmo)");
             ImGui.sameLine();
             ImGui.text("Type: %s".formatted(action.getActionTypeTitle()));
          }
