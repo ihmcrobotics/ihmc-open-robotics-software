@@ -97,7 +97,7 @@ public class ClockFaceRotation3DMouseDragAlgorithm
       return axisAngleToRotateBy;
    }
 
-   Point3DReadOnly getClockHandTipInWorld()
+   public Point3DReadOnly getClockHandTipInWorld()
    {
       return clockHandTipInWorld;
    }
