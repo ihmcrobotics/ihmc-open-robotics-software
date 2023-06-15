@@ -1,8 +1,11 @@
-package us.ihmc.rdx.ui.gizmo;
+package us.ihmc.robotics.interaction;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 
+/**
+ * Used for specifying 3-axis graphics, like position and orientation gizmos.
+ */
 public class Axis3DRotations
 {
    private final RotationMatrix[] axisRotations = new RotationMatrix[3];
