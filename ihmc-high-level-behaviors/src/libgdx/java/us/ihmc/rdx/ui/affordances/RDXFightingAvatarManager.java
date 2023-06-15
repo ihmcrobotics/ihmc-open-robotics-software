@@ -39,6 +39,7 @@ public class RDXFightingAvatarManager
    private final SideDependentList<Pose3D> feetHome = new SideDependentList<>();
    private static final double pelvisHeightHome = 1.077;
    private long sequenceId = (UUID.randomUUID().getLeastSignificantBits() % Integer.MAX_VALUE) + Integer.MAX_VALUE;
+   private boolean feetAligned = true;
 
    public RDXFightingAvatarManager(DRCRobotModel robotModel,
                         ROS2SyncedRobotModel syncedRobot,
@@ -52,9 +53,8 @@ public class RDXFightingAvatarManager
 
       armsHome.put(RobotSide.LEFT, new double[] {-0.221, -0.124, -0.4, -2.613, -0.0, -0.0, 0.0});
       armsHome.put(RobotSide.RIGHT, new double[] {0.4, -0.124, 0.7, -2.6, 0.0, 0.0, -0.0});
-
-      feetHome.put(RobotSide.LEFT, new Pose3D(0.10, 0.0, 0.0, 0.0, 0.0, 0.0));
-      feetHome.put(RobotSide.RIGHT, new Pose3D(-0.20, 0.0, 0.0, -Math.toRadians(45), 0.0, 0.0));
+      feetHome.put(RobotSide.LEFT, new Pose3D(0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
+      feetHome.put(RobotSide.RIGHT, new Pose3D(-0.35, 0.0, 0.0, -Math.toRadians(45), 0.0, 0.0));
    }
 
    public void renderImGuiWidgets()
@@ -70,6 +70,7 @@ public class RDXFightingAvatarManager
                                                                                                         armsHome.get(side));
             ros2Helper.publishToController(armTrajectoryMessage);
          }
+         double trajectoryTime = 3.5;
 
          FrameYawPitchRoll frameChestYawPitchRoll = new FrameYawPitchRoll(syncedRobot.getReferenceFrames().getChestFrame());
          frameChestYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
@@ -77,7 +78,7 @@ public class RDXFightingAvatarManager
          frameChestYawPitchRoll.changeFrame(ReferenceFrame.getWorldFrame());
          ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage();
          chestTrajectoryMessage.getSo3Trajectory()
-                .set(HumanoidMessageTools.createSO3TrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
+                .set(HumanoidMessageTools.createSO3TrajectoryMessage(trajectoryTime,
                                                                      frameChestYawPitchRoll,
                                                                      EuclidCoreTools.zeroVector3D,
                                                                      syncedRobot.getReferenceFrames().getPelvisZUpFrame()));
@@ -88,7 +89,6 @@ public class RDXFightingAvatarManager
          chestTrajectoryMessage.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
          ros2Helper.publishToController(chestTrajectoryMessage);
 
-         double trajectoryTime = teleoperationParameters.getPelvisHeightChangeVelocity();
          PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage();
          message.getEuclideanTrajectory()
                 .set(HumanoidMessageTools.createEuclideanTrajectoryMessage(trajectoryTime,
@@ -102,12 +102,15 @@ public class RDXFightingAvatarManager
          ros2Helper.publishToController(message);
       }
       ImGui.sameLine();
-      if(ImGui.button(labels.get("Guard Stance")))
+      String buttonLabel = "Guard Stance";
+      if (!feetAligned)
+         buttonLabel = "Normal Stance";
+      if(ImGui.button(labels.get(buttonLabel)))
       {
          sequenceId = (UUID.randomUUID().getLeastSignificantBits() % Integer.MAX_VALUE) + Integer.MAX_VALUE;
          FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-         footstepDataListMessage.setDefaultSwingDuration(robotModel.getWalkingControllerParameters().getDefaultSwingTime());
-         footstepDataListMessage.setDefaultTransferDuration(robotModel.getWalkingControllerParameters().getDefaultTransferTime());
+         footstepDataListMessage.setDefaultSwingDuration(1.2);
+         footstepDataListMessage.setDefaultTransferDuration(0.8);
          footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(true);
 
          SideDependentList<MovingReferenceFrame> feetFrames = syncedRobot.getFullRobotModel().getSoleFrames();
@@ -125,25 +128,21 @@ public class RDXFightingAvatarManager
                feetFramePosesToSend.put(side, new FramePose3D(feetFrames.get(side), feetHome.get(side)));
                feetFramePosesToSend.get(side).changeFrame(ReferenceFrame.getWorldFrame());
             }
+            feetAligned = false;
          } // if not align right foot with left one
          else
          {
-            feetFramePosesToSend.put(RobotSide.LEFT, new FramePose3D(feetFrames.get(RobotSide.LEFT)));
             feetFramePosesToSend.put(RobotSide.RIGHT, new FramePose3D(feetFrames.get(RobotSide.LEFT)));
             feetFramePosesToSend.get(RobotSide.RIGHT).appendTranslation(0.0, -0.260, 0.0);
-            feetFramePosesToSend.get(RobotSide.LEFT).changeFrame(ReferenceFrame.getWorldFrame());
             feetFramePosesToSend.get(RobotSide.RIGHT).changeFrame(ReferenceFrame.getWorldFrame());
+            feetAligned = true;
          }
-
-         for (RobotSide side : RobotSide.values)
-         {
-            FootstepDataMessage footstepDataMessage = footstepDataListMessage.getFootstepDataList().add();
-            footstepDataMessage.setSequenceId(sequenceId++);
-            footstepDataMessage.setRobotSide(side.toByte());
-            footstepDataMessage.getLocation().set(feetFramePosesToSend.get(side).getPosition());
-            footstepDataMessage.getOrientation().set(feetFramePosesToSend.get(side).getOrientation());
-            footstepDataMessage.setTrajectoryType(TrajectoryType.DEFAULT.toByte());
-         }
+         FootstepDataMessage footstepDataMessage = footstepDataListMessage.getFootstepDataList().add();
+         footstepDataMessage.setSequenceId(sequenceId++);
+         footstepDataMessage.setRobotSide(RobotSide.RIGHT.toByte());
+         footstepDataMessage.getLocation().set(feetFramePosesToSend.get(RobotSide.RIGHT).getPosition());
+         footstepDataMessage.getOrientation().set(feetFramePosesToSend.get(RobotSide.RIGHT).getOrientation());
+         footstepDataMessage.setTrajectoryType(TrajectoryType.DEFAULT.toByte());
          ros2Helper.publishToController(footstepDataListMessage);
       }
    }
