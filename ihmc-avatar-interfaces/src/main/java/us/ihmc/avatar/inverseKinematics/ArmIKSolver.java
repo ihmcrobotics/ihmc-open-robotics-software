@@ -37,7 +37,7 @@ import us.ihmc.wholeBodyController.HandTransformTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
- * An attempt to use the WholeBodyControllerCore directly to get IK solutions for
+ * Uses the WholeBodyControllerCore directly to get IK solutions for
  * a humanoid robot arm.
  *
  * TODO:
@@ -213,6 +213,7 @@ public class ArmIKSolver
 
          controllerCore.compute(controllerCoreCommand);
 
+         // Feed the solution output back into the working joints to be the start state of the next compute.
          ControllerCoreOutput controllerCoreOutput = controllerCore.getControllerCoreOutput();
          JointDesiredOutputListReadOnly output = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();
          for (int j = 0; j < workingOneDoFJoints.length; j++)
