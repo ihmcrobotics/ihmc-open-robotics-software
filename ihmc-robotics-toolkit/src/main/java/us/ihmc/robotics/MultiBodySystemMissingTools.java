@@ -124,4 +124,45 @@ public class MultiBodySystemMissingTools
 
       return joints;
    }
+
+   public static MultiBodySystemBasics createSingleBodySystem(RigidBodyBasics singleBody)
+   {
+      List<? extends JointBasics> allJoints = new ArrayList<>();
+      List<? extends JointBasics> jointsToConsider = new ArrayList<>();
+      List<? extends JointBasics> jointsToIgnore = new ArrayList<>();
+      JointMatrixIndexProvider jointMatrixIndexProvider = JointMatrixIndexProvider.toIndexProvider(jointsToConsider);
+
+      return new MultiBodySystemBasics()
+      {
+         @Override
+         public RigidBodyBasics getRootBody()
+         {
+            return singleBody;
+         }
+
+         @Override
+         public List<? extends JointBasics> getAllJoints()
+         {
+            return allJoints;
+         }
+
+         @Override
+         public List<? extends JointBasics> getJointsToConsider()
+         {
+            return jointsToConsider;
+         }
+
+         @Override
+         public List<? extends JointBasics> getJointsToIgnore()
+         {
+            return jointsToIgnore;
+         }
+
+         @Override
+         public JointMatrixIndexProvider getJointMatrixIndexProvider()
+         {
+            return jointMatrixIndexProvider;
+         }
+      };
+   }
 }
