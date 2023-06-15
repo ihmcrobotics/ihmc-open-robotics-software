@@ -1,6 +1,7 @@
 package us.ihmc.rdx.vr;
 
 import static org.lwjgl.openvr.VR.VR_ShutdownInternal;
+import static org.lwjgl.openvr.VRSystem.VRSystem_GetStringTrackedDeviceProperty;
 
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
@@ -63,31 +64,43 @@ public class RDXVRContext
    // your thumb is pointing at your face and your index finger pointing right
    // The default orientation of the IHMC Zup frame is such that
    // your thumb is up and your index finger is pointing away from you
-   public static final RigidBodyTransformReadOnly openVRYUpToIHMCZUpSpace = new RigidBodyTransform(
-         new YawPitchRoll(          // For this transformation, we start with IHMC ZUp with index forward and thumb up
-            Math.toRadians(-90.0),  // rotating around thumb, index goes forward to right
-            Math.toRadians(0.0),    // no rotation about middle finger
-            Math.toRadians(90.0)    // rotating about index finger, thumb goes up to toward you
-         ),
-         new Point3D()
-   );
-   /** When the VR player teleports, it adds onto the transform from VR play area frame to world ZUp frame. */
+   public static final RigidBodyTransformReadOnly openVRYUpToIHMCZUpSpace = new RigidBodyTransform(new YawPitchRoll(
+         // For this transformation, we start with IHMC ZUp with index forward and thumb up
+         Math.toRadians(-90.0),
+         // rotating around thumb, index goes forward to right
+         Math.toRadians(0.0),
+         // no rotation about middle finger
+         Math.toRadians(90.0)
+         // rotating about index finger, thumb goes up to toward you
+   ), new Point3D());
+   /**
+    * When the VR player teleports, it adds onto the transform from VR play area frame to world ZUp frame.
+    */
    private final RigidBodyTransform teleportIHMCZUpToIHMCZUpWorld = new RigidBodyTransform();
-   private final ReferenceFrame teleportFrameIHMCZUp
-         = ReferenceFrameTools.constructFrameWithChangingTransformToParent("teleportFrame",
-                                                                           ReferenceFrame.getWorldFrame(),
-                                                                           teleportIHMCZUpToIHMCZUpWorld);
-   /** The VR play area is on the floor in the center of your VR tracker space area. Also called tracker frame. */
-   private final ReferenceFrame vrPlayAreaYUpZBackFrame
-         = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("vrPlayAreaFrame",
-                                                                           teleportFrameIHMCZUp,
-                                                                           openVRYUpToIHMCZUpSpace);
+   private final ReferenceFrame teleportFrameIHMCZUp = ReferenceFrameTools.constructFrameWithChangingTransformToParent("teleportFrame",
+                                                                                                                       ReferenceFrame.getWorldFrame(),
+                                                                                                                       teleportIHMCZUpToIHMCZUpWorld);
+   /**
+    * The VR play area is on the floor in the center of your VR tracker space area. Also called tracker frame.
+    */
+   private final ReferenceFrame vrPlayAreaYUpZBackFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("vrPlayAreaFrame",
+                                                                                                                            teleportFrameIHMCZUp,
+                                                                                                                            openVRYUpToIHMCZUpSpace);
    private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
    private final RDXVRHeadset headset = new RDXVRHeadset(vrPlayAreaYUpZBackFrame);
    private final SideDependentList<RDXVRController> controllers = new SideDependentList<>(new RDXVRController(RobotSide.LEFT, vrPlayAreaYUpZBackFrame),
                                                                                           new RDXVRController(RobotSide.RIGHT, vrPlayAreaYUpZBackFrame));
    private final HashMap<Integer, RDXVRBaseStation> baseStations = new HashMap<>();
-   private final HashMap<Integer, RDXVRTracker> trackers = new HashMap<>();
+   private final HashMap<String, RDXVRTracker> trackers = new HashMap<>();
+   private static final HashMap<String, String> TRACKER_SERIAL_MAP = new HashMap<String, String>()
+   {
+      {
+         put("Chest", "LHR-AC72B09D");
+         put("LeftForeArm", "LHR-4CB1033A");
+         put("RightForeArm", "SerialNumber3");
+      }
+   }; // must use serial number, tracker role is not supported in org.lwjgl.openvr.VR (IVRInput does)
+
    private final SideDependentList<ArrayList<RDXVRPickResult>> pickResults = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
    private SideDependentList<RDXVRPickResult> selectedPick = new SideDependentList<>(null, null);
 
@@ -143,7 +156,9 @@ public class RDXVRContext
       activeActionSets.ulRestrictedToDevice(VR.k_ulInvalidInputValueHandle);
    }
 
-   /** Needs to be on libGDX thread. */
+   /**
+    * Needs to be on libGDX thread.
+    */
    public void setupEyes()
    {
       LogTools.info("VR per eye render size: {} x {}", width, height);
@@ -162,9 +177,11 @@ public class RDXVRContext
       }
    }
 
-   /** This method waits for OpenVR to say "go" and gathers the latest data.
-    *  The goal is to submit frames to the eyes ASAP after this returns,
-    *  then get back to this method before the frame is over. */
+   /**
+    * This method waits for OpenVR to say "go" and gathers the latest data.
+    * The goal is to submit frames to the eyes ASAP after this returns,
+    * then get back to this method before the frame is over.
+    */
    public void waitGetPoses()
    {
       VRCompositor.VRCompositor_WaitGetPoses(trackedDevicePoses, trackedDeviceGamePoses);
@@ -172,8 +189,8 @@ public class RDXVRContext
    }
 
    /**
-    *  For input, see https://github.com/ValveSoftware/openvr/wiki/SteamVR-Input
-    *  and https://github.com/ValveSoftware/openvr/issues/1151
+    * For input, see https://github.com/ValveSoftware/openvr/wiki/SteamVR-Input
+    * and https://github.com/ValveSoftware/openvr/issues/1151
     */
    public void pollEvents()
    {
@@ -192,11 +209,11 @@ public class RDXVRContext
          int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
          if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker)
          {
-            trackers.put(deviceIndex, new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex));
+            trackers.put(getBodySegment(getSerialNumber(deviceIndex)), new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex));
          }
       }
 
-      for (Map.Entry<Integer, RDXVRTracker> entryTracker : trackers.entrySet())
+      for (Map.Entry<String, RDXVRTracker> entryTracker : trackers.entrySet())
       {
          entryTracker.getValue().update(trackedDevicePoses);
       }
@@ -231,6 +248,17 @@ public class RDXVRContext
             }
          }
       }
+   }
+
+   private String getSerialNumber(int index)
+   {
+      String serialNumber = VRSystem_GetStringTrackedDeviceProperty(index, VR.ETrackedDeviceProperty_Prop_SerialNumber_String, null);
+      return serialNumber;
+   }
+
+   private String getBodySegment(String serialNumber)
+   {
+      return TRACKER_SERIAL_MAP.get(serialNumber);
    }
 
    /**
@@ -345,12 +373,12 @@ public class RDXVRContext
       return trackers.values();
    }
 
-   public RDXVRTracker getTracker(int index)
+   public RDXVRTracker getTracker(String bodySegment)
    {
-      return trackers.get(index);
+      return trackers.get(bodySegment);
    }
 
-   public Set<Integer> getTrackerIndices()
+   public Set<String> getBodySegmentsWithTrackers()
    {
       return trackers.keySet();
    }

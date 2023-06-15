@@ -265,27 +265,31 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
             });
          }
 
-         Set<Integer> trackerIndices = vrContext.getTrackerIndices();
-         for (int index : trackerIndices) {
-            vrContext.getTracker(index).runIfConnected(tracker -> {
-               if (index == 3) {
-                  if (elbowDesiredControlFrame == null) {
-                     elbowDesiredControlFrame = new ModifiableReferenceFrame(vrContext.getTracker(index).getXForwardZUpTrackerFrame());
+         Set<String> trackedSegments = vrContext.getBodySegmentsWithTrackers();
+         for (String segment : trackedSegments)
+         {
+            vrContext.getTracker(segment).runIfConnected(tracker -> {
+               if (segment.equals("LeftForeArm"))
+               {
+                  if (elbowDesiredControlFrame == null)
+                  {
+                     elbowDesiredControlFrame = new ModifiableReferenceFrame(vrContext.getTracker(segment).getXForwardZUpTrackerFrame());
                      elbowDesiredControlFrame.getTransformToParent().getRotation().appendYawRotation(-Math.PI / 2.0);
                   }
-                  elbowDesiredControlFrame.changeParentFrame(vrContext.getTracker(index).getXForwardZUpTrackerFrame());
+                  elbowDesiredControlFrame.changeParentFrame(vrContext.getTracker(segment).getXForwardZUpTrackerFrame());
                   elbowDesiredControlFrame.getReferenceFrame().update();
                   elbowControlFrameGraphic.setToReferenceFrame(elbowDesiredControlFrame.getReferenceFrame());
                   KinematicsToolboxRigidBodyMessage message = createOrientationOnlyRigidBodyMessage(ghostFullRobotModel.getForearm(RobotSide.LEFT), elbowDesiredControlFrame, 1);
                   toolboxInputMessage.getInputs().add().set(message);
                }
 
-               if (index == 6) {
-                  if (chestDesiredControlFrame == null) {
-                     chestDesiredControlFrame = new ModifiableReferenceFrame(vrContext.getTracker(index).getXForwardZUpTrackerFrame());
+               if (segment.equals("Chest")) {
+                  if (chestDesiredControlFrame == null)
+                  {
+                     chestDesiredControlFrame = new ModifiableReferenceFrame(vrContext.getTracker(segment).getXForwardZUpTrackerFrame());
                      // chestDesiredControlFrame.getTransformToParent().getRotation().appendYawRotation(-Math.PI / 2.0);
                   }
-                  chestDesiredControlFrame.changeParentFrame(vrContext.getTracker(index).getXForwardZUpTrackerFrame());
+                  chestDesiredControlFrame.changeParentFrame(vrContext.getTracker(segment).getXForwardZUpTrackerFrame());
                   chestDesiredControlFrame.getReferenceFrame().update();
                   chestControlFrameGraphic.setToReferenceFrame(chestDesiredControlFrame.getReferenceFrame());
                   KinematicsToolboxRigidBodyMessage message = createOrientationOnlyRigidBodyMessage(ghostFullRobotModel.getChest(), chestDesiredControlFrame, 0.1);
