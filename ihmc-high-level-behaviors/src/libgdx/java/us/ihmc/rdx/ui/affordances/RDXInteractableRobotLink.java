@@ -275,4 +275,9 @@ public class RDXInteractableRobotLink
    {
       return contextMenuNotification;
    }
+
+   public Notification getGizmoModifiedByUser()
+   {
+      return selectablePose3DGizmo.getPoseGizmo().getGizmoModifiedByUser();
+   }
 }

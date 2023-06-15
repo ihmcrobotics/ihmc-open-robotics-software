@@ -1,9 +1,10 @@
-package us.ihmc.rdx.ui.gizmo;
+package us.ihmc.robotics.interaction;
 
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.robotics.interaction.SphereRayIntersection;
 
 import java.util.function.Function;
 
