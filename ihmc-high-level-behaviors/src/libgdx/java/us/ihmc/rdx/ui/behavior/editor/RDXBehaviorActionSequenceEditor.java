@@ -27,6 +27,7 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.behavior.editor.actions.*;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
@@ -63,6 +64,7 @@ public class RDXBehaviorActionSequenceEditor
    private RDX3DPanel panel3D;
    private DRCRobotModel robotModel;
    private ROS2SyncedRobotModel syncedRobot;
+   private RobotCollisionModel selectionCollisionModel;
    private ReferenceFrameLibrary referenceFrameLibrary;
    private ROS2ControllerHelper ros2;
    private final MutablePair<Integer, Integer> reorderRequest = MutablePair.of(-1, 0);
@@ -97,17 +99,20 @@ public class RDXBehaviorActionSequenceEditor
    {
       panel = new ImGuiPanel(name + " Behavior Sequence Editor", this::renderImGuiWidgets, false, true);
       pascalCasedName = FormattingTools.titleToPascalCase(name);
+      panel.getIsShowing().set(true);
    }
 
    public void create(RDX3DPanel panel3D,
                       DRCRobotModel robotModel,
                       ROS2Node ros2Node,
                       ROS2SyncedRobotModel syncedRobot,
+                      RobotCollisionModel selectionCollisionModel,
                       ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.panel3D = panel3D;
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
+      this.selectionCollisionModel = selectionCollisionModel;
       this.referenceFrameLibrary = referenceFrameLibrary;
       ros2 = new ROS2ControllerHelper(ros2Node, robotModel);
 
@@ -133,11 +138,17 @@ public class RDXBehaviorActionSequenceEditor
          JSONTools.forEachArrayElement(jsonNode, "actions", actionNode ->
          {
             String actionTypeName = actionNode.get("type").asText();
-            RDXBehaviorAction action = RDXActionSequenceTools.createBlankAction(actionTypeName, robotModel, syncedRobot, panel3D, referenceFrameLibrary);
+            RDXBehaviorAction action = RDXActionSequenceTools.createBlankAction(actionTypeName,
+                                                                                robotModel,
+                                                                                syncedRobot,
+                                                                                selectionCollisionModel,
+                                                                                panel3D,
+                                                                                referenceFrameLibrary);
             if (action != null)
             {
                action.getActionData().loadFromFile(actionNode);
                action.updateAfterLoading();
+               action.update();
                actionSequence.add(action);
                action.getSelected().set(false);
             }
@@ -415,8 +426,8 @@ public class RDXBehaviorActionSequenceEditor
 
          if (action.getExpanded().get())
          {
-            ImGui.checkbox(labels.get("Show gizmo", "selected", i), action.getSelected());
-            ImGuiTools.previousWidgetTooltip("Show gizmo");
+            action.getSelected().renderImGuiWidget();
+            ImGuiTools.previousWidgetTooltip("(Show gizmo)");
             ImGui.sameLine();
             ImGui.text("Type: %s".formatted(action.getActionTypeTitle()));
          }
@@ -449,7 +460,11 @@ public class RDXBehaviorActionSequenceEditor
       {
          if (ImGui.button(labels.get(side.getPascalCaseName(), "HandPose")))
          {
-            RDXHandPoseAction handPoseAction = new RDXHandPoseAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), referenceFrameLibrary);
+            RDXHandPoseAction handPoseAction = new RDXHandPoseAction(panel3D,
+                                                                     robotModel,
+                                                                     syncedRobot.getFullRobotModel(),
+                                                                     selectionCollisionModel,
+                                                                     referenceFrameLibrary);
             // Set the new action to where the last one was for faster authoring
             handPoseAction.setSide(side);
             RDXHandPoseAction nextPreviousHandPoseAction = findNextPreviousHandPoseAction(side);
