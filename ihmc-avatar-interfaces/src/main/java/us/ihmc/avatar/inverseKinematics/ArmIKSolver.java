@@ -73,17 +73,16 @@ public class ArmIKSolver
    private final FramePose3D controlFramePose = new FramePose3D();
    private final OneDoFJointBasics[] syncedOneDoFJoints;
    private final OneDoFJointBasics[] workingOneDoFJoints;
-   private final OneDoFJointBasics[] solutionOneDoFJoints;
    private final KinematicsSolutionQualityCalculator solutionQualityCalculator = new KinematicsSolutionQualityCalculator();
    private final FeedbackControllerDataHolderReadOnly feedbackControllerDataHolder;
    private final RigidBodyBasics syncedChest;
+   private double quality;
 
-   public ArmIKSolver(RobotSide side, DRCRobotModel robotModel, FullHumanoidRobotModel syncedRobot, FullHumanoidRobotModel solutionRobot)
+   public ArmIKSolver(RobotSide side, DRCRobotModel robotModel, FullHumanoidRobotModel syncedRobot)
    {
       syncedChest = syncedRobot.getChest();
       OneDoFJointBasics syncedFirstArmJoint = syncedRobot.getArmJoint(side, robotModel.getJointMap().getArmJointNames()[0]);
       syncedOneDoFJoints = FullRobotModelUtils.getArmJoints(syncedRobot, side, robotModel.getJointMap().getArmJointNames());
-      solutionOneDoFJoints = FullRobotModelUtils.getArmJoints(solutionRobot, side, robotModel.getJointMap().getArmJointNames());
 
       // We clone a detached chest and single arm for the WBCC to work with. We just want to find arm joint angles.
       workChest = MultiBodySystemMissingTools.getDetachedCopyOfSubtree(syncedChest, armWorldFrame, syncedFirstArmJoint);
@@ -227,20 +226,20 @@ public class ArmIKSolver
       }
 
       double totalRobotMass = 0.0; // We don't need this parameter
-      double quality = solutionQualityCalculator.calculateSolutionQuality(feedbackControllerDataHolder, totalRobotMass, 1.0);
+      quality = solutionQualityCalculator.calculateSolutionQuality(feedbackControllerDataHolder, totalRobotMass, 1.0);
       if (quality > 1.0)
       {
          LogTools.debug("Bad quality solution: {} Try upping the gains, giving more iteration, or setting a more acheivable goal.", quality);
       }
    }
 
-   public void copyWorkToDesired()
+   public double getQuality()
    {
-      MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(workingOneDoFJoints, solutionOneDoFJoints);
+      return quality;
    }
 
-   public void setDesiredToCurrent()
+   public OneDoFJointBasics[] getSolutionOneDoFJoints()
    {
-      MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(syncedOneDoFJoints, solutionOneDoFJoints);
+      return workingOneDoFJoints;
    }
 }
