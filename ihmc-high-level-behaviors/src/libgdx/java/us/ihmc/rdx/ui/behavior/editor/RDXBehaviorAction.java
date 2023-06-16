@@ -25,6 +25,7 @@ public abstract class RDXBehaviorAction
                                                                          imBoolean -> ImGui.checkbox(labels.get("Selected"), imBoolean));
    private final ImBoolean expanded = new ImBoolean(true);
    private final ImString description = new ImString();
+   private int actionIndex = -1;
 
    public RDXBehaviorAction()
    {
@@ -86,5 +87,15 @@ public abstract class RDXBehaviorAction
    public ImString getDescription()
    {
       return description;
+   }
+
+   public int getActionIndex()
+   {
+      return actionIndex;
+   }
+
+   public void setActionIndex(int actionIndex)
+   {
+      this.actionIndex = actionIndex;
    }
 }

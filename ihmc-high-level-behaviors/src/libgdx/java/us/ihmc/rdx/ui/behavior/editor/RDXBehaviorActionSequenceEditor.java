@@ -210,8 +210,12 @@ public class RDXBehaviorActionSequenceEditor
 
    public void update()
    {
-      for (var action : actionSequence)
+      for (int i = 0; i < actionSequence.size(); i++)
+      {
+         RDXBehaviorAction action = actionSequence.get(i);
          action.update();
+         action.setActionIndex(i);
+      }
    }
 
    public void renderImGuiWidgets()
