@@ -134,12 +134,10 @@ public class RDXWalkAction extends RDXBehaviorAction
       footstepPlannerGoalGizmo.calculate3DViewPick(input);
       if (getSelected().get())
       {
-         boolean goalFootEditingEnabled = false;
          for (RobotSide side : RobotSide.values)
          {
             if (goalFeetPosesSelected.get(side).get())
             {
-               goalFootEditingEnabled = true;
                goalFeetGizmos.get(side).calculate3DViewPick(input);
             }
          }
@@ -152,12 +150,10 @@ public class RDXWalkAction extends RDXBehaviorAction
       footstepPlannerGoalGizmo.process3DViewInput(input);
       if (getSelected().get())
       {
-         boolean goalFootEditingEnabled = false;
          for (RobotSide side : RobotSide.values)
          {
             if (goalFeetPosesSelected.get(side).get())
             {
-               goalFootEditingEnabled = true;
                goalFeetGizmos.get(side).process3DViewInput(input);
             }
          }
