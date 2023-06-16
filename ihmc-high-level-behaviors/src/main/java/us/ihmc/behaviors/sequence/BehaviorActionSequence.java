@@ -11,7 +11,6 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -131,7 +130,7 @@ public class BehaviorActionSequence
          }
          for (HandPoseActionMessage message : latestUpdateMessage.getHandPoseActions())
          {
-            HandPoseAction action = new HandPoseAction(ros2, referenceFrameLibrary);
+            HandPoseAction action = new HandPoseAction(ros2, referenceFrameLibrary, robotModel, syncedRobot);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
@@ -174,13 +173,15 @@ public class BehaviorActionSequence
 
       syncedRobot.update();
 
-      for (var action : actionSequence)
-         action.update();
-
       if (automaticExecutionSubscription.getMessageNotification().poll())
          automaticExecution = automaticExecutionSubscription.getMessageNotification().read().getData();
       if (executionNextIndexSubscription.getMessageNotification().poll())
          excecutionNextIndex = executionNextIndexSubscription.getMessageNotification().read().getData();
+
+      for (int i = 0; i < actionSequence.size(); i++)
+      {
+         actionSequence.get(i).update(i, excecutionNextIndex);
+      }
 
       sendStatus();
 
