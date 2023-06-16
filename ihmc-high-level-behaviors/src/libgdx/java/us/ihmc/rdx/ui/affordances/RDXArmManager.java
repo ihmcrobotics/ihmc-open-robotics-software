@@ -90,8 +90,7 @@ public class RDXArmManager
                           new ArmIKSolver(side,
                                           robotModel,
                                           syncedRobot.getFullRobotModel(),
-                                          desiredRobot,
-                                          interactableHands.get(side).getControlReferenceFrame()));
+                                          desiredRobot));
       }
    }
 
@@ -118,7 +117,7 @@ public class RDXArmManager
 
       for (RobotSide side : interactableHands.sides())
       {
-         armIKSolvers.get(side).update();
+         armIKSolvers.get(side).update(interactableHands.get(side).getControlReferenceFrame());
 
          // wrench expressed in wrist pitch body fixed-frame
          boolean showWrench = indicateWrenchOnScreen.get();
