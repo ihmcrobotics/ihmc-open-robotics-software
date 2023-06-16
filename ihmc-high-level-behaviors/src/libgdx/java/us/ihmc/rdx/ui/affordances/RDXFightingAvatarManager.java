@@ -51,7 +51,7 @@ public class RDXFightingAvatarManager
       this.ros2Helper = ros2Helper;
       this.teleoperationParameters = teleoperationParameters;
 
-      armsHome.put(RobotSide.LEFT, new double[] {-0.221, -0.124, -0.4, -2.613, -0.0, -0.0, 0.0});
+      armsHome.put(RobotSide.LEFT, new double[] {-0.391, -0.024, -0.4, -2.613, -0.0, -0.0, 0.0});
       armsHome.put(RobotSide.RIGHT, new double[] {0.4, -0.124, 0.7, -2.6, 0.0, 0.0, -0.0});
       feetHome.put(RobotSide.LEFT, new Pose3D(0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
       feetHome.put(RobotSide.RIGHT, new Pose3D(-0.35, 0.0, 0.0, -Math.toRadians(45), 0.0, 0.0));

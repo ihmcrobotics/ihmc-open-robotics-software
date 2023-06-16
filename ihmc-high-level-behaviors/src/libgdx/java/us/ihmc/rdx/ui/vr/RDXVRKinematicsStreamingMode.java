@@ -313,6 +313,8 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
       message.setEndEffectorHashCode(endEffector.hashCode());
       tempFramePose.setToZero(desiredControlFrame.getReferenceFrame());
       tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      if (kinematicsRecorder.isReplaying())
+         kinematicsRecorder.framePoseToPack(tempFramePose); //get values of tempFramePose from replay
       message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
       kinematicsRecorder.framePoseToRecord(tempFramePose);
       message.getAngularSelectionMatrix().setXSelected(true);

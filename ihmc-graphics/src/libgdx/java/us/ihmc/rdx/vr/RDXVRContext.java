@@ -95,11 +95,11 @@ public class RDXVRContext
    private static final HashMap<String, String> TRACKER_SERIAL_MAP = new HashMap<String, String>()
    {
       {
-         put("Chest", "LHR-AC72B09D");
-         put("LeftForeArm", "LHR-4CB1033A");
-         put("RightForeArm", "SerialNumber3");
+         put("LHR-4CB1033A", "Chest");
+         put("LHR-AC72B09D", "LeftForeArm");
+         put("SerialNumber3", "RightForeArm");
       }
-   }; // must use serial number, tracker role is not supported in org.lwjgl.openvr.VR (IVRInput does)
+   }; // must use serial number, tracker role is not supported in org.lwjgl.openvr.VR
 
    private final SideDependentList<ArrayList<RDXVRPickResult>> pickResults = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
    private SideDependentList<RDXVRPickResult> selectedPick = new SideDependentList<>(null, null);
@@ -206,10 +206,13 @@ public class RDXVRContext
       while (VRSystem.VRSystem_PollNextEvent(event))
       {
          int deviceIndex = event.trackedDeviceIndex();
-         int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
-         if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker)
+         if (!trackers.containsKey(getBodySegment(getSerialNumber(deviceIndex))))
          {
-            trackers.put(getBodySegment(getSerialNumber(deviceIndex)), new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex));
+            int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
+            if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker)
+            {
+               trackers.put(getBodySegment(getSerialNumber(deviceIndex)), new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex));
+            }
          }
       }
 
