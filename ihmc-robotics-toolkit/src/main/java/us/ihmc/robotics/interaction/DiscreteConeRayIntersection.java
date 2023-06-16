@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.gizmo;
+package us.ihmc.robotics.interaction;
 
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.Plane3D;
@@ -7,6 +7,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.robotics.interaction.SphereRayIntersection;
 
 public class DiscreteConeRayIntersection
 {
