@@ -14,7 +14,7 @@ import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
  */
 public class RDXWebcam6DPoseEstimationDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI("Webcam CozyPose Demo");
+   private final RDXBaseUI baseUI = new RDXBaseUI("Webcam 6 DoF Pose Estimation Demo");
    private RDXOpenCVWebcamReader webcamReader;
    private volatile boolean running = true;
    private final Mat bgrSourceCopy = new Mat();
@@ -36,7 +36,7 @@ public class RDXWebcam6DPoseEstimationDemo
             webcamReader.create();
             baseUI.getImGuiPanelManager().addPanel(webcamReader.getSwapCVPanel().getImagePanel());
 
-            net = opencv_dnn.readNetFromTorch("");
+//            net = opencv_dnn.readNetFromTorch("");
 
             ThreadTools.startAsDaemon(() ->
             {
