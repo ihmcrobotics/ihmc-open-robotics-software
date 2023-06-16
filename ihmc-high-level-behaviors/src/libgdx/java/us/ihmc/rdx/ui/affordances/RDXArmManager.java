@@ -15,11 +15,14 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -45,6 +48,7 @@ public class RDXArmManager
    private final SideDependentList<double[]> doorAvoidanceArms = new SideDependentList<>();
 
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
+   private final SideDependentList<OneDoFJointBasics[]> desiredRobotArmJoints = new SideDependentList<>();
 
    private volatile boolean readyToSolve = true;
    private volatile boolean readyToCopySolution = false;
@@ -86,11 +90,8 @@ public class RDXArmManager
 
       for (RobotSide side : RobotSide.values)
       {
-         armIKSolvers.put(side,
-                          new ArmIKSolver(side,
-                                          robotModel,
-                                          syncedRobot.getFullRobotModel(),
-                                          desiredRobot));
+         armIKSolvers.put(side, new ArmIKSolver(side, robotModel, syncedRobot.getFullRobotModel()));
+         desiredRobotArmJoints.put(side, FullRobotModelUtils.getArmJoints(desiredRobot, side, robotModel.getJointMap().getArmJointNames()));
       }
    }
 
@@ -167,7 +168,7 @@ public class RDXArmManager
          readyToCopySolution = false;
          for (RobotSide side : interactableHands.sides())
          {
-            armIKSolvers.get(side).copyWorkToDesired();
+            MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(armIKSolvers.get(side).getSolutionOneDoFJoints(), desiredRobotArmJoints.get(side));
          }
 
          readyToSolve = true;
@@ -272,14 +273,6 @@ public class RDXArmManager
          }
       };
       return runnable;
-   }
-
-   public void setDesiredToCurrent()
-   {
-      for (RobotSide side : RobotSide.values)
-      {
-         armIKSolvers.get(side).setDesiredToCurrent();
-      }
    }
 
    public RDXArmControlMode getArmControlMode()
