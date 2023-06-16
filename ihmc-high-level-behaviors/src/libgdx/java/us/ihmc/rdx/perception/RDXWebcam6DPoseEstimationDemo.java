@@ -1,23 +1,26 @@
 package us.ihmc.rdx.perception;
 
+import org.bytedeco.opencv.global.opencv_dnn;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_dnn.Net;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
 
 /**
- * Renders the CozyPose results.
+ * Renders the pose estimation results.
  */
-public class RDXWebcamCozyPoseDemo
+public class RDXWebcam6DPoseEstimationDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI("Webcam CozyPose Demo");
    private RDXOpenCVWebcamReader webcamReader;
    private volatile boolean running = true;
    private final Mat bgrSourceCopy = new Mat();
+   private Net net;
 
-   public RDXWebcamCozyPoseDemo()
+   public RDXWebcam6DPoseEstimationDemo()
    {
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -32,6 +35,8 @@ public class RDXWebcamCozyPoseDemo
 
             webcamReader.create();
             baseUI.getImGuiPanelManager().addPanel(webcamReader.getSwapCVPanel().getImagePanel());
+
+            net = opencv_dnn.readNetFromTorch("");
 
             ThreadTools.startAsDaemon(() ->
             {
@@ -61,6 +66,8 @@ public class RDXWebcamCozyPoseDemo
                if (bgrSourceCopy.rows() > 0)
                {
 
+//                  net.forward(bgrSourceCopy, );
+
                   opencv_imgproc.cvtColor(bgrSourceCopy, displayImageToDrawTo, opencv_imgproc.COLOR_BGR2RGBA, 0);
                }
             }
@@ -78,6 +85,6 @@ public class RDXWebcamCozyPoseDemo
 
    public static void main(String[] args)
    {
-      new RDXWebcamCozyPoseDemo();
+      new RDXWebcam6DPoseEstimationDemo();
    }
 }
