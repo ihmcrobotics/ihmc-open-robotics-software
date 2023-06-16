@@ -99,6 +99,7 @@ public class RDXBehaviorActionSequenceEditor
    {
       panel = new ImGuiPanel(name + " Behavior Sequence Editor", this::renderImGuiWidgets, false, true);
       pascalCasedName = FormattingTools.titleToPascalCase(name);
+      panel.getIsShowing().set(true);
    }
 
    public void create(RDX3DPanel panel3D,
