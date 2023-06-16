@@ -66,7 +66,6 @@ public class ArmIKSolver
    private final DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
    private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
-   private final ReferenceFrame handControlDesiredFrame;
    private final FramePose3D handControlDesiredPose = new FramePose3D();
    private final FramePose3D lastHandControlDesiredPose = new FramePose3D();
    private final RigidBodyTransform handControlDesiredPoseToChestCoMTransform = new RigidBodyTransform();
@@ -79,13 +78,8 @@ public class ArmIKSolver
    private final FeedbackControllerDataHolderReadOnly feedbackControllerDataHolder;
    private final RigidBodyBasics syncedChest;
 
-   public ArmIKSolver(RobotSide side,
-                      DRCRobotModel robotModel,
-                      FullHumanoidRobotModel syncedRobot,
-                      FullHumanoidRobotModel solutionRobot,
-                      ReferenceFrame handControlDesiredFrame)
+   public ArmIKSolver(RobotSide side, DRCRobotModel robotModel, FullHumanoidRobotModel syncedRobot, FullHumanoidRobotModel solutionRobot)
    {
-      this.handControlDesiredFrame = handControlDesiredFrame;
       syncedChest = syncedRobot.getChest();
       OneDoFJointBasics syncedFirstArmJoint = syncedRobot.getArmJoint(side, robotModel.getJointMap().getArmJointNames()[0]);
       syncedOneDoFJoints = FullRobotModelUtils.getArmJoints(syncedRobot, side, robotModel.getJointMap().getArmJointNames());
@@ -163,7 +157,7 @@ public class ArmIKSolver
       MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(syncedOneDoFJoints, workingOneDoFJoints);
    }
 
-   public void update()
+   public void update(ReferenceFrame handControlDesiredFrame)
    {
       // since this is temporaririly modifying the desired pose and it's passed
       // to the WBCC command on another thread below, we need to synchronize.
