@@ -1,22 +1,17 @@
 package us.ihmc.rdx.ui.affordances;
 
-import com.badlogic.gdx.graphics.Color;
-import imgui.internal.ImGui;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.footstepPlanning.SwingPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepPoseHeuristicChecker;
-import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -46,7 +41,7 @@ public class RDXFootstepChecker
    private RobotSide swingSide;
 
    private String text = null;
-   private ImGui3DViewInput latestInput;
+   private RDX3DPanelTooltip tooltip;
    private boolean renderTooltip = false;
 
    public RDXFootstepChecker(RDXBaseUI baseUI,
@@ -57,6 +52,7 @@ public class RDXFootstepChecker
       this.syncedRobot = syncedRobot;
       this.footPolygons = footPolygons;
       primary3DPanel = baseUI.getPrimary3DPanel();
+      tooltip = new RDX3DPanelTooltip(primary3DPanel);
       primary3DPanel.addImGuiOverlayAddition(this::renderTooltips);
       this.footstepPlannerParameters = footstepPlannerParameters;
       snapper = new FootstepSnapAndWiggler(footPolygons, this.footstepPlannerParameters);
@@ -80,25 +76,14 @@ public class RDXFootstepChecker
 
    public void getInput(ImGui3DViewInput input)
    {
-      latestInput = input;
+      tooltip.setInput(input);
    }
 
    private void renderTooltips()
    {
-      if (latestInput != null && renderTooltip)
+      if (renderTooltip)
       {
-         float offsetX = 10.0f;
-         float offsetY = 31.0f;
-         float mousePosX = latestInput.getMousePosX();
-         float mousePosY = latestInput.getMousePosY();
-         float drawStartX = primary3DPanel.getWindowDrawMinX() + mousePosX + offsetX;
-         float drawStartY = primary3DPanel.getWindowDrawMinY() + mousePosY + offsetY;
-
-         ImGui.getWindowDrawList()
-              .addRectFilled(drawStartX, drawStartY, drawStartX + text.length() * 7.2f, drawStartY + 21.0f, new Color(0.2f, 0.2f, 0.2f, 0.7f).toIntBits());
-
-         ImGui.getWindowDrawList()
-              .addText(ImGuiTools.getSmallFont(), ImGuiTools.getSmallFont().getFontSize(), drawStartX + 5.0f, drawStartY + 2.0f, Color.WHITE.toIntBits(), text);
+         tooltip.render(text);
       }
    }
 
@@ -157,11 +142,11 @@ public class RDXFootstepChecker
       // checkValidStepList(footstepArrayList);
       if (reason != null)
       {
-         text = " Warning ! : " + reason.name();
+         text = "Rejected for %s.".formatted(reason.name());
       }
       else
       {
-         text = "Looks Good !";
+         text = "Passes checks.";
       }
    }
 
