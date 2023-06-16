@@ -17,6 +17,7 @@ import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePathControlRingGizmo;
@@ -46,7 +47,7 @@ public class RDXWalkAction extends RDXBehaviorAction
    private final ImDoubleWrapper transferDurationWidget = new ImDoubleWrapper(actionData::getTransferDuration,
                                                                               actionData::setTransferDuration,
                                                                               imDouble -> ImGui.inputDouble(labels.get("Transfer duration"), imDouble));
-
+   private final RDX3DPanelTooltip tooltip;
 
    public RDXWalkAction(RDX3DPanel panel3D,
                         DRCRobotModel robotModel,
@@ -58,6 +59,9 @@ public class RDXWalkAction extends RDXBehaviorAction
 
       footstepPlannerGoalGizmo.create(panel3D);
       FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+
+      tooltip = new RDX3DPanelTooltip(panel3D);
+      panel3D.addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
 
       for (RobotSide side : RobotSide.values)
       {
@@ -148,6 +152,7 @@ public class RDXWalkAction extends RDXBehaviorAction
    public void process3DViewInput(ImGui3DViewInput input)
    {
       footstepPlannerGoalGizmo.process3DViewInput(input);
+      tooltip.setInput(input);
       if (getSelected().get())
       {
          for (RobotSide side : RobotSide.values)
@@ -183,6 +188,16 @@ public class RDXWalkAction extends RDXBehaviorAction
       swingDurationWidget.renderImGuiWidget();
       transferDurationWidget.renderImGuiWidget();
       ImGui.popItemWidth();
+   }
+
+   public void render3DPanelImGuiOverlays()
+   {
+      if (footstepPlannerGoalGizmo.getPathControlRingGizmo().getRingHovered())
+      {
+         tooltip.render("%s Action\nIndex: %d\nDescription: %s".formatted(getActionTypeTitle(),
+                                                                          getActionIndex(),
+                                                                          actionData.getDescription()));
+      }
    }
 
    @Override
