@@ -45,7 +45,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class DualBlackflyCamera
 {
-   private static final double PUBLISH_RATE = 15.0;
+   private static final double PUBLISH_RATE = 20.0;
 
    private final RobotSide side;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -63,34 +63,35 @@ public class DualBlackflyCamera
    private final ROS2DetectableSceneNodesPublisher detectableSceneObjectsPublisher = new ROS2DetectableSceneNodesPublisher();
    private final ROS2DetectableSceneNodesSubscription detectableSceneNodesSubscription;
 
-   private final AtomicReference<GpuMat> latestImageOnGpu = new AtomicReference<>();
    private final AtomicReference<Instant> spinImageAcquisitionTime = new AtomicReference<>();
    private final ImageMessage imageMessage = new ImageMessage();
    private final IHMCROS2Publisher<ImageMessage> ros2ImagePublisher;
    private long imageMessageSequenceNumber = 0;
 
+   private final CUDAImageEncoder cudaImageEncoder;
+
    // These update when a camera image resolution change is detected
    private int imageWidth = 0;
    private int imageHeight = 0;
-   private long numberOfBytesInFrame = 0;
+   private long imageFrameSize = 0;
    private GpuMat distortedRGBImage;
    private GpuMat undistortedImage;
    private BytedecoImage undistortedBytedecoImage;
    private GpuMat undistortionMap1;
    private GpuMat undistortionMap2;
-   private GpuMat processThreadSourceImage;
-   private GpuMat undistortThreadSourceImage;
-   private final LinkedList<GpuMat> gpuMatDeque = new LinkedList<>();
 
-   private final Object processThreadSyncObject = new Object();
-   private final Object undistortThreadSyncObject = new Object();
-
-   private final CUDAImageEncoder cudaImageEncoder;
+   // These are used to ensure safe deallocation of images
+   private GpuMat sourceImageBeingUsedForProcessing;
+   private GpuMat sourceImageBeingUsedForUndistortion;
+   private final LinkedList<GpuMat> receivedImagesDeque = new LinkedList<>(); /* deque of images received from the blackfly camera.
+                                                                               * last element = newest image received
+                                                                               * first element = oldest image received */
+   private final Object processThreadSyncObject = new Object();   // sync objects are used to synchronize deallocation of images (GpuMats)
+   private final Object undistortThreadSyncObject = new Object(); // notify the deallocation thread when a thread is finished using a source image
+   private long numberOfGpuMatsAllocated = 0L;   // keep count of images allocated and deallocated
+   private long numberOfGpuMatsDeallocated = 0L; // an exception is thrown if more than 100 images are allocated at a time
 
    private volatile boolean destroyed = false;
-
-   private long numCreated = 0L;
-   private long numReleased = 0L;
 
    public DualBlackflyCamera(RobotSide side,
                              ROS2SyncedRobotModel syncedRobot,
@@ -106,11 +107,10 @@ public class DualBlackflyCamera
       this.ousterFisheyeColoringIntrinsics = ousterFisheyeColoringIntrinsics;
       this.predefinedSceneNodeLibrary = predefinedSceneNodeLibrary;
 
-      cudaImageEncoder = new CUDAImageEncoder();
-
       ROS2Topic<ImageMessage> imageTopic = PerceptionAPI.BLACKFLY_FISHEYE_COLOR_IMAGE.get(side);
       ros2ImagePublisher = ROS2Tools.createPublisher(ros2Node, imageTopic, ROS2QosProfile.BEST_EFFORT());
       ros2Helper = new ROS2Helper(ros2Node);
+      cudaImageEncoder = new CUDAImageEncoder();
 
       ousterFisheyeColoringIntrinsicsROS2 = new ROS2StoredPropertySet<>(ros2Helper,
                                                                         DualBlackflyComms.OUSTER_FISHEYE_COLORING_INTRINSICS,
@@ -125,16 +125,18 @@ public class DualBlackflyCamera
                                                                                   ROS2IOTopicQualifier.COMMAND);
 
       // Camera read thread
-      ThreadTools.startAsDaemon(() ->
+      ThreadTools.startAThread(() ->
       {
          Throttler cameraReadThrottler = new Throttler();
          cameraReadThrottler.setFrequency(PUBLISH_RATE);
 
          while (!destroyed)
          {
+            // Read an image at PUBLISH_RATE hz
             cameraReadThrottler.waitAndRun();
             cameraRead();
 
+            // Notify threads when a new image is available
             synchronized (DualBlackflyCamera.this)
             {
                DualBlackflyCamera.this.notifyAll();
@@ -142,32 +144,12 @@ public class DualBlackflyCamera
          }
       }, "SpinnakerCameraRead");
 
-      ThreadTools.startAThread(() ->
-      {
-         while (!destroyed)
-         {
-            try
-            {
-               synchronized (DualBlackflyCamera.this)
-               {
-                  DualBlackflyCamera.this.wait();
-               }
-            }
-            catch (InterruptedException e)
-            {
-               LogTools.error(e);
-            }
-
-            // TODO: peekLast isn't working for some reason
-            processThreadSourceImage = gpuMatDeque.peekLast();
-            imageProcessAndPublish();
-         }
-      }, "SpinnakerImageProcessAndPublish");
-
+      // Image process and publish thread
       ThreadTools.startAsDaemon(() ->
       {
          while (!destroyed)
          {
+            // Wait until new image is available
             try
             {
                synchronized (DualBlackflyCamera.this)
@@ -180,15 +162,40 @@ public class DualBlackflyCamera
                LogTools.error(e);
             }
 
-            undistortThreadSourceImage = gpuMatDeque.peekLast();
+            // Process and publish the new image
+            imageProcessAndPublish();
+         }
+      }, "SpinnakerImageProcessAndPublish");
+
+      // Undistort image and update aruco thread
+      ThreadTools.startAsDaemon(() ->
+      {
+         while (!destroyed)
+         {
+            // Wait until new image is available
+            try
+            {
+               synchronized (DualBlackflyCamera.this)
+               {
+                  DualBlackflyCamera.this.wait();
+               }
+            }
+            catch (InterruptedException e)
+            {
+               LogTools.error(e);
+            }
+
+            // Undistort  the new image
             undistortImageAndUpdateArUco();
          }
       }, "SpinnakerImageUndistortAndUpdateArUco");
 
-      ThreadTools.startAThread(() ->
+      // Deallocation thread
+      ThreadTools.startAsDaemon(() ->
       {
          while (!destroyed)
          {
+            // Wait until process and undistort threads are done using the newest image
             try
             {
                synchronized (processThreadSyncObject)
@@ -205,16 +212,22 @@ public class DualBlackflyCamera
                LogTools.error(e);
             }
 
-            GpuMat oldestGpuMat = gpuMatDeque.peekFirst();
+            // Get the oldest image in the deque
+            GpuMat oldestGpuMat = receivedImagesDeque.peekFirst();
+            if (oldestGpuMat == null)
+               continue;
 
-            while (!oldestGpuMat.equals(processThreadSourceImage) && !oldestGpuMat.equals(undistortThreadSourceImage))
+            // While the threads aren't using the oldest image
+            while (!oldestGpuMat.equals(sourceImageBeingUsedForProcessing) && !oldestGpuMat.equals(sourceImageBeingUsedForUndistortion))
             {
-               GpuMat gpuMat = gpuMatDeque.pop();
+               // Deallocate the oldest image
+               GpuMat gpuMat = receivedImagesDeque.pollFirst();
                gpuMat.release();
                gpuMat.close();
-               ++numReleased;
+               ++numberOfGpuMatsDeallocated;
 
-               oldestGpuMat = gpuMatDeque.peekFirst();
+               // Get next oldest image
+               oldestGpuMat = receivedImagesDeque.peekFirst();
                if (oldestGpuMat == null)
                   break;
             }
@@ -222,11 +235,16 @@ public class DualBlackflyCamera
       }, "SpinnakerImageDeallocation");
    }
 
+   /**
+    * Initializes variables that depend on image width and height.
+    * @param imageWidth the width, in pixels, of the image received
+    * @param imageHeight the height, in pixels, of the image received
+    */
    private void initialize(int imageWidth, int imageHeight)
    {
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
-      numberOfBytesInFrame = (long) imageWidth * imageHeight; // BGR8
+      imageFrameSize = (long) imageWidth * imageHeight;
       LogTools.info("Blackfly {} resolution detected: {} x {}", spinnakerBlackfly.getSerialNumber(), imageWidth, imageHeight);
 
       distortedRGBImage = new GpuMat(imageWidth, imageHeight, opencv_core.CV_8UC3);
@@ -323,7 +341,7 @@ public class DualBlackflyCamera
       }
 
       // Get pointer to image data
-      BytePointer spinImageData = new BytePointer(numberOfBytesInFrame); // close at the end
+      BytePointer spinImageData = new BytePointer(imageFrameSize); // close at the end
       spinnakerBlackfly.setPointerToSpinImageData(spinImage, spinImageData);
 
       // Upload image data to GPU
@@ -332,30 +350,32 @@ public class DualBlackflyCamera
       GpuMat latestImageSetter = new GpuMat(imageWidth, imageHeight, opencv_core.CV_8UC3);
       latestImageSetter.upload(sourceBytedecoImage.getBytedecoOpenCVMat());
 
-      gpuMatDeque.push(latestImageSetter);
+      // Add image to deque
+      receivedImagesDeque.offerLast(latestImageSetter);
 
-      if (numCreated - numReleased > 100)
+      // Ensure images are being deallocated
+      if (numberOfGpuMatsAllocated - numberOfGpuMatsDeallocated > 100)
       {
          throw new RuntimeException("GpuMats are not being released in time");
       }
-
-      numCreated++;
+      numberOfGpuMatsAllocated++;
 
       spinImageAcquisitionTime.set(Instant.now());
 
+      // Close pointers
       spinImageData.close();
       spinnakerBlackfly.releaseImage(spinImage);
    }
 
    /**
-    * Get the last image read from the camera read thread, undistort fisheye,
-    * update arUco marker detection (if right fisheye camera), change pixel formats,
-    * apply jpeg compression, and publish over the network
+    * Get the last image read from the camera read thread, apply jpeg compression, and publish over the network
     */
    private void imageProcessAndPublish()
    {
+      // Get newest image and ensure it's not null
+      sourceImageBeingUsedForProcessing = receivedImagesDeque.peekLast();
       Instant spinImageAcquisitionTime = this.spinImageAcquisitionTime.get();
-      if (processThreadSourceImage == null || spinImageAcquisitionTime == null)
+      if (sourceImageBeingUsedForProcessing == null || spinImageAcquisitionTime == null)
          return;
 
       ReferenceFrame ousterLidarFrame = syncedRobot.getReferenceFrames().getOusterLidarFrame();
@@ -371,11 +391,12 @@ public class DualBlackflyCamera
       remoteTunableCameraTransform.update();
       syncedRobot.update();
 
-      BytePointer jpegImageBytePointer = new BytePointer(numberOfBytesInFrame); // close at the end
+      BytePointer jpegImageBytePointer = new BytePointer(imageFrameSize); // close at the end
 
       // Encode the image
-      cudaImageEncoder.encodeBGR(processThreadSourceImage, jpegImageBytePointer, imageWidth, imageHeight);
+      cudaImageEncoder.encodeBGR(sourceImageBeingUsedForProcessing.data(), jpegImageBytePointer, imageWidth, imageHeight, sourceImageBeingUsedForProcessing.step());
 
+      // Notify deallocation thread that the images has been processed, and is ready for deallocation
       synchronized (processThreadSyncObject)
       {
          processThreadSyncObject.notify();
@@ -401,16 +422,23 @@ public class DualBlackflyCamera
       ros2ImagePublisher.publish(imageMessage);
 
       // Close pointers
-      //jpegImageBytePointer.close();
+      jpegImageBytePointer.close();
    }
 
+   /**
+    * undistort fisheye, update arUco marker detection (if right fisheye camera)
+    */
    private void undistortImageAndUpdateArUco()
    {
-      if (undistortThreadSourceImage == null)
+      // Get newest image and ensure it's not null
+      sourceImageBeingUsedForUndistortion = receivedImagesDeque.peekLast();
+      if (sourceImageBeingUsedForUndistortion == null)
          return;
 
-      opencv_cudaimgproc.cvtColor(undistortThreadSourceImage, distortedRGBImage, opencv_imgproc.COLOR_BGR2RGB);
+      // Convert color from BGR to RGB
+      opencv_cudaimgproc.cvtColor(sourceImageBeingUsedForUndistortion, distortedRGBImage, opencv_imgproc.COLOR_BGR2RGB);
 
+      // Notify deallocation thread that the image has been used, and is ready for deallocation
       synchronized (undistortThreadSyncObject)
       {
          undistortThreadSyncObject.notify();
@@ -422,14 +450,8 @@ public class DualBlackflyCamera
                                undistortionMap2,
                                opencv_imgproc.INTER_LINEAR);
 
-      ReferenceFrame ousterLidarFrame = syncedRobot.getReferenceFrames().getOusterLidarFrame();
-      RigidBodyTransform ousterToBlackflyTransfrom = new RigidBodyTransform();
-
       if (side == RobotSide.RIGHT)
       {
-         ReferenceFrame blackflyCameraFrame = syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame();
-         ousterLidarFrame.getTransformToDesiredFrame(ousterToBlackflyTransfrom, blackflyCameraFrame);
-
          arUcoMarkerDetection.update();
          // TODO: Maybe publish a separate image for ArUco marker debugging sometime.
          // arUcoMarkerDetection.drawDetectedMarkers(blackflySourceImage.getBytedecoOpenCVMat());
