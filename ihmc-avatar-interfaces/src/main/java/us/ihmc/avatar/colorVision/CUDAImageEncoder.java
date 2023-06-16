@@ -73,8 +73,8 @@ public class CUDAImageEncoder
     * Encodes a YUV I420 image into jpeg.
     * @param sourceImage the YUV I420 image
     * @param outputImagePointer pointer to the jpeg image output
-    * @param imageWidth original width (in bytes) of the image
-    * @param imageHeight original height (in bytes) of the image
+    * @param imageWidth width (in bytes) of the source image
+    * @param imageHeight height (in bytes) of the source image
     */
    public void encodeYUV420(BytePointer sourceImage, BytePointer outputImagePointer, int imageWidth, int imageHeight)
    {
@@ -146,7 +146,15 @@ public class CUDAImageEncoder
       jpegSize.close();
    }
 
-   public void encodeBGR(GpuMat sourceImage, BytePointer outputImagePointer, int imageWidth, int imageHeight)
+   /**
+    * Encodes a BGR image into jpeg
+    * @param sourceImage the BGR image
+    * @param outputImagePointer pointer to the jpeg image output
+    * @param imageWidth width (in bytes) of the source image
+    * @param imageHeight height (in bytes) of the source image
+    * @param sourceImagePitch number of bytes (including padding) in a row of the image
+    */
+   public void encodeBGR(BytePointer sourceImage, BytePointer outputImagePointer, int imageWidth, int imageHeight, long sourceImagePitch)
    {
       // TODO: Make this work with GpuMat
       long rowSize = 3L * imageWidth;
@@ -160,7 +168,7 @@ public class CUDAImageEncoder
       // Get B plane data
       BytePointer devicePointer = new BytePointer();
       CHECK_CUDA("cudaMalloc", cudaMalloc(devicePointer, frameSize)); // allocate GPU memory
-      CHECK_CUDA("cudaMemcpy2D", cudaMemcpy2D(devicePointer, rowSize, sourceImage.data(), sourceImage.step(), rowSize, imageHeight, cudaMemcpyDeviceToDevice));
+      CHECK_CUDA("cudaMemcpy2D", cudaMemcpy2D(devicePointer, rowSize, sourceImage, sourceImagePitch, rowSize, imageHeight, cudaMemcpyDeviceToDevice));
       nvjpegImage.pitch(0, rowSize);
       nvjpegImage.channel(0, devicePointer);
 
