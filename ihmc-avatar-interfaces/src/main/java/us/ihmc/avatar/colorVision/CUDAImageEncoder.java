@@ -8,7 +8,6 @@ import org.bytedeco.cuda.nvjpeg.nvjpegHandle;
 import org.bytedeco.cuda.nvjpeg.nvjpegImage_t;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.SizeTPointer;
-import org.bytedeco.opencv.opencv_core.GpuMat;
 
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvjpeg.*;
@@ -46,24 +45,24 @@ public class CUDAImageEncoder
    {
       // Initialize context
       cudaContext = new CUctx_st();
-      CHECK_CUDA("cuInit", cuInit(0));
-      CHECK_CUDA("cuCtxCreate", cuCtxCreate(cudaContext, CU_CTX_SCHED_BLOCKING_SYNC, 0));
+      checkCUDA("cuInit", cuInit(0));
+      checkCUDA("cuCtxCreate", cuCtxCreate(cudaContext, CU_CTX_SCHED_BLOCKING_SYNC, 0));
 
       // Initialize stream
       cudaStream = new CUstream_st();
-      CHECK_CUDA("cuStreamCreate", cuStreamCreate(cudaStream, NVJPEG_FLAGS_DEFAULT));
+      checkCUDA("cuStreamCreate", cuStreamCreate(cudaStream, NVJPEG_FLAGS_DEFAULT));
 
       // Initialize handle
       nvjpegHandle = new nvjpegHandle();
-      CHECK_NVJPEG("nvjpegCreateSimple", nvjpegCreateSimple(nvjpegHandle));
+      checkNVJPEG("nvjpegCreateSimple", nvjpegCreateSimple(nvjpegHandle));
 
       // Initialize encoder state
       encoderState = new nvjpegEncoderState();
-      CHECK_NVJPEG("nvjpegEncoderStateCreate", nvjpegEncoderStateCreate(nvjpegHandle, encoderState, cudaStream));
+      checkNVJPEG("nvjpegEncoderStateCreate", nvjpegEncoderStateCreate(nvjpegHandle, encoderState, cudaStream));
 
       // Initialize encoder parameters
       encoderParameters = new nvjpegEncoderParams();
-      CHECK_NVJPEG("nvjpegEncoderParamsCreate", nvjpegEncoderParamsCreate(nvjpegHandle, encoderParameters, cudaStream));
+      checkNVJPEG("nvjpegEncoderParamsCreate", nvjpegEncoderParamsCreate(nvjpegHandle, encoderParameters, cudaStream));
 
       // Initialize nvjpeg image
       nvjpegImage = new nvjpegImage_t();
@@ -82,51 +81,48 @@ public class CUDAImageEncoder
       long quarterOfFrameSize = ((frameSize % 4 == 0) ? (frameSize / 4) : (frameSize / 4 + 1)); // ensure integer math goes well
       long halfOfImageWidth = ((imageWidth % 2 == 0) ? (imageWidth / 2) : (imageWidth / 2 + 1));
 
-      CHECK_CUDA("cuCtxSetCurrent", cuCtxSetCurrent(cudaContext));
+      checkCUDA("cuCtxSetCurrent", cuCtxSetCurrent(cudaContext));
 
       // Set params to correct sampling factor
-      CHECK_NVJPEG("nvjpegEncoderParamsSetSamplingFactors", nvjpegEncoderParamsSetSamplingFactors(encoderParameters, NVJPEG_CSS_420, cudaStream));
-
-      // Set pointer to start of Y plane
-      BytePointer planeStartPointer = sourceImage;
+      checkNVJPEG("nvjpegEncoderParamsSetSamplingFactors", nvjpegEncoderParamsSetSamplingFactors(encoderParameters, NVJPEG_CSS_420, cudaStream));
 
       // Get Y plane data
       BytePointer YPlanePointer = new BytePointer(); // create a pointer for the Y plane
-      CHECK_CUDA("cudaMalloc", cudaMalloc(YPlanePointer, frameSize)); // allocate Y plane memory
-      CHECK_CUDA("cudaMemcpy", cudaMemcpy(YPlanePointer, planeStartPointer, frameSize, cudaMemcpyHostToDevice)); // copy Y plane data to device memory
+      checkCUDA("cudaMalloc", cudaMalloc(YPlanePointer, frameSize)); // allocate Y plane memory
+      checkCUDA("cudaMemcpy", cudaMemcpy(YPlanePointer, sourceImage, frameSize, cudaMemcpyHostToDevice)); // copy Y plane data to device memory
       nvjpegImage.pitch(0, imageWidth); // set the pitch
       nvjpegImage.channel(0, YPlanePointer); //set the channel
-      planeStartPointer.position(planeStartPointer.position() + frameSize); // move plane start pointer to start of U plane
+      sourceImage.position(sourceImage.position() + frameSize); // move pointer to start of U plane
 
       // Get U plane data
       BytePointer UPlanePointer = new BytePointer();
-      CHECK_CUDA("cudaMalloc", cudaMalloc(UPlanePointer, quarterOfFrameSize));
-      CHECK_CUDA("cudaMemcpy", cudaMemcpy(UPlanePointer, planeStartPointer, quarterOfFrameSize, cudaMemcpyHostToDevice));
+      checkCUDA("cudaMalloc", cudaMalloc(UPlanePointer, quarterOfFrameSize));
+      checkCUDA("cudaMemcpy", cudaMemcpy(UPlanePointer, sourceImage, quarterOfFrameSize, cudaMemcpyHostToDevice));
       nvjpegImage.pitch(1, halfOfImageWidth);
       nvjpegImage.channel(1, UPlanePointer);
-      planeStartPointer.position(planeStartPointer.position() + quarterOfFrameSize);
+      sourceImage.position(sourceImage.position() + quarterOfFrameSize);
 
       // Get V plane data
       BytePointer VPlanePointer = new BytePointer();
-      CHECK_CUDA("cudaMalloc", cudaMalloc(VPlanePointer, quarterOfFrameSize));
-      CHECK_CUDA("cudaMemcpy", cudaMemcpy(VPlanePointer, planeStartPointer, quarterOfFrameSize, cudaMemcpyHostToDevice));
+      checkCUDA("cudaMalloc", cudaMalloc(VPlanePointer, quarterOfFrameSize));
+      checkCUDA("cudaMemcpy", cudaMemcpy(VPlanePointer, sourceImage, quarterOfFrameSize, cudaMemcpyHostToDevice));
       nvjpegImage.pitch(2, halfOfImageWidth);
       nvjpegImage.channel(2, VPlanePointer);
 
       // Encode image (mem)
-      CHECK_NVJPEG("nvjpegEncodeYUV",
-                   nvjpegEncodeYUV(nvjpegHandle, encoderState, encoderParameters, nvjpegImage, NVJPEG_CSS_420, imageWidth, imageHeight, cudaStream));
+      checkNVJPEG("nvjpegEncodeYUV",
+                  nvjpegEncodeYUV(nvjpegHandle, encoderState, encoderParameters, nvjpegImage, NVJPEG_CSS_420, imageWidth, imageHeight, cudaStream));
 
       // Get compressed size
       SizeTPointer jpegSize = new SizeTPointer(1);
-      CHECK_NVJPEG("nvjpegEncodeRetrieveBitstream", nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, (BytePointer) null, jpegSize, cudaStream));
+      checkNVJPEG("nvjpegEncodeRetrieveBitstream", nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, (BytePointer) null, jpegSize, cudaStream));
 
       // Retrieve bitstream
       BytePointer jpegBytePointer = new BytePointer(jpegSize.get());
-      CHECK_NVJPEG("nvjpegEncodeRetrieveBitstream", nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, jpegBytePointer, jpegSize, cudaStream));
+      checkNVJPEG("nvjpegEncodeRetrieveBitstream", nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, jpegBytePointer, jpegSize, cudaStream));
 
       // Synchronize cuda stream
-      CHECK_CUDA("cudaStreamSynchronize", cudaStreamSynchronize(cudaStream));
+      checkCUDA("cudaStreamSynchronize", cudaStreamSynchronize(cudaStream));
 
       //copy data into output pointer
       byte[] bytes = new byte[(int) jpegBytePointer.limit()];
@@ -135,9 +131,9 @@ public class CUDAImageEncoder
       outputImagePointer.limit(jpegBytePointer.limit());
 
       // Free GPU memory
-      CHECK_CUDA("cudaFree", cudaFree(YPlanePointer));
-      CHECK_CUDA("cudaFree", cudaFree(UPlanePointer));
-      CHECK_CUDA("cudaFree", cudaFree(VPlanePointer));
+      checkCUDA("cudaFree", cudaFree(YPlanePointer));
+      checkCUDA("cudaFree", cudaFree(UPlanePointer));
+      checkCUDA("cudaFree", cudaFree(VPlanePointer));
 
       // Close pointers
       YPlanePointer.close();
@@ -156,36 +152,35 @@ public class CUDAImageEncoder
     */
    public void encodeBGR(BytePointer sourceImage, BytePointer outputImagePointer, int imageWidth, int imageHeight, long sourceImagePitch)
    {
-      // TODO: Make this work with GpuMat
       long rowSize = 3L * imageWidth;
       long frameSize = 3L * imageWidth * imageHeight;
 
-      CHECK_CUDA("cuCtxSetCurrent", cuCtxSetCurrent(cudaContext));
+      checkCUDA("cuCtxSetCurrent", cuCtxSetCurrent(cudaContext));
 
       // Set params to correct sampling factor
-      CHECK_NVJPEG("nvjpegEncoderParamsSetSamplingFactors", nvjpegEncoderParamsSetSamplingFactors(encoderParameters, NVJPEG_CSS_444, cudaStream));
+      checkNVJPEG("nvjpegEncoderParamsSetSamplingFactors", nvjpegEncoderParamsSetSamplingFactors(encoderParameters, NVJPEG_CSS_444, cudaStream));
 
       // Get B plane data
       BytePointer devicePointer = new BytePointer();
-      CHECK_CUDA("cudaMalloc", cudaMalloc(devicePointer, frameSize)); // allocate GPU memory
-      CHECK_CUDA("cudaMemcpy2D", cudaMemcpy2D(devicePointer, rowSize, sourceImage, sourceImagePitch, rowSize, imageHeight, cudaMemcpyDeviceToDevice));
+      checkCUDA("cudaMalloc", cudaMalloc(devicePointer, frameSize)); // allocate GPU memory
+      checkCUDA("cudaMemcpy2D", cudaMemcpy2D(devicePointer, rowSize, sourceImage, sourceImagePitch, rowSize, imageHeight, cudaMemcpyDeviceToDevice));
       nvjpegImage.pitch(0, rowSize);
       nvjpegImage.channel(0, devicePointer);
 
       // Encode the image
-      CHECK_NVJPEG("nvjpegEncodeImage",
-                   nvjpegEncodeImage(nvjpegHandle, encoderState, encoderParameters, nvjpegImage, NVJPEG_INPUT_BGRI, imageWidth, imageHeight, cudaStream));
+      checkNVJPEG("nvjpegEncodeImage",
+                  nvjpegEncodeImage(nvjpegHandle, encoderState, encoderParameters, nvjpegImage, NVJPEG_INPUT_BGRI, imageWidth, imageHeight, cudaStream));
 
       // Get compressed size
       SizeTPointer jpegSize = new SizeTPointer(1);
-      CHECK_NVJPEG("nvjpegEncodeRetrieveBitstream", nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, (BytePointer) null, jpegSize, cudaStream));
+      checkNVJPEG("nvjpegEncodeRetrieveBitstream", nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, (BytePointer) null, jpegSize, cudaStream));
 
       // Retrieve bitstream
       BytePointer jpegBytePointer = new BytePointer(jpegSize.get());
-      CHECK_NVJPEG("nvjpegEncodeRetrieveBitstream", nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, jpegBytePointer, jpegSize, cudaStream));
+      checkNVJPEG("nvjpegEncodeRetrieveBitstream", nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, jpegBytePointer, jpegSize, cudaStream));
 
       // Synchronize cuda stream
-      CHECK_CUDA("cudaStreamSynchronize", cudaStreamSynchronize(cudaStream));
+      checkCUDA("cudaStreamSynchronize", cudaStreamSynchronize(cudaStream));
 
       //copy data into output pointer
       byte[] bytes = new byte[(int) jpegBytePointer.limit()];
@@ -194,19 +189,20 @@ public class CUDAImageEncoder
       outputImagePointer.limit(jpegBytePointer.limit());
 
       // Free GPU memory
-      CHECK_CUDA("cudaFree", cudaFree(devicePointer));
+      checkCUDA("cudaFree", cudaFree(devicePointer));
 
       // Close pointers
       jpegSize.close();
+      jpegBytePointer.close();
    }
 
    public void destroy()
    {
-      CHECK_NVJPEG("nvjpegEncoderParamsDestroy", nvjpegEncoderParamsDestroy(encoderParameters));
-      CHECK_NVJPEG("nvjpegEncoderStateDestroy", nvjpegEncoderStateDestroy(encoderState));
-      CHECK_NVJPEG("nvjpegDestroy", nvjpegDestroy(nvjpegHandle));
-      CHECK_CUDA("cuStreamDestroy", cuStreamDestroy(cudaStream));
-      CHECK_CUDA("cuCtxDestroy", cuCtxDestroy(cudaContext));
+      checkNVJPEG("nvjpegEncoderParamsDestroy", nvjpegEncoderParamsDestroy(encoderParameters));
+      checkNVJPEG("nvjpegEncoderStateDestroy", nvjpegEncoderStateDestroy(encoderState));
+      checkNVJPEG("nvjpegDestroy", nvjpegDestroy(nvjpegHandle));
+      checkCUDA("cuStreamDestroy", cuStreamDestroy(cudaStream));
+      checkCUDA("cuCtxDestroy", cuCtxDestroy(cudaContext));
    }
 
    /**
@@ -216,7 +212,7 @@ public class CUDAImageEncoder
     * @param functionName the name of the function being called as a string
     * @param result the returned error code from the function called. A CUDA function should be called for this parameter
     */
-   private static void CHECK_CUDA(String functionName, int result)
+   private static void checkCUDA(String functionName, int result)
    {
       if (result != CUDA_SUCCESS)
       {
@@ -231,7 +227,7 @@ public class CUDAImageEncoder
     * @param functionName the name of the function being called as a string
     * @param result the returned error code from the function called. An nvjpeg function should be called for this parameter
     */
-   private static void CHECK_NVJPEG(String functionName, int result)
+   private static void checkNVJPEG(String functionName, int result)
    {
       if (result != NVJPEG_STATUS_SUCCESS)
       {

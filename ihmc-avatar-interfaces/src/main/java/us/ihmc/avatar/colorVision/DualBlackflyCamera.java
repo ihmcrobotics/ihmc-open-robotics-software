@@ -8,7 +8,6 @@ import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -86,11 +85,16 @@ public class DualBlackflyCamera
    private final LinkedList<GpuMat> receivedImagesDeque = new LinkedList<>(); /* deque of images received from the blackfly camera.
                                                                                * last element = newest image received
                                                                                * first element = oldest image received */
-   private final Object processThreadSyncObject = new Object();   // sync objects are used to synchronize deallocation of images (GpuMats)
-   private final Object undistortThreadSyncObject = new Object(); // notify the deallocation thread when a thread is finished using a source image
+   private final Object newImageReadNotifier = new Object();
+   private final Object encodingCompletionNotifier = new Object();   // sync objects are used to synchronize deallocation of images (GpuMats)
+   private final Object undistortionCompletionNotifier = new Object(); // notify the deallocation thread when a thread is finished using a source image
    private long numberOfGpuMatsAllocated = 0L;   // keep count of images allocated and deallocated
    private long numberOfGpuMatsDeallocated = 0L; // an exception is thrown if more than 100 images are allocated at a time
 
+   private Thread cameraReadThread;
+   private Thread imageEncodeAndPublishThread;
+   private Thread imageUndistortAndUpdateArUcoThread;
+   private Thread imageDeallocationThread;
    private volatile boolean destroyed = false;
 
    public DualBlackflyCamera(RobotSide side,
@@ -125,7 +129,7 @@ public class DualBlackflyCamera
                                                                                   ROS2IOTopicQualifier.COMMAND);
 
       // Camera read thread
-      ThreadTools.startAThread(() ->
+      cameraReadThread = new Thread(() ->
       {
          Throttler cameraReadThrottler = new Throttler();
          cameraReadThrottler.setFrequency(PUBLISH_RATE);
@@ -137,24 +141,24 @@ public class DualBlackflyCamera
             cameraRead();
 
             // Notify threads when a new image is available
-            synchronized (DualBlackflyCamera.this)
+            synchronized (newImageReadNotifier)
             {
-               DualBlackflyCamera.this.notifyAll();
+               newImageReadNotifier.notifyAll();
             }
          }
       }, "SpinnakerCameraRead");
 
       // Image process and publish thread
-      ThreadTools.startAsDaemon(() ->
+      imageEncodeAndPublishThread = new Thread(() ->
       {
          while (!destroyed)
          {
             // Wait until new image is available
             try
             {
-               synchronized (DualBlackflyCamera.this)
+               synchronized (newImageReadNotifier)
                {
-                  DualBlackflyCamera.this.wait();
+                  newImageReadNotifier.wait();
                }
             }
             catch (InterruptedException e)
@@ -165,19 +169,19 @@ public class DualBlackflyCamera
             // Process and publish the new image
             imageProcessAndPublish();
          }
-      }, "SpinnakerImageProcessAndPublish");
+      }, "SpinnakerImageEncodeAndPublish");
 
       // Undistort image and update aruco thread
-      ThreadTools.startAsDaemon(() ->
+      imageUndistortAndUpdateArUcoThread = new Thread(() ->
       {
          while (!destroyed)
          {
             // Wait until new image is available
             try
             {
-               synchronized (DualBlackflyCamera.this)
+               synchronized (newImageReadNotifier)
                {
-                  DualBlackflyCamera.this.wait();
+                  newImageReadNotifier.wait();
                }
             }
             catch (InterruptedException e)
@@ -191,20 +195,20 @@ public class DualBlackflyCamera
       }, "SpinnakerImageUndistortAndUpdateArUco");
 
       // Deallocation thread
-      ThreadTools.startAsDaemon(() ->
+      imageDeallocationThread = new Thread(() ->
       {
          while (!destroyed)
          {
             // Wait until process and undistort threads are done using the newest image
             try
             {
-               synchronized (processThreadSyncObject)
+               synchronized (encodingCompletionNotifier)
                {
-                  processThreadSyncObject.wait();
+                  encodingCompletionNotifier.wait();
                }
-               synchronized (undistortThreadSyncObject)
+               synchronized (undistortionCompletionNotifier)
                {
-                  undistortThreadSyncObject.wait();
+                  undistortionCompletionNotifier.wait();
                }
             }
             catch (InterruptedException e)
@@ -233,6 +237,11 @@ public class DualBlackflyCamera
             }
          }
       }, "SpinnakerImageDeallocation");
+
+      cameraReadThread.start();
+      imageEncodeAndPublishThread.start();
+      imageUndistortAndUpdateArUcoThread.start();
+      imageDeallocationThread.start();
    }
 
    /**
@@ -397,9 +406,9 @@ public class DualBlackflyCamera
       cudaImageEncoder.encodeBGR(sourceImageBeingUsedForProcessing.data(), jpegImageBytePointer, imageWidth, imageHeight, sourceImageBeingUsedForProcessing.step());
 
       // Notify deallocation thread that the images has been processed, and is ready for deallocation
-      synchronized (processThreadSyncObject)
+      synchronized (encodingCompletionNotifier)
       {
-         processThreadSyncObject.notify();
+         encodingCompletionNotifier.notify();
       }
 
       ousterFisheyeColoringIntrinsicsROS2.updateAndPublishThrottledStatus();
@@ -439,9 +448,9 @@ public class DualBlackflyCamera
       opencv_cudaimgproc.cvtColor(sourceImageBeingUsedForUndistortion, distortedRGBImage, opencv_imgproc.COLOR_BGR2RGB);
 
       // Notify deallocation thread that the image has been used, and is ready for deallocation
-      synchronized (undistortThreadSyncObject)
+      synchronized (undistortionCompletionNotifier)
       {
-         undistortThreadSyncObject.notify();
+         undistortionCompletionNotifier.notify();
       }
 
       opencv_cudawarping.remap(distortedRGBImage,
@@ -449,6 +458,8 @@ public class DualBlackflyCamera
                                undistortionMap1,
                                undistortionMap2,
                                opencv_imgproc.INTER_LINEAR);
+
+      undistortedImage.download(undistortedBytedecoImage.getBytedecoOpenCVMat());
 
       if (side == RobotSide.RIGHT)
       {
@@ -463,13 +474,26 @@ public class DualBlackflyCamera
          detectableSceneObjectsPublisher.publish(predefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2Helper, ROS2IOTopicQualifier.STATUS);
       }
       // TODO: left behavior?
-
-      undistortedImage.download(undistortedBytedecoImage.getBytedecoOpenCVMat());
    }
 
    public void destroy()
    {
       destroyed = true;
+
+      // Wait until threads finish their loops
+      try
+      {
+         cameraReadThread.join();
+         imageEncodeAndPublishThread.join();
+         imageUndistortAndUpdateArUcoThread.join();
+         imageDeallocationThread.join();
+      }
+      catch (InterruptedException e)
+      {
+         LogTools.error(e);
+      }
+
+      // Destroy objects
       cudaImageEncoder.destroy();
       if (spinnakerBlackfly != null)
          spinnakerBlackfly.stopAcquiringImages();
