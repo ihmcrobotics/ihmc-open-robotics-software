@@ -17,6 +17,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.affordances.*;
 import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
 import us.ihmc.rdx.ui.collidables.RDXRobotCollisionModel;
@@ -55,6 +56,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(actionData::getTrajectoryDuration,
                                                                                 actionData::setTrajectoryDuration,
                                                                                 imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
+   private final RDX3DPanelTooltip tooltip;
 
    public RDXHandPoseAction(RDX3DPanel panel3D,
                             DRCRobotModel robotModel,
@@ -93,6 +95,9 @@ public class RDXHandPoseAction extends RDXBehaviorAction
 
       referenceFrameLibraryCombo = new ImGuiReferenceFrameLibraryCombo(referenceFrameLibrary);
       poseGizmo.create(panel3D);
+
+      tooltip = new RDX3DPanelTooltip(panel3D);
+      panel3D.addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
    }
 
    @Override
@@ -156,6 +161,16 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       ImGui.popItemWidth();
    }
 
+   public void render3DPanelImGuiOverlays()
+   {
+      if (isMouseHovering)
+      {
+         tooltip.render("%s Action\nIndex: %d\nDescription: %s".formatted(getActionTypeTitle(),
+                                                                          getActionIndex(),
+                                                                          actionData.getDescription()));
+      }
+   }
+
    @Override
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
@@ -184,6 +199,8 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       }
 
       poseGizmo.process3DViewInput(input, isMouseHovering);
+
+      tooltip.setInput(input);
    }
 
    @Override
