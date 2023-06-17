@@ -56,7 +56,7 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
    {
       RDXRigidBody RDXRigidBody;
       Executor executorToRunLaterOnThreadWithGraphicsContext = Gdx.app::postRunnable;
-      RDXRigidBody = RDXMultiBodySystemFactories.toGDXRigidBody(rigidBody,
+      RDXRigidBody = RDXMultiBodySystemFactories.toRDXRigidBody(rigidBody,
                                                                 robotDefinition.getRigidBodyDefinition(rigidBody.getName()),
                                                                 executorToRunLaterOnThreadWithGraphicsContext,
                                                                 scaleFactor,
@@ -69,12 +69,12 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
             CrossFourBarJoint fourBarJoint = (CrossFourBarJoint) childrenJoint;
             CrossFourBarJointDefinition fourBarJointDefinition = (CrossFourBarJointDefinition) robotDefinition.getJointDefinition(fourBarJoint.getName());
 
-            fourBarJoint.getJointA().setSuccessor(RDXMultiBodySystemFactories.toGDXRigidBody(fourBarJoint.getBodyDA(),
+            fourBarJoint.getJointA().setSuccessor(RDXMultiBodySystemFactories.toRDXRigidBody(fourBarJoint.getBodyDA(),
                                                                                              fourBarJointDefinition.getBodyDA(),
                                                                                              executorToRunLaterOnThreadWithGraphicsContext,
                                                                                              scaleFactor,
                                                                                              createReferenceFrameGraphics));
-            fourBarJoint.getJointB().setSuccessor(RDXMultiBodySystemFactories.toGDXRigidBody(fourBarJoint.getBodyBC(),
+            fourBarJoint.getJointB().setSuccessor(RDXMultiBodySystemFactories.toRDXRigidBody(fourBarJoint.getBodyBC(),
                                                                                              fourBarJointDefinition.getBodyBC(),
                                                                                              executorToRunLaterOnThreadWithGraphicsContext,
                                                                                              scaleFactor,

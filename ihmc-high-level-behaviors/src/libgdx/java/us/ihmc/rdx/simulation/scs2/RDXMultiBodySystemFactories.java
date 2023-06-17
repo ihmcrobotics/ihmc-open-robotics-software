@@ -22,51 +22,51 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class RDXMultiBodySystemFactories
 {
-   public static RDXRigidBody toGDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
+   public static RDXRigidBody toRDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
                                                    ReferenceFrame cloneStationaryFrame,
                                                    RobotDefinition robotDefinition)
    {
-      return toGDXMultiBodySystem(originalRootBody, cloneStationaryFrame, robotDefinition, MultiBodySystemFactories.DEFAULT_JOINT_BUILDER);
+      return toRDXMultiBodySystem(originalRootBody, cloneStationaryFrame, robotDefinition, MultiBodySystemFactories.DEFAULT_JOINT_BUILDER);
    }
 
-   public static RDXRigidBody toGDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
+   public static RDXRigidBody toRDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
                                                    ReferenceFrame cloneStationaryFrame,
                                                    RobotDefinition robotDefinition,
                                                    Executor graphicLoader)
    {
-      return toGDXMultiBodySystem(originalRootBody, cloneStationaryFrame, robotDefinition, MultiBodySystemFactories.DEFAULT_JOINT_BUILDER, graphicLoader);
+      return toRDXMultiBodySystem(originalRootBody, cloneStationaryFrame, robotDefinition, MultiBodySystemFactories.DEFAULT_JOINT_BUILDER, graphicLoader);
    }
 
-   public static RDXRigidBody toYoGDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
+   public static RDXRigidBody toYoRDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
                                                      ReferenceFrame cloneStationaryFrame,
                                                      RobotDefinition robotDefinition,
                                                      YoRegistry registry)
    {
-      return toGDXMultiBodySystem(originalRootBody, cloneStationaryFrame, robotDefinition, YoMultiBodySystemFactories.newYoJointBuilder(registry), null);
+      return toRDXMultiBodySystem(originalRootBody, cloneStationaryFrame, robotDefinition, YoMultiBodySystemFactories.newYoJointBuilder(registry), null);
    }
 
-   public static RDXRigidBody toYoGDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
+   public static RDXRigidBody toYoRDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
                                                      ReferenceFrame cloneStationaryFrame,
                                                      RobotDefinition robotDefinition,
                                                      YoRegistry registry,
                                                      Executor graphicLoader)
    {
-      return toGDXMultiBodySystem(originalRootBody,
+      return toRDXMultiBodySystem(originalRootBody,
                                   cloneStationaryFrame,
                                   robotDefinition,
                                   YoMultiBodySystemFactories.newYoJointBuilder(registry),
                                   graphicLoader);
    }
 
-   public static RDXRigidBody toGDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
+   public static RDXRigidBody toRDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
                                                    ReferenceFrame cloneStationaryFrame,
                                                    RobotDefinition robotDefinition,
                                                    JointBuilder jointBuilder)
    {
-      return toGDXMultiBodySystem(originalRootBody, cloneStationaryFrame, robotDefinition, jointBuilder, null);
+      return toRDXMultiBodySystem(originalRootBody, cloneStationaryFrame, robotDefinition, jointBuilder, null);
    }
 
-   public static RDXRigidBody toGDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
+   public static RDXRigidBody toRDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
                                                    ReferenceFrame cloneStationaryFrame,
                                                    RobotDefinition robotDefinition,
                                                    JointBuilder jointBuilder,
@@ -75,26 +75,26 @@ public class RDXMultiBodySystemFactories
       return (RDXRigidBody) MultiBodySystemFactories.cloneMultiBodySystem(originalRootBody,
                                                                           cloneStationaryFrame,
                                                                           "",
-                                                                          newGDXRigidBodyBuilder(robotDefinition, graphicLoader),
+                                                                          newRDXRigidBodyBuilder(robotDefinition, graphicLoader),
                                                                           jointBuilder);
    }
 
-   public static RigidBodyBuilder newGDXRigidBodyBuilder(RobotDefinition robotDefinition)
+   public static RigidBodyBuilder newRDXRigidBodyBuilder(RobotDefinition robotDefinition)
    {
-      return newGDXRigidBodyBuilder(robotDefinition, null);
+      return newRDXRigidBodyBuilder(robotDefinition, null);
    }
 
-   public static RigidBodyBuilder newGDXRigidBodyBuilder(RobotDefinition robotDefinition, Executor graphicLoader)
+   public static RigidBodyBuilder newRDXRigidBodyBuilder(RobotDefinition robotDefinition, Executor graphicLoader)
    {
-      return newGDXRigidBodyBuilder(MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER, robotDefinition, graphicLoader, RDXVisualTools.NO_SCALING, false);
+      return newRDXRigidBodyBuilder(MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER, robotDefinition, graphicLoader, RDXVisualTools.NO_SCALING, false);
    }
 
-   public static RigidBodyBuilder newGDXRigidBodyBuilder(RigidBodyBuilder rigidBodyBuilder, RobotDefinition robotDefinition)
+   public static RigidBodyBuilder newRDXRigidBodyBuilder(RigidBodyBuilder rigidBodyBuilder, RobotDefinition robotDefinition)
    {
-      return newGDXRigidBodyBuilder(rigidBodyBuilder, robotDefinition, null, RDXVisualTools.NO_SCALING, false);
+      return newRDXRigidBodyBuilder(rigidBodyBuilder, robotDefinition, null, RDXVisualTools.NO_SCALING, false);
    }
 
-   public static RigidBodyBuilder newGDXRigidBodyBuilder(RigidBodyBuilder rigidBodyBuilder,
+   public static RigidBodyBuilder newRDXRigidBodyBuilder(RigidBodyBuilder rigidBodyBuilder,
                                                          RobotDefinition robotDefinition,
                                                          Executor graphicLoader,
                                                          double scaleFactor,
@@ -106,7 +106,7 @@ public class RDXMultiBodySystemFactories
          public RDXRigidBody buildRoot(String bodyName, RigidBodyTransformReadOnly transformToParent, ReferenceFrame parentStationaryFrame)
          {
             RigidBodyBasics rootBody = rigidBodyBuilder.buildRoot(bodyName, transformToParent, parentStationaryFrame);
-            return toGDXRigidBody(rootBody,
+            return toRDXRigidBody(rootBody,
                                   robotDefinition.getRigidBodyDefinition(rootBody.getName()),
                                   graphicLoader,
                                   scaleFactor,
@@ -121,7 +121,7 @@ public class RDXMultiBodySystemFactories
                                    RigidBodyTransformReadOnly inertiaPose)
          {
             RigidBodyBasics rigidBody = rigidBodyBuilder.build(bodyName, parentJoint, momentOfInertia, mass, inertiaPose);
-            return toGDXRigidBody(rigidBody,
+            return toRDXRigidBody(rigidBody,
                                   robotDefinition.getRigidBodyDefinition(rigidBody.getName()),
                                   graphicLoader,
                                   scaleFactor,
@@ -130,7 +130,7 @@ public class RDXMultiBodySystemFactories
       };
    }
 
-   public static RDXRigidBody toGDXRigidBody(RigidBodyBasics rigidBody,
+   public static RDXRigidBody toRDXRigidBody(RigidBodyBasics rigidBody,
                                              RigidBodyDefinition rigidBodyDefinition,
                                              Executor graphicLoader,
                                              double scaleFactor,
