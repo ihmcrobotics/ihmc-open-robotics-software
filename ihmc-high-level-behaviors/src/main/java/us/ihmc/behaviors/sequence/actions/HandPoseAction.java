@@ -1,11 +1,13 @@
 package us.ihmc.behaviors.sequence.actions;
 
+import behavior_msgs.msg.dds.ArmJointAnglesActionMessage;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
+import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -17,6 +19,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
 {
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
+   private final ArmJointAnglesActionMessage armJointAnglesStatus = new ArmJointAnglesActionMessage();
 
    public HandPoseAction(ROS2ControllerHelper ros2ControllerHelper,
                          ReferenceFrameLibrary referenceFrameLibrary,
@@ -41,6 +44,14 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
          armIKSolver.copyActualToWork();
          armIKSolver.update(getReferenceFrame());
          armIKSolver.solve();
+
+         armJointAnglesStatus.getActionInformation().setActionIndex(actionIndex);
+         armJointAnglesStatus.setRobotSide(getSide().toByte());
+         for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
+         {
+            armJointAnglesStatus.getJointAngles()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
+         }
+         ros2ControllerHelper.publish(BehaviorActionSequence.HAND_POSE_JOINT_ANGLES_STATUS, armJointAnglesStatus);
       }
    }
 
