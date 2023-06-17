@@ -41,6 +41,8 @@ public class BehaviorActionSequence
    public static final ROS2Topic<Bool> AUTOMATIC_EXECUTION_STATUS_TOPIC = STATUS_TOPIC.withType(Bool.class).withSuffix("automatic_execution");
    public static final ROS2Topic<Int32> EXECUTION_NEXT_INDEX_COMMAND_TOPIC = COMMAND_TOPIC.withType(Int32.class).withSuffix("execution_next_index");
    public static final ROS2Topic<Int32> EXECUTION_NEXT_INDEX_STATUS_TOPIC = STATUS_TOPIC.withType(Int32.class).withSuffix("execution_next_index");
+   public static final ROS2Topic<ArmJointAnglesActionMessage> HAND_POSE_JOINT_ANGLES_STATUS
+         = STATUS_TOPIC.withType(ArmJointAnglesActionMessage.class).withSuffix("hand_pose_joint_angles");
 
    private final DRCRobotModel robotModel;
    private final ROS2ControllerHelper ros2;
