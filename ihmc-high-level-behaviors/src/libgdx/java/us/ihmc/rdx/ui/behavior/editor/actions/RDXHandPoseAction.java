@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui.behavior.editor.actions;
 
 import behavior_msgs.msg.dds.HandPoseJointAnglesStatusMessage;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -23,6 +24,7 @@ import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
+import us.ihmc.rdx.simulation.scs2.RDXFrameNodePart;
 import us.ihmc.rdx.simulation.scs2.RDXMultiBodySystemFactories;
 import us.ihmc.rdx.simulation.scs2.RDXRigidBody;
 import us.ihmc.rdx.simulation.scs2.RDXVisualTools;
@@ -55,6 +57,8 @@ import java.util.List;
 
 public class RDXHandPoseAction extends RDXBehaviorAction
 {
+   public static final String GOOD_QUALITY_COLOR = "0x4B61D1";
+   public static final String BAD_QUALITY_COLOR = "0xD14B4B";
    private final HandPoseActionData actionData = new HandPoseActionData();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    /** Gizmo is control frame */
@@ -66,6 +70,8 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
    private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
    private final RigidBodyBasics syncedChest;
+   private final Color goodQualityColor;
+   private final Color badQualityColor;
    private boolean isMouseHovering = false;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private final ArrayList<MouseCollidable> mouseCollidables = new ArrayList<>();
@@ -76,6 +82,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
                                                                                 imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
    private final SideDependentList<RDXRigidBody> armMultiBodyGraphics = new SideDependentList<>();
    private final SideDependentList<OneDoFJointBasics[]> armGraphicOneDoFJoints = new SideDependentList<>();
+   private final SideDependentList<Color> currentColor = new SideDependentList<>();
    private boolean displayIKSolution = false;
    private final IHMCROS2Input<HandPoseJointAnglesStatusMessage> handJointAnglesStatusSubscription;
    private final RDX3DPanelTooltip tooltip;
@@ -89,7 +96,10 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    {
       actionData.setReferenceFrameLibrary(referenceFrameLibrary);
 
-      // TODO: It would be nice to have just the mathematical
+      ColorDefinition goodQualityColorDefinition = ColorDefinitions.parse(GOOD_QUALITY_COLOR).derive(0.0, 1.0, 1.0, 0.5);
+      goodQualityColor = RDXVisualTools.toColor(goodQualityColorDefinition);
+      badQualityColor = RDXVisualTools.toColor(ColorDefinitions.parse(BAD_QUALITY_COLOR).derive(0.0, 1.0, 1.0, 0.5));
+
       RDXRobotCollisionModel robotCollisionModel = new RDXRobotCollisionModel(selectionCollisionModel);
       for (RobotSide side : RobotSide.values)
       {
@@ -120,8 +130,8 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          RobotDefinition armDefinition = RobotDefinitionTools.cloneLimbOnlyDefinitionWithElevator(robotModel.getRobotDefinition(),
                                                                                                   jointMap.getChestName(),
                                                                                                   jointMap.getArmJointName(side, firstArmJointName));
-         ColorDefinition ghostColor = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.5);
-         MaterialDefinition material = new MaterialDefinition(ghostColor);
+         MaterialDefinition material = new MaterialDefinition(goodQualityColorDefinition);
+         currentColor.put(side, goodQualityColor);
          RobotDefinition.forEachRigidBodyDefinition(armDefinition.getRootBodyDefinition(), body ->
          {
             body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material));
@@ -207,6 +217,26 @@ public class RDXHandPoseAction extends RDXBehaviorAction
             }
             armMultiBodyGraphics.get(getActionData().getSide()).updateFramesRecursively();
             armMultiBodyGraphics.get(getActionData().getSide()).updateSubtreeGraphics();
+         }
+
+         // We probably don't want to recolor the mesh every tick.
+         Color color = handPoseJointAnglesStatusMessage.getSolutionQuality() > 1.0 ? badQualityColor : goodQualityColor;
+         if (color != currentColor.get(getActionData().getSide()))
+         {
+            currentColor.put(getActionData().getSide(), color);
+            for (RigidBodyBasics body : armMultiBodyGraphics.get(getActionData().getSide()).subtreeIterable())
+            {
+               if (body instanceof RDXRigidBody rdxRigidBody)
+               {
+                  if (rdxRigidBody.getVisualGraphicsNode() != null)
+                  {
+                     for (RDXFrameNodePart part : rdxRigidBody.getVisualGraphicsNode().getParts())
+                     {
+                        part.getModelInstance().setDiffuseColor(color);
+                     }
+                  }
+               }
+            }
          }
       }
    }
