@@ -24,7 +24,20 @@ public class RDXMultiBodySystemFactories
 {
    public static RDXRigidBody toRDXMultiBodySystem(RigidBodyReadOnly originalRootBody, RobotDefinition robotDefinition)
    {
-      return toRDXMultiBodySystem(originalRootBody, ReferenceFrame.getWorldFrame(), robotDefinition);
+      return toRDXMultiBodySystem(originalRootBody, null, robotDefinition);
+   }
+
+   public static RDXRigidBody toRDXMultiBodySystem(RigidBodyReadOnly originalRootBody, RobotDefinition robotDefinition, double scaleFactor)
+   {
+      return (RDXRigidBody) MultiBodySystemFactories.cloneMultiBodySystem(originalRootBody,
+                                                                          null,
+                                                                          "",
+                                                                          newRDXRigidBodyBuilder(MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER,
+                                                                                                 robotDefinition,
+                                                                                                 null,
+                                                                                                 scaleFactor,
+                                                                                                 false),
+                                                                          MultiBodySystemFactories.DEFAULT_JOINT_BUILDER);
    }
 
    public static RDXRigidBody toRDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
