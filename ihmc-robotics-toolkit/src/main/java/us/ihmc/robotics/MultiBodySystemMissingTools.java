@@ -29,6 +29,12 @@ public class MultiBodySystemMissingTools
       }
    }
 
+   /**
+    * You want an elevator if you want to move the base around in world.
+    * Otherwise, it's stuck there.
+    * 
+    * See {@link #getDetachedCopyOfSubtree(RigidBodyBasics, OneDoFJointBasics)}
+    */
    public static RigidBodyBasics getDetachedCopyOfSubtreeWithElevator(RigidBodyBasics rootBodyToDetach, OneDoFJointBasics childJointToFollow)
    {
       RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());

@@ -149,6 +149,10 @@ public class RobotDefinitionTools
       return TerrainObjectDefinitionTools.toCollisionShapeDefinition(source);
    }
 
+   /**
+    * This is useful to get a detached copy of an arm or a leg, or perhaps a finger.
+    * The base can't be moved from world, as there's no elevator and 6 DoF joint.
+    */
    public static RobotDefinition cloneLimbOnlyDefinition(RobotDefinition originalRobotDefinition, String rootBodyName, String jointNameToFollow)
    {
       RobotDefinition robotDefinition = new RobotDefinition();
@@ -162,6 +166,10 @@ public class RobotDefinitionTools
       return robotDefinition;
    }
 
+   /**
+    * This is useful to get a detached copy of an arm or a leg, or perhaps a finger.
+    * The base canbe moved from world, using the elevator and 6 DoF joint.
+    */
    public static RobotDefinition cloneLimbOnlyDefinitionWithElevator(RobotDefinition originalRobotDefinition, String rootBodyName, String jointNameToFollow)
    {
       RobotDefinition robotDefinition = new RobotDefinition();
