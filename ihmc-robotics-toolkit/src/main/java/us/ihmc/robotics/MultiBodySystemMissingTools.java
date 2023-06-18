@@ -3,6 +3,8 @@ package us.ihmc.robotics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
@@ -27,6 +29,23 @@ public class MultiBodySystemMissingTools
       }
    }
 
+   public static RigidBodyBasics getDetachedCopyOfSubtreeWithElevator(RigidBodyBasics rootBodyToDetach, OneDoFJointBasics childJointToFollow)
+   {
+      RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
+      SixDoFJoint floatingJoint = new SixDoFJoint(rootBodyToDetach.getName(), elevator);
+      RigidBodyBasics clonedChest = MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER.cloneRigidBody(rootBodyToDetach,
+                                                                                                       null,
+                                                                                                       "",
+                                                                                                       floatingJoint);
+      JointBasics clonedFirstShoulderJoint = MultiBodySystemFactories.DEFAULT_JOINT_BUILDER.cloneJoint(childJointToFollow, "", clonedChest);
+      RigidBodyBasics clonedFirstShoulderLink = MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER.cloneRigidBody(childJointToFollow.getSuccessor(),
+                                                                                                                   null,
+                                                                                                                   "",
+                                                                                                                   clonedFirstShoulderJoint);
+      cloneSubtree(childJointToFollow.getSuccessor(), clonedFirstShoulderLink, "");
+      return elevator;
+   }
+
    /**
     * This is useful to get a detached copy of an arm or a leg, or perhaps a finger,
     * for running IK over it.
@@ -36,7 +55,7 @@ public class MultiBodySystemMissingTools
     */
    public static RigidBodyBasics getDetachedCopyOfSubtree(RigidBodyBasics rootBodyToDetach, OneDoFJointBasics childJointToFollow)
    {
-      return getDetachedCopyOfSubtree(rootBodyToDetach, ReferenceFrame.getWorldFrame(), childJointToFollow);
+      return getDetachedCopyOfSubtree(rootBodyToDetach, null, childJointToFollow);
    }
 
    /**

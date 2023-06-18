@@ -13,6 +13,7 @@ import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -24,6 +25,7 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
 import us.ihmc.rdx.simulation.scs2.RDXMultiBodySystemFactories;
 import us.ihmc.rdx.simulation.scs2.RDXRigidBody;
+import us.ihmc.rdx.simulation.scs2.RDXVisualTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.affordances.*;
@@ -42,6 +44,9 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.wholeBodyController.HandTransformTools;
 
@@ -60,6 +65,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private final SideDependentList<String> handNames = new SideDependentList<>();
    private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
    private final ModifiableReferenceFrame collisionShapeFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
+   private final RigidBodyBasics syncedChest;
    private boolean isMouseHovering = false;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private final ArrayList<MouseCollidable> mouseCollidables = new ArrayList<>();
@@ -76,7 +82,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
 
    public RDXHandPoseAction(RDX3DPanel panel3D,
                             DRCRobotModel robotModel,
-                            FullHumanoidRobotModel fullRobotModel,
+                            FullHumanoidRobotModel syncedFullRobotModel,
                             RobotCollisionModel selectionCollisionModel,
                             ReferenceFrameLibrary referenceFrameLibrary,
                             ROS2ControllerPublishSubscribeAPI ros2)
@@ -87,21 +93,21 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       RDXRobotCollisionModel robotCollisionModel = new RDXRobotCollisionModel(selectionCollisionModel);
       for (RobotSide side : RobotSide.values)
       {
-         handNames.put(side, fullRobotModel.getHand(side).getName());
+         handNames.put(side, syncedFullRobotModel.getHand(side).getName());
 
          RigidBodyTransform graphicToControlFrameTransform = new RigidBodyTransform();
-         HandTransformTools.getHandGraphicToControlFrameTransform(fullRobotModel, robotModel.getUIParameters(), side, graphicToControlFrameTransform);
+         HandTransformTools.getHandGraphicToControlFrameTransform(syncedFullRobotModel, robotModel.getUIParameters(), side, graphicToControlFrameTransform);
          graphicFrame.update(transformToParent -> transformToParent.set(graphicToControlFrameTransform));
 
          String handBodyName = handNames.get(side);
          String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(handBodyName));
          highlightModels.put(side, new RDXInteractableHighlightModel(modelFileName));
 
-         MultiBodySystemBasics handOnlySystem = MultiBodySystemMissingTools.createSingleBodySystem(fullRobotModel.getHand(side));
+         MultiBodySystemBasics handOnlySystem = MultiBodySystemMissingTools.createSingleBodySystem(syncedFullRobotModel.getHand(side));
          List<Collidable> handCollidables = selectionCollisionModel.getRobotCollidables(handOnlySystem);
 
          RigidBodyTransform linkToControlFrameTransform = new RigidBodyTransform();
-         HandTransformTools.getHandLinkToControlFrameTransform(fullRobotModel, side, linkToControlFrameTransform);
+         HandTransformTools.getHandLinkToControlFrameTransform(syncedFullRobotModel, side, linkToControlFrameTransform);
          collisionShapeFrame.update(transformToParent -> transformToParent.set(linkToControlFrameTransform));
 
          for (Collidable handCollidable : handCollidables)
@@ -111,12 +117,21 @@ public class RDXHandPoseAction extends RDXBehaviorAction
 
          HumanoidJointNameMap jointMap = robotModel.getJointMap();
          ArmJointName firstArmJointName = jointMap.getArmJointNames()[0];
-         RobotDefinition armDefinition = RobotDefinitionTools.cloneLimbOnlyDefinition(robotModel.getRobotDefinition(),
-                                                                                      jointMap.getChestName(),
-                                                                                      jointMap.getArmJointName(side, firstArmJointName));
-         RigidBodyBasics armOnlyMultiBody = MultiBodySystemMissingTools.getDetachedCopyOfSubtree(fullRobotModel.getChest(),
-                                                                                                 fullRobotModel.getArmJoint(side, firstArmJointName));
-         armMultiBodyGraphics = RDXMultiBodySystemFactories.toRDXMultiBodySystem(armOnlyMultiBody, armDefinition);
+         RobotDefinition armDefinition = RobotDefinitionTools.cloneLimbOnlyDefinitionWithElevator(robotModel.getRobotDefinition(),
+                                                                                                  jointMap.getChestName(),
+                                                                                                  jointMap.getArmJointName(side, firstArmJointName));
+         ColorDefinition ghostColor = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.5);
+         MaterialDefinition material = new MaterialDefinition(ghostColor);
+         RobotDefinition.forEachRigidBodyDefinition(armDefinition.getRootBodyDefinition(), body ->
+         {
+            body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material));
+         });
+         RigidBodyBasics armOnlyMultiBody
+               = MultiBodySystemMissingTools.getDetachedCopyOfSubtreeWithElevator(syncedFullRobotModel.getChest(),
+                                                                                  syncedFullRobotModel.getArmJoint(side, firstArmJointName));
+         armMultiBodyGraphics = RDXMultiBodySystemFactories.toRDXMultiBodySystem(armOnlyMultiBody, armDefinition, RDXVisualTools.DESIRED_ROBOT_SCALING);
+         armMultiBodyGraphics.getRigidBodiesToHide().add("elevator");
+         armMultiBodyGraphics.getRigidBodiesToHide().add(jointMap.getChestName());
          armGraphicOneDoFJoints = MultiBodySystemMissingTools.getSubtreeJointArray(OneDoFJointBasics.class, armMultiBodyGraphics);
       }
 
@@ -127,6 +142,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       panel3D.addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
 
       handJointAnglesStatusSubscription = ros2.subscribe(BehaviorActionSequence.HAND_POSE_JOINT_ANGLES_STATUS);
+      syncedChest = syncedFullRobotModel.getChest();
    }
 
    @Override
@@ -182,6 +198,8 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          HandPoseJointAnglesStatusMessage handPoseJointAnglesStatusMessage = handJointAnglesStatusSubscription.getLatest();
          if (handPoseJointAnglesStatusMessage.getActionInformation().getActionIndex() == getActionIndex())
          {
+            SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.getRigidBody().getChildrenJoints().get(0);
+            floatingJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
             for (int i = 0; i < handPoseJointAnglesStatusMessage.getJointAngles().length; i++)
             {
                armGraphicOneDoFJoints[i].setQ(handPoseJointAnglesStatusMessage.getJointAngles()[i]);
