@@ -65,16 +65,16 @@ public class ArmIKSolver
    private final InverseKinematicsOptimizationSettingsCommand activeOptimizationSettings = new InverseKinematicsOptimizationSettingsCommand();
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final WholeBodyControllerCore controllerCore;
-   private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
+   private final SpatialFeedbackControlCommand handSpatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
+   private final SpatialFeedbackControlCommand forearmSpatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand();
    private final DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
-   private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+   private final SelectionMatrix6D handSelectionMatrix = new SelectionMatrix6D();
+   private final SelectionMatrix6D forearmSelectionMatrix = new SelectionMatrix6D();
    private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
    private final FramePose3D handControlDesiredPose = new FramePose3D();
    private final FramePose3D lastHandControlDesiredPose = new FramePose3D();
    private final FramePose3D forearmControlDesiredPose = new FramePose3D();
-   private final RigidBodyTransform handControlDesiredPoseToChestCoMTransform = new RigidBodyTransform();
-   private final RigidBodyTransform forearmControlDesiredPoseToChestCoMTransform = new RigidBodyTransform();
    private final SpatialVectorReadOnly zeroVector6D = new SpatialVector(ReferenceFrame.getWorldFrame());
    private final FramePose3D controlFramePose = new FramePose3D();
    private final OneDoFJointBasics[] syncedOneDoFJoints;
@@ -145,8 +145,10 @@ public class ArmIKSolver
       weightMatrix.setLinearWeights(weight, weight, weight);
       weightMatrix.setAngularWeights(weight, weight, weight);
 
-      selectionMatrix.setLinearAxisSelection(true, true, true);
-      selectionMatrix.setAngularAxisSelection(true, true, true);
+      handSelectionMatrix.setLinearAxisSelection(true, true, true);
+      handSelectionMatrix.setAngularAxisSelection(true, true, true);
+      forearmSelectionMatrix.setLinearAxisSelection(false, false, false);
+      forearmSelectionMatrix.setAngularAxisSelection(true, true, true);
 
       privilegedConfigurationCommand.setDefaultWeight(0.025);
       privilegedConfigurationCommand.setDefaultConfigurationGain(50.0);
@@ -179,13 +181,6 @@ public class ArmIKSolver
          // Get the hand desired pose, but put it in the world of the detached arm
          handControlDesiredPose.setToZero(handControlDesiredFrame);
          handControlDesiredPose.changeFrame(ReferenceFrame.getWorldFrame());
-//         handControlDesiredPose.get(handControlDesiredPoseToChestCoMTransform);
-//
-//         // The world of the arm is at the chest root (after parent joint), but the solver solves w.r.t. the chest fixed CoM frame
-//         workChest.getBodyFixedFrame().getTransformToParent().transform(handControlDesiredPoseToChestCoMTransform);
-//
-//         handControlDesiredPose.setToZero(ReferenceFrame.getWorldFrame());
-//         handControlDesiredPose.set(handControlDesiredPoseToChestCoMTransform);
 
          if (forearmControlDesiredFrame == null)
          {
@@ -194,14 +189,7 @@ public class ArmIKSolver
          else
          {
             forearmControlDesiredPose.setToZero(forearmControlDesiredFrame);
-            forearmControlDesiredPose.changeFrame(syncedChest.getParentJoint().getFrameAfterJoint());
-            forearmControlDesiredPose.get(forearmControlDesiredPoseToChestCoMTransform);
-
-            // The world of the arm is at the chest root (after parent joint), but the solver solves w.r.t. the chest fixed CoM frame
-            workChest.getBodyFixedFrame().getTransformToParent().transform(forearmControlDesiredPoseToChestCoMTransform);
-
-            forearmControlDesiredPose.setToZero(ReferenceFrame.getWorldFrame());
-            forearmControlDesiredPose.set(forearmControlDesiredPoseToChestCoMTransform);
+            forearmControlDesiredPose.changeFrame(ReferenceFrame.getWorldFrame());
          }
       }
    }
@@ -217,22 +205,36 @@ public class ArmIKSolver
    {
       copyActualToWork();
 
-      spatialFeedbackControlCommand.set(workChest, workHand);
-      spatialFeedbackControlCommand.setGains(gains);
-      spatialFeedbackControlCommand.setSelectionMatrix(selectionMatrix);
-      spatialFeedbackControlCommand.setWeightMatrixForSolver(weightMatrix);
+      boolean usingForearmConstraint = false;
       synchronized (handControlDesiredPose)
       {
-         spatialFeedbackControlCommand.setInverseKinematics(handControlDesiredPose, zeroVector6D);
+         handSpatialFeedbackControlCommand.set(workChest, workHand);
+         handSpatialFeedbackControlCommand.setGains(gains);
+         handSpatialFeedbackControlCommand.setSelectionMatrix(handSelectionMatrix);
+         handSpatialFeedbackControlCommand.setWeightMatrixForSolver(weightMatrix);
+         handSpatialFeedbackControlCommand.setInverseKinematics(handControlDesiredPose, zeroVector6D);
+         handSpatialFeedbackControlCommand.setControlFrameFixedInEndEffector(controlFramePose);
+
+         if (!forearmControlDesiredPose.containsNaN())
+         {
+            usingForearmConstraint = true;
+            forearmSpatialFeedbackControlCommand.set(workChest, workHand);
+            forearmSpatialFeedbackControlCommand.setGains(gains);
+            forearmSpatialFeedbackControlCommand.setSelectionMatrix(handSelectionMatrix);
+            forearmSpatialFeedbackControlCommand.setWeightMatrixForSolver(weightMatrix);
+            forearmSpatialFeedbackControlCommand.setInverseKinematics(handControlDesiredPose, zeroVector6D);
+//            forearmSpatialFeedbackControlCommand.setControlFrameFixedInEndEffector(...); TODO: Needed?
+         }
       }
-      spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(controlFramePose);
 
       for (int i = 0; i < INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE; i++)
       {
          controllerCoreCommand.clear();
          controllerCoreCommand.addInverseKinematicsCommand(activeOptimizationSettings);
          controllerCoreCommand.addInverseKinematicsCommand(privilegedConfigurationCommand);
-         controllerCoreCommand.addFeedbackControlCommand(spatialFeedbackControlCommand);
+         controllerCoreCommand.addFeedbackControlCommand(handSpatialFeedbackControlCommand);
+         if (usingForearmConstraint)
+            controllerCoreCommand.addFeedbackControlCommand(forearmSpatialFeedbackControlCommand);
 
          controllerCore.compute(controllerCoreCommand);
 
