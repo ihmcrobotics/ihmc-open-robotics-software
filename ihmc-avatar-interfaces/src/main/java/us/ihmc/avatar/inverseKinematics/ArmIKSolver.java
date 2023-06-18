@@ -40,6 +40,9 @@ import us.ihmc.yoVariables.registry.YoRegistry;
  * Uses the WholeBodyControllerCore directly to get IK solutions for
  * a humanoid robot arm.
  *
+ * This class also supports an orientation only forearm constraint in order to
+ * control the elbow pose.
+ *
  * TODO:
  *   - Collision constraints
  *
@@ -53,7 +56,8 @@ public class ArmIKSolver
    private static final int INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE = 10;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final ReferenceFrame armWorldFrame = ReferenceFrame.getWorldFrame();
+   private final RigidBodyBasics rootBody;
+   private final SixDoFJoint rootSixDoFJoint;
    private final RigidBodyBasics workChest;
    private final RigidBodyBasics workHand;
    // TODO: Mess with these settings
@@ -68,8 +72,10 @@ public class ArmIKSolver
    private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
    private final FramePose3D handControlDesiredPose = new FramePose3D();
    private final FramePose3D lastHandControlDesiredPose = new FramePose3D();
+   private final FramePose3D forearmControlDesiredPose = new FramePose3D();
    private final RigidBodyTransform handControlDesiredPoseToChestCoMTransform = new RigidBodyTransform();
-   private final SpatialVectorReadOnly zeroVector6D = new SpatialVector(armWorldFrame);
+   private final RigidBodyTransform forearmControlDesiredPoseToChestCoMTransform = new RigidBodyTransform();
+   private final SpatialVectorReadOnly zeroVector6D = new SpatialVector(ReferenceFrame.getWorldFrame());
    private final FramePose3D controlFramePose = new FramePose3D();
    private final OneDoFJointBasics[] syncedOneDoFJoints;
    private final OneDoFJointBasics[] workingOneDoFJoints;
@@ -85,7 +91,9 @@ public class ArmIKSolver
       syncedOneDoFJoints = FullRobotModelUtils.getArmJoints(syncedRobot, side, robotModel.getJointMap().getArmJointNames());
 
       // We clone a detached chest and single arm for the WBCC to work with. We just want to find arm joint angles.
-      workChest = MultiBodySystemMissingTools.getDetachedCopyOfSubtree(syncedChest, armWorldFrame, syncedFirstArmJoint);
+      rootBody = MultiBodySystemMissingTools.getDetachedCopyOfSubtreeWithElevator(syncedChest, syncedFirstArmJoint);
+      rootSixDoFJoint = (SixDoFJoint) rootBody.getChildrenJoints().get(0);
+      workChest = rootSixDoFJoint.getSuccessor();
 
       // Remove fingers
       workHand = MultiBodySystemTools.findRigidBody(workChest, robotModel.getJointMap().getHandName(side));
@@ -100,7 +108,6 @@ public class ArmIKSolver
 
       workingOneDoFJoints = MultiBodySystemMissingTools.getSubtreeJointArray(OneDoFJointBasics.class, workChest);
 
-      SixDoFJoint rootSixDoFJoint = null; // don't need this for fixed base single limb IK
       CenterOfMassReferenceFrame centerOfMassFrame = null; // we don't need this
       YoGraphicsListRegistry yoGraphicsListRegistry = null; // opt out
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(CONTROL_DT,
@@ -153,25 +160,49 @@ public class ArmIKSolver
 
    public void copyActualToWork()
    {
+      rootSixDoFJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
       MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(syncedOneDoFJoints, workingOneDoFJoints);
+      rootBody.updateFramesRecursively();
    }
 
    public void update(ReferenceFrame handControlDesiredFrame)
    {
-      // since this is temporaririly modifying the desired pose and it's passed
+      update(handControlDesiredFrame, null);
+   }
+
+   public void update(ReferenceFrame handControlDesiredFrame, ReferenceFrame forearmControlDesiredFrame)
+   {
+      // since this is temporarily modifying the desired pose and it's passed
       // to the WBCC command on another thread below, we need to synchronize.
       synchronized (handControlDesiredPose)
       {
          // Get the hand desired pose, but put it in the world of the detached arm
          handControlDesiredPose.setToZero(handControlDesiredFrame);
-         handControlDesiredPose.changeFrame(syncedChest.getParentJoint().getFrameAfterJoint());
-         handControlDesiredPose.get(handControlDesiredPoseToChestCoMTransform);
+         handControlDesiredPose.changeFrame(ReferenceFrame.getWorldFrame());
+//         handControlDesiredPose.get(handControlDesiredPoseToChestCoMTransform);
+//
+//         // The world of the arm is at the chest root (after parent joint), but the solver solves w.r.t. the chest fixed CoM frame
+//         workChest.getBodyFixedFrame().getTransformToParent().transform(handControlDesiredPoseToChestCoMTransform);
+//
+//         handControlDesiredPose.setToZero(ReferenceFrame.getWorldFrame());
+//         handControlDesiredPose.set(handControlDesiredPoseToChestCoMTransform);
 
-         // The world of the arm is at the chest root (after parent joint), but the solver solves w.r.t. the chest fixed CoM frame
-         workChest.getBodyFixedFrame().getTransformToParent().transform(handControlDesiredPoseToChestCoMTransform);
+         if (forearmControlDesiredFrame == null)
+         {
+            forearmControlDesiredPose.setToNaN();
+         }
+         else
+         {
+            forearmControlDesiredPose.setToZero(forearmControlDesiredFrame);
+            forearmControlDesiredPose.changeFrame(syncedChest.getParentJoint().getFrameAfterJoint());
+            forearmControlDesiredPose.get(forearmControlDesiredPoseToChestCoMTransform);
 
-         handControlDesiredPose.setToZero(armWorldFrame);
-         handControlDesiredPose.set(handControlDesiredPoseToChestCoMTransform);
+            // The world of the arm is at the chest root (after parent joint), but the solver solves w.r.t. the chest fixed CoM frame
+            workChest.getBodyFixedFrame().getTransformToParent().transform(forearmControlDesiredPoseToChestCoMTransform);
+
+            forearmControlDesiredPose.setToZero(ReferenceFrame.getWorldFrame());
+            forearmControlDesiredPose.set(forearmControlDesiredPoseToChestCoMTransform);
+         }
       }
    }
 
@@ -185,7 +216,6 @@ public class ArmIKSolver
    public void solve()
    {
       copyActualToWork();
-      workChest.updateFramesRecursively();
 
       spatialFeedbackControlCommand.set(workChest, workHand);
       spatialFeedbackControlCommand.setGains(gains);
@@ -222,7 +252,7 @@ public class ArmIKSolver
                }
             }
          }
-         workChest.updateFramesRecursively();
+         rootBody.updateFramesRecursively();
       }
 
       double totalRobotMass = 0.0; // We don't need this parameter
