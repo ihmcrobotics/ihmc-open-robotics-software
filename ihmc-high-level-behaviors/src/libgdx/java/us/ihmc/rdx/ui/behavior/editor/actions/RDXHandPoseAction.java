@@ -74,8 +74,8 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(actionData::getTrajectoryDuration,
                                                                                 actionData::setTrajectoryDuration,
                                                                                 imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
-   private RDXRigidBody armMultiBodyGraphics;
-   private OneDoFJointBasics[] armGraphicOneDoFJoints;
+   private final SideDependentList<RDXRigidBody> armMultiBodyGraphics = new SideDependentList<>();
+   private final SideDependentList<OneDoFJointBasics[]> armGraphicOneDoFJoints = new SideDependentList<>();
    private boolean displayIKSolution = false;
    private final IHMCROS2Input<HandPoseJointAnglesStatusMessage> handJointAnglesStatusSubscription;
    private final RDX3DPanelTooltip tooltip;
@@ -129,10 +129,11 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          RigidBodyBasics armOnlyMultiBody
                = MultiBodySystemMissingTools.getDetachedCopyOfSubtreeWithElevator(syncedFullRobotModel.getChest(),
                                                                                   syncedFullRobotModel.getArmJoint(side, firstArmJointName));
-         armMultiBodyGraphics = RDXMultiBodySystemFactories.toRDXMultiBodySystem(armOnlyMultiBody, armDefinition, RDXVisualTools.DESIRED_ROBOT_SCALING);
-         armMultiBodyGraphics.getRigidBodiesToHide().add("elevator");
-         armMultiBodyGraphics.getRigidBodiesToHide().add(jointMap.getChestName());
-         armGraphicOneDoFJoints = MultiBodySystemMissingTools.getSubtreeJointArray(OneDoFJointBasics.class, armMultiBodyGraphics);
+         armMultiBodyGraphics.put(side,
+                                  RDXMultiBodySystemFactories.toRDXMultiBodySystem(armOnlyMultiBody, armDefinition, RDXVisualTools.DESIRED_ROBOT_SCALING));
+         armMultiBodyGraphics.get(side).getRigidBodiesToHide().add("elevator");
+         armMultiBodyGraphics.get(side).getRigidBodiesToHide().add(jointMap.getChestName());
+         armGraphicOneDoFJoints.put(side, MultiBodySystemMissingTools.getSubtreeJointArray(OneDoFJointBasics.class, armMultiBodyGraphics.get(side)));
       }
 
       referenceFrameLibraryCombo = new ImGuiReferenceFrameLibraryCombo(referenceFrameLibrary);
@@ -198,14 +199,14 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          HandPoseJointAnglesStatusMessage handPoseJointAnglesStatusMessage = handJointAnglesStatusSubscription.getLatest();
          if (handPoseJointAnglesStatusMessage.getActionInformation().getActionIndex() == getActionIndex())
          {
-            SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.getRigidBody().getChildrenJoints().get(0);
+            SixDoFJoint floatingJoint = (SixDoFJoint) armMultiBodyGraphics.get(getActionData().getSide()).getRigidBody().getChildrenJoints().get(0);
             floatingJoint.getJointPose().set(syncedChest.getParentJoint().getFrameAfterJoint().getTransformToRoot());
             for (int i = 0; i < handPoseJointAnglesStatusMessage.getJointAngles().length; i++)
             {
-               armGraphicOneDoFJoints[i].setQ(handPoseJointAnglesStatusMessage.getJointAngles()[i]);
+               armGraphicOneDoFJoints.get(getActionData().getSide())[i].setQ(handPoseJointAnglesStatusMessage.getJointAngles()[i]);
             }
-            armMultiBodyGraphics.updateFramesRecursively();
-            armMultiBodyGraphics.updateSubtreeGraphics();
+            armMultiBodyGraphics.get(getActionData().getSide()).updateFramesRecursively();
+            armMultiBodyGraphics.get(getActionData().getSide()).updateSubtreeGraphics();
          }
       }
    }
@@ -272,7 +273,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       poseGizmo.getVirtualRenderables(renderables, pool);
 
       if (displayIKSolution)
-         armMultiBodyGraphics.getVisualRenderables(renderables, pool);
+         armMultiBodyGraphics.get(getActionData().getSide()).getVisualRenderables(renderables, pool);
    }
 
    @Override
