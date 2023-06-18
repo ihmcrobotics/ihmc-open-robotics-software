@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.ArmJointAnglesActionMessage;
+import behavior_msgs.msg.dds.HandPoseJointAnglesStatusMessage;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -19,7 +19,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
 {
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
-   private final ArmJointAnglesActionMessage armJointAnglesStatus = new ArmJointAnglesActionMessage();
+   private final HandPoseJointAnglesStatusMessage handPoseJointAnglesStatus = new HandPoseJointAnglesStatusMessage();
 
    public HandPoseAction(ROS2ControllerHelper ros2ControllerHelper,
                          ReferenceFrameLibrary referenceFrameLibrary,
@@ -45,13 +45,14 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
          armIKSolver.update(getReferenceFrame());
          armIKSolver.solve();
 
-         armJointAnglesStatus.getActionInformation().setActionIndex(actionIndex);
-         armJointAnglesStatus.setRobotSide(getSide().toByte());
+         handPoseJointAnglesStatus.getActionInformation().setActionIndex(actionIndex);
+         handPoseJointAnglesStatus.setRobotSide(getSide().toByte());
+         handPoseJointAnglesStatus.setSolutionQuality(armIKSolver.getQuality());
          for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
          {
-            armJointAnglesStatus.getJointAngles()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
+            handPoseJointAnglesStatus.getJointAngles()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
          }
-         ros2ControllerHelper.publish(BehaviorActionSequence.HAND_POSE_JOINT_ANGLES_STATUS, armJointAnglesStatus);
+         ros2ControllerHelper.publish(BehaviorActionSequence.HAND_POSE_JOINT_ANGLES_STATUS, handPoseJointAnglesStatus);
       }
    }
 

@@ -148,6 +148,19 @@ public class RobotDefinitionTools
       return TerrainObjectDefinitionTools.toCollisionShapeDefinition(source);
    }
 
+   public static RobotDefinition cloneLimbOnlyDefinition(RobotDefinition originalRobotDefinition, String rootBodyName, String jointNameToFollow)
+   {
+      RobotDefinition robotDefinition = new RobotDefinition();
+
+      RigidBodyDefinition clonedRootBody = originalRobotDefinition.getRigidBodyDefinition(rootBodyName).copyRecursive();
+      JointDefinition clonedJointToFollow = originalRobotDefinition.getJointDefinition(jointNameToFollow).copyRecursive();
+
+      clonedRootBody.addChildJoint(clonedJointToFollow);
+
+      robotDefinition.setRootBodyDefinition(clonedRootBody);
+      return robotDefinition;
+   }
+
    // --------------------------------------------------------
    // RobotDefinitionLoader redirections:
    // --------------------------------------------------------
