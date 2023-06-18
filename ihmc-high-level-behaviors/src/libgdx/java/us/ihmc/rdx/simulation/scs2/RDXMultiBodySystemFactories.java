@@ -22,6 +22,11 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class RDXMultiBodySystemFactories
 {
+   public static RDXRigidBody toRDXMultiBodySystem(RigidBodyReadOnly originalRootBody, RobotDefinition robotDefinition)
+   {
+      return toRDXMultiBodySystem(originalRootBody, ReferenceFrame.getWorldFrame(), robotDefinition);
+   }
+
    public static RDXRigidBody toRDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
                                                    ReferenceFrame cloneStationaryFrame,
                                                    RobotDefinition robotDefinition)
