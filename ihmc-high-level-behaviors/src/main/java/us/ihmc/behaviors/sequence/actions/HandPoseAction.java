@@ -45,6 +45,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
          armIKSolver.update(getReferenceFrame());
          armIKSolver.solve();
 
+         // Send the solution back to the UI so the user knows what's gonna happen with the arm.
          handPoseJointAnglesStatus.getActionInformation().setActionIndex(actionIndex);
          handPoseJointAnglesStatus.setRobotSide(getSide().toByte());
          handPoseJointAnglesStatus.setSolutionQuality(armIKSolver.getQuality());
