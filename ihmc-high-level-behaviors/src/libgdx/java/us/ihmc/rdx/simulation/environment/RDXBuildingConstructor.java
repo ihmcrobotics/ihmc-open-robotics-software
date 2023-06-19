@@ -26,7 +26,7 @@ import us.ihmc.rdx.simulation.environment.object.objects.RDXBuildingObject;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.rdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
+import us.ihmc.robotics.interaction.StepCheckIsPointInsideAlgorithm;
 
 import java.util.ArrayList;
 

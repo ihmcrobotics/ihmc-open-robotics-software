@@ -1,8 +1,8 @@
 @echo on
 
-:: Requires: cmake, msvc2019, JDK 17
+:: Requires: cmake, msvc2022, JDK 17
 
-pushd "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools"
+pushd "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\Tools"
 call VsDevCmd.bat -host_arch=amd64 -arch=amd64
 popd
 
@@ -12,7 +12,7 @@ rd /s /q build
 mkdir build
 cd build
 
-cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release -DBoost_USE_STATIC_LIBS=ON -DCMAKE_INSTALL_PREFIX=. .. || exit /b 1
+cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release -DBoost_USE_STATIC_LIBS=ON -DCMAKE_INSTALL_PREFIX=. .. || exit /b 1
 cmake --build . --config Release || exit /b 1
 cmake --install . || exit /b 1
 

@@ -63,7 +63,7 @@ public class RDXInteractableRobotLink
                       RDX3DPanel panel3D)
    {
       this.syncedControlFrame = syncedControlFrame;
-      selectablePose3DGizmo = new RDXSelectablePose3DGizmo(syncedControlFrame);
+      selectablePose3DGizmo = new RDXSelectablePose3DGizmo();
       robotCollidables.add(robotCollidable);
       graphicFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame(),
                                                                                               graphicToControlFrameTransform);
@@ -77,7 +77,7 @@ public class RDXInteractableRobotLink
    {
       if (!modified) // Ensure the gizmo is at the hand when not modified
       {
-         selectablePose3DGizmo.getPoseGizmo().getTransformToParent().setToZero();
+         selectablePose3DGizmo.getPoseGizmo().getTransformToParent().set(syncedControlFrame.getTransformToRoot());
       }
       selectablePose3DGizmo.getPoseGizmo().update();
       for (RDXRobotCollidable robotCollidable : robotCollidables)
@@ -274,5 +274,10 @@ public class RDXInteractableRobotLink
    public Notification getContextMenuNotification()
    {
       return contextMenuNotification;
+   }
+
+   public Notification getGizmoModifiedByUser()
+   {
+      return selectablePose3DGizmo.getPoseGizmo().getGizmoModifiedByUser();
    }
 }

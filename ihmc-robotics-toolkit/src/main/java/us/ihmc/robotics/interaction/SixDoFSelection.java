@@ -1,8 +1,10 @@
-package us.ihmc.rdx.ui.gizmo;
+package us.ihmc.robotics.interaction;
 
 import us.ihmc.euclid.Axis3D;
 
-/** Extract and use the same as the other VR UI */
+/**
+ * A class for managing user interaction selections from 6 degrees of freedom.
+ */
 public enum SixDoFSelection
    {
       CENTER, LINEAR_X, LINEAR_Y, LINEAR_Z, ANGULAR_X, ANGULAR_Y, ANGULAR_Z;

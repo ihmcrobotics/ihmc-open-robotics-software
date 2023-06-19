@@ -95,7 +95,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final RDXDesiredRobot desiredRobot;
    private final RDXHandConfigurationManager handManager;
    private RDXRobotCollisionModel selfCollisionModel;
-   private RDXRobotCollisionModel environmentCollisionModel;
+   private RDXRobotCollisionModel selectionCollisionModel;
    private RDXArmManager armManager;
    private final RDXLocomotionManager locomotionManager;
    private final ImBoolean showSelfCollisionMeshes = new ImBoolean();
@@ -130,7 +130,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
     */
    public RDXTeleoperationManager(CommunicationHelper communicationHelper,
                                   RobotCollisionModel robotSelfCollisionModel,
-                                  RobotCollisionModel robotEnvironmentCollisionModel,
+                                  RobotCollisionModel robotSelectionCollisionModel,
                                   YoVariableClientHelper yoVariableClientHelper)
    {
       super("Teleoperation");
@@ -167,7 +167,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       if (interactablesAvailable)
       {
          selfCollisionModel = new RDXRobotCollisionModel(robotSelfCollisionModel);
-         environmentCollisionModel = new RDXRobotCollisionModel(robotEnvironmentCollisionModel);
+         selectionCollisionModel = new RDXRobotCollisionModel(robotSelectionCollisionModel);
       }
 
       if (robotHasArms)
@@ -190,9 +190,9 @@ public class RDXTeleoperationManager extends ImGuiPanel
       if (interactablesAvailable)
       {
          selfCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkGreen(), 0.4));
-         environmentCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkRed(), 0.4));
+         selectionCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkRed(), 0.4));
 
-         for (RDXRobotCollidable robotCollidable : environmentCollisionModel.getRobotCollidables())
+         for (RDXRobotCollidable robotCollidable : selectionCollisionModel.getRobotCollidables())
          {
             RobotDefinition robotDefinition = robotModel.getRobotDefinition();
             FullHumanoidRobotModel fullRobotModel = syncedRobot.getFullRobotModel();
@@ -309,7 +309,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
                armManager.update();
 
             selfCollisionModel.update();
-            environmentCollisionModel.update();
+            selectionCollisionModel.update();
 
             for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
                robotPartInteractable.update();
@@ -338,7 +338,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private void calculateVRPick(RDXVRContext vrContext)
    {
       if (interactablesAvailable && interactablesEnabled.get())
-         environmentCollisionModel.calculateVRPick(vrContext);
+         selectionCollisionModel.calculateVRPick(vrContext);
    }
 
    private void processVRInput(RDXVRContext vrContext)
@@ -349,7 +349,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
             robotPartInteractable.processVRInput(vrContext);
 
          if (interactablesEnabled.get())
-            environmentCollisionModel.processVRInput(vrContext);
+            selectionCollisionModel.processVRInput(vrContext);
       }
    }
 
@@ -362,7 +362,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
          if (interactablesAvailable)
          {
             if (input.isWindowHovered())
-               environmentCollisionModel.calculate3DViewPick(input);
+               selectionCollisionModel.calculate3DViewPick(input);
 
             for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
                robotPartInteractable.calculate3DViewPick(input);
@@ -379,7 +379,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
          if (interactablesAvailable)
          {
-            environmentCollisionModel.process3DViewInput(input);
+            selectionCollisionModel.process3DViewInput(input);
 
             interactablePelvis.process3DViewInput(input);
 
@@ -577,7 +577,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
                if (showSelfCollisionMeshes.get())
                   selfCollisionModel.getRenderables(renderables, pool);
                if (showEnvironmentCollisionMeshes.get())
-                  environmentCollisionModel.getRenderables(renderables, pool);
+                  selectionCollisionModel.getRenderables(renderables, pool);
 
                for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
                   robotPartInteractable.getVirtualRenderables(renderables, pool);
