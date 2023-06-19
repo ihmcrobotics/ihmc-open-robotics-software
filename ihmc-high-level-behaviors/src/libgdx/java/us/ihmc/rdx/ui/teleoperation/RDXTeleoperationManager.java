@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
-import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -14,7 +13,6 @@ import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
-import us.ihmc.commons.FormattingTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
@@ -36,7 +34,6 @@ import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.YawPitchRollAxis;
-import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -242,7 +239,13 @@ public class RDXTeleoperationManager extends ImGuiPanel
                {
                   if (!interactableHands.containsKey(side))
                   {
-                     RDXInteractableHand interactableHand = new RDXInteractableHand(side, baseUI, robotCollidable, robotModel, syncedRobot, yoVariableClientHelper);
+                     RDXInteractableHand interactableHand = new RDXInteractableHand(side,
+                                                                                    baseUI,
+                                                                                    robotCollidable,
+                                                                                    robotModel,
+                                                                                    syncedRobot,
+                                                                                    desiredRobot,
+                                                                                    yoVariableClientHelper);
                      interactableHands.put(side, interactableHand);
                      allInteractableRobotLinks.add(interactableHand);
                   }
@@ -276,7 +279,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
          baseUI.getVRManager().getContext().addVRInputProcessor(this::processVRInput);
          baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
          baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
-         baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltipsAndContextMenus);
          interactablesEnabled.set(true);
       }
 
@@ -490,65 +492,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       // TODO: Add transparency sliders
       // TODO: Add motion previews
-   }
-
-   private void renderTooltipsAndContextMenus()
-   {
-      for (RobotSide side : interactableHands.sides())
-      {
-         RDXInteractableHand interactableHand = interactableHands.get(side);
-         if (interactableHand.getContextMenuNotification().poll())
-         {
-            ImGui.openPopup(labels.get(interactableHand.getContextMenuName()));
-         }
-
-         if (ImGui.beginPopup(labels.get(interactableHand.getContextMenuName())))
-         {
-            ImGui.text("Real robot joint angles:");
-
-            tempImGuiText.clear();
-
-            tempImGuiText.set(buildJointAnglesString(side, syncedRobot.getFullRobotModel()));
-            ImGui.inputTextMultiline(labels.getHidden(side.getPascalCaseName() + "RealRobotJointAngles"), tempImGuiText, 0, 60, ImGuiInputTextFlags.ReadOnly);
-
-            ImGui.text("Desired joint angles:");
-            tempImGuiText.set(buildJointAnglesString(side, desiredRobot.getDesiredFullRobotModel()));
-            ImGui.inputTextMultiline(labels.getHidden(side.getPascalCaseName() + "DesiredRobotJointAngles"), tempImGuiText, 0, 60, ImGuiInputTextFlags.ReadOnly);
-
-            if (ImGui.menuItem("Close"))
-               ImGui.closeCurrentPopup();
-            ImGui.endPopup();
-         }
-      }
-   }
-
-   private String buildJointAnglesString(RobotSide side, FullHumanoidRobotModel fullRobotModel)
-   {
-      StringBuilder jointAnglesString = new StringBuilder();
-
-      ArmJointName[] armJointNames = robotModel.getJointMap().getArmJointNames();
-      int i = 0;
-      for (ArmJointName armJoint : armJointNames)
-      {
-         double q = fullRobotModel.getArmJoint(side, armJoint).getQ();
-         jointAnglesString.append(FormattingTools.getFormattedDecimal3D(q));
-
-         if (i < armJointNames.length - 1)
-         {
-            jointAnglesString.append(",");
-         }
-         if ((i - 2) % 3 == 0)
-         {
-            jointAnglesString.append("\n");
-         }
-         else
-         {
-            jointAnglesString.append(" ");
-         }
-
-         ++i;
-      }
-      return jointAnglesString.toString();
    }
 
    // The create method adds the renderables, so this shouldn't be accessed externally.

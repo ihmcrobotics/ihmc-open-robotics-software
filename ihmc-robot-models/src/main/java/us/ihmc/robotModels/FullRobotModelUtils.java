@@ -3,6 +3,7 @@ package us.ihmc.robotModels;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -49,6 +50,39 @@ public class FullRobotModelUtils
          oneDoFJoints[i] = model.getArmJoint(side, armJointNames[i]);
       }
       return oneDoFJoints;
+   }
+
+   /**
+    * Gets string of joint angles in a somewhat compact form, like:
+    * <pre>
+    *    0.605, 0.317, -0.495,
+    *    -1.004, -0.600, 0.000,
+    *    -0.005
+    * </pre>
+    */
+   public static String getArmJointAnglesString(OneDoFJointBasics[] armOneDoFJoints)
+   {
+      StringBuilder jointAnglesString = new StringBuilder();
+      for (int i = 0; i < armOneDoFJoints.length; i++)
+      {
+         double q = armOneDoFJoints[i].getQ();
+         jointAnglesString.append(FormattingTools.getFormattedDecimal3D(q));
+         if (i < armOneDoFJoints.length - 1)
+         {
+            jointAnglesString.append(",");
+         }
+         if ((i - 2) % 3 == 0)
+         {
+            jointAnglesString.append("\n");
+         }
+         else
+         {
+            jointAnglesString.append(" ");
+         }
+
+         ++i;
+      }
+      return jointAnglesString.toString();
    }
 
    public static void checkJointNameHash(int expectedJointNameHash, int actualJointNameHash)

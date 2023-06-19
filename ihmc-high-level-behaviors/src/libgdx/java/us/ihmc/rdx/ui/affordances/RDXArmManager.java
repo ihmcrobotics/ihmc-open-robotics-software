@@ -131,7 +131,7 @@ public class RDXArmManager
          // Otherwise, we will not notice the desired changed while the solver was still solving
          if (readyToSolve)
          {
-            desiredHandPoseChanged |= armIKSolvers.get(side).getDesiredHandControlPoseChanged();
+            desiredHandPoseChanged |= armIKSolvers.get(side).getDesiredsChanged();
          }
 
          panelHandWrenchIndicator.update(side,

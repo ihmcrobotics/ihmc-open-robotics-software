@@ -75,6 +75,7 @@ public class ArmIKSolver
    private final FramePose3D handControlDesiredPose = new FramePose3D();
    private final FramePose3D lastHandControlDesiredPose = new FramePose3D();
    private final FramePose3D forearmControlDesiredPose = new FramePose3D();
+   private final FramePose3D lastForearmControlDesiredPose = new FramePose3D();
    private final SpatialVectorReadOnly zeroVector6D = new SpatialVector(ReferenceFrame.getWorldFrame());
    private final FramePose3D controlFramePose = new FramePose3D();
    private final OneDoFJointBasics[] syncedOneDoFJoints;
@@ -194,11 +195,13 @@ public class ArmIKSolver
       }
    }
 
-   public boolean getDesiredHandControlPoseChanged()
+   public boolean getDesiredsChanged()
    {
-      boolean desiredHandControlPoseChanged = !handControlDesiredPose.geometricallyEquals(lastHandControlDesiredPose, 0.0001);
+      boolean desiredsChanged = !handControlDesiredPose.geometricallyEquals(lastHandControlDesiredPose, 0.0001);
       lastHandControlDesiredPose.setIncludingFrame(handControlDesiredPose);
-      return desiredHandControlPoseChanged;
+      desiredsChanged |= !forearmControlDesiredPose.getOrientation().geometricallyEquals(lastForearmControlDesiredPose.getOrientation(), 0.0001);
+      lastForearmControlDesiredPose.setIncludingFrame(forearmControlDesiredPose);
+      return desiredsChanged;
    }
 
    public void solve()
