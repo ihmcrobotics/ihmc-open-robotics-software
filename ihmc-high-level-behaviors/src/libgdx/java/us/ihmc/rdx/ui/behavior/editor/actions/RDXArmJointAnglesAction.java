@@ -20,8 +20,6 @@ public class RDXArmJointAnglesAction extends RDXBehaviorAction
 
    public RDXArmJointAnglesAction()
    {
-      super("Arm Joint Angles");
-
       for (int i = 0; i < ArmJointAnglesAction.NUMBER_OF_JOINTS; i++)
       {
          int jointIndex = i;
@@ -49,5 +47,11 @@ public class RDXArmJointAnglesAction extends RDXBehaviorAction
    public ArmJointAnglesActionData getActionData()
    {
       return actionData;
+   }
+
+   @Override
+   public String getActionTypeTitle()
+   {
+      return "Arm Joint Angles";
    }
 }
