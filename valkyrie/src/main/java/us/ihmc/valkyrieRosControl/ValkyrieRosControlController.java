@@ -153,7 +153,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    private MultiThreadedRobotControlElementCoordinator robotController;
 
    private final SettableTimestampProvider wallTimeProvider = new SettableTimestampProvider();
-   private final TimestampProvider monotonicTimeProvider = () -> RealtimeThread.getCurrentMonotonicClockTime();
+   private final TimestampProvider monotonicTimeProvider = RealtimeThread::getCurrentMonotonicClockTime;
 
    private boolean firstTick = true;
 

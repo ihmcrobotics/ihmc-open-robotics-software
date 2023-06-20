@@ -35,8 +35,7 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
                                                                                       getRobotSidePrefix(RobotSide.RIGHT) + "Foot");
 
    private final ValkyrieRobotVersion robotVersion;
-   private final LegJointName[] legJoints = {LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE_PITCH,
-         LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL};
+   private final LegJointName[] legJoints;
    private final ArmJointName[] armJoints;
    private final SpineJointName[] spineJoints = {SpineJointName.SPINE_YAW, SpineJointName.SPINE_PITCH, SpineJointName.SPINE_ROLL};
    private final NeckJointName[] neckJoints = {NeckJointName.PROXIMAL_NECK_PITCH, NeckJointName.DISTAL_NECK_YAW, NeckJointName.DISTAL_NECK_PITCH};
@@ -83,21 +82,35 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
             armJoints = new ArmJointName[] {};
       }
 
+      if (robotVersion.hasLegs())
+      {
+         legJoints = new LegJointName[] {LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE_PITCH,
+                      LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL};
+      }
+      else
+      {
+         legJoints = new LegJointName[] {};
+      }
+
       for (RobotSide robotSide : RobotSide.values)
       {
          String[] forcedSideJointNames = ValkyrieOrderedJointMap.forcedSideDependentJointNames.get(robotSide);
-         legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftHipYaw],
-                           new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_YAW));
-         legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftHipRoll],
-                           new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_ROLL));
-         legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftHipPitch],
-                           new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_PITCH));
-         legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftKneePitch],
-                           new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.KNEE_PITCH));
-         legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftAnklePitch],
-                           new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_PITCH));
-         legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftAnkleRoll],
-                           new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_ROLL));
+
+         if (robotVersion.hasLegs())
+         {
+            legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftHipYaw],
+                              new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_YAW));
+            legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftHipRoll],
+                              new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_ROLL));
+            legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftHipPitch],
+                              new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_PITCH));
+            legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftKneePitch],
+                              new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.KNEE_PITCH));
+            legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftAnklePitch],
+                              new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_PITCH));
+            legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftAnkleRoll],
+                              new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_ROLL));
+         }
 
          switch (robotVersion)
          {
@@ -369,6 +382,7 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
       {
          case DEFAULT:
          case FINGERLESS:
+         case UPPER_BODY:
             return physicalProperties.getHandControlFrameToWristTransform(robotSide);
          case ARM_MASS_SIM:
             return physicalProperties.getHandControlFrameToArmMassSimTransform(robotSide);
