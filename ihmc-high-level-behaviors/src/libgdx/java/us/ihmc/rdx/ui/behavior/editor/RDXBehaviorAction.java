@@ -26,6 +26,7 @@ public abstract class RDXBehaviorAction
    private final ImBoolean expanded = new ImBoolean(true);
    private final ImString description = new ImString();
    private int actionIndex = -1;
+   private int actionNextExcecutionIndex = -1;
 
    public RDXBehaviorAction()
    {
@@ -97,5 +98,15 @@ public abstract class RDXBehaviorAction
    public void setActionIndex(int actionIndex)
    {
       this.actionIndex = actionIndex;
+   }
+
+   public int getActionNextExcecutionIndex()
+   {
+      return actionNextExcecutionIndex;
+   }
+
+   public void setActionNextExcecutionIndex(int actionNextExcecutionIndex)
+   {
+      this.actionNextExcecutionIndex = actionNextExcecutionIndex;
    }
 }

@@ -5,6 +5,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
 import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
+import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.behavior.editor.actions.*;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -20,7 +21,8 @@ public class RDXActionSequenceTools
                                                      ROS2SyncedRobotModel syncedRobot,
                                                      RobotCollisionModel selectionCollisionModel,
                                                      RDX3DPanel panel3D,
-                                                     ReferenceFrameLibrary referenceFrameLibrary)
+                                                     ReferenceFrameLibrary referenceFrameLibrary,
+                                                     ROS2ControllerPublishSubscribeAPI ros2)
    {
       boolean robotHasArms = robotModel.getRobotVersion().hasArms();
       switch (actionType)
@@ -44,7 +46,7 @@ public class RDXActionSequenceTools
          case "RDXHandPoseAction" ->
          {
             return robotHasArms ?
-                  new RDXHandPoseAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), selectionCollisionModel, referenceFrameLibrary) :
+                  new RDXHandPoseAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), selectionCollisionModel, referenceFrameLibrary, ros2) :
                   null;
          }
          case "RDXHandWrenchAction" ->

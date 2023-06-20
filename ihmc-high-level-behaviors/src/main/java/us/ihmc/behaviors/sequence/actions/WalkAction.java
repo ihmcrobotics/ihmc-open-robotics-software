@@ -44,7 +44,7 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    }
 
    @Override
-   public void update()
+   public void update(int actionIndex, int nextExecutionIndex)
    {
       for (RobotSide side : RobotSide.values)
       {
