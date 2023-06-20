@@ -8,18 +8,22 @@ import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.Timer;
 
 public class HandPoseAction extends HandPoseActionData implements BehaviorAction
 {
    private final ROS2ControllerHelper ros2ControllerHelper;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final HandPoseJointAnglesStatusMessage handPoseJointAnglesStatus = new HandPoseJointAnglesStatusMessage();
+   private final Timer executionTimer = new Timer();
 
    public HandPoseAction(ROS2ControllerHelper ros2ControllerHelper,
                          ReferenceFrameLibrary referenceFrameLibrary,
@@ -27,6 +31,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
                          ROS2SyncedRobotModel syncedRobot)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
+      this.syncedRobot = syncedRobot;
       setReferenceFrameLibrary(referenceFrameLibrary);
 
       for (RobotSide side : RobotSide.values)
@@ -73,11 +78,35 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
          }
 
          ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(getSide(), getTrajectoryDuration(), jointAngles);
+         armTrajectoryMessage.setForceExecution(true); // Prevent the command being rejected because robot is still finishing up walking
          ros2ControllerHelper.publishToController(armTrajectoryMessage);
+
+         executionTimer.reset();
       }
       else
       {
          LogTools.error("Solution is low quality ({}). Not sending.", solutionQuality);
       }
+   }
+
+   @Override
+   public boolean isExecuting()
+   {
+      boolean trajectoryTimerRunning = executionTimer.isRunning(getTrajectoryDuration());
+
+      RigidBodyTransform desired = getReferenceFrame().getTransformToRoot();
+      RigidBodyTransform actual = syncedRobot.getFullRobotModel().getHandControlFrame(getSide()).getTransformToRoot();
+      double reasonableAchievementWindowMeters = 0.02;
+      double reasonableAchievementWindowRadians = 0.04;
+      double translationError = actual.getTranslation().differenceNorm(desired.getTranslation());
+      boolean desiredAchieved = translationError < reasonableAchievementWindowMeters;
+      desiredAchieved &= actual.getRotation().geometricallyEquals(desired.getRotation(), reasonableAchievementWindowMeters);
+
+      if (!trajectoryTimerRunning && !desiredAchieved && executionTimer.getElapsedTime() > (getTrajectoryDuration() + 0.1))
+      {
+         LogTools.warn("We didn't achieve the desired in time. Elapsed time: {} s", executionTimer.getElapsedTime());
+      }
+
+      return trajectoryTimerRunning | !desiredAchieved;
    }
 }
