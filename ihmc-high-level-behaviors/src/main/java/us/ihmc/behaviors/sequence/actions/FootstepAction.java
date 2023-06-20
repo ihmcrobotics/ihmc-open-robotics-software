@@ -24,7 +24,7 @@ public class FootstepAction extends FootstepActionData implements BehaviorAction
    }
 
    @Override
-   public void update()
+   public void update(int actionIndex, int nextExecutionIndex)
    {
       pose.setToZero(getReferenceFrame());
       pose.changeFrame(ReferenceFrame.getWorldFrame());
