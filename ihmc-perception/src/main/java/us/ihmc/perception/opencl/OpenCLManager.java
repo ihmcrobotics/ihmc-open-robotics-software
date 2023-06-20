@@ -22,18 +22,52 @@ import static org.bytedeco.opencl.global.OpenCL.*;
  */
 public class OpenCLManager
 {
+   // Platform and device stay the same throughout the process
+   private static final _cl_platform_id platformId = new _cl_platform_id();
+   private static final _cl_device_id deviceId = new _cl_device_id();
+   private static volatile boolean initialized = false;
+
    static
    {
-      Loader.load(OpenCL.class);
+      if (!initialized)
+      {
+         Loader.load(OpenCL.class);
+
+         /* Get platform/device information */
+         IntPointer platformCount = new IntPointer(1);
+         IntPointer deviceCount = new IntPointer(1);
+
+         OpenCLTools.checkReturnCode(clGetPlatformIDs(1, platformId, platformCount));
+         OpenCLTools.checkReturnCode(clGetDeviceIDs(platformId, CL_DEVICE_TYPE_DEFAULT, 1, deviceId, deviceCount));
+
+         LogTools.info("Number of platforms: {}", platformCount.get());
+         LogTools.info("Number of devices: {}", deviceCount.get());
+
+         for (int i = 0; i < platformCount.get(); i++)
+         {
+            String message = "OpenCL Platform:";
+            message += " Name: " + OpenCLTools.readPlatformInfoParameter(platformId, i, CL_PLATFORM_NAME);
+            message += " Vendor: " + OpenCLTools.readPlatformInfoParameter(platformId, i, CL_PLATFORM_VENDOR);
+            message += " Version: " + OpenCLTools.readPlatformInfoParameter(platformId, i, CL_PLATFORM_VERSION);
+            LogTools.info(message);
+         }
+
+         for (int i = 0; i < deviceCount.get(); i++)
+         {
+            String message = "OpenCL Device:";
+            message += " Name: " + OpenCLTools.readDeviceInfoParameter(deviceId, i, CL_DEVICE_NAME);
+            message += " Vendor: " + OpenCLTools.readDeviceInfoParameter(deviceId, i, CL_DEVICE_VENDOR);
+            message += " Driver Version: " + OpenCLTools.readDeviceInfoParameter(deviceId, i, CL_DRIVER_VERSION);
+            LogTools.info(message);
+         }
+
+         initialized = true;
+      }
    }
 
-   private static _cl_platform_id platforms = new _cl_platform_id();
-   private static _cl_device_id devices = new _cl_device_id();
-   private static _cl_context context = null;
-   private static _cl_command_queue commandQueue = null;
-   private static final IntPointer numberOfDevices = new IntPointer(1);
-   private static final IntPointer numberOfPlatforms = new IntPointer(3);
-   private static volatile boolean initialized = false;
+   // A new context and command queue are created for each OpenCLManager
+   private final _cl_context context;
+   private final _cl_command_queue commandQueue;
 
    private final ArrayList<_cl_program> programs = new ArrayList<>();
    private final ArrayList<_cl_kernel> kernels = new ArrayList<>();
@@ -45,84 +79,17 @@ public class OpenCLManager
    private final SizeTPointer origin = new SizeTPointer(3);
    private final SizeTPointer region = new SizeTPointer(3);
    private final IntPointer returnCode = new IntPointer(1);
-   //   private final SizeTPointer localWorkSize = new SizeTPointer(1024, 0, 0); // TODO: Rethink this
 
    public OpenCLManager()
    {
-      if (!initialized)
-      {
-         /* Get platform/device information */
-         final int platformCount = 1; // We're just interested in the primary platform (most likely "NVIDIA CUDA")
-         checkReturnCode(clGetPlatformIDs(platformCount, platforms, numberOfPlatforms));
-         checkReturnCode(clGetDeviceIDs(platforms, CL_DEVICE_TYPE_ALL, platformCount, devices, numberOfDevices));
+      /* Create OpenCL Context */
+      context = clCreateContext(null, 1, deviceId, null, null, returnCode);
+      OpenCLTools.checkReturnCode(returnCode);
 
-         int numberOfPlatforms = OpenCLManager.numberOfPlatforms.get();
-         LogTools.info("Number of platforms: {}", numberOfPlatforms);
-         int numberOfDevices = OpenCLManager.numberOfDevices.get();
-         LogTools.info("Number of devices: {}", numberOfDevices);
-
-         for (int i = 0; i < numberOfPlatforms; i++)
-         {
-            String message = "OpenCL Platform:";
-            message += " Name: " + readPlatformInfoParameter(i, CL_PLATFORM_NAME);
-            message += " Vendor: " + readPlatformInfoParameter(i, CL_PLATFORM_VENDOR);
-            message += " Version: " + readPlatformInfoParameter(i, CL_PLATFORM_VERSION);
-            LogTools.info(message);
-         }
-
-         for (int i = 0; i < numberOfDevices; i++)
-         {
-            String message = "OpenCL Device:";
-            message += " Name: " + readDeviceInfoParameter(i, CL_DEVICE_NAME);
-            message += " Vendor: " + readDeviceInfoParameter(i, CL_DEVICE_VENDOR);
-            message += " Driver Version: " + readDeviceInfoParameter(i, CL_DRIVER_VERSION);
-            LogTools.info(message);
-         }
-
-         /* Create OpenCL Context */
-         context = clCreateContext(null, 1, devices, null, null, returnCode);
-         checkReturnCode();
-
-         /* Create Command Queue */
-         LongPointer properties = null;
-         commandQueue = clCreateCommandQueueWithProperties(context, devices, properties, returnCode);
-         checkReturnCode();
-
-         initialized = true;
-
-         Thread shutdownHook = new Thread(() ->
-         {
-            checkReturnCode(clFlush(commandQueue));
-            checkReturnCode(clFinish(commandQueue));
-            checkReturnCode(clReleaseCommandQueue(commandQueue));
-            checkReturnCode(clReleaseContext(context));
-         }, "OpenCLManager-Shutdown-Hook");
-         Runtime.getRuntime().addShutdownHook(shutdownHook);
-      }
-   }
-
-   private String readPlatformInfoParameter(int i, int parameterName)
-   {
-      return OpenCLTools.readString((stringSizeByteLimit, stringPointer, resultingStringLengthPointer) ->
-      {
-         checkReturnCode(clGetPlatformInfo(platforms.position(i).getPointer(),
-                                           parameterName,
-                                           stringSizeByteLimit,
-                                           stringPointer,
-                                           resultingStringLengthPointer));
-      });
-   }
-
-   private String readDeviceInfoParameter(int i, int parameterName)
-   {
-      return OpenCLTools.readString((stringSizeByteLimit, stringPointer, resultingStringLengthPointer) ->
-      {
-         checkReturnCode(clGetDeviceInfo(devices.position(i).getPointer(),
-                                         parameterName,
-                                         stringSizeByteLimit,
-                                         stringPointer,
-                                         resultingStringLengthPointer));
-      });
+      /* Create Command Queue */
+      LongPointer properties = null;
+      commandQueue = clCreateCommandQueueWithProperties(context, deviceId, properties, returnCode);
+      OpenCLTools.checkReturnCode(returnCode);
    }
 
    public _cl_kernel loadSingleFunctionProgramAndCreateKernel(String programName, String... headerFilesToInclude)
@@ -160,7 +127,7 @@ public class OpenCLManager
                                                       new PointerPointer(sourceAsString),
                                                       new SizeTPointer(1).put(sourceAsString.length()),
                                                       returnCode);
-      checkReturnCode();
+      OpenCLTools.checkReturnCode(returnCode);
       programs.add(program);
 
       /* Build Kernel Program */
@@ -168,14 +135,19 @@ public class OpenCLManager
       String options = null;
       Pfn_notify__cl_program_Pointer notificationRoutine = null;
       Pointer userData = null;
-      int returnCode = clBuildProgram(program, numberOfDevices, devices, options, notificationRoutine, userData);
+      int returnCode = clBuildProgram(program, numberOfDevices, deviceId, options, notificationRoutine, userData);
       LogTools.info("OpenCL build info for openCL/{}.cl: \n{}",
                     programName,
                     OpenCLTools.readString((stringSizeByteLimit, stringPointer, resultingStringLengthPointer) ->
                                            {
-                                              clGetProgramBuildInfo(program, devices.getPointer(), CL_PROGRAM_BUILD_LOG, stringSizeByteLimit, stringPointer, resultingStringLengthPointer);
+                                              clGetProgramBuildInfo(program,
+                                                                    deviceId.getPointer(),
+                                                                    CL_PROGRAM_BUILD_LOG,
+                                                                    stringSizeByteLimit,
+                                                                    stringPointer,
+                                                                    resultingStringLengthPointer);
                                            }));
-      checkReturnCode(returnCode);
+      OpenCLTools.checkReturnCode(returnCode);
 
       return program;
    }
@@ -184,7 +156,7 @@ public class OpenCLManager
    {
       /* Create OpenCL Kernel */
       _cl_kernel kernel = clCreateKernel(program, kernelName, returnCode);
-      checkReturnCode();
+      OpenCLTools.checkReturnCode(returnCode);
       kernels.add(kernel);
       return kernel;
    }
@@ -206,7 +178,7 @@ public class OpenCLManager
       if (hostPointer != null)
          flags |= CL_MEM_USE_HOST_PTR;
       _cl_mem bufferObject = clCreateBuffer(context, flags, sizeInBytes, hostPointer, returnCode);
-      checkReturnCode();
+      OpenCLTools.checkReturnCode(returnCode);
       bufferObjects.add(bufferObject);
       return bufferObject;
    }
@@ -231,7 +203,7 @@ public class OpenCLManager
       imageDescription.mem_object(null);
       _cl_mem image = clCreateImage(context, flags, imageFormat, imageDescription, hostPointer, returnCode);
       bufferObjects.add(image);
-      checkReturnCode();
+      OpenCLTools.checkReturnCode(returnCode);
       return image;
    }
 
@@ -243,7 +215,7 @@ public class OpenCLManager
       int numberOfEventsInWaitList = 0; // no events
       PointerPointer eventWaitList = null; // no events
       PointerPointer event = null; // no events
-      checkReturnCode(clEnqueueWriteBuffer(commandQueue,
+      OpenCLTools.checkReturnCode(clEnqueueWriteBuffer(commandQueue,
                                            bufferObject,
                                            blockingWrite,
                                            offset,
@@ -269,7 +241,7 @@ public class OpenCLManager
       int numberOfEventsInWaitList = 0; // no events
       PointerPointer eventWaitList = null; // no events
       PointerPointer event = null; // no events
-      checkReturnCode(clEnqueueWriteImage(commandQueue,
+      OpenCLTools.checkReturnCode(clEnqueueWriteImage(commandQueue,
                                           image,
                                           blockingWrite,
                                           origin,
@@ -292,19 +264,11 @@ public class OpenCLManager
       setKernelArgument(kernel, argumentIndex, intPointerSize, intPointer);
    }
 
-   /**
-    * You can't pass booleans to OpenCL kernels, so we use an int.
-    */
-   public void setKernelArgument(_cl_kernel kernel, int argumentIndex, OpenCLBooleanParameter booleanParameter)
-   {
-      setKernelArgument(kernel, argumentIndex, intPointerSize, booleanParameter.getIntPointer());
-   }
-
    private void setKernelArgument(_cl_kernel kernel, int argumentIndex, long argumentSize, Pointer bufferObject)
    {
       /* Set OpenCL kernel argument */
       tempPointerPointerForSetKernelArgument.put(bufferObject);
-      checkReturnCode(clSetKernelArg(kernel, argumentIndex, argumentSize, tempPointerPointerForSetKernelArgument));
+      OpenCLTools.checkReturnCode(clSetKernelArg(kernel, argumentIndex, argumentSize, tempPointerPointerForSetKernelArgument));
    }
 
    public void execute1D(_cl_kernel kernel, long workSizeX)
@@ -336,7 +300,7 @@ public class OpenCLManager
       int numberOfEventsInWaitList = 0; // no events
       PointerPointer eventWaitList = null; // no events
       PointerPointer event = null; // no events
-      checkReturnCode(clEnqueueNDRangeKernel(commandQueue,
+      OpenCLTools.checkReturnCode(clEnqueueNDRangeKernel(commandQueue,
                                              kernel,
                                              numberOfWorkDimensions,
                                              globalWorkOffset,
@@ -355,7 +319,7 @@ public class OpenCLManager
    public void enqueueReadBuffer(_cl_mem bufferObject, long sizeInBytes, Pointer hostMemoryPointer)
    {
       /* Transfer result from the memory buffer */
-      checkReturnCode(clEnqueueReadBuffer(commandQueue, bufferObject, CL_TRUE, 0, sizeInBytes, hostMemoryPointer, 0, (PointerPointer) null, null));
+      OpenCLTools.checkReturnCode(clEnqueueReadBuffer(commandQueue, bufferObject, CL_TRUE, 0, sizeInBytes, hostMemoryPointer, 0, (PointerPointer) null, null));
    }
 
    public void enqueueReadImage(_cl_mem image, long imageWidth, long imageHeight, Pointer hostMemoryPointer)
@@ -373,7 +337,7 @@ public class OpenCLManager
       int numberOfEventsInWaitList = 0; // no events
       PointerPointer eventWaitList = null; // no events
       PointerPointer event = null; // no events
-      checkReturnCode(clEnqueueReadImage(commandQueue,
+      OpenCLTools.checkReturnCode(clEnqueueReadImage(commandQueue,
                                          image,
                                          blockingRead,
                                          origin,
@@ -386,183 +350,29 @@ public class OpenCLManager
                                          event));
    }
 
-   private void checkReturnCode(int returnCode)
-   {
-      this.returnCode.put(returnCode);
-      if (returnCode != CL_SUCCESS) // duplicated to reduce stack trace height
-      {
-         String message = "OpenCL error code: " + returnCode + ": " + getReturnCodeString(returnCode);
-         LogTools.error(1, message);
-         throw new RuntimeException(message);
-      }
-   }
-
-   private void checkReturnCode()
-   {
-      if (returnCode.get() != CL_SUCCESS)
-      {
-         String message = "OpenCL error code: " + returnCode.get() + ": " + getReturnCodeString(returnCode.get());
-         LogTools.error(1, message);
-         throw new RuntimeException(message);
-      }
-   }
-
    public void releaseBufferObject(_cl_mem bufferObject)
    {
-      checkReturnCode(clReleaseMemObject(bufferObject));
+      OpenCLTools.checkReturnCode(clReleaseMemObject(bufferObject));
       bufferObjects.remove(bufferObject);
    }
 
    public void destroy()
    {
       for (_cl_program program : programs)
-         checkReturnCode(clReleaseProgram(program));
+         OpenCLTools.checkReturnCode(clReleaseProgram(program));
       programs.clear();
       for (_cl_kernel kernel : kernels)
-         checkReturnCode(clReleaseKernel(kernel));
+         OpenCLTools.checkReturnCode(clReleaseKernel(kernel));
       kernels.clear();
       for (_cl_mem bufferObject : bufferObjects)
-         checkReturnCode(clReleaseMemObject(bufferObject));
+         OpenCLTools.checkReturnCode(clReleaseMemObject(bufferObject));
       bufferObjects.clear();
+
+      OpenCLTools.checkReturnCode(clFlush(commandQueue));
+      OpenCLTools.checkReturnCode(clFinish(commandQueue));
+      OpenCLTools.checkReturnCode(clReleaseCommandQueue(commandQueue));
+      OpenCLTools.checkReturnCode(clReleaseContext(context));
    }
 
-   public int getReturnCode()
-   {
-      return returnCode.get();
-   }
 
-   private String getReturnCodeString(int returnCode)
-   {
-      switch (returnCode)
-      {
-         case OpenCL.CL_SUCCESS:
-            return "CL_SUCCESS";
-         case OpenCL.CL_DEVICE_NOT_FOUND:
-            return "CL_DEVICE_NOT_FOUND";
-         case OpenCL.CL_DEVICE_NOT_AVAILABLE:
-            return "CL_DEVICE_NOT_AVAILABLE";
-         case OpenCL.CL_COMPILER_NOT_AVAILABLE:
-            return "CL_COMPILER_NOT_AVAILABLE";
-         case OpenCL.CL_MEM_OBJECT_ALLOCATION_FAILURE:
-            return "CL_MEM_OBJECT_ALLOCATION_FAILURE";
-         case OpenCL.CL_OUT_OF_RESOURCES:
-            return "CL_OUT_OF_RESOURCES";
-         case OpenCL.CL_OUT_OF_HOST_MEMORY:
-            return "CL_OUT_OF_HOST_MEMORY";
-         case OpenCL.CL_PROFILING_INFO_NOT_AVAILABLE:
-            return "CL_PROFILING_INFO_NOT_AVAILABLE";
-         case OpenCL.CL_MEM_COPY_OVERLAP:
-            return "CL_MEM_COPY_OVERLAP";
-         case OpenCL.CL_IMAGE_FORMAT_MISMATCH:
-            return "CL_IMAGE_FORMAT_MISMATCH";
-         case OpenCL.CL_IMAGE_FORMAT_NOT_SUPPORTED:
-            return "CL_IMAGE_FORMAT_NOT_SUPPORTED";
-         case OpenCL.CL_BUILD_PROGRAM_FAILURE:
-            return "CL_BUILD_PROGRAM_FAILURE";
-         case OpenCL.CL_MAP_FAILURE:
-            return "CL_MAP_FAILURE";
-         case OpenCL.CL_MISALIGNED_SUB_BUFFER_OFFSET:
-            return "CL_MISALIGNED_SUB_BUFFER_OFFSET";
-         case OpenCL.CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST:
-            return "CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST";
-         case OpenCL.CL_COMPILE_PROGRAM_FAILURE:
-            return "CL_COMPILE_PROGRAM_FAILURE";
-         case OpenCL.CL_LINKER_NOT_AVAILABLE:
-            return "CL_LINKER_NOT_AVAILABLE";
-         case OpenCL.CL_LINK_PROGRAM_FAILURE:
-            return "CL_LINK_PROGRAM_FAILURE";
-         case OpenCL.CL_DEVICE_PARTITION_FAILED:
-            return "CL_DEVICE_PARTITION_FAILED";
-         case OpenCL.CL_KERNEL_ARG_INFO_NOT_AVAILABLE:
-            return "CL_KERNEL_ARG_INFO_NOT_AVAILABLE";
-         case OpenCL.CL_INVALID_VALUE:
-            return "CL_INVALID_VALUE";
-         case OpenCL.CL_INVALID_DEVICE_TYPE:
-            return "CL_INVALID_DEVICE_TYPE";
-         case OpenCL.CL_INVALID_PLATFORM:
-            return "CL_INVALID_PLATFORM";
-         case OpenCL.CL_INVALID_DEVICE:
-            return "CL_INVALID_DEVICE";
-         case OpenCL.CL_INVALID_CONTEXT:
-            return "CL_INVALID_CONTEXT";
-         case OpenCL.CL_INVALID_QUEUE_PROPERTIES:
-            return "CL_INVALID_QUEUE_PROPERTIES";
-         case OpenCL.CL_INVALID_COMMAND_QUEUE:
-            return "CL_INVALID_COMMAND_QUEUE";
-         case OpenCL.CL_INVALID_HOST_PTR:
-            return "CL_INVALID_HOST_PTR";
-         case OpenCL.CL_INVALID_MEM_OBJECT:
-            return "CL_INVALID_MEM_OBJECT";
-         case OpenCL.CL_INVALID_IMAGE_FORMAT_DESCRIPTOR:
-            return "CL_INVALID_IMAGE_FORMAT_DESCRIPTOR";
-         case OpenCL.CL_INVALID_IMAGE_SIZE:
-            return "CL_INVALID_IMAGE_SIZE";
-         case OpenCL.CL_INVALID_SAMPLER:
-            return "CL_INVALID_SAMPLER";
-         case OpenCL.CL_INVALID_BINARY:
-            return "CL_INVALID_BINARY";
-         case OpenCL.CL_INVALID_BUILD_OPTIONS:
-            return "CL_INVALID_BUILD_OPTIONS";
-         case OpenCL.CL_INVALID_PROGRAM:
-            return "CL_INVALID_PROGRAM";
-         case OpenCL.CL_INVALID_PROGRAM_EXECUTABLE:
-            return "CL_INVALID_PROGRAM_EXECUTABLE";
-         case OpenCL.CL_INVALID_KERNEL_NAME:
-            return "CL_INVALID_KERNEL_NAME";
-         case OpenCL.CL_INVALID_KERNEL_DEFINITION:
-            return "CL_INVALID_KERNEL_DEFINITION";
-         case OpenCL.CL_INVALID_KERNEL:
-            return "CL_INVALID_KERNEL";
-         case OpenCL.CL_INVALID_ARG_INDEX:
-            return "CL_INVALID_ARG_INDEX";
-         case OpenCL.CL_INVALID_ARG_VALUE:
-            return "CL_INVALID_ARG_VALUE";
-         case OpenCL.CL_INVALID_ARG_SIZE:
-            return "CL_INVALID_ARG_SIZE";
-         case OpenCL.CL_INVALID_KERNEL_ARGS:
-            return "CL_INVALID_KERNEL_ARGS";
-         case OpenCL.CL_INVALID_WORK_DIMENSION:
-            return "CL_INVALID_WORK_DIMENSION";
-         case OpenCL.CL_INVALID_WORK_GROUP_SIZE:
-            return "CL_INVALID_WORK_GROUP_SIZE";
-         case OpenCL.CL_INVALID_WORK_ITEM_SIZE:
-            return "CL_INVALID_WORK_ITEM_SIZE";
-         case OpenCL.CL_INVALID_GLOBAL_OFFSET:
-            return "CL_INVALID_GLOBAL_OFFSET";
-         case OpenCL.CL_INVALID_EVENT_WAIT_LIST:
-            return "CL_INVALID_EVENT_WAIT_LIST";
-         case OpenCL.CL_INVALID_EVENT:
-            return "CL_INVALID_EVENT";
-         case OpenCL.CL_INVALID_OPERATION:
-            return "CL_INVALID_OPERATION";
-         case OpenCL.CL_INVALID_GL_OBJECT:
-            return "CL_INVALID_GL_OBJECT";
-         case OpenCL.CL_INVALID_BUFFER_SIZE:
-            return "CL_INVALID_BUFFER_SIZE";
-         case OpenCL.CL_INVALID_MIP_LEVEL:
-            return "CL_INVALID_MIP_LEVEL";
-         case OpenCL.CL_INVALID_GLOBAL_WORK_SIZE:
-            return "CL_INVALID_GLOBAL_WORK_SIZE";
-         case OpenCL.CL_INVALID_PROPERTY:
-            return "CL_INVALID_PROPERTY";
-         case OpenCL.CL_INVALID_IMAGE_DESCRIPTOR:
-            return "CL_INVALID_IMAGE_DESCRIPTOR";
-         case OpenCL.CL_INVALID_COMPILER_OPTIONS:
-            return "CL_INVALID_COMPILER_OPTIONS";
-         case OpenCL.CL_INVALID_LINKER_OPTIONS:
-            return "CL_INVALID_LINKER_OPTIONS";
-         case OpenCL.CL_INVALID_DEVICE_PARTITION_COUNT:
-            return "CL_INVALID_DEVICE_PARTITION_COUNT";
-         case OpenCL.CL_INVALID_PIPE_SIZE:
-            return "CL_INVALID_PIPE_SIZE";
-         case OpenCL.CL_INVALID_DEVICE_QUEUE:
-            return "CL_INVALID_DEVICE_QUEUE";
-         case OpenCL.CL_INVALID_SPEC_ID:
-            return "CL_INVALID_SPEC_ID";
-         case OpenCL.CL_MAX_SIZE_RESTRICTION_EXCEEDED:
-            return "CL_MAX_SIZE_RESTRICTION_EXCEEDED";
-         default:
-            return "Code not found";
-      }
-   }
 }
