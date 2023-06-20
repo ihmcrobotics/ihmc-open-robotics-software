@@ -91,10 +91,10 @@ public class DualBlackflyCamera
    private long numberOfGpuMatsAllocated = 0L;   // keep count of images allocated and deallocated
    private long numberOfGpuMatsDeallocated = 0L; // an exception is thrown if more than 100 images are allocated at a time
 
-   private Thread cameraReadThread;
-   private Thread imageEncodeAndPublishThread;
-   private Thread imageUndistortAndUpdateArUcoThread;
-   private Thread imageDeallocationThread;
+   private final Thread cameraReadThread;
+   private final Thread imageEncodeAndPublishThread;
+   private final Thread imageUndistortAndUpdateArUcoThread;
+   private final Thread imageDeallocationThread;
    private volatile boolean destroyed = false;
 
    public DualBlackflyCamera(RobotSide side,
@@ -161,9 +161,9 @@ public class DualBlackflyCamera
                   newImageReadNotifier.wait();
                }
             }
-            catch (InterruptedException e)
+            catch (InterruptedException interruptedException)
             {
-               LogTools.error(e);
+               LogTools.error(interruptedException);
             }
 
             // Process and publish the new image
@@ -184,9 +184,9 @@ public class DualBlackflyCamera
                   newImageReadNotifier.wait();
                }
             }
-            catch (InterruptedException e)
+            catch (InterruptedException interruptedException)
             {
-               LogTools.error(e);
+               LogTools.error(interruptedException);
             }
 
             // Undistort  the new image
@@ -211,9 +211,9 @@ public class DualBlackflyCamera
                   undistortionCompletionNotifier.wait();
                }
             }
-            catch (InterruptedException e)
+            catch (InterruptedException interruptedException)
             {
-               LogTools.error(e);
+               LogTools.error(interruptedException);
             }
 
             // Get the oldest image in the deque
@@ -488,9 +488,9 @@ public class DualBlackflyCamera
          imageUndistortAndUpdateArUcoThread.join();
          imageDeallocationThread.join();
       }
-      catch (InterruptedException e)
+      catch (InterruptedException interruptedException)
       {
-         LogTools.error(e);
+         LogTools.error(interruptedException);
       }
 
       // Destroy objects
