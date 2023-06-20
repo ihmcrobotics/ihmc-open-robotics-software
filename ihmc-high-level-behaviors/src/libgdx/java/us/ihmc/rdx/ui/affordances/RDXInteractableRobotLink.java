@@ -246,6 +246,11 @@ public class RDXInteractableRobotLink
       return !selectablePose3DGizmo.getSelected().get() && !modified;
    }
 
+   protected boolean isSelected()
+   {
+      return selectablePose3DGizmo.isSelected();
+   }
+
    public void destroy()
    {
       highlightModel.dispose();

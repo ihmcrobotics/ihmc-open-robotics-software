@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
+import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -44,6 +45,7 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
    private final OneDoFJointBasics[] desiredArmJoints;
    private RDXSpatialVectorArrows sensorWristWrenchArrows;
    private final RDXSpatialVectorArrows estimatedHandWrenchArrows;
+   private final ImBoolean controlForearmOrientation = new ImBoolean(false);
    private final RDXSelectablePose3DGizmo forearmOrientationGizmo;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -101,13 +103,20 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
       baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltipsAndContextMenus);
 
       forearmOrientationGizmo = new RDXSelectablePose3DGizmo();
-      forearmOrientationGizmo.create(baseUI.getPrimary3DPanel());
+      forearmOrientationGizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
    }
 
    @Override
    public void update()
    {
       super.update();
+
+      forearmOrientationGizmo.getSelected().set(isSelected() && controlForearmOrientation.get());
+//      if (forearmOrientationGizmo.isSelected())
+//      {
+//
+//      }
+      forearmOrientationGizmo.getPoseGizmo().update();
 
       if (sensorWristWrenchArrows != null)
       {
@@ -150,7 +159,7 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
 
       if (ImGui.beginPopup(labels.get(contextMenuName)))
       {
-         ImGui.checkbox(labels.get("Control forearm orientation"), forearmOrientationGizmo.getSelected());
+         ImGui.checkbox(labels.get("Control forearm orientation"), controlForearmOrientation);
 
          ImGui.text("Real robot joint angles:");
          tempImGuiText.set(FullRobotModelUtils.getArmJointAnglesString(syncedArmJoints));
@@ -174,5 +183,10 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
    public RDXSpatialVectorArrows getEstimatedHandWrenchArrows()
    {
       return estimatedHandWrenchArrows;
+   }
+
+   public ReferenceFrame getForearmOrientationDesiredFrame()
+   {
+      return forearmOrientationGizmo.getPoseGizmo().getGizmoFrame();
    }
 }
