@@ -7,7 +7,8 @@ public enum ValkyrieRobotVersion implements RobotVersion
    DEFAULT,
    FINGERLESS,
    ARM_MASS_SIM,
-   ARMLESS;
+   ARMLESS,
+   UPPER_BODY;
 
    public static final String ROBOT_VERSION_ENVIRONMENT_VARIABLE_NAME = "IHMC_VALKYRIE_ROBOT_VERSION";
 
@@ -17,12 +18,17 @@ public enum ValkyrieRobotVersion implements RobotVersion
 
       if (valueFromEnvironment == null)
          return DEFAULT;
-      else if (valueFromEnvironment.trim().toLowerCase().contains(FINGERLESS.name().toLowerCase()))
+
+      valueFromEnvironment = valueFromEnvironment.trim().toLowerCase();
+
+      if (valueFromEnvironment.contains(FINGERLESS.name().toLowerCase()))
          return FINGERLESS;
-      else if (valueFromEnvironment.trim().toLowerCase().contains(ARM_MASS_SIM.name().toLowerCase()))
+      else if (valueFromEnvironment.contains(ARM_MASS_SIM.name().toLowerCase()))
          return ARM_MASS_SIM;
-      else if (valueFromEnvironment.trim().toLowerCase().contains(ARMLESS.name().toLowerCase()))
+      else if (valueFromEnvironment.contains(ARMLESS.name().toLowerCase()))
          return ARMLESS;
+      else if (valueFromEnvironment.contains(UPPER_BODY.name().toLowerCase()))
+         return UPPER_BODY;
       else
          return DEFAULT;
    }
@@ -39,6 +45,8 @@ public enum ValkyrieRobotVersion implements RobotVersion
             return "models/val_description/urdf/valkyrie_sim_arm_mass_sim.urdf";
          case ARMLESS:
             return "models/val_description/urdf/valkyrie_sim_no_arms.urdf";
+         case UPPER_BODY:
+            return "models/val_description/urdf/valkyrie_sim_upper_body.urdf";
          default:
             throw new RuntimeException("ValkyrieRobotVersion: Unimplemented enumeration case : " + this);
       }
@@ -56,6 +64,8 @@ public enum ValkyrieRobotVersion implements RobotVersion
             return "models/val_description/urdf/valkyrie_sim_arm_mass_sim.urdf";
          case ARMLESS:
             return "models/val_description/urdf/valkyrie_sim_no_arms.urdf";
+         case UPPER_BODY:
+            return "models/val_description/urdf/valkyrie_sim_upper_body.urdf";
          default:
             throw new RuntimeException("ValkyrieRobotVersion: Unimplemented enumeration case : " + this);
       }
@@ -68,8 +78,25 @@ public enum ValkyrieRobotVersion implements RobotVersion
          case DEFAULT:
          case FINGERLESS:
          case ARM_MASS_SIM:
+         case UPPER_BODY:
             return true;
          case ARMLESS:
+            return false;
+         default:
+            throw new RuntimeException("ValkyrieRobotVersion: Unimplemented enumeration case : " + this);
+      }
+   }
+
+   public boolean hasLegs()
+   {
+      switch(this)
+      {
+         case DEFAULT:
+         case FINGERLESS:
+         case ARM_MASS_SIM:
+         case ARMLESS:
+            return true;
+         case UPPER_BODY:
             return false;
          default:
             throw new RuntimeException("ValkyrieRobotVersion: Unimplemented enumeration case : " + this);
@@ -81,6 +108,7 @@ public enum ValkyrieRobotVersion implements RobotVersion
       switch(this)
       {
          case DEFAULT:
+         case UPPER_BODY:
             return true;
          case FINGERLESS:
          case ARM_MASS_SIM:
@@ -97,6 +125,7 @@ public enum ValkyrieRobotVersion implements RobotVersion
       {
          case DEFAULT:
          case FINGERLESS:
+         case UPPER_BODY:
             return true;
          case ARM_MASS_SIM:
          case ARMLESS:
