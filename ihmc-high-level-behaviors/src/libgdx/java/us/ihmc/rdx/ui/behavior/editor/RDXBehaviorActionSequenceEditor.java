@@ -124,7 +124,7 @@ public class RDXBehaviorActionSequenceEditor
 
    public void loadNameFromFile()
    {
-      JSONFileTools.load(workspaceFile, jsonNode -> name = jsonNode.get("name").asText());
+      JSONFileTools.load(workspaceFile.getFilesystemFile(), jsonNode -> name = jsonNode.get("name").asText());
    }
 
    public boolean loadActionsFromFile()
@@ -133,7 +133,7 @@ public class RDXBehaviorActionSequenceEditor
       executionNextIndexStatus = 0;
       LogTools.info("Loading from {}", workspaceFile.getClasspathResource().toString());
       MutableBoolean successfullyLoadedActions = new MutableBoolean(true);
-      JSONFileTools.load(workspaceFile.getClasspathResourceAsStream(), jsonNode ->
+      JSONFileTools.load(workspaceFile.getFilesystemFile(), jsonNode ->
       {
          JSONTools.forEachArrayElement(jsonNode, "actions", actionNode ->
          {

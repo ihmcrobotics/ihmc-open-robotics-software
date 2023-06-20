@@ -11,7 +11,7 @@ public class RDXAvailableActionSequence
    public RDXAvailableActionSequence(WorkspaceResourceFile sequenceFile)
    {
       this.sequenceFile = sequenceFile;
-      JSONFileTools.load(sequenceFile, jsonNode -> name = jsonNode.get("name").asText());
+      JSONFileTools.load(sequenceFile.getFilesystemFile(), jsonNode -> name = jsonNode.get("name").asText());
    }
 
    public String getName()
