@@ -8,6 +8,7 @@ import org.bytedeco.cuda.nvjpeg.nvjpegHandle;
 import org.bytedeco.cuda.nvjpeg.nvjpegImage_t;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.SizeTPointer;
+import us.ihmc.log.LogTools;
 
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvjpeg.*;
@@ -87,27 +88,27 @@ public class CUDAImageEncoder
       checkNVJPEG("nvjpegEncoderParamsSetSamplingFactors", nvjpegEncoderParamsSetSamplingFactors(encoderParameters, NVJPEG_CSS_420, cudaStream));
 
       // Get Y plane data
-      BytePointer YPlanePointer = new BytePointer(); // create a pointer for the Y plane
-      checkCUDA("cudaMalloc", cudaMalloc(YPlanePointer, frameSize)); // allocate Y plane memory
-      checkCUDA("cudaMemcpy", cudaMemcpy(YPlanePointer, sourceImage, frameSize, cudaMemcpyHostToDevice)); // copy Y plane data to device memory
+      BytePointer yPlanePointer = new BytePointer(); // create a pointer for the Y plane
+      checkCUDA("cudaMalloc", cudaMalloc(yPlanePointer, frameSize)); // allocate Y plane memory
+      checkCUDA("cudaMemcpy", cudaMemcpy(yPlanePointer, sourceImage, frameSize, cudaMemcpyHostToDevice)); // copy Y plane data to device memory
       nvjpegImage.pitch(0, imageWidth); // set the pitch
-      nvjpegImage.channel(0, YPlanePointer); //set the channel
+      nvjpegImage.channel(0, yPlanePointer); //set the channel
       sourceImage.position(sourceImage.position() + frameSize); // move pointer to start of U plane
 
       // Get U plane data
-      BytePointer UPlanePointer = new BytePointer();
-      checkCUDA("cudaMalloc", cudaMalloc(UPlanePointer, quarterOfFrameSize));
-      checkCUDA("cudaMemcpy", cudaMemcpy(UPlanePointer, sourceImage, quarterOfFrameSize, cudaMemcpyHostToDevice));
+      BytePointer uPlanePointer = new BytePointer();
+      checkCUDA("cudaMalloc", cudaMalloc(uPlanePointer, quarterOfFrameSize));
+      checkCUDA("cudaMemcpy", cudaMemcpy(uPlanePointer, sourceImage, quarterOfFrameSize, cudaMemcpyHostToDevice));
       nvjpegImage.pitch(1, halfOfImageWidth);
-      nvjpegImage.channel(1, UPlanePointer);
+      nvjpegImage.channel(1, uPlanePointer);
       sourceImage.position(sourceImage.position() + quarterOfFrameSize);
 
       // Get V plane data
-      BytePointer VPlanePointer = new BytePointer();
-      checkCUDA("cudaMalloc", cudaMalloc(VPlanePointer, quarterOfFrameSize));
-      checkCUDA("cudaMemcpy", cudaMemcpy(VPlanePointer, sourceImage, quarterOfFrameSize, cudaMemcpyHostToDevice));
+      BytePointer vPlanePointer = new BytePointer();
+      checkCUDA("cudaMalloc", cudaMalloc(vPlanePointer, quarterOfFrameSize));
+      checkCUDA("cudaMemcpy", cudaMemcpy(vPlanePointer, sourceImage, quarterOfFrameSize, cudaMemcpyHostToDevice));
       nvjpegImage.pitch(2, halfOfImageWidth);
-      nvjpegImage.channel(2, VPlanePointer);
+      nvjpegImage.channel(2, vPlanePointer);
 
       // Encode image (mem)
       checkNVJPEG("nvjpegEncodeYUV",
@@ -131,14 +132,14 @@ public class CUDAImageEncoder
       outputImagePointer.limit(jpegBytePointer.limit());
 
       // Free GPU memory
-      checkCUDA("cudaFree", cudaFree(YPlanePointer));
-      checkCUDA("cudaFree", cudaFree(UPlanePointer));
-      checkCUDA("cudaFree", cudaFree(VPlanePointer));
+      checkCUDA("cudaFree", cudaFree(yPlanePointer));
+      checkCUDA("cudaFree", cudaFree(uPlanePointer));
+      checkCUDA("cudaFree", cudaFree(vPlanePointer));
 
       // Close pointers
-      YPlanePointer.close();
-      UPlanePointer.close();
-      VPlanePointer.close();
+      yPlanePointer.close();
+      uPlanePointer.close();
+      vPlanePointer.close();
       jpegSize.close();
    }
 
@@ -216,7 +217,7 @@ public class CUDAImageEncoder
    {
       if (result != CUDA_SUCCESS)
       {
-         throw new RuntimeException(String.format("%s returned '%d'", functionName, result));
+         LogTools.error(String.format("%s returned '%d'", functionName, result));
       }
    }
 
@@ -231,7 +232,7 @@ public class CUDAImageEncoder
    {
       if (result != NVJPEG_STATUS_SUCCESS)
       {
-         throw new RuntimeException(String.format("%s returned '%d'", functionName, result));
+         LogTools.error(String.format("%s returned '%d'", functionName, result));
       }
    }
 }
