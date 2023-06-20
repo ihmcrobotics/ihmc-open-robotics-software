@@ -373,6 +373,4 @@ public class OpenCLManager
       OpenCLTools.checkReturnCode(clReleaseCommandQueue(commandQueue));
       OpenCLTools.checkReturnCode(clReleaseContext(context));
    }
-
-
 }
