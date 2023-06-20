@@ -1,6 +1,5 @@
 package us.ihmc.rdx.ui.affordances;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -21,6 +20,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePathControlRingGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -34,7 +34,6 @@ public class RDXWalkPathControlRing
    private final RDXSelectablePathControlRingGizmo footstepPlannerGoalGizmo = new RDXSelectablePathControlRingGizmo();
    private final Notification becomesModifiedNotification = new Notification();
    private final Notification goalUpdatedNotification = new Notification();
-   private RDX3DPanel panel3D;
    private MovingReferenceFrame midFeetZUpFrame;
    private RDXFootstepGraphic leftGoalFootstepGraphic;
    private RDXFootstepGraphic rightGoalFootstepGraphic;
@@ -43,15 +42,13 @@ public class RDXWalkPathControlRing
    private double halfIdealFootstepWidth;
    private final AxisAngle walkFacingDirection = new AxisAngle();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private ImGui3DViewInput latestInput;
+   private RDX3DPanelTooltip tooltip;
 
    public void create(RDX3DPanel panel3D,
                       DRCRobotModel robotModel,
                       ROS2SyncedRobotModel syncedRobot,
                       FootstepPlannerParametersBasics footstepPlannerParameters)
    {
-      this.panel3D = panel3D;
-
       footstepPlannerGoalGizmo.create(panel3D);
       panel3D.addImGuiOverlayAddition(this::renderTooltips);
       midFeetZUpFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
@@ -59,6 +56,8 @@ public class RDXWalkPathControlRing
       SegmentDependentList<RobotSide, ArrayList<Point2D>> contactPoints = robotModel.getContactPointParameters().getControllerFootGroundContactPoints();
       leftGoalFootstepGraphic = new RDXFootstepGraphic(contactPoints, RobotSide.LEFT);
       rightGoalFootstepGraphic = new RDXFootstepGraphic(contactPoints, RobotSide.RIGHT);
+
+      tooltip = new RDX3DPanelTooltip(panel3D);
 
       leftGoalFootstepGraphic.create();
       rightGoalFootstepGraphic.create();
@@ -86,7 +85,7 @@ public class RDXWalkPathControlRing
    // This happens after update.
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      latestInput = input;
+      tooltip.setInput(input);
       boolean leftMouseReleasedWithoutDrag = input.isWindowHovered() && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
 
       boolean previouslySelected = footstepPlannerGoalGizmo.getSelected();
@@ -188,29 +187,12 @@ public class RDXWalkPathControlRing
    {
       if (footstepPlannerGoalGizmo.getSelected() && footstepPlannerGoalGizmo.getPathControlRingGizmo().getAnyPartHovered())
       {
-         float offsetX = 10.0f;
-         float offsetY = 10.0f;
-         float mousePosX = latestInput.getMousePosX();
-         float mousePosY = latestInput.getMousePosY();
-         float drawStartX = panel3D.getWindowDrawMinX() + mousePosX + offsetX;
-         float drawStartY = panel3D.getWindowDrawMinY() + mousePosY + offsetY;
-
-         String message = """
+         tooltip.render("""
                           Use left mouse drag to translate.
                           Use right mouse drag to yaw.
                           Use keyboard arrows to translate. (Hold shift for slow)
                           Use alt+left and alt+left arrows to yaw. (Hold shift for slow)
-                          """;
-
-         ImGui.getWindowDrawList()
-              .addRectFilled(drawStartX, drawStartY, drawStartX + 62 * 6.7f, drawStartY + 4 * 17.0f, new Color(0.2f, 0.2f, 0.2f, 0.7f).toIntBits());
-         ImGui.getWindowDrawList()
-              .addText(ImGuiTools.getSmallFont(),
-                       ImGuiTools.getSmallFont().getFontSize(),
-                       drawStartX + 5.0f,
-                       drawStartY + 2.0f,
-                       Color.WHITE.toIntBits(),
-                       message);
+                          """);
       }
    }
 
