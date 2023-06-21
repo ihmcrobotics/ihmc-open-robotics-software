@@ -142,8 +142,8 @@ public class WalkAction extends WalkActionData implements BehaviorAction
          RigidBodyTransform desired = commandedGoalFeetTransformToWorld.get(side);
          RigidBodyTransform actual = syncedRobot.getReferenceFrames().getSoleFrame(side).getTransformToRoot();
 
-         double translationTolerance = 0.03;
-         double rotationTolerance = Math.toRadians(5.0);
+         double translationTolerance = 0.15;
+         double rotationTolerance = Math.toRadians(10.0);
          isExecuting |= BehaviorActionSequenceTools.isExecuting(desired,
                                                                 actual,
                                                                 translationTolerance,
