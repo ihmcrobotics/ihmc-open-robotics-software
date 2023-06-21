@@ -96,15 +96,31 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
 
       RigidBodyTransform desired = getReferenceFrame().getTransformToRoot();
       RigidBodyTransform actual = syncedRobot.getFullRobotModel().getHandControlFrame(getSide()).getTransformToRoot();
+
       double reasonableAchievementWindowMeters = 0.02;
-      double reasonableAchievementWindowRadians = 0.04;
       double translationError = actual.getTranslation().differenceNorm(desired.getTranslation());
-      boolean desiredAchieved = translationError < reasonableAchievementWindowMeters;
-      desiredAchieved &= actual.getRotation().geometricallyEquals(desired.getRotation(), reasonableAchievementWindowMeters);
+      boolean desiredTranslationAcheived = translationError <= reasonableAchievementWindowMeters;
+
+      double reasonableAchievementWindowRadians = 0.04;
+      double rotationError = actual.getRotation().distance(desired.getRotation(), true);
+      boolean desiredRotationAcheived = rotationError <= reasonableAchievementWindowRadians;
+
+      boolean desiredAchieved = desiredTranslationAcheived && desiredRotationAcheived;
 
       if (!trajectoryTimerRunning && !desiredAchieved && executionTimer.getElapsedTime() > (getTrajectoryDuration() + 0.1))
       {
-         LogTools.warn("We didn't achieve the desired in time. Elapsed time: {} s", executionTimer.getElapsedTime());
+         LogTools.warn("""
+                       We didn't achieve the desired in time.
+                          Elapsed time: %s s
+                          Desired translation acheived: %b
+                          Translation error: %.5f
+                          Desired rotation achieved: %b
+                          Rotation error: %.5f
+                       """.formatted(executionTimer.getElapsedTime(),
+                                     desiredTranslationAcheived,
+                                     translationError,
+                                     desiredRotationAcheived,
+                                     rotationError));
       }
 
       return trajectoryTimerRunning | !desiredAchieved;
