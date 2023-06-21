@@ -1,4 +1,4 @@
-package us.ihmc.avatar.colorVision;
+package us.ihmc.perception.cuda;
 
 import org.bytedeco.cuda.cudart.CUctx_st;
 import org.bytedeco.cuda.cudart.CUstream_st;
