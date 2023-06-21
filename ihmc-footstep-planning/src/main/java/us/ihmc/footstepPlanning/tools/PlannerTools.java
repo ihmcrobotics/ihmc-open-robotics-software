@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetector;
@@ -261,5 +262,26 @@ public class PlannerTools
       double totalPathLength = bodyPathPlanHolder.computePathLength(0.0);
       double alphaToQuery = MathTools.clamp(alpha + horizonDistanceToCheck / totalPathLength, 0.0, 1.0);
       bodyPathPlanHolder.getPointAlongPath(alphaToQuery, poseToPack);
+   }
+
+   public static double calculateNominalTotalPlanExecutionDuration(FootstepPlan footstepPlan, double defaultSwingDuration, double defaultTransferDuration)
+   {
+      int numberOfSteps = footstepPlan.getNumberOfSteps();
+      double planExecutionTime = 0.0;
+      for (int i = 0; i < numberOfSteps; i++)
+      {
+         PlannedFootstep footstep = footstepPlan.getFootstep(i);
+
+         if (footstep.getTransferDuration() < 0.0)
+            planExecutionTime += defaultTransferDuration;
+         else
+            planExecutionTime += footstep.getTransferDuration();
+
+         if (footstep.getSwingDuration() < 0.0)
+            planExecutionTime += defaultSwingDuration;
+         else
+            planExecutionTime += footstep.getSwingDuration();
+      }
+      return planExecutionTime;
    }
 }

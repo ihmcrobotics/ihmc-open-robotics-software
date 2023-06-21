@@ -8,6 +8,7 @@ import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
+import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
@@ -16,6 +17,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.Timer;
+import us.ihmc.tools.thread.Throttler;
 
 public class HandPoseAction extends HandPoseActionData implements BehaviorAction
 {
@@ -24,6 +26,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final HandPoseJointAnglesStatusMessage handPoseJointAnglesStatus = new HandPoseJointAnglesStatusMessage();
    private final Timer executionTimer = new Timer();
+   private final Throttler warningThrottler = new Throttler().setFrequency(2.0);
 
    public HandPoseAction(ROS2ControllerHelper ros2ControllerHelper,
                          ReferenceFrameLibrary referenceFrameLibrary,
@@ -92,37 +95,17 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    @Override
    public boolean isExecuting()
    {
-      boolean trajectoryTimerRunning = executionTimer.isRunning(getTrajectoryDuration());
-
       RigidBodyTransform desired = getReferenceFrame().getTransformToRoot();
       RigidBodyTransform actual = syncedRobot.getFullRobotModel().getHandControlFrame(getSide()).getTransformToRoot();
 
-      double reasonableAchievementWindowMeters = 0.02;
-      double translationError = actual.getTranslation().differenceNorm(desired.getTranslation());
-      boolean desiredTranslationAcheived = translationError <= reasonableAchievementWindowMeters;
-
-      double reasonableAchievementWindowRadians = 0.04;
-      double rotationError = actual.getRotation().distance(desired.getRotation(), true);
-      boolean desiredRotationAcheived = rotationError <= reasonableAchievementWindowRadians;
-
-      boolean desiredAchieved = desiredTranslationAcheived && desiredRotationAcheived;
-
-      if (!trajectoryTimerRunning && !desiredAchieved && executionTimer.getElapsedTime() > (getTrajectoryDuration() + 0.1))
-      {
-         LogTools.warn("""
-                       We didn't achieve the desired in time.
-                          Elapsed time: %s s
-                          Desired translation acheived: %b
-                          Translation error: %.5f
-                          Desired rotation achieved: %b
-                          Rotation error: %.5f
-                       """.formatted(executionTimer.getElapsedTime(),
-                                     desiredTranslationAcheived,
-                                     translationError,
-                                     desiredRotationAcheived,
-                                     rotationError));
-      }
-
-      return trajectoryTimerRunning | !desiredAchieved;
+      double translationTolerance = 0.02;
+      double rotationTolerance = Math.toRadians(2.5);
+      return BehaviorActionSequenceTools.isExecuting(desired,
+                                                     actual,
+                                                     translationTolerance,
+                                                     rotationTolerance,
+                                                     getTrajectoryDuration(),
+                                                     executionTimer,
+                                                     warningThrottler);
    }
 }
