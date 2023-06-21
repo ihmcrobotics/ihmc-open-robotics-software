@@ -1427,6 +1427,4 @@ public class EuclidCoreMissingTools
       matrix3D.scale(scalarToShrinkMatrixWithinBounds);
       return matrix3D;
    }
-
-//   public static
 }
