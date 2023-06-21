@@ -113,6 +113,16 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
                      compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
                      decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
                   }
+                  case COLOR_JPEG_BGR8 ->
+                  {
+                     LogTools.info("Creating Image Message Visualizer for {} with the type COLOR_JPEG_BGR8", topic.getName());
+                     bytesIfUncompressed = numberOfPixels * 3;
+                     incomingCompressedImageBuffer = NativeMemoryTools.allocate(bytesIfUncompressed);
+                     incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
+
+                     compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
+                     decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
+                  }
                }
             }
 
@@ -147,6 +157,10 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
                case COLOR_JPEG_YUVI420 ->
                {
                   opencv_imgproc.cvtColor(decompressedImage, getRGBA8Mat(), opencv_imgproc.COLOR_YUV2RGBA_I420);
+               }
+               case COLOR_JPEG_BGR8 ->
+               {
+                  opencv_imgproc.cvtColor(decompressedImage, getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA);
                }
             }
          }
