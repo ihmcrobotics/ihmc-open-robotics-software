@@ -98,8 +98,9 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
       RigidBodyTransform desired = getReferenceFrame().getTransformToRoot();
       RigidBodyTransform actual = syncedRobot.getFullRobotModel().getHandControlFrame(getSide()).getTransformToRoot();
 
-      double translationTolerance = 0.02;
-      double rotationTolerance = Math.toRadians(2.5);
+      double translationTolerance = 0.15;
+      // Left hand broke on Nadia and not in the robot model?
+      double rotationTolerance = Math.toRadians(getSide() == RobotSide.LEFT ? 90.0 : 10.0);
       return BehaviorActionSequenceTools.isExecuting(desired,
                                                      actual,
                                                      translationTolerance,
