@@ -176,9 +176,14 @@ public class BehaviorActionSequence
       syncedRobot.update();
 
       if (automaticExecutionSubscription.getMessageNotification().poll())
+      {
          automaticExecution = automaticExecutionSubscription.getMessageNotification().read().getData();
+      }
       if (executionNextIndexSubscription.getMessageNotification().poll())
+      {
          excecutionNextIndex = executionNextIndexSubscription.getMessageNotification().read().getData();
+         currentlyExecutingAction = null; // Set to null so we don't wait for that action to complete
+      }
 
       for (int i = 0; i < actionSequence.size(); i++)
       {
