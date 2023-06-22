@@ -577,12 +577,6 @@ public class WalkingCommandConsumer
       abortWalkingRequested.set(commandConsumerWithDelayBuffers.pollNewestCommand(AbortWalkingCommand.class).isAbortWalkingRequested());
    }
 
-   public void consumeEnvironmentalModelingCommands()
-   {
-//      consumePlanarRegionStepConstraintCommand();
-//      consumePlanarRegionStepConstraintsListCommand();
-   }
-
    public void consumePrepareForLocomotionCommands()
    {
       if (!commandConsumerWithDelayBuffers.isNewCommandAvailable(PrepareForLocomotionCommand.class))
