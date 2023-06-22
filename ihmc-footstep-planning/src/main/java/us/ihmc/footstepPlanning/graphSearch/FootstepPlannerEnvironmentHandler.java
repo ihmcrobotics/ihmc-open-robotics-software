@@ -22,7 +22,6 @@ public class FootstepPlannerEnvironmentHandler
    {
       FLAT_GROUND(false),
       PRIMARY_PLANAR_REGIONS(true),
-      FALLBACK_PLANAR_REGIONS(true),
       HEIGHT_MAP(false);
 
       private final boolean isPlanarRegion;
@@ -41,13 +40,8 @@ public class FootstepPlannerEnvironmentHandler
    private final ConvexPolygon2D primaryPlanarRegionModeledWorld = new ConvexPolygon2D();
    private final BoundingBox2D primaryPlanarRegionModeledBoundingBox = new BoundingBox2D();
 
-   private final ConvexPolygon2D fallbackPlanarRegionModeledWorld = new ConvexPolygon2D();
-   private final BoundingBox2D fallbackPlanarRegionModeledBoundingBox = new BoundingBox2D();
-
    private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
    private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
-
-   private EnvironmentToUse environmentToUseForStep;
 
    private final HashMap<DiscreteFootstep, EnvironmentToUse> environmentDataHolder = new HashMap<>();
 
@@ -70,14 +64,6 @@ public class FootstepPlannerEnvironmentHandler
       environmentDataHolder.clear();
 
       computeHullOfRegions(primaryPlanarRegions, primaryPlanarRegionModeledWorld, primaryPlanarRegionModeledBoundingBox);
-   }
-
-   public void setFallbackPlanarRegions(PlanarRegionsList fallbackPlanarRegions)
-   {
-      this.fallbackPlanarRegions = fallbackPlanarRegions;
-      environmentDataHolder.clear();
-
-      computeHullOfRegions(fallbackPlanarRegions, fallbackPlanarRegionModeledWorld, fallbackPlanarRegionModeledBoundingBox);
    }
 
    public void setFallbackHeightMap(HeightMapData fallbackHeightMap)
@@ -116,6 +102,7 @@ public class FootstepPlannerEnvironmentHandler
       {
          DiscreteFootstepTools.getFootPolygon(footstep, footPolygonsInSoleFrame.get(footstep.getRobotSide()), footPolygon);
 
+         EnvironmentToUse environmentToUseForStep;
          if (flatGroundMode())
          {
             environmentToUseForStep = EnvironmentToUse.FLAT_GROUND;
@@ -123,10 +110,6 @@ public class FootstepPlannerEnvironmentHandler
          else if (hasPrimaryPlanarRegions() && isFootstepInRegionSet(primaryPlanarRegionModeledWorld, primaryPlanarRegionModeledBoundingBox))
          {
             environmentToUseForStep = EnvironmentToUse.PRIMARY_PLANAR_REGIONS;
-         }
-         else if (hasFallbackPlanarRegions() && isFootstepInRegionSet(fallbackPlanarRegionModeledWorld, fallbackPlanarRegionModeledBoundingBox))
-         {
-            environmentToUseForStep = EnvironmentToUse.FALLBACK_PLANAR_REGIONS;
          }
          else if (hasFallbackHeightMap())
          {
@@ -161,11 +144,6 @@ public class FootstepPlannerEnvironmentHandler
    public PlanarRegionsList getPrimaryPlanarRegions()
    {
       return primaryPlanarRegions;
-   }
-
-   public PlanarRegionsList getFallbackPlanarRegions()
-   {
-      return fallbackPlanarRegions;
    }
 
    public HeightMapData getFallbackHeightMap()
