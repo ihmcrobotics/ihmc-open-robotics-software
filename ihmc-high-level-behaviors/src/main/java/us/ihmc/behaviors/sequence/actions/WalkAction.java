@@ -5,6 +5,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -34,6 +35,7 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    private final SideDependentList<RigidBodyTransform> commandedGoalFeetTransformToWorld = new SideDependentList<>(() -> new RigidBodyTransform());
    private final FootstepPlanningModule footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final WalkingControllerParameters walkingControllerParameters;
    private FootstepDataListMessage footstepDataListMessage;
    private final Timer executionTimer = new Timer();
    private final Throttler warningThrottler = new Throttler().setFrequency(2.0);
@@ -42,12 +44,14 @@ public class WalkAction extends WalkActionData implements BehaviorAction
                      ROS2SyncedRobotModel syncedRobot,
                      FootstepPlanningModule footstepPlanner,
                      FootstepPlannerParametersBasics footstepPlannerParameters,
+                     WalkingControllerParameters walkingControllerParameters,
                      ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.footstepPlanner = footstepPlanner;
       this.footstepPlannerParameters = footstepPlannerParameters;
+      this.walkingControllerParameters = walkingControllerParameters;
       setReferenceFrameLibrary(referenceFrameLibrary);
    }
 
@@ -89,15 +93,16 @@ public class WalkAction extends WalkActionData implements BehaviorAction
       footstepPlanner.getFootstepPlannerParameters().setMaximumStepReach(idealFootstepLength);
       LogTools.info("Planning footsteps...");
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
+      FootstepPlan footstepPlan = footstepPlannerOutput.getFootstepPlan();
       LogTools.info("Footstep planner completed with {}, {} step(s)",
                     footstepPlannerOutput.getFootstepPlanningResult(),
-                    footstepPlannerOutput.getFootstepPlan().getNumberOfSteps());
+                    footstepPlan.getNumberOfSteps());
 
       FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
       footstepPlannerLogger.logSession();
       ThreadTools.startAThread(FootstepPlannerLogger::deleteOldLogs, "FootstepPlanLogDeletion");
 
-      if (footstepPlannerOutput.getFootstepPlan().getNumberOfSteps() < 1) // failed
+      if (footstepPlan.getNumberOfSteps() < 1) // failed
       {
          FootstepPlannerRejectionReasonReport rejectionReasonReport = new FootstepPlannerRejectionReasonReport(footstepPlanner);
          rejectionReasonReport.update();
@@ -111,7 +116,12 @@ public class WalkAction extends WalkActionData implements BehaviorAction
       }
       else
       {
-         footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlannerOutput.getFootstepPlan(),
+         footstepPlan.getFootstep(0).setTransferDuration(getTransferDuration() / 2.0);
+
+         if (footstepPlan.getNumberOfSteps() > 1)
+            footstepPlan.getFootstep(footstepPlan.getNumberOfSteps() - 1).setTransferDuration(getTransferDuration() / 2.0);
+
+         footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan,
                                                                                                getSwingDuration(),
                                                                                                getTransferDuration());
          footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
@@ -135,7 +145,9 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    {
       double nominalExecutionDuration = PlannerTools.calculateNominalTotalPlanExecutionDuration(footstepPlanner.getOutput().getFootstepPlan(),
                                                                                                 getSwingDuration(),
-                                                                                                getTransferDuration());
+                                                                                                walkingControllerParameters.getDefaultInitialTransferTime(),
+                                                                                                getTransferDuration(),
+                                                                                                walkingControllerParameters.getDefaultFinalTransferTime());
       boolean isExecuting = false;
       for (RobotSide side : RobotSide.values)
       {
