@@ -394,10 +394,8 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
       unachievedSwingAcceleration.setToZero();
    }
 
-   public void initialize(boolean checkVelocityForSwingSingularityAvoidance)
+   public void setCheckVelocityForSwingSingularityAvoidance(boolean checkVelocityForSwingSingularityAvoidance)
    {
-      isLegLengthening.set(false);
-      isLegShortening.set(false);
       this.checkVelocityForSwingSingularityAvoidance.set(checkVelocityForSwingSingularityAvoidance);
    }
 
@@ -447,10 +445,6 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
 
          if (desiredPercentOfLegLength.getDoubleValue() > upperBoundToStartFootCorrection)
          {
-            // update if the leg is lengthening
-            if (!isLegLengthening.getBooleanValue())
-               isLegLengthening.set(isLegLengthening());
-
             correctSwingFootTrajectoryOverExtensionForSingularityAvoidance(desiredFootPositionToCorrect,
                                                                            desiredFootLinearVelocityToCorrect,
                                                                            desiredFootLinearAccelerationToCorrect);
@@ -506,10 +500,7 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
 
       // foot's being picked up more quickly than the pelvis is.
       if (checkVelocityForSwingSingularityAvoidance.getBooleanValue() && isLegShortening())
-      {
-         isLegLengthening.set(false);
          return;
-      }
 
       checkVelocityForSwingSingularityAvoidance.set(false);
 
@@ -568,7 +559,7 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
       // Mix the desired leg extension velocity to progressively follow the pelvis velocity as the the leg is more straight
       double desiredLinearVelocityZ = desiredFootLinearVelocity.getZ();
       double desiredLinearAccelerationZ = desiredFootLinearAcceleration.getZ();
-      if (isLegLengthening.getBooleanValue())
+      if (isLegLengthening())
       {
          desiredLinearVelocityZ = InterpolationTools.linearInterpolate(desiredFootLinearVelocity.getZ(),
                                                                        pelvisLinearVelocity.getZ(),

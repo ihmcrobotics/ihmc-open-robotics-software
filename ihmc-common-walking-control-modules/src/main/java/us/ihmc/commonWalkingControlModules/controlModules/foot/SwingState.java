@@ -35,7 +35,6 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.math.filters.RateLimitedYoFramePose;
-import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.math.trajectories.*;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePoseTrajectoryGenerator;
@@ -323,7 +322,7 @@ public class SwingState extends AbstractFootControlState
 
       if (workspaceLimiterControlModule != null)
       {
-         workspaceLimiterControlModule.initialize(true);
+         workspaceLimiterControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
       }
 
       YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);

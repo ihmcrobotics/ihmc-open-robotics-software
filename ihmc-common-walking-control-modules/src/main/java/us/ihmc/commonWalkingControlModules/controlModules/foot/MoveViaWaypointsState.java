@@ -102,7 +102,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       isPerformingTouchdown.set(false);
 
       if (workspaceLimiterControlModule != null)
-         workspaceLimiterControlModule.initialize(false);
+         workspaceLimiterControlModule.setCheckVelocityForSwingSingularityAvoidance(false);
    }
 
    @Override

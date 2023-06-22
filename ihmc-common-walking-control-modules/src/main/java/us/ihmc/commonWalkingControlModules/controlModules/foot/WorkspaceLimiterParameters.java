@@ -57,7 +57,7 @@ public class WorkspaceLimiterParameters
 
       velocityDifferenceForLengthening = new DoubleParameter(namePrefix + "VelocityDifferenceForLengthening", registry, defaultMinVelocityDifference);
 
-      enableSingularityAvoidanceOnSwingFoot = new BooleanParameter(namePrefix + "enableSingularityAvoidanceOnSwingFoot", registry, false);
+      enableSingularityAvoidanceOnSwingFoot = new BooleanParameter(namePrefix + "enableSingularityAvoidanceOnSwingFoot", registry, true);
 
       parentRegistry.addChild(registry);
    }
