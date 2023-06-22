@@ -101,11 +101,6 @@ public class FootstepPlannerRequest
    private PlanarRegionsList planarRegionsList;
 
    /**
-    * Fallback planar regions. May be null or empty to enable flat ground mode.
-    */
-   private PlanarRegionsList fallbackPlanarRegionsList;
-
-   /**
     * Height map. May be null to enable flat ground mode.
     */
    private HeightMapData heightMapData;
@@ -159,7 +154,6 @@ public class FootstepPlannerRequest
       maximumIterations = -1;
       horizonLength = Double.MAX_VALUE;
       planarRegionsList = null;
-      fallbackPlanarRegionsList = null;
       heightMapData = null;
       assumeFlatGround = false;
       bodyPathWaypoints.clear();
@@ -288,11 +282,6 @@ public class FootstepPlannerRequest
       this.planarRegionsList = planarRegionsList;
    }
 
-   public void setFallbackPlanarRegionsList(PlanarRegionsList fallbackPlanarRegionsList)
-   {
-      this.fallbackPlanarRegionsList = fallbackPlanarRegionsList;
-   }
-
    public void setHeightMapData(HeightMapData heightMapData)
    {
       this.heightMapData = heightMapData;
@@ -401,11 +390,6 @@ public class FootstepPlannerRequest
       return planarRegionsList;
    }
 
-   public PlanarRegionsList getFallbackPlanarRegionsList()
-   {
-      return fallbackPlanarRegionsList;
-   }
-
    public HeightMapData getHeightMapData()
    {
       return heightMapData;
@@ -482,8 +466,6 @@ public class FootstepPlannerRequest
 
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(requestPacket.getPlanarRegionsListMessage());
       setPlanarRegionsList(planarRegionsList);
-      PlanarRegionsList fallbackPlanarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(requestPacket.getFallbackPlanarRegionsListMessage());
-      setFallbackPlanarRegionsList(fallbackPlanarRegionsList);
       HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(requestPacket.getHeightMapMessage());
       if (!heightMapData.isEmpty())
          setHeightMapData(heightMapData);
@@ -525,11 +507,6 @@ public class FootstepPlannerRequest
       {
          PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(getPlanarRegionsList());
          requestPacket.getPlanarRegionsListMessage().set(planarRegionsListMessage);
-      }
-      if (getFallbackPlanarRegionsList() != null)
-      {
-         PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(getFallbackPlanarRegionsList());
-         requestPacket.getFallbackPlanarRegionsListMessage().set(planarRegionsListMessage);
       }
 
       if (getHeightMapData() != null)
@@ -574,10 +551,6 @@ public class FootstepPlannerRequest
       if(other.planarRegionsList != null)
       {
          this.planarRegionsList = other.planarRegionsList.copy();
-      }
-      if(other.fallbackPlanarRegionsList != null)
-      {
-         this.fallbackPlanarRegionsList = other.fallbackPlanarRegionsList.copy();
       }
 
       for (int i = 0; i < other.bodyPathWaypoints.size(); i++)
