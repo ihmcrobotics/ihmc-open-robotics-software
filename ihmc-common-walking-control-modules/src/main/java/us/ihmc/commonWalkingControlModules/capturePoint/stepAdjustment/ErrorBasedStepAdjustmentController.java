@@ -106,7 +106,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final BooleanProvider resetFootstepProjectionEachTick;
    private final BooleanProvider useICPControlPlaneInStepAdjustment;
    private final DoubleProvider minimumTimeForStepAdjustment;
-   private final DoubleProvider extraTimeToProjectDynamics;
    private final DoubleParameter supportDistanceFromFront;
    private final DoubleParameter supportDistanceFromBack;
    private final DoubleParameter supportDistanceFromInside;
@@ -173,7 +172,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                          registry,
                                                          stepAdjustmentParameters.getMinimumTimeForStepAdjustment());
 
-      extraTimeToProjectDynamics = new DoubleParameter(yoNamePrefix + "ExtraTimeToProjectDynamics", registry, 0.0);
       supportDistanceFromFront = new DoubleParameter(yoNamePrefix + "supportDistanceFromFront",
                                                      registry,
                                                      stepAdjustmentParameters.getCoPDistanceFromFrontOfFoot());
@@ -385,7 +383,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       computeLimitedAreaForCoP(copToShrinkAbout, percentageToShrinkPolygon);
       RobotSide swingSide = upcomingFootstepSide.getEnumValue();
       RobotSide stanceSide = swingSide.getOppositeSide();
-      double timeToPrject = Math.max(timeRemainingInState.getDoubleValue(), 0.0) + extraTimeToProjectDynamics.getValue();
+      double timeToPrject = Math.max(timeRemainingInState.getDoubleValue(), 0.0);
       captureRegionCalculator.calculateCaptureRegion(swingSide, timeToPrject, currentICP, omega0, allowableAreaForCoP);
       oneStepSafetyHeuristics.computeCaptureRegionWithSafetyHeuristics(stanceSide,
                                                                        currentICP,
