@@ -16,7 +16,7 @@ import us.ihmc.tools.thread.SwapReference;
  */
 public class RDXROS2ColoredPointCloudVisualizerColorChannel extends RDXROS2ColoredPointCloudVisualizerChannel
 {
-   private Mat bgr8Image;
+   private Mat yuv1420Image;
    private BytedecoImage color8UC3Image;
    private SwapReference<BytedecoImage> color8UC4ImageSwapReference;
 
@@ -28,7 +28,7 @@ public class RDXROS2ColoredPointCloudVisualizerColorChannel extends RDXROS2Color
    @Override
    protected void initialize(OpenCLManager openCLManager)
    {
-      bgr8Image = new Mat(1, 1, opencv_core.CV_8UC3);
+      yuv1420Image = new Mat(1, 1, opencv_core.CV_8UC1);
       color8UC3Image = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
       color8UC4ImageSwapReference = new SwapReference<>(() ->
       {
@@ -44,10 +44,12 @@ public class RDXROS2ColoredPointCloudVisualizerColorChannel extends RDXROS2Color
       synchronized (decompressionInputSwapReference)
       {
          Mat decompressionInputMat = decompressionInputSwapReference.getForThreadTwo().getInputMat();
-         opencv_imgcodecs.imdecode(decompressionInputMat, opencv_imgcodecs.IMREAD_UNCHANGED, bgr8Image);
+         opencv_imgcodecs.imdecode(decompressionInputMat, opencv_imgcodecs.IMREAD_UNCHANGED, yuv1420Image);
       }
-      opencv_imgproc.cvtColor(bgr8Image, color8UC4ImageSwapReference.getForThreadOne().getBytedecoOpenCVMat(),
-                              opencv_imgproc.COLOR_BGR2RGBA);
+      opencv_imgproc.cvtColor(yuv1420Image, color8UC3Image.getBytedecoOpenCVMat(), opencv_imgproc.COLOR_YUV2RGBA_I420);
+      opencv_imgproc.cvtColor(color8UC3Image.getBytedecoOpenCVMat(),
+                              color8UC4ImageSwapReference.getForThreadOne().getBytedecoOpenCVMat(),
+                              opencv_imgproc.COLOR_RGB2RGBA);
       color8UC4ImageSwapReference.swap();
    }
 
