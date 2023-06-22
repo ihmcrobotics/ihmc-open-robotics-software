@@ -53,7 +53,6 @@ public class RDXFootstepPlanning
    private final TypedNotification<Pose3DReadOnly> planningRequestNotification = new TypedNotification<>();
    private final FramePose3D midFeetZUpPose = new FramePose3D();
    private volatile PlanarRegionsList planarRegionsList = null;
-   private volatile PlanarRegionsList fallbackPlanarRegionsList = null;
    private volatile HeightMapMessage heightMapMessage = null;
    private final FramePose3D startPose = new FramePose3D();
 
@@ -169,11 +168,6 @@ public class RDXFootstepPlanning
             footstepPlannerRequest.setPlanarRegionsList(planarRegionsList);
             assumeFlatGround = false;
          }
-         if (fallbackPlanarRegionsList != null)
-         {
-            footstepPlannerRequest.setFallbackPlanarRegionsList(fallbackPlanarRegionsList);
-            assumeFlatGround = false;
-         }
       }
       footstepPlannerRequest.setAssumeFlatGround(assumeFlatGround);
 
@@ -250,19 +244,9 @@ public class RDXFootstepPlanning
       }
    }
 
-   public void setPlanarRegionsListMessage(PlanarRegionsListMessage planarRegionsListMessage)
-   {
-      setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
-   }
-
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
-   }
-
-   public void setFallbackPlanarRegionsListMessage(PlanarRegionsList planarRegionsList)
-   {
-      this.fallbackPlanarRegionsList = planarRegionsList;
    }
 
    public void setHeightMapData(HeightMapMessage heightMapMessage)
