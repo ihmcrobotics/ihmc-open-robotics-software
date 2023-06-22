@@ -32,7 +32,8 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final SideDependentList<FramePose3D> goalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
-   private final SideDependentList<RigidBodyTransform> commandedGoalFeetTransformToWorld = new SideDependentList<>(() -> new RigidBodyTransform());
+   private final SideDependentList<FramePose3D> syncedFeetPoses = new SideDependentList<>(() -> new FramePose3D());
+   private final SideDependentList<FramePose3D> commandedGoalFeetTransformToWorld = new SideDependentList<>(() -> new FramePose3D());
    private final FootstepPlanningModule footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
@@ -151,13 +152,12 @@ public class WalkAction extends WalkActionData implements BehaviorAction
       boolean isExecuting = false;
       for (RobotSide side : RobotSide.values)
       {
-         RigidBodyTransform desired = commandedGoalFeetTransformToWorld.get(side);
-         RigidBodyTransform actual = syncedRobot.getReferenceFrames().getSoleFrame(side).getTransformToRoot();
+         syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
 
          double translationTolerance = 0.15;
          double rotationTolerance = Math.toRadians(10.0);
-         isExecuting |= BehaviorActionSequenceTools.isExecuting(desired,
-                                                                actual,
+         isExecuting |= BehaviorActionSequenceTools.isExecuting(commandedGoalFeetTransformToWorld.get(side),
+                                                                syncedFeetPoses.get(side),
                                                                 translationTolerance,
                                                                 rotationTolerance,
                                                                 nominalExecutionDuration,

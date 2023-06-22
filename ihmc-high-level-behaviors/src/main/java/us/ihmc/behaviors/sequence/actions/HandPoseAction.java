@@ -9,7 +9,8 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -24,6 +25,8 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
+   private final FramePose3D desiredHandControlPose = new FramePose3D();
+   private final FramePose3D syncedHandControlPose = new FramePose3D();
    private final HandPoseJointAnglesStatusMessage handPoseJointAnglesStatus = new HandPoseJointAnglesStatusMessage();
    private final Timer executionTimer = new Timer();
    private final Throttler warningThrottler = new Throttler().setFrequency(2.0);
@@ -95,14 +98,14 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    @Override
    public boolean isExecuting()
    {
-      RigidBodyTransform desired = getReferenceFrame().getTransformToRoot();
-      RigidBodyTransform actual = syncedRobot.getFullRobotModel().getHandControlFrame(getSide()).getTransformToRoot();
+      desiredHandControlPose.setFromReferenceFrame(getReferenceFrame());
+      syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getSide()));
 
       double translationTolerance = 0.15;
       // Left hand broke on Nadia and not in the robot model?
       double rotationTolerance = Math.toRadians(getSide() == RobotSide.LEFT ? 90.0 : 10.0);
-      return BehaviorActionSequenceTools.isExecuting(desired,
-                                                     actual,
+      return BehaviorActionSequenceTools.isExecuting(desiredHandControlPose,
+                                                     syncedHandControlPose,
                                                      translationTolerance,
                                                      rotationTolerance,
                                                      getTrajectoryDuration(),

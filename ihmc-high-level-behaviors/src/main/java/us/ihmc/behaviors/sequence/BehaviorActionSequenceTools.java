@@ -2,7 +2,7 @@ package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.*;
 import us.ihmc.behaviors.sequence.actions.*;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.tools.Timer;
@@ -86,8 +86,8 @@ public class BehaviorActionSequenceTools
       }
    }
 
-   public static boolean isExecuting(RigidBodyTransform desired,
-                                     RigidBodyTransform actual,
+   public static boolean isExecuting(FramePose3DReadOnly desired,
+                                     FramePose3DReadOnly actual,
                                      double translationTolerance,
                                      double rotationTolerance,
                                      double actionNominalDuration,
@@ -113,8 +113,8 @@ public class BehaviorActionSequenceTools
       return trajectoryTimerRunning | !desiredPoseAchieved;
    }
 
-   public static boolean isDesiredPoseAchieved(RigidBodyTransform desired,
-                                               RigidBodyTransform actual,
+   public static boolean isDesiredPoseAchieved(FramePose3DReadOnly desired,
+                                               FramePose3DReadOnly actual,
                                                double translationTolerance,
                                                double rotationTolerance,
                                                boolean shouldBeAchieved,
