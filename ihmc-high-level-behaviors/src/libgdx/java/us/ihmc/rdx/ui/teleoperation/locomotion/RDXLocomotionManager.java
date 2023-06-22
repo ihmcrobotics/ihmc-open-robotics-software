@@ -100,9 +100,6 @@ public class RDXLocomotionManager
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;
 
-//      addChild(swingFootPlanningParametersTuner);
-
-
       locomotionParameters = new RDXLocomotionParameters(robotModel.getSimpleRobotName());
       locomotionParameters.load();
       lastAssumeFlatGroundState = locomotionParameters.getAssumeFlatGround();
@@ -129,7 +126,6 @@ public class RDXLocomotionManager
          footstepPlanning.setPlanarRegionsList(planarRegionsList);
          interactableFootstepPlan.setPlanarRegionsList(planarRegionsList);
       });
-//      ros2Helper.subscribeViaCallback(PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS, footstepPlanning::setFallbackPlanarRegionsListMessage);
       ros2Helper.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_OUTPUT, heightMap ->
       {
          footstepPlanning.setHeightMapData(heightMap);
@@ -274,15 +270,12 @@ public class RDXLocomotionManager
       // This ensures that when the spacebar key is pressed it executes the correct action.
       boolean pauseAvailable = controllerStatusTracker.isWalking();
       boolean continueAvailable = !pauseAvailable && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0;
-      boolean walkAvailable = true;//!continueAvailable && interactableFootstepPlan.getNumberOfFootsteps() > 0;
+      boolean walkAvailable = !continueAvailable && interactableFootstepPlan.getNumberOfFootsteps() > 0;
 
       areFootstepsAdjustableCheckbox.renderImGuiWidget();
       assumeFlatGroundCheckbox.renderImGuiWidget();
       planSwingTrajectoriesCheckbox.renderImGuiWidget();
       replanSwingTrajectoriesOnChangeCheckbox.renderImGuiWidget();
-
-      ImGui.checkbox(labels.get("Show swing planner parameter tuner"), swingFootPlanningParametersTuner.getIsShowing());
-
 
       swingTimeSlider.renderImGuiWidget();
       transferTimeSlider.renderImGuiWidget();
