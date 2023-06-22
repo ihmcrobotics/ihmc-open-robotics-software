@@ -13,6 +13,7 @@ public class RDXHumanoidPerceptionUI
    private HumanoidPerceptionModule humanoidPerception;
    private RDXRemotePerceptionUI remotePerceptionUI;
    private RDXRapidRegionsUI rapidRegionsUI;
+   private RDXActiveMappingUI activeMappingUI;
    private RDXROS2PlanarRegionsVisualizer rapidRegionsMapVisualizer;
    private RDXROS2FramePlanarRegionsVisualizer rapidRegionsVisualizer;
 
@@ -22,6 +23,7 @@ public class RDXHumanoidPerceptionUI
       this.remotePerceptionUI = new RDXRemotePerceptionUI(ros2Helper);
       this.rapidRegionsUI = new RDXRapidRegionsUI();
       this.rapidRegionsUI.create(humanoidPerception.getRapidRegionsExtractor());
+      this.activeMappingUI = new RDXActiveMappingUI("Active Mapping", ros2Helper);
    }
 
    public void renderImGuiWidgets()
@@ -58,6 +60,8 @@ public class RDXHumanoidPerceptionUI
    {
       return remotePerceptionUI;
    }
+
+   public RDXActiveMappingUI getActiveMappingUI() { return activeMappingUI; }
 
    public void destroy()
    {
