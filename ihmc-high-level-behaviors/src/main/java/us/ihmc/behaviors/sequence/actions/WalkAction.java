@@ -11,7 +11,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -29,6 +28,9 @@ import java.util.UUID;
 
 public class WalkAction extends WalkActionData implements BehaviorAction
 {
+   public static final double TRANSLATION_TOLERANCE = 0.15;
+   public static final double ROTATION_TOLERANCE = Math.toRadians(10.0);
+
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final SideDependentList<FramePose3D> goalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
@@ -154,12 +156,10 @@ public class WalkAction extends WalkActionData implements BehaviorAction
       {
          syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
 
-         double translationTolerance = 0.15;
-         double rotationTolerance = Math.toRadians(10.0);
          isExecuting |= BehaviorActionSequenceTools.isExecuting(commandedGoalFeetTransformToWorld.get(side),
                                                                 syncedFeetPoses.get(side),
-                                                                translationTolerance,
-                                                                rotationTolerance,
+                                                                TRANSLATION_TOLERANCE,
+                                                                ROTATION_TOLERANCE,
                                                                 nominalExecutionDuration,
                                                                 executionTimer,
                                                                 warningThrottler);
