@@ -5,8 +5,8 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.mult.VectorVectorMult_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.optimization.EvaluationProblems.EvaluationProblem;
-import us.ihmc.robotics.optimization.EvaluationProblems.GomezLeveyConstrainedEvaluationProblem;
+import us.ihmc.robotics.optimization.EvaluationProblems.OptimizationEvaluationProblem;
+import us.ihmc.robotics.optimization.EvaluationProblems.GomezLeveyConstrainedOptimizationEvaluationProblem;
 import us.ihmc.robotics.optimization.constrainedOptimization.AugmentedLagrangeOptimizationProblem;
 import us.ihmc.robotics.optimization.constrainedOptimization.AugmentedLagrangeOptimizer;
 
@@ -149,7 +149,7 @@ public class AugmentedLagrangeOptimizerTest
    @Test
    public void testGomezLevy()
    {
-      EvaluationProblem problem = new GomezLeveyConstrainedEvaluationProblem();
+      OptimizationEvaluationProblem problem = new GomezLeveyConstrainedOptimizationEvaluationProblem();
       DMatrixD1 initial = new DMatrixRMaj(new double[] {0, 0});
       int numLagrangeIterations = 10;
       double initialPenalty = 1;

@@ -8,7 +8,7 @@ import us.ihmc.robotics.optimization.constrainedOptimization.ConstraintFunction;
 
 import java.util.List;
 
-public class SixHumpCamelEvaluationProblem implements EvaluationProblem
+public class SixHumpCamelOptimizationEvaluationProblem implements OptimizationEvaluationProblem
 {
    @Override
    public RealDomainBounds[] getDomain()

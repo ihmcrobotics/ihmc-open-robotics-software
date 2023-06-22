@@ -9,7 +9,7 @@ import us.ihmc.robotics.optimization.constrainedOptimization.ConstraintFunction;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GomezLeveyConstrainedEvaluationProblem implements EvaluationProblem
+public class GomezLeveyConstrainedOptimizationEvaluationProblem implements OptimizationEvaluationProblem
 {
    @Override
    public RealDomainBounds[] getDomain()

@@ -51,8 +51,9 @@ import java.util.List;
 public class MultiblockADMMProblem
 {
    private final List<AugmentedLagrangeOptimizationProblem> isolatedOptimizationProblems = new ArrayList<>(); // size = numblocks
-   private final List<BlockConstraintFunction> inequalityConstraints = new ArrayList<>();
-   private final List<BlockConstraintFunction> equalityConstraints = new ArrayList<>();
+   private final List<BlockConstraintFunction> globalInequalityConstraints = new ArrayList<>();
+   private final List<BlockConstraintFunction> globalEqualityConstraints = new ArrayList<>();
+   private BlockCostFunction globalCostFunction = BlockCostFunction.getEmptyCostFunction();
 
    private AugmentedLagrangeConstructor multiblockAugmentedLagrangeConstructor;
    private DMatrixD1[] optimalBlocksFromLastIteration;
@@ -61,6 +62,11 @@ public class MultiblockADMMProblem
 
    public MultiblockADMMProblem()
    {
+   }
+
+   public void setGlobalCostFunction(BlockCostFunction costFunction)
+   {
+      this.globalCostFunction = costFunction;
    }
 
    /**
@@ -81,7 +87,7 @@ public class MultiblockADMMProblem
     */
    public void addInequalityConstraint(BlockConstraintFunction constraint)
    {
-      inequalityConstraints.add(constraint);
+      globalInequalityConstraints.add(constraint);
    }
 
    /**
@@ -90,13 +96,13 @@ public class MultiblockADMMProblem
     */
    public void addEqualityConstraint(BlockConstraintFunction constraint)
    {
-      equalityConstraints.add(constraint);
+      globalEqualityConstraints.add(constraint);
    }
 
    public void clearConstraints()
    {
-      equalityConstraints.clear();
-      inequalityConstraints.clear();
+      globalEqualityConstraints.clear();
+      globalInequalityConstraints.clear();
    }
 
    public void clearIsolatedProblems()
@@ -113,8 +119,8 @@ public class MultiblockADMMProblem
 
       multiblockAugmentedLagrangeConstructor = new AugmentedLagrangeConstructor(penalty,
                                                                                 penaltyIncreaseFactor,
-                                                                                equalityConstraints.size(),
-                                                                                inequalityConstraints.size());
+                                                                                globalEqualityConstraints.size(),
+                                                                                globalInequalityConstraints.size());
    }
 
    // ======================== Solving ===================================
@@ -162,8 +168,10 @@ public class MultiblockADMMProblem
       double isolatedCost = isolatedOptimizationProblems.get(blockIndex).calculateDualProblemCost(blocks[blockIndex]);
       DMatrixD1 inequalityConstraintEvaluations = evaluateGlobalInequalityConstraints(blocks);
       DMatrixD1 equalityConstraintEvaluations = evaluateEqualityConstraints(blocks);
+      double globalCost = globalCostFunction.calculate(blocks);
+      double cost = isolatedCost + globalCost;
 
-      return multiblockAugmentedLagrangeConstructor.getAugmentedLagrangeCost(isolatedCost, equalityConstraintEvaluations, inequalityConstraintEvaluations);
+      return multiblockAugmentedLagrangeConstructor.getAugmentedLagrangeCost(cost, equalityConstraintEvaluations, inequalityConstraintEvaluations);
    }
 
    /**
@@ -174,11 +182,11 @@ public class MultiblockADMMProblem
     */
    private DMatrixD1 evaluateGlobalInequalityConstraints(DMatrixD1[] blocks)
    {
-      int numConstraints = inequalityConstraints.size();
+      int numConstraints = globalInequalityConstraints.size();
       DMatrixD1 value = new DMatrixRMaj(numConstraints, 1);
       for (int i = 0; i < numConstraints; i++)
       {
-         value.set(i, inequalityConstraints.get(i).calculate(blocks));
+         value.set(i, globalInequalityConstraints.get(i).calculate(blocks));
       }
       return value;
    }
@@ -191,11 +199,11 @@ public class MultiblockADMMProblem
     */
    private DMatrixD1 evaluateEqualityConstraints(DMatrixD1[] blocks)
    {
-      int numConstraints = equalityConstraints.size();
+      int numConstraints = globalEqualityConstraints.size();
       DMatrixD1 value = new DMatrixRMaj(numConstraints, 1);
       for (int i = 0; i < numConstraints; i++)
       {
-         value.set(i, equalityConstraints.get(i).calculate(blocks));
+         value.set(i, globalEqualityConstraints.get(i).calculate(blocks));
       }
       return value;
    }

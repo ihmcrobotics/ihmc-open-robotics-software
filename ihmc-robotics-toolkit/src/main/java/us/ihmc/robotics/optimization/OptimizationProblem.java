@@ -1,13 +1,10 @@
-package us.ihmc.robotics.optimization.EvaluationProblems;
+package us.ihmc.robotics.optimization;
 
-import org.ejml.data.DMatrixD1;
-import us.ihmc.robotics.optimization.CostFunction;
-import us.ihmc.robotics.optimization.RealDomainBounds;
 import us.ihmc.robotics.optimization.constrainedOptimization.ConstraintFunction;
 
 import java.util.List;
 
-public interface EvaluationProblem
+public interface OptimizationProblem
 {
    /**
     *
@@ -19,6 +16,4 @@ public interface EvaluationProblem
 
    public List<ConstraintFunction> getEqualityConstraints();
    public List<ConstraintFunction> getInequalityConstraints();
-   public DMatrixD1 getOptimumParameters();
-   public double getOptimumCost();
 }

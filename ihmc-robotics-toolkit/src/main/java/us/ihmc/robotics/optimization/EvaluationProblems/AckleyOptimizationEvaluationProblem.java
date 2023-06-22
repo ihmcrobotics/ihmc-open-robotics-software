@@ -10,7 +10,7 @@ import us.ihmc.robotics.optimization.constrainedOptimization.ConstraintFunction;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AckleyEvaluationProblem implements EvaluationProblem
+public class AckleyOptimizationEvaluationProblem implements OptimizationEvaluationProblem
 {
    private final double c;
    private final double a;
@@ -19,12 +19,12 @@ public class AckleyEvaluationProblem implements EvaluationProblem
    private final DMatrixD1 optimumParameters;
    private final double optimumValue = 0;
 
-   public AckleyEvaluationProblem(int parameterDimensions)
+   public AckleyOptimizationEvaluationProblem(int parameterDimensions)
    {
       this(20.0, 0.2, 2.0 * Math.PI, parameterDimensions);
    }
 
-   public AckleyEvaluationProblem(double a, double b, double c, int parameterDimensions)
+   public AckleyOptimizationEvaluationProblem(double a, double b, double c, int parameterDimensions)
    {
       this.a = a;
       this.b = b;
