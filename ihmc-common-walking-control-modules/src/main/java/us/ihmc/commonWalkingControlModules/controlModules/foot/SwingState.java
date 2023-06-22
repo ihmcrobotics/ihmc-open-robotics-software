@@ -89,9 +89,7 @@ public class SwingState extends AbstractFootControlState
    private final FrameVector3DReadOnly finalAngularVelocity = new FrameVector3D(worldFrame);
 
    private final YoDouble swingDuration;
-   private final YoDouble speedUpFactorMaxRate;
    private final YoDouble swingTimeSpeedUpFactor;
-   private final RateLimitedYoVariable limitedSwingTimeSpeedUpFactor;
    private final YoDouble maxSwingTimeSpeedUpFactor;
    private final YoDouble minSwingTimeForDisturbanceRecovery;
    private final YoBoolean isSwingSpeedUpEnabled;
@@ -237,9 +235,7 @@ public class SwingState extends AbstractFootControlState
       else
          swingVisualizer = null;
 
-      speedUpFactorMaxRate = new YoDouble(namePrefix + "SpeedUpFactorMaxRate", registry);
       swingTimeSpeedUpFactor = new YoDouble(namePrefix + "TimeSpeedUpFactor", registry);
-      limitedSwingTimeSpeedUpFactor = new RateLimitedYoVariable(namePrefix + "LimitedTimeSpeedUpFactor", registry, speedUpFactorMaxRate, swingTimeSpeedUpFactor, controlDT);
       minSwingTimeForDisturbanceRecovery = new YoDouble(namePrefix + "MinTimeForDisturbanceRecovery", registry);
       minSwingTimeForDisturbanceRecovery.set(walkingControllerParameters.getMinimumSwingTimeForDisturbanceRecovery());
       maxSwingTimeSpeedUpFactor = new YoDouble(namePrefix + "MaxTimeSpeedUpFactor", registry);
@@ -248,9 +244,7 @@ public class SwingState extends AbstractFootControlState
       isSwingSpeedUpEnabled = new YoBoolean(namePrefix + "IsSpeedUpEnabled", registry);
       isSwingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
 
-      speedUpFactorMaxRate.set(25.0);
       swingTimeSpeedUpFactor.setToNaN();
-      limitedSwingTimeSpeedUpFactor.setToNaN();
 
       scaleSecondaryJointWeights.set(walkingControllerParameters.applySecondaryJointScaleDuringSwing());
 
@@ -324,7 +318,6 @@ public class SwingState extends AbstractFootControlState
       swingTrajectoryCalculator.setShouldVisualize(true);
       currentTime.set(0.0);
       swingTimeSpeedUpFactor.set(1.0);
-      limitedSwingTimeSpeedUpFactor.set(1.0);
       currentTimeWithSwingSpeedUp.set(Double.NaN);
       replanTrajectory.set(false);
 
@@ -352,7 +345,6 @@ public class SwingState extends AbstractFootControlState
       super.onExit(timeInState);
       currentTime.set(0.0);
       swingTimeSpeedUpFactor.set(Double.NaN);
-      limitedSwingTimeSpeedUpFactor.set(Double.NaN);
       currentTimeWithSwingSpeedUp.set(Double.NaN);
 
       swingTrajectoryCalculator.informDone();
@@ -449,7 +441,6 @@ public class SwingState extends AbstractFootControlState
          rateLimitedAdjustedPose.update(adjustedFootstepPose);
       }
 
-      limitedSwingTimeSpeedUpFactor.update();
       double time;
       if (!isSwingSpeedUpEnabled.getBooleanValue() || currentTimeWithSwingSpeedUp.isNaN())
       {
@@ -457,7 +448,7 @@ public class SwingState extends AbstractFootControlState
       }
       else
       {
-         currentTimeWithSwingSpeedUp.add(limitedSwingTimeSpeedUpFactor.getDoubleValue() * controlDT);
+         currentTimeWithSwingSpeedUp.add(swingTimeSpeedUpFactor.getDoubleValue() * controlDT);
          time = Math.max(currentTime.getValue(), currentTimeWithSwingSpeedUp.getDoubleValue());
       }
 
@@ -496,11 +487,11 @@ public class SwingState extends AbstractFootControlState
 
       if (isSwingSpeedUpEnabled.getBooleanValue() && !currentTimeWithSwingSpeedUp.isNaN())
       {
-         desiredLinearVelocity.scale(limitedSwingTimeSpeedUpFactor.getDoubleValue());
-         yoReferenceSoleLinearVelocity.scale(limitedSwingTimeSpeedUpFactor.getDoubleValue());
-         desiredAngularVelocity.scale(limitedSwingTimeSpeedUpFactor.getDoubleValue());
+         desiredLinearVelocity.scale(swingTimeSpeedUpFactor.getDoubleValue());
+         yoReferenceSoleLinearVelocity.scale(swingTimeSpeedUpFactor.getDoubleValue());
+         desiredAngularVelocity.scale(swingTimeSpeedUpFactor.getDoubleValue());
 
-         double speedUpFactorSquared = limitedSwingTimeSpeedUpFactor.getDoubleValue() * limitedSwingTimeSpeedUpFactor.getDoubleValue();
+         double speedUpFactorSquared = swingTimeSpeedUpFactor.getDoubleValue() * swingTimeSpeedUpFactor.getDoubleValue();
          desiredLinearAcceleration.scale(speedUpFactorSquared);
          desiredAngularAcceleration.scale(speedUpFactorSquared);
       }
