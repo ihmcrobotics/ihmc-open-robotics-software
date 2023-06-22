@@ -18,6 +18,7 @@ import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
@@ -157,7 +158,15 @@ public class ActiveMappingRemoteProcess
       LogTools.info("Updating Active Mapping Plan: " + configurationParameters.getActiveMapping());
       if (configurationParameters.getActiveMapping())
       {
-         activeMappingModule.updateFootstepPlan();
+         if (walkingStatusMessage.get() != null)
+         {
+            activeMappingModule.setWalkingStatus(WalkingStatus.fromByte(walkingStatusMessage.get().getWalkingStatus()));
+
+            if (walkingStatusMessage.get().getWalkingStatus() == WalkingStatusMessage.COMPLETED && !activeMappingModule.isPlanAvailable())
+            {
+               activeMappingModule.updateFootstepPlan();
+            }
+         }
 
          if (activeMappingModule.isPlanAvailable())
          {

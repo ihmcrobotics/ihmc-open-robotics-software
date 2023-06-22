@@ -4,7 +4,10 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.activeMapping.ActiveMappingRemoteProcess;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -24,6 +27,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 
 import java.util.concurrent.Executors;
@@ -39,6 +43,7 @@ public class HumanoidPerceptionModule
    private BytedecoImage bytedecoDepthImage;
    private OpenCLManager openCLManager;
    private LocalizationAndMappingProcess localizationAndMappingProcess;
+   private ActiveMappingRemoteProcess activeMappingRemoteProcess;
    private RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor;
    private CollidingScanRegionFilter collidingScanRegionFilter;
    private FullHumanoidRobotModel fullRobotModel;
@@ -124,6 +129,12 @@ public class HumanoidPerceptionModule
       LogTools.info("Initializing Localization and Mapping Process (Smoothing: {})", smoothing);
       localizationAndMappingProcess = new LocalizationAndMappingProcess(robotName, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
               PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE, ros2Node, syncedRobot.getReferenceFrames(), () -> {}, smoothing);
+   }
+
+   public void initializeActiveMappingProcess(String robotName, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, ROS2Topic<FramePlanarRegionsListMessage> regionsTopic, ROS2Node ros2Node)
+   {
+      LogTools.info("Initializing Active Mapping Process");
+      activeMappingRemoteProcess = new ActiveMappingRemoteProcess(robotName, robotModel, syncedRobot, regionsTopic, ros2Node);
    }
 
    public void extractFramePlanarRegionsList(ReferenceFrame cameraFrame)
