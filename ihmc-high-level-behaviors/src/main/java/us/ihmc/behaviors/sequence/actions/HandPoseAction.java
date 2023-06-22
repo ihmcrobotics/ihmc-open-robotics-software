@@ -10,7 +10,6 @@ import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -22,6 +21,10 @@ import us.ihmc.tools.thread.Throttler;
 
 public class HandPoseAction extends HandPoseActionData implements BehaviorAction
 {
+   public static final double TRANSLATION_TOLERANCE = 0.15;
+   public static final double ROTATION_TOLERANCE = Math.toRadians(10.0);
+   public static final double BROKEN_WRIST_ROTATION_TOLERANCE = Math.toRadians(90.0);
+
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
@@ -101,12 +104,11 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
       desiredHandControlPose.setFromReferenceFrame(getReferenceFrame());
       syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getSide()));
 
-      double translationTolerance = 0.15;
       // Left hand broke on Nadia and not in the robot model?
-      double rotationTolerance = Math.toRadians(getSide() == RobotSide.LEFT ? 90.0 : 10.0);
+      double rotationTolerance = getSide() == RobotSide.LEFT ? BROKEN_WRIST_ROTATION_TOLERANCE : ROTATION_TOLERANCE;
       return BehaviorActionSequenceTools.isExecuting(desiredHandControlPose,
                                                      syncedHandControlPose,
-                                                     translationTolerance,
+                                                     TRANSLATION_TOLERANCE,
                                                      rotationTolerance,
                                                      getTrajectoryDuration(),
                                                      executionTimer,
