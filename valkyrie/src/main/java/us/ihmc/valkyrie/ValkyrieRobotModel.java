@@ -338,6 +338,8 @@ public class ValkyrieRobotModel implements DRCRobotModel
                                                               getContactPointParameters(),
                                                               getJointMap(),
                                                               true);
+         robotDefinition.simplifyKinematics();
+         robotDefinition.transformAllFramesToZUp();
          // For backward compatibility w.r.t. when we were using SDF file.
          // The URDF to SDF conversion appeared to sort the joints by alphabetical order.
          // The ordering matters when serializing messages such as RobotConfigurationData.
