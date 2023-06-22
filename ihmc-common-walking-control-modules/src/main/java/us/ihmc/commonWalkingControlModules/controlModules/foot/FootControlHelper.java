@@ -131,8 +131,15 @@ public class FootControlHelper implements SCS2YoGraphicHolder
    public void update()
    {
       controllerToolbox.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
-      currentCoP.setIncludingFrame(controllerToolbox.getFootSwitches().get(robotSide).getCenterOfPressure());
-      currentCoP.changeFrame(controllerToolbox.getReferenceFrames().getSoleFrame(robotSide));
+      if (controllerToolbox.getFootSwitches().get(robotSide).getCenterOfPressure() != null)
+      {
+         currentCoP.setIncludingFrame(controllerToolbox.getFootSwitches().get(robotSide).getCenterOfPressure());
+         currentCoP.changeFrame(controllerToolbox.getReferenceFrames().getSoleFrame(robotSide));
+      }
+      else
+      {
+         currentCoP.setToZero(controllerToolbox.getReferenceFrames().getSoleFrame(robotSide));
+      }
 
       if (desiredCoP.containsNaN())
       {
