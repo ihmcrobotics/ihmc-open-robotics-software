@@ -283,11 +283,11 @@ public class PlannerTools
             }
             else if (i == numberOfSteps - 1)
             {
-               planExecutionTime += defaultTransferDuration;
+               planExecutionTime += defaultFinalTransferDuration;
             }
             else
             {
-               planExecutionTime += defaultFinalTransferDuration;
+               planExecutionTime += defaultTransferDuration;
             }
          }
          else
