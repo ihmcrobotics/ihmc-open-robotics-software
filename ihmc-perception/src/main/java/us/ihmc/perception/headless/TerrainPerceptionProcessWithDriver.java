@@ -130,9 +130,6 @@ public class TerrainPerceptionProcessWithDriver
 
       openCLManager = new OpenCLManager();
 
-      rapidRegionsExtractor = new RapidPlanarRegionsExtractor();
-      rapidRegionsExtractor.initializeBodyCollisionFilter(fullRobotModel, collisionBoxProvider);
-
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_videopub");
       realtimeROS2Node.spin();
 

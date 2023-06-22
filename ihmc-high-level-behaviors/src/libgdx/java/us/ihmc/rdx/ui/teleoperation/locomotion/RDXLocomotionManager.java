@@ -158,7 +158,7 @@ public class RDXLocomotionManager
       locomotionParametersTuner.create(locomotionParameters);
       footstepPlanningParametersTuner.create(footstepPlannerParameters, false);
       bodyPathPlanningParametersTuner.create(bodyPathPlannerParameters, false);
-      swingFootPlanningParametersTuner.create(swingFootPlannerParameters, false, () -> setSwingParameters(swingFootPlannerParameters));
+      swingFootPlanningParametersTuner.create(swingFootPlannerParameters, false);
 
       areFootstepsAdjustableCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.areFootstepsAdjustable);
       assumeFlatGroundCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.assumeFlatGround);
@@ -187,7 +187,6 @@ public class RDXLocomotionManager
       controllerStatusTracker.checkControllerIsRunning();
 
       swingFootPlannerParameters.setMinimumSwingTime(locomotionParameters.getSwingTime());
-      setSwingParameters(swingFootPlannerParameters);
 
       if (ballAndArrowMidFeetPosePlacement.getPlacedNotification().poll() || (lastAssumeFlatGroundState != locomotionParameters.getAssumeFlatGround()
                                                                               && ballAndArrowMidFeetPosePlacement.isPlaced()))
