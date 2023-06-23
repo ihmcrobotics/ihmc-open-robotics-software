@@ -1,5 +1,7 @@
 package us.ihmc.perception.sensorHead;
 
+import us.ihmc.perception.spinnaker.BlackflyModelProperties;
+
 public enum BlackflyLensProperties
 {
    BFLY_U3_23S6C_FE185C086HA_1(451.13411,
@@ -10,6 +12,10 @@ public enum BlackflyLensProperties
                                0.0103141,
                                -0.0056699,
                                0.0007021),
+   /**
+    * These Blackfly S 27S5C parameters were calculated and tuned by @dcalvert, @danderson, and @tbialek on 6/23/2023
+    * with a setup with 4 ArUco markers out in the main lab space, one occupying each quadrant of vision.
+    */
    BFS_U3_27S5C_FE185C086HA_1(591.83671,
                               579.59183,
                               963.47389,
@@ -85,5 +91,14 @@ public enum BlackflyLensProperties
    public double getK4ForUndistortion()
    {
       return k4ForUndistortion;
+   }
+
+   public static BlackflyLensProperties forModel(BlackflyModelProperties blackflyModelProperties)
+   {
+      return switch (blackflyModelProperties)
+      {
+         case BFLY_U3_23S6C -> BFLY_U3_23S6C_FE185C086HA_1;
+         default -> BFS_U3_27S5C_FE185C086HA_1;
+      };
    }
 }

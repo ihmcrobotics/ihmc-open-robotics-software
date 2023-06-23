@@ -5,8 +5,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
-import us.ihmc.perception.spinnaker.BlackflyModelProperties;
-import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 
 /**
@@ -18,32 +16,12 @@ import us.ihmc.robotics.EuclidCoreMissingTools;
  */
 public class SensorHeadParameters
 {
+   public static final BlackflyLensProperties BENCHTOP_BLACKFLY_LENS_COMBO = BlackflyLensProperties.BFS_U3_27S5C_FE185C086HA_1;
+
    // Fujinon FE185C086HA_1 lens
    // https://www.fujifilm.com/us/en/business/optical-devices/machine-vision-lens/fe185-series
    public static final double FE185C086HA_1_FOCAL_LENGTH = 0.0027;
-//   public static final double FE185C086HA_1_FOCAL_LENGTH_IN_BFLY_U3_23S6C_PIXELS
-//         = FE185C086HA_1_FOCAL_LENGTH * SpinnakerBlackfly.BFLY_U3_23S6C_WIDTH_PIXELS / SpinnakerBlackfly.BFLY_U3_23S6C_CMOS_SENSOR_WIDTH;
-   /** These undistortion fx, fy, generated through calibration with average reprojection error of 0.24742. */
-//   public static final double FOCAL_LENGTH_X_FOR_UNDISORTION = 451.13411;
-//   public static final double FOCAL_LENGTH_Y_FOR_UNDISORTION = 451.23058;
-   public static final double FOCAL_LENGTH_X_FOR_UNDISORTION = 591.83671;
-   public static final double FOCAL_LENGTH_Y_FOR_UNDISORTION = 579.59183;
-   /** These undistortion principal point (i.e. cx, cy) were then hand tuned by @dcalvert so that close by ArUco
-    *  marker coordinate frame lined up good with the colored point cloud. This is the manipulation zone, which is
-    *  where we care about accuracy the most. */
-   public static final double PRINCIPAL_POINT_X_FOR_UNDISORTION = 963.47389;
-   public static final double PRINCIPAL_POINT_Y_FOR_UNDISORTION = 727.86785;
 
-   public static void main(String[] args) {
-      System.out.println(FE185C086HA_1_FOCAL_LENGTH * BlackflyModelProperties.BFS_U3_27S5C.getImageWidthPixels() / BlackflyModelProperties.BFS_U3_27S5C.getCmosSensorWidth());
-      System.out.println(FE185C086HA_1_FOCAL_LENGTH * BlackflyModelProperties.BFS_U3_27S5C.getImageHeightPixels() / BlackflyModelProperties.BFS_U3_27S5C.getCmosSensorHeight());
-
-   }
-
-   public static final double K1_FOR_UNDISORTION = 0.0211219;
-   public static final double K2_FOR_UNDISORTION = -0.0059760;
-   public static final double K3_FOR_UNDISORTION = 0.0025230;
-   public static final double K4_FOR_UNDISORTION = -0.0008246;
    /** We want to increase the resolution of the undistorted image to keep detail in the highly compacted center. */
    public static final double UNDISTORTED_IMAGE_SCALE = 1.6;
    /** Reduce the minimum allowable marker size (in pixels) so far away ones can be picked up. */
