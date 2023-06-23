@@ -99,13 +99,18 @@ public class SensorHeadParameters
    }
 
    /**
-    * These were tuned with sliders on the real Nadia robot with all sorts of objects out in the scene,
+    * The BFLY parameters were tuned with sliders on the real Nadia robot with all sorts of objects out in the scene,
     * above and below and left and right of the camera prinicpal axis. by @dcalvert
-    * ihmc-perception/src/main/resources/us/ihmc/perception/parameters/IntrinsicCameraMatrixPropertiesOusterFisheyeOnRobot.json
+    *
+    * The Blackfly S 27S5C parameters were hand tuned by @dcalvert, @danderson, and @tbialek on 6/23/2023
+    * with a setup with 4 ArUco markers out in the main lab space, one occupying each quadrant of vision.
+    *
+    * The JSON files can be found at:
+    * ihmc-perception/src/main/resources/us/ihmc/perception/parameters/IntrinsicCameraMatrixProperties*.json
     */
-   public static IntrinsicCameraMatrixProperties loadOusterFisheyeColoringIntrinsicsOnRobot()
+   public static IntrinsicCameraMatrixProperties loadOusterFisheyeColoringIntrinsicsOnRobot(BlackflyLensProperties blackflyLensProperties)
    {
-      return new IntrinsicCameraMatrixProperties("OusterFisheyeOnRobot");
+      return new IntrinsicCameraMatrixProperties(blackflyLensProperties.name());
    }
 
    public static void setArUcoMarkerDetectionParameters(DetectorParameters detectionParameters)
