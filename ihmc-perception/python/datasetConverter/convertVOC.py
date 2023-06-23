@@ -5,18 +5,18 @@ import json
 
 class ConvertVOC:
 
-    def __init__(self, path) -> None:
-        self.path = path
-        self.classes = []
-        self.input_dir = path + "raw/VOC2007/Annotations/"
-        self.output_dir = path + "/processed/VOC/labels/"
-        self.image_dir = path + "raw/VOC2007/JPEGImages/"
+    def __init__(self, inputImage, inputAnn, path) -> None:
+        self.path = path # path to common output directory for labels and images
+        self.input_dir = inputAnn 
+        self.image_dir = inputImage
+        self.classes = [] 
+
         try:
-            os.mkdir(path + "processed/VOC")
-            os.mkdir(path + "processed/VOC/labels")
-            os.mkdir(path + "processed/VOC/images")
+            os.mkdir(f"{path}/labels")
+            os.mkdir(f"{path}/images")
         except:
-            print("VOC dataset has already been processed.")
+            print("Path to output label/images already exists... exiting program")
+            quit()
 
     def xml_to_yolo_bbox(self, bbox, w, h):
         # xmin, ymin, xmax, ymax
@@ -41,13 +41,13 @@ class ConvertVOC:
         files = glob.glob(os.path.join(self.image_dir, '*.jpg'))
         for file in files:
             fileName = os.path.basename(file)
-            os.rename(file, f"{self.path}processed/VOC/images/{fileName}" )
+            os.rename(file, f"{self.path}/images/{fileName}" )
 
     def convert(self):
 
         # create the labels folder (output directory)
-        if not os.path.isdir(self.output_dir):
-            os.mkdir(self.output_dir)
+        # if not os.path.isdir(self.output_dir):
+        #     os.mkdir(self.output_dir)
 
         # identify all the xml files in the annotations folder (input directory)
         files = glob.glob(os.path.join(self.input_dir, '*.xml'))
@@ -83,7 +83,7 @@ class ConvertVOC:
 
             if result:
                 # generate a YOLO format text file for each xml file
-                with open(os.path.join(self.output_dir, f"{filename}.txt"), "w", encoding="utf-8") as f:
+                with open(os.path.join(f"{self.path}/labels", f"{filename}.txt"), "w", encoding="utf-8") as f:
                     f.write("\n".join(result))
 
         # generate the classes file as reference

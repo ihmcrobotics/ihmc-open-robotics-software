@@ -10,44 +10,49 @@ ConvertCOCO is a helper class that converts object detection datasets in COCO fo
 COCO stores infomation about bounding boxes and semantic class in a json file
 """
 class ConvertCOCO:
-    """
-    input_path - path to folder containing image dataset
-    output_path - path to folder that renamed images should be saved in
-    annotationFile - path to annotation json file in COCO format
-    """
-    def __init__(self, path):
-        self.input_path = path + "raw/ms-coco/train2017" # path to images
-        self.output_path = path + "processed/COCO/" # path to save renamed images
-        annotFile = path + "raw/ms-coco/annotations/instances_train2017.json"
+
+    def __init__(self, inputImage, inputAnn, path):
+        self.inputImage = inputImage # path to images in raw dataset
+        self.outputAnn = f"{path}labels/" # path to save converted labels
+        self.outputImage = f"{path}images/" 
+        annotFile = f"{inputAnn}instances_train2017.json" 
 
         try:
-            os.mkdir(path + "processed/COCO")
-            os.mkdir(path + "processed/COCO/labels")
-            os.mkdir(path + "processed/COCO/images")
+            os.mkdir(f"{path}labels")
+            os.mkdir(f"{path}images")
         except:
-            print("VOC dataset has already been processed... exiting program")
-            exit
+            print("Path to output label/images already exists... exiting program")
+            quit()
 
-        f = open(annotFile) # '/home/jcornette/.ihmc/datasets/raw/ms-coco/annotations/captions_train2017.json')
-        self.data = json.load(f)
-        f.close()
+        try:
+            f = open(annotFile)
+            self.data = json.load(f)
+            f.close()
+        except:
+            print("The annotation file was not found... exiting program")
+            os.rmdir(f"{path}labels")
+            os.rmdir(f"{path}images")
+            quit()
 
         self.file_names = []
-        self.load_images_from_folder(self.input_path)
+        self.load_images_from_folder(self.inputImage)
+        print(f"Images have loaded, starting conversion for {len(self.file_names)} images...")
 
 
     def load_images_from_folder(self, folder):
+        response = input("Input images and labels found, do you want to move the images to the output directory? [Y/n] ")
         count = 0
         for filename in os.listdir(folder):
-            source = os.path.join(folder,filename)
-            destination = f"{self.output_path}images/img{count}.jpg"
+            if response.lower() == 'y' or 'yes':
+                source = os.path.join(folder,filename)
+                destination = f"{self.outputImage}img{count}.jpg"
 
-            try:
-                shutil.copy(source, destination)
-                #print("File copied successfully.")
-            # If source and destination are same
-            except shutil.SameFileError:
-                print(f"Source and destination represents the same file: {source} {destination}")
+                try:
+                    shutil.copy(source, destination)
+                    #print("File copied successfully.")
+                # If source and destination are same
+                except shutil.SameFileError:
+                    print(f"Source and destination represents the same file: {source} {destination}")
 
             self.file_names.append(filename)
             count += 1
@@ -85,7 +90,7 @@ class ConvertCOCO:
 
             if img_ann:
                 # Opening output annotation file for current image
-                file_object = open(f"{self.output_path}labels/img{count}.txt", "a")
+                file_object = open(f"{self.outputAnn}img{count}.txt", "a")
 
                 for ann in img_ann:
                     current_category = ann['category_id'] - 1 # yolo format labels start from 0 
