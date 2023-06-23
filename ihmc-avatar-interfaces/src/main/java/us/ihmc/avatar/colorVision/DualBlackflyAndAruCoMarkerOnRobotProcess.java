@@ -20,7 +20,7 @@ import us.ihmc.ros2.ROS2Node;
 public class DualBlackflyAndAruCoMarkerOnRobotProcess
 {
    private static final String LEFT_SERIAL_NUMBER = System.getProperty("blackfly.left.serial.number", "00000000");
-   private static final String RIGHT_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "00000000");
+   private static final String RIGHT_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "22206798");
 
    private final SpinnakerBlackflyManager spinnakerBlackflyManager = new SpinnakerBlackflyManager();
    private final SideDependentList<DualBlackflyCamera> dualBlackflyCameras = new SideDependentList<>();
