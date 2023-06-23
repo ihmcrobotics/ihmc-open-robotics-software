@@ -20,6 +20,7 @@ import us.ihmc.perception.opencv.OpenCVArUcoMarker;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
+import us.ihmc.perception.spinnaker.BlackflyModelProperties;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
@@ -50,6 +51,7 @@ import java.util.ArrayList;
 public class RDXBlackflyCalibrationSuite
 {
    private static final String BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.serial.number", "00000000");
+   public static final BlackflyModelProperties BLACKFLY_MODEL = BlackflyModelProperties.BFS_U3_27S5C;
 
    private final RDXBaseUI baseUI = new RDXBaseUI("Blackfly Calibration Suite");
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -106,8 +108,8 @@ public class RDXBlackflyCalibrationSuite
    private final ImDouble distortionCoefficientK3 = new ImDouble(SensorHeadParameters.K3_FOR_UNDISORTION);
    private final ImDouble distortionCoefficientK4 = new ImDouble(SensorHeadParameters.K4_FOR_UNDISORTION);
    private final ImDouble undistortedImageScale = new ImDouble(SensorHeadParameters.UNDISTORTED_IMAGE_SCALE);
-   private final ImInt undistortedImageWidth = new ImInt((int) SpinnakerBlackfly.BFLY_U3_23S6C_WIDTH_PIXELS);
-   private final ImInt undistortedImageHeight = new ImInt((int) SpinnakerBlackfly.BFLY_U3_23S6C_HEIGHT_PIXELS);
+   private final ImInt undistortedImageWidth = new ImInt((int) BLACKFLY_MODEL.getImageWidthPixels());
+   private final ImInt undistortedImageHeight = new ImInt((int) BLACKFLY_MODEL.getImageHeightPixels());
    private final ImDouble balanceNewFocalLength = new ImDouble(0.0);
    private final ImDouble fovScaleFocalLengthDivisor = new ImDouble(1.0);
    private Mat distortionCoefficients;
@@ -220,7 +222,7 @@ public class RDXBlackflyCalibrationSuite
             newCameraMatrixEstimate = new Mat(3, 3, opencv_core.CV_64F);
             opencv_core.setIdentity(newCameraMatrixEstimate);
             cameraMatrixForMonitorShifting = opencv_core.noArray();
-            sourceImageSize = new Size((int) SpinnakerBlackfly.BFLY_U3_23S6C_WIDTH_PIXELS, (int) SpinnakerBlackfly.BFLY_U3_23S6C_HEIGHT_PIXELS);
+            sourceImageSize = new Size((int) BLACKFLY_MODEL.getImageWidthPixels(), (int) BLACKFLY_MODEL.getImageHeightPixels());
             undistortedImageSize = new Size(undistortedImageWidth.get(), undistortedImageHeight.get());
             imageForUndistortion = new SwapReference<>(Mat::new);
             spareRGBMatForArUcoDrawing = new Mat(100, 100, opencv_core.CV_8UC3);
