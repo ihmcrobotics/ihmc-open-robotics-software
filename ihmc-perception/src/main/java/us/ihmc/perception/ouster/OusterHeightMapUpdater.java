@@ -31,7 +31,7 @@ import java.util.function.Consumer;
 public class OusterHeightMapUpdater
 {
    private static final long updateDTMillis = 100;
-   private static final double updateDTSeconds = updateDTMillis / 1000;
+   private static final double updateDTSeconds = (double) updateDTMillis / 1000;
    private static final int initialPublishFrequency = 5;
 
    private final RealtimeROS2Node realtimeROS2Node;
