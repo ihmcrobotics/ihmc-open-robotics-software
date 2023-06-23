@@ -131,7 +131,7 @@ public class KinematicsToolboxController extends ToolboxController
     * Array containing all the one degree-of-freedom joints of the desired robot except for the finger
     * joints that are not handled by this solver.
     */
-   protected final OneDoFJointBasics[] desiredOneDoFJoints;
+   private final OneDoFJointBasics[] oneDoFJoints;
    private final List<? extends RigidBodyBasics> controllableRigidBodies;
 
    /**
@@ -165,7 +165,7 @@ public class KinematicsToolboxController extends ToolboxController
     * gathering the entire set of desired inputs and formulate the adequate optimization problem to be
     * solved for every control tick. The output of the controller core provides every tick a new robot
     * joint configurations and velocities that are one step closer to the desireds. The output is used
-    * to update the state of the {@link #desiredOneDoFJoints} such that it progresses towards the desired user
+    * to update the state of the {@link #oneDoFJoints} such that it progresses towards the desired user
     * inputs over time.
     */
    private final WholeBodyControllerCore controllerCore;
@@ -178,7 +178,7 @@ public class KinematicsToolboxController extends ToolboxController
 
    /**
     * This is the output of the {@code KinematicsToolboxController}. It is filled with the robot
-    * configuration obtained from {@link #desiredOneDoFJoints} and also with the solution quality which can be
+    * configuration obtained from {@link #oneDoFJoints} and also with the solution quality which can be
     * used to quickly see if the solution is viable. It is sent back to the caller only.
     */
    private final KinematicsToolboxOutputStatus inverseKinematicsSolution;
@@ -251,7 +251,7 @@ public class KinematicsToolboxController extends ToolboxController
 
    /**
     * Reference to the most recent robot configuration received from the controller. It is used for
-    * initializing the {@link #desiredOneDoFJoints} before starting the optimization process.
+    * initializing the {@link #oneDoFJoints} before starting the optimization process.
     */
    private final ConcurrentCopier<RobotConfigurationData> concurrentRobotConfigurationDataCopier = new ConcurrentCopier<>(RobotConfigurationData::new);
    protected final RobotConfigurationData robotConfigurationDataInternal = new RobotConfigurationData();
@@ -366,7 +366,7 @@ public class KinematicsToolboxController extends ToolboxController
     * @param statusOutputManager     the output interface used by this controller.
     * @param rootJoint               the underactuated floating root joint of the multi-body system.
     *                                Can be {@code null} in the case all the joints are actuated.
-    * @param desiredOneDoFJoints            the actuated joints of the system. The inverse kinematics will
+    * @param oneDoFJoints            the actuated joints of the system. The inverse kinematics will
     *                                only use these joints during the optimization.
     * @param controllableRigidBodies the sublist of rigid-bodies that can be controlled by the user.
     *                                Can be {@code null} in the case all rigid-body should be
@@ -378,7 +378,7 @@ public class KinematicsToolboxController extends ToolboxController
    public KinematicsToolboxController(CommandInputManager commandInputManager,
                                       StatusMessageOutputManager statusOutputManager,
                                       FloatingJointBasics rootJoint,
-                                      OneDoFJointBasics[] desiredOneDoFJoints,
+                                      OneDoFJointBasics[] oneDoFJoints,
                                       Collection<? extends RigidBodyBasics> controllableRigidBodies,
                                       double updateDT,
                                       YoGraphicsListRegistry yoGraphicsListRegistry,
@@ -387,13 +387,13 @@ public class KinematicsToolboxController extends ToolboxController
       super(statusOutputManager, parentRegistry);
       this.commandInputManager = commandInputManager;
       this.rootJoint = rootJoint;
-      this.desiredOneDoFJoints = desiredOneDoFJoints;
+      this.oneDoFJoints = oneDoFJoints;
       this.controllableRigidBodies = controllableRigidBodies == null ? null : new ArrayList<>(controllableRigidBodies);
       this.updateDT = updateDT;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
       // This will find the root body without using rootJoint so it can be null.
-      rootBody = MultiBodySystemTools.getRootBody(desiredOneDoFJoints[0].getPredecessor());
+      rootBody = MultiBodySystemTools.getRootBody(oneDoFJoints[0].getPredecessor());
       totalRobotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
 
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, rootBody);
@@ -402,7 +402,7 @@ public class KinematicsToolboxController extends ToolboxController
       controllerCore = createControllerCore(controllableRigidBodies);
       feedbackControllerDataHolder = controllerCore.getWholeBodyFeedbackControllerDataHolder();
 
-      inverseKinematicsSolution = MessageTools.createKinematicsToolboxOutputStatus(desiredOneDoFJoints);
+      inverseKinematicsSolution = MessageTools.createKinematicsToolboxOutputStatus(oneDoFJoints);
       inverseKinematicsSolution.setDestination(-1);
 
       robotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
@@ -506,7 +506,7 @@ public class KinematicsToolboxController extends ToolboxController
       }
       this.initialRobotConfigurationMap = new TObjectDoubleHashMap<>();
 
-      for (OneDoFJointBasics joint : desiredOneDoFJoints)
+      for (OneDoFJointBasics joint : oneDoFJoints)
       {
          Double q_priv = jointNameToInitialJointPosition.get(joint.getName());
          if (q_priv != null)
@@ -638,20 +638,20 @@ public class KinematicsToolboxController extends ToolboxController
     * Creating the controller core which is the main piece of this solver.
     * 
     * @param controllableRigidBodies
-    * @return the controller core that will run for the desired robot model in {@link #desiredOneDoFJoints}.
+    * @return the controller core that will run for the desired robot model in {@link #oneDoFJoints}.
     */
    private WholeBodyControllerCore createControllerCore(Collection<? extends RigidBodyBasics> controllableRigidBodies)
    {
       JointBasics[] controlledJoints;
       if (rootJoint != null)
       {
-         controlledJoints = new JointBasics[desiredOneDoFJoints.length + 1];
+         controlledJoints = new JointBasics[oneDoFJoints.length + 1];
          controlledJoints[0] = rootJoint;
-         System.arraycopy(desiredOneDoFJoints, 0, controlledJoints, 1, desiredOneDoFJoints.length);
+         System.arraycopy(oneDoFJoints, 0, controlledJoints, 1, oneDoFJoints.length);
       }
       else
       {
-         controlledJoints = desiredOneDoFJoints;
+         controlledJoints = oneDoFJoints;
       }
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT,
                                                                             GRAVITY,
@@ -666,7 +666,7 @@ public class KinematicsToolboxController extends ToolboxController
       jointTorqueMinimizationWeightCalculator.setParameters(0.0, 0.001, 0.10);
       toolbox.setupForInverseKinematicsSolver(jointTorqueMinimizationWeightCalculator);
       FeedbackControllerTemplate controllerCoreTemplate = createFeedbackControllerTemplate(controllableRigidBodies, 1);
-      JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(desiredOneDoFJoints);
+      JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(oneDoFJoints);
       return new WholeBodyControllerCore(toolbox, controllerCoreTemplate, lowLevelControllerOutput, registry);
    }
 
@@ -744,7 +744,7 @@ public class KinematicsToolboxController extends ToolboxController
          robotConfigurationDataInternal.set(robotConfigurationData);
 
          // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
-         KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationDataInternal, rootJoint, desiredOneDoFJoints);
+         KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationDataInternal, rootJoint, oneDoFJoints);
          if (initialRobotConfigurationMap != null)
          {
             initialRobotConfigurationMap.forEachEntry((joint, q_priv) ->
@@ -833,11 +833,11 @@ public class KinematicsToolboxController extends ToolboxController
       currentCenterOfMassGraphic.update();
 
       // Updating the the robot state from the current solution, initializing the next control tick.
-      KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCore.getControllerCoreOutput(), rootJoint, desiredOneDoFJoints);
+      KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCore.getControllerCoreOutput(), rootJoint, oneDoFJoints);
       updateVisualization();
 
       inverseKinematicsSolution.setCurrentToolboxState(CURRENT_TOOLBOX_STATE_RUNNING);
-      MessageTools.packDesiredJointState(inverseKinematicsSolution, rootJoint, desiredOneDoFJoints);
+      MessageTools.packDesiredJointState(inverseKinematicsSolution, rootJoint, oneDoFJoints);
       inverseKinematicsSolution.setSolutionQuality(solutionQuality.getDoubleValue());
       /*
        * Update tools for the next iteration. Only need to do it 1 per iteration and since it is updated
@@ -1447,14 +1447,14 @@ public class KinematicsToolboxController extends ToolboxController
 
    /**
     * Creates a {@code PrivilegedConfigurationCommand} to update the privileged joint angles to match
-    * the current state of {@link #desiredOneDoFJoints}.
+    * the current state of {@link #oneDoFJoints}.
     */
    private void snapPrivilegedConfigurationToCurrent()
    {
       privilegedConfigurationCommand.clear();
-      for (int i = 0; i < desiredOneDoFJoints.length; i++)
+      for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         privilegedConfigurationCommand.addJoint(desiredOneDoFJoints[i], desiredOneDoFJoints[i].getQ());
+         privilegedConfigurationCommand.addJoint(oneDoFJoints[i], oneDoFJoints[i].getQ());
       }
       privilegedConfigurationCommand.setDefaultWeight(privilegedWeight.getDoubleValue());
       privilegedConfigurationCommand.setDefaultConfigurationGain(privilegedConfigurationGain.getDoubleValue());
@@ -1551,9 +1551,9 @@ public class KinematicsToolboxController extends ToolboxController
       return rootJoint;
    }
 
-   public OneDoFJointBasics[] getDesiredOneDoFJoints()
+   public OneDoFJointBasics[] getDesiredOneDoFJoint()
    {
-      return desiredOneDoFJoints;
+      return oneDoFJoints;
    }
 
    public List<? extends RigidBodyBasics> getControllableRigidBodies()
