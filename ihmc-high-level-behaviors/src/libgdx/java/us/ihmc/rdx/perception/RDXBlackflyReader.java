@@ -52,9 +52,9 @@ public class RDXBlackflyReader
 
       spinImage = new spinImage();
 
-      blackfly.setAcquisitionMode(Spinnaker_C.spinAcquisitionModeEnums.AcquisitionMode_Continuous);
-      blackfly.setPixelFormat(Spinnaker_C.spinPixelFormatEnums.PixelFormat_BayerRG8);
-      blackfly.startAcquiringImages();
+//      blackfly.setAcquisitionMode(Spinnaker_C.spinAcquisitionModeEnums.AcquisitionMode_Continuous);
+//      blackfly.setPixelFormat(Spinnaker_C.spinPixelFormatEnums.PixelFormat_BayerRG8);
+//      blackfly.startAcquiringImages();
 
       swapImagePanel = new RDXOpenCVSwapVideoPanel("Blackfly Monitor");
    }
