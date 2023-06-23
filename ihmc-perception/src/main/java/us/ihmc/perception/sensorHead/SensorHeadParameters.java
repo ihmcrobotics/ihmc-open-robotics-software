@@ -5,6 +5,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
+import us.ihmc.perception.spinnaker.BlackflyModelProperties;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 
@@ -20,8 +21,8 @@ public class SensorHeadParameters
    // Fujinon FE185C086HA_1 lens
    // https://www.fujifilm.com/us/en/business/optical-devices/machine-vision-lens/fe185-series
    public static final double FE185C086HA_1_FOCAL_LENGTH = 0.0027;
-   public static final double FE185C086HA_1_FOCAL_LENGTH_IN_BFLY_U3_23S6C_PIXELS
-         = FE185C086HA_1_FOCAL_LENGTH * SpinnakerBlackfly.BFLY_U3_23S6C_WIDTH_PIXELS / SpinnakerBlackfly.BFLY_U3_23S6C_CMOS_SENSOR_WIDTH;
+//   public static final double FE185C086HA_1_FOCAL_LENGTH_IN_BFLY_U3_23S6C_PIXELS
+//         = FE185C086HA_1_FOCAL_LENGTH * SpinnakerBlackfly.BFLY_U3_23S6C_WIDTH_PIXELS / SpinnakerBlackfly.BFLY_U3_23S6C_CMOS_SENSOR_WIDTH;
    /** These undistortion fx, fy, generated through calibration with average reprojection error of 0.24742. */
    public static final double FOCAL_LENGTH_X_FOR_UNDISORTION = 451.13411;
    public static final double FOCAL_LENGTH_Y_FOR_UNDISORTION = 451.23058;
