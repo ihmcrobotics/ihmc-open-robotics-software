@@ -280,10 +280,21 @@ public class CaptureRegionSafetyHeuristics implements SCS2YoGraphicHolder
    /**
     * Use the triangle rules to figure out how far along the current projection angle you can go before hitting your reachability limit.
     */
-   private static double findMaximumProjectionDistance(double distanceToPointToProject, double maxDistanceToProjectedPoint, double projectionAngle)
+   static double findMaximumProjectionDistance(double distanceToPointToProject, double maxDistanceToProjectedPoint, double projectionAngle)
    {
+      // we're already outside the distance, so zero it out
+      if (distanceToPointToProject > maxDistanceToProjectedPoint - 1e-8)
+         return 0.0;
+
+      projectionAngle = Math.abs(projectionAngle);
+
+      if (projectionAngle < 1e-5)
+      { // this is a straight line, so the calculation is really easy
+         return Math.max(maxDistanceToProjectedPoint - distanceToPointToProject, 0.0);
+      }
+
       double A = maxDistanceToProjectedPoint;
-      double a = Math.PI - Math.abs(projectionAngle);
+      double a = Math.PI - projectionAngle;
       double B = distanceToPointToProject;
       double sinA = Math.sin(a);
       double b = Math.asin(B * sinA / A);
