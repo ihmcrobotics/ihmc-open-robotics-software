@@ -1,0 +1,55 @@
+ADE20K:
+    type - segmentation
+    # images - 20,000
+    # classes - 150
+    author - MIT CSAIL
+    tool - Gluon
+
+Indoor Object Detection Dataset:
+    type - Bounding Box
+    # images - 2213
+    # classes - 7
+    author - Zenodo
+    tool - 
+
+Open Images Dataset V6:
+    type - Bounding Box
+    # images - 900,000,000
+    # classes - 600
+    author - OID
+    tool - FiftyOne
+
+Reconstruction Meets Recognition Challenge:
+    type - segmentation
+    # images - 1800
+    # classes - 23
+    author - RMRC
+    tool - 
+
+MS-COCO:
+    type - Bounding Box
+    # images - 200,000
+    # classes - 80
+    author - Microsoft
+    tool - Gluon
+
+Exclusively Dark:
+    type - Bounding Box
+    # images - 7363
+    # classes - 12
+    author - ExDark
+    tool - 
+
+PASCAL-VOC:
+    type - Bounding Box
+    # images - 1464
+    # classes - 20
+    author - PASCAL
+    tool - Gluon
+
+SUN-RGBD:
+    type - Bounding Box
+    # images - 10335
+    # classes - 700
+    author - SUN RGBD 3D
+    tool - Toolkit

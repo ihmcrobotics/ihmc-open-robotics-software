@@ -72,9 +72,10 @@ public class RDXHeightMapRenderer implements RenderableProvider
       shader.init(renderable);
       renderable.shader = shader.getBaseShader();
 
-      intermediateVertexBuffer = new float[totalCells * FLOATS_PER_CELL];
+      intermediateVertexBuffer = new float[totalCells * FLOATS_PER_CELL]; // each cell has xyz, 4 color and size data
    }
 
+   // renders the height map in the 3D sim using the calculated height map image
    public void update(BytePointer heightMapPointer, int gridLength, int gridWidth, float cellSizeXYInMeters)
    {
       LogTools.info("Rendering Height Map: {} {} {}", gridLength, gridWidth, cellSizeXYInMeters);

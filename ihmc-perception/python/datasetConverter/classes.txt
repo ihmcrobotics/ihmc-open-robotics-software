@@ -1,0 +1,1 @@
+["cat", "horse", "person", "pottedplant", "car", "motorbike", "sheep", "bicycle", "aeroplane", "train", "dog", "cow", "bird", "tvmonitor", "sofa", "chair", "diningtable", "boat", "bus", "bottle"]
