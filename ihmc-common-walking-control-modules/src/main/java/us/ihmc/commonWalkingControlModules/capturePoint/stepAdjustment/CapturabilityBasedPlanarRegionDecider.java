@@ -62,10 +62,6 @@ public class CapturabilityBasedPlanarRegionDecider implements SCS2YoGraphicHolde
 
    private final YoBoolean isBoundingBoxVisualized;
 
-
-   private final BooleanProvider useControlPlane;
-   private final ICPControlPlane icpControlPlane;
-
    /**************** State variables as inputs ********************/
    private final FrameConvexPolygon2D captureRegion = new FrameConvexPolygon2D();
    private final List<StepConstraintRegion> stepConstraintRegions = new ArrayList<>();
@@ -94,24 +90,8 @@ public class CapturabilityBasedPlanarRegionDecider implements SCS2YoGraphicHolde
    private final FramePoint3D projectedFoothold = new FramePoint3D();
    private final FramePoint2D tempPoint = new FramePoint2D();
 
-
-   public CapturabilityBasedPlanarRegionDecider(ReferenceFrame centerOfMassFrame,
-                                                double gravityZ,
-                                                BooleanProvider useControlPlane,
-                                                YoRegistry registry,
-                                                YoGraphicsListRegistry yoGraphicsListRegistry)
+   public CapturabilityBasedPlanarRegionDecider(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(new ICPControlPlane(centerOfMassFrame, gravityZ, registry), useControlPlane, registry, yoGraphicsListRegistry);
-   }
-
-   public CapturabilityBasedPlanarRegionDecider(ICPControlPlane icpControlPlane,
-                                                BooleanProvider useControlPlane,
-                                                YoRegistry registry,
-                                                YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      this.useControlPlane = useControlPlane;
-      this.icpControlPlane = icpControlPlane;
-
       currentStepConstraintIsStillValid = new YoBoolean("currentStepConstraintIsStillValid", registry);
       constraintRegionChanged = new YoBoolean("constraintRegionChanged", registry);
       hasConstraintRegion = new YoBoolean("hasConstraintRegion", registry);
@@ -149,12 +129,6 @@ public class CapturabilityBasedPlanarRegionDecider implements SCS2YoGraphicHolde
    public void setCaptureRegion(FrameConvexPolygon2DReadOnly captureRegion)
    {
       this.captureRegion.setIncludingFrame(captureRegion);
-   }
-
-   public void setOmega0(double omega)
-   {
-      if (useControlPlane.getValue() && icpControlPlane != null)
-         icpControlPlane.setOmega0(omega);
    }
 
    public void setSwitchPlanarRegionConstraintsAutomatically(boolean switchAutomatically)
@@ -269,18 +243,9 @@ public class CapturabilityBasedPlanarRegionDecider implements SCS2YoGraphicHolde
     */
    private void computeEnvironmentConvexHull(StepConstraintRegion constraintRegion, ConvexPolygon2DBasics environmentConvexHullToPack)
    {
-      if (useControlPlane.getValue() && icpControlPlane != null)
-      {
-         icpControlPlane.projectVerticesOntoControlPlane(constraintRegion.getConvexHullInConstraintRegion(),
-                                                         constraintRegion.getTransformToWorld(),
-                                                         environmentConvexHullToPack);
-      }
-      else
-      {
-         environmentConvexHullToPack.set(constraintRegion.getConvexHullInConstraintRegion());
-         environmentConvexHullToPack.applyTransform(constraintRegion.getTransformToWorld(), false);
-         environmentConvexHullToPack.update();
-      }
+      environmentConvexHullToPack.set(constraintRegion.getConvexHullInConstraintRegion());
+      environmentConvexHullToPack.applyTransform(constraintRegion.getTransformToWorld(), false);
+      environmentConvexHullToPack.update();
    }
 
    /**
@@ -379,16 +344,9 @@ public class CapturabilityBasedPlanarRegionDecider implements SCS2YoGraphicHolde
       {
          ConcavePolygon2DReadOnly hole = constraintRegion.getHoleInConstraintRegion(i);
 
-         if (useControlPlane.getValue() && icpControlPlane != null)
-         {
-            icpControlPlane.projectVerticesOntoControlPlane(hole, constraintRegion.getTransformToWorld(), tempHoleConvexHull);
-         }
-         else
-         {
-            tempHoleConvexHull.set(constraintRegion.getConcaveHull());
-            tempHoleConvexHull.applyTransform(constraintRegion.getTransformToWorld());
-            tempHoleConvexHull.update();
-         }
+         tempHoleConvexHull.set(hole);
+         tempHoleConvexHull.applyTransform(constraintRegion.getTransformToWorld());
+         tempHoleConvexHull.update();
 
          computeStepConstraintPolygon(tempHoleConvexHull, reachabilityRegion, captureRegionInControlPlane, tempReachableHoleConvexHull);
          intersectionArea -= tempReachableHoleConvexHull.getArea();

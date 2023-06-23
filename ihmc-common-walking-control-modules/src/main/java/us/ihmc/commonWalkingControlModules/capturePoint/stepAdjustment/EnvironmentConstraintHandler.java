@@ -75,16 +75,14 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
    private final CapturabilityBasedPlanarRegionDecider planarRegionDecider;
    private final ConvexStepConstraintOptimizer stepConstraintOptimizer;
 
-   public EnvironmentConstraintHandler(ICPControlPlane icpControlPlane,
-                                       SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                       BooleanProvider useICPControlPlaneInStepAdjustment,
+   public EnvironmentConstraintHandler(SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                                        String yoNamePrefix,
                                        YoRegistry registry,
                                        YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.contactableFeet = contactableFeet;
 
-      planarRegionDecider = new CapturabilityBasedPlanarRegionDecider(icpControlPlane, useICPControlPlaneInStepAdjustment, registry, null);
+      planarRegionDecider = new CapturabilityBasedPlanarRegionDecider(registry, null);
       stepConstraintOptimizer = new ConvexStepConstraintOptimizer(registry);
       parameters = new YoConstraintOptimizerParameters(registry);
 
