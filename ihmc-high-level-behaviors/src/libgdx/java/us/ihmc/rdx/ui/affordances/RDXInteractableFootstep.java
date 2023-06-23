@@ -171,7 +171,6 @@ public class RDXInteractableFootstep
 
    public void updatePlannedTrajectory(Pair<PlannedFootstep, EnumMap<Axis3D, List<PolynomialReadOnly>>> other)
    {
-      wasPoseUpdated = true;
       plannedFootstepInput.set(other);
    }
 
