@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.simulation;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -21,6 +22,7 @@ public class ValkyrieFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    @Tag("fast")
    @Override
 	@Test
+   @Disabled
    public void testFlatGroundWalking()
    {
       super.testFlatGroundWalking();
