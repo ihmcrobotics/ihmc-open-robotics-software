@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -21,6 +23,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameGeometry2dPlotter;
@@ -42,6 +45,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Random;
 
 import static us.ihmc.robotics.Assert.*;
 
@@ -367,6 +371,148 @@ public class CaptureRegionSafetyHeuristicsTest
          plotter.addFramePoint2d(icp, Color.blue);
 
          waitForButtonOrPause(testFrame);
+      }
+   }
+
+   @Test
+   public void testCaptureRegionWithNoTimeLeft()
+   {
+      // do not change parameters
+      // expected results are pre-calculated
+      double footLength = 0.2;
+      double footWidth = 0.1;
+      double kinematicsStepRange = 3.0;
+
+      RobotSide swingSide = RobotSide.LEFT;
+      double swingTimeRemaining = 0.0;
+      double omega0 = 3.0;
+
+      OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicsStepRange,
+                                                                                                  ankleZUpFrames, registry, null);
+      CaptureRegionSafetyHeuristics heuristics = new CaptureRegionSafetyHeuristics(() -> kinematicsStepRange, registry);
+
+      new DefaultParameterReader().readParametersInRegistry(registry);
+
+
+      ArrayList<Point2D> listOfPoints = new ArrayList<Point2D>();
+      listOfPoints.add(new Point2D(-footLength / 2.0, -footWidth / 2.0));
+      listOfPoints.add(new Point2D(-footLength / 2.0, footWidth / 2.0));
+      listOfPoints.add(new Point2D(footLength / 2.0, -footWidth / 2.0));
+      listOfPoints.add(new Point2D(footLength / 2.0, footWidth / 2.0));
+      FrameConvexPolygon2D supportFootPolygon = new FrameConvexPolygon2D(ankleZUpFrames.get(swingSide.getOppositeSide()), Vertex2DSupplier.asVertex2DSupplier(listOfPoints));
+      supportFootPolygon.changeFrameAndProjectToXYPlane(worldFrame);
+
+      FramePoint2D icp = new FramePoint2D(worldFrame, footLength / 2.0 - 0.02, 0.4);
+      captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, icp, omega0, supportFootPolygon);
+      FrameConvexPolygon2D captureRegion = captureRegionCalculator.getCaptureRegion();
+
+      heuristics.computeCaptureRegionWithSafetyHeuristics(swingSide.getOppositeSide(), icp, supportFootPolygon.getCentroid(), captureRegion);
+
+//      assertTrue(heuristics.getCaptureRegionWithSafetyMargin().signedDistance(icp) > heuristics.extraDistanceToStepFromStanceFoot.getValue());
+
+      if (PLOT_RESULTS)
+      {
+         FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(-5, 5, -5, 5);
+         FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
+         plotter.setDrawPointsLarge();
+         plotter.addPolygon(supportFootPolygon, Color.black);
+         plotter.addPolygon(captureRegion, Color.red);
+         plotter.addPolygon(heuristics.getCaptureRegionWithSafetyMargin(), Color.green);
+         plotter.addFramePoint2d(icp, Color.blue);
+
+         waitForButtonOrPause(testFrame);
+      }
+   }
+
+   @Test
+   public void testMaxProjectionDistance()
+   {
+      double maxDistanceTotal = 1.0;
+      double currentDistance = 0.5;
+
+      // if the angle is zero, then it's just continuing along the current line. test this all around the edge
+      double angle = 0.0;
+      assertEquals(maxDistanceTotal - currentDistance, CaptureRegionSafetyHeuristics.findMaximumProjectionDistance(currentDistance, maxDistanceTotal, angle), 1e-5);
+      currentDistance = 0.99;
+      assertEquals(maxDistanceTotal - currentDistance, CaptureRegionSafetyHeuristics.findMaximumProjectionDistance(currentDistance, maxDistanceTotal, angle), 1e-5);
+      currentDistance = maxDistanceTotal - 1e-5;
+      assertEquals(maxDistanceTotal - currentDistance, CaptureRegionSafetyHeuristics.findMaximumProjectionDistance(currentDistance, maxDistanceTotal, angle), 1e-5);
+      currentDistance = maxDistanceTotal;
+      assertEquals(0.0, CaptureRegionSafetyHeuristics.findMaximumProjectionDistance(currentDistance, maxDistanceTotal, angle), 1e-5);
+      currentDistance = maxDistanceTotal + 1e-5;
+      assertEquals(0.0, CaptureRegionSafetyHeuristics.findMaximumProjectionDistance(currentDistance, maxDistanceTotal, angle), 1e-5);
+      currentDistance = 1.01;
+      assertEquals(0.0, CaptureRegionSafetyHeuristics.findMaximumProjectionDistance(currentDistance, maxDistanceTotal, angle), 1e-5);
+      currentDistance = 1.5;
+      assertEquals(0.0, CaptureRegionSafetyHeuristics.findMaximumProjectionDistance(currentDistance, maxDistanceTotal, angle), 1e-5);
+
+      // testing a simple right triangle
+      maxDistanceTotal = 1.0;
+      currentDistance = 0.5;
+
+      angle = Math.PI / 2.0;
+      assertEquals(Math.sqrt(MathTools.square(maxDistanceTotal) - MathTools.square(currentDistance)),
+                   CaptureRegionSafetyHeuristics.findMaximumProjectionDistance(currentDistance, maxDistanceTotal, angle),
+                   1e-5);
+      currentDistance = 0.99;
+      assertEquals(Math.sqrt(MathTools.square(maxDistanceTotal) - MathTools.square(currentDistance)),
+                   CaptureRegionSafetyHeuristics.findMaximumProjectionDistance(currentDistance, maxDistanceTotal, angle),
+                   1e-5);
+      currentDistance = maxDistanceTotal - 1e-5;
+      assertEquals(Math.sqrt(MathTools.square(maxDistanceTotal) - MathTools.square(currentDistance)),
+                   CaptureRegionSafetyHeuristics.findMaximumProjectionDistance(currentDistance, maxDistanceTotal, angle),
+                   1e-5);
+      currentDistance = maxDistanceTotal;
+      assertEquals(0.0, CaptureRegionSafetyHeuristics.findMaximumProjectionDistance(currentDistance, maxDistanceTotal, angle), 1e-5);
+      currentDistance = maxDistanceTotal + 1e-5;
+      assertEquals(0.0, CaptureRegionSafetyHeuristics.findMaximumProjectionDistance(currentDistance, maxDistanceTotal, angle), 1e-5);
+      currentDistance = 1.01;
+      assertEquals(0.0, CaptureRegionSafetyHeuristics.findMaximumProjectionDistance(currentDistance, maxDistanceTotal, angle), 1e-5);
+      currentDistance = 1.5;
+      assertEquals(0.0, CaptureRegionSafetyHeuristics.findMaximumProjectionDistance(currentDistance, maxDistanceTotal, angle), 1e-5);
+
+      // testing with a really shallow projection angle
+      maxDistanceTotal = 1.0;
+      currentDistance = 0.5;
+      angle = 1e-4;
+      assertEquals(maxDistanceTotal - currentDistance, CaptureRegionSafetyHeuristics.findMaximumProjectionDistance(currentDistance, maxDistanceTotal, angle), 1e-5);
+      currentDistance = 0.99;
+      assertEquals(maxDistanceTotal - currentDistance, CaptureRegionSafetyHeuristics.findMaximumProjectionDistance(currentDistance, maxDistanceTotal, angle), 1e-5);
+      currentDistance = maxDistanceTotal - 1e-5;
+      assertEquals(maxDistanceTotal - currentDistance, CaptureRegionSafetyHeuristics.findMaximumProjectionDistance(currentDistance, maxDistanceTotal, angle), 1e-5);
+      currentDistance = maxDistanceTotal;
+      assertEquals(0.0, CaptureRegionSafetyHeuristics.findMaximumProjectionDistance(currentDistance, maxDistanceTotal, angle), 1e-5);
+      currentDistance = maxDistanceTotal + 1e-5;
+      assertEquals(0.0, CaptureRegionSafetyHeuristics.findMaximumProjectionDistance(currentDistance, maxDistanceTotal, angle), 1e-5);
+      currentDistance = 1.01;
+      assertEquals(0.0, CaptureRegionSafetyHeuristics.findMaximumProjectionDistance(currentDistance, maxDistanceTotal, angle), 1e-5);
+      currentDistance = 1.5;
+      assertEquals(0.0, CaptureRegionSafetyHeuristics.findMaximumProjectionDistance(currentDistance, maxDistanceTotal, angle), 1e-5);
+
+
+      // test with a bunch of random things
+      int iters = 100000;
+      Random random = new Random(1738L);
+      for (int iter = 0; iter < iters; iter++)
+      {
+         maxDistanceTotal = RandomNumbers.nextDouble(random, 0.0, 1.5);
+         currentDistance = RandomNumbers.nextDouble(random, 0.0, 1.5 * maxDistanceTotal);
+         angle = RandomNumbers.nextDouble(random, -Math.PI / 2.0, Math.PI / 2.0);
+
+         double maxDistance = CaptureRegionSafetyHeuristics.findMaximumProjectionDistance(currentDistance, maxDistanceTotal, angle);
+         double a = Math.PI - Math.abs(angle);
+         double b = Math.asin(currentDistance / maxDistanceTotal * Math.sin(a));
+         double c = Math.PI - a - b;
+         if (currentDistance > maxDistanceTotal)
+            assertEquals(0.0, maxDistance, 1e-5);
+         else
+         {
+            assertEquals(currentDistance * Math.sin(c), maxDistance * Math.sin(b), 1e-5);
+
+            double expectedTotal = Math.cos(c) * currentDistance + Math.cos(b) * maxDistance;
+
+            assertEquals(expectedTotal, maxDistanceTotal, 1e-5);
+         }
       }
    }
 
