@@ -19,9 +19,9 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.opencv.OpenCVArUcoMarker;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
+import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.spinnaker.BlackflyModelProperties;
-import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -52,6 +52,7 @@ public class RDXBlackflyCalibrationSuite
 {
    private static final String BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.serial.number", "00000000");
    public static final BlackflyModelProperties BLACKFLY_MODEL = BlackflyModelProperties.BFS_U3_27S5C;
+   public static final BlackflyLensProperties BLACKFLY_LENS_COMBO = BlackflyLensProperties.forModel(BLACKFLY_MODEL);
 
    private final RDXBaseUI baseUI = new RDXBaseUI("Blackfly Calibration Suite");
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -76,10 +77,10 @@ public class RDXBlackflyCalibrationSuite
    private MatVector cornersOrCentersMatVector;
    private SimpleBlobDetector simpleBlobDetector;
    private final ImFloat patternDistanceBetweenPoints = new ImFloat(0.0189f);
-   private final ImDouble fxGuess = new ImDouble(SensorHeadParameters.FOCAL_LENGTH_X_FOR_UNDISORTION);
-   private final ImDouble fyGuess = new ImDouble(SensorHeadParameters.FOCAL_LENGTH_Y_FOR_UNDISORTION);
-   private final ImDouble cxGuess = new ImDouble(SensorHeadParameters.PRINCIPAL_POINT_X_FOR_UNDISORTION);
-   private final ImDouble cyGuess = new ImDouble(SensorHeadParameters.PRINCIPAL_POINT_Y_FOR_UNDISORTION);
+   private final ImDouble fxGuess = new ImDouble(BLACKFLY_LENS_COMBO.getFocalLengthXForUndistortion());
+   private final ImDouble fyGuess = new ImDouble(BLACKFLY_LENS_COMBO.getFocalLengthYForUndistortion());
+   private final ImDouble cxGuess = new ImDouble(BLACKFLY_LENS_COMBO.getPrincipalPointXForUndistortion());
+   private final ImDouble cyGuess = new ImDouble(BLACKFLY_LENS_COMBO.getPrincipalPointYForUndistortion());
    private final ImDouble skewGuess = new ImDouble(0.0);
    private final MatVector estimatedRotationVectors = new MatVector();
    private final MatVector estimatedTranslationVectors = new MatVector();
@@ -103,10 +104,10 @@ public class RDXBlackflyCalibrationSuite
    private final ImString coloringCameraMatrixAsText = new ImString(512);
    private final ImString cameraMatrixAsText = new ImString(512);
    private final ImString newCameraMatrixAsText = new ImString(512);
-   private final ImDouble distortionCoefficientK1 = new ImDouble(SensorHeadParameters.K1_FOR_UNDISORTION);
-   private final ImDouble distortionCoefficientK2 = new ImDouble(SensorHeadParameters.K2_FOR_UNDISORTION);
-   private final ImDouble distortionCoefficientK3 = new ImDouble(SensorHeadParameters.K3_FOR_UNDISORTION);
-   private final ImDouble distortionCoefficientK4 = new ImDouble(SensorHeadParameters.K4_FOR_UNDISORTION);
+   private final ImDouble distortionCoefficientK1 = new ImDouble(BLACKFLY_LENS_COMBO.getK1ForUndistortion());
+   private final ImDouble distortionCoefficientK2 = new ImDouble(BLACKFLY_LENS_COMBO.getK2ForUndistortion());
+   private final ImDouble distortionCoefficientK3 = new ImDouble(BLACKFLY_LENS_COMBO.getK3ForUndistortion());
+   private final ImDouble distortionCoefficientK4 = new ImDouble(BLACKFLY_LENS_COMBO.getK4ForUndistortion());
    private final ImDouble undistortedImageScale = new ImDouble(SensorHeadParameters.UNDISTORTED_IMAGE_SCALE);
    private final ImInt undistortedImageWidth = new ImInt((int) BLACKFLY_MODEL.getImageWidthPixels());
    private final ImInt undistortedImageHeight = new ImInt((int) BLACKFLY_MODEL.getImageHeightPixels());
