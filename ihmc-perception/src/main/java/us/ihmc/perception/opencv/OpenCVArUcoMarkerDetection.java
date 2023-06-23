@@ -158,12 +158,6 @@ public class OpenCVArUcoMarkerDetection
                                            data.getCorners(),
                                            data.getIds(),
                                            data.getRejectedImagePoints());
-               if (data.getCorners().size() != data.getIds().rows())
-               {
-                  LogTools.warn("What? {} {}", data.getCorners().size(), data.getIds().rows());
-                  data.getCorners().clear();
-//                  data.getIds().
-               }
                data.getStopwatch().suspend();
                data.setHasDetected(true);
             }
@@ -330,7 +324,7 @@ public class OpenCVArUcoMarkerDetection
    public void drawRejectedPoints(Mat imageForDrawing)
    {
       MatVector rejectedImagePoints = detectionSwapReference.getForThreadTwo().getRejectedImagePoints();
-//      opencv_objdetect.drawDetectedMarkers(imageForDrawing, rejectedImagePoints);
+      opencv_objdetect.drawDetectedMarkers(imageForDrawing, rejectedImagePoints);
    }
 
    /**
