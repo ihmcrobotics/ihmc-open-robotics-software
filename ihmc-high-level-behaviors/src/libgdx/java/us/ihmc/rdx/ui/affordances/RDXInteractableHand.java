@@ -143,7 +143,6 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       super.getVirtualRenderables(renderables, pool);
-      forearmOrientationGizmo.getVirtualRenderables(renderables, pool);
 
       if (sensorWristWrenchArrows != null)
       {
