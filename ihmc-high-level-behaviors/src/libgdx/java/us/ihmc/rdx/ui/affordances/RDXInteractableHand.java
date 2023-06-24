@@ -10,8 +10,10 @@ import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -21,6 +23,7 @@ import us.ihmc.rdx.ui.graphics.RDXSpatialVectorArrows;
 import us.ihmc.rdx.ui.teleoperation.RDXDesiredRobot;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -112,11 +115,12 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
       super.update();
 
       forearmOrientationGizmo.getSelected().set(isSelected() && controlForearmOrientation.get());
-//      if (forearmOrientationGizmo.isSelected())
-//      {
-//
-//      }
-      forearmOrientationGizmo.getPoseGizmo().update();
+      if (forearmOrientationGizmo.isSelected())
+      {
+         MovingReferenceFrame afterElbowFrame = desiredRobot.getDesiredFullRobotModel().getArmJoint(side, ArmJointName.ELBOW_PITCH).getFrameAfterJoint();
+         forearmOrientationGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(afterElbowFrame.getTransformToRoot().getTranslation());
+         forearmOrientationGizmo.getPoseGizmo().update();
+      }
 
       if (sensorWristWrenchArrows != null)
       {
@@ -139,6 +143,7 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       super.getVirtualRenderables(renderables, pool);
+      forearmOrientationGizmo.getVirtualRenderables(renderables, pool);
 
       if (sensorWristWrenchArrows != null)
       {
@@ -188,5 +193,10 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
    public ReferenceFrame getForearmOrientationDesiredFrame()
    {
       return forearmOrientationGizmo.getPoseGizmo().getGizmoFrame();
+   }
+
+   public boolean getControlForearmOrientation()
+   {
+      return controlForearmOrientation.get();
    }
 }
