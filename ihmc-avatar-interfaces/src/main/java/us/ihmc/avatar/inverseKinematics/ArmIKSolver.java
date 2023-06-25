@@ -18,6 +18,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
@@ -27,6 +28,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
@@ -60,6 +62,7 @@ public class ArmIKSolver
    private final SixDoFJoint rootSixDoFJoint;
    private final RigidBodyBasics workChest;
    private final RigidBodyBasics workHand;
+   private final RigidBodyBasics workForearm;
    // TODO: Mess with these settings
    private final KinematicsToolboxOptimizationSettings optimizationSettings = new KinematicsToolboxOptimizationSettings();
    private final InverseKinematicsOptimizationSettingsCommand activeOptimizationSettings = new InverseKinematicsOptimizationSettingsCommand();
@@ -69,9 +72,15 @@ public class ArmIKSolver
    private final SpatialFeedbackControlCommand forearmSpatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand();
    private final DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
+   private final DefaultPIDSE3Gains forearmGains = new DefaultPIDSE3Gains();
    private final SelectionMatrix6D handSelectionMatrix = new SelectionMatrix6D();
    private final SelectionMatrix6D forearmSelectionMatrix = new SelectionMatrix6D();
+   private double handKp = 1200.0;
+   private double handWeight = 20.0;
+   private double forearmKp = 1200.0;
+   private double forearmWeight = 5.0;
    private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
+   private final WeightMatrix6D forearmWeightMatrix = new WeightMatrix6D();
    private final FramePose3D handControlDesiredPose = new FramePose3D();
    private final FramePose3D lastHandControlDesiredPose = new FramePose3D();
    private final FramePose3D forearmControlDesiredPose = new FramePose3D();
@@ -99,6 +108,9 @@ public class ArmIKSolver
       // Remove fingers
       workHand = MultiBodySystemTools.findRigidBody(workChest, robotModel.getJointMap().getHandName(side));
       workHand.getChildrenJoints().clear();
+
+      JointBasics elbowJoint = MultiBodySystemTools.findJoint(workChest, robotModel.getJointMap().getArmJointName(side, ArmJointName.WRIST_YAW));
+      workForearm = elbowJoint.getSuccessor();
 
       // Set the control frame pose to our palm centered control frame.
       // The spatial feedback command wants this relative to the fixed CoM of the hand link.
@@ -139,12 +151,8 @@ public class ArmIKSolver
 
       controllerCoreCommand.setControllerCoreMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
 
-      double gain = 1200.0;
-      double weight = 20.0;
-      gains.setPositionProportionalGains(gain);
-      gains.setOrientationProportionalGains(gain);
-      weightMatrix.setLinearWeights(weight, weight, weight);
-      weightMatrix.setAngularWeights(weight, weight, weight);
+      forearmGains.setOrientationProportionalGains(forearmKp);
+      forearmWeightMatrix.setAngularWeights(forearmWeight, forearmWeight, forearmWeight);
 
       handSelectionMatrix.setLinearAxisSelection(true, true, true);
       handSelectionMatrix.setAngularAxisSelection(true, true, true);
@@ -211,6 +219,11 @@ public class ArmIKSolver
       boolean usingForearmConstraint = false;
       synchronized (handControlDesiredPose)
       {
+         gains.setPositionProportionalGains(handKp);
+         gains.setOrientationProportionalGains(handKp);
+         weightMatrix.setLinearWeights(handWeight, handWeight, handWeight);
+         weightMatrix.setAngularWeights(handWeight, handWeight, handWeight);
+
          handSpatialFeedbackControlCommand.set(workChest, workHand);
          handSpatialFeedbackControlCommand.setGains(gains);
          handSpatialFeedbackControlCommand.setSelectionMatrix(handSelectionMatrix);
@@ -221,12 +234,17 @@ public class ArmIKSolver
          if (!forearmControlDesiredPose.containsNaN())
          {
             usingForearmConstraint = true;
-            forearmSpatialFeedbackControlCommand.set(workChest, workHand);
-            forearmSpatialFeedbackControlCommand.setGains(gains);
-            forearmSpatialFeedbackControlCommand.setSelectionMatrix(handSelectionMatrix);
-            forearmSpatialFeedbackControlCommand.setWeightMatrixForSolver(weightMatrix);
-            forearmSpatialFeedbackControlCommand.setInverseKinematics(handControlDesiredPose, zeroVector6D);
-//            forearmSpatialFeedbackControlCommand.setControlFrameFixedInEndEffector(...); TODO: Needed?
+
+            forearmGains.setPositionProportionalGains(forearmKp);
+            forearmGains.setOrientationProportionalGains(forearmKp);
+            forearmWeightMatrix.setLinearWeights(forearmWeight, forearmWeight, forearmWeight);
+            forearmWeightMatrix.setAngularWeights(forearmWeight, forearmWeight, forearmWeight);
+
+            forearmSpatialFeedbackControlCommand.set(workChest, workForearm);
+            forearmSpatialFeedbackControlCommand.setGains(forearmGains);
+            forearmSpatialFeedbackControlCommand.setSelectionMatrix(forearmSelectionMatrix);
+            forearmSpatialFeedbackControlCommand.setWeightMatrixForSolver(forearmWeightMatrix);
+            forearmSpatialFeedbackControlCommand.setInverseKinematics(forearmControlDesiredPose, zeroVector6D);
          }
       }
 
@@ -276,5 +294,45 @@ public class ArmIKSolver
    public OneDoFJointBasics[] getSolutionOneDoFJoints()
    {
       return workingOneDoFJoints;
+   }
+
+   public double getHandKp()
+   {
+      return handKp;
+   }
+
+   public double getHandWeight()
+   {
+      return handWeight;
+   }
+
+   public double getForearmKp()
+   {
+      return forearmKp;
+   }
+
+   public double getForearmWeight()
+   {
+      return forearmWeight;
+   }
+
+   public void setHandKp(double handKp)
+   {
+      this.handKp = handKp;
+   }
+
+   public void setHandWeight(double handWeight)
+   {
+      this.handWeight = handWeight;
+   }
+
+   public void setForearmKp(double forearmKp)
+   {
+      this.forearmKp = forearmKp;
+   }
+
+   public void setForearmWeight(double forearmWeight)
+   {
+      this.forearmWeight = forearmWeight;
    }
 }

@@ -120,12 +120,12 @@ public class RDXArmManager
       {
          if (interactableHands.get(side).getControlForearmOrientation())
          {
-            armIKSolvers.get(side).update(interactableHands.get(side).getControlReferenceFrame());
+            armIKSolvers.get(side).update(interactableHands.get(side).getControlReferenceFrame(),
+                                          interactableHands.get(side).getForearmOrientationDesiredFrame());
          }
          else
          {
-            armIKSolvers.get(side).update(interactableHands.get(side).getControlReferenceFrame(),
-                                          interactableHands.get(side).getForearmOrientationDesiredFrame());
+            armIKSolvers.get(side).update(interactableHands.get(side).getControlReferenceFrame());
          }
 
          // wrench expressed in wrist pitch body fixed-frame

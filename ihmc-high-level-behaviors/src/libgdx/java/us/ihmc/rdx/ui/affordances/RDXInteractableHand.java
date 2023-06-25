@@ -10,11 +10,12 @@ import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -46,9 +47,11 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
    private final RDXDesiredRobot desiredRobot;
    private final OneDoFJointBasics[] syncedArmJoints;
    private final OneDoFJointBasics[] desiredArmJoints;
+   private final MovingReferenceFrame forearmFixedCoMFrame;
    private RDXSpatialVectorArrows sensorWristWrenchArrows;
    private final RDXSpatialVectorArrows estimatedHandWrenchArrows;
    private final ImBoolean controlForearmOrientation = new ImBoolean(false);
+   private final Notification controlForearmOrientationNewlyEnabled = new Notification();
    private final RDXSelectablePose3DGizmo forearmOrientationGizmo;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -105,6 +108,8 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
       desiredArmJoints = FullRobotModelUtils.getArmJoints(desiredRobot.getDesiredFullRobotModel(), side, robotModel.getJointMap().getArmJointNames());
       baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltipsAndContextMenus);
 
+      RigidBodyBasics forearm = desiredRobot.getDesiredFullRobotModel().getArmJoint(side, ArmJointName.WRIST_YAW).getSuccessor();
+      forearmFixedCoMFrame = forearm.getBodyFixedFrame();
       forearmOrientationGizmo = new RDXSelectablePose3DGizmo();
       forearmOrientationGizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
    }
@@ -115,10 +120,13 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
       super.update();
 
       forearmOrientationGizmo.getSelected().set(isSelected() && controlForearmOrientation.get());
+      if (controlForearmOrientationNewlyEnabled.poll())
+      {
+         forearmOrientationGizmo.getPoseGizmo().getTransformToParent().getRotation().set(forearmFixedCoMFrame.getTransformToRoot().getRotation());
+      }
       if (forearmOrientationGizmo.isSelected())
       {
-         MovingReferenceFrame afterElbowFrame = desiredRobot.getDesiredFullRobotModel().getArmJoint(side, ArmJointName.ELBOW_PITCH).getFrameAfterJoint();
-         forearmOrientationGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(afterElbowFrame.getTransformToRoot().getTranslation());
+         forearmOrientationGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(forearmFixedCoMFrame.getTransformToRoot().getTranslation());
          forearmOrientationGizmo.getPoseGizmo().update();
       }
 
@@ -163,7 +171,10 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
 
       if (ImGui.beginPopup(labels.get(contextMenuName)))
       {
-         ImGui.checkbox(labels.get("Control forearm orientation"), controlForearmOrientation);
+         if (ImGui.checkbox(labels.get("Control forearm orientation"), controlForearmOrientation) && controlForearmOrientation.get())
+         {
+            controlForearmOrientationNewlyEnabled.set();
+         }
 
          ImGui.text("Real robot joint angles:");
          tempImGuiText.set(FullRobotModelUtils.getArmJointAnglesString(syncedArmJoints));
