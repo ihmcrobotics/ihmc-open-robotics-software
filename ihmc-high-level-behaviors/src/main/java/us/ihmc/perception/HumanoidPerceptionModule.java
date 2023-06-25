@@ -77,7 +77,8 @@ public class HumanoidPerceptionModule
 
    public void update(ROS2Helper ros2Helper, Mat depthImage, ReferenceFrame cameraFrame, boolean rapidRegionsEnabled, boolean mappingEnabled)
    {
-      localizationAndMappingProcess.setEnableLiveMode(mappingEnabled);
+      if (localizationAndMappingProcess != null)
+         localizationAndMappingProcess.setEnableLiveMode(mappingEnabled);
 
       if (rapidRegionsEnabled)
       {
