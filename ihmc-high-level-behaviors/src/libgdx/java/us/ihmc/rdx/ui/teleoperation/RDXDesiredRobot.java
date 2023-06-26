@@ -118,13 +118,6 @@ public class RDXDesiredRobot extends RDXMultiBodyGraphic
       super.destroy();
    }
 
-   public void setDesiredToCurrent()
-   {
-      desiredFullRobotModel.getRootJoint().setJointConfiguration(syncedRobotModel.getFullRobotModel().getRootJoint());
-      for (OneDoFJointBasics joint : syncedRobotModel.getFullRobotModel().getOneDoFJoints())
-         desiredFullRobotModel.getOneDoFJointByName(joint.getName()).setJointConfiguration(joint);
-   }
-
    @Override
    public void setActive(boolean active)
    {

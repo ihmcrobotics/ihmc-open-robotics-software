@@ -29,6 +29,7 @@ import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreFactories;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -281,7 +282,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       FullHumanoidRobotModel robot = robotModel.createFullRobotModel();
       defaultRobotInitialSetup.initializeFullRobotModel(robot);
 
-      for (OneDoFJointBasics joint : getDesiredOneDoFJoints())
+      for (OneDoFJointBasics joint : getDesiredOneDoFJoint())
       {
          double q_priv = robot.getOneDoFJointByName(joint.getName()).getQ();
          privilegedConfiguration.put(joint, q_priv);
@@ -584,12 +585,12 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       JointLimitReductionCommand jointLimitReductionCommand = bufferToPack.addJointLimitReductionCommand();
       jointLimitReductionCommand.clear();
 
-      for (int i = 0; i < desiredOneDoFJoints.length; i++)
+      for (int i = 0; i < currentOneDoFJoints.length; i++)
       {
-         double reductionFactor = jointLimitReductionFactors.get(desiredOneDoFJoints[i].getName()).getValue();
+         double reductionFactor = jointLimitReductionFactors.get(currentOneDoFJoints[i].getName()).getValue();
          if (reductionFactor <= 0.0 || reductionFactor > 1.0)
             continue;
-         jointLimitReductionCommand.addReductionFactor(desiredOneDoFJoints[i], reductionFactor);
+         jointLimitReductionCommand.addReductionFactor(currentOneDoFJoints[i], reductionFactor);
       }
    }
 
