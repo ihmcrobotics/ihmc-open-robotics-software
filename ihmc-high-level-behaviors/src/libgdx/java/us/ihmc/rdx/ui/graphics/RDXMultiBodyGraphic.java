@@ -54,9 +54,9 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
 
    private RDXRigidBody loadRigidBody(RigidBodyBasics rigidBody, RobotDefinition robotDefinition, double scaleFactor, boolean createReferenceFrameGraphics)
    {
-      RDXRigidBody RDXRigidBody;
+      RDXRigidBody rdxRigidBody;
       Executor executorToRunLaterOnThreadWithGraphicsContext = Gdx.app::postRunnable;
-      RDXRigidBody = RDXMultiBodySystemFactories.toRDXRigidBody(rigidBody,
+      rdxRigidBody = RDXMultiBodySystemFactories.toRDXRigidBody(rigidBody,
                                                                 robotDefinition.getRigidBodyDefinition(rigidBody.getName()),
                                                                 executorToRunLaterOnThreadWithGraphicsContext,
                                                                 scaleFactor,
@@ -84,7 +84,7 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
          childrenJoint.setSuccessor(loadRigidBody(childrenJoint.getSuccessor(), robotDefinition, scaleFactor, createReferenceFrameGraphics));
       }
 
-      return RDXRigidBody;
+      return rdxRigidBody;
    }
 
    @Override

@@ -60,6 +60,9 @@ public class OusterDriverAndDepthPublisher
       heightMapUpdater.attachHeightMapConsumer(steppableRegionsUpdater::submitLatestHeightMapMessage);
       steppableRegionsUpdater.start();
 
+      if (publishHeightMapMonitor.isAlive())
+         heightMapUpdater.start();
+
       publishHeightMapMonitor.setAlivenessChangedCallback(isAlive ->
       {
          if (isAlive)

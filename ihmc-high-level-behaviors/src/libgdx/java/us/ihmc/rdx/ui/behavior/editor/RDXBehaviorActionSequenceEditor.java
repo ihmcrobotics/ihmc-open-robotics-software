@@ -124,7 +124,7 @@ public class RDXBehaviorActionSequenceEditor
 
    public void loadNameFromFile()
    {
-      JSONFileTools.load(workspaceFile, jsonNode -> name = jsonNode.get("name").asText());
+      JSONFileTools.load(workspaceFile.getFilesystemFile(), jsonNode -> name = jsonNode.get("name").asText());
    }
 
    public boolean loadActionsFromFile()
@@ -133,7 +133,7 @@ public class RDXBehaviorActionSequenceEditor
       executionNextIndexStatus = 0;
       LogTools.info("Loading from {}", workspaceFile.getClasspathResource().toString());
       MutableBoolean successfullyLoadedActions = new MutableBoolean(true);
-      JSONFileTools.load(workspaceFile.getClasspathResourceAsStream(), jsonNode ->
+      JSONFileTools.load(workspaceFile.getFilesystemFile(), jsonNode ->
       {
          JSONTools.forEachArrayElement(jsonNode, "actions", actionNode ->
          {
@@ -143,7 +143,8 @@ public class RDXBehaviorActionSequenceEditor
                                                                                 syncedRobot,
                                                                                 selectionCollisionModel,
                                                                                 panel3D,
-                                                                                referenceFrameLibrary);
+                                                                                referenceFrameLibrary,
+                                                                                ros2);
             if (action != null)
             {
                action.getActionData().loadFromFile(actionNode);
@@ -213,8 +214,9 @@ public class RDXBehaviorActionSequenceEditor
       for (int i = 0; i < actionSequence.size(); i++)
       {
          RDXBehaviorAction action = actionSequence.get(i);
-         action.update();
          action.setActionIndex(i);
+         action.setActionNextExcecutionIndex(executionNextIndexStatus);
+         action.update();
       }
    }
 
@@ -468,7 +470,8 @@ public class RDXBehaviorActionSequenceEditor
                                                                      robotModel,
                                                                      syncedRobot.getFullRobotModel(),
                                                                      selectionCollisionModel,
-                                                                     referenceFrameLibrary);
+                                                                     referenceFrameLibrary,
+                                                                     ros2);
             // Set the new action to where the last one was for faster authoring
             handPoseAction.setSide(side);
             RDXHandPoseAction nextPreviousHandPoseAction = findNextPreviousHandPoseAction(side);
@@ -587,7 +590,7 @@ public class RDXBehaviorActionSequenceEditor
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       if (panel.getIsShowing().get())
-         for (var action : actionSequence)
+         for (RDXBehaviorAction action : actionSequence)
             action.getRenderables(renderables, pool);
    }
 

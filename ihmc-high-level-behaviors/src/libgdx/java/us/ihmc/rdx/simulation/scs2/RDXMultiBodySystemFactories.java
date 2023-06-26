@@ -22,6 +22,24 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class RDXMultiBodySystemFactories
 {
+   public static RDXRigidBody toRDXMultiBodySystem(RigidBodyReadOnly originalRootBody, RobotDefinition robotDefinition)
+   {
+      return toRDXMultiBodySystem(originalRootBody, null, robotDefinition);
+   }
+
+   public static RDXRigidBody toRDXMultiBodySystem(RigidBodyReadOnly originalRootBody, RobotDefinition robotDefinition, double scaleFactor)
+   {
+      return (RDXRigidBody) MultiBodySystemFactories.cloneMultiBodySystem(originalRootBody,
+                                                                          null,
+                                                                          "",
+                                                                          newRDXRigidBodyBuilder(MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER,
+                                                                                                 robotDefinition,
+                                                                                                 null,
+                                                                                                 scaleFactor,
+                                                                                                 false),
+                                                                          MultiBodySystemFactories.DEFAULT_JOINT_BUILDER);
+   }
+
    public static RDXRigidBody toRDXMultiBodySystem(RigidBodyReadOnly originalRootBody,
                                                    ReferenceFrame cloneStationaryFrame,
                                                    RobotDefinition robotDefinition)
@@ -158,11 +176,11 @@ public class RDXMultiBodySystemFactories
 
    private static void loadRigidBodyGraphic(List<VisualDefinition> visualDefinitions,
                                             List<CollisionShapeDefinition> collisionShapeDefinitions,
-                                            RDXRigidBody RDXRigidBody,
+                                            RDXRigidBody rdxRigidBody,
                                             double scaleFactor,
                                             boolean createReferenceFrameGraphics)
    {
-      ReferenceFrame graphicFrame = RDXRigidBody.isRootBody() ? RDXRigidBody.getBodyFixedFrame() : RDXRigidBody.getParentJoint().getFrameAfterJoint();
+      ReferenceFrame graphicFrame = rdxRigidBody.isRootBody() ? rdxRigidBody.getBodyFixedFrame() : rdxRigidBody.getParentJoint().getFrameAfterJoint();
       List<RDXVisualModelInstance> visualModels = RDXVisualTools.collectNodes(visualDefinitions, scaleFactor);
       List<RDXVisualModelInstance> collisionModels = RDXVisualTools.collectCollisionNodes(collisionShapeDefinitions, scaleFactor);
       if (!visualModels.isEmpty() || !collisionModels.isEmpty())
@@ -171,16 +189,16 @@ public class RDXMultiBodySystemFactories
          int i = 0;
          for (RDXVisualModelInstance visualModel : visualModels)
          {
-            visualGraphicsNode.addModelPart(visualModel, RDXRigidBody.getName() + "Visual" + i);
+            visualGraphicsNode.addModelPart(visualModel, rdxRigidBody.getName() + "Visual" + i);
          }
-         RDXRigidBody.setVisualGraphics(visualGraphicsNode);
+         rdxRigidBody.setVisualGraphics(visualGraphicsNode);
          RDXFrameGraphicsNode collisionGraphicsNode = new RDXFrameGraphicsNode(graphicFrame, createReferenceFrameGraphics);
          i = 0;
          for (RDXVisualModelInstance collisionModel : collisionModels)
          {
-            collisionGraphicsNode.addModelPart(collisionModel, RDXRigidBody.getName() + "Collision" + i);
+            collisionGraphicsNode.addModelPart(collisionModel, rdxRigidBody.getName() + "Collision" + i);
          }
-         RDXRigidBody.setCollisionGraphics(collisionGraphicsNode);
+         rdxRigidBody.setCollisionGraphics(collisionGraphicsNode);
       }
    }
 }
