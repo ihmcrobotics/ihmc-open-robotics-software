@@ -265,8 +265,10 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    public void squareUp()
    {
       MovingReferenceFrame midFootZUpGroundFrame = syncedRobot.getReferenceFrames().getMidFootZUpGroundFrame();
-      FramePose3D leftFootPose = new FramePose3D(midFootZUpGroundFrame, footstepPlan.getLastFootstepTransform(RobotSide.LEFT));
-      FramePose3D rightFootPose = new FramePose3D(midFootZUpGroundFrame, footstepPlan.getLastFootstepTransform(RobotSide.RIGHT));
+      FramePose3D leftFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPlan.getLastFootstepTransform(RobotSide.LEFT));
+      leftFootPose.changeFrame(midFootZUpGroundFrame);
+      FramePose3D rightFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPlan.getLastFootstepTransform(RobotSide.RIGHT));
+      rightFootPose.changeFrame(midFootZUpGroundFrame);
       RobotSide furthestForwardFootstep = leftFootPose.getTranslationX() < rightFootPose.getTranslationX() ? RobotSide.RIGHT : RobotSide.LEFT;
       MovingReferenceFrame soleFrame = syncedRobot.getReferenceFrames().getSoleFrame(furthestForwardFootstep);
       footstepBeingPlaced = new RDXInteractableFootstep(baseUI, furthestForwardFootstep.getOppositeSide(), footstepPlan.getNumberOfFootsteps(), null);
