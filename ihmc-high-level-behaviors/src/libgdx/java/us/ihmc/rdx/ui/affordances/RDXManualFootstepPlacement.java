@@ -18,6 +18,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.spatial.interfaces.TwistBasics;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -264,21 +265,18 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    public void squareUp()
    {
       MovingReferenceFrame midFootZUpGroundFrame = syncedRobot.getReferenceFrames().getMidFootZUpGroundFrame();
-      FramePose3D leftFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPlan.getLastFootstepTransform(RobotSide.LEFT));
-      leftFootPose.changeFrame(midFootZUpGroundFrame);
-      FramePose3D rightFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPlan.getLastFootstepTransform(RobotSide.RIGHT));
-      rightFootPose.changeFrame(midFootZUpGroundFrame);
+      FramePose3D leftFootPose = new FramePose3D(midFootZUpGroundFrame, footstepPlan.getLastFootstepTransform(RobotSide.LEFT));
+      FramePose3D rightFootPose = new FramePose3D(midFootZUpGroundFrame, footstepPlan.getLastFootstepTransform(RobotSide.RIGHT));
       RobotSide furthestForwardFootstep = leftFootPose.getTranslationX() < rightFootPose.getTranslationX() ? RobotSide.RIGHT : RobotSide.LEFT;
+      MovingReferenceFrame soleFrame = syncedRobot.getReferenceFrames().getSoleFrame(furthestForwardFootstep);
       footstepBeingPlaced = new RDXInteractableFootstep(baseUI, furthestForwardFootstep.getOppositeSide(), footstepPlan.getNumberOfFootsteps(), null);
-      tempFramePose.set(footstepPlan.getLastFootstepTransform(furthestForwardFootstep));
+      tempFramePose.set(soleFrame.getTransformToRoot());
       tempFramePose.getPosition()
                    .addY(furthestForwardFootstep.negateIfLeftSide(
-                         Math.cos(footstepPlan.getLastFootstepTransform(furthestForwardFootstep).getRotation().getYaw())
-                         * footstepPlannerParameters.getIdealSideStepWidth()));
+                         Math.cos(soleFrame.getTransformToRoot().getRotation().getYaw()) * footstepPlannerParameters.getIdealSideStepWidth()));
       tempFramePose.getPosition()
                    .addX(furthestForwardFootstep.negateIfRightSide(
-                         Math.sin(footstepPlan.getLastFootstepTransform(furthestForwardFootstep).getRotation().getYaw())
-                         * footstepPlannerParameters.getIdealSideStepWidth()));
+                         Math.sin(soleFrame.getTransformToRoot().getRotation().getYaw()) * footstepPlannerParameters.getIdealSideStepWidth()));
       footstepBeingPlaced.updatePose(tempFramePose);
       placeFootstep();
       exitPlacement();
