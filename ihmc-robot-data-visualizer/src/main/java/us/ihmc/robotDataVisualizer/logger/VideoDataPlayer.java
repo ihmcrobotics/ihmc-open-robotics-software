@@ -72,20 +72,20 @@ public class VideoDataPlayer
 
       currentRobotTimestamp = timestampScrubber.getVideoTimestamp(queryRobotTimestamp);
 
-      int index = timestampScrubber.getCurrentIndex();
-      long videoTimestamp = videoTimestamps[index];
+      int currentIndex = timestampScrubber.getCurrentIndex();
+      long videoTimestamp = videoTimestamps[currentIndex];
       long previousTimestamp = 0;
       long nextVideoTimestamp = 0;
 
-      if (index > 0)
+      if (currentIndex > 0)
       {
-         previousTimestamp = videoTimestamps[index - 1];
+         previousTimestamp = videoTimestamps[currentIndex - 1];
       }
 
-      if (index + 1 < robotTimestamps.length)
+      if (currentIndex + 1 < robotTimestamps.length)
       {
-         nextVideoTimestamp = videoTimestamps[index + 1];
-         upcomingRobotTimestamp = robotTimestamps[index + 1];
+         nextVideoTimestamp = videoTimestamps[currentIndex + 1];
+         upcomingRobotTimestamp = robotTimestamps[currentIndex + 1];
       }
       else
       {
