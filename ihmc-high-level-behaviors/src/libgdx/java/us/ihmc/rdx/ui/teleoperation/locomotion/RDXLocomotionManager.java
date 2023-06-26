@@ -266,14 +266,22 @@ public class RDXLocomotionManager
       }
       ImGui.sameLine();
 
-//      ImGui.beginDisabled(!walkAvailable);
+      //      ImGui.beginDisabled(!walkAvailable);
       if (ImGui.button(labels.get("Walk")))
       { // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
          interactableFootstepPlan.walkFromSteps();
       }
       ImGuiTools.previousWidgetTooltip("Keybind: Space");
       ImGui.sameLine();
-//      ImGui.endDisabled();
+
+      if (ImGui.button(labels.get("Square Up")) || ImGui.isKeyPressed('U'))
+      {
+         deleteAll();
+         manualFootstepPlacement.squareUp();
+      }
+      ImGuiTools.previousWidgetTooltip("Keybind: U");
+      ImGui.sameLine();
+      //      ImGui.endDisabled();
 
       ImGui.beginDisabled(!pauseAvailable);
       if (ImGui.button(labels.get("Pause")))

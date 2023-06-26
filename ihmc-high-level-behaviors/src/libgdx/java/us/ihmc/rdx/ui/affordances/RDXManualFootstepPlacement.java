@@ -28,8 +28,6 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.robotSide.RobotSide;
-
-import java.awt.*;
 import java.util.ArrayList;
 
 /**
@@ -267,32 +265,19 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    public void squareUp()
    {
       MovingReferenceFrame midFootZUpGroundFrame = syncedRobot.getReferenceFrames().getMidFootZUpGroundFrame();
-      RobotSide footStepSide;
-      RigidBodyTransformReadOnly latestFootstepTransform;
       FramePose3D leftFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPlan.getLastFootstepTransform(RobotSide.LEFT));
       leftFootPose.changeFrame(midFootZUpGroundFrame);
       FramePose3D rightFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPlan.getLastFootstepTransform(RobotSide.RIGHT));
       rightFootPose.changeFrame(midFootZUpGroundFrame);
-      if (leftFootPose.getTranslationX() < rightFootPose.getTranslationX())
-      {
-         footStepSide = RobotSide.LEFT;
-         latestFootstepTransform = footstepPlan.getLastFootstepTransform(RobotSide.LEFT.getOppositeSide());
-      }
-      else
-      {
-         footStepSide = RobotSide.RIGHT;
-         latestFootstepTransform = footstepPlan.getLastFootstepTransform(RobotSide.RIGHT.getOppositeSide());
-      }
-      footstepBeingPlaced = new RDXInteractableFootstep(baseUI, footStepSide, footstepPlan.getNumberOfFootsteps(), null);
-      tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
-      //Set X, Y, and Z based on last footstep
-      tempFramePose.setX(latestFootstepTransform.getTranslationX());
-      if (footStepSide == RobotSide.LEFT)
-         tempFramePose.setY(footstepPlannerParameters.getIdealSideStepWidth() + latestFootstepTransform.getTranslationY());
-      else
-         tempFramePose.setY(latestFootstepTransform.getTranslationY() - footstepPlannerParameters.getIdealSideStepWidth());
-      tempFramePose.setZ(latestFootstepTransform.getTranslationZ());
-      tempFramePose.getOrientation().setToYawOrientation(latestFootstepTransform.getRotation().getYaw());
+      RobotSide furthestForwardFootstep = leftFootPose.getTranslationX() < rightFootPose.getTranslationX() ? RobotSide.RIGHT : RobotSide.LEFT;
+      FramePose3D furthestForwardFootstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPlan.getLastFootstepTransform(furthestForwardFootstep));
+      footstepBeingPlaced = new RDXInteractableFootstep(baseUI, furthestForwardFootstep.getOppositeSide(), footstepPlan.getNumberOfFootsteps(), null);
+      tempFramePose.setToZero(midFootZUpGroundFrame);
+      tempFramePose.getOrientation().setToYawOrientation(furthestForwardFootstepPose.getRotation().getYaw());
+      tempFramePose.setX(furthestForwardFootstepPose.getTranslationX());
+      tempFramePose.setY(furthestForwardFootstepPose.getTranslationY());
+      tempFramePose.getPosition().addY(furthestForwardFootstep.negateIfLeftSide(footstepPlannerParameters.getIdealSideStepWidth()));
+      tempFramePose.setZ(furthestForwardFootstepPose.getTranslationZ());
       footstepBeingPlaced.updatePose(tempFramePose);
       placeFootstep();
       exitPlacement();
