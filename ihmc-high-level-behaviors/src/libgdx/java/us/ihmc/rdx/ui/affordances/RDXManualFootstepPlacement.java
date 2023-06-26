@@ -29,7 +29,6 @@ import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.robotSide.RobotSide;
 import java.util.ArrayList;
-
 /**
  * Manages and assists with the operator placement of footsteps.
  */
@@ -270,14 +269,16 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       FramePose3D rightFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPlan.getLastFootstepTransform(RobotSide.RIGHT));
       rightFootPose.changeFrame(midFootZUpGroundFrame);
       RobotSide furthestForwardFootstep = leftFootPose.getTranslationX() < rightFootPose.getTranslationX() ? RobotSide.RIGHT : RobotSide.LEFT;
-      FramePose3D furthestForwardFootstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPlan.getLastFootstepTransform(furthestForwardFootstep));
       footstepBeingPlaced = new RDXInteractableFootstep(baseUI, furthestForwardFootstep.getOppositeSide(), footstepPlan.getNumberOfFootsteps(), null);
-      tempFramePose.setToZero(midFootZUpGroundFrame);
-      tempFramePose.getOrientation().setToYawOrientation(furthestForwardFootstepPose.getRotation().getYaw());
-      tempFramePose.setX(furthestForwardFootstepPose.getTranslationX());
-      tempFramePose.setY(furthestForwardFootstepPose.getTranslationY());
-      tempFramePose.getPosition().addY(furthestForwardFootstep.negateIfLeftSide(footstepPlannerParameters.getIdealSideStepWidth()));
-      tempFramePose.setZ(furthestForwardFootstepPose.getTranslationZ());
+      tempFramePose.set(footstepPlan.getLastFootstepTransform(furthestForwardFootstep));
+      tempFramePose.getPosition()
+                   .addY(furthestForwardFootstep.negateIfLeftSide(
+                         Math.cos(footstepPlan.getLastFootstepTransform(furthestForwardFootstep).getRotation().getYaw())
+                         * footstepPlannerParameters.getIdealSideStepWidth()));
+      tempFramePose.getPosition()
+                   .addX(furthestForwardFootstep.negateIfRightSide(
+                         Math.sin(footstepPlan.getLastFootstepTransform(furthestForwardFootstep).getRotation().getYaw())
+                         * footstepPlannerParameters.getIdealSideStepWidth()));
       footstepBeingPlaced.updatePose(tempFramePose);
       placeFootstep();
       exitPlacement();
