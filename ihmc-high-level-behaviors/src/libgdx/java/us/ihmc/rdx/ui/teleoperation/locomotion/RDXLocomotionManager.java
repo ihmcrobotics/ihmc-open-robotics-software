@@ -274,12 +274,11 @@ public class RDXLocomotionManager
       ImGuiTools.previousWidgetTooltip("Keybind: Space");
       ImGui.sameLine();
 
-      if (ImGui.button(labels.get("Square Up")) || ImGui.isKeyPressed('U'))
+      if (ImGui.button(labels.get("Square Up")))
       {
          deleteAll();
          manualFootstepPlacement.squareUp();
       }
-      ImGuiTools.previousWidgetTooltip("Keybind: U");
       ImGui.sameLine();
       //      ImGui.endDisabled();
 
