@@ -445,7 +445,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
          ImGuiTools.previousWidgetTooltip("Send with: Spacebar");
          ImGui.sameLine();
          interactablePelvis.renderImGuiWidgets();
-         ImGuiTools.previousWidgetTooltip("Send with: Spacebar");
 
          boolean handInteractablesAreDeleted = true;
          if (robotHasArms)
