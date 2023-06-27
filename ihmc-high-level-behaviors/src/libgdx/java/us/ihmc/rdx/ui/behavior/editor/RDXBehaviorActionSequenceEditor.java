@@ -131,7 +131,7 @@ public class RDXBehaviorActionSequenceEditor
    {
       actionSequence.clear();
       executionNextIndexStatus = 0;
-      LogTools.info("Loading from {}", workspaceFile.getClasspathResource().toString());
+      LogTools.info("Loading from {}", workspaceFile.getFilesystemFile());
       MutableBoolean successfullyLoadedActions = new MutableBoolean(true);
       JSONFileTools.load(workspaceFile.getFilesystemFile(), jsonNode ->
       {
