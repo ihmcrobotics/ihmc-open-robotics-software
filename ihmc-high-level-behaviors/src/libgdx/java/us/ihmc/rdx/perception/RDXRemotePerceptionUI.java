@@ -7,7 +7,6 @@ import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.rapidRegions.RapidRegionsExtractorParameters;
-import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySetGroup;
@@ -29,14 +28,12 @@ public class RDXRemotePerceptionUI
    private final PolygonizerParameters sphericalPolygonizerParameters = new PolygonizerParameters("ForSphericalRapidRegions");
    private final ConcaveHullFactoryParameters sphericalConcaveHullFactoryParameters = new ConcaveHullFactoryParameters("ForSphericalRapidRegions");
    private final PlanarRegionMappingParameters sphericalRegionMappingParameters = new PlanarRegionMappingParameters();
-   private final IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
+   private final IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsOnRobot();
 
    private final ImGuiRemoteROS2StoredPropertySetGroup remotePropertySets;
 
-   public RDXRemotePerceptionUI(ROS2Helper ros2Helper, BlackflyLensProperties blackflyLensCombo)
+   public RDXRemotePerceptionUI(ROS2Helper ros2Helper)
    {
-      ousterFisheyeColoringIntrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsOnRobot(blackflyLensCombo);
-
       remotePropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper);
 
       remotePropertySets.registerRemotePropertySet(perceptionConfigurationParameters, PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS);

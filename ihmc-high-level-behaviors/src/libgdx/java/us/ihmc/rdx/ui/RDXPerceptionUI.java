@@ -5,7 +5,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionDataLogger;
-import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.logging.RDXPerceptionDataLoaderPanel;
@@ -167,7 +166,7 @@ public class RDXPerceptionUI
             baseUI.create();
             baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI);
 
-            remotePerceptionUI = new RDXRemotePerceptionUI(ros2Helper, SensorHeadParameters.BENCHTOP_BLACKFLY_LENS_COMBO);
+            remotePerceptionUI = new RDXRemotePerceptionUI(ros2Helper);
             baseUI.getImGuiPanelManager().addPanel(remotePerceptionUI.getPanel());
 
             environmentBuilder.create();
