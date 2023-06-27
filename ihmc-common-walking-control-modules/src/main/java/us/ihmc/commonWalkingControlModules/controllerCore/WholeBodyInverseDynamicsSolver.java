@@ -159,8 +159,6 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
 
       minimizeJointTorques = new YoBoolean("minimizeJointTorques", registry);
       minimizeJointTorques.set(toolbox.getOptimizationSettings().areJointTorquesMinimized());
-      //      areJointTorqueLimitsConsidered = new YoBoolean("areJointTorqueLimitsConsidered", registry);
-      //      areJointTorqueLimitsConsidered.set(toolbox.getOptimizationSettings().areJointTorqueLimitsConsidered());
       areJointTorqueLimitsConsidered = new YoEnum<>("areJointTorqueLimitsConsidered", registry, JointTorqueEnforcementMethod.class);
       areJointTorqueLimitsConsidered.set(toolbox.getOptimizationSettings().areJointTorqueLimitsConsidered());
       useDynamicMatrixCalculatorForInverseDynamics = new YoBoolean("useDynamicMatrixCalculator", registry);
