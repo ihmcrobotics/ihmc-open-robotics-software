@@ -1,17 +1,38 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import gnu.trove.list.array.TIntArrayList;
+import static us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsQPSolver.QPInputDomain.MOTION;
+import static us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsQPSolver.QPInputDomain.MOTION_AND_RHO;
+import static us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsQPSolver.QPInputDomain.RHO;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.LinearMomentumRateCostCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.QPObjectiveCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerBoundCalculator;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings.TorqueConstraintsInQP;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings.JointTorqueEnforcementMethod;
 import us.ihmc.commonWalkingControlModules.visualizer.BasisVectorVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.commons.MathTools;
@@ -19,7 +40,12 @@ import us.ihmc.convexOptimization.quadraticProgram.NativeActiveSetQPSolverWithIn
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.KinematicLoopFunction;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
@@ -33,13 +59,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsQPSolver.QPInputDomain.*;
 
 public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHolder
 {
@@ -77,8 +96,6 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
    private final JointIndexHandler jointIndexHandler;
    private final TIntArrayList inactiveJointIndices = new TIntArrayList();
-//   private final TIntArrayList torqueConstrainedJointIndices = new TIntArrayList();
-   private final List<String> torqueConstrainedJointNames;
    private final ArrayList<OneDoFJointBasics> torqueConstrainedJoints = new ArrayList<>();
    private final JointTorqueCommand torqueConstraintMinimumCommand = new JointTorqueCommand();
    private final JointTorqueCommand torqueConstraintMaximumCommand = new JointTorqueCommand();
@@ -155,37 +172,14 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       CommonOps_DDRM.fill(qDDotMinMatrix, Double.NEGATIVE_INFINITY);
       CommonOps_DDRM.fill(qDDotMaxMatrix, Double.POSITIVE_INFINITY);
 
-      torqueConstrainedJointNames = optimizationSettings.getJointTorqueConstrainedJoints();
-      TorqueConstraintsInQP torqueConstraintInQPEnum = optimizationSettings.areJointTorqueLimitsEnforced();
+      JointTorqueEnforcementMethod jointTorqueEnforcementMethod = optimizationSettings.areJointTorqueLimitsConsidered();
       
-      if (torqueConstraintInQPEnum == TorqueConstraintsInQP.ALL_JOINTS_CONSTRAINED)
+      if (jointTorqueEnforcementMethod == JointTorqueEnforcementMethod.CONSTRAINTS_IN_QP)
       {
          for (int i = 0; i < oneDoFJoints.length; i++)
          {
             OneDoFJointBasics joint = oneDoFJoints[i];
             torqueConstrainedJoints.add(joint);
-         }
-      }
-      if (torqueConstraintInQPEnum == TorqueConstraintsInQP.SPECIFIC_JOINTS_CONSTRAINED) 
-      {
-         if (torqueConstrainedJointNames != null)
-         {
-            for (int i = 0; i < oneDoFJoints.length; i++)
-            {
-               OneDoFJointBasics joint = oneDoFJoints[i];
-               for (int j = 0; j < torqueConstrainedJointNames.size(); j++)
-               {
-                  String jointToConstrain = torqueConstrainedJointNames.get(j);
-                  if (joint.getName() == jointToConstrain)
-                  {
-                     torqueConstrainedJoints.add(joint);
-                  }
-               }
-            }
-         }
-         else 
-         {
-            throw new RuntimeException("TorqueConstraintsInQP was set to SPECIFIC_JOINTS_CONSTRAINED but no joints were specified.");
          }
       }
 
@@ -222,7 +216,6 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       externalWrenchHandler.reset();
       motionQPInputCalculator.initialize();
       inactiveJointIndices.reset();
-//      torqueConstrainedJointIndices.reset();
    }
 
    public void resetCustomBounds()

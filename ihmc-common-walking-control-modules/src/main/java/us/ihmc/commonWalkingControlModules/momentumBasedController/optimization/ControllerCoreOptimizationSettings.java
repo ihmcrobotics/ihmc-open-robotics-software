@@ -133,6 +133,23 @@ public interface ControllerCoreOptimizationSettings
    }
 
    /**
+    * Whether the joint torques should be constrained and, if so, where they are constrained. Joints
+    * are constrained to their effort limits.
+    * <ul>
+    * <li>{@code CONSTRAINTS_IN_QP} will constrain torque inside the QP,
+    * <li>{@code CONSTRAINTS_IN_CONTROLLER} will clamp torque in the controller (after the QP),
+    * <li>{@code NO_CONSTRAINTS} will not add constraints anywhere.
+    * </ul>
+    * Default value: {@code NO_CONSTRAINTS}.
+    */
+   public enum JointTorqueEnforcementMethod
+   {
+
+      NO_CONSTRAINTS, CONSTRAINTS_IN_QP, CONSTRAINTS_IN_CONTROLLER;
+
+   }
+
+   /**
     * Whether the desired joint torques coming out of the controller core should be limited.
     * <p>
     * When enabled, {@link OneDoFJointReadOnly#getEffortLimitLower()} and
@@ -143,59 +160,9 @@ public interface ControllerCoreOptimizationSettings
     * @return {@code true} if the desired joint torques should be limited to the joint's limits,
     *         {@code false} for not limiting the joint torques. Default value: {@code false}.
     */
-   default boolean areJointTorqueLimitsConsidered()
+   default JointTorqueEnforcementMethod areJointTorqueLimitsConsidered()
    {
-      return false;
-   }
-   
-   /**
-    * Whether the joint torques should be constrained inside the QP.
-    * <p>
-    * {@code SPECIFIC_JOINTS_CONSTRAINED} will constrain the joints
-    *         listed wherever {@link ControllerCoreOptimizationSettings#getJointTorqueConstrainedJoints()} 
-    *         is overwritten, 
-    *         {@code ALL_JOINTS_CONSTRAINED} will constrain all the
-    *         joints to their effort limits, 
-    *         {@code NO_JOINTS_CONSTRAINED} will
-    *         not add any constraints to the QP. Default value: {@code NO_JOINTS_CONSTRAINED}.
-    * </p>
-    */
-   public enum TorqueConstraintsInQP
-   {
-      
-      NO_JOINTS_CONSTRAINED,
-      SPECIFIC_JOINTS_CONSTRAINED,
-      ALL_JOINTS_CONSTRAINED;
-      
-   }
-   
-   /**
-    * Whether the joint torques should be constrained inside the QP.
-    * <p>
-    * This method can be overwritten in the optimization settings for any robot to change the return
-    * value. It is used in InverseDynamicsOptimizationControlModule().
-    * </p>
-    *
-    * @return {@code TorqueConstraintsInQP.SPECIFIC_JOINTS_CONSTRAINED} will constrain the joints
-    *         listed wherever {@link ControllerCoreOptimizationSettings#getJointTorqueConstrainedJoints()} 
-    *         is overwritten, 
-    *         {@code TorqueConstraintsInQP.ALL_JOINTS_CONSTRAINED} will constrain all the
-    *         joints to their effort limits, 
-    *         {@code TorqueConstraintsInQP.NO_JOINTS_CONSTRAINED} will
-    *         not add any constraints to the QP. Default value: {@code NO_JOINTS_CONSTRAINED}.
-    */
-   default TorqueConstraintsInQP areJointTorqueLimitsEnforced()
-   {
-      return TorqueConstraintsInQP.NO_JOINTS_CONSTRAINED;
-   }
-
-   /**
-    * List of which joints should be constrained if
-    * areJointTorqueLimitsEnforced() = TorqueConstraintsInQP.SPECIFIC_JOINTS_CONSTRAINED
-    */
-   default List<String> getJointTorqueConstrainedJoints()
-   {
-      return null;
+      return JointTorqueEnforcementMethod.NO_CONSTRAINTS;
    }
 
    /**
