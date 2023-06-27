@@ -354,15 +354,19 @@ public class DualBlackflyCamera
          initialize(spinnakerBlackfly.getWidth(spinImage), spinnakerBlackfly.getHeight(spinImage));
       }
 
-      // Get pointer to image data
+      // Get image data
       BytePointer spinImageData = new BytePointer(imageFrameSize); // close at the end
       spinnakerBlackfly.setPointerToSpinImageData(spinImage, spinImageData);
-
-      // Upload image data to GPU
-      BytedecoImage sourceBytedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
+      BytedecoImage sourceBytedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
       sourceBytedecoImage.changeAddress(spinImageData.address());
+
+      // Upload image to GPU
+      GpuMat deviceSourceImage = new GpuMat(imageWidth, imageHeight, opencv_core.CV_8UC1);
+      deviceSourceImage.upload(sourceBytedecoImage.getBytedecoOpenCVMat());
+
+      // Convert from BayerRG8 to BGR for further conversion
       GpuMat latestImageSetter = new GpuMat(imageWidth, imageHeight, opencv_core.CV_8UC3);
-      latestImageSetter.upload(sourceBytedecoImage.getBytedecoOpenCVMat());
+      opencv_cudaimgproc.cvtColor(deviceSourceImage, latestImageSetter, opencv_imgproc.COLOR_BayerBG2BGR); // for some reason you need to convert BayerBG to BGR
 
       // Add image to deque
       receivedImagesDeque.offerLast(latestImageSetter);
@@ -377,6 +381,8 @@ public class DualBlackflyCamera
       spinImageAcquisitionTime.set(Instant.now());
 
       // Close pointers
+      deviceSourceImage.release();
+      deviceSourceImage.close();
       spinImageData.close();
       spinnakerBlackfly.releaseImage(spinImage);
    }
