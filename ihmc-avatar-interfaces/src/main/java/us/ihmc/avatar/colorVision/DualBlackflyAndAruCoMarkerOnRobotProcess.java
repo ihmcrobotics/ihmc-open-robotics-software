@@ -4,8 +4,8 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
 import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
+import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.spinnaker.SpinnakerBlackflyManager;
 import us.ihmc.pubsub.DomainFactory;
@@ -28,7 +28,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
 
    public DualBlackflyAndAruCoMarkerOnRobotProcess(DRCRobotModel robotModel,
                                                    PredefinedSceneNodeLibrary predefinedSceneNodeLibrary,
-                                                   IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics)
+                                                   BlackflyLensProperties blackflyLensProperties)
    {
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "blackfly_node");
 
@@ -51,7 +51,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
                                                         robotModel.getSensorInformation().getObjectDetectionCameraTransform(),
                                                         ros2Node,
                                                         spinnakerBlackfly,
-                                                        ousterFisheyeColoringIntrinsics,
+                                                        blackflyLensProperties,
                                                         predefinedSceneNodeLibrary));
       }
       else
