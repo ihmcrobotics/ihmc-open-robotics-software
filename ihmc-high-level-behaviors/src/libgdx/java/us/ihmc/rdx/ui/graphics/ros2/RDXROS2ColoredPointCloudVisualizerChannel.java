@@ -124,6 +124,7 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
          // the unpacked result to a decompression input buffer.
          decompressionInputSwapReference.getForThreadOne().extract(imageMessage);
          decompressionInputSwapReference.swap();
+         // FIXME: This call prints "no afterExecute handlers" warnings whe the Ouster Fisheye point cloud's refresh rate is too fast
          channelDecompressionThreadExecutor.clearQueueAndExecute(decompressionAsynchronousThread);
 
          messageSizeReadout.update(imageMessage.getData().size());
