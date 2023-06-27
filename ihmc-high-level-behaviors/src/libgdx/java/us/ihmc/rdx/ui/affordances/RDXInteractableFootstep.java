@@ -116,6 +116,7 @@ public class RDXInteractableFootstep
       getFootstepModelInstance().transform.val[Matrix4.M03] = Float.NaN;
       plannedFootstepInternal.reset();
       plannedFootstepTrajectory.clear();
+      updateTrajectoryModel(plannedFootstepInternal, plannedFootstepTrajectory);
    }
 
    public PlannedFootstepReadOnly getPlannedFootstep()
@@ -167,6 +168,8 @@ public class RDXInteractableFootstep
       updateFootstepIndexText(footstepIndex);
 
       updatePose(plannedFootstep.getFootstepPose());
+
+      updateTrajectoryModel(plannedFootstepInternal, plannedFootstepTrajectory);
    }
 
    public void updatePlannedTrajectory(Pair<PlannedFootstep, EnumMap<Axis3D, List<PolynomialReadOnly>>> other)
@@ -197,6 +200,8 @@ public class RDXInteractableFootstep
             plannedFootstepTrajectory.put(axis, polynomialListCopy);
          }
       }
+
+      updateTrajectoryModel(plannedFootstepInternal, plannedFootstepTrajectory);
    }
 
    public void update()
@@ -220,7 +225,6 @@ public class RDXInteractableFootstep
          Pair<PlannedFootstep, EnumMap<Axis3D, List<PolynomialReadOnly>>> pair = plannedFootstepInput.getAndSet(null);
          updatePlannedTrajectoryInternal(pair.getLeft(), pair.getRight());
       }
-      updateTrajectoryModel(plannedFootstepInternal, plannedFootstepTrajectory);
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
