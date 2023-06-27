@@ -273,7 +273,7 @@ public final class KinematicsToolboxControllerTest
          LogTools.info("Entering: testRandomJointPositionWithInputcollection");
       Random random = new Random(2135);
       KinematicsToolboxTestRobot randomizedFullRobotModel = createFullRobotModelAtInitialConfiguration(robotDescription);
-      Map<Integer, OneDoFJointBasics> hashCodeToSolverJointMap = Stream.of(toolboxController.getDesiredOneDoFJoints())
+      Map<Integer, OneDoFJointBasics> hashCodeToSolverJointMap = Stream.of(toolboxController.getDesiredOneDoFJoint())
                                                                        .collect(Collectors.toMap(JointReadOnly::hashCode, Function.identity()));
 
       for (int i = 0; i < 10; i++)
