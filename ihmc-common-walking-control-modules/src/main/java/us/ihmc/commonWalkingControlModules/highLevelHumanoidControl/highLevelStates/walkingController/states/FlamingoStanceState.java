@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
@@ -36,7 +37,7 @@ public class FlamingoStanceState extends SingleSupportState
    private final FootstepTiming footstepTiming = new FootstepTiming();
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
-   public FlamingoStanceState(WalkingStateEnum stateEnum, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
+   public FlamingoStanceState(WalkingStateEnum stateEnum, WalkingControllerParameters walkingControllerParameters, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
                               HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule,
                               YoRegistry parentRegistry)
    {
@@ -56,8 +57,8 @@ public class FlamingoStanceState extends SingleSupportState
       loadFootTransferDuration = new YoDouble(namePrefix + "LoadFootTransferDuration", registry);
 
       loadFoot.set(false);
-      loadFootDuration.set(1.2);
-      loadFootTransferDuration.set(0.8);
+      loadFootDuration.set(walkingControllerParameters.getLoadFootDuration()); //1.2
+      loadFootTransferDuration.set(walkingControllerParameters.getLoadFootTransferDuration()); //0.8
    }
 
    @Override
