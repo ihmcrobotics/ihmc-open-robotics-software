@@ -9,6 +9,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -47,6 +48,7 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
    private final RDXDesiredRobot desiredRobot;
    private final OneDoFJointBasics[] syncedArmJoints;
    private final OneDoFJointBasics[] desiredArmJoints;
+   private final ArmIKSolver ikSolver;
    private final MovingReferenceFrame forearmFixedCoMFrame;
    private RDXSpatialVectorArrows sensorWristWrenchArrows;
    private final RDXSpatialVectorArrows estimatedHandWrenchArrows;
@@ -107,6 +109,8 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
       syncedArmJoints = FullRobotModelUtils.getArmJoints(syncedRobot.getFullRobotModel(), side, robotModel.getJointMap().getArmJointNames());
       desiredArmJoints = FullRobotModelUtils.getArmJoints(desiredRobot.getDesiredFullRobotModel(), side, robotModel.getJointMap().getArmJointNames());
       baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltipsAndContextMenus);
+
+      ikSolver = new ArmIKSolver(side, robotModel, syncedRobot.getFullRobotModel());
 
       RigidBodyBasics forearm = desiredRobot.getDesiredFullRobotModel().getArmJoint(side, ArmJointName.WRIST_YAW).getSuccessor();
       forearmFixedCoMFrame = forearm.getBodyFixedFrame();

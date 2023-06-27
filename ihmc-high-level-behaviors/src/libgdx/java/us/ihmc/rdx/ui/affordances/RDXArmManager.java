@@ -47,9 +47,6 @@ public class RDXArmManager
    private final SideDependentList<double[]> armHomes = new SideDependentList<>();
    private final SideDependentList<double[]> doorAvoidanceArms = new SideDependentList<>();
 
-   private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
-   private final SideDependentList<OneDoFJointBasics[]> desiredRobotArmJoints = new SideDependentList<>();
-
    private volatile boolean readyToSolve = true;
    private volatile boolean readyToCopySolution = false;
 
@@ -90,7 +87,6 @@ public class RDXArmManager
 
       for (RobotSide side : RobotSide.values)
       {
-         armIKSolvers.put(side, new ArmIKSolver(side, robotModel, syncedRobot.getFullRobotModel()));
          desiredRobotArmJoints.put(side, FullRobotModelUtils.getArmJoints(desiredRobot, side, robotModel.getJointMap().getArmJointNames()));
       }
    }
