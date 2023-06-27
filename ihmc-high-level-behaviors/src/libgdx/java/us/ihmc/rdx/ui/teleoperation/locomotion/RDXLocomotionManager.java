@@ -17,7 +17,6 @@ import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -86,7 +85,7 @@ public class RDXLocomotionManager
    private final ControllerStatusTracker controllerStatusTracker;
    private boolean lastAssumeFlatGroundState;
 
-   private RDXFootstepPlanning.StartStanceSide startStanceSide = RDXFootstepPlanning.StartStanceSide.AUTO;
+   private RDXFootstepPlanning.InitialStanceSide startStanceSide = RDXFootstepPlanning.InitialStanceSide.AUTO;
 
    public RDXLocomotionManager(DRCRobotModel robotModel,
                                CommunicationHelper communicationHelper,
@@ -246,7 +245,7 @@ public class RDXLocomotionManager
       bodyPathPlanGraphic.update();
       interactableFootstepPlan.update();
 
-      footstepPlanning.setStartStanceSide(startStanceSide);
+      footstepPlanning.setInitialStanceSide(startStanceSide);
 
       if (interactableFootstepPlan.getNumberOfFootsteps() > 0)
       {
@@ -345,19 +344,19 @@ public class RDXLocomotionManager
 
       ImGui.text("First stance side for planner:");
 
-      if (ImGui.radioButton(labels.get("Auto"), startStanceSide == RDXFootstepPlanning.StartStanceSide.AUTO))
+      if (ImGui.radioButton(labels.get("Auto"), startStanceSide == RDXFootstepPlanning.InitialStanceSide.AUTO))
       {
-         startStanceSide = RDXFootstepPlanning.StartStanceSide.AUTO;
+         startStanceSide = RDXFootstepPlanning.InitialStanceSide.AUTO;
       }
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Left"), startStanceSide == RDXFootstepPlanning.StartStanceSide.LEFT))
+      if (ImGui.radioButton(labels.get("Left"), startStanceSide == RDXFootstepPlanning.InitialStanceSide.LEFT))
       {
-         startStanceSide = RDXFootstepPlanning.StartStanceSide.LEFT;
+         startStanceSide = RDXFootstepPlanning.InitialStanceSide.LEFT;
       }
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Right"), startStanceSide == RDXFootstepPlanning.StartStanceSide.RIGHT))
+      if (ImGui.radioButton(labels.get("Right"), startStanceSide == RDXFootstepPlanning.InitialStanceSide.RIGHT))
       {
-         startStanceSide = RDXFootstepPlanning.StartStanceSide.RIGHT;
+         startStanceSide = RDXFootstepPlanning.InitialStanceSide.RIGHT;
       }
 
       if (ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton())

@@ -3,7 +3,6 @@ package us.ihmc.rdx.ui.footstepPlanner;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import perception_msgs.msg.dds.HeightMapMessage;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
@@ -11,7 +10,6 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -58,10 +56,10 @@ public class RDXFootstepPlanning
 
    private final RDXLocomotionParameters locomotionParameters;
 
-   public enum StartStanceSide
+   public enum InitialStanceSide
    {LEFT, RIGHT, AUTO}
 
-   private StartStanceSide startStanceSide;
+   private InitialStanceSide initialStanceSide;
    /**
     * We create this field so that we can terminate a running plan via
     * a custom termination condition so we don't have to wait
@@ -148,9 +146,9 @@ public class RDXFootstepPlanning
          soleFramePose.get(pose3D);
       });
 
-      if (startStanceSide == StartStanceSide.AUTO)
+      if (initialStanceSide == InitialStanceSide.AUTO)
          footstepPlannerRequest.setRequestedInitialStanceSide(getStanceSideToClosestToGoal(footstepPlannerRequest, goalPose));
-      else if (startStanceSide == StartStanceSide.LEFT)
+      else if (initialStanceSide == InitialStanceSide.LEFT)
          footstepPlannerRequest.setRequestedInitialStanceSide(RobotSide.LEFT);
       else
          footstepPlannerRequest.setRequestedInitialStanceSide(RobotSide.RIGHT);
@@ -264,8 +262,8 @@ public class RDXFootstepPlanning
       executor.destroy();
    }
 
-   public void setStartStanceSide(StartStanceSide startStanceSide)
+   public void setInitialStanceSide(InitialStanceSide initialStanceSide)
    {
-      this.startStanceSide = startStanceSide;
+      this.initialStanceSide = initialStanceSide;
    }
 }
