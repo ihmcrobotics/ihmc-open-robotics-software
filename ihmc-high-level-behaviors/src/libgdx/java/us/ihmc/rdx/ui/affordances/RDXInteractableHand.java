@@ -146,6 +146,8 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
       }
    }
 
+//   public void update
+
    public void updateEstimatedWrench(SpatialVectorReadOnly spatialVector)
    {
       estimatedHandWrenchArrows.update(spatialVector);
