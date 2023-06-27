@@ -46,8 +46,9 @@ import java.util.concurrent.atomic.AtomicReference;
  * 4. Perform factor graph optimization
  * 5. Publish optimized results for both map and localization estimates
  */
-public class LocalizationAndMappingProcess {
-    private final static long SCHEDULED_UPDATE_PERIOD_MS = 100;
+public class LocalizationAndMappingProcess
+{
+   private final static long SCHEDULED_UPDATE_PERIOD_MS = 100;
 
    private static final double maxAngleFromNormalToFilterAsShadow = 10.0;
 
@@ -55,73 +56,75 @@ public class LocalizationAndMappingProcess {
    private ROS2Helper ros2Helper;
    private PlanarRegionMap planarRegionMap;
    private IHMCROS2Publisher<PlanarRegionsListMessage> controllerRegionsPublisher;
-    private IHMCROS2Publisher<PlanarRegionsListMessage> slamOutputRegionsPublisher;
+   private IHMCROS2Publisher<PlanarRegionsListMessage> slamOutputRegionsPublisher;
 
-    private final AtomicReference<HighLevelStateMessage> highLevelState = new AtomicReference<>();
-    private final AtomicReference<WalkingControllerFailureStatusMessage> walkingFailureStatus = new AtomicReference<>();
-    private final AtomicReference<FramePlanarRegionsListMessage> latestIncomingRegions = new AtomicReference<>(null);
-    private final AtomicReference<PlanarRegionsList> latestPlanarRegionsForPublishing = new AtomicReference<>(null);
-    private final PerceptionConfigurationParameters perceptionConfigurationParameters = new PerceptionConfigurationParameters();
-    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters("ForGPURegions");
+   private final AtomicReference<HighLevelStateMessage> highLevelState = new AtomicReference<>();
+   private final AtomicReference<WalkingControllerFailureStatusMessage> walkingFailureStatus = new AtomicReference<>();
+   private final AtomicReference<FramePlanarRegionsListMessage> latestIncomingRegions = new AtomicReference<>(null);
+   private final AtomicReference<PlanarRegionsList> latestPlanarRegionsForPublishing = new AtomicReference<>(null);
+   private final PerceptionConfigurationParameters perceptionConfigurationParameters = new PerceptionConfigurationParameters();
+   private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters("ForGPURegions");
 
-    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
+   private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
 
-    private final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
-            getClass(),
-            ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
+   private final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
+                                                                                                        getClass(),
+                                                                                                        ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
-    /**
-     * Live Mode refers to being active and accepting new planar regions for updating the map. It can be overridden by the PerceptionConfigurationParameters
-     * parameter for enabling SLAM.
-     */
-    private boolean enableLiveMode = false;
-    private boolean smoothingEnabled = false;
+   /**
+    * Live Mode refers to being active and accepting new planar regions for updating the map. It can be overridden by the PerceptionConfigurationParameters
+    * parameter for enabling SLAM.
+    */
+   private boolean enableLiveMode = false;
+   private boolean smoothingEnabled = false;
 
-    private HumanoidReferenceFrames referenceFrames;
-    private Runnable referenceFramesUpdater;
-    private ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic;
-    private ROS2Topic<FramePlanarRegionsListMessage> structuralRegionsTopic;
-    private ScheduledFuture<?> updateMapFuture;
+   private HumanoidReferenceFrames referenceFrames;
+   private Runnable referenceFramesUpdater;
+   private ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic;
+   private ROS2Topic<FramePlanarRegionsListMessage> structuralRegionsTopic;
+   private ScheduledFuture<?> updateMapFuture;
 
-    public LocalizationAndMappingProcess(String simpleRobotName,
-                                         ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic,
-                                         ROS2Topic<FramePlanarRegionsListMessage> structuralRegionsTopic,
-                                         ROS2Node ros2Node,
-                                         HumanoidReferenceFrames referenceFrames,
-                                         Runnable referenceFramesUpdater,
-                                         boolean smoothing) {
-        this.referenceFramesUpdater = referenceFramesUpdater;
-        this.terrainRegionsTopic = terrainRegionsTopic;
-        this.structuralRegionsTopic = structuralRegionsTopic;
-        this.referenceFrames = referenceFrames;
-        this.smoothingEnabled = smoothing;
+   public LocalizationAndMappingProcess(String simpleRobotName,
+                                        ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic,
+                                        ROS2Topic<FramePlanarRegionsListMessage> structuralRegionsTopic,
+                                        ROS2Node ros2Node,
+                                        HumanoidReferenceFrames referenceFrames,
+                                        Runnable referenceFramesUpdater,
+                                        boolean smoothing)
+   {
+      this.referenceFramesUpdater = referenceFramesUpdater;
+      this.terrainRegionsTopic = terrainRegionsTopic;
+      this.structuralRegionsTopic = structuralRegionsTopic;
+      this.referenceFrames = referenceFrames;
+      this.smoothingEnabled = smoothing;
 
-        this.planarRegionMap = new PlanarRegionMap(smoothing, "Fast");
-        planarRegionMap.setInitialSupportSquareEnabled(perceptionConfigurationParameters.getSupportSquareEnabled());
+      this.planarRegionMap = new PlanarRegionMap(smoothing, "Fast");
+      planarRegionMap.setInitialSupportSquareEnabled(perceptionConfigurationParameters.getSupportSquareEnabled());
 
-        this.ros2Node = ros2Node;
-        this.ros2Helper = new ROS2Helper(ros2Node);
+      this.ros2Node = ros2Node;
+      this.ros2Helper = new ROS2Helper(ros2Node);
 
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_PLANAR_REGION_MAPPING_PARAMETERS, planarRegionMap.getParameters());
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, perceptionConfigurationParameters);
 
-        controllerRegionsPublisher = ROS2Tools.createPublisher(ros2Node, StepGeneratorAPIDefinition.getTopic(PlanarRegionsListMessage.class, simpleRobotName));
-        slamOutputRegionsPublisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS);
-        ros2Helper.subscribeViaCallback(terrainRegionsTopic, this::onPlanarRegionsReceived);
+      controllerRegionsPublisher = ROS2Tools.createPublisher(ros2Node, StepGeneratorAPIDefinition.getTopic(PlanarRegionsListMessage.class, simpleRobotName));
+      slamOutputRegionsPublisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS);
+      ros2Helper.subscribeViaCallback(terrainRegionsTopic, this::onPlanarRegionsReceived);
 
-        ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(WalkingControllerFailureStatusMessage.class, simpleRobotName), message ->
-        {
-            LogTools.warn("Resetting Map (Walking Failure Detected)");
-            setEnableLiveMode(false);
-        });
+      ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(WalkingControllerFailureStatusMessage.class, simpleRobotName), message ->
+      {
+         LogTools.warn("Resetting Map (Walking Failure Detected)");
+         setEnableLiveMode(false);
+      });
 
-        ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(HighLevelStateMessage.class, simpleRobotName), highLevelState::set);
+      ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(HighLevelStateMessage.class, simpleRobotName), highLevelState::set);
 
-        updateMapFuture = executorService.scheduleAtFixedRate(this::scheduledUpdate, 0, SCHEDULED_UPDATE_PERIOD_MS, TimeUnit.MILLISECONDS);
-    }
+      updateMapFuture = executorService.scheduleAtFixedRate(this::scheduledUpdate, 0, SCHEDULED_UPDATE_PERIOD_MS, TimeUnit.MILLISECONDS);
+   }
 
-   private void scheduledUpdate() {
+   private void scheduledUpdate()
+   {
 
       planarRegionMap.setInitialSupportSquareEnabled(perceptionConfigurationParameters.getSupportSquareEnabled());
 
@@ -133,17 +136,20 @@ public class LocalizationAndMappingProcess {
             resetMap();
    }
 
-   public void onPlanarRegionsReceived(FramePlanarRegionsListMessage message) {
+   public void onPlanarRegionsReceived(FramePlanarRegionsListMessage message)
+   {
       if (latestIncomingRegions.get() == null)
          latestIncomingRegions.set(message);
 
       executorService.submit(this::updateMap);
    }
 
-   public synchronized void updateMap() {
+   public synchronized void updateMap()
+   {
       referenceFramesUpdater.run();
 
-      if (latestIncomingRegions.get() == null) {
+      if (latestIncomingRegions.get() == null)
+      {
          LogTools.debug("No regions received");
          return;
       }
@@ -151,31 +157,32 @@ public class LocalizationAndMappingProcess {
       FramePlanarRegionsList framePlanarRegionsList = PlanarRegionMessageConverter.convertToFramePlanarRegionsList(latestIncomingRegions.getAndSet(null));
       PerceptionFilterTools.filterShadowRegions(framePlanarRegionsList, maxAngleFromNormalToFilterAsShadow);
 
-      if (enableLiveMode) {
+      if (enableLiveMode)
+      {
          updateMapWithNewRegions(framePlanarRegionsList);
       }
 
       PlanarRegionsList regionsToPublish = latestPlanarRegionsForPublishing.getAndSet(null);
-      if (regionsToPublish != null) {
+      if (regionsToPublish != null)
+      {
          PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regionsToPublish);
          controllerRegionsPublisher.publish(planarRegionsListMessage);
          slamOutputRegionsPublisher.publish(planarRegionsListMessage);
       }
 
-      if (perceptionConfigurationParameters.getSLAMReset()) {
+      if (perceptionConfigurationParameters.getSLAMReset())
+      {
          resetMap();
          perceptionConfigurationParameters.setSLAMReset(false);
       }
    }
 
-   public void updateMapWithNewRegions(FramePlanarRegionsList regions) {
+   public void updateMapWithNewRegions(FramePlanarRegionsList regions)
+   {
       referenceFramesUpdater.run();
 
       RigidBodyTransform midFootTransform = referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame();
-      planarRegionMap.registerRegions(
-            regions.getPlanarRegionsList(),
-            regions.getSensorToWorldFrameTransform(),
-            midFootTransform);
+      planarRegionMap.registerRegions(regions.getPlanarRegionsList(), regions.getSensorToWorldFrameTransform(), midFootTransform);
 
       PlanarRegionsList resultMap = planarRegionMap.getMapRegions().copy();
 
@@ -198,24 +205,27 @@ public class LocalizationAndMappingProcess {
       latestPlanarRegionsForPublishing.set(resultMap);
    }
 
-    public void resetMap() {
-        latestIncomingRegions.set(null);
-        latestPlanarRegionsForPublishing.set(null);
+   public void resetMap()
+   {
+      latestIncomingRegions.set(null);
+      latestPlanarRegionsForPublishing.set(null);
 
-        planarRegionMap.destroy();
-        planarRegionMap = new PlanarRegionMap(this.smoothingEnabled, "Fast");
-        planarRegionMap.setInitialSupportSquareEnabled(perceptionConfigurationParameters.getSupportSquareEnabled());
-        enableLiveMode = true;
-    }
+      planarRegionMap.destroy();
+      planarRegionMap = new PlanarRegionMap(this.smoothingEnabled, "Fast");
+      planarRegionMap.setInitialSupportSquareEnabled(perceptionConfigurationParameters.getSupportSquareEnabled());
+      enableLiveMode = true;
+   }
 
-    public void destroy() {
-        if (updateMapFuture != null)
-            updateMapFuture.cancel(true);
-        executorService.shutdownNow();
-        planarRegionMap.destroy();
-    }
+   public void destroy()
+   {
+      if (updateMapFuture != null)
+         updateMapFuture.cancel(true);
+      executorService.shutdownNow();
+      planarRegionMap.destroy();
+   }
 
-    public void setEnableLiveMode(boolean enableLiveMode) {
-        this.enableLiveMode = enableLiveMode;
-    }
+   public void setEnableLiveMode(boolean enableLiveMode)
+   {
+      this.enableLiveMode = enableLiveMode;
+   }
 }
