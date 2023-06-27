@@ -32,7 +32,7 @@ public class ValkyrieUpperBodyStateEstimator
       this.rootBody = rootJoint.getPredecessor();
       this.controlledOneDoFJoints = controlledOneDoFJoints;
 
-      registry.addChild(registry);
+//      registry.addChild(this.registry);
    }
 
    public void init(ValkyrieRosControlSensorReader sensorReader)

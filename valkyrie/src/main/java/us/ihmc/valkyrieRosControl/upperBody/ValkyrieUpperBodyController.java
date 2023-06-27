@@ -49,6 +49,8 @@ import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.VALKYRIE_I
 
 public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
 {
+   private static final boolean ARM_MASS_SIMULATORS = true;
+
    private static final String[] torqueControlledJoints;
    private static final String[] positionControlledJoints = {"lowerNeckPitch", "neckYaw", "upperNeckPitch"};
    private static final String[] allValkyrieJoints;
@@ -69,6 +71,9 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
          torqueControlledJointList.add(robotSide.getLowerCaseName() + "ShoulderRoll");
          torqueControlledJointList.add(robotSide.getLowerCaseName() + "ShoulderYaw");
          torqueControlledJointList.add(robotSide.getLowerCaseName() + "ElbowPitch");
+
+         if (ARM_MASS_SIMULATORS)
+            continue;
 
          // Forearm joints
          torqueControlledJointList.add(robotSide.getLowerCaseName() + "ForearmYaw");
@@ -169,8 +174,8 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
       }
 
       HashMap<String, IMUHandle> imuHandles = new HashMap<>();
-      for (String imu : ValkyrieRosControlController.readIMUs)
-         imuHandles.put(imu, createIMUHandle(imu));
+      String leftTrunkIMUSensor = ValkyrieSensorInformation.leftTrunkIMUSensor;
+      imuHandles.put(leftTrunkIMUSensor, createIMUHandle(leftTrunkIMUSensor));
 
       // The upper body has no force-torque sensors
       HashMap<String, ForceTorqueSensorHandle> forceTorqueSensorHandles = new HashMap<>();
@@ -213,6 +218,7 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
       /* Perform state estimation */
       stateEstimator.update();
 
+      /* Update YoVariable server */
       yoVariableServer.update(monotonicTimeProvider.getTimestamp(), registry);
       robotConfigurationDataPublisher.write();
    }

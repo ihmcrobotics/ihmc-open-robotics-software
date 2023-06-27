@@ -127,10 +127,10 @@ public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
    private static final String multisense_height_map = multisense_namespace + "/highly_filtered_cloud";
    private static final String multisenseHandoffFrame = "upperNeckPitchLink";
 
-   private static final String rightTrunkIMUSensor = "rightTorsoImu";
-   private static final String leftTrunkIMUSensor = "leftTorsoImu";
-   private static final String rearPelvisIMUSensor = "pelvisRearImu";
-   private static final String middlePelvisIMUSensor = "pelvisMiddleImu";
+   public static final String rightTrunkIMUSensor = "rightTorsoImu";
+   public static final String leftTrunkIMUSensor = "leftTorsoImu";
+   public static final String rearPelvisIMUSensor = "pelvisRearImu";
+   public static final String middlePelvisIMUSensor = "pelvisMiddleImu";
 
    private static final RigidBodyTransform transformChestToL515DepthCamera = new RigidBodyTransform();
    static
