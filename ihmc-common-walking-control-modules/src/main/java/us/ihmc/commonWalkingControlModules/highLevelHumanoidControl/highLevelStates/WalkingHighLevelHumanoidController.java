@@ -367,6 +367,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       {
          WalkingStateEnum stateEnum = WalkingStateEnum.getFlamingoSingleSupportState(supportSide);
          FlamingoStanceState singleSupportState = new FlamingoStanceState(stateEnum,
+                                                                          walkingControllerParameters,
                                                                           walkingMessageHandler,
                                                                           controllerToolbox,
                                                                           managerFactory,
