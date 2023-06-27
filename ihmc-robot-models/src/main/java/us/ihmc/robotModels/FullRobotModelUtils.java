@@ -11,6 +11,7 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -38,6 +39,16 @@ public class FullRobotModelUtils
             }
          }
       }
+   }
+
+   public static OneDoFJointBasics[] getArmJoints(FullHumanoidRobotModel model, RobotSide side, ArmJointName[] armJointNames)
+   {
+      OneDoFJointBasics[] oneDoFJoints = new OneDoFJointBasics[armJointNames.length];
+      for (int i = 0; i < armJointNames.length; i++)
+      {
+         oneDoFJoints[i] = model.getArmJoint(side, armJointNames[i]);
+      }
+      return oneDoFJoints;
    }
 
    public static void checkJointNameHash(int expectedJointNameHash, int actualJointNameHash)

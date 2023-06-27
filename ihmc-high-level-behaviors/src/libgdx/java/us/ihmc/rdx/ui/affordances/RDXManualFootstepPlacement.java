@@ -218,11 +218,11 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       {
          if (footstepBeingPlacedIsReachable)
          {
-            tooltip.render("Right click to exit", 1);
+            tooltip.render("Right click to exit.");
          }
          else
          {
-            tooltip.render("Footstep out of reach.\nRight click to exit", 2);
+            tooltip.render("Footstep out of reach.\nRight click to exit.");
          }
       }
    }

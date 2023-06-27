@@ -15,7 +15,7 @@ public class SimpleCoactiveBehaviorDataPacketPubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "bab319ba7160595bca2cedc878d1a558d3e12a651784d9a972e7ebae35780dfe";
+   		return "b36f5451c9430da460e9b2e8da44bc6c6c44fdb707af3d1c12754fa4914b4b52";
    }
    
    @Override

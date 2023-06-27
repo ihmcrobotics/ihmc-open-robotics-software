@@ -15,7 +15,7 @@ public class VehiclePosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c450e526a51856309fbda72f3f684bb9223c4c73fdd9efef250ea4f98019aa19";
+   		return "799c2a3e8c459a96f2e1e8e26750822a95b01887e69e8ea12d8f351ca0b5854e";
    }
    
    @Override

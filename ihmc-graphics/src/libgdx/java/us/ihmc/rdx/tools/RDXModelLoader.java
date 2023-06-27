@@ -82,7 +82,8 @@ public class RDXModelLoader
    {
       LogTools.debug("Loading {}", modelFileName);
 
-      boolean shouldPrintWarnings = !printedWarnings.contains(modelFileName);
+      String requestedModelFileName = modelFileName;
+      boolean shouldPrintWarnings = !printedWarnings.contains(requestedModelFileName);
      
       ModelData modelData = null;
       try
@@ -127,7 +128,7 @@ public class RDXModelLoader
          e.printStackTrace();
       }
 
-      printedWarnings.add(modelFileName);
+      printedWarnings.add(requestedModelFileName);
      
       return modelData;
    }

@@ -98,7 +98,7 @@ public class RDXSwingPlanningModule
                                                 startFootPoses,
                                                 swingPlannerType);
 
-      for (int i = 0; i < footstepPlan.size(); i++)
+      for (int i = 0; i < footstepPlan.size() && i < swingPlanningModule.getSwingTrajectories().size(); i++)
       {
          footstepPlan.get(i).updatePlannedTrajectory(Pair.of(tempPlan.getFootstep(i), swingPlanningModule.getSwingTrajectories().get(i)));
       }

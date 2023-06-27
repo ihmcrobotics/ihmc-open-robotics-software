@@ -48,11 +48,11 @@ import java.util.function.Consumer;
  *     update()
  *     calculateVRPick(RDXVRContext)
  *     processVRInput(RDXVRContext)
+ *     renderImGuiWidgets()
  *     calculate3DViewPick(ImGui3DViewInput)
  *     process3DViewInput(ImGui3DViewInput)
- *     renderImGuiWidgets()
- *     renderTooltipsAndContextMenus()
  *     getRenderables()
+ *     renderTooltipsAndContextMenus()
  *
  * destroy()
  * </pre>

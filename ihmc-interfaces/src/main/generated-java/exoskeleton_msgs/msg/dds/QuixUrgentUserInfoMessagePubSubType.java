@@ -15,7 +15,7 @@ public class QuixUrgentUserInfoMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "15327bd7a18175028dad8663be64073cbd812701a50652f6de04e3c05f4cddab";
+   		return "f78d3af8e2645d6054c0d0d6a9f481342d339c03c48c897d4a398f0617e7b080";
    }
    
    @Override

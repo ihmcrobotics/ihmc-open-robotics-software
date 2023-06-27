@@ -40,9 +40,27 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
             * If this is true and the solver receives a MultiContactBalanceStatus, it will solve for the multi-contact support region
             */
    public boolean enable_multi_contact_support_region_solver_;
+   /**
+            * Whether restrictive joint limits are enabled, in order to have the IK avoid a solution at the joint limit.
+            */
+   public boolean enable_joint_limit_reduction_ = true;
+   /**
+            * By default, the hip joint limits are restricted by 0.05 of the RoM.
+            * When this and the subsequent list are set, the default limit restrictions are replaced with these values.
+            * This list are the new joint limit reduction factors to be used, such that a value 0.05 means the restricted RoM will be 0.95 of the nominal (0.025 from either end).
+            */
+   public us.ihmc.idl.IDLSequence.Float  joint_limit_reduction_factors_;
+   /**
+            * The list of joints that the field joint_limit_reduction_values correspond to, by hash-code. The hash-code is computed from OneDoFJoint#hashcode().
+            */
+   public us.ihmc.idl.IDLSequence.Integer  joint_limit_reduction_hash_codes_;
 
    public HumanoidKinematicsToolboxConfigurationMessage()
    {
+      joint_limit_reduction_factors_ = new us.ihmc.idl.IDLSequence.Float (20, "type_5");
+
+      joint_limit_reduction_hash_codes_ = new us.ihmc.idl.IDLSequence.Integer (20, "type_2");
+
    }
 
    public HumanoidKinematicsToolboxConfigurationMessage(HumanoidKinematicsToolboxConfigurationMessage other)
@@ -63,6 +81,10 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
       enable_multi_contact_support_region_solver_ = other.enable_multi_contact_support_region_solver_;
 
+      enable_joint_limit_reduction_ = other.enable_joint_limit_reduction_;
+
+      joint_limit_reduction_factors_.set(other.joint_limit_reduction_factors_);
+      joint_limit_reduction_hash_codes_.set(other.joint_limit_reduction_hash_codes_);
    }
 
    /**
@@ -154,6 +176,41 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
       return enable_multi_contact_support_region_solver_;
    }
 
+   /**
+            * Whether restrictive joint limits are enabled, in order to have the IK avoid a solution at the joint limit.
+            */
+   public void setEnableJointLimitReduction(boolean enable_joint_limit_reduction)
+   {
+      enable_joint_limit_reduction_ = enable_joint_limit_reduction;
+   }
+   /**
+            * Whether restrictive joint limits are enabled, in order to have the IK avoid a solution at the joint limit.
+            */
+   public boolean getEnableJointLimitReduction()
+   {
+      return enable_joint_limit_reduction_;
+   }
+
+
+   /**
+            * By default, the hip joint limits are restricted by 0.05 of the RoM.
+            * When this and the subsequent list are set, the default limit restrictions are replaced with these values.
+            * This list are the new joint limit reduction factors to be used, such that a value 0.05 means the restricted RoM will be 0.95 of the nominal (0.025 from either end).
+            */
+   public us.ihmc.idl.IDLSequence.Float  getJointLimitReductionFactors()
+   {
+      return joint_limit_reduction_factors_;
+   }
+
+
+   /**
+            * The list of joints that the field joint_limit_reduction_values correspond to, by hash-code. The hash-code is computed from OneDoFJoint#hashcode().
+            */
+   public us.ihmc.idl.IDLSequence.Integer  getJointLimitReductionHashCodes()
+   {
+      return joint_limit_reduction_hash_codes_;
+   }
+
 
    public static Supplier<HumanoidKinematicsToolboxConfigurationMessagePubSubType> getPubSubType()
    {
@@ -182,6 +239,12 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_multi_contact_support_region_solver_, other.enable_multi_contact_support_region_solver_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_joint_limit_reduction_, other.enable_joint_limit_reduction_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.joint_limit_reduction_factors_, other.joint_limit_reduction_factors_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.joint_limit_reduction_hash_codes_, other.joint_limit_reduction_hash_codes_, epsilon)) return false;
+
 
       return true;
    }
@@ -205,6 +268,10 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
       if(this.enable_multi_contact_support_region_solver_ != otherMyClass.enable_multi_contact_support_region_solver_) return false;
 
+      if(this.enable_joint_limit_reduction_ != otherMyClass.enable_joint_limit_reduction_) return false;
+
+      if (!this.joint_limit_reduction_factors_.equals(otherMyClass.joint_limit_reduction_factors_)) return false;
+      if (!this.joint_limit_reduction_hash_codes_.equals(otherMyClass.joint_limit_reduction_hash_codes_)) return false;
 
       return true;
    }
@@ -224,7 +291,13 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
       builder.append("hold_support_rigid_bodies=");
       builder.append(this.hold_support_rigid_bodies_);      builder.append(", ");
       builder.append("enable_multi_contact_support_region_solver=");
-      builder.append(this.enable_multi_contact_support_region_solver_);
+      builder.append(this.enable_multi_contact_support_region_solver_);      builder.append(", ");
+      builder.append("enable_joint_limit_reduction=");
+      builder.append(this.enable_joint_limit_reduction_);      builder.append(", ");
+      builder.append("joint_limit_reduction_factors=");
+      builder.append(this.joint_limit_reduction_factors_);      builder.append(", ");
+      builder.append("joint_limit_reduction_hash_codes=");
+      builder.append(this.joint_limit_reduction_hash_codes_);
       builder.append("}");
       return builder.toString();
    }

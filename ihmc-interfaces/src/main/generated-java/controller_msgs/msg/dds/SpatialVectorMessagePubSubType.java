@@ -15,7 +15,7 @@ public class SpatialVectorMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0f14b9df41c6bc9ca2758fed1aa298cc87e7308ea2cae38380899ee4735df0d7";
+   		return "277a8a49ddae09c623f85c8a414a62e0abb042d3b1910190207f06a570e685b8";
    }
    
    @Override

@@ -29,6 +29,9 @@ public class FrameBasedGizmoModification
 {
    private static final boolean SET_ABSOLUTE = false;
    public static final boolean PREPEND = true;
+   private static final double TRANSLATION_EPSILON = 1e-8;
+   /** Any less than this and the gizmo will report motion even when the mouse is not moving. */
+   private static final double ROTATION_EPSILON = 1e-4;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final boolean yawOnly;
@@ -92,7 +95,7 @@ public class FrameBasedGizmoModification
 
    public void translateInWorld(Vector3DReadOnly translation)
    {
-      if (translation.normSquared() > 0.0)
+      if (translation.normSquared() > TRANSLATION_EPSILON)
       {
          adjustmentPose3D.changeFrame(ReferenceFrame.getWorldFrame());
          adjustmentPose3D.getPosition().add(translation);
@@ -102,7 +105,7 @@ public class FrameBasedGizmoModification
 
    public void rotateInWorld(AxisAngleReadOnly rotationInWorld)
    {
-      if (!rotationInWorld.isZeroOrientation(0.0))
+      if (Math.abs(rotationInWorld.angle()) > ROTATION_EPSILON)
       {
          adjustmentPose3D.changeFrame(ReferenceFrame.getWorldFrame());
          rotationInWorld.transform(adjustmentPose3D.getOrientation());
@@ -112,7 +115,7 @@ public class FrameBasedGizmoModification
 
    public void yawInWorld(double yaw)
    {
-      if (Math.abs(yaw) > 0.0)
+      if (Math.abs(yaw) > ROTATION_EPSILON)
       {
          Orientation3DBasics orientationToAdjust = beforeForRotationAdjustment();
          orientationToAdjust.appendYawRotation(yaw);

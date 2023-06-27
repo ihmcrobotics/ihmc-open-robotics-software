@@ -15,7 +15,7 @@ public class KinematicsToolboxPrivilegedConfigurationMessagePubSubType implement
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "52b302087779096145600b5c7971ddcff25210ef2137daae8a6d2f072e3176cc";
+   		return "f86db132c11356fa13d70bb96be0da75e65b1e73a629b5b687dfcf915d0cc0e9";
    }
    
    @Override

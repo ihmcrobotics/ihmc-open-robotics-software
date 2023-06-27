@@ -27,7 +27,7 @@ public class RDXHandWrenchAction extends RDXBehaviorAction
    }
 
    @Override
-   public String getNameForDisplay()
+   public String getActionTypeTitle()
    {
       return actionData.getSide().getPascalCaseName() + " Hand Wrench";
    }

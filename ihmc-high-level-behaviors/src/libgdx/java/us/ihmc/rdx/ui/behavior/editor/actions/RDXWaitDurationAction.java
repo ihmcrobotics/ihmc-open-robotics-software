@@ -29,7 +29,7 @@ public class RDXWaitDurationAction extends RDXBehaviorAction
    }
 
    @Override
-   public String getNameForDisplay()
+   public String getActionTypeTitle()
    {
       return String.format("Wait %.1f s", actionData.getWaitDuration());
    }

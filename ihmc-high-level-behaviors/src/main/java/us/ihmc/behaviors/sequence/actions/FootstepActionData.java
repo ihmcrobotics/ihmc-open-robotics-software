@@ -5,47 +5,88 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.JSONTools;
+
+import java.util.function.Consumer;
 
 public class FootstepActionData implements BehaviorActionData
 {
    private String description = "Footstep";
    private RobotSide side = RobotSide.LEFT;
-   private String parentFrameName = "";
-   private final RigidBodyTransform transformToParent = new RigidBodyTransform();
+   private ReferenceFrameLibrary referenceFrameLibrary;
+   private final ModifiableReferenceFrame modifiableReferenceFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
+
+   @Override
+   public void setReferenceFrameLibrary(ReferenceFrameLibrary referenceFrameLibrary)
+   {
+      this.referenceFrameLibrary = referenceFrameLibrary;
+   }
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
       jsonNode.put("description", description);
       jsonNode.put("side", side.getLowerCaseName());
-      jsonNode.put("parentFrame", parentFrameName);
-      JSONTools.toJSON(jsonNode, transformToParent);
+      jsonNode.put("parentFrame", modifiableReferenceFrame.getReferenceFrame().getParent().getName());
+      JSONTools.toJSON(jsonNode, modifiableReferenceFrame.getTransformToParent());
    }
 
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
       side = RobotSide.getSideFromString(jsonNode.get("side").asText());
-      parentFrameName = jsonNode.get("parentFrame").asText();
-      JSONTools.toEuclid(jsonNode, transformToParent);
+      modifiableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()));
+      modifiableReferenceFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
    }
 
    public void toMessage(FootstepActionMessage message)
    {
       message.setRobotSide(side.toByte());
       message.getParentFrame().resetQuick();
-      message.getParentFrame().add(parentFrameName);
-      MessageTools.toMessage(transformToParent, message.getTransformToParent());
+      message.getParentFrame().add(getParentReferenceFrame().getName());
+      MessageTools.toMessage(modifiableReferenceFrame.getTransformToParent(), message.getTransformToParent());
    }
 
    public void fromMessage(FootstepActionMessage message)
    {
       side = RobotSide.fromByte(message.getRobotSide());
-      parentFrameName = message.getParentFrame().getString(0);
-      MessageTools.toEuclid(message.getTransformToParent(), transformToParent);
+      modifiableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(message.getParentFrame().getString(0)));
+      modifiableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
+   }
+
+   public ReferenceFrame getParentReferenceFrame()
+   {
+      return modifiableReferenceFrame.getReferenceFrame().getParent();
+   }
+
+   public ReferenceFrame getReferenceFrame()
+   {
+      return modifiableReferenceFrame.getReferenceFrame();
+   }
+
+   public void changeParentFrameWithoutMoving(ReferenceFrame parentFrame)
+   {
+      modifiableReferenceFrame.changeParentFrameWithoutMoving(parentFrame);
+   }
+
+   public void changeParentFrame(ReferenceFrame parentFrame)
+   {
+      modifiableReferenceFrame.changeParentFrame(parentFrame);
+   }
+
+   public void setTransformToParent(Consumer<RigidBodyTransform> transformToParentConsumer)
+   {
+      modifiableReferenceFrame.update(transformToParentConsumer);
+   }
+
+   public RigidBodyTransform getTransformToParent()
+   {
+      return modifiableReferenceFrame.getTransformToParent();
    }
 
    public RobotSide getSide()
@@ -56,21 +97,6 @@ public class FootstepActionData implements BehaviorActionData
    public void setSide(RobotSide side)
    {
       this.side = side;
-   }
-
-   public String getParentFrameName()
-   {
-      return parentFrameName;
-   }
-
-   public void setParentFrameName(String parentFrameName)
-   {
-      this.parentFrameName = parentFrameName;
-   }
-
-   public RigidBodyTransform getTransformToParent()
-   {
-      return transformToParent;
    }
 
    @Override

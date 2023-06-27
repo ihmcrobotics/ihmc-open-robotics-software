@@ -15,7 +15,7 @@ public class RigidBodyExplorationConfigurationMessagePubSubType implements us.ih
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "bcbb2dc316bec9f2dfa9e88b689995076b0af61390a28aec1829d9965421993d";
+   		return "c63c351a38c422da1abfa2326ef954f5e684941b2d11b87c8e992c07773ffb30";
    }
    
    @Override

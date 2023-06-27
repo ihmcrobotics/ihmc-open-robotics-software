@@ -15,7 +15,7 @@ public class Polygon2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "8d56d44326ae52f8c803881dbf80a87d69e7906de88529d810ca15f9fb31f0a4";
+   		return "eee972306762f99e5b72d9b34ad930f313b3ece0882aa0a9651ea83d5f37faa4";
    }
    
    @Override

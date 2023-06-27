@@ -15,7 +15,7 @@ public class WallPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType<pe
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "49c0ad13dc110bc59f644d1a636a5864996a1fd4ee90991d100bbf657d488d2f";
+   		return "47ac5b25b1f47e235ce7c9817775bca66b4fbacff2555e308e710980225d67e4";
    }
    
    @Override

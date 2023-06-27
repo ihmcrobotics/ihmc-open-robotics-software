@@ -9,7 +9,7 @@ import org.bytedeco.javacpp.annotation.*;
 public class SlamWrapper extends us.ihmc.perception.slamWrapper.presets.SlamWrapperInfoMapper {
     static { Loader.load(); }
 
-// Parsed from include/FactorGraphExternal.h
+// Parsed from FactorGraphExternal.h
 
 // #pragma once
 

@@ -202,6 +202,26 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator implements FrameOri
       finalAngularVelocity.setToZero();
    }
 
+   public FixedFrameQuaternionBasics getInitialOrientation()
+   {
+      return initialOrientation;
+   }
+
+   public FixedFrameVector3DBasics getInitialAngularVelocity()
+   {
+      return initialAngularVelocity;
+   }
+
+   public FixedFrameQuaternionBasics getFinalOrientation()
+   {
+      return finalOrientation;
+   }
+
+   public FixedFrameVector3DBasics getFinalAngularVelocity()
+   {
+      return finalAngularVelocity;
+   }
+
    /**
     * Sets an integer the desired number of revolutions to be achieved between the endpoints of this
     * trajectory.

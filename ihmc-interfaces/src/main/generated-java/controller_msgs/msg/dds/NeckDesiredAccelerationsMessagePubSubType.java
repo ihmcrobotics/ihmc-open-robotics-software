@@ -15,7 +15,7 @@ public class NeckDesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0f97ea3fc538a8074361664d5133dc9593b30f65db103f81cf5aa505720325aa";
+   		return "f50efecc776a0e173d2da55aad7f3410170dafb37700db71c3b4805ea6cb039f";
    }
    
    @Override

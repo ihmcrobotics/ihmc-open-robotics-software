@@ -15,7 +15,7 @@ public class FrameInformationPubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4f9b298a18980604c1208b4f6bf11698548dad2fdab6a9aff61a4ccb0aa91857";
+   		return "8993d15a4993416d6f466d7a53d44e56afe4bed0b87b311345fa7ad64c3a2105";
    }
    
    @Override

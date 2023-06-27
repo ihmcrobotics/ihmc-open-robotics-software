@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -96,14 +97,33 @@ public class RapidPlanarRegionsExtractor
    private final RapidPlanarRegionIsland tempIsland = new RapidPlanarRegionIsland();
    private boolean firstRun = true;
 
-   public void create(OpenCLManager openCLManager, int imageHeight, int imageWidth, double fx, double fy, double cx, double cy)
+   public RapidPlanarRegionsExtractor(OpenCLManager openCLManager, CameraIntrinsics cameraIntrinsics)
    {
-      create(openCLManager, openCLManager.loadProgram("RapidRegionsExtractor"), imageHeight, imageWidth, fx, fy, cx, cy);
+      this(openCLManager,
+           openCLManager.loadProgram("RapidRegionsExtractor"),
+           cameraIntrinsics.getHeight(),
+           cameraIntrinsics.getWidth(),
+           cameraIntrinsics.getFx(),
+           cameraIntrinsics.getFy(),
+           cameraIntrinsics.getCx(),
+           cameraIntrinsics.getCy());
    }
 
-   public void create(OpenCLManager openCLManager, _cl_program program, int imageHeight, int imageWidth, double fx, double fy, double cx, double cy)
+   public RapidPlanarRegionsExtractor(OpenCLManager openCLManager, int imageHeight, int imageWidth, double fx, double fy, double cx, double cy)
    {
-      create(openCLManager, program, imageHeight, imageWidth, fx, fy, cx, cy, "");
+      this(openCLManager, openCLManager.loadProgram("RapidRegionsExtractor"), imageHeight, imageWidth, fx, fy, cx, cy);
+   }
+
+   public RapidPlanarRegionsExtractor(OpenCLManager openCLManager,
+                                      _cl_program program,
+                                      int imageHeight,
+                                      int imageWidth,
+                                      double fx,
+                                      double fy,
+                                      double cx,
+                                      double cy)
+   {
+      this(openCLManager, program, imageHeight, imageWidth, fx, fy, cx, cy, "");
    }
    /**
     * Creates buffers and kernels for the OpenCL program.
@@ -111,7 +131,15 @@ public class RapidPlanarRegionsExtractor
     * @param imageWidth  width of the input depth image
     * @param imageHeight height of the input depth image
     */
-   public void create(OpenCLManager openCLManager, _cl_program program, int imageHeight, int imageWidth, double fx, double fy, double cx, double cy, String version)
+   public RapidPlanarRegionsExtractor(OpenCLManager openCLManager,
+                                      _cl_program program,
+                                      int imageHeight,
+                                      int imageWidth,
+                                      double fx,
+                                      double fy,
+                                      double cx,
+                                      double cy,
+                                      String version)
    {
       this.sensorModel = SensorModel.PERSPECTIVE;
       this.openCLManager = openCLManager;
@@ -130,22 +158,24 @@ public class RapidPlanarRegionsExtractor
       this.create();
    }
 
-   public void create(OpenCLManager openCLManager, _cl_program program, int imageHeight, int imageWidth)
+   public RapidPlanarRegionsExtractor(OpenCLManager openCLManager, _cl_program program, int imageHeight, int imageWidth)
    {
-      this.sensorModel = SensorModel.SPHERICAL;
       this.openCLManager = openCLManager;
       this.planarRegionExtractionProgram = program;
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
 
+      sensorModel = SensorModel.SPHERICAL;
+
       this.parameters = new RapidRegionsExtractorParameters("Spherical");
 
       rapidPlanarRegionsCustomizer = new RapidPlanarRegionsCustomizer("ForSphericalRapidRegions");
       sphericalBackProjectionKernel = openCLManager.createKernel(planarRegionExtractionProgram, "sphericalBackProjectionKernel");
-      this.create();
+
+      create();
    }
 
-   public void create()
+   private void create()
    {
       calculateDerivativeParameters();
 

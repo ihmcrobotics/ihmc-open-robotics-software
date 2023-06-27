@@ -15,7 +15,7 @@ public class OcTreeKeyListMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "bc9bd1d0c534effa5077f3fe3daaf8ae9de6cb3c0f4ac61d5433f15364487257";
+   		return "6d44ede3a6991ff0bc677b3768f44463248de9a717062e7418c435dc21657a64";
    }
    
    @Override

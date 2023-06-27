@@ -15,7 +15,7 @@ public class DesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "377c58d84710921444fd015eded6990fe1919cc95d99ad6d301f255a94769d06";
+   		return "2673e65ad2f9b226f8b138b8a0f28b4bfb8a3d0954a70143bff9cd544ad6903e";
    }
    
    @Override

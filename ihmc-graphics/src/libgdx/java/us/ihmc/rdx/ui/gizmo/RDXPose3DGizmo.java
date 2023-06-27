@@ -41,6 +41,7 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.robotics.interaction.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -91,7 +92,6 @@ public class RDXPose3DGizmo implements RenderableProvider
    private RigidBodyTransform transformToParent;
    /** This pose 3D should always be left in world frame and represent this gizmo's pose. */
    private final FramePose3D framePose3D = new FramePose3D();
-   private ReferenceFrame parentReferenceFrame;
    private ReferenceFrame gizmoFrame;
    /** Gizmo transform to world so it can be calculated once. */
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
@@ -138,14 +138,18 @@ public class RDXPose3DGizmo implements RenderableProvider
 
    private void initialize(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify)
    {
-      this.parentReferenceFrame = gizmoFrame.getParent();
       this.transformToParent = gizmoTransformToParentFrameToModify;
+      this.gizmoFrame = gizmoFrame;
+   }
+
+   public void setGizmoFrame(ReferenceFrame gizmoFrame)
+   {
       this.gizmoFrame = gizmoFrame;
    }
 
    public void setParentFrame(ReferenceFrame parentReferenceFrame)
    {
-      this.parentReferenceFrame = parentReferenceFrame;
+      gizmoFrame.remove();
       gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
    }
 
@@ -160,7 +164,7 @@ public class RDXPose3DGizmo implements RenderableProvider
    public void create(RDX3DPanel panel3D)
    {
       camera3D = panel3D.getCamera3D();
-      frameBasedGizmoModification = new FrameBasedGizmoModification(this::getGizmoFrame, () -> parentReferenceFrame, camera3D);
+      frameBasedGizmoModification = new FrameBasedGizmoModification(this::getGizmoFrame, () -> gizmoFrame.getParent(), camera3D);
       panel3D.addImGuiOverlayAddition(this::renderTooltipAndContextMenu);
 
       for (Axis3D axis : Axis3D.values)
@@ -463,11 +467,12 @@ public class RDXPose3DGizmo implements RenderableProvider
 
    private void updateMaterialHighlighting()
    {
-      boolean prior = isGizmoHovered || isBeingManipulated;
+      // closestCollisionSelection can be null if the the 3D panel is zoomed in or out without the mouse hovering
+      boolean highlightingPrior = (isGizmoHovered || isBeingManipulated) && closestCollisionSelection != null;
       // could only do this when selection changed
       for (Axis3D axis : Axis3D.values)
       {
-         if (prior && closestCollisionSelection.isAngular() && closestCollisionSelection.toAxis3D() == axis)
+         if (highlightingPrior && closestCollisionSelection.isAngular() && closestCollisionSelection.toAxis3D() == axis)
          {
             torusModels[axis.ordinal()].setMaterial(highlightedMaterials[axis.ordinal()]);
          }
@@ -476,7 +481,7 @@ public class RDXPose3DGizmo implements RenderableProvider
             torusModels[axis.ordinal()].setMaterial(normalMaterials[axis.ordinal()]);
          }
 
-         if (prior && closestCollisionSelection.isLinear() && closestCollisionSelection.toAxis3D() == axis)
+         if (highlightingPrior && closestCollisionSelection.isLinear() && closestCollisionSelection.toAxis3D() == axis)
          {
             arrowModels[axis.ordinal()].setMaterial(highlightedMaterials[axis.ordinal()]);
          }

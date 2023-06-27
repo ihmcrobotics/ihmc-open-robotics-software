@@ -15,7 +15,7 @@ public class TimeIntervalMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2b54a064f01f06547e5e8d5db31063cfca28d167d2194cdd5d6195b60bed089e";
+   		return "b52a85e3c446c41e70f351618253f9e5f48726b6371ed9f1ecd9dc3c55955250";
    }
    
    @Override

@@ -78,7 +78,6 @@ public class TerrainPerceptionProcessWithDriver
    private final ROS2Topic<ImageMessage> colorTopic;
    private final ROS2Topic<ImageMessage> depthTopic;
 
-   private final RapidPlanarRegionsExtractor rapidRegionsExtractor;
    private final OpenCLManager openCLManager;
    private final ROS2Helper ros2Helper;
    private final RealSenseHardwareManager realSenseHardwareManager;
@@ -88,6 +87,7 @@ public class TerrainPerceptionProcessWithDriver
 
    private ROS2StoredPropertySetGroup ros2PropertySetGroup;
    private CollidingScanRegionFilter collisionFilter;
+   private RapidPlanarRegionsExtractor rapidRegionsExtractor;
    private BytedecoImage depthBytedecoImage;
 
    private Mat depth16UC1Image;
@@ -124,7 +124,6 @@ public class TerrainPerceptionProcessWithDriver
       realtimeROS2Node.spin();
 
       openCLManager = new OpenCLManager();
-      rapidRegionsExtractor = new RapidPlanarRegionsExtractor();
 
       realSenseHardwareManager = new RealSenseHardwareManager();
 
@@ -207,16 +206,16 @@ public class TerrainPerceptionProcessWithDriver
                return;
             }
 
-            rapidRegionsExtractor.create(openCLManager,
-                    openCLProgram,
-                    depthHeight,
-                    depthWidth,
-                    realsense.getDepthFocalLengthPixelsX(),
-                    realsense.getDepthFocalLengthPixelsY(),
-                    realsense.getDepthPrincipalOffsetXPixels(),
-                    realsense.getDepthPrincipalOffsetYPixels());
+            rapidRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager,
+                                                                    openCLProgram,
+                                                                    depthHeight,
+                                                                    depthWidth,
+                                                                    realsense.getDepthFocalLengthPixelsX(),
+                                                                    realsense.getDepthFocalLengthPixelsY(),
+                                                                    realsense.getDepthPrincipalOffsetXPixels(),
+                                                                    realsense.getDepthPrincipalOffsetYPixels());
 
-            rapidRegionsExtractor.getDebugger().setEnabled(true);
+            rapidRegionsExtractor.getDebugger().setEnabled(false);
 
             ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
             ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);

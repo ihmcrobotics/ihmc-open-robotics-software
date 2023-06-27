@@ -15,7 +15,7 @@ public class MultiContactBalanceStatusPubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2ce8412d8f0913d3492cf72fbec81c41aefad71c37d44fd2a8f8ece6dcb2b97f";
+   		return "44145fc8d4eb207cfd8818163dc8d17597cd9790ef206b9175e8382ad0814adf";
    }
    
    @Override

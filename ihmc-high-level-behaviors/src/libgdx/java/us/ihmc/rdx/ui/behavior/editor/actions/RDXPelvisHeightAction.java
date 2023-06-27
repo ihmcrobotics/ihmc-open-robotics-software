@@ -19,7 +19,7 @@ public class RDXPelvisHeightAction extends RDXBehaviorAction
 
    public RDXPelvisHeightAction()
    {
-      super("Pelvis Height");
+
    }
 
    @Override
@@ -35,5 +35,11 @@ public class RDXPelvisHeightAction extends RDXBehaviorAction
    public PelvisHeightActionData getActionData()
    {
       return actionData;
+   }
+
+   @Override
+   public String getActionTypeTitle()
+   {
+      return "Pelvis Height";
    }
 }
