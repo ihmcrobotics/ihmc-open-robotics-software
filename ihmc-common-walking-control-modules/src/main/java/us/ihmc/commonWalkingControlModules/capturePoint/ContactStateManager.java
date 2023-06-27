@@ -166,14 +166,13 @@ public class ContactStateManager
       adjustedRemainingTimeUnderDisturbance.set(swingDuration);
       offsetTimeInState.set(transferDuration);
 
-
       adjustedTimeInSupportSequence.set(transferDuration);
       totalTimeAdjustment.set(0.0);
 
       contactStateIsDone.set(false);
    }
 
-   public void initializeForTransferToStanding(double finalTransferDuration )
+   public void initializeForTransferToStanding(double finalTransferDuration)
    {
       timeAtStartOfSupportSequence.set(time.getValue());
       timeInSupportSequence.set(0.0);
@@ -202,41 +201,10 @@ public class ContactStateManager
 
       if (shouldAdjustTimeFromTrackingError)
       {
-         double minDuration = (inSingleSupport.getBooleanValue() ? minimumSwingDuration.getDoubleValue() : minimumTransferDuration.getDoubleValue());
-         double maxTotalAdjustment = Math.max(currentStateDuration.getDoubleValue() - offsetTimeInState.getDoubleValue() - minDuration, 0.0);
-
-         double remainingTimeAfterAdjustment = Math.max(remainingTimeInContactSequence.getDoubleValue() - totalTimeAdjustment.getDoubleValue(), 0.0);
-         double maxAdjustment = Math.min(remainingTimeAfterAdjustment, maxTotalAdjustment - totalTimeAdjustment.getDoubleValue());
-         double minAdjustment = -remainingTimeAfterAdjustment;
-
-         double proposedAdjustment = computeTimeAdjustmentForDynamicsBasedOnState(timeShiftProvider);
-         proposedAdjustment = MathTools.clamp(proposedAdjustment, minAdjustment, maxAdjustment);
-         if (proposedAdjustment > 0.0)
-         {
-            if ((isInSingleSupport() && speedUpSwingDynamicsFromError.getValue()) || (!isInSingleSupport() && speedUpTransferDynamicsFromError.getValue()))
-            {
-               timeAdjustment.set(timeAdjustmentDiscountGain.getValue() * proposedAdjustment);
-               timeAdjustmentForSwing.set(0.0);
-            }
-            else
-            {
-               timeAdjustmentForSwing.set(proposedAdjustment);
-               timeAdjustment.set(0.0);
-            }
-         }
+         if (isInSingleSupport())
+            adjustTimeInSwingState(timeShiftProvider);
          else
-         {
-            if ((isInSingleSupport() && slowDownSwingDynamicsFromError.getValue()) || (!isInSingleSupport() && slowDownTransferDynamicsFromError.getValue()))
-            {
-               timeAdjustment.set(timeAdjustmentDiscountGain.getValue() * proposedAdjustment);
-               timeAdjustmentForSwing.set(0.0);
-            }
-            else
-            {
-               timeAdjustmentForSwing.set(proposedAdjustment);
-               timeAdjustment.set(0.0);
-            }
-         }
+            adjustTimeInTransferState(timeShiftProvider);
       }
       else
       {
@@ -246,12 +214,90 @@ public class ContactStateManager
 
       totalTimeAdjustment.add(timeAdjustment.getValue());
 
-
-      adjustedTimeInSupportSequence.set(MathTools.clamp(timeInSupportSequence.getValue() + totalTimeAdjustment.getValue(), 0.0, currentStateDuration.getDoubleValue()));
+      adjustedTimeInSupportSequence.set(MathTools.clamp(timeInSupportSequence.getValue() + totalTimeAdjustment.getValue(),
+                                                        0.0,
+                                                        currentStateDuration.getDoubleValue()));
 
       adjustedRemainingTimeUnderDisturbance.set(currentStateDuration.getDoubleValue() - adjustedTimeInSupportSequence.getDoubleValue());
 
       contactStateIsDone.set(adjustedTimeInSupportSequence.getValue() >= currentStateDuration.getValue());
+   }
+
+   private void adjustTimeInSwingState(DoubleProvider timeShiftProvider)
+   {
+      double swingDuration = currentStateDuration.getDoubleValue() - offsetTimeInState.getDoubleValue();
+      double maxSpeedUpFactor = Math.max(1.0, swingDuration / minimumSwingDuration.getDoubleValue());
+      double maxTotalTimeShortening = remainingTimeInContactSequence.getDoubleValue() * (1.0 - 1.0 / maxSpeedUpFactor);
+
+      double remainingTimeAfterAdjustment = Math.max(remainingTimeInContactSequence.getDoubleValue() - totalTimeAdjustment.getDoubleValue(), 0.0);
+      double maxAdjustment = Math.min(remainingTimeAfterAdjustment, maxTotalTimeShortening - totalTimeAdjustment.getDoubleValue());
+      double minAdjustment = -remainingTimeAfterAdjustment;
+
+      double proposedAdjustment = MathTools.clamp(computeTimeAdjustmentForDynamicsBasedOnState(timeShiftProvider), minAdjustment, maxAdjustment);
+      if (proposedAdjustment > 0.0)
+      {
+         if (speedUpSwingDynamicsFromError.getValue())
+         {
+            timeAdjustment.set(proposedAdjustment);
+            timeAdjustmentForSwing.set(0.0);
+         }
+         else
+         {
+            timeAdjustmentForSwing.set(proposedAdjustment);
+            timeAdjustment.set(0.0);
+         }
+      }
+      else
+      {
+         if (slowDownSwingDynamicsFromError.getValue())
+         {
+            timeAdjustment.set(proposedAdjustment);
+            timeAdjustmentForSwing.set(0.0);
+         }
+         else
+         {
+            timeAdjustmentForSwing.set(proposedAdjustment);
+            timeAdjustment.set(0.0);
+         }
+      }
+   }
+
+   private void adjustTimeInTransferState(DoubleProvider timeShiftProvider)
+   {
+      double maxTotalAdjustment = Math.max(
+            currentStateDuration.getDoubleValue() - offsetTimeInState.getDoubleValue() - minimumTransferDuration.getDoubleValue(), 0.0);
+
+      double remainingTimeAfterAdjustment = Math.max(remainingTimeInContactSequence.getDoubleValue() - totalTimeAdjustment.getDoubleValue(), 0.0);
+      double maxAdjustment = Math.min(remainingTimeAfterAdjustment, maxTotalAdjustment - totalTimeAdjustment.getDoubleValue());
+      double minAdjustment = -remainingTimeAfterAdjustment;
+
+      double proposedAdjustment = MathTools.clamp(computeTimeAdjustmentForDynamicsBasedOnState(timeShiftProvider), minAdjustment, maxAdjustment);
+      if (proposedAdjustment > 0.0)
+      {
+         if (speedUpTransferDynamicsFromError.getValue())
+         {
+            timeAdjustment.set(timeAdjustmentDiscountGain.getValue() * proposedAdjustment);
+            timeAdjustmentForSwing.set(0.0);
+         }
+         else
+         {
+            timeAdjustmentForSwing.set(proposedAdjustment);
+            timeAdjustment.set(0.0);
+         }
+      }
+      else
+      {
+         if (slowDownTransferDynamicsFromError.getValue())
+         {
+            timeAdjustment.set(timeAdjustmentDiscountGain.getValue() * proposedAdjustment);
+            timeAdjustmentForSwing.set(0.0);
+         }
+         else
+         {
+            timeAdjustmentForSwing.set(proposedAdjustment);
+            timeAdjustment.set(0.0);
+         }
+      }
    }
 
    private double computeTimeAdjustmentForDynamicsBasedOnState(DoubleProvider timeShiftProvider)
