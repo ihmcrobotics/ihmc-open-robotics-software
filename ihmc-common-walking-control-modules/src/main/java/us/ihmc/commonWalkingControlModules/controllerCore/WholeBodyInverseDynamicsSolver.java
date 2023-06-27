@@ -29,8 +29,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJ
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings.TorqueConstraintsInQP;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings.JointTorqueEnforcementMethod;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DynamicsMatrixCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsOptimizationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointAccelerationIntegrationCalculator;
@@ -106,13 +105,10 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
     */
    private final YoBoolean minimizeJointTorques;
    /**
-    * Whether the desired joint torques should be clamped (AFTER the QP) to each joint min and max torque.
+    * Whether the desired joint torques should be constrained to each joint min and max torque and
+    * where it should happen (in the QP or after the QP inside the controller).
     */
-   private final YoBoolean areJointTorqueLimitsConsidered;
-   /**
-    * Whether the desired joint torques should be clamped (INSIDE the QP) to each joint min and max torque.
-    */
-   private final YoEnum<TorqueConstraintsInQP> areJointTorqueLimitsEnforced;
+   private final YoEnum<JointTorqueEnforcementMethod> areJointTorqueLimitsConsidered;
    /**
     * Whether {@link #dynamicsMatrixCalculator} is used for inverse dynamics.
     */
@@ -163,10 +159,10 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
 
       minimizeJointTorques = new YoBoolean("minimizeJointTorques", registry);
       minimizeJointTorques.set(toolbox.getOptimizationSettings().areJointTorquesMinimized());
-      areJointTorqueLimitsConsidered = new YoBoolean("areJointTorqueLimitsConsidered", registry);
+      //      areJointTorqueLimitsConsidered = new YoBoolean("areJointTorqueLimitsConsidered", registry);
+      //      areJointTorqueLimitsConsidered.set(toolbox.getOptimizationSettings().areJointTorqueLimitsConsidered());
+      areJointTorqueLimitsConsidered = new YoEnum<>("areJointTorqueLimitsConsidered", registry, JointTorqueEnforcementMethod.class);
       areJointTorqueLimitsConsidered.set(toolbox.getOptimizationSettings().areJointTorqueLimitsConsidered());
-      areJointTorqueLimitsEnforced = new YoEnum<>("areJointTorqueLimitsEnforced", registry, TorqueConstraintsInQP.class);
-      areJointTorqueLimitsEnforced.set(toolbox.getOptimizationSettings().areJointTorqueLimitsEnforced());
       useDynamicMatrixCalculatorForInverseDynamics = new YoBoolean("useDynamicMatrixCalculator", registry);
       useDynamicMatrixCalculatorForInverseDynamics.set(toolbox.getOptimizationSettings().useDynamicMatrixCalculatorForInverseDynamics());
       updateDynamicMatrixCalculator = new YoBoolean("updateDynamicMatrixCalculator", registry);
@@ -225,7 +221,7 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
       {
          optimizationControlModule.setupTorqueMinimizationCommand();
       }
-      if (areJointTorqueLimitsEnforced.getValue() != TorqueConstraintsInQP.NO_JOINTS_CONSTRAINED )
+      if (areJointTorqueLimitsConsidered.getValue() == JointTorqueEnforcementMethod.CONSTRAINTS_IN_QP)
       {
          optimizationControlModule.setupTorqueConstraintCommand();
       }
@@ -268,7 +264,7 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
             int jointAccelerationIndex = inverseDynamicsCalculator.getInput().getJointMatrixIndexProvider().getJointDoFIndices(joint)[0];
             JointDesiredOutputBasics jointDesiredOutput = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
             jointDesiredOutput.setDesiredAcceleration(jointAccelerations.get(jointAccelerationIndex, 0));
-            if (areJointTorqueLimitsConsidered.getValue())
+            if (areJointTorqueLimitsConsidered.getValue() == JointTorqueEnforcementMethod.CONSTRAINTS_IN_CONTROLLER)
                jointDesiredOutput.setDesiredTorque(MathTools.clamp(tauSolution.get(jointIndex, 0), joint.getEffortLimitLower(), joint.getEffortLimitUpper()));
             else
                jointDesiredOutput.setDesiredTorque(tauSolution.get(jointIndex, 0));
@@ -293,7 +289,7 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
             JointDesiredOutputBasics jointDesiredOutput = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
             jointDesiredOutput.setDesiredAcceleration(jointAccelerations.get(jointIndex, 0));
             double tau = inverseDynamicsCalculator.getComputedJointTau(joint).get(0);
-            if (areJointTorqueLimitsConsidered.getValue())
+            if (areJointTorqueLimitsConsidered.getValue() == JointTorqueEnforcementMethod.CONSTRAINTS_IN_CONTROLLER)
                jointDesiredOutput.setDesiredTorque(MathTools.clamp(tau, joint.getEffortLimitLower(), joint.getEffortLimitUpper()));
             else
                jointDesiredOutput.setDesiredTorque(tau);
@@ -337,20 +333,20 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
       {
          KinematicLoopFunction kinematicLoopFunction = kinematicLoopFunctions.get(i);
          List<? extends OneDoFJointReadOnly> loopJoints = kinematicLoopFunction.getLoopJoints();
-         
-         if(loopJoints != null && !loopJoints.isEmpty())
+
+         if (loopJoints != null && !loopJoints.isEmpty())
          {
             kinematicLoopJointTau.reshape(loopJoints.size(), 1);
-   
+
             for (int j = 0; j < loopJoints.size(); j++)
             {
                OneDoFJointReadOnly loopJoint = loopJoints.get(j);
                double tau = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointTorque((OneDoFJointBasics) loopJoint);
                kinematicLoopJointTau.set(j, tau);
             }
-   
+
             kinematicLoopFunction.adjustTau(kinematicLoopJointTau);
-   
+
             for (int j = 0; j < loopJoints.size(); j++)
             {
                OneDoFJointReadOnly loopJoint = loopJoints.get(j);
@@ -406,7 +402,8 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
                }
                else
                {
-                  throw new RuntimeException("The command type: (type=" + command.getCommandType() + ")-(class=" + command.getClass().getSimpleName() + ") is not handled.");
+                  throw new RuntimeException("The command type: (type=" + command.getCommandType() + ")-(class=" + command.getClass().getSimpleName()
+                                             + ") is not handled.");
                }
                break;
             case MOMENTUM:
