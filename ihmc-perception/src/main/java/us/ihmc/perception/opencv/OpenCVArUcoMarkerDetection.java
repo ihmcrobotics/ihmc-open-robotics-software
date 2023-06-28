@@ -338,6 +338,7 @@ public class OpenCVArUcoMarkerDetection
 
    public void destroy()
    {
+      System.out.println("Destroying aruco marker detection");
       running = false;
    }
 
