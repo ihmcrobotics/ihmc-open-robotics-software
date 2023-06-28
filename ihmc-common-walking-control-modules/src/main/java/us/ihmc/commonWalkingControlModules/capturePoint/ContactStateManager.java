@@ -114,7 +114,6 @@ public class ContactStateManager
 
    public void initializeForStanding()
    {
-
       inSingleSupport.set(false);
       inStanding.set(true);
 
