@@ -64,6 +64,8 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
 
    private void destroy()
    {
+      System.out.println("Destroying dual blackfly process");
+
       for (DualBlackflyCamera dualBlackflyCamera : dualBlackflyCameras)
       {
          if (dualBlackflyCamera != null)
@@ -71,5 +73,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
       }
       ros2Node.destroy();
       spinnakerBlackflyManager.destroy();
+
+      System.out.println("All objects destroyed");
    }
 }

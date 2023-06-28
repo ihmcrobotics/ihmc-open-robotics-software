@@ -43,6 +43,7 @@ public class SpinnakerBlackflyManager
 
    public void destroy()
    {
+      System.out.println("Destroying spinnaker blackfly manager");
       for (Map.Entry<String, SpinnakerBlackfly> entry : serialNumberToBlackflyMap.entrySet())
          spinCameraRelease(entry.getValue().getSpinCamera());
       spinCameraListClear(spinCameraList);
