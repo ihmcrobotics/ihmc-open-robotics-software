@@ -9,7 +9,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
  */
 public class RDXBlackflyDisplayDemo
 {
-   private static final String BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.serial.number", "22206798");
+   private static final String BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.serial.number", "00000000");
 
    private final RDXBaseUI baseUI = new RDXBaseUI("Blackfly Display Demo");
    private RDXBlackflyReader blackflyReader;
