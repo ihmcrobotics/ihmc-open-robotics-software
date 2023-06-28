@@ -21,7 +21,7 @@ basicsDependencies {
    api("us.ihmc:euclid-frame:0.20.0")
    api("us.ihmc:euclid-frame-shape:0.20.0")
    api("us.ihmc:euclid-shape:0.20.0")
-   api("us.ihmc:ihmc-robot-description:0.21.10")
+   api("us.ihmc:ihmc-robot-description:0.21.11")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
 }
@@ -39,7 +39,7 @@ planningDependencies {
 
    api("us.ihmc:robot-environment-awareness:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.28.1")
+   api("us.ihmc:ihmc-robot-data-logger:0.28.2")
    api("us.ihmc:ihmc-path-planning:source")
 }
 
