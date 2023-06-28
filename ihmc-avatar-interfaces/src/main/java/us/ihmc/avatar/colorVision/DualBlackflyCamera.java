@@ -151,6 +151,7 @@ public class DualBlackflyCamera
                newImageReadNotifier.notifyAll();
             }
          }
+         System.out.println("Camera read thread has finished");
       }, "SpinnakerCameraRead");
 
       // Image process and publish thread
@@ -174,6 +175,7 @@ public class DualBlackflyCamera
             // Process and publish the new image
             imageProcessAndPublish();
          }
+         System.out.println("Image encode and publish thread has finished");
       }, "SpinnakerImageEncodeAndPublish");
 
       // Undistort image and update aruco thread
@@ -197,6 +199,7 @@ public class DualBlackflyCamera
             // Undistort  the new image
             undistortImageAndUpdateArUco();
          }
+         System.out.println("Image undistort and update ArUco thread has finished");
       }, "SpinnakerImageUndistortAndUpdateArUco");
 
       // Deallocation thread
@@ -241,6 +244,7 @@ public class DualBlackflyCamera
                   break;
             }
          }
+         System.out.println("Deallocation thread has finished");
       }, "SpinnakerImageDeallocation");
 
       cameraReadThread.start();
