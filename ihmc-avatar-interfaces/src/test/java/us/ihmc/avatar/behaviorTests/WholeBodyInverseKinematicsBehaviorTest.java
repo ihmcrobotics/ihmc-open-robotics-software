@@ -43,10 +43,6 @@ import us.ihmc.tools.MemoryTools;
 public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   static 
-   {
-      simulationTestingParameters.setCreateGUI(false);
-   }
    private boolean isKinematicsToolboxVisualizerEnabled = false;
    private SCS2BehaviorTestHelper behaviorTestHelper;
    private KinematicsToolboxModule kinematicsToolboxModule;
