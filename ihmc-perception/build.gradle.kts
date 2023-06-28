@@ -76,7 +76,7 @@ mainDependencies {
    api("org.bytedeco:hdf5:$hdf5Version:windows-x86_64")
 
    api("us.ihmc:euclid:0.20.0")
-   api("us.ihmc:simulation-construction-set:0.23.5")
+   api("us.ihmc:simulation-construction-set:0.24.0")
    api("us.ihmc:ihmc-native-library-loader:2.0.2")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-communication:source")
