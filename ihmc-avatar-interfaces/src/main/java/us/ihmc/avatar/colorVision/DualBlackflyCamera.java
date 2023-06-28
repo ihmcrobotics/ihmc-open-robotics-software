@@ -34,6 +34,7 @@ import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
 import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesPublisher;
 import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesSubscription;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
+import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
@@ -54,6 +55,7 @@ public class DualBlackflyCamera
    private final RobotSide side;
    private final ROS2SyncedRobotModel syncedRobot;
    private SpinnakerBlackfly spinnakerBlackfly;
+   private final BlackflyLensProperties blackflyLensProperties;
    private final ROS2StoredPropertySet<IntrinsicCameraMatrixProperties> ousterFisheyeColoringIntrinsicsROS2;
 
    private final ROS2Helper ros2Helper;
@@ -95,13 +97,14 @@ public class DualBlackflyCamera
                              RigidBodyTransform cameraTransformToParent,
                              ROS2Node ros2Node,
                              SpinnakerBlackfly spinnakerBlackfly,
-                             IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics,
+                             BlackflyLensProperties blackflyLensProperties,
                              PredefinedSceneNodeLibrary predefinedSceneNodeLibrary)
    {
       this.side = side;
       this.syncedRobot = syncedRobot;
       this.spinnakerBlackfly = spinnakerBlackfly;
-      this.ousterFisheyeColoringIntrinsics = ousterFisheyeColoringIntrinsics;
+      this.blackflyLensProperties = blackflyLensProperties;
+      this.ousterFisheyeColoringIntrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsOnRobot(blackflyLensProperties);
       this.predefinedSceneNodeLibrary = predefinedSceneNodeLibrary;
 
       ROS2Topic<ImageMessage> imageTopic = PerceptionAPI.BLACKFLY_FISHEYE_COLOR_IMAGE.get(side);
@@ -173,16 +176,16 @@ public class DualBlackflyCamera
 
          Mat cameraMatrix = new Mat(3, 3, opencv_core.CV_64F);
          opencv_core.setIdentity(cameraMatrix);
-         cameraMatrix.ptr(0, 0).putDouble(SensorHeadParameters.FOCAL_LENGTH_X_FOR_UNDISORTION);
-         cameraMatrix.ptr(1, 1).putDouble(SensorHeadParameters.FOCAL_LENGTH_Y_FOR_UNDISORTION);
-         cameraMatrix.ptr(0, 2).putDouble(SensorHeadParameters.PRINCIPAL_POINT_X_FOR_UNDISORTION);
-         cameraMatrix.ptr(1, 2).putDouble(SensorHeadParameters.PRINCIPAL_POINT_Y_FOR_UNDISORTION);
+         cameraMatrix.ptr(0, 0).putDouble(blackflyLensProperties.getFocalLengthXForUndistortion());
+         cameraMatrix.ptr(1, 1).putDouble(blackflyLensProperties.getFocalLengthYForUndistortion());
+         cameraMatrix.ptr(0, 2).putDouble(blackflyLensProperties.getPrincipalPointXForUndistortion());
+         cameraMatrix.ptr(1, 2).putDouble(blackflyLensProperties.getPrincipalPointYForUndistortion());
          Mat newCameraMatrixEstimate = new Mat(3, 3, opencv_core.CV_64F);
          opencv_core.setIdentity(newCameraMatrixEstimate);
-         Mat distortionCoefficients = new Mat(SensorHeadParameters.K1_FOR_UNDISORTION,
-                                              SensorHeadParameters.K2_FOR_UNDISORTION,
-                                              SensorHeadParameters.K3_FOR_UNDISORTION,
-                                              SensorHeadParameters.K4_FOR_UNDISORTION);
+         Mat distortionCoefficients = new Mat(blackflyLensProperties.getK1ForUndistortion(),
+                                              blackflyLensProperties.getK2ForUndistortion(),
+                                              blackflyLensProperties.getK3ForUndistortion(),
+                                              blackflyLensProperties.getK4ForUndistortion());
          Size sourceImageSize = new Size(imageWidth, imageHeight);
          Size undistortedImageSize = new Size((int) (SensorHeadParameters.UNDISTORTED_IMAGE_SCALE * imageWidth),
                                               (int) (SensorHeadParameters.UNDISTORTED_IMAGE_SCALE * imageHeight));
