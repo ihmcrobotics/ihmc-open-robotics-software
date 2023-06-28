@@ -21,6 +21,7 @@ mainDependencies {
    api("com.google.guava:guava:18.0")
    api("org.reflections:reflections:0.10.2")
    api("org.apache.commons:commons-text:1.10.0")
+   api("xml-apis:xml-apis:2.0.2")
 
    api("us.ihmc:ihmc-commons:0.32.0")
    api("us.ihmc:log-tools:0.6.3")
