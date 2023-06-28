@@ -42,6 +42,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.tools.gui.YoAppearanceTools;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -284,7 +285,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       standPrepButton.loadAndSetIcon("icons/standPrep.png");
       standPrepButton.setOnPressed(robotLowLevelMessenger::sendStandRequest);
       standPrepButton.setTooltipText("Stand prep");
-      
+
       if (robotHasArms)
          handManager.create(baseUI, communicationHelper);
 
@@ -430,8 +431,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       ImGui.separator();
       locomotionManager.renderImGuiWidgets();
-
       ImGui.separator();
+
       if (robotHasArms)
          handManager.renderImGuiWidgets();
 

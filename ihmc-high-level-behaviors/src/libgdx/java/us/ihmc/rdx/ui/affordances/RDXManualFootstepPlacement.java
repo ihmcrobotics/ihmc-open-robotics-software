@@ -28,7 +28,9 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.robotSide.RobotSide;
+
 import java.util.ArrayList;
+
 /**
  * Manages and assists with the operator placement of footsteps.
  */
@@ -140,7 +142,10 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          candidateStepPose.getPosition().set(pickPointInWorld);
          candidateStepPose.getRotation().setToYawOrientation(getFootstepBeingPlacedOrLastFootstepPlaced().getYaw());
 
-         stepChecker.checkValidSingleStep(footstepPlan.getFootsteps(), candidateStepPose, currentFootStepSide, footstepPlan.getNumberOfFootsteps());
+         stepChecker.checkValidSingleStep(footstepPlan.getFootsteps(),
+                                          candidateStepPose,
+                                          currentFootStepSide,
+                                          footstepPlan.getNumberOfFootsteps());
 
          // Get the warnings and flash if the footstep's placement isn't okay
          ArrayList<BipedalFootstepPlannerNodeRejectionReason> temporaryReasons = stepChecker.getReasons();
