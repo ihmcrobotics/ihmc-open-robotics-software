@@ -25,8 +25,18 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class contains tools to both create and apply filters for perception data
+ */
 public class PerceptionFilterTools
 {
+   /**
+    * Creates a colliding scan region filter that will filter out planar regions that are in collision with the robot's shin.
+    *
+    * @param fullRobotModel
+    * @param collisionBoxProvider
+    * @return colliding scan region filter
+    */
    public static CollidingScanRegionFilter createHumanoidShinCollisionFilter(FullHumanoidRobotModel fullRobotModel, CollisionBoxProvider collisionBoxProvider)
    {
       CollisionShapeTester shapeTester = new CollisionShapeTester(fullRobotModel, collisionBoxProvider);
@@ -40,22 +50,38 @@ public class PerceptionFilterTools
       return new CollidingScanRegionFilter(shapeTester);
    }
 
+   /**
+    * Filters out planar regions that intersect with the collision meshes in the CollidingScanRegionFilter passed in. Used to remove regions that
+    * collide with robot body. Performs parallel stream processing for fast and efficient CPU usage.
+    *
+    * @param framePlanarRegionsList
+    * @param collisionFilter
+    */
    public static void filterCollidingPlanarRegions(FramePlanarRegionsList framePlanarRegionsList, CollidingScanRegionFilter collisionFilter)
    {
       collisionFilter.update();
       PlanarRegionsList planarRegionsList = framePlanarRegionsList.getPlanarRegionsList();
 
-      List<PlanarRegion> filteredPlanarRegions = planarRegionsList.getPlanarRegionsAsList().parallelStream()
-                                                                  .filter(region -> {
-                                                                     PlanarRegion regionInWorld = region.copy();
-                                                                     regionInWorld.applyTransform(framePlanarRegionsList.getSensorToWorldFrameTransform());
-                                                                     return collisionFilter.test(0, regionInWorld);
-                                                                  }).toList();
+      List<PlanarRegion> filteredPlanarRegions = planarRegionsList.getPlanarRegionsAsList().parallelStream().filter(region ->
+                                                                                                                    {
+                                                                                                                       PlanarRegion regionInWorld = region.copy();
+                                                                                                                       regionInWorld.applyTransform(
+                                                                                                                             framePlanarRegionsList.getSensorToWorldFrameTransform());
+                                                                                                                       return collisionFilter.test(0,
+                                                                                                                                                   regionInWorld);
+                                                                                                                    }).toList();
 
       framePlanarRegionsList.getPlanarRegionsList().clear();
       framePlanarRegionsList.getPlanarRegionsList().addPlanarRegions(filteredPlanarRegions);
    }
 
+   /**
+    * Applies a bounding box filter on the planar region lists by chopping off parts of the regions that are outside the bounding box. Performs
+    * a plane-by-plane chopping tool for each plane on the bounding box.
+    *
+    * @param planarRegionsList
+    * @param boundingBox
+    */
    public static void filterByBoundingBox(PlanarRegionsList planarRegionsList, BoundingBox3D boundingBox)
    {
       PlanarRegionsList result = null;
@@ -76,23 +102,41 @@ public class PerceptionFilterTools
       planarRegionsList.addPlanarRegions(result.getPlanarRegionsAsList());
    }
 
+   /**
+    * Removes regions that have surface normals that are orthogonal to the line joining the camera center to the region origin.
+    * Uses parallel stream for efficient CPU usage.
+    *
+    * @param framePlanarRegionsList
+    * @param maxAngleFromNormal
+    */
    public static void filterShadowRegions(FramePlanarRegionsList framePlanarRegionsList, double maxAngleFromNormal)
    {
       double angleFromNormal = Math.toRadians(maxAngleFromNormal);
       double minDot = Math.cos(Math.PI / 2.0 - angleFromNormal);
 
       List<PlanarRegion> filteredList = framePlanarRegionsList.getPlanarRegionsList().getPlanarRegionsAsList().parallelStream().filter(region ->
-       {
-          Vector3D vectorToRegion = new Vector3D(region.getPoint());
-          vectorToRegion.normalize();
+                                                                                                                                       {
+                                                                                                                                          Vector3D vectorToRegion = new Vector3D(
+                                                                                                                                                region.getPoint());
+                                                                                                                                          vectorToRegion.normalize();
 
-          return Math.abs(vectorToRegion.dot(region.getNormal())) > minDot;
-       }).toList();
+                                                                                                                                          return Math.abs(
+                                                                                                                                                vectorToRegion.dot(
+                                                                                                                                                      region.getNormal()))
+                                                                                                                                                 > minDot;
+                                                                                                                                       }).toList();
 
       framePlanarRegionsList.getPlanarRegionsList().clear();
       framePlanarRegionsList.getPlanarRegionsList().addPlanarRegions(filteredList);
    }
 
+   /**
+    * This filter reduces the concave hull vertex count by remoting peaks, shallow angles and short edges along the bounding hull for
+    * every region in the provided planar regions list. Uses parallel stream for efficient CPU usage.
+    *
+    * @param planarRegionsList
+    * @param polygonizerParameters
+    */
    public static void applyConcaveHullReduction(PlanarRegionsList planarRegionsList, PolygonizerParameters polygonizerParameters)
    {
       // Apply some simple filtering to reduce the number of vertices and hopefully the number of convex polygons.
@@ -101,23 +145,28 @@ public class PerceptionFilterTools
       double lengthThreshold = polygonizerParameters.getLengthThreshold();
       double depthThreshold = polygonizerParameters.getDepthThreshold();
 
-      planarRegionsList.getPlanarRegionsAsList().parallelStream().forEach(
-            region ->
-            {
-               ConcaveHull concaveHull = new ConcaveHull(region.getConcaveHull());
+      planarRegionsList.getPlanarRegionsAsList().parallelStream().forEach(region ->
+                                                                          {
+                                                                             ConcaveHull concaveHull = new ConcaveHull(region.getConcaveHull());
 
-               ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHull);
-               ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHull);
+                                                                             ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(
+                                                                                   shallowAngleThreshold,
+                                                                                   peakAngleThreshold,
+                                                                                   concaveHull);
+                                                                             ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHull);
 
-               List<ConvexPolygon2D> decomposedPolygons = new ArrayList<>();
-               ConcaveHullDecomposition.recursiveApproximateDecomposition(concaveHull, depthThreshold, decomposedPolygons);
+                                                                             List<ConvexPolygon2D> decomposedPolygons = new ArrayList<>();
+                                                                             ConcaveHullDecomposition.recursiveApproximateDecomposition(concaveHull,
+                                                                                                                                        depthThreshold,
+                                                                                                                                        decomposedPolygons);
 
-               // Pack the data in PlanarRegion
-               PlanarRegion filteredRegion = new PlanarRegion(region.getTransformToWorld(), concaveHull.getConcaveHullVertices(), decomposedPolygons);
-               filteredRegion.setRegionId(region.getRegionId());
+                                                                             // Pack the data in PlanarRegion
+                                                                             PlanarRegion filteredRegion = new PlanarRegion(region.getTransformToWorld(),
+                                                                                                                            concaveHull.getConcaveHullVertices(),
+                                                                                                                            decomposedPolygons);
+                                                                             filteredRegion.setRegionId(region.getRegionId());
 
-               region.set(filteredRegion);
-            }
-      );
+                                                                             region.set(filteredRegion);
+                                                                          });
    }
 }
