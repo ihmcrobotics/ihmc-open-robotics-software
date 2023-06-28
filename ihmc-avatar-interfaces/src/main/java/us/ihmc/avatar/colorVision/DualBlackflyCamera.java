@@ -212,11 +212,11 @@ public class DualBlackflyCamera
             {
                synchronized (encodingCompletionNotifier)
                {
-                  encodingCompletionNotifier.wait();
+                  encodingCompletionNotifier.wait(500);
                }
                synchronized (undistortionCompletionNotifier)
                {
-                  undistortionCompletionNotifier.wait();
+                  undistortionCompletionNotifier.wait(500);
                }
             }
             catch (InterruptedException interruptedException)
@@ -495,6 +495,16 @@ public class DualBlackflyCamera
    {
       System.out.println("Destroying dual blackfly camera");
       destroyed = true;
+
+      // Notify deallocation thread to ensure it doesn't hang
+      synchronized (encodingCompletionNotifier)
+      {
+         encodingCompletionNotifier.notify();
+      }
+      synchronized (undistortionCompletionNotifier)
+      {
+         undistortionCompletionNotifier.notify();
+      }
 
       // Wait until threads finish their loops
       try
