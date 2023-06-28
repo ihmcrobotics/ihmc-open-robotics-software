@@ -489,6 +489,7 @@ public class DualBlackflyCamera
 
    public void destroy()
    {
+      System.out.println("Destroying dual blackfly camera");
       destroyed = true;
 
       // Wait until threads finish their loops
