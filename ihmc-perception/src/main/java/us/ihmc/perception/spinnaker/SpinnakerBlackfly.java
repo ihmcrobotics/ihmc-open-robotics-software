@@ -167,6 +167,7 @@ public class SpinnakerBlackfly
 
    public void stopAcquiringImages()
    {
+      System.out.println("Stopping spinnaker blackfly");
       assertNoError(Spinnaker_C.spinCameraEndAcquisition(spinCamera), "Ending camera acquisition");
    }
 }
