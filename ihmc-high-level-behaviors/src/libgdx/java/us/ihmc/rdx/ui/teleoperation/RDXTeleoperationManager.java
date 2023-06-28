@@ -430,6 +430,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       ImGui.separator();
       locomotionManager.renderImGuiWidgets();
+
       ImGui.separator();
       if (robotHasArms)
          handManager.renderImGuiWidgets();
