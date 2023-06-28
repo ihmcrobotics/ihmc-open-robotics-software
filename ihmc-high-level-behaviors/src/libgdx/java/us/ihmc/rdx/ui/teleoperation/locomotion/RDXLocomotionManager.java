@@ -465,14 +465,4 @@ public class RDXLocomotionManager
    {
       return locomotionParameters;
    }
-
-   public ImGuiStoredPropertySetTuner getLocomotionParametersTuner()
-   {
-      return locomotionParametersTuner;
-   }
-
-   public ImGuiStoredPropertySetTuner getSwingFootPlanningParametersTuner()
-   {
-      return swingFootPlanningParametersTuner;
-   }
 }

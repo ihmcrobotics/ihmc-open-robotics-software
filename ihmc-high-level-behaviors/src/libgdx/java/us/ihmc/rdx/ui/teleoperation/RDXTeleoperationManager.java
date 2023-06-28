@@ -164,7 +164,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
       controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2Helper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
 
       locomotionManager = new RDXLocomotionManager(robotModel, communicationHelper, syncedRobot, ros2Helper, controllerStatusTracker, this);
-      addChild(locomotionManager.getSwingFootPlanningParametersTuner());
 
       interactablesAvailable = robotSelfCollisionModel != null;
       if (interactablesAvailable)
@@ -185,7 +184,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
       desiredRobot.create();
 
       locomotionManager.create(baseUI);
-      addChild(locomotionManager.getLocomotionParametersTuner());
 
       teleoperationParametersTuner.create(teleoperationParameters);
 
