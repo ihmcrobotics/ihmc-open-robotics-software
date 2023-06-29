@@ -100,7 +100,7 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
    @Override
    public void create(RDXBaseUI baseUI)
    {
-      goalAffordance.create(goalPose -> helper.publish(GOAL_INPUT, goalPose), Color.SALMON);
+      goalAffordance.create(goalPose -> helper.publish(GOAL_INPUT, goalPose), Color.SALMON, helper.getRobotModel());
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGui3DViewInput);
 
       FootstepPlannerParametersBasics footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("_Stairs");
