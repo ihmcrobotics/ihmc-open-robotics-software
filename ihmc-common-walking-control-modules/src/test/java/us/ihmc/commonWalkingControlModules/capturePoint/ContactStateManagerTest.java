@@ -46,10 +46,21 @@ public class ContactStateManagerTest
       double maxSpeedUpFactor = swingDuration / minSwingDuration;
       expectedTotalTimeRemaining = swingDuration - (timeAtCompute - timeAtSTart);
       double scaledTimeRemaining = expectedTotalTimeRemaining / maxSpeedUpFactor;
+      double actualSpeedUp = expectedTotalTimeRemaining - scaledTimeRemaining;
+      // the time remaining never gets scaled
       assertEquals(expectedTotalTimeRemaining, contactStateManager.getTimeRemainingInCurrentSupportSequence(), 1e-7);
-      adjustedTimeRemaining = contactStateManager.getAdjustedTimeRemainingInCurrentSupportSequence()
-                                     - contactStateManager.getExtraTimeAdjustmentForSwing();
+      // TODO this should have a convenience function, maybe
+      adjustedTimeRemaining = contactStateManager.getAdjustedTimeRemainingInCurrentSupportSequence() - contactStateManager.getExtraTimeAdjustmentForSwing();
       assertEquals(scaledTimeRemaining, adjustedTimeRemaining, 1e-7);
+
+      // apply it at the end of swing. there should be zero allowed swing spped up there, but the applied speed up should still apply
+      timeAtCompute = timeAtSTart + swingDuration - actualSpeedUp;
+      time.set(timeAtCompute);
+      contactStateManager.updateTimeInState(() -> setSpeedUpDesired, true);
+
+      assertEquals(actualSpeedUp, contactStateManager.getTimeRemainingInCurrentSupportSequence(), 1e-7);
+      adjustedTimeRemaining = contactStateManager.getAdjustedTimeRemainingInCurrentSupportSequence() - contactStateManager.getExtraTimeAdjustmentForSwing();
+      assertEquals(0.0, adjustedTimeRemaining, 1e-7);
    }
 
 
