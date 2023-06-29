@@ -423,7 +423,8 @@ public class DynamicStateInspectorTest
       rightFootPose.getOrientation().set(-0.007, -0.0065, 0.079, 0.9968);
 
       inspector.setPolygons(rightPolygon, leftPolygon, onToesPolygon);
-      inspector.checkICPLocations(parameters, RobotSide.LEFT, rightFootPose, desiredICP, currentICP, toePosition);
+      for (int i = 0; i < 4; i++)
+         inspector.checkICPLocations(parameters, RobotSide.LEFT, rightFootPose, desiredICP, currentICP, toePosition);
 
       visualize(inspector);
 

@@ -18,5 +18,8 @@
   "Log depth" : false,
   "SLAM enabled" : false,
   "SLAM reset" : false,
+  "Support square enabled" : true,
+  "Bounding box filter" : true,
+  "Concave hull filters" : true,
   "Active mapping" : false
 }

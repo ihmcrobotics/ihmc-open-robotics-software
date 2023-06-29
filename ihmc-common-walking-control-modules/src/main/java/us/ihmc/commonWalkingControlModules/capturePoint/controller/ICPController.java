@@ -18,9 +18,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -67,6 +65,8 @@ public class ICPController implements ICPControllerInterface
 
    private final YoFrameVector2D unconstrainedFeedback = new YoFrameVector2D(yoNamePrefix + "UnconstrainedFeedback", worldFrame, registry);
    private final YoFramePoint2D unconstrainedFeedbackCMP = new YoFramePoint2D(yoNamePrefix + "UnconstrainedFeedbackCMP", worldFrame, registry);
+   private final YoFrameVector2D unconstrainedFeedbackNoScaling = new YoFrameVector2D(yoNamePrefix + "UnconstrainedFeedbackNoScaling", worldFrame, registry);
+   private final YoFramePoint2D unconstrainedFeedbackCMPNoScaling = new YoFramePoint2D(yoNamePrefix + "UnconstrainedFeedbackCMPNoScaling", worldFrame, registry);
    final YoFramePoint2D perfectCoP = new YoFramePoint2D(yoNamePrefix + "PerfectCoP", worldFrame, registry);
    final YoFramePoint2D perfectCMP = new YoFramePoint2D(yoNamePrefix + "PerfectCMP", worldFrame, registry);
 
@@ -369,13 +369,13 @@ public class ICPController implements ICPControllerInterface
                                         feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
 
       // run a temporary computation here to get what the  unconstrained CMP would be with none of the scaling
-      computeUnconstrainedFeedbackCMP(perfectCoP, perfectCMPOffset);
+      computeUnconstrainedFeedbackCMP(perfectCoP, perfectCMPOffset, unconstrainedFeedbackNoScaling, unconstrainedFeedbackCMPNoScaling);
       computeFeedForwardAndFeedBackAlphas();
 
       referenceFeedForwardCMPOffset.setAndScale(1.0 - feedForwardAlpha.getDoubleValue(), perfectCMPOffset);
       referenceFeedForwardCoP.interpolate(perfectCoP, desiredICP, feedForwardAlpha.getDoubleValue());
 
-      computeUnconstrainedFeedbackCMP(referenceFeedForwardCoP, referenceFeedForwardCMPOffset);
+      computeUnconstrainedFeedbackCMP(referenceFeedForwardCoP, referenceFeedForwardCMPOffset, unconstrainedFeedback, unconstrainedFeedbackCMP);
 
       UnrolledInverseFromMinor_DDRM.inv(transformedGains, inverseTransformedGains);
 
@@ -414,12 +414,15 @@ public class ICPController implements ICPControllerInterface
       return converged;
    }
 
-   private void computeUnconstrainedFeedbackCMP(FramePoint2DReadOnly feedforwardCoP, FrameVector2DReadOnly feedForwardCMPOffset)
+   private void computeUnconstrainedFeedbackCMP(FramePoint2DReadOnly feedforwardCoP,
+                                                FrameVector2DReadOnly feedForwardCMPOffset,
+                                                FixedFrameVector2DBasics unconstrainedFeedbackToPack,
+                                                FixedFramePoint2DBasics unconstrainedFeedbackCMPToPack)
    {
-      unconstrainedFeedback.setX(transformedGains.get(0, 0) * icpError.getX() + transformedGains.get(0, 1) * icpError.getY());
-      unconstrainedFeedback.setY(transformedGains.get(1, 0) * icpError.getX() + transformedGains.get(1, 1) * icpError.getY());
-      unconstrainedFeedbackCMP.add(feedforwardCoP, feedForwardCMPOffset);
-      unconstrainedFeedbackCMP.add(unconstrainedFeedback);
+      unconstrainedFeedbackToPack.setX(transformedGains.get(0, 0) * icpError.getX() + transformedGains.get(0, 1) * icpError.getY());
+      unconstrainedFeedbackToPack.setY(transformedGains.get(1, 0) * icpError.getX() + transformedGains.get(1, 1) * icpError.getY());
+      unconstrainedFeedbackCMPToPack.add(feedforwardCoP, feedForwardCMPOffset);
+      unconstrainedFeedbackCMPToPack.add(unconstrainedFeedbackToPack);
    }
 
    private void extractSolutionsFromSolver(boolean converged)

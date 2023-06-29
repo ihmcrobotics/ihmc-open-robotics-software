@@ -260,6 +260,11 @@ public class BipedSupportPolygons implements SCS2YoGraphicHolder
       return footPolygonsInSoleZUpFrame.get(robotSide);
    }
 
+   public SideDependentList<? extends FrameConvexPolygon2DReadOnly> getFootPolygonsInSoleFrame()
+   {
+      return footPolygonsInSoleFrame;
+   }
+
    public SideDependentList<? extends FrameConvexPolygon2DReadOnly> getFootPolygonsInSoleZUpFrame()
    {
       return footPolygonsInSoleZUpFrame;
