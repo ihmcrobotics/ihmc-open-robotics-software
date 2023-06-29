@@ -397,7 +397,6 @@ public class ICPController implements ICPControllerInterface
 
    private boolean solveQP()
    {
-
       boolean converged = solver.compute(icpError, referenceFeedForwardCoP, referenceFeedForwardCMPOffset);
       previousTickFailed.set(solver.previousTickFailed());
       if (!converged)
@@ -456,6 +455,10 @@ public class ICPController implements ICPControllerInterface
                                                       unconstrainedFeedbackCMP,
                                                       copConstraintHandler.getCoPConstraint()));
       else
+         feedForwardAlpha.set(0.0);
+
+      // catches a few bugs
+      if (feedForwardAlpha.isNaN())
          feedForwardAlpha.set(0.0);
    }
 
