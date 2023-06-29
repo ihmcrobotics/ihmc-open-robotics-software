@@ -24,6 +24,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class WalkingControllerParameters
 {
@@ -832,12 +833,28 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    *  When there's less than this fraction of swing remaining, the robot joints in swing should switch to
-    *  "load bearing". Essentially, for hydraulic robots, this switches them from velocity to position controlled.
-    *  This can be used to help alleviate heavy impacts at touchdown.
+    * When there's less than this fraction of swing remaining, the robot joints in swing should switch
+    * to "load bearing". Essentially, for hydraulic robots, this switches them from velocity to
+    * position controlled. This can be used to help alleviate heavy impacts at touchdown.
     */
    public double getFractionOfSwingToSwitchToLoaded()
    {
       return Double.NaN;
+   }
+
+   /**
+    * Parameter for the duration of foot loading.
+    */
+   public double getLoadFootDuration()
+   {
+      return 1.2;
+   }
+
+   /**
+    * Parameter for the duration of transfer from single support to double support.
+    */
+   public double getLoadFootTransferDuration()
+   {
+      return 0.8;
    }
 }
