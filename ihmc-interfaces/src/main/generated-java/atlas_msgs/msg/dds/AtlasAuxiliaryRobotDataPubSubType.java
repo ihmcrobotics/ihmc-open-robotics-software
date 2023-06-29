@@ -15,7 +15,7 @@ public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "af283b1c7c50a2933531ee4488523932a87c9db5e7d7ad43544ee2efbba336ec";
+   		return "0fbb8447010c9526fd1056dfce3a4ef01ff11b47d6233da7441090bc87652585";
    }
    
    @Override

@@ -15,7 +15,7 @@ public class StampedAlphabetPubSubType implements us.ihmc.pubsub.TopicDataType<t
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "aeff37d553ed05bb5a6bdc707e41d329311b9a30330146f300b0c1883121621c";
+   		return "a94de71705b91e7d83e6140a84d746f72573f895fc5a626021a8b01afa265954";
    }
    
    @Override

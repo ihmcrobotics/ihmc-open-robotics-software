@@ -13,7 +13,13 @@ public class OpenCVArUcoMarkerGenerator
     *
     * You can also use this site to generate markers as SVG: https://chev.me/arucogen/
     * Use Inkscape to size them and place them onto a canvas for printing.
-    * Save as PDF in Inkscape.
+    * Save as PDF in Inkscape. Use Custom:
+    * Left: 0  Top: 0
+    * Right: 24 in  Bottom: 30 in
+    * Width: 24 in  Height: 30 in
+    * Image size:
+    * Width: 710 px  Height: 888 px
+    * DPI: 29.60
     *
     * ---
     *

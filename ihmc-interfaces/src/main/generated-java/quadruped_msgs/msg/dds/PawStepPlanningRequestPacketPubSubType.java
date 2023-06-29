@@ -15,7 +15,7 @@ public class PawStepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "192a86560f5e67c920c2c86e6448b38e1b0e36674cda463e196f5d910310570a";
+   		return "d5a261a0f8296480bd57b7f6cd9c4006e7b5180e6a19b6110d2f6a912c02a77c";
    }
    
    @Override

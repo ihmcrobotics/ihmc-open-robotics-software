@@ -28,17 +28,14 @@ public class PlanarRegionCuttingTools
     * Cut a planar region map by a plane in 3D world; keeping the pert "above" the plane. (i.e. In the direction the normal points)
     *
     * @param plane
-    * @param map
+    * @param regionsListToCut
     * @return cut planar regions list
     */
-   public static PlanarRegionsList cutByPlane(Plane3D plane, PlanarRegionsList map)
+   public static PlanarRegionsList cutByPlane(Plane3D plane, PlanarRegionsList regionsListToCut)
    {
       PlanarRegionsList resultingRegions = new PlanarRegionsList();
 
-      for (PlanarRegion mapRegion : map.getPlanarRegionsAsList())
-      {
-         resultingRegions.addPlanarRegions(cutRegionByPlane(plane, mapRegion));
-      }
+      regionsListToCut.getPlanarRegionsAsList().parallelStream().map(region -> cutRegionByPlane(plane, region)).forEach(resultingRegions::addPlanarRegions);
 
       return resultingRegions;
    }

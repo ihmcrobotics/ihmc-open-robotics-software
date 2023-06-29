@@ -15,7 +15,7 @@ public class SimulatedLidarScanPacketPubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "88fec6e83e381641cc9641eba6a306d0dac31d54bbd66cc3842209f9847924b8";
+   		return "c66124cd59758586174028a4674c7ad83b09d6df7c02a2576d94eebb632e8f4d";
    }
    
    @Override

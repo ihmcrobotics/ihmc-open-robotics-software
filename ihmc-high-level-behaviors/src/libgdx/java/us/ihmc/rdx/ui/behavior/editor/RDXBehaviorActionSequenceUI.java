@@ -13,13 +13,14 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.TreeSet;
 
 /**
  * This panel renders a list of available action sequences found as JSON on disk,
@@ -42,15 +43,18 @@ public class RDXBehaviorActionSequenceUI
    private DRCRobotModel robotModel;
    private ROS2Node ros2Node;
    private ROS2SyncedRobotModel syncedRobot;
+   private RobotCollisionModel selectionCollisionModel;
    private ReferenceFrameLibrary referenceFrameLibrary;
    private final ImString newSequenceName = new ImString(256);
-   private final TreeSet<RDXBehaviorActionSequenceEditor> editors = new TreeSet<>(Comparator.comparing(RDXBehaviorActionSequenceEditor::getName));
+   private final ArrayList<RDXAvailableActionSequence> availableSequences = new ArrayList<>();
+   private RDXBehaviorActionSequenceEditor selectedEditor = null;
 
    public void create(WorkspaceResourceDirectory behaviorSequenceStorageDirectory,
                       RDX3DPanel panel3D,
                       DRCRobotModel robotModel,
                       ROS2Node ros2Node,
                       ROS2SyncedRobotModel syncedRobot,
+                      RobotCollisionModel selectionCollisionModel,
                       ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.behaviorSequenceStorageDirectory = behaviorSequenceStorageDirectory;
@@ -58,6 +62,7 @@ public class RDXBehaviorActionSequenceUI
       this.robotModel = robotModel;
       this.ros2Node = ros2Node;
       this.syncedRobot = syncedRobot;
+      this.selectionCollisionModel = selectionCollisionModel;
       this.referenceFrameLibrary = referenceFrameLibrary;
 
       BehaviorActionSequence.addCommonFrames(referenceFrameLibrary, syncedRobot);
@@ -68,9 +73,8 @@ public class RDXBehaviorActionSequenceUI
 
    public void update()
    {
-      for (var editor : editors)
-         if (editor.getPanel().getIsShowing().get())
-            editor.update();
+      if (selectedEditor != null)
+         selectedEditor.update();
    }
 
    private void renderImGuiWidgets()
@@ -79,59 +83,70 @@ public class RDXBehaviorActionSequenceUI
       if (reindexClicked)
          reindexSequences();
 
-      for (var editor : editors)
-         ImGui.checkbox(labels.get(editor.getName()), editor.getPanel().getIsShowing());
+      if (ImGui.radioButton(labels.get("None"), selectedEditor == null))
+      {
+         if (selectedEditor != null)
+         {
+            managerPanel.queueRemoveChild(selectedEditor.getPanel());
+            selectedEditor = null;
+         }
+      }
+      for (RDXAvailableActionSequence availableSequenceFile : availableSequences)
+      {
+         if (ImGui.radioButton(labels.get(availableSequenceFile.getName()),
+                               selectedEditor != null
+                               && selectedEditor.getWorkspaceFile().getFileName().equals(availableSequenceFile.getSequenceFile().getFileName())))
+         {
+            if (selectedEditor != null)
+               managerPanel.queueRemoveChild(selectedEditor.getPanel());
+
+            selectedEditor = new RDXBehaviorActionSequenceEditor(availableSequenceFile.getSequenceFile());
+            selectedEditor.create(panel3D, robotModel, ros2Node, syncedRobot, selectionCollisionModel, referenceFrameLibrary);
+            selectedEditor.loadActionsFromFile();
+            managerPanel.queueAddChild(selectedEditor.getPanel());
+         }
+      }
 
       ImGuiTools.inputText(labels.getHidden("newSequenceName"), newSequenceName);
       ImGui.sameLine();
       if (ImGui.button("Create new sequence"))
       {
-         var editor = new RDXBehaviorActionSequenceEditor(newSequenceName.get(), behaviorSequenceStorageDirectory);
-         editor.saveToFile();
-         addEditor(editor);
+         selectedEditor = new RDXBehaviorActionSequenceEditor(newSequenceName.get(), behaviorSequenceStorageDirectory);
+         selectedEditor.create(panel3D, robotModel, ros2Node, syncedRobot, selectionCollisionModel, referenceFrameLibrary);
+         selectedEditor.saveToFile();
+         managerPanel.queueAddChild(selectedEditor.getPanel());
+         availableSequences.add(new RDXAvailableActionSequence(selectedEditor.getWorkspaceFile()));
       }
    }
 
    private void reindexSequences()
    {
+      availableSequences.clear();
       for (WorkspaceResourceFile queryContainedFile : behaviorSequenceStorageDirectory.queryContainedFiles())
       {
-         boolean alreadyLoaded = false;
-         for (var editor : editors)
-            alreadyLoaded |= editor.getWorkspaceFile().getFileName().equals(queryContainedFile.getFileName());
-
-         if (!alreadyLoaded)
-         {
-            var editor = new RDXBehaviorActionSequenceEditor(queryContainedFile);
-            addEditor(editor);
-            editor.loadActionsFromFile();
-         }
+         availableSequences.add(new RDXAvailableActionSequence(queryContainedFile));
       }
-   }
 
-   private void addEditor(RDXBehaviorActionSequenceEditor editor)
-   {
-      editor.create(panel3D, robotModel, ros2Node, syncedRobot, referenceFrameLibrary);
-      editors.add(editor);
-      managerPanel.queueAddChild(editor.getPanel());
+      // Keep them in alphabetical order
+      availableSequences.sort(Comparator.comparing(RDXAvailableActionSequence::getName));
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      for (var editor : editors)
-         editor.calculate3DViewPick(input);
+      if (selectedEditor != null)
+         selectedEditor.calculate3DViewPick(input);
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      for (var editor : editors)
-         editor.process3DViewInput(input);
+      if (selectedEditor != null)
+         selectedEditor.process3DViewInput(input);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (var editor : editors)
-         editor.getRenderables(renderables, pool);
+      if (selectedEditor != null)
+         selectedEditor.getRenderables(renderables, pool);
    }
 
    public ImGuiPanel getManagerPanel()

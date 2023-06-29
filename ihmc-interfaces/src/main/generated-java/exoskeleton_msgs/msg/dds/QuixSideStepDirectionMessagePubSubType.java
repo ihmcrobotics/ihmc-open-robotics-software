@@ -15,7 +15,7 @@ public class QuixSideStepDirectionMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "bfb3ddceaa5ecaef166f8d8881d82bb68c6d8db9d43624393c51e7df7c4e623e";
+   		return "4afe9d2fe0aff1410ddd7d7c0455b0c9fa48b4cd9d6a0000a66380221a680f37";
    }
    
    @Override

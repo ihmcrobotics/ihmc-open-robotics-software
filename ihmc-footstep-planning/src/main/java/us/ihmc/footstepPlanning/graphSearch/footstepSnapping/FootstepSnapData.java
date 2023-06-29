@@ -185,6 +185,8 @@ public class FootstepSnapData implements FootstepSnapDataReadOnly
       this.achievedInsideDelta = Double.NaN;
       this.snappedFootstepTransformIncludesWiggleTransform = false;
       rmsErrorHeightMap = Double.NaN;
+      snappedToPlanarRegions = false;
+      snappedToHeightMap = false;
    }
 
    private static final FootstepSnapData EMPTY_SNAP_DATA;

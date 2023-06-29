@@ -15,7 +15,7 @@ public class Capsule3DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "09320bdb1355fdec82b8a4bafe0e19ba407b6ea6dfd1e5649e369905f97187cc";
+   		return "57cb066363fbd1b15b561793a1809920cb3f869c775c5b83285b2c5e2a66b6bf";
    }
    
    @Override

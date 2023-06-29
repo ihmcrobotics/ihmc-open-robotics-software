@@ -15,7 +15,7 @@ public class QuadrupedTimedStepMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4395d7eae5938e70baad0c6330397a866a68d4a10031db5b0a712bd273b738c3";
+   		return "2b82eb71f124709261eb34e51eb35be59f47b6d77a21d38268cc7bc0745eff3f";
    }
    
    @Override

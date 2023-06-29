@@ -24,7 +24,7 @@ import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
+import us.ihmc.robotics.interaction.StepCheckIsPointInsideAlgorithm;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
 import java.util.HashMap;

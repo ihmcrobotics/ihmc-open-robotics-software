@@ -15,7 +15,7 @@ public class AtlasWristSensorCalibrationRequestPacketPubSubType implements us.ih
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "92c3e0592865a085cf9a2a797d9fe5d576da0b9b28731726c93f56a3fc7541e0";
+   		return "0f1c49f7895db145448999a7a90966381fb5e5b7b1ac84939cd907e787c01c8a";
    }
    
    @Override

@@ -58,7 +58,7 @@ public class StepConstraintsListMessage extends Packet<StepConstraintsListMessag
 
       hole_polygons_size_ = new us.ihmc.idl.IDLSequence.Integer (100, "type_2");
 
-      vertex_buffer_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (500, new geometry_msgs.msg.dds.PointPubSubType());
+      vertex_buffer_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (50000, new geometry_msgs.msg.dds.PointPubSubType());
 
    }
 

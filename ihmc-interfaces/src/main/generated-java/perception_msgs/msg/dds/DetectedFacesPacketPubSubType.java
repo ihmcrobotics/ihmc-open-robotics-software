@@ -15,7 +15,7 @@ public class DetectedFacesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4d6dd101edb231643689f763b8525968ca4927122c2ee90f0431d7a75c49b42b";
+   		return "e0b4cf8d681a38efb848dd8f9dbda0bab59bf3b68758777424303a91a60c544b";
    }
    
    @Override

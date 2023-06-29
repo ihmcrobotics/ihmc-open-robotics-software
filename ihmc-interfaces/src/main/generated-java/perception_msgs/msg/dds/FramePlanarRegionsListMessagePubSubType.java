@@ -15,7 +15,7 @@ public class FramePlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "69848117e826a7aa6e0c2b146f616b0872ff6a44b17d92eeba77ac3cd3212271";
+   		return "ed941904fc58fd7646c5fdd9c141595ec114a7003b5d42d3da1b8998f249c3c4";
    }
    
    @Override

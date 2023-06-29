@@ -45,6 +45,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLIntBuffer;
@@ -860,6 +861,16 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
    public CameraPinholeBrown getDepthCameraIntrinsics()
    {
       return depthCameraIntrinsics;
+   }
+
+   public CameraIntrinsics getCopyOfCameraParameters()
+   {
+      return new CameraIntrinsics(imageHeight,
+                                  imageWidth,
+                                  getLowLevelSimulator().getFocalLengthPixels().get(),
+                                  getLowLevelSimulator().getFocalLengthPixels().get(),
+                                  getLowLevelSimulator().getPrincipalOffsetXPixels().get(),
+                                  getLowLevelSimulator().getPrincipalOffsetYPixels().get());
    }
 
    public Color getPointColorFromPicker()

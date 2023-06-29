@@ -15,7 +15,7 @@ public class TextToSpeechPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "381fbfde636c044ca7e4ab42403aac167bb8b2d2892d5ffefaa49e18729ee8d5";
+   		return "30fa7fbdd72b7528c57ffc704d020f7b284f6c2a770df29c3b7f9de5b854428a";
    }
    
    @Override

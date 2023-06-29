@@ -4,6 +4,8 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
+import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -14,55 +16,54 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.Timer;
+import us.ihmc.tools.thread.Throttler;
 
 import java.util.UUID;
 
 public class WalkAction extends WalkActionData implements BehaviorAction
 {
+   public static final double TRANSLATION_TOLERANCE = 0.15;
+   public static final double ROTATION_TOLERANCE = Math.toRadians(10.0);
+
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
-   private ReferenceFrame parentReferenceFrame;
-   private final ModifiableReferenceFrame gizmoFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
    private final SideDependentList<FramePose3D> goalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
+   private final SideDependentList<FramePose3D> syncedFeetPoses = new SideDependentList<>(() -> new FramePose3D());
+   private final SideDependentList<FramePose3D> commandedGoalFeetTransformToWorld = new SideDependentList<>(() -> new FramePose3D());
    private final FootstepPlanningModule footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final WalkingControllerParameters walkingControllerParameters;
    private FootstepDataListMessage footstepDataListMessage;
+   private final Timer executionTimer = new Timer();
+   private final Throttler warningThrottler = new Throttler().setFrequency(2.0);
 
    public WalkAction(ROS2ControllerHelper ros2ControllerHelper,
                      ROS2SyncedRobotModel syncedRobot,
                      FootstepPlanningModule footstepPlanner,
                      FootstepPlannerParametersBasics footstepPlannerParameters,
+                     WalkingControllerParameters walkingControllerParameters,
                      ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.footstepPlanner = footstepPlanner;
       this.footstepPlannerParameters = footstepPlannerParameters;
-      this.referenceFrameLibrary = referenceFrameLibrary;
+      this.walkingControllerParameters = walkingControllerParameters;
+      setReferenceFrameLibrary(referenceFrameLibrary);
    }
 
    @Override
-   public void update()
+   public void update(int actionIndex, int nextExecutionIndex)
    {
-      ReferenceFrame previousParentReferenceFrame = parentReferenceFrame;
-      parentReferenceFrame = referenceFrameLibrary.findFrameByName(getParentFrameName());
-      if (parentReferenceFrame != previousParentReferenceFrame)
-      {
-         gizmoFrame.changeParentFrame(parentReferenceFrame);
-      }
-
-      gizmoFrame.getTransformToParent().set(getTransformToParent());
-      gizmoFrame.getReferenceFrame().update();
-
       for (RobotSide side : RobotSide.values)
       {
-         goalFeetPoses.get(side).setIncludingFrame(gizmoFrame.getReferenceFrame(), getGoalFootstepToGizmos().get(side));
+         goalFeetPoses.get(side).setIncludingFrame(getReferenceFrame(), getGoalFootstepToParentTransforms().get(side));
          goalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
       }
    }
@@ -83,6 +84,7 @@ public class WalkAction extends WalkActionData implements BehaviorAction
       for (RobotSide side : RobotSide.values)
       {
          footstepPlannerRequest.setGoalFootPose(side, goalFeetPoses.get(side));
+         goalFeetPoses.get(side).get(commandedGoalFeetTransformToWorld.get(side));
       }
 
       //      footstepPlannerRequest.setPlanarRegionsList(...);
@@ -94,15 +96,16 @@ public class WalkAction extends WalkActionData implements BehaviorAction
       footstepPlanner.getFootstepPlannerParameters().setMaximumStepReach(idealFootstepLength);
       LogTools.info("Planning footsteps...");
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
+      FootstepPlan footstepPlan = footstepPlannerOutput.getFootstepPlan();
       LogTools.info("Footstep planner completed with {}, {} step(s)",
                     footstepPlannerOutput.getFootstepPlanningResult(),
-                    footstepPlannerOutput.getFootstepPlan().getNumberOfSteps());
+                    footstepPlan.getNumberOfSteps());
 
       FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
       footstepPlannerLogger.logSession();
       ThreadTools.startAThread(FootstepPlannerLogger::deleteOldLogs, "FootstepPlanLogDeletion");
 
-      if (footstepPlannerOutput.getFootstepPlan().getNumberOfSteps() < 1) // failed
+      if (footstepPlan.getNumberOfSteps() < 1) // failed
       {
          FootstepPlannerRejectionReasonReport rejectionReasonReport = new FootstepPlannerRejectionReasonReport(footstepPlanner);
          rejectionReasonReport.update();
@@ -116,7 +119,12 @@ public class WalkAction extends WalkActionData implements BehaviorAction
       }
       else
       {
-         footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlannerOutput.getFootstepPlan(),
+         footstepPlan.getFootstep(0).setTransferDuration(getTransferDuration() / 2.0);
+
+         if (footstepPlan.getNumberOfSteps() > 1)
+            footstepPlan.getFootstep(footstepPlan.getNumberOfSteps() - 1).setTransferDuration(getTransferDuration() / 2.0);
+
+         footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan,
                                                                                                getSwingDuration(),
                                                                                                getTransferDuration());
          footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
@@ -131,6 +139,31 @@ public class WalkAction extends WalkActionData implements BehaviorAction
       if (footstepDataListMessage != null)
       {
          ros2ControllerHelper.publishToController(footstepDataListMessage);
+         executionTimer.reset();
       }
+   }
+
+   @Override
+   public boolean isExecuting()
+   {
+      double nominalExecutionDuration = PlannerTools.calculateNominalTotalPlanExecutionDuration(footstepPlanner.getOutput().getFootstepPlan(),
+                                                                                                getSwingDuration(),
+                                                                                                walkingControllerParameters.getDefaultInitialTransferTime(),
+                                                                                                getTransferDuration(),
+                                                                                                walkingControllerParameters.getDefaultFinalTransferTime());
+      boolean isExecuting = false;
+      for (RobotSide side : RobotSide.values)
+      {
+         syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
+
+         isExecuting |= BehaviorActionSequenceTools.isExecuting(commandedGoalFeetTransformToWorld.get(side),
+                                                                syncedFeetPoses.get(side),
+                                                                TRANSLATION_TOLERANCE,
+                                                                ROTATION_TOLERANCE,
+                                                                nominalExecutionDuration,
+                                                                executionTimer,
+                                                                warningThrottler);
+      }
+      return isExecuting;
    }
 }

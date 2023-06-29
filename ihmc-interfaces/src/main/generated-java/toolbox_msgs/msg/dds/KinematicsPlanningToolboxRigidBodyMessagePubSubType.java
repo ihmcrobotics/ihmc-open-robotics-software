@@ -15,7 +15,7 @@ public class KinematicsPlanningToolboxRigidBodyMessagePubSubType implements us.i
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "8b1e0acf6b484097fbf6330d2c75d002dcc0427e3dff49a06224440712b9ac14";
+   		return "1c1e883aa7799d3cddd8ed8254474733d475101f16186ddeee9bf73d8209e6ad";
    }
    
    @Override

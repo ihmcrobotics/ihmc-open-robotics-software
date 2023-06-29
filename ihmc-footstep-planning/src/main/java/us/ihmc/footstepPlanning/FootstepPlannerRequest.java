@@ -558,6 +558,7 @@ public class FootstepPlannerRequest
          this.bodyPathWaypoints.add(new Pose3D(other.bodyPathWaypoints.get(i)));
       }
 
+      // todo should be a copy
       this.heightMapData = other.heightMapData;
 
       if (other.referencePlan != null)

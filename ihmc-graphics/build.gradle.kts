@@ -1,6 +1,6 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.7"
+   id("us.ihmc.ihmc-ci") version "8.3"
    id("us.ihmc.ihmc-cd") version "1.24"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
@@ -16,7 +16,7 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-interfaces:source")
    api("us.ihmc:ihmc-java-toolkit:source")
-   api("us.ihmc:ihmc-graphics-description:0.20.3")
+   api("us.ihmc:ihmc-graphics-description:0.20.5")
    api("us.ihmc:ihmc-video-codecs:2.1.6")
 }
 
@@ -27,7 +27,7 @@ testDependencies {
 javafxDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.3")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.5")
    api("us.ihmc:simulation-construction-set-tools:source")
 }
 
@@ -77,16 +77,16 @@ libgdxDependencies {
    val javaFXVersion = "17.0.2"
    api(ihmc.javaFXModule("graphics", javaFXVersion)) // JFX Color
 
-   // https://oss.sonatype.org/content/repositories/snapshots/org/bytedeco/
-   val javaCPPVersion = "1.5.9-SNAPSHOT"
-   api("org.bytedeco:javacpp:$javaCPPVersion")
-   val openblasVersion = "0.3.23-1.5.9-20230404.015544-39"
+   api("org.bytedeco:javacpp:1.5.9")
+   val openblasVersion = "0.3.23-1.5.9"
    api("org.bytedeco:openblas:$openblasVersion")
    api("org.bytedeco:openblas:$openblasVersion:linux-x86_64")
+   api("org.bytedeco:openblas:$openblasVersion:linux-arm64")
    api("org.bytedeco:openblas:$openblasVersion:windows-x86_64")
-   val opencvVersion = "4.7.0-1.5.9-20230516.151940-290"
+   val opencvVersion = "4.7.0-1.5.9"
    api("org.bytedeco:opencv:$opencvVersion")
    api("org.bytedeco:opencv:$opencvVersion:linux-x86_64")
+   api("org.bytedeco:opencv:$opencvVersion:linux-arm64")
    api("org.bytedeco:opencv:$opencvVersion:windows-x86_64")
 }
 

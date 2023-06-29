@@ -15,7 +15,7 @@ public class ManualHandControlPacketPubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c2918029148eebf9718640d293eb27393d7157a658be067eb348276db4b07fe9";
+   		return "55e525b155b4d7b26a116e21fde5829eba620904c00e3c53a74451d32d557f65";
    }
    
    @Override
