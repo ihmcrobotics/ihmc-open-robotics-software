@@ -320,8 +320,6 @@ public class TerrainPerceptionProcessWithDriver
             extractFramePlanarRegionsList(depthBytedecoImage, cameraFrame, framePlanarRegionsList);
 
             PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, frameRegionsTopic, ros2Helper);
-
-//            LogTools.info("Total Planar Regions: " + framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions());
          }
 
          if (parameters.getPublishDepth() || parameters.getRapidRegionsEnabled())
