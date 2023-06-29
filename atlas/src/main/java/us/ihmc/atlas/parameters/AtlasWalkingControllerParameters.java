@@ -156,7 +156,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return true;
    }
 
-
    @Override
    public double getOmega0()
    {
@@ -314,6 +313,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    {
       Map<String, RigidBodyControlMode> defaultControlModes = new HashMap<>();
       defaultControlModes.put(jointMap.getChestName(), RigidBodyControlMode.TASKSPACE);
+      for (RobotSide robotSide : RobotSide.values)
+         defaultControlModes.put(jointMap.getFootName(robotSide), RigidBodyControlMode.TASKSPACE);
       return defaultControlModes;
    }
 
@@ -331,6 +332,16 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       jointHomeConfiguration.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), 0.0);
 
       jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH), runningOnRealRobot ? 0.7 : 0.0);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW), 0);
+         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 0);
+         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH), -0.5);
+         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), 1.0);
+         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH), -0.5);
+         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), 0);
+      }
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -353,7 +364,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       if (bodyHomeConfiguration != null)
          return bodyHomeConfiguration;
 
-      bodyHomeConfiguration = new HashMap<String, Pose3D>();
+      bodyHomeConfiguration = new HashMap<>();
 
       Pose3D homeChestPoseInPelvisZUpFrame = new Pose3D();
       if (runningOnRealRobot)
@@ -361,6 +372,11 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
          homeChestPoseInPelvisZUpFrame.appendPitchRotation(Math.toRadians(10.0));
       }
       bodyHomeConfiguration.put(jointMap.getChestName(), homeChestPoseInPelvisZUpFrame);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         bodyHomeConfiguration.put(jointMap.getFootName(robotSide), new Pose3D(0, 0, -0.5, 0, 0, 0));
+      }
 
       return bodyHomeConfiguration;
    }
@@ -608,8 +624,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    /**
-    * Maximum velocity of the CoM height. Desired height velocity will be set to this if it is exceeded.
-    * Not a very clean variable and probably should not be here, but here it is...
+    * Maximum velocity of the CoM height. Desired height velocity will be set to this if it is
+    * exceeded. Not a very clean variable and probably should not be here, but here it is...
     */
    @Override
    public double getMaximumVelocityCoMHeight()
