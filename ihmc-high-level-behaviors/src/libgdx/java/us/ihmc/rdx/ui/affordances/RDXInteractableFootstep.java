@@ -31,8 +31,8 @@ import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
-import us.ihmc.rdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
-import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
+import us.ihmc.robotics.interaction.StepCheckIsPointInsideAlgorithm;
+import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.visualizers.RDXPolynomial;
 import us.ihmc.robotics.math.trajectories.core.Polynomial;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
@@ -116,6 +116,7 @@ public class RDXInteractableFootstep
       getFootstepModelInstance().transform.val[Matrix4.M03] = Float.NaN;
       plannedFootstepInternal.reset();
       plannedFootstepTrajectory.clear();
+      updateTrajectoryModel(plannedFootstepInternal, plannedFootstepTrajectory);
    }
 
    public PlannedFootstepReadOnly getPlannedFootstep()
@@ -141,7 +142,7 @@ public class RDXInteractableFootstep
 
       if (setCustomFoothold)
       {
-         Color regionColor = RDXFootstepPlanGraphic.footstepColors.get(plannedFootstep.getRobotSide());
+         Color regionColor = RDXFootstepGraphic.FOOT_COLORS.get(plannedFootstep.getRobotSide());
          List<Point3DReadOnly> points = new ArrayList<>();
          for (int i = 0; i < plannedFootstep.getFoothold().getNumberOfVertices(); i++)
          {
@@ -167,11 +168,12 @@ public class RDXInteractableFootstep
       updateFootstepIndexText(footstepIndex);
 
       updatePose(plannedFootstep.getFootstepPose());
+
+      updateTrajectoryModel(plannedFootstepInternal, plannedFootstepTrajectory);
    }
 
    public void updatePlannedTrajectory(Pair<PlannedFootstep, EnumMap<Axis3D, List<PolynomialReadOnly>>> other)
    {
-      wasPoseUpdated = true;
       plannedFootstepInput.set(other);
    }
 
@@ -198,6 +200,8 @@ public class RDXInteractableFootstep
             plannedFootstepTrajectory.put(axis, polynomialListCopy);
          }
       }
+
+      updateTrajectoryModel(plannedFootstepInternal, plannedFootstepTrajectory);
    }
 
    public void update()
@@ -221,7 +225,6 @@ public class RDXInteractableFootstep
          Pair<PlannedFootstep, EnumMap<Axis3D, List<PolynomialReadOnly>>> pair = plannedFootstepInput.getAndSet(null);
          updatePlannedTrajectoryInternal(pair.getLeft(), pair.getRight());
       }
-      updateTrajectoryModel(plannedFootstepInternal, plannedFootstepTrajectory);
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)

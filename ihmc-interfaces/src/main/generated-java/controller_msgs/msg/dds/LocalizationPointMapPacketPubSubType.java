@@ -15,7 +15,7 @@ public class LocalizationPointMapPacketPubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "175ab3a3151254657dc94fc391a706ce6229fae0af767c5fd095ac12d507c792";
+   		return "74f1d99d8166fa95c0bf34c7decadc75966c59625e5466d41facfdc9957044e2";
    }
    
    @Override

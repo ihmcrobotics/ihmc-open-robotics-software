@@ -50,11 +50,6 @@ public class RDXSwingPlanningModule
       swingPlanningModule = new SwingPlanningModule(footstepPlannerParameters, swingPlannerParameters, walkingControllerParameters, footPolygons);
    }
 
-   public void setPlanarRegionListMessage(PlanarRegionsListMessage planarRegionsListMessage)
-   {
-      this.planarRegionsListMessage = planarRegionsListMessage;
-   }
-
    public void setPlanarRegionList(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
@@ -98,7 +93,7 @@ public class RDXSwingPlanningModule
                                                 startFootPoses,
                                                 swingPlannerType);
 
-      for (int i = 0; i < footstepPlan.size(); i++)
+      for (int i = 0; i < footstepPlan.size() && i < swingPlanningModule.getSwingTrajectories().size(); i++)
       {
          footstepPlan.get(i).updatePlannedTrajectory(Pair.of(tempPlan.getFootstep(i), swingPlanningModule.getSwingTrajectories().get(i)));
       }

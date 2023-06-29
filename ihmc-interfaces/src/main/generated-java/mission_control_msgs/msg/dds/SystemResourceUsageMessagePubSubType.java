@@ -15,7 +15,7 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "55ef385f77484d36434f681085b72d17e858b04113fc6ff0886a16d98daa7d51";
+   		return "5e938f2337b8e65cd417d64f4155d3921400c6a7248d8331fdda31a35b4a83d6";
    }
    
    @Override

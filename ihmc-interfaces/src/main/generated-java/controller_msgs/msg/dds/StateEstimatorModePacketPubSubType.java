@@ -15,7 +15,7 @@ public class StateEstimatorModePacketPubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "356a3184a0e1772e97a61b75d9c617714f2748b0056e506b274a9f7571405083";
+   		return "796f3c9e065ec156304e105f8b1bebd46bf89410b07bf9f22f7a2667118f3297";
    }
    
    @Override

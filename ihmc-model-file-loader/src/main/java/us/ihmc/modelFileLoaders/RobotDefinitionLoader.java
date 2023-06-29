@@ -51,7 +51,7 @@ public class RobotDefinitionLoader
       try
       {
          URDFModel urdfRoot = URDFTools.loadURDFModel(stream, resourceDirectories, classLoader);
-         RobotDefinition robotDefinition = URDFTools.toFloatingRobotDefinition(urdfRoot);
+         RobotDefinition robotDefinition = URDFTools.toRobotDefinition(urdfRoot);
          // By default SDFTools names the root body "rootBody", for backward compatibility it is renamed "elevator".
          robotDefinition.getRootBodyDefinition().setName(DEFAULT_ROOT_BODY_NAME);
 

@@ -15,7 +15,7 @@ public class StoredPropertySetMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9d41f5aba740548eefb3bd8c73ef4dbf670210e9a195d457b93db7ab37534574";
+   		return "df1e117510bfbc9a3b5e5f09fe846d21aee1aa9168aac2625a0cc9f6d6ef0436";
    }
    
    @Override

@@ -157,9 +157,6 @@ public class PlanarRegionMappingHandler
             Depth: [fx:730.7891, fy:731.0859, cx:528.6094, cy:408.1602, h:768, w:1024]
        */
 
-      rapidRegionsExtractor = new RapidPlanarRegionsExtractor();
-      rapidRegionsExtractor.getDebugger().setEnabled(true);
-
       openCLManager = new OpenCLManager();
       openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
 
@@ -180,7 +177,8 @@ public class PlanarRegionMappingHandler
 
       String version = simulation ? "Simulation" : "";
 
-      rapidRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth, 654.29, 654.29, 651.14, 361.89, version);
+      rapidRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager, openCLProgram, depthHeight, depthWidth, 654.29, 654.29, 651.14, 361.89, version);
+      setupPlanarRegionsExtractor();
       rapidPatchesBasedICP.create(openCLManager, openCLProgram, depthHeight, depthWidth);
       depth16UC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
 
@@ -195,7 +193,8 @@ public class PlanarRegionMappingHandler
    {
       planarRegionMap = new PlanarRegionMap(smoothing, "Spherical");
       sensorLogChannelName = PerceptionLoggerConstants.OUSTER_DEPTH_NAME;
-      rapidRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth);
+      rapidRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager, openCLProgram, depthHeight, depthWidth);
+      setupPlanarRegionsExtractor();
       rapidPatchesBasedICP.create(openCLManager, openCLProgram, depthHeight, depthWidth);
       depth16UC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
 
@@ -204,6 +203,11 @@ public class PlanarRegionMappingHandler
       perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, sensorOrientationBuffer);
 
       totalDepthCount = perceptionDataLoader.getHDF5Manager().getCount(sensorLogChannelName);
+   }
+
+   private void setupPlanarRegionsExtractor()
+   {
+      rapidRegionsExtractor.getDebugger().setEnabled(true);
    }
 
    public PlanarRegionMappingHandler(File planarRegionLogDirectory, boolean smoothing)
@@ -331,7 +335,7 @@ public class PlanarRegionMappingHandler
 
    public void performMapCleanUp()
    {
-      planarRegionMap.performMapCleanUp();
+      planarRegionMap.performMapCleanUp(true, true);
       latestPlanarRegionsForRendering.set(planarRegionMap.getMapRegions().copy());
       planarRegionMap.setModified(true);
    }
@@ -380,7 +384,7 @@ public class PlanarRegionMappingHandler
 
       LogTools.debug("Updating Map with {} regions", regions.getPlanarRegionsList().getNumberOfPlanarRegions());
 
-      RigidBodyTransform keyframePose = planarRegionMap.registerRegions(regions.getPlanarRegionsList(), regions.getSensorToWorldFrameTransform());
+      RigidBodyTransform keyframePose = planarRegionMap.registerRegions(regions.getPlanarRegionsList(), regions.getSensorToWorldFrameTransform(), null);
 
       if (keyframePose != null)
          latestKeyframePoseForRendering.set(keyframePose);
@@ -408,7 +412,7 @@ public class PlanarRegionMappingHandler
 
    public void resetMap()
    {
-      planarRegionMap.reset();
+      planarRegionMap.destroy();
       latestKeyframePoseForRendering.set(new RigidBodyTransform());
       latestPlanarRegionsForRendering.set(new PlanarRegionsList());
       planarRegionMap.setModified(true);

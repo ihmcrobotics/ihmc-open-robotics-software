@@ -15,7 +15,7 @@ public class QuadrupedSteppingStateChangeMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "be915c39d2f62ed326c6588a90339939f9e06fc0ea2a23094aeeba2349dc7443";
+   		return "feacbe79b0fcffd655b3dd0553af4ecf153cf240d5e8d57cb8f0f5aabca80cb4";
    }
    
    @Override

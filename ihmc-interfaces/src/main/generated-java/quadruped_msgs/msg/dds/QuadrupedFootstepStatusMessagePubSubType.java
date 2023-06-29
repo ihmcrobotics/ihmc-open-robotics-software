@@ -15,7 +15,7 @@ public class QuadrupedFootstepStatusMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b67fb3606525ccec7bf08cb031e8256f78388a56357991b7446f22e23ef060c4";
+   		return "c08b17d293e4e11cfa83331dddb7394f0b1598dc59811e0e0c1dbc6bdb43690c";
    }
    
    @Override

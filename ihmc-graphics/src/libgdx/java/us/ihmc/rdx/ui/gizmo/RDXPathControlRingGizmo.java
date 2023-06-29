@@ -33,6 +33,7 @@ import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.robotics.interaction.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 import java.util.Random;
@@ -91,7 +92,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private RigidBodyTransform transformToParent;
    /** This pose 3D should always be left in world frame and represent this gizmo's pose. */
    private final FramePose3D framePose3D = new FramePose3D();
-   private ReferenceFrame parentReferenceFrame;
    private ReferenceFrame gizmoFrame;
    /** Gizmo transform to world so it can be calculated once. */
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
@@ -136,14 +136,18 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    private void initialize(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify)
    {
-      this.parentReferenceFrame = gizmoFrame.getParent();
       this.transformToParent = gizmoTransformToParentFrameToModify;
+      this.gizmoFrame = gizmoFrame;
+   }
+
+   public void setGizmoFrame(ReferenceFrame gizmoFrame)
+   {
       this.gizmoFrame = gizmoFrame;
    }
 
    public void setParentFrame(ReferenceFrame parentReferenceFrame)
    {
-      this.parentReferenceFrame = parentReferenceFrame;
+      gizmoFrame.remove();
       gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
    }
 
@@ -159,7 +163,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    {
       camera3D = panel3D.getCamera3D();
       boolean yawOnly = true;
-      frameBasedGizmoModification = new FrameBasedGizmoModification(this::getGizmoFrame, () -> parentReferenceFrame, camera3D, yawOnly);
+      frameBasedGizmoModification = new FrameBasedGizmoModification(this::getGizmoFrame, () -> gizmoFrame.getParent(), camera3D, yawOnly);
       panel3D.addImGuiOverlayAddition(this::renderTooltipAndContextMenu);
 
       normalMaterial = createAlphaPaletteMaterial(RDXGizmoTools.X_AXIS_DEFAULT_COLOR.a);
@@ -350,7 +354,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
             }
             else // translation
             {
-
                double amount = deltaTime * (shiftHeld ? 0.05 : 0.4);
                Point3DBasics positionToAdjust = frameBasedGizmoModification.beforeForTranslationAdjustment();
                if (upArrowHeld && !ctrlHeld) // x +
@@ -513,12 +516,12 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    private void updateMaterialHighlighting()
    {
-      boolean prior = highlightingEnabled && isGizmoHovered;
-      discModel.setMaterial(prior && closestCollisionSelection == RING ? highlightedMaterial : normalMaterial);
-      positiveXArrowModel.setMaterial(prior && closestCollisionSelection == POSITIVE_X_ARROW ? highlightedMaterial : normalMaterial);
-      positiveYArrowModel.setMaterial(prior && closestCollisionSelection == POSITIVE_Y_ARROW ? highlightedMaterial : normalMaterial);
-      negativeXArrowModel.setMaterial(prior && closestCollisionSelection == NEGATIVE_X_ARROW ? highlightedMaterial : normalMaterial);
-      negativeYArrowModel.setMaterial(prior && closestCollisionSelection == NEGATIVE_Y_ARROW ? highlightedMaterial : normalMaterial);
+      boolean highlightingPrior = highlightingEnabled && isGizmoHovered;
+      discModel.setMaterial(highlightingPrior && closestCollisionSelection == RING ? highlightedMaterial : normalMaterial);
+      positiveXArrowModel.setMaterial(highlightingPrior && closestCollisionSelection == POSITIVE_X_ARROW ? highlightedMaterial : normalMaterial);
+      positiveYArrowModel.setMaterial(highlightingPrior && closestCollisionSelection == POSITIVE_Y_ARROW ? highlightedMaterial : normalMaterial);
+      negativeXArrowModel.setMaterial(highlightingPrior && closestCollisionSelection == NEGATIVE_X_ARROW ? highlightedMaterial : normalMaterial);
+      negativeYArrowModel.setMaterial(highlightingPrior && closestCollisionSelection == NEGATIVE_Y_ARROW ? highlightedMaterial : normalMaterial);
    }
 
    public ImGuiPanel createTunerPanel(String name)

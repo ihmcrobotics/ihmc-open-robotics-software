@@ -15,7 +15,7 @@ public class KinematicsStreamingToolboxConfigurationMessagePubSubType implements
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d02554af0f096cb3a37348a912bae8215f8e3ff9d449e8a6854a572391bd570a";
+   		return "51c97a65e4f64904825f9fa72b50ebdd79a92fa87b958ecac9c978f5e9d8c0c9";
    }
    
    @Override

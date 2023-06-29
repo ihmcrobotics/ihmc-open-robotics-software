@@ -19,7 +19,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StepConstraintsListCommand;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegionsList;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -66,7 +66,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final FrameVector3D tempAngularVelocity = new FrameVector3D();
 
    private final TouchdownErrorCompensator touchdownErrorCompensator;
-   private final StepConstraintsListCommand stepConstraints = new StepConstraintsListCommand();
+   private final StepConstraintRegionsList stepConstraints = new StepConstraintRegionsList();
 
    public WalkingSingleSupportState(WalkingStateEnum stateEnum,
                                     WalkingMessageHandler walkingMessageHandler,
@@ -199,8 +199,6 @@ public class WalkingSingleSupportState extends SingleSupportState
       if (walkingMessageHandler.getCurrentNumberOfFootsteps() > 0)
          walkingMessageHandler.peekFootstep(0, nextNextFootstep);
 
-      walkingMessageHandler.pollStepConstraints(stepConstraints);
-      walkingMessageHandler.getStepConstraintRegionHandler().handleStepConstraintsListCommand(stepConstraints);
 
       /**
        * 1/08/2018 RJG this has to be done before calling #updateFootstepParameters() to make sure the
@@ -225,6 +223,10 @@ public class WalkingSingleSupportState extends SingleSupportState
       balanceManager.setICPPlanSupportSide(supportSide);
       balanceManager.initializeICPPlanForSingleSupport();
 
+      /** This has to be called after calling initialize ICP Plan, as that resets the step constraints **/
+      walkingMessageHandler.pollStepConstraints(stepConstraints);
+      balanceManager.setCurrentStepConstraints(stepConstraints);
+
       updateHeightManager();
 
       feetManager.requestSwing(swingSide,
@@ -242,6 +244,8 @@ public class WalkingSingleSupportState extends SingleSupportState
       }
 
       balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
+
+      pelvisOrientationManager.initializeSwing();
 
       desiredFootPoseInWorld.set(nextFootstep.getFootstepPose());
       desiredFootPoseInWorld.changeFrame(worldFrame);
@@ -352,6 +356,11 @@ public class WalkingSingleSupportState extends SingleSupportState
       // Update the contact states based on the footstep. If the footstep doesn't have any predicted contact points, then use the default ones in the ContactablePlaneBodies.
       controllerToolbox.updateContactPointsForUpcomingFootstep(nextFootstep);
       controllerToolbox.updateBipedSupportPolygons();
+
+      pelvisOrientationManager.setTrajectoryTime(swingTime);
+      pelvisOrientationManager.setUpcomingFootstep(nextFootstep);
+      pelvisOrientationManager.updateTrajectoryFromFootstep(); // fixme this shouldn't be called when the footstep is updated
+
    }
 
    private void updateHeightManager()

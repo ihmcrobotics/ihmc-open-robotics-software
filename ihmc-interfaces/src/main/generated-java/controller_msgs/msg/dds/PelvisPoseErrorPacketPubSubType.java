@@ -15,7 +15,7 @@ public class PelvisPoseErrorPacketPubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "32ddeb8023d92ed9b2b3cb701ee9e12e307f69f48ce5bdd2a0eb8e69740234ed";
+   		return "7300ed74b8286fb63a9d7cc7a7ab399a9473d525fdcf15340c704be710859ebb";
    }
    
    @Override
