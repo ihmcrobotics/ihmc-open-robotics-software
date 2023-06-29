@@ -143,7 +143,7 @@ public class RDXLocomotionManager
       transferTimeSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.transferTime, 0.3, 1.5);
       turnAggressivenessSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.turnAggressiveness, 0.0, 10.0);
 
-      ballAndArrowMidFeetPosePlacement.create(Color.YELLOW, robotModel);
+      ballAndArrowMidFeetPosePlacement.create(Color.YELLOW, syncedRobot);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
 
       interactableFootstepPlan.create(baseUI, communicationHelper, syncedRobot, locomotionParameters, footstepPlannerParameters, swingFootPlannerParameters);

@@ -110,7 +110,7 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
          PoseStamped poseStampedMessage = manualTargetPublisher.getMessage();
          RosTools.toRos(manualTargetPose, poseStampedMessage.getPose());
          manualTargetPublisher.publish(poseStampedMessage);
-      }, Color.GREEN, syncedRobot.getRobotModel());
+      }, Color.GREEN, syncedRobot);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(manualTargetAffordance::processImGui3DViewInput);
 
       lookAndStepUI.create(baseUI);

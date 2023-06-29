@@ -12,7 +12,7 @@ import imgui.flag.ImGuiStyleVar;
 import imgui.internal.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import org.lwjgl.openvr.InputDigitalActionData;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -46,6 +46,7 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private ModelInstance sphere;
    private ModelInstance arrow;
+   private ROS2SyncedRobotModel syncedRobot;
    private RDXFootstepGraphic leftGoalFootstepGraphic;
    private RDXFootstepGraphic rightGoalFootstepGraphic;
    private final FramePose3D leftFootstepGoalPose = new FramePose3D();
@@ -67,25 +68,26 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
    private Runnable onStartPositionPlacement;
    private Runnable onEndPositionPlacement;
 
-   public void create(Color color, DRCRobotModel robotModel)
+   public void create(Color color, ROS2SyncedRobotModel syncedRobot)
    {
-      create(null, color, robotModel);
+      create(null, color, syncedRobot);
    }
 
-   public void create(Consumer<Pose3D> placedPoseConsumer, Color color, DRCRobotModel robotModel)
+   public void create(Consumer<Pose3D> placedPoseConsumer, Color color, ROS2SyncedRobotModel syncedRobot)
    {
+      this.syncedRobot = syncedRobot;
       this.placedPoseConsumer = placedPoseConsumer;
       float sphereRadius = 0.03f;
       sphere = RDXModelBuilder.createSphere(sphereRadius, color);
       arrow = RDXModelBuilder.createArrow(sphereRadius * 6.0, color);
 
-      SegmentDependentList<RobotSide, ArrayList<Point2D>> contactPoints = robotModel.getContactPointParameters().getControllerFootGroundContactPoints();
+      SegmentDependentList<RobotSide, ArrayList<Point2D>> contactPoints = syncedRobot.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints();
       leftGoalFootstepGraphic = new RDXFootstepGraphic(contactPoints, RobotSide.LEFT);
       rightGoalFootstepGraphic = new RDXFootstepGraphic(contactPoints, RobotSide.RIGHT);
       leftGoalFootstepGraphic.create();
       rightGoalFootstepGraphic.create();
 
-      halfIdealFootstepWidth = robotModel.getFootstepPlannerParameters().getIdealFootstepWidth() / 2.0;
+      halfIdealFootstepWidth = syncedRobot.getRobotModel().getFootstepPlannerParameters().getIdealFootstepWidth() / 2.0;
 
       placeGoalActionMap = new RDXUIActionMap(startAction ->
       {
@@ -129,6 +131,18 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
          if (placingPosition)
          {
             sphere.transform.setTranslation(pickPointInWorld.getX32(), pickPointInWorld.getY32(), pickPointInWorld.getZ32());
+            LibGDXTools.toEuclid(sphere.transform, tempSpherePosition);
+
+            // Find vector from mid-feet z up frame to current sphere location
+            goalPoseForReading.set(syncedRobot.getReferenceFrames().getMidFeetZUpFrame().getTransformToWorldFrame());
+            tempRotationVector.set(tempSpherePosition);
+            tempRotationVector.sub(goalPoseForReading.getPosition());
+            double yaw = Math.atan2(tempRotationVector.getY(), tempRotationVector.getX());
+
+            goalPoseForReading.setRotationYawAndZeroTranslation(yaw);
+            goalPoseForReading.prependTranslation(tempSpherePosition);
+
+            updateGoalFootstepGraphics(goalPoseForReading);
 
             if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
@@ -149,7 +163,7 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
 
             goalPoseForReading.set(tempSpherePosition, arrowRotationMatrix);
 
-            updateGoalFootstepGraphics();
+            updateGoalFootstepGraphics(goalPoseForReading);
 
             if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
@@ -192,9 +206,9 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
       placedNotification.set();
    }
 
-   private void updateGoalFootstepGraphics()
+   private void updateGoalFootstepGraphics(Pose3DReadOnly goalPose)
    {
-      goalPoseForReading.get(transformToGoalPose);
+      goalPose.get(transformToGoalPose);
       goalPoseFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(), transformToGoalPose);
 
       leftFootstepGoalPose.setToZero(goalPoseFrame);
