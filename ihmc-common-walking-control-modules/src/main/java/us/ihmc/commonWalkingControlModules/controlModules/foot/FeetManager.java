@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff.CentroidPr
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff.DynamicStateInspectorParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff.GeometricToeOffManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff.ToeOffCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -84,6 +85,7 @@ public class FeetManager implements SCS2YoGraphicHolder
                       PIDSE3GainsReadOnly swingFootGains,
                       PIDSE3GainsReadOnly holdFootGains,
                       PIDSE3GainsReadOnly toeOffFootGains,
+                      SideDependentList<RigidBodyControlManager> flamingoFootControlManagers,
                       YoRegistry parentRegistry,
                       YoGraphicsListRegistry graphicsListRegistry)
    {
@@ -151,6 +153,7 @@ public class FeetManager implements SCS2YoGraphicHolder
                                                                      swingFootGains,
                                                                      holdFootGains,
                                                                      toeOffFootGains,
+                                                                     flamingoFootControlManagers.get(robotSide),
                                                                      controllerToolbox,
                                                                      explorationParameters,
                                                                      footholdRotationParameters,

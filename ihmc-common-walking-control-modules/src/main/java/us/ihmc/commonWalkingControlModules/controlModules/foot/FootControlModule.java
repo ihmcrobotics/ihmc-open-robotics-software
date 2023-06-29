@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParam
 import us.ihmc.commonWalkingControlModules.controlModules.SwingTrajectoryCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.YoPartialFootholdModuleParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff.ToeOffCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
@@ -113,6 +114,7 @@ public class FootControlModule implements SCS2YoGraphicHolder
                             PIDSE3GainsReadOnly swingFootControlGains,
                             PIDSE3GainsReadOnly holdPositionFootControlGains,
                             PIDSE3GainsReadOnly toeOffFootControlGains,
+                            RigidBodyControlManager moveViaWaypointControlManager,
                             HighLevelHumanoidControllerToolbox controllerToolbox,
                             ExplorationParameters explorationParameters,
                             YoPartialFootholdModuleParameters footholdRotationParameters,
@@ -155,7 +157,7 @@ public class FootControlModule implements SCS2YoGraphicHolder
       onToesState = new OnToesState(footControlHelper, toeOffCalculator, toeOffFootControlGains, registry);
       supportState = new SupportState(footControlHelper, holdPositionFootControlGains, registry);
       swingState = new SwingState(footControlHelper, swingFootControlGains, registry);
-      moveViaWaypointsState = new MoveViaWaypointsState(footControlHelper, swingFootControlGains, registry);
+      moveViaWaypointsState = new MoveViaWaypointsState(footControlHelper, moveViaWaypointControlManager, registry);
 
       stateMachine = setupStateMachine(namePrefix);
 
@@ -249,7 +251,6 @@ public class FootControlModule implements SCS2YoGraphicHolder
                           Vector3DReadOnly footLinearWeight)
    {
       swingState.setWeights(footAngularWeight, footLinearWeight);
-      moveViaWaypointsState.setWeights(footAngularWeight, footLinearWeight);
       onToesState.setWeights(loadedFootAngularWeight, loadedFootLinearWeight);
       supportState.setWeights(loadedFootAngularWeight, loadedFootLinearWeight);
    }
