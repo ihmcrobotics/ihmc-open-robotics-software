@@ -160,7 +160,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final YoFramePoint2D yoCenterOfPressure = new YoFramePoint2D("CenterOfPressure", worldFrame, registry);
 
    private WalkingMessageHandler walkingMessageHandler;
-   private final WalkingTrajectoryPath walkingTrajectoryPath;
+   private WalkingTrajectoryPath walkingTrajectoryPath;
 
    private final YoBoolean controllerFailed = new YoBoolean("controllerFailed", registry);
 
@@ -543,7 +543,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          copError.setToZero(planeFrame);
          copError.sub(copDesired, copActual);
          yoCoPError.get(robotSide).set(copError);
-         yoCoPErrorMagnitude.get(robotSide).set(copError.length());
+         yoCoPErrorMagnitude.get(robotSide).set(copError.norm());
 
          footSwitch.getMeasuredWrench(footWrench);
          footForceVector.setIncludingFrame(footWrench.getLinearPart());
@@ -974,16 +974,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    public YoDouble getOmega0Provider()
    {
       return omega0;
-   }
-
-   public void getCoP(FramePoint3D copToPack)
-   {
-      copToPack.setIncludingFrame(yoCenterOfPressure, 0.0);
-   }
-
-   public void getCoP(FramePoint2D copToPack)
-   {
-      copToPack.setIncludingFrame(yoCenterOfPressure);
    }
 
    public FrameVector3DReadOnly getAngularMomentum()

@@ -103,6 +103,22 @@ public class FootstepChecker implements FootstepCheckerInterface
          return;
       }
 
+      // Check snapped footstep placement
+      BipedalFootstepPlannerNodeRejectionReason poseRejectionReason;
+      if (parameters.getUseStepReachabilityMap())
+      {
+         poseRejectionReason = reachabilityChecker.checkStepValidity(candidateStep, stanceStep);
+      }
+      else
+      {
+         poseRejectionReason = heuristicPoseChecker.snapAndCheckValidity(candidateStep, stanceStep, startOfSwing);
+      }
+      if (poseRejectionReason != null)
+      {
+         rejectionReason.set(poseRejectionReason);
+         return;
+      }
+
       // Programmatically added custom checks
       for (CustomFootstepChecker customFootstepChecker : customFootstepCheckers)
       {
@@ -112,6 +128,7 @@ public class FootstepChecker implements FootstepCheckerInterface
             return;
          }
       }
+
 
       if (regionsForCollisionChecking == null || regionsForCollisionChecking.isEmpty())
       {
@@ -208,21 +225,7 @@ public class FootstepChecker implements FootstepCheckerInterface
          return true;
       }
 
-      // Check snapped footstep placement
-      BipedalFootstepPlannerNodeRejectionReason poseRejectionReason;
-      if (parameters.getUseStepReachabilityMap())
-      {
-         poseRejectionReason = reachabilityChecker.checkStepValidity(candidateStep, stanceStep);
-      }
-      else
-      {
-         poseRejectionReason = heuristicPoseChecker.snapAndCheckValidity(candidateStep, stanceStep, startOfSwing);
-      }
-      if (poseRejectionReason != null)
-      {
-         rejectionReason.set(poseRejectionReason);
-         return false;
-      }
+
 
 
       // Check for obstacle collisions (vertically extruded line between steps)
