@@ -139,34 +139,29 @@ public class PerceptionFilterTools
     */
    public static void applyConcaveHullReduction(PlanarRegionsList planarRegionsList, PolygonizerParameters polygonizerParameters)
    {
+      planarRegionsList.getPlanarRegionsAsList().parallelStream().forEach((region) -> applyConcaveHullReductionSingleRegion(region, polygonizerParameters));
+   }
+
+   public static void applyConcaveHullReductionSingleRegion(PlanarRegion region, PolygonizerParameters polygonizerParameters)
+   {
       // Apply some simple filtering to reduce the number of vertices and hopefully the number of convex polygons.
       double shallowAngleThreshold = polygonizerParameters.getShallowAngleThreshold();
       double peakAngleThreshold = polygonizerParameters.getPeakAngleThreshold();
       double lengthThreshold = polygonizerParameters.getLengthThreshold();
       double depthThreshold = polygonizerParameters.getDepthThreshold();
 
-      planarRegionsList.getPlanarRegionsAsList().parallelStream().forEach(region ->
-                                                                          {
-                                                                             ConcaveHull concaveHull = new ConcaveHull(region.getConcaveHull());
+      ConcaveHull concaveHull = new ConcaveHull(region.getConcaveHull());
 
-                                                                             ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(
-                                                                                   shallowAngleThreshold,
-                                                                                   peakAngleThreshold,
-                                                                                   concaveHull);
-                                                                             ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHull);
+      ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHull);
+      ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHull);
 
-                                                                             List<ConvexPolygon2D> decomposedPolygons = new ArrayList<>();
-                                                                             ConcaveHullDecomposition.recursiveApproximateDecomposition(concaveHull,
-                                                                                                                                        depthThreshold,
-                                                                                                                                        decomposedPolygons);
+      List<ConvexPolygon2D> decomposedPolygons = new ArrayList<>();
+      ConcaveHullDecomposition.recursiveApproximateDecomposition(concaveHull, depthThreshold, decomposedPolygons);
 
-                                                                             // Pack the data in PlanarRegion
-                                                                             PlanarRegion filteredRegion = new PlanarRegion(region.getTransformToWorld(),
-                                                                                                                            concaveHull.getConcaveHullVertices(),
-                                                                                                                            decomposedPolygons);
-                                                                             filteredRegion.setRegionId(region.getRegionId());
+      // Pack the data in PlanarRegion
+      PlanarRegion filteredRegion = new PlanarRegion(region.getTransformToWorld(), concaveHull.getConcaveHullVertices(), decomposedPolygons);
+      filteredRegion.setRegionId(region.getRegionId());
 
-                                                                             region.set(filteredRegion);
-                                                                          });
+      region.set(filteredRegion);
    }
 }
