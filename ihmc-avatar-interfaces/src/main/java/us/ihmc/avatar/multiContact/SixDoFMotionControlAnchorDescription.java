@@ -18,6 +18,7 @@ public class SixDoFMotionControlAnchorDescription
    public static final String RIGID_BODY_NAME_JSON = "rigidBodyName";
    public static final String IS_CONTACT_STATE_JSON = "isContactState";
    public static final String IS_TRACKING_CONTROLLER_JSON = "isTrackingController";
+   public static final String ANCHOR_ID = "anchorId";
    public static final String IK_SOLVER_MESSAGE_JSON = "ikSolverMessage";
 
    private static final ObjectMapper objectMapper = new ObjectMapper(new JsonFactory());
@@ -26,6 +27,7 @@ public class SixDoFMotionControlAnchorDescription
    private String rigidBodyName;
    private boolean isContactState;
    private boolean isTrackingController;
+   private int anchorId = -1;
    private KinematicsToolboxRigidBodyMessage inputMessage;
 
    public SixDoFMotionControlAnchorDescription()
@@ -37,6 +39,7 @@ public class SixDoFMotionControlAnchorDescription
       rigidBodyName = other.rigidBodyName;
       isContactState = other.isContactState;
       isTrackingController = other.isTrackingController;
+      anchorId = other.anchorId;
       inputMessage = new KinematicsToolboxRigidBodyMessage(other.inputMessage);
    }
 
@@ -51,6 +54,10 @@ public class SixDoFMotionControlAnchorDescription
          description.setContactState(anchorNode.get(IS_CONTACT_STATE_JSON).asBoolean());
          description.setTrackingController(anchorNode.get(IS_TRACKING_CONTROLLER_JSON).asBoolean());
          description.setInputMessage(messageSerializer.deserialize(anchorNode.get(IK_SOLVER_MESSAGE_JSON).toString()));
+
+         if (anchorNode.has(ANCHOR_ID))
+            description.setAnchorId(anchorNode.get(ANCHOR_ID).asInt());
+
          return description;
       }
       catch (IOException e)
@@ -67,6 +74,7 @@ public class SixDoFMotionControlAnchorDescription
       anchorJSON.put(RIGID_BODY_NAME_JSON, rigidBodyName);
       anchorJSON.put(IS_CONTACT_STATE_JSON, isContactState);
       anchorJSON.put(IS_TRACKING_CONTROLLER_JSON, isTrackingController);
+      anchorJSON.put(ANCHOR_ID, anchorId);
 
       try
       {
@@ -101,6 +109,11 @@ public class SixDoFMotionControlAnchorDescription
       return isTrackingController;
    }
 
+   public int getAnchorId()
+   {
+      return anchorId;
+   }
+
    public KinematicsToolboxRigidBodyMessage getInputMessage()
    {
       return inputMessage;
@@ -119,6 +132,11 @@ public class SixDoFMotionControlAnchorDescription
    public void setTrackingController(boolean isTrackingController)
    {
       this.isTrackingController = isTrackingController;
+   }
+
+   public void setAnchorId(int anchorId)
+   {
+      this.anchorId = anchorId;
    }
 
    public void setInputMessage(KinematicsToolboxRigidBodyMessage inputMessage)
