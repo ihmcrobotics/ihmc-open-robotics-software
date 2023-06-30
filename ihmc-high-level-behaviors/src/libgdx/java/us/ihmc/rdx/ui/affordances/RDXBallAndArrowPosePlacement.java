@@ -136,11 +136,7 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
 
             // Find vector from mid-feet z up frame to current sphere location
             goalPoseForReading.set(syncedRobot.getReferenceFrames().getMidFeetZUpFrame().getTransformToWorldFrame());
-            tempRotationVector.set(tempSpherePosition);
-            tempRotationVector.sub(goalPoseForReading.getPosition());
-            double yaw = Math.atan2(tempRotationVector.getY(), tempRotationVector.getX());
-
-            goalPoseForReading.setRotationYawAndZeroTranslation(yaw);
+            goalPoseForReading.setTranslationToZero();
             goalPoseForReading.prependTranslation(tempSpherePosition);
 
             updateGoalFootstepGraphics(goalPoseForReading);
