@@ -135,7 +135,12 @@ public class FlamingoStanceState extends SingleSupportState
       super.onEntry();
 
       balanceManager.enablePelvisXYControl();
-      feetManager.handleFootTrajectoryCommand(walkingMessageHandler.pollFootTrajectoryForFlamingoStance(swingSide));
+      if (walkingMessageHandler.hasFootTrajectoryForFlamingoStance(swingSide))
+         feetManager.handleFootTrajectoryCommand(walkingMessageHandler.pollFootTrajectoryForFlamingoStance(swingSide));
+      else if (walkingMessageHandler.hasLegTrajectoryForFlamingoStance(swingSide))
+         feetManager.handleLegTrajectoryCommand(walkingMessageHandler.pollLegTrajectoryForFlamingoStance(swingSide));
+      else
+         throw new IllegalStateException("Entered flamingo stance state without Foot/LegTrajectoryCommand?!");
 
       double swingTime = Double.POSITIVE_INFINITY;
       double initialTransferTime = walkingMessageHandler.getInitialTransferTime();
