@@ -39,7 +39,6 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajec
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commonWalkingControlModules.messageHandlers.CenterOfMassTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
-import us.ihmc.commonWalkingControlModules.messageHandlers.StepConstraintRegionHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.InterpolationTools;
@@ -854,7 +853,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
          return copTrajectory.getContactStateProviders().get(4).getECMPEndPosition();
    }
 
-   public double getTimeRemainingInCurrentState()
+   public double getTimeRemainingInCurrentSupportSequence()
    {
       return contactStateManager.getTimeRemainingInCurrentSupportSequence();
    }
@@ -864,9 +863,9 @@ public class BalanceManager implements SCS2YoGraphicHolder
       return contactStateManager.getAdjustedTimeRemainingInCurrentSupportSequence();
    }
 
-   public double getExtraTimeAdjustmentForSwing()
+   public double getTimeRemainingInSwingState()
    {
-      return contactStateManager.getExtraTimeAdjustmentForSwing();
+      return contactStateManager.getTimeRemainingInSwingState();
    }
 
    public void goHome()

@@ -34,7 +34,7 @@ public class ContactStateManagerTest
       double expectedTotalTimeRemaining = swingDuration - (timeAtCompute - timeAtSTart);
       assertEquals(expectedTotalTimeRemaining, contactStateManager.getTimeRemainingInCurrentSupportSequence(), 1e-7);
       double adjustedTimeRemaining = contactStateManager.getAdjustedTimeRemainingInCurrentSupportSequence()
-                                     - contactStateManager.getExtraTimeAdjustmentForSwing();
+                                     - contactStateManager.getTimeRemainingInSwingState();
       assertEquals(swingDuration - setSpeedUpDesired, adjustedTimeRemaining, 1e-7);
 
       // advance a little bit through swing. Because we're now doing this further into swing, we can't acheive the full requested amount for the swing
@@ -50,7 +50,7 @@ public class ContactStateManagerTest
       // the time remaining never gets scaled
       assertEquals(expectedTotalTimeRemaining, contactStateManager.getTimeRemainingInCurrentSupportSequence(), 1e-7);
       // TODO this should have a convenience function, maybe
-      adjustedTimeRemaining = contactStateManager.getAdjustedTimeRemainingInCurrentSupportSequence() - contactStateManager.getExtraTimeAdjustmentForSwing();
+      adjustedTimeRemaining = contactStateManager.getAdjustedTimeRemainingInCurrentSupportSequence() - contactStateManager.getTimeRemainingInSwingState();
       assertEquals(scaledTimeRemaining, adjustedTimeRemaining, 1e-7);
 
       // apply it at the end of swing. there should be zero allowed swing spped up there, but the applied speed up should still apply
@@ -59,7 +59,7 @@ public class ContactStateManagerTest
       contactStateManager.updateTimeInState(() -> setSpeedUpDesired, true);
 
       assertEquals(actualSpeedUp, contactStateManager.getTimeRemainingInCurrentSupportSequence(), 1e-7);
-      adjustedTimeRemaining = contactStateManager.getAdjustedTimeRemainingInCurrentSupportSequence() - contactStateManager.getExtraTimeAdjustmentForSwing();
+      adjustedTimeRemaining = contactStateManager.getAdjustedTimeRemainingInCurrentSupportSequence() - contactStateManager.getTimeRemainingInSwingState();
       assertEquals(0.0, adjustedTimeRemaining, 1e-7);
    }
 

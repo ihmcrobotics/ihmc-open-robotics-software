@@ -334,10 +334,8 @@ public class WalkingSingleSupportState extends SingleSupportState
     */
    private double requestSwingSpeedUpInFeetManagerIfNeeded()
    {
-      double remainingSwingTimeAccordingToPlan = balanceManager.getTimeRemainingInCurrentState();
-      double adjustedRemainingTime = Math.max(0.0,
-                                              balanceManager.getAdjustedTimeRemainingInCurrentSupportSequence()
-                                                    - balanceManager.getExtraTimeAdjustmentForSwing());
+      double remainingSwingTimeAccordingToPlan = balanceManager.getTimeRemainingInCurrentSupportSequence();
+      double adjustedRemainingTime = Math.max(0.0, balanceManager.getTimeRemainingInSwingState());
 
       if (adjustedRemainingTime > 1.0e-3)
       {
