@@ -9,6 +9,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import imgui.ImGui;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
+import rosgraph_msgs.Log;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -86,6 +87,11 @@ public class RDXLocomotionManager
    private boolean lastAssumeFlatGroundState;
 
    private RDXFootstepPlanning.InitialStanceSide startStanceSide = RDXFootstepPlanning.InitialStanceSide.AUTO;
+
+   private Thread footstepModelClearingThread;
+   private boolean running = true;
+   private final Object syncObject = new Object();
+   private int lastNum = 0;
 
    public RDXLocomotionManager(DRCRobotModel robotModel,
                                CommunicationHelper communicationHelper,
@@ -175,6 +181,35 @@ public class RDXLocomotionManager
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(manualFootstepPlacement::calculate3DViewPick);
 
       walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, footstepPlannerParameters);
+
+      footstepModelClearingThread = new Thread(() ->
+                                               {
+                                                  int i = 0;
+                                                  while (running)
+                                                  {
+                                                     try
+                                                     {
+                                                        synchronized (syncObject)
+                                                        {
+                                                           syncObject.wait();
+                                                        }
+                                                     }
+                                                     catch (InterruptedException e)
+                                                     {
+                                                        LogTools.error(e);
+                                                     }
+
+                                                     System.out.println("Removing footstep " + i);
+                                                     footstepsSentToControllerGraphic.getFootstepModels().remove(i);
+                                                     if (footstepsSentToControllerGraphic.getFootstepModels().isEmpty())
+                                                     {
+                                                        i = 0;
+                                                     }
+                                                     else
+                                                        ++i;
+                                                  }
+                                               }, "Footstep model clearing thread");
+      footstepModelClearingThread.start();
    }
 
    public void update()
@@ -261,6 +296,16 @@ public class RDXLocomotionManager
       isPlacingFootstep = isCurrentlyPlacingFootstep;
 
       lastAssumeFlatGroundState = locomotionParameters.getAssumeFlatGround();
+
+      if (controllerStatusTracker.getFootstepTracker().getNumberOfCompletedFootsteps() > lastNum)
+      {
+         synchronized (syncObject)
+         {
+            System.out.println("Notifying!");
+            syncObject.notify();
+         }
+         lastNum = controllerStatusTracker.getFootstepTracker().getNumberOfCompletedFootsteps();
+      }
    }
 
    public void renderImGuiWidgets()
@@ -401,6 +446,7 @@ public class RDXLocomotionManager
 
    public void destroy()
    {
+      running = false;
       footstepPlanning.destroy();
       footstepsSentToControllerGraphic.destroy();
       bodyPathPlanGraphic.destroy();

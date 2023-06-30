@@ -46,8 +46,8 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
    private final SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
    private volatile Runnable buildMeshAndCreateModelInstance = null;
 
-   private ModelInstance modelInstance;
-   private Model lastModel;
+   private final ArrayList<ModelInstance> footstepModels = new ArrayList<>();
+   private final ArrayList<Model> lastModels = new ArrayList<>();
 
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private final ArrayList<RDX3DSituatedText> textRenderables = new ArrayList<>();
@@ -122,56 +122,62 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
 
    public void generateMeshes(ArrayList<MinimalFootstep> footsteps)
    {
-      // this prevents generating empty plans like crazy which is expensive
-      if (isEmpty && footsteps.size() == 0)
-         return;
-      isEmpty = footsteps.size() == 0;
-
-      meshBuilder.clear();
-
-      RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      ConvexPolygon2D foothold = new ConvexPolygon2D();
-
-      for (int i = 0; i < footsteps.size(); i++)
-      {
-         MinimalFootstep minimalFootstep = footsteps.get(i);
-         Color regionColor = footstepColors.get(minimalFootstep.getSide());
-
-         minimalFootstep.getSolePoseInWorld().get(transformToWorld);
-         transformToWorld.appendTranslation(0.0, 0.0, 0.01);
-
-         if (minimalFootstep.getFoothold() != null && !minimalFootstep.getFoothold().isEmpty())
-         {
-            try
-            {
-               foothold.set(minimalFootstep.getFoothold());
-            }
-            catch (OutdatedPolygonException e)
-            {
-               LogTools.error(e.getMessage() + " See https://github.com/ihmcrobotics/euclid/issues/43");
-            }
-         }
-         else if (defaultContactPoints.containsKey(minimalFootstep.getSide()))
-         {
-            foothold.set(defaultContactPoints.get(minimalFootstep.getSide()));
-         }
-         else
-         {
-            LogTools.error("Must specify default or per footstep foothold");
-            throw new RuntimeException("Must specify default or per footstep foothold");
-         }
-
-         Point2D[] vertices = new Point2D[foothold.getNumberOfVertices()];
-         for (int j = 0; j < vertices.length; j++)
-         {
-            vertices[j] = new Point2D(foothold.getVertex(j));
-         }
-
-         meshBuilder.addMultiLine(transformToWorld, vertices, 0.01, regionColor, true);
-         meshBuilder.addPolygon(transformToWorld, foothold, regionColor);
-      }
       buildMeshAndCreateModelInstance = () ->
       {
+         // this prevents generating empty plans like crazy which is expensive
+         if (isEmpty && footsteps.size() == 0)
+            return;
+         isEmpty = footsteps.size() == 0;
+
+         if (!lastModels.isEmpty())
+            lastModels.clear();
+
+         RigidBodyTransform transformToWorld = new RigidBodyTransform();
+         ConvexPolygon2D foothold = new ConvexPolygon2D();
+
+         for (int i = 0; i < footsteps.size(); i++)
+         {
+            meshBuilder.clear();
+
+            MinimalFootstep minimalFootstep = footsteps.get(i);
+            Color regionColor = footstepColors.get(minimalFootstep.getSide());
+
+            minimalFootstep.getSolePoseInWorld().get(transformToWorld);
+            transformToWorld.appendTranslation(0.0, 0.0, 0.01);
+
+            if (minimalFootstep.getFoothold() != null && !minimalFootstep.getFoothold().isEmpty())
+            {
+               try
+               {
+                  foothold.set(minimalFootstep.getFoothold());
+               }
+               catch (OutdatedPolygonException e)
+               {
+                  LogTools.error(e.getMessage() + " See https://github.com/ihmcrobotics/euclid/issues/43");
+               }
+            }
+            else if (defaultContactPoints.containsKey(minimalFootstep.getSide()))
+            {
+               foothold.set(defaultContactPoints.get(minimalFootstep.getSide()));
+            }
+            else
+            {
+               LogTools.error("Must specify default or per footstep foothold");
+               throw new RuntimeException("Must specify default or per footstep foothold");
+            }
+
+            Point2D[] vertices = new Point2D[foothold.getNumberOfVertices()];
+            for (int j = 0; j < vertices.length; j++)
+            {
+               vertices[j] = new Point2D(foothold.getVertex(j));
+            }
+
+            meshBuilder.addMultiLine(transformToWorld, vertices, 0.01, regionColor, true);
+            meshBuilder.addPolygon(transformToWorld, foothold, regionColor);
+
+            lastModels.add(RDXModelBuilder.buildModelFromMesh(modelBuilder, meshBuilder));
+            LibGDXTools.setOpacity(lastModels.get(i), footstepColors.get(RobotSide.LEFT).a);
+         }
          // This can't be done outside the libGDX thread. TODO: Consider using Gdx.app.postRunnable
          textRenderables.clear();
          for (int i = 0; i < footsteps.size(); i++)
@@ -203,21 +209,27 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
             }
          }
 
-         if (lastModel != null)
-            lastModel.dispose();
-
-         lastModel = RDXModelBuilder.buildModelFromMesh(modelBuilder, meshBuilder);
-         LibGDXTools.setOpacity(lastModel, footstepColors.get(RobotSide.LEFT).a);
-         modelInstance = new ModelInstance(lastModel); // TODO: Clean up garbage and look into reusing the Model
+         for (int i = 0; i < footsteps.size(); ++i)
+         {
+            footstepModels.add(new ModelInstance(lastModels.get(i))); // TODO: Clean up garbage and look into reusing the Model
+         }
       };
+   }
+
+   public ArrayList<ModelInstance> getFootstepModels()
+   {
+      return footstepModels;
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (modelInstance != null)
+      if (footstepModels != null)
       {
-         modelInstance.getRenderables(renderables, pool);
+         for (ModelInstance footstepModel : footstepModels)
+         {
+            footstepModel.getRenderables(renderables, pool);
+         }
          for (RDX3DSituatedText textRenderable : textRenderables)
          {
             textRenderable.getRenderables(renderables, pool);
