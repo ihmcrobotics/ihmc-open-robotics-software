@@ -133,6 +133,15 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
       }
       else if (obj instanceof ForceSensorDataHolder other)
       {
+         if (forceSensorDefinitions.size() != other.forceSensorDefinitions.size())
+            return false;
+         for (int i = 0; i < forceSensorDefinitions.size(); i++)
+         {
+            if (!forceSensorDefinitions.get(i).equals(other.forceSensorDefinitions.get(i)))
+               return false;
+            if (!forceSensorDatas.get(i).equals(other.forceSensorDatas.get(i)))
+               return false;
+         }
          return true;
       }
       else
