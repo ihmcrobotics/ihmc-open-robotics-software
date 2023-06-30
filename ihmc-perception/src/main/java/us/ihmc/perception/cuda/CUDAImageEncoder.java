@@ -199,6 +199,7 @@ public class CUDAImageEncoder
 
    public void destroy()
    {
+      System.out.println("Destroying CUDA image encoder");
       checkNVJPEG("nvjpegEncoderParamsDestroy", nvjpegEncoderParamsDestroy(encoderParameters));
       checkNVJPEG("nvjpegEncoderStateDestroy", nvjpegEncoderStateDestroy(encoderState));
       checkNVJPEG("nvjpegDestroy", nvjpegDestroy(nvjpegHandle));

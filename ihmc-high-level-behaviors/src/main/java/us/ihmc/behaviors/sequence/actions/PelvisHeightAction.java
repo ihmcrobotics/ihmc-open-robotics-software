@@ -7,10 +7,12 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.tools.Timer;
 
 public class PelvisHeightAction extends PelvisHeightActionData implements BehaviorAction
 {
    private final ROS2ControllerHelper ros2ControllerHelper;
+   private final Timer executionTimer = new Timer();
 
    public PelvisHeightAction(ROS2ControllerHelper ros2ControllerHelper)
    {
@@ -32,5 +34,12 @@ public class PelvisHeightAction extends PelvisHeightActionData implements Behavi
       message.getEuclideanTrajectory().getSelectionMatrix().setZSelected(true);
 
       ros2ControllerHelper.publishToController(message);
+      executionTimer.reset();
+   }
+
+   @Override
+   public boolean isExecuting()
+   {
+      return executionTimer.isRunning(getTrajectoryDuration());
    }
 }

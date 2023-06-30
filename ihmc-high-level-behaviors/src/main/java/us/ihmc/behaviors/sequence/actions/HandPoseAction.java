@@ -8,18 +8,31 @@ import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
+import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.Timer;
+import us.ihmc.tools.thread.Throttler;
 
 public class HandPoseAction extends HandPoseActionData implements BehaviorAction
 {
+   public static final double TRANSLATION_TOLERANCE = 0.15;
+   public static final double ROTATION_TOLERANCE = Math.toRadians(10.0);
+   public static final double BROKEN_WRIST_ROTATION_TOLERANCE = Math.toRadians(90.0);
+
    private final ROS2ControllerHelper ros2ControllerHelper;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
+   private final FramePose3D desiredHandControlPose = new FramePose3D();
+   private final FramePose3D syncedHandControlPose = new FramePose3D();
    private final HandPoseJointAnglesStatusMessage handPoseJointAnglesStatus = new HandPoseJointAnglesStatusMessage();
+   private final Timer executionTimer = new Timer();
+   private final Throttler warningThrottler = new Throttler().setFrequency(2.0);
 
    public HandPoseAction(ROS2ControllerHelper ros2ControllerHelper,
                          ReferenceFrameLibrary referenceFrameLibrary,
@@ -27,6 +40,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
                          ROS2SyncedRobotModel syncedRobot)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
+      this.syncedRobot = syncedRobot;
       setReferenceFrameLibrary(referenceFrameLibrary);
 
       for (RobotSide side : RobotSide.values)
@@ -61,23 +75,41 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    public void executeAction()
    {
       ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
+
       double solutionQuality = armIKSolver.getQuality();
       if (solutionQuality < 1.0)
       {
-         OneDoFJointBasics[] solutionOneDoFJoints = armIKSolver.getSolutionOneDoFJoints();
-         double[] jointAngles = new double[solutionOneDoFJoints.length];
-
-         for (int i = 0; i < jointAngles.length; i++)
-         {
-            jointAngles[i] = solutionOneDoFJoints[i].getQ();
-         }
-
-         ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(getSide(), getTrajectoryDuration(), jointAngles);
-         ros2ControllerHelper.publishToController(armTrajectoryMessage);
-      }
-      else
-      {
          LogTools.error("Solution is low quality ({}). Not sending.", solutionQuality);
       }
+
+      OneDoFJointBasics[] solutionOneDoFJoints = armIKSolver.getSolutionOneDoFJoints();
+      double[] jointAngles = new double[solutionOneDoFJoints.length];
+      for (int i = 0; i < jointAngles.length; i++)
+      {
+         jointAngles[i] = solutionOneDoFJoints[i].getQ();
+      }
+
+      ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(getSide(), getTrajectoryDuration(), jointAngles);
+      armTrajectoryMessage.setForceExecution(true); // Prevent the command being rejected because robot is still finishing up walking
+      ros2ControllerHelper.publishToController(armTrajectoryMessage);
+
+      executionTimer.reset();
+   }
+
+   @Override
+   public boolean isExecuting()
+   {
+      desiredHandControlPose.setFromReferenceFrame(getReferenceFrame());
+      syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getSide()));
+
+      // Left hand broke on Nadia and not in the robot model?
+      double rotationTolerance = getSide() == RobotSide.LEFT ? BROKEN_WRIST_ROTATION_TOLERANCE : ROTATION_TOLERANCE;
+      return BehaviorActionSequenceTools.isExecuting(desiredHandControlPose,
+                                                     syncedHandControlPose,
+                                                     TRANSLATION_TOLERANCE,
+                                                     rotationTolerance,
+                                                     getTrajectoryDuration(),
+                                                     executionTimer,
+                                                     warningThrottler);
    }
 }

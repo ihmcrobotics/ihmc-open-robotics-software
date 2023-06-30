@@ -8,6 +8,7 @@ import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import imgui.ImGui;
+import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -15,6 +16,7 @@ import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -33,6 +35,8 @@ import us.ihmc.rdx.ui.footstepPlanner.RDXFootstepPlanning;
 import us.ihmc.rdx.ui.graphics.RDXBodyPathPlanGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXLegControlMode;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -57,6 +61,8 @@ public class RDXLocomotionManager
    private final ImGuiStoredPropertySetTuner swingFootPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Swing Foot Planning Parameters (Teleoperation)");
    private ImGuiStoredPropertySetBooleanWidget areFootstepsAdjustableCheckbox;
    private ImGuiStoredPropertySetBooleanWidget assumeFlatGroundCheckbox;
+   private ImGuiStoredPropertySetBooleanWidget planSwingTrajectoriesCheckbox;
+   private ImGuiStoredPropertySetBooleanWidget replanSwingTrajectoriesOnChangeCheckbox;
    private ImGuiStoredPropertySetDoubleWidget swingTimeSlider;
    private ImGuiStoredPropertySetDoubleWidget transferTimeSlider;
    private ImGuiStoredPropertySetDoubleWidget turnAggressivenessSlider;
@@ -78,6 +84,8 @@ public class RDXLocomotionManager
    private final AbortWalkingMessage abortWalkingMessage = new AbortWalkingMessage();
    private final ControllerStatusTracker controllerStatusTracker;
    private boolean lastAssumeFlatGroundState;
+
+   private RDXFootstepPlanning.InitialStanceSide startStanceSide = RDXFootstepPlanning.InitialStanceSide.AUTO;
 
    public RDXLocomotionManager(DRCRobotModel robotModel,
                                CommunicationHelper communicationHelper,
@@ -111,10 +119,11 @@ public class RDXLocomotionManager
                                                  swingFootPlannerParameters);
 
       // TODO remove ros from this module, and have it call from the higher level.
-      ros2Helper.subscribeViaCallback(PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS, regions ->
+      ros2Helper.subscribeViaCallback(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, regions ->
       {
-         footstepPlanning.setPlanarRegionsListMessage(regions);
-         interactableFootstepPlan.setPlanarRegionsListMessage(regions);
+         PlanarRegionsList planarRegionsList = getPlanarRegionListInWorld(regions);
+         footstepPlanning.setPlanarRegionsList(planarRegionsList);
+         interactableFootstepPlan.setPlanarRegionsList(planarRegionsList);
       });
       ros2Helper.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_OUTPUT, heightMap ->
       {
@@ -128,6 +137,15 @@ public class RDXLocomotionManager
                                                                                                                 "Teleoperation Panel Controller Spy")));
    }
 
+   private PlanarRegionsList getPlanarRegionListInWorld(FramePlanarRegionsListMessage message)
+   {
+      FramePlanarRegionsList framePlanarRegionsList = PlanarRegionMessageConverter.convertToFramePlanarRegionsList(message);
+      PlanarRegionsList planarRegionsList = framePlanarRegionsList.getPlanarRegionsList().copy();
+      planarRegionsList.applyTransform(framePlanarRegionsList.getSensorToWorldFrameTransform());
+
+      return planarRegionsList;
+   }
+
    public void create(RDXBaseUI baseUI)
    {
       this.baseUI = baseUI;
@@ -139,6 +157,8 @@ public class RDXLocomotionManager
 
       areFootstepsAdjustableCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.areFootstepsAdjustable);
       assumeFlatGroundCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.assumeFlatGround);
+      planSwingTrajectoriesCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.planSwingTrajectories);
+      replanSwingTrajectoriesOnChangeCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.replanSwingTrajectoriesOnChange);
       swingTimeSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.swingTime, 0.3, 1.5);
       transferTimeSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.transferTime, 0.3, 1.5);
       turnAggressivenessSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.turnAggressiveness, 0.0, 10.0);
@@ -160,6 +180,8 @@ public class RDXLocomotionManager
    public void update()
    {
       controllerStatusTracker.checkControllerIsRunning();
+
+      swingFootPlannerParameters.setMinimumSwingTime(locomotionParameters.getSwingTime());
 
       if (ballAndArrowMidFeetPosePlacement.getPlacedNotification().poll() || (lastAssumeFlatGroundState != locomotionParameters.getAssumeFlatGround()
                                                                               && ballAndArrowMidFeetPosePlacement.isPlaced()))
@@ -223,6 +245,8 @@ public class RDXLocomotionManager
       bodyPathPlanGraphic.update();
       interactableFootstepPlan.update();
 
+      footstepPlanning.setInitialStanceSide(startStanceSide);
+
       if (interactableFootstepPlan.getNumberOfFootsteps() > 0)
       {
          footstepsSentToControllerGraphic.clear();
@@ -249,6 +273,9 @@ public class RDXLocomotionManager
 
       areFootstepsAdjustableCheckbox.renderImGuiWidget();
       assumeFlatGroundCheckbox.renderImGuiWidget();
+      planSwingTrajectoriesCheckbox.renderImGuiWidget();
+      replanSwingTrajectoriesOnChangeCheckbox.renderImGuiWidget();
+
       swingTimeSlider.renderImGuiWidget();
       transferTimeSlider.renderImGuiWidget();
       turnAggressivenessSlider.renderImGuiWidget();
@@ -321,6 +348,23 @@ public class RDXLocomotionManager
       }
 
       manualFootstepPlacement.renderImGuiWidgets();
+
+      ImGui.text("First stance side for planner:");
+
+      if (ImGui.radioButton(labels.get("Auto"), startStanceSide == RDXFootstepPlanning.InitialStanceSide.AUTO))
+      {
+         startStanceSide = RDXFootstepPlanning.InitialStanceSide.AUTO;
+      }
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Left"), startStanceSide == RDXFootstepPlanning.InitialStanceSide.LEFT))
+      {
+         startStanceSide = RDXFootstepPlanning.InitialStanceSide.LEFT;
+      }
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Right"), startStanceSide == RDXFootstepPlanning.InitialStanceSide.RIGHT))
+      {
+         startStanceSide = RDXFootstepPlanning.InitialStanceSide.RIGHT;
+      }
 
       if (ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton())
          legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
