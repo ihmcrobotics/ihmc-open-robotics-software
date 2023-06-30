@@ -84,7 +84,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
    public void renderImGuiWidgets()
    {
-      boolean panel3DIsHovered = latestInput.isWindowHovered();
+      boolean panel3DIsHovered = latestInput != null && latestInput.isWindowHovered();
 
       ImGui.text("Footstep Planning:");
       ImGui.sameLine();
