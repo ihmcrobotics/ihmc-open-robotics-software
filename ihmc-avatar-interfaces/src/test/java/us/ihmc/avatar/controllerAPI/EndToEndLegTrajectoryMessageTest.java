@@ -12,6 +12,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
 import controller_msgs.msg.dds.LegTrajectoryMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -21,6 +22,9 @@ import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
@@ -28,8 +32,10 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
@@ -44,6 +50,11 @@ public abstract class EndToEndLegTrajectoryMessageTest implements MultiRobotTest
    protected double getTimePerWaypoint()
    {
       return 0.5;
+   }
+
+   protected boolean usePerfectSensors()
+   {
+      return false;
    }
 
    //the z height the foot comes off the ground before starting the trajectory
@@ -87,6 +98,19 @@ public abstract class EndToEndLegTrajectoryMessageTest implements MultiRobotTest
          String[] legJointNames = Stream.of(legJoints).map(JointReadOnly::getName).toArray(String[]::new);
          int numberOfJoints = MultiBodySystemTools.computeDegreesOfFreedom(legJoints);
          double[] desiredJointPositions = EndToEndArmTrajectoryMessageTest.generateRandomJointPositions(random, legJoints);
+         for (int i = 0; i < legJoints.length; i++)
+         { // Tweaking the knee joint angle
+            if (legJoints[i] == fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH))
+            {
+               double qMin = legJoints[i].getJointLimitLower();
+               double qMax = legJoints[i].getJointLimitUpper();
+               if (legJoints[i].getQ() > 0.0)
+                  qMin = legJoints[i].getQ();
+               else
+                  qMax = legJoints[i].getQ();
+               desiredJointPositions[i] = EuclidCoreRandomTools.nextDouble(random, qMin, qMax);
+            }
+         }
          double[] desiredJointVelocities = new double[numberOfJoints];
          long sequenceID = random.nextLong();
 
@@ -134,16 +158,38 @@ public abstract class EndToEndLegTrajectoryMessageTest implements MultiRobotTest
                                                             getRobotModel().getControllerDT());
 
          // Without forgetting to put the foot back on the ground
+         prepFootForLoadBearing(robotSide, foot, initialFootPosition, simulationTestHelper);
          assertTrue(EndToEndFootTrajectoryMessageTest.putFootOnGround(robotSide, foot, initialFootPosition, simulationTestHelper));
       }
 
       simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
+   static boolean prepFootForLoadBearing(RobotSide robotSide, RigidBodyBasics foot, FramePose3D desiredPose, SCS2AvatarTestingSimulation simulationTestHelper)
+         throws SimulationExceededMaximumTimeException
+   {
+      Point3D desiredPosition = new Point3D();
+      Quaternion desiredOrientation = new Quaternion();
+      double trajectoryTime = 1.0;
+
+      desiredPose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      desiredPose.get(desiredPosition, desiredOrientation);
+      desiredPosition.addZ(0.2);
+
+      FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(robotSide,
+                                                                                                     trajectoryTime,
+                                                                                                     desiredPosition,
+                                                                                                     desiredOrientation);
+      simulationTestHelper.publishToController(footTrajectoryMessage);
+
+      return simulationTestHelper.simulateNow(trajectoryTime);
+   }
+
    public void createSimulationTestHelper()
    {
       SCS2AvatarTestingSimulationFactory testSimulationFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
                                                                                                                                        simulationTestingParameters);
+      testSimulationFactory.setUsePerfectSensors(usePerfectSensors());
       simulationTestHelper = testSimulationFactory.createAvatarTestingSimulation();
    }
 
