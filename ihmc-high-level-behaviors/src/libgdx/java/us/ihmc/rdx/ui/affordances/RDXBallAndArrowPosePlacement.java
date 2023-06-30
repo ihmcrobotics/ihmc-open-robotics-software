@@ -43,6 +43,7 @@ import java.util.function.Consumer;
 
 public class RDXBallAndArrowPosePlacement implements RenderableProvider
 {
+   private final static Pose3D NaN_POSE = BehaviorTools.createNaNPose();
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private ModelInstance sphere;
    private ModelInstance arrow;
@@ -51,8 +52,8 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
    private RDXFootstepGraphic rightGoalFootstepGraphic;
    private final FramePose3D leftFootstepGoalPose = new FramePose3D();
    private final FramePose3D rightFootstepGoalPose = new FramePose3D();
-   private final RigidBodyTransform transformToGoalPose = new RigidBodyTransform();
-   private ReferenceFrame goalPoseFrame;
+   private final RigidBodyTransform goalToWorldTransform = new RigidBodyTransform();
+   private final ReferenceFrame goalPoseFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(null, null);
    private double halfIdealFootstepWidth;
    private RDXUIActionMap placeGoalActionMap;
    private boolean placingGoal = false;
@@ -208,8 +209,8 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
 
    private void updateGoalFootstepGraphics(Pose3DReadOnly goalPose)
    {
-      goalPose.get(transformToGoalPose);
-      goalPoseFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(), transformToGoalPose);
+      goalPose.get(goalToWorldTransform);
+      goalPoseFrame.update();
 
       leftFootstepGoalPose.setToZero(goalPoseFrame);
       leftFootstepGoalPose.getPosition().addY(halfIdealFootstepWidth);
@@ -292,8 +293,8 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
          sphere.transform.val[Matrix4.M03] = Float.NaN;
       if (arrow != null)
          arrow.transform.val[Matrix4.M03] = Float.NaN;
-      leftGoalFootstepGraphic.setPose(BehaviorTools.createNaNPose());
-      rightGoalFootstepGraphic.setPose(BehaviorTools.createNaNPose());
+      leftGoalFootstepGraphic.setPose(NaN_POSE);
+      rightGoalFootstepGraphic.setPose(NaN_POSE);
    }
 
    public Pose3DReadOnly getGoalPose()
