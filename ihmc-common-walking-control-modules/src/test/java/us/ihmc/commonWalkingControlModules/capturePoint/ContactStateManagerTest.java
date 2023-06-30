@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 import org.junit.jupiter.api.Test;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 import static us.ihmc.robotics.Assert.assertEquals;
 
@@ -18,6 +19,7 @@ public class ContactStateManagerTest
       YoRegistry registry = new YoRegistry("test");
       ContactStateManager contactStateManager = new ContactStateManager(time::get, minSwingDuration, minTransferDuration, registry);
       new DefaultParameterReader().readParametersInRegistry(registry);
+      ((YoBoolean) registry.findVariable("speedUpSwingDynamicsFromError")).set(true);
 
       double timeAtSTart = 1.7;
       time.set(timeAtSTart);
@@ -33,9 +35,10 @@ public class ContactStateManagerTest
 
       double expectedTotalTimeRemaining = swingDuration - (timeAtCompute - timeAtSTart);
       assertEquals(expectedTotalTimeRemaining, contactStateManager.getTimeRemainingInCurrentSupportSequence(), 1e-7);
-      double adjustedTimeRemaining = contactStateManager.getAdjustedTimeRemainingInCurrentSupportSequence()
-                                     - contactStateManager.getTimeRemainingInSwingState();
+      double adjustedTimeRemaining = contactStateManager.getAdjustedTimeRemainingInCurrentSupportSequence();
+      double adjustedSwingTimeRemaining = contactStateManager.getTimeRemainingInSwingState();
       assertEquals(swingDuration - setSpeedUpDesired, adjustedTimeRemaining, 1e-7);
+      assertEquals(swingDuration - setSpeedUpDesired, adjustedSwingTimeRemaining, 1e-7);
 
       // advance a little bit through swing. Because we're now doing this further into swing, we can't acheive the full requested amount for the swing
       // speed up. Because of that, we need to compute what the applied swing speed up factor is.
@@ -50,8 +53,10 @@ public class ContactStateManagerTest
       // the time remaining never gets scaled
       assertEquals(expectedTotalTimeRemaining, contactStateManager.getTimeRemainingInCurrentSupportSequence(), 1e-7);
       // TODO this should have a convenience function, maybe
-      adjustedTimeRemaining = contactStateManager.getAdjustedTimeRemainingInCurrentSupportSequence() - contactStateManager.getTimeRemainingInSwingState();
+      adjustedTimeRemaining = contactStateManager.getAdjustedTimeRemainingInCurrentSupportSequence();
+      adjustedSwingTimeRemaining =contactStateManager.getTimeRemainingInSwingState();
       assertEquals(scaledTimeRemaining, adjustedTimeRemaining, 1e-7);
+      assertEquals(scaledTimeRemaining, adjustedSwingTimeRemaining, 1e-7);
 
       // apply it at the end of swing. there should be zero allowed swing spped up there, but the applied speed up should still apply
       timeAtCompute = timeAtSTart + swingDuration - actualSpeedUp;

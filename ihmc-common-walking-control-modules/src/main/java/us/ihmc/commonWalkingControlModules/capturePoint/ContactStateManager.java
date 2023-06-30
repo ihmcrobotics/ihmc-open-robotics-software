@@ -41,7 +41,6 @@ public class ContactStateManager
 
    private final DoubleProvider timeAdjustmentDiscountGain = new DoubleParameter("timeAdjustmentDiscountGain", registry, 0.8);
 
-
    private final DoubleProvider time;
 
    public ContactStateManager(DoubleProvider time, WalkingControllerParameters walkingControllerParameters, YoRegistry parentRegistry)
@@ -235,10 +234,13 @@ public class ContactStateManager
    {
       double swingDuration = currentStateDuration.getDoubleValue() - offsetTimeInState.getDoubleValue();
       double maxSpeedUpFactor = Math.max(1.0, swingDuration / minimumSwingDuration.getDoubleValue());
-      double maxTotalTimeShortening = remainingTimeInContactSequence.getDoubleValue() * (1.0 - 1.0 / maxSpeedUpFactor);
+
+      // FIXME there's a bug in this shortening
+      double availableTimeToShorten = remainingTimeInContactSequence.getDoubleValue() * (1.0 - 1.0 / maxSpeedUpFactor);
+      
 
       double remainingTimeAfterAdjustment = Math.max(remainingTimeInContactSequence.getDoubleValue() - totalTimeAdjustment.getDoubleValue(), 0.0);
-      double maxAdjustment = Math.min(remainingTimeAfterAdjustment, maxTotalTimeShortening - totalTimeAdjustment.getDoubleValue());
+      double maxAdjustment = Math.min(remainingTimeAfterAdjustment, availableTimeToShorten - totalTimeAdjustment.getDoubleValue());
       double minAdjustment = -remainingTimeAfterAdjustment;
 
       double proposedAdjustment = MathTools.clamp(computeTimeAdjustmentForDynamicsBasedOnState(timeShiftProvider), minAdjustment, maxAdjustment);
