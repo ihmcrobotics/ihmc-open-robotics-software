@@ -53,7 +53,7 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
    private final FramePose3D leftFootstepGoalPose = new FramePose3D();
    private final FramePose3D rightFootstepGoalPose = new FramePose3D();
    private final RigidBodyTransform goalToWorldTransform = new RigidBodyTransform();
-   private final ReferenceFrame goalPoseFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(null, null);
+   private final ReferenceFrame goalPoseFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), goalToWorldTransform);
    private double halfIdealFootstepWidth;
    private RDXUIActionMap placeGoalActionMap;
    private boolean placingGoal = false;
