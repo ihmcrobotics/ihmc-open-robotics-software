@@ -2,13 +2,13 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
@@ -39,8 +39,12 @@ public class FlamingoStanceState extends SingleSupportState
    private final FootstepTiming footstepTiming = new FootstepTiming();
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
-   public FlamingoStanceState(WalkingStateEnum stateEnum, WalkingControllerParameters walkingControllerParameters, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
-                              HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule,
+   public FlamingoStanceState(WalkingStateEnum stateEnum,
+                              WalkingControllerParameters walkingControllerParameters,
+                              WalkingMessageHandler walkingMessageHandler,
+                              HighLevelHumanoidControllerToolbox controllerToolbox,
+                              HighLevelControlManagerFactory managerFactory,
+                              WalkingFailureDetectionControlModule failureDetectionControlModule,
                               YoRegistry parentRegistry)
    {
       super(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory, parentRegistry);
@@ -74,11 +78,10 @@ public class FlamingoStanceState extends SingleSupportState
       if (loadFoot.getBooleanValue() && loadFootStartTime.isNaN())
          loadFootStartTime.set(timeInState);
 
-      if (walkingMessageHandler.hasFootTrajectoryForFlamingoStance(swingSide))
-      {
-         while (walkingMessageHandler.hasFootTrajectoryForFlamingoStance(swingSide))
-            feetManager.handleFootTrajectoryCommand(walkingMessageHandler.pollFootTrajectoryForFlamingoStance(swingSide));
-      }
+      while (walkingMessageHandler.hasFootTrajectoryForFlamingoStance(swingSide))
+         feetManager.handleFootTrajectoryCommand(walkingMessageHandler.pollFootTrajectoryForFlamingoStance(swingSide));
+      while (walkingMessageHandler.hasLegTrajectoryForFlamingoStance(swingSide))
+         feetManager.handleLegTrajectoryCommand(walkingMessageHandler.pollLegTrajectoryForFlamingoStance(swingSide));
 
       capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
 
@@ -100,7 +103,7 @@ public class FlamingoStanceState extends SingleSupportState
          }
       }
 
-      walkingMessageHandler.clearFootTrajectory(supportSide);
+      walkingMessageHandler.clearFlamingoCommands(supportSide);
    }
 
    @Override

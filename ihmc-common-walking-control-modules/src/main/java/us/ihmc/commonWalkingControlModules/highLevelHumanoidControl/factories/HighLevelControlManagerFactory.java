@@ -25,7 +25,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -277,6 +279,8 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
 
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
 
+      TObjectDoubleHashMap<String> jointHomeConfiguration = walkingControllerParameters.getOrCreateJointHomeConfiguration();
+
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyBasics foot = fullRobotModel.getFoot(robotSide);
@@ -285,6 +289,16 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
          if (!taskspacePositionGainMap.containsKey(foot.getName()))
             taskspacePositionGainMap.put(foot.getName(), swingFootGains.getPositionGains());
          RigidBodyBasics pelvis = fullRobotModel.getPelvis();
+
+
+         for (OneDoFJointBasics joint : MultiBodySystemTools.createOneDoFJointPath(pelvis, foot))
+         {
+            if (!jointHomeConfiguration.contains(joint.getName()))
+            {
+               jointHomeConfiguration.put(joint.getName(), 0.5 * (joint.getJointLimitLower() + joint.getJointLimitUpper()));
+            }
+         }
+
          RigidBodyControlManager controlManager = getOrCreateRigidBodyManager(foot,
                                                                               pelvis,
                                                                               foot.getParentJoint().getFrameAfterJoint(),

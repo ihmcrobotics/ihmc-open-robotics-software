@@ -13,6 +13,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LegTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
@@ -52,7 +54,6 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       controlFrame = ankleFrame;
 
       workspaceLimiterControlModule = footControlHelper.getWorkspaceLimiterControlModule();
-      controlManager.initialize();
    }
 
    public void handleFootTrajectoryCommand(FootTrajectoryCommand command)
@@ -60,6 +61,13 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       SE3TrajectoryControllerCommand se3Trajectory = command.getSE3Trajectory();
       se3Trajectory.setSequenceId(command.getSequenceId());
       controlManager.handleTaskspaceTrajectoryCommand(se3Trajectory);
+   }
+
+   public void handleLegTrajectoryCommand(LegTrajectoryCommand command)
+   {
+      JointspaceTrajectoryCommand jointspaceTrajectory = command.getJointspaceTrajectory();
+      jointspaceTrajectory.setSequenceId(command.getSequenceId());
+      controlManager.handleJointspaceTrajectoryCommand(jointspaceTrajectory);
    }
 
    @Override
@@ -195,6 +203,12 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return controlManager.getFeedbackControlCommand();
+   }
+
+   @Override
+   public FeedbackControlCommand<?> createFeedbackControlTemplate()
+   {
+      return controlManager.createFeedbackControlTemplate();
    }
 
    @Override

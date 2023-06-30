@@ -27,6 +27,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LegTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -438,6 +439,11 @@ public class FootControlModule implements SCS2YoGraphicHolder
       moveViaWaypointsState.handleFootTrajectoryCommand(command);
    }
 
+   public void handleLegTrajectoryCommand(LegTrajectoryCommand command)
+   {
+      moveViaWaypointsState.handleLegTrajectoryCommand(command);
+   }
+
    public void resetHeightCorrectionParametersForSingularityAvoidance()
    {
       if (workspaceLimiterControlModule != null)
@@ -506,8 +512,8 @@ public class FootControlModule implements SCS2YoGraphicHolder
       for (ConstraintType constraintType : ConstraintType.values())
       {
          AbstractFootControlState state = stateMachine.getState(constraintType);
-         if (state != null && state.getFeedbackControlCommand() != null)
-            ret.addCommand(state.getFeedbackControlCommand());
+         if (state != null && state.createFeedbackControlTemplate() != null)
+            ret.addCommand(state.createFeedbackControlTemplate());
       }
       return ret;
    }
