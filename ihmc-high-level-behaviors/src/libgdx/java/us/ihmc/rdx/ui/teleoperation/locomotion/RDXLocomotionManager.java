@@ -305,7 +305,7 @@ public class RDXLocomotionManager
       if (ImGui.button(labels.get("Square Up")))
       {
          deleteAll();
-         manualFootstepPlacement.squareUp();
+         manualFootstepPlacement.squareUpFootstep();
       }
       ImGui.sameLine();
 
