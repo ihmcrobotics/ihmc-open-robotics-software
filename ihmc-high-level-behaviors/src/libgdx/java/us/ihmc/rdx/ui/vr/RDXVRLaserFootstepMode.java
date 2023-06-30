@@ -6,9 +6,16 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import imgui.ImGuiIO;
+import imgui.flag.ImGuiMouseButton;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.referenceFrame.FrameLine3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DBasics;
@@ -26,54 +33,26 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 
 public class RDXVRLaserFootstepMode
 {
-   private final SideDependentList<Model> footModels = new SideDependentList<>();
-   private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
-   private final FramePose3D vrPickPose = new FramePose3D();
-   private DRCRobotModel robotModel;
-   private ROS2ControllerHelper controllerHelper;
-   private RDXLocomotionParameters locomotionParameters;
    private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
-   public void create(DRCRobotModel robotModel, ROS2ControllerHelper controllerHelper)
-   {
-      this.robotModel = robotModel;
-      this.controllerHelper = controllerHelper;
+   private FramePose3D frontController;
+   private double sizeChange;
+   private float mousePosX = -20.0f;
+   private float mousePosY = -20.0f;
+   private boolean leftMouseDown = false;
+   private RDXLocomotionParameters locomotionParameters;
 
-      RobotDefinition robotDefinition = robotModel.getRobotDefinition();
-      for (RobotSide side : RobotSide.values)
-      {
-         // change for manual foot placement
-         String footName = robotModel.getJointMap().getFootName(side);
-         RigidBodyDefinition footBody = robotDefinition.getRigidBodyDefinition(footName);
-         String modelFileName = RDXInteractableTools.getModelFileName(robotDefinition.getRigidBodyDefinition(footBody.getName()));
-
-         footModels.put(side, RDXModelLoader.load(modelFileName));
-      }
-   }
    public void setLocomotionParameters(RDXLocomotionParameters locomotionParameters)
    {
       this.locomotionParameters = locomotionParameters;
    }
-   public void calculateVRPick(RDXVRContext vrContext)
+
+   public void update()
    {
-      //      for (RobotSide side : RobotSide.values)
-      //      {
-      //         vrPickResult.get(side).reset();
-      //         vrContext.getController(side).runIfConnected(controller ->
-      //         {
-      //            vrPickPose.setIncludingFrame(controller.getPickPointPose());
-      //            vrPickPose.changeFrame(vrContext.getController(side).getPickPoseFrame());
-      //            // if statement should look to see if line goes through plane of origin (how to do that?)
-      //            if (shape.isPointInside(vrPickPose.getPosition()))
-      //            {
-      //               vrPickResult.get(side).addPickCollision(shape.getCentroid().distance(vrPickPose.getPosition()));
-      //            }
-      //         });
-      //         if (vrPickResult.get(side).getPickCollisionWasAddedSinceReset())
-      //         {
-      //            vrContext.addPickResult(side, vrPickResult.get(side));
-      //         }
-      //      }
+      ImGuiIO io = ImGui.getIO();
+      io.setMousePos(mousePosX, mousePosY);
+      io.setMouseDown(ImGuiMouseButton.Left, leftMouseDown);
    }
+
    public void processVRInput(RDXVRContext vrContext)
    {
       if (controllerModel == RDXVRControllerModel.UNKNOWN)
@@ -91,23 +70,27 @@ public class RDXVRLaserFootstepMode
                                                             if (triggerClick.bChanged() && triggerClick.bState())
                                                             {
                                                                System.out.println("Yo you clicked a button");
-                                                               FramePose3D frontController = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                                                                             vrContext.getController(side)
-                                                                                                                      .getXForwardZUpPose());
+                                                               frontController = new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                                                                 vrContext.getController(side).getXForwardZUpPose());
                                                                frontController.changeFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
                                                                frontController.setToZero(vrContext.getController(side).getXForwardZUpControllerFrame());
                                                                frontController.getPosition().addX(.1);
                                                                frontController.changeFrame(ReferenceFrame.getWorldFrame());
-                                                               double sizeChange = vrContext.getController(side).getXForwardZUpPose().getZ() / (
+                                                               sizeChange = vrContext.getController(side).getXForwardZUpPose().getZ() / (
                                                                      vrContext.getController(side).getXForwardZUpPose().getZ()
                                                                      - frontController.getTranslationZ());
                                                                frontController.changeFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
                                                                if (sizeChange > 0)
                                                                {
                                                                   calculateSpot(frontController, sizeChange);
+                                                                  leftMouseDown = controller.getClickTriggerActionData().bState();
+                                                                  update();
                                                                }
                                                                else
                                                                {
+                                                                  mousePosX = -20.0f;
+                                                                  mousePosY = -20.0f;
+                                                                  leftMouseDown = false;
                                                                   System.out.println("Its time to cry");
                                                                }
                                                             }
@@ -116,12 +99,29 @@ public class RDXVRLaserFootstepMode
       }
    }
 
+   public float getMousePosX()
+   {
+      return mousePosX;
+   }
+
+   public float getMousePosY()
+   {
+      return mousePosY;
+   }
+
+   public FramePose3D getControllerFrame()
+   {
+      return frontController;
+   }
+
    public void calculateSpot(FramePose3D spot, double sizeChange)
    {
       spot.getPosition().addX(sizeChange * spot.getX());
       spot.changeFrame(ReferenceFrame.getWorldFrame());
       spot.getPosition().setZ(0);
       System.out.println(spot.getPosition());
+      mousePosX = Math.round(spot.getTranslationX());
+      mousePosY = Math.round(spot.getTranslationY());
    }
 
    public void renderImGuiWidgets()

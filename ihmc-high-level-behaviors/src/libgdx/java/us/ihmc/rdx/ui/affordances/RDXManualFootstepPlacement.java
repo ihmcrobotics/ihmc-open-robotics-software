@@ -280,6 +280,18 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       exitPlacement();
    }
 
+   public void vrPlacement(float mousePosX, float mousePosY, FramePose3D controllerPose, RobotSide side)
+   {
+      modeNewlyActivated = true;
+      footstepBeingPlaced = new RDXInteractableFootstep(baseUI, side, footstepPlan.getNumberOfFootsteps(), null);
+
+      tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
+      tempFramePose.setX(mousePosX);
+      tempFramePose.setY(mousePosY);
+      tempFramePose.getOrientation().setToYawOrientation(controllerPose.getYaw());
+      footstepBeingPlaced.updatePose(tempFramePose);
+   }
+
    public boolean pollIsModeNewlyActivated()
    {
       boolean modeNewlyActivatedReturn = modeNewlyActivated;

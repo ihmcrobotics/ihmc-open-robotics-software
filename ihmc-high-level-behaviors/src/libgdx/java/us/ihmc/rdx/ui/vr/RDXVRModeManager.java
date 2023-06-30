@@ -50,7 +50,6 @@ public class RDXVRModeManager
       handPlacedFootstepMode = new RDXVRHandPlacedFootstepMode();
       handPlacedFootstepMode.create(syncedRobot.getRobotModel(), controllerHelper);
       laserFootstepMode = new RDXVRLaserFootstepMode();
-      laserFootstepMode.create(syncedRobot.getRobotModel(), controllerHelper);
 
       if (syncedRobot.getRobotModel().getRobotVersion().hasArms())
       {
