@@ -9,11 +9,13 @@ import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.tools.Timer;
 
 public class ChestOrientationAction extends ChestOrientationActionData implements BehaviorAction
 {
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
+   private final Timer executionTimer = new Timer();
 
    public ChestOrientationAction(ROS2ControllerHelper ros2ControllerHelper, ROS2SyncedRobotModel syncedRobot)
    {
@@ -39,5 +41,12 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
       message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
 
       ros2ControllerHelper.publishToController(message);
+      executionTimer.reset();
+   }
+
+   @Override
+   public boolean isExecuting()
+   {
+      return executionTimer.isRunning(getTrajectoryDuration());
    }
 }

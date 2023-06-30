@@ -30,6 +30,7 @@ import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
 import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesPublisher;
 import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesSubscription;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
+import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
@@ -50,6 +51,7 @@ public class DualBlackflyCamera
    private final RobotSide side;
    private final ROS2SyncedRobotModel syncedRobot;
    private SpinnakerBlackfly spinnakerBlackfly;
+   private final BlackflyLensProperties blackflyLensProperties;
    private final ROS2StoredPropertySet<IntrinsicCameraMatrixProperties> ousterFisheyeColoringIntrinsicsROS2;
 
    private final ROS2Helper ros2Helper;
@@ -63,6 +65,7 @@ public class DualBlackflyCamera
    private final ROS2DetectableSceneNodesPublisher detectableSceneObjectsPublisher = new ROS2DetectableSceneNodesPublisher();
    private final ROS2DetectableSceneNodesSubscription detectableSceneNodesSubscription;
 
+   private final AtomicReference<BytePointer> spinImageData = new AtomicReference<>();
    private final AtomicReference<Instant> spinImageAcquisitionTime = new AtomicReference<>();
    private final ImageMessage imageMessage = new ImageMessage();
    private final IHMCROS2Publisher<ImageMessage> ros2ImagePublisher;
@@ -103,13 +106,14 @@ public class DualBlackflyCamera
                              RigidBodyTransform cameraTransformToParent,
                              ROS2Node ros2Node,
                              SpinnakerBlackfly spinnakerBlackfly,
-                             IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics,
+                             BlackflyLensProperties blackflyLensProperties,
                              PredefinedSceneNodeLibrary predefinedSceneNodeLibrary)
    {
       this.side = side;
       this.syncedRobot = syncedRobot;
       this.spinnakerBlackfly = spinnakerBlackfly;
-      this.ousterFisheyeColoringIntrinsics = ousterFisheyeColoringIntrinsics;
+      this.blackflyLensProperties = blackflyLensProperties;
+      this.ousterFisheyeColoringIntrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsOnRobot(blackflyLensProperties);
       this.predefinedSceneNodeLibrary = predefinedSceneNodeLibrary;
 
       ROS2Topic<ImageMessage> imageTopic = PerceptionAPI.BLACKFLY_FISHEYE_COLOR_IMAGE.get(side);
@@ -147,6 +151,7 @@ public class DualBlackflyCamera
                newImageReadNotifier.notifyAll();
             }
          }
+         System.out.println("Camera read thread has finished");
       }, "SpinnakerCameraRead");
 
       // Image process and publish thread
@@ -170,6 +175,7 @@ public class DualBlackflyCamera
             // Process and publish the new image
             imageProcessAndPublish();
          }
+         System.out.println("Image encode and publish thread has finished");
       }, "SpinnakerImageEncodeAndPublish");
 
       // Undistort image and update aruco thread
@@ -193,6 +199,7 @@ public class DualBlackflyCamera
             // Undistort  the new image
             undistortImageAndUpdateArUco();
          }
+         System.out.println("Image undistort and update ArUco thread has finished");
       }, "SpinnakerImageUndistortAndUpdateArUco");
 
       // Deallocation thread
@@ -205,11 +212,11 @@ public class DualBlackflyCamera
             {
                synchronized (encodingCompletionNotifier)
                {
-                  encodingCompletionNotifier.wait();
+                  encodingCompletionNotifier.wait(500);
                }
                synchronized (undistortionCompletionNotifier)
                {
-                  undistortionCompletionNotifier.wait();
+                  undistortionCompletionNotifier.wait(500);
                }
             }
             catch (InterruptedException interruptedException)
@@ -237,6 +244,7 @@ public class DualBlackflyCamera
                   break;
             }
          }
+         System.out.println("Deallocation thread has finished");
       }, "SpinnakerImageDeallocation");
 
       cameraReadThread.start();
@@ -268,16 +276,16 @@ public class DualBlackflyCamera
    {
       Mat cameraMatrix = new Mat(3, 3, opencv_core.CV_64F);
       opencv_core.setIdentity(cameraMatrix);
-      cameraMatrix.ptr(0, 0).putDouble(SensorHeadParameters.FOCAL_LENGTH_X_FOR_UNDISORTION);
-      cameraMatrix.ptr(1, 1).putDouble(SensorHeadParameters.FOCAL_LENGTH_Y_FOR_UNDISORTION);
-      cameraMatrix.ptr(0, 2).putDouble(SensorHeadParameters.PRINCIPAL_POINT_X_FOR_UNDISORTION);
-      cameraMatrix.ptr(1, 2).putDouble(SensorHeadParameters.PRINCIPAL_POINT_Y_FOR_UNDISORTION);
+      cameraMatrix.ptr(0, 0).putDouble(blackflyLensProperties.getFocalLengthXForUndistortion());
+      cameraMatrix.ptr(1, 1).putDouble(blackflyLensProperties.getFocalLengthYForUndistortion());
+      cameraMatrix.ptr(0, 2).putDouble(blackflyLensProperties.getPrincipalPointXForUndistortion());
+      cameraMatrix.ptr(1, 2).putDouble(blackflyLensProperties.getPrincipalPointYForUndistortion());
       Mat newCameraMatrixEstimate = new Mat(3, 3, opencv_core.CV_64F);
       opencv_core.setIdentity(newCameraMatrixEstimate);
-      Mat distortionCoefficients = new Mat(SensorHeadParameters.K1_FOR_UNDISORTION,
-                                           SensorHeadParameters.K2_FOR_UNDISORTION,
-                                           SensorHeadParameters.K3_FOR_UNDISORTION,
-                                           SensorHeadParameters.K4_FOR_UNDISORTION);
+      Mat distortionCoefficients = new Mat(blackflyLensProperties.getK1ForUndistortion(),
+                                           blackflyLensProperties.getK2ForUndistortion(),
+                                           blackflyLensProperties.getK3ForUndistortion(),
+                                           blackflyLensProperties.getK4ForUndistortion());
       Size sourceImageSize = new Size(imageWidth, imageHeight);
       Size undistortedImageSize = new Size((int) (SensorHeadParameters.UNDISTORTED_IMAGE_SCALE * imageWidth),
                                            (int) (SensorHeadParameters.UNDISTORTED_IMAGE_SCALE * imageHeight));
@@ -350,15 +358,19 @@ public class DualBlackflyCamera
          initialize(spinnakerBlackfly.getWidth(spinImage), spinnakerBlackfly.getHeight(spinImage));
       }
 
-      // Get pointer to image data
+      // Get image data
       BytePointer spinImageData = new BytePointer(imageFrameSize); // close at the end
       spinnakerBlackfly.setPointerToSpinImageData(spinImage, spinImageData);
-
-      // Upload image data to GPU
-      BytedecoImage sourceBytedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
+      BytedecoImage sourceBytedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
       sourceBytedecoImage.changeAddress(spinImageData.address());
+
+      // Upload image to GPU
+      GpuMat deviceSourceImage = new GpuMat(imageWidth, imageHeight, opencv_core.CV_8UC1);
+      deviceSourceImage.upload(sourceBytedecoImage.getBytedecoOpenCVMat());
+
+      // Convert from BayerRG8 to BGR for further conversion
       GpuMat latestImageSetter = new GpuMat(imageWidth, imageHeight, opencv_core.CV_8UC3);
-      latestImageSetter.upload(sourceBytedecoImage.getBytedecoOpenCVMat());
+      opencv_cudaimgproc.cvtColor(deviceSourceImage, latestImageSetter, opencv_imgproc.COLOR_BayerBG2BGR); // for some reason you need to convert BayerBG to BGR
 
       // Add image to deque
       receivedImagesDeque.offerLast(latestImageSetter);
@@ -373,6 +385,8 @@ public class DualBlackflyCamera
       spinImageAcquisitionTime.set(Instant.now());
 
       // Close pointers
+      deviceSourceImage.release();
+      deviceSourceImage.close();
       spinImageData.close();
       spinnakerBlackfly.releaseImage(spinImage);
    }
@@ -479,7 +493,18 @@ public class DualBlackflyCamera
 
    public void destroy()
    {
+      System.out.println("Destroying dual blackfly camera");
       destroyed = true;
+
+      // Notify deallocation thread to ensure it doesn't hang
+      synchronized (encodingCompletionNotifier)
+      {
+         encodingCompletionNotifier.notify();
+      }
+      synchronized (undistortionCompletionNotifier)
+      {
+         undistortionCompletionNotifier.notify();
+      }
 
       // Wait until threads finish their loops
       try

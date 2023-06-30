@@ -66,7 +66,14 @@ public class ICPControllerHelper
 
          tempVector.setIncludingFrame(icpVelocityDirectionFrame, parallelValue, orthogonalValue);
          tempVector.changeFrameAndProjectToXYPlane(valuesToPack.getReferenceFrame());
-         valuesToPack.set(tempVector);
+         if (Double.isNaN(tempVector.getX()))
+            valuesToPack.setX(Double.POSITIVE_INFINITY);
+         else
+            valuesToPack.setX(tempVector.getX());
+         if (Double.isNaN(tempVector.getY()))
+            valuesToPack.setY(Double.POSITIVE_INFINITY);
+         else
+            valuesToPack.setY(tempVector.getY());
       }
       else
       {

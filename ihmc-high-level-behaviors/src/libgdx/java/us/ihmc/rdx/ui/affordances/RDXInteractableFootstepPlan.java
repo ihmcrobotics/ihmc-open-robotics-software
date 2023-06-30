@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import imgui.ImGui;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -22,7 +21,6 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -55,8 +53,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    private RDXLocomotionParameters locomotionParameters;
    private SwingPlannerParametersBasics swingFootPlannerParameters;
 
-   private final AtomicReference<HeightMapMessage> heightMapReference = new AtomicReference<>();
-   private final AtomicReference<PlanarRegionsListMessage> planarRegionsListMessageReference = new AtomicReference<>();
+   private final AtomicReference<HeightMapMessage> heightMapDataReference = new AtomicReference<>();
    private final AtomicReference<PlanarRegionsList> planarRegionsListReference = new AtomicReference<>();
 
    private int previousPlanLength;
@@ -100,11 +97,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       }
    }
 
-   public void setPlanarRegionsListMessage(PlanarRegionsListMessage planarRegionsListMessage)
-   {
-      planarRegionsListMessageReference.set(planarRegionsListMessage);
-   }
-
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
       planarRegionsListReference.set(planarRegionsList);
@@ -114,7 +106,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
    public void setHeightMapMessage(HeightMapMessage heightMapMessage)
    {
-      heightMapReference.set(heightMapMessage);
+      heightMapDataReference.set(heightMapMessage);
       if (swingPlanningModule != null)
          swingPlanningModule.setHeightMapData(heightMapMessage);
    }
@@ -217,14 +209,11 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       stepChecker.update(footsteps);
       if (wasPlanUpdated && locomotionParameters.getReplanSwingTrajectoryOnChange() && !swingPlanningModule.getIsCurrentlyPlanning())
       {
-         PlanarRegionsListMessage planarRegionsListMessage = planarRegionsListMessageReference.getAndSet(null);
          PlanarRegionsList planarRegionsList = planarRegionsListReference.getAndSet(null);
 
-         if (planarRegionsListMessage != null)
-            swingPlanningModule.setPlanarRegionList(planarRegionsList);
          if (planarRegionsList != null)
             swingPlanningModule.setPlanarRegionList(planarRegionsList);
-         HeightMapMessage heightMapMessage = heightMapReference.getAndSet(null);
+         HeightMapMessage heightMapMessage = heightMapDataReference.getAndSet(null);
          if (heightMapMessage != null)
             swingPlanningModule.setHeightMapData(heightMapMessage);
 

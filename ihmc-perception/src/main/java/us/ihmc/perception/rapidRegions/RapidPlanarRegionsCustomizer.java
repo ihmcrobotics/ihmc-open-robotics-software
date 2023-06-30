@@ -118,21 +118,6 @@ public class RapidPlanarRegionsCustomizer
       }
    }
 
-   public ConcaveHullCollection applyConcaveHullFilters(ConcaveHullCollection concaveHulls)
-   {
-      // Apply some simple filtering to reduce the number of vertices and hopefully the number of convex polygons.
-      double shallowAngleThreshold = polygonizerParameters.getShallowAngleThreshold();
-      double peakAngleThreshold = polygonizerParameters.getPeakAngleThreshold();
-      double lengthThreshold = polygonizerParameters.getLengthThreshold();
-
-      ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHulls);
-      ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHulls);
-      if (polygonizerParameters.getCutNarrowPassage())
-         return ConcaveHullPruningFilteringTools.concaveHullNarrowPassageCutter(lengthThreshold, concaveHulls);
-      else
-         return concaveHulls;
-   }
-
    public ConcaveHullFactoryParameters getConcaveHullFactoryParameters()
    {
       return concaveHullFactoryParameters;
