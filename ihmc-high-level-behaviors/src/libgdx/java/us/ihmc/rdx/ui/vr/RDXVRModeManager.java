@@ -28,6 +28,7 @@ import java.util.Set;
 public class RDXVRModeManager
 {
    private ROS2SyncedRobotModel syncedRobot;
+   private RDXVRLaserFootstepMode laserFootstepMode;
    private RDXVRHandPlacedFootstepMode handPlacedFootstepMode;
    private RDXVRKinematicsStreamingMode kinematicsStreamingMode;
    private RDXJoystickBasedStepping joystickBasedStepping;
@@ -48,6 +49,8 @@ public class RDXVRModeManager
       this.syncedRobot = syncedRobot;
       handPlacedFootstepMode = new RDXVRHandPlacedFootstepMode();
       handPlacedFootstepMode.create(syncedRobot.getRobotModel(), controllerHelper);
+      laserFootstepMode = new RDXVRLaserFootstepMode();
+      laserFootstepMode.create(syncedRobot.getRobotModel(), controllerHelper);
 
       if (syncedRobot.getRobotModel().getRobotVersion().hasArms())
       {
@@ -83,6 +86,7 @@ public class RDXVRModeManager
       switch (mode)
       {
          case FOOTSTEP_PLACEMENT -> handPlacedFootstepMode.processVRInput(vrContext);
+         case LASER_PLACEMENT -> laserFootstepMode.processVRInput(vrContext);
          case WHOLE_BODY_IK_STREAMING ->
          {
             if (kinematicsStreamingMode != null)
@@ -131,11 +135,15 @@ public class RDXVRModeManager
       {
          mode = RDXVRMode.FOOTSTEP_PLACEMENT;
       }
+      if (ImGui.radioButton(labels.get("Laser placement"), mode == RDXVRMode.LASER_PLACEMENT))
+      {
+         mode = RDXVRMode.LASER_PLACEMENT;
+      }
       if (ImGui.radioButton(labels.get("Whole body IK streaming"), mode == RDXVRMode.WHOLE_BODY_IK_STREAMING))
       {
          mode = RDXVRMode.WHOLE_BODY_IK_STREAMING;
-//         if (!kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().isStarted())
-//            kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().start();
+         //         if (!kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().isStarted())
+         //            kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().start();
       }
       if (ImGui.radioButton(labels.get("Joystick walking"), mode == RDXVRMode.JOYSTICK_WALKING))
       {
@@ -151,6 +159,10 @@ public class RDXVRModeManager
          case FOOTSTEP_PLACEMENT ->
          {
             handPlacedFootstepMode.renderImGuiWidgets();
+         }
+         case LASER_PLACEMENT ->
+         {
+            laserFootstepMode.renderImGuiWidgets();
          }
          case WHOLE_BODY_IK_STREAMING ->
          {
@@ -173,6 +185,10 @@ public class RDXVRModeManager
             case FOOTSTEP_PLACEMENT ->
             {
                handPlacedFootstepMode.getRenderables(renderables, pool);
+            }
+            case LASER_PLACEMENT ->
+            {
+               laserFootstepMode.getRenderables(renderables, pool);
             }
             case WHOLE_BODY_IK_STREAMING ->
             {
@@ -223,5 +239,10 @@ public class RDXVRModeManager
    public RDXVRHandPlacedFootstepMode getHandPlacedFootstepMode()
    {
       return handPlacedFootstepMode;
+   }
+
+   public RDXVRLaserFootstepMode getLaserFootstepMode()
+   {
+      return laserFootstepMode;
    }
 }
