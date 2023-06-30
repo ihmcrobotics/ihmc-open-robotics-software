@@ -5,6 +5,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 
+import java.util.ArrayList;
+
 /**
  * A scene object detectable via an ArUco marker.
  * Loads a stored property set for the marker information.
@@ -13,56 +15,29 @@ import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
  */
 public class ArUcoDetectableNode extends PredefinedRigidBodySceneNode
 {
-   private final int markerID;
-   private final double markerSize;
-   private final ModifiableReferenceFrame markerFrame;
+   /**
+    * It's possible to have more than one marker able to detect the pose of this object.
+    * For instance, for a door, you want a marker on the "push" side and another one with
+    * a different ID on the "pull" side, which give the pose of the same object: the door
+    * panel.
+    */
+   private final ArrayList<ArUcoMarkerInfo> detectableMarkers = new ArrayList<>();
 
    /**
     * Give the marker info directly from code.
-    *
-    * @param markerToNodeFrameTransform we measure the marker like it's a child of the node
-    *                                   but really it's the parent, so we'll invert it in here
     */
-   public ArUcoDetectableNode(String name,
-                              int markerID,
-                              double markerSize,
-                              RigidBodyTransform markerToNodeFrameTransform,
-                              String visualModelFilePath,
-                              RigidBodyTransform visualModelToNodeFrameTransform)
+   public ArUcoDetectableNode(String name, String visualModelFilePath, RigidBodyTransform visualModelToNodeFrameTransform)
    {
       super(name, visualModelFilePath, visualModelToNodeFrameTransform);
 
-      markerFrame = new ModifiableReferenceFrame(name + "MarkerFrame", ReferenceFrame.getWorldFrame());
       changeParentFrame(markerFrame.getReferenceFrame());
 
-      this.markerID = markerID;
-      this.markerSize = markerSize;
       getNodeToParentFrameTransform().setAndInvert(markerToNodeFrameTransform);
       getNodeFrame().update();
    }
 
-   public int getMarkerID()
+   public ArrayList<ArUcoMarkerInfo> getDetectableMarkers()
    {
-      return markerID;
-   }
-
-   public double getMarkerSize()
-   {
-      return markerSize;
-   }
-
-   public ReferenceFrame getMarkerFrame()
-   {
-      return markerFrame.getReferenceFrame();
-   }
-
-   /**
-    * Used to get and set the transform from marker frame to world frame.
-    * If you modify this transform, you must then call {@link ReferenceFrame#update()} on {@link #getMarkerFrame()}.
-    * @return the transform from marker frame to world frame
-    */
-   public RigidBodyTransform getMarkerToWorldFrameTransform()
-   {
-      return markerFrame.getTransformToParent();
+      return detectableMarkers;
    }
 }
