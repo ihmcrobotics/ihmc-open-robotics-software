@@ -30,6 +30,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LegTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -250,6 +251,16 @@ public class FeetManager implements SCS2YoGraphicHolder
       RobotSide robotSide = command.getRobotSide();
       FootControlModule footControlModule = footControlModules.get(robotSide);
       footControlModule.handleFootTrajectoryCommand(command);
+
+      if (footControlModule.getCurrentConstraintType() != ConstraintType.MOVE_VIA_WAYPOINTS)
+         setContactStateForMoveViaWaypoints(robotSide);
+   }
+
+   public void handleLegTrajectoryCommand(LegTrajectoryCommand command)
+   {
+      RobotSide robotSide = command.getRobotSide();
+      FootControlModule footControlModule = footControlModules.get(robotSide);
+      footControlModule.handleLegTrajectoryCommand(command);
 
       if (footControlModule.getCurrentConstraintType() != ConstraintType.MOVE_VIA_WAYPOINTS)
          setContactStateForMoveViaWaypoints(robotSide);
