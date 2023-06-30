@@ -263,7 +263,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       footstepBeingPlaced.updatePose(tempFramePose);
    }
 
-   public void squareUp()
+   public void squareUpFootstep()
    {
       ReferenceFrame leftFootFrame = syncedRobot.getReferenceFrames().getFootFrame(RobotSide.LEFT);
       FramePose3D rightFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
@@ -273,7 +273,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       MovingReferenceFrame furthestForwardSoleFrame = syncedRobot.getReferenceFrames().getSoleFrame(furthestForwardFootstep);
       footstepBeingPlaced = new RDXInteractableFootstep(baseUI, furthestForwardFootstep.getOppositeSide(), footstepPlan.getNumberOfFootsteps(), null);
       tempFramePose.setToZero(furthestForwardSoleFrame);
-      tempFramePose.getTranslation().addY(furthestForwardFootstep.negateIfLeftSide(footstepPlannerParameters.getIdealSideStepWidth()));
+      tempFramePose.getTranslation().addY(furthestForwardFootstep.negateIfLeftSide(footstepPlannerParameters.getIdealFootstepWidth()));
       tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       footstepBeingPlaced.updatePose(tempFramePose);
       placeFootstep();
