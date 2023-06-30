@@ -265,22 +265,16 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
    public void squareUp()
    {
-      MovingReferenceFrame midFootZUpGroundFrame = syncedRobot.getReferenceFrames().getMidFootZUpGroundFrame();
       ReferenceFrame leftFootFrame = syncedRobot.getReferenceFrames().getFootFrame(RobotSide.LEFT);
-      FramePose3D leftFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPlan.getLastFootstepTransform(RobotSide.LEFT));
-      leftFootPose.changeFrame(midFootZUpGroundFrame);
-      FramePose3D rightFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepPlan.getLastFootstepTransform(RobotSide.RIGHT));
+      FramePose3D rightFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                  syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
       rightFootPose.changeFrame(leftFootFrame);
       RobotSide furthestForwardFootstep = rightFootPose.getTranslationX() > 0 ? RobotSide.RIGHT : RobotSide.LEFT;
-      MovingReferenceFrame soleFrame = syncedRobot.getReferenceFrames().getSoleFrame(furthestForwardFootstep);
+      MovingReferenceFrame furthestForwardSoleFrame = syncedRobot.getReferenceFrames().getSoleFrame(furthestForwardFootstep);
       footstepBeingPlaced = new RDXInteractableFootstep(baseUI, furthestForwardFootstep.getOppositeSide(), footstepPlan.getNumberOfFootsteps(), null);
-      tempFramePose.set(soleFrame.getTransformToRoot());
-      tempFramePose.getPosition()
-                   .addY(furthestForwardFootstep.negateIfLeftSide(
-                         Math.cos(soleFrame.getTransformToRoot().getRotation().getYaw()) * footstepPlannerParameters.getIdealSideStepWidth()));
-      tempFramePose.getPosition()
-                   .addX(furthestForwardFootstep.negateIfRightSide(
-                         Math.sin(soleFrame.getTransformToRoot().getRotation().getYaw()) * footstepPlannerParameters.getIdealSideStepWidth()));
+      tempFramePose.setToZero(furthestForwardSoleFrame);
+      tempFramePose.getTranslation().addY(furthestForwardFootstep.negateIfLeftSide(footstepPlannerParameters.getIdealSideStepWidth()));
+      tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       footstepBeingPlaced.updatePose(tempFramePose);
       placeFootstep();
       exitPlacement();
