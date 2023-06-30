@@ -2,9 +2,7 @@ package us.ihmc.perception.sceneGraph.arUco;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.arUco.ArUcoMarker;
 import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
-import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 
 /**
@@ -40,31 +38,6 @@ public class ArUcoDetectableNode extends PredefinedRigidBodySceneNode
       this.markerID = markerID;
       this.markerSize = markerSize;
       getNodeToParentFrameTransform().setAndInvert(markerToNodeFrameTransform);
-      getNodeFrame().update();
-   }
-
-   /**
-    * Loads info from StoredPropertySet with name as suffix
-    */
-   public ArUcoDetectableNode(String name, String visualModelFilePath, RigidBodyTransform visualModelToNodeFrameTransform)
-   {
-      super(name, visualModelFilePath, visualModelToNodeFrameTransform);
-
-      markerFrame = new ModifiableReferenceFrame(name + "MarkerFrame", ReferenceFrame.getWorldFrame());
-      changeParentFrame(markerFrame.getReferenceFrame());
-
-      ArUcoMarker arUcoMarker = new ArUcoMarker(name);
-      markerID = arUcoMarker.getMarkerID();
-      markerSize = arUcoMarker.getMarkerSize();
-      // We measure the marker like it's a child of the node
-      // but really it's the parent, so we'll invert it in here
-      getNodeToParentFrameTransform().getTranslation().set(arUcoMarker.getMarkerXTranslationToParent(),
-                                                           arUcoMarker.getMarkerYTranslationToParent(),
-                                                           arUcoMarker.getMarkerZTranslationToParent());
-      EuclidCoreMissingTools.setYawPitchRollDegrees(getNodeToParentFrameTransform().getRotation(),
-                                                    arUcoMarker.getMarkerYawRotationToParentDegrees(),
-                                                    arUcoMarker.getMarkerPitchRotationToParentDegrees(),
-                                                    arUcoMarker.getMarkerRollRotationToParentDegrees());
       getNodeFrame().update();
    }
 
