@@ -79,6 +79,44 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       rightFootButton.setOnPressed(() -> createNewFootStep(RobotSide.RIGHT));
    }
 
+   public void update()
+   {
+      if (footstepBeingPlaced != null)
+      {
+         footstepBeingPlaced.update();
+         footstepBeingPlaced.updateFootstepIndexText(footstepPlan.getNumberOfFootsteps());
+      }
+   }
+
+   public void renderImGuiWidgets()
+   {
+      ImGui.text("Footstep Planning:");
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Left")) || ImGui.isKeyPressed('R'))
+      {
+         createNewFootStep(RobotSide.LEFT);
+      }
+      ImGuiTools.previousWidgetTooltip("Keybind: R");
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Right")) || ImGui.isKeyPressed('T'))
+      {
+         createNewFootStep(RobotSide.RIGHT);
+      }
+      ImGuiTools.previousWidgetTooltip("Keybind: T");
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Cancel")) || ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
+      {
+         exitPlacement();
+      }
+      ImGuiTools.previousWidgetTooltip("Keybind: Escape");
+      ImGui.sameLine();
+      if (imgui.ImGui.button(labels.get("Delete Last")) || (ImGui.getIO().getKeyCtrl() && ImGui.isKeyPressed('Z')))
+      {
+         footstepPlan.removeLastStep();
+      }
+      ImGuiTools.previousWidgetTooltip("Keybind: Ctrl + Z");
+   }
+
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
       renderTooltip = false;
@@ -183,33 +221,13 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       }
    }
 
-   public void renderImGuiWidgets()
+   @Override
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      ImGui.text("Footstep Planning:");
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Left")) || ImGui.isKeyPressed('R'))
+      if (footstepBeingPlaced != null)
       {
-         createNewFootStep(RobotSide.LEFT);
+         footstepBeingPlaced.getVirtualRenderables(renderables, pool);
       }
-      ImGuiTools.previousWidgetTooltip("Keybind: R");
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Right")) || ImGui.isKeyPressed('T'))
-      {
-         createNewFootStep(RobotSide.RIGHT);
-      }
-      ImGuiTools.previousWidgetTooltip("Keybind: T");
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Cancel")) || ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
-      {
-         exitPlacement();
-      }
-      ImGuiTools.previousWidgetTooltip("Keybind: Escape");
-      ImGui.sameLine();
-      if (imgui.ImGui.button(labels.get("Delete Last")) || (ImGui.getIO().getKeyCtrl() && ImGui.isKeyPressed('Z')))
-      {
-         footstepPlan.removeLastStep();
-      }
-      ImGuiTools.previousWidgetTooltip("Keybind: Ctrl + Z");
    }
 
    private void renderTooltips()
@@ -224,24 +242,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          {
             tooltip.render("Footstep out of reach.\nRight click to exit.");
          }
-      }
-   }
-
-   @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
-      if (footstepBeingPlaced != null)
-      {
-         footstepBeingPlaced.getVirtualRenderables(renderables, pool);
-      }
-   }
-
-   public void update()
-   {
-      if (footstepBeingPlaced != null)
-      {
-         footstepBeingPlaced.update();
-         footstepBeingPlaced.updateFootstepIndexText(footstepPlan.getNumberOfFootsteps());
       }
    }
 
