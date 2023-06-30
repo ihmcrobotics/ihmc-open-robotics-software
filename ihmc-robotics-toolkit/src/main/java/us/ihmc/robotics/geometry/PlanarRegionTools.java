@@ -1413,7 +1413,7 @@ public class PlanarRegionTools
       return highestIntersection;
    }
 
-   public static <T extends RegionInWorldInterface<T>> boolean projectPointToPlanesVertically(Point3DReadOnly pointInWorldToProject,
+   public static <T extends RegionInWorldInterface<T>> T projectPointToPlanesVertically(Point3DReadOnly pointInWorldToProject,
                                                                                               List<T> regions,
                                                                                               Point3DBasics projectedPointToPack,
                                                                                               T highestRegionToPack)
@@ -1421,13 +1421,15 @@ public class PlanarRegionTools
       if (regions == null)
       {
          projectedPointToPack.setToNaN();
-         return false;
+         return null;
       }
 
       double originalX = projectedPointToPack.getX();
       double originalY = projectedPointToPack.getY();
 
       double highestZ = Double.NEGATIVE_INFINITY;
+
+      T highestRegion = null;
 
       for (int i = 0; i < regions.size(); i++)
       {
@@ -1447,6 +1449,7 @@ public class PlanarRegionTools
          if (highestZ < height)
          {
             highestZ = height;
+            highestRegion = region;
             if (highestRegionToPack != null)
                highestRegionToPack.set(region);
          }
@@ -1455,12 +1458,12 @@ public class PlanarRegionTools
       if (Double.isInfinite(highestZ))
       {
          projectedPointToPack.setToNaN();
-         return false;
+         return null;
       }
 
       projectedPointToPack.set(originalX, originalY, highestZ);
 
-      return true;
+      return highestRegion;
    }
 
    public static boolean isPointOnRegion(PlanarRegion region, Point3D point, double epsilon)
