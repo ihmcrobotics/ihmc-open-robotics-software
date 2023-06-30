@@ -17,14 +17,13 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.ImGui3DViewInput;
-import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXIconTexture;
-import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
+import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -106,7 +105,10 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          // and the sphere used in stepCheckIsPointInsideAlgorithm all to the pointInWorld that the cursor is at
          LibGDXTools.toLibGDX(pickPointInWorld, footstepBeingPlaced.getFootstepModelInstance().transform);
 
-         footstepBeingPlaced.setGizmoPose(pickPointInWorld.getX(), pickPointInWorld.getY(), pickPointInWorld.getZ(), footstepBeingPlaced.getFootPose());
+         footstepBeingPlaced.setGizmoPose(pickPointInWorld.getX(),
+                                          pickPointInWorld.getY(),
+                                          pickPointInWorld.getZ(),
+                                          footstepBeingPlaced.getFootPose());
 
          // Adjust footstep yaw while placing with Ctrl + Mouse Scroll Up/Down
          double deltaYaw = 0.0;
@@ -139,7 +141,10 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          candidateStepPose.getPosition().set(pickPointInWorld);
          candidateStepPose.getRotation().setToYawOrientation(getFootstepBeingPlacedOrLastFootstepPlaced().getYaw());
 
-         stepChecker.checkValidSingleStep(footstepPlan.getFootsteps(), candidateStepPose, currentFootStepSide, footstepPlan.getNumberOfFootsteps());
+         stepChecker.checkValidSingleStep(footstepPlan.getFootsteps(),
+                                          candidateStepPose,
+                                          currentFootStepSide,
+                                          footstepPlan.getNumberOfFootsteps());
 
          // Get the warnings and flash if the footstep's placement isn't okay
          ArrayList<BipedalFootstepPlannerNodeRejectionReason> temporaryReasons = stepChecker.getReasons();
@@ -263,23 +268,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       footstepBeingPlaced.updatePose(tempFramePose);
    }
 
-   public void squareUp()
-   {
-      ReferenceFrame leftFootFrame = syncedRobot.getReferenceFrames().getFootFrame(RobotSide.LEFT);
-      FramePose3D rightFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                  syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
-      rightFootPose.changeFrame(leftFootFrame);
-      RobotSide furthestForwardFootstep = rightFootPose.getTranslationX() > 0 ? RobotSide.RIGHT : RobotSide.LEFT;
-      MovingReferenceFrame furthestForwardSoleFrame = syncedRobot.getReferenceFrames().getSoleFrame(furthestForwardFootstep);
-      footstepBeingPlaced = new RDXInteractableFootstep(baseUI, furthestForwardFootstep.getOppositeSide(), footstepPlan.getNumberOfFootsteps(), null);
-      tempFramePose.setToZero(furthestForwardSoleFrame);
-      tempFramePose.getTranslation().addY(furthestForwardFootstep.negateIfLeftSide(footstepPlannerParameters.getIdealSideStepWidth()));
-      tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-      footstepBeingPlaced.updatePose(tempFramePose);
-      placeFootstep();
-      exitPlacement();
-   }
-
    public boolean pollIsModeNewlyActivated()
    {
       boolean modeNewlyActivatedReturn = modeNewlyActivated;
@@ -326,11 +314,9 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          previousFootstepPose.setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(currentFootStepSide.getOppositeSide()));
       }
 
-      boolean isReachable = footstepBeingPlaced.getFootPose().getPositionDistance(previousFootstepPose)
-                            < MAX_DISTANCE_MULTIPLIER * footstepPlannerParameters.getMaximumStepReach();
+      boolean isReachable = footstepBeingPlaced.getFootPose().getPositionDistance(previousFootstepPose) < MAX_DISTANCE_MULTIPLIER * footstepPlannerParameters.getMaximumStepReach();
       isReachable &= footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ() < MAX_DISTANCE_MULTIPLIER * footstepPlannerParameters.getMaxStepZ();
-      isReachable &=
-            footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ() > -MAX_DISTANCE_MULTIPLIER * footstepPlannerParameters.getMaxStepZ();
+      isReachable &= footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ() > -MAX_DISTANCE_MULTIPLIER * footstepPlannerParameters.getMaxStepZ();
 
       return isReachable;
    }
