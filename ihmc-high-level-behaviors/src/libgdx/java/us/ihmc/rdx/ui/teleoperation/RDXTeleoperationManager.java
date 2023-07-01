@@ -35,6 +35,7 @@ import us.ihmc.rdx.ui.interactable.RDXPelvisHeightSlider;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionManager;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
+import us.ihmc.rdx.ui.vr.RDXVRLaserFootstepMode;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.YawPitchRollAxis;
@@ -118,6 +119,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final ControllerStatusTracker controllerStatusTracker;
    private final LogToolsLogger logToolsLogger = new LogToolsLogger();
 
+
    /**
     * For use without interactables available. May crash if a YoVariableClient is needed.
     */
@@ -164,6 +166,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2Helper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
 
       locomotionManager = new RDXLocomotionManager(robotModel, communicationHelper, syncedRobot, ros2Helper, controllerStatusTracker, this);
+
 
       interactablesAvailable = robotSelfCollisionModel != null;
       if (interactablesAvailable)
@@ -616,5 +619,10 @@ public class RDXTeleoperationManager extends ImGuiPanel
    public RDXLocomotionParameters getLocomotionParameters()
    {
       return locomotionManager.getLocomotionParameters();
+   }
+   public void setLaserFootstepMode(RDXVRLaserFootstepMode laserFootstepMode)
+   {
+      System.out.println("we be setting");
+      locomotionManager.setLaserFootstepMode(laserFootstepMode);
    }
 }

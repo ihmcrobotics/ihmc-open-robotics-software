@@ -35,6 +35,7 @@ import us.ihmc.rdx.ui.footstepPlanner.RDXFootstepPlanning;
 import us.ihmc.rdx.ui.graphics.RDXBodyPathPlanGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXLegControlMode;
+import us.ihmc.rdx.ui.vr.RDXVRLaserFootstepMode;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -69,6 +70,7 @@ public class RDXLocomotionManager
 
    private final RDXFootstepPlanGraphic footstepsSentToControllerGraphic;
    private final RDXBodyPathPlanGraphic bodyPathPlanGraphic = new RDXBodyPathPlanGraphic();
+   private RDXVRLaserFootstepMode laserFootstepMode;
 
    private final SideDependentList<RDXInteractableFoot> interactableFeet = new SideDependentList<>();
    private final RDXBallAndArrowPosePlacement ballAndArrowMidFeetPosePlacement = new RDXBallAndArrowPosePlacement();
@@ -252,6 +254,15 @@ public class RDXLocomotionManager
          footstepsSentToControllerGraphic.clear();
       }
 
+      if (laserFootstepMode != null && laserFootstepMode.getFrontController() != null)
+      {
+         if(laserFootstepMode.getControllerSide() != null)
+         {
+            manualFootstepPlacement.vrPlacement(laserFootstepMode.getFrontController(),
+                                                laserFootstepMode.getControllerSide());
+            laserFootstepMode.setFrontController(null);
+         }
+         }
       footstepsSentToControllerGraphic.update();
 
       boolean isCurrentlyPlacingFootstep =
@@ -471,5 +482,10 @@ public class RDXLocomotionManager
    public RDXLocomotionParameters getLocomotionParameters()
    {
       return locomotionParameters;
+   }
+
+   public void setLaserFootstepMode(RDXVRLaserFootstepMode laserFootstepMode)
+   {
+      this.laserFootstepMode = laserFootstepMode;
    }
 }

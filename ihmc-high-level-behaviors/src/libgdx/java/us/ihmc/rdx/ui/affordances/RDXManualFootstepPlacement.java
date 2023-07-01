@@ -177,6 +177,11 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          LogTools.info("Footstep Rejected, too far from previous foot... not placing footstep");
       }
    }
+   private void vrPlaceFootstep()
+   {
+         RDXInteractableFootstep addedStep = footstepPlan.getNextFootstep();
+         addedStep.copyFrom(baseUI, footstepBeingPlaced);
+   }
 
    public void renderImGuiWidgets()
    {
@@ -280,16 +285,19 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       exitPlacement();
    }
 
-   public void vrPlacement(float mousePosX, float mousePosY, FramePose3D controllerPose, RobotSide side)
+   public void vrPlacement(FramePose3D controllerPose, RobotSide side)
    {
       modeNewlyActivated = true;
       footstepBeingPlaced = new RDXInteractableFootstep(baseUI, side, footstepPlan.getNumberOfFootsteps(), null);
+      currentFootStepSide = side;
 
       tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
-      tempFramePose.setX(mousePosX);
-      tempFramePose.setY(mousePosY);
+      tempFramePose.setX(controllerPose.getTranslationX());
+      tempFramePose.setY(controllerPose.getTranslationY());
       tempFramePose.getOrientation().setToYawOrientation(controllerPose.getYaw());
       footstepBeingPlaced.updatePose(tempFramePose);
+      vrPlaceFootstep();
+      exitPlacement();
    }
 
    public boolean pollIsModeNewlyActivated()
