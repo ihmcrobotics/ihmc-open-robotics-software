@@ -1,10 +1,13 @@
 package us.ihmc.perception.sceneGraph.multiBodies.door;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticArUcoRelativeDetectableSceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
 import us.ihmc.robotics.EuclidCoreMissingTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class DoorSceneNodeDefinitions
 {
@@ -52,8 +55,23 @@ public class DoorSceneNodeDefinitions
    public static final RigidBodyTransform PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER = new RigidBodyTransform();
    static
    {
-      PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER.getTranslation().add(0.03, 0.09, -0.105);
-      EuclidCoreMissingTools.setYawPitchRollDegrees(PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER.getRotation(), 90.0, 0.0, 90.0);
+      ReferenceFrame markerFrame = ReferenceFrame.getWorldFrame(); // Placeholder for initialization
+      ReferenceFrame panelFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(markerFrame,
+                                                                                                           PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER);
+      FramePose3D leverPose = new FramePose3D(panelFrame);
+
+      leverPose.getOrientation().setToYawOrientation(Math.PI);
+//      leverPose
+
+      leverPose.changeFrame(markerFrame);
+      leverPose.get(PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER);
+
+      panelFrame.remove();
+
+//      PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER.getRotation().setToYawOrientation(Math.PI);
+//      PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER.getTranslation().sub(PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER.getTranslation());
+//      PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER.getTranslation().add(0.03, 0.09, -0.105);
+//      EuclidCoreMissingTools.setYawPitchRollDegrees(PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER.getRotation(), 90.0, 0.0, 90.0);
    }
 
    // TODO: These transforms need to be verified.
