@@ -200,7 +200,8 @@ public class RDXLocomotionManager
                                                      }
 
                                                      System.out.println("Removing footstep " + i);
-                                                     footstepsSentToControllerGraphic.getFootstepModels().remove(i);
+                                                     footstepsSentToControllerGraphic.getFootstepModels().remove(0);
+                                                     footstepsSentToControllerGraphic.getTextRenderables().remove(0);
                                                      if (footstepsSentToControllerGraphic.getFootstepModels().isEmpty())
                                                      {
                                                         i = 0;

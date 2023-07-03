@@ -221,6 +221,11 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
       return footstepModels;
    }
 
+   public ArrayList<RDX3DSituatedText> getTextRenderables()
+   {
+      return textRenderables;
+   }
+
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
