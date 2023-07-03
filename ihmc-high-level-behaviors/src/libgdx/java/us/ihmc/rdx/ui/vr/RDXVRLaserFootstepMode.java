@@ -26,7 +26,8 @@ public class RDXVRLaserFootstepMode
    private double sizeChange;
    private RDXLocomotionParameters locomotionParameters;
    private RobotSide controllerSide;
-   private RDXModelInstance laser;
+   private RDXModelInstance leftLaser;
+   private RDXModelInstance rightLaser;
    private boolean sendWalkPlan = false;
 
    public void setLocomotionParameters(RDXLocomotionParameters locomotionParameters)
@@ -47,16 +48,13 @@ public class RDXVRLaserFootstepMode
          {
             vrContext.getController(side).runIfConnected(controller ->
                                                          {
-                                                            setControllerSide(side);
                                                             calculateVR(vrContext);
-                                                            createLaser(sizeChange / 10);
-                                                            laser.setPoseInWorldFrame(vrContext.getController(getControllerSide()).getPickPointPose());
+                                                            updateLaser(sizeChange / 10, vrContext);
                                                             InputDigitalActionData triggerClick = controller.getClickTriggerActionData();
                                                             InputDigitalActionData aButtonClick = controller.getAButtonActionData();
                                                             if (triggerClick.bChanged() && triggerClick.bState())
                                                             {
                                                                setControllerSide(side);
-                                                               System.out.println(getControllerSide());
                                                                calculateVR(vrContext);
                                                                if (sizeChange > 0)
                                                                {
@@ -84,30 +82,37 @@ public class RDXVRLaserFootstepMode
 
    public void calculateVR(RDXVRContext vrContext)
    {
-      vrContext.getController(getControllerSide()).runIfConnected(controller ->
-                                                                  {
-                                                                     frontController = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                                                                       vrContext.getController(getControllerSide())
-                                                                                                                .getXForwardZUpPose());
-                                                                     frontController.changeFrame(vrContext.getController(getControllerSide())
-                                                                                                          .getXForwardZUpControllerFrame());
-                                                                     frontController.setToZero(vrContext.getController(getControllerSide())
-                                                                                                        .getXForwardZUpControllerFrame());
-                                                                     frontController.getPosition().addX(.1);
-                                                                     frontController.changeFrame(ReferenceFrame.getWorldFrame());
-                                                                     sizeChange = vrContext.getController(getControllerSide()).getXForwardZUpPose().getZ() / (
-                                                                           vrContext.getController(getControllerSide()).getXForwardZUpPose().getZ()
-                                                                           - frontController.getTranslationZ());
-                                                                     frontController.changeFrame(vrContext.getController(getControllerSide())
-                                                                                                          .getXForwardZUpControllerFrame());
-                                                                     frontController.getPosition().addX(sizeChange * frontController.getX());
-                                                                     frontController.changeFrame(ReferenceFrame.getWorldFrame());
-                                                                  });
+      if (controllerModel == RDXVRControllerModel.UNKNOWN)
+         controllerModel = vrContext.getControllerModel();
+      boolean noSelectedPick = true;
+      for (RobotSide side : RobotSide.values)
+         noSelectedPick = noSelectedPick && vrContext.getSelectedPick().get(side) == null;
+      if (noSelectedPick)
+      {
+         RobotSide side = getControllerSide();
+         vrContext.getController(side).runIfConnected(controller ->
+                                                      {
+                                                         frontController = new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                                                           vrContext.getController(side).getXForwardZUpPose());
+                                                         frontController.changeFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
+                                                         frontController.setToZero(vrContext.getController(side).getXForwardZUpControllerFrame());
+                                                         frontController.getPosition().addX(.1);
+                                                         frontController.changeFrame(ReferenceFrame.getWorldFrame());
+                                                         sizeChange = vrContext.getController(side).getXForwardZUpPose().getZ() / (
+                                                               vrContext.getController(side).getXForwardZUpPose().getZ() - frontController.getTranslationZ());
+                                                         frontController.changeFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
+                                                         frontController.getPosition().addX(sizeChange * frontController.getX());
+                                                         frontController.changeFrame(ReferenceFrame.getWorldFrame());
+                                                      });
+      }
    }
 
-   public void createLaser(double length)
+   public void updateLaser(double length, RDXVRContext vrContext)
    {
-      laser = new RDXModelInstance(RDXModelBuilder.createArrow(length, 0.01, new Color(0x870707ff)));
+      leftLaser = new RDXModelInstance(RDXModelBuilder.createArrow(length, 0.001, new Color(0x870707ff)));
+      rightLaser = new RDXModelInstance(RDXModelBuilder.createArrow(length, 0.001, new Color(0x870707ff)));
+      leftLaser.setPoseInWorldFrame(vrContext.getController(RobotSide.LEFT).getPickPointPose());
+      rightLaser.setPoseInWorldFrame(vrContext.getController(RobotSide.RIGHT).getPickPointPose());
    }
 
    public void renderImGuiWidgets()
@@ -146,9 +151,13 @@ public class RDXVRLaserFootstepMode
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (laser != null)
+      if (rightLaser != null)
       {
-         laser.getRenderables(renderables, pool);
+         rightLaser.getRenderables(renderables, pool);
+      }
+      if (leftLaser != null)
+      {
+         leftLaser.getRenderables(renderables, pool);
       }
    }
 
