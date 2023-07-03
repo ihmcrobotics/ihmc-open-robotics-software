@@ -1,13 +1,20 @@
+/*
 package us.ihmc.perception.demo;
 
-import org.bytedeco.opencv.opencv_videoio.VideoCapture;
+import
+import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.sensors.ZED2ColorStereoDepthPublisher;
 
 public class Zed2Demo
 {
-   VideoCapture  videoCapture;
+   private ZED2ColorStereoDepthPublisher publisher;
+   private RDXROS2ImageMessageVisualizer visualizer;
 
-   Zed2Demo()
+
+   public Zed2Demo()
    {
-
+      visualizer = new RDXROS2ImageMessageVisualizer();
+      publisher = new ZED2ColorStereoDepthPublisher(0, PerceptionAPI.ZED2_STEREO_COLOR, null);
    }
 }
+*/
