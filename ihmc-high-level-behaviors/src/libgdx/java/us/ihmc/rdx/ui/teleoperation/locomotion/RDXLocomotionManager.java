@@ -254,15 +254,22 @@ public class RDXLocomotionManager
          footstepsSentToControllerGraphic.clear();
       }
 
-      if (laserFootstepMode != null && laserFootstepMode.getFrontController() != null)
+      if (laserFootstepMode != null)
       {
-         if(laserFootstepMode.getControllerSide() != null)
+         if (laserFootstepMode.getSpotPlacement() != null)
          {
-            manualFootstepPlacement.vrPlacement(laserFootstepMode.getFrontController(),
-                                                laserFootstepMode.getControllerSide());
-            laserFootstepMode.setFrontController(null);
+            if (laserFootstepMode.getControllerSide() != null)
+            {
+               manualFootstepPlacement.vrPlacement(laserFootstepMode.getSpotPlacement(), laserFootstepMode.getControllerSide());
+               laserFootstepMode.setSpotPlacement(null);
+            }
          }
+         else if (laserFootstepMode.getSendWalkPlan())
+         {
+            interactableFootstepPlan.walkFromSteps();
+            laserFootstepMode.setSendWalkPlan(false);
          }
+      }
       footstepsSentToControllerGraphic.update();
 
       boolean isCurrentlyPlacingFootstep =
