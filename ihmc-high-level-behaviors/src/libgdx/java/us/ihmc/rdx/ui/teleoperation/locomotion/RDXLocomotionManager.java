@@ -183,33 +183,24 @@ public class RDXLocomotionManager
       walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, footstepPlannerParameters);
 
       footstepModelClearingThread = new Thread(() ->
-                                               {
-                                                  int i = 0;
-                                                  while (running)
-                                                  {
-                                                     try
-                                                     {
-                                                        synchronized (syncObject)
-                                                        {
-                                                           syncObject.wait();
-                                                        }
-                                                     }
-                                                     catch (InterruptedException e)
-                                                     {
-                                                        LogTools.error(e);
-                                                     }
-
-                                                     System.out.println("Removing footstep " + i);
-                                                     footstepsSentToControllerGraphic.getFootstepModels().remove(0);
-                                                     footstepsSentToControllerGraphic.getTextRenderables().remove(0);
-                                                     if (footstepsSentToControllerGraphic.getFootstepModels().isEmpty())
-                                                     {
-                                                        i = 0;
-                                                     }
-                                                     else
-                                                        ++i;
-                                                  }
-                                               }, "Footstep model clearing thread");
+      {
+         while (running)
+         {
+            try
+            {
+               synchronized (syncObject)
+               {
+                  syncObject.wait();
+               }
+            }
+            catch (InterruptedException e)
+            {
+               LogTools.error(e);
+            }
+            footstepsSentToControllerGraphic.getFootstepModels().remove(0);
+            footstepsSentToControllerGraphic.getTextRenderables().remove(0);
+         }
+      }, "Footstep model clearing thread");
       footstepModelClearingThread.start();
    }
 
@@ -305,7 +296,7 @@ public class RDXLocomotionManager
             System.out.println("Notifying!");
             syncObject.notify();
          }
-         lastNum = controllerStatusTracker.getFootstepTracker().getNumberOfCompletedFootsteps();
+         ++lastNum;
       }
    }
 

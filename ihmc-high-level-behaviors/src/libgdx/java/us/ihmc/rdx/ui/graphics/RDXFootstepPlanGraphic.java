@@ -122,19 +122,25 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
 
    public void generateMeshes(ArrayList<MinimalFootstep> footsteps)
    {
+      // this prevents generating empty plans like crazy which is expensive
+      if (isEmpty && footsteps.size() == 0)
+         return;
+      isEmpty = footsteps.size() == 0;
+
+      if (!lastModels.isEmpty())
+      {
+         for (Model model : lastModels)
+         {
+            model.dispose();
+         }
+         lastModels.clear();
+      }
+
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      ConvexPolygon2D foothold = new ConvexPolygon2D();
+
       buildMeshAndCreateModelInstance = () ->
       {
-         // this prevents generating empty plans like crazy which is expensive
-         if (isEmpty && footsteps.size() == 0)
-            return;
-         isEmpty = footsteps.size() == 0;
-
-         if (!lastModels.isEmpty())
-            lastModels.clear();
-
-         RigidBodyTransform transformToWorld = new RigidBodyTransform();
-         ConvexPolygon2D foothold = new ConvexPolygon2D();
-
          for (int i = 0; i < footsteps.size(); i++)
          {
             meshBuilder.clear();
@@ -178,6 +184,7 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
             lastModels.add(RDXModelBuilder.buildModelFromMesh(modelBuilder, meshBuilder));
             LibGDXTools.setOpacity(lastModels.get(i), footstepColors.get(RobotSide.LEFT).a);
          }
+
          // This can't be done outside the libGDX thread. TODO: Consider using Gdx.app.postRunnable
          textRenderables.clear();
          for (int i = 0; i < footsteps.size(); i++)
