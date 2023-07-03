@@ -5,6 +5,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -28,10 +29,12 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameGeometryTestFrame;
@@ -104,7 +107,6 @@ public class MultiStepCaptureRegionCalculatorTest
       double swingTimeRemaining = 0.1;
       double omega0 = 3.0;
 
-
       StepAdjustmentReachabilityConstraint reachabilityConstraint = new StepAdjustmentReachabilityConstraint(ankleZUpFrames,
                                                                                                              yoForwardLimit,
                                                                                                              yoBackwardLimit,
@@ -116,13 +118,15 @@ public class MultiStepCaptureRegionCalculatorTest
                                                                                                              false,
                                                                                                              registry,
                                                                                                              null);
-      MultiStepCaptureRegionCalculator multiStepRegionCalculator = new MultiStepCaptureRegionCalculator(ankleZUpFrames, reachabilityConstraint, yoUseCrossOverSteps, registry);
+      MultiStepCaptureRegionCalculator multiStepRegionCalculator = new MultiStepCaptureRegionCalculator(ankleZUpFrames,
+                                                                                                        reachabilityConstraint,
+                                                                                                        yoUseCrossOverSteps,
+                                                                                                        registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
       reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
-
 
       for (RobotSide swingSide : RobotSide.values())
       {
@@ -137,7 +141,7 @@ public class MultiStepCaptureRegionCalculatorTest
 
          captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
 
-//         testTheRegions(multiStepRegionCalculator, captureRegion, swingDuration, omega0, kinematicStepRange, swingSide.getOppositeSide());
+         //         testTheRegions(multiStepRegionCalculator, captureRegion, swingDuration, omega0, kinematicStepRange, swingSide.getOppositeSide());
 
          if (PLOT_RESULTS)
          {
@@ -278,13 +282,15 @@ public class MultiStepCaptureRegionCalculatorTest
                                                                                                              false,
                                                                                                              registry,
                                                                                                              null);
-      MultiStepCaptureRegionCalculator multiStepRegionCalculator = new MultiStepCaptureRegionCalculator(ankleZUpFrames, reachabilityConstraint, yoUseCrossoverSteps, registry);
+      MultiStepCaptureRegionCalculator multiStepRegionCalculator = new MultiStepCaptureRegionCalculator(ankleZUpFrames,
+                                                                                                        reachabilityConstraint,
+                                                                                                        yoUseCrossoverSteps,
+                                                                                                        registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
       reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
-
 
       ArrayList<Point2D> listOfPoints = new ArrayList<Point2D>();
       listOfPoints.add(new Point2D(-footLength / 2.0, -footWidth / 2.0));
@@ -299,8 +305,6 @@ public class MultiStepCaptureRegionCalculatorTest
       captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
 
       testTheRegions(multiStepRegionCalculator, captureRegion, swingDuration, omega0, kinematicStepRange, swingSide.getOppositeSide());
-
-
 
       if (PLOT_RESULTS)
       {
@@ -440,13 +444,15 @@ public class MultiStepCaptureRegionCalculatorTest
                                                                                                              false,
                                                                                                              registry,
                                                                                                              null);
-      MultiStepCaptureRegionCalculator multiStepRegionCalculator = new MultiStepCaptureRegionCalculator(ankleZUpFrames, reachabilityConstraint, yoUseCrossoverSteps, registry);
+      MultiStepCaptureRegionCalculator multiStepRegionCalculator = new MultiStepCaptureRegionCalculator(ankleZUpFrames,
+                                                                                                        reachabilityConstraint,
+                                                                                                        yoUseCrossoverSteps,
+                                                                                                        registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
       reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
-
 
       ArrayList<Point2D> listOfPoints = new ArrayList<Point2D>();
       listOfPoints.add(new Point2D(0.0, 0.0));
@@ -457,7 +463,7 @@ public class MultiStepCaptureRegionCalculatorTest
       FrameConvexPolygon2D captureRegion = new FrameConvexPolygon2D(captureRegionCalculator.getCaptureRegion());
       captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
 
-//      testTheRegions(multiStepRegionCalculator, captureRegion, swingDuration, omega0, kinematicStepRange, swingSide.getOppositeSide());
+      //      testTheRegions(multiStepRegionCalculator, captureRegion, swingDuration, omega0, kinematicStepRange, swingSide.getOppositeSide());
 
       if (PLOT_RESULTS)
       {
@@ -591,7 +597,10 @@ public class MultiStepCaptureRegionCalculatorTest
                                                                                                              false,
                                                                                                              registry,
                                                                                                              null);
-      MultiStepCaptureRegionCalculator multiStepRegionCalculator = new MultiStepCaptureRegionCalculator(ankleZUpFrames, reachabilityConstraint, yoUseCrossoverSteps, registry);
+      MultiStepCaptureRegionCalculator multiStepRegionCalculator = new MultiStepCaptureRegionCalculator(ankleZUpFrames,
+                                                                                                        reachabilityConstraint,
+                                                                                                        yoUseCrossoverSteps,
+                                                                                                        registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
 
@@ -727,7 +736,6 @@ public class MultiStepCaptureRegionCalculatorTest
       RobotSide swingSide = RobotSide.RIGHT;
       double omega0 = 3.0;
 
-
       StepAdjustmentReachabilityConstraint reachabilityConstraint = new StepAdjustmentReachabilityConstraint(ankleZUpFrames,
                                                                                                              yoForwardLimit,
                                                                                                              yoBackwardLimit,
@@ -739,7 +747,10 @@ public class MultiStepCaptureRegionCalculatorTest
                                                                                                              false,
                                                                                                              registry,
                                                                                                              null);
-      MultiStepCaptureRegionCalculator multiStepRegionCalculator = new MultiStepCaptureRegionCalculator(ankleZUpFrames, reachabilityConstraint, yoUseCrossoverSteps, registry);
+      MultiStepCaptureRegionCalculator multiStepRegionCalculator = new MultiStepCaptureRegionCalculator(ankleZUpFrames,
+                                                                                                        reachabilityConstraint,
+                                                                                                        yoUseCrossoverSteps,
+                                                                                                        registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
 
@@ -842,6 +853,250 @@ public class MultiStepCaptureRegionCalculatorTest
       }
    }
 
+   public void visualizeForPaper()
+   {
+      double footWidth = 0.1;
+      double footLength = 0.2;
+      double kinematicStepRange = 1.0;
+      double forwardLimit = 1.0;
+      double backwardLimit = 0.8;
+      double innerLimit = 0.05;
+      double outerLimit = 0.6;
+      double width = 0.3;
+      double swingDuration = 0.6;
+
+      YoBoolean yoUseCrossoverSteps = new YoBoolean("useCrossOverSteps", registry);
+      YoDouble yoForwardLimit = new YoDouble("forwardLimit", registry);
+      YoDouble yoBackwardLimit = new YoDouble("backwardLimit", registry);
+      YoDouble yoInnerLimit = new YoDouble("innerLimit", registry);
+      YoDouble yoOuterLimit = new YoDouble("outerLimit", registry);
+      YoDouble yoNominalWidth = new YoDouble("nominalWidth", registry);
+      YoDouble yoSwingDuration = new YoDouble("swingDuration", registry);
+
+      yoUseCrossoverSteps.set(false);
+      yoForwardLimit.set(forwardLimit);
+      yoBackwardLimit.set(backwardLimit);
+      yoInnerLimit.set(innerLimit);
+      yoOuterLimit.set(outerLimit);
+      yoNominalWidth.set(width);
+      yoSwingDuration.set(swingDuration);
+
+      RobotSide swingSide = RobotSide.RIGHT;
+      double swingTimeRemaining = 0.1;
+      double omega0 = 3.0;
+      double horiztonalOffset = 0.75;
+
+      OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth,
+                                                                                                  kinematicStepRange,
+                                                                                                  ankleZUpFrames,
+                                                                                                  registry,
+                                                                                                  null);
+
+      StepAdjustmentReachabilityConstraint reachabilityConstraint = new StepAdjustmentReachabilityConstraint(ankleZUpFrames,
+                                                                                                             yoForwardLimit,
+                                                                                                             yoBackwardLimit,
+                                                                                                             yoInnerLimit,
+                                                                                                             yoOuterLimit,
+                                                                                                             yoNominalWidth,
+                                                                                                             new StepAdjustmentParameters.CrossOverReachabilityParameters(),
+                                                                                                             "name",
+                                                                                                             false,
+                                                                                                             registry,
+                                                                                                             null);
+      MultiStepCaptureRegionCalculator multiStepRegionCalculator = new MultiStepCaptureRegionCalculator(ankleZUpFrames,
+                                                                                                        reachabilityConstraint,
+                                                                                                        () -> false,
+                                                                                                        registry);
+
+
+     SimpleAnkleZUpReferenceFrame leftAnkleZUpFrame = new SimpleAnkleZUpReferenceFrame("CrossOverleftAnkleZUp");
+     SimpleAnkleZUpReferenceFrame rightAnkleZUpFrame = new SimpleAnkleZUpReferenceFrame("CrossOverrightAnkleZUp");
+     SideDependentList<ReferenceFrame> crossOverAnkleZUpFrames = new SideDependentList<>(leftAnkleZUpFrame, rightAnkleZUpFrame);
+
+     YoRegistry crossOverRegistry = new YoRegistry("supaChild");
+     registry.addChild(crossOverRegistry);
+      StepAdjustmentReachabilityConstraint crossOverReachabilityConstraint = new StepAdjustmentReachabilityConstraint(crossOverAnkleZUpFrames,
+                                                                                                             yoForwardLimit,
+                                                                                                             yoBackwardLimit,
+                                                                                                             yoInnerLimit,
+                                                                                                             yoOuterLimit,
+                                                                                                             yoNominalWidth,
+                                                                                                             new CrossoverParametersForPaper(),
+                                                                                                             "crossOverName",
+                                                                                                             false,
+                                                                                                                      crossOverRegistry,
+                                                                                                             null);
+      MultiStepCaptureRegionCalculator crossOverMultiStepRegionCalculator = new MultiStepCaptureRegionCalculator(crossOverAnkleZUpFrames,
+                                                                                                                 crossOverReachabilityConstraint,
+                                                                                                                 () -> true,
+                                                                                                                 crossOverRegistry);
+
+
+      SimpleMultiStepCaptureRegionCalculator simpleMultiStepRegionCalculator = new SimpleMultiStepCaptureRegionCalculator(registry);
+
+      new DefaultParameterReader().readParametersInRegistry(registry);
+
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
+
+      RigidBodyTransform crossOverTranslation = new RigidBodyTransform();
+      crossOverTranslation.getTranslation().addY(-horiztonalOffset);
+      leftAnkleZUpFrame.setOffset(crossOverTranslation.getTranslation());
+      rightAnkleZUpFrame.setOffset(crossOverTranslation.getTranslation());
+      leftAnkleZUpFrame.update();
+      rightAnkleZUpFrame.update();
+
+      crossOverReachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D(worldFrame, crossOverTranslation));
+      crossOverReachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D(worldFrame, crossOverTranslation));
+
+      ArrayList<Point2D> listOfPoints = new ArrayList<Point2D>();
+      listOfPoints.add(new Point2D(-footLength / 2.0, -footWidth / 2.0));
+      listOfPoints.add(new Point2D(-footLength / 2.0, footWidth / 2.0));
+      listOfPoints.add(new Point2D(footLength / 2.0, -footWidth / 2.0));
+      listOfPoints.add(new Point2D(footLength / 2.0, footWidth / 2.0));
+      FrameConvexPolygon2D supportFootPolygon = new FrameConvexPolygon2D(worldFrame, Vertex2DSupplier.asVertex2DSupplier(listOfPoints));
+
+      FramePoint2D icp = new FramePoint2D(worldFrame, 0.3, -0.2);
+      captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, icp, omega0, supportFootPolygon);
+      FrameConvexPolygon2D captureRegion = new FrameConvexPolygon2D(captureRegionCalculator.getCaptureRegion());
+      captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
+      FrameConvexPolygon2D simpleCaptureRegion = new FrameConvexPolygon2D(captureRegionCalculator.getCaptureRegion());
+      simpleCaptureRegion.changeFrameAndProjectToXYPlane(worldFrame);
+      FrameConvexPolygon2D crossOverCaptureRegion = new FrameConvexPolygon2D(captureRegionCalculator.getCaptureRegion());
+      crossOverCaptureRegion.changeFrameAndProjectToXYPlane(worldFrame);
+
+      RigidBodyTransform translation = new RigidBodyTransform();
+      translation.getTranslation().addY(horiztonalOffset);
+      simpleCaptureRegion.applyTransform(translation);
+
+      crossOverCaptureRegion.applyTransform(crossOverTranslation);
+
+      if (PLOT_RESULTS)
+      {
+         YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
+
+         int numberOfRegions = 6;
+         List<YoFrameConvexPolygon2D> trueCaptureRegions = createRegionPool("true", numberOfRegions, registry);
+         List<YoFrameConvexPolygon2D> simpleCaptureRegions = createRegionPool("simple", numberOfRegions, registry);
+         List<YoFrameConvexPolygon2D> crossOverCaptureRegions = createRegionPool("crossOver", numberOfRegions, registry);
+         graphicsListRegistry.registerArtifactList(createRegionGraphics("true", trueCaptureRegions));
+         graphicsListRegistry.registerArtifactList(createRegionGraphics("simple", simpleCaptureRegions));
+         graphicsListRegistry.registerArtifactList(createRegionGraphics("crossOver", crossOverCaptureRegions));
+
+         YoFrameConvexPolygon2D regularReachability = new YoFrameConvexPolygon2D("regularReachability", worldFrame, 20, registry);
+         YoFrameConvexPolygon2D crossOverReachability = new YoFrameConvexPolygon2D("CrossOVerReachability", worldFrame, 20, registry);
+         regularReachability.setMatchingFrame(reachabilityConstraint.getReachabilityPolygonInFootFrame(RobotSide.LEFT), false);
+         crossOverReachability.setMatchingFrame(crossOverReachabilityConstraint.getTotalReachabilityHull(RobotSide.LEFT), false);
+         graphicsListRegistry.registerArtifact("regular", new YoArtifactPolygon("regularReachability", regularReachability, Color.blue, false));
+         graphicsListRegistry.registerArtifact("crossover", new YoArtifactPolygon("crossOverReachability", crossOverReachability, Color.blue, false));
+
+         List<YoFrameConvexPolygon2D> trueMultiStepRegions = new ArrayList<>();
+         for (int i = 1; i < trueCaptureRegions.size(); i++)
+            trueMultiStepRegions.add(trueCaptureRegions.get(i));
+         List<YoFrameConvexPolygon2D> simpleMultiStepRegions = new ArrayList<>();
+         for (int i = 1; i < simpleCaptureRegions.size(); i++)
+            simpleMultiStepRegions.add(simpleCaptureRegions.get(i));
+         List<YoFrameConvexPolygon2D> crossOverMultiStepRegions = new ArrayList<>();
+         for (int i = 1; i < crossOverCaptureRegions.size(); i++)
+            crossOverMultiStepRegions.add(crossOverCaptureRegions.get(i));
+
+         Robot robot = new Robot("test");
+         robot.getRobotsYoRegistry().addChild(registry);
+
+         SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+
+         scs.addYoGraphicsListRegistry(graphicsListRegistry);
+
+         SimulationOverheadPlotterFactory plotterFactory = scs.createSimulationOverheadPlotterFactory();
+         plotterFactory.addYoGraphicsListRegistries(graphicsListRegistry);
+         plotterFactory.createOverheadPlotter();
+
+         scs.startOnAThread();
+
+         trueCaptureRegions.get(0).setMatchingFrame(captureRegion, false);
+         simpleCaptureRegions.get(0).setMatchingFrame(simpleCaptureRegion, false);
+         crossOverCaptureRegions.get(0).setMatchingFrame(crossOverCaptureRegion, false);
+
+         updateRegionsForPaper(yoSwingDuration.getDoubleValue(),
+                               multiStepRegionCalculator,
+                               simpleMultiStepRegionCalculator,
+                               crossOverMultiStepRegionCalculator,
+                               captureRegion,
+                               simpleCaptureRegion,
+                               crossOverCaptureRegion,
+                               omega0,
+                               yoForwardLimit.getDoubleValue(),
+                               swingSide.getOppositeSide(),
+                               trueMultiStepRegions,
+                               simpleMultiStepRegions,
+                               crossOverMultiStepRegions);
+
+         YoVariableChangedListener updatedListener = v ->
+         {
+            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
+            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
+
+            updateRegionsForPaper(yoSwingDuration.getDoubleValue(),
+                                  multiStepRegionCalculator,
+                                  simpleMultiStepRegionCalculator,
+                                  crossOverMultiStepRegionCalculator,
+                                  captureRegion,
+                                  simpleCaptureRegion,
+                                  crossOverCaptureRegion,
+                                  omega0,
+                                  yoForwardLimit.getDoubleValue(),
+                                  swingSide.getOppositeSide(),
+                                  trueMultiStepRegions,
+                                  simpleMultiStepRegions,
+                                  crossOverMultiStepRegions);
+            scs.tickAndUpdate();
+         };
+
+         yoUseCrossoverSteps.addListener(updatedListener);
+         yoForwardLimit.addListener(updatedListener);
+         yoBackwardLimit.addListener(updatedListener);
+         yoInnerLimit.addListener(updatedListener);
+         yoOuterLimit.addListener(updatedListener);
+         yoNominalWidth.addListener(updatedListener);
+         yoSwingDuration.addListener(updatedListener);
+
+         scs.tickAndUpdate();
+
+         ThreadTools.sleepForever();
+      }
+   }
+
+   private static List<YoFrameConvexPolygon2D> createRegionPool(String prefix, int regionsTomake, YoRegistry registry)
+   {
+      List<YoFrameConvexPolygon2D> regions = new ArrayList<>();
+
+      for (int i = 0; i < regionsTomake; i++)
+      {
+         regions.add(new YoFrameConvexPolygon2D(prefix + "StepRegion" + (i + 1), worldFrame, 100, registry));
+      }
+
+      return regions;
+   }
+
+   private static ArtifactList createRegionGraphics(String prefix, List<YoFrameConvexPolygon2D> regions)
+   {
+      ArtifactList artifactList = new ArtifactList(prefix + "regions");
+      for (int i = 0; i < regions.size(); i++)
+      {
+         int colorIdx = i % 3;
+         Color color;
+         if (colorIdx == 0)
+            color = Color.green;
+         else if (colorIdx == 1)
+            color = Color.red;
+         else
+            color = Color.yellow;
+         artifactList.add(new YoArtifactPolygon(prefix + "StepRegion" + (i + 1), regions.get(i), color, false));
+      }
+
+      return artifactList;
+   }
+
    private void testTheRegions(MultiStepCaptureRegionCalculator multiStepRegionCalculator,
                                FrameConvexPolygon2DReadOnly captureRegion,
                                double swingDuration,
@@ -890,7 +1145,6 @@ public class MultiStepCaptureRegionCalculatorTest
 
          nStepRegionBound.set(scaledPolygon);
       }
-
    }
 
    private void updateRegions(double swingDuration,
@@ -909,6 +1163,44 @@ public class MultiStepCaptureRegionCalculatorTest
       }
    }
 
+   private void updateRegionsForPaper(double swingDuration,
+                                      MultiStepCaptureRegionCalculator calculator,
+                                      SimpleMultiStepCaptureRegionCalculator simpleCalculator,
+                                      MultiStepCaptureRegionCalculator crossOverCalculator,
+                                      FrameConvexPolygon2DReadOnly captureRegion,
+                                      FrameConvexPolygon2DReadOnly simpleCaptureRegion,
+                                      FrameConvexPolygon2DReadOnly crossOverCaptureRegion,
+                                      double omega,
+                                      double stepReach,
+                                      RobotSide stanceSide,
+                                      List<YoFrameConvexPolygon2D> truePolygons,
+                                      List<YoFrameConvexPolygon2D> simplePolygons,
+                                      List<YoFrameConvexPolygon2D> crossOverPolygons)
+   {
+      int i = 1;
+      for (YoFrameConvexPolygon2D polygon : truePolygons)
+      {
+         i++;
+         calculator.compute(stanceSide, captureRegion, swingDuration, omega, i);
+         polygon.setMatchingFrame(calculator.getCaptureRegion(), false);
+      }
+
+      i = 1;
+      for (YoFrameConvexPolygon2D polygon : simplePolygons)
+      {
+         i++;
+         simpleCalculator.compute(simpleCaptureRegion, swingDuration, omega, stepReach, i);
+         polygon.setMatchingFrame(simpleCalculator.getCaptureRegion(), false);
+      }
+      i = 1;
+      for (YoFrameConvexPolygon2D polygon : crossOverPolygons)
+      {
+         i++;
+         crossOverCalculator.compute(stanceSide, crossOverCaptureRegion, swingDuration, omega, i);
+         polygon.setMatchingFrame(crossOverCalculator.getCaptureRegion(), false);
+      }
+   }
+
    private static class SimpleAnkleZUpReferenceFrame extends ReferenceFrame
    {
       private final Vector3D offset = new Vector3D();
@@ -922,6 +1214,11 @@ public class MultiStepCaptureRegionCalculatorTest
       {
          transformToParent.setIdentity();
          transformToParent.getTranslation().set(offset);
+      }
+
+      public void setOffset(Tuple3DReadOnly offset)
+      {
+         this.offset.set(offset);
       }
    }
 
@@ -1081,36 +1378,80 @@ public class MultiStepCaptureRegionCalculatorTest
       Point2D diamondLeft = new Point2D(0.0, 1.0);
 
       // check the right side of the diamond is shared with the top left of the square
-      assertTrue(MultiStepCaptureRegionCalculator.isPointASharedNonintersectingVertex(squareBottomLeft, squareTopLeft, squareTopRight,
-                                                                                      diamondTop, diamondRight, diamondBottom));
+      assertTrue(MultiStepCaptureRegionCalculator.isPointASharedNonintersectingVertex(squareBottomLeft,
+                                                                                      squareTopLeft,
+                                                                                      squareTopRight,
+                                                                                      diamondTop,
+                                                                                      diamondRight,
+                                                                                      diamondBottom));
       // check the bottom side of the diamond is shared with the top left of the square
-      assertTrue(MultiStepCaptureRegionCalculator.isPointASharedNonintersectingVertex(squareBottomLeft, squareTopLeft, squareTopRight,
-                                                                                      diamondRight, diamondBottom, diamondLeft));
+      assertTrue(MultiStepCaptureRegionCalculator.isPointASharedNonintersectingVertex(squareBottomLeft,
+                                                                                      squareTopLeft,
+                                                                                      squareTopRight,
+                                                                                      diamondRight,
+                                                                                      diamondBottom,
+                                                                                      diamondLeft));
       // check the left side of the diamond is not shared with the top left of the square without intersection
-      assertFalse(MultiStepCaptureRegionCalculator.isPointASharedNonintersectingVertex(squareBottomLeft, squareTopLeft, squareTopRight,
-                                                                                      diamondBottom, diamondLeft, diamondTop));
+      assertFalse(MultiStepCaptureRegionCalculator.isPointASharedNonintersectingVertex(squareBottomLeft,
+                                                                                       squareTopLeft,
+                                                                                       squareTopRight,
+                                                                                       diamondBottom,
+                                                                                       diamondLeft,
+                                                                                       diamondTop));
       // check the top side of the diamond is not shared with the top left of the square without intersection
-      assertFalse(MultiStepCaptureRegionCalculator.isPointASharedNonintersectingVertex(squareBottomLeft, squareTopLeft, squareTopRight,
-                                                                                       diamondLeft, diamondTop, diamondRight));
-
+      assertFalse(MultiStepCaptureRegionCalculator.isPointASharedNonintersectingVertex(squareBottomLeft,
+                                                                                       squareTopLeft,
+                                                                                       squareTopRight,
+                                                                                       diamondLeft,
+                                                                                       diamondTop,
+                                                                                       diamondRight));
 
       // check the bottom side of the diamond is shared with the top right of the square
-      assertTrue(MultiStepCaptureRegionCalculator.isPointASharedNonintersectingVertex(squareTopLeft, squareTopRight, squareBottomRight,
-                                                                                      diamondRight, diamondBottom, diamondLeft));
+      assertTrue(MultiStepCaptureRegionCalculator.isPointASharedNonintersectingVertex(squareTopLeft,
+                                                                                      squareTopRight,
+                                                                                      squareBottomRight,
+                                                                                      diamondRight,
+                                                                                      diamondBottom,
+                                                                                      diamondLeft));
       // check the left side of the diamond is shared with the top right of the square
-      assertTrue(MultiStepCaptureRegionCalculator.isPointASharedNonintersectingVertex(squareTopLeft, squareTopRight, squareBottomRight,
-                                                                                      diamondBottom, diamondLeft, diamondTop));
+      assertTrue(MultiStepCaptureRegionCalculator.isPointASharedNonintersectingVertex(squareTopLeft,
+                                                                                      squareTopRight,
+                                                                                      squareBottomRight,
+                                                                                      diamondBottom,
+                                                                                      diamondLeft,
+                                                                                      diamondTop));
       // check the top side of the diamond is not shared with the top right of the square without intersection
-      assertFalse(MultiStepCaptureRegionCalculator.isPointASharedNonintersectingVertex(squareTopLeft, squareTopRight, squareBottomRight,
-                                                                                      diamondLeft, diamondTop, diamondRight));
+      assertFalse(MultiStepCaptureRegionCalculator.isPointASharedNonintersectingVertex(squareTopLeft,
+                                                                                       squareTopRight,
+                                                                                       squareBottomRight,
+                                                                                       diamondLeft,
+                                                                                       diamondTop,
+                                                                                       diamondRight));
       // check the right side of the diamond is not shared with the top left of the square without intersection
-      assertFalse(MultiStepCaptureRegionCalculator.isPointASharedNonintersectingVertex(squareTopLeft, squareTopRight, squareBottomRight,
-                                                                                       diamondTop, diamondRight, diamondLeft));
+      assertFalse(MultiStepCaptureRegionCalculator.isPointASharedNonintersectingVertex(squareTopLeft,
+                                                                                       squareTopRight,
+                                                                                       squareBottomRight,
+                                                                                       diamondTop,
+                                                                                       diamondRight,
+                                                                                       diamondLeft));
    }
 
+   private class CrossoverParametersForPaper extends StepAdjustmentParameters.CrossOverReachabilityParameters
+   {
+      @Override
+      public double getForwardCrossOverDistance()
+      {
+         return 0.2;
+      }
 
+      public double getBackwardCrossOverDistance()
+      {
+         return 0.1;
+      }
+   }
    public static void main(String[] args)
    {
-      setupVisualizer();
+      MultiStepCaptureRegionCalculatorTest test = new MultiStepCaptureRegionCalculatorTest();
+      test.visualizeForPaper();
    }
 }
