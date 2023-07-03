@@ -1,32 +1,55 @@
 package us.ihmc.sensors;
 
-import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacpp.Pointer;
+import org.bytedeco.opencv.global.*;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.opencv_core.GpuMat;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.zed.SL_InitParameters;
 import org.bytedeco.zed.SL_RuntimeParameters;
 import perception_msgs.msg.dds.ImageMessage;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.log.LogTools;
+import us.ihmc.perception.CameraModel;
+import us.ihmc.perception.comms.ImageMessageFormat;
+import us.ihmc.perception.cuda.CUDAImageEncoder;
+import us.ihmc.perception.tools.ImageMessageDataPacker;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import static org.bytedeco.zed.global.zed.*;
 
 public class ZED2ColorStereoDepthPublisher
 {
+   private static final double UPDATE_PERIOD_SECONDS = 0.1;
+
    private int cameraID;
    private final SL_InitParameters zedInitializationParameters = new SL_InitParameters();
-   private int cameraState;
    private final SL_RuntimeParameters zedRuntimeParameters = new SL_RuntimeParameters();
 
    private int imageWidth;
    private int imageHeight;
-   private IntPointer colorImagePointer;
-   private IntPointer depthImagePoitner;
-   private IntPointer pointCloudPointer;
+   private Pointer colorImagePointer;
+   private Pointer depthImagePointer;
+   private Pointer pointCloudPointer;
+   private GpuMat colorImageMatBGRA;
+   private GpuMat colorImageMatBGR;
+   private BytePointer jpegImagePointer = new BytePointer();
 
+   private final ImageMessage colorImageMessage = new ImageMessage();
+   private final ImageMessage depthImageMessage = new ImageMessage();
+   private final IHMCROS2Publisher<ImageMessage> ros2ImagePublisher;
    private final ROS2Topic<ImageMessage> colorTopic;
    private final ROS2Topic<ImageMessage> depthTopic;
    private final ROS2Node ros2Node;
+   private CUDAImageEncoder imageEncoder;
+
+   private final PausablePeriodicThread zedPublisherThread = new PausablePeriodicThread("ZED publisher", 0.1d, this::update);
 
    public ZED2ColorStereoDepthPublisher(int cameraID,
                                         ROS2Topic<ImageMessage> colorTopic,
@@ -57,11 +80,7 @@ public class ZED2ColorStereoDepthPublisher
       zedInitializationParameters.open_timeout_sec(5.0f);
       zedInitializationParameters.async_grab_camera_recovery(false);
 
-      cameraState = sl_open_camera(cameraID, zedInitializationParameters, 0, "", "", 0, "", "", "")
-      if (cameraState != 0)
-      {
-         throw new RuntimeException("Failed to open ZED 2 camera");
-      }
+      checkError("sl_open_camera", sl_open_camera(cameraID, zedInitializationParameters, 0, "", "", 0, "", "", ""));
 
       zedRuntimeParameters.enable_depth(true);
       zedRuntimeParameters.confidence_threshold(95);
@@ -72,19 +91,70 @@ public class ZED2ColorStereoDepthPublisher
       imageWidth = sl_get_width(cameraID);
       imageHeight = sl_get_height(cameraID);
 
-      colorImagePointer = new IntPointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_GPU));
+      colorImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_CPU));
+      depthImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_F32_C4, SL_MEM_CPU));
+      pointCloudPointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_F32_C4, SL_MEM_CPU));
+      colorImageMatBGR = new GpuMat(imageWidth, imageHeight, opencv_core.CV_8UC3);
 
       this.colorTopic = colorTopic;
       this.depthTopic = depthTopic;
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "zed2_node");
+      ros2ImagePublisher = ROS2Tools.createPublisher(ros2Node, colorTopic, ROS2QosProfile.BEST_EFFORT());
 
+      imageEncoder = new CUDAImageEncoder();
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, getClass().getName() + "-Shutdown"));
+
+      zedPublisherThread.start();
+   }
+
+   public void update()
+   {
+      checkError("sl_grab", sl_grab(cameraID, zedRuntimeParameters));
+
+      retrieveAndPublishColorImage();
+      checkError("sl_retrieve_measure", sl_retrieve_measure(cameraID, depthImagePointer, SL_MEASURE_DEPTH_RIGHT, SL_MEM_CPU, imageWidth, imageHeight));
+      checkError("sl_retrieve_measure", sl_retrieve_measure(cameraID, pointCloudPointer, SL_MEASURE_XYZRGBA_RIGHT, SL_MEM_CPU, imageWidth, imageHeight));
+   }
+
+   private void retrieveAndPublishColorImage()
+   {
+      // Retrieve image
+      checkError("sl_retrieve_image", sl_retrieve_image(cameraID, colorImagePointer, SL_VIEW_RIGHT, SL_MEM_CPU, imageWidth, imageHeight));
+
+      // Convert to BGR and encode to jpeg
+      colorImageMatBGRA = new GpuMat(colorImagePointer);
+      opencv_cudaimgproc.cvtColor(colorImageMatBGRA, colorImageMatBGR, opencv_imgproc.COLOR_BGRA2BGR);
+      imageEncoder.encodeBGR(colorImageMatBGR.data(), jpegImagePointer, imageWidth, imageHeight, colorImageMatBGR.step());
+
+      // Publish image
+      ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(jpegImagePointer.limit());
+      imageMessageDataPacker.pack(colorImageMessage, jpegImagePointer);
+      colorImageMessage.setImageWidth(imageWidth);
+      colorImageMessage.setImageHeight(imageHeight);
+      CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
+      ImageMessageFormat.COLOR_JPEG_BGR8.packMessageFormat(colorImageMessage);
+      // TODO: Add position and orientation to image message
+      ros2ImagePublisher.publish(colorImageMessage);
    }
 
    public void destroy()
    {
-
+      zedPublisherThread.destroy();
+      sl_close_camera(cameraID);
+      ros2Node.destroy();
    }
 
+   private void checkError(String functionName, int returnedState)
+   {
+      if (returnedState != SL_ERROR_CODE_SUCCESS)
+      {
+         LogTools.error(String.format("%s returned '%d'", functionName, returnedState));
+      }
+   }
+
+   public static void main(String[] args)
+   {
+      new ZED2ColorStereoDepthPublisher(0, PerceptionAPI.ZED2_STEREO_COLOR, null);
+   }
 }
