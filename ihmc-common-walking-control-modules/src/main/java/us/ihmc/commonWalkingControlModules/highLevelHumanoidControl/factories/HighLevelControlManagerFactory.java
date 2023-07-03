@@ -290,11 +290,14 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
             taskspacePositionGainMap.put(foot.getName(), swingFootGains.getPositionGains());
          RigidBodyBasics pelvis = fullRobotModel.getPelvis();
 
-
          for (OneDoFJointBasics joint : MultiBodySystemTools.createOneDoFJointPath(pelvis, foot))
          {
             if (!jointHomeConfiguration.contains(joint.getName()))
             {
+               /*
+                * Adding default values for the home configuration. They're not really useful for the flamingo
+                * stance but required by the RigidBodyControlManager.
+                */
                jointHomeConfiguration.put(joint.getName(), 0.5 * (joint.getJointLimitLower() + joint.getJointLimitUpper()));
             }
          }
