@@ -12,16 +12,12 @@ import imgui.flag.ImGuiStyleVar;
 import imgui.internal.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import org.lwjgl.openvr.InputDigitalActionData;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -32,29 +28,18 @@ import us.ihmc.rdx.input.editor.RDXUITrigger;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXIconTexture;
 import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.vr.RDXVRManager;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SegmentDependentList;
 
-import java.util.ArrayList;
 import java.util.function.Consumer;
 
 public class RDXBallAndArrowPosePlacement implements RenderableProvider
 {
    private final static Pose3D NaN_POSE = BehaviorTools.createNaNPose();
+
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private ModelInstance sphere;
    private ModelInstance arrow;
-   private ROS2SyncedRobotModel syncedRobot;
-   private RDXFootstepGraphic leftGoalFootstepGraphic;
-   private RDXFootstepGraphic rightGoalFootstepGraphic;
-   private final FramePose3D leftFootstepGoalPose = new FramePose3D();
-   private final FramePose3D rightFootstepGoalPose = new FramePose3D();
-   private final RigidBodyTransform goalToWorldTransform = new RigidBodyTransform();
-   private final ReferenceFrame goalPoseFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), goalToWorldTransform);
-   private double halfIdealFootstepWidth;
    private RDXUIActionMap placeGoalActionMap;
    private boolean placingGoal = false;
    private boolean placingPosition = true;
@@ -69,26 +54,17 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
    private Runnable onStartPositionPlacement;
    private Runnable onEndPositionPlacement;
 
-   public void create(Color color, ROS2SyncedRobotModel syncedRobot)
+   public void create(Color color)
    {
-      create(null, color, syncedRobot);
+      create(null, color);
    }
 
-   public void create(Consumer<Pose3D> placedPoseConsumer, Color color, ROS2SyncedRobotModel syncedRobot)
+   public void create(Consumer<Pose3D> placedPoseConsumer, Color color)
    {
-      this.syncedRobot = syncedRobot;
       this.placedPoseConsumer = placedPoseConsumer;
       float sphereRadius = 0.03f;
       sphere = RDXModelBuilder.createSphere(sphereRadius, color);
       arrow = RDXModelBuilder.createArrow(sphereRadius * 6.0, color);
-
-      SegmentDependentList<RobotSide, ArrayList<Point2D>> contactPoints = syncedRobot.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints();
-      leftGoalFootstepGraphic = new RDXFootstepGraphic(contactPoints, RobotSide.LEFT);
-      rightGoalFootstepGraphic = new RDXFootstepGraphic(contactPoints, RobotSide.RIGHT);
-      leftGoalFootstepGraphic.create();
-      rightGoalFootstepGraphic.create();
-
-      halfIdealFootstepWidth = syncedRobot.getRobotModel().getFootstepPlannerParameters().getIdealFootstepWidth() / 2.0;
 
       placeGoalActionMap = new RDXUIActionMap(startAction ->
       {
@@ -134,12 +110,8 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
             sphere.transform.setTranslation(pickPointInWorld.getX32(), pickPointInWorld.getY32(), pickPointInWorld.getZ32());
             LibGDXTools.toEuclid(sphere.transform, tempSpherePosition);
 
-            // Find vector from mid-feet z up frame to current sphere location
-            goalPoseForReading.set(syncedRobot.getReferenceFrames().getMidFeetZUpFrame().getTransformToWorldFrame());
-            goalPoseForReading.setTranslationToZero();
+            goalPoseForReading.setToZero();
             goalPoseForReading.prependTranslation(tempSpherePosition);
-
-            updateGoalFootstepGraphics(goalPoseForReading);
 
             if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
@@ -159,8 +131,6 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
             LibGDXTools.toLibGDX(arrowRotationMatrix, arrow.transform);
 
             goalPoseForReading.set(tempSpherePosition, arrowRotationMatrix);
-
-            updateGoalFootstepGraphics(goalPoseForReading);
 
             if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
@@ -201,22 +171,6 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
          placedPoseConsumer.accept(goalPoseForReading);
 
       placedNotification.set();
-   }
-
-   private void updateGoalFootstepGraphics(Pose3DReadOnly goalPose)
-   {
-      goalPose.get(goalToWorldTransform);
-      goalPoseFrame.update();
-
-      leftFootstepGoalPose.setToZero(goalPoseFrame);
-      leftFootstepGoalPose.getPosition().addY(halfIdealFootstepWidth);
-      leftFootstepGoalPose.changeFrame(ReferenceFrame.getWorldFrame());
-      leftGoalFootstepGraphic.setPose(leftFootstepGoalPose);
-
-      rightFootstepGoalPose.setToZero(goalPoseFrame);
-      rightFootstepGoalPose.getPosition().subY(halfIdealFootstepWidth);
-      rightFootstepGoalPose.changeFrame(ReferenceFrame.getWorldFrame());
-      rightGoalFootstepGraphic.setPose(rightFootstepGoalPose);
    }
 
    public boolean renderPlaceGoalButton()
@@ -266,8 +220,6 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
       {
          sphere.getRenderables(renderables, pool);
          arrow.getRenderables(renderables, pool);
-         leftGoalFootstepGraphic.getRenderables(renderables, pool);
-         rightGoalFootstepGraphic.getRenderables(renderables, pool);
       }
    }
 
@@ -281,6 +233,16 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
       return placingGoal;
    }
 
+   public boolean isPlacingPosition()
+   {
+      return placingPosition;
+   }
+
+   public RDXUIActionMap getPlaceGoalActionMap()
+   {
+      return placeGoalActionMap;
+   }
+
    public void clear()
    {
       placingGoal = false;
@@ -289,8 +251,7 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
          sphere.transform.val[Matrix4.M03] = Float.NaN;
       if (arrow != null)
          arrow.transform.val[Matrix4.M03] = Float.NaN;
-      leftGoalFootstepGraphic.setPose(NaN_POSE);
-      rightGoalFootstepGraphic.setPose(NaN_POSE);
+      goalPoseForReading.set(NaN_POSE);
    }
 
    public Pose3DReadOnly getGoalPose()

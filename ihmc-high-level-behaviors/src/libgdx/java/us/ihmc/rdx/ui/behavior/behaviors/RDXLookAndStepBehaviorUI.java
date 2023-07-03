@@ -188,7 +188,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    @Override
    public void create(RDXBaseUI baseUI)
    {
-      goalAffordance.create(goalPose -> helper.publish(GOAL_COMMAND, goalPose), Color.CYAN, helper.newSyncedRobot());
+      goalAffordance.create(goalPose -> helper.publish(GOAL_COMMAND, goalPose), Color.CYAN);
       goalAffordance.setOnStartPositionPlacement(() -> baseUI.setModelSceneMouseCollisionEnabled(true));
       goalAffordance.setOnEndPositionPlacement(() -> baseUI.setModelSceneMouseCollisionEnabled(false));
       subGoalGraphic.create(0.027, 0.027 * 6.0, Color.YELLOW);

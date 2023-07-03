@@ -74,7 +74,7 @@ public class RDXBuildingExplorationBehaviorUI extends RDXBehaviorUIInterface
          helper.publish(GOAL_COMMAND, goalPose);
          lookAndStepUI.setGoal(goalPose);
          traverseStairsUI.setGoal(goalPose);
-      }, Color.GREEN, helper.newSyncedRobot());
+      }, Color.GREEN);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(goalAffordance::processImGui3DViewInput);
 
       lookAndStepUI.create(baseUI);
