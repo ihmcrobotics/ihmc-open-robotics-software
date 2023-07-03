@@ -37,8 +37,8 @@ public class LegTrajectoryCommand implements Command<LegTrajectoryCommand, LegTr
 
    public void clear(RobotSide robotSide)
    {
+      clear();
       this.robotSide = robotSide;
-      jointspaceTrajectory.clear();
    }
 
    @Override
