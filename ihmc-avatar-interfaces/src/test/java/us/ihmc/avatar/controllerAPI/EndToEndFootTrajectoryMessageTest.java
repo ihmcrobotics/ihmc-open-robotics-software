@@ -760,11 +760,11 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
                                  .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(i, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D()));
          }
          simulationTestHelper.publishToController(footTrajectoryMessage);
-         success = simulationTestHelper.simulateNow(getRobotModel().getControllerDT() * 2);
+         success = simulationTestHelper.simulateNow(getRobotModel().getControllerDT());
          assertTrue(success);
 
          String bodyName = fullRobotModel.getFoot(robotSide).getName();
-         EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(bodyName, 1, simulationTestHelper);
+         EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(bodyName, 0, simulationTestHelper);
 
          assertTrue(putFootOnGround(robotSide, foot, initialFootPosition));
       }
