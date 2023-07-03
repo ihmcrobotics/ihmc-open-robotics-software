@@ -28,14 +28,8 @@ import us.ihmc.robotics.robotSide.SegmentDependentList;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
-public class RDXBallAndArrowGoalFootstepPlacement implements RenderableProvider
+public class RDXBallAndArrowGoalFootstepPlacement extends RDXBallAndArrowPosePlacement implements RenderableProvider
 {
-   private final static Pose3D NaN_POSE = BehaviorTools.createNaNPose();
-
-   private final ImGuiLabelMap labels = new ImGuiLabelMap();
-   private RDXIconTexture locationFlagIcon;
-
-   private final RDXBallAndArrowPosePlacement ballAndArrowPosePlacement= new RDXBallAndArrowPosePlacement();
    private ROS2SyncedRobotModel syncedRobot;
    private RDXFootstepGraphic leftGoalFootstepGraphic;
    private RDXFootstepGraphic rightGoalFootstepGraphic;
@@ -53,7 +47,7 @@ public class RDXBallAndArrowGoalFootstepPlacement implements RenderableProvider
 
    public void create(Consumer<Pose3D> placedPoseConsumer, Color color, ROS2SyncedRobotModel syncedRobot)
    {
-      ballAndArrowPosePlacement.create(placedPoseConsumer, color);
+      super.create(placedPoseConsumer, color);
 
       this.syncedRobot = syncedRobot;
 
@@ -64,99 +58,37 @@ public class RDXBallAndArrowGoalFootstepPlacement implements RenderableProvider
       rightGoalFootstepGraphic.create();
 
       halfIdealFootstepWidth = syncedRobot.getRobotModel().getFootstepPlannerParameters().getIdealFootstepWidth() / 2;
-
-      locationFlagIcon = new RDXIconTexture("icons/locationFlag.png");
    }
 
+   @Override
    public void processImGui3DViewInput(ImGui3DViewInput input)
    {
-      ballAndArrowPosePlacement.processImGui3DViewInput(input);
+      super.processImGui3DViewInput(input);
 
       if (isPlacingGoal())
       {
-         updateGoalFootstepGraphics(ballAndArrowPosePlacement.getGoalPose());
+         updateGoalFootstepGraphics(super.getGoalPose());
       }
-   }
-
-   public boolean renderPlaceGoalButton()
-   {
-      boolean placementStarted = false;
-      if (locationFlagIcon != null)
-      {
-         ImGui.image(locationFlagIcon.getTexture().getTextureObjectHandle(), 22.0f, 22.0f);
-         ImGui.sameLine();
-      }
-      boolean pushedFlags = false;
-      if (isPlacingGoal())
-      {
-         ImGui.pushItemFlag(ImGuiItemFlags.Disabled, true);
-         ImGui.pushStyleVar(ImGuiStyleVar.Alpha, 0.6f);
-         pushedFlags = true;
-      }
-      if (ImGui.button(labels.get(pushedFlags ? "Placing" : "Place goal")))
-      {
-         placementStarted = true;
-         ballAndArrowPosePlacement.getPlaceGoalActionMap().start();
-      }
-      if (pushedFlags)
-      {
-         ImGui.popItemFlag();
-         ImGui.popStyleVar();
-      }
-      if (ImGui.isItemHovered())
-      {
-         ImGui.setTooltip("Hold Ctrl and scroll the mouse wheel while placing to adjust Z.");
-      }
-      ImGui.sameLine();
-      ImGui.beginDisabled(!isPlaced());
-      if (ImGui.button(labels.get("Clear")))
-      {
-         clear();
-      }
-      ImGui.endDisabled();
-
-      return placementStarted;
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      ballAndArrowPosePlacement.getRenderables(renderables, pool);
+      super.getRenderables(renderables, pool);
       leftGoalFootstepGraphic.getRenderables(renderables, pool);
       rightGoalFootstepGraphic.getRenderables(renderables, pool);
    }
 
-   public boolean isPlaced()
-   {
-      return ballAndArrowPosePlacement.isPlaced();
-   }
-
-   public boolean isPlacingGoal()
-   {
-      return ballAndArrowPosePlacement.isPlacingGoal();
-   }
-
-   public boolean isPlacingPosition()
-   {
-      return ballAndArrowPosePlacement.isPlacingPosition();
-   }
-
+   @Override
    public void clear()
    {
-      ballAndArrowPosePlacement.clear();
+      super.clear();
 
-      leftGoalFootstepGraphic.setPose(NaN_POSE);
-      rightGoalFootstepGraphic.setPose(NaN_POSE);
-   }
+      if (leftGoalFootstepGraphic != null)
+         leftGoalFootstepGraphic.setPose(NaN_POSE);
 
-   public Pose3DReadOnly getGoalPose()
-   {
-      return ballAndArrowPosePlacement.getGoalPose();
-   }
-
-   public Notification getPlacedNotification()
-   {
-      return ballAndArrowPosePlacement.getPlacedNotification();
+      if (rightGoalFootstepGraphic != null)
+         rightGoalFootstepGraphic.setPose(NaN_POSE);
    }
 
    private void updateGoalFootstepGraphics(Pose3DReadOnly goalPose)

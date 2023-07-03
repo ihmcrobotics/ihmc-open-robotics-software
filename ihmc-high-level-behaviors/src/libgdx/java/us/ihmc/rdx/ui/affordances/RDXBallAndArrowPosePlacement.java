@@ -35,7 +35,7 @@ import java.util.function.Consumer;
 
 public class RDXBallAndArrowPosePlacement implements RenderableProvider
 {
-   private final static Pose3D NaN_POSE = BehaviorTools.createNaNPose();
+   protected final static Pose3D NaN_POSE = BehaviorTools.createNaNPose();
 
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private ModelInstance sphere;
