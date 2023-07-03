@@ -60,11 +60,6 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
 
    private final StepAdjustmentReachabilityConstraint reachabilityConstraint;
    private final SideDependentList<? extends ReferenceFrame> soleFrames;
-   final FrameVector2D vertexExtrusionVector = new FrameVector2D();
-   final FramePoint2D extrudedFirstVertex = new FramePoint2D();
-   final FramePoint2D extrudedSecondVertex = new FramePoint2D();
-   private final FrameLineSegment2D edgeToExtrude = new FrameLineSegment2D();
-   private final FrameVector2D vectorPerpendicularToEdge = new FrameVector2D();
 
    private final RecyclingArrayList<FramePoint2DBasics> expansionPoints = new RecyclingArrayList<>(FramePoint2D::new);
 
@@ -120,9 +115,6 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
     */
    public void compute(RobotSide currentStanceSide, FrameConvexPolygon2DReadOnly oneStepCaptureRegion, double stepDuration, double omega, int stepsInQueue)
    {
-      multiStepRegion.clear(soleFrames.get(currentStanceSide));
-      vertexExtrusionVector.setReferenceFrame(soleFrames.get(currentStanceSide));
-
       stepsConsideringForRecovery.set(Math.min(stepsInQueue, maxStepsToConsider.getValue()));
       this.stepsInQueue.set(stepsInQueue);
 
@@ -159,22 +151,26 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
          polygon.update();
       }
 
-      extrudedFirstVertex.setReferenceFrame(soleFrames.get(currentStanceSide));
-      extrudedSecondVertex.setReferenceFrame(soleFrames.get(currentStanceSide));
-
       regionToExpand.setIncludingFrame(oneStepCaptureRegion);
       multiStepRegion.setReferenceFrame(oneStepCaptureRegion.getReferenceFrame());
+
       if (stepsConsideringForRecovery.getIntegerValue() > 0)
       {
-         expandCaptureRegion(regionToExpand,  reachabilityPolygonsWithOrigin.get(currentStanceSide.getOppositeSide()), multiStepRegion, oppositeSupportMultiplier);
+         expandCaptureRegion(regionToExpand,
+                             reachabilityPolygonsWithOrigin.get(currentStanceSide.getOppositeSide()),
+                             multiStepRegion,
+                             oppositeSupportMultiplier);
          regionToExpand.set(multiStepRegion);
+      }
+      else
+      {
+         multiStepRegion.set(regionToExpand);
       }
       if (stepsConsideringForRecovery.getIntegerValue() > 1)
       {
-         expandCaptureRegion(regionToExpand,  reachabilityPolygonsWithOrigin.get(currentStanceSide), multiStepRegion, currentSupportMultiplier);
+         expandCaptureRegion(regionToExpand, reachabilityPolygonsWithOrigin.get(currentStanceSide), multiStepRegion, currentSupportMultiplier);
       }
 
-      multiStepRegion.update();
       yoMultiStepRegion.setMatchingFrame(multiStepRegion, false);
    }
 
@@ -244,17 +240,23 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
    }
 
    /**
-    * Checks to see if two corners of two separate convex polygons result in overlap between the two polygons. Both polygons are assumed to be clockwise ordered.
+    * Checks to see if two corners of two separate convex polygons result in overlap between the two polygons. Both polygons are assumed to be clockwise
+    * ordered.
+    *
     * @param precedingPointA
-    * @param cornerToCheckA Intersecting vertex on polygon A
+    * @param cornerToCheckA   Intersecting vertex on polygon A
     * @param succeedingPointA
     * @param precedingPointB
-    * @param cornerToCheckB Intersecting vertex on polygon B
+    * @param cornerToCheckB   Intersecting vertex on polygon B
     * @param succeedingPointB
     * @return
     */
-   static boolean isPointASharedNonintersectingVertex(Point2DReadOnly precedingPointA, Point2DReadOnly cornerToCheckA, Point2DReadOnly succeedingPointA,
-                                                              Point2DReadOnly precedingPointB, Point2DReadOnly cornerToCheckB, Point2DReadOnly succeedingPointB)
+   static boolean isPointASharedNonintersectingVertex(Point2DReadOnly precedingPointA,
+                                                      Point2DReadOnly cornerToCheckA,
+                                                      Point2DReadOnly succeedingPointA,
+                                                      Point2DReadOnly precedingPointB,
+                                                      Point2DReadOnly cornerToCheckB,
+                                                      Point2DReadOnly succeedingPointB)
    {
       return isPointASharedNonintersectingVertex(precedingPointA.getX() - cornerToCheckA.getX(),
                                                  precedingPointA.getY() - cornerToCheckA.getY(),
@@ -267,13 +269,13 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
    }
 
    static boolean isPointASharedNonintersectingVertex(double dxAPrev,
-                                                              double dyAPrev,
-                                                              double dxANext,
-                                                              double dyANext,
-                                                              double dxBPrev,
-                                                              double dyBPrev,
-                                                              double dxBNext,
-                                                              double dyBNext)
+                                                      double dyAPrev,
+                                                      double dxANext,
+                                                      double dyANext,
+                                                      double dxBPrev,
+                                                      double dyBPrev,
+                                                      double dxBNext,
+                                                      double dyBNext)
    {
       boolean isBPreviousLeftOfANext = cross(dxANext, dyANext, dxBPrev, dyBPrev) < 0.0;
 
