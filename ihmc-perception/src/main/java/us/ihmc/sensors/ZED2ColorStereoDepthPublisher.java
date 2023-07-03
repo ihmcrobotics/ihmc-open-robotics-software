@@ -4,7 +4,6 @@ import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.*;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
-import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.zed.SL_InitParameters;
 import org.bytedeco.zed.SL_RuntimeParameters;
 import perception_msgs.msg.dds.ImageMessage;
@@ -49,7 +48,7 @@ public class ZED2ColorStereoDepthPublisher
    private final ROS2Node ros2Node;
    private CUDAImageEncoder imageEncoder;
 
-   private final PausablePeriodicThread zedPublisherThread = new PausablePeriodicThread("ZED publisher", 0.1d, this::update);
+   private final PausablePeriodicThread zedPublisherThread = new PausablePeriodicThread("ZED publisher", UPDATE_PERIOD_SECONDS, this::update);
 
    public ZED2ColorStereoDepthPublisher(int cameraID,
                                         ROS2Topic<ImageMessage> colorTopic,
@@ -59,7 +58,7 @@ public class ZED2ColorStereoDepthPublisher
 
       sl_create_camera(cameraID);
 
-      zedInitializationParameters.camera_fps(30);
+      zedInitializationParameters.camera_fps(10);
       zedInitializationParameters.resolution(SL_RESOLUTION_HD1080);
       zedInitializationParameters.input_type(SL_INPUT_TYPE_USB);
       zedInitializationParameters.camera_device_id(cameraID);
@@ -91,7 +90,7 @@ public class ZED2ColorStereoDepthPublisher
       imageWidth = sl_get_width(cameraID);
       imageHeight = sl_get_height(cameraID);
 
-      colorImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_CPU));
+      colorImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_GPU));
       depthImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_F32_C4, SL_MEM_CPU));
       pointCloudPointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_F32_C4, SL_MEM_CPU));
       colorImageMatBGR = new GpuMat(imageWidth, imageHeight, opencv_core.CV_8UC3);
@@ -120,7 +119,7 @@ public class ZED2ColorStereoDepthPublisher
    private void retrieveAndPublishColorImage()
    {
       // Retrieve image
-      checkError("sl_retrieve_image", sl_retrieve_image(cameraID, colorImagePointer, SL_VIEW_RIGHT, SL_MEM_CPU, imageWidth, imageHeight));
+      checkError("sl_retrieve_image", sl_retrieve_image(cameraID, colorImagePointer, SL_VIEW_RIGHT, SL_MEM_GPU, imageWidth, imageHeight));
 
       // Convert to BGR and encode to jpeg
       colorImageMatBGRA = new GpuMat(colorImagePointer);
