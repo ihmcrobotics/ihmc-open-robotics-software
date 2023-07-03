@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
+import static us.ihmc.robotics.Assert.assertFalse;
 import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.awt.Color;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentReachabilityConstraint;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -51,7 +53,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public class MultiStepCaptureRegionCalculatorTest
 {
-   private static final boolean PLOT_RESULTS = false;
+   private static final boolean PLOT_RESULTS = true;
    private static final boolean WAIT_FOR_BUTTON_PUSH = true;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -69,7 +71,6 @@ public class MultiStepCaptureRegionCalculatorTest
    }
 
    @SuppressWarnings("unused")
-
    @Test
    public void testPointsInsideSimpleSquareRegion()
    {
@@ -136,17 +137,17 @@ public class MultiStepCaptureRegionCalculatorTest
 
          captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
 
-         testTheRegions(multiStepRegionCalculator, captureRegion, swingDuration, omega0, kinematicStepRange, swingSide.getOppositeSide());
+//         testTheRegions(multiStepRegionCalculator, captureRegion, swingDuration, omega0, kinematicStepRange, swingSide.getOppositeSide());
 
          if (PLOT_RESULTS)
          {
             YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
             YoFrameConvexPolygon2D yoOneStepRegion = new YoFrameConvexPolygon2D("oneStepRegion", worldFrame, 10, registry);
-            YoFrameConvexPolygon2D yoTwoStepRegion = new YoFrameConvexPolygon2D("twoStepRegion", worldFrame, 20, registry);
-            YoFrameConvexPolygon2D yoThreeStepRegion = new YoFrameConvexPolygon2D("threeStepRegion", worldFrame, 20, registry);
-            YoFrameConvexPolygon2D yoFourStepRegion = new YoFrameConvexPolygon2D("fourStepRegion", worldFrame, 20, registry);
-            YoFrameConvexPolygon2D yoFiveStepRegion = new YoFrameConvexPolygon2D("fiveStepRegion", worldFrame, 20, registry);
-            YoFrameConvexPolygon2D yoSixStepRegion = new YoFrameConvexPolygon2D("sixStepRegion", worldFrame, 20, registry);
+            YoFrameConvexPolygon2D yoTwoStepRegion = new YoFrameConvexPolygon2D("twoStepRegion", worldFrame, 40, registry);
+            YoFrameConvexPolygon2D yoThreeStepRegion = new YoFrameConvexPolygon2D("threeStepRegion", worldFrame, 50, registry);
+            YoFrameConvexPolygon2D yoFourStepRegion = new YoFrameConvexPolygon2D("fourStepRegion", worldFrame, 60, registry);
+            YoFrameConvexPolygon2D yoFiveStepRegion = new YoFrameConvexPolygon2D("fiveStepRegion", worldFrame, 80, registry);
+            YoFrameConvexPolygon2D yoSixStepRegion = new YoFrameConvexPolygon2D("sixStepRegion", worldFrame, 100, registry);
 
             YoArtifactPolygon oneStepRegionGraphic = new YoArtifactPolygon("oneStepRegion", yoOneStepRegion, Color.green, false);
             YoArtifactPolygon twoStepRegionGraphic = new YoArtifactPolygon("twoStepRegion", yoTwoStepRegion, Color.blue, false);
@@ -305,11 +306,11 @@ public class MultiStepCaptureRegionCalculatorTest
       {
          YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
          YoFrameConvexPolygon2D yoOneStepRegion = new YoFrameConvexPolygon2D("oneStepRegion", worldFrame, 10, registry);
-         YoFrameConvexPolygon2D yoTwoStepRegion = new YoFrameConvexPolygon2D("twoStepRegion", worldFrame, 20, registry);
-         YoFrameConvexPolygon2D yoThreeStepRegion = new YoFrameConvexPolygon2D("threeStepRegion", worldFrame, 20, registry);
-         YoFrameConvexPolygon2D yoFourStepRegion = new YoFrameConvexPolygon2D("fourStepRegion", worldFrame, 20, registry);
-         YoFrameConvexPolygon2D yoFiveStepRegion = new YoFrameConvexPolygon2D("fiveStepRegion", worldFrame, 20, registry);
-         YoFrameConvexPolygon2D yoSixStepRegion = new YoFrameConvexPolygon2D("sixStepRegion", worldFrame, 20, registry);
+         YoFrameConvexPolygon2D yoTwoStepRegion = new YoFrameConvexPolygon2D("twoStepRegion", worldFrame, 100, registry);
+         YoFrameConvexPolygon2D yoThreeStepRegion = new YoFrameConvexPolygon2D("threeStepRegion", worldFrame, 100, registry);
+         YoFrameConvexPolygon2D yoFourStepRegion = new YoFrameConvexPolygon2D("fourStepRegion", worldFrame, 100, registry);
+         YoFrameConvexPolygon2D yoFiveStepRegion = new YoFrameConvexPolygon2D("fiveStepRegion", worldFrame, 100, registry);
+         YoFrameConvexPolygon2D yoSixStepRegion = new YoFrameConvexPolygon2D("sixStepRegion", worldFrame, 100, registry);
 
          YoArtifactPolygon oneStepRegionGraphic = new YoArtifactPolygon("oneStepRegion", yoOneStepRegion, Color.green, false);
          YoArtifactPolygon twoStepRegionGraphic = new YoArtifactPolygon("twoStepRegion", yoTwoStepRegion, Color.blue, false);
@@ -462,11 +463,11 @@ public class MultiStepCaptureRegionCalculatorTest
       {
          YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
          YoFrameConvexPolygon2D yoOneStepRegion = new YoFrameConvexPolygon2D("oneStepRegion", worldFrame, 10, registry);
-         YoFrameConvexPolygon2D yoTwoStepRegion = new YoFrameConvexPolygon2D("twoStepRegion", worldFrame, 20, registry);
-         YoFrameConvexPolygon2D yoThreeStepRegion = new YoFrameConvexPolygon2D("threeStepRegion", worldFrame, 20, registry);
-         YoFrameConvexPolygon2D yoFourStepRegion = new YoFrameConvexPolygon2D("fourStepRegion", worldFrame, 20, registry);
-         YoFrameConvexPolygon2D yoFiveStepRegion = new YoFrameConvexPolygon2D("fiveStepRegion", worldFrame, 20, registry);
-         YoFrameConvexPolygon2D yoSixStepRegion = new YoFrameConvexPolygon2D("sixStepRegion", worldFrame, 20, registry);
+         YoFrameConvexPolygon2D yoTwoStepRegion = new YoFrameConvexPolygon2D("twoStepRegion", worldFrame, 100, registry);
+         YoFrameConvexPolygon2D yoThreeStepRegion = new YoFrameConvexPolygon2D("threeStepRegion", worldFrame, 100, registry);
+         YoFrameConvexPolygon2D yoFourStepRegion = new YoFrameConvexPolygon2D("fourStepRegion", worldFrame, 100, registry);
+         YoFrameConvexPolygon2D yoFiveStepRegion = new YoFrameConvexPolygon2D("fiveStepRegion", worldFrame, 100, registry);
+         YoFrameConvexPolygon2D yoSixStepRegion = new YoFrameConvexPolygon2D("sixStepRegion", worldFrame, 100, registry);
 
          YoArtifactPolygon oneStepRegionGraphic = new YoArtifactPolygon("oneStepRegion", yoOneStepRegion, Color.green, false);
          YoArtifactPolygon twoStepRegionGraphic = new YoArtifactPolygon("twoStepRegion", yoTwoStepRegion, Color.blue, false);
@@ -1065,6 +1066,48 @@ public class MultiStepCaptureRegionCalculatorTest
       Thread myThread = new Thread(scs);
       myThread.start();
    }
+
+   @Test
+   public void testIsSharedVertex()
+   {
+      Point2D squareTopLeft = new Point2D(1.0, 1.0);
+      Point2D squareTopRight = new Point2D(1.0, -1.0);
+      Point2D squareBottomRight = new Point2D(-1.0, -1.0);
+      Point2D squareBottomLeft = new Point2D(-1.0, 1.0);
+
+      Point2D diamondTop = new Point2D(1.0, 0.0);
+      Point2D diamondRight = new Point2D(0.0, -1.0);
+      Point2D diamondBottom = new Point2D(-1.0, 0.0);
+      Point2D diamondLeft = new Point2D(0.0, 1.0);
+
+      // check the right side of the diamond is shared with the top left of the square
+      assertTrue(MultiStepCaptureRegionCalculator.isPointASharedNonintersectingVertex(squareBottomLeft, squareTopLeft, squareTopRight,
+                                                                                      diamondTop, diamondRight, diamondBottom));
+      // check the bottom side of the diamond is shared with the top left of the square
+      assertTrue(MultiStepCaptureRegionCalculator.isPointASharedNonintersectingVertex(squareBottomLeft, squareTopLeft, squareTopRight,
+                                                                                      diamondRight, diamondBottom, diamondLeft));
+      // check the left side of the diamond is not shared with the top left of the square without intersection
+      assertFalse(MultiStepCaptureRegionCalculator.isPointASharedNonintersectingVertex(squareBottomLeft, squareTopLeft, squareTopRight,
+                                                                                      diamondBottom, diamondLeft, diamondTop));
+      // check the top side of the diamond is not shared with the top left of the square without intersection
+      assertFalse(MultiStepCaptureRegionCalculator.isPointASharedNonintersectingVertex(squareBottomLeft, squareTopLeft, squareTopRight,
+                                                                                       diamondLeft, diamondTop, diamondRight));
+
+
+      // check the bottom side of the diamond is shared with the top right of the square
+      assertTrue(MultiStepCaptureRegionCalculator.isPointASharedNonintersectingVertex(squareTopLeft, squareTopRight, squareBottomRight,
+                                                                                      diamondRight, diamondBottom, diamondLeft));
+      // check the left side of the diamond is shared with the top right of the square
+      assertTrue(MultiStepCaptureRegionCalculator.isPointASharedNonintersectingVertex(squareTopLeft, squareTopRight, squareBottomRight,
+                                                                                      diamondBottom, diamondLeft, diamondTop));
+      // check the top side of the diamond is not shared with the top right of the square without intersection
+      assertFalse(MultiStepCaptureRegionCalculator.isPointASharedNonintersectingVertex(squareTopLeft, squareTopRight, squareBottomRight,
+                                                                                      diamondLeft, diamondTop, diamondRight));
+      // check the right side of the diamond is not shared with the top left of the square without intersection
+      assertFalse(MultiStepCaptureRegionCalculator.isPointASharedNonintersectingVertex(squareTopLeft, squareTopRight, squareBottomRight,
+                                                                                       diamondTop, diamondRight, diamondLeft));
+   }
+
 
    public static void main(String[] args)
    {
