@@ -1250,7 +1250,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       return armTrajectoryMessage;
    }
 
-   private static double[] generateRandomJointPositions(Random random, OneDoFJointBasics[] armJoints)
+   static double[] generateRandomJointPositions(Random random, OneDoFJointBasics[] armJoints)
    {
       double[] desiredJointPositions = new double[armJoints.length];
       for (int i = 0; i < armJoints.length; i++)
