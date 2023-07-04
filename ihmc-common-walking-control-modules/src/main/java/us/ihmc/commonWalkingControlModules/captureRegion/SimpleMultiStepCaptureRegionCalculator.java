@@ -39,7 +39,7 @@ import java.awt.*;
  */
 public class SimpleMultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
 {
-   private static final int expansionPointsPerCorner = 12;
+   private static final int expansionPointsPerCorner = 20;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
