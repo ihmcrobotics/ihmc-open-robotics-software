@@ -4,6 +4,8 @@ import com.google.common.util.concurrent.AtomicDouble;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentReachabilityConstraint;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
@@ -45,6 +47,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -52,6 +55,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import static us.ihmc.robotics.Assert.*;
@@ -978,12 +982,9 @@ public class CaptureRegionSafetyHeuristicsTest
    private static void setupVisualizer()
    {
       Robot robot = new Robot("CaptureRegionViz");
-      double footLength = 0.255;
-      double footBack = 0.09;
-      double footForward = footLength - footBack;
-      double midFootAnkleXOffset = footForward - footLength / 2.0;
-      double footWidth = 0.095;
-      double kinematicStepRange = 0.6;
+      double footLength = 0.2;
+      double footWidth = 0.1;
+      double kinematicStepRange = 1.0;
       final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
       final SideDependentList<FrameConvexPolygon2D> footPolygons = new SideDependentList<>();
       final SideDependentList<YoFrameConvexPolygon2D> yoFootPolygons = new SideDependentList<>();
@@ -997,17 +998,17 @@ public class CaptureRegionSafetyHeuristicsTest
             @Override
             protected void updateTransformToParent(RigidBodyTransform transformToParent)
             {
-               transformToParent.getTranslation().set(new Vector3D(0.0, robotSide.negateIfRightSide(0.15), 0.0));
+               transformToParent.getTranslation().set(new Vector3D(0.0, robotSide.negateIfRightSide(0.0), 0.0));
             }
          };
          ankleZUpFrame.update();
          ankleZUpFrames.put(robotSide, ankleZUpFrame);
 
          FrameConvexPolygon2D footConvexPolygon2d = new FrameConvexPolygon2D(ankleZUpFrame);
-         footConvexPolygon2d.addVertex(ankleZUpFrame, footForward, -footWidth / 2.0);
-         footConvexPolygon2d.addVertex(ankleZUpFrame, footForward, footWidth / 2.0);
-         footConvexPolygon2d.addVertex(ankleZUpFrame, -footBack, footWidth / 2.0);
-         footConvexPolygon2d.addVertex(ankleZUpFrame, -footBack, -footWidth / 2.0);
+         footConvexPolygon2d.addVertex(ankleZUpFrame, footLength / 2.0, -footWidth / 2.0);
+         footConvexPolygon2d.addVertex(ankleZUpFrame, footLength / 2.0, footWidth / 2.0);
+         footConvexPolygon2d.addVertex(ankleZUpFrame, -footLength / 2.0, footWidth / 2.0);
+         footConvexPolygon2d.addVertex(ankleZUpFrame, -footLength / 2.0, -footWidth / 2.0);
          footConvexPolygon2d.update();
          footPolygons.put(robotSide, footConvexPolygon2d);
 
@@ -1017,26 +1018,34 @@ public class CaptureRegionSafetyHeuristicsTest
          yoFootPolygon.set(footConvexPolygon2d);
          footConvexPolygon2d.changeFrame(ankleZUpFrame);
          yoFootPolygons.put(robotSide, yoFootPolygon);
-         Color footColor;
-         if (robotSide == RobotSide.LEFT)
-            footColor = Color.pink;
-         else
-            footColor = Color.green;
-         YoArtifactPolygon footArtifact = new YoArtifactPolygon(robotSide.getCamelCaseNameForStartOfExpression(), yoFootPolygon, footColor, false);
+         Color footColor = YoAppearance.DarkGreen().getAwtColor();
+         YoArtifactPolygon footArtifact = new YoArtifactPolygon(robotSide.getCamelCaseNameForStartOfExpression(), yoFootPolygon, footColor, true);
          yoGraphicsListRegistry.registerArtifact("Feet", footArtifact);
          footArtifacts.put(robotSide, footArtifact);
       }
       final OneStepCaptureRegionCalculator oneStepCaptureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth,
             kinematicStepRange, ankleZUpFrames, registry, null);
+      final CaptureRegionSafetyHeuristics heuristics = new CaptureRegionSafetyHeuristics(() -> kinematicStepRange, registry);
+
+      new DefaultParameterReader().readParametersInRegistry(registry);
+
 
       final YoFrameConvexPolygon2D yoCaptureRegion = new YoFrameConvexPolygon2D("captureRegion", "", worldFrame, 50, registry);
-      YoArtifactPolygon captureRegionArtifact = new YoArtifactPolygon("CaptureRegion", yoCaptureRegion, Color.BLACK, false);
+      final YoFrameConvexPolygon2D yoCaptureRegionHeuristics = new YoFrameConvexPolygon2D("captureRegionHeuristics", "", worldFrame, 50, registry);
+      YoArtifactPolygon captureRegionArtifact = new YoArtifactPolygon("CaptureRegion", yoCaptureRegion, Color.green, false);
+      YoArtifactPolygon captureRegionHeuristicsArtifact = new YoArtifactPolygon("CaptureRegionHeuristics", yoCaptureRegionHeuristics, Color.green, false);
       yoGraphicsListRegistry.registerArtifact("Capture", captureRegionArtifact);
+      yoGraphicsListRegistry.registerArtifact("Capture", captureRegionHeuristicsArtifact);
       final YoEnum<RobotSide> yoSupportSide = new YoEnum<>("supportSide", registry, RobotSide.class);
       final YoDouble swingTimeRemaining = new YoDouble("swingTimeRemaining", registry);
       final YoFramePoint2D yoICP = new YoFramePoint2D("ICP", worldFrame, registry);
-      yoGraphicsListRegistry.registerArtifact("ICP", new YoGraphicPosition("ICP", yoICP, 0.02, YoAppearance.Blue(), GraphicType.CROSS).createArtifact());
-      final double omega0 = 3.4;
+      yoGraphicsListRegistry.registerArtifact("ICP", new YoGraphicPosition("ICP", yoICP, 0.025, YoAppearance.Purple(), GraphicType.BALL_WITH_CROSS).createArtifact());
+      final double omega0 = 3.0;
+
+      swingTimeRemaining.set(0.1);
+      yoICP.set(0.3, -0.2);
+
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
 
       final SimulationOverheadPlotter simulationOverheadPlotter = new SimulationOverheadPlotter();
       YoVariableChangedListener variableChangedListener = new YoVariableChangedListener()
@@ -1058,18 +1067,23 @@ public class CaptureRegionSafetyHeuristicsTest
             frameConvexPolygon2d.changeFrame(worldFrame);
             yoCaptureRegion.set(frameConvexPolygon2d);
 
+            FramePoint2D stancePosition = new FramePoint2D(footPolygons.get(supportSide).getCentroid());
+            stancePosition.changeFrame(worldFrame);
+            heuristics.computeCaptureRegionWithSafetyHeuristics(supportSide, yoICP, stancePosition, oneStepCaptureRegionCalculator.getCaptureRegion());
+            yoCaptureRegionHeuristics.set(heuristics.getCaptureRegionWithSafetyMargin());
+
             simulationOverheadPlotter.update();
+            scs.tickAndUpdate();
          }
       };
       swingTimeRemaining.addListener(variableChangedListener);
       yoICP.attachVariableChangedListener(variableChangedListener);
       yoSupportSide.addListener(variableChangedListener);
 
-      swingTimeRemaining.set(0.3);
-      yoICP.set(0.1, 0.2);
+
+
       variableChangedListener.changed(null);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
 
       //      simulationOverheadPlotter.setDrawHistory(false);
 
@@ -1088,6 +1102,237 @@ public class CaptureRegionSafetyHeuristicsTest
       Thread myThread = new Thread(scs);
       myThread.start();
    }
+
+   /*
+   public void visualizeForPaper()
+   {
+      double footWidth = 0.1;
+      double footLength = 0.2;
+      double kinematicStepRange = 1.0;
+      double forwardLimit = 1.0;
+      double backwardLimit = 0.8;
+      double innerLimit = 0.05;
+      double outerLimit = 0.6;
+      double width = 0.3;
+      double swingDuration = 0.6;
+
+      YoBoolean yoUseCrossoverSteps = new YoBoolean("useCrossOverSteps", registry);
+      YoDouble yoForwardLimit = new YoDouble("forwardLimit", registry);
+      YoDouble yoBackwardLimit = new YoDouble("backwardLimit", registry);
+      YoDouble yoInnerLimit = new YoDouble("innerLimit", registry);
+      YoDouble yoOuterLimit = new YoDouble("outerLimit", registry);
+      YoDouble yoNominalWidth = new YoDouble("nominalWidth", registry);
+      YoDouble yoSwingDuration = new YoDouble("swingDuration", registry);
+
+      yoUseCrossoverSteps.set(false);
+      yoForwardLimit.set(forwardLimit);
+      yoBackwardLimit.set(backwardLimit);
+      yoInnerLimit.set(innerLimit);
+      yoOuterLimit.set(outerLimit);
+      yoNominalWidth.set(width);
+      yoSwingDuration.set(swingDuration);
+
+      RobotSide swingSide = RobotSide.RIGHT;
+      double swingTimeRemaining = 0.1;
+      double omega0 = 3.0;
+      double horiztonalOffset = 1.0;
+
+      OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth,
+                                                                                                  kinematicStepRange,
+                                                                                                  ankleZUpFrames,
+                                                                                                  registry,
+                                                                                                  null);
+
+      StepAdjustmentReachabilityConstraint reachabilityConstraint = new StepAdjustmentReachabilityConstraint(ankleZUpFrames,
+                                                                                                             yoForwardLimit,
+                                                                                                             yoBackwardLimit,
+                                                                                                             yoInnerLimit,
+                                                                                                             yoOuterLimit,
+                                                                                                             yoNominalWidth,
+                                                                                                             new StepAdjustmentParameters.CrossOverReachabilityParameters(),
+                                                                                                             "name",
+                                                                                                             false,
+                                                                                                             registry,
+                                                                                                             null);
+      MultiStepCaptureRegionCalculator multiStepRegionCalculator = new MultiStepCaptureRegionCalculator(ankleZUpFrames,
+                                                                                                        reachabilityConstraint,
+                                                                                                        () -> false,
+                                                                                                        registry);
+
+
+      MultiStepCaptureRegionCalculatorTest.SimpleAnkleZUpReferenceFrame leftAnkleZUpFrame = new MultiStepCaptureRegionCalculatorTest.SimpleAnkleZUpReferenceFrame("CrossOverleftAnkleZUp");
+      MultiStepCaptureRegionCalculatorTest.SimpleAnkleZUpReferenceFrame rightAnkleZUpFrame = new MultiStepCaptureRegionCalculatorTest.SimpleAnkleZUpReferenceFrame("CrossOverrightAnkleZUp");
+      SideDependentList<ReferenceFrame> crossOverAnkleZUpFrames = new SideDependentList<>(leftAnkleZUpFrame, rightAnkleZUpFrame);
+
+      YoRegistry crossOverRegistry = new YoRegistry("supaChild");
+      registry.addChild(crossOverRegistry);
+      StepAdjustmentReachabilityConstraint crossOverReachabilityConstraint = new StepAdjustmentReachabilityConstraint(crossOverAnkleZUpFrames,
+                                                                                                                      yoForwardLimit,
+                                                                                                                      yoBackwardLimit,
+                                                                                                                      yoInnerLimit,
+                                                                                                                      yoOuterLimit,
+                                                                                                                      yoNominalWidth,
+                                                                                                                      new MultiStepCaptureRegionCalculatorTest.CrossoverParametersForPaper(),
+                                                                                                                      "crossOverName",
+                                                                                                                      false,
+                                                                                                                      crossOverRegistry,
+                                                                                                                      null);
+      MultiStepCaptureRegionCalculator crossOverMultiStepRegionCalculator = new MultiStepCaptureRegionCalculator(crossOverAnkleZUpFrames,
+                                                                                                                 crossOverReachabilityConstraint,
+                                                                                                                 () -> true,
+                                                                                                                 crossOverRegistry);
+
+
+      SimpleMultiStepCaptureRegionCalculator simpleMultiStepRegionCalculator = new SimpleMultiStepCaptureRegionCalculator(registry);
+
+      new DefaultParameterReader().readParametersInRegistry(registry);
+
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
+
+      RigidBodyTransform crossOverTranslation = new RigidBodyTransform();
+      crossOverTranslation.getTranslation().addY(-horiztonalOffset);
+      leftAnkleZUpFrame.setOffset(crossOverTranslation.getTranslation());
+      rightAnkleZUpFrame.setOffset(crossOverTranslation.getTranslation());
+      leftAnkleZUpFrame.update();
+      rightAnkleZUpFrame.update();
+
+      crossOverReachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D(worldFrame, crossOverTranslation));
+      crossOverReachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D(worldFrame, crossOverTranslation));
+
+      ArrayList<Point2D> listOfPoints = new ArrayList<Point2D>();
+      listOfPoints.add(new Point2D(-footLength / 2.0, -footWidth / 2.0));
+      listOfPoints.add(new Point2D(-footLength / 2.0, footWidth / 2.0));
+      listOfPoints.add(new Point2D(footLength / 2.0, -footWidth / 2.0));
+      listOfPoints.add(new Point2D(footLength / 2.0, footWidth / 2.0));
+      FrameConvexPolygon2D supportFootPolygon = new FrameConvexPolygon2D(worldFrame, Vertex2DSupplier.asVertex2DSupplier(listOfPoints));
+
+      FramePoint2D icp = new FramePoint2D(worldFrame, 0.3, -0.2);
+      captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, icp, omega0, supportFootPolygon);
+      FrameConvexPolygon2D captureRegion = new FrameConvexPolygon2D(captureRegionCalculator.getCaptureRegion());
+      captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
+      FrameConvexPolygon2D simpleCaptureRegion = new FrameConvexPolygon2D(captureRegionCalculator.getCaptureRegion());
+      simpleCaptureRegion.changeFrameAndProjectToXYPlane(worldFrame);
+      FrameConvexPolygon2D crossOverCaptureRegion = new FrameConvexPolygon2D(captureRegionCalculator.getCaptureRegion());
+      crossOverCaptureRegion.changeFrameAndProjectToXYPlane(worldFrame);
+
+      RigidBodyTransform simpleTranslation = new RigidBodyTransform();
+      simpleTranslation.getTranslation().addY(horiztonalOffset);
+      simpleCaptureRegion.applyTransform(simpleTranslation);
+
+      crossOverCaptureRegion.applyTransform(crossOverTranslation);
+
+      if (PLOT_RESULTS)
+      {
+         YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
+
+         int numberOfRegions = 6;
+         java.util.List<YoFrameConvexPolygon2D> trueCaptureRegions = createRegionPool("true", numberOfRegions, registry);
+         java.util.List<YoFrameConvexPolygon2D> simpleCaptureRegions = createRegionPool("simple", numberOfRegions, registry);
+         java.util.List<YoFrameConvexPolygon2D> crossOverCaptureRegions = createRegionPool("crossOver", numberOfRegions, registry);
+         graphicsListRegistry.registerArtifactList(createRegionGraphics("true", trueCaptureRegions));
+         graphicsListRegistry.registerArtifactList(createRegionGraphics("simple", simpleCaptureRegions));
+         graphicsListRegistry.registerArtifactList(createRegionGraphics("crossOver", crossOverCaptureRegions));
+
+         YoFrameConvexPolygon2D simpleReachability = new YoFrameConvexPolygon2D("simpleReachability", worldFrame, 75, registry);
+         YoFrameConvexPolygon2D regularReachability = new YoFrameConvexPolygon2D("regularReachability", worldFrame, 20, registry);
+         YoFrameConvexPolygon2D crossOverReachability = new YoFrameConvexPolygon2D("CrossOVerReachability", worldFrame, 20, registry);
+         simpleReachability.set(createApproximateCircle(forwardLimit));
+         simpleReachability.applyTransform(simpleTranslation);
+         regularReachability.setMatchingFrame(reachabilityConstraint.getReachabilityPolygonInFootFrame(RobotSide.LEFT), false);
+         crossOverReachability.setMatchingFrame(crossOverReachabilityConstraint.getTotalReachabilityHull(RobotSide.LEFT), false);
+         graphicsListRegistry.registerArtifact("simple", new YoArtifactPolygon("simpleReachability", simpleReachability, Color.blue, false));
+         graphicsListRegistry.registerArtifact("regular", new YoArtifactPolygon("regularReachability", regularReachability, Color.blue, false));
+         graphicsListRegistry.registerArtifact("crossover", new YoArtifactPolygon("crossOverReachability", crossOverReachability, Color.blue, false));
+
+         YoFrameConvexPolygon2D regularFootstep = new YoFrameConvexPolygon2D("regularFootstep", worldFrame, 4, registry);
+         YoFrameConvexPolygon2D simpleFootstep = new YoFrameConvexPolygon2D("simpleFootstep", worldFrame, 4, registry);
+         YoFrameConvexPolygon2D crossOverFootstep = new YoFrameConvexPolygon2D("crossOverFootstep", worldFrame, 4, registry);
+
+         graphicsListRegistry.registerArtifact("regular", new YoArtifactPolygon("regularFootstep", regularFootstep, YoAppearance.DarkGreen().getAwtColor(), true));
+         graphicsListRegistry.registerArtifact("simple", new YoArtifactPolygon("simpleFootstep", simpleFootstep, YoAppearance.DarkGreen().getAwtColor(), true));
+         graphicsListRegistry.registerArtifact("crossover", new YoArtifactPolygon("crossOverFootstep", crossOverFootstep, YoAppearance.DarkGreen().getAwtColor(), true));
+
+         YoFramePoint2D regularICP = new YoFramePoint2D("regularICP", worldFrame, registry);
+         YoFramePoint2D simpleICP = new YoFramePoint2D("simpleICP", worldFrame, registry);
+         YoFramePoint2D crossOverICP = new YoFramePoint2D("crossOverICP", worldFrame, registry);
+
+         double icpPointSize = 0.025;
+         graphicsListRegistry.registerArtifact("regular", new YoGraphicPosition("regularICP", regularICP, icpPointSize, YoAppearance.Purple(), GraphicType.BALL_WITH_CROSS).createArtifact());
+         graphicsListRegistry.registerArtifact("simple", new YoGraphicPosition("simpleICP", simpleICP, icpPointSize, YoAppearance.Purple(), GraphicType.BALL_WITH_CROSS).createArtifact());
+         graphicsListRegistry.registerArtifact("crossover", new YoGraphicPosition("crossOverICP", crossOverICP, icpPointSize, YoAppearance.Purple(), GraphicType.BALL_WITH_CROSS).createArtifact());
+
+
+         regularFootstep.set(supportFootPolygon);
+         simpleFootstep.set(supportFootPolygon);
+         simpleFootstep.applyTransform(simpleTranslation);
+         crossOverFootstep.set(supportFootPolygon);
+         crossOverFootstep.applyTransform(crossOverTranslation);
+
+         regularICP.set(icp);
+         simpleICP.set(icp);
+         simpleICP.applyTransform(simpleTranslation);
+         crossOverICP.set(icp);
+         crossOverICP.applyTransform(crossOverTranslation);
+
+
+         java.util.List<YoFrameConvexPolygon2D> trueMultiStepRegions = new ArrayList<>();
+         for (int i = 1; i < trueCaptureRegions.size(); i++)
+            trueMultiStepRegions.add(trueCaptureRegions.get(i));
+         java.util.List<YoFrameConvexPolygon2D> simpleMultiStepRegions = new ArrayList<>();
+         for (int i = 1; i < simpleCaptureRegions.size(); i++)
+            simpleMultiStepRegions.add(simpleCaptureRegions.get(i));
+         List<YoFrameConvexPolygon2D> crossOverMultiStepRegions = new ArrayList<>();
+         for (int i = 1; i < crossOverCaptureRegions.size(); i++)
+            crossOverMultiStepRegions.add(crossOverCaptureRegions.get(i));
+
+         Robot robot = new Robot("test");
+         robot.getRobotsYoRegistry().addChild(registry);
+
+         SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+
+         scs.addYoGraphicsListRegistry(graphicsListRegistry);
+
+         SimulationOverheadPlotterFactory plotterFactory = scs.createSimulationOverheadPlotterFactory();
+         plotterFactory.addYoGraphicsListRegistries(graphicsListRegistry);
+         plotterFactory.createOverheadPlotter();
+
+         scs.startOnAThread();
+
+         trueCaptureRegions.get(0).setMatchingFrame(captureRegion, false);
+         simpleCaptureRegions.get(0).setMatchingFrame(simpleCaptureRegion, false);
+         crossOverCaptureRegions.get(0).setMatchingFrame(crossOverCaptureRegion, false);
+
+         updateRegionsForPaper(yoSwingDuration.getDoubleValue(),
+                               multiStepRegionCalculator,
+                               simpleMultiStepRegionCalculator,
+                               crossOverMultiStepRegionCalculator,
+                               captureRegion,
+                               simpleCaptureRegion,
+                               crossOverCaptureRegion,
+                               omega0,
+                               yoForwardLimit.getDoubleValue(),
+                               swingSide.getOppositeSide(),
+                               trueMultiStepRegions,
+                               simpleMultiStepRegions,
+                               crossOverMultiStepRegions);
+
+
+         yoUseCrossoverSteps.addListener(updatedListener);
+         yoForwardLimit.addListener(updatedListener);
+         yoBackwardLimit.addListener(updatedListener);
+         yoInnerLimit.addListener(updatedListener);
+         yoOuterLimit.addListener(updatedListener);
+         yoNominalWidth.addListener(updatedListener);
+         yoSwingDuration.addListener(updatedListener);
+
+         scs.tickAndUpdate();
+
+         ThreadTools.sleepForever();
+      }
+   }
+
+    */
 
    public static void main(String[] args)
    {
