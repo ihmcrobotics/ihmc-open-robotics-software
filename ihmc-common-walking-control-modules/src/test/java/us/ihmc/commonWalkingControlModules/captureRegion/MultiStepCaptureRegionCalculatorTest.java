@@ -87,7 +87,7 @@ public class MultiStepCaptureRegionCalculatorTest
       double outerLimit = 0.6;
       double width = 0.3;
       double swingDuration = 0.6;
-      boolean useCrossOverSteps = false;
+      boolean useCrossOverSteps = true;
 
       YoBoolean yoUseCrossOverSteps = new YoBoolean("yoUseCrossOverSteps", registry);
       YoDouble yoForwardLimit = new YoDouble("forwardLimit", registry);
@@ -114,7 +114,7 @@ public class MultiStepCaptureRegionCalculatorTest
                                                                                                              yoInnerLimit,
                                                                                                              yoOuterLimit,
                                                                                                              yoNominalWidth,
-                                                                                                             new StepAdjustmentParameters.CrossOverReachabilityParameters(),
+                                                                                                             new CrossoverParametersForPaper(),
                                                                                                              "name",
                                                                                                              false,
                                                                                                              registry,
@@ -1318,7 +1318,7 @@ public class MultiStepCaptureRegionCalculatorTest
       RobotSide swingSide = RobotSide.RIGHT;
       double swingTimeRemaining = 0.1;
       double omega0 = 3.0;
-      double horiztonalOffset = 0.75;
+      double horiztonalOffset = 1.0;
 
       OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth,
                                                                                                   kinematicStepRange,
@@ -1397,9 +1397,9 @@ public class MultiStepCaptureRegionCalculatorTest
       FrameConvexPolygon2D crossOverCaptureRegion = new FrameConvexPolygon2D(captureRegionCalculator.getCaptureRegion());
       crossOverCaptureRegion.changeFrameAndProjectToXYPlane(worldFrame);
 
-      RigidBodyTransform translation = new RigidBodyTransform();
-      translation.getTranslation().addY(horiztonalOffset);
-      simpleCaptureRegion.applyTransform(translation);
+      RigidBodyTransform simpleTranslation = new RigidBodyTransform();
+      simpleTranslation.getTranslation().addY(horiztonalOffset);
+      simpleCaptureRegion.applyTransform(simpleTranslation);
 
       crossOverCaptureRegion.applyTransform(crossOverTranslation);
 
@@ -1415,12 +1415,47 @@ public class MultiStepCaptureRegionCalculatorTest
          graphicsListRegistry.registerArtifactList(createRegionGraphics("simple", simpleCaptureRegions));
          graphicsListRegistry.registerArtifactList(createRegionGraphics("crossOver", crossOverCaptureRegions));
 
+         YoFrameConvexPolygon2D simpleReachability = new YoFrameConvexPolygon2D("simpleReachability", worldFrame, 75, registry);
          YoFrameConvexPolygon2D regularReachability = new YoFrameConvexPolygon2D("regularReachability", worldFrame, 20, registry);
          YoFrameConvexPolygon2D crossOverReachability = new YoFrameConvexPolygon2D("CrossOVerReachability", worldFrame, 20, registry);
+         simpleReachability.set(createApproximateCircle(forwardLimit));
+         simpleReachability.applyTransform(simpleTranslation);
          regularReachability.setMatchingFrame(reachabilityConstraint.getReachabilityPolygonInFootFrame(RobotSide.LEFT), false);
          crossOverReachability.setMatchingFrame(crossOverReachabilityConstraint.getTotalReachabilityHull(RobotSide.LEFT), false);
+         graphicsListRegistry.registerArtifact("simple", new YoArtifactPolygon("simpleReachability", simpleReachability, Color.blue, false));
          graphicsListRegistry.registerArtifact("regular", new YoArtifactPolygon("regularReachability", regularReachability, Color.blue, false));
          graphicsListRegistry.registerArtifact("crossover", new YoArtifactPolygon("crossOverReachability", crossOverReachability, Color.blue, false));
+
+         YoFrameConvexPolygon2D regularFootstep = new YoFrameConvexPolygon2D("regularFootstep", worldFrame, 4, registry);
+         YoFrameConvexPolygon2D simpleFootstep = new YoFrameConvexPolygon2D("simpleFootstep", worldFrame, 4, registry);
+         YoFrameConvexPolygon2D crossOverFootstep = new YoFrameConvexPolygon2D("crossOverFootstep", worldFrame, 4, registry);
+
+         graphicsListRegistry.registerArtifact("regular", new YoArtifactPolygon("regularFootstep", regularFootstep, YoAppearance.DarkGreen().getAwtColor(), true));
+         graphicsListRegistry.registerArtifact("simple", new YoArtifactPolygon("simpleFootstep", simpleFootstep, YoAppearance.DarkGreen().getAwtColor(), true));
+         graphicsListRegistry.registerArtifact("crossover", new YoArtifactPolygon("crossOverFootstep", crossOverFootstep, YoAppearance.DarkGreen().getAwtColor(), true));
+
+         YoFramePoint2D regularICP = new YoFramePoint2D("regularICP", worldFrame, registry);
+         YoFramePoint2D simpleICP = new YoFramePoint2D("simpleICP", worldFrame, registry);
+         YoFramePoint2D crossOverICP = new YoFramePoint2D("crossOverICP", worldFrame, registry);
+
+         double icpPointSize = 0.025;
+         graphicsListRegistry.registerArtifact("regular", new YoGraphicPosition("regularICP", regularICP, icpPointSize, YoAppearance.Purple(), GraphicType.BALL_WITH_CROSS).createArtifact());
+         graphicsListRegistry.registerArtifact("simple", new YoGraphicPosition("simpleICP", simpleICP, icpPointSize, YoAppearance.Purple(), GraphicType.BALL_WITH_CROSS).createArtifact());
+         graphicsListRegistry.registerArtifact("crossover", new YoGraphicPosition("crossOverICP", crossOverICP, icpPointSize, YoAppearance.Purple(), GraphicType.BALL_WITH_CROSS).createArtifact());
+
+
+         regularFootstep.set(supportFootPolygon);
+         simpleFootstep.set(supportFootPolygon);
+         simpleFootstep.applyTransform(simpleTranslation);
+         crossOverFootstep.set(supportFootPolygon);
+         crossOverFootstep.applyTransform(crossOverTranslation);
+
+         regularICP.set(icp);
+         simpleICP.set(icp);
+         simpleICP.applyTransform(simpleTranslation);
+         crossOverICP.set(icp);
+         crossOverICP.applyTransform(crossOverTranslation);
+
 
          List<YoFrameConvexPolygon2D> trueMultiStepRegions = new ArrayList<>();
          for (int i = 1; i < trueCaptureRegions.size(); i++)
@@ -1498,6 +1533,25 @@ public class MultiStepCaptureRegionCalculatorTest
       }
    }
 
+   private static ConvexPolygon2D createApproximateCircle(double radius)
+   {
+      ConvexPolygon2D polygon2D = new ConvexPolygon2D();
+
+      int points = 50;
+      for (int i = 0; i < points; i++)
+      {
+         double angle = (double) i / points * Math.PI * 2.0;
+         double x = Math.cos(angle) * radius;
+         double y = Math.sin(angle) * radius;
+
+         polygon2D.addVertex(x, y);
+      }
+
+      polygon2D.update();
+      return polygon2D;
+   }
+
+
    private static List<YoFrameConvexPolygon2D> createRegionPool(String prefix, int regionsTomake, YoRegistry registry)
    {
       List<YoFrameConvexPolygon2D> regions = new ArrayList<>();
@@ -1522,7 +1576,7 @@ public class MultiStepCaptureRegionCalculatorTest
          else if (colorIdx == 1)
             color = Color.red;
          else
-            color = Color.yellow;
+            color = Color.orange;
          artifactList.add(new YoArtifactPolygon(prefix + "StepRegion" + (i + 1), regions.get(i), color, false));
       }
 
