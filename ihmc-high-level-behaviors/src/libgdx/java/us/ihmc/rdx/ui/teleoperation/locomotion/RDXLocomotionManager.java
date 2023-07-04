@@ -320,13 +320,6 @@ public class RDXLocomotionManager
       ImGui.sameLine();
 //      ImGui.endDisabled();
 
-      if (ImGui.button(labels.get("Square Up")))
-      {
-         deleteAll();
-         manualFootstepPlacement.squareUp();
-      }
-      ImGui.sameLine();
-
       ImGui.beginDisabled(!pauseAvailable);
       if (ImGui.button(labels.get("Pause")))
       {
