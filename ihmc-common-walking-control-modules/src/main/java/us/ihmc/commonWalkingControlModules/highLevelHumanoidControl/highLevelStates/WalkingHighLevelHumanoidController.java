@@ -515,7 +515,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       commandInputManager.clearAllCommands();
       commandConsumer.clearAllCommands();
       walkingMessageHandler.clearFootsteps();
-      walkingMessageHandler.clearFootTrajectory();
+      walkingMessageHandler.clearFlamingoCommands();
 
       privilegedConfigurationCommand.clear();
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
@@ -711,7 +711,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if (failureDetectionControlModule.isRobotFalling())
       {
          walkingMessageHandler.clearFootsteps();
-         walkingMessageHandler.clearFootTrajectory();
+         walkingMessageHandler.clearFlamingoCommands();
 
          commandInputManager.clearAllCommands();
 

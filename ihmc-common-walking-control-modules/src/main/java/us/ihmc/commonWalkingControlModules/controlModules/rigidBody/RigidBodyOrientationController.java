@@ -38,8 +38,13 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
 
    private final TaskspaceTrajectoryStatusMessageHelper statusHelper;
 
-   public RigidBodyOrientationController(RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator, ReferenceFrame baseFrame,
-                                         YoDouble yoTime, RigidBodyJointControlHelper jointControlHelper, YoRegistry parentRegistry)
+   public RigidBodyOrientationController(RigidBodyBasics bodyToControl,
+                                         RigidBodyBasics baseBody,
+                                         RigidBodyBasics elevator,
+                                         ReferenceFrame baseFrame,
+                                         YoDouble yoTime,
+                                         RigidBodyJointControlHelper jointControlHelper,
+                                         YoRegistry parentRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
 
@@ -54,8 +59,16 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
       BooleanParameter useBaseFrameForControl = new BooleanParameter(prefix + "UseBaseFrameForControl", registry, false);
       // Must be the body frame until the controller core allows custom control frame rotations for orientation commands:
       MovingReferenceFrame controlFrame = bodyToControl.getBodyFixedFrame();
-      orientationHelper = new RigidBodyOrientationControlHelper(prefix, bodyToControl, baseBody, elevator, controlFrame, baseFrame, useBaseFrameForControl,
-                                                                usingWeightFromMessage, yoTime, registry);
+      orientationHelper = new RigidBodyOrientationControlHelper(prefix,
+                                                                bodyToControl,
+                                                                baseBody,
+                                                                elevator,
+                                                                controlFrame,
+                                                                baseFrame,
+                                                                useBaseFrameForControl,
+                                                                usingWeightFromMessage,
+                                                                yoTime,
+                                                                registry);
 
       this.jointControlHelper = jointControlHelper;
       hybridModeActive = new YoBoolean(prefix + "HybridModeActive", registry);
@@ -157,7 +170,8 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
    }
 
    @Override
-   public boolean handleHybridTrajectoryCommand(SO3TrajectoryControllerCommand command, JointspaceTrajectoryCommand jointspaceCommand,
+   public boolean handleHybridTrajectoryCommand(SO3TrajectoryControllerCommand command,
+                                                JointspaceTrajectoryCommand jointspaceCommand,
                                                 double[] initialJointPositions)
    {
       if (handleTrajectoryCommand(command) && jointControlHelper.handleTrajectoryCommand(jointspaceCommand, initialJointPositions))
@@ -227,6 +241,12 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
    public double getLastTrajectoryPointTime()
    {
       return orientationHelper.getLastTrajectoryPointTime();
+   }
+
+   @Override
+   public boolean isHybridModeActive()
+   {
+      return hybridModeActive.getValue();
    }
 
    private void clear()
