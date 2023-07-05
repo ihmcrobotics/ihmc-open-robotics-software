@@ -30,7 +30,8 @@ public class RDXVRLaserFootstepMode
    private RDXModelInstance leftLaser;
    private RDXModelInstance rightLaser;
    private boolean sendWalkPlan = false;
-   private boolean joystickPressed = false;
+   private boolean aButtonPressed = false;
+   private int pickedUpFootstepNumber = -1;
    private int numTimesPressed = 0;
 
    public void setLocomotionParameters(RDXLocomotionParameters locomotionParameters)
@@ -56,6 +57,11 @@ public class RDXVRLaserFootstepMode
                InputDigitalActionData triggerClick = controller.getClickTriggerActionData();
                InputDigitalActionData joystickClick = controller.getJoystickPressActionData();
                InputDigitalActionData aButtonClick = controller.getAButtonActionData();
+               InputDigitalActionData sideTriggerClick = controller.getTouchpadTouchedActionData();
+               if (sideTriggerClick.bChanged() && sideTriggerClick.bState())
+               {
+                  System.out.println("Yo you pressed it");
+               }
                if (triggerClick.bChanged() && triggerClick.bState())
                {
                   setControllerSide(side);
@@ -74,16 +80,16 @@ public class RDXVRLaserFootstepMode
                {
                   setSpotPlacement(null);
                }
-               if (aButtonClick.bChanged() && aButtonClick.bState())
+               if (joystickClick.bChanged() && joystickClick.bState())
                {
                   sendWalkPlan = true;
                }
-               if(joystickClick.bChanged() && joystickClick.bState()||joystickPressed == true)
+               if(aButtonClick.bChanged() && aButtonClick.bState()||aButtonPressed == true)
                {
-                  if (joystickClick.bChanged() && joystickClick.bState())
+                  if (aButtonClick.bChanged() && aButtonClick.bState())
                   {
                      setControllerSide(side);
-                     joystickPressed = true;
+                     aButtonPressed = true;
                      numTimesPressed++;
                   }
                   calculateVR(vrContext);
@@ -96,8 +102,9 @@ public class RDXVRLaserFootstepMode
                }
                if(numTimesPressed >= 2)
                {
+                  setPickedUpFootstepNumber(-1);
                   setEndOfLaser(null);
-                  joystickPressed = false;
+                  aButtonPressed = false;
                   numTimesPressed = 0;
                }
             });
@@ -199,6 +206,14 @@ public class RDXVRLaserFootstepMode
       {
          leftLaser.getRenderables(renderables, pool);
       }
+   }
+   public int getPickedUpFootstepNumber()
+   {
+      return pickedUpFootstepNumber;
+   }
+   public void setPickedUpFootstepNumber(int pickedUpFootstepNumber)
+   {
+      this.pickedUpFootstepNumber = pickedUpFootstepNumber;
    }
    public boolean getSendWalkPlan()
    {
