@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import javafx.geometry.Point3D;
+import org.lwjgl.openvr.InputAnalogActionData;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -58,6 +59,7 @@ public class RDXVRLaserFootstepMode
                InputDigitalActionData joystickClick = controller.getJoystickPressActionData();
                InputDigitalActionData aButtonClick = controller.getAButtonActionData();
                InputDigitalActionData sideTriggerClick = controller.getTouchpadTouchedActionData();
+               InputAnalogActionData joystickAction = controller.getJoystickActionData();
                if (sideTriggerClick.bChanged() && sideTriggerClick.bState())
                {
                   System.out.println("Yo you pressed it");
@@ -95,7 +97,7 @@ public class RDXVRLaserFootstepMode
                   calculateVR(vrContext);
                   if (sizeChange > 0)
                   {
-                     frontController.getRotation().setYawPitchRoll(frontController.getYaw(), 0, 0);
+                     frontController.getRotation().setYawPitchRoll(frontController.getYaw(), joystickAction.y(), joystickAction.x());
                      frontController.getPosition().setZ(0);
                      setEndOfLaser(frontController);
                   }
