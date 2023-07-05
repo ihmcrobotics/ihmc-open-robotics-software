@@ -83,7 +83,7 @@ mainDependencies {
    api("org.bytedeco:cuda:$cudaVersion:windows-x86_64")
    val zedVersion = "4.0.4_2-1.5.9"
    api("us.ihmc:zed:$zedVersion")
-   api("us.ihmc:zed:$zedVersion-linux-x86_64")
+   api("us.ihmc:zed:$zedVersion:linux-x86_64")
 
    api("us.ihmc:euclid:0.20.0")
    api("us.ihmc:simulation-construction-set:0.24.1")
