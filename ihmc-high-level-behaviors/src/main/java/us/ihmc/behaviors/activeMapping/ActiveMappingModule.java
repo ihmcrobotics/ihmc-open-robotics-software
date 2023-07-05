@@ -31,7 +31,7 @@ public class ActiveMappingModule
    private final FootstepPlanningModule footstepPlanner;
    private final DRCRobotModel robotModel;
    private final HumanoidReferenceFrames referenceFrames;
-   private final PlanarRegionMap planarRegionMap;
+   private PlanarRegionMap planarRegionMap;
 
    private FootstepPlannerRequest request;
    private FootstepPlannerOutput plannerOutput;
@@ -71,7 +71,7 @@ public class ActiveMappingModule
    {
       if (active)
       {
-         planarRegionMap.registerRegions(regions.getPlanarRegionsList(), regions.getSensorToWorldFrameTransform());
+         planarRegionMap.registerRegions(regions.getPlanarRegionsList(), regions.getSensorToWorldFrameTransform(), null);
       }
    }
 
@@ -138,8 +138,8 @@ public class ActiveMappingModule
 
    public void reset()
    {
-      planarRegionMap.reset();
-      planarRegionMap.setModified(true);
+      planarRegionMap.destroy();
+      planarRegionMap = new PlanarRegionMap(true);
    }
 
    public void setPlanAvailable(boolean planAvailable)

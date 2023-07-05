@@ -50,11 +50,6 @@ public class RDXSwingPlanningModule
       swingPlanningModule = new SwingPlanningModule(footstepPlannerParameters, swingPlannerParameters, walkingControllerParameters, footPolygons);
    }
 
-   public void setPlanarRegionListMessage(PlanarRegionsListMessage planarRegionsListMessage)
-   {
-      this.planarRegionsListMessage = planarRegionsListMessage;
-   }
-
    public void setPlanarRegionList(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;

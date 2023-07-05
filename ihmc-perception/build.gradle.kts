@@ -86,7 +86,7 @@ mainDependencies {
    api("us.ihmc:zed:$zedVersion-linux-x86_64")
 
    api("us.ihmc:euclid:0.20.0")
-   api("us.ihmc:simulation-construction-set:0.24.0")
+   api("us.ihmc:simulation-construction-set:0.24.1")
    api("us.ihmc:ihmc-native-library-loader:2.0.2")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-communication:source")

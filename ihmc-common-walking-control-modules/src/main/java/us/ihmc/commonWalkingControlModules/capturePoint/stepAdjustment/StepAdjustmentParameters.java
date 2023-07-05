@@ -24,15 +24,6 @@ public abstract class StepAdjustmentParameters
    }
 
    /**
-    * Sets whether to use the ICP control plane for step adjustment. This projects the center of pressure and step adjustment algorithm into the control plane,
-    * and performs all the math there, when set to try
-    */
-   public boolean useICPControlPlane()
-   {
-      return false;
-   }
-
-   /**
     * Deadband on the step adjustment.
     * When the adjustment is within the deadband, it is set to zero.
     * When it is outside the deadband, the deadband is subtracted from it.
@@ -96,7 +87,7 @@ public abstract class StepAdjustmentParameters
        */
       public double getForwardCrossOverDistance()
       {
-         return 0.05;
+         return 0.0;
       }
 
       /**
@@ -105,7 +96,7 @@ public abstract class StepAdjustmentParameters
        */
       public double getForwardCrossOverClearanceAngle()
       {
-         return Math.toRadians(25.0);
+         return Math.toRadians(35.0);
       }
 
       /**

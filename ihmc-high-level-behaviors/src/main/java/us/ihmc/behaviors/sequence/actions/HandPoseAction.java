@@ -75,27 +75,25 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    public void executeAction()
    {
       ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
+
       double solutionQuality = armIKSolver.getQuality();
       if (solutionQuality < 1.0)
       {
-         OneDoFJointBasics[] solutionOneDoFJoints = armIKSolver.getSolutionOneDoFJoints();
-         double[] jointAngles = new double[solutionOneDoFJoints.length];
-
-         for (int i = 0; i < jointAngles.length; i++)
-         {
-            jointAngles[i] = solutionOneDoFJoints[i].getQ();
-         }
-
-         ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(getSide(), getTrajectoryDuration(), jointAngles);
-         armTrajectoryMessage.setForceExecution(true); // Prevent the command being rejected because robot is still finishing up walking
-         ros2ControllerHelper.publishToController(armTrajectoryMessage);
-
-         executionTimer.reset();
-      }
-      else
-      {
          LogTools.error("Solution is low quality ({}). Not sending.", solutionQuality);
       }
+
+      OneDoFJointBasics[] solutionOneDoFJoints = armIKSolver.getSolutionOneDoFJoints();
+      double[] jointAngles = new double[solutionOneDoFJoints.length];
+      for (int i = 0; i < jointAngles.length; i++)
+      {
+         jointAngles[i] = solutionOneDoFJoints[i].getQ();
+      }
+
+      ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(getSide(), getTrajectoryDuration(), jointAngles);
+      armTrajectoryMessage.setForceExecution(true); // Prevent the command being rejected because robot is still finishing up walking
+      ros2ControllerHelper.publishToController(armTrajectoryMessage);
+
+      executionTimer.reset();
    }
 
    @Override

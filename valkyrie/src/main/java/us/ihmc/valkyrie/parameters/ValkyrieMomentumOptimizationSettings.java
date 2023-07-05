@@ -9,10 +9,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSettings
 {
@@ -50,11 +46,13 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
    private final double neckJointspaceWeight = 5.0;
    private final double spineJointspaceWeight = 10.0;
    private final double armJointspaceWeight = 1.0;
+   private final double legJointspaceWeight = 1.0;
    private final List<GroupParameter<Double>> jointspaceWeights = new ArrayList<>();
 
    private final double neckUserModeWeight = 50.0;
    private final double spineUserModeWeight = 50.0;
    private final double armUserModeWeight = 50.0;
+   private final double legUserModeWeight = 50.0;
    private final List<GroupParameter<Double>> userModeWeights = new ArrayList<>();
 
    private final Vector3D headAngularWeight = new Vector3D(500.0, 500.0, 500.0);
@@ -76,23 +74,15 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
       rhoRateDefaultWeight = defaultRhoRateDefaultWeight / (scale * scale);
       rhoRateHighWeight = defaultRhoRateHighWeight / (scale * scale);
 
-      for (SpineJointName jointName : jointMap.getSpineJointNames())
-      {
-         configureBehavior(jointspaceWeights, jointMap, jointName, spineJointspaceWeight);
-         configureBehavior(userModeWeights, jointMap, jointName, spineUserModeWeight);
-      }
+      jointspaceWeights.add(new GroupParameter<>("Spine", spineJointspaceWeight, jointMap.getSpineJointNamesAsStrings()));
+      jointspaceWeights.add(new GroupParameter<>("Arms", armJointspaceWeight, jointMap.getArmJointNamesAsStrings()));
+      jointspaceWeights.add(new GroupParameter<>("Legs", legJointspaceWeight, jointMap.getLegJointNamesAsStrings()));
+      jointspaceWeights.add(new GroupParameter<>("Neck", neckJointspaceWeight, jointMap.getNeckJointNamesAsStrings()));
 
-      for (ArmJointName jointName : jointMap.getArmJointNames())
-      {
-         configureSymmetricBehavior(jointspaceWeights, jointMap, jointName, armJointspaceWeight);
-         configureSymmetricBehavior(userModeWeights, jointMap, jointName, armUserModeWeight);
-      }
-
-      for (NeckJointName jointName : jointMap.getNeckJointNames())
-      {
-         configureBehavior(jointspaceWeights, jointMap, jointName, neckJointspaceWeight);
-         configureBehavior(userModeWeights, jointMap, jointName, neckUserModeWeight);
-      }
+      userModeWeights.add(new GroupParameter<>("Spine", spineUserModeWeight, jointMap.getSpineJointNamesAsStrings()));
+      userModeWeights.add(new GroupParameter<>("Arms", armUserModeWeight, jointMap.getArmJointNamesAsStrings()));
+      userModeWeights.add(new GroupParameter<>("Legs", legUserModeWeight, jointMap.getLegJointNamesAsStrings()));
+      userModeWeights.add(new GroupParameter<>("Neck", neckUserModeWeight, jointMap.getNeckJointNamesAsStrings()));
 
       taskspaceAngularWeights.add(new GroupParameter<>("Chest", chestAngularWeight, Collections.singletonList(jointMap.getChestName())));
       taskspaceAngularWeights.add(new GroupParameter<>("Head", headAngularWeight, Collections.singletonList(jointMap.getHeadName())));
@@ -106,23 +96,6 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
       taskspaceLinearWeights.add(new GroupParameter<>("Hand", handLinearWeight, handNames));
       taskspaceAngularWeights.add(new GroupParameter<>("Foot", footAngularWeight, footNames));
       taskspaceLinearWeights.add(new GroupParameter<>("Foot", footLinearWeight, footNames));
-   }
-
-   private static void configureSymmetricBehavior(List<GroupParameter<Double>> behaviors, HumanoidJointNameMap jointMap, ArmJointName jointName, double weight)
-   {
-      behaviors.add(new GroupParameter<>(jointName.toString(), Double.valueOf(weight), jointMap.getLeftAndRightJointNames(jointName)));
-   }
-
-   private static void configureBehavior(List<GroupParameter<Double>> behaviors, HumanoidJointNameMap jointMap, SpineJointName jointName, double weight)
-   {
-      List<String> names = Collections.singletonList(jointMap.getSpineJointName(jointName));
-      behaviors.add(new GroupParameter<>(jointName.toString(), Double.valueOf(weight), names));
-   }
-
-   private static void configureBehavior(List<GroupParameter<Double>> behaviors, HumanoidJointNameMap jointMap, NeckJointName jointName, double weight)
-   {
-      List<String> names = Collections.singletonList(jointMap.getNeckJointName(jointName));
-      behaviors.add(new GroupParameter<>(jointName.toString(), Double.valueOf(weight), names));
    }
 
    /** @inheritDoc */

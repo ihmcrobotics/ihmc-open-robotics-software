@@ -152,9 +152,19 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       this.gains = gains;
    }
 
+   public PID3DGainsReadOnly getGains()
+   {
+      return gains;
+   }
+
    public void setWeights(Vector3DReadOnly weights)
    {
       this.defaultWeight = weights;
+   }
+
+   public Vector3DReadOnly getDefaultWeight()
+   {
+      return defaultWeight;
    }
 
    private void setupViz(YoGraphicsListRegistry graphicsListRegistry, String bodyName)
