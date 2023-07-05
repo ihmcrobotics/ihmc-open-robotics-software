@@ -1,11 +1,12 @@
 package us.ihmc.sensors;
 
-import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.javacpp.Pointer;
-import org.bytedeco.opencv.global.*;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.Pointer;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.zed.SL_CalibrationParameters;
 import org.bytedeco.zed.SL_InitParameters;
 import org.bytedeco.zed.SL_RuntimeParameters;
 import perception_msgs.msg.dds.ImageMessage;
@@ -13,6 +14,8 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.comms.ImageMessageFormat;
@@ -33,22 +36,27 @@ import static org.bytedeco.zed.global.zed.*;
 public class ZED2ColorStereoDepthPublisher
 {
    private static final double UPDATE_PERIOD_SECONDS = 0.1;
+   private static long depthImageSequence = 0L;
+   private static long colorImageSequence = 0L;
 
-   private int cameraID;
-   private final SL_InitParameters zedInitializationParameters = new SL_InitParameters();
+   private final int cameraID;
    private final SL_RuntimeParameters zedRuntimeParameters = new SL_RuntimeParameters();
+   private final SL_CalibrationParameters calibrationParameters;
 
-   private int imageWidth;
-   private int imageHeight;
+   private final int imageWidth;
+   private final int imageHeight;
    private final Pointer colorImagePointer;
    private final Pointer depthImagePointer;
    private Pointer pointCloudPointer;
+
+   private final FramePose3D worldFramePose = new FramePose3D(ReferenceFrame.getWorldFrame());
 
    private final ImageMessage colorImageMessage = new ImageMessage();
    private final AtomicReference<Instant> colorImageAcquisitionTime = new AtomicReference<>();
    private final ImageMessage depthImageMessage = new ImageMessage();
    private final AtomicReference<Instant> depthImageAcquisitionTime = new AtomicReference<>();
-   private final IHMCROS2Publisher<ImageMessage> ros2ImagePublisher;
+   private final IHMCROS2Publisher<ImageMessage> ros2ColorImagePublisher;
+   private final IHMCROS2Publisher<ImageMessage> ros2DepthImagePublisher;
    private final ROS2Topic<ImageMessage> colorTopic;
    private final ROS2Topic<ImageMessage> depthTopic;
    private final ROS2Node ros2Node;
@@ -64,6 +72,7 @@ public class ZED2ColorStereoDepthPublisher
 
       sl_create_camera(cameraID);
 
+      SL_InitParameters zedInitializationParameters = new SL_InitParameters();
       zedInitializationParameters.camera_fps(10);
       zedInitializationParameters.resolution(SL_RESOLUTION_HD1080);
       zedInitializationParameters.input_type(SL_INPUT_TYPE_USB);
@@ -72,7 +81,7 @@ public class ZED2ColorStereoDepthPublisher
       zedInitializationParameters.camera_disable_self_calib(false);
       zedInitializationParameters.enable_image_enhancement(true);
       zedInitializationParameters.svo_real_time_mode(true);
-      zedInitializationParameters.depth_mode(SL_DEPTH_MODE_PERFORMANCE);
+      zedInitializationParameters.depth_mode(SL_DEPTH_MODE_ULTRA);
       zedInitializationParameters.depth_stabilization(1);
       zedInitializationParameters.depth_maximum_distance(20);
       zedInitializationParameters.depth_minimum_distance(-1);
@@ -81,7 +90,7 @@ public class ZED2ColorStereoDepthPublisher
       zedInitializationParameters.sdk_gpu_id(-1);
       zedInitializationParameters.sdk_verbose(0); // false
       zedInitializationParameters.sensors_required(false);
-      zedInitializationParameters.enable_right_side_measure(false);
+      zedInitializationParameters.enable_right_side_measure(true);
       zedInitializationParameters.open_timeout_sec(5.0f);
       zedInitializationParameters.async_grab_camera_recovery(false);
 
@@ -92,18 +101,21 @@ public class ZED2ColorStereoDepthPublisher
       zedRuntimeParameters.reference_frame(SL_REFERENCE_FRAME_CAMERA);
       zedRuntimeParameters.texture_confidence_threshold(100);
       zedRuntimeParameters.remove_saturated_areas(true);
+      zedRuntimeParameters.enable_fill_mode(true);
 
+      calibrationParameters = sl_get_calibration_parameters(cameraID, false);
       imageWidth = sl_get_width(cameraID);
       imageHeight = sl_get_height(cameraID);
 
       colorImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_CPU));
-      depthImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_F32_C4, SL_MEM_CPU));
+      depthImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U16_C1, SL_MEM_CPU));
       pointCloudPointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_F32_C4, SL_MEM_CPU));
 
       this.colorTopic = colorTopic;
       this.depthTopic = depthTopic;
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "zed2_node");
-      ros2ImagePublisher = ROS2Tools.createPublisher(ros2Node, colorTopic, ROS2QosProfile.BEST_EFFORT());
+      ros2ColorImagePublisher = ROS2Tools.createPublisher(ros2Node, colorTopic, ROS2QosProfile.BEST_EFFORT());
+      ros2DepthImagePublisher = ROS2Tools.createPublisher(ros2Node, depthTopic, ROS2QosProfile.BEST_EFFORT());
 
       imageEncoder = new CUDAImageEncoder();
 
@@ -144,12 +156,20 @@ public class ZED2ColorStereoDepthPublisher
       ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(colorJPEGPointer.limit());
       imageMessageDataPacker.pack(colorImageMessage, colorJPEGPointer);
       MessageTools.toMessage(colorImageAcquisitionTime.get(), colorImageMessage.getAcquisitionTime());
+      colorImageMessage.setFocalLengthXPixels(calibrationParameters.right_cam().fx());
+      colorImageMessage.setFocalLengthYPixels(calibrationParameters.right_cam().fy());
+      colorImageMessage.setPrincipalPointXPixels(calibrationParameters.right_cam().cx());
+      colorImageMessage.setPrincipalPointYPixels(calibrationParameters.right_cam().cy());
       colorImageMessage.setImageWidth(imageWidth);
       colorImageMessage.setImageHeight(imageHeight);
+      colorImageMessage.getPosition().set(worldFramePose.getPosition());
+      colorImageMessage.getOrientation().set(worldFramePose.getOrientation());
+      colorImageMessage.setSequenceNumber(colorImageSequence++);
+      colorImageMessage.setDepthDiscretization(0.1f);
       CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
       ImageMessageFormat.COLOR_JPEG_BGR8.packMessageFormat(colorImageMessage);
       // TODO: Add position and orientation to image message
-      ros2ImagePublisher.publish(colorImageMessage);
+      ros2ColorImagePublisher.publish(colorImageMessage);
 
       // Close stuff
       colorJPEGPointer.close();
@@ -161,11 +181,10 @@ public class ZED2ColorStereoDepthPublisher
 
    private void retrieveAndPublishDepthImage()
    {
-      checkError("sl_retrieve_measure", sl_retrieve_measure(cameraID, depthImagePointer, SL_MEASURE_DEPTH, SL_MEM_CPU, imageWidth, imageHeight));
+      checkError("sl_retrieve_measure", sl_retrieve_measure(cameraID, depthImagePointer, SL_MEASURE_DEPTH_U16_MM_RIGHT, SL_MEM_CPU, imageWidth, imageHeight));
 
-      Mat depthImage32FC4 = new Mat(imageHeight, imageWidth, opencv_core.CV_32FC1, depthImagePointer, sl_mat_get_step_bytes(depthImagePointer, SL_MEM_CPU));
-      Mat depthImage16UC1 = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
-      depthImage32FC4.convertTo(depthImage16UC1, opencv_core.CV_16UC1);
+      //System.out.println(sl_mat_get_step_bytes(depthImagePointer, SL_MEM_CPU));
+      Mat depthImage16UC1 = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1, depthImagePointer, sl_mat_get_step_bytes(depthImagePointer, SL_MEM_CPU));
 
       BytePointer depthPNGPointer = new BytePointer();
       OpenCVTools.compressImagePNG(depthImage16UC1, depthPNGPointer);
@@ -175,11 +194,23 @@ public class ZED2ColorStereoDepthPublisher
       ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(depthPNGPointer.limit());
       imageMessageDataPacker.pack(depthImageMessage, depthPNGPointer);
       MessageTools.toMessage(depthImageAcquisitionTime.get(), depthImageMessage.getAcquisitionTime());
+      depthImageMessage.setFocalLengthXPixels(calibrationParameters.right_cam().fx());
+      depthImageMessage.setFocalLengthYPixels(calibrationParameters.right_cam().fy());
+      depthImageMessage.setPrincipalPointXPixels(calibrationParameters.right_cam().cx());
+      depthImageMessage.setPrincipalPointYPixels(calibrationParameters.right_cam().cx());
       depthImageMessage.setImageWidth(imageWidth);
       depthImageMessage.setImageHeight(imageHeight);
+      depthImageMessage.getPosition().set(worldFramePose.getPosition());
+      depthImageMessage.getOrientation().set(worldFramePose.getOrientation());
+      depthImageMessage.setSequenceNumber(depthImageSequence++);
+      depthImageMessage.setDepthDiscretization(0.1f);
       CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
       ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
-      ros2ImagePublisher.publish(depthImageMessage);
+      ros2DepthImagePublisher.publish(depthImageMessage);
+
+      // Close stuff
+      depthPNGPointer.close();
+      depthImage16UC1.close();
    }
 
    public void destroy()
@@ -199,6 +230,6 @@ public class ZED2ColorStereoDepthPublisher
 
    public static void main(String[] args)
    {
-      new ZED2ColorStereoDepthPublisher(0, PerceptionAPI.ZED2_STEREO_COLOR, null);
+      new ZED2ColorStereoDepthPublisher(0, PerceptionAPI.D455_COLOR_IMAGE, PerceptionAPI.D455_DEPTH_IMAGE);
    }
 }
