@@ -140,7 +140,7 @@ public class RDXVRLaserFootstepMode
                frontController.changeFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
                frontController.getPosition().addX(sizeChange * frontController.getX());
                frontController.changeFrame(ReferenceFrame.getWorldFrame());
-               frontController.getOrientation().setToYawOrientation(vrContext.getController(side).getXForwardZUpPose().getRoll());
+               frontController.getOrientation().setToYawOrientation(-vrContext.getController(side).getXForwardZUpPose().getRoll());
             });
          }
       }
