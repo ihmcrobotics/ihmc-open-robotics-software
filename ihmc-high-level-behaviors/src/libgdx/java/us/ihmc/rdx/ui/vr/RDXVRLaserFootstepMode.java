@@ -11,7 +11,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
-import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -59,10 +58,6 @@ public class RDXVRLaserFootstepMode
                      frontController.getPosition().setZ(0);
                      setSpotPlacement(frontController);
                   }
-                  else
-                  {
-                     System.out.println("size change is less than zero as it is" + sizeChange);
-                  }
                }
                if (triggerClick.bChanged() && !triggerClick.bState())
                {
@@ -72,9 +67,9 @@ public class RDXVRLaserFootstepMode
                {
                   sendWalkPlan = true;
                }
-               if(gripClick.x()==1||gripPressed == true)
+               if(gripClick.x()>=0.5||gripPressed)
                {
-                  if (gripClick.x()==1)
+                  if (gripClick.x()>=0.5)
                   {
                      setControllerSide(side);
                      gripPressed = true;
