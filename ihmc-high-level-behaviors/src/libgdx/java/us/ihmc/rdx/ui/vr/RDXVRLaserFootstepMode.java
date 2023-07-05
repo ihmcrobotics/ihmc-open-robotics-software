@@ -23,6 +23,7 @@ public class RDXVRLaserFootstepMode
    private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
    private FramePose3D frontController;
    private FramePose3D spotPlacement;
+   private FramePose3D endOfLaser;
    private double sizeChange;
    private RDXLocomotionParameters locomotionParameters;
    private RobotSide controllerSide;
@@ -51,6 +52,7 @@ public class RDXVRLaserFootstepMode
                calculateVR(vrContext);
                updateLaser(sizeChange / 10, vrContext);
                InputDigitalActionData triggerClick = controller.getClickTriggerActionData();
+               InputDigitalActionData joystickClick = controller.getJoystickPressActionData();
                InputDigitalActionData aButtonClick = controller.getAButtonActionData();
                if (triggerClick.bChanged() && triggerClick.bState())
                {
@@ -59,7 +61,6 @@ public class RDXVRLaserFootstepMode
                   if (sizeChange > 0)
                   {
                      frontController.getPosition().setZ(0);
-                     spotPlacement = frontController;
                      setSpotPlacement(frontController);
                   }
                   else
@@ -74,6 +75,17 @@ public class RDXVRLaserFootstepMode
                if (aButtonClick.bChanged() && aButtonClick.bState())
                {
                   sendWalkPlan = true;
+               }
+               if(joystickClick.bChanged() && joystickClick.bState())
+               {
+                  setControllerSide(side);
+                  calculateVR(vrContext);
+                  if (sizeChange > 0)
+                  {
+                     frontController.getRotation().setYawPitchRoll(frontController.getYaw(), 0, 0);
+                     frontController.getPosition().setZ(0);
+                     setEndOfLaser(frontController);
+                  }
                }
             });
          }
@@ -146,6 +158,15 @@ public class RDXVRLaserFootstepMode
       this.spotPlacement = spotPlacement;
    }
 
+   public FramePose3D getEndOfLaser()
+   {
+      return endOfLaser;
+   }
+
+   public void setEndOfLaser(FramePose3D endOfLaser)
+   {
+      this.endOfLaser = endOfLaser;
+   }
    public RobotSide getControllerSide()
    {
       return controllerSide;
@@ -166,12 +187,10 @@ public class RDXVRLaserFootstepMode
          leftLaser.getRenderables(renderables, pool);
       }
    }
-
    public boolean getSendWalkPlan()
    {
       return sendWalkPlan;
    }
-
    public void setSendWalkPlan(boolean sendWalkPlan)
    {
       this.sendWalkPlan = sendWalkPlan;
