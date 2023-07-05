@@ -45,6 +45,7 @@ public class RDXArmManager
 
    private final ArmJointName[] armJointNames;
    private RDXArmControlMode armControlMode = RDXArmControlMode.JOINT_ANGLES;
+   private final SideDependentList<double[]> armsWide = new SideDependentList<>();
    private final SideDependentList<double[]> doorAvoidanceArms = new SideDependentList<>();
 
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
@@ -72,6 +73,17 @@ public class RDXArmManager
       this.interactableHands = interactableHands;
       armJointNames = robotModel.getJointMap().getArmJointNames();
 
+      for (RobotSide side : RobotSide.values)
+      {
+         armsWide.put(side,
+                      new double[] {0.6,
+                                    side.negateIfRightSide(0.3),
+                                    side.negateIfRightSide(-0.5),
+                                    -1.0,
+                                    side.negateIfRightSide(-0.6),
+                                    0.000,
+                                    side.negateIfLeftSide(0.0)});
+      }
       doorAvoidanceArms.put(RobotSide.LEFT, new double[] {-0.121, -0.124, -0.971, -1.713, -0.935, -0.873, 0.277});
       doorAvoidanceArms.put(RobotSide.RIGHT, new double[] {-0.523, -0.328, 0.586, -2.192, 0.828, 1.009, -0.281});
 
@@ -175,18 +187,32 @@ public class RDXArmManager
          ImGui.sameLine();
          if (ImGui.button(labels.get("Home " + side.getPascalCaseName())))
          {
-            GoHomeMessage armHome = new GoHomeMessage();
-            armHome.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
+            GoHomeMessage armHomeMessage = new GoHomeMessage();
+            armHomeMessage.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
 
-            if (side.getSideNameFirstLetter().equals("R"))
-               armHome.setRobotSide(GoHomeMessage.ROBOT_SIDE_RIGHT);
+            if (side == RobotSide.LEFT)
+               armHomeMessage.setRobotSide(GoHomeMessage.ROBOT_SIDE_LEFT);
             else
-               armHome.setRobotSide(GoHomeMessage.ROBOT_SIDE_LEFT);
+               armHomeMessage.setRobotSide(GoHomeMessage.ROBOT_SIDE_RIGHT);
 
-            armHome.setTrajectoryTime(teleoperationParameters.getTrajectoryTime());
-            ros2Helper.publishToController(armHome);
+            armHomeMessage.setTrajectoryTime(teleoperationParameters.getTrajectoryTime());
+            ros2Helper.publishToController(armHomeMessage);
          }
       }
+
+      ImGui.text("Wide Arms:");
+      for (RobotSide side : RobotSide.values)
+      {
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Wide " + side.getPascalCaseName())))
+         {
+            ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
+                                                                                                        teleoperationParameters.getTrajectoryTime(),
+                                                                                                        armsWide.get(side));
+            ros2Helper.publishToController(armTrajectoryMessage);
+         }
+      }
+
       ImGui.text("Door avoidance arms:");
       for (RobotSide side : RobotSide.values)
       {
