@@ -55,7 +55,6 @@ public class RDXVRLaserFootstepMode
                   calculateVR(vrContext);
                   if (sizeChange > 0)
                   {
-                     frontController.getPosition().setZ(0);
                      setSpotPlacement(frontController);
                   }
                }
@@ -78,8 +77,6 @@ public class RDXVRLaserFootstepMode
                   calculateVR(vrContext);
                   if (sizeChange > 0)
                   {
-                     frontController.getRotation().setYawPitchRoll(frontController.getYaw(), 0, 0);
-                     frontController.getPosition().setZ(0);
                      setEndOfLaser(frontController);
                   }
                }
@@ -122,6 +119,8 @@ public class RDXVRLaserFootstepMode
                frontController.getPosition().addX(sizeChange * frontController.getX());
                frontController.changeFrame(ReferenceFrame.getWorldFrame());
                frontController.getOrientation().setToYawOrientation(-vrContext.getController(side).getXForwardZUpPose().getRoll());
+               frontController.getRotation().setYawPitchRoll(frontController.getYaw(), 0, 0);
+               frontController.getPosition().setZ(0);
             });
          }
       }
