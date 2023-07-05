@@ -12,6 +12,7 @@ import imgui.flag.ImGuiStyleVar;
 import imgui.internal.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import org.lwjgl.openvr.InputDigitalActionData;
+import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -20,8 +21,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
+import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.editor.RDXUIActionMap;
 import us.ihmc.rdx.input.editor.RDXUITrigger;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -34,6 +35,8 @@ import java.util.function.Consumer;
 
 public class RDXBallAndArrowPosePlacement implements RenderableProvider
 {
+   protected final static Pose3D NaN_POSE = BehaviorTools.createNaNPose();
+
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private ModelInstance sphere;
    private ModelInstance arrow;
@@ -105,6 +108,10 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
          if (placingPosition)
          {
             sphere.transform.setTranslation(pickPointInWorld.getX32(), pickPointInWorld.getY32(), pickPointInWorld.getZ32());
+            LibGDXTools.toEuclid(sphere.transform, tempSpherePosition);
+
+            goalPoseForReading.setToZero();
+            goalPoseForReading.prependTranslation(tempSpherePosition);
 
             if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
@@ -226,12 +233,25 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
       return placingGoal;
    }
 
+   public boolean isPlacingPosition()
+   {
+      return placingPosition;
+   }
+
+   public RDXUIActionMap getPlaceGoalActionMap()
+   {
+      return placeGoalActionMap;
+   }
+
    public void clear()
    {
       placingGoal = false;
       placingPosition = true;
       if (sphere != null)
          sphere.transform.val[Matrix4.M03] = Float.NaN;
+      if (arrow != null)
+         arrow.transform.val[Matrix4.M03] = Float.NaN;
+      goalPoseForReading.set(NaN_POSE);
    }
 
    public Pose3DReadOnly getGoalPose()
