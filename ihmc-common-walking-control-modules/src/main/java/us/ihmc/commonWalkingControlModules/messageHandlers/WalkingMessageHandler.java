@@ -6,9 +6,9 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.PlanOffsetStatus;
-import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
+import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
@@ -28,7 +28,13 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegionsList;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LegTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -76,6 +82,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
 
    private final SideDependentList<RecyclingArrayDeque<FootTrajectoryCommand>> upcomingFootTrajectoryCommandListForFlamingoStance = new SideDependentList<>();
+   private final SideDependentList<RecyclingArrayDeque<LegTrajectoryCommand>> upcomingLegTrajectoryCommandListForFlamingoStance = new SideDependentList<>();
 
    private final StatusMessageOutputManager statusOutputManager;
    private final PlanOffsetStatus planOffsetStatus = new PlanOffsetStatus();
@@ -148,6 +155,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
          soleFrames.put(robotSide, contactableFoot.getSoleFrame());
 
          upcomingFootTrajectoryCommandListForFlamingoStance.put(robotSide, new RecyclingArrayDeque<>(FootTrajectoryCommand.class, FootTrajectoryCommand::set));
+         upcomingLegTrajectoryCommandListForFlamingoStance.put(robotSide, new RecyclingArrayDeque<>(LegTrajectoryCommand.class, LegTrajectoryCommand::set));
       }
 
       for (int i = 0; i < numberOfFootstepsToVisualize; i++)
@@ -182,7 +190,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
                planOffsetInWorld.setToZero();
                planOffsetInWorldPrevious.setToZero();
                clearFootsteps();
-               clearFootTrajectory();
+               clearFlamingoCommands();
                break;
             case QUEUE:
                // TODO review the use of this. 
@@ -333,6 +341,15 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       }
    }
 
+   public void handleLegTrajectoryCommand(List<LegTrajectoryCommand> commands)
+   {
+      for (int i = 0; i < commands.size(); i++)
+      {
+         LegTrajectoryCommand command = commands.get(i);
+         upcomingLegTrajectoryCommandListForFlamingoStance.get(command.getRobotSide()).addLast(command);
+      }
+   }
+
    public void handleMomentumTrajectoryCommand(MomentumTrajectoryCommand command)
    {
       momentumTrajectoryHandler.handleMomentumTrajectory(command);
@@ -474,6 +491,11 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       return upcomingFootTrajectoryCommandListForFlamingoStance.get(swingSide).poll();
    }
 
+   public LegTrajectoryCommand pollLegTrajectoryForFlamingoStance(RobotSide swingSide)
+   {
+      return upcomingLegTrajectoryCommandListForFlamingoStance.get(swingSide).poll();
+   }
+
    public boolean hasUpcomingFootsteps()
    {
       return getStepsBeforePause() > 0 && !isWalkingPaused.getBooleanValue();
@@ -526,32 +548,28 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       return upcomingFootsteps.get(0).getRobotSide() == swingSide;
    }
 
-   public boolean hasFootTrajectoryForFlamingoStance()
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         if (hasFootTrajectoryForFlamingoStance(robotSide))
-            return true;
-      }
-      return false;
-   }
-
    public boolean hasFootTrajectoryForFlamingoStance(RobotSide swingSide)
    {
       return !upcomingFootTrajectoryCommandListForFlamingoStance.get(swingSide).isEmpty();
    }
+   
+   public boolean hasLegTrajectoryForFlamingoStance(RobotSide swingSide)
+   {
+      return !upcomingLegTrajectoryCommandListForFlamingoStance.get(swingSide).isEmpty();
+   }
 
-   public void clearFootTrajectory(RobotSide robotSide)
+   public void clearFlamingoCommands(RobotSide robotSide)
    {
       upcomingFootTrajectoryCommandListForFlamingoStance.get(robotSide).clear();
+      upcomingLegTrajectoryCommandListForFlamingoStance.get(robotSide).clear();
    }
 
-   public void clearFootTrajectory()
+   public void clearFlamingoCommands()
    {
       for (RobotSide robotSide : RobotSide.values)
-         clearFootTrajectory(robotSide);
+         clearFlamingoCommands(robotSide);
    }
-
+   
    public void clearFootsteps()
    {
       upcomingFootsteps.clear();
