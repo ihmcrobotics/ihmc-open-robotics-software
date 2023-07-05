@@ -686,6 +686,8 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
          group.addChild(planeContactWrenchProcessor.getSCS2YoGraphics());
       if (wrenchVisualizer != null)
          group.addChild(wrenchVisualizer.getSCS2YoGraphics());
+      if (wrenchMatrixCalculator != null)
+         group.addChild(wrenchMatrixCalculator.getSCS2YoGraphics());
       return group;
    }
 }

@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryCo
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryBalanceManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControlManagerFactory;
@@ -25,6 +26,7 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
 
    private final CenterOfMassHeightManager comHeightManager;
    private final PushRecoveryBalanceManager balanceManager;
+   private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
 
    private final PushRecoveryControllerParameters pushRecoveryParameters;
@@ -51,6 +53,7 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       this.pushRecoveryParameters = pushRecoveryParameters;
 
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
+      pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
    }
 
@@ -174,6 +177,7 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       double finalTransferTime = pushRecoveryParameters.getFinalTransferDurationForRecovery();
 
       // Just standing in double support, do nothing
+      pelvisOrientationManager.centerInMidFeetZUpFrame(finalTransferTime);
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.initializeICPPlanForTransferToStanding();
    }
