@@ -1,25 +1,32 @@
 package us.ihmc.sensors;
 
+import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.*;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.zed.SL_InitParameters;
 import org.bytedeco.zed.SL_RuntimeParameters;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.cuda.CUDAImageEncoder;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.PausablePeriodicThread;
+
+import java.time.Instant;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.bytedeco.zed.global.zed.*;
 
@@ -33,15 +40,14 @@ public class ZED2ColorStereoDepthPublisher
 
    private int imageWidth;
    private int imageHeight;
-   private Pointer colorImagePointer;
-   private Pointer depthImagePointer;
+   private final Pointer colorImagePointer;
+   private final Pointer depthImagePointer;
    private Pointer pointCloudPointer;
-   private GpuMat colorImageMatBGRA;
-   private GpuMat colorImageMatBGR;
-   private BytePointer jpegImagePointer = new BytePointer();
 
    private final ImageMessage colorImageMessage = new ImageMessage();
+   private final AtomicReference<Instant> colorImageAcquisitionTime = new AtomicReference<>();
    private final ImageMessage depthImageMessage = new ImageMessage();
+   private final AtomicReference<Instant> depthImageAcquisitionTime = new AtomicReference<>();
    private final IHMCROS2Publisher<ImageMessage> ros2ImagePublisher;
    private final ROS2Topic<ImageMessage> colorTopic;
    private final ROS2Topic<ImageMessage> depthTopic;
@@ -90,10 +96,9 @@ public class ZED2ColorStereoDepthPublisher
       imageWidth = sl_get_width(cameraID);
       imageHeight = sl_get_height(cameraID);
 
-      colorImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_GPU));
+      colorImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_CPU));
       depthImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_F32_C4, SL_MEM_CPU));
       pointCloudPointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_F32_C4, SL_MEM_CPU));
-      colorImageMatBGR = new GpuMat(imageWidth, imageHeight, opencv_core.CV_8UC3);
 
       this.colorTopic = colorTopic;
       this.depthTopic = depthTopic;
@@ -112,29 +117,69 @@ public class ZED2ColorStereoDepthPublisher
       checkError("sl_grab", sl_grab(cameraID, zedRuntimeParameters));
 
       retrieveAndPublishColorImage();
-      checkError("sl_retrieve_measure", sl_retrieve_measure(cameraID, depthImagePointer, SL_MEASURE_DEPTH_RIGHT, SL_MEM_CPU, imageWidth, imageHeight));
-      checkError("sl_retrieve_measure", sl_retrieve_measure(cameraID, pointCloudPointer, SL_MEASURE_XYZRGBA_RIGHT, SL_MEM_CPU, imageWidth, imageHeight));
+      retrieveAndPublishDepthImage();
+      //checkError("sl_retrieve_measure", sl_retrieve_measure(cameraID, pointCloudPointer, SL_MEASURE_XYZRGBA_RIGHT, SL_MEM_CPU, imageWidth, imageHeight));
    }
 
    private void retrieveAndPublishColorImage()
    {
       // Retrieve image
-      checkError("sl_retrieve_image", sl_retrieve_image(cameraID, colorImagePointer, SL_VIEW_RIGHT, SL_MEM_GPU, imageWidth, imageHeight));
+      checkError("sl_retrieve_image", sl_retrieve_image(cameraID, colorImagePointer, SL_VIEW_RIGHT, SL_MEM_CPU, imageWidth, imageHeight));
 
       // Convert to BGR and encode to jpeg
-      colorImageMatBGRA = new GpuMat(colorImagePointer);
-      opencv_cudaimgproc.cvtColor(colorImageMatBGRA, colorImageMatBGR, opencv_imgproc.COLOR_BGRA2BGR);
-      imageEncoder.encodeBGR(colorImageMatBGR.data(), jpegImagePointer, imageWidth, imageHeight, colorImageMatBGR.step());
+      // TODO: Make this work with GpuMats
+      Mat colorImageMatBGRA = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, colorImagePointer, sl_mat_get_step_bytes(colorImagePointer, SL_MEM_CPU));
+      Mat colorImageMatBGR = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
+      opencv_imgproc.cvtColor(colorImageMatBGRA, colorImageMatBGR, opencv_imgproc.COLOR_BGRA2BGR);
+
+      GpuMat bgrImageGpuMat = new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC3);
+      bgrImageGpuMat.upload(colorImageMatBGR);
+
+      BytePointer colorJPEGPointer = new BytePointer((long) imageHeight * imageWidth);
+      imageEncoder.encodeBGR(bgrImageGpuMat.data(), colorJPEGPointer, imageWidth, imageHeight, bgrImageGpuMat.step());
+
+      colorImageAcquisitionTime.set(Instant.now());
 
       // Publish image
-      ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(jpegImagePointer.limit());
-      imageMessageDataPacker.pack(colorImageMessage, jpegImagePointer);
+      ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(colorJPEGPointer.limit());
+      imageMessageDataPacker.pack(colorImageMessage, colorJPEGPointer);
+      MessageTools.toMessage(colorImageAcquisitionTime.get(), colorImageMessage.getAcquisitionTime());
       colorImageMessage.setImageWidth(imageWidth);
       colorImageMessage.setImageHeight(imageHeight);
       CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
       ImageMessageFormat.COLOR_JPEG_BGR8.packMessageFormat(colorImageMessage);
       // TODO: Add position and orientation to image message
       ros2ImagePublisher.publish(colorImageMessage);
+
+      // Close stuff
+      colorJPEGPointer.close();
+      bgrImageGpuMat.release();
+      bgrImageGpuMat.close();
+      colorImageMatBGR.close();
+      colorImageMatBGRA.close();
+   }
+
+   private void retrieveAndPublishDepthImage()
+   {
+      checkError("sl_retrieve_measure", sl_retrieve_measure(cameraID, depthImagePointer, SL_MEASURE_DEPTH, SL_MEM_CPU, imageWidth, imageHeight));
+
+      Mat depthImage32FC4 = new Mat(imageHeight, imageWidth, opencv_core.CV_32FC1, depthImagePointer, sl_mat_get_step_bytes(depthImagePointer, SL_MEM_CPU));
+      Mat depthImage16UC1 = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
+      depthImage32FC4.convertTo(depthImage16UC1, opencv_core.CV_16UC1);
+
+      BytePointer depthPNGPointer = new BytePointer();
+      OpenCVTools.compressImagePNG(depthImage16UC1, depthPNGPointer);
+
+      depthImageAcquisitionTime.set(Instant.now());
+
+      ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(depthPNGPointer.limit());
+      imageMessageDataPacker.pack(depthImageMessage, depthPNGPointer);
+      MessageTools.toMessage(depthImageAcquisitionTime.get(), depthImageMessage.getAcquisitionTime());
+      depthImageMessage.setImageWidth(imageWidth);
+      depthImageMessage.setImageHeight(imageHeight);
+      CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
+      ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
+      ros2ImagePublisher.publish(depthImageMessage);
    }
 
    public void destroy()
