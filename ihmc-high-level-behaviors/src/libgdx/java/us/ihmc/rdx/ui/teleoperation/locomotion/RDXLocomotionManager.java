@@ -260,9 +260,17 @@ public class RDXLocomotionManager
          {
             for (int i = 0; i < interactableFootstepPlan.getNumberOfFootsteps(); i++)
             {
+
                if (laserFootstepMode.getEndOfLaser().getPosition().distance(interactableFootstepPlan.getFootsteps().get(i).getFootPose().getPosition()) < 5)
                {
-                  interactableFootstepPlan.getFootsteps().get(i).updatePose(laserFootstepMode.getEndOfLaser());
+                  if(laserFootstepMode.getControllerSide() == interactableFootstepPlan.getFootsteps().get(i).getFootstepSide())
+                  {
+                     interactableFootstepPlan.getFootsteps().get(i).updatePose(laserFootstepMode.getEndOfLaser());
+                  }
+                  else
+                  {
+                  laserFootstepMode.setControllerSide(interactableFootstepPlan.getFootsteps().get(i).getFootstepSide());
+                  }
                }
             }
          }

@@ -30,6 +30,8 @@ public class RDXVRLaserFootstepMode
    private RDXModelInstance leftLaser;
    private RDXModelInstance rightLaser;
    private boolean sendWalkPlan = false;
+   private boolean joystickPressed = false;
+   private int numTimesPressed = 0;
 
    public void setLocomotionParameters(RDXLocomotionParameters locomotionParameters)
    {
@@ -76,9 +78,14 @@ public class RDXVRLaserFootstepMode
                {
                   sendWalkPlan = true;
                }
-               if(joystickClick.bChanged() && joystickClick.bState())
+               if(joystickClick.bChanged() && joystickClick.bState()||joystickPressed == true)
                {
-                  setControllerSide(side);
+                  if (joystickClick.bChanged() && joystickClick.bState())
+                  {
+                     setControllerSide(side);
+                     joystickPressed = true;
+                     numTimesPressed++;
+                  }
                   calculateVR(vrContext);
                   if (sizeChange > 0)
                   {
@@ -86,6 +93,12 @@ public class RDXVRLaserFootstepMode
                      frontController.getPosition().setZ(0);
                      setEndOfLaser(frontController);
                   }
+               }
+               if(numTimesPressed >= 2)
+               {
+                  setEndOfLaser(null);
+                  joystickPressed = false;
+                  numTimesPressed = 0;
                }
             });
          }
