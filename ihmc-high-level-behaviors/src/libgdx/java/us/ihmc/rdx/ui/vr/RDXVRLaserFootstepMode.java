@@ -140,6 +140,7 @@ public class RDXVRLaserFootstepMode
                frontController.changeFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
                frontController.getPosition().addX(sizeChange * frontController.getX());
                frontController.changeFrame(ReferenceFrame.getWorldFrame());
+               frontController.getOrientation().setToYawOrientation(vrContext.getController(side).getXForwardZUpPose().getRoll());
             });
          }
       }
@@ -162,12 +163,14 @@ public class RDXVRLaserFootstepMode
       if (controllerModel == RDXVRControllerModel.FOCUS3)
       {
          ImGui.text("Clear footsteps: Y button");
-         ImGui.text("Walk: A button");
+         ImGui.text("Edit placed footstep: A and X buttons");
+         ImGui.text("Walk: Joystick button");
+
       }
       else
       {
          ImGui.text("Clear footsteps: Left B button");
-         ImGui.text("Walk: Right A button");
+         ImGui.text("Edit placed footstep: A buttons");
       }
    }
    public FramePose3D getSpotPlacement()
