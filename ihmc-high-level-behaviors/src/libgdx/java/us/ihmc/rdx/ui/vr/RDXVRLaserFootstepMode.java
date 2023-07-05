@@ -5,16 +5,13 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
-import javafx.geometry.Point3D;
 import org.lwjgl.openvr.InputAnalogActionData;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
-import us.ihmc.rdx.visualizers.RDXSphereAndArrowGraphic;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -26,7 +23,6 @@ public class RDXVRLaserFootstepMode
    private FramePose3D spotPlacement;
    private FramePose3D endOfLaser;
    private double sizeChange;
-   private RDXLocomotionParameters locomotionParameters;
    private RobotSide controllerSide;
    private RDXModelInstance leftLaser;
    private RDXModelInstance rightLaser;
@@ -34,11 +30,6 @@ public class RDXVRLaserFootstepMode
    private boolean gripPressed = false;
    private int pickedUpFootstepNumber = -1;
    private int numTimesPressed = 0;
-
-   public void setLocomotionParameters(RDXLocomotionParameters locomotionParameters)
-   {
-      this.locomotionParameters = locomotionParameters;
-   }
 
    public void processVRInput(RDXVRContext vrContext)
    {
