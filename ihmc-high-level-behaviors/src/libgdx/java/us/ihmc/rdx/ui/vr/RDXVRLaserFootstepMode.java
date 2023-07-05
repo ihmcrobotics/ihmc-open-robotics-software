@@ -31,7 +31,7 @@ public class RDXVRLaserFootstepMode
    private RDXModelInstance leftLaser;
    private RDXModelInstance rightLaser;
    private boolean sendWalkPlan = false;
-   private boolean aButtonPressed = false;
+   private boolean gripPressed = false;
    private int pickedUpFootstepNumber = -1;
    private int numTimesPressed = 0;
 
@@ -57,13 +57,8 @@ public class RDXVRLaserFootstepMode
                updateLaser(sizeChange / 10, vrContext);
                InputDigitalActionData triggerClick = controller.getClickTriggerActionData();
                InputDigitalActionData joystickClick = controller.getJoystickPressActionData();
-               InputDigitalActionData aButtonClick = controller.getAButtonActionData();
-               InputDigitalActionData sideTriggerClick = controller.getTouchpadTouchedActionData();
-               InputAnalogActionData joystickAction = controller.getJoystickActionData();
-               if (sideTriggerClick.bChanged() && sideTriggerClick.bState())
-               {
-                  System.out.println("Yo you pressed it");
-               }
+               InputAnalogActionData gripClick = controller.getGripActionData();
+
                if (triggerClick.bChanged() && triggerClick.bState())
                {
                   setControllerSide(side);
@@ -86,18 +81,18 @@ public class RDXVRLaserFootstepMode
                {
                   sendWalkPlan = true;
                }
-               if(aButtonClick.bChanged() && aButtonClick.bState()||aButtonPressed == true)
+               if(gripClick.x()==1||gripPressed == true)
                {
-                  if (aButtonClick.bChanged() && aButtonClick.bState())
+                  if (gripClick.x()==1)
                   {
                      setControllerSide(side);
-                     aButtonPressed = true;
+                     gripPressed = true;
                      numTimesPressed++;
                   }
                   calculateVR(vrContext);
                   if (sizeChange > 0)
                   {
-                     frontController.getRotation().setYawPitchRoll(frontController.getYaw(), joystickAction.y(), joystickAction.x());
+                     frontController.getRotation().setYawPitchRoll(frontController.getYaw(), 0, 0);
                      frontController.getPosition().setZ(0);
                      setEndOfLaser(frontController);
                   }
@@ -106,7 +101,7 @@ public class RDXVRLaserFootstepMode
                {
                   setPickedUpFootstepNumber(-1);
                   setEndOfLaser(null);
-                  aButtonPressed = false;
+                  gripPressed = false;
                   numTimesPressed = 0;
                }
             });
