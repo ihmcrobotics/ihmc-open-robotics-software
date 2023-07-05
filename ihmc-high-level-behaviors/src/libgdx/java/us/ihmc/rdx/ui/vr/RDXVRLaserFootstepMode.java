@@ -47,35 +47,35 @@ public class RDXVRLaserFootstepMode
          for (RobotSide side : RobotSide.values)
          {
             vrContext.getController(side).runIfConnected(controller ->
-                                                         {
-                                                            calculateVR(vrContext);
-                                                            updateLaser(sizeChange / 10, vrContext);
-                                                            InputDigitalActionData triggerClick = controller.getClickTriggerActionData();
-                                                            InputDigitalActionData aButtonClick = controller.getAButtonActionData();
-                                                            if (triggerClick.bChanged() && triggerClick.bState())
-                                                            {
-                                                               setControllerSide(side);
-                                                               calculateVR(vrContext);
-                                                               if (sizeChange > 0)
-                                                               {
-                                                                  frontController.getPosition().setZ(0);
-                                                                  spotPlacement = frontController;
-                                                                  setSpotPlacement(frontController);
-                                                               }
-                                                               else
-                                                               {
-                                                                  System.out.println("size change is less than zero as it is" + sizeChange);
-                                                               }
-                                                            }
-                                                            if (triggerClick.bChanged() && !triggerClick.bState())
-                                                            {
-                                                               setSpotPlacement(null);
-                                                            }
-                                                            if (aButtonClick.bChanged() && aButtonClick.bState())
-                                                            {
-                                                               sendWalkPlan = true;
-                                                            }
-                                                         });
+            {
+               calculateVR(vrContext);
+               updateLaser(sizeChange / 10, vrContext);
+               InputDigitalActionData triggerClick = controller.getClickTriggerActionData();
+               InputDigitalActionData aButtonClick = controller.getAButtonActionData();
+               if (triggerClick.bChanged() && triggerClick.bState())
+               {
+                  setControllerSide(side);
+                  calculateVR(vrContext);
+                  if (sizeChange > 0)
+                  {
+                     frontController.getPosition().setZ(0);
+                     spotPlacement = frontController;
+                     setSpotPlacement(frontController);
+                  }
+                  else
+                  {
+                     System.out.println("size change is less than zero as it is" + sizeChange);
+                  }
+               }
+               if (triggerClick.bChanged() && !triggerClick.bState())
+               {
+                  setSpotPlacement(null);
+               }
+               if (aButtonClick.bChanged() && aButtonClick.bState())
+               {
+                  sendWalkPlan = true;
+               }
+            });
          }
       }
    }
@@ -93,20 +93,20 @@ public class RDXVRLaserFootstepMode
          if (side != null)
          {
             vrContext.getController(side).runIfConnected(controller ->
-                                                         {
-                                                            frontController = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                                                              vrContext.getController(side).getXForwardZUpPose());
-                                                            frontController.changeFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
-                                                            frontController.setToZero(vrContext.getController(side).getXForwardZUpControllerFrame());
-                                                            frontController.getPosition().addX(.1);
-                                                            frontController.changeFrame(ReferenceFrame.getWorldFrame());
-                                                            sizeChange = vrContext.getController(side).getXForwardZUpPose().getZ() / (
-                                                                  vrContext.getController(side).getXForwardZUpPose().getZ()
-                                                                  - frontController.getTranslationZ());
-                                                            frontController.changeFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
-                                                            frontController.getPosition().addX(sizeChange * frontController.getX());
-                                                            frontController.changeFrame(ReferenceFrame.getWorldFrame());
-                                                         });
+            {
+               frontController = new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                 vrContext.getController(side).getXForwardZUpPose());
+               frontController.changeFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
+               frontController.setToZero(vrContext.getController(side).getXForwardZUpControllerFrame());
+               frontController.getPosition().addX(.1);
+               frontController.changeFrame(ReferenceFrame.getWorldFrame());
+               sizeChange = vrContext.getController(side).getXForwardZUpPose().getZ() / (
+                     vrContext.getController(side).getXForwardZUpPose().getZ()
+                     - frontController.getTranslationZ());
+               frontController.changeFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
+               frontController.getPosition().addX(sizeChange * frontController.getX());
+               frontController.changeFrame(ReferenceFrame.getWorldFrame());
+            });
          }
       }
    }
