@@ -14,6 +14,8 @@ import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 public class RDXVRLaserFootstepMode
 {
@@ -29,6 +31,8 @@ public class RDXVRLaserFootstepMode
    private boolean gripPressed = false;
    private int pickedUpFootstepNumber = -1;
    private int numTimesPressed = 0;
+   private boolean armsOnly = false;
+   private int aButtonPressed = 0;
 
    public void processVRInput(RDXVRContext vrContext)
    {
@@ -48,44 +52,57 @@ public class RDXVRLaserFootstepMode
                InputDigitalActionData triggerClick = controller.getClickTriggerActionData();
                InputDigitalActionData joystickClick = controller.getJoystickPressActionData();
                InputAnalogActionData gripClick = controller.getGripActionData();
-
-               if (triggerClick.bChanged() && triggerClick.bState())
+               InputDigitalActionData aButton = controller.getAButtonActionData();
+               if(!armsOnly)
                {
-                  setControllerSide(side);
-                  calculateVR(vrContext);
-                  if (sizeChange > 0)
-                  {
-                     setSpotPlacement(frontController);
-                  }
-               }
-               if (triggerClick.bChanged() && !triggerClick.bState())
-               {
-                  setSpotPlacement(null);
-               }
-               if (joystickClick.bChanged() && joystickClick.bState())
-               {
-                  sendWalkPlan = true;
-               }
-               if(gripClick.x()>=0.5||gripPressed)
-               {
-                  if (gripClick.x()>=0.5)
+                  if (triggerClick.bChanged() && triggerClick.bState())
                   {
                      setControllerSide(side);
-                     gripPressed = true;
-                     numTimesPressed++;
+                     calculateVR(vrContext);
+                     if (sizeChange > 0)
+                     {
+                        setSpotPlacement(frontController);
+                     }
                   }
-                  calculateVR(vrContext);
-                  if (sizeChange > 0)
+                  if (triggerClick.bChanged() && !triggerClick.bState())
                   {
-                     setEndOfLaser(frontController);
+                     setSpotPlacement(null);
+                  }
+                  if (joystickClick.bChanged() && joystickClick.bState())
+                  {
+                     sendWalkPlan = true;
+                  }
+                  if (gripClick.x() >= 0.5 || gripPressed)
+                  {
+                     if (gripClick.x() >= 0.5)
+                     {
+                        setControllerSide(side);
+                        gripPressed = true;
+                        numTimesPressed++;
+                     }
+                     calculateVR(vrContext);
+                     if (sizeChange > 0)
+                     {
+                        setEndOfLaser(frontController);
+                     }
+                  }
+                  if (numTimesPressed >= 2)
+                  {
+                     setPickedUpFootstepNumber(-1);
+                     setEndOfLaser(null);
+                     gripPressed = false;
+                     numTimesPressed = 0;
                   }
                }
-               if(numTimesPressed >= 2)
+               if (aButton.bChanged() && aButton.bState())
                {
-                  setPickedUpFootstepNumber(-1);
-                  setEndOfLaser(null);
-                  gripPressed = false;
-                  numTimesPressed = 0;
+                  armsOnly = true;
+                  aButtonPressed++;
+               }
+               if (aButtonPressed >= 2)
+               {
+                  armsOnly = false;
+                  aButtonPressed = 0;
                }
             });
          }
@@ -207,5 +224,15 @@ public class RDXVRLaserFootstepMode
    public void setSendWalkPlan(boolean sendWalkPlan)
    {
       this.sendWalkPlan = sendWalkPlan;
+   }
+
+   public boolean isArmsOnly()
+   {
+      return armsOnly;
+   }
+
+   public void setArmsOnly(boolean armsOnly)
+   {
+      this.armsOnly = armsOnly;
    }
 }

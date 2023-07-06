@@ -622,6 +622,9 @@ public class RDXTeleoperationManager extends ImGuiPanel
    }
    public void setLaserFootstepMode(RDXVRLaserFootstepMode laserFootstepMode)
    {
-      locomotionManager.setLaserFootstepMode(laserFootstepMode);
+      if (!laserFootstepMode.isArmsOnly())
+      {
+         locomotionManager.setLaserFootstepMode(laserFootstepMode);
+      }
    }
 }
