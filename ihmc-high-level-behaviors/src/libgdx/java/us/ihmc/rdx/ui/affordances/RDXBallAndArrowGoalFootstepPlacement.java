@@ -75,24 +75,12 @@ public class RDXBallAndArrowGoalFootstepPlacement extends RDXBallAndArrowPosePla
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       super.getRenderables(renderables, pool);
-      
+
       if (isPlaced())
       {
          leftGoalFootstepGraphic.getRenderables(renderables, pool);
          rightGoalFootstepGraphic.getRenderables(renderables, pool);
       }
-   }
-
-   @Override
-   public void clear()
-   {
-      super.clear();
-
-      if (leftGoalFootstepGraphic != null)
-         leftGoalFootstepGraphic.setPose(NaN_POSE);
-
-      if (rightGoalFootstepGraphic != null)
-         rightGoalFootstepGraphic.setPose(NaN_POSE);
    }
 
    private void updateGoalFootstepGraphics(Pose3DReadOnly goalPose)
