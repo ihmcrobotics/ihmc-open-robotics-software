@@ -9,7 +9,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessagePubSubType;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 
 public class SixDoFMotionControlAnchorDescription
@@ -18,7 +23,8 @@ public class SixDoFMotionControlAnchorDescription
    public static final String RIGID_BODY_NAME_JSON = "rigidBodyName";
    public static final String IS_CONTACT_STATE_JSON = "isContactState";
    public static final String IS_TRACKING_CONTROLLER_JSON = "isTrackingController";
-   public static final String ANCHOR_ID = "anchorId";
+   public static final String ANCHOR_ID_JSON = "anchorId";
+   public static final String CONTACT_NORMAL_JSON = "contactNormalInWorld";
    public static final String IK_SOLVER_MESSAGE_JSON = "ikSolverMessage";
 
    private static final ObjectMapper objectMapper = new ObjectMapper(new JsonFactory());
@@ -28,6 +34,7 @@ public class SixDoFMotionControlAnchorDescription
    private boolean isContactState;
    private boolean isTrackingController;
    private int anchorId = -1;
+   private FrameVector3DReadOnly contactNormal;
    private KinematicsToolboxRigidBodyMessage inputMessage;
 
    public SixDoFMotionControlAnchorDescription()
@@ -40,6 +47,7 @@ public class SixDoFMotionControlAnchorDescription
       isContactState = other.isContactState;
       isTrackingController = other.isTrackingController;
       anchorId = other.anchorId;
+      contactNormal = other.contactNormal;
       inputMessage = new KinematicsToolboxRigidBodyMessage(other.inputMessage);
    }
 
@@ -55,8 +63,10 @@ public class SixDoFMotionControlAnchorDescription
          description.setTrackingController(anchorNode.get(IS_TRACKING_CONTROLLER_JSON).asBoolean());
          description.setInputMessage(messageSerializer.deserialize(anchorNode.get(IK_SOLVER_MESSAGE_JSON).toString()));
 
-         if (anchorNode.has(ANCHOR_ID))
-            description.setAnchorId(anchorNode.get(ANCHOR_ID).asInt());
+         if (anchorNode.has(ANCHOR_ID_JSON))
+            description.setAnchorId(anchorNode.get(ANCHOR_ID_JSON).asInt());
+         if (anchorNode.has(CONTACT_NORMAL_JSON))
+            description.setContactNormal(stringToTuple3D(anchorNode.get(CONTACT_NORMAL_JSON).toString()));
 
          return description;
       }
@@ -74,12 +84,14 @@ public class SixDoFMotionControlAnchorDescription
       anchorJSON.put(RIGID_BODY_NAME_JSON, rigidBodyName);
       anchorJSON.put(IS_CONTACT_STATE_JSON, isContactState);
       anchorJSON.put(IS_TRACKING_CONTROLLER_JSON, isTrackingController);
-      anchorJSON.put(ANCHOR_ID, anchorId);
+      anchorJSON.put(ANCHOR_ID_JSON, anchorId);
+
+      if (contactNormal != null)
+         anchorJSON.put(CONTACT_NORMAL_JSON, tuple3DToString(contactNormal));
 
       try
       {
          anchorJSON.set(IK_SOLVER_MESSAGE_JSON, messageToJSON(messageSerializer, inputMessage));
-
          return root;
       }
       catch (IOException e)
@@ -87,6 +99,17 @@ public class SixDoFMotionControlAnchorDescription
          e.printStackTrace();
          return null;
       }
+   }
+
+   private static String tuple3DToString(Tuple3DReadOnly vector)
+   {
+      return vector.getX() + "," + vector.getY() + "," + vector.getZ();
+   }
+
+   private static FrameVector3DReadOnly stringToTuple3D(String string)
+   {
+      String[] tupleValues = string.split(",");
+      return new FrameVector3D(ReferenceFrame.getWorldFrame(), Double.parseDouble(tupleValues[0]), Double.parseDouble(tupleValues[1]), Double.parseDouble(tupleValues[2]));
    }
 
    private static <T> JsonNode messageToJSON(JSONSerializer<T> serializer, T message) throws IOException
@@ -114,6 +137,11 @@ public class SixDoFMotionControlAnchorDescription
       return anchorId;
    }
 
+   public FrameVector3DReadOnly getContactNormal()
+   {
+      return contactNormal;
+   }
+
    public KinematicsToolboxRigidBodyMessage getInputMessage()
    {
       return inputMessage;
@@ -137,6 +165,12 @@ public class SixDoFMotionControlAnchorDescription
    public void setAnchorId(int anchorId)
    {
       this.anchorId = anchorId;
+   }
+
+   public void setContactNormal(FrameVector3DReadOnly contactNormal)
+   {
+      contactNormal.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      this.contactNormal = contactNormal;
    }
 
    public void setInputMessage(KinematicsToolboxRigidBodyMessage inputMessage)
