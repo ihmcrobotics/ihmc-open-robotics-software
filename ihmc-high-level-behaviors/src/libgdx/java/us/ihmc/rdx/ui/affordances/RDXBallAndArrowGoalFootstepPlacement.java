@@ -56,6 +56,8 @@ public class RDXBallAndArrowGoalFootstepPlacement extends RDXBallAndArrowPosePla
       rightGoalFootstepGraphic = new RDXFootstepGraphic(contactPoints, RobotSide.RIGHT);
       leftGoalFootstepGraphic.create();
       rightGoalFootstepGraphic.create();
+      leftGoalFootstepGraphic.setPose(NaN_POSE);
+      rightGoalFootstepGraphic.setPose(NaN_POSE);
 
       halfIdealFootstepWidth = syncedRobot.getRobotModel().getFootstepPlannerParameters().getIdealFootstepWidth() / 2;
    }
