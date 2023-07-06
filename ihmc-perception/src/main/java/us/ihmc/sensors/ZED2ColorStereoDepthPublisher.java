@@ -3,6 +3,7 @@ package us.ihmc.sensors;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_cudaimgproc;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -10,6 +11,7 @@ import org.bytedeco.zed.SL_CalibrationParameters;
 import org.bytedeco.zed.SL_InitParameters;
 import org.bytedeco.zed.SL_RuntimeParameters;
 import perception_msgs.msg.dds.ImageMessage;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -26,7 +28,8 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.thread.PausablePeriodicThread;
+import us.ihmc.tools.UnitConversions;
+import us.ihmc.tools.thread.Throttler;
 
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicReference;
@@ -35,8 +38,8 @@ import static org.bytedeco.zed.global.zed.*;
 
 public class ZED2ColorStereoDepthPublisher
 {
-   private static final double UPDATE_PERIOD_SECONDS = 0.1;
-   private static final float DEPTH_DISCRETIZATION = 0.001f;
+   private static final double UPDATE_PERIOD = UnitConversions.hertzToSeconds(15.0);
+   private static final float DEPTH_DISCRETIZATION_VALUE = 0.001f;
 
    private long depthImageSequenceNumber = 0L;
    private long colorImageSequenceNumber = 0L;
@@ -59,9 +62,14 @@ public class ZED2ColorStereoDepthPublisher
    private final IHMCROS2Publisher<ImageMessage> ros2ColorImagePublisher;
    private final IHMCROS2Publisher<ImageMessage> ros2DepthImagePublisher;
    private final ROS2Node ros2Node;
-   private CUDAImageEncoder imageEncoder;
+   private final CUDAImageEncoder imageEncoder;
 
-   private final PausablePeriodicThread zedPublisherThread = new PausablePeriodicThread("ZED publisher", UPDATE_PERIOD_SECONDS, this::update);
+   private final Thread grabImageThread;
+   private final Thread colorImagePublishThread;
+   private final Thread depthImagePublishThread;
+   private final Object imageGrabbedNotifier = new Object();
+   private final Throttler throttler = new Throttler();
+   private volatile boolean running = true;
 
    public ZED2ColorStereoDepthPublisher(int cameraID,
                                         ROS2Topic<ImageMessage> colorTopic,
@@ -72,8 +80,8 @@ public class ZED2ColorStereoDepthPublisher
       sl_create_camera(cameraID);
 
       SL_InitParameters zedInitializationParameters = new SL_InitParameters();
-      zedInitializationParameters.camera_fps(10);
-      zedInitializationParameters.resolution(SL_RESOLUTION_HD1080);
+      zedInitializationParameters.camera_fps(15);
+      zedInitializationParameters.resolution(SL_RESOLUTION_HD720);
       zedInitializationParameters.input_type(SL_INPUT_TYPE_USB);
       zedInitializationParameters.camera_device_id(cameraID);
       zedInitializationParameters.camera_image_flip(SL_FLIP_MODE_OFF);
@@ -117,35 +125,86 @@ public class ZED2ColorStereoDepthPublisher
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, getClass().getName() + "-Shutdown"));
 
-      zedPublisherThread.start();
-   }
+      grabImageThread = new Thread(() ->
+      {
+         while (running)
+         {
+            checkError("sl_grab", sl_grab(cameraID, zedRuntimeParameters));
 
-   public void update()
-   {
-      checkError("sl_grab", sl_grab(cameraID, zedRuntimeParameters));
+            synchronized (imageGrabbedNotifier)
+            {
+               imageGrabbedNotifier.notifyAll();
+            }
 
-      retrieveAndPublishColorImage();
-      retrieveAndPublishDepthImage();
+            throttler.waitAndRun(UPDATE_PERIOD);
+         }
+      }, "ZED2ImageGrabThread");
+
+      colorImagePublishThread = new Thread(() ->
+      {
+         while (running)
+         {
+            try
+            {
+               synchronized (imageGrabbedNotifier)
+               {
+                  imageGrabbedNotifier.wait();
+               }
+            }
+            catch (InterruptedException interruptedException)
+            {
+               LogTools.error(interruptedException);
+            }
+
+            retrieveAndPublishColorImage();
+         }
+      }, "ZED2ColorImagePublishThread");
+
+      depthImagePublishThread = new Thread(() ->
+      {
+         while (running)
+         {
+            try
+            {
+               synchronized (imageGrabbedNotifier)
+               {
+                  imageGrabbedNotifier.wait();
+               }
+            }
+            catch (InterruptedException interruptedException)
+            {
+               LogTools.error(interruptedException);
+            }
+
+            retrieveAndPublishDepthImage();
+         }
+      }, "ZED2DepthImagePublishThread");
+
+      colorImagePublishThread.setDaemon(true);
+      depthImagePublishThread.setDaemon(true);
+
+      grabImageThread.start();
+      colorImagePublishThread.start();
+      depthImagePublishThread.start();
    }
 
    private void retrieveAndPublishColorImage()
    {
-      // Retrieve image
+      // Retrieve color image
+      // TODO: Try to retrieve from GPU
       checkError("sl_retrieve_image", sl_retrieve_image(cameraID, colorImagePointer, SL_VIEW_LEFT, SL_MEM_CPU, imageWidth, imageHeight));
+      colorImageAcquisitionTime.set(Instant.now());
 
       // Convert to BGR and encode to jpeg
-      // TODO: Make this work with GpuMats
-      Mat colorImageBGRA = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, colorImagePointer, sl_mat_get_step_bytes(colorImagePointer, SL_MEM_CPU));
-      Mat colorImageBGR = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
-      opencv_imgproc.cvtColor(colorImageBGRA, colorImageBGR, opencv_imgproc.COLOR_BGRA2BGR);
+      Mat cpuColorImageBGRA = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, colorImagePointer, sl_mat_get_step_bytes(colorImagePointer, SL_MEM_CPU));
+      GpuMat gpuColorImageBGRA = new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC4);
+      gpuColorImageBGRA.upload(cpuColorImageBGRA);
 
-      GpuMat bgrImageGpuMat = new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC3);
-      bgrImageGpuMat.upload(colorImageBGR);
+      GpuMat gpuColorImageBGR = new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC3);
+      opencv_cudaimgproc.cvtColor(gpuColorImageBGRA, gpuColorImageBGR, opencv_imgproc.COLOR_BGRA2BGR);
 
       BytePointer colorJPEGPointer = new BytePointer((long) imageHeight * imageWidth);
-      imageEncoder.encodeBGR(bgrImageGpuMat.data(), colorJPEGPointer, imageWidth, imageHeight, bgrImageGpuMat.step());
-
-      colorImageAcquisitionTime.set(Instant.now());
+      imageEncoder.encodeBGR(gpuColorImageBGR.data(), colorJPEGPointer, imageWidth, imageHeight, gpuColorImageBGR.step());
 
       // Publish image
       ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(colorJPEGPointer.limit());
@@ -161,30 +220,33 @@ public class ZED2ColorStereoDepthPublisher
       colorImageMessage.getPosition().set(worldFramePose.getPosition());
       colorImageMessage.getOrientation().set(worldFramePose.getOrientation());
       colorImageMessage.setSequenceNumber(colorImageSequenceNumber++);
-      colorImageMessage.setDepthDiscretization(DEPTH_DISCRETIZATION);
+      colorImageMessage.setDepthDiscretization(DEPTH_DISCRETIZATION_VALUE);
       CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
       ImageMessageFormat.COLOR_JPEG_BGR8.packMessageFormat(colorImageMessage);
       ros2ColorImagePublisher.publish(colorImageMessage);
 
       // Close stuff
       colorJPEGPointer.close();
-      bgrImageGpuMat.release();
-      bgrImageGpuMat.close();
-      colorImageBGR.close();
-      colorImageBGRA.close();
+      gpuColorImageBGR.release();
+      gpuColorImageBGR.close();
+      gpuColorImageBGRA.release();
+      gpuColorImageBGRA.close();
+      cpuColorImageBGRA.close();
    }
 
    private void retrieveAndPublishDepthImage()
    {
+      // Retrieve depth image
       checkError("sl_retrieve_measure", sl_retrieve_measure(cameraID, depthImagePointer, SL_MEASURE_DEPTH_U16_MM, SL_MEM_CPU, imageWidth, imageHeight));
+      depthImageAcquisitionTime.set(Instant.now());
 
+      // Encode depth image to png
       Mat depthImage16UC1 = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1, depthImagePointer, sl_mat_get_step_bytes(depthImagePointer, SL_MEM_CPU));
 
       BytePointer depthPNGPointer = new BytePointer();
       OpenCVTools.compressImagePNG(depthImage16UC1, depthPNGPointer);
 
-      depthImageAcquisitionTime.set(Instant.now());
-
+      // Publish image
       ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(depthPNGPointer.limit());
       imageMessageDataPacker.pack(depthImageMessage, depthPNGPointer);
       MessageTools.toMessage(depthImageAcquisitionTime.get(), depthImageMessage.getAcquisitionTime());
@@ -197,7 +259,7 @@ public class ZED2ColorStereoDepthPublisher
       depthImageMessage.getPosition().set(worldFramePose.getPosition());
       depthImageMessage.getOrientation().set(worldFramePose.getOrientation());
       depthImageMessage.setSequenceNumber(depthImageSequenceNumber++);
-      depthImageMessage.setDepthDiscretization(DEPTH_DISCRETIZATION);
+      depthImageMessage.setDepthDiscretization(DEPTH_DISCRETIZATION_VALUE);
       CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
       ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
       ros2DepthImagePublisher.publish(depthImageMessage);
@@ -209,7 +271,7 @@ public class ZED2ColorStereoDepthPublisher
 
    public void destroy()
    {
-      zedPublisherThread.destroy();
+      running = false;
       sl_close_camera(cameraID);
       ros2Node.destroy();
    }
