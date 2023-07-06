@@ -114,6 +114,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final ImString tempImGuiText = new ImString(1000);
    private final boolean interactablesAvailable;
    private ImGuiStoredPropertySetDoubleWidget trajectoryTimeSlider;
+   private RDXVRLaserFootstepMode laserFootstepMode;
 
    /** This tracker should be shared with the sub-managers to keep the state consistent. */
    private final ControllerStatusTracker controllerStatusTracker;
@@ -191,6 +192,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
       teleoperationParametersTuner.create(teleoperationParameters);
 
       trajectoryTimeSlider = teleoperationParametersTuner.createDoubleSlider(RDXTeleoperationParameters.trajectoryTime, 0.1, 0.5, "s", "%.2f");
+
+      laserFootstepMode = new RDXVRLaserFootstepMode();
 
       if (interactablesAvailable)
       {
@@ -356,6 +359,11 @@ public class RDXTeleoperationManager extends ImGuiPanel
          if (interactablesEnabled.get())
             selectionCollisionModel.processVRInput(vrContext);
       }
+      laserFootstepMode.processVRInput(vrContext);
+      if (!laserFootstepMode.isArmsOnly())
+      {
+         locomotionManager.setLaserFootstepMode(laserFootstepMode);
+      }
    }
 
    private void calculate3DViewPick(ImGui3DViewInput input)
@@ -416,6 +424,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
       chestYawSlider.renderImGuiWidgets();
 
       trajectoryTimeSlider.renderImGuiWidget();
+
+      laserFootstepMode.renderImGuiWidgets();
 
       ImGui.checkbox(labels.get("Show teleoperation parameter tuner"), teleoperationParametersTuner.getIsShowing());
 
@@ -582,6 +592,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
             }
 
             locomotionManager.getWalkPathControlRingVirtualRenderables(renderables, pool);
+
+            laserFootstepMode.getRenderables(renderables, pool);
          }
       }
    }
@@ -622,9 +634,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
    }
    public void setLaserFootstepMode(RDXVRLaserFootstepMode laserFootstepMode)
    {
-      if (!laserFootstepMode.isArmsOnly())
-      {
-         locomotionManager.setLaserFootstepMode(laserFootstepMode);
-      }
+
    }
 }
