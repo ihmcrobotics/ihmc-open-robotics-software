@@ -11,7 +11,6 @@ import org.bytedeco.zed.SL_CalibrationParameters;
 import org.bytedeco.zed.SL_InitParameters;
 import org.bytedeco.zed.SL_RuntimeParameters;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -33,6 +32,7 @@ import us.ihmc.tools.thread.Throttler;
 
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 import static org.bytedeco.zed.global.zed.*;
 
@@ -53,14 +53,13 @@ public class ZED2ColorStereoDepthPublisher
    private final Pointer colorImagePointer;
    private final Pointer depthImagePointer;
 
-   private final FramePose3D worldFramePose = new FramePose3D(ReferenceFrame.getWorldFrame());
-
    private final ImageMessage colorImageMessage = new ImageMessage();
    private final ImageMessage depthImageMessage = new ImageMessage();
    private final AtomicReference<Instant> colorImageAcquisitionTime = new AtomicReference<>();
    private final AtomicReference<Instant> depthImageAcquisitionTime = new AtomicReference<>();
    private final IHMCROS2Publisher<ImageMessage> ros2ColorImagePublisher;
    private final IHMCROS2Publisher<ImageMessage> ros2DepthImagePublisher;
+   private final FramePose3D zedLeftCameraFramePose = new FramePose3D();
    private final ROS2Node ros2Node;
    private final CUDAImageEncoder imageEncoder;
 
@@ -73,7 +72,8 @@ public class ZED2ColorStereoDepthPublisher
 
    public ZED2ColorStereoDepthPublisher(int cameraID,
                                         ROS2Topic<ImageMessage> colorTopic,
-                                        ROS2Topic<ImageMessage> depthTopic)
+                                        ROS2Topic<ImageMessage> depthTopic,
+                                        Supplier<ReferenceFrame> zed2FrameSupplier)
    {
       this.cameraID = cameraID;
 
@@ -130,6 +130,7 @@ public class ZED2ColorStereoDepthPublisher
          while (running)
          {
             checkError("sl_grab", sl_grab(cameraID, zedRuntimeParameters));
+            zedLeftCameraFramePose.setToZero(zed2FrameSupplier.get());
 
             synchronized (imageGrabbedNotifier)
             {
@@ -217,8 +218,8 @@ public class ZED2ColorStereoDepthPublisher
       colorImageMessage.setImageWidth(imageWidth);
       colorImageMessage.setImageHeight(imageHeight);
       // TODO: Get ZED's FramePose3D on robot
-      colorImageMessage.getPosition().set(worldFramePose.getPosition());
-      colorImageMessage.getOrientation().set(worldFramePose.getOrientation());
+      colorImageMessage.getPosition().set(zedLeftCameraFramePose.getPosition());
+      colorImageMessage.getOrientation().set(zedLeftCameraFramePose.getOrientation());
       colorImageMessage.setSequenceNumber(colorImageSequenceNumber++);
       colorImageMessage.setDepthDiscretization(DEPTH_DISCRETIZATION_VALUE);
       CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
@@ -256,8 +257,8 @@ public class ZED2ColorStereoDepthPublisher
       depthImageMessage.setPrincipalPointYPixels(zedCalibrationParameters.left_cam().cy());
       depthImageMessage.setImageWidth(imageWidth);
       depthImageMessage.setImageHeight(imageHeight);
-      depthImageMessage.getPosition().set(worldFramePose.getPosition());
-      depthImageMessage.getOrientation().set(worldFramePose.getOrientation());
+      depthImageMessage.getPosition().set(zedLeftCameraFramePose.getPosition());
+      depthImageMessage.getOrientation().set(zedLeftCameraFramePose.getOrientation());
       depthImageMessage.setSequenceNumber(depthImageSequenceNumber++);
       depthImageMessage.setDepthDiscretization(DEPTH_DISCRETIZATION_VALUE);
       CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
@@ -286,6 +287,6 @@ public class ZED2ColorStereoDepthPublisher
 
    public static void main(String[] args)
    {
-      new ZED2ColorStereoDepthPublisher(0, PerceptionAPI.ZED2_STEREO_COLOR, PerceptionAPI.ZED2_DEPTH);
+      new ZED2ColorStereoDepthPublisher(0, PerceptionAPI.ZED2_STEREO_COLOR, PerceptionAPI.ZED2_DEPTH, ReferenceFrame::getWorldFrame);
    }
 }
