@@ -98,6 +98,8 @@ public class RDXVRController extends RDXVRTrackedDevice
    private final ModifiableReferenceFrame pickPoseFrame;
    private final ImGuiRigidBodyTransformTuner pickPoseTransformTuner;
    private RDXModelInstance pickPoseSphere;
+   private boolean gripped = false;
+   private boolean grippedChanged = false;
 
    public RDXVRController(RobotSide side, ReferenceFrame vrPlayAreaYUpZBackFrame)
    {
@@ -184,6 +186,10 @@ public class RDXVRController extends RDXVRTrackedDevice
       VRInput.VRInput_GetDigitalActionData(touchpadTouchedActionHandle.get(0), touchpadTouchedActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetAnalogActionData(joystickActionHandle.get(0), joystickActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetAnalogActionData(gripActionHandle.get(0), gripActionData, VR.k_ulInvalidInputValueHandle);
+
+      boolean lastGripped = gripped;
+      gripped = gripActionData.x() > 0.5;
+      grippedChanged = lastGripped != gripped;
    }
 
    public void renderImGuiTunerWidgets()
@@ -259,6 +265,16 @@ public class RDXVRController extends RDXVRTrackedDevice
    public InputAnalogActionData getGripActionData()
    {
       return gripActionData;
+   }
+
+   public boolean getGripped()
+   {
+      return gripped;
+   }
+
+   public boolean getGrippedChanged()
+   {
+      return grippedChanged;
    }
 
    public ReferenceFrame getXForwardZUpControllerFrame()

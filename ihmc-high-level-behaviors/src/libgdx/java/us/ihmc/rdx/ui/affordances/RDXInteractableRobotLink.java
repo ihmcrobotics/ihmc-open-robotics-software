@@ -45,7 +45,7 @@ public class RDXInteractableRobotLink
    private boolean isMouseHovering;
    private final Notification contextMenuNotification = new Notification();
    private boolean isVRHovering;
-   private boolean isVRDragging = false;
+   private final SideDependentList<Boolean> isVRDragging = new SideDependentList<>(false, false);
    private final SideDependentList<ModifiableReferenceFrame> dragReferenceFrame = new SideDependentList<>();
 
    /** For when the graphic, the link, and control frame are all the same. */
@@ -115,36 +115,32 @@ public class RDXInteractableRobotLink
             }
             isVRHovering |= isHovering;
 
-            boolean triggerDown = controller.getClickTriggerActionData().bState();
-            boolean triggerNewlyDown = triggerDown && controller.getClickTriggerActionData().bChanged();
-            boolean triggerNewlyUp = !triggerDown && controller.getClickTriggerActionData().bChanged();
+            boolean gripped = controller.getGripped();
+            boolean newlyGripped = gripped && controller.getGrippedChanged();
+            boolean newlyUnGripped = !gripped && controller.getGrippedChanged();
 
             if (dragReferenceFrame.get(side) == null)
             {
                dragReferenceFrame.put(side, new ModifiableReferenceFrame(controller.getPickPoseFrame()));
             }
 
-            if (isHovering && triggerNewlyDown)
+            if (isHovering && newlyGripped)
             {
-               if (!modified)
-               {
-                  modified = true;
-               }
-
+               modified = true;
                selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getTransformToDesiredFrame(dragReferenceFrame.get(side).getTransformToParent(),
                                                                                                controller.getPickPoseFrame());
                dragReferenceFrame.get(side).getReferenceFrame().update();
-               isVRDragging = true;
+               isVRDragging.put(side, true);
             }
 
-            if (isVRDragging)
+            if (isVRDragging.get(side))
             {
                dragReferenceFrame.get(side).getReferenceFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
                                                                                            ReferenceFrame.getWorldFrame());
             }
 
-            if (triggerNewlyUp)
-               isVRDragging = false;
+            if (newlyUnGripped || !gripped)
+               isVRDragging.put(side, false);
          });
       }
    }
