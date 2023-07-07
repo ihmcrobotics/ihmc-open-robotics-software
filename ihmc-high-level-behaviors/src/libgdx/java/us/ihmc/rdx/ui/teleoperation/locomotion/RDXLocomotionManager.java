@@ -86,6 +86,7 @@ public class RDXLocomotionManager
    private final AbortWalkingMessage abortWalkingMessage = new AbortWalkingMessage();
    private final ControllerStatusTracker controllerStatusTracker;
    private boolean lastAssumeFlatGroundState;
+   private boolean footNotPlaced = true;
 
    private RDXFootstepPlanning.InitialStanceSide startStanceSide = RDXFootstepPlanning.InitialStanceSide.AUTO;
 
@@ -282,8 +283,23 @@ public class RDXLocomotionManager
          {
             if (laserFootstepMode.getControllerSide() != null)
             {
-               manualFootstepPlacement.vrPlacement(laserFootstepMode.getSpotPlacement(), laserFootstepMode.getControllerSide());
-               laserFootstepMode.setSpotPlacement(null);
+               if(laserFootstepMode.getTriggerPressed())
+               {
+                  if(footNotPlaced)
+                  {
+                     manualFootstepPlacement.vrPlacement(laserFootstepMode.getSpotPlacement(), laserFootstepMode.getControllerSide());
+                     footNotPlaced = false;
+                  }
+                  interactableFootstepPlan.getLastFootstep().updatePose(laserFootstepMode.getHandLaser());
+               }
+               else
+               {
+                  footNotPlaced = true;
+                  manualFootstepPlacement.exitPlacement();
+                  laserFootstepMode.setSpotPlacement(null);
+                  laserFootstepMode.setTriggerPressed(false);
+
+               }
             }
          }
          else if (laserFootstepMode.getSendWalkPlan())

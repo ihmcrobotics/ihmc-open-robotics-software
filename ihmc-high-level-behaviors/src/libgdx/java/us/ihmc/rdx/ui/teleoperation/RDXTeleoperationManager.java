@@ -396,8 +396,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
                robotPartInteractable.getOnSpacePressed().run();
             }
          }
-         }
       }
+   }
 
    private void calculate3DViewPick(ImGui3DViewInput input)
    {
