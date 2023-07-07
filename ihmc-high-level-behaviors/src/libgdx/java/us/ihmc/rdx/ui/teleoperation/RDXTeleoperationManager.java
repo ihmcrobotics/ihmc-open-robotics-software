@@ -362,27 +362,27 @@ public class RDXTeleoperationManager extends ImGuiPanel
             selectionCollisionModel.processVRInput(vrContext);
       }
       laserFootstepMode.processVRInput(vrContext);
-      if(robotHasArms)
-      {
-         if (laserFootstepMode.getHandLaser() != null)
-         {
-            for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
-            {
-               for (RobotSide side : RobotSide.values)
-               {
-                  if (Math.PI - robotPartInteractable.getPose().getOrientationDistance(laserFootstepMode.getHandLaser()) - robotPartInteractable.getPose().getOrientationDistance(vrContext.getController(side).getPickPointPose()) <= 0.3 && robotPartInteractable.getClass().getName() == "us.ihmc.rdx.ui.affordances.RDXInteractableHand")
-                  {
-                     if (laserFootstepMode.getSpotPlacement() != null)
-                     {
-                        //TODO get hand to edit when gripped
-                        System.out.println("You got here :)");
-                        laserFootstepMode.setSpotPlacement(null);
-                     }
-                  }
-               }
-            }
-         }
-      }
+//      if(robotHasArms)
+//      {
+//         if (laserFootstepMode.getHandLaser() != null)
+//         {
+//            for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
+//            {
+//               for (RobotSide side : RobotSide.values)
+//               {
+//                  if (Math.PI - robotPartInteractable.getPose().getOrientationDistance(laserFootstepMode.getHandLaser()) - robotPartInteractable.getPose().getOrientationDistance(vrContext.getController(side).getPickPointPose()) <= 0.3 && robotPartInteractable.getClass().getName() == "us.ihmc.rdx.ui.affordances.RDXInteractableHand")
+//                  {
+//                     if (laserFootstepMode.getSpotPlacement() != null)
+//                     {
+//                        //TODO get hand to edit when gripped
+//                        System.out.println("You got here :)");
+//                        laserFootstepMode.setSpotPlacement(null);
+//                     }
+//                  }
+//               }
+//            }
+//         }
+//      }
       if (!laserFootstepMode.isArmsOnly())
       {
          locomotionManager.setLaserFootstepMode(laserFootstepMode);
