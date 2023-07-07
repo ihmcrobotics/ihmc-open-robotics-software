@@ -21,19 +21,19 @@ module controller_msgs
          */
         unsigned long sequence_id;
         /**
-         * Timed contact sequences of left arm
+         * Timed intervals that left arm is in contact
          */
         sequence<ihmc_common_msgs::msg::dds::TimeIntervalMessage, 25> left_arm_contact_intervals;
         /**
-         * Timed contact sequences of right arm
+         * Timed intervals that right arm is in contact
          */
         sequence<ihmc_common_msgs::msg::dds::TimeIntervalMessage, 25> right_arm_contact_intervals;
         /**
-         * Timed contact sequences of left leg
+         * Timed intervals that left leg is in contact
          */
         sequence<ihmc_common_msgs::msg::dds::TimeIntervalMessage, 25> left_leg_contact_intervals;
         /**
-         * Timed contact sequences of right leg
+         * Timed intervals that right leg is in contact
          */
         sequence<ihmc_common_msgs::msg::dds::TimeIntervalMessage, 25> right_leg_contact_intervals;
       };

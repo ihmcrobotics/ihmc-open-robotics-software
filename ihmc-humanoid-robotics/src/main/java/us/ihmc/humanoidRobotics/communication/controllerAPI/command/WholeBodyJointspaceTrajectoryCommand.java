@@ -15,6 +15,7 @@ public final class WholeBodyJointspaceTrajectoryCommand extends QueueableCommand
    private long sequenceId;
    private final TIntArrayList jointHashCodes = new TIntArrayList();
    private final RecyclingArrayList<OneDoFJointTrajectoryCommand> jointTrajectoryInputs = new RecyclingArrayList<>(10, OneDoFJointTrajectoryCommand.class);
+   private final MultiContactTimedContactSequenceCommand contactSequenceCommand = new MultiContactTimedContactSequenceCommand();
 
    public WholeBodyJointspaceTrajectoryCommand()
    {
@@ -40,6 +41,7 @@ public final class WholeBodyJointspaceTrajectoryCommand extends QueueableCommand
       clearQueuableCommandVariables();
       jointHashCodes.reset();
       jointTrajectoryInputs.clear();
+      contactSequenceCommand.clear();
    }
 
    @Override
@@ -58,6 +60,8 @@ public final class WholeBodyJointspaceTrajectoryCommand extends QueueableCommand
       {
          jointTrajectoryInputs.add().set(other.jointTrajectoryInputs.get(i));
       }
+
+      contactSequenceCommand.set(other.contactSequenceCommand);
    }
 
    @Override
@@ -77,6 +81,8 @@ public final class WholeBodyJointspaceTrajectoryCommand extends QueueableCommand
       {
          jointTrajectoryInputs.add().setFromMessage(trajectoryPointListArray.get(i));
       }
+
+      contactSequenceCommand.setFromMessage(message.getContactSequenceMessage());
    }
 
    @Override
@@ -108,6 +114,11 @@ public final class WholeBodyJointspaceTrajectoryCommand extends QueueableCommand
    public OneDoFJointTrajectoryCommand getJointTrajectoryPointList(int jointIndex)
    {
       return jointTrajectoryInputs.get(jointIndex);
+   }
+
+   public MultiContactTimedContactSequenceCommand getContactSequenceCommand()
+   {
+      return contactSequenceCommand;
    }
 
    public double getTrajectoryStartTime()
@@ -150,6 +161,7 @@ public final class WholeBodyJointspaceTrajectoryCommand extends QueueableCommand
    {
       for (int i = 0; i < jointTrajectoryInputs.size(); i++)
          jointTrajectoryInputs.get(i).addTimeOffset(timeOffsetToAdd);
+      contactSequenceCommand.addTimeOffset(timeOffsetToAdd);
    }
 
    @Override

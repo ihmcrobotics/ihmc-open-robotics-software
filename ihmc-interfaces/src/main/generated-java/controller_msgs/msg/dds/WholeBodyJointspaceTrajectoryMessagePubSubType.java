@@ -61,6 +61,8 @@ public class WholeBodyJointspaceTrajectoryMessagePubSubType implements us.ihmc.p
           current_alignment += controller_msgs.msg.dds.OneDoFJointTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += controller_msgs.msg.dds.MultiContactTimedContactSequenceMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -88,6 +90,8 @@ public class WholeBodyJointspaceTrajectoryMessagePubSubType implements us.ihmc.p
 
       current_alignment += ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.getCdrSerializedSize(data.getQueueingProperties(), current_alignment);
 
+      current_alignment += controller_msgs.msg.dds.MultiContactTimedContactSequenceMessagePubSubType.getCdrSerializedSize(data.getContactSequenceMessage(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -105,6 +109,7 @@ public class WholeBodyJointspaceTrajectoryMessagePubSubType implements us.ihmc.p
           throw new RuntimeException("joint_trajectory_messages field exceeds the maximum length");
 
       ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.write(data.getQueueingProperties(), cdr);
+      controller_msgs.msg.dds.MultiContactTimedContactSequenceMessagePubSubType.write(data.getContactSequenceMessage(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.WholeBodyJointspaceTrajectoryMessage data, us.ihmc.idl.CDR cdr)
@@ -114,6 +119,7 @@ public class WholeBodyJointspaceTrajectoryMessagePubSubType implements us.ihmc.p
       cdr.read_type_e(data.getJointHashCodes());	
       cdr.read_type_e(data.getJointTrajectoryMessages());	
       ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.read(data.getQueueingProperties(), cdr);	
+      controller_msgs.msg.dds.MultiContactTimedContactSequenceMessagePubSubType.read(data.getContactSequenceMessage(), cdr);	
 
    }
 
@@ -125,6 +131,8 @@ public class WholeBodyJointspaceTrajectoryMessagePubSubType implements us.ihmc.p
       ser.write_type_e("joint_trajectory_messages", data.getJointTrajectoryMessages());
       ser.write_type_a("queueing_properties", new ihmc_common_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
 
+      ser.write_type_a("contact_sequence_message", new controller_msgs.msg.dds.MultiContactTimedContactSequenceMessagePubSubType(), data.getContactSequenceMessage());
+
    }
 
    @Override
@@ -134,6 +142,8 @@ public class WholeBodyJointspaceTrajectoryMessagePubSubType implements us.ihmc.p
       ser.read_type_e("joint_hash_codes", data.getJointHashCodes());
       ser.read_type_e("joint_trajectory_messages", data.getJointTrajectoryMessages());
       ser.read_type_a("queueing_properties", new ihmc_common_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
+
+      ser.read_type_a("contact_sequence_message", new controller_msgs.msg.dds.MultiContactTimedContactSequenceMessagePubSubType(), data.getContactSequenceMessage());
 
    }
 
