@@ -15,6 +15,8 @@ import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -360,6 +362,27 @@ public class RDXTeleoperationManager extends ImGuiPanel
             selectionCollisionModel.processVRInput(vrContext);
       }
       laserFootstepMode.processVRInput(vrContext);
+      if(robotHasArms)
+      {
+         if (laserFootstepMode.getHandLaser() != null)
+         {
+            for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
+            {
+               for (RobotSide side : RobotSide.values)
+               {
+                  if (Math.PI - robotPartInteractable.getPose().getOrientationDistance(laserFootstepMode.getHandLaser()) - robotPartInteractable.getPose().getOrientationDistance(vrContext.getController(side).getPickPointPose()) <= 0.3 && robotPartInteractable.getClass().getName() == "us.ihmc.rdx.ui.affordances.RDXInteractableHand")
+                  {
+                     if (laserFootstepMode.getSpotPlacement() != null)
+                     {
+                        //TODO get hand to edit when gripped
+                        System.out.println("You got here :)");
+                        laserFootstepMode.setSpotPlacement(null);
+                     }
+                  }
+               }
+            }
+         }
+      }
       if (!laserFootstepMode.isArmsOnly())
       {
          locomotionManager.setLaserFootstepMode(laserFootstepMode);
@@ -368,12 +391,9 @@ public class RDXTeleoperationManager extends ImGuiPanel
       {
          if(robotHasArms)
          {
-            if (robotHasArms)
+            for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
             {
-               for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
-               {
-                  robotPartInteractable.getOnSpacePressed().run();
-               }
+               robotPartInteractable.getOnSpacePressed().run();
             }
          }
          }

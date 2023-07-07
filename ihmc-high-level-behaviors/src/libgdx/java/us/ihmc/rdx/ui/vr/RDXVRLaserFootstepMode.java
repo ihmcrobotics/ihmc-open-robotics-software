@@ -21,6 +21,7 @@ public class RDXVRLaserFootstepMode
    private FramePose3D frontController;
    private FramePose3D spotPlacement;
    private FramePose3D endOfLaser;
+   private FramePose3D handLaser;
    private double sizeChange;
    private RobotSide controllerSide;
    private RDXModelInstance leftLaser;
@@ -46,6 +47,7 @@ public class RDXVRLaserFootstepMode
             vrContext.getController(side).runIfConnected(controller ->
             {
                calculateVR(vrContext);
+               setHandLaser(frontController);
                updateLaser(sizeChange / 10, vrContext);
                InputDigitalActionData triggerClick = controller.getClickTriggerActionData();
                InputDigitalActionData joystickClick = controller.getJoystickPressActionData();
@@ -65,10 +67,6 @@ public class RDXVRLaserFootstepMode
                   if (triggerClick.bChanged() && !triggerClick.bState())
                   {
                      setSpotPlacement(null);
-                  }
-                  if (joystickClick.bChanged() && joystickClick.bState())
-                  {
-                     sendWalkPlan = true;
                   }
                   if (gripClick.x() >= 0.5 || gripPressed)
                   {
@@ -91,6 +89,10 @@ public class RDXVRLaserFootstepMode
                      gripPressed = false;
                      numTimesPressed = 0;
                   }
+               }
+               if (joystickClick.bChanged() && joystickClick.bState())
+               {
+                  sendWalkPlan = true;
                }
                if (aButton.bChanged() && aButton.bState())
                {
@@ -227,5 +229,15 @@ public class RDXVRLaserFootstepMode
    public boolean isArmsOnly()
    {
       return armsOnly;
+   }
+
+   public FramePose3D getHandLaser()
+   {
+      return handLaser;
+   }
+
+   public void setHandLaser(FramePose3D handLaser)
+   {
+      this.handLaser = handLaser;
    }
 }
