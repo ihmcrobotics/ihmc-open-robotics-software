@@ -4,11 +4,11 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
-# Timed contact sequences of left arm
+# Timed intervals that left arm is in contact
 ihmc_common_msgs/TimeIntervalMessage[<=25] left_arm_contact_intervals
-# Timed contact sequences of right arm
+# Timed intervals that right arm is in contact
 ihmc_common_msgs/TimeIntervalMessage[<=25] right_arm_contact_intervals
-# Timed contact sequences of left leg
+# Timed intervals that left leg is in contact
 ihmc_common_msgs/TimeIntervalMessage[<=25] left_leg_contact_intervals
-# Timed contact sequences of right leg
+# Timed intervals that right leg is in contact
 ihmc_common_msgs/TimeIntervalMessage[<=25] right_leg_contact_intervals
