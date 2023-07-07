@@ -69,6 +69,9 @@ public class RDXInteractableFootstep
    private final Notification contextMenuNotification = new Notification();
    private boolean isVRHovering;
    private boolean modified = false;
+   private boolean isPointing = false;
+   private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
+   private FramePose3D frontController;
    private final SideDependentList<Boolean> isVRDragging = new SideDependentList<>(false, false);
    private final SideDependentList<ModifiableReferenceFrame> dragReferenceFrame = new SideDependentList<>();
 
@@ -258,20 +261,7 @@ public class RDXInteractableFootstep
                dragReferenceFrame.put(side, new ModifiableReferenceFrame(controller.getPickPoseFrame()));
             }
 
-            if (isHovering)
-            {
-               if (getFootstepSide() == RobotSide.LEFT)
-                  footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 1.0f, 0.0f, 0.0f, 0.0f));
-               else
-                  footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 1.0f, 0.0f, 0.0f));
-            }
-            else
-            {
-               if (plannedFootstepInternal.getRobotSide() == RobotSide.LEFT)
-                  footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.5f, 0.0f, 0.0f, 0.0f));
-               else
-                  footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 0.5f, 0.0f, 0.0f));
-            }
+
             if (isHovering && newlyGripped)
             {
                modified = true;
@@ -289,8 +279,83 @@ public class RDXInteractableFootstep
 
             if (newlyUnGripped || !gripped)
                isVRDragging.put(side, false);
+
+            boolean triggered = controller.getClickTriggerActionData().bState();
+            boolean newPressedTrigger = triggered && controller.getClickTriggerActionData().bChanged();
+            boolean newReleasedTrigger = !triggered && controller.getClickTriggerActionData().bChanged();
+            calculateVR(vrContext);
+            if (frontController != null)
+            {
+               isPointing |= frontController.getPositionDistance(getFootPose().getTranslation()) < 0.1;
+            }
+
+            if (isPointing && newPressedTrigger)
+            {
+               selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getTransformToDesiredFrame(dragReferenceFrame.get(side).getTransformToParent(), frontController.getReferenceFrame());
+               dragReferenceFrame.get(side).getReferenceFrame().update();
+               isVRDragging.put(side, true);
+            }
+            if (isVRDragging.get(side))
+            {
+               dragReferenceFrame.get(side).getReferenceFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
+                                                                                           ReferenceFrame.getWorldFrame());
+            }
+            if (newReleasedTrigger || !triggered)
+            {
+               isVRDragging.put(side, false);
+            }
+            if (isHovering || isPointing)
+            {
+               if (getFootstepSide() == RobotSide.LEFT)
+                  footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 1.0f, 0.0f, 0.0f, 0.0f));
+               else
+                  footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 1.0f, 0.0f, 0.0f));
+            }
+            else
+            {
+               if (plannedFootstepInternal.getRobotSide() == RobotSide.LEFT)
+                  footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.5f, 0.0f, 0.0f, 0.0f));
+               else
+                  footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 0.5f, 0.0f, 0.0f));
+            }
          });
       }
+   }
+   public void calculateVR (RDXVRContext vrContext)
+   {
+      if (controllerModel == RDXVRControllerModel.UNKNOWN)
+         controllerModel = vrContext.getControllerModel();
+      boolean noSelectedPick = true;
+      for (RobotSide side : RobotSide.values)
+         noSelectedPick = noSelectedPick && vrContext.getSelectedPick().get(side) == null;
+      if (noSelectedPick)
+      {
+         for(RobotSide side : RobotSide.values)
+         {
+            if (side != null)
+            {
+               vrContext.getController(side).runIfConnected(controller ->
+                                                            {
+                                                               frontController = new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                                                                 vrContext.getController(side).getXForwardZUpPose());
+                                                               frontController.changeFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
+                                                               frontController.setToZero(vrContext.getController(side).getXForwardZUpControllerFrame());
+                                                               frontController.getPosition().addX(.1);
+                                                               frontController.changeFrame(ReferenceFrame.getWorldFrame());
+                                                               double sizeChange = vrContext.getController(side).getXForwardZUpPose().getZ() / (
+                                                                     vrContext.getController(side).getXForwardZUpPose().getZ() - frontController.getTranslationZ());
+                                                               frontController.changeFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
+                                                               frontController.getPosition().addX(sizeChange * frontController.getX());
+                                                               frontController.changeFrame(ReferenceFrame.getWorldFrame());
+                                                               frontController.getOrientation()
+                                                                              .setToYawOrientation(-vrContext.getController(side).getXForwardZUpPose().getRoll());
+                                                               frontController.getRotation().setYawPitchRoll(frontController.getYaw(), 0, 0);
+                                                               frontController.getPosition().setZ(0);
+                                                            });
+            }
+         }
+      }
+
    }
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
