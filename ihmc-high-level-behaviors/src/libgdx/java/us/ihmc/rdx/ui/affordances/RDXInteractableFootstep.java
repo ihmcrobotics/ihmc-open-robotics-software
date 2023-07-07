@@ -31,6 +31,8 @@ import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
+import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.robotics.interaction.StepCheckIsPointInsideAlgorithm;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.visualizers.RDXPolynomial;
@@ -55,12 +57,15 @@ public class RDXInteractableFootstep
    private RDXSelectablePose3DGizmo selectablePose3DGizmo;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private boolean isHovered;
+   private boolean isPointedAt;
    private final Sphere3D boundingSphere = new Sphere3D(0.1);
    private boolean isClickedOn;
+   private boolean isGripped;
    private final FramePose3D textFramePose = new FramePose3D();
    private final Timer timerFlashingFootsteps = new Timer();
    private boolean flashingFootStepsColorHigh = false;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
+   private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
 
    private final List<ModelInstance> trajectoryWaypointModel = new ArrayList<>();
    private final RDXPolynomial swingTrajectoryModel = new RDXPolynomial(0.03, 25);
@@ -227,6 +232,49 @@ public class RDXInteractableFootstep
       }
    }
 
+   public void processVRInput(RDXVRContext vrContext)
+   {
+
+      if (controllerModel == RDXVRControllerModel.UNKNOWN)
+         controllerModel = vrContext.getControllerModel();
+      boolean noSelectedPick = true;
+      for (RobotSide side : RobotSide.values)
+         noSelectedPick = noSelectedPick && vrContext.getSelectedPick().get(side) == null;
+      if (noSelectedPick)
+      {
+         for (RobotSide side : RobotSide.values)
+         {
+            isPointedAt = vrContext.getController(side).getPickPointPose().getPositionDistance(getFootPose().getPosition()) <= 0.3;
+            vrContext.getController(side).runIfConnected(controller ->
+{
+isGripped = controller.getGripped() && isPointedAt;
+if (isGripped)
+{
+   System.out.println("yo it got clicked on");
+   if (plannedFootstepInternal.getRobotSide() == RobotSide.LEFT)
+      footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 1.0f, 0.0f, 0.0f, 0.0f));
+   else
+      footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 1.0f, 0.0f, 0.0f));
+}
+else
+{
+   if (plannedFootstepInternal.getRobotSide() == RobotSide.LEFT)
+      footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.5f, 0.0f, 0.0f, 0.0f));
+   else
+      footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 0.5f, 0.0f, 0.0f));
+}
+   footstepModelInstance.transform.setToRotationRad(controller.getXForwardZUpPose().getRotation().getX32(),
+                                                    controller.getXForwardZUpPose().getRotation().getY32(),
+                                                    controller.getXForwardZUpPose().getRotation().getZ32(),
+                                                    (float) controller.getXForwardZUpPose().getRotation().angle());
+   footstepModelInstance.transform.setTranslation(controller.getXForwardZUpPose().getPosition().getX32(),
+                                                  controller.getXForwardZUpPose().getPosition().getY32(),
+                                                  controller.getXForwardZUpPose().getPosition().getZ32());
+   boundingSphere.getPosition().set(controller.getXForwardZUpPose().getPosition());
+});
+         }
+      }
+   }
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
       selectablePose3DGizmo.calculate3DViewPick(input);

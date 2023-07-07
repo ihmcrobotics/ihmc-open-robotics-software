@@ -361,7 +361,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
          if (interactablesEnabled.get())
             selectionCollisionModel.processVRInput(vrContext);
       }
-      laserFootstepMode.processVRInput(vrContext);
+      //laserFootstepMode.processVRInput(vrContext);
 //      if(robotHasArms)
 //      {
 //         if (laserFootstepMode.getHandLaser() != null)

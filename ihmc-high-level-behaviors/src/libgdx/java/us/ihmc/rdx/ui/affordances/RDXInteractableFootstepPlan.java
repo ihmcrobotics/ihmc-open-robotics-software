@@ -24,6 +24,7 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
@@ -109,6 +110,18 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       heightMapDataReference.set(heightMapMessage);
       if (swingPlanningModule != null)
          swingPlanningModule.setHeightMapData(heightMapMessage);
+   }
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      for (int i = 0; i < footsteps.size(); i++)
+      {
+         RDXInteractableFootstep singleFootstep = footsteps.get(i);
+         singleFootstep.processVRInput(vrContext);
+         if (selectedFootstep != null)
+         {
+            selectedFootstep.processVRInput(vrContext);
+         }
+      }
    }
 
    public void processImGui3DViewInput(ImGui3DViewInput input)
