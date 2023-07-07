@@ -364,7 +364,20 @@ public class RDXTeleoperationManager extends ImGuiPanel
       {
          locomotionManager.setLaserFootstepMode(laserFootstepMode);
       }
-   }
+      if (laserFootstepMode.getSendWalkPlan())
+      {
+         if(robotHasArms)
+         {
+            if (robotHasArms)
+            {
+               for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
+               {
+                  robotPartInteractable.getOnSpacePressed().run();
+               }
+            }
+         }
+         }
+      }
 
    private void calculate3DViewPick(ImGui3DViewInput input)
    {
@@ -401,14 +414,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
                if (interactableFeet.get(side).process3DViewInput(input))
                {
                   locomotionManager.setLegControlModeToSingleSupportFootPosing();
-               }
-            }
-
-            if (robotHasArms)
-            {
-               for (RobotSide side : interactableHands.sides())
-               {
-                  interactableHands.get(side).process3DViewInput(input);
                }
             }
          }
@@ -631,9 +636,5 @@ public class RDXTeleoperationManager extends ImGuiPanel
    public RDXLocomotionParameters getLocomotionParameters()
    {
       return locomotionManager.getLocomotionParameters();
-   }
-   public void setLaserFootstepMode(RDXVRLaserFootstepMode laserFootstepMode)
-   {
-
    }
 }

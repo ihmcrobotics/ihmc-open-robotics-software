@@ -14,8 +14,6 @@ import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.thread.MissingThreadTools;
-import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 public class RDXVRLaserFootstepMode
 {
@@ -229,10 +227,5 @@ public class RDXVRLaserFootstepMode
    public boolean isArmsOnly()
    {
       return armsOnly;
-   }
-
-   public void setArmsOnly(boolean armsOnly)
-   {
-      this.armsOnly = armsOnly;
    }
 }

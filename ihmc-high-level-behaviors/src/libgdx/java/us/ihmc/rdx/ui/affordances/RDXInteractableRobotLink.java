@@ -261,6 +261,10 @@ public class RDXInteractableRobotLink
       return selectablePose3DGizmo.getPoseGizmo().getGizmoFrame();
    }
 
+   public Runnable getOnSpacePressed()
+   {
+      return onSpacePressed;
+   }
    public void setOnSpacePressed(Runnable onSpacePressed)
    {
       this.onSpacePressed = onSpacePressed;
