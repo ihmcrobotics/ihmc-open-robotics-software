@@ -246,7 +246,7 @@ public class RDXInteractableFootstep
          vrContext.getController(side).runIfConnected(controller ->
          {
             boolean isHovering = false;
-               isHovering |= controller.getPickPointPose().getTranslation().distance(getFootPose().getPosition()) < 0.5;
+               isHovering |= controller.getPickPointPose().getTranslation().distance(getFootPose().getPosition()) < 0.1;
             isVRHovering |= isHovering;
 
             boolean gripped = controller.getGripped();
@@ -258,6 +258,20 @@ public class RDXInteractableFootstep
                dragReferenceFrame.put(side, new ModifiableReferenceFrame(controller.getPickPoseFrame()));
             }
 
+            if (isHovering)
+            {
+               if (getFootstepSide() == RobotSide.LEFT)
+                  footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 1.0f, 0.0f, 0.0f, 0.0f));
+               else
+                  footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 1.0f, 0.0f, 0.0f));
+            }
+            else
+            {
+               if (plannedFootstepInternal.getRobotSide() == RobotSide.LEFT)
+                  footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.5f, 0.0f, 0.0f, 0.0f));
+               else
+                  footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 0.5f, 0.0f, 0.0f));
+            }
             if (isHovering && newlyGripped)
             {
                modified = true;
