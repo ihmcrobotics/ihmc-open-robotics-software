@@ -91,6 +91,8 @@ public class RDXHandConfigurationManager
       {
          setupShieldButton(baseUI, communicationHelper);
       }
+
+      setupForSakeHands();
    }
 
    public void publishArmHomeCommand(RobotSide side)

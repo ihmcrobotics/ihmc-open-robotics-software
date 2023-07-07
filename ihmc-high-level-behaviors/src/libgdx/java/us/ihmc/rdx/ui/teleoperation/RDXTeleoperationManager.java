@@ -178,7 +178,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
                                         robotModel,
                                         syncedRobot,
                                         desiredRobot,
-                                        yoVariableClientHelper,
                                         teleoperationParameters,
                                         interactableHands);
       }
