@@ -77,4 +77,10 @@ public class TimeIntervalCommand implements Command<TimeIntervalCommand, TimeInt
    {
       return sequenceId;
    }
+
+   public void addTimeOffset(double timeOffset)
+   {
+      startTime += timeOffset;
+      endTime += timeOffset;
+   }
 }
