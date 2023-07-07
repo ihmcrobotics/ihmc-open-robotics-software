@@ -114,8 +114,8 @@ public class ZED2ColorStereoDepthPublisher
       imageWidth = sl_get_width(cameraID);
       imageHeight = sl_get_height(cameraID);
 
-      colorImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_CPU));
-      depthImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U16_C1, SL_MEM_CPU));
+      colorImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_GPU));
+      depthImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U16_C1, SL_MEM_GPU));
 
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "zed2_node");
       ros2ColorImagePublisher = ROS2Tools.createPublisher(ros2Node, colorTopic, ROS2QosProfile.BEST_EFFORT());
@@ -192,20 +192,21 @@ public class ZED2ColorStereoDepthPublisher
    private void retrieveAndPublishColorImage()
    {
       // Retrieve color image
-      // TODO: Try to retrieve from GPU
-      checkError("sl_retrieve_image", sl_retrieve_image(cameraID, colorImagePointer, SL_VIEW_LEFT, SL_MEM_CPU, imageWidth, imageHeight));
+      checkError("sl_retrieve_image", sl_retrieve_image(cameraID, colorImagePointer, SL_VIEW_LEFT, SL_MEM_GPU, imageWidth, imageHeight));
       colorImageAcquisitionTime.set(Instant.now());
 
       // Convert to BGR and encode to jpeg
-      Mat cpuColorImageBGRA = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, colorImagePointer, sl_mat_get_step_bytes(colorImagePointer, SL_MEM_CPU));
-      GpuMat gpuColorImageBGRA = new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC4);
-      gpuColorImageBGRA.upload(cpuColorImageBGRA);
+      GpuMat colorImageBGRA = new GpuMat(imageHeight,
+                                         imageWidth,
+                                         opencv_core.CV_8UC4,
+                                         sl_mat_get_ptr(colorImagePointer, SL_MEM_GPU),
+                                         sl_mat_get_step_bytes(colorImagePointer, SL_MEM_GPU));
 
-      GpuMat gpuColorImageBGR = new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC3);
-      opencv_cudaimgproc.cvtColor(gpuColorImageBGRA, gpuColorImageBGR, opencv_imgproc.COLOR_BGRA2BGR);
+      GpuMat colorImageBGR = new GpuMat(imageHeight, imageWidth, opencv_core.CV_8UC3);
+      opencv_cudaimgproc.cvtColor(colorImageBGRA, colorImageBGR, opencv_imgproc.COLOR_BGRA2BGR);
 
       BytePointer colorJPEGPointer = new BytePointer((long) imageHeight * imageWidth);
-      imageEncoder.encodeBGR(gpuColorImageBGR.data(), colorJPEGPointer, imageWidth, imageHeight, gpuColorImageBGR.step());
+      imageEncoder.encodeBGR(colorImageBGR.data(), colorJPEGPointer, imageWidth, imageHeight, colorImageBGR.step());
 
       // Publish image
       ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(colorJPEGPointer.limit());
@@ -228,24 +229,28 @@ public class ZED2ColorStereoDepthPublisher
 
       // Close stuff
       colorJPEGPointer.close();
-      gpuColorImageBGR.release();
-      gpuColorImageBGR.close();
-      gpuColorImageBGRA.release();
-      gpuColorImageBGRA.close();
-      cpuColorImageBGRA.close();
+      colorImageBGR.release();
+      colorImageBGR.close();
+      colorImageBGRA.close();
    }
 
    private void retrieveAndPublishDepthImage()
    {
       // Retrieve depth image
-      checkError("sl_retrieve_measure", sl_retrieve_measure(cameraID, depthImagePointer, SL_MEASURE_DEPTH_U16_MM, SL_MEM_CPU, imageWidth, imageHeight));
+      checkError("sl_retrieve_measure", sl_retrieve_measure(cameraID, depthImagePointer, SL_MEASURE_DEPTH_U16_MM, SL_MEM_GPU, imageWidth, imageHeight));
       depthImageAcquisitionTime.set(Instant.now());
 
       // Encode depth image to png
-      Mat depthImage16UC1 = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1, depthImagePointer, sl_mat_get_step_bytes(depthImagePointer, SL_MEM_CPU));
+      GpuMat gpuDepthImage16UC1 = new GpuMat(imageHeight,
+                                             imageWidth,
+                                             opencv_core.CV_16UC1,
+                                             sl_mat_get_ptr(depthImagePointer, SL_MEM_GPU),
+                                             sl_mat_get_step_bytes(depthImagePointer, SL_MEM_GPU));
+      Mat cpuDepthImage16UC1 = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
+      gpuDepthImage16UC1.download(cpuDepthImage16UC1);
 
       BytePointer depthPNGPointer = new BytePointer();
-      OpenCVTools.compressImagePNG(depthImage16UC1, depthPNGPointer);
+      OpenCVTools.compressImagePNG(cpuDepthImage16UC1, depthPNGPointer);
 
       // Publish image
       ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(depthPNGPointer.limit());
@@ -267,7 +272,9 @@ public class ZED2ColorStereoDepthPublisher
 
       // Close stuff
       depthPNGPointer.close();
-      depthImage16UC1.close();
+      cpuDepthImage16UC1.close();
+      gpuDepthImage16UC1.release();
+      gpuDepthImage16UC1.close();
    }
 
    public void destroy()
