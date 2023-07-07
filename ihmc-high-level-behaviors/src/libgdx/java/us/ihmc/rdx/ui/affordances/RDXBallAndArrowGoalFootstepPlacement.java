@@ -5,21 +5,14 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import imgui.flag.ImGuiStyleVar;
-import imgui.internal.ImGui;
-import imgui.internal.flag.ImGuiItemFlags;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.tools.BehaviorTools;
-import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.rdx.imgui.ImGuiLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
-import us.ihmc.rdx.tools.RDXIconTexture;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -75,20 +68,12 @@ public class RDXBallAndArrowGoalFootstepPlacement extends RDXBallAndArrowPosePla
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       super.getRenderables(renderables, pool);
-      leftGoalFootstepGraphic.getRenderables(renderables, pool);
-      rightGoalFootstepGraphic.getRenderables(renderables, pool);
-   }
 
-   @Override
-   public void clear()
-   {
-      super.clear();
-
-      if (leftGoalFootstepGraphic != null)
-         leftGoalFootstepGraphic.setPose(NaN_POSE);
-
-      if (rightGoalFootstepGraphic != null)
-         rightGoalFootstepGraphic.setPose(NaN_POSE);
+      if (isPlaced())
+      {
+         leftGoalFootstepGraphic.getRenderables(renderables, pool);
+         rightGoalFootstepGraphic.getRenderables(renderables, pool);
+      }
    }
 
    private void updateGoalFootstepGraphics(Pose3DReadOnly goalPose)

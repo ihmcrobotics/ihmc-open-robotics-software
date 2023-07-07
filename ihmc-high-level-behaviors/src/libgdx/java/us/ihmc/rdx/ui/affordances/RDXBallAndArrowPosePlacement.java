@@ -12,7 +12,6 @@ import imgui.flag.ImGuiStyleVar;
 import imgui.internal.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import org.lwjgl.openvr.InputDigitalActionData;
-import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -35,8 +34,6 @@ import java.util.function.Consumer;
 
 public class RDXBallAndArrowPosePlacement implements RenderableProvider
 {
-   protected final static Pose3D NaN_POSE = BehaviorTools.createNaNPose();
-
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private ModelInstance sphere;
    private ModelInstance arrow;
@@ -251,7 +248,6 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
          sphere.transform.val[Matrix4.M03] = Float.NaN;
       if (arrow != null)
          arrow.transform.val[Matrix4.M03] = Float.NaN;
-      goalPoseForReading.set(NaN_POSE);
    }
 
    public Pose3DReadOnly getGoalPose()
