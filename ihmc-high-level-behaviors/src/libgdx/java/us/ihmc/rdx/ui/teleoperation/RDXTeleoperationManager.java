@@ -65,7 +65,6 @@ import java.util.Set;
  * <br/>
  * Sub managers:
  * <ul>
- * <li>{@link RDXHandConfigurationManager Hand manager} TODO: Perhaps this should go in arm manager?</li>
  * <li>{@link RDXArmManager Arm manager}</li>
  * <li>{@link RDXLocomotionManager Locomotion manager}</li>
  * </ul>
@@ -95,7 +94,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final RDXChestOrientationSlider chestPitchSlider;
    private final RDXChestOrientationSlider chestYawSlider;
    private final RDXDesiredRobot desiredRobot;
-   private final RDXHandConfigurationManager handManager;
    private RDXRobotCollisionModel selfCollisionModel;
    private RDXRobotCollisionModel selectionCollisionModel;
    private RDXArmManager armManager;
@@ -173,9 +171,17 @@ public class RDXTeleoperationManager extends ImGuiPanel
       }
 
       if (robotHasArms)
-         handManager = new RDXHandConfigurationManager();
-      else
-         handManager = null;
+      {
+         // create the manager for the desired arm setpoints
+         armManager = new RDXArmManager(communicationHelper,
+                                        ros2Helper,
+                                        robotModel,
+                                        syncedRobot,
+                                        desiredRobot,
+                                        yoVariableClientHelper,
+                                        teleoperationParameters,
+                                        interactableHands);
+      }
    }
 
    public void create(RDXBaseUI baseUI)
@@ -258,13 +264,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
          if (robotHasArms)
          {
-            // create the manager for the desired arm setpoints
-            armManager = new RDXArmManager(robotModel,
-                                           syncedRobot,
-                                           desiredRobot.getDesiredFullRobotModel(),
-                                           ros2Helper,
-                                           teleoperationParameters,
-                                           interactableHands);
+
             armManager.create(baseUI);
             for (RobotSide side : interactableHands.sides())
             {
@@ -287,9 +287,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
       standPrepButton.loadAndSetIcon("icons/standPrep.png");
       standPrepButton.setOnPressed(robotLowLevelMessenger::sendStandRequest);
       standPrepButton.setTooltipText("Stand prep");
-
-      if (robotHasArms)
-         handManager.create(baseUI, communicationHelper);
 
       baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
    }
@@ -434,9 +431,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
       ImGui.separator();
       locomotionManager.renderImGuiWidgets();
       ImGui.separator();
-
-      if (robotHasArms)
-         handManager.renderImGuiWidgets();
 
       if (interactablesAvailable)
       {
@@ -606,11 +600,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
    public RDXRobotCollisionModel getSelfCollisionModel()
    {
       return selfCollisionModel;
-   }
-
-   public RDXHandConfigurationManager getHandManager()
-   {
-      return handManager;
    }
 
    public RDXLocomotionParameters getLocomotionParameters()
