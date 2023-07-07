@@ -27,7 +27,6 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
 
 import java.time.Instant;
@@ -38,8 +37,8 @@ import static org.bytedeco.zed.global.zed.*;
 
 public class ZED2ColorStereoDepthPublisher
 {
-   private static final double UPDATE_PERIOD = UnitConversions.hertzToSeconds(15.0);
-   private static final float DEPTH_DISCRETIZATION_VALUE = 0.001f;
+   private static final int CAMERA_FPS = 30;
+   private static final float MILLIMETER_TO_METERS = 0.001f;
 
    private long depthImageSequenceNumber = 0L;
    private long colorImageSequenceNumber = 0L;
@@ -66,7 +65,6 @@ public class ZED2ColorStereoDepthPublisher
    private final Thread grabImageThread;
    private final Thread colorImagePublishThread;
    private final Thread depthImagePublishThread;
-   private final Object imageGrabbedNotifier = new Object();
    private final Throttler throttler = new Throttler();
    private volatile boolean running = true;
 
@@ -80,7 +78,7 @@ public class ZED2ColorStereoDepthPublisher
       sl_create_camera(cameraID);
 
       SL_InitParameters zedInitializationParameters = new SL_InitParameters();
-      zedInitializationParameters.camera_fps(15);
+      zedInitializationParameters.camera_fps(CAMERA_FPS);
       zedInitializationParameters.resolution(SL_RESOLUTION_HD720);
       zedInitializationParameters.input_type(SL_INPUT_TYPE_USB);
       zedInitializationParameters.camera_device_id(cameraID);
@@ -90,7 +88,7 @@ public class ZED2ColorStereoDepthPublisher
       zedInitializationParameters.svo_real_time_mode(true);
       zedInitializationParameters.depth_mode(SL_DEPTH_MODE_ULTRA);
       zedInitializationParameters.depth_stabilization(1);
-      zedInitializationParameters.depth_maximum_distance(20);
+      zedInitializationParameters.depth_maximum_distance(40);
       zedInitializationParameters.depth_minimum_distance(-1);
       zedInitializationParameters.coordinate_unit(SL_UNIT_METER);
       zedInitializationParameters.coordinate_system(SL_COORDINATE_SYSTEM_RIGHT_HANDED_Z_UP_X_FWD);
@@ -104,7 +102,7 @@ public class ZED2ColorStereoDepthPublisher
       checkError("sl_open_camera", sl_open_camera(cameraID, zedInitializationParameters, 0, "", "", 0, "", "", ""));
 
       zedRuntimeParameters.enable_depth(true);
-      zedRuntimeParameters.confidence_threshold(95);
+      zedRuntimeParameters.confidence_threshold(100);
       zedRuntimeParameters.reference_frame(SL_REFERENCE_FRAME_CAMERA);
       zedRuntimeParameters.texture_confidence_threshold(100);
       zedRuntimeParameters.remove_saturated_areas(true);
@@ -122,6 +120,7 @@ public class ZED2ColorStereoDepthPublisher
       ros2DepthImagePublisher = ROS2Tools.createPublisher(ros2Node, depthTopic, ROS2QosProfile.BEST_EFFORT());
 
       imageEncoder = new CUDAImageEncoder();
+      throttler.setFrequency(CAMERA_FPS);
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, getClass().getName() + "-Shutdown"));
 
@@ -131,13 +130,6 @@ public class ZED2ColorStereoDepthPublisher
          {
             checkError("sl_grab", sl_grab(cameraID, zedRuntimeParameters));
             zedLeftCameraFramePose.setToZero(zed2FrameSupplier.get());
-
-            synchronized (imageGrabbedNotifier)
-            {
-               imageGrabbedNotifier.notifyAll();
-            }
-
-            throttler.waitAndRun(UPDATE_PERIOD);
          }
       }, "ZED2ImageGrabThread");
 
@@ -145,19 +137,8 @@ public class ZED2ColorStereoDepthPublisher
       {
          while (running)
          {
-            try
-            {
-               synchronized (imageGrabbedNotifier)
-               {
-                  imageGrabbedNotifier.wait();
-               }
-            }
-            catch (InterruptedException interruptedException)
-            {
-               LogTools.error(interruptedException);
-            }
-
             retrieveAndPublishColorImage();
+            throttler.waitAndRun();
          }
       }, "ZED2ColorImagePublishThread");
 
@@ -165,19 +146,8 @@ public class ZED2ColorStereoDepthPublisher
       {
          while (running)
          {
-            try
-            {
-               synchronized (imageGrabbedNotifier)
-               {
-                  imageGrabbedNotifier.wait();
-               }
-            }
-            catch (InterruptedException interruptedException)
-            {
-               LogTools.error(interruptedException);
-            }
-
             retrieveAndPublishDepthImage();
+            throttler.waitAndRun();
          }
       }, "ZED2DepthImagePublishThread");
 
@@ -222,7 +192,7 @@ public class ZED2ColorStereoDepthPublisher
       colorImageMessage.getPosition().set(zedLeftCameraFramePose.getPosition());
       colorImageMessage.getOrientation().set(zedLeftCameraFramePose.getOrientation());
       colorImageMessage.setSequenceNumber(colorImageSequenceNumber++);
-      colorImageMessage.setDepthDiscretization(DEPTH_DISCRETIZATION_VALUE);
+      colorImageMessage.setDepthDiscretization(MILLIMETER_TO_METERS);
       CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
       ImageMessageFormat.COLOR_JPEG_BGR8.packMessageFormat(colorImageMessage);
       ros2ColorImagePublisher.publish(colorImageMessage);
@@ -265,7 +235,7 @@ public class ZED2ColorStereoDepthPublisher
       depthImageMessage.getPosition().set(zedLeftCameraFramePose.getPosition());
       depthImageMessage.getOrientation().set(zedLeftCameraFramePose.getOrientation());
       depthImageMessage.setSequenceNumber(depthImageSequenceNumber++);
-      depthImageMessage.setDepthDiscretization(DEPTH_DISCRETIZATION_VALUE);
+      depthImageMessage.setDepthDiscretization(MILLIMETER_TO_METERS);
       CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
       ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
       ros2DepthImagePublisher.publish(depthImageMessage);
