@@ -157,8 +157,8 @@ public class RDXVRLaserFootstepMode
    {
       if (length > 0)
       {
-         leftLaser = new RDXModelInstance(RDXModelBuilder.createArrow(length, 0.001, new Color(0x870707ff)));
-         rightLaser = new RDXModelInstance(RDXModelBuilder.createArrow(length, 0.001, new Color(0x00ff00ff)));
+         leftLaser = new RDXModelInstance(RDXModelBuilder.createArrow(length, 0.001, new Color(Color.WHITE)));
+         rightLaser = new RDXModelInstance(RDXModelBuilder.createArrow(length, 0.001, new Color(Color.WHITE)));
          leftLaser.setPoseInWorldFrame(vrContext.getController(RobotSide.LEFT).getPickPointPose());
          rightLaser.setPoseInWorldFrame(vrContext.getController(RobotSide.RIGHT).getPickPointPose());
       }
