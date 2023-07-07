@@ -17,19 +17,19 @@ public class MultiContactTimedContactSequenceMessage extends Packet<MultiContact
             */
    public long sequence_id_;
    /**
-            * Timed contact sequences of left arm
+            * Timed intervals that left arm is in contact
             */
    public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.TimeIntervalMessage>  left_arm_contact_intervals_;
    /**
-            * Timed contact sequences of right arm
+            * Timed intervals that right arm is in contact
             */
    public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.TimeIntervalMessage>  right_arm_contact_intervals_;
    /**
-            * Timed contact sequences of left leg
+            * Timed intervals that left leg is in contact
             */
    public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.TimeIntervalMessage>  left_leg_contact_intervals_;
    /**
-            * Timed contact sequences of right leg
+            * Timed intervals that right leg is in contact
             */
    public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.TimeIntervalMessage>  right_leg_contact_intervals_;
 
@@ -75,7 +75,7 @@ public class MultiContactTimedContactSequenceMessage extends Packet<MultiContact
 
 
    /**
-            * Timed contact sequences of left arm
+            * Timed intervals that left arm is in contact
             */
    public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.TimeIntervalMessage>  getLeftArmContactIntervals()
    {
@@ -84,7 +84,7 @@ public class MultiContactTimedContactSequenceMessage extends Packet<MultiContact
 
 
    /**
-            * Timed contact sequences of right arm
+            * Timed intervals that right arm is in contact
             */
    public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.TimeIntervalMessage>  getRightArmContactIntervals()
    {
@@ -93,7 +93,7 @@ public class MultiContactTimedContactSequenceMessage extends Packet<MultiContact
 
 
    /**
-            * Timed contact sequences of left leg
+            * Timed intervals that left leg is in contact
             */
    public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.TimeIntervalMessage>  getLeftLegContactIntervals()
    {
@@ -102,7 +102,7 @@ public class MultiContactTimedContactSequenceMessage extends Packet<MultiContact
 
 
    /**
-            * Timed contact sequences of right leg
+            * Timed intervals that right leg is in contact
             */
    public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.TimeIntervalMessage>  getRightLegContactIntervals()
    {

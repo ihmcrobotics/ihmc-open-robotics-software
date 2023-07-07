@@ -12,3 +12,5 @@ int32[] joint_hash_codes
 OneDoFJointTrajectoryMessage[] joint_trajectory_messages
 # Properties for queueing trajectories.
 ihmc_common_msgs/QueueableMessage queueing_properties
+# Contact sequence message
+controller_msgs/MultiContactTimedContactSequenceMessage contact_sequence_message
