@@ -39,6 +39,7 @@ import us.ihmc.tools.thread.MissingThreadTools;
  */
 public class RDXArmManager
 {
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final CommunicationHelper communicationHelper;
    private final ROS2ControllerHelper ros2Helper;
    private final DRCRobotModel robotModel;
@@ -227,23 +228,23 @@ public class RDXArmManager
       }
 
       ImGui.text("Arm & hand control mode:");
-      if (ImGui.radioButton("Joint angles (DDogleg)", armControlMode == RDXArmControlMode.JOINT_ANGLES))
+      if (ImGui.radioButton(labels.get("Joint angles (DDogleg)"), armControlMode == RDXArmControlMode.JOINT_ANGLES))
       {
          armControlMode = RDXArmControlMode.JOINT_ANGLES;
       }
       ImGui.text("Hand pose only:");
       ImGui.sameLine();
-      if (ImGui.radioButton("World", armControlMode == RDXArmControlMode.POSE_WORLD))
+      if (ImGui.radioButton(labels.get("World"), armControlMode == RDXArmControlMode.POSE_WORLD))
       {
          armControlMode = RDXArmControlMode.POSE_WORLD;
       }
       ImGui.sameLine();
-      if (ImGui.radioButton("Chest", armControlMode == RDXArmControlMode.POSE_CHEST))
+      if (ImGui.radioButton(labels.get("Chest"), armControlMode == RDXArmControlMode.POSE_CHEST))
       {
          armControlMode = RDXArmControlMode.POSE_CHEST;
       }
 
-      if (ImGui.checkbox("Hand wrench magnitudes on 3D View", indicateWrenchOnScreen))
+      if (ImGui.checkbox(labels.get("Hand wrench magnitudes on 3D View"), indicateWrenchOnScreen))
       {
          panelHandWrenchIndicator.setShowAndUpdate(indicateWrenchOnScreen.get());
       }
