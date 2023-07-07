@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -39,6 +40,7 @@ import us.ihmc.rdx.visualizers.RDXPolynomial;
 import us.ihmc.robotics.math.trajectories.core.Polynomial;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -57,15 +59,18 @@ public class RDXInteractableFootstep
    private RDXSelectablePose3DGizmo selectablePose3DGizmo;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private boolean isHovered;
-   private boolean isPointedAt;
    private final Sphere3D boundingSphere = new Sphere3D(0.1);
    private boolean isClickedOn;
-   private boolean isGripped;
    private final FramePose3D textFramePose = new FramePose3D();
    private final Timer timerFlashingFootsteps = new Timer();
    private boolean flashingFootStepsColorHigh = false;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
-   private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
+   private boolean isMouseHovering;
+   private final Notification contextMenuNotification = new Notification();
+   private boolean isVRHovering;
+   private boolean modified = false;
+   private final SideDependentList<Boolean> isVRDragging = new SideDependentList<>(false, false);
+   private final SideDependentList<ModifiableReferenceFrame> dragReferenceFrame = new SideDependentList<>();
 
    private final List<ModelInstance> trajectoryWaypointModel = new ArrayList<>();
    private final RDXPolynomial swingTrajectoryModel = new RDXPolynomial(0.03, 25);
@@ -234,45 +239,43 @@ public class RDXInteractableFootstep
 
    public void processVRInput(RDXVRContext vrContext)
    {
+      isVRHovering = false;
 
-      if (controllerModel == RDXVRControllerModel.UNKNOWN)
-         controllerModel = vrContext.getControllerModel();
-      boolean noSelectedPick = true;
       for (RobotSide side : RobotSide.values)
-         noSelectedPick = noSelectedPick && vrContext.getSelectedPick().get(side) == null;
-      if (noSelectedPick)
       {
-         for (RobotSide side : RobotSide.values)
+         vrContext.getController(side).runIfConnected(controller ->
          {
-            isPointedAt = vrContext.getController(side).getPickPointPose().getPositionDistance(getFootPose().getPosition()) <= 0.3;
-            vrContext.getController(side).runIfConnected(controller ->
-{
-isGripped = controller.getGripped() && isPointedAt;
-if (isGripped)
-{
-   System.out.println("yo it got clicked on");
-   if (plannedFootstepInternal.getRobotSide() == RobotSide.LEFT)
-      footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 1.0f, 0.0f, 0.0f, 0.0f));
-   else
-      footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 1.0f, 0.0f, 0.0f));
-}
-else
-{
-   if (plannedFootstepInternal.getRobotSide() == RobotSide.LEFT)
-      footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.5f, 0.0f, 0.0f, 0.0f));
-   else
-      footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 0.5f, 0.0f, 0.0f));
-}
-   footstepModelInstance.transform.setToRotationRad(controller.getXForwardZUpPose().getRotation().getX32(),
-                                                    controller.getXForwardZUpPose().getRotation().getY32(),
-                                                    controller.getXForwardZUpPose().getRotation().getZ32(),
-                                                    (float) controller.getXForwardZUpPose().getRotation().angle());
-   footstepModelInstance.transform.setTranslation(controller.getXForwardZUpPose().getPosition().getX32(),
-                                                  controller.getXForwardZUpPose().getPosition().getY32(),
-                                                  controller.getXForwardZUpPose().getPosition().getZ32());
-   boundingSphere.getPosition().set(controller.getXForwardZUpPose().getPosition());
-});
-         }
+            boolean isHovering = false;
+               isHovering |= controller.getPickPointPose().getTranslation().distance(getFootPose().getPosition()) < 0.5;
+            isVRHovering |= isHovering;
+
+            boolean gripped = controller.getGripped();
+            boolean newlyGripped = gripped && controller.getGrippedChanged();
+            boolean newlyUnGripped = !gripped && controller.getGrippedChanged();
+
+            if (dragReferenceFrame.get(side) == null)
+            {
+               dragReferenceFrame.put(side, new ModifiableReferenceFrame(controller.getPickPoseFrame()));
+            }
+
+            if (isHovering && newlyGripped)
+            {
+               modified = true;
+               selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getTransformToDesiredFrame(dragReferenceFrame.get(side).getTransformToParent(),
+                                                                                               controller.getPickPoseFrame());
+               dragReferenceFrame.get(side).getReferenceFrame().update();
+               isVRDragging.put(side, true);
+            }
+
+            if (isVRDragging.get(side))
+            {
+               dragReferenceFrame.get(side).getReferenceFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
+                                                                                           ReferenceFrame.getWorldFrame());
+            }
+
+            if (newlyUnGripped || !gripped)
+               isVRDragging.put(side, false);
+         });
       }
    }
    public void calculate3DViewPick(ImGui3DViewInput input)
