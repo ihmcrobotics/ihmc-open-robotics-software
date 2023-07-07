@@ -45,7 +45,6 @@ public class RDXArmManager
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final RDXDesiredRobot desiredRobot;
-   private final YoVariableClientHelper yoVariableClientHelper;
 
    private final RDXTeleoperationParameters teleoperationParameters;
    private final SideDependentList<RDXInteractableHand> interactableHands;
@@ -71,7 +70,6 @@ public class RDXArmManager
                         DRCRobotModel robotModel,
                         ROS2SyncedRobotModel syncedRobot,
                         RDXDesiredRobot desiredRobot,
-                        YoVariableClientHelper yoVariableClientHelper,
                         RDXTeleoperationParameters teleoperationParameters,
                         SideDependentList<RDXInteractableHand> interactableHands)
    {
@@ -80,7 +78,6 @@ public class RDXArmManager
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.desiredRobot = desiredRobot;
-      this.yoVariableClientHelper = yoVariableClientHelper;
       this.teleoperationParameters = teleoperationParameters;
       this.interactableHands = interactableHands;
       armJointNames = robotModel.getJointMap().getArmJointNames();
