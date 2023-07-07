@@ -279,6 +279,11 @@ public class RDXLocomotionManager
                }
             }
          }
+         if (laserFootstepMode.isbPressed())
+         {
+            manualFootstepPlacement.getFootstepPlan().removeLastStep();
+            laserFootstepMode.setbPressed(false);
+         }
          if (laserFootstepMode.getSpotPlacement() != null)
          {
             if (laserFootstepMode.getControllerSide() != null)
@@ -290,7 +295,13 @@ public class RDXLocomotionManager
                      manualFootstepPlacement.vrPlacement(laserFootstepMode.getSpotPlacement(), laserFootstepMode.getControllerSide());
                      footNotPlaced = false;
                   }
-                  interactableFootstepPlan.getLastFootstep().updatePose(laserFootstepMode.getHandLaser());
+                  if(laserFootstepMode.getHandLaser() != null)
+                     if (interactableFootstepPlan.getLastFootstep() !=null)
+                        interactableFootstepPlan.getLastFootstep().updatePose(laserFootstepMode.getHandLaser());
+                     else if (manualFootstepPlacement.getFootstepBeingPlacedOrLastFootstepPlaced() != null)
+                     {
+                        manualFootstepPlacement.getFootstepBeingPlacedOrLastFootstepPlaced().updatePose(laserFootstepMode.getHandLaser());
+                     }
                }
                else
                {

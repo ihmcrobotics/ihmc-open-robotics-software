@@ -33,6 +33,7 @@ public class RDXVRLaserFootstepMode
    private boolean armsOnly = false;
    private int aButtonPressed = 0;
    private boolean triggerPressed = false;
+   private boolean bPressed = false;
 
    public void processVRInput(RDXVRContext vrContext)
    {
@@ -55,16 +56,21 @@ public class RDXVRLaserFootstepMode
                InputDigitalActionData joystickClick = controller.getJoystickPressActionData();
                InputAnalogActionData gripClick = controller.getGripActionData();
                InputDigitalActionData aButton = controller.getAButtonActionData();
+               InputDigitalActionData bButton = controller.getBButtonActionData();
                if(!armsOnly)
                {
+                  if(bButton.bChanged() && bButton.bState())
+                  {
+                     bPressed = true;
+                  }
                   if (triggerClick.bChanged() && triggerClick.bState())
                   {
                      setControllerSide(side);
-                     calculateVR(vrContext);
+                        calculateVR(vrContext);
 
-                     if (sizeChange > 0)
-                     {
-                        triggerPressed = !triggerPressed;
+                        if (sizeChange > 0)
+                        {
+                           triggerPressed = !triggerPressed;
                         setSpotPlacement(frontController);
                      }
                   }
@@ -253,5 +259,15 @@ public class RDXVRLaserFootstepMode
    public void setTriggerPressed(boolean triggerPressed)
    {
       this.triggerPressed = triggerPressed;
+   }
+
+   public boolean isbPressed()
+   {
+      return bPressed;
+   }
+
+   public void setbPressed(boolean bPressed)
+   {
+      this.bPressed = bPressed;
    }
 }
