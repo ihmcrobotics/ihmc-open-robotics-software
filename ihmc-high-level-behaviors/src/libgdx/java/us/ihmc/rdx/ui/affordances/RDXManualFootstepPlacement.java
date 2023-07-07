@@ -17,14 +17,13 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.ImGui3DViewInput;
-import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXIconTexture;
-import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
+import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -221,11 +220,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          LogTools.info("Footstep Rejected, too far from previous foot... not placing footstep");
       }
    }
-   private void vrPlaceFootstep()
-   {
-         RDXInteractableFootstep addedStep = footstepPlan.getNextFootstep();
-         addedStep.copyFrom(baseUI, footstepBeingPlaced);
-   }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -272,21 +266,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       tempFramePose.set(rigidBodyTransform);
       tempFramePose.getOrientation().setToYawOrientation(latestFootstepYaw);
       footstepBeingPlaced.updatePose(tempFramePose);
-   }
-
-   public void vrPlacement(FramePose3D controllerPose, RobotSide side)
-   {
-      modeNewlyActivated = true;
-      footstepBeingPlaced = new RDXInteractableFootstep(baseUI, side, footstepPlan.getNumberOfFootsteps(), null);
-      currentFootStepSide = side;
-
-      tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
-      tempFramePose.setX(controllerPose.getTranslationX());
-      tempFramePose.setY(controllerPose.getTranslationY());
-      tempFramePose.getOrientation().setToYawOrientation(controllerPose.getYaw());
-      footstepBeingPlaced.updatePose(tempFramePose);
-      vrPlaceFootstep();
-      exitPlacement();
    }
 
    public boolean pollIsModeNewlyActivated()
