@@ -4,12 +4,18 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
@@ -46,6 +52,7 @@ public class OneStepCaptureRegionCalculator implements SCS2YoGraphicHolder
    private final DoubleProvider kinematicStepRange;
    private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
    private final SideDependentList<FrameConvexPolygon2D> reachableRegions = new SideDependentList<>(new FrameConvexPolygon2D(), new FrameConvexPolygon2D());
+   private final Point2DBasics tempPoint = new Point2D();
 
    private final RecyclingArrayList<FramePoint2D> visibleVertices = new RecyclingArrayList<>(MAX_CAPTURE_REGION_POLYGON_POINTS, FramePoint2D.class);
 
@@ -129,6 +136,11 @@ public class OneStepCaptureRegionCalculator implements SCS2YoGraphicHolder
       {
          captureRegionVisualizer = new CaptureRegionVisualizer(this::getCaptureRegion, suffix, yoGraphicsListRegistry, registry);
       }
+   }
+
+   public void calculateReachableRegions()
+   {
+      calculateReachableRegions(footWidth);
    }
 
    private void calculateReachableRegions(double footWidth)
@@ -295,7 +307,13 @@ public class OneStepCaptureRegionCalculator implements SCS2YoGraphicHolder
             // This assumes that once there is no capture region the robot will fall for sure.
             rawCaptureRegion.checkReferenceFrameMatch(reachableRegion);
             captureRegionPolygon.clear(rawCaptureRegion.getReferenceFrame());
-            convexPolygonTools.computeIntersectionOfPolygons(rawCaptureRegion, reachableRegion, captureRegionPolygon);
+            if (!convexPolygonTools.computeIntersectionOfPolygons(rawCaptureRegion, reachableRegion, captureRegionPolygon))
+            {
+               // OK, so there was no intersection. We should set the closest point
+               getClosestPointOnPolygonToPoint(rawCaptureRegion, footCentroid, tempPoint);
+               reachableRegion.orthogonalProjection(tempPoint);
+               captureRegionPolygon.addVertex(tempPoint);
+            }
          }
          else
          {
@@ -307,6 +325,15 @@ public class OneStepCaptureRegionCalculator implements SCS2YoGraphicHolder
 
       globalTimer.stopMeasurement();
       updateVisualizer();
+   }
+
+   private static void getClosestPointOnPolygonToPoint(ConvexPolygon2DReadOnly polygon, Point2DReadOnly pointToCheck, Point2DBasics closestPointToPack)
+   {
+      int edgeIndex = polygon.getClosestEdgeIndex(pointToCheck);
+      Point2DReadOnly startVertex = polygon.getVertex(edgeIndex);
+      Point2DReadOnly endVertex = polygon.getNextVertex(edgeIndex);
+
+      EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(pointToCheck, startVertex, endVertex, closestPointToPack);
    }
 
    private void updateVisualizer()
