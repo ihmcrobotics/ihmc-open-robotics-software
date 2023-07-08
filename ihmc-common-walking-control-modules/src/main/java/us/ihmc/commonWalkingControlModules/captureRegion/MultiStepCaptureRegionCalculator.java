@@ -3,26 +3,15 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 import java.awt.*;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentReachabilityConstraint;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.Location;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
-import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
-import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
@@ -59,27 +48,23 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
    private final BooleanProvider useCrossOverSteps;
 
    private final StepAdjustmentReachabilityConstraint reachabilityConstraint;
-   private final SideDependentList<? extends ReferenceFrame> soleFrames;
 
    private final RecyclingArrayList<FramePoint2DBasics> expansionPoints = new RecyclingArrayList<>(FramePoint2D::new);
 
    private MultiStepCaptureRegionVisualizer visualizer = null;
 
-   public MultiStepCaptureRegionCalculator(SideDependentList<? extends ReferenceFrame> soleFrames,
-                                           StepAdjustmentReachabilityConstraint reachabilityConstraint,
+   public MultiStepCaptureRegionCalculator(StepAdjustmentReachabilityConstraint reachabilityConstraint,
                                            BooleanProvider useCrossOverSteps,
                                            YoRegistry parentRegistry)
    {
-      this(soleFrames, reachabilityConstraint, useCrossOverSteps, parentRegistry, null);
+      this(reachabilityConstraint, useCrossOverSteps, parentRegistry, null);
    }
 
-   public MultiStepCaptureRegionCalculator(SideDependentList<? extends ReferenceFrame> soleFrames,
-                                           StepAdjustmentReachabilityConstraint reachabilityConstraint,
+   public MultiStepCaptureRegionCalculator(StepAdjustmentReachabilityConstraint reachabilityConstraint,
                                            BooleanProvider useCrossOverSteps,
                                            YoRegistry parentRegistry,
                                            YoGraphicsListRegistry graphicsListRegistry)
    {
-      this.soleFrames = soleFrames;
       this.reachabilityConstraint = reachabilityConstraint;
       this.useCrossOverSteps = useCrossOverSteps;
 
@@ -184,6 +169,65 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
                                     FrameConvexPolygon2DBasics expandedRegionToPack,
                                     double stepMultiplier)
    {
+      if (regionToExpand.getNumberOfVertices() > 2)
+      {
+         expandCaptureRegionPolygon(regionToExpand, reachabilityPolygon, expandedRegionToPack, stepMultiplier);
+      }
+      else if (regionToExpand.getNumberOfVertices() == 2)
+      {
+         expandCaptureRegionLine(regionToExpand, reachabilityPolygon, expandedRegionToPack, stepMultiplier);
+      }
+      else
+      {
+         expandCaptureRegionPoint(regionToExpand, reachabilityPolygon, expandedRegionToPack, stepMultiplier);
+      }
+   }
+
+   private void expandCaptureRegionPoint(FrameConvexPolygon2DReadOnly regionToExpand,
+                                         ConvexPolygon2DReadOnly reachabilityPolygon,
+                                         FrameConvexPolygon2DBasics expandedRegionToPack,
+                                         double stepMultiplier)
+   {
+      expandedRegionToPack.clear();
+      FramePoint2DReadOnly vertex = regionToExpand.getVertex(0);
+
+      expandPoint(vertex, reachabilityPolygon, expansionPoints, stepMultiplier);
+
+      for (int expandedPointIndex = 0; expandedPointIndex < expansionPoints.size(); expandedPointIndex++)
+      {
+         Point2DBasics expansionPoint = expansionPoints.get(expandedPointIndex);
+         expandedRegionToPack.addVertex(expansionPoint.getX(), expansionPoint.getY());
+      }
+      expandedRegionToPack.update();
+   }
+
+   private void expandCaptureRegionLine(FrameConvexPolygon2DReadOnly regionToExpand,
+                                        ConvexPolygon2DReadOnly reachabilityPolygon,
+                                        FrameConvexPolygon2DBasics expandedRegionToPack,
+                                        double stepMultiplier)
+   {
+      expandedRegionToPack.clear();
+
+      for (int vertexIdx = 0; vertexIdx < regionToExpand.getNumberOfVertices(); vertexIdx++)
+      {
+         FramePoint2DReadOnly vertex = regionToExpand.getVertex(vertexIdx);
+
+         expandLine(vertex, regionToExpand.getNextVertex(vertexIdx), reachabilityPolygon, expansionPoints, stepMultiplier);
+
+         for (int expandedPointIndex = 0; expandedPointIndex < expansionPoints.size(); expandedPointIndex++)
+         {
+            Point2DBasics expansionPoint = expansionPoints.get(expandedPointIndex);
+            expandedRegionToPack.addVertex(expansionPoint.getX(), expansionPoint.getY());
+         }
+      }
+      expandedRegionToPack.update();
+   }
+
+   private void expandCaptureRegionPolygon(FrameConvexPolygon2DReadOnly regionToExpand,
+                                           ConvexPolygon2DReadOnly reachabilityPolygon,
+                                           FrameConvexPolygon2DBasics expandedRegionToPack,
+                                           double stepMultiplier)
+   {
       expandedRegionToPack.clear();
       FramePoint2DReadOnly vertex = regionToExpand.getVertex(0);
       FramePoint2DReadOnly previousVertex = regionToExpand.getPreviousVertex(0);
@@ -206,14 +250,67 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
       expandedRegionToPack.update();
    }
 
+   private static void expandPoint(FramePoint2DReadOnly pointToExpand,
+                                   ConvexPolygon2DReadOnly reachabilityRegion,
+                                   RecyclingArrayList<FramePoint2DBasics> expansionPointsToPack,
+                                   double expansionScalar)
+   {
+      expansionPointsToPack.clear();
+      ReferenceFrame referenceFrame = pointToExpand.getReferenceFrame();
+
+      for (int i = 0; i < reachabilityRegion.getNumberOfVertices(); i++)
+      {
+         Point2DReadOnly vertex = reachabilityRegion.getNextVertex(i);
+
+         FramePoint2DBasics expansionVector = expansionPointsToPack.add();
+         expansionVector.setReferenceFrame(referenceFrame);
+         expansionVector.scaleAdd(-expansionScalar, vertex, pointToExpand);
+      }
+
+      if (expansionPointsToPack.size() == 0)
+         expansionPointsToPack.add().set(pointToExpand);
+   }
+
+   private static void expandLine(FramePoint2DReadOnly pointToExpand,
+                                  FramePoint2DReadOnly otherEnd,
+                                  ConvexPolygon2DReadOnly reachabilityRegion,
+                                  RecyclingArrayList<FramePoint2DBasics> expansionPointsToPack,
+                                  double expansionScalar)
+   {
+      expansionPointsToPack.clear();
+
+      ReferenceFrame referenceFrame = pointToExpand.getReferenceFrame();
+
+      Point2DReadOnly vertex = reachabilityRegion.getVertex(0);
+      Point2DReadOnly precedingPointB = reachabilityRegion.getPreviousVertex(0);
+
+      for (int i = 0; i < reachabilityRegion.getNumberOfVertices(); i++)
+      {
+         Point2DReadOnly succeedingPointB = reachabilityRegion.getNextVertex(i);
+
+         if (!isRayPointingToTheInside(precedingPointB, vertex, succeedingPointB, otherEnd.getX() - pointToExpand.getX(), otherEnd.getY() - pointToExpand.getY()))
+         {
+            FramePoint2DBasics expansionVector = expansionPointsToPack.add();
+            expansionVector.setReferenceFrame(referenceFrame);
+            expansionVector.scaleAdd(-expansionScalar, vertex, pointToExpand);
+         }
+
+         precedingPointB = vertex;
+         vertex = succeedingPointB;
+      }
+
+      if (expansionPointsToPack.size() == 0)
+         expansionPointsToPack.add().set(pointToExpand);
+   }
+
    private static void expandCorner(FramePoint2DReadOnly precedingPoint,
                                     FramePoint2DReadOnly cornerToExpand,
                                     FramePoint2DReadOnly succeedingPoint,
                                     ConvexPolygon2DReadOnly reachabilityRegion,
-                                    RecyclingArrayList<FramePoint2DBasics> expansionDirectionsToPack,
+                                    RecyclingArrayList<FramePoint2DBasics> expansionPointsToPack,
                                     double expansionScalar)
    {
-      expansionDirectionsToPack.clear();
+      expansionPointsToPack.clear();
 
       ReferenceFrame referenceFrame = precedingPoint.getReferenceFrame();
 
@@ -224,9 +321,9 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
       {
          Point2DReadOnly succeedingPointB = reachabilityRegion.getNextVertex(i);
 
-         if (isPointASharedNonintersectingVertex(precedingPoint, cornerToExpand, succeedingPoint, precedingPointB, vertex, succeedingPointB))
+         if (isPointASharedNonIntersectingVertex(precedingPoint, cornerToExpand, succeedingPoint, precedingPointB, vertex, succeedingPointB))
          {
-            FramePoint2DBasics expansionVector = expansionDirectionsToPack.add();
+            FramePoint2DBasics expansionVector = expansionPointsToPack.add();
             expansionVector.setReferenceFrame(referenceFrame);
             expansionVector.scaleAdd(-expansionScalar, vertex, cornerToExpand);
          }
@@ -235,8 +332,47 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
          vertex = succeedingPointB;
       }
 
-      if (expansionDirectionsToPack.size() == 0)
-         expansionDirectionsToPack.add().set(cornerToExpand);
+      if (expansionPointsToPack.size() == 0)
+         expansionPointsToPack.add().set(cornerToExpand);
+   }
+
+   static boolean isRayPointingToTheInside(Point2DReadOnly precedingPointA,
+                                           Point2DReadOnly cornerToCheckA,
+                                           Point2DReadOnly succeedingPointA,
+                                           Point2DReadOnly sharedPointB,
+                                           Point2DReadOnly otherPointOnB)
+   {
+      return isRayPointingToTheInside(precedingPointA, cornerToCheckA, succeedingPointA,
+                                      otherPointOnB.getX() - sharedPointB.getX(),
+                                      otherPointOnB.getY() - sharedPointB.getY());
+   }
+
+   static boolean isRayPointingToTheInside(Point2DReadOnly precedingPointA,
+                                           Point2DReadOnly cornerToCheckA,
+                                           Point2DReadOnly succeedingPointA,
+                                           double dx,
+                                           double dy)
+   {
+      return isRayPointingToTheInside(precedingPointA.getX() - cornerToCheckA.getX(),
+                                      precedingPointA.getY() - cornerToCheckA.getY(),
+                                      succeedingPointA.getX() - cornerToCheckA.getX(),
+                                      succeedingPointA.getY() - cornerToCheckA.getY(),
+                                      dx,
+                                      dy);
+   }
+
+   private static boolean isRayPointingToTheInside(double dxAPrev, double dyAPrev, double dxANext, double dyANext, double dxB, double dyB)
+   {
+      boolean isBLeftOfANext = cross(dxANext, dyANext, dxB, dxB) > 0.0;
+
+      if (isBLeftOfANext)
+      {
+         return false;
+      }
+
+      boolean isBLeftOfAPrevious = cross(dxAPrev, dyAPrev, dxB, dyB) >= 0.0;
+
+      return isBLeftOfAPrevious;
    }
 
    /**
@@ -251,14 +387,14 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
     * @param succeedingPointB
     * @return
     */
-   static boolean isPointASharedNonintersectingVertex(Point2DReadOnly precedingPointA,
+   static boolean isPointASharedNonIntersectingVertex(Point2DReadOnly precedingPointA,
                                                       Point2DReadOnly cornerToCheckA,
                                                       Point2DReadOnly succeedingPointA,
                                                       Point2DReadOnly precedingPointB,
                                                       Point2DReadOnly cornerToCheckB,
                                                       Point2DReadOnly succeedingPointB)
    {
-      return isPointASharedNonintersectingVertex(precedingPointA.getX() - cornerToCheckA.getX(),
+      return isPointASharedNonIntersectingVertex(precedingPointA.getX() - cornerToCheckA.getX(),
                                                  precedingPointA.getY() - cornerToCheckA.getY(),
                                                  succeedingPointA.getX() - cornerToCheckA.getX(),
                                                  succeedingPointA.getY() - cornerToCheckA.getY(),
@@ -268,7 +404,7 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
                                                  succeedingPointB.getY() - cornerToCheckB.getY());
    }
 
-   static boolean isPointASharedNonintersectingVertex(double dxAPrev,
+   static boolean isPointASharedNonIntersectingVertex(double dxAPrev,
                                                       double dyAPrev,
                                                       double dxANext,
                                                       double dyANext,
