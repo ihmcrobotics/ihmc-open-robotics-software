@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
@@ -115,6 +116,12 @@ public class CaptureRegionSafetyHeuristics implements SCS2YoGraphicHolder
 
       saferCaptureRegion.update();
 
+      // If the safety capture region is bad, we can reset it to be a line. Likely, moving something towards to the center messed up, so this resets things.
+      if (saferCaptureRegion.getNumberOfVertices() < 1)
+      {
+         createTheCaptureLine(captureRegion, capturePoint, saferCaptureRegion);
+      }
+
       yoSafetyBiasedCaptureRegion.setMatchingFrame(saferCaptureRegion, false);
    }
 
@@ -123,6 +130,11 @@ public class CaptureRegionSafetyHeuristics implements SCS2YoGraphicHolder
       if (saferCaptureRegion.getNumberOfVertices() > 3)
       {
          if (computeVisibiltyOfVerticesFromStance(saferCaptureRegion))
+            projectVerticesVisibleToStanceAwayFromTheFoot();
+      }
+      else if (saferCaptureRegion.getNumberOfVertices() == 3)
+      {
+         if (computeClosestVertexOfTheTriangle(saferCaptureRegion))
             projectVerticesVisibleToStanceAwayFromTheFoot();
       }
       else if (saferCaptureRegion.getNumberOfVertices() == 2)
@@ -157,6 +169,16 @@ public class CaptureRegionSafetyHeuristics implements SCS2YoGraphicHolder
             break;
          }
       }
+
+      return true;
+   }
+
+   private boolean computeClosestVertexOfTheTriangle(FrameConvexPolygon2DBasics oneStepCaptureRegion)
+   {
+      verticesVisibleFromStance.clear();
+
+      int closestVertexIndex = oneStepCaptureRegion.getClosestVertexIndex(stancePosition);
+      verticesVisibleFromStance.add(oneStepCaptureRegion.getVertexUnsafe(closestVertexIndex));
 
       return true;
    }
@@ -260,6 +282,28 @@ public class CaptureRegionSafetyHeuristics implements SCS2YoGraphicHolder
 
       saferCaptureRegion.getVertexUnsafe(indexToModify).add(tempVector);
       saferCaptureRegion.notifyVerticesChanged();
+   }
+
+   private final FramePoint2D firstPoint = new FramePoint2D();
+   private final FramePoint2D secondPoint = new FramePoint2D();
+
+   private void createTheCaptureLine(FrameConvexPolygon2DReadOnly oneStepCaptureRegion,
+                                     FramePoint2DReadOnly capturePoint,
+                                     FrameConvexPolygon2DBasics captureLineToPack)
+   {
+      int intersections = oneStepCaptureRegion.intersectionWith(lineOfMinimalAction, firstPoint, secondPoint);
+      captureLineToPack.clear();
+      if (intersections == 0)
+         captureLineToPack.addVertex(capturePoint);
+      else if (intersections == 1)
+         captureLineToPack.addVertex(firstPoint);
+      else
+      {
+         captureLineToPack.addVertex(firstPoint);
+         captureLineToPack.addVertex(secondPoint);
+      }
+
+      captureLineToPack.update();
    }
 
    private static boolean checkIfClockWiseOrdered(List<? extends Point2DReadOnly> points, ConvexPolygon2DReadOnly captureRegion)
