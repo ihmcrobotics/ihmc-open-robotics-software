@@ -229,7 +229,6 @@ public class ZED2ColorStereoDepthPublisher
 
          // Close stuff
          colorJPEGPointer.close();
-         colorImageBGR.release();
          colorImageBGR.close();
          colorImageBGRA.close();
       }
@@ -276,7 +275,6 @@ public class ZED2ColorStereoDepthPublisher
       // Close stuff
       depthPNGPointer.close();
       cpuDepthImage16UC1.close();
-      gpuDepthImage16UC1.release();
       gpuDepthImage16UC1.close();
    }
 
