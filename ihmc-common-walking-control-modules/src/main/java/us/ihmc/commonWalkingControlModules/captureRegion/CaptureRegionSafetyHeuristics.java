@@ -294,13 +294,13 @@ public class CaptureRegionSafetyHeuristics implements SCS2YoGraphicHolder
       int intersections = oneStepCaptureRegion.intersectionWith(lineOfMinimalAction, firstPoint, secondPoint);
       captureLineToPack.clear();
       if (intersections == 0)
-         captureLineToPack.addVertex(capturePoint);
+         captureLineToPack.addVertexMatchingFrame(capturePoint, false);
       else if (intersections == 1)
-         captureLineToPack.addVertex(firstPoint);
+         captureLineToPack.addVertexMatchingFrame(firstPoint, false);
       else
       {
-         captureLineToPack.addVertex(firstPoint);
-         captureLineToPack.addVertex(secondPoint);
+         captureLineToPack.addVertexMatchingFrame(firstPoint, false);
+         captureLineToPack.addVertexMatchingFrame(secondPoint, false);
       }
 
       captureLineToPack.update();
