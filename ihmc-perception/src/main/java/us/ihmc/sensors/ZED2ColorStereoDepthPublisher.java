@@ -35,22 +35,25 @@ import java.util.function.Supplier;
 
 import static org.bytedeco.zed.global.zed.*;
 
+/**
+ * Encodes and publishes color and depth images from a ZED 2 sensor.
+ * Both depth and color images are aligned to the left side camera of the sensor.
+ */
 public class ZED2ColorStereoDepthPublisher
 {
    private static final int CAMERA_FPS = 30;
    private static final float MILLIMETER_TO_METERS = 0.001f;
 
-   private long depthImageSequenceNumber = 0L;
-   private long colorImageSequenceNumber = 0L;
-
    private final int cameraID;
    private final SL_RuntimeParameters zedRuntimeParameters = new SL_RuntimeParameters();
-   private final SL_CalibrationParameters zedCalibrationParameters;
+   private final SL_CalibrationParameters zedCalibrationParameters; // These hold the camera's focal lengths, principal point, etc.
 
-   private final int imageWidth;
-   private final int imageHeight;
+   private final int imageWidth; // Width of rectified image in pixels (color image width == depth image width)
+   private final int imageHeight; // Height of rectified image in pixels (color image height ==  depth image height)
    private final Pointer colorImagePointer;
    private final Pointer depthImagePointer;
+   private long depthImageSequenceNumber = 0L;
+   private long colorImageSequenceNumber = 0L;
 
    private final ImageMessage colorImageMessage = new ImageMessage();
    private final ImageMessage depthImageMessage = new ImageMessage();
@@ -75,6 +78,7 @@ public class ZED2ColorStereoDepthPublisher
    {
       this.cameraID = cameraID;
 
+      // Create and initialize the camera
       sl_create_camera(cameraID);
 
       SL_InitParameters zedInitializationParameters = new SL_InitParameters();
@@ -108,10 +112,12 @@ public class ZED2ColorStereoDepthPublisher
       zedRuntimeParameters.remove_saturated_areas(true);
       zedRuntimeParameters.enable_fill_mode(false);
 
+      // Get camera's parameters
       zedCalibrationParameters = sl_get_calibration_parameters(cameraID, false);
       imageWidth = sl_get_width(cameraID);
       imageHeight = sl_get_height(cameraID);
 
+      // Create Pointers to the SL mats for the images
       colorImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_GPU));
       depthImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U16_C1, SL_MEM_GPU));
 
@@ -128,6 +134,8 @@ public class ZED2ColorStereoDepthPublisher
       {
          while (running)
          {
+            // Continuously grab images from the camera. These images go to GPU memory.
+            // sl_grab processes the stereo images to create the depth image
             checkError("sl_grab", sl_grab(cameraID, zedRuntimeParameters));
             zedLeftCameraFramePose.setToZero(zed2FrameSupplier.get());
          }
@@ -137,8 +145,8 @@ public class ZED2ColorStereoDepthPublisher
       {
          while (running)
          {
-            retrieveAndPublishColorImage();
             throttler.waitAndRun();
+            retrieveAndPublishColorImage();
          }
       }, "ZED2ColorImagePublishThread");
 
@@ -146,8 +154,8 @@ public class ZED2ColorStereoDepthPublisher
       {
          while (running)
          {
-            retrieveAndPublishDepthImage();
             throttler.waitAndRun();
+            retrieveAndPublishDepthImage();
          }
       }, "ZED2DepthImagePublishThread");
 
@@ -207,10 +215,11 @@ public class ZED2ColorStereoDepthPublisher
    private void retrieveAndPublishDepthImage()
    {
       // Retrieve depth image
+      // There is a bug where retrieving the depth image using SL_MEM_CPU causes the depth image to be misaligned and very dark.
+      // Thus, the image is retrieved onto a GpuMat then downloaded onto the CPU for further processing.
       checkError("sl_retrieve_measure", sl_retrieve_measure(cameraID, depthImagePointer, SL_MEASURE_DEPTH_U16_MM, SL_MEM_GPU, imageWidth, imageHeight));
       depthImageAcquisitionTime.set(Instant.now());
 
-      // Encode depth image to png
       GpuMat gpuDepthImage16UC1 = new GpuMat(imageHeight,
                                              imageWidth,
                                              opencv_core.CV_16UC1,
@@ -219,6 +228,7 @@ public class ZED2ColorStereoDepthPublisher
       Mat cpuDepthImage16UC1 = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
       gpuDepthImage16UC1.download(cpuDepthImage16UC1);
 
+      // Encode depth image to png
       BytePointer depthPNGPointer = new BytePointer();
       OpenCVTools.compressImagePNG(cpuDepthImage16UC1, depthPNGPointer);
 
