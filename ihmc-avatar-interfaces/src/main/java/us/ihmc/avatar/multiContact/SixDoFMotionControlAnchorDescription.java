@@ -169,8 +169,11 @@ public class SixDoFMotionControlAnchorDescription
 
    public void setContactNormal(FrameVector3DReadOnly contactNormal)
    {
-      contactNormal.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      this.contactNormal = contactNormal;
+      if (contactNormal != null)
+      {
+         contactNormal.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+         this.contactNormal = contactNormal;
+      }
    }
 
    public void setInputMessage(KinematicsToolboxRigidBodyMessage inputMessage)
