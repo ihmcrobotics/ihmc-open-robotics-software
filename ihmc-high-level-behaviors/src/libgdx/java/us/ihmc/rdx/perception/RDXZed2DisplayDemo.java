@@ -8,6 +8,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 
 public class RDXZed2DisplayDemo
@@ -26,7 +27,7 @@ public class RDXZed2DisplayDemo
          {
             RDXROS2ImageMessageVisualizer zed2ColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color",
                                                                                                        PubSubImplementation.FAST_RTPS,
-                                                                                                       PerceptionAPI.ZED2_STEREO_COLOR);
+                                                                                                       PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
             zed2ColorImageVisualizer.setSubscribed(true);
             zed2ColorImageVisualizer.setActive(true);
             globalVisualizersPanel.addVisualizer(zed2ColorImageVisualizer);
@@ -41,7 +42,8 @@ public class RDXZed2DisplayDemo
             RDXROS2ColoredPointCloudVisualizer zed2ColoredPointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED 2 Colored Point Cloud",
                                                                                                                         PubSubImplementation.FAST_RTPS,
                                                                                                                         PerceptionAPI.ZED2_DEPTH,
-                                                                                                                        PerceptionAPI.ZED2_STEREO_COLOR);
+                                                                                                                        PerceptionAPI.ZED2_COLOR_IMAGES
+                                                                                                                        .get(RobotSide.LEFT));
             zed2ColoredPointCloudVisualizer.setSubscribed(true);
             zed2ColoredPointCloudVisualizer.setActive(true);
             globalVisualizersPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
