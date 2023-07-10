@@ -77,6 +77,8 @@ public class RDXInteractableFootstep
    private final SideDependentList<Boolean> modified = new SideDependentList<>(false, false);
    private SideDependentList<FramePose3D> footBeingPlaced = new SideDependentList<>();
    private FramePose3D footPose;
+   private RDXModelInstance leftLaser;
+   private RDXModelInstance rightLaser;
 
    private final SideDependentList<ModifiableReferenceFrame> dragReferenceFrame = new SideDependentList<>();
    private final SideDependentList<ModifiableReferenceFrame> laserReferenceFrame = new SideDependentList<>();
@@ -369,6 +371,10 @@ public class RDXInteractableFootstep
                                  .setToYawOrientation(-vrContext.getController(side).getXForwardZUpPose().getRoll());
                   frontController.get(side).getRotation().setYawPitchRoll(frontController.get(side).getYaw(), 0, 0);
                   frontController.get(side).getPosition().setZ(0);
+                  leftLaser = new RDXModelInstance(RDXModelBuilder.createArrow(sizeChange, 0.001, new Color(Color.WHITE)));
+                  rightLaser = new RDXModelInstance(RDXModelBuilder.createArrow(sizeChange, 0.001, new Color(Color.WHITE)));
+                  leftLaser.setPoseInWorldFrame(vrContext.getController(RobotSide.LEFT).getPickPointPose());
+                  rightLaser.setPoseInWorldFrame(vrContext.getController(RobotSide.RIGHT).getPickPointPose());
                });
             }
          }
@@ -442,6 +448,14 @@ public class RDXInteractableFootstep
          trajectoryPoint.getRenderables(renderables, pool);
 
       swingTrajectoryModel.getRenderables(renderables, pool);
+      if (rightLaser != null)
+      {
+         rightLaser.getRenderables(renderables, pool);
+      }
+      if (leftLaser != null)
+      {
+         leftLaser.getRenderables(renderables, pool);
+      }
    }
 
    // Sets the gizmo's position and rotation
