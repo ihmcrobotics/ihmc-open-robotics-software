@@ -68,12 +68,16 @@ public class RDXInteractableFootstep
    private boolean isMouseHovering;
    private final Notification contextMenuNotification = new Notification();
    private boolean isVRHovering;
-   private boolean modified = false;
-   private boolean isPointing = false;
+   private boolean isVRPointing;
+   private double sizeChange = 0;
    private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
-   private FramePose3D frontController;
+   private SideDependentList<FramePose3D> frontController = new SideDependentList<>();
    private final SideDependentList<Boolean> isVRDragging = new SideDependentList<>(false, false);
+   private final SideDependentList<Boolean> isVRLasering = new SideDependentList<>(false, false);
+   private final SideDependentList<Boolean> modified = new SideDependentList<>(false, false);
+
    private final SideDependentList<ModifiableReferenceFrame> dragReferenceFrame = new SideDependentList<>();
+   private final SideDependentList<ModifiableReferenceFrame> laserReferenceFrame = new SideDependentList<>();
 
    private final List<ModelInstance> trajectoryWaypointModel = new ArrayList<>();
    private final RDXPolynomial swingTrajectoryModel = new RDXPolynomial(0.03, 25);
@@ -243,6 +247,7 @@ public class RDXInteractableFootstep
    public void processVRInput(RDXVRContext vrContext)
    {
       isVRHovering = false;
+      isVRPointing = false;
 
       for (RobotSide side : RobotSide.values)
       {
@@ -261,10 +266,9 @@ public class RDXInteractableFootstep
                dragReferenceFrame.put(side, new ModifiableReferenceFrame(controller.getPickPoseFrame()));
             }
 
-
             if (isHovering && newlyGripped)
             {
-               modified = true;
+               modified.put(side, true);
                selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getTransformToDesiredFrame(dragReferenceFrame.get(side).getTransformToParent(),
                                                                                                controller.getPickPoseFrame());
                dragReferenceFrame.get(side).getReferenceFrame().update();
@@ -280,29 +284,40 @@ public class RDXInteractableFootstep
             if (newlyUnGripped || !gripped)
                isVRDragging.put(side, false);
 
-            boolean triggered = controller.getClickTriggerActionData().bState();
-            boolean newPressedTrigger = triggered && controller.getClickTriggerActionData().bChanged();
-            boolean newReleasedTrigger = !triggered && controller.getClickTriggerActionData().bChanged();
+            boolean isPointing = false;
             calculateVR(vrContext);
-            if (frontController != null)
+            if(frontController.get(side) != null)
             {
-               isPointing |= frontController.getPositionDistance(getFootPose().getTranslation()) < 0.1;
-            }
+               isPointing |= frontController.get(side).getPositionDistance(getFootPose().getPosition()) < 0.1;
+               isVRPointing |= isPointing;
 
-            if (isPointing && newPressedTrigger)
-            {
-               selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getTransformToDesiredFrame(dragReferenceFrame.get(side).getTransformToParent(), frontController.getReferenceFrame());
-               dragReferenceFrame.get(side).getReferenceFrame().update();
-               isVRDragging.put(side, true);
-            }
-            if (isVRDragging.get(side))
-            {
-               dragReferenceFrame.get(side).getReferenceFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
-                                                                                           ReferenceFrame.getWorldFrame());
-            }
-            if (newReleasedTrigger || !triggered)
-            {
-               isVRDragging.put(side, false);
+               boolean triggered = controller.getClickTriggerActionData().bState();
+               boolean newPressedTrigger = triggered && controller.getClickTriggerActionData().bChanged();
+               boolean newReleasedTrigger = !triggered && controller.getClickTriggerActionData().bChanged();
+
+               if (isPointing && newPressedTrigger)
+               {
+                     modified.put(side, true);
+                     selectablePose3DGizmo.getPoseGizmo()
+                                          .getGizmoFrame()
+                                          .getTransformToDesiredFrame(dragReferenceFrame.get(side).getTransformToParent(), frontController.get(side).getReferenceFrame());
+                     dragReferenceFrame.get(side).getReferenceFrame().update();
+                     isVRLasering.put(side, true);
+               }
+               else if (newPressedTrigger && !isPointing)
+               {
+
+               }
+
+               if (isVRLasering.get(side))
+               {
+                  setGizmoPose(frontController.get(side).getTranslationX(), frontController.get(side).getTranslationY(), frontController.get(side).getTranslationZ(), frontController.get(side).getYaw(), 0, 0);
+               }
+
+               if (newReleasedTrigger)
+               {
+                  isVRLasering.put(side, false);
+               }
             }
             if (isHovering || isPointing)
             {
@@ -335,23 +350,23 @@ public class RDXInteractableFootstep
             if (side != null)
             {
                vrContext.getController(side).runIfConnected(controller ->
-                                                            {
-                                                               frontController = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                                                                 vrContext.getController(side).getXForwardZUpPose());
-                                                               frontController.changeFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
-                                                               frontController.setToZero(vrContext.getController(side).getXForwardZUpControllerFrame());
-                                                               frontController.getPosition().addX(.1);
-                                                               frontController.changeFrame(ReferenceFrame.getWorldFrame());
-                                                               double sizeChange = vrContext.getController(side).getXForwardZUpPose().getZ() / (
-                                                                     vrContext.getController(side).getXForwardZUpPose().getZ() - frontController.getTranslationZ());
-                                                               frontController.changeFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
-                                                               frontController.getPosition().addX(sizeChange * frontController.getX());
-                                                               frontController.changeFrame(ReferenceFrame.getWorldFrame());
-                                                               frontController.getOrientation()
-                                                                              .setToYawOrientation(-vrContext.getController(side).getXForwardZUpPose().getRoll());
-                                                               frontController.getRotation().setYawPitchRoll(frontController.getYaw(), 0, 0);
-                                                               frontController.getPosition().setZ(0);
-                                                            });
+               {
+                  frontController.put(side, new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                            vrContext.getController(side).getXForwardZUpPose()));
+                  frontController.get(side).changeFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
+                  frontController.get(side).setToZero(vrContext.getController(side).getXForwardZUpControllerFrame());
+                  frontController.get(side).getPosition().addX(.1);
+                  frontController.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+                  sizeChange = vrContext.getController(side).getXForwardZUpPose().getZ() / (
+                        vrContext.getController(side).getXForwardZUpPose().getZ() - frontController.get(side).getTranslationZ());
+                  frontController.get(side).changeFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
+                  frontController.get(side).getPosition().addX(sizeChange * frontController.get(side).getX());
+                  frontController.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+                  frontController.get(side).getOrientation()
+                                 .setToYawOrientation(-vrContext.getController(side).getXForwardZUpPose().getRoll());
+                  frontController.get(side).getRotation().setYawPitchRoll(frontController.get(side).getYaw(), 0, 0);
+                  frontController.get(side).getPosition().setZ(0);
+               });
             }
          }
       }
@@ -432,6 +447,16 @@ public class RDXInteractableFootstep
       RigidBodyTransform gizmoTransform = selectablePose3DGizmo.getPoseGizmo().getTransformToParent();
       gizmoTransform.getTranslation().set(x, y, z);
       gizmoTransform.getRotation().set(transform.getRotation());
+      plannedFootstepInternal.getFootstepPose().set(gizmoTransform);
+      wasPoseUpdated = true;
+
+      boundingSphere.getPosition().set(x, y, z);
+   }
+   public void setGizmoPose(double x, double y, double z, double yaw, double pitch, double roll)
+   {
+      RigidBodyTransform gizmoTransform = selectablePose3DGizmo.getPoseGizmo().getTransformToParent();
+      gizmoTransform.getTranslation().set(x, y, z);
+      gizmoTransform.getRotation().setYawPitchRoll(yaw, pitch, roll);
       plannedFootstepInternal.getFootstepPose().set(gizmoTransform);
       wasPoseUpdated = true;
 
