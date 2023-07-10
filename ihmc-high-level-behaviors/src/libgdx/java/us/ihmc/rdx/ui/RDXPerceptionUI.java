@@ -101,14 +101,15 @@ public class RDXPerceptionUI
             globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("D435 Depth",
                                                                                 PubSubImplementation.FAST_RTPS,
                                                                                 PerceptionAPI.D435_DEPTH_IMAGE));
+
             RDXROS2ColoredPointCloudVisualizer ZEDColoredDepthVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED2 Colored Depth",
                                                                                                                    PubSubImplementation.FAST_RTPS,
                                                                                                                    PerceptionAPI.ZED2_DEPTH,
-                                                                                                                   PerceptionAPI.ZED2_STEREO_COLOR);
+                                                                                                                   PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
             globalVisualizersUI.addVisualizer(ZEDColoredDepthVisualizer);
             globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("ZED2 Color Stereo",
                                                                                 PubSubImplementation.FAST_RTPS,
-                                                                                PerceptionAPI.ZED2_STEREO_COLOR));
+                                                                                PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT)));
 
             globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("ZED2 Depth",
                                                                                 PubSubImplementation.FAST_RTPS,

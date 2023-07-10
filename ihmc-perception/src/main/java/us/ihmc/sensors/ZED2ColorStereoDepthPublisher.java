@@ -24,6 +24,7 @@ import us.ihmc.perception.cuda.CUDAImageEncoder;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
@@ -274,6 +275,6 @@ public class ZED2ColorStereoDepthPublisher
 
    public static void main(String[] args)
    {
-      new ZED2ColorStereoDepthPublisher(0, PerceptionAPI.ZED2_STEREO_COLOR, PerceptionAPI.ZED2_DEPTH, ReferenceFrame::getWorldFrame);
+      new ZED2ColorStereoDepthPublisher(0, PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT), PerceptionAPI.ZED2_DEPTH, ReferenceFrame::getWorldFrame);
    }
 }

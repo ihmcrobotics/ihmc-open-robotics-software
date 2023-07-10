@@ -114,6 +114,12 @@ public class PerceptionAPI
    public static final ROS2Topic<BigVideoPacket> BIG_VIDEO_TEST = IHMC_ROOT.withModule(BLACKFLY_NAME).withType(BigVideoPacket.class).withSuffix("test");
 
    public static final ROS2Topic<ImageMessage> ZED2_STEREO_COLOR = IHMC_ROOT.withModule(ZED2_NAME).withType(ImageMessage.class).withSuffix("color_stereo");
+   public static final SideDependentList<ROS2Topic<ImageMessage>> ZED2_COLOR_IMAGES = new SideDependentList<>(IHMC_ROOT.withModule(ZED2_NAME)
+                                                                                                                       .withType(ImageMessage.class)
+                                                                                                                       .withSuffix("left_color"),
+                                                                                                              IHMC_ROOT.withModule(ZED2_NAME)
+                                                                                                                       .withType(ImageMessage.class)
+                                                                                                                       .withSuffix("right_color"));
    public static final ROS2Topic<ImageMessage> ZED2_DEPTH = IHMC_ROOT.withSuffix(ZED2_NAME).withType(ImageMessage.class).withSuffix("depth");
 
    public static final ROS2Topic<LidarScanMessage> MULTISENSE_LIDAR_SCAN = IHMC_ROOT.withTypeName(LidarScanMessage.class);
