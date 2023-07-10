@@ -12,9 +12,12 @@ import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -34,6 +37,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRControllerModel;
+import us.ihmc.robotics.interaction.MouseCollidable;
 import us.ihmc.robotics.interaction.StepCheckIsPointInsideAlgorithm;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.visualizers.RDXPolynomial;
@@ -56,10 +60,11 @@ public class RDXInteractableFootstep
    private static final Map<String, RDX3DSituatedText> textRenderablesMap = new HashMap<>();
    private RDX3DSituatedText footstepIndexText;
    private ModelInstance footstepModelInstance;
-   private RDXSelectablePose3DGizmo selectablePose3DGizmo;
+   private final RDXSelectablePose3DGizmo selectablePose3DGizmo;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private boolean isHovered;
    private final Sphere3D boundingSphere = new Sphere3D(0.1);
+   private final FrameBox3D selectionCollisionBox;
    private boolean isClickedOn;
    private final FramePose3D textFramePose = new FramePose3D();
    private final Timer timerFlashingFootsteps = new Timer();
@@ -79,6 +84,7 @@ public class RDXInteractableFootstep
    private FramePose3D footPose;
    private RDXModelInstance leftLaser;
    private RDXModelInstance rightLaser;
+   private MouseCollidable mouseCollidable;
 
    private final SideDependentList<ModifiableReferenceFrame> dragReferenceFrame = new SideDependentList<>();
    private final SideDependentList<ModifiableReferenceFrame> laserReferenceFrame = new SideDependentList<>();
@@ -109,6 +115,13 @@ public class RDXInteractableFootstep
 
       selectablePose3DGizmo = new RDXSelectablePose3DGizmo();
       selectablePose3DGizmo.create(baseUI.getPrimary3DPanel());
+      selectionCollisionBox = new FrameBox3D(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
+      // Measured footstep.fbx in Blender
+      double footGraphicHeight = 0.029234;
+      selectionCollisionBox.getSize().set(0.25, 0.12, footGraphicHeight);
+      selectionCollisionBox.getPose().getTranslation().set(0.010887, 0.0, footGraphicHeight / 2.0);
+      mouseCollidable = new MouseCollidable(selectionCollisionBox);
+
 
       updateFootstepIndexText(index);
    }
@@ -183,9 +196,6 @@ public class RDXInteractableFootstep
          }
       }
 
-      selectablePose3DGizmo = new RDXSelectablePose3DGizmo();
-      selectablePose3DGizmo.create(baseUI.getPrimary3DPanel());
-
       updateFootstepIndexText(footstepIndex);
 
       updatePose(plannedFootstep.getFootstepPose());
@@ -259,6 +269,7 @@ public class RDXInteractableFootstep
          {
             boolean isHovering = false;
                isHovering |= controller.getPickPointPose().getTranslation().distance(getFootPose().getPosition()) < 0.1;
+
             isVRHovering |= isHovering;
 
             boolean gripped = controller.getGripped();
@@ -384,17 +395,15 @@ public class RDXInteractableFootstep
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
       selectablePose3DGizmo.calculate3DViewPick(input);
+      Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
+      pickResult.reset();
+      double collision = mouseCollidable.collide(pickRayInWorld, selectionCollisionBox.getReferenceFrame());
+      if (!Double.isNaN(collision))
+         pickResult.addPickCollision(collision);
 
-      StepCheckIsPointInsideAlgorithm stepCheckIsPointInsideAlgorithm = new StepCheckIsPointInsideAlgorithm();
-      stepCheckIsPointInsideAlgorithm.update(boundingSphere.getRadius(), boundingSphere.getPosition());
-
-      Function<Point3DReadOnly, Boolean> isPointInside = boundingSphere::isPointInside;
-      boolean pickIntersected = !Double.isNaN(stepCheckIsPointInsideAlgorithm.intersect(input.getPickRayInWorld(), 100, isPointInside));
-      if (pickIntersected)
-      {
-         pickResult.setDistanceToCamera(stepCheckIsPointInsideAlgorithm.getClosestIntersection().distance(input.getPickRayInWorld().getPoint()));
+      if(pickResult.getPickCollisionWasAddedSinceReset())
          input.addPickResult(pickResult);
-      }
+
    }
 
    public void process3DViewInput(ImGui3DViewInput input, boolean currentlyPlacingFootstep)
@@ -435,7 +444,8 @@ public class RDXInteractableFootstep
       footstepModelInstance.transform.setTranslation(selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getX32(),
                                                      selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getY32(),
                                                      selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getZ32());
-      boundingSphere.getPosition().set(selectablePose3DGizmo.getPoseGizmo().getPose().getPosition());
+      selectionCollisionBox.getPosition().set(selectablePose3DGizmo.getPoseGizmo().getPose().getPosition());
+
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -467,7 +477,7 @@ public class RDXInteractableFootstep
       plannedFootstepInternal.getFootstepPose().set(gizmoTransform);
       wasPoseUpdated = true;
 
-      boundingSphere.getPosition().set(x, y, z);
+      selectionCollisionBox.getPosition().set(x, y, z);
    }
    public void setGizmoPose(double x, double y, double z, double yaw, double pitch, double roll)
    {
@@ -477,7 +487,7 @@ public class RDXInteractableFootstep
       plannedFootstepInternal.getFootstepPose().set(gizmoTransform);
       wasPoseUpdated = true;
 
-      boundingSphere.getPosition().set(x, y, z);
+      selectionCollisionBox.getPosition().set(x, y, z);
    }
 
    public void flashFootstepWhenBadPlacement(BipedalFootstepPlannerNodeRejectionReason reason)
@@ -643,7 +653,6 @@ public class RDXInteractableFootstep
       this.footstepIndexText = manuallyPlacedFootstep.footstepIndexText;
       this.footstepModelInstance = manuallyPlacedFootstep.footstepModelInstance;
       this.plannedFootstepInternal.set(manuallyPlacedFootstep.plannedFootstepInternal);
-      this.selectablePose3DGizmo = manuallyPlacedFootstep.selectablePose3DGizmo;
       this.isHovered = manuallyPlacedFootstep.isHovered;
       this.isClickedOn = manuallyPlacedFootstep.isClickedOn;
       this.textFramePose.setIncludingFrame(manuallyPlacedFootstep.textFramePose);
