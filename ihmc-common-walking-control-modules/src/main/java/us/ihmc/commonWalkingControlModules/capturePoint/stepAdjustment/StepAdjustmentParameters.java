@@ -87,7 +87,7 @@ public abstract class StepAdjustmentParameters
        */
       public double getForwardCrossOverDistance()
       {
-         return 0.0;
+         return 0.1;
       }
 
       /**
