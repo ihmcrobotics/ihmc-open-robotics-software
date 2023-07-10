@@ -75,6 +75,8 @@ public class RDXInteractableFootstep
    private final SideDependentList<Boolean> isVRDragging = new SideDependentList<>(false, false);
    private final SideDependentList<Boolean> isVRLasering = new SideDependentList<>(false, false);
    private final SideDependentList<Boolean> modified = new SideDependentList<>(false, false);
+   private SideDependentList<FramePose3D> footBeingPlaced = new SideDependentList<>();
+   private FramePose3D footPose;
 
    private final SideDependentList<ModifiableReferenceFrame> dragReferenceFrame = new SideDependentList<>();
    private final SideDependentList<ModifiableReferenceFrame> laserReferenceFrame = new SideDependentList<>();
@@ -306,7 +308,8 @@ public class RDXInteractableFootstep
                }
                else if (newPressedTrigger && !isPointing)
                {
-
+                  footBeingPlaced.put(side, frontController.get(side));
+                  setFootStepPose(frontController.get(side));
                }
 
                if (isVRLasering.get(side))
@@ -631,5 +634,19 @@ public class RDXInteractableFootstep
       this.isClickedOn = manuallyPlacedFootstep.isClickedOn;
       this.textFramePose.setIncludingFrame(manuallyPlacedFootstep.textFramePose);
       this.flashingFootStepsColorHigh = manuallyPlacedFootstep.flashingFootStepsColorHigh;
+   }
+
+   public void setFootStepPose(FramePose3D footPose)
+   {
+      this.footPose = footPose;
+   }
+
+   public FramePose3D getFootStepPose()
+   {
+      return footPose;
+   }
+   public boolean getIsVRPointing()
+   {
+      return isVRPointing;
    }
 }

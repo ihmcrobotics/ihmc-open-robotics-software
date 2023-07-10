@@ -86,7 +86,9 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       {
          footstepBeingPlaced.update();
          footstepBeingPlaced.updateFootstepIndexText(footstepPlan.getNumberOfFootsteps());
+
       }
+
    }
 
    public void renderImGuiWidgets()
@@ -120,9 +122,43 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
    public void processVRInput(RDXVRContext vrContext)
    {
+      for (RobotSide side : RobotSide.values)
+      {
+         vrContext.getController(side).runIfConnected(controller ->
+                                                      {
+                                                         boolean triggered = controller.getClickTriggerActionData().bState();
+                                                         boolean newPressedTrigger = triggered && controller.getClickTriggerActionData().bChanged();
+                                                         boolean newReleasedTrigger = !triggered && controller.getClickTriggerActionData().bChanged();
+
+                                                         if (newPressedTrigger)
+                                                         {
+                                                            footstepBeingPlaced = new RDXInteractableFootstep(baseUI,
+                                                                                                              side,
+                                                                                                              footstepPlan.getNumberOfFootsteps(),
+                                                                                                              null);
+                                                            for (int i = 0; i < footstepPlan.getNumberOfFootsteps(); i++)
+                                                            {
+                                                               if (footstepPlan.getFootsteps().get(i).getIsVRPointing())
+                                                               {
+                                                                  footstepBeingPlaced = null;
+                                                               }
+                                                            }
+                                                            if (footstepBeingPlaced != null)
+                                                            {
+                                                               footstepBeingPlaced.processVRInput(vrContext);
+                                                               if (footstepBeingPlaced.getFootStepPose() != null)
+                                                               {
+                                                                  vrPlacement(footstepBeingPlaced.getFootStepPose(), side);
+                                                               }
+                                                               footstepBeingPlaced = null;
+                                                            }
+                                                         }
+                                                      });
+      }
       if (footstepBeingPlaced != null)
       {
          footstepBeingPlaced.processVRInput(vrContext);
+
       }
    }
    public void calculate3DViewPick(ImGui3DViewInput input)
@@ -283,7 +319,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    public void vrPlacement(FramePose3D controllerPose, RobotSide side)
    {
       modeNewlyActivated = true;
-      footstepBeingPlaced = new RDXInteractableFootstep(baseUI, side, footstepPlan.getNumberOfFootsteps(), null);
       currentFootStepSide = side;
 
       tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
