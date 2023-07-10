@@ -25,12 +25,19 @@ public class RDXZed2DisplayDemo
          @Override
          public void create()
          {
-            RDXROS2ImageMessageVisualizer zed2ColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color",
+            RDXROS2ImageMessageVisualizer zed2LeftColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Left",
                                                                                                        PubSubImplementation.FAST_RTPS,
                                                                                                        PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
-            zed2ColorImageVisualizer.setSubscribed(true);
-            zed2ColorImageVisualizer.setActive(true);
-            globalVisualizersPanel.addVisualizer(zed2ColorImageVisualizer);
+            zed2LeftColorImageVisualizer.setSubscribed(true);
+            zed2LeftColorImageVisualizer.setActive(true);
+            globalVisualizersPanel.addVisualizer(zed2LeftColorImageVisualizer);
+
+            RDXROS2ImageMessageVisualizer zed2RightColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Right",
+                                                                                                       PubSubImplementation.FAST_RTPS,
+                                                                                                       PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.RIGHT));
+            zed2RightColorImageVisualizer.setSubscribed(true);
+            zed2RightColorImageVisualizer.setActive(true);
+            globalVisualizersPanel.addVisualizer(zed2RightColorImageVisualizer);
 
             RDXROS2ImageMessageVisualizer zed2DepthImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Depth",
                                                                                                        PubSubImplementation.FAST_RTPS,
