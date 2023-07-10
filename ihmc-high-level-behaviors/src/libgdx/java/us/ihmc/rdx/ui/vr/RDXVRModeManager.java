@@ -49,7 +49,7 @@ public class RDXVRModeManager
       handPlacedFootstepMode = new RDXVRHandPlacedFootstepMode();
       handPlacedFootstepMode.create(syncedRobot.getRobotModel(), controllerHelper);
 
-      kinematicsStreamingMode = new RDXVRKinematicsStreamingMode(syncedRobot.getRobotModel(), controllerHelper, kinematicsStreamingToolboxProcess);
+      kinematicsStreamingMode = new RDXVRKinematicsStreamingMode(syncedRobot, controllerHelper, kinematicsStreamingToolboxProcess);
       kinematicsStreamingMode.create(baseUI.getVRManager().getContext());
 
       joystickBasedStepping = new RDXJoystickBasedStepping(syncedRobot.getRobotModel());
@@ -129,8 +129,8 @@ public class RDXVRModeManager
       if (ImGui.radioButton(labels.get("Whole body IK streaming"), mode == RDXVRMode.WHOLE_BODY_IK_STREAMING))
       {
          mode = RDXVRMode.WHOLE_BODY_IK_STREAMING;
-         if (kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().isStarted() && !kinematicsStreamingMode.isEnabled())
-            kinematicsStreamingMode.setEnabled(true);
+//         if (kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().isStarted() && !kinematicsStreamingMode.isEnabled())
+//            kinematicsStreamingMode.setEnabled(true);
       }
       if (ImGui.radioButton(labels.get("Joystick walking"), mode == RDXVRMode.JOYSTICK_WALKING))
       {

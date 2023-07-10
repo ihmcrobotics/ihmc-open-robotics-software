@@ -96,7 +96,8 @@ public class RDXVRContext
    {
       {
          put("LHR-4CB1033A", "chest");
-         put("LHR-AC72B09D", "leftForeArm");
+         put("LHR-743512BE", "leftForeArm");
+//         put("LHR-AC72B09D", "leftForeArm");
          put("SerialNumber3", "rightForeArm");
       }
    }; // must use serial number, tracker role is not supported in org.lwjgl.openvr.VR

@@ -11,6 +11,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sharedControl.HandConfigurationListener;
@@ -18,6 +19,7 @@ import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
+import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -39,8 +41,10 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -56,6 +60,7 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
 {
    private static final int NUMBER_OF_PARTS_TO_RECORD = 4;
    private final DRCRobotModel robotModel;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final RestartableJavaProcess kinematicsStreamingToolboxProcess;
    private RDXMultiBodyGraphic ghostRobotGraphic;
@@ -92,11 +97,12 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
    private int rightIndex = -1;
    private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
 
-   public RDXVRKinematicsStreamingMode(DRCRobotModel robotModel,
+   public RDXVRKinematicsStreamingMode(ROS2SyncedRobotModel syncedRobot,
                                        ROS2ControllerHelper ros2ControllerHelper,
                                        RestartableJavaProcess kinematicsStreamingToolboxProcess)
    {
-      this.robotModel = robotModel;
+      this.syncedRobot = syncedRobot;
+      this.robotModel = syncedRobot.getRobotModel();
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.kinematicsStreamingToolboxProcess = kinematicsStreamingToolboxProcess;
    }
@@ -158,8 +164,8 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
       kinematicsRecorder = new KinematicsRecordReplay(ros2ControllerHelper, enabled, NUMBER_OF_PARTS_TO_RECORD);
       vrAssistant = new RDXVRAssistance(robotModel, ros2ControllerHelper, streamToController, kinematicsRecorder.isReplayingEnabled());
 
-//      if (!kinematicsStreamingToolboxProcess.isStarted())
-//         kinematicsStreamingToolboxProcess.start();
+      if (!kinematicsStreamingToolboxProcess.isStarted())
+         kinematicsStreamingToolboxProcess.start();
    }
 
    public void processVRInput(RDXVRContext vrContext)
@@ -298,18 +304,19 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
 //               }
             });
          }
-         // maintain fixed chest orientation. //todo change when found a better support for the tracker on chest
-         if (chestDesiredControlFrame == null)
+
+         if (enabled.get())
          {
-            //                     chestDesiredControlFrame = new ModifiableReferenceFrame(vrContext.getTracker(segment).getXForwardZUpTrackerFrame());
-            chestDesiredControlFrame = new ModifiableReferenceFrame(ghostFullRobotModel.getChest().getBodyFixedFrame());
-            // chestDesiredControlFrame.getTransformToParent().getRotation().appendYawRotation(-Math.PI / 2.0);
+            // maintain fixed chest orientation. //todo change when found a better support for the tracker on chest
+            if (chestDesiredControlFrame == null)
+            {
+               FixedReferenceFrame initialChestFrame = new FixedReferenceFrame("fixedChestFrame", ReferenceFrame.getWorldFrame(), new RigidBodyTransform(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame().getTransformToWorldFrame()));
+               chestDesiredControlFrame = new ModifiableReferenceFrame(initialChestFrame);
+            }
+            chestControlFrameGraphic.setToReferenceFrame(chestDesiredControlFrame.getReferenceFrame());
+            KinematicsToolboxRigidBodyMessage message = createPoseRigidBodyMessage(ghostFullRobotModel.getChest(), chestDesiredControlFrame, 100);
+            toolboxInputMessage.getInputs().add().set(message);
          }
-         //                  chestDesiredControlFrame.changeParentFrame(vrContext.getTracker(segment).getXForwardZUpTrackerFrame());
-         //                  chestDesiredControlFrame.getReferenceFrame().update();
-         chestControlFrameGraphic.setToReferenceFrame(chestDesiredControlFrame.getReferenceFrame());
-         KinematicsToolboxRigidBodyMessage message = createOrientationOnlyRigidBodyMessage(ghostFullRobotModel.getChest(), chestDesiredControlFrame, 100);
-         toolboxInputMessage.getInputs().add().set(message);
 
          if (enabled.get())
             toolboxInputMessage.setStreamToController(streamToController.get());
@@ -337,6 +344,27 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
       message.getLinearSelectionMatrix().setYSelected(false);
       message.getLinearSelectionMatrix().setZSelected(false);
       message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(weight));
+      return message;
+   }
+
+   private KinematicsToolboxRigidBodyMessage createPoseRigidBodyMessage(RigidBodyBasics endEffector, ModifiableReferenceFrame desiredControlFrame, double weight) {
+      KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
+      message.setEndEffectorHashCode(endEffector.hashCode());
+      tempFramePose.setToZero(desiredControlFrame.getReferenceFrame());
+      tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      if (kinematicsRecorder.isReplaying())
+         kinematicsRecorder.framePoseToPack(tempFramePose); //get values of tempFramePose from replay
+      message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
+      message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
+      kinematicsRecorder.framePoseToRecord(tempFramePose);
+      message.getAngularSelectionMatrix().setXSelected(true);
+      message.getAngularSelectionMatrix().setYSelected(true);
+      message.getAngularSelectionMatrix().setZSelected(true);
+      message.getLinearSelectionMatrix().setXSelected(true);
+      message.getLinearSelectionMatrix().setYSelected(true);
+      message.getLinearSelectionMatrix().setZSelected(true);
+      message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(weight));
+      message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(weight));
       return message;
    }
 
@@ -481,6 +509,7 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
       else
       {
          vrAssistant.setEnabled(false);
+         chestDesiredControlFrame = null;
       }
    }
 
