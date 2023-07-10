@@ -95,9 +95,9 @@ public class RDXVRContext
    private static final HashMap<String, String> TRACKER_SERIAL_MAP = new HashMap<String, String>()
    {
       {
-         put("LHR-4CB1033A", "Chest");
-         put("LHR-AC72B09D", "LeftForeArm");
-         put("SerialNumber3", "RightForeArm");
+         put("LHR-4CB1033A", "chest");
+         put("LHR-AC72B09D", "leftForeArm");
+         put("SerialNumber3", "rightForeArm");
       }
    }; // must use serial number, tracker role is not supported in org.lwjgl.openvr.VR
 

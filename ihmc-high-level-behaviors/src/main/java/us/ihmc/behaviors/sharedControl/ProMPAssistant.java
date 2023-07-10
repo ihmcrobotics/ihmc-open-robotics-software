@@ -85,6 +85,7 @@ public class ProMPAssistant
          HashMap<String, String>[] bodyPartsGeometries = new HashMap[numberOfTasks];
          Point3D[] goalToEETranslations = new Point3D[numberOfTasks];
          Quaternion[] goalToEERotations = new Quaternion[numberOfTasks];
+         LogTools.info("Loading ProMPs for tasks:");
          for (int i = 0; i < numberOfTasks; i++)
          {
             JsonNode taskNode = tasksArrayNode.get(i);
@@ -126,11 +127,9 @@ public class ProMPAssistant
             taskBodyPartInferenceMap.put(taskNames[i], bodyPartsInference[i]);
             taskBodyPartGoalMap.put(taskNames[i], bodyPartsGoal[i]);
             taskTransformGoalMap.put(taskNames[i], new RigidBodyTransform(goalToEERotations[i], goalToEETranslations[i]));
-            LogTools.info("Loading ProMPs for tasks:");
             LogTools.info("{}", taskNames[i]);
-            for (HashMap<String, String> partsGeometry : bodyPartsGeometries)
-               for (String key : partsGeometry.keySet())
-                  LogTools.info("     {} {}", key, partsGeometry.get(key));
+            for (String key : bodyPartsGeometries[i].keySet())
+               LogTools.info("     {} {}", key, bodyPartsGeometries[i].get(key));
          }
 
          for (ProMPManager prompManager : proMPManagers.values())

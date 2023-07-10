@@ -93,8 +93,7 @@ public class ProMPManager
          fileListTraining.add(demoTrainingDirAbs + "/" + (i + 1) + ".csv");
 
       // This is how the dofs are stored in the csv files (generated RDX framework, see RDXVRKinematicsStreaming, RDXAffordanceEditorUI)
-      // 0,1,2,3: left hand quaternion; 4,5,6: left hand X,Y,Z;
-      // 7,8,9,10: right hand quaternion; 11,12,13: right hand X,Y,Z;
+      // e.g., 0,1,2,3: left hand quaternion; 4,5,6: left hand X,Y,Z; - 7,8,9,10: right hand quaternion; 11,12,13: right hand X,Y,Z; ...
       for (Map.Entry<String, String> entry : bodyPartsGeometry.entrySet())
       {
          List<Long> dofs = new ArrayList<>();
@@ -127,6 +126,18 @@ public class ProMPManager
          if (entry.getKey().equals("rightHand"))
          {
             dofs.replaceAll(dof -> dof + 7L);
+         }
+         if (entry.getKey().equals("leftForeArm"))
+         {
+            dofs.replaceAll(dof -> dof + 14L);
+         }
+         if (entry.getKey().equals("rightForeArm"))
+         {
+            dofs.replaceAll(dof -> dof + 21L);
+         }
+         if (entry.getKey().equals("chest"))
+         {
+            dofs.replaceAll(dof -> dof + 28L);
          }
          TrajectoryGroup trainingTrajectory = new TrajectoryGroup();
          // training filelist
@@ -588,11 +599,14 @@ public class ProMPManager
       Point3D[] pointArray = new Point3D[(int) matrix.rows()];
       for (int i = 0; i < matrix.rows(); i++)
       {
-         FramePoint3D setPoint = new FramePoint3D(frame);
+         FramePoint3D setPoint;
+         if (frame != null)
+            setPoint = new FramePoint3D(frame);
+         else
+            setPoint = new FramePoint3D();
          switch (bodyPartsGeometry.get(bodyPart))
          {
             case "Position" -> setPoint.set(matrix.coeff(i, 0), matrix.coeff(i, 1), matrix.coeff(i, 2));
-            case "Orientation" -> LogTools.error("Cannot convert matrix to FramePoint3D List. Matrix contains only orientations");
             case "Pose" -> setPoint.set(matrix.coeff(i, 4), matrix.coeff(i, 5), matrix.coeff(i, 6));
          }
          if(frame != ReferenceFrame.getWorldFrame())
@@ -611,7 +625,6 @@ public class ProMPManager
          switch (bodyPartsGeometry.get(bodyPart))
          {
             case "Position" -> setPoint.set(matrix.coeff(i, 0), matrix.coeff(i, 1), matrix.coeff(i, 2));
-            case "Orientation" -> LogTools.error("Cannot convert matrix to FramePoint3D List. Matrix contains only orientations");
             case "Pose" -> setPoint.set(matrix.coeff(i, 4), matrix.coeff(i, 5), matrix.coeff(i, 6));
          }
          pointArray[i] = setPoint;

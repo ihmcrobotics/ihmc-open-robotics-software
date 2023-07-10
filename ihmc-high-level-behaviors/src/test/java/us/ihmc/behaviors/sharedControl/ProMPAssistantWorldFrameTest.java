@@ -23,6 +23,31 @@ public class ProMPAssistantWorldFrameTest
    @Test
    public void ProMPTrajectoryGenerationWorldFrameTest() throws IOException
    {
+      /* ProMPAssistant.json:
+       {
+           "testNumberUseOnlyForTesting": 1,
+           "logging" : true,
+           "numberBasisFunctions": 20,
+           "numberObservations": 50,
+           "conditionOnlyLastObservation": true,
+           "numberOfInferredSpeeds": 30,
+           "allowedIncreaseDecreaseSpeedFactor": 2,
+           "tasks":[
+             {
+               "context": "PushDoorLeverHandle",
+               "name": "PushDoorWorldFrame",
+               "bodyPartForInference": "rightHand",
+               "bodyPartWithObservableGoal": "rightHand",
+               "translationGoalToEE": [0.135, -0.027,  0.174],
+               "rotationGoalToEE": [-0.158, -0.691,  0.681, -0.185],
+               "bodyParts":[
+                 { "name":"leftHand", "geometry":"Pose" },
+                 { "name":"rightHand", "geometry":"Pose" }
+               ]
+             }
+           ]
+         }
+      */
       // learn ProMPs
       // Check ProMPAssistant.json if you want to change parameters (e.g, task to learn, body parts to consider in the motion)
       ProMPAssistant proMPAssistant = new ProMPAssistant();
@@ -43,6 +68,7 @@ public class ProMPAssistantWorldFrameTest
       Files.copy(originalPath, copyForPlottingPath, StandardCopyOption.REPLACE_EXISTING);
 
       // replay that file
+      LogTools.info(testFilePath);
       TrajectoryRecordReplay trajectoryPlayer = new TrajectoryRecordReplay(testFilePath, 2); //2 body parts: the hands
       // start parsing data immedediately, assuming user is moving from beginning of recorded test trajectory
       proMPAssistant.setIsMovingThreshold(0.00001);
@@ -63,8 +89,8 @@ public class ProMPAssistantWorldFrameTest
             framePose.setFromReferenceFrame(ReferenceFrame.getWorldFrame());
             // Read file with stored trajectories: read set point per timestep until file is over
             double[] dataPoint = trajectoryPlayer.play(true);
-            framePose.getOrientation().get(dataPoint);
-            framePose.getPosition().get(4, dataPoint);
+            framePose.getOrientation().set(dataPoint);
+            framePose.getPosition().set(4, dataPoint);
 
             if (proMPAssistant.readyToPack())
             {
@@ -76,7 +102,7 @@ public class ProMPAssistantWorldFrameTest
                assertTrue(!proMPAssistant.readyToPack());
                FramePose3D observedGoalPose = null; // no observed goal
                //do not change the frame, just observe it in order to generate a prediction later
-               proMPAssistant.processFrameAndObjectInformation(framePose, bodyPart, "Door", observedGoalPose);
+               proMPAssistant.processFrameAndObjectInformation(framePose, bodyPart, "PushDoorLeverHandle", observedGoalPose);
             }
             //record frame and store it in csv file
             double[] bodyPartTrajectories = new double[7];
@@ -87,7 +113,7 @@ public class ProMPAssistantWorldFrameTest
       }
       //concatenate each set point of hands in single row
       trajectoryRecorder.concatenateData();
-      ArrayList<double[]> dataConcatenated = trajectoryRecorder.getData();
+      ArrayList<double[]> dataConcatenated = trajectoryRecorder.getConcatenatedData();
       assertTrue(dataConcatenated.size() > 0); // check data is not empty
       // save recorded file name
       String recordFile = trajectoryRecorder.getRecordFileName();
