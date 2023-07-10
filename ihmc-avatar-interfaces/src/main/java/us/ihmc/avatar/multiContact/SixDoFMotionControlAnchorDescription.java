@@ -66,7 +66,7 @@ public class SixDoFMotionControlAnchorDescription
          if (anchorNode.has(ANCHOR_ID_JSON))
             description.setAnchorId(anchorNode.get(ANCHOR_ID_JSON).asInt());
          if (anchorNode.has(CONTACT_NORMAL_JSON))
-            description.setContactNormal(stringToTuple3D(anchorNode.get(CONTACT_NORMAL_JSON).toString()));
+            description.setContactNormal(stringToTuple3D(anchorNode.get(CONTACT_NORMAL_JSON).textValue()));
 
          return description;
       }
