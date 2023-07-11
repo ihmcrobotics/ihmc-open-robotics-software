@@ -143,10 +143,10 @@ public class RDXVRAssistance implements TeleoperationAssistant
          play = joystickValue > 0 || isPreviewGraphicActive();
       });
 
-      vrContext.getHeadset().runIfConnected(headset ->
+      vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
       {
-        if (menu != null)
-           menu.update(headset.getXForwardZUpHeadsetFrame());
+         if (menu != null)
+            menu.update(controller.getXForwardZUpControllerFrame());
       });
    }
 

@@ -48,4 +48,9 @@ public class ModifiableReferenceFrame
    {
       return referenceFrame;
    }
+
+   public String getFrameName()
+   {
+      return frameName;
+   }
 }

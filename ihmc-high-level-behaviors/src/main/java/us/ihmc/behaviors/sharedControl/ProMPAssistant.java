@@ -59,6 +59,7 @@ public class ProMPAssistant
    private boolean isMoving = false;
    private ReferenceFrame objectFrame;
    private double isMovingThreshold = -1;
+   private final HashMap<String, FramePose3D> previousObservedPose = new HashMap<>();
 
    public ProMPAssistant()
    {
@@ -238,8 +239,10 @@ public class ProMPAssistant
             }
             if (userIsMoving(lastObservedPose, bodyPart)) // check if user has started moving after activating the assistance (after pressing the button)
             {
+               ensureOrientationContinuity(bodyPart, lastObservedPose);
                // store observed pose
                bodyPartObservedTrajectoryMap.get(bodyPart).add(new FramePose3D(lastObservedPose));
+
                // update the proMP prediction according to observations and generate mean trajectory
                if (bodyPartObservedTrajectoryMap.get(bodyPart).size() > numberObservations) // if observed a sufficient number of poses
                {
@@ -250,6 +253,27 @@ public class ProMPAssistant
                }
             }
          }
+      }
+   }
+
+   private void ensureOrientationContinuity(String bodyPart, FramePose3D lastObservedPose)
+   {
+      if (previousObservedPose.containsKey(bodyPart))
+      {
+         if (!bodyPartGoal.isEmpty())
+            previousObservedPose.get(bodyPart).changeFrame(objectFrame);
+         // Check that quaternion is not changing 2pi range. Even if q = -q, the observed motion has to be continuous
+         if (Math.signum(previousObservedPose.get(bodyPart).getOrientation().getS() * lastObservedPose.getOrientation().getS()) == -1
+             && Math.signum(previousObservedPose.get(bodyPart).getOrientation().getZ() * lastObservedPose.getOrientation().getZ()) == -1
+             && Math.signum(previousObservedPose.get(bodyPart).getOrientation().getY() * lastObservedPose.getOrientation().getY()) == -1
+             && Math.signum(previousObservedPose.get(bodyPart).getOrientation().getX() * lastObservedPose.getOrientation().getX()) == -1)
+            lastObservedPose.getOrientation().negate();
+
+         previousObservedPose.get(bodyPart).set(lastObservedPose);
+      }
+      else
+      {
+         previousObservedPose.put(bodyPart,new FramePose3D());
       }
    }
 

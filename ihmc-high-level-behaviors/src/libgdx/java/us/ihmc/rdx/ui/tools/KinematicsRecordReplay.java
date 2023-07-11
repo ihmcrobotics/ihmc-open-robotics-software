@@ -21,6 +21,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class KinematicsRecordReplay
@@ -40,6 +41,7 @@ public class KinematicsRecordReplay
    private final IHMCROS2Input<DetectableSceneNodesMessage> detectableSceneObjectsSubscription;
    private boolean sceneNodeLocked = false;
    private ReferenceFrame sceneNodeFrame;
+   private final HashMap<String, FramePose3D> previousFramePose = new HashMap<>();
 
 
    public KinematicsRecordReplay(ROS2PublishSubscribeAPI ros2, ImBoolean enabledKinematicsStreaming, int numberOfParts)
@@ -99,7 +101,7 @@ public class KinematicsRecordReplay
       }
    }
 
-   public void framePoseToRecord(FramePose3DReadOnly framePose)
+   public void framePoseToRecord(FramePose3DReadOnly framePose, String frameName)
    {
       if (isRecording)
       {
@@ -107,6 +109,7 @@ public class KinematicsRecordReplay
          { // we want to start the recording as soon as the user starts moving, recordings with different initial pauses can lead to bad behaviors when used for learning
             framePose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
             FramePose3D frameToRecord = new FramePose3D(framePose);
+            ensureOrientationContinuity(frameToRecord, frameName);
             // transform to object reference frame if using object detection
             if (sceneNodeFrame != null)
                frameToRecord.changeFrame(sceneNodeFrame);
@@ -125,6 +128,25 @@ public class KinematicsRecordReplay
          isUserMoving = false;
          sceneNodeLocked = false;
          sceneNodeFrame = null;
+      }
+   }
+
+   private void ensureOrientationContinuity(FramePose3D frameToCheck, String frameName)
+   {
+      if (previousFramePose.containsKey(frameName))
+      {
+         // Check that quaternion is not changing 2pi range. Even if q = -q, the observed motion has to be continuous
+         if (Math.signum(previousFramePose.get(frameName).getOrientation().getS() * frameToCheck.getOrientation().getS()) == -1
+             && Math.signum(previousFramePose.get(frameName).getOrientation().getZ() * frameToCheck.getOrientation().getZ()) == -1
+             && Math.signum(previousFramePose.get(frameName).getOrientation().getY() * frameToCheck.getOrientation().getY()) == -1
+             && Math.signum(previousFramePose.get(frameName).getOrientation().getX() * frameToCheck.getOrientation().getX()) == -1)
+            frameToCheck.getOrientation().negate();
+
+         previousFramePose.get(frameName).set(frameToCheck);
+      }
+      else
+      {
+         previousFramePose.put(frameName,new FramePose3D());
       }
    }
 

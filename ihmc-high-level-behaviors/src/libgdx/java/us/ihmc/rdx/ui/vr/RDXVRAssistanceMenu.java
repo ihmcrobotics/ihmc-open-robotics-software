@@ -4,6 +4,7 @@ import imgui.ImGui;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.RDX3DSituatedImGuiTransparentPanel;
 import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
@@ -19,7 +20,8 @@ public class RDXVRAssistanceMenu
    private ReferenceFrame menuPanelFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                                                   menuPanelTransformToWorld);
    private RDX3DSituatedImGuiTransparentPanel menuPanel;
-   private static final double[] positionPanel = {0.2, 0.0, 0.045};
+   private static final double[] positionPanel = {0.0, -0.1, 0.08};
+   private static final YawPitchRoll yawPitchRollPanel = new YawPitchRoll(-Math.toRadians(45),Math.toRadians(45),0);
    private final ArrayList<RDXIconTexture> iconsAssistanceMode = new ArrayList<>();
    private final ArrayList<RDXIconTexture> iconsAssistanceProgress = new ArrayList<>();
    private final ArrayList<RDXIconTexture> iconsJoysticks = new ArrayList<>();
@@ -64,6 +66,7 @@ public class RDXVRAssistanceMenu
       {
          menuPanelPose.setToZero(placementFrame);
          menuPanelPose.getPosition().set(positionPanel);
+         menuPanelPose.getOrientation().set(yawPitchRollPanel);
          menuPanelPose.changeFrame(ReferenceFrame.getWorldFrame());
          menuPanelPose.get(menuPanelTransformToWorld);
          menuPanelFrame.update();
