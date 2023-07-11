@@ -67,6 +67,8 @@ public class RDXFootstepPlannerPanel extends ImGuiPanel implements RenderablePro
    public void create(RDXBaseUI baseUI)
    {
       goalGizmo.create(baseUI.getPrimary3DPanel());
+      baseUI.getVRManager().getContext().addVRPickCalculator(goalGizmo::calculateVRPick);
+      baseUI.getVRManager().getContext().addVRInputProcessor(goalGizmo::processVRInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(goalGizmo::calculate3DViewPick);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(goalGizmo::process3DViewInput);
       baseUI.getPrimary3DPanel().getScene().addRenderableProvider(this, RDXSceneLevel.VIRTUAL);
