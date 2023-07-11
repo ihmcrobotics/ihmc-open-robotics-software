@@ -561,25 +561,31 @@ public class RDXBehaviorActionSequenceEditor
          insertNewAction(newAction);
    }
 
+   /**
+    * @return This used to find the most likely desired frame that a new action will
+    *         be specified in, by traversing the sequence backwards and finding the
+    *         first action that is specified in a frame, and returning that frame.
+    *         This helps the authoring process by initializing new actions with
+    *         spatially consistent values.
+    */
    private ReferenceFrame findNextPreviousParentFrame()
    {
-      ReferenceFrame nextPreviousParentFrame = null;
-      for (int i = 0; i < executionNextIndexStatus + 1 && i < actionSequence.size(); i++)
+      for (int i = Math.min(executionNextIndexStatus, actionSequence.size() - 1); i >= 0; i--)
       {
          if (actionSequence.get(i) instanceof RDXFootstepAction footstepAction)
          {
-            nextPreviousParentFrame = footstepAction.getActionData().getParentReferenceFrame();
+            return footstepAction.getActionData().getParentReferenceFrame();
          }
          else if (actionSequence.get(i) instanceof RDXHandPoseAction handPoseAction)
          {
-            nextPreviousParentFrame = handPoseAction.getActionData().getParentReferenceFrame();
+            return handPoseAction.getActionData().getParentReferenceFrame();
          }
          else if (actionSequence.get(i) instanceof RDXWalkAction walkAction)
          {
-            nextPreviousParentFrame = walkAction.getActionData().getParentReferenceFrame();
+            return walkAction.getActionData().getParentReferenceFrame();
          }
       }
-      return nextPreviousParentFrame;
+      return null;
    }
 
    private RDXFootstepAction findNextPreviousFootstepAction()
