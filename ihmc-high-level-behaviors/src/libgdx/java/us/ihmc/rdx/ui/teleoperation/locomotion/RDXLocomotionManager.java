@@ -35,7 +35,6 @@ import us.ihmc.rdx.ui.footstepPlanner.RDXFootstepPlanning;
 import us.ihmc.rdx.ui.graphics.RDXBodyPathPlanGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXLegControlMode;
-import us.ihmc.rdx.ui.vr.RDXVRLaserFootstepMode;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -70,7 +69,6 @@ public class RDXLocomotionManager
 
    private final RDXFootstepPlanGraphic footstepsSentToControllerGraphic;
    private final RDXBodyPathPlanGraphic bodyPathPlanGraphic = new RDXBodyPathPlanGraphic();
-   private RDXVRLaserFootstepMode laserFootstepMode;
 
    private final SideDependentList<RDXInteractableFoot> interactableFeet = new SideDependentList<>();
    private final RDXBallAndArrowGoalFootstepPlacement ballAndArrowMidFeetPosePlacement = new RDXBallAndArrowGoalFootstepPlacement();
@@ -171,6 +169,7 @@ public class RDXLocomotionManager
 
       interactableFootstepPlan.create(baseUI, communicationHelper, syncedRobot, locomotionParameters, footstepPlannerParameters, swingFootPlannerParameters);
       baseUI.getVRManager().getContext().addVRInputProcessor(interactableFootstepPlan::processVRInput);
+      baseUI.getVRManager().getContext().addVRPickCalculator(interactableFootstepPlan::calculateVRPick);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(interactableFootstepPlan::processImGui3DViewInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(interactableFootstepPlan::calculate3DViewPick);
 
@@ -257,71 +256,7 @@ public class RDXLocomotionManager
       {
          footstepsSentToControllerGraphic.clear();
       }
-
-      if (laserFootstepMode != null)
-      {
-         if (laserFootstepMode.getEndOfLaser() != null)
-         {
-            for (int i = 0; i < interactableFootstepPlan.getNumberOfFootsteps(); i++)
-            {
-               if(laserFootstepMode.getPickedUpFootstepNumber() == i || laserFootstepMode.getPickedUpFootstepNumber() == -1)
-               {
-                  if (laserFootstepMode.getEndOfLaser().getPosition().distance(interactableFootstepPlan.getFootsteps().get(i).getFootPose().getPosition()) < .3)
-                  {
-                     laserFootstepMode.setPickedUpFootstepNumber(i);
-                     if (laserFootstepMode.getControllerSide() == interactableFootstepPlan.getFootsteps().get(i).getFootstepSide())
-                     {
-                        interactableFootstepPlan.getFootsteps().get(i).updatePose(laserFootstepMode.getEndOfLaser());
-                     }
-                     else
-                     {
-                        laserFootstepMode.setControllerSide(interactableFootstepPlan.getFootsteps().get(i).getFootstepSide());
-                     }
-                  }
-               }
-            }
-         }
-         if (laserFootstepMode.isbPressed())
-         {
-            manualFootstepPlacement.getFootstepPlan().removeLastStep();
-            laserFootstepMode.setbPressed(false);
-         }
-         if (laserFootstepMode.getSpotPlacement() != null)
-         {
-            if (laserFootstepMode.getControllerSide() != null)
-            {
-               if(laserFootstepMode.getTriggerPressed())
-               {
-                  if(footNotPlaced)
-                  {
-                     manualFootstepPlacement.vrPlacement(laserFootstepMode.getSpotPlacement(), laserFootstepMode.getControllerSide());
-                     footNotPlaced = false;
-                  }
-                  if(laserFootstepMode.getHandLaser() != null)
-                     if (interactableFootstepPlan.getLastFootstep() !=null)
-                        interactableFootstepPlan.getLastFootstep().updatePose(laserFootstepMode.getHandLaser());
-                     else if (manualFootstepPlacement.getFootstepBeingPlacedOrLastFootstepPlaced() != null)
-                     {
-                        manualFootstepPlacement.getFootstepBeingPlacedOrLastFootstepPlaced().updatePose(laserFootstepMode.getHandLaser());
-                     }
-               }
-               else
-               {
-                  footNotPlaced = true;
-                  manualFootstepPlacement.exitPlacement();
-                  laserFootstepMode.setSpotPlacement(null);
-                  laserFootstepMode.setTriggerPressed(false);
-
-               }
-            }
-         }
-         else if (laserFootstepMode.getSendWalkPlan())
-         {
-            interactableFootstepPlan.walkFromSteps();
-            laserFootstepMode.setSendWalkPlan(false);
-         }
-      }
-      footstepsSentToControllerGraphic.update();
+         footstepsSentToControllerGraphic.update();
 
       boolean isCurrentlyPlacingFootstep =
             getManualFootstepPlacement().isPlacingFootstep() || ballAndArrowMidFeetPosePlacement.isPlacingGoal() || walkPathControlRing.isSelected();
@@ -533,10 +468,5 @@ public class RDXLocomotionManager
    public RDXLocomotionParameters getLocomotionParameters()
    {
       return locomotionParameters;
-   }
-
-   public void setLaserFootstepMode(RDXVRLaserFootstepMode laserFootstepMode)
-   {
-      this.laserFootstepMode = laserFootstepMode;
    }
 }

@@ -28,7 +28,6 @@ import java.util.Set;
 public class RDXVRModeManager
 {
    private ROS2SyncedRobotModel syncedRobot;
-   private RDXVRLaserFootstepMode laserFootstepMode;
    private RDXVRHandPlacedFootstepMode handPlacedFootstepMode;
    private RDXVRKinematicsStreamingMode kinematicsStreamingMode;
    private RDXJoystickBasedStepping joystickBasedStepping;

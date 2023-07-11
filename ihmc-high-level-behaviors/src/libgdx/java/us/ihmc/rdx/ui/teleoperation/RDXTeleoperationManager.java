@@ -37,7 +37,6 @@ import us.ihmc.rdx.ui.interactable.RDXPelvisHeightSlider;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionManager;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
-import us.ihmc.rdx.ui.vr.RDXVRLaserFootstepMode;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.YawPitchRollAxis;
@@ -116,7 +115,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final ImString tempImGuiText = new ImString(1000);
    private final boolean interactablesAvailable;
    private ImGuiStoredPropertySetDoubleWidget trajectoryTimeSlider;
-   private RDXVRLaserFootstepMode laserFootstepMode;
 
    /** This tracker should be shared with the sub-managers to keep the state consistent. */
    private final ControllerStatusTracker controllerStatusTracker;
@@ -195,7 +193,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       trajectoryTimeSlider = teleoperationParametersTuner.createDoubleSlider(RDXTeleoperationParameters.trajectoryTime, 0.1, 0.5, "s", "%.2f");
 
-      laserFootstepMode = new RDXVRLaserFootstepMode();
 
       if (interactablesAvailable)
       {
@@ -361,42 +358,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
          if (interactablesEnabled.get())
             selectionCollisionModel.processVRInput(vrContext);
       }
-      //laserFootstepMode.processVRInput(vrContext);
-//      if(robotHasArms)
-//      {
-//         if (laserFootstepMode.getHandLaser() != null)
-//         {
-//            for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
-//            {
-//               for (RobotSide side : RobotSide.values)
-//               {
-//                  if (Math.PI - robotPartInteractable.getPose().getOrientationDistance(laserFootstepMode.getHandLaser()) - robotPartInteractable.getPose().getOrientationDistance(vrContext.getController(side).getPickPointPose()) <= 0.3 && robotPartInteractable.getClass().getName() == "us.ihmc.rdx.ui.affordances.RDXInteractableHand")
-//                  {
-//                     if (laserFootstepMode.getSpotPlacement() != null)
-//                     {
-//                        //TODO get hand to edit when gripped
-//                        System.out.println("You got here :)");
-//                        laserFootstepMode.setSpotPlacement(null);
-//                     }
-//                  }
-//               }
-//            }
-//         }
-//      }
-      if (!laserFootstepMode.isArmsOnly())
-      {
-         locomotionManager.setLaserFootstepMode(laserFootstepMode);
-      }
-      if (laserFootstepMode.getSendWalkPlan())
-      {
-         if(robotHasArms)
-         {
-            for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
-            {
-               robotPartInteractable.getOnSpacePressed().run();
-            }
-         }
-      }
    }
 
    private void calculate3DViewPick(ImGui3DViewInput input)
@@ -449,8 +410,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
       chestYawSlider.renderImGuiWidgets();
 
       trajectoryTimeSlider.renderImGuiWidget();
-
-      laserFootstepMode.renderImGuiWidgets();
 
       ImGui.checkbox(labels.get("Show teleoperation parameter tuner"), teleoperationParametersTuner.getIsShowing());
 
@@ -618,7 +577,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
             locomotionManager.getWalkPathControlRingVirtualRenderables(renderables, pool);
 
-            laserFootstepMode.getRenderables(renderables, pool);
          }
       }
    }
