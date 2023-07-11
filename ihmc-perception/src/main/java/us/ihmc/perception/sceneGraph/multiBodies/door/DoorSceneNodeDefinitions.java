@@ -2,6 +2,7 @@ package us.ihmc.perception.sceneGraph.multiBodies.door;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticArUcoRelativeDetectableSceneNode;
@@ -33,9 +34,13 @@ public class DoorSceneNodeDefinitions
    static
    {
       PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER.getTranslation().setX(DoorModelParameters.DOOR_PANEL_THICKNESS / 2.0);
-      PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER.getTranslation().setY(DoorModelParameters.DOOR_PANEL_HINGE_OFFSET
-                                                                + DoorModelParameters.ARUCO_MARKER_PUSH_SIDE_BOTTOM_RIGHT_CORNER_Y_IN_PANEL_FRAME);
+      PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER.getTranslation().setY(DoorModelParameters.ARUCO_MARKER_PUSH_SIDE_BOTTOM_RIGHT_CORNER_Y_IN_PANEL_FRAME);
       PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER.getTranslation().setZ(DoorModelParameters.ARUCO_MARKER_PUSH_SIDE_BOTTOM_RIGHT_CORNER_Z_IN_PANEL_FRAME);
+   }
+   public static final RigidBodyTransform MARKER_TO_PUSH_DOOR_PANEL_FRAME_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      MARKER_TO_PUSH_DOOR_PANEL_FRAME_TRANSFORM.getTranslation().setX(DoorModelParameters.DOOR_PANEL_THICKNESS / 2.0);
    }
    public static final RigidBodyTransform PUSH_DOOR_FRAME_TRANSFORM_TO_MARKER = new RigidBodyTransform(PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER);
    static
@@ -55,7 +60,7 @@ public class DoorSceneNodeDefinitions
    public static final RigidBodyTransform PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER = new RigidBodyTransform();
    static
    {
-      ReferenceFrame markerFrame = ReferenceFrame.getWorldFrame(); // Placeholder for initialization
+      ReferenceFrame markerFrame = ReferenceFrameMissingTools.constructARootFrame();
       ReferenceFrame panelFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(markerFrame,
                                                                                                            PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER);
       FramePose3D leverPose = new FramePose3D(panelFrame);
@@ -66,7 +71,6 @@ public class DoorSceneNodeDefinitions
       leverPose.changeFrame(markerFrame);
       leverPose.get(PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER);
 
-      panelFrame.remove();
 
 //      PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER.getRotation().setToYawOrientation(Math.PI);
 //      PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER.getTranslation().sub(PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER.getTranslation());
