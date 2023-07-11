@@ -111,6 +111,18 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       if (swingPlanningModule != null)
          swingPlanningModule.setHeightMapData(heightMapMessage);
    }
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+      for (int i = 0; i < footsteps.size(); i++)
+      {
+         RDXInteractableFootstep singleFootstep = footsteps.get(i);
+         singleFootstep.calculateVRPick(vrContext);
+         if (selectedFootstep != null)
+         {
+            selectedFootstep.calculateVRPick(vrContext);
+         }
+      }
+   }
    public void processVRInput(RDXVRContext vrContext)
    {
       for (int i = 0; i < footsteps.size(); i++)

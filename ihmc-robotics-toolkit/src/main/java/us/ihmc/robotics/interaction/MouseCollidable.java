@@ -67,9 +67,9 @@ public class MouseCollidable
     * @return The closest collision distance of NaN if not colliding
     */
 
-   public double pointCollide(Point3DReadOnly pointCollide)
+   public boolean pointCollide(Point3DReadOnly pickPoint)
    {
-      return shape.distance(pointCollide);
+      return shape.isPointInside(pickPoint);
    }
    public double collide(Line3DReadOnly pickRayInWorld, ReferenceFrame collisionShapeFrame)
    {

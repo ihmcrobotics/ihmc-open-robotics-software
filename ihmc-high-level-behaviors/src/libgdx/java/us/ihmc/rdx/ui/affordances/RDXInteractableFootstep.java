@@ -12,6 +12,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -79,11 +80,13 @@ public class RDXInteractableFootstep
    private final SideDependentList<FramePose3D> footBeingPlaced = new SideDependentList<>();
    private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
    private final SideDependentList<Boolean> vrPickSelected = new SideDependentList<>(false, false);
+   private final SideDependentList<Line3D> laser = new SideDependentList<>();
    private final FramePose3D vrPickPose = new FramePose3D();
    private FramePose3D footPose;
    private RDXModelInstance leftLaser;
    private RDXModelInstance rightLaser;
    private final MouseCollidable mouseCollidable;
+   private boolean isHovering = false;
 
    private final SideDependentList<ModifiableReferenceFrame> dragReferenceFrame = new SideDependentList<>();
    private final SideDependentList<ModifiableReferenceFrame> laserReferenceFrame = new SideDependentList<>();
@@ -260,15 +263,57 @@ public class RDXInteractableFootstep
       selectionCollisionBox.getPose().getTranslation().set(selectablePose3DGizmo.getPoseGizmo().getPose().getTranslation());
       collisionBoxFrame.update(transformToParent -> transformToParent.set(selectionCollisionBox.getPose()));
    }
+   public void calculateVRPick (RDXVRContext vrContext)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         vrPickResult.get(side).reset();
+         vrContext.getController(side).runIfConnected(controller ->
+         {
+            vrPickPose.setIncludingFrame(controller.getPickPointPose());
+            vrPickPose.changeFrame(ReferenceFrame.getWorldFrame());
+            isHovering = mouseCollidable.pointCollide(vrPickPose.getPosition());
+            if(isHovering)
+            {
+               vrPickResult.get(side).addPickCollision(0.0);
+            }
 
+
+            frontController.put(side, new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                      vrContext.getController(side).getXForwardZUpPose()));
+            frontController.get(side).changeFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
+            frontController.get(side).setToZero(vrContext.getController(side).getXForwardZUpControllerFrame());
+            frontController.get(side).getPosition().addX(0.1);
+            laser.put(side, new Line3D(vrContext.getController(side).getPickPointPose().getPosition(), frontController.get(side).getPosition()));
+            double lineIntersect = mouseCollidable.collide(laser.get(side), collisionBoxFrame.getReferenceFrame());
+            if(!Double.isNaN(lineIntersect))
+            {
+               vrPickResult.get(side).addPickCollision(0.0);
+            }
+            sizeChange = vrContext.getController(side).getXForwardZUpPose().getZ() / (
+                  vrContext.getController(side).getXForwardZUpPose().getZ() - frontController.get(side).getTranslationZ());
+            frontController.get(side).changeFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
+            frontController.get(side).getPosition().addX(sizeChange * frontController.get(side).getX());
+            frontController.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+            frontController.get(side).getOrientation()
+                           .setToYawOrientation(-vrContext.getController(side).getXForwardZUpPose().getRoll());
+            frontController.get(side).getRotation().setYawPitchRoll(frontController.get(side).getYaw(), 0, 0);
+            frontController.get(side).getPosition().setZ(0);
+         });
+         if (vrPickResult.get(side).getPickCollisionWasAddedSinceReset())
+         {
+            vrContext.addPickResult(side, vrPickResult.get(side));
+         }
+      }
+   }
    public void processVRInput(RDXVRContext vrContext)
    {
       for (RobotSide side : RobotSide.values)
       {
          isVRHovering = false;
+         isVRPointing = false;
          vrContext.getController(side).runIfConnected(controller ->
          {
-            boolean isHovering = false;
             boolean gripped = controller.getGripped();
             boolean newlyGripped = gripped && controller.getGrippedChanged();
             boolean newlyUnGripped = !gripped && controller.getGrippedChanged();
@@ -279,9 +324,7 @@ public class RDXInteractableFootstep
 
             if (newlyGripped)
             {
-               calculateVR(vrContext);
-               isHovering |= isVRHovering;
-               if (isHovering)
+               if (vrContext.getSelectedPick().get(side) == vrPickResult.get(side))
                {
                   selectablePose3DGizmo.getPoseGizmo()
                                        .getGizmoFrame()
@@ -299,26 +342,24 @@ public class RDXInteractableFootstep
 
             if (newlyUnGripped || !gripped)
                isVRDragging.put(side, false);
-         });
-      }
-   }
-   public void calculateVR (RDXVRContext vrContext)
-   {
-      for (RobotSide side : RobotSide.values)
-      {
-         vrPickResult.get(side).reset();
-         vrContext.getController(side).runIfConnected(controller ->
+         if (isHovering)
          {
-            vrPickPose.setIncludingFrame(controller.getPickPointPose());
-            vrPickPose.changeFrame(ReferenceFrame.getWorldFrame());
-            double pointCollide = mouseCollidable.pointCollide(vrPickPose.getPosition());
-            if (pointCollide == 0)
-            {
-               isVRHovering = true;
-            }
+            if (getFootstepSide() == RobotSide.LEFT)
+               footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 1.0f, 0.0f, 0.0f, 0.0f));
+            else
+               footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 1.0f, 0.0f, 0.0f));
+         }
+         else
+         {
+            if (plannedFootstepInternal.getRobotSide() == RobotSide.LEFT)
+               footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.5f, 0.0f, 0.0f, 0.0f));
+            else
+               footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 0.5f, 0.0f, 0.0f));
+         }
          });
       }
    }
+
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
       Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
@@ -330,7 +371,6 @@ public class RDXInteractableFootstep
       if(pickResult.getPickCollisionWasAddedSinceReset())
          input.addPickResult(pickResult);
       selectablePose3DGizmo.calculate3DViewPick(input);
-
    }
 
    public void process3DViewInput(ImGui3DViewInput input, boolean currentlyPlacingFootstep)
@@ -386,14 +426,6 @@ public class RDXInteractableFootstep
          trajectoryPoint.getRenderables(renderables, pool);
 
       swingTrajectoryModel.getRenderables(renderables, pool);
-      if (rightLaser != null)
-      {
-         rightLaser.getRenderables(renderables, pool);
-      }
-      if (leftLaser != null)
-      {
-         leftLaser.getRenderables(renderables, pool);
-      }
    }
 
    // Sets the gizmo's position and rotation
