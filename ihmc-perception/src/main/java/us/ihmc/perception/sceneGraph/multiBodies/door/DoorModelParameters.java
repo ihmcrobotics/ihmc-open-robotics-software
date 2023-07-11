@@ -5,6 +5,19 @@ package us.ihmc.perception.sceneGraph.multiBodies.door;
  * TODO: Currently this is the simulation door.
  *   - Turn into a stored property set to represent both
  *     simulation and real lab door parameters
+ *
+ * Remeasured by dcalvert on 7/11/23:
+ * Push door (real):
+ * Thickness - 3.4 cm
+ * Lever axis inset - 6.2 cm
+ * Lever axis height - 91.5 cm
+ * 91.4 cm panel width
+ * 203.3 cm panel height
+ * 104.4 market z from bottom of panel
+ * 12.7 cm lever below marker
+ * 8.85 cm lever right of marker
+ * 5 cm lever away from panel
+ * 9 cm lever length
  */
 public class DoorModelParameters
 {
