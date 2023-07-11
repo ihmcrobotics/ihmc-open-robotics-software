@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
-import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
@@ -21,7 +20,6 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -122,6 +120,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private final FramePose3D vrPickPose = new FramePose3D();
    private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
    private final SideDependentList<Boolean> isVRDragging = new SideDependentList<>(false, false);
+   private double oldPitch = 0;
 
    public RDXPathControlRingGizmo()
    {
@@ -251,10 +250,10 @@ public class RDXPathControlRingGizmo implements RenderableProvider
          vrContext.getController(side).runIfConnected(controller ->
          {
             frontController.put(side, new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                      vrContext.getController(side).getXForwardZUpPose()));
-            frontController.get(side).changeFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
-            frontController.get(side).setToZero(vrContext.getController(side).getXForwardZUpControllerFrame());
-            frontController.get(side).getPosition().addX(10);
+                                                      vrContext.getController(side).getPickPointPose()));
+            frontController.get(side).changeFrame(vrContext.getController(side).getPickPoseFrame());
+            frontController.get(side).setToZero(vrContext.getController(side).getPickPoseFrame());
+            frontController.get(side).getPosition().addX(0.1);
             laser.put(side, new Line3D(vrContext.getController(side).getPickPointPose().getPosition(), frontController.get(side).getPosition()));
 
             hollowCylinderIntersection.update(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), discThickness.get() / 2.0, transformToWorld);
@@ -289,6 +288,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
                                                             {
                                                                Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(laser.get(side), closestCollision, Axis3D.Z);
                                                                frameBasedGizmoModification.translateInWorld(planarMotion);
+                                                               closestCollision.add(planarMotion);
                                                                isVRDragging.put(side, true);
                                                             }
                                                          }
@@ -296,6 +296,10 @@ public class RDXPathControlRingGizmo implements RenderableProvider
                                                          {
                                                             Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(laser.get(side), closestCollision, Axis3D.Z);
                                                             frameBasedGizmoModification.translateInWorld(planarMotion);
+                                                            frameBasedGizmoModification.yawInWorld(controller.getPickPointPose().getPitch() - oldPitch);
+                                                            System.out.println(laser.get(side).getPoint());
+                                                            closestCollision.add(planarMotion);
+                                                            oldPitch = controller.getPickPointPose().getPitch();
                                                          }
                                                          if(newUnTriggered || !triggered)
                                                          {
