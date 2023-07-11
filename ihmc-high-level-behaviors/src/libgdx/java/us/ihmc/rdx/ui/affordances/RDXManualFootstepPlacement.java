@@ -120,47 +120,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       ImGuiTools.previousWidgetTooltip("Keybind: Ctrl + Z");
    }
 
-   public void processVRInput(RDXVRContext vrContext)
-   {
-      for (RobotSide side : RobotSide.values)
-      {
-         vrContext.getController(side).runIfConnected(controller ->
-                                                      {
-                                                         boolean triggered = controller.getClickTriggerActionData().bState();
-                                                         boolean newPressedTrigger = triggered && controller.getClickTriggerActionData().bChanged();
-                                                         boolean newReleasedTrigger = !triggered && controller.getClickTriggerActionData().bChanged();
-
-                                                         if (newPressedTrigger)
-                                                         {
-                                                            footstepBeingPlaced = new RDXInteractableFootstep(baseUI,
-                                                                                                              side,
-                                                                                                              footstepPlan.getNumberOfFootsteps(),
-                                                                                                              null);
-                                                            for (int i = 0; i < footstepPlan.getNumberOfFootsteps(); i++)
-                                                            {
-                                                               if (footstepPlan.getFootsteps().get(i).getIsVRPointing())
-                                                               {
-                                                                  footstepBeingPlaced = null;
-                                                               }
-                                                            }
-                                                            if (footstepBeingPlaced != null)
-                                                            {
-                                                               footstepBeingPlaced.processVRInput(vrContext);
-                                                               if (footstepBeingPlaced.getFootStepPose() != null)
-                                                               {
-                                                                  vrPlacement(footstepBeingPlaced.getFootStepPose(), side);
-                                                               }
-                                                               footstepBeingPlaced = null;
-                                                            }
-                                                         }
-                                                      });
-      }
-      if (footstepBeingPlaced != null)
-      {
-         footstepBeingPlaced.processVRInput(vrContext);
-
-      }
-   }
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
       renderTooltip = false;

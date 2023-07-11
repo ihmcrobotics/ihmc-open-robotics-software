@@ -9,7 +9,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import org.apache.commons.lang3.tuple.Pair;
-import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line3D;
@@ -35,7 +34,6 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.vr.RDXVRContext;
-import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.interaction.MouseCollidable;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
@@ -67,29 +65,17 @@ public class RDXInteractableFootstep
    private final Timer timerFlashingFootsteps = new Timer();
    private boolean flashingFootStepsColorHigh = false;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
-   private boolean isMouseHovering;
-   private final Notification contextMenuNotification = new Notification();
-   private boolean isVRHovering;
-   private boolean isVRPointing;
    private double sizeChange = 0;
-   private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
    private final SideDependentList<FramePose3D> frontController = new SideDependentList<>();
    private final SideDependentList<Boolean> isVRDragging = new SideDependentList<>(false, false);
-   private final SideDependentList<Boolean> isVRLasering = new SideDependentList<>(false, false);
-   private final SideDependentList<Boolean> modified = new SideDependentList<>(false, false);
-   private final SideDependentList<FramePose3D> footBeingPlaced = new SideDependentList<>();
    private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
-   private final SideDependentList<Boolean> vrPickSelected = new SideDependentList<>(false, false);
    private final SideDependentList<Line3D> laser = new SideDependentList<>();
    private final FramePose3D vrPickPose = new FramePose3D();
    private FramePose3D footPose;
-   private RDXModelInstance leftLaser;
-   private RDXModelInstance rightLaser;
    private final MouseCollidable mouseCollidable;
    private boolean isHovering = false;
 
    private final SideDependentList<ModifiableReferenceFrame> dragReferenceFrame = new SideDependentList<>();
-   private final SideDependentList<ModifiableReferenceFrame> laserReferenceFrame = new SideDependentList<>();
    private final ModifiableReferenceFrame collisionBoxFrame;
 
    private final List<ModelInstance> trajectoryWaypointModel = new ArrayList<>();
@@ -310,8 +296,6 @@ public class RDXInteractableFootstep
    {
       for (RobotSide side : RobotSide.values)
       {
-         isVRHovering = false;
-         isVRPointing = false;
          vrContext.getController(side).runIfConnected(controller ->
          {
             boolean gripped = controller.getGripped();
@@ -440,17 +424,6 @@ public class RDXInteractableFootstep
       selectionCollisionBox.getPosition().set(x, y, z);
       collisionBoxFrame.getReferenceFrame().getTransformToWorldFrame().getTranslation().set(x, y, z);
    }
-   public void setGizmoPose(double x, double y, double z, double yaw, double pitch, double roll)
-   {
-      RigidBodyTransform gizmoTransform = selectablePose3DGizmo.getPoseGizmo().getTransformToParent();
-      gizmoTransform.getTranslation().set(x, y, z);
-      gizmoTransform.getRotation().setYawPitchRoll(yaw, pitch, roll);
-      plannedFootstepInternal.getFootstepPose().set(gizmoTransform);
-      wasPoseUpdated = true;
-
-      selectionCollisionBox.getPosition().set(x, y, z);
-      collisionBoxFrame.getReferenceFrame().getTransformToWorldFrame().getTranslation().set(x, y, z);
-   }
 
    public void flashFootstepWhenBadPlacement(BipedalFootstepPlannerNodeRejectionReason reason)
    {
@@ -506,10 +479,6 @@ public class RDXInteractableFootstep
       footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, r, g, b, a));
    }
 
-   public void setFootstepModelInstance(RDXModelInstance footstepModelInstance)
-   {
-      this.footstepModelInstance = footstepModelInstance;
-   }
 
    public RobotSide getFootstepSide()
    {
@@ -621,18 +590,5 @@ public class RDXInteractableFootstep
       this.textFramePose.setIncludingFrame(manuallyPlacedFootstep.textFramePose);
       this.flashingFootStepsColorHigh = manuallyPlacedFootstep.flashingFootStepsColorHigh;
    }
-
-   public void setFootStepPose(FramePose3D footPose)
-   {
-      this.footPose = footPose;
-   }
-
-   public FramePose3D getFootStepPose()
-   {
-      return footPose;
-   }
-   public boolean getIsVRPointing()
-   {
-      return isVRPointing;
-   }
+   
 }
