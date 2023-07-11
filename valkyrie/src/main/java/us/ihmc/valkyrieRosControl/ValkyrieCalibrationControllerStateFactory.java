@@ -4,6 +4,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelCon
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.valkyrie.ValkyrieCalibrationParameters;
 import us.ihmc.wholeBodyController.diagnostics.TorqueOffsetPrinter;
 
@@ -25,9 +27,16 @@ public class ValkyrieCalibrationControllerStateFactory implements HighLevelContr
       if (calibrationControllerState != null)
          return calibrationControllerState;
 
+      OneDoFJoint[] controlledJoints = MultiBodySystemTools.filterJoints(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getControlledJoints(),
+                                                                         OneDoFJoint.class);
       calibrationControllerState = new ValkyrieCalibrationControllerState(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
+                                                                          controlledJoints,
+                                                                          controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getYoTime(),
                                                                           controllerFactoryHelper.getHighLevelControllerParameters(),
-                                                                          controllerFactoryHelper.getLowLevelControllerOutput(), calibrationParameters,
+                                                                          controllerFactoryHelper.getLowLevelControllerOutput(),
+                                                                          controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getFootContactStates(),
+                                                                          controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getBipedSupportPolygons(),
+                                                                          calibrationParameters,
                                                                           torqueOffsetPrinter);
       return calibrationControllerState;
    }

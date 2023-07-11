@@ -24,6 +24,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -61,19 +62,23 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
 
    private final YoBoolean hasReachedMaximumTorqueOffset = new YoBoolean("hasReachedMaximumTorqueOffset", registry);
 
-   private final YoDouble currentTime;
+   private final DoubleProvider currentTime;
 
    public JointTorqueOffsetEstimatorController(WholeBodySetpointParameters wholeBodySetpointParameters,
                                                HighLevelHumanoidControllerToolbox highLevelControllerToolbox,
+                                               SideDependentList<YoPlaneContactState> footContactStates,
+                                               BipedSupportPolygons bipedSupportPolygons,
                                                TorqueOffsetPrinter torqueOffsetPrinter,
+                                               FullHumanoidRobotModel fullHumanoidRobotModel,
+                                               DoubleProvider yoTime,
                                                JointTorqueOffsetEstimatorParameters parameters)
    {
-      this.bipedSupportPolygons = highLevelControllerToolbox.getBipedSupportPolygons();
-      this.footContactStates = highLevelControllerToolbox.getFootContactStates();
+      this.footContactStates = footContactStates;
+      this.bipedSupportPolygons = bipedSupportPolygons;
       this.controllerToolbox = highLevelControllerToolbox;
       this.torqueOffsetPrinter = torqueOffsetPrinter;
-      this.fullRobotModel = highLevelControllerToolbox.getFullRobotModel();
-      this.currentTime = highLevelControllerToolbox.getYoTime();
+      this.fullRobotModel = fullHumanoidRobotModel;
+      this.currentTime = yoTime;
 
       ditherAmplitude.set(0.3);
       ditherFrequency.set(5.0);
@@ -141,8 +146,10 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
    @Override
    public void doControl()
    {
-      bipedSupportPolygons.updateUsingContactStates(footContactStates);
-      controllerToolbox.update();
+      if (bipedSupportPolygons != null && footContactStates != null)
+         bipedSupportPolygons.updateUsingContactStates(footContactStates);
+      if (controllerToolbox != null)
+         controllerToolbox.update();
 
       updateDiagnosticsWhenHangingHelpers();
       updatePDControllers();
@@ -193,7 +200,7 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
       {
          OneDoFJointBasics joint = oneDoFJoints.get(i);
          if (hasTorqueOffsetForJoint(joint))
-            updatePDController(joint, currentTime.getDoubleValue());
+            updatePDController(joint, currentTime.getValue());
       }
    }
 

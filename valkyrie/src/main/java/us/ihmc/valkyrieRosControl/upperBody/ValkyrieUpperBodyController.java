@@ -4,11 +4,17 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.FinishedControllerStateTransitionFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HoldPositionControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.SmoothTransitionControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandPrepControllerState;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -19,6 +25,11 @@ import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.core.StateTransition;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.rosControl.EffortJointHandle;
@@ -31,20 +42,20 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.tools.SettableTimestampProvider;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
+import us.ihmc.valkyrie.ValkyrieCalibrationParameters;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
-import us.ihmc.valkyrieRosControl.ValkyriePriorityParameters;
-import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
-import us.ihmc.valkyrieRosControl.ValkyrieRosControlSensorReader;
-import us.ihmc.valkyrieRosControl.ValkyrieRosControlSensorReaderFactory;
+import us.ihmc.valkyrieRosControl.*;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.*;
 
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
 import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.VALKYRIE_IHMC_ROS_CONTROLLER_NODE_NAME;
 
 public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
@@ -114,22 +125,24 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
    private final HashMap<String, PositionJointHandle> positionJointHandles = new HashMap<>();
    private final HashMap<String, JointStateHandle> jointStateHandles = new HashMap<>();
 
+   private final OneDoFJointBasics[] controlledJoints;
    private YoVariableServer yoVariableServer;
+   private final ValkyrieTorqueOffsetPrinter valkyrieTorqueOffsetPrinter = new ValkyrieTorqueOffsetPrinter();
 
    public ValkyrieUpperBodyController()
    {
       fullRobotModel = robotModel.createFullRobotModel();
       ValkyrieJointMap jointMap = robotModel.getJointMap();
-      OneDoFJointBasics[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
+      controlledJoints = fullRobotModel.getOneDoFJoints();
 
       CommandInputManager commandInputManager = new CommandInputManager(ControllerAPIDefinition.getControllerSupportedCommands());
       StatusMessageOutputManager statusMessageOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
 
       PeriodicRealtimeThreadSchedulerFactory realtimeThreadFactory = new PeriodicRealtimeThreadSchedulerFactory(ValkyriePriorityParameters.POSECOMMUNICATOR_PRIORITY);
       ros2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, realtimeThreadFactory, VALKYRIE_IHMC_ROS_CONTROLLER_NODE_NAME);
-      stateEstimator = new ValkyrieUpperBodyStateEstimator(fullRobotModel.getRootJoint(), oneDoFJoints, registry);
+      stateEstimator = new ValkyrieUpperBodyStateEstimator(fullRobotModel.getRootJoint(), controlledJoints, registry);
 
-      jointDesiredOutputList = new YoLowLevelOneDoFJointDesiredDataHolder(oneDoFJoints, registry);
+      jointDesiredOutputList = new YoLowLevelOneDoFJointDesiredDataHolder(controlledJoints, registry);
 
       ROS2Topic<?> inputTopic = ROS2Tools.getControllerInputTopic(robotModel.getSimpleRobotName());
       ROS2Topic<?> outputTopic = ROS2Tools.getControllerOutputTopic(robotModel.getSimpleRobotName());
@@ -196,6 +209,75 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
       sensorReaderFactory.build(fullRobotModel.getRootJoint(), fullRobotModel.getIMUDefinitions(), fullRobotModel.getForceSensorDefinitions(), jointDesiredOutputList, registry);
       ValkyrieRosControlSensorReader sensorReader = sensorReaderFactory.getSensorReader();
       stateEstimator.init(sensorReader);
+
+      // Setup upper body controller state machine
+      StateMachineFactory<HighLevelControllerName, HighLevelControllerState> factory = new StateMachineFactory<>(HighLevelControllerName.class);
+      factory.setNamePrefix("highLevelControllerName").setRegistry(registry).buildYoClock(yoTime);
+
+      // Setup stand prep state
+      StandPrepControllerState standPrepControllerState = new StandPrepControllerState(controlledJoints,
+                                                                                       robotModel.getHighLevelControllerParameters(),
+                                                                                       jointDesiredOutputList,
+                                                                                       yoTime);
+      factory.addState(standPrepControllerState.getHighLevelControllerName(), standPrepControllerState);
+
+      // Stand ready state
+      HoldPositionControllerState standReadyState = new HoldPositionControllerState(HighLevelControllerName.STAND_READY,
+                                                                                    controlledJoints,
+                                                                                    robotModel.getHighLevelControllerParameters(),
+                                                                                    jointDesiredOutputList);
+      factory.addState(standReadyState.getHighLevelControllerName(), standReadyState);
+
+      // Setup manipulation state
+      ValkyrieUpperBodyManipulationState manipulationState = new ValkyrieUpperBodyManipulationState(robotModel.getHighLevelControllerParameters(), controlledJoints);
+
+      // Smooth transition state
+      SmoothTransitionControllerState standTransitionState = new SmoothTransitionControllerState("toWalking",
+                                                                                                 HighLevelControllerName.STAND_TRANSITION_STATE,
+                                                                                                 standReadyState,
+                                                                                                 manipulationState,
+                                                                                                 controlledJoints,
+                                                                                                 robotModel.getHighLevelControllerParameters());
+      factory.addState(standTransitionState.getHighLevelControllerName(), standTransitionState);
+
+      // Setup calibration state
+      ValkyrieCalibrationControllerState calibrationControllerState = new ValkyrieCalibrationControllerState(null,
+                                                                                                             controlledJoints,
+                                                                                                             yoTime,
+                                                                                                             robotModel.getHighLevelControllerParameters(),
+                                                                                                             jointDesiredOutputList,
+                                                                                                             null,
+                                                                                                             null,
+                                                                                                             robotModel.getCalibrationParameters(),
+                                                                                                             valkyrieTorqueOffsetPrinter);
+      factory.addState(calibrationControllerState.getHighLevelControllerName(), calibrationControllerState);
+
+      // Setup transitions
+      YoEnum<HighLevelControllerName> requestedHighLevelControllerState = new YoEnum<>("requestedHighLevelControllerState", registry, HighLevelControllerName.class, true);
+
+      factory.addRequestedTransition(calibrationControllerState.getHighLevelControllerName(),   standPrepControllerState.getHighLevelControllerName(),   requestedHighLevelControllerState);
+      factory.addRequestedTransition(standPrepControllerState.getHighLevelControllerName(),     calibrationControllerState.getHighLevelControllerName(), requestedHighLevelControllerState);
+      factory.addRequestedTransition(standReadyState.getHighLevelControllerName(),              standTransitionState.getHighLevelControllerName(),       requestedHighLevelControllerState);
+      factory.addRequestedTransition(standReadyState.getHighLevelControllerName(),              calibrationControllerState.getHighLevelControllerName(), requestedHighLevelControllerState);
+      factory.addRequestedTransition(standReadyState.getHighLevelControllerName(),              standPrepControllerState.getHighLevelControllerName(),   requestedHighLevelControllerState);
+
+      // Stand transition to manipulation
+      factory.addTransition(standTransitionState.getHighLevelControllerName(), new StateTransition<>(manipulationState.getHighLevelControllerName(), new StateTransitionCondition()
+      {
+         @Override
+         public boolean testCondition(double timeInCurrentState)
+         {
+            return standTransitionState.isDone(timeInCurrentState);
+         }
+         @Override
+         public boolean performOnEntry()
+         {
+            return false;
+         }
+      }));
+
+      // Build state machine
+      StateMachine<HighLevelControllerName, HighLevelControllerState> controllerStateMachine = factory.build(robotModel.getHighLevelControllerParameters().getDefaultInitialControllerState());
 
       LogModelProvider logModelProvider = robotModel.getLogModelProvider();
       DataServerSettings logSettings = robotModel.getLogSettings();

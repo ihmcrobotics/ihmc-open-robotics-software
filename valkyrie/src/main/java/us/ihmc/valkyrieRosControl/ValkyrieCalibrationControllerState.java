@@ -1,5 +1,7 @@
 package us.ihmc.valkyrieRosControl;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
@@ -10,6 +12,7 @@ import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
@@ -22,6 +25,7 @@ import us.ihmc.wholeBodyController.diagnostics.CalibrationState;
 import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimatorController;
 import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimatorParameters;
 import us.ihmc.wholeBodyController.diagnostics.TorqueOffsetPrinter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ValkyrieCalibrationControllerState extends HighLevelControllerState
@@ -48,11 +52,16 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
    private final JointDesiredOutputListReadOnly highLevelControlOutput;
 
    public ValkyrieCalibrationControllerState(HighLevelHumanoidControllerToolbox highLevelControllerToolbox,
+                                             OneDoFJointBasics[] controlledJoints,
+                                             DoubleProvider yoTime,
                                              HighLevelControllerParameters highLevelControllerParameters,
                                              JointDesiredOutputListReadOnly highLevelControlOutput,
-                                             ValkyrieCalibrationParameters calibrationParameters, TorqueOffsetPrinter torqueOffsetPrinter)
+                                             SideDependentList<YoPlaneContactState> footContactStates,
+                                             BipedSupportPolygons bipedSupportPolygons,
+                                             ValkyrieCalibrationParameters calibrationParameters,
+                                             TorqueOffsetPrinter torqueOffsetPrinter)
    {
-      super(controllerState, highLevelControllerParameters, MultiBodySystemTools.filterJoints(highLevelControllerToolbox.getControlledJoints(), OneDoFJoint.class));
+      super(controllerState, highLevelControllerParameters, controlledJoints);
       this.highLevelControlOutput = highLevelControlOutput;
 
       for (OneDoFJointBasics controlledJoint : controlledJoints)
@@ -70,14 +79,22 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       JointTorqueOffsetEstimatorParameters parameters = new JointTorqueOffsetEstimatorParameters();
       if (!useArms)
          parameters.setArmJointsToRun(null);
-      jointTorqueOffsetEstimatorController = new JointTorqueOffsetEstimatorController(calibrationParameters, highLevelControllerToolbox, torqueOffsetPrinter, parameters);
+
+      jointTorqueOffsetEstimatorController = new JointTorqueOffsetEstimatorController(calibrationParameters,
+                                                                                      highLevelControllerToolbox,
+                                                                                      footContactStates,
+                                                                                      bipedSupportPolygons,
+                                                                                      torqueOffsetPrinter,
+                                                                                      highLevelControllerToolbox.getFullRobotModel(),
+                                                                                      highLevelControllerToolbox.getYoTime(),
+                                                                                      parameters);
       registry.addChild(jointTorqueOffsetEstimatorController.getYoRegistry());
 
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
 
       
       StateMachineFactory<CalibrationStates, CalibrationState> factory = new StateMachineFactory<>(CalibrationStates.class);
-      factory.setNamePrefix("calibrationState").setRegistry(registry).buildYoClock(highLevelControllerToolbox.getYoTime());
+      factory.setNamePrefix("calibrationState").setRegistry(registry).buildYoClock(yoTime);
       factory.addStateAndDoneTransition(CalibrationStates.ENTRY, new CalibrationEntry(), CalibrationStates.CALIBRATE);
       factory.addStateAndDoneTransition(CalibrationStates.CALIBRATE, new Calibration(), CalibrationStates.EXIT);
       factory.addState(CalibrationStates.EXIT, new CalibrationExit());
