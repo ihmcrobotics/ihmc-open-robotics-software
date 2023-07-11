@@ -6,6 +6,7 @@ import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -26,11 +27,9 @@ import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.thread.ExecutorServiceTools;
+import us.ihmc.tools.thread.PausablePeriodicThread;
 
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -48,7 +47,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class LocalizationAndMappingProcess
 {
-   private final static long SCHEDULED_UPDATE_PERIOD_MS = 100;
+   private final static double SCHEDULED_UPDATE_PERIOD = 0.1;
 
    private static final double maxAngleFromNormalToFilterAsShadow = 10.0;
 
@@ -67,9 +66,8 @@ public class LocalizationAndMappingProcess
 
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
 
-   private final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
-                                                                                                        getClass(),
-                                                                                                        ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
+   private final PausablePeriodicThread periodicThread = new PausablePeriodicThread(getClass().getSimpleName(), SCHEDULED_UPDATE_PERIOD, this::scheduledUpdate);
+   private final Notification shouldUpdateMap = new Notification();
 
    /**
     * Live Mode refers to being active and accepting new planar regions for updating the map. It can be overridden by the PerceptionConfigurationParameters
@@ -119,13 +117,20 @@ public class LocalizationAndMappingProcess
       });
 
       ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(HighLevelStateMessage.class, simpleRobotName), highLevelState::set);
+   }
 
-      updateMapFuture = executorService.scheduleAtFixedRate(this::scheduledUpdate, 0, SCHEDULED_UPDATE_PERIOD_MS, TimeUnit.MILLISECONDS);
+   public void start()
+   {
+      periodicThread.start();
+   }
+
+   public void stop()
+   {
+      periodicThread.stop();
    }
 
    private void scheduledUpdate()
    {
-
       planarRegionMap.setInitialSupportSquareEnabled(perceptionConfigurationParameters.getSupportSquareEnabled());
 
       ros2PropertySetGroup.update();
@@ -134,6 +139,11 @@ public class LocalizationAndMappingProcess
       if (highLevelState != null)
          if (highLevelState.getHighLevelControllerName() != HighLevelControllerName.WALKING.toByte())
             resetMap();
+
+      if (shouldUpdateMap.poll())
+      {
+         updateMap();
+      }
    }
 
    public void onPlanarRegionsReceived(FramePlanarRegionsListMessage message)
@@ -141,7 +151,7 @@ public class LocalizationAndMappingProcess
       if (latestIncomingRegions.get() == null)
          latestIncomingRegions.set(message);
 
-      executorService.submit(this::updateMap);
+      shouldUpdateMap.set();
    }
 
    public synchronized void updateMap()
@@ -220,7 +230,7 @@ public class LocalizationAndMappingProcess
    {
       if (updateMapFuture != null)
          updateMapFuture.cancel(true);
-      executorService.shutdownNow();
+      periodicThread.destroy();
       planarRegionMap.destroy();
    }
 

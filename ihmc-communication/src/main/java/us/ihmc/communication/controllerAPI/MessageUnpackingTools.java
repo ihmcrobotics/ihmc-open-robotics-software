@@ -10,6 +10,7 @@ import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
 import controller_msgs.msg.dds.JointspaceStreamingMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
+import controller_msgs.msg.dds.LegTrajectoryMessage;
 import controller_msgs.msg.dds.NeckTrajectoryMessage;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
@@ -59,6 +60,8 @@ public final class MessageUnpackingTools
             NeckTrajectoryMessage neckTrajectoryMessage = multipleMessageHolder.getNeckTrajectoryMessage();
             FootTrajectoryMessage leftFootTrajectoryMessage = multipleMessageHolder.getLeftFootTrajectoryMessage();
             FootTrajectoryMessage rightFootTrajectoryMessage = multipleMessageHolder.getRightFootTrajectoryMessage();
+            LegTrajectoryMessage leftLegTrajectoryMessage = multipleMessageHolder.getLeftLegTrajectoryMessage();
+            LegTrajectoryMessage rightLegTrajectoryMessage = multipleMessageHolder.getRightLegTrajectoryMessage();
 
             if (!leftHandTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
             {
@@ -99,6 +102,11 @@ public final class MessageUnpackingTools
             {
                messagesToPack.add(rightArmTrajectoryMessage);
             }
+            
+            if (!rightLegTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().isEmpty())
+               messagesToPack.add(rightLegTrajectoryMessage);
+            if (!leftLegTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().isEmpty())
+               messagesToPack.add(leftLegTrajectoryMessage);
 
             if (!chestTrajectoryMessage.getSo3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
                messagesToPack.add(chestTrajectoryMessage);
