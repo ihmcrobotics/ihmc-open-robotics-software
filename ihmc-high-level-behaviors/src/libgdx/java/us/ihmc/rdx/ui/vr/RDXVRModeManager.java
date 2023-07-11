@@ -48,7 +48,6 @@ public class RDXVRModeManager
       this.syncedRobot = syncedRobot;
       handPlacedFootstepMode = new RDXVRHandPlacedFootstepMode();
       handPlacedFootstepMode.create(syncedRobot.getRobotModel(), controllerHelper);
-      //laserFootstepMode = new RDXVRLaserFootstepMode();
 
       if (syncedRobot.getRobotModel().getRobotVersion().hasArms())
       {
@@ -73,18 +72,17 @@ public class RDXVRModeManager
       renderPanel = vrContext.getHeadset().isConnected() && vrContext.getController(RobotSide.LEFT).isConnected();
 
       vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
-      {
-         leftHandPanelPose.setToZero(controller.getXForwardZUpControllerFrame());
-         leftHandPanelPose.getOrientation().setYawPitchRoll(Math.PI / 2.0, 0.0, Math.PI / 4.0);
-         leftHandPanelPose.getPosition().addY(-0.05);
-         leftHandPanelPose.changeFrame(ReferenceFrame.getWorldFrame());
-         leftHandPanel.updateDesiredPose(leftHandPanelPose::get);
-      });
+                                                             {
+                                                                leftHandPanelPose.setToZero(controller.getXForwardZUpControllerFrame());
+                                                                leftHandPanelPose.getOrientation().setYawPitchRoll(Math.PI / 2.0, 0.0, Math.PI / 4.0);
+                                                                leftHandPanelPose.getPosition().addY(-0.05);
+                                                                leftHandPanelPose.changeFrame(ReferenceFrame.getWorldFrame());
+                                                                leftHandPanel.updateDesiredPose(leftHandPanelPose::get);
+                                                             });
 
       switch (mode)
       {
          case FOOTSTEP_PLACEMENT -> handPlacedFootstepMode.processVRInput(vrContext);
-//         case LASER_PLACEMENT -> laserFootstepMode.processVRInput(vrContext);
          case WHOLE_BODY_IK_STREAMING ->
          {
             if (kinematicsStreamingMode != null)
@@ -133,15 +131,11 @@ public class RDXVRModeManager
       {
          mode = RDXVRMode.FOOTSTEP_PLACEMENT;
       }
-//      if (ImGui.radioButton(labels.get("Laser placement"), mode == RDXVRMode.LASER_PLACEMENT))
-//      {
-//         mode = RDXVRMode.LASER_PLACEMENT;
-//      }
       if (ImGui.radioButton(labels.get("Whole body IK streaming"), mode == RDXVRMode.WHOLE_BODY_IK_STREAMING))
       {
          mode = RDXVRMode.WHOLE_BODY_IK_STREAMING;
-//         if (!kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().isStarted())
-//            kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().start();
+         //         if (!kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().isStarted())
+         //            kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().start();
       }
       if (ImGui.radioButton(labels.get("Joystick walking"), mode == RDXVRMode.JOYSTICK_WALKING))
       {
@@ -158,10 +152,6 @@ public class RDXVRModeManager
          {
             handPlacedFootstepMode.renderImGuiWidgets();
          }
-//         case LASER_PLACEMENT ->
-//         {
-//            laserFootstepMode.renderImGuiWidgets();
-//         }
          case WHOLE_BODY_IK_STREAMING ->
          {
             if (kinematicsStreamingMode != null)
@@ -184,10 +174,6 @@ public class RDXVRModeManager
             {
                handPlacedFootstepMode.getRenderables(renderables, pool);
             }
-//            case LASER_PLACEMENT ->
-//            {
-//               laserFootstepMode.getRenderables(renderables, pool);
-//            }
             case WHOLE_BODY_IK_STREAMING ->
             {
                if (kinematicsStreamingMode != null)
@@ -238,9 +224,4 @@ public class RDXVRModeManager
    {
       return handPlacedFootstepMode;
    }
-
-//   public RDXVRLaserFootstepMode getLaserFootstepMode()
-//   {
-//      return laserFootstepMode;
-//   }
 }
