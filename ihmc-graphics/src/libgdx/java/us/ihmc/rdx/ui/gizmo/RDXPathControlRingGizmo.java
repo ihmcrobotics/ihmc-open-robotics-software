@@ -265,15 +265,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
                closestCollisionSelection = RING;
                closestCollision.set(hollowCylinderIntersection.getClosestIntersection());
             }
-            double sizeChange = vrContext.getController(side).getXForwardZUpPose().getZ() / (
-                  vrContext.getController(side).getXForwardZUpPose().getZ() - frontController.get(side).getTranslationZ());
-            frontController.get(side).changeFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
-            frontController.get(side).getPosition().addX(sizeChange * frontController.get(side).getX());
-            frontController.get(side).changeFrame(ReferenceFrame.getWorldFrame());
-            frontController.get(side).getOrientation()
-                           .setToYawOrientation(-vrContext.getController(side).getXForwardZUpPose().getRoll());
-            frontController.get(side).getRotation().setYawPitchRoll(frontController.get(side).getYaw(), 0, 0);
-            frontController.get(side).getPosition().setZ(0);
          });
          if (vrPickResult.get(side).getPickCollisionWasAddedSinceReset())
          {
