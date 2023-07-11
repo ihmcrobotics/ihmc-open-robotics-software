@@ -609,6 +609,11 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       return stateMachine.getCurrentState().pollStatusToReport();
    }
 
+   public RigidBodyTaskspaceControlState getTaskspaceControlState()
+   {
+      return taskspaceControlState;
+   }
+
    @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {

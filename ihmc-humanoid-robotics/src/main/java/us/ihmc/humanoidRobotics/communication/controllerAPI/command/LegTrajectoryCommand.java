@@ -2,32 +2,28 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.Random;
 
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.LegTrajectoryMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTrajectoryMessage>, EpsilonComparable<ArmTrajectoryCommand>
+public class LegTrajectoryCommand implements Command<LegTrajectoryCommand, LegTrajectoryMessage>, EpsilonComparable<LegTrajectoryCommand>
 {
    private long sequenceId;
    private RobotSide robotSide;
-   private boolean forceExecution = false;
-   private RequestedMode requestedMode = null;
    private final JointspaceTrajectoryCommand jointspaceTrajectory;
 
-   public ArmTrajectoryCommand()
+   public LegTrajectoryCommand()
    {
       sequenceId = 0;
       robotSide = null;
-      setForceExecution(false);
       jointspaceTrajectory = new JointspaceTrajectoryCommand();
    }
 
-   public ArmTrajectoryCommand(Random random)
+   public LegTrajectoryCommand(Random random)
    {
       sequenceId = random.nextInt();
       robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;
-      setForceExecution(random.nextBoolean());
       jointspaceTrajectory = new JointspaceTrajectoryCommand(random);
    }
 
@@ -36,8 +32,6 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    {
       sequenceId = 0;
       robotSide = null;
-      setForceExecution(false);
-      setRequestedMode(null);
       jointspaceTrajectory.clear();
    }
 
@@ -48,21 +42,17 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    }
 
    @Override
-   public void setFromMessage(ArmTrajectoryMessage message)
+   public void setFromMessage(LegTrajectoryMessage message)
    {
       clear(RobotSide.fromByte(message.getRobotSide()));
-      setForceExecution(message.getForceExecution());
-      setRequestedMode(RequestedMode.fromByte(message.getRequestedMode()));
       sequenceId = message.getSequenceId();
       jointspaceTrajectory.setFromMessage(message.getJointspaceTrajectory());
    }
 
    @Override
-   public void set(ArmTrajectoryCommand other)
+   public void set(LegTrajectoryCommand other)
    {
       clear(other.getRobotSide());
-      setForceExecution(other.getForceExecution());
-      setRequestedMode(other.getRequestedMode());
       sequenceId = other.sequenceId;
       jointspaceTrajectory.set(other.getJointspaceTrajectory());
    }
@@ -77,35 +67,15 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
       return robotSide;
    }
 
-   public void setForceExecution(boolean forceExecution)
-   {
-      this.forceExecution = forceExecution;
-   }
-
-   public void setRequestedMode(RequestedMode requestedMode)
-   {
-      this.requestedMode = requestedMode;
-   }
-
-   public boolean getForceExecution()
-   {
-      return forceExecution;
-   }
-
-   public RequestedMode getRequestedMode()
-   {
-      return requestedMode;
-   }
-
    public JointspaceTrajectoryCommand getJointspaceTrajectory()
    {
       return jointspaceTrajectory;
    }
 
    @Override
-   public Class<ArmTrajectoryMessage> getMessageClass()
+   public Class<LegTrajectoryMessage> getMessageClass()
    {
-      return ArmTrajectoryMessage.class;
+      return LegTrajectoryMessage.class;
    }
 
    @Override
@@ -115,7 +85,7 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    }
 
    @Override
-   public boolean epsilonEquals(ArmTrajectoryCommand other, double epsilon)
+   public boolean epsilonEquals(LegTrajectoryCommand other, double epsilon)
    {
       if (robotSide != other.robotSide)
          return false;
@@ -158,24 +128,5 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    public long getSequenceId()
    {
       return sequenceId;
-   }
-
-   public enum RequestedMode
-   {
-      TORQUE_CONTROL, POSITION_CONTROL;
-
-      public static final RequestedMode[] values = values();
-
-      public byte toByte()
-      {
-         return (byte) ordinal();
-      }
-
-      public static RequestedMode fromByte(byte enumAsByte)
-      {
-         if (enumAsByte == -1)
-            return null;
-         return values[enumAsByte];
-      }
    }
 }
