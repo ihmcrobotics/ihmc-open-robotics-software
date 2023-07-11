@@ -66,6 +66,11 @@ public class MouseCollidable
     *                            which is why we don't pass it in in the constructor
     * @return The closest collision distance of NaN if not colliding
     */
+
+   public double pointCollide(Point3DReadOnly pointCollide)
+   {
+      return shape.distance(pointCollide);
+   }
    public double collide(Line3DReadOnly pickRayInWorld, ReferenceFrame collisionShapeFrame)
    {
       if (shape instanceof Sphere3DReadOnly sphere)
