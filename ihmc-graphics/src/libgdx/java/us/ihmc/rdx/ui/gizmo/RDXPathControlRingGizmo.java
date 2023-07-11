@@ -253,7 +253,8 @@ public class RDXPathControlRingGizmo implements RenderableProvider
                                                       vrContext.getController(side).getPickPointPose()));
             frontController.get(side).changeFrame(vrContext.getController(side).getPickPoseFrame());
             frontController.get(side).setToZero(vrContext.getController(side).getPickPoseFrame());
-            frontController.get(side).getPosition().addX(0.1);
+            frontController.get(side).getPosition().addX(1.0);
+            frontController.get(side).changeFrame(ReferenceFrame.getWorldFrame());
             laser.put(side, new Line3D(vrContext.getController(side).getPickPointPose().getPosition(), frontController.get(side).getPosition()));
 
             hollowCylinderIntersection.update(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), discThickness.get() / 2.0, transformToWorld);
@@ -264,6 +265,15 @@ public class RDXPathControlRingGizmo implements RenderableProvider
                closestCollisionSelection = RING;
                closestCollision.set(hollowCylinderIntersection.getClosestIntersection());
             }
+            double sizeChange = vrContext.getController(side).getXForwardZUpPose().getZ() / (
+                  vrContext.getController(side).getXForwardZUpPose().getZ() - frontController.get(side).getTranslationZ());
+            frontController.get(side).changeFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
+            frontController.get(side).getPosition().addX(sizeChange * frontController.get(side).getX());
+            frontController.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+            frontController.get(side).getOrientation()
+                           .setToYawOrientation(-vrContext.getController(side).getXForwardZUpPose().getRoll());
+            frontController.get(side).getRotation().setYawPitchRoll(frontController.get(side).getYaw(), 0, 0);
+            frontController.get(side).getPosition().setZ(0);
          });
          if (vrPickResult.get(side).getPickCollisionWasAddedSinceReset())
          {
