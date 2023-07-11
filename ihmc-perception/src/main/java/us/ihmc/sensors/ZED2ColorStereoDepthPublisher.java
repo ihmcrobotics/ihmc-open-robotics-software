@@ -39,7 +39,7 @@ import static org.bytedeco.zed.global.zed.*;
 
 /**
  * Encodes and publishes color and depth images from a ZED 2 sensor.
- * Both depth and color images are aligned to the left side camera of the sensor.
+ * The depth image is aligned to the left camera of the ZED.
  */
 public class ZED2ColorStereoDepthPublisher
 {
