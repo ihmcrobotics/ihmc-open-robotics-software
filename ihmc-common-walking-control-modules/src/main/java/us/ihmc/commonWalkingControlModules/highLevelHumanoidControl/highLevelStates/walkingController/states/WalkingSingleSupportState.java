@@ -163,7 +163,7 @@ public class WalkingSingleSupportState extends SingleSupportState
          comHeightManager.initializeTransitionToFall(swingTime / 6.0);
       }
 
-      walkingMessageHandler.clearFootTrajectory();
+      walkingMessageHandler.clearFlamingoCommands();
 
       switchToToeOffIfPossible(supportSide);
    }
