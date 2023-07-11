@@ -53,6 +53,8 @@ public class RDXFrameGizmoDemo
             RDXPathControlRingGizmo footstepRingGizmo
                   = new RDXPathControlRingGizmo(interactableReferenceFrame2.getSelectablePose3DGizmo().getPoseGizmo().getGizmoFrame());
             footstepRingGizmo.create(baseUI.getPrimary3DPanel());
+            baseUI.getVRManager().getContext().addVRPickCalculator(footstepRingGizmo::calculateVRPick);
+            baseUI.getVRManager().getContext().addVRInputProcessor(footstepRingGizmo::processVRInput);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(footstepRingGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(footstepRingGizmo::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(footstepRingGizmo);

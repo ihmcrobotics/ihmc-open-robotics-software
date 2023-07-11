@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
@@ -14,11 +15,13 @@ import imgui.internal.ImGui;
 import imgui.type.ImFloat;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -33,8 +36,12 @@ import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.interaction.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.Random;
 
@@ -110,6 +117,12 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private boolean proportionsNeedUpdate = false;
    private FrameBasedGizmoModification frameBasedGizmoModification;
 
+   private final SideDependentList<FramePose3D> frontController = new SideDependentList<>();
+   private final SideDependentList<Line3D> laser = new SideDependentList<>();
+   private final FramePose3D vrPickPose = new FramePose3D();
+   private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
+   private final SideDependentList<Boolean> isVRDragging = new SideDependentList<>(false, false);
+
    public RDXPathControlRingGizmo()
    {
       this(ReferenceFrame.getWorldFrame());
@@ -176,6 +189,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
                                        new Point3D(0.0, 0.0, 0.0),
                                        DISC_COLOR);
       });
+
       positiveXArrowModel.setMesh(meshBuilder ->
       {
          meshBuilder.addIsoscelesTriangularPrism(arrowWidth.get(),
@@ -230,6 +244,66 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       return material;
    }
 
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         vrContext.getController(side).runIfConnected(controller ->
+         {
+            frontController.put(side, new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                      vrContext.getController(side).getXForwardZUpPose()));
+            frontController.get(side).changeFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
+            frontController.get(side).setToZero(vrContext.getController(side).getXForwardZUpControllerFrame());
+            frontController.get(side).getPosition().addX(10);
+            laser.put(side, new Line3D(vrContext.getController(side).getPickPointPose().getPosition(), frontController.get(side).getPosition()));
+
+            hollowCylinderIntersection.update(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), discThickness.get() / 2.0, transformToWorld);
+            double distance = hollowCylinderIntersection.intersect(laser.get(side));
+            if (!Double.isNaN(distance))
+            {
+               vrPickResult.get(side).addPickCollision(0.0);
+               closestCollisionSelection = RING;
+               closestCollision.set(hollowCylinderIntersection.getClosestIntersection());
+            }
+         });
+         if (vrPickResult.get(side).getPickCollisionWasAddedSinceReset())
+         {
+            vrContext.addPickResult(side, vrPickResult.get(side));
+         }
+      }
+   }
+
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         vrContext.getController(side).runIfConnected(controller ->
+                                                      {
+                                                         boolean triggered = controller.getClickTriggerActionData().bState();
+                                                         boolean newTriggered = controller.getClickTriggerActionData().bChanged() && triggered;
+                                                         boolean newUnTriggered = controller.getClickTriggerActionData().bChanged() && !triggered;
+
+                                                         if (newTriggered)
+                                                         {
+                                                            if (vrContext.getSelectedPick().get(side) == vrPickResult.get(side))
+                                                            {
+                                                               Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(laser.get(side), closestCollision, Axis3D.Z);
+                                                               frameBasedGizmoModification.translateInWorld(planarMotion);
+                                                               isVRDragging.put(side, true);
+                                                            }
+                                                         }
+                                                         if(isVRDragging.get(side))
+                                                         {
+                                                            Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(laser.get(side), closestCollision, Axis3D.Z);
+                                                            frameBasedGizmoModification.translateInWorld(planarMotion);
+                                                         }
+                                                         if(newUnTriggered || !triggered)
+                                                         {
+                                                          isVRDragging.put(side, false);
+                                                         }
+                                                      });
+      }
+   }
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
       boolean isWindowHovered = ImGui.isWindowHovered();
