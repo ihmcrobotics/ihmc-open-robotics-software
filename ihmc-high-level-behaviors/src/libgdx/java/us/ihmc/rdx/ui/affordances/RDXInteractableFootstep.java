@@ -478,7 +478,7 @@ public class RDXInteractableFootstep
    {
       footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, r, g, b, a));
    }
-
+   
 
    public RobotSide getFootstepSide()
    {
@@ -590,5 +590,4 @@ public class RDXInteractableFootstep
       this.textFramePose.setIncludingFrame(manuallyPlacedFootstep.textFramePose);
       this.flashingFootStepsColorHigh = manuallyPlacedFootstep.flashingFootStepsColorHigh;
    }
-   
 }
