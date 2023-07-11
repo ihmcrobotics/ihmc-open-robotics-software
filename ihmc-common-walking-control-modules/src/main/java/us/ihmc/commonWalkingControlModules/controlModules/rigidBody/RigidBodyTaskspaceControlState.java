@@ -27,6 +27,8 @@ public abstract class RigidBodyTaskspaceControlState extends RigidBodyControlSta
    public abstract void holdCurrent();
 
    public abstract void holdCurrentDesired();
+   
+   public abstract boolean isHybridModeActive();
 
    public boolean handleTrajectoryCommand(EuclideanTrajectoryControllerCommand command)
    {
