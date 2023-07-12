@@ -1,5 +1,7 @@
 package us.ihmc.perception.sceneGraph.multiBodies.door;
 
+import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
+
 /**
  * The parameters for a door.
  * TODO: Currently this is the simulation door.
@@ -40,6 +42,11 @@ public class DoorModelParameters
    /** Distance from the frame post to the frame model's origin. */
    public static final double DOOR_FRAME_HINGE_OFFSET = 0.006;
 
+   /** This refers to the edges of the black parts with no margin. The margins included will be wider than this. */
+   public static final double DOOR_ARUCO_MARKER_WIDTH = RigidBodySceneObjectDefinitions.LARGE_MARKER_WIDTH;
+   public static final int PULL_DOOR_MARKER_ID = 0;
+   public static final int PUSH_DOOR_MARKER_ID = 1;
+
    /**
     * It is actually important to measure the ArUco marker pose relative to the lever handle,
     * as that's what's most important to get right.
@@ -48,5 +55,5 @@ public class DoorModelParameters
    public static final double PUSH_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Y = 0.0885;
 
    public static final double PULL_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Z = 0.127;
-   public static final double PULL_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Y = 0.0885;
+   public static final double PULL_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Y = -0.0885 - DOOR_ARUCO_MARKER_WIDTH;
 }
