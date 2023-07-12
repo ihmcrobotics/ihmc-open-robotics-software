@@ -13,7 +13,7 @@ package us.ihmc.perception.sceneGraph.multiBodies.door;
  * Lever axis height - 91.5 cm
  * 91.4 cm panel width
  * 203.3 cm panel height
- * 104.4 market z from bottom of panel
+ * 104.4 marker z from bottom of panel
  * 12.7 cm lever below marker
  * 8.85 cm lever right of marker
  * 5 cm lever away from panel
