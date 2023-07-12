@@ -40,9 +40,13 @@ public class DoorModelParameters
    /** Distance from the frame post to the frame model's origin. */
    public static final double DOOR_FRAME_HINGE_OFFSET = 0.006;
 
-   public static final double ARUCO_MARKER_PUSH_SIDE_BOTTOM_RIGHT_CORNER_Z_IN_PANEL_FRAME = 1.03981;
-   public static final double ARUCO_MARKER_PUSH_SIDE_BOTTOM_RIGHT_CORNER_Y_IN_PANEL_FRAME = 0.780302;
+   /**
+    * It is actually important to measure the ArUco marker pose relative to the lever handle,
+    * as that's what's most important to get right.
+    */
+   public static final double PUSH_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Z = 0.127;
+   public static final double PUSH_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Y = 0.0885;
 
-   public static final double ARUCO_MARKER_PULL_SIDE_BOTTOM_RIGHT_CORNER_Z_IN_PANEL_FRAME = 1.03981;
-   public static final double ARUCO_MARKER_PULL_SIDE_BOTTOM_RIGHT_CORNER_Y_IN_PANEL_FRAME = 0.577101;
+   public static final double PULL_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Z = 0.127;
+   public static final double PULL_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Y = 0.0885;
 }

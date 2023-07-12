@@ -2,7 +2,6 @@ package us.ihmc.perception.sceneGraph.multiBodies.door;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticArUcoRelativeDetectableSceneNode;
@@ -10,6 +9,11 @@ import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
+/**
+ * We want to measure this stuff in the right order.
+ *
+ * It's all based on the one ArUco marker, so it makes setting everything up kinda hard.
+ */
 public class DoorSceneNodeDefinitions
 {
    /** This refers to the edges of the black parts with no margin. The margins included will be wider than this. */
@@ -18,14 +22,23 @@ public class DoorSceneNodeDefinitions
    public static final int PULL_DOOR_MARKER_ID = 0;
    public static final int PUSH_DOOR_MARKER_ID = 1;
 
+
+   public static final RigidBodyTransform PUSH_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM  = new RigidBodyTransform();
+   static
+   {
+      PUSH_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM.getRotation().setToYawOrientation(Math.PI);
+      PUSH_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM.getTranslation().setZ(DoorModelParameters.PUSH_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Z);
+      PUSH_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM.getTranslation().setY(DoorModelParameters.PUSH_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Y);
+   }
+
    public static final RigidBodyTransform PULL_DOOR_PANEL_TRANSFORM_TO_MARKER = new RigidBodyTransform();
    static
    {
       EuclidCoreMissingTools.setYawPitchRollDegrees(PULL_DOOR_PANEL_TRANSFORM_TO_MARKER.getRotation(), 180.0, 0.0, 0.0);
       PULL_DOOR_PANEL_TRANSFORM_TO_MARKER.getTranslation().setX(-DoorModelParameters.DOOR_PANEL_THICKNESS / 2.0);
       PULL_DOOR_PANEL_TRANSFORM_TO_MARKER.getTranslation().setY(DoorModelParameters.DOOR_PANEL_HINGE_OFFSET
-                                                                + DoorModelParameters.ARUCO_MARKER_PULL_SIDE_BOTTOM_RIGHT_CORNER_Y_IN_PANEL_FRAME);
-      PULL_DOOR_PANEL_TRANSFORM_TO_MARKER.getTranslation().setZ(DoorModelParameters.ARUCO_MARKER_PULL_SIDE_BOTTOM_RIGHT_CORNER_Z_IN_PANEL_FRAME);
+                                                                + DoorModelParameters.PULL_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Y);
+      PULL_DOOR_PANEL_TRANSFORM_TO_MARKER.getTranslation().setZ(DoorModelParameters.PULL_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Z);
    }
    /** The frame has the same origin as the panel. */
    public static final RigidBodyTransform PULL_DOOR_FRAME_TRANSFORM_TO_MARKER = new RigidBodyTransform(PULL_DOOR_PANEL_TRANSFORM_TO_MARKER);
@@ -34,8 +47,8 @@ public class DoorSceneNodeDefinitions
    static
    {
       PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER.getTranslation().setX(DoorModelParameters.DOOR_PANEL_THICKNESS / 2.0);
-      PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER.getTranslation().setY(DoorModelParameters.ARUCO_MARKER_PUSH_SIDE_BOTTOM_RIGHT_CORNER_Y_IN_PANEL_FRAME);
-      PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER.getTranslation().setZ(DoorModelParameters.ARUCO_MARKER_PUSH_SIDE_BOTTOM_RIGHT_CORNER_Z_IN_PANEL_FRAME);
+      PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER.getTranslation().setY(DoorModelParameters.PUSH_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Y);
+      PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER.getTranslation().setZ(DoorModelParameters.PUSH_SIDE_ARUCO_MARKER_TO_LEVER_AXIS_Z);
    }
    public static final RigidBodyTransform MARKER_TO_PUSH_DOOR_PANEL_FRAME_TRANSFORM = new RigidBodyTransform();
    static
@@ -88,6 +101,10 @@ public class DoorSceneNodeDefinitions
    public static final String DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH = "environmentObjects/door/doorLeverHandle/DoorLeverHandle.g3dj";
    public static final RigidBodyTransform PULL_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
    public static final RigidBodyTransform PUSH_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      PUSH_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.appendRollRotation(Math.PI);
+   }
 
    public static ArUcoDetectableNode createPullDoorPanel()
    {
@@ -136,7 +153,7 @@ public class DoorSceneNodeDefinitions
       return new ArUcoDetectableNode("PushDoorLeverHandle",
                                      PUSH_DOOR_MARKER_ID,
                                      DOOR_ARUCO_MARKER_WIDTH,
-                                     PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER,
+                                     PUSH_DOOR_MARKER_TO_LEVER_HANDLE_TRANSFORM,
                                      DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
                                      PUSH_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
    }
