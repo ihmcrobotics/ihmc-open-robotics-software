@@ -161,14 +161,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
    }
 
-   public void createAndSetupDefault(RDX3DPanel panel3D)
-   {
-      create(panel3D);
-      panel3D.addImGui3DViewPickCalculator(this::calculate3DViewPick);
-      panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
-      panel3D.getScene().addRenderableProvider(this, RDXSceneLevel.VIRTUAL);
-   }
-
    public void create(RDX3DPanel panel3D)
    {
       camera3D = panel3D.getCamera3D();

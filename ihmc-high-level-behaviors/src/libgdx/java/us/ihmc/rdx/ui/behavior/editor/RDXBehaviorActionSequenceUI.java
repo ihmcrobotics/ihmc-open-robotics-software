@@ -13,6 +13,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.ros2.ROS2Node;
@@ -131,6 +132,17 @@ public class RDXBehaviorActionSequenceUI
       availableSequences.sort(Comparator.comparing(RDXAvailableActionSequence::getName));
    }
 
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+      if (selectedEditor != null)
+         selectedEditor.calculateVRPick(vrContext);
+   }
+
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      if (selectedEditor != null)
+         selectedEditor.processVRInput(vrContext);
+   }
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
       if (selectedEditor != null)

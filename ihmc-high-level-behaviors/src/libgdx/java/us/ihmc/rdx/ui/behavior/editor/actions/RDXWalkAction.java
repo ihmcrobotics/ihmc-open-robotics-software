@@ -23,6 +23,7 @@ import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePathControlRingGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
+import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -130,6 +131,18 @@ public class RDXWalkAction extends RDXBehaviorAction
          goalFeetGraphics.get(side).setPose(goalFeetGizmos.get(side).getPose());
       }
       footstepPlanGraphic.update();
+   }
+
+   @Override
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+      footstepPlannerGoalGizmo.calculateVRPick(vrContext);
+   }
+
+   @Override
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      footstepPlannerGoalGizmo.processVRInput(vrContext);
    }
 
    @Override
