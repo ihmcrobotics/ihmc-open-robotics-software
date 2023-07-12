@@ -339,14 +339,20 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
    private void calculateVRPick(RDXVRContext vrContext)
    {
-      if (interactablesAvailable && interactablesEnabled.get())
-         selectionCollisionModel.calculateVRPick(vrContext);
+      if (interactablesEnabled.get())
+      {
+         locomotionManager.calculateWalkPathControlRingVRPick(vrContext);
+         if (interactablesAvailable)
+            selectionCollisionModel.calculateVRPick(vrContext);
+      }
+
    }
 
    private void processVRInput(RDXVRContext vrContext)
    {
       if (interactablesAvailable)
       {
+         locomotionManager.processWalkPathControlRingVRInput(vrContext);
          for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
             robotPartInteractable.processVRInput(vrContext);
 
