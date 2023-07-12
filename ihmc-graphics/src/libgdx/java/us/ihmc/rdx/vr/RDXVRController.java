@@ -4,7 +4,9 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.BufferUtils;
 import org.lwjgl.openvr.*;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameLine3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -19,6 +21,7 @@ import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.nio.LongBuffer;
 import java.util.function.Consumer;
@@ -72,6 +75,8 @@ public class RDXVRController extends RDXVRTrackedDevice
    private InputAnalogActionData joystickActionData;
    private final LongBuffer gripActionHandle = BufferUtils.newLongBuffer(1);
    private InputAnalogActionData gripActionData;
+   private final SideDependentList<FrameLine3D> vrPickRays = new SideDependentList<>(() -> new FrameLine3D());
+   private final SideDependentList<FramePose3D> vrPickRayPose = new SideDependentList<>(() -> new FramePose3D());
 
    private static final RigidBodyTransformReadOnly controllerYBackZLeftXRightToXForwardZUp = new RigidBodyTransform(
       new YawPitchRoll(          // For this transformation, we start with IHMC ZUp with index forward and thumb up
@@ -295,5 +300,17 @@ public class RDXVRController extends RDXVRTrackedDevice
    public ReferenceFrame getPickPoseFrame()
    {
       return pickPoseFrame.getReferenceFrame();
+   }
+
+   public FrameLine3D getPickRay(RobotSide side)
+   {
+      vrPickRays.get(side).setToZero(getXForwardZUpControllerFrame());
+      vrPickRays.get(side).getDirection().set(Axis3D.X);
+      vrPickRays.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+
+      vrPickRayPose.get(side).setToZero(getXForwardZUpControllerFrame());
+      vrPickRayPose.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+
+      return vrPickRays.get(side);
    }
 }

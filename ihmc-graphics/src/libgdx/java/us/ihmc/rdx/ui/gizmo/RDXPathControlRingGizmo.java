@@ -249,12 +249,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
-            laser.get(side).setToZero(controller.getXForwardZUpControllerFrame());
-            laser.get(side).getDirection().set(Axis3D.X);
-            laser.get(side).changeFrame(ReferenceFrame.getWorldFrame());
-
-            pickRayPose.get(side).setToZero(controller.getXForwardZUpControllerFrame());
-            pickRayPose.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+            laser.put(side, controller.getPickRay(side));
 
             hollowCylinderIntersection.update(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), discThickness.get() / 2.0, transformToWorld);
             double distance = hollowCylinderIntersection.intersect(laser.get(side));
@@ -282,10 +277,10 @@ public class RDXPathControlRingGizmo implements RenderableProvider
          vrContext.getController(side).runIfConnected(controller ->
          {
             boolean triggered = controller.getClickTriggerActionData().bState();
-            boolean newTriggered = controller.getClickTriggerActionData().bChanged() && triggered;
-            boolean newUnTriggered = controller.getClickTriggerActionData().bChanged() && !triggered;
+            boolean newlyTriggered = controller.getClickTriggerActionData().bChanged() && triggered;
+            boolean newlyUnTriggered = controller.getClickTriggerActionData().bChanged() && !triggered;
 
-            if (newTriggered)
+            if (newlyTriggered)
             {
                if (vrContext.getSelectedPick().get(side) == vrPickResult.get(side))
                {
@@ -304,7 +299,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
                closestCollision.add(planarMotion);
                oldPitch = controller.getPickPointPose().getPitch();
             }
-            if(newUnTriggered || !triggered)
+            if(newlyUnTriggered || !triggered)
             {
              isVRDragging.put(side, false);
             }
