@@ -76,7 +76,7 @@ public class DoorDefinition extends RobotDefinition
                     .getTranslation()
                     .add(-DoorModelParameters.DOOR_PANEL_THICKNESS / 2.0,
                          DoorModelParameters.DOOR_PANEL_WIDTH - DoorModelParameters.DOOR_LEVER_HANDLE_INSET,
-                         (DoorModelParameters.DOOR_PANEL_HEIGHT / 2.0) - DoorModelParameters.DOOR_LEVER_HANDLE_DISTANCE_BELOW_MID_HEIGHT);
+                         DoorModelParameters.DOOR_LEVER_HANDLE_FROM_BOTTOM_OF_PANEL);
       initialLeverState = new OneDoFJointState();
       doorLeverJoint.setInitialJointState(initialLeverState);
 

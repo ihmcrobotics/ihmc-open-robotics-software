@@ -23,15 +23,15 @@ public class DoorModelParameters
 {
    /* These measurements from the simulation door model, measured in Blender. */
    /** The thickness of the door panel. */
-   public static final double DOOR_PANEL_THICKNESS = 0.0508;
+   public static final double DOOR_PANEL_THICKNESS = 0.034;
    /** The vertical length of the panel. */
-   public static final double DOOR_PANEL_HEIGHT = 2.0447;
+   public static final double DOOR_PANEL_HEIGHT = 2.033;
    /** The horizontal length of the panel. */
-   public static final double DOOR_PANEL_WIDTH = 0.9144;
+   public static final double DOOR_PANEL_WIDTH = 0.914;
    /** Distance the handle joint in from the edge of the panel. */
-   public static final double DOOR_LEVER_HANDLE_INSET = 0.05;
-   /** We place the lever handle a little below halfway up the door like it normally is on doors. */
-   public static final double DOOR_LEVER_HANDLE_DISTANCE_BELOW_MID_HEIGHT = 0.13;
+   public static final double DOOR_LEVER_HANDLE_INSET = 0.062;
+   /** We place the lever handle up from the bottom of the panel as measured on our lab door. */
+   public static final double DOOR_LEVER_HANDLE_FROM_BOTTOM_OF_PANEL = 0.915;
    /** Mount the panel up off the ground a little so it's not dragging. */
    public static final double DOOR_PANEL_GROUND_GAP_HEIGHT = 0.02;
    /** Place the panel away from the hinge a little.
