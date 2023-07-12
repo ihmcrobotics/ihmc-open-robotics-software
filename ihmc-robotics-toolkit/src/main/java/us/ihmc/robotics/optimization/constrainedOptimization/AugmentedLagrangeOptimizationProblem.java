@@ -178,7 +178,7 @@ public class AugmentedLagrangeOptimizationProblem
 
    public void printResults(DMatrixD1 x, double cost, DMatrixD1 equalityEvaluations, DMatrixD1 inequalityEvaluations)
    {
-      LogTools.info("");
+      LogTools.info("\n==================");
       System.out.println("Solution x:");
       for (int i = 0; i < x.getNumElements(); i++)
       {
@@ -205,5 +205,7 @@ public class AugmentedLagrangeOptimizationProblem
             System.out.println("\t" + inequalityEvaluations.get(i) + " >= 0");
          }
       }
+      LogTools.info("==================\n");
+
    }
 }

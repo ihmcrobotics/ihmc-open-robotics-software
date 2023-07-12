@@ -85,7 +85,7 @@ public class MultiblockADMMProblem
     * A global constraint
     *    K(x1, x2,...) >= 0
     */
-   public void addInequalityConstraint(BlockConstraintFunction constraint)
+   public void addGlobalInequalityConstraint(BlockConstraintFunction constraint)
    {
       globalInequalityConstraints.add(constraint);
    }
@@ -94,7 +94,7 @@ public class MultiblockADMMProblem
     * A global constraint
     *    J(x1, x2,...) == 0
     */
-   public void addEqualityConstraint(BlockConstraintFunction constraint)
+   public void addGlobalEqualityConstraint(BlockConstraintFunction constraint)
    {
       globalEqualityConstraints.add(constraint);
    }

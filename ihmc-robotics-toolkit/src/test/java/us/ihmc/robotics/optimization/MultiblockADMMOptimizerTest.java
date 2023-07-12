@@ -76,7 +76,7 @@ public class MultiblockADMMOptimizerTest
       MultiblockADMMProblem admm = new MultiblockADMMProblem();
       admm.addIsolatedProblem(augmentedLagrange1);
       admm.addIsolatedProblem(augmentedLagrange2);
-      admm.addEqualityConstraint(MultiblockADMMOptimizerTest::blockConstraint1);
+      admm.addGlobalEqualityConstraint(MultiblockADMMOptimizerTest::blockConstraint1);
       admm.initialize(initialPenalty, penaltyIncreaseFactor);
 
       // ========= Everything below is for solving ==============
