@@ -18,6 +18,7 @@ import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
+import us.ihmc.euclid.referenceFrame.FrameLine3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -115,9 +116,8 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private boolean proportionsNeedUpdate = false;
    private FrameBasedGizmoModification frameBasedGizmoModification;
 
-   private final SideDependentList<FramePose3D> frontController = new SideDependentList<>();
-   private final SideDependentList<Line3D> laser = new SideDependentList<>();
-   private final FramePose3D vrPickPose = new FramePose3D();
+   private final SideDependentList<FrameLine3D> laser = new SideDependentList<>(() -> new FrameLine3D());
+   private final SideDependentList<FramePose3D> pickRayPose = new SideDependentList<>(() -> new FramePose3D());
    private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
    private final SideDependentList<Boolean> isVRDragging = new SideDependentList<>(false, false);
    private double oldPitch = 0;
@@ -249,22 +249,24 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
-            frontController.put(side, new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                      vrContext.getController(side).getPickPointPose()));
-            frontController.get(side).changeFrame(vrContext.getController(side).getPickPoseFrame());
-            frontController.get(side).setToZero(vrContext.getController(side).getPickPoseFrame());
-            frontController.get(side).getPosition().addX(1.0);
-            frontController.get(side).changeFrame(ReferenceFrame.getWorldFrame());
-            laser.put(side, new Line3D(vrContext.getController(side).getPickPointPose().getPosition(), frontController.get(side).getPosition()));
+            laser.get(side).setToZero(controller.getXForwardZUpControllerFrame());
+            laser.get(side).getDirection().set(Axis3D.X);
+            laser.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+
+            pickRayPose.get(side).setToZero(controller.getXForwardZUpControllerFrame());
+            pickRayPose.get(side).changeFrame(ReferenceFrame.getWorldFrame());
 
             hollowCylinderIntersection.update(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), discThickness.get() / 2.0, transformToWorld);
             double distance = hollowCylinderIntersection.intersect(laser.get(side));
             if (!Double.isNaN(distance))
             {
-               vrPickResult.get(side).addPickCollision(0.0);
+               vrPickResult.get(side).addPickCollision(distance);
                closestCollisionSelection = RING;
-               closestCollision.set(hollowCylinderIntersection.getClosestIntersection());
+               determineCurrentSelectionFromPickRay(laser.get(side));
             }
+
+
+
          });
          if (vrPickResult.get(side).getPickCollisionWasAddedSinceReset())
          {
@@ -278,35 +280,35 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       for (RobotSide side : RobotSide.values)
       {
          vrContext.getController(side).runIfConnected(controller ->
-                                                      {
-                                                         boolean triggered = controller.getClickTriggerActionData().bState();
-                                                         boolean newTriggered = controller.getClickTriggerActionData().bChanged() && triggered;
-                                                         boolean newUnTriggered = controller.getClickTriggerActionData().bChanged() && !triggered;
+         {
+            boolean triggered = controller.getClickTriggerActionData().bState();
+            boolean newTriggered = controller.getClickTriggerActionData().bChanged() && triggered;
+            boolean newUnTriggered = controller.getClickTriggerActionData().bChanged() && !triggered;
 
-                                                         if (newTriggered)
-                                                         {
-                                                            if (vrContext.getSelectedPick().get(side) == vrPickResult.get(side))
-                                                            {
-                                                               Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(laser.get(side), closestCollision, Axis3D.Z);
-                                                               frameBasedGizmoModification.translateInWorld(planarMotion);
-                                                               closestCollision.add(planarMotion);
-                                                               isVRDragging.put(side, true);
-                                                            }
-                                                         }
-                                                         if(isVRDragging.get(side))
-                                                         {
-                                                            Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(laser.get(side), closestCollision, Axis3D.Z);
-                                                            frameBasedGizmoModification.translateInWorld(planarMotion);
-                                                            frameBasedGizmoModification.yawInWorld(controller.getPickPointPose().getPitch() - oldPitch);
-                                                            System.out.println(laser.get(side).getPoint());
-                                                            closestCollision.add(planarMotion);
-                                                            oldPitch = controller.getPickPointPose().getPitch();
-                                                         }
-                                                         if(newUnTriggered || !triggered)
-                                                         {
-                                                          isVRDragging.put(side, false);
-                                                         }
-                                                      });
+            if (newTriggered)
+            {
+               if (vrContext.getSelectedPick().get(side) == vrPickResult.get(side))
+               {
+                  Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(laser.get(side), closestCollision, Axis3D.Z);
+                  frameBasedGizmoModification.translateInWorld(planarMotion);
+                  closestCollision.add(planarMotion);
+                  isVRDragging.put(side, true);
+               }
+            }
+            if(isVRDragging.get(side))
+            {
+               Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(laser.get(side), closestCollision, Axis3D.Z);
+               frameBasedGizmoModification.translateInWorld(planarMotion);
+               frameBasedGizmoModification.yawInWorld(controller.getPickPointPose().getPitch() - oldPitch);
+               System.out.println(laser.get(side).getPoint());
+               closestCollision.add(planarMotion);
+               oldPitch = controller.getPickPointPose().getPitch();
+            }
+            if(newUnTriggered || !triggered)
+            {
+             isVRDragging.put(side, false);
+            }
+         });
       }
    }
    public void calculate3DViewPick(ImGui3DViewInput input)
