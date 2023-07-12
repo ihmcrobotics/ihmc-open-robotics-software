@@ -126,7 +126,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private final SideDependentList<RDXModelInstance> lasers = new SideDependentList<>();
    private final AxisAngle oldAngle = new AxisAngle();
    private final AxisAngle axisAngleToRotateBy = new AxisAngle();
-   private boolean isVRGizmoHovered = false;
+   private final SideDependentList<Boolean> isVRGizmoHovered = new SideDependentList<>(false, false);
 
    public RDXPathControlRingGizmo()
    {
@@ -273,8 +273,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
          });
          if (vrPickResult.get(side).getPickCollisionWasAddedSinceReset())
          {
-
-            System.out.println(isVRGizmoHovered);
             vrPickResult.get(side).setDistanceToControllerPickPoint(closestCollisionDistance);
             vrContext.addPickResult(side, vrPickResult.get(side));
          }
@@ -286,7 +284,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    {
       for (RobotSide side : RobotSide.values)
       {
-         isVRGizmoHovered = vrPickResult.get(side) == vrContext.getSelectedPick().get(side);
+         isVRGizmoHovered.put(side, vrContext.getSelectedPick().get(side) == vrPickResult.get(side));
       }
    }
 
@@ -603,7 +601,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    private void updateMaterialHighlighting()
    {
-         boolean highlightingPrior = highlightingEnabled && isGizmoHovered || isVRGizmoHovered;
+         boolean highlightingPrior = highlightingEnabled && isGizmoHovered || isVRGizmoHovered.get(RobotSide.LEFT) || isVRGizmoHovered.get(RobotSide.RIGHT);
          discModel.setMaterial(highlightingPrior && closestCollisionSelection == RING ? highlightedMaterial : normalMaterial);
          positiveXArrowModel.setMaterial(highlightingPrior && closestCollisionSelection == POSITIVE_X_ARROW ? highlightedMaterial : normalMaterial);
          positiveYArrowModel.setMaterial(highlightingPrior && closestCollisionSelection == POSITIVE_Y_ARROW ? highlightedMaterial : normalMaterial);
