@@ -117,12 +117,13 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private final Random random = new Random();
    private boolean proportionsNeedUpdate = false;
    private FrameBasedGizmoModification frameBasedGizmoModification;
-   private RDXModelInstance leftLaser;
-   private RDXModelInstance rightLaser;
+   private RDXModelInstance box;
 
    private final SideDependentList<FrameLine3D> vrPickRays = new SideDependentList<>(() -> new FrameLine3D());
    private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
    private final SideDependentList<Boolean> isVRDragging = new SideDependentList<>(false, false);
+   private final SideDependentList<Boolean> isGizmoPointed = new SideDependentList<>(false, false);
+   private final SideDependentList<RDXModelInstance> lasers = new SideDependentList<>();
    private final AxisAngle oldAngle = new AxisAngle();
    private final AxisAngle axisAngleToRotateBy = new AxisAngle();
 
@@ -246,23 +247,32 @@ public class RDXPathControlRingGizmo implements RenderableProvider
          vrPickResult.get(side).reset();
          vrContext.getController(side).runIfConnected(controller ->
          {
+
             vrPickRays.put(side, controller.getPickRay(side));
-            double length = hollowCylinderIntersection.getCylinder().getPosition().distance(controller.getPickPointPose().getPosition());
-            leftLaser = new RDXModelInstance(RDXModelBuilder.createArrow(length, 0.001, new Color(Color.WHITE)));
-            rightLaser = new RDXModelInstance(RDXModelBuilder.createArrow(length, 0.001, new Color(Color.WHITE)));
-            leftLaser.setPoseInWorldFrame(vrContext.getController(RobotSide.LEFT).getPickPointPose());
-            rightLaser.setPoseInWorldFrame(vrContext.getController(RobotSide.RIGHT).getPickPointPose());
+
             hollowCylinderIntersection.update(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), discThickness.get() / 2.0, transformToWorld);
             double distance = hollowCylinderIntersection.intersect(vrPickRays.get(side));
             if (!Double.isNaN(distance))
             {
-               vrPickResult.get(side).addPickCollision(distance);
+               closestCollisionDistance = distance;
                closestCollisionSelection = RING;
+               closestCollision.set(hollowCylinderIntersection.getClosestIntersection());
+               lasers.put(side, controller.createLaser(side, distance));
+
+               vrPickResult.get(side).addPickCollision(closestCollisionDistance);
+               vrPickResult.get(side).setDistanceToControllerPickPoint(closestCollisionDistance);
                determineCurrentSelectionFromPickRay(vrPickRays.get(side));
+               isGizmoPointed.put(side, true);
+            }
+            else
+            {
+               lasers.put(side, controller.updateLaser(side));
+               isGizmoPointed.put(side, false);
             }
          });
          if (vrPickResult.get(side).getPickCollisionWasAddedSinceReset())
          {
+            vrPickResult.get(side).setDistanceToControllerPickPoint(closestCollisionDistance);
             vrContext.addPickResult(side, vrPickResult.get(side));
          }
 
@@ -275,6 +285,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
+            Line3DReadOnly pickRay = controller.getPickRay(side);;
             boolean triggered = controller.getClickTriggerActionData().bState();
             boolean newlyTriggered = controller.getClickTriggerActionData().bChanged() && triggered;
             boolean newlyUnTriggered = controller.getClickTriggerActionData().bChanged() && !triggered;
@@ -282,25 +293,28 @@ public class RDXPathControlRingGizmo implements RenderableProvider
             {
                if (newlyTriggered)
                {
-                  Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(vrPickRays.get(side), closestCollision, Axis3D.Z);
+                  box = new RDXModelInstance(RDXModelBuilder.createBox((float) 0.1, (float)0.1, (float)0.1, new Color(Color.WHITE)));
+                  box.setPositionInWorldFrame(closestCollision);
+
+                  Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
                   frameBasedGizmoModification.translateInWorld(planarMotion);
-                  closestCollision.add(planarMotion);
                   isVRDragging.put(side, true);
+                  update();
 
                }
             }
             if(isVRDragging.get(side))
             {
-               Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(vrPickRays.get(side), closestCollision, Axis3D.Z);
-               System.out.println(planarMotion);
+               Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
                frameBasedGizmoModification.translateInWorld(planarMotion);
-               System.out.println(oldAngle.getYaw());
-               axisAngleToRotateBy.setYawPitchRoll(controller.getPickPointPose().getRoll() - oldAngle.getYaw(), 0, 0);
+               axisAngleToRotateBy.setYawPitchRoll(-controller.getPickPointPose().getRoll() - oldAngle.getYaw(), 0, 0);
                System.out.println(axisAngleToRotateBy.getYaw());
                frameBasedGizmoModification.rotateInWorld(axisAngleToRotateBy);
-               oldAngle.setYawPitchRoll(controller.getPickPointPose().getRoll(), 0, 0);
+               oldAngle.setYawPitchRoll(-controller.getPickPointPose().getRoll(), 0, 0);
+               box = new RDXModelInstance(RDXModelBuilder.createBox((float) 0.1, (float)0.1, (float)0.1, new Color(Color.WHITE)));
+               box.setPositionInWorldFrame(closestCollision);
+               update();
 
-               closestCollision.add(planarMotion);
             }
             if(newlyUnTriggered || !triggered)
             {
@@ -596,12 +610,12 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    private void updateMaterialHighlighting()
    {
-      boolean highlightingPrior = highlightingEnabled && isGizmoHovered;
-      discModel.setMaterial(highlightingPrior && closestCollisionSelection == RING ? highlightedMaterial : normalMaterial);
-      positiveXArrowModel.setMaterial(highlightingPrior && closestCollisionSelection == POSITIVE_X_ARROW ? highlightedMaterial : normalMaterial);
-      positiveYArrowModel.setMaterial(highlightingPrior && closestCollisionSelection == POSITIVE_Y_ARROW ? highlightedMaterial : normalMaterial);
-      negativeXArrowModel.setMaterial(highlightingPrior && closestCollisionSelection == NEGATIVE_X_ARROW ? highlightedMaterial : normalMaterial);
-      negativeYArrowModel.setMaterial(highlightingPrior && closestCollisionSelection == NEGATIVE_Y_ARROW ? highlightedMaterial : normalMaterial);
+         boolean highlightingPrior = highlightingEnabled && isGizmoHovered;
+         discModel.setMaterial(highlightingPrior && closestCollisionSelection == RING ? highlightedMaterial : normalMaterial);
+         positiveXArrowModel.setMaterial(highlightingPrior && closestCollisionSelection == POSITIVE_X_ARROW ? highlightedMaterial : normalMaterial);
+         positiveYArrowModel.setMaterial(highlightingPrior && closestCollisionSelection == POSITIVE_Y_ARROW ? highlightedMaterial : normalMaterial);
+         negativeXArrowModel.setMaterial(highlightingPrior && closestCollisionSelection == NEGATIVE_X_ARROW ? highlightedMaterial : normalMaterial);
+         negativeYArrowModel.setMaterial(highlightingPrior && closestCollisionSelection == NEGATIVE_Y_ARROW ? highlightedMaterial : normalMaterial);
    }
 
    public ImGuiPanel createTunerPanel(String name)
@@ -654,13 +668,16 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (rightLaser != null)
+      for (RobotSide side : RobotSide.values)
       {
-         rightLaser.getRenderables(renderables, pool);
+         if (lasers.get(side) != null)
+         {
+            lasers.get(side).getRenderables(renderables, pool);
+         }
       }
-      if (leftLaser != null)
+      if (box != null)
       {
-         leftLaser.getRenderables(renderables, pool);
+         box.getRenderables(renderables, pool);
       }
       discModel.getOrCreateModelInstance().getRenderables(renderables, pool);
       if (showArrows)

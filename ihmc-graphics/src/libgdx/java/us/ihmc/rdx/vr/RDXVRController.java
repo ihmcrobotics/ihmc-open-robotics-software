@@ -1,8 +1,11 @@
 package us.ihmc.rdx.vr;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.BufferUtils;
+import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.openvr.*;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -76,7 +79,7 @@ public class RDXVRController extends RDXVRTrackedDevice
    private final LongBuffer gripActionHandle = BufferUtils.newLongBuffer(1);
    private InputAnalogActionData gripActionData;
    private final SideDependentList<FrameLine3D> vrPickRays = new SideDependentList<>(() -> new FrameLine3D());
-   private final SideDependentList<FramePose3D> vrPickRayPose = new SideDependentList<>(() -> new FramePose3D());
+   private final SideDependentList<RDXModelInstance> lasers = new SideDependentList<>();
 
    private static final RigidBodyTransformReadOnly controllerYBackZLeftXRightToXForwardZUp = new RigidBodyTransform(
       new YawPitchRoll(          // For this transformation, we start with IHMC ZUp with index forward and thumb up
@@ -309,5 +312,27 @@ public class RDXVRController extends RDXVRTrackedDevice
       vrPickRays.get(side).changeFrame(ReferenceFrame.getWorldFrame());
 
       return vrPickRays.get(side);
+   }
+
+   public RDXModelInstance createLaser(RobotSide side, double distance)
+   {
+      lasers.put(side, new RDXModelInstance(RDXModelBuilder.createArrow(distance, 0.001, new Color(Color.WHITE))));
+      lasers.get(side).setPoseInWorldFrame(getPickPointPose());
+      return lasers.get(side);
+
+   }
+   public RDXModelInstance updateLaser(RobotSide side)
+   {
+      lasers.put(side, null);
+      return lasers.get(side);
+   }
+
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      for(RobotSide side : RobotSide.values)
+      {
+         if(lasers.get(side) != null)
+            lasers.get(side).getRenderables(renderables, pool);
+      }
    }
 }
