@@ -9,6 +9,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.vr.RDXVRContext;
 
 /**
  * Adds "selectedness" to a path control ring gizmo.
@@ -52,6 +53,16 @@ public class RDXSelectablePathControlRingGizmo
       panel3D.addImGui3DViewPickCalculator(this::calculate3DViewPick);
       panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
       panel3D.getScene().addRenderableProvider(this::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+   }
+
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+      pathControlRingGizmo.calculateVRPick(vrContext);
+   }
+
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      pathControlRingGizmo.processVRInput(vrContext);
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)

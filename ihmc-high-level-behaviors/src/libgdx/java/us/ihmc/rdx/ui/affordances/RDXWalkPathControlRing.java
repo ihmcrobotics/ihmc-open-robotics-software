@@ -24,6 +24,7 @@ import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePathControlRingGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 
@@ -75,6 +76,16 @@ public class RDXWalkPathControlRing
       {
          updateStuff();
       }
+   }
+
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+      footstepPlannerGoalGizmo.calculateVRPick(vrContext);
+   }
+
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      footstepPlannerGoalGizmo.processVRInput(vrContext);
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)

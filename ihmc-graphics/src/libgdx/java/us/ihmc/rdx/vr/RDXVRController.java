@@ -308,9 +308,6 @@ public class RDXVRController extends RDXVRTrackedDevice
       vrPickRays.get(side).getDirection().set(Axis3D.X);
       vrPickRays.get(side).changeFrame(ReferenceFrame.getWorldFrame());
 
-      vrPickRayPose.get(side).setToZero(getXForwardZUpControllerFrame());
-      vrPickRayPose.get(side).changeFrame(ReferenceFrame.getWorldFrame());
-
       return vrPickRays.get(side);
    }
 }
