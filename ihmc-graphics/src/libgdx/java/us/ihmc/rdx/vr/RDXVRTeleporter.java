@@ -111,9 +111,7 @@ public class RDXVRTeleporter
         else if (preparingToTeleport) // holding B button
         {
            // Ray teleport
-           pickRay.setToZero(controller.getXForwardZUpControllerFrame());
-           pickRay.getDirection().set(Axis3D.X);
-           pickRay.changeFrame(ReferenceFrame.getWorldFrame());
+           pickRay.set(controller.getPickRay(RobotSide.RIGHT));
 
            pickRayPose.setToZero(controller.getXForwardZUpControllerFrame());
            pickRayPose.changeFrame(ReferenceFrame.getWorldFrame());
