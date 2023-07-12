@@ -167,6 +167,23 @@ public class RDXModelBuilder
       }, "cylinder");
    }
 
+   public static ModelInstance createArrow(double length, double radius, Color color)
+   {
+      return buildModelInstance(meshBuilder ->
+                                {
+                                   double coneHeight = 0.10 * length;
+                                   double cylinderLength = length - coneHeight;
+                                   double cylinderRadius = radius;
+                                   double coneRadius = 1.5 * radius;
+                                   meshBuilder.addCylinder(cylinderLength, cylinderRadius, new Point3D(), new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0), color);
+                                   meshBuilder.addCone(coneHeight,
+                                                       coneRadius,
+                                                       new Point3D(cylinderLength, 0.0, 0.0),
+                                                       new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0),
+                                                       color);
+                                }, "arrow");
+   }
+
    public static ModelInstance createArrow(double length, Color color)
    {
       return buildModelInstance(meshBuilder ->
