@@ -32,7 +32,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerBoundCalculator;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings.JointTorqueEnforcementMethod;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings.JointTorqueLimitEnforcementMethod;
 import us.ihmc.commonWalkingControlModules.visualizer.BasisVectorVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.commons.MathTools;
@@ -172,9 +172,9 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       CommonOps_DDRM.fill(qDDotMinMatrix, Double.NEGATIVE_INFINITY);
       CommonOps_DDRM.fill(qDDotMaxMatrix, Double.POSITIVE_INFINITY);
 
-      JointTorqueEnforcementMethod jointTorqueEnforcementMethod = optimizationSettings.areJointTorqueLimitsConsidered();
+      JointTorqueLimitEnforcementMethod jointTorqueEnforcementMethod = optimizationSettings.getJointTorqueLimitEnforcementMethod();
       
-      if (jointTorqueEnforcementMethod == JointTorqueEnforcementMethod.CONSTRAINTS_IN_QP)
+      if (jointTorqueEnforcementMethod == JointTorqueLimitEnforcementMethod.CONSTRAINTS_IN_QP)
       {
          for (int i = 0; i < oneDoFJoints.length; i++)
          {
