@@ -395,10 +395,15 @@ public class RDXLocomotionManager
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
-            InputDigitalActionData aPressed = controller.getAButtonActionData();
-            if (aPressed.bChanged())
+            boolean aPressed = controller.getAButtonActionData().bChanged() && side == RobotSide.RIGHT;
+            boolean xPressed = controller.getAButtonActionData().bChanged() && side == RobotSide.LEFT;
+            if (aPressed)
             {
                interactableFootstepPlan.walkFromSteps();
+            }
+            if (xPressed)
+            {
+               interactableFootstepPlan.removeLastStep();
             }
          });
       }
