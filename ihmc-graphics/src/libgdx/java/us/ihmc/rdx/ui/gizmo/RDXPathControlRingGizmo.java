@@ -14,7 +14,6 @@ import imgui.internal.ImGui;
 import imgui.type.ImFloat;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
@@ -36,6 +35,7 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.rdx.vr.RDXVRDragData;
 import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.interaction.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
@@ -115,16 +115,9 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private final Random random = new Random();
    private boolean proportionsNeedUpdate = false;
    private FrameBasedGizmoModification frameBasedGizmoModification;
-
    private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
-   private final SideDependentList<Boolean> isVRDragging = new SideDependentList<>(false, false);
-   private final SideDependentList<Boolean> isGizmoPointed = new SideDependentList<>(false, false);
-   private final AxisAngle oldAngle = new AxisAngle();
-   private final AxisAngle axisAngleToRotateBy = new AxisAngle();
-   private final SideDependentList<Boolean> isVRGizmoHovered = new SideDependentList<>(false, false);
-   private boolean triggered = false;
-   private boolean newlyTriggered = false;
-   boolean newlyUnTriggered = false;
+   private final SideDependentList<Boolean> isGizmoHoveredVR = new SideDependentList<>(false, false);
+   private final SideDependentList<Boolean> isBeingManipulatedVR = new SideDependentList<>(false, false);
 
    public RDXPathControlRingGizmo()
    {
@@ -255,7 +248,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
-            if (!triggered)
+            if (!controller.getTriggerDragData().isDragging())
             {
                Line3DReadOnly pickRay = controller.getPickRay();
                determineCurrentSelectionFromPickRay(pickRay);
@@ -274,7 +267,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    {
       for (RobotSide side : RobotSide.values)
       {
-         isGizmoHovered = vrContext.getSelectedPick().get(side) == vrPickResult.get(side);
+         isGizmoHoveredVR.put(side, vrContext.getSelectedPick().get(side) == vrPickResult.get(side));
       }
    }
 
@@ -288,28 +281,38 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    {
       for (RobotSide side : RobotSide.values)
       {
-         boolean isRingHovered = isVRGizmoHovered.get(side) && closestCollisionSelection == RING;
-         if (isRingHovered)
-         {
-         }
          vrContext.getController(side).runIfConnected(controller ->
          {
-            triggered = controller.getClickTriggerActionData().bState();
-            newlyTriggered = controller.getClickTriggerActionData().bChanged() && triggered;
-            newlyUnTriggered = controller.getClickTriggerActionData().bChanged() && !triggered;
-            isBeingManipulated = triggered;
+            RDXVRDragData triggerDragData = controller.getTriggerDragData();
+
+            boolean isRingHovered = isGizmoHoveredVR.get(side) && closestCollisionSelection == RING;
+            if (isRingHovered)
+            {
+               if (triggerDragData.getDragJustStarted())
+               {
+                  triggerDragData.setObjectBeingDragged(this);
+               }
+            }
+            isBeingManipulatedVR.put(side, triggerDragData.isBeingDragged(this));
 
             if (isBeingManipulated)
             {
-               Line3DReadOnly pickRay = controller.getPickRay(side);
-               Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
-               frameBasedGizmoModification.translateInWorld(planarMotion);
-               closestCollision.add(planarMotion);
+               Line3DReadOnly pickRay = controller.getPickRay();
+
+               if (triggerDragData.isDragging())
+               {
+                  Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
+                  frameBasedGizmoModification.translateInWorld(planarMotion);
+                  closestCollision.add(planarMotion);
+               }
+
                frameBasedGizmoModification.setAdjustmentNeedsToBeApplied();
-               update();
             }
          });
       }
+
+      // after things have been modified, update the derivative stuff
+      update();
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
@@ -656,13 +659,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (RobotSide side : RobotSide.values)
-      {
-         if (lasers.get(side) != null)
-         {
-            lasers.get(side).getRenderables(renderables, pool);
-         }
-      }
       discModel.getOrCreateModelInstance().getRenderables(renderables, pool);
       if (showArrows)
       {

@@ -1,6 +1,7 @@
 package us.ihmc.rdx.vr;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
@@ -10,6 +11,7 @@ import org.lwjgl.openvr.*;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameLine3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine3DReadOnly;
@@ -104,9 +106,11 @@ public class RDXVRController extends RDXVRTrackedDevice
    private final ModifiableReferenceFrame pickPoseFrame;
    private final ImGuiRigidBodyTransformTuner pickPoseTransformTuner;
    private final FrameLine3D pickRay = new FrameLine3D();
+   private final FramePoint3D pickCollisionPoint = new FramePoint3D();
    private RDXModelInstance pickPoseSphere;
    private RDXModelInstance pickRayGraphic;
    private RDXModelInstance pickRayCollisionPointGraphic;
+   private final RDXVRDragData triggerDragData = new RDXVRDragData(() -> getClickTriggerActionData().bState());
 
    public RDXVRController(RobotSide side, ReferenceFrame vrPlayAreaYUpZBackFrame)
    {
@@ -201,6 +205,8 @@ public class RDXVRController extends RDXVRTrackedDevice
       VRInput.VRInput_GetDigitalActionData(touchpadTouchedActionHandle.get(0), touchpadTouchedActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetAnalogActionData(joystickActionHandle.get(0), joystickActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetAnalogActionData(gripActionHandle.get(0), gripActionData, VR.k_ulInvalidInputValueHandle);
+
+      triggerDragData.update();
    }
 
    public void renderImGuiTunerWidgets()
@@ -229,11 +235,20 @@ public class RDXVRController extends RDXVRTrackedDevice
       if (Double.isNaN(distance))
       {
          pickRayGraphic = null;
+         pickRayCollisionPointGraphic.transform.setTranslation(Float.NaN, Float.NaN, Float.NaN);
       }
       else
       {
-         pickRayGraphic = new RDXModelInstance(RDXModelBuilder.createBox((float) distance, 0.001f, 0.001f, new Color(Color.WHITE)));
+         Point3D offset = new Point3D(distance / 2.0, 0.0, 0.0);
+         ModelInstance pickRayBox = RDXModelBuilder.buildModelInstance(meshBuilder ->
+            meshBuilder.addBox((float) distance, 0.001f, 0.001f, offset, new Color(Color.WHITE)), "box");
+         pickRayGraphic = new RDXModelInstance(pickRayBox);
          pickRayGraphic.setPoseInWorldFrame(getPickPointPose());
+
+         pickCollisionPoint.setToZero(xForwardZUpControllerFrame);
+         pickCollisionPoint.setX(distance);
+         pickCollisionPoint.changeFrame(ReferenceFrame.getWorldFrame());
+         LibGDXTools.toLibGDX(pickCollisionPoint, pickRayCollisionPointGraphic.transform);
       }
    }
 
@@ -255,6 +270,11 @@ public class RDXVRController extends RDXVRTrackedDevice
    public InputAnalogActionData getTriggerActionData()
    {
       return triggerActionData;
+   }
+
+   public RDXVRDragData getTriggerDragData()
+   {
+      return triggerDragData;
    }
 
    public InputDigitalActionData getAButtonActionData()
