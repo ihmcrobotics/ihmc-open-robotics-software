@@ -114,7 +114,7 @@ public class RDXWalkPathControlRing
          becomeModified(true);
       }
 
-      if (footstepPlannerGoalGizmo.getSelected() && leftMouseReleasedWithoutDrag)
+      if (footstepPlannerGoalGizmo.getSelected())
       {
          if (footstepPlannerGoalGizmo.getPathControlRingGizmo().getPositiveXArrowHovered())
          {

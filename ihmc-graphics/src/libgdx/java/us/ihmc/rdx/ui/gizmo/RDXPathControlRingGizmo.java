@@ -54,8 +54,6 @@ import static us.ihmc.rdx.ui.gizmo.RDXPathControlRingCollisionSelection.*;
  *
  * It has arrows that can be used for various purposes.
  *
- * TODO: Add VR support. The user should be able to point the controller
- * at it from a distance and move it around.
  */
 public class RDXPathControlRingGizmo implements RenderableProvider
 {
@@ -287,30 +285,11 @@ public class RDXPathControlRingGizmo implements RenderableProvider
             RDXVRDragData triggerDragData = controller.getTriggerDragData();
 
             boolean isRingHovered = isGizmoHoveredVR.get(side) && closestVRCollisionSelection.get(side) == RING;
-            boolean isPositiveXArrowHovered = isGizmoHoveredVR.get(side) && closestVRCollisionSelection.get(side) == POSITIVE_X_ARROW;
-            boolean isNegativeXArrowHovered = isGizmoHoveredVR.get(side) && closestVRCollisionSelection.get(side) == NEGATIVE_X_ARROW;
-            boolean isPositiveYArrowHovered = isGizmoHoveredVR.get(side) && closestVRCollisionSelection.get(side) == POSITIVE_Y_ARROW;
-            boolean isNegativeYArrowHovered = isGizmoHoveredVR.get(side) && closestVRCollisionSelection.get(side) == NEGATIVE_Y_ARROW;
             if (isRingHovered)
             {
                if (triggerDragData.getDragJustStarted())
                {
                   triggerDragData.setObjectBeingDragged(this);
-               }
-            }
-            if(controller.getClickTriggerActionData().bState() && controller.getClickTriggerActionData().bChanged())
-            {
-               if (isNegativeXArrowHovered)
-               {
-                  frameBasedGizmoModification.yawInWorld(Math.PI);
-               }
-               if (isPositiveYArrowHovered)
-               {
-                  frameBasedGizmoModification.yawInWorld(Math.PI/2);
-               }
-               if (isNegativeYArrowHovered)
-               {
-                  frameBasedGizmoModification.yawInWorld(-Math.PI/2);
                }
             }
 
@@ -801,22 +780,22 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    public boolean getPositiveXArrowHovered()
    {
-      return isGizmoHovered && closestCollisionSelection == POSITIVE_X_ARROW;
+      return isGizmoHovered && closestCollisionSelection == POSITIVE_X_ARROW || (isGizmoHoveredVR.get(RobotSide.LEFT) && closestVRCollisionSelection.get(RobotSide.LEFT) == POSITIVE_X_ARROW)|| (isGizmoHoveredVR.get(RobotSide.RIGHT) && closestVRCollisionSelection.get(RobotSide.RIGHT) == POSITIVE_X_ARROW);
    }
 
    public boolean getPositiveYArrowHovered()
    {
-      return isGizmoHovered && closestCollisionSelection == POSITIVE_Y_ARROW;
+      return isGizmoHovered && closestCollisionSelection == POSITIVE_Y_ARROW || (isGizmoHoveredVR.get(RobotSide.LEFT) && closestVRCollisionSelection.get(RobotSide.LEFT) == POSITIVE_Y_ARROW) || (isGizmoHoveredVR.get(RobotSide.RIGHT) && closestVRCollisionSelection.get(RobotSide.RIGHT) == POSITIVE_Y_ARROW);
    }
 
    public boolean getNegativeXArrowHovered()
    {
-      return isGizmoHovered && closestCollisionSelection == NEGATIVE_X_ARROW;
+      return isGizmoHovered && closestCollisionSelection == NEGATIVE_X_ARROW || (isGizmoHoveredVR.get(RobotSide.LEFT) && closestVRCollisionSelection.get(RobotSide.LEFT) == NEGATIVE_X_ARROW) || (isGizmoHoveredVR.get(RobotSide.RIGHT) && closestVRCollisionSelection.get(RobotSide.RIGHT) == NEGATIVE_X_ARROW);
    }
 
    public boolean getNegativeYArrowHovered()
    {
-      return isGizmoHovered && closestCollisionSelection == NEGATIVE_Y_ARROW;
+      return isGizmoHovered && closestCollisionSelection == NEGATIVE_Y_ARROW || (isGizmoHoveredVR.get(RobotSide.LEFT) && closestVRCollisionSelection.get(RobotSide.LEFT) == NEGATIVE_Y_ARROW) || (isGizmoHoveredVR.get(RobotSide.RIGHT) && closestVRCollisionSelection.get(RobotSide.RIGHT) == NEGATIVE_Y_ARROW);
    }
 
    public void setShowArrows(boolean showArrows)
