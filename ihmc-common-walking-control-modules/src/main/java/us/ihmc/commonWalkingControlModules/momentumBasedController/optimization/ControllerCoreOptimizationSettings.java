@@ -142,16 +142,16 @@ public interface ControllerCoreOptimizationSettings
     * </ul>
     * Default value: {@code NO_CONSTRAINTS}.
     */
-   public enum JointTorqueEnforcementMethod
+   public enum JointTorqueLimitEnforcementMethod
    {
 
       NO_CONSTRAINTS, CONSTRAINTS_IN_QP, CONSTRAINTS_IN_CONTROLLER;
 
    }
 
-   default JointTorqueEnforcementMethod areJointTorqueLimitsConsidered()
+   default JointTorqueLimitEnforcementMethod getJointTorqueLimitEnforcementMethod()
    {
-      return JointTorqueEnforcementMethod.NO_CONSTRAINTS;
+      return JointTorqueLimitEnforcementMethod.NO_CONSTRAINTS;
    }
 
    /**
@@ -163,16 +163,16 @@ public interface ControllerCoreOptimizationSettings
     * </ul>
     * Default value: {@code NO_CONSTRAINTS}.
     */
-   public enum JointPowerEnforcementMethod
+   public enum JointPowerLimitEnforcementMethod
    {
 
       NO_CONSTRAINTS, CONSTRAINTS_IN_QP, CONSTRAINTS_IN_CONTROLLER;
 
    }
 
-   default JointPowerEnforcementMethod areJointPowerLimitsConsidered()
+   default JointPowerLimitEnforcementMethod getJointPowerLimitEnforcementMethod()
    {
-      return JointPowerEnforcementMethod.NO_CONSTRAINTS;
+      return JointPowerLimitEnforcementMethod.NO_CONSTRAINTS;
    }
 
    /**
