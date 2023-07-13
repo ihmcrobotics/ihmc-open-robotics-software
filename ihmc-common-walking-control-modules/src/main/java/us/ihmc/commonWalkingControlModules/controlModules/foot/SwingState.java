@@ -42,7 +42,6 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3Tr
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -322,7 +321,9 @@ public class SwingState extends AbstractFootControlState
       replanTrajectory.set(false);
 
       if (workspaceLimiterControlModule != null)
+      {
          workspaceLimiterControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
+      }
 
       YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
       contactState.notifyContactStateHasChanged();
@@ -856,6 +857,7 @@ public class SwingState extends AbstractFootControlState
          return false;
 
       double timeToSwitchToLoadBearing = swingDuration.getValue() * (1.0 - fractionOfSwingToSwitchToLoaded.getValue());
-      return currentTimeWithSwingSpeedUp.getDoubleValue() > timeToSwitchToLoadBearing;
+      double time = currentTimeWithSwingSpeedUp.isNaN() ? currentTime.getValue() : currentTimeWithSwingSpeedUp.getDoubleValue();
+      return time > timeToSwitchToLoadBearing;
    }
 }

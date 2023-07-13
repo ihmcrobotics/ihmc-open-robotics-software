@@ -43,10 +43,8 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
 
    public void clear(RobotSide robotSide)
    {
+      clear();
       this.robotSide = robotSide;
-      setForceExecution(false);
-      setRequestedMode(null);
-      jointspaceTrajectory.clear();
    }
 
    @Override
@@ -164,8 +162,7 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
 
    public enum RequestedMode
    {
-      TORQUE_CONTROL,
-      POSITION_CONTROL;
+      TORQUE_CONTROL, POSITION_CONTROL;
 
       public static final RequestedMode[] values = values();
 

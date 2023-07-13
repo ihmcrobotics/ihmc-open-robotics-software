@@ -61,6 +61,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegionsList;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -167,8 +168,6 @@ public class BalanceManager implements SCS2YoGraphicHolder
    private final ConvexPolygonScaler convexPolygonShrinker = new ConvexPolygonScaler();
    private final FrameConvexPolygon2D shrunkSupportPolygon = new FrameConvexPolygon2D();
 
-   private StepConstraintRegionHandler stepConstraintRegionHandler;
-
    private final YoDouble distanceToShrinkSupportPolygonWhenHoldingCurrent = new YoDouble("distanceToShrinkSupportPolygonWhenHoldingCurrent", registry);
 
    private final YoBoolean holdICPToCurrentCoMLocationInNextDoubleSupport = new YoBoolean("holdICPToCurrentCoMLocationInNextDoubleSupport", registry);
@@ -221,6 +220,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
    private final List<Footstep> footsteps = new ArrayList<>();
    private final List<FootstepTiming> footstepTimings = new ArrayList<>();
+   private final StepConstraintRegionsList currentStepConstraints = new StepConstraintRegionsList();
 
    private final ContactStateManager contactStateManager;
    private final DoubleProvider timeShiftProvider = this::computeTimeShiftToMinimizeTrackingError;
@@ -423,9 +423,9 @@ public class BalanceManager implements SCS2YoGraphicHolder
       footstepTimings.add(timing);
    }
 
-   public void setStepConstraintRegionsHandler(StepConstraintRegionHandler planarRegionStepConstraint)
+   public void setCurrentStepConstraints(StepConstraintRegionsList stepConstraintRegionsList)
    {
-      this.stepConstraintRegionHandler = planarRegionStepConstraint;
+      stepAdjustmentController.setStepConstraintRegions(stepConstraintRegionsList.getAsList());
    }
 
    public boolean checkAndUpdateStepAdjustment(Footstep footstep)
@@ -446,8 +446,6 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
       if (!swingSpeedUpForStepAdjustment.isNaN() && swingSpeedUpForStepAdjustment.getValue() > 0.0)
          stepAdjustmentController.submitSwingSpeedUpUnderDisturbance(swingSpeedUpForStepAdjustment.getValue());
-      if (stepConstraintRegionHandler != null && stepConstraintRegionHandler.hasNewStepConstraintRegion())
-         stepAdjustmentController.setStepConstraintRegions(stepConstraintRegionHandler.pollHasNewStepConstraintRegions());
 
       // compute the amount to scale the support polygon, and the point to scale it about.
       double feedbackAlpha = Double.NaN;
@@ -497,7 +495,8 @@ public class BalanceManager implements SCS2YoGraphicHolder
                                        yoEquivalentRemainingCoP,
                                        1.0 - feedbackAlpha);
       boolean footstepWasAdjusted = stepAdjustmentController.wasFootstepAdjusted();
-      footstep.setPose(stepAdjustmentController.getFootstepSolution());
+      if (footstepWasAdjusted)
+         footstep.setPose(stepAdjustmentController.getFootstepSolution());
 
       return footstepWasAdjusted;
    }
@@ -907,6 +906,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(false);
 
       initializeOnStateChange = true;
+      currentStepConstraints.clear();
       stepAdjustmentController.reset();
       comTrajectoryPlanner.reset();
       angularMomentumHandler.resetAngularMomentum();
@@ -920,6 +920,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       double swingTime = footstepTimings.get(0).getSwingTime();
       double transferTime = footstepTimings.get(0).getTransferTime();
 
+      currentStepConstraints.clear();
       stepAdjustmentController.reset();
       if (footsteps.size() > 1 && footstepTimings.size() > 1)
       {
@@ -954,6 +955,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
       initializeOnStateChange = true;
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
+      currentStepConstraints.clear();
       stepAdjustmentController.reset();
    }
 
@@ -976,6 +978,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
       initializeOnStateChange = true;
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
+      currentStepConstraints.clear();
       stepAdjustmentController.reset();
    }
 
@@ -988,6 +991,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
 
+      currentStepConstraints.clear();
       stepAdjustmentController.reset();
 
       comTrajectoryPlanner.removeCompletedSegments(contactStateManager.getTotalStateDuration());
