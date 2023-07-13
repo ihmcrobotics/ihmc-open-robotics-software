@@ -295,7 +295,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
             }
             isBeingManipulatedVR.put(side, triggerDragData.isBeingDragged(this));
 
-            if (isBeingManipulated)
+            if (isBeingManipulatedVR.get(side))
             {
                Line3DReadOnly pickRay = controller.getPickRay();
 
