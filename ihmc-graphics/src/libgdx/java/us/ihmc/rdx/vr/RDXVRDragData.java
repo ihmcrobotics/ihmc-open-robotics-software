@@ -23,7 +23,7 @@ public class RDXVRDragData
          dragging = false;
          dragJustStarted = false;
       }
-      else // Mouse down. We are now dragging.
+      else // Button down. We are now dragging.
       {
          dragJustStarted = !dragging;
          dragging = true;
