@@ -1,4 +1,4 @@
-package us.ihmc.robotics.optimization.EvaluationProblems;
+package us.ihmc.robotics.optimization.evaluationProblems;
 
 import org.ejml.data.DMatrixD1;
 import org.ejml.data.DMatrixRMaj;

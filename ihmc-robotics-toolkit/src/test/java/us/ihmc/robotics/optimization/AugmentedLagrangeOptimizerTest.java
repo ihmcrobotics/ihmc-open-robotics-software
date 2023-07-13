@@ -5,8 +5,8 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.mult.VectorVectorMult_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.optimization.EvaluationProblems.OptimizationEvaluationProblem;
-import us.ihmc.robotics.optimization.EvaluationProblems.GomezLeveyConstrainedOptimizationEvaluationProblem;
+import us.ihmc.robotics.optimization.evaluationProblems.OptimizationEvaluationProblem;
+import us.ihmc.robotics.optimization.evaluationProblems.GomezLeveyConstrainedOptimizationEvaluationProblem;
 import us.ihmc.robotics.optimization.constrainedOptimization.AugmentedLagrangeOptimizationProblem;
 import us.ihmc.robotics.optimization.constrainedOptimization.AugmentedLagrangeOptimizer;
 
