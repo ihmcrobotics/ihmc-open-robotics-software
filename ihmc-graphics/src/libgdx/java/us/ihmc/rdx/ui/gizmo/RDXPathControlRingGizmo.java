@@ -302,7 +302,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
                Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
                frameBasedGizmoModification.translateInWorld(planarMotion);
                closestCollision.add(planarMotion);
-               System.out.println(pickRay.getPoint());
                frameBasedGizmoModification.setAdjustmentNeedsToBeApplied();
                update();
 
