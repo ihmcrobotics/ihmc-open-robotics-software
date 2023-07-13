@@ -300,10 +300,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
             }
             if(controller.getClickTriggerActionData().bState() && controller.getClickTriggerActionData().bChanged())
             {
-               if (isPositiveXArrowHovered)
-               {
-
-               }
                if (isNegativeXArrowHovered)
                {
                   frameBasedGizmoModification.yawInWorld(Math.PI);
