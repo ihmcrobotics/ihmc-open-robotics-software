@@ -73,6 +73,9 @@ public class RDXVRController extends RDXVRTrackedDevice
    private final LongBuffer gripActionHandle = BufferUtils.newLongBuffer(1);
    private InputAnalogActionData gripActionData;
 
+   private boolean gripped = false;
+   private boolean grippedChanged = false;
+
    private static final RigidBodyTransformReadOnly controllerYBackZLeftXRightToXForwardZUp = new RigidBodyTransform(
       new YawPitchRoll(          // For this transformation, we start with IHMC ZUp with index forward and thumb up
          Math.toRadians(90.0),   // rotating around thumb, index goes forward to left
@@ -184,6 +187,10 @@ public class RDXVRController extends RDXVRTrackedDevice
       VRInput.VRInput_GetDigitalActionData(touchpadTouchedActionHandle.get(0), touchpadTouchedActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetAnalogActionData(joystickActionHandle.get(0), joystickActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetAnalogActionData(gripActionHandle.get(0), gripActionData, VR.k_ulInvalidInputValueHandle);
+
+      boolean lastGripped = gripped;
+      gripped = gripActionData.x() > 0.5;
+      grippedChanged = lastGripped != gripped;
    }
 
    public void renderImGuiTunerWidgets()
@@ -260,6 +267,17 @@ public class RDXVRController extends RDXVRTrackedDevice
    {
       return gripActionData;
    }
+
+   public boolean getGripped()
+   {
+      return gripped;
+   }
+
+   public boolean getGrippedChanged()
+   {
+      return grippedChanged;
+   }
+
 
    public ReferenceFrame getXForwardZUpControllerFrame()
    {
