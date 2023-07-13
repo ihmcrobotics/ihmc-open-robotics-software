@@ -154,6 +154,7 @@ public class RDXBehaviorActionSequenceUI
       if (selectedEditor != null)
          selectedEditor.processVRInput(vrContext);
    }
+
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
       if (anEditorIsSelected())

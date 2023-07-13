@@ -345,7 +345,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
          if (interactablesAvailable)
             selectionCollisionModel.calculateVRPick(vrContext);
       }
-
    }
 
    private void processVRInput(RDXVRContext vrContext)

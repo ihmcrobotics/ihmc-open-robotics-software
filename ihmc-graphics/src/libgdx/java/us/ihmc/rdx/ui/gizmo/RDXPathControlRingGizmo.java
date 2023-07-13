@@ -115,6 +115,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private final Random random = new Random();
    private boolean proportionsNeedUpdate = false;
    private FrameBasedGizmoModification frameBasedGizmoModification;
+
    private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
    private final SideDependentList<Boolean> isGizmoHoveredVR = new SideDependentList<>(false, false);
    private final SideDependentList<Boolean> isBeingManipulatedVR = new SideDependentList<>(false, false);
@@ -188,7 +189,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
                                        new Point3D(0.0, 0.0, 0.0),
                                        DISC_COLOR);
       });
-
       positiveXArrowModel.setMesh(meshBuilder ->
       {
          meshBuilder.addIsoscelesTriangularPrism(arrowWidth.get(),
@@ -313,6 +313,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
                   frameBasedGizmoModification.yawInWorld(-Math.PI/2);
                }
             }
+
             isBeingManipulatedVR.put(side, triggerDragData.isBeingDragged(this));
 
             if (isBeingManipulatedVR.get(side))
