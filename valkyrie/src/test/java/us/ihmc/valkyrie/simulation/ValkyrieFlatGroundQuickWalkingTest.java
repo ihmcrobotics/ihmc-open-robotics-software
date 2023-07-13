@@ -1,4 +1,4 @@
-package us.ihmc.atlas;
+package us.ihmc.valkyrie.simulation;
 
 import java.io.File;
 import java.io.InputStream;
@@ -7,17 +7,11 @@ import java.nio.file.Paths;
 import java.util.Objects;
 
 import org.apache.commons.io.FilenameUtils;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import us.ihmc.atlas.parameters.AtlasCoPTrajectoryParameters;
-import us.ihmc.atlas.parameters.AtlasSwingTrajectoryParameters;
-import us.ihmc.atlas.parameters.AtlasToeOffParameters;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
-import us.ihmc.avatar.AvatarFlatGroundFastWalkingTest;
+import us.ihmc.avatar.AvatarFlatGroundQuickWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -27,15 +21,19 @@ import us.ihmc.parameterTuner.guiElements.main.ParameterGuiInterface;
 import us.ihmc.parameterTuner.guiElements.main.ParameterTuningApplication;
 import us.ihmc.parameterTuner.offline.FileInputManager;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.parameters.ValkyrieCoPTrajectoryParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieSwingTrajectoryParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 
-public class AtlasFlatGroundFastWalkingTest extends AvatarFlatGroundFastWalkingTest
+public class ValkyrieFlatGroundQuickWalkingTest extends AvatarFlatGroundQuickWalkingTest
 {
-   private static final String FAST_WALKING_PARAMETERS_XML = "/us/ihmc/atlas/fast_walking_parameters.xml";
+   private static final String FAST_WALKING_PARAMETERS_XML = "/us/ihmc/valkyrie/simulation/fast_walking_parameters.xml";
 
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS)
+      return new ValkyrieRobotModel(RobotTarget.SCS)
       {
          @Override
          public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes, boolean enableJointDamping)
@@ -46,7 +44,7 @@ public class AtlasFlatGroundFastWalkingTest extends AvatarFlatGroundFastWalkingT
          @Override
          public InputStream getParameterOverwrites()
          {
-            InputStream resourceAsStream = AtlasFlatGroundFastWalkingTest.class.getResourceAsStream(FAST_WALKING_PARAMETERS_XML);
+            InputStream resourceAsStream = ValkyrieFlatGroundQuickWalkingTest.class.getResourceAsStream(FAST_WALKING_PARAMETERS_XML);
             Objects.requireNonNull(resourceAsStream);
             return resourceAsStream;
          }
@@ -54,7 +52,7 @@ public class AtlasFlatGroundFastWalkingTest extends AvatarFlatGroundFastWalkingT
          @Override
          public CoPTrajectoryParameters getCoPTrajectoryParameters()
          {
-            return new AtlasCoPTrajectoryParameters()
+            return new ValkyrieCoPTrajectoryParameters()
             {
                @Override
                public int getMaxNumberOfStepsToConsider()
@@ -67,25 +65,13 @@ public class AtlasFlatGroundFastWalkingTest extends AvatarFlatGroundFastWalkingT
          @Override
          public WalkingControllerParameters getWalkingControllerParameters()
          {
-            return new AtlasWalkingControllerParameters(getTarget(), getJointMap(), getContactPointParameters())
+            return new ValkyrieWalkingControllerParameters(getJointMap(), getRobotPhysicalProperties(), getTarget())
             {
-               @Override
-               public boolean controlHeightWithMomentum()
-               {
-                  return false;
-               }
-
                @Override
                public SwingTrajectoryParameters getSwingTrajectoryParameters()
                {
-                  return new AtlasSwingTrajectoryParameters(getTarget(), getJointMap().getModelScale())
+                  return new ValkyrieSwingTrajectoryParameters(getRobotPhysicalProperties(), getTarget())
                   {
-                     @Override
-                     public double getDesiredTouchdownHeightOffset()
-                     {
-                        return -0.005;
-                     }
-
                      @Override
                      public Tuple3DReadOnly getTouchdownVelocityWeight()
                      {
@@ -95,18 +81,17 @@ public class AtlasFlatGroundFastWalkingTest extends AvatarFlatGroundFastWalkingT
                }
 
                @Override
-               public ToeOffParameters getToeOffParameters()
+               public boolean controlHeightWithMomentum()
                {
-                  return new AtlasToeOffParameters(getJointMap())
-                  {
-                     @Override
-                     public boolean doToeOffIfPossibleInSingleSupport()
-                     {
-                        return true;
-                     }
-                  };
+                  return false;
                }
             };
+         }
+
+         @Override
+         public double getSimulateDT()
+         {
+            return 2.5e-4;
          }
 
          @Override
@@ -116,9 +101,9 @@ public class AtlasFlatGroundFastWalkingTest extends AvatarFlatGroundFastWalkingT
          }
 
          @Override
-         public double getSimulateDT()
+         public double getEstimatorDT()
          {
-            return 0.0005;
+            return 0.001;
          }
       };
    }
@@ -126,7 +111,7 @@ public class AtlasFlatGroundFastWalkingTest extends AvatarFlatGroundFastWalkingT
    @Override
    public double getFastSwingTime()
    {
-      return 0.45;
+      return 0.55;
    }
 
    @Override
@@ -138,10 +123,9 @@ public class AtlasFlatGroundFastWalkingTest extends AvatarFlatGroundFastWalkingT
    @Override
    public double getMaxForwardStepLength()
    {
-      return 0.525;
+      return 0.55;
    }
 
-   @Tag("humanoid-flat-ground")
    @Test
    @Override
    public void testForwardWalking() throws Exception
@@ -151,10 +135,10 @@ public class AtlasFlatGroundFastWalkingTest extends AvatarFlatGroundFastWalkingT
 
    public static void main(String[] args)
    {
-      ApplicationNoModule.launch(AtlasFastWalkingTunerOffline.class, args);
+      ApplicationNoModule.launch(ValkyrieFastWalkingTunerOffline.class, args);
    }
 
-   public static class AtlasFastWalkingTunerOffline extends ParameterTuningApplication
+   public static class ValkyrieFastWalkingTunerOffline extends ParameterTuningApplication
    {
       @Override
       protected ParameterGuiInterface createInputManager()
