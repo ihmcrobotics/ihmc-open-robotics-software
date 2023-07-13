@@ -149,17 +149,6 @@ public interface ControllerCoreOptimizationSettings
 
    }
 
-   /**
-    * Whether the desired joint torques coming out of the controller core should be limited.
-    * <p>
-    * When enabled, {@link OneDoFJointReadOnly#getEffortLimitLower()} and
-    * {@link OneDoFJointReadOnly#getEffortLimitUpper()} are used to clamp the desired joint torque for
-    * each individual joint.
-    * </p>
-    *
-    * @return {@code true} if the desired joint torques should be limited to the joint's limits,
-    *         {@code false} for not limiting the joint torques. Default value: {@code false}.
-    */
    default JointTorqueEnforcementMethod areJointTorqueLimitsConsidered()
    {
       return JointTorqueEnforcementMethod.NO_CONSTRAINTS;
