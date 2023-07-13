@@ -56,7 +56,6 @@ public class ZED2ColorStereoDepthPublisher
    private final SideDependentList<Float> cameraPrincipalPointX;
    private final SideDependentList<Float> cameraPrincipalPointY;
 
-
    private final SideDependentList<Pointer> colorImagePointers;
    private final Pointer depthImagePointer;
    private long depthImageSequenceNumber = 0L;
@@ -176,8 +175,9 @@ public class ZED2ColorStereoDepthPublisher
          }
       }, "ZED2DepthImagePublishThread");
 
-      colorImagePublishThread.setDaemon(true);
-      depthImagePublishThread.setDaemon(true);
+      LogTools.info("Starting {} camera", getCameraModel(cameraID));
+      LogTools.info("Firmware version: {}", sl_get_camera_firmware(cameraID));
+      LogTools.info("Image resolution: {} x {}", imageWidth, imageHeight);
 
       grabImageThread.start();
       colorImagePublishThread.start();
@@ -278,10 +278,23 @@ public class ZED2ColorStereoDepthPublisher
       gpuDepthImage16UC1.close();
    }
 
-   public void destroy()
+   private void destroy()
    {
       running = false;
+
+      try
+      {
+         grabImageThread.join();
+         colorImagePublishThread.join();
+         depthImagePublishThread.join();
+      }
+      catch (InterruptedException interruptedException)
+      {
+         LogTools.error(interruptedException);
+      }
+
       sl_close_camera(cameraID);
+      imageEncoder.destroy();
       ros2Node.destroy();
    }
 
@@ -293,16 +306,23 @@ public class ZED2ColorStereoDepthPublisher
       }
    }
 
+   private String getCameraModel(int cameraID)
+   {
+      switch (sl_get_camera_model(cameraID))
+      {
+         case 0: return "ZED";
+         case 1: return "ZED Mini";
+         case 2: return "ZED 2";
+         case 3: return "ZED 2i";
+         case 4: return "ZED X";
+         case 5: return "ZED XM";
+         default: return "Unknown model";
+      }
+   }
+
    public static void main(String[] args)
    {
-      Supplier worldFrameSupplier = new Supplier()
-      {
-         @Override
-         public Object get()
-         {
-            return new SideDependentList<ReferenceFrame>(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
-         }
-      };
+      Supplier worldFrameSupplier = () -> new SideDependentList<ReferenceFrame>(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
 
       new ZED2ColorStereoDepthPublisher(0, PerceptionAPI.ZED2_COLOR_IMAGES, PerceptionAPI.ZED2_DEPTH, worldFrameSupplier);
    }
