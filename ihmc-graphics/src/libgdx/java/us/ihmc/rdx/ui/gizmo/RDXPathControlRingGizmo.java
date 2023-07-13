@@ -18,7 +18,6 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
-import us.ihmc.euclid.referenceFrame.FrameLine3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -34,8 +33,6 @@ import us.ihmc.rdx.input.ImGuiMouseDragData;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.vr.RDXVRContext;
@@ -118,13 +115,10 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private final Random random = new Random();
    private boolean proportionsNeedUpdate = false;
    private FrameBasedGizmoModification frameBasedGizmoModification;
-   private RDXModelInstance box;
 
-   private final SideDependentList<FrameLine3D> vrPickRays = new SideDependentList<>(() -> new FrameLine3D());
    private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
    private final SideDependentList<Boolean> isVRDragging = new SideDependentList<>(false, false);
    private final SideDependentList<Boolean> isGizmoPointed = new SideDependentList<>(false, false);
-   private final SideDependentList<RDXModelInstance> lasers = new SideDependentList<>();
    private final AxisAngle oldAngle = new AxisAngle();
    private final AxisAngle axisAngleToRotateBy = new AxisAngle();
    private final SideDependentList<Boolean> isVRGizmoHovered = new SideDependentList<>(false, false);
@@ -263,7 +257,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
          {
             if (!triggered)
             {
-               Line3DReadOnly pickRay = controller.getPickRay(side);
+               Line3DReadOnly pickRay = controller.getPickRay();
                determineCurrentSelectionFromPickRay(pickRay);
             }
 
@@ -274,10 +268,9 @@ public class RDXPathControlRingGizmo implements RenderableProvider
             }
          });
       }
-
    }
 
-   void calculateHovered(RDXVRContext vrContext)
+   private void calculateHovered(RDXVRContext vrContext)
    {
       for (RobotSide side : RobotSide.values)
       {
@@ -291,7 +284,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       processVRInputModification(vrContext);
    }
 
-   void processVRInputModification (RDXVRContext vrContext)
+   private void processVRInputModification(RDXVRContext vrContext)
    {
       for (RobotSide side : RobotSide.values)
       {
@@ -308,14 +301,12 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
             if (isBeingManipulated)
             {
-              lasers.put(side, controller.createLaser(side, 10));
                Line3DReadOnly pickRay = controller.getPickRay(side);
                Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
                frameBasedGizmoModification.translateInWorld(planarMotion);
                closestCollision.add(planarMotion);
                frameBasedGizmoModification.setAdjustmentNeedsToBeApplied();
                update();
-
             }
          });
       }
@@ -671,10 +662,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
          {
             lasers.get(side).getRenderables(renderables, pool);
          }
-      }
-      if (box != null)
-      {
-         box.getRenderables(renderables, pool);
       }
       discModel.getOrCreateModelInstance().getRenderables(renderables, pool);
       if (showArrows)
