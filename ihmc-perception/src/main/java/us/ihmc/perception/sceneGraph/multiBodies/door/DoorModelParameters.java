@@ -3,10 +3,9 @@ package us.ihmc.perception.sceneGraph.multiBodies.door;
 import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
 
 /**
- * The parameters for a door.
- * TODO: Currently this is the simulation door.
- *   - Turn into a stored property set to represent both
- *     simulation and real lab door parameters
+ * The parameters for the real and simulated door.
+ * We are trying to keep the simulation door representing the
+ * real door pretty much exactly for now.
  *
  * Remeasured by dcalvert on 7/11/23:
  * Push door (real):
