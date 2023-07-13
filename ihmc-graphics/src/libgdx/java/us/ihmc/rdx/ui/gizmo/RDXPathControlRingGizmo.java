@@ -286,12 +286,35 @@ public class RDXPathControlRingGizmo implements RenderableProvider
          {
             RDXVRDragData triggerDragData = controller.getTriggerDragData();
 
-            boolean isRingHovered = isGizmoHoveredVR.get(side) && closestVRCollisionSelection.get(side) != null;
+            boolean isRingHovered = isGizmoHoveredVR.get(side) && closestVRCollisionSelection.get(side) == RING;
+            boolean isPositiveXArrowHovered = isGizmoHoveredVR.get(side) && closestVRCollisionSelection.get(side) == POSITIVE_X_ARROW;
+            boolean isNegativeXArrowHovered = isGizmoHoveredVR.get(side) && closestVRCollisionSelection.get(side) == NEGATIVE_X_ARROW;
+            boolean isPositiveYArrowHovered = isGizmoHoveredVR.get(side) && closestVRCollisionSelection.get(side) == POSITIVE_Y_ARROW;
+            boolean isNegativeYArrowHovered = isGizmoHoveredVR.get(side) && closestVRCollisionSelection.get(side) == NEGATIVE_Y_ARROW;
             if (isRingHovered)
             {
                if (triggerDragData.getDragJustStarted())
                {
                   triggerDragData.setObjectBeingDragged(this);
+               }
+            }
+            if(controller.getClickTriggerActionData().bState() && controller.getClickTriggerActionData().bChanged())
+            {
+               if (isPositiveXArrowHovered)
+               {
+
+               }
+               if (isNegativeXArrowHovered)
+               {
+                  frameBasedGizmoModification.yawInWorld(Math.PI);
+               }
+               if (isPositiveYArrowHovered)
+               {
+                  frameBasedGizmoModification.yawInWorld(Math.PI/2);
+               }
+               if (isNegativeYArrowHovered)
+               {
+                  frameBasedGizmoModification.yawInWorld(-Math.PI/2);
                }
             }
             isBeingManipulatedVR.put(side, triggerDragData.isBeingDragged(this));
@@ -307,7 +330,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
                   closestCollision.add(planarMotion);
                   frameBasedGizmoModification.yawInWorld(-controller.getPickPointPose().getRoll() - oldRoll);
                   oldRoll = -controller.getPickPointPose().getRoll();
-
                }
                frameBasedGizmoModification.setAdjustmentNeedsToBeApplied();
             }
