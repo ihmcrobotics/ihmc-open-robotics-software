@@ -149,20 +149,30 @@ public interface ControllerCoreOptimizationSettings
 
    }
 
-   /**
-    * Whether the desired joint torques coming out of the controller core should be limited.
-    * <p>
-    * When enabled, {@link OneDoFJointReadOnly#getEffortLimitLower()} and
-    * {@link OneDoFJointReadOnly#getEffortLimitUpper()} are used to clamp the desired joint torque for
-    * each individual joint.
-    * </p>
-    *
-    * @return {@code true} if the desired joint torques should be limited to the joint's limits,
-    *         {@code false} for not limiting the joint torques. Default value: {@code false}.
-    */
    default JointTorqueEnforcementMethod areJointTorqueLimitsConsidered()
    {
       return JointTorqueEnforcementMethod.NO_CONSTRAINTS;
+   }
+
+   /**
+    * Whether the joint powers should be constrained and, if so, where they are constrained.
+    * <ul>
+    * <li>{@code CONSTRAINTS_IN_QP} will constrain power inside the QP,
+    * <li>{@code CONSTRAINTS_IN_CONTROLLER} will clamp power in the controller (after the QP),
+    * <li>{@code NO_CONSTRAINTS} will not add constraints anywhere.
+    * </ul>
+    * Default value: {@code NO_CONSTRAINTS}.
+    */
+   public enum JointPowerEnforcementMethod
+   {
+
+      NO_CONSTRAINTS, CONSTRAINTS_IN_QP, CONSTRAINTS_IN_CONTROLLER;
+
+   }
+
+   default JointPowerEnforcementMethod areJointPowerLimitsConsidered()
+   {
+      return JointPowerEnforcementMethod.NO_CONSTRAINTS;
    }
 
    /**
