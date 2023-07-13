@@ -67,7 +67,7 @@ public class RDXSelectablePathControlRingGizmo
    public void processVRInput(RDXVRContext vrContext)
    {
       pathControlRingGizmo.processVRInput(vrContext);
-      if(pathControlRingGizmo.getIsGizmoHoveredVR().get(RobotSide.LEFT) || pathControlRingGizmo.getIsGizmoHoveredVR().get(RobotSide.RIGHT))
+      if(pathControlRingGizmo.getIsGizmoManipulatedVR().get(RobotSide.LEFT) || pathControlRingGizmo.getIsGizmoManipulatedVR().get(RobotSide.RIGHT))
       {
          selected = true;
       }
