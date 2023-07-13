@@ -187,7 +187,7 @@ public class RDXVRController extends RDXVRTrackedDevice
          pickPoseFramePose.changeFrame(ReferenceFrame.getWorldFrame());
          pickPoseSphere.setPoseInWorldFrame(pickPoseFramePose);
 
-         pickRay.setToZero(getXForwardZUpControllerFrame());
+         pickRay.setToZero(getPickPoseFrame());
          pickRay.getDirection().set(Axis3D.X);
          pickRay.changeFrame(ReferenceFrame.getWorldFrame());
       }
@@ -245,7 +245,7 @@ public class RDXVRController extends RDXVRTrackedDevice
          pickRayGraphic = new RDXModelInstance(pickRayBox);
          pickRayGraphic.setPoseInWorldFrame(getPickPointPose());
 
-         pickCollisionPoint.setToZero(xForwardZUpControllerFrame);
+         pickCollisionPoint.setToZero(pickPoseFrame.getReferenceFrame());
          pickCollisionPoint.setX(distance);
          pickCollisionPoint.changeFrame(ReferenceFrame.getWorldFrame());
          LibGDXTools.toLibGDX(pickCollisionPoint, pickRayCollisionPointGraphic.transform);
