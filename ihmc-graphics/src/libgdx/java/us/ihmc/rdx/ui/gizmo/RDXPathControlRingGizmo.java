@@ -37,6 +37,7 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.interaction.*;
@@ -170,6 +171,16 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    {
       gizmoFrame.remove();
       gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
+   }
+
+   public void createAndSetupDefault(RDXBaseUI baseUI)
+   {
+      create(baseUI.getPrimary3DPanel());
+      baseUI.getVRManager().getContext().addVRPickCalculator(this::calculateVRPick);
+      baseUI.getVRManager().getContext().addVRPickCalculator(this::processVRInput);
+      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
+      baseUI.getPrimary3DPanel().getScene().addRenderableProvider(this, RDXSceneLevel.VIRTUAL);
    }
 
    public void create(RDX3DPanel panel3D)
@@ -307,7 +318,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
             }
          });
-
       }
    }
 
