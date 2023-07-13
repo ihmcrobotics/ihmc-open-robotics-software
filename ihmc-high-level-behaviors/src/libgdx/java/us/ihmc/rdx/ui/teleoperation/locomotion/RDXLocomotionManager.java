@@ -8,6 +8,7 @@ import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import imgui.ImGui;
+import org.lwjgl.openvr.InputDigitalActionData;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -388,6 +389,20 @@ public class RDXLocomotionManager
       walkPathControlRing.update();
    }
 
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         vrContext.getController(side).runIfConnected(controller ->
+         {
+            InputDigitalActionData aPressed = controller.getAButtonActionData();
+            if (aPressed.bChanged())
+            {
+               interactableFootstepPlan.walkFromSteps();
+            }
+         });
+      }
+   }
    public void calculateWalkPathControlRingVRPick(RDXVRContext vrContext)
    {
       if (!manualFootstepPlacement.isPlacingFootstep())
