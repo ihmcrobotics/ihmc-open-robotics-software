@@ -20,6 +20,7 @@ import us.ihmc.behaviors.sequence.BehaviorActionData;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -124,16 +125,16 @@ public class RDXBehaviorActionSequenceEditor
 
    public void loadNameFromFile()
    {
-      JSONFileTools.load(workspaceFile, jsonNode -> name = jsonNode.get("name").asText());
+      JSONFileTools.load(workspaceFile.getFilesystemFile(), jsonNode -> name = jsonNode.get("name").asText());
    }
 
    public boolean loadActionsFromFile()
    {
       actionSequence.clear();
       executionNextIndexStatus = 0;
-      LogTools.info("Loading from {}", workspaceFile.getClasspathResource().toString());
+      LogTools.info("Loading from {}", workspaceFile.getFilesystemFile());
       MutableBoolean successfullyLoadedActions = new MutableBoolean(true);
-      JSONFileTools.load(workspaceFile.getClasspathResourceAsStream(), jsonNode ->
+      JSONFileTools.load(workspaceFile.getFilesystemFile(), jsonNode ->
       {
          JSONTools.forEachArrayElement(jsonNode, "actions", actionNode ->
          {
@@ -143,7 +144,8 @@ public class RDXBehaviorActionSequenceEditor
                                                                                 syncedRobot,
                                                                                 selectionCollisionModel,
                                                                                 panel3D,
-                                                                                referenceFrameLibrary);
+                                                                                referenceFrameLibrary,
+                                                                                ros2);
             if (action != null)
             {
                action.getActionData().loadFromFile(actionNode);
@@ -213,8 +215,9 @@ public class RDXBehaviorActionSequenceEditor
       for (int i = 0; i < actionSequence.size(); i++)
       {
          RDXBehaviorAction action = actionSequence.get(i);
-         action.update();
          action.setActionIndex(i);
+         action.setActionNextExcecutionIndex(executionNextIndexStatus);
+         action.update();
       }
    }
 
@@ -452,10 +455,15 @@ public class RDXBehaviorActionSequenceEditor
    private void renderActionCreationArea()
    {
       RDXBehaviorAction newAction = null;
+
+      ReferenceFrame nextPreviousParentFrame = findNextPreviousParentFrame();
+
       if (ImGui.button(labels.get("Add Walk")))
       {
          RDXWalkAction walkAction = new RDXWalkAction(panel3D, robotModel, referenceFrameLibrary);
          walkAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
+         if (nextPreviousParentFrame != null)
+            walkAction.getActionData().changeParentFrameWithoutMoving(nextPreviousParentFrame);
          newAction = walkAction;
       }
       ImGui.text("Add Hand Pose:");
@@ -468,7 +476,8 @@ public class RDXBehaviorActionSequenceEditor
                                                                      robotModel,
                                                                      syncedRobot.getFullRobotModel(),
                                                                      selectionCollisionModel,
-                                                                     referenceFrameLibrary);
+                                                                     referenceFrameLibrary,
+                                                                     ros2);
             // Set the new action to where the last one was for faster authoring
             handPoseAction.setSide(side);
             RDXHandPoseAction nextPreviousHandPoseAction = findNextPreviousHandPoseAction(side);
@@ -481,6 +490,8 @@ public class RDXBehaviorActionSequenceEditor
             {
                handPoseAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getHandFrame(side));
             }
+            if (nextPreviousParentFrame != null)
+               handPoseAction.getActionData().changeParentFrameWithoutMoving(nextPreviousParentFrame);
             newAction = handPoseAction;
          }
          if (side.ordinal() < 1)
@@ -534,6 +545,8 @@ public class RDXBehaviorActionSequenceEditor
             {
                footstepAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
             }
+            if (nextPreviousParentFrame != null)
+               footstepAction.getActionData().changeParentFrameWithoutMoving(nextPreviousParentFrame);
             newAction = footstepAction;
          }
          if (side.ordinal() < 1)
@@ -548,12 +561,43 @@ public class RDXBehaviorActionSequenceEditor
          insertNewAction(newAction);
    }
 
+   /**
+    * @return This used to find the most likely desired frame that a new action will
+    *         be specified in, by traversing the sequence backwards and finding the
+    *         first action that is specified in a frame, and returning that frame.
+    *         This helps the authoring process by initializing new actions with
+    *         spatially consistent values.
+    */
+   private ReferenceFrame findNextPreviousParentFrame()
+   {
+      for (int i = Math.min(executionNextIndexStatus, actionSequence.size() - 1); i >= 0; i--)
+      {
+         if (actionSequence.get(i) instanceof RDXFootstepAction footstepAction)
+         {
+            return footstepAction.getActionData().getParentReferenceFrame();
+         }
+         else if (actionSequence.get(i) instanceof RDXHandPoseAction handPoseAction)
+         {
+            return handPoseAction.getActionData().getParentReferenceFrame();
+         }
+         else if (actionSequence.get(i) instanceof RDXWalkAction walkAction)
+         {
+            return walkAction.getActionData().getParentReferenceFrame();
+         }
+      }
+      return null;
+   }
+
    private RDXFootstepAction findNextPreviousFootstepAction()
    {
       RDXFootstepAction previousAction = null;
       for (int i = 0; i < executionNextIndexStatus + 1 && i < actionSequence.size(); i++)
-         if (actionSequence.get(i) instanceof RDXFootstepAction)
-            previousAction = (RDXFootstepAction) actionSequence.get(i);
+      {
+         if (actionSequence.get(i) instanceof RDXFootstepAction footstepAction)
+         {
+            previousAction = footstepAction;
+         }
+      }
       return previousAction;
    }
 
@@ -562,10 +606,12 @@ public class RDXBehaviorActionSequenceEditor
       RDXHandPoseAction previousAction = null;
       for (int i = 0; i < executionNextIndexStatus + 1 && i < actionSequence.size(); i++)
       {
-         if (actionSequence.get(i) instanceof RDXHandPoseAction
-             && ((RDXHandPoseAction) actionSequence.get(i)).getActionData().getSide() == side)
+         if (actionSequence.get(i) instanceof RDXHandPoseAction handPoseAction)
          {
-            previousAction = (RDXHandPoseAction) actionSequence.get(i);
+            if (handPoseAction.getActionData().getSide() == side)
+            {
+               previousAction = (RDXHandPoseAction) actionSequence.get(i);
+            }
          }
       }
       return previousAction;
@@ -573,6 +619,9 @@ public class RDXBehaviorActionSequenceEditor
 
    private void insertNewAction(RDXBehaviorAction action)
    {
+      action.updateAfterLoading();
+      action.update();
+
       int insertionIndex = executionNextIndexStatus == actionSequence.size() ? executionNextIndexStatus : executionNextIndexStatus + 1;
       actionSequence.add(insertionIndex, action);
 
@@ -587,8 +636,15 @@ public class RDXBehaviorActionSequenceEditor
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       if (panel.getIsShowing().get())
-         for (var action : actionSequence)
+         for (RDXBehaviorAction action : actionSequence)
             action.getRenderables(renderables, pool);
+   }
+
+   public void destroy()
+   {
+      automaticExecutionStatusSubscription.destroy();
+      executionNextIndexStatusSubscription.destroy();
+      sequenceStatusSubscription.destroy();
    }
 
    public ImGuiPanel getPanel()

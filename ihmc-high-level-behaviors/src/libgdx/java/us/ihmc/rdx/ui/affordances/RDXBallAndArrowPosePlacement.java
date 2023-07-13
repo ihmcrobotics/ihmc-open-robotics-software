@@ -20,8 +20,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
+import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.editor.RDXUIActionMap;
 import us.ihmc.rdx.input.editor.RDXUITrigger;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -105,6 +105,10 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
          if (placingPosition)
          {
             sphere.transform.setTranslation(pickPointInWorld.getX32(), pickPointInWorld.getY32(), pickPointInWorld.getZ32());
+            LibGDXTools.toEuclid(sphere.transform, tempSpherePosition);
+
+            goalPoseForReading.setToZero();
+            goalPoseForReading.prependTranslation(tempSpherePosition);
 
             if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
@@ -226,12 +230,24 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
       return placingGoal;
    }
 
+   public boolean isPlacingPosition()
+   {
+      return placingPosition;
+   }
+
+   public RDXUIActionMap getPlaceGoalActionMap()
+   {
+      return placeGoalActionMap;
+   }
+
    public void clear()
    {
       placingGoal = false;
       placingPosition = true;
       if (sphere != null)
          sphere.transform.val[Matrix4.M03] = Float.NaN;
+      if (arrow != null)
+         arrow.transform.val[Matrix4.M03] = Float.NaN;
    }
 
    public Pose3DReadOnly getGoalPose()

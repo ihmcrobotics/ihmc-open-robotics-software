@@ -15,6 +15,8 @@ import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
@@ -435,13 +437,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       if (robotHasArms)
          handManager.renderImGuiWidgets();
-
-      if (ImGui.button(labels.get("Set Desired To Current")))
-      {
-         if (armManager != null)
-            armManager.setDesiredToCurrent();
-         desiredRobot.setDesiredToCurrent();
-      }
 
       if (interactablesAvailable)
       {
