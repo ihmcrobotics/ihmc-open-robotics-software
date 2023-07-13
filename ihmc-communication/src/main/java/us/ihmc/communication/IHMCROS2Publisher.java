@@ -69,7 +69,7 @@ public class IHMCROS2Publisher<T>
          boolean success = publisher.publish(message);
          if (!success)
          {
-            throw new Exception("Failed to publish message.");
+            throw new Exception("Failed to publish message. Type: " + message.getClass().getSimpleName());
          }
       }
       catch (Exception e)
