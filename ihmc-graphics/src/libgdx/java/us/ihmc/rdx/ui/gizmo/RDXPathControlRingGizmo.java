@@ -671,13 +671,14 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    }
    private void updateMaterialHighlighting()
    {
-      boolean gizmoHoveredByAnything = isGizmoHovered || isGizmoHoveredVR.get(RobotSide.LEFT) || isGizmoHoveredVR.get(RobotSide.RIGHT);
+      boolean gizmoHoveredByVR = isGizmoHoveredVR.get(RobotSide.LEFT) || isGizmoHoveredVR.get(RobotSide.RIGHT);
+      boolean gizmoHoveredByAnything = isGizmoHovered || gizmoHoveredByVR;
       boolean highlightingPrior = highlightingEnabled && gizmoHoveredByAnything;
-      discModel.setMaterial(highlightingPrior && closestCollisionSelection == RING ? highlightedMaterial : normalMaterial);
-      positiveXArrowModel.setMaterial(highlightingPrior && closestCollisionSelection == POSITIVE_X_ARROW ? highlightedMaterial : normalMaterial);
-      positiveYArrowModel.setMaterial(highlightingPrior && closestCollisionSelection == POSITIVE_Y_ARROW ? highlightedMaterial : normalMaterial);
-      negativeXArrowModel.setMaterial(highlightingPrior && closestCollisionSelection == NEGATIVE_X_ARROW ? highlightedMaterial : normalMaterial);
-      negativeYArrowModel.setMaterial(highlightingPrior && closestCollisionSelection == NEGATIVE_Y_ARROW ? highlightedMaterial : normalMaterial);
+      discModel.setMaterial(highlightingPrior && (closestCollisionSelection == RING || closestVRCollisionSelection.get(RobotSide.LEFT) == RING || closestVRCollisionSelection.get(RobotSide.RIGHT) == RING)? highlightedMaterial : normalMaterial);
+      positiveXArrowModel.setMaterial(highlightingPrior && (closestCollisionSelection == POSITIVE_X_ARROW  || closestVRCollisionSelection.get(RobotSide.LEFT) == POSITIVE_X_ARROW || closestVRCollisionSelection.get(RobotSide.RIGHT) == POSITIVE_X_ARROW)? highlightedMaterial : normalMaterial);
+      positiveYArrowModel.setMaterial(highlightingPrior && (closestCollisionSelection == POSITIVE_Y_ARROW || closestVRCollisionSelection.get(RobotSide.LEFT) == POSITIVE_Y_ARROW || closestVRCollisionSelection.get(RobotSide.RIGHT) == POSITIVE_Y_ARROW)? highlightedMaterial : normalMaterial);
+      negativeXArrowModel.setMaterial(highlightingPrior && (closestCollisionSelection == NEGATIVE_X_ARROW || closestVRCollisionSelection.get(RobotSide.LEFT) == NEGATIVE_X_ARROW || closestVRCollisionSelection.get(RobotSide.RIGHT) == NEGATIVE_X_ARROW)? highlightedMaterial : normalMaterial);
+      negativeYArrowModel.setMaterial(highlightingPrior && (closestCollisionSelection == NEGATIVE_Y_ARROW || closestVRCollisionSelection.get(RobotSide.LEFT) == NEGATIVE_Y_ARROW || closestVRCollisionSelection.get(RobotSide.RIGHT) == NEGATIVE_Y_ARROW)? highlightedMaterial : normalMaterial);
    }
 
    public ImGuiPanel createTunerPanel(String name)
