@@ -22,7 +22,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnviro
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestInterface
+public abstract class AvatarFlatGroundQuickWalkingTest implements MultiRobotTestInterface
 {
    protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private SCS2AvatarTestingSimulation simulationTestHelper;
