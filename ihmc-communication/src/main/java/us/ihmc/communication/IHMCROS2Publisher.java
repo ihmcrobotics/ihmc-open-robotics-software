@@ -5,10 +5,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.ROS2TopicNameTools;
-import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.*;
 import us.ihmc.ros2.rosidl.geometry_msgs.msg.dds.Pose3DPubSubTypeImpl;
 
 public class IHMCROS2Publisher<T>
@@ -26,6 +23,11 @@ public class IHMCROS2Publisher<T>
 
    IHMCROS2Publisher(ROS2PublisherBasics<T> ros2Publisher)
    {
+      // There is an edge case somewhere where this is null. - @dcalvert
+      // It seems to be rare. If not getting this after 7/13/24, remove it.
+      if (ros2Publisher == null)
+         throw new RuntimeException("Publisher cannot be null!");
+
       this.publisher = ros2Publisher;
    }
 
@@ -64,13 +66,10 @@ public class IHMCROS2Publisher<T>
    {
       try
       {
-         if (publisher != null)
+         boolean success = publisher.publish(message);
+         if (!success)
          {
-            publisher.publish(message);
-         }
-         else
-         {
-            LogTools.warn(1, "Publisher already removed! Cannot publish " + message.getClass().getSimpleName());
+            throw new Exception("Failed to publish message. Type: " + message.getClass().getSimpleName());
          }
       }
       catch (Exception e)
