@@ -39,6 +39,11 @@ public class ReferenceFrameMissingTools
                                                                              transformToParent);
    }
 
+   public static ReferenceFrame constructARootFrame()
+   {
+      return ReferenceFrameTools.constructARootFrame(computeFrameName(getCallingClassName()));
+   }
+
    /**
     * To be used externally. Remember {@link #getCallingClassName()}
     * depends on the stacktrace, so don't try and call this from the

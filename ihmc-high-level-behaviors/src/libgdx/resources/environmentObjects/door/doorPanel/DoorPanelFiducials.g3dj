@@ -113,7 +113,7 @@
 	"nodes": [
 		{
 			"id": "Box034", 
-			"translation": [ 0.025875,  0.681831,  1.034812], 
+			"translation": [ 0.025875,  0.661843,  1.043962], 
 			"parts": [
 				{
 					"meshpartid": "Mesh.001_part1", 
