@@ -86,6 +86,12 @@ public class RDXWalkPathControlRing
    public void processVRInput(RDXVRContext vrContext)
    {
       footstepPlannerGoalGizmo.processVRInput(vrContext);
+      boolean selected = footstepPlannerGoalGizmo.getSelected();
+
+      if (selected)
+      {
+         becomeModified(true);
+      }
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)

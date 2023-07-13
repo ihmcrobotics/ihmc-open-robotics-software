@@ -11,6 +11,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
  * Adds "selectedness" to a path control ring gizmo.
@@ -66,6 +67,13 @@ public class RDXSelectablePathControlRingGizmo
    public void processVRInput(RDXVRContext vrContext)
    {
       pathControlRingGizmo.processVRInput(vrContext);
+      if(pathControlRingGizmo.getIsBeingManipulatedVR().get(RobotSide.LEFT) || pathControlRingGizmo.getIsBeingManipulatedVR().get(RobotSide.RIGHT))
+      {
+         selected = true;
+      }
+
+      pathControlRingGizmo.setShowArrows(selected);
+      pathControlRingGizmo.setHighlightingEnabled(modified);
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
