@@ -9,6 +9,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.vr.RDXVRContext;
 
 /**
@@ -47,12 +48,14 @@ public class RDXSelectablePathControlRingGizmo
       pathControlRingGizmo.create(panel3D);
    }
 
-   public void createAndSetupDefault(RDX3DPanel panel3D)
+   public void createAndSetupDefault(RDXBaseUI baseUI)
    {
-      create(panel3D);
-      panel3D.addImGui3DViewPickCalculator(this::calculate3DViewPick);
-      panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
-      panel3D.getScene().addRenderableProvider(this::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+      create(baseUI.getPrimary3DPanel());
+      baseUI.getVRManager().getContext().addVRPickCalculator(this::calculateVRPick);
+      baseUI.getVRManager().getContext().addVRPickCalculator(this::processVRInput);
+      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
+      baseUI.getPrimary3DPanel().getScene().addRenderableProvider(this::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
