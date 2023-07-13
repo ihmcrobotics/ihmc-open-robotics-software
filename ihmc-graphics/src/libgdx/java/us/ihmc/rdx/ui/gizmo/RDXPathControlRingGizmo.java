@@ -286,7 +286,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
          {
             RDXVRDragData triggerDragData = controller.getTriggerDragData();
 
-            boolean isRingHovered = isGizmoHoveredVR.get(side) && closestVRCollisionSelection.get(side) == RING;
+            boolean isRingHovered = isGizmoHoveredVR.get(side) && closestVRCollisionSelection.get(side) != null;
             if (isRingHovered)
             {
                if (triggerDragData.getDragJustStarted())
