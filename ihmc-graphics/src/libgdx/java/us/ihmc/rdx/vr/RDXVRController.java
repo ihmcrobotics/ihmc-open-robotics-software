@@ -241,9 +241,11 @@ public class RDXVRController extends RDXVRTrackedDevice
    {
       selectedPick = null;
 
-      if (exclusiveAccess != null)
+      for (RDXVRPickResult pickResult : pickResults)
       {
-         for (RDXVRPickResult pickResult : pickResults)
+         // This is done so certain things in the UI can operate without accidental interactions
+         // with other stuff.
+         if (exclusiveAccess == null || pickResult.getObjectBeingPicked() == exclusiveAccess)
          {
             if (selectedPick == null)
             {

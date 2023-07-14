@@ -8,6 +8,7 @@ package us.ihmc.rdx.vr;
 public class RDXVRPickResult
 {
    private double distanceToControllerPickPoint = Double.POSITIVE_INFINITY;
+   private Object objectBeingPicked = null;
 
    public void reset()
    {
@@ -35,5 +36,18 @@ public class RDXVRPickResult
    public double getDistanceToControllerPickPoint()
    {
       return distanceToControllerPickPoint;
+   }
+
+   /**
+    * Optional. Used to filter access between various parts of the application.
+    */
+   public void setObjectBeingPicked(Object objectBeingPicked)
+   {
+      this.objectBeingPicked = objectBeingPicked;
+   }
+
+   public Object getObjectBeingPicked()
+   {
+      return objectBeingPicked;
    }
 }
