@@ -213,6 +213,17 @@ public class RDXVRContext
          vrPickCalculator.accept(this);
       }
       calculateSelectedPick();
+      for (RobotSide side : RobotSide.values)
+      {
+         if (selectedPick.get(side) != null)
+         {
+            double distance = selectedPick.get(side).getDistanceToControllerPickPoint();
+            if (distance > 0.0)
+            {
+               controllers.get(side).setPickRayColliding(distance);
+            }
+         }
+      }
       for (Consumer<RDXVRContext> vrInputProcessor : vrInputProcessors)
       {
          vrInputProcessor.accept(this);
@@ -301,12 +312,7 @@ public class RDXVRContext
          RDXVRController controller = controllers.get(side);
          if (controller.isConnected())
          {
-            ModelInstance modelInstance = controller.getModelInstance();
-            if (modelInstance != null)
-            {
-               modelInstance.getRenderables(renderables, pool);
-               controller.getPickPoseSphere().getRenderables(renderables, pool);
-            }
+            controller.getRenderables(renderables, pool);
          }
       }
    }

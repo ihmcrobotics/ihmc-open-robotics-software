@@ -108,7 +108,7 @@ public class RDXInteractableRobotLink
             boolean isHovering = false;
             for (RDXRobotCollidable robotCollidable : robotCollidables)
             {
-               isHovering |= robotCollidable.getVRPickSelected(side);
+               isHovering |= robotCollidable.getVRHovering(side);
             }
             isVRHovering |= isHovering;
 
@@ -124,7 +124,7 @@ public class RDXInteractableRobotLink
             if (gripDragData.isDragging() && gripDragData.getObjectBeingDragged() == this)
             {
                gripDragData.getDragFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
-                                                                      ReferenceFrame.getWorldFrame());
+                                                                      selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getParent());
             }
          });
       }
@@ -140,7 +140,7 @@ public class RDXInteractableRobotLink
       isMouseHovering = false;
       for (RDXRobotCollidable robotCollidable : robotCollidables)
       {
-         isMouseHovering |= robotCollidable.getMousePickSelected();
+         isMouseHovering |= robotCollidable.getMouseHovering();
       }
 
       if (isMouseHovering && ImGui.getMouseClickedCount(ImGuiMouseButton.Right) == 1)
@@ -207,7 +207,7 @@ public class RDXInteractableRobotLink
    {
       boolean anyRobotCollidableHovered = false;
       for (RDXRobotCollidable robotCollidable : robotCollidables)
-         anyRobotCollidableHovered |= robotCollidable.getAnyPickSelected();
+         anyRobotCollidableHovered |= robotCollidable.getIsHoveredByAnything();
 
       if (modified || anyRobotCollidableHovered)
       {
