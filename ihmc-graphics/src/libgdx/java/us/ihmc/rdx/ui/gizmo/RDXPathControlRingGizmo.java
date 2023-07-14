@@ -825,4 +825,10 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    {
       return isBeingManipulatedVR;
    }
+
+   public SideDependentList<Boolean> getIsGizmoHoveredVR()
+   {
+      return isGizmoHoveredVR;
+   }
+
 }
