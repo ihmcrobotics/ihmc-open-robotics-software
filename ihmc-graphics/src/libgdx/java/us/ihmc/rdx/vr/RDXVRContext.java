@@ -215,7 +215,14 @@ public class RDXVRContext
       calculateSelectedPick();
       for (RobotSide side : RobotSide.values)
       {
-         controllers.get(side).setPickDistance(selectedPick.get(side) == null ? Double.NaN : selectedPick.get(side).getDistanceToControllerPickPoint());
+         if (selectedPick.get(side) != null)
+         {
+            double distance = selectedPick.get(side).getDistanceToControllerPickPoint();
+            if (distance > 0.0)
+            {
+               controllers.get(side).setPickRayColliding(distance);
+            }
+         }
       }
       for (Consumer<RDXVRContext> vrInputProcessor : vrInputProcessors)
       {
