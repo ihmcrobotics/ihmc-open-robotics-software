@@ -285,12 +285,28 @@ public class RDXPathControlRingGizmo implements RenderableProvider
             RDXVRDragData triggerDragData = controller.getTriggerDragData();
 
             boolean isRingHovered = isGizmoHoveredVR.get(side) && closestVRCollisionSelection.get(side) == RING;
-            if (isRingHovered)
+            if (isGizmoHoveredVR.get(side))
             {
                if (triggerDragData.getDragJustStarted())
                {
                   triggerDragData.setObjectBeingDragged(this);
                   triggerDragData.setZUpDragStart(gizmoFrame);
+               }
+            }
+
+            if(triggerDragData.getDragJustStarted())
+            {
+               if (getNegativeXArrowHovered())
+               {
+                  frameBasedGizmoModification.yawInWorld(Math.PI);
+               }
+               if (getPositiveYArrowHovered())
+               {
+                  frameBasedGizmoModification.yawInWorld(Math.PI/2);
+               }
+               if (getNegativeYArrowHovered())
+               {
+                  frameBasedGizmoModification.yawInWorld(-Math.PI/2);
                }
             }
 
@@ -302,13 +318,15 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
                if (triggerDragData.isDragging())
                {
-                  Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
-                  frameBasedGizmoModification.translateInWorld(planarMotion);
-                  closestCollision.add(planarMotion);
-                  triggerDragData.updateZUpDrag(gizmoFrame);
-                  double deltaYaw = triggerDragData.getZUpDragPose().getOrientation().getYaw()
-                                    - gizmoFrame.getTransformToRoot().getRotation().getYaw();
-                  frameBasedGizmoModification.yawInWorld(deltaYaw);
+                  if (isRingHovered)
+                  {
+                     Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
+                     frameBasedGizmoModification.translateInWorld(planarMotion);
+                     closestCollision.add(planarMotion);
+                     triggerDragData.updateZUpDrag(gizmoFrame);
+                     double deltaYaw = triggerDragData.getZUpDragPose().getOrientation().getYaw() - gizmoFrame.getTransformToRoot().getRotation().getYaw();
+                     frameBasedGizmoModification.yawInWorld(deltaYaw);
+                  }
                }
                frameBasedGizmoModification.setAdjustmentNeedsToBeApplied();
             }
