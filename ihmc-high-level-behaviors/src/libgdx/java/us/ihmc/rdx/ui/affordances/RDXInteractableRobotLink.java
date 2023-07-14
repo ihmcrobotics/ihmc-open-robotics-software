@@ -15,9 +15,10 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.vr.RDXVRContext;
-import us.ihmc.rdx.vr.RDXVRDragData;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 
@@ -44,6 +45,8 @@ public class RDXInteractableRobotLink
    private boolean isMouseHovering;
    private final Notification contextMenuNotification = new Notification();
    private boolean isVRHovering;
+   private boolean isVRDragging = false;
+   private final SideDependentList<ModifiableReferenceFrame> dragReferenceFrame = new SideDependentList<>();
 
    /** For when the graphic, the link, and control frame are all the same. */
    public void create(RDXRobotCollidable robotCollidable, ReferenceFrame syncedControlFrame, String graphicFileName, RDX3DPanel panel3D)
@@ -108,24 +111,40 @@ public class RDXInteractableRobotLink
             boolean isHovering = false;
             for (RDXRobotCollidable robotCollidable : robotCollidables)
             {
-               isHovering |= robotCollidable.getVRHovering(side);
+               isHovering |= robotCollidable.getVRPickSelected(side);
             }
             isVRHovering |= isHovering;
 
-            RDXVRDragData gripDragData = controller.getGripDragData();
+            boolean triggerDown = controller.getClickTriggerActionData().bState();
+            boolean triggerNewlyDown = triggerDown && controller.getClickTriggerActionData().bChanged();
+            boolean triggerNewlyUp = !triggerDown && controller.getClickTriggerActionData().bChanged();
 
-            if (isHovering && gripDragData.getDragJustStarted())
+            if (dragReferenceFrame.get(side) == null)
             {
-               modified = true;
-               gripDragData.setObjectBeingDragged(this);
-               gripDragData.setInteractableFrameOnDragStart(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
+               dragReferenceFrame.put(side, new ModifiableReferenceFrame(controller.getPickPoseFrame()));
             }
 
-            if (gripDragData.isDragging() && gripDragData.getObjectBeingDragged() == this)
+            if (isHovering && triggerNewlyDown)
             {
-               gripDragData.getDragFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
-                                                                      selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getParent());
+               if (!modified)
+               {
+                  modified = true;
+               }
+
+               selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getTransformToDesiredFrame(dragReferenceFrame.get(side).getTransformToParent(),
+                                                                                               controller.getPickPoseFrame());
+               dragReferenceFrame.get(side).getReferenceFrame().update();
+               isVRDragging = true;
             }
+
+            if (isVRDragging)
+            {
+               dragReferenceFrame.get(side).getReferenceFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
+                                                                                           ReferenceFrame.getWorldFrame());
+            }
+
+            if (triggerNewlyUp)
+               isVRDragging = false;
          });
       }
    }
@@ -140,7 +159,7 @@ public class RDXInteractableRobotLink
       isMouseHovering = false;
       for (RDXRobotCollidable robotCollidable : robotCollidables)
       {
-         isMouseHovering |= robotCollidable.getMouseHovering();
+         isMouseHovering |= robotCollidable.getMousePickSelected();
       }
 
       if (isMouseHovering && ImGui.getMouseClickedCount(ImGuiMouseButton.Right) == 1)
@@ -207,7 +226,7 @@ public class RDXInteractableRobotLink
    {
       boolean anyRobotCollidableHovered = false;
       for (RDXRobotCollidable robotCollidable : robotCollidables)
-         anyRobotCollidableHovered |= robotCollidable.getIsHoveredByAnything();
+         anyRobotCollidableHovered |= robotCollidable.getAnyPickSelected();
 
       if (modified || anyRobotCollidableHovered)
       {
