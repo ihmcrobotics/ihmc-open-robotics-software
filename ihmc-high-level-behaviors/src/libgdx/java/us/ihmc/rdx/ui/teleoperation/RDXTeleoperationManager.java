@@ -349,7 +349,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
    private void processVRInput(RDXVRContext vrContext)
    {
-      locomotionManager.processVRInput(vrContext);
       if (interactablesAvailable)
       {
          locomotionManager.processWalkPathControlRingVRInput(vrContext);
