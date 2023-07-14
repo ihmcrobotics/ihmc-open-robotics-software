@@ -67,7 +67,8 @@ public class RDXSelectablePathControlRingGizmo
    public void processVRInput(RDXVRContext vrContext)
    {
       pathControlRingGizmo.processVRInput(vrContext);
-      if(selectable && (pathControlRingGizmo.getIsGizmoManipulatedVR().get(RobotSide.LEFT) || pathControlRingGizmo.getIsGizmoManipulatedVR().get(RobotSide.RIGHT)))
+      if(selectable && (pathControlRingGizmo.getIsGizmoManipulatedVR().get(RobotSide.LEFT) ||
+                        pathControlRingGizmo.getIsGizmoManipulatedVR().get(RobotSide.RIGHT)))
       {
          selected = true;
       }
@@ -123,7 +124,9 @@ public class RDXSelectablePathControlRingGizmo
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if ((selectable && (pathControlRingGizmo.getRingHovered()) || pathControlRingGizmo.getIsGizmoHoveredVR().get(RobotSide.RIGHT) || pathControlRingGizmo.getIsGizmoHoveredVR().get(RobotSide.LEFT)) || modified || selected)
+      if ((selectable && (pathControlRingGizmo.getRingHovered()) ||
+           pathControlRingGizmo.getIsGizmoHoveredVR().get(RobotSide.RIGHT) ||
+           pathControlRingGizmo.getIsGizmoHoveredVR().get(RobotSide.LEFT)) || modified || selected)
       {
          pathControlRingGizmo.getRenderables(renderables, pool);
       }
