@@ -21,6 +21,7 @@ import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -70,6 +71,7 @@ public class RDX3DSituatedImagePanel
    private SideDependentList<Boolean> grippedLastTime = new SideDependentList<>(false, false);
    private boolean justShown;
    private boolean isShowing;
+   private Box3D frameOfVideo = new Box3D();
 
    /**
     * Create for a programmatically placed panel.
@@ -217,7 +219,7 @@ public class RDX3DSituatedImagePanel
             }
          }
       });
-
+      frameOfVideo.set(floatingPanelFramePose, 0.05,Math.abs(topRightPosition.y-topLeftPosition.y), Math.abs(topRightPosition.y - bottomLeftPosition.y));
       for (RobotSide side : RobotSide.values)
       {
          context.getController(side).runIfConnected(controller ->
@@ -228,10 +230,10 @@ public class RDX3DSituatedImagePanel
                {
                   floatingPanelFramePose.setToZero(floatingPanelFrame.getReferenceFrame());
                   floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-                  boolean controllerIsCloseToPanel = controller.getXForwardZUpPose().getPosition().distance(floatingPanelFramePose.getPosition()) < 0.05;
+                  boolean intersectVideo = frameOfVideo.isPointInside(controller.getPickPointPose().getPosition());
 
                   boolean isGripping = controller.getGripActionData().x() > 0.9;
-                  if ((grippedLastTime.get(side) || controllerIsCloseToPanel) && isGripping)
+                  if ((grippedLastTime.get(side) || intersectVideo) && isGripping)
                   {
                      if (!grippedLastTime.get(side)) // set up offset
                      {
