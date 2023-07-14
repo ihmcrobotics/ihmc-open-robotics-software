@@ -123,7 +123,7 @@ public class RDXSelectablePathControlRingGizmo
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if ((selectable && pathControlRingGizmo.getRingHovered()) || modified || selected)
+      if ((selectable && (pathControlRingGizmo.getRingHovered()) || pathControlRingGizmo.getIsGizmoHoveredVR().get(RobotSide.RIGHT) || pathControlRingGizmo.getIsGizmoHoveredVR().get(RobotSide.LEFT)) || modified || selected)
       {
          pathControlRingGizmo.getRenderables(renderables, pool);
       }
