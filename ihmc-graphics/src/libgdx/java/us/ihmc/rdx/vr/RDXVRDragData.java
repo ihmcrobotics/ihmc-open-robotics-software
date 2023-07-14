@@ -99,12 +99,22 @@ public class RDXVRDragData
       return objectBeingDragged;
    }
 
+   /**
+    * Call this when starting to "grip" drag something, controlling
+    * the whole 6 DoF pose.
+    * @param interactableFrame The frame of the origin of the thing being grabbed.
+    */
    public void setInteractableFrameOnDragStart(ReferenceFrame interactableFrame)
    {
       interactableFrame.getTransformToDesiredFrame(dragReferenceFrame.getTransformToParent(), controllerPickFrame);
       dragReferenceFrame.getReferenceFrame().update();
    }
 
+   /**
+    * Call this when beginning to drag something along the XY plane,
+    * controlling the XY translation and yaw simultaneously.
+    * @param interactableFrame The frame of the origin of the thing being grabbed.
+    */
    public void setZUpDragStart(ReferenceFrame interactableFrame)
    {
       updateZUpDrag(interactableFrame);
@@ -116,6 +126,11 @@ public class RDXVRDragData
       zUpDragParentFrame.getReferenceFrame().update();
    }
 
+   /**
+    * Call this once per frame while dragging something on the XY plane.
+    * Doesn't need to be called on the drag start frame.
+    * @param interactableFrame The frame of the origin of the thing being grabbed.
+    */
    public void updateZUpDrag(ReferenceFrame interactableFrame)
    {
       pickPlaneYawCalculator.calculate(controllerPickFrame, interactableFrame);
