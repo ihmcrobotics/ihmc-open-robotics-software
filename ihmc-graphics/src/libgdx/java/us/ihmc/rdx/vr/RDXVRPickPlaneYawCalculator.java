@@ -10,7 +10,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 
+/**
+ * This class is used for pointing the VR controllers at the ground
+ * and dragging stuff around, controlling the XY translation and yaw.
+ */
 public class RDXVRPickPlaneYawCalculator
 {
    private final FrameVector3D controllerZAxisVector = new FrameVector3D();
@@ -21,6 +26,7 @@ public class RDXVRPickPlaneYawCalculator
    private final Point3D controllerZAxisProjectedToPlanePoint = new Point3D();
    private final Vector3D orientationDeterminationVector = new Vector3D();
    private final FramePose3D yawPose = new FramePose3D();
+   private final ModifiableReferenceFrame yawReferenceFrame = new ModifiableReferenceFrame();
 
    public FramePose3DReadOnly calculate(ReferenceFrame controllerPickFrame, ReferenceFrame xyPlaneFrame)
    {
@@ -48,6 +54,14 @@ public class RDXVRPickPlaneYawCalculator
       yawPose.getPosition().set(planeRayIntesection);
       EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.X, orientationDeterminationVector, yawPose.getOrientation());
 
+      yawPose.get(yawReferenceFrame.getTransformToParent());
+      yawReferenceFrame.getReferenceFrame().update();
+
       return yawPose;
+   }
+
+   public ReferenceFrame getYawReferenceFrame()
+   {
+      return yawReferenceFrame.getReferenceFrame();
    }
 }

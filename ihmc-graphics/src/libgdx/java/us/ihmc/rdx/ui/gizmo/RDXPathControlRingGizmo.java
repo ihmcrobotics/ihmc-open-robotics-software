@@ -113,12 +113,11 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private final Random random = new Random();
    private boolean proportionsNeedUpdate = false;
    private FrameBasedGizmoModification frameBasedGizmoModification;
-
    private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
    private final SideDependentList<Boolean> isGizmoHoveredVR = new SideDependentList<>(false, false);
    private final SideDependentList<Boolean> isBeingManipulatedVR = new SideDependentList<>(false, false);
    private final SideDependentList<RDXPathControlRingCollisionSelection> closestVRCollisionSelection = new SideDependentList<>(null, null);
-   private double oldRoll = 0.0;
+
    public RDXPathControlRingGizmo()
    {
       this(ReferenceFrame.getWorldFrame());
@@ -291,6 +290,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
                if (triggerDragData.getDragJustStarted())
                {
                   triggerDragData.setObjectBeingDragged(this);
+                  triggerDragData.setZUpDragStart(gizmoFrame);
                }
             }
 
@@ -305,8 +305,10 @@ public class RDXPathControlRingGizmo implements RenderableProvider
                   Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
                   frameBasedGizmoModification.translateInWorld(planarMotion);
                   closestCollision.add(planarMotion);
-                  frameBasedGizmoModification.yawInWorld(-controller.getPickPointPose().getRoll() - oldRoll);
-                  oldRoll = -controller.getPickPointPose().getRoll();
+                  triggerDragData.updateZUpDrag(gizmoFrame);
+                  double deltaYaw = triggerDragData.getZUpDragPose().getOrientation().getYaw()
+                                    - gizmoFrame.getTransformToRoot().getRotation().getYaw();
+                  frameBasedGizmoModification.yawInWorld(deltaYaw);
                }
                frameBasedGizmoModification.setAdjustmentNeedsToBeApplied();
             }
