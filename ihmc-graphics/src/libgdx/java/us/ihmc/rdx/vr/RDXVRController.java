@@ -20,6 +20,8 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.imgui.ImGuiRigidBodyTransformTuner;
 import us.ihmc.rdx.tools.RDXModelBuilder;
@@ -81,6 +83,8 @@ public class RDXVRController extends RDXVRTrackedDevice
    private final LongBuffer gripActionHandle = BufferUtils.newLongBuffer(1);
    private InputAnalogActionData gripActionData;
 
+   private boolean gripAsButtonDown = false;
+
    private static final RigidBodyTransformReadOnly controllerYBackZLeftXRightToXForwardZUp = new RigidBodyTransform(
       new YawPitchRoll(          // For this transformation, we start with IHMC ZUp with index forward and thumb up
          Math.toRadians(90.0),   // rotating around thumb, index goes forward to left
@@ -110,7 +114,8 @@ public class RDXVRController extends RDXVRTrackedDevice
    private RDXModelInstance pickPoseSphere;
    private RDXModelInstance pickRayGraphic;
    private RDXModelInstance pickRayCollisionPointGraphic;
-   private final RDXVRDragData triggerDragData = new RDXVRDragData(() -> getClickTriggerActionData().bState());
+   private final RDXVRDragData triggerDragData;
+   private final RDXVRDragData gripDragData;
 
    public RDXVRController(RobotSide side, ReferenceFrame vrPlayAreaYUpZBackFrame)
    {
@@ -127,6 +132,9 @@ public class RDXVRController extends RDXVRTrackedDevice
       pickPoseFrame.getTransformToParent().getTranslation().setZ(-0.017);
       pickPoseFrame.getReferenceFrame().update();
       pickPoseTransformTuner = new ImGuiRigidBodyTransformTuner(pickPoseFrame.getTransformToParent());
+
+      triggerDragData = new RDXVRDragData(() -> getClickTriggerActionData().bState(), pickPoseFrame.getReferenceFrame());
+      gripDragData = new RDXVRDragData(this::getGripAsButtonDown, pickPoseFrame.getReferenceFrame());
    }
 
    public void initSystem()
@@ -180,6 +188,7 @@ public class RDXVRController extends RDXVRTrackedDevice
          if (pickRayCollisionPointGraphic == null)
          {
             pickRayCollisionPointGraphic = new RDXModelInstance(RDXModelBuilder.createSphere(0.0015f, new Color(Color.WHITE)));
+            LibGDXTools.hideGraphic(pickRayCollisionPointGraphic);
          }
 
          pickPoseFrame.getReferenceFrame().update();
@@ -206,7 +215,15 @@ public class RDXVRController extends RDXVRTrackedDevice
       VRInput.VRInput_GetAnalogActionData(joystickActionHandle.get(0), joystickActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetAnalogActionData(gripActionHandle.get(0), gripActionData, VR.k_ulInvalidInputValueHandle);
 
+      // The Valve Index controller grip is pretty sensitive.
+      gripAsButtonDown = gripActionData.x() > 0.7;
+
       triggerDragData.update();
+      gripDragData.update();
+
+      pickRayGraphic = null;
+      if (pickRayCollisionPointGraphic != null)
+         LibGDXTools.hideGraphic(pickRayCollisionPointGraphic);
    }
 
    public void renderImGuiTunerWidgets()
@@ -222,34 +239,31 @@ public class RDXVRController extends RDXVRTrackedDevice
          pickPoseSphere.getRenderables(renderables, pool);
 
          if (pickRayGraphic != null)
-         {
             pickRayGraphic.getRenderables(renderables, pool);
+         if (pickRayCollisionPointGraphic != null)
             pickRayCollisionPointGraphic.getRenderables(renderables, pool);
-         }
       }
    }
 
    /** Updates the pick ray graphic. */
-   public void setPickDistance(double distance)
+   public void setPickRayColliding(double distance)
    {
-      if (Double.isNaN(distance))
-      {
-         pickRayGraphic = null;
-         pickRayCollisionPointGraphic.transform.setTranslation(Float.NaN, Float.NaN, Float.NaN);
-      }
-      else
-      {
-         Point3D offset = new Point3D(distance / 2.0, 0.0, 0.0);
-         ModelInstance pickRayBox = RDXModelBuilder.buildModelInstance(meshBuilder ->
-            meshBuilder.addBox((float) distance, 0.001f, 0.001f, offset, new Color(Color.WHITE)), "box");
-         pickRayGraphic = new RDXModelInstance(pickRayBox);
-         pickRayGraphic.setPoseInWorldFrame(getPickPointPose());
+      Point3D offset = new Point3D(distance / 2.0, 0.0, 0.0);
+      ModelInstance pickRayBox = RDXModelBuilder.buildModelInstance(meshBuilder ->
+         meshBuilder.addBox((float) distance, 0.001f, 0.001f, offset, new Color(Color.WHITE)), "box");
+      pickRayGraphic = new RDXModelInstance(pickRayBox);
+      pickRayGraphic.setPoseInWorldFrame(getPickPointPose());
 
-         pickCollisionPoint.setToZero(pickPoseFrame.getReferenceFrame());
-         pickCollisionPoint.setX(distance);
-         pickCollisionPoint.changeFrame(ReferenceFrame.getWorldFrame());
-         LibGDXTools.toLibGDX(pickCollisionPoint, pickRayCollisionPointGraphic.transform);
-      }
+      pickCollisionPoint.setToZero(pickPoseFrame.getReferenceFrame());
+      pickCollisionPoint.setX(distance);
+      pickCollisionPoint.changeFrame(ReferenceFrame.getWorldFrame());
+      LibGDXTools.toLibGDX(pickCollisionPoint, pickRayCollisionPointGraphic.transform);
+   }
+
+   public void setPickCollisionPoint(Point3DReadOnly closestPointInWorld)
+   {
+      pickCollisionPoint.setIncludingFrame(ReferenceFrame.getWorldFrame(), closestPointInWorld);
+      LibGDXTools.toLibGDX(pickCollisionPoint, pickRayCollisionPointGraphic.transform);
    }
 
    public RDXModelInstance getPickPoseSphere()
@@ -325,6 +339,16 @@ public class RDXVRController extends RDXVRTrackedDevice
    public InputAnalogActionData getGripActionData()
    {
       return gripActionData;
+   }
+
+   public boolean getGripAsButtonDown()
+   {
+      return gripAsButtonDown;
+   }
+
+   public RDXVRDragData getGripDragData()
+   {
+      return gripDragData;
    }
 
    public ReferenceFrame getXForwardZUpControllerFrame()
