@@ -55,7 +55,6 @@ public class RDXRobotCollidable implements RenderableProvider
    private boolean isMouseHovering = false;
    private final SideDependentList<Boolean> isVRHovering = new SideDependentList<>(false, false);
    private RDXModelInstance pickRayCollisionPointGraphic;
-   private FrameShape3DBasics oldShape;
 
    public RDXRobotCollidable(us.ihmc.scs2.simulation.collision.Collidable collidable, Color color)
    {
@@ -151,7 +150,6 @@ public class RDXRobotCollidable implements RenderableProvider
       collisionShapeFrame.update(transformToParent -> transformToParent.set(collisionToLinkFrameTransform));
 
       collisionShapeCoordinateFrameGraphic = new RDXModelInstance(RDXModelBuilder.createCoordinateFrame(0.15));
-
       pickRayCollisionPointGraphic = new RDXModelInstance(RDXModelBuilder.createSphere(0.0015f, new Color(Color.WHITE)));
    }
 
