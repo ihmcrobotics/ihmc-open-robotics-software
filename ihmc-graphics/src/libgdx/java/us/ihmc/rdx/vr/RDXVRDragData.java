@@ -77,7 +77,7 @@ public class RDXVRDragData
     * this to keep track of what is being dragged. Each thing
     * that has drag support wants to know if it is the thing in
     * the foreground.
-    *
+    * <p>
     * Set this after a call to {@link #getDragJustStarted()} returns true.
     *
     * @param objectBeingDragged Any user object, just for checking equals.
@@ -102,3 +102,4 @@ public class RDXVRDragData
    {
       return dragReferenceFrame;
    }
+}
