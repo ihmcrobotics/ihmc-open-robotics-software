@@ -30,6 +30,7 @@ import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.nio.LongBuffer;
+import java.util.ArrayList;
 import java.util.function.Consumer;
 
 /**
@@ -115,6 +116,9 @@ public class RDXVRController extends RDXVRTrackedDevice
    private final FramePose3D pickPoseFramePose = new FramePose3D();
    private final ModifiableReferenceFrame pickPoseFrame;
    private final ImGuiRigidBodyTransformTuner pickPoseTransformTuner;
+   private final ArrayList<RDXVRPickResult> pickResults = new ArrayList<>();
+   private RDXVRPickResult selectedPick;
+   private Object exclusiveAccess = null;
    private final FrameLine3D pickRay = new FrameLine3D();
    private final FramePoint3D pickCollisionPoint = new FramePoint3D();
    private RDXModelInstance pickPoseSphere;
@@ -229,6 +233,37 @@ public class RDXVRController extends RDXVRTrackedDevice
       pickRayGraphic = null;
       if (pickRayCollisionPointGraphic != null)
          LibGDXTools.hideGraphic(pickRayCollisionPointGraphic);
+
+      pickResults.clear();
+   }
+
+   public void updatePickResults()
+   {
+      selectedPick = null;
+
+      if (exclusiveAccess != null)
+      {
+         for (RDXVRPickResult pickResult : pickResults)
+         {
+            if (selectedPick == null)
+            {
+               selectedPick = pickResult;
+            }
+            else if (pickResult.getDistanceToControllerPickPoint() < selectedPick.getDistanceToControllerPickPoint())
+            {
+               selectedPick = pickResult;
+            }
+         }
+      }
+
+      if (selectedPick != null)
+      {
+         double distance = selectedPick.getDistanceToControllerPickPoint();
+         if (distance > 0.0)
+         {
+            setPickRayColliding(distance);
+         }
+      }
    }
 
    public void renderImGuiTunerWidgets()
@@ -380,6 +415,31 @@ public class RDXVRController extends RDXVRTrackedDevice
       {
          runIfConnected.accept(this);
       }
+   }
+
+   public void addPickResult(RDXVRPickResult pickResult)
+   {
+      pickResults.add(pickResult);
+   }
+
+   public RDXVRPickResult getSelectedPick()
+   {
+      return selectedPick;
+   }
+
+   /**
+    * Use to declare exclusive access to this controller.
+    * This is useful to prevent unwanted actions from happening
+    * when using the controller for specific functions.
+    */
+   public void setExclusiveAccess(Object exclusiveAccess)
+   {
+      this.exclusiveAccess = exclusiveAccess;
+   }
+
+   public Object getExclusiveAccess()
+   {
+      return exclusiveAccess;
    }
 
    public FramePose3DReadOnly getPickPointPose()
