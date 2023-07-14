@@ -15,7 +15,7 @@ public class HandSakeDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c2b020a592730e863c4bf1d7f7977c0e2dee5a12496c9894b0fd010701c6af77";
+   		return "a302c11241b352faa48306bd30169eb0c1c6a4a4453f490b4e70b03c095eb204";
    }
    
    @Override
@@ -100,7 +100,7 @@ public class HandSakeDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_9(data.getRobotSide());
 
-      cdr.write_type_9(data.getDesiredHandConfiguration());
+      cdr.write_type_9(data.getDesiredCommandOption());
 
       cdr.write_type_6(data.getPostionRatio());
 
@@ -114,7 +114,7 @@ public class HandSakeDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
       	
       data.setRobotSide(cdr.read_type_9());
       	
-      data.setDesiredHandConfiguration(cdr.read_type_9());
+      data.setDesiredCommandOption(cdr.read_type_9());
       	
       data.setPostionRatio(cdr.read_type_6());
       	
@@ -128,7 +128,7 @@ public class HandSakeDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_9("robot_side", data.getRobotSide());
-      ser.write_type_9("desired_hand_configuration", data.getDesiredHandConfiguration());
+      ser.write_type_9("desired_command_option", data.getDesiredCommandOption());
       ser.write_type_6("postion_ratio", data.getPostionRatio());
       ser.write_type_6("torque_ratio", data.getTorqueRatio());
    }
@@ -138,7 +138,7 @@ public class HandSakeDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setRobotSide(ser.read_type_9("robot_side"));
-      data.setDesiredHandConfiguration(ser.read_type_9("desired_hand_configuration"));
+      data.setDesiredCommandOption(ser.read_type_9("desired_command_option"));
       data.setPostionRatio(ser.read_type_6("postion_ratio"));
       data.setTorqueRatio(ser.read_type_6("torque_ratio"));
    }
