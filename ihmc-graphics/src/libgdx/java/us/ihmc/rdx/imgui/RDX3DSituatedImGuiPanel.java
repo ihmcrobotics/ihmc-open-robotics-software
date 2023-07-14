@@ -265,6 +265,7 @@ public class RDX3DSituatedImGuiPanel
             mousePosY = scaledY;
 
             pickResult.setDistanceToControllerPickPoint(distance);
+            pickResult.setObjectBeingPicked(this);
             controller.addPickResult(pickResult);
          }
       });
