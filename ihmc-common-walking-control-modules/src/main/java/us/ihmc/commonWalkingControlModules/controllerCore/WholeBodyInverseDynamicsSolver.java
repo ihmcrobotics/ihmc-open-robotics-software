@@ -315,7 +315,17 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
 
             }
             else
-               jointDesiredOutput.setDesiredTorque(tauSolution.get(jointIndex, 0));
+            {
+
+               if (jointPowerLimitEnforcementMethod.getValue() == JointPowerLimitEnforcementMethod.CONSTRAINTS_IN_CONTROLLER)
+               {
+                  jointDesiredOutput.setDesiredTorque(MathTools.clamp(tauSolution.get(jointIndex, 0), torqueLimitFromPowerLower, torqueLimitFromPowerUpper));
+               }
+               else
+               {
+                  jointDesiredOutput.setDesiredTorque(tauSolution.get(jointIndex, 0));
+               }
+            }
          }
 
          if (!kinematicLoopFunctions.isEmpty())
@@ -371,14 +381,21 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
                }
                else
                {
-                  jointDesiredOutput.setDesiredTorque(MathTools.clamp(tau,
-                                                                      joint.getEffortLimitLower(),
-                                                                      joint.getEffortLimitUpper()));
+                  jointDesiredOutput.setDesiredTorque(MathTools.clamp(tau, joint.getEffortLimitLower(), joint.getEffortLimitUpper()));
                }
-
             }
             else
-               jointDesiredOutput.setDesiredTorque(tau);
+            {
+
+               if (jointPowerLimitEnforcementMethod.getValue() == JointPowerLimitEnforcementMethod.CONSTRAINTS_IN_CONTROLLER)
+               {
+                  jointDesiredOutput.setDesiredTorque(MathTools.clamp(tau, torqueLimitFromPowerLower, torqueLimitFromPowerUpper));
+               }
+               else
+               {
+                  jointDesiredOutput.setDesiredTorque(tau);
+               }
+            }
          }
 
          updateKinematicLoopJointEfforts();

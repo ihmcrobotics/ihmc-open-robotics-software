@@ -12,6 +12,7 @@ import java.util.Map;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueAndPowerConstraintHandler;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
@@ -488,7 +489,6 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
     */
    private void setupPowerConstraintCommand()
    {
-      //TODO add API to set individual joint power limits
       double powerLimitLower = Double.NEGATIVE_INFINITY;
       double powerLimitUpper = Double.POSITIVE_INFINITY;
 
@@ -557,6 +557,8 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
                torqueLimitFromPowerLower = powerLimitLower / qd;
                torqueLimitFromPowerUpper = powerLimitUpper / qd;
             }
+            
+//            JointTorqueAndPowerConstraintHandler(joint, powerLimitLower, powerLimitUpper);
 
             if (!torqueConstrainedJoints.contains(joint))
             {
