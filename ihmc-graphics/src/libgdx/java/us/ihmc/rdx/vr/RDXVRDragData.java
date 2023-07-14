@@ -1,8 +1,8 @@
 package us.ihmc.rdx.vr;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 
 import java.util.function.BooleanSupplier;
 
@@ -25,14 +25,21 @@ public class RDXVRDragData
     * (without even updating it), so we can safely grab the transform to world
     * and set the interactable's pose to it.
     */
-   private final ReferenceFrame dragReferenceFrame;
-   private final RigidBodyTransform dragToControllerPickTransform = new RigidBodyTransform();
+   private final ModifiableReferenceFrame dragReferenceFrame;
+   /**
+    * Used for dragging from a distance on the XY plane while the controller's
+    * respective roll controls the yaw.
+    */
+   private final RDXVRPickPlaneYawCalculator pickPlaneYawCalculator = new RDXVRPickPlaneYawCalculator();
+   private final ModifiableReferenceFrame zUpDragParentFrame;
+   private final FramePose3D zUpDragPose = new FramePose3D();
 
    public RDXVRDragData(BooleanSupplier isButtonDown, ReferenceFrame controllerPickFrame)
    {
       this.isButtonDown = isButtonDown;
       this.controllerPickFrame = controllerPickFrame;
-      dragReferenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(controllerPickFrame, dragToControllerPickTransform);
+      dragReferenceFrame = new ModifiableReferenceFrame(controllerPickFrame);
+      zUpDragParentFrame = new ModifiableReferenceFrame();
    }
 
    public void update()
@@ -94,12 +101,40 @@ public class RDXVRDragData
 
    public void setInteractableFrameOnDragStart(ReferenceFrame interactableFrame)
    {
-      interactableFrame.getTransformToDesiredFrame(dragToControllerPickTransform, controllerPickFrame);
-      dragReferenceFrame.update();
+      interactableFrame.getTransformToDesiredFrame(dragReferenceFrame.getTransformToParent(), controllerPickFrame);
+      dragReferenceFrame.getReferenceFrame().update();
+   }
+
+   public void setZUpDragStart(ReferenceFrame interactableFrame)
+   {
+      updateZUpDrag(interactableFrame);
+
+      zUpDragParentFrame.changeParentFrame(pickPlaneYawCalculator.getYawReferenceFrame());
+      interactableFrame.getTransformToDesiredFrame(zUpDragParentFrame.getTransformToParent(), pickPlaneYawCalculator.getYawReferenceFrame());
+      // This is a rotation only thing
+      zUpDragParentFrame.getTransformToParent().getTranslation().setToZero();
+      zUpDragParentFrame.getReferenceFrame().update();
+   }
+
+   public void updateZUpDrag(ReferenceFrame interactableFrame)
+   {
+      pickPlaneYawCalculator.calculate(controllerPickFrame, interactableFrame);
    }
 
    public ReferenceFrame getDragFrame()
    {
-      return dragReferenceFrame;
+      return dragReferenceFrame.getReferenceFrame();
+   }
+
+   public ReferenceFrame getZUpDragFrame()
+   {
+      return zUpDragParentFrame.getReferenceFrame();
+   }
+
+   public FramePose3D getZUpDragPose()
+   {
+      zUpDragPose.setToZero(getZUpDragFrame());
+      zUpDragPose.changeFrame(ReferenceFrame.getWorldFrame());
+      return zUpDragPose;
    }
 }
