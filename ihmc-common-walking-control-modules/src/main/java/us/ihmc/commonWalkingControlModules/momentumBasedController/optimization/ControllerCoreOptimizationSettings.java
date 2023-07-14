@@ -1,7 +1,10 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.InverseKinematicsOptimizationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelControlOptimizationControlModule;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
@@ -10,10 +13,9 @@ import us.ihmc.convexOptimization.quadraticProgram.NativeActiveSetQPSolverWithIn
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolverWithInactiveVariables;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 
 public interface ControllerCoreOptimizationSettings
 {
@@ -131,19 +133,25 @@ public interface ControllerCoreOptimizationSettings
    }
 
    /**
-    * Whether the desired joint torques coming out of the controller core should be limited.
-    * <p>
-    * When enabled, {@link OneDoFJointReadOnly#getEffortLimitLower()} and
-    * {@link OneDoFJointReadOnly#getEffortLimitUpper()} are used to clamp the desired joint torque for
-    * each individual joint.
-    * </p>
-    *
-    * @return {@code true} if the desired joint torques should be limited to the joint's limits,
-    *         {@code false} for not limiting the joint torques. Default value: {@code false}.
+    * Whether the joint torques should be constrained and, if so, where they are constrained. Joints
+    * are constrained to their effort limits.
+    * <ul>
+    * <li>{@code CONSTRAINTS_IN_QP} will constrain torque inside the QP,
+    * <li>{@code CONSTRAINTS_IN_CONTROLLER} will clamp torque in the controller (after the QP),
+    * <li>{@code NO_CONSTRAINTS} will not add constraints anywhere.
+    * </ul>
+    * Default value: {@code NO_CONSTRAINTS}.
     */
-   default boolean areJointTorqueLimitsConsidered()
+   public enum JointTorqueLimitEnforcementMethod
    {
-      return false;
+
+      NO_CONSTRAINTS, CONSTRAINTS_IN_QP, CONSTRAINTS_IN_CONTROLLER;
+
+   }
+
+   default JointTorqueLimitEnforcementMethod getJointTorqueLimitEnforcementMethod()
+   {
+      return JointTorqueLimitEnforcementMethod.NO_CONSTRAINTS;
    }
 
    /**

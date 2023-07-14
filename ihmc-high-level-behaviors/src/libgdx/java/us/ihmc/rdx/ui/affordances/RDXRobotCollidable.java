@@ -254,6 +254,15 @@ public class RDXRobotCollidable implements RenderableProvider
       linkFrame = syncedLinkFrame;
    }
 
+   /**
+    * isHoveredByAnything is used to find if either VR controller
+    * or the mouse is hovering over the object
+    * getIsHoveredByAnything is used to highlight the object which is hovered
+    * <p>
+    * getMouseHovering is used to allow for modifying different parts of robot
+    * with the mouse
+    * While getVRHovering does the same except with VR Controllers
+    */
    public boolean getIsHoveredByAnything()
    {
       return isHoveredByAnything;
