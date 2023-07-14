@@ -113,7 +113,7 @@ public class RDXVRTeleporter
            // Ray teleport
            pickRay.set(controller.getPickRay());
 
-           pickRayPose.setToZero(controller.getXForwardZUpControllerFrame());
+           pickRayPose.setToZero(controller.getPickPoseFrame());
            pickRayPose.changeFrame(ReferenceFrame.getWorldFrame());
 
            currentPlayArea.setToZero(vrContext.getTeleportFrameIHMCZUp());
@@ -124,14 +124,14 @@ public class RDXVRTeleporter
 
            currentPlayAreaPlane.intersectionWith(pickRay, planeRayIntesection);
 
-           controllerZAxisVector.setIncludingFrame(controller.getXForwardZUpControllerFrame(), Axis3D.Z);
+           controllerZAxisVector.setIncludingFrame(controller.getPickPoseFrame(), Axis3D.Z);
            controllerZAxisVector.changeFrame(ReferenceFrame.getWorldFrame());
 
            controllerZAxisProjectedToPlanePoint.set(planeRayIntesection);
            controllerZAxisProjectedToPlanePoint.add(controllerZAxisVector);
            currentPlayAreaPlane.orthogonalProjection(controllerZAxisProjectedToPlanePoint);
 
-           orientationDeterminationVector.sub(controllerZAxisProjectedToPlanePoint,planeRayIntesection );
+           orientationDeterminationVector.sub(controllerZAxisProjectedToPlanePoint, planeRayIntesection);
 
            proposedTeleportPose.setToZero(ReferenceFrame.getWorldFrame());
            proposedTeleportPose.getPosition().set(planeRayIntesection);
