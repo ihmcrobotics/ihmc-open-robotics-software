@@ -71,14 +71,22 @@ public class RDXVRModeManager
    {
       renderPanel = vrContext.getHeadset().isConnected() && vrContext.getController(RobotSide.LEFT).isConnected();
 
-      vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
+      for (RobotSide side : RobotSide.values)
       {
-         leftHandPanelPose.setToZero(controller.getXForwardZUpControllerFrame());
-         leftHandPanelPose.getOrientation().setYawPitchRoll(Math.PI / 2.0, 0.0, Math.PI / 4.0);
-         leftHandPanelPose.getPosition().addY(-0.05);
-         leftHandPanelPose.changeFrame(ReferenceFrame.getWorldFrame());
-         leftHandPanel.updateDesiredPose(leftHandPanelPose::get);
-      });
+         vrContext.getController(side).runIfConnected(controller ->
+         {
+            controller.setExclusiveAccess(mode == RDXVRMode.WHOLE_BODY_IK_STREAMING ? this : null);
+
+            if (side == RobotSide.LEFT)
+            {
+               leftHandPanelPose.setToZero(controller.getXForwardZUpControllerFrame());
+               leftHandPanelPose.getOrientation().setYawPitchRoll(Math.PI / 2.0, 0.0, Math.PI / 4.0);
+               leftHandPanelPose.getPosition().addY(-0.05);
+               leftHandPanelPose.changeFrame(ReferenceFrame.getWorldFrame());
+               leftHandPanel.updateDesiredPose(leftHandPanelPose::get);
+            }
+         });
+      }
 
       switch (mode)
       {
