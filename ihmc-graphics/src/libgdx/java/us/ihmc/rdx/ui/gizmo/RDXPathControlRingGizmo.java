@@ -294,7 +294,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
                }
             }
 
-            if(triggerDragData.getDragJustStarted())
+            if (triggerDragData.getDragJustStarted())
             {
                if (getNegativeXArrowHovered())
                {
