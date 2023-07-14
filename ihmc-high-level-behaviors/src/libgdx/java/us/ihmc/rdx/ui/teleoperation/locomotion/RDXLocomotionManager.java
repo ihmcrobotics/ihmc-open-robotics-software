@@ -388,26 +388,7 @@ public class RDXLocomotionManager
    {
       walkPathControlRing.update();
    }
-
-   public void processVRInput(RDXVRContext vrContext)
-   {
-      for (RobotSide side : RobotSide.values)
-      {
-         vrContext.getController(side).runIfConnected(controller ->
-         {
-            boolean aPressed = controller.getAButtonActionData().bChanged() && side == RobotSide.RIGHT;
-            boolean xPressed = controller.getAButtonActionData().bChanged() && side == RobotSide.LEFT;
-            if (aPressed)
-            {
-               interactableFootstepPlan.walkFromSteps();
-            }
-            if (xPressed)
-            {
-               interactableFootstepPlan.removeLastStep();
-            }
-         });
-      }
-   }
+   
    public void calculateWalkPathControlRingVRPick(RDXVRContext vrContext)
    {
       if (!manualFootstepPlacement.isPlacingFootstep())

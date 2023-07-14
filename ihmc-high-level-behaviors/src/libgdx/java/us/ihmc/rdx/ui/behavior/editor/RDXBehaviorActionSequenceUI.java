@@ -154,6 +154,7 @@ public class RDXBehaviorActionSequenceUI
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
    }
+
    public void calculateVRPick(RDXVRContext vrContext)
    {
       if (selectedEditor != null)
