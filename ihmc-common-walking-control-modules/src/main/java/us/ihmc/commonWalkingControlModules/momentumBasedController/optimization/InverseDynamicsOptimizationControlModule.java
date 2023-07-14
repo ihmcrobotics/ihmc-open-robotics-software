@@ -99,6 +99,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    private final TIntArrayList inactiveJointIndices = new TIntArrayList();
    private final ArrayList<OneDoFJointBasics> torqueConstrainedJoints = new ArrayList<>();
    private final ArrayList<OneDoFJointBasics> powerConstrainedJoints = new ArrayList<>();
+   private final Map<OneDoFJointBasics, YoDouble> powerConstrainedJointLimits = new HashMap<>();
    private final JointTorqueCommand torqueConstraintMinimumCommand = new JointTorqueCommand();
    private final JointTorqueCommand torqueConstraintMaximumCommand = new JointTorqueCommand();
 
@@ -185,12 +186,17 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       }
 
       JointPowerLimitEnforcementMethod jointPowerEnforcementMethod = optimizationSettings.getJointPowerLimitEnforcementMethod();
-      if (jointPowerEnforcementMethod == JointPowerLimitEnforcementMethod.CONSTRAINTS_IN_QP)
+      if (jointPowerEnforcementMethod == JointPowerLimitEnforcementMethod.CONSTRAINTS_IN_QP && !optimizationSettings.getJointPowerLimits().isEmpty())
       {
          for (int i = 0; i < oneDoFJoints.length; i++)
          {
             OneDoFJointBasics joint = oneDoFJoints[i];
-            powerConstrainedJoints.add(joint);
+            if (optimizationSettings.getJointPowerLimits().containsKey(joint.getName()))
+            {
+               powerConstrainedJoints.add(joint);
+               powerConstrainedJointLimits.put(joint, new YoDouble("power_limit_qp_" + joint.getName(), registry));
+               powerConstrainedJointLimits.get(joint).set(optimizationSettings.getJointPowerLimits().get(joint.getName()));
+            }
          }
       }
 
@@ -483,15 +489,18 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    private void setupPowerConstraintCommand()
    {
       //TODO add API to set individual joint power limits
-      double powerLimitUpper = Double.POSITIVE_INFINITY;
       double powerLimitLower = Double.NEGATIVE_INFINITY;
+      double powerLimitUpper = Double.POSITIVE_INFINITY;
 
       for (int i = 0; i < powerConstrainedJoints.size(); i++)
       {
          OneDoFJointBasics joint = powerConstrainedJoints.get(i);
+         powerLimitLower = -powerConstrainedJointLimits.get(joint).getValue();
+         powerLimitUpper = powerConstrainedJointLimits.get(joint).getValue();
+
          double qd = joint.getQd();
-         double torqueLimitFromPowerLower = 0.0;
-         double torqueLimitFromPowerUpper = 0.0;
+         double torqueLimitFromPowerLower = Double.NEGATIVE_INFINITY;
+         double torqueLimitFromPowerUpper = Double.POSITIVE_INFINITY;
          if (qd < 0)
          {
             torqueLimitFromPowerLower = powerLimitUpper / qd;
@@ -515,50 +524,58 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
     */
    private void setupTorqueAndPowerConstraintCommand()
    {
-
-      //TODO add API to set individual joint power limits
-      double powerLimitUpper = Double.POSITIVE_INFINITY;
       double powerLimitLower = Double.NEGATIVE_INFINITY;
+      double powerLimitUpper = Double.POSITIVE_INFINITY;
 
-      double torqueLimitUpper = Double.POSITIVE_INFINITY;
       double torqueLimitLower = Double.NEGATIVE_INFINITY;
+      double torqueLimitUpper = Double.POSITIVE_INFINITY;
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJointBasics joint = oneDoFJoints[i];
          double qd = joint.getQd();
-         double torqueLimitFromPowerLower = 0.0;
-         double torqueLimitFromPowerUpper = 0.0;
-         if (qd < 0)
-         {
-            torqueLimitFromPowerLower = powerLimitUpper / qd;
-            torqueLimitFromPowerUpper = powerLimitLower / qd;
-         }
-         else
-         {
-            torqueLimitFromPowerLower = powerLimitLower / qd;
-            torqueLimitFromPowerUpper = powerLimitUpper / qd;
-         }
+         double torqueLimitFromPowerLower = Double.NEGATIVE_INFINITY;
+         double torqueLimitFromPowerUpper = Double.POSITIVE_INFINITY;
 
-         if (torqueConstrainedJoints.contains(joint) && powerConstrainedJoints.contains(joint))
+         if (torqueConstrainedJoints.contains(joint) && !powerConstrainedJoints.contains(joint))
          {
-            torqueLimitLower = Math.max(joint.getEffortLimitLower(), torqueLimitFromPowerLower);
-            torqueLimitUpper = Math.min(joint.getEffortLimitUpper(), torqueLimitFromPowerUpper);
-         }
-         else if (torqueConstrainedJoints.contains(joint))
-         {
+            /* this joint has only a torque constraint */
             torqueLimitLower = joint.getEffortLimitLower();
             torqueLimitUpper = joint.getEffortLimitUpper();
          }
          else if (powerConstrainedJoints.contains(joint))
          {
-            torqueLimitLower = torqueLimitFromPowerLower;
-            torqueLimitUpper = torqueLimitFromPowerUpper;
+            powerLimitLower = -powerConstrainedJointLimits.get(joint).getValue();
+            powerLimitUpper = powerConstrainedJointLimits.get(joint).getValue();
+            if (qd < 0)
+            {
+               torqueLimitFromPowerLower = powerLimitUpper / qd;
+               torqueLimitFromPowerUpper = powerLimitLower / qd;
+            }
+            else
+            {
+               torqueLimitFromPowerLower = powerLimitLower / qd;
+               torqueLimitFromPowerUpper = powerLimitUpper / qd;
+            }
+
+            if (!torqueConstrainedJoints.contains(joint))
+            {
+               /* this joint has only a power constraint */
+               torqueLimitLower = torqueLimitFromPowerLower;
+               torqueLimitUpper = torqueLimitFromPowerUpper;
+            }
+            else
+            {
+               /* this joint has both a torque and a power constraint */
+               torqueLimitLower = Math.max(joint.getEffortLimitLower(), torqueLimitFromPowerLower);
+               torqueLimitUpper = Math.min(joint.getEffortLimitUpper(), torqueLimitFromPowerUpper);
+            }
          }
          else
          {
-            //Do nothing.
+            /* this joint has neither type of constraint, so do nothing and move to the next joint */
          }
+
          torqueConstraintMinimumCommand.addJoint(joint, torqueLimitLower);
          torqueConstraintMaximumCommand.addJoint(joint, torqueLimitUpper);
       }

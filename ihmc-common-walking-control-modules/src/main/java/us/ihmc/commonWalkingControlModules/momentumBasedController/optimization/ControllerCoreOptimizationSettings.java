@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
 import java.util.List;
+import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -173,6 +174,12 @@ public interface ControllerCoreOptimizationSettings
    default JointPowerLimitEnforcementMethod getJointPowerLimitEnforcementMethod()
    {
       return JointPowerLimitEnforcementMethod.NO_CONSTRAINTS;
+   }
+   
+   /** Gets the list of all joints with a constraint on power */
+   default Map<String,Double> getJointPowerLimits()
+   {
+      return null;
    }
 
    /**
