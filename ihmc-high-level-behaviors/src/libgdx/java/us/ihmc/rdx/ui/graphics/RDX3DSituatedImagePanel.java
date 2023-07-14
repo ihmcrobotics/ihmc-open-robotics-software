@@ -180,12 +180,12 @@ public class RDX3DSituatedImagePanel
          justShown = vrModeManager.getShowFloatVideoPanelNotification().poll();
       }
 
-      if (isShowing && imageTexture != texture)
+      if (isShowing && imageTexture != null && imageTexture != texture)
       {
          boolean flipY = false;
          float multiplier = 2.0f;
-         float halfWidth = imageTexture.getWidth() / 1000.0f * multiplier;
-         float halfHeight = imageTexture.getHeight() / 1000.0f * multiplier;
+         float halfWidth = imageTexture.getWidth() / 10000.0f * multiplier;
+         float halfHeight = imageTexture.getHeight() / 10000.0f * multiplier;
          create(imageTexture,
                 new Vector3[] {new Vector3(0.0f, halfWidth, halfHeight),
                                new Vector3(0.0f, halfWidth, -halfHeight),
