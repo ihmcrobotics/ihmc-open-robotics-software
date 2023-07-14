@@ -29,6 +29,7 @@ import us.ihmc.rdx.ui.vr.RDXVRModeManager;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.Set;
 
@@ -66,7 +67,7 @@ public class RDX3DSituatedImagePanel
    private double lastTouchpadY = Double.NaN;
    private double panelZoom = 0;
    private double panelDistanceFromHeadset = 0.5;
-   private boolean grippedLastTime = false;
+   private SideDependentList<Boolean> grippedLastTime = new SideDependentList<>(false, false);
    private boolean justShown;
    private boolean isShowing;
 
@@ -228,10 +229,11 @@ public class RDX3DSituatedImagePanel
                   floatingPanelFramePose.setToZero(floatingPanelFrame.getReferenceFrame());
                   floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
                   boolean controllerIsCloseToPanel = controller.getXForwardZUpPose().getPosition().distance(floatingPanelFramePose.getPosition()) < 0.05;
+
                   boolean isGripping = controller.getGripActionData().x() > 0.9;
-                  if ((grippedLastTime || controllerIsCloseToPanel) && isGripping)
+                  if ((grippedLastTime.get(side) || controllerIsCloseToPanel) && isGripping)
                   {
-                     if (!grippedLastTime) // set up offset
+                     if (!grippedLastTime.get(side)) // set up offset
                      {
                         floatingPanelFramePose.changeFrame(controller.getXForwardZUpControllerFrame());
                         floatingPanelFramePose.get(gripOffsetTransform);
@@ -241,11 +243,11 @@ public class RDX3DSituatedImagePanel
                      controller.getXForwardZUpControllerFrame().getTransformToWorldFrame().transform(floatingPanelFrame.getTransformToParent());
                      floatingPanelFrame.getReferenceFrame().update();
 
-                     grippedLastTime = true;
+                     grippedLastTime.put(side, true);
                   }
                   else
                   {
-                     grippedLastTime = false;
+                     grippedLastTime.put(side, false);
                   }
                }
             }
