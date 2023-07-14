@@ -49,7 +49,8 @@ import static us.ihmc.rdx.ui.gizmo.RDXPathControlRingCollisionSelection.*;
 /**
  * A gizmo designed for specifying the walk goals of bipedal robots.
  * It is able to be manipulated by mouse and keyboard by clicking and
- * dragging it around in the 3D scene. The control ring is not able
+ * dragging it around in the 3D scene as well as with VR controllers by
+ * using the front triggers and dragging. The control ring is not able
  * to be pitched or rolled.
  *
  * It has arrows that can be used for various purposes.
