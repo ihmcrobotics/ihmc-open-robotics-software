@@ -20,7 +20,6 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.imgui.ImGuiRigidBodyTransformTuner;
@@ -51,6 +50,13 @@ import java.util.function.Consumer;
  */
 public class RDXVRController extends RDXVRTrackedDevice
 {
+   /**
+    * The Valve Index controller grip is pretty sensitive. 0.7 seems like a good amount
+    * of grip to not be an accident but also not require squeezing too hard.
+    * The Vive Focus 3 apparenly just goes from 0.0 to 1.0 so is not a factor.
+    */
+   public static final double GRIP_AS_BUTTON_THRESHOLD = 0.7;
+
    private final RobotSide side;
 
    private final LongBuffer inputSourceHandle = BufferUtils.newLongBuffer(1);
@@ -215,8 +221,7 @@ public class RDXVRController extends RDXVRTrackedDevice
       VRInput.VRInput_GetAnalogActionData(joystickActionHandle.get(0), joystickActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetAnalogActionData(gripActionHandle.get(0), gripActionData, VR.k_ulInvalidInputValueHandle);
 
-      // The Valve Index controller grip is pretty sensitive.
-      gripAsButtonDown = gripActionData.x() > 0.7;
+      gripAsButtonDown = gripActionData.x() > GRIP_AS_BUTTON_THRESHOLD;
 
       triggerDragData.update();
       gripDragData.update();
