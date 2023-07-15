@@ -42,7 +42,7 @@ public class RDX3DSituatedText implements RenderableProvider
    private static final HashMap<Model, Integer> MODEL_USAGES = new HashMap<>();
    private static final Timer TIMER = new Timer();
    private static final ModelBuilder BUILDER = new ModelBuilder();
-   private static final Font DEFAULT_FONT = new Font("Arial", Font.PLAIN, 72);
+   public static final Font DEFAULT_FONT = new Font("Arial", Font.PLAIN, 72);
 
    //Storing some of the models (such as commonly stored ones, like numbers) helps reduce stuttering when creating GDXTextObjects
    private static boolean enableCaching = true;
@@ -62,7 +62,12 @@ public class RDX3DSituatedText implements RenderableProvider
 
    public RDX3DSituatedText(String text, Font font)
    {
-      this.model = getModel(text, font);
+      this(text, font, Color.BLACK);
+   }
+
+   public RDX3DSituatedText(String text, Font font, Color color)
+   {
+      this.model = getModel(text, font, color);
       this.modelInstance = new ModelInstance(model);
       setSize(0.1f);
    }
@@ -165,7 +170,7 @@ public class RDX3DSituatedText implements RenderableProvider
       MODEL_USAGES.clear();
    }
 
-   private static Model createModel(String text, Font font)
+   private static Model createModel(String text, Font font, Color color)
    { // Mostly following this method: https://stackoverflow.com/a/18800845/3503725
       //Create temporary image here in order to get Graphics2D instance
       BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
@@ -192,7 +197,7 @@ public class RDX3DSituatedText implements RenderableProvider
 
       g2d.setFont(font != null ? font : DEFAULT_FONT);
       fm = g2d.getFontMetrics();
-      g2d.setColor(Color.BLACK);
+      g2d.setColor(color);
       g2d.drawString(text, 0, fm.getAscent());
       g2d.dispose();
 
@@ -221,7 +226,7 @@ public class RDX3DSituatedText implements RenderableProvider
       return model;
    }
 
-   private static Model getModel(String text, Font font)
+   private static Model getModel(String text, Font font, Color color)
    {
       Pair<String, String> modelPair = new Pair<>(text, font.getName());
 
@@ -229,7 +234,7 @@ public class RDX3DSituatedText implements RenderableProvider
          return MODELS.get(modelPair);
       else
       {
-         Model model = createModel(text, font);
+         Model model = createModel(text, font, color);
          if (enableCaching && model != null)
          {
             MODELS.put(modelPair, model);
