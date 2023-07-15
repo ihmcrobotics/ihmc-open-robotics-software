@@ -32,10 +32,6 @@ public class RDXVRControllerButtonLabel
    public void setText(String text)
    {
       situated3DText = new RDX3DSituatedText(text, RDX3DSituatedText.DEFAULT_FONT, java.awt.Color.WHITE);
-   }
-
-   public void update()
-   {
       LibGDXTools.toLibGDX(textFrame.getReferenceFrame().getTransformToRoot(), situated3DText.getModelInstance().transform);
       situated3DText.scale(0.01f);
    }

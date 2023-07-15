@@ -205,9 +205,6 @@ public class RDXVRController extends RDXVRTrackedDevice
             LibGDXTools.hideGraphic(pickRayCollisionPointGraphic);
          }
 
-         aButtonLabel.setText("A Button");
-         bButtonLabel.setText("B Button");
-
          pickPoseFrame.getReferenceFrame().update();
          pickPoseFramePose.setToZero(pickPoseFrame.getReferenceFrame());
          pickPoseFramePose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -217,8 +214,9 @@ public class RDXVRController extends RDXVRTrackedDevice
          pickRay.getDirection().set(Axis3D.X);
          pickRay.changeFrame(ReferenceFrame.getWorldFrame());
 
-         aButtonLabel.update();
-         bButtonLabel.update();
+         // Must not be empty string for now, else error
+         aButtonLabel.setText(" ");
+         bButtonLabel.setText(" ");
       }
 
       VRInput.VRInput_GetDigitalActionData(clickTriggerActionHandle.get(0), clickTriggerActionData, VR.k_ulInvalidInputValueHandle);
@@ -471,5 +469,15 @@ public class RDXVRController extends RDXVRTrackedDevice
    public FrameLine3DReadOnly getPickRay()
    {
       return pickRay;
+   }
+
+   public void setAButtonText(String text)
+   {
+      aButtonLabel.setText(text);
+   }
+
+   public void setBButtonText(String text)
+   {
+      bButtonLabel.setText(text);
    }
 }
