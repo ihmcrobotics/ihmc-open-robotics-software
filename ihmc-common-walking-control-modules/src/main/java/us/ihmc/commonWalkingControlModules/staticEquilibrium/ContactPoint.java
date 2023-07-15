@@ -115,8 +115,6 @@ class ContactPoint
             return;
          }
       }
-
-      return;
    }
 
    public Tuple3DReadOnly getResolvedForce()

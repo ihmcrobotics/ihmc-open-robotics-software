@@ -4,27 +4,21 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
-import us.ihmc.yoVariables.registry.YoRegistry;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.staticEquilibrium.ContactPoint.basisVectorsPerContactPoint;
 
-public class MultiContactForceOptimizer
+public class MultiContactForceDistributionCalculator
 {
+   /* Maintain static equilibrium */
    private static final int staticEquilibriumConstraints = 6;
-   static final double mg = 1.0;
-
-   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-
-   private final List<ContactPoint> contactPoints = new ArrayList<>();
-   private MultiContactSupportRegionSolverInput input;
+   /* Forces are normalized in static equilibrium constraint */
+   private static final double mg = 1.0;
 
    private final DMatrixRMaj Aeq = new DMatrixRMaj(0);
    private final DMatrixRMaj beq = new DMatrixRMaj(0);
@@ -34,55 +28,53 @@ public class MultiContactForceOptimizer
    private final DMatrixRMaj quadraticCost = new DMatrixRMaj(0);
    private final DMatrixRMaj linearCost = new DMatrixRMaj(0);
 
+   private final FramePoint3D contactPointPosition = new FramePoint3D();
    private final SimpleEfficientActiveSetQPSolver qpSolver = new SimpleEfficientActiveSetQPSolver();
-
-   public MultiContactForceOptimizer()
-   {
-      for (int i = 0; i < MultiContactSupportRegionSolverInput.maxContactPoints; i++)
-      {
-         contactPoints.add(new ContactPoint(i, registry, graphicsListRegistry));
-      }
-   }
 
    /**
     * Returns whether an optimal solution was found
     */
-   public boolean solve(MultiContactSupportRegionSolverInput input, double comX, double comY)
+   public boolean solve(MultiContactForceDistributionInput input)
    {
       clear();
 
-      int rhoSize = basisVectorsPerContactPoint * input.getNumberOfContacts();
+      int rhoSize = MultiContactForceDistributionInput.numberOfBasisVectors * input.getNumberOfContactPoints();
       int decisionVariables = rhoSize;
 
       rho.reshape(rhoSize, 1);
       Aeq.reshape(staticEquilibriumConstraints, decisionVariables);
       beq.reshape(staticEquilibriumConstraints, 1);
-      Ain.reshape(rhoSize, rhoSize);
-      bin.reshape(rhoSize, 1);
+      Ain.reshape(rhoSize + 2 * input.getNumberOfJoints(), rhoSize);
+      bin.reshape(rhoSize + 2 * input.getNumberOfJoints(), 1);
       quadraticCost.reshape(rhoSize, rhoSize);
       linearCost.reshape(rhoSize, 1);
 
-      CommonOps_DDRM.setIdentity(Ain);
       CommonOps_DDRM.setIdentity(quadraticCost);
-      CommonOps_DDRM.scale(-1.0, Ain);
       CommonOps_DDRM.fill(beq, 0.0);
 
-      for (int i = 0; i < contactPoints.size(); i++)
-      {
-         contactPoints.get(i).clear();
+      for (int i = 0; i < rhoSize; i++)
+      { // Constraint for rho to be positive
+         Ain.set(i, i, -1.0);
       }
 
-      for (int i = 0; i < input.getNumberOfContacts(); i++)
+      DMatrixRMaj constraintUpperBound = input.getConstraintUpperBound();
+      DMatrixRMaj constraintLowerBound = input.getConstraintLowerBound();
+      DMatrixRMaj graspMatrixJacobianTranspose = input.getGraspMatrixJacobianTranspose();
+
+      MatrixTools.setMatrixBlock(Ain, rhoSize, 0, graspMatrixJacobianTranspose, 0, 0, graspMatrixJacobianTranspose.getNumRows(), graspMatrixJacobianTranspose.getNumCols(), 1.0);
+      MatrixTools.setMatrixBlock(Ain, rhoSize + graspMatrixJacobianTranspose.getNumRows(), 0, graspMatrixJacobianTranspose, 0, 0, graspMatrixJacobianTranspose.getNumRows(), graspMatrixJacobianTranspose.getNumCols(), -1.0);
+      MatrixTools.setMatrixBlock(bin, rhoSize, 0, constraintUpperBound, 0, 0, constraintUpperBound.getNumRows(), constraintUpperBound.getNumCols(), 1.0);
+      MatrixTools.setMatrixBlock(bin, rhoSize + constraintUpperBound.getNumRows(), 0, constraintLowerBound, 0, 0, constraintLowerBound.getNumRows(), constraintLowerBound.getNumCols(), -1.0);
+
+      for (int contactPointIndex = 0; contactPointIndex < input.getNumberOfContactPoints(); contactPointIndex++)
       {
-         ContactPoint contactPoint = contactPoints.get(i);
-         contactPoint.initialize(input);
+         contactPointPosition.setToZero(input.getContactFrame(contactPointIndex));
+         contactPointPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
-         FramePoint3D contactPointPosition = input.getContactPointPositions().get(i);
-
-         for (int j = 0; j < basisVectorsPerContactPoint; j++)
+         for (int basisVectorIndex = 0; basisVectorIndex < MultiContactForceDistributionInput.numberOfBasisVectors; basisVectorIndex++)
          {
-            YoFrameVector3D basisVector = contactPoint.getBasisVector(j);
-            int column = basisVectorsPerContactPoint * i + j;
+            FrameVector3D basisVector = input.getBasisVector(contactPointIndex, basisVectorIndex);
+            int column = basisVectorsPerContactPoint * contactPointIndex + basisVectorIndex;
 
             Aeq.set(0, column, basisVector.getX());
             Aeq.set(1, column, basisVector.getY());
@@ -102,9 +94,10 @@ public class MultiContactForceOptimizer
          }
       }
 
+      FramePoint3DReadOnly centerOfMass = input.getCenterOfMass();
       beq.set(2, 0, mg);
-      beq.set(3, 0, mg * comY);
-      beq.set(4, 0, -mg * comX);
+      beq.set(3, 0, mg * centerOfMass.getY());
+      beq.set(4, 0, -mg * centerOfMass.getX());
 
       qpSolver.clear();
       qpSolver.resetActiveSet();
@@ -118,24 +111,7 @@ public class MultiContactForceOptimizer
       qpSolver.solve(rho);
       boolean success = !MatrixTools.containsNaN(rho);
 
-      for (int i = 0; i < input.getNumberOfContacts(); i++)
-      {
-         if (success)
-         {
-            contactPoints.get(i).setResolvedForce(rho.getData());
-         }
-         else
-         {
-            contactPoints.get(i).clear();
-         }
-      }
-
       return success;
-   }
-
-   public Tuple3DReadOnly getResolvedForce(int i)
-   {
-      return contactPoints.get(i).getResolvedForce();
    }
 
    private void clear()
