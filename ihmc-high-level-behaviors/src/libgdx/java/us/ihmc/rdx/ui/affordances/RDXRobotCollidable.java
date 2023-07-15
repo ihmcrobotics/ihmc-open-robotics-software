@@ -198,11 +198,11 @@ public class RDXRobotCollidable implements RenderableProvider
             {
                pickRayCollisionPointGraphic.setColor(ColorDefinitions.White());
             }
+            if (vrPickResult.get(side).getPickCollisionWasAddedSinceReset())
+            {
+               controller.addPickResult(vrPickResult.get(side));
+            }
          });
-         if (vrPickResult.get(side).getPickCollisionWasAddedSinceReset())
-         {
-            vrContext.addPickResult(side, vrPickResult.get(side));
-         }
       }
    }
 
@@ -210,7 +210,7 @@ public class RDXRobotCollidable implements RenderableProvider
    {
       for (RobotSide side : RobotSide.values)
       {
-         boolean isHovering = vrContext.getSelectedPick().get(side) == vrPickResult.get(side);
+         boolean isHovering = vrContext.getController(side).getSelectedPick() == vrPickResult.get(side);
          isVRHovering.set(side, isHovering);
          isHoveredByAnything |= isHovering;
       }

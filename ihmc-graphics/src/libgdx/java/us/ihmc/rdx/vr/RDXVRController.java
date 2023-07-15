@@ -20,7 +20,6 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.imgui.ImGuiRigidBodyTransformTuner;
@@ -31,6 +30,7 @@ import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.nio.LongBuffer;
+import java.util.ArrayList;
 import java.util.function.Consumer;
 
 /**
@@ -51,6 +51,13 @@ import java.util.function.Consumer;
  */
 public class RDXVRController extends RDXVRTrackedDevice
 {
+   /**
+    * The Valve Index controller grip is pretty sensitive. 0.7 seems like a good amount
+    * of grip to not be an accident but also not require squeezing too hard.
+    * The Vive Focus 3 apparenly just goes from 0.0 to 1.0 so is not a factor.
+    */
+   public static final double GRIP_AS_BUTTON_THRESHOLD = 0.7;
+
    private final RobotSide side;
 
    private final LongBuffer inputSourceHandle = BufferUtils.newLongBuffer(1);
@@ -109,6 +116,9 @@ public class RDXVRController extends RDXVRTrackedDevice
    private final FramePose3D pickPoseFramePose = new FramePose3D();
    private final ModifiableReferenceFrame pickPoseFrame;
    private final ImGuiRigidBodyTransformTuner pickPoseTransformTuner;
+   private final ArrayList<RDXVRPickResult> pickResults = new ArrayList<>();
+   private RDXVRPickResult selectedPick;
+   private Object exclusiveAccess = null;
    private final FrameLine3D pickRay = new FrameLine3D();
    private final FramePoint3D pickCollisionPoint = new FramePoint3D();
    private RDXModelInstance pickPoseSphere;
@@ -215,8 +225,7 @@ public class RDXVRController extends RDXVRTrackedDevice
       VRInput.VRInput_GetAnalogActionData(joystickActionHandle.get(0), joystickActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetAnalogActionData(gripActionHandle.get(0), gripActionData, VR.k_ulInvalidInputValueHandle);
 
-      // The Valve Index controller grip is pretty sensitive.
-      gripAsButtonDown = gripActionData.x() > 0.7;
+      gripAsButtonDown = gripActionData.x() > GRIP_AS_BUTTON_THRESHOLD;
 
       triggerDragData.update();
       gripDragData.update();
@@ -224,6 +233,39 @@ public class RDXVRController extends RDXVRTrackedDevice
       pickRayGraphic = null;
       if (pickRayCollisionPointGraphic != null)
          LibGDXTools.hideGraphic(pickRayCollisionPointGraphic);
+
+      pickResults.clear();
+   }
+
+   public void updatePickResults()
+   {
+      selectedPick = null;
+
+      for (RDXVRPickResult pickResult : pickResults)
+      {
+         // This is done so certain things in the UI can operate without accidental interactions
+         // with other stuff.
+         if (exclusiveAccess == null || pickResult.getObjectBeingPicked() == exclusiveAccess)
+         {
+            if (selectedPick == null)
+            {
+               selectedPick = pickResult;
+            }
+            else if (pickResult.getDistanceToControllerPickPoint() < selectedPick.getDistanceToControllerPickPoint())
+            {
+               selectedPick = pickResult;
+            }
+         }
+      }
+
+      if (selectedPick != null)
+      {
+         double distance = selectedPick.getDistanceToControllerPickPoint();
+         if (distance > 0.0)
+         {
+            setPickRayColliding(distance);
+         }
+      }
    }
 
    public void renderImGuiTunerWidgets()
@@ -375,6 +417,31 @@ public class RDXVRController extends RDXVRTrackedDevice
       {
          runIfConnected.accept(this);
       }
+   }
+
+   public void addPickResult(RDXVRPickResult pickResult)
+   {
+      pickResults.add(pickResult);
+   }
+
+   public RDXVRPickResult getSelectedPick()
+   {
+      return selectedPick;
+   }
+
+   /**
+    * Use to declare exclusive access to this controller.
+    * This is useful to prevent unwanted actions from happening
+    * when using the controller for specific functions.
+    */
+   public void setExclusiveAccess(Object exclusiveAccess)
+   {
+      this.exclusiveAccess = exclusiveAccess;
+   }
+
+   public Object getExclusiveAccess()
+   {
+      return exclusiveAccess;
    }
 
    public FramePose3DReadOnly getPickPointPose()
