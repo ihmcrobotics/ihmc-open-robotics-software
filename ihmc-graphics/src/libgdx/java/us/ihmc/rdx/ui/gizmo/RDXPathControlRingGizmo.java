@@ -256,7 +256,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
             if (closestVRCollisionSelection.get(side) != null)
             {
                vrPickResult.get(side).setDistanceToControllerPickPoint(closestCollisionDistance);
-               vrContext.addPickResult(side, vrPickResult.get(side));
+               controller.addPickResult(vrPickResult.get(side));
             }
          });
       }
@@ -266,7 +266,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    {
       for (RobotSide side : RobotSide.values)
       {
-         isGizmoHoveredVR.put(side, vrContext.getSelectedPick().get(side) == vrPickResult.get(side));
+         isGizmoHoveredVR.put(side, vrContext.getController(side).getSelectedPick() == vrPickResult.get(side));
       }
    }
 
