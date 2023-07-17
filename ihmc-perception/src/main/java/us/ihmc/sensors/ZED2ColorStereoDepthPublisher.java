@@ -70,7 +70,7 @@ public class ZED2ColorStereoDepthPublisher
    private final IHMCROS2Publisher<ImageMessage> ros2DepthImagePublisher;
    private final ROS2Node ros2Node;
    private final CUDAImageEncoder imageEncoder;
-   // Frane pose of left camera on the ZED2i sensor. Left color and depth image comes from this frame pose.
+   // Frame pose of left camera on the ZED 2i sensor. Left color and depth image comes from this frame pose.
    private final FramePose3D leftCameraFramePose = new FramePose3D();
    // Frame poses of each side's camera in the depth frame (i.e. left camera frame).
    private final SideDependentList<FramePose3D> cameraPosesInDepthFrame = new SideDependentList<>(new FramePose3D(), new FramePose3D());
