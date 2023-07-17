@@ -15,7 +15,7 @@ public class LegTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1c7e477ed2e5026b8ae90088e69a96c5901808c32b500f74a89ba44f94a8e4a0";
+   		return "01df732412156b58c9696328489a4f7c958c34bb62387e7805aed60af3149e2a";
    }
    
    @Override
