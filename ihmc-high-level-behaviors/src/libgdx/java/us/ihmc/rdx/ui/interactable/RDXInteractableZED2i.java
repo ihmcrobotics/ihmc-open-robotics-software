@@ -13,12 +13,12 @@ import us.ihmc.robotics.interaction.CylinderRayIntersection;
 
 public class RDXInteractableZED2i
 {
-   private static final double LENGTH = 0.175;
-   private static final double RADIUS = 0.043 / 2.0;
+   private static final double LENGTH = 0.172;
+   private static final double RADIUS = 0.042 / 2.0;
 
    private final RDXInteractableFrameModel interactableFrameModel = new RDXInteractableFrameModel();
    private final CylinderRayIntersection cylinderRayIntersection = new CylinderRayIntersection();
-   private final Point3D offset = new Point3D(-RADIUS, 0.0, 0.0); // TODO: Figure out offset
+   private final Point3D offset = new Point3D(-RADIUS, 0.0, 0.0);
 
    public RDXInteractableZED2i(RDX3DPanel panel3D, ReferenceFrame referenceFrameToRepresent, RigidBodyTransform transformToParentToModify)
    {
