@@ -70,8 +70,10 @@ public class ZED2ColorStereoDepthPublisher
    private final IHMCROS2Publisher<ImageMessage> ros2DepthImagePublisher;
    private final ROS2Node ros2Node;
    private final CUDAImageEncoder imageEncoder;
+   // Frane pose of left camera on the ZED2i sensor. Left color and depth image comes from this frame pose.
    private final FramePose3D leftCameraFramePose = new FramePose3D();
-   private final SideDependentList<FramePose3D> cameraFramePoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+   // Frame poses of each side's camera in the depth frame (i.e. left camera frame).
+   private final SideDependentList<FramePose3D> cameraPosesInDepthFrame = new SideDependentList<>(new FramePose3D(), new FramePose3D());
 
    private final Thread grabImageThread;
    private final Thread colorImagePublishThread;
@@ -104,7 +106,7 @@ public class ZED2ColorStereoDepthPublisher
       zedInitializationParameters.depth_minimum_distance(-1);
       zedInitializationParameters.coordinate_unit(SL_UNIT_METER);
       zedInitializationParameters.coordinate_system(SL_COORDINATE_SYSTEM_RIGHT_HANDED_Z_UP_X_FWD);
-      zedInitializationParameters.sdk_gpu_id(-1);
+      zedInitializationParameters.sdk_gpu_id(-1); // Will find and use the best available GPU
       zedInitializationParameters.sdk_verbose(0); // false
       zedInitializationParameters.sensors_required(true);
       zedInitializationParameters.enable_right_side_measure(false);
@@ -142,7 +144,7 @@ public class ZED2ColorStereoDepthPublisher
 
       // Setup other things
       imageEncoder = new CUDAImageEncoder();
-      cameraFramePoses.get(RobotSide.RIGHT).getPosition().subY(2.0 * ZED_2i_CENTER_TO_CAMERA_DISTANCE);
+      cameraPosesInDepthFrame.get(RobotSide.RIGHT).getPosition().subY(2.0 * ZED_2i_CENTER_TO_CAMERA_DISTANCE);
       throttler.setFrequency(CAMERA_FPS);
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, getClass().getName() + "-Shutdown"));
@@ -155,6 +157,7 @@ public class ZED2ColorStereoDepthPublisher
             // sl_grab processes the stereo images to create the depth image
             checkError("sl_grab", sl_grab(cameraID, zedRuntimeParameters));
 
+            // Frame supplier provides frame pose of center of camera. Add Y to get left camera's frame pose
             leftCameraFramePose.setToZero(sensorFrameSupplier.get());
             leftCameraFramePose.getPosition().addY(ZED_2i_CENTER_TO_CAMERA_DISTANCE);
             leftCameraFramePose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -221,8 +224,8 @@ public class ZED2ColorStereoDepthPublisher
          colorImageMessage.setPrincipalPointYPixels(cameraPrincipalPointY.get(side));
          colorImageMessage.setImageWidth(imageWidth);
          colorImageMessage.setImageHeight(imageHeight);
-         colorImageMessage.getPosition().set(cameraFramePoses.get(side).getPosition());
-         colorImageMessage.getOrientation().set(cameraFramePoses.get(side).getOrientation());
+         colorImageMessage.getPosition().set(cameraPosesInDepthFrame.get(side).getPosition());
+         colorImageMessage.getOrientation().set(cameraPosesInDepthFrame.get(side).getOrientation());
          colorImageMessage.setSequenceNumber(colorImageSequenceNumber.get(side));
          colorImageMessage.setDepthDiscretization(MILLIMETER_TO_METERS);
          CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
