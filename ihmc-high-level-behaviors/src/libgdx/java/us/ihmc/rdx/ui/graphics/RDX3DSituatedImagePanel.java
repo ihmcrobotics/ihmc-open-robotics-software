@@ -215,21 +215,25 @@ public class RDX3DSituatedImagePanel
             if (modelInstance != null)
             {
                floatingPanelFramePose.setToZero(headset.getXForwardZUpHeadsetFrame());
-               floatingPanelFramePose.getPosition().set(panelDistanceFromHeadset, FOLLOW_HEADSET_OFFSET_Y, FOLLOW_HEADSET_OFFSET_Z);
+               floatingPanelFramePose.getPosition()
+                                     .set(panelDistanceFromHeadset, FOLLOW_HEADSET_OFFSET_Y, FOLLOW_HEADSET_OFFSET_Z);
                floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
                floatingPanelFramePose.get(floatingPanelFrame.getTransformToParent());
                floatingPanelFrame.getReferenceFrame().update();
             }
          }
       });
-      frameOfVideo.set(floatingPanelFramePose, 0.15,Math.abs(topRightPosition.y-topLeftPosition.y), Math.abs(topRightPosition.y - bottomLeftPosition.y));
+      frameOfVideo.set(floatingPanelFramePose, 0.15, Math.abs(topRightPosition.y - topLeftPosition.y), Math.abs(topRightPosition.y - bottomLeftPosition.y));
       for (RobotSide side : RobotSide.values)
       {
          context.getController(side).runIfConnected(controller ->
          {
             Line3DReadOnly pickRay = controller.getPickRay();
-            boolean intersecting = frameOfVideoIntersection.intersect(frameOfVideo.getSizeX(), frameOfVideo.getSizeY(), frameOfVideo.getSizeZ(),
-                                                                      floatingPanelFrame.getReferenceFrame().getTransformToWorldFrame(), pickRay);
+            boolean intersecting = frameOfVideoIntersection.intersect(frameOfVideo.getSizeX(),
+                                                                      frameOfVideo.getSizeY(),
+                                                                      frameOfVideo.getSizeZ(),
+                                                                      floatingPanelFrame.getReferenceFrame().getTransformToWorldFrame(),
+                                                                      pickRay);
             if (placementMode == MANUAL_PLACEMENT)
             {
                if (modelInstance != null)
@@ -248,7 +252,9 @@ public class RDX3DSituatedImagePanel
                         floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
                      }
                      floatingPanelFrame.getTransformToParent().set(gripOffsetTransform);
-                     controller.getXForwardZUpControllerFrame().getTransformToWorldFrame().transform(floatingPanelFrame.getTransformToParent());
+                     controller.getXForwardZUpControllerFrame()
+                               .getTransformToWorldFrame()
+                               .transform(floatingPanelFrame.getTransformToParent());
                      floatingPanelFrame.getReferenceFrame().update();
 
                      grippedLastTime.put(side, true);
@@ -272,7 +278,6 @@ public class RDX3DSituatedImagePanel
                   panelDistanceFromHeadset = panelDistanceFromHeadset + panelZoom;
                }
                else
-
                {
                   lastTouchpadY = Double.NaN;
                }
