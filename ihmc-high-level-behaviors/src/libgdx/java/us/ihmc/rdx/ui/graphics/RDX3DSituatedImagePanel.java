@@ -222,7 +222,7 @@ public class RDX3DSituatedImagePanel
             }
          }
       });
-      frameOfVideo.set(floatingPanelFramePose, 0.05,Math.abs(topRightPosition.y-topLeftPosition.y), Math.abs(topRightPosition.y - bottomLeftPosition.y));
+      frameOfVideo.set(floatingPanelFramePose, 0.15,Math.abs(topRightPosition.y-topLeftPosition.y), Math.abs(topRightPosition.y - bottomLeftPosition.y));
       for (RobotSide side : RobotSide.values)
       {
          context.getController(side).runIfConnected(controller ->
@@ -259,9 +259,7 @@ public class RDX3DSituatedImagePanel
             }
             // TODO: Make this context based, by pointing at the panel
             else if (frameOfVideoIntersection.intersect(frameOfVideo.getSizeX(), frameOfVideo.getSizeY(), frameOfVideo.getSizeZ(),
-                                                        floatingPanelFramePose.getReferenceFrame().getTransformToWorldFrame(), pickRay))
-            System.out.println("You be pointing");
-
+                                                        floatingPanelFrame.getReferenceFrame().getTransformToWorldFrame(), pickRay))
             {
                if (controller.getTouchpadTouchedActionData().bState())
                {
