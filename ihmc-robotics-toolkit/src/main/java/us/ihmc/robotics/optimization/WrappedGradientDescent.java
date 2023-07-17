@@ -18,6 +18,7 @@ public class WrappedGradientDescent implements Optimizer
    private final DMatrixD1 optimalInput = new DMatrixRMaj();
    private double stepSize = 10.0;
    private double learningRate = 0.9;
+   private int maxIterations;
 
    public WrappedGradientDescent()
    {
@@ -66,6 +67,8 @@ public class WrappedGradientDescent implements Optimizer
       this.learningRate = learningRate;
    }
 
+   public void setMaxIterations(int maxIterations) {this.maxIterations = maxIterations;}
+
    /**
     * Not implemented
     * @return
@@ -84,6 +87,7 @@ public class WrappedGradientDescent implements Optimizer
       gradientDescentModule = new GradientDescentModule(createUnwrappedCostFunction(costFunction), initialArray);
       gradientDescentModule.setStepSize(stepSize);
       gradientDescentModule.setReducingStepSizeRatio(1.0/learningRate);
+      gradientDescentModule.setMaximumIterations(maxIterations);
 
       gradientDescentModule.run();
       return getOptimalParameters();

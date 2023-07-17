@@ -88,6 +88,7 @@ public class AugmentedLagrangeOptimizationProblem
    }
 
    /**
+    * Call this after the problem has been fully specified and just before optimization.
     * @param initialPenalty Keep the initial penalty small
     * @param penaltyIncreaseFactor
     */

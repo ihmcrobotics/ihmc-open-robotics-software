@@ -118,4 +118,9 @@ public class MultiblockADMMOptimizer
 
       return optima;
    }
+
+   public MultiblockADMMProblem getADMMProblem()
+   {
+      return admm;
+   }
 }

@@ -53,10 +53,14 @@ public class MultiblockADMMProblem
    private final List<AugmentedLagrangeOptimizationProblem> isolatedOptimizationProblems = new ArrayList<>(); // size = numblocks
    private final List<BlockConstraintFunction> globalInequalityConstraints = new ArrayList<>();
    private final List<BlockConstraintFunction> globalEqualityConstraints = new ArrayList<>();
+   private final List<ParallelizableBlockConstraintFunction> parallelizedGlobalInequalityConstraints = new ArrayList<>();
+   private final List<ParallelizableBlockConstraintFunction> parallelizedGlobalEqualityConstraints = new ArrayList<>();
    private BlockCostFunction globalCostFunction = BlockCostFunction.getEmptyCostFunction();
 
    private AugmentedLagrangeConstructor multiblockAugmentedLagrangeConstructor;
    private DMatrixD1[] optimalBlocksFromLastIteration;
+
+   private final int DEFAULT_PARALLELIZED_BLOCK_INDEX = 0;
 
    // =========================== Setup ===================================
 
@@ -82,7 +86,9 @@ public class MultiblockADMMProblem
    }
 
    /**
-    * A global constraint
+    * A function
+    *    K(x1, x2,...)
+    * that should be globally constrained as
     *    K(x1, x2,...) >= 0
     */
    public void addGlobalInequalityConstraint(BlockConstraintFunction constraint)
@@ -91,7 +97,9 @@ public class MultiblockADMMProblem
    }
 
    /**
-    * A global constraint
+    * A function
+    *    J(x1, x2,...)
+    * that should be globally constrained as
     *    J(x1, x2,...) == 0
     */
    public void addGlobalEqualityConstraint(BlockConstraintFunction constraint)
@@ -99,10 +107,22 @@ public class MultiblockADMMProblem
       globalEqualityConstraints.add(constraint);
    }
 
+   public void addParallelizedGlobalEqualityConstraint(ParallelizableBlockConstraintFunction constraint)
+   {
+      parallelizedGlobalEqualityConstraints.add(constraint);
+   }
+
+   public void addParallelizedGlobalInequalityConstraint(ParallelizableBlockConstraintFunction constraint)
+   {
+      parallelizedGlobalInequalityConstraints.add(constraint);
+   }
+
    public void clearConstraints()
    {
       globalEqualityConstraints.clear();
+      parallelizedGlobalEqualityConstraints.clear();
       globalInequalityConstraints.clear();
+      parallelizedGlobalInequalityConstraints.clear();
    }
 
    public void clearIsolatedProblems()
@@ -110,6 +130,11 @@ public class MultiblockADMMProblem
       this.isolatedOptimizationProblems.clear();
    }
 
+   /**
+    * Call this after the problem has been fully specified and just before optimization.
+    * @param penalty
+    * @param penaltyIncreaseFactor
+    */
    public void initialize(double penalty, double penaltyIncreaseFactor)
    {
       for (AugmentedLagrangeOptimizationProblem problem : isolatedOptimizationProblems)
@@ -119,15 +144,17 @@ public class MultiblockADMMProblem
 
       multiblockAugmentedLagrangeConstructor = new AugmentedLagrangeConstructor(penalty,
                                                                                 penaltyIncreaseFactor,
-                                                                                globalEqualityConstraints.size(),
-                                                                                globalInequalityConstraints.size());
+                                                                                globalEqualityConstraints.size()
+                                                                                + parallelizedGlobalEqualityConstraints.size(),
+                                                                                globalInequalityConstraints.size()
+                                                                                + parallelizedGlobalInequalityConstraints.size());
    }
 
    // ======================== Solving ===================================
 
    /**
     * Returns Li(xi) == Li(xi, x_other*), the unconstrained augmented cost function
-    * x_other* is stored implicitely in this class by updating {@link #saveOptimalBlocksForLastIteration(DMatrixD1[])}
+    * x_other* is stored implicitly in this class by updating {@link #saveOptimalBlocksForLastIteration(DMatrixD1[])}
     *
     * Use a separate optimizer to solve this unconstrained problem
     */
@@ -166,8 +193,8 @@ public class MultiblockADMMProblem
    private double calculateDualCostForBlock(int blockIndex, DMatrixD1[] blocks)
    {
       double isolatedCost = isolatedOptimizationProblems.get(blockIndex).calculateDualProblemCost(blocks[blockIndex]);
-      DMatrixD1 inequalityConstraintEvaluations = evaluateGlobalInequalityConstraints(blocks);
-      DMatrixD1 equalityConstraintEvaluations = evaluateEqualityConstraints(blocks);
+      DMatrixD1 inequalityConstraintEvaluations = evaluateGlobalInequalityConstraintsForProblemI(blocks, blockIndex);
+      DMatrixD1 equalityConstraintEvaluations = evaluateGlobalEqualityConstraintsForProblemI(blocks, blockIndex);
       double globalCost = globalCostFunction.calculate(blocks);
       double cost = isolatedCost + globalCost;
 
@@ -180,13 +207,30 @@ public class MultiblockADMMProblem
     *
     * If all constraints are satisfied, all returned values will be (tolerant) >= to 0.0
     */
-   private DMatrixD1 evaluateGlobalInequalityConstraints(DMatrixD1[] blocks)
+//   private DMatrixD1 evaluateGlobalInequalityConstraints(DMatrixD1[] blocks)
+//   {
+//      int numConstraints = globalInequalityConstraints.size();
+//      DMatrixD1 value = new DMatrixRMaj(numConstraints, 1);
+//      for (int i = 0; i < numConstraints; i++)
+//      {
+//         value.set(i, globalInequalityConstraints.get(i).calculate(blocks));
+//      }
+//      return value;
+//   }
+
+   private DMatrixD1 evaluateGlobalInequalityConstraintsForProblemI(DMatrixD1[] blocks, int iProblem)
    {
       int numConstraints = globalInequalityConstraints.size();
-      DMatrixD1 value = new DMatrixRMaj(numConstraints, 1);
+      int numParallelizedConstraints = parallelizedGlobalInequalityConstraints.size();
+
+      DMatrixD1 value = new DMatrixRMaj(numConstraints + numParallelizedConstraints, 1);
       for (int i = 0; i < numConstraints; i++)
       {
          value.set(i, globalInequalityConstraints.get(i).calculate(blocks));
+      }
+      for (int i = 0; i < numParallelizedConstraints; i++)
+      {
+         value.set(i + numConstraints, parallelizedGlobalInequalityConstraints.get(i).calculate(blocks, iProblem));
       }
       return value;
    }
@@ -197,13 +241,30 @@ public class MultiblockADMMProblem
     *
     * If all constraints are satisfied, all returned values will be (tolerant) equal to 0.0
     */
-   private DMatrixD1 evaluateEqualityConstraints(DMatrixD1[] blocks)
+//   private DMatrixD1 evaluateEqualityConstraints(DMatrixD1[] blocks)
+//   {
+//      int numConstraints = globalEqualityConstraints.size();
+//      DMatrixD1 value = new DMatrixRMaj(numConstraints, 1);
+//      for (int i = 0; i < numConstraints; i++)
+//      {
+//         value.set(i, globalEqualityConstraints.get(i).calculate(blocks));
+//      }
+//      return value;
+//   }
+
+   private DMatrixD1 evaluateGlobalEqualityConstraintsForProblemI(DMatrixD1[] blocks, int iProblem)
    {
       int numConstraints = globalEqualityConstraints.size();
-      DMatrixD1 value = new DMatrixRMaj(numConstraints, 1);
+      int numParallelizedConstraints = parallelizedGlobalEqualityConstraints.size();
+
+      DMatrixD1 value = new DMatrixRMaj(numConstraints + numParallelizedConstraints, 1);
       for (int i = 0; i < numConstraints; i++)
       {
          value.set(i, globalEqualityConstraints.get(i).calculate(blocks));
+      }
+      for (int i = 0; i < numParallelizedConstraints; i++)
+      {
+         value.set(i + numConstraints, parallelizedGlobalEqualityConstraints.get(i).calculate(blocks, iProblem));
       }
       return value;
    }
@@ -214,8 +275,11 @@ public class MultiblockADMMProblem
          throw new RuntimeException(
                "Not enough values " + optimalBlocks.length + " were provided for all blocks of the problem " + getNumBlocks());
 
-      multiblockAugmentedLagrangeConstructor.updateLagrangeMultipliers(evaluateEqualityConstraints(optimalBlocks),
-                                                                       evaluateGlobalInequalityConstraints(optimalBlocks));
+
+      multiblockAugmentedLagrangeConstructor.updateLagrangeMultipliers(evaluateGlobalEqualityConstraintsForProblemI(optimalBlocks,
+                                                                                                                    DEFAULT_PARALLELIZED_BLOCK_INDEX),
+                                                                       evaluateGlobalInequalityConstraintsForProblemI(optimalBlocks,
+                                                                                                                      DEFAULT_PARALLELIZED_BLOCK_INDEX));
 
       for (int i = 0; i < isolatedOptimizationProblems.size(); i++)
       {
@@ -251,7 +315,9 @@ public class MultiblockADMMProblem
 
    public void printResults(DMatrixD1[] blocks)
    {
-      printResults(evaluateEqualityConstraints(blocks), evaluateGlobalInequalityConstraints(blocks), blocks);
+      printResults(evaluateGlobalEqualityConstraintsForProblemI(blocks, DEFAULT_PARALLELIZED_BLOCK_INDEX),
+                   evaluateGlobalInequalityConstraintsForProblemI(blocks, DEFAULT_PARALLELIZED_BLOCK_INDEX),
+                   blocks);
    }
 
    public void printResults(DMatrixD1 equalityEvaluations, DMatrixD1 inequalityEvaluations, DMatrixD1[] blocks)
