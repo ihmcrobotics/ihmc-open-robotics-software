@@ -53,16 +53,16 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
             */
    public controller_msgs.msg.dds.FootTrajectoryMessage right_foot_trajectory_message_;
    /**
-            * Trajectory for the neck joints
+            * Trajectory for the left leg
             */
    public controller_msgs.msg.dds.LegTrajectoryMessage left_leg_trajectory_message_;
    /**
-    * Trajectory for the right foot
-    */
+            * Trajectory for the right leg
+            */
    public controller_msgs.msg.dds.LegTrajectoryMessage right_leg_trajectory_message_;
    /**
-    * Trajectory for the neck joints
-    */
+            * Trajectory for the neck joints
+            */
    public controller_msgs.msg.dds.NeckTrajectoryMessage neck_trajectory_message_;
    /**
             * Trajectory for the head
@@ -207,17 +207,19 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       return right_foot_trajectory_message_;
    }
 
+
    /**
-    * Trajectory for the right foot
-    */
+            * Trajectory for the left leg
+            */
    public controller_msgs.msg.dds.LegTrajectoryMessage getLeftLegTrajectoryMessage()
    {
       return left_leg_trajectory_message_;
    }
 
+
    /**
-    * Trajectory for the right foot
-    */
+            * Trajectory for the right leg
+            */
    public controller_msgs.msg.dds.LegTrajectoryMessage getRightLegTrajectoryMessage()
    {
       return right_leg_trajectory_message_;
@@ -331,11 +333,11 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       builder.append("left_foot_trajectory_message=");
       builder.append(this.left_foot_trajectory_message_);      builder.append(", ");
       builder.append("right_foot_trajectory_message=");
-      builder.append(this.right_leg_trajectory_message_);      builder.append(", ");
+      builder.append(this.right_foot_trajectory_message_);      builder.append(", ");
       builder.append("left_leg_trajectory_message=");
       builder.append(this.left_leg_trajectory_message_);      builder.append(", ");
       builder.append("right_leg_trajectory_message=");
-      builder.append(this.right_foot_trajectory_message_);      builder.append(", ");
+      builder.append(this.right_leg_trajectory_message_);      builder.append(", ");
       builder.append("neck_trajectory_message=");
       builder.append(this.neck_trajectory_message_);      builder.append(", ");
       builder.append("head_trajectory_message=");
