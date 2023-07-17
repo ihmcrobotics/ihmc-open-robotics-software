@@ -15,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.perception.sceneGraph.SceneGraphAPI;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
@@ -42,7 +43,6 @@ public class KinematicsRecordReplay
    private boolean sceneNodeLocked = false;
    private ReferenceFrame sceneNodeFrame;
    private final HashMap<String, FramePose3D> previousFramePose = new HashMap<>();
-
 
    public KinematicsRecordReplay(ROS2PublishSubscribeAPI ros2, ImBoolean enabledKinematicsStreaming, int numberOfParts)
    {
@@ -88,7 +88,8 @@ public class KinematicsRecordReplay
          for (var sceneNodeMessage : detectableSceneNodeMessage.getDetectableSceneNodes())
          {
             // TODO. update this once Panel and LeverHandle are unified into single detectable "Door"
-            if (sceneNodeMessage.currently_detected_ && !sceneNodeMessage.name_.toString().contains("Panel") && !sceneNodeMessage.name_.toString().contains("Frame"))
+            if (sceneNodeMessage.currently_detected_ && !sceneNodeMessage.name_.toString().contains("Panel") && !sceneNodeMessage.name_.toString()
+                                                                                                                                       .contains("Frame"))
             {
                RigidBodyTransform objectTransformToWorld = new RigidBodyTransform();
                MessageTools.toEuclid(sceneNodeMessage.getTransformToWorld(), objectTransformToWorld);
@@ -109,12 +110,11 @@ public class KinematicsRecordReplay
          { // we want to start the recording as soon as the user starts moving, recordings with different initial pauses can lead to bad behaviors when used for learning
             framePose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
             FramePose3D frameToRecord = new FramePose3D(framePose);
-            ensureOrientationContinuity(frameToRecord, frameName);
             // transform to object reference frame if using object detection
             if (sceneNodeFrame != null)
                frameToRecord.changeFrame(sceneNodeFrame);
 
-            // Store trajectories in file: store a setpoint per timestep until trigger button is pressed again
+            ensureOrientationContinuity(frameToRecord, frameName);
             double[] dataTrajectories = new double[7];
             frameToRecord.getOrientation().get(dataTrajectories);
             frameToRecord.getPosition().get(4, dataTrajectories);
@@ -133,20 +133,38 @@ public class KinematicsRecordReplay
 
    private void ensureOrientationContinuity(FramePose3D frameToCheck, String frameName)
    {
+      QuaternionReadOnly quaternionToCheck = frameToCheck.getOrientation();
       if (previousFramePose.containsKey(frameName))
       {
+         if (sceneNodeFrame != null)
+            previousFramePose.get(frameName).changeFrame(sceneNodeFrame);
+
+         QuaternionReadOnly previousQuaternion = previousFramePose.get(frameName).getOrientation();
          // Check that quaternion is not changing 2pi range. Even if q = -q, the observed motion has to be continuous
-         if (Math.signum(previousFramePose.get(frameName).getOrientation().getS() * frameToCheck.getOrientation().getS()) == -1
-             && Math.signum(previousFramePose.get(frameName).getOrientation().getZ() * frameToCheck.getOrientation().getZ()) == -1
-             && Math.signum(previousFramePose.get(frameName).getOrientation().getY() * frameToCheck.getOrientation().getY()) == -1
-             && Math.signum(previousFramePose.get(frameName).getOrientation().getX() * frameToCheck.getOrientation().getX()) == -1)
-            frameToCheck.getOrientation().negate();
+         frameToCheck.getOrientation().interpolate(previousQuaternion, quaternionToCheck, 1.0);
 
          previousFramePose.get(frameName).set(frameToCheck);
       }
       else
       {
-         previousFramePose.put(frameName,new FramePose3D());
+         double x = quaternionToCheck.getX();
+         double y = quaternionToCheck.getY();
+         double z = quaternionToCheck.getZ();
+         double s = quaternionToCheck.getS();
+
+         // Calculate the maximum absolute value
+         double max = Math.max(Math.abs(x), Math.max(Math.abs(y), Math.max(Math.abs(z), Math.abs(s))));
+
+         // Check if the maximum absolute value is negative
+         if ((Math.abs(x) == max && x < 0) ||
+             (Math.abs(y) == max && y < 0) ||
+             (Math.abs(z) == max && z < 0) ||
+             (Math.abs(s) == max && s < 0))
+         {
+            frameToCheck.getOrientation().negate();
+         }
+
+         previousFramePose.put(frameName, new FramePose3D(frameToCheck));
       }
    }
 
@@ -172,7 +190,8 @@ public class KinematicsRecordReplay
                partId = 0;
          }
       }
-      if (isUserMoving && partId > 0)  // we want to record the frames of all parts at each time step, if the user starts moving only after we parsed the frame of a previous part
+      if (isUserMoving && partId
+                          > 0)  // we want to record the frames of all parts at each time step, if the user starts moving only after we parsed the frame of a previous part
       { // this clause will activate the recording at the next step, preventing start recording while skipping the frame of a part, which would make the trajectory recorder crash
          partId++;
          if (partId >= framesToRecordHistory.size())

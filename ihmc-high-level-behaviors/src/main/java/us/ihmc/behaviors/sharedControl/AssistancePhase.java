@@ -2,5 +2,5 @@ package us.ihmc.behaviors.sharedControl;
 
 public enum AssistancePhase
 {
-   PROMP, BLENDING, AFFORDANCE
+   DISABLED, PROMP, BLENDING, AFFORDANCE
 }

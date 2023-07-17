@@ -35,6 +35,7 @@ public class RDXVRAssistanceMenu
    private boolean hasProMP = false;
    private int affordanceSamples = -1;
    private int currentAffordanceSample = -1;
+   private boolean hasAffordance = false;
 
    public RDXVRAssistanceMenu(RDXImGuiWindowAndDockSystem window, VRMenuGuideMode[] mode)
    {
@@ -92,7 +93,8 @@ public class RDXVRAssistanceMenu
             if (hasProMPSamples())
             {
                hasProMP = true;
-               int percentageProgress = currentProMPSample < 0 ? 0 : Math.round((currentProMPSample * 50.0f) / proMPSamples / 5.0f);
+               float maxPercentage = hasAffordance ? 50.0f : 100.0f;
+               int percentageProgress = currentProMPSample < 0 ? 0 : Math.round((currentProMPSample * maxPercentage) / proMPSamples / 5.0f);
                ImGui.sameLine(ImGui.getCursorPosX() + 10.0f);
                ImGui.image(iconsAssistanceProgress.get(percentageProgress).getTexture().getTextureObjectHandle(), 250.1f, 121.3f);
             }
@@ -181,5 +183,10 @@ public class RDXVRAssistanceMenu
    public void setCurrentAffordanceSample(int sample)
    {
       currentAffordanceSample = sample;
+   }
+
+   public void setHasAffordance(boolean hasAffordance)
+   {
+      this.hasAffordance = hasAffordance;
    }
 }

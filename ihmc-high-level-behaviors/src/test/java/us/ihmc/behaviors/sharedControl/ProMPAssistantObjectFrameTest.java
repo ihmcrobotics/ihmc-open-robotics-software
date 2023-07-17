@@ -56,6 +56,7 @@ public class ProMPAssistantObjectFrameTest
       bodyParts.add("leftHand");
       bodyParts.add("rightHand");
       bodyParts.add("leftForeArm");
+      bodyParts.add("rightForeArm");
       bodyParts.add("chest");
       // replay that file
       TrajectoryRecordReplay trajectoryPlayer = new TrajectoryRecordReplay(testFilePath, bodyParts.size());
@@ -86,7 +87,7 @@ public class ProMPAssistantObjectFrameTest
             {
                assertTrue(!proMPAssistant.readyToPack());
                //do not change the frame, just observe it in order to generate a prediction later
-               proMPAssistant.processFrameAndObjectInformation(framePose, bodyPart,  "Target", objectFrame);
+               proMPAssistant.processFrameAndObjectInformation(framePose, bodyPart,  "Target", objectFrame, null);
             }
             //record frame and store it in csv file
             framePose.changeFrame(objectFrame);

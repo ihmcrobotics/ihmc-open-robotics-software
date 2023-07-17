@@ -95,10 +95,9 @@ public class RDXVRContext
    private static final HashMap<String, String> TRACKER_SERIAL_MAP = new HashMap<String, String>()
    {
       {
-         put("LHR-4CB1033A", "chest");
+         put("LHR-6680BD50", "chest");
          put("LHR-743512BE", "leftForeArm");
-//         put("LHR-AC72B09D", "leftForeArm");
-         put("SerialNumber3", "rightForeArm");
+         put("LHR-41A915A6", "rightForeArm");
       }
    }; // must use serial number, tracker role is not supported in org.lwjgl.openvr.VR
 
@@ -149,6 +148,18 @@ public class RDXVRContext
       for (RobotSide side : RobotSide.values)
       {
          controllers.get(side).initSystem();
+      }
+      // trackers TODO check why VRSystem_GetSortedTrackedDeviceIndicesOfClass is always returning 0 and not the size of the array
+      int[] deviceIndices = new int[TRACKER_SERIAL_MAP.size()];
+      IntBuffer trackerIndices = IntBuffer.wrap(deviceIndices);
+      int numberOfTrackers = VRSystem.VRSystem_GetSortedTrackedDeviceIndicesOfClass(
+            VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker, trackerIndices, -1);
+      LogTools.info("{}, {}", numberOfTrackers, trackerIndices.get(0));
+      for (int i = 0; i < numberOfTrackers; i++) {
+         int deviceIndex = trackerIndices.get(i);
+         if (!trackers.containsKey(getBodySegment(getSerialNumber(deviceIndex)))) {
+            trackers.put(getBodySegment(getSerialNumber(deviceIndex)), new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex));
+         }
       }
       // TODO: Bindings for /user/gamepad
 

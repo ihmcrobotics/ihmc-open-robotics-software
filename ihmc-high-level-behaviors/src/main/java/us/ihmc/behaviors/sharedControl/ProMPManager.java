@@ -50,6 +50,8 @@ public class ProMPManager
    private final long speedFactor;
    private final int numberOfInferredSpeeds;
    private double meanEndValueQS;
+   private final boolean useCustomSpeed;
+   private final int customSpeed;
 
    /**
     * Class constructor
@@ -63,7 +65,9 @@ public class ProMPManager
                        AtomicBoolean isLastViaPoint,
                        int numberBasisFunctions,
                        long speedFactor,
-                       int numberOfInferredSpeeds)
+                       int numberOfInferredSpeeds,
+                       boolean useCustomSpeed,
+                       int customSpeed)
    {
       this.taskName = taskName;
       this.bodyPartsGeometry = bodyPartsGeometry;
@@ -72,6 +76,8 @@ public class ProMPManager
       this.numberBasisFunctions = numberBasisFunctions; // 20 rbf functions seems to generalize well
       this.speedFactor = speedFactor;
       this.numberOfInferredSpeeds = numberOfInferredSpeeds;
+      this.useCustomSpeed = useCustomSpeed;
+      this.customSpeed = customSpeed;
 
       ProMPNativeLibrary.load();
    }
@@ -272,6 +278,17 @@ public class ProMPManager
       for (Map.Entry<String, ProMP> partProMP : learnedProMPs.entrySet())
       {
          (partProMP.getValue()).update_time_modulation((double) (partProMP.getValue()).get_traj_length() / inferredTimesteps);
+         if (logEnabled)
+            logger.saveUpdatedTrajectories(partProMP.getKey(), partProMP.getValue(), "Modulated");
+      }
+   }
+
+   public void setTaskCustomSpeed()
+   {
+      // update the time modulation of the learned ProMPs with estimated value
+      for (Map.Entry<String, ProMP> partProMP : learnedProMPs.entrySet())
+      {
+         (partProMP.getValue()).update_time_modulation((double) (partProMP.getValue()).get_traj_length() / customSpeed);
          if (logEnabled)
             logger.saveUpdatedTrajectories(partProMP.getKey(), partProMP.getValue(), "Modulated");
       }

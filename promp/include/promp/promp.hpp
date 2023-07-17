@@ -364,9 +364,9 @@ namespace promp {
         //! time modulation
         double _alpha = 1.0;
         //! ridge factor
-        double _ridge_factor = 0.00000001;
+        double _ridge_factor = 0.0001;
         //!conditioning ridge factor
-        double _conditioning_ridge_factor = 0.0001;
+        double _conditioning_ridge_factor = 0.0005;
         //!default std deviation of observed via points, no noise assumption
         Eigen::MatrixXd _default_std_via_point;
         //! number of samples used to rescale all the trajectories to same duration

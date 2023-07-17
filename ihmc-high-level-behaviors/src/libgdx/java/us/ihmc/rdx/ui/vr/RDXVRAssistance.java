@@ -23,6 +23,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.perception.sceneGraph.SceneGraphAPI;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -51,9 +52,9 @@ import java.util.*;
  * 2. spline trajectories for end-effectors
  * 3. std deviation colored region of the autonomy used for assistance
  */
-public class RDXVRAssistance implements TeleoperationAssistant
+public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
 {
-   private AssistancePhase assistancePhase = AssistancePhase.PROMP;
+   private AssistancePhase assistancePhase = AssistancePhase.DISABLED;
    private final SideDependentList<RigidBodyTransform> affordanceToCOMHandTransform = new SideDependentList<>(); // fixed offset hand CoM - link after last wrist joint
    private final ROS2PublishSubscribeAPI ros2;
    private final IHMCROS2Input<DetectableSceneNodesMessage> detectableSceneObjectsSubscription;
@@ -85,7 +86,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
    private RDXVRAssistanceMenu menu;
    private final VRMenuGuideMode[] menuMode;
    boolean sentInitialHandConfiguration = false;
-
+   private final ImBoolean sportMode =  new ImBoolean(false);
 
    public RDXVRAssistance(DRCRobotModel robotModel, ROS2PublishSubscribeAPI ros2, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
    {
@@ -140,7 +141,10 @@ public class RDXVRAssistance implements TeleoperationAssistant
           setEnabled(!enabled.get());
          }
          joystickValue = forwardJoystickValue;
-         play = joystickValue > 0 || isPreviewGraphicActive();
+         if (sportMode.get())
+            play = true;
+         else
+            play = joystickValue > 0 || isPreviewGraphicActive();
       });
 
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
@@ -300,7 +304,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
 
       if (!objectName.isEmpty())
       {
-         proMPAssistant.processFrameAndObjectInformation(observedPose, bodyPart, objectName, objectFrame);
+         proMPAssistant.processFrameAndObjectInformation(observedPose, bodyPart, objectName, objectFrame, this);
 
          if (previewSetToActive)
          {
@@ -425,6 +429,13 @@ public class RDXVRAssistance implements TeleoperationAssistant
       }
    }
 
+   @Override
+   public void streamOnNotification() {
+      LogTools.info("Notified: ", enabledIKStreaming.get());
+      if (!enabledIKStreaming.get())
+         enabledIKStreaming.set(true);
+   }
+
    public void checkForHandConfigurationUpdates(HandConfigurationListener listener)
    {
       if (!assistancePhase.equals(AssistancePhase.PROMP))
@@ -480,8 +491,14 @@ public class RDXVRAssistance implements TeleoperationAssistant
 
       if (assistancePhase.equals(AssistancePhase.PROMP) || assistancePhase.equals(AssistancePhase.BLENDING) )
       {
-         if(!menu.hasProMPSamples())
+         if(proMPAssistant.getNumberOfSamples()>0 && !menu.hasProMPSamples())
+         {
             menu.setProMPSamples(proMPAssistant.getNumberOfSamples());
+            if(!affordanceAssistant.hasAffordance(objectName))
+               menu.setHasAffordance(false);
+            else
+               menu.setHasAffordance(true);
+         }
          menu.setCurrentProMPSample(proMPAssistant.getCurrentSample());
       }
       else if (assistancePhase.equals(AssistancePhase.AFFORDANCE))
@@ -498,10 +515,10 @@ public class RDXVRAssistance implements TeleoperationAssistant
    public void renderWidgets(ImGuiUniqueLabelMap labels)
    {
       if (ImGui.checkbox(labels.get("Assistance"), enabled))
-      {
          setEnabled(enabled.get());
-      }
       ghostRobotGraphic.renderImGuiWidgets();
+      if(ImGui.checkbox(labels.get("SPORT Mode"), sportMode))
+         proMPAssistant.setSportMode(sportMode.get());
    }
 
    public void destroy()
@@ -517,11 +534,12 @@ public class RDXVRAssistance implements TeleoperationAssistant
          if (enabled)
          {
             firstPreview = true;
+            assistancePhase = AssistancePhase.PROMP;
 
             if (enabledReplay.get())
                this.enabled.set(false); // check no concurrency with replay
 
-            if (!enabledIKStreaming.get() && !isPreviewGraphicActive())
+            if (!enabledIKStreaming.get() && !isPreviewGraphicActive() && !sportMode.get())
                this.enabledIKStreaming.set(true);  // if preview disabled we do not want to start the assistance while we're not streaming to the controller
             else if (isPreviewGraphicActive())
                enabledIKStreaming.set(false); // if preview is enabled we do not want to stream to the controller
@@ -541,7 +559,7 @@ public class RDXVRAssistance implements TeleoperationAssistant
             ghostRobotGraphic.setActive(previewSetToActive); // set it back to what it was (graphic is disabled when using assistance after validation)
             splineGraphics.clear();
             stdDeviationGraphics.clear();
-            assistancePhase = AssistancePhase.PROMP;
+            assistancePhase = AssistancePhase.DISABLED;
             blendingCounter = 0;
             affordanceAssistant.reset();
             this.enabledIKStreaming.set(false);
@@ -627,7 +645,8 @@ public class RDXVRAssistance implements TeleoperationAssistant
 
    public boolean isPlaying()
    {
-      // avoid last frame when affordance is over and do not to stream controller value before deactivating
+      // avoid last frame when affordance is over and do not stream to controller value before deactivating
+      // we're safe when we're either not in affordance phase or in affordance phase and affordance is not over yet
       return (!assistancePhase.equals(AssistancePhase.AFFORDANCE) || (affordanceAssistant.hasAffordanceStarted() && !affordanceAssistant.isAffordanceOver()));
    }
 
