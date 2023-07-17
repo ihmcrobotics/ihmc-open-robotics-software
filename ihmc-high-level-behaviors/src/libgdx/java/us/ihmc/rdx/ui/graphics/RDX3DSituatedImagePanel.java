@@ -281,6 +281,10 @@ public class RDX3DSituatedImagePanel
                   lastTouchpadY = Double.NaN;
                }
             }
+            else if(controller.getGripActionData().x() > 0.9 && frameOfVideo.isPointInside(controller.getPickPointPose().getPosition()))
+            {
+               vrModeManager.setVideoPanelPlacementMode(MANUAL_PLACEMENT);
+            }
             else if (placementMode == RIGHT_HAND_DOCK)
             {
                frameOfVideo.getSize().scale(0.25);
@@ -290,12 +294,6 @@ public class RDX3DSituatedImagePanel
                floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
                floatingPanelFramePose.get(floatingPanelFrame.getTransformToParent());
                floatingPanelFrame.getReferenceFrame().update();
-            }
-            else if(controller.getGripActionData().x() > 0.9
-                    && frameOfVideo.isPointInside(controller.getPickPointPose().getPosition())
-                    && placementMode == FOLLOW_HEADSET)
-            {
-               vrModeManager.setVideoPanelPlacementMode(MANUAL_PLACEMENT);
             }
          });
       }
