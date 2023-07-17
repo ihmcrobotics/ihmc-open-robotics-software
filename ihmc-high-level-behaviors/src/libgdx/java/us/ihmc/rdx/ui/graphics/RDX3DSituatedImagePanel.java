@@ -287,7 +287,7 @@ public class RDX3DSituatedImagePanel
             }
             else if (placementMode == RIGHT_HAND_DOCK)
             {
-               frameOfVideo.getSize().scale(0.25);
+
                floatingPanelFramePose.setToZero(controller.getXForwardZUpControllerFrame());
                floatingPanelFramePose.getRotation().setYawPitchRoll(-Math.PI / 2.0, 0.0, -Math.PI / 4.0);
                floatingPanelFramePose.getPosition().addY(0.05);
