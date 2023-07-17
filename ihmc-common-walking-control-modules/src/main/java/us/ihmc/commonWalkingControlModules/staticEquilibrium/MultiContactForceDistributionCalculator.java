@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -109,9 +110,7 @@ public class MultiContactForceDistributionCalculator
       qpSolver.setLinearInequalityConstraints(Ain, bin);
 
       qpSolver.solve(rho);
-      boolean success = !MatrixTools.containsNaN(rho);
-
-      return success;
+      return !MatrixTools.containsNaN(rho);
    }
 
    private void clear()
@@ -125,4 +124,21 @@ public class MultiContactForceDistributionCalculator
       rho.zero();
    }
 
+   public Vector3D getResolvedForce(int contactPointIndex, MultiContactForceDistributionInput input)
+   {
+      Vector3D resolvedForce = new Vector3D();
+      for (int i = 0; i < MultiContactForceDistributionInput.numberOfBasisVectors; i++)
+      {
+         FrameVector3D basisVector = input.getBasisVector(contactPointIndex, i);
+         basisVector.changeFrame(ReferenceFrame.getWorldFrame());
+
+         double rho = this.rho.get(MultiContactForceDistributionInput.numberOfBasisVectors * contactPointIndex + i, 0);
+
+         resolvedForce.addX(basisVector.getX() * rho);
+         resolvedForce.addY(basisVector.getY() * rho);
+         resolvedForce.addZ(basisVector.getZ() * rho);
+      }
+
+      return resolvedForce;
+   }
 }

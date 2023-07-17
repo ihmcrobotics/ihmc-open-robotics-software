@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -22,6 +23,7 @@ import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculato
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 public class MultiContactForceDistributionInput
 {
@@ -141,7 +143,7 @@ public class MultiContactForceDistributionInput
             for (int linearCoordIndex = 0; linearCoordIndex < 3; linearCoordIndex++)
             {
                // We're computing just the linear velocity, ignore angular block. We're also ignoring root joint acceleration
-               double jacobianEntry = jacobianMatrix.get(3 + linearCoordIndex, 6 + jacobianJointIndex);
+               double jacobianEntry = jacobianMatrix.get(3 + linearCoordIndex, 5 + jacobianJointIndex);
 
                contactJacobian.set(linearCoordIndex, jointIndex, jacobianEntry);
             }
@@ -152,7 +154,7 @@ public class MultiContactForceDistributionInput
          FrameVector3D contactNormal = new FrameVector3D(contactFrame, Axis3D.Z);
          for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectors; basisVectorIndex++)
          {
-            double angleToRotateAroundInXY = basisVectorIndex * 2.0 * Math.PI / basisVectorIndex;
+            double angleToRotateAroundInXY = basisVectorIndex * 2.0 * Math.PI / numberOfBasisVectors;
             AxisAngle basisVectorRotation = new AxisAngle(Math.cos(angleToRotateAroundInXY), Math.sin(angleToRotateAroundInXY), 0.0, basisVectorAngleFromNormal);
 
             FrameVector3D basisVector = new FrameVector3D(contactNormal);
