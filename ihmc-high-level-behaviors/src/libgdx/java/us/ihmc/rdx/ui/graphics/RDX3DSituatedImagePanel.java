@@ -38,8 +38,7 @@ import java.util.Set;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.TextureCoordinates;
-import static us.ihmc.rdx.ui.vr.RDX3DSituatedVideoPanelMode.FOLLOW_HEADSET;
-import static us.ihmc.rdx.ui.vr.RDX3DSituatedVideoPanelMode.MANUAL_PLACEMENT;
+import static us.ihmc.rdx.ui.vr.RDX3DSituatedVideoPanelMode.*;
 
 public class RDX3DSituatedImagePanel
 {
@@ -210,7 +209,7 @@ public class RDX3DSituatedImagePanel
 
       context.getHeadset().runIfConnected(headset ->
       {
-         if (placementMode == FOLLOW_HEADSET || (placementMode == MANUAL_PLACEMENT && justShown))
+         if (placementMode == FOLLOW_HEADSET || (placementMode == MANUAL_PLACEMENT  && justShown))
          {
             if (modelInstance != null)
             {
@@ -281,6 +280,16 @@ public class RDX3DSituatedImagePanel
                {
                   lastTouchpadY = Double.NaN;
                }
+            }
+            else if (placementMode == RIGHT_HAND_DOCK)
+            {
+               frameOfVideo.getSize().scale(0.25);
+               floatingPanelFramePose.setToZero(controller.getXForwardZUpControllerFrame());
+               floatingPanelFramePose.getRotation().setYawPitchRoll(-Math.PI / 2.0, 0.0, -Math.PI / 4.0);
+               floatingPanelFramePose.getPosition().addY(0.05);
+               floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+               floatingPanelFramePose.get(floatingPanelFrame.getTransformToParent());
+               floatingPanelFrame.getReferenceFrame().update();
             }
             else if(controller.getGripActionData().x() > 0.9
                     && frameOfVideo.isPointInside(controller.getPickPointPose().getPosition())

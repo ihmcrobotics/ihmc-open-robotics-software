@@ -16,7 +16,6 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXJoystickBasedStepping;
-import us.ihmc.rdx.ui.graphics.RDX3DSituatedImagePanel;
 import us.ihmc.rdx.ui.processes.RestartableJavaProcess;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -130,6 +129,10 @@ public class RDXVRModeManager
          if (ImGui.radioButton(labels.get("Follow headset"), panelPlacementMode == RDX3DSituatedVideoPanelMode.FOLLOW_HEADSET))
          {
             panelPlacementMode = RDX3DSituatedVideoPanelMode.FOLLOW_HEADSET;
+         }
+         if (ImGui.radioButton(labels.get("Right Hand Dock"), panelPlacementMode == RDX3DSituatedVideoPanelMode.RIGHT_HAND_DOCK))
+         {
+            panelPlacementMode = RDX3DSituatedVideoPanelMode.RIGHT_HAND_DOCK;
          }
       }
 
