@@ -45,7 +45,7 @@ public class ZED2ColorStereoDepthPublisher
 {
    private static final int CAMERA_FPS = 30;
    private static final float MILLIMETER_TO_METERS = 0.001f;
-   private static final double ZED_2i_CENTER_TO_CAMERA_DISTANCE = 0.06;
+   private static final double ZED_2I_CENTER_TO_CAMERA_DISTANCE = 0.06;
 
    private final int cameraID;
    private final SL_RuntimeParameters zedRuntimeParameters = new SL_RuntimeParameters();
@@ -144,7 +144,7 @@ public class ZED2ColorStereoDepthPublisher
 
       // Setup other things
       imageEncoder = new CUDAImageEncoder();
-      cameraPosesInDepthFrame.get(RobotSide.RIGHT).getPosition().subY(2.0 * ZED_2i_CENTER_TO_CAMERA_DISTANCE);
+      cameraPosesInDepthFrame.get(RobotSide.RIGHT).getPosition().subY(2.0 * ZED_2I_CENTER_TO_CAMERA_DISTANCE);
       throttler.setFrequency(CAMERA_FPS);
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, getClass().getName() + "-Shutdown"));
@@ -159,7 +159,7 @@ public class ZED2ColorStereoDepthPublisher
 
             // Frame supplier provides frame pose of center of camera. Add Y to get left camera's frame pose
             leftCameraFramePose.setToZero(sensorFrameSupplier.get());
-            leftCameraFramePose.getPosition().addY(ZED_2i_CENTER_TO_CAMERA_DISTANCE);
+            leftCameraFramePose.getPosition().addY(ZED_2I_CENTER_TO_CAMERA_DISTANCE);
             leftCameraFramePose.changeFrame(ReferenceFrame.getWorldFrame());
          }
       }, "ZED2ImageGrabThread");
