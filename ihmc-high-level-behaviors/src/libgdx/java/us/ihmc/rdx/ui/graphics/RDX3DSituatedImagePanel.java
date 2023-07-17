@@ -228,6 +228,8 @@ public class RDX3DSituatedImagePanel
          context.getController(side).runIfConnected(controller ->
          {
             Line3DReadOnly pickRay = controller.getPickRay();
+            boolean intersecting = frameOfVideoIntersection.intersect(frameOfVideo.getSizeX(), frameOfVideo.getSizeY(), frameOfVideo.getSizeZ(),
+                                                                      floatingPanelFrame.getReferenceFrame().getTransformToWorldFrame(), pickRay);
             if (placementMode == MANUAL_PLACEMENT)
             {
                if (modelInstance != null)
@@ -257,9 +259,7 @@ public class RDX3DSituatedImagePanel
                   }
                }
             }
-            // TODO: Make this context based, by pointing at the panel
-            else if (frameOfVideoIntersection.intersect(frameOfVideo.getSizeX(), frameOfVideo.getSizeY(), frameOfVideo.getSizeZ(),
-                                                        floatingPanelFrame.getReferenceFrame().getTransformToWorldFrame(), pickRay))
+            else if (intersecting)
             {
                if (controller.getTouchpadTouchedActionData().bState())
                {
