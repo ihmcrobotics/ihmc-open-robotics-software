@@ -265,7 +265,7 @@ public class RDX3DSituatedImagePanel
                   }
                }
             }
-            else if (intersecting)
+            else if (intersecting && placementMode == FOLLOW_HEADSET)
             {
                if (controller.getTouchpadTouchedActionData().bState())
                {
@@ -281,6 +281,12 @@ public class RDX3DSituatedImagePanel
                {
                   lastTouchpadY = Double.NaN;
                }
+            }
+            else if(controller.getGripActionData().x() > 0.9
+                    && frameOfVideo.isPointInside(controller.getPickPointPose().getPosition())
+                    && placementMode == FOLLOW_HEADSET)
+            {
+               vrModeManager.setVideoPanelPlacementMode(MANUAL_PLACEMENT);
             }
          });
       }

@@ -16,6 +16,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXJoystickBasedStepping;
+import us.ihmc.rdx.ui.graphics.RDX3DSituatedImagePanel;
 import us.ihmc.rdx.ui.processes.RestartableJavaProcess;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -227,6 +228,11 @@ public class RDXVRModeManager
    public RDX3DSituatedVideoPanelMode getVideoPanelPlacementMode()
    {
       return panelPlacementMode;
+   }
+
+   public void setVideoPanelPlacementMode(RDX3DSituatedVideoPanelMode panelPlacementMode)
+   {
+      this.panelPlacementMode = panelPlacementMode;
    }
 
    public RDXVRHandPlacedFootstepMode getHandPlacedFootstepMode()
