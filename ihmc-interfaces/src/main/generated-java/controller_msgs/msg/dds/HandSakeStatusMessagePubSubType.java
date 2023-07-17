@@ -15,7 +15,7 @@ public class HandSakeStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6bb08caea12d1db576d1dda27378858cef10e4d0115ec27ed33012d7e1fd2bc6";
+   		return "115cb34fd4297a13ba28917413cb43dd5ddd1016e1fcff1d6e8bab12d48a9450";
    }
    
    @Override
@@ -64,8 +64,6 @@ public class HandSakeStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
       return current_alignment - initial_alignment;
    }
@@ -97,9 +95,6 @@ public class HandSakeStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
 
       return current_alignment - initial_alignment;
    }
@@ -116,9 +111,7 @@ public class HandSakeStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       cdr.write_type_6(data.getPostionRatio());
 
-      cdr.write_type_7(data.getCalibrated());
-
-      cdr.write_type_7(data.getNeedsReset());
+      cdr.write_type_7(data.getIsInErrorState());
 
    }
 
@@ -134,9 +127,7 @@ public class HandSakeStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       	
       data.setPostionRatio(cdr.read_type_6());
       	
-      data.setCalibrated(cdr.read_type_7());
-      	
-      data.setNeedsReset(cdr.read_type_7());
+      data.setIsInErrorState(cdr.read_type_7());
       	
 
    }
@@ -149,8 +140,7 @@ public class HandSakeStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       ser.write_type_6("temperature", data.getTemperature());
       ser.write_type_6("torque_ratio", data.getTorqueRatio());
       ser.write_type_6("postion_ratio", data.getPostionRatio());
-      ser.write_type_7("calibrated", data.getCalibrated());
-      ser.write_type_7("needs_reset", data.getNeedsReset());
+      ser.write_type_7("is_in_error_state", data.getIsInErrorState());
    }
 
    @Override
@@ -161,8 +151,7 @@ public class HandSakeStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       data.setTemperature(ser.read_type_6("temperature"));
       data.setTorqueRatio(ser.read_type_6("torque_ratio"));
       data.setPostionRatio(ser.read_type_6("postion_ratio"));
-      data.setCalibrated(ser.read_type_7("calibrated"));
-      data.setNeedsReset(ser.read_type_7("needs_reset"));
+      data.setIsInErrorState(ser.read_type_7("is_in_error_state"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.HandSakeStatusMessage src, controller_msgs.msg.dds.HandSakeStatusMessage dest)

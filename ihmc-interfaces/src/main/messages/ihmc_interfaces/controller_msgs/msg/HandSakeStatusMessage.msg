@@ -13,5 +13,4 @@ float64 torque_ratio
 # 0.0 closed, 1.0 open
 float64 postion_ratio
 
-bool calibrated
-bool needs_reset
+bool is_in_error_state
