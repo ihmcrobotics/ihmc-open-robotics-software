@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.ejml.data.DMatrixRMaj;
@@ -96,6 +97,18 @@ public class MultiContactForceDistributionInput
       graspMatrixJacobianTranspose.zero();
    }
 
+   public void copyAndIgnoreIndex(int indexToIgnore, MultiContactForceDistributionInput other)
+   {
+      clear();
+
+      for (int contactPointIndex = 0; contactPointIndex < other.getNumberOfContactPoints(); contactPointIndex++)
+      {
+         if (contactPointIndex == indexToIgnore)
+            continue;
+         addContactPoint(other.contactFrames.get(contactPointIndex), other.contactingBodies.get(contactPointIndex), other.contactJacobians.get(contactPointIndex));
+      }
+   }
+
    /* Contact frame should have origin at the contact point with z pointing into the robot contacting link */
    public void addContactPoint(ReferenceFrame contactFrame, RigidBodyBasics contactingBody, GeometricJacobian contactJacobian)
    {
@@ -142,7 +155,7 @@ public class MultiContactForceDistributionInput
 
             for (int linearCoordIndex = 0; linearCoordIndex < 3; linearCoordIndex++)
             {
-               // We're computing just the linear velocity, ignore angular block. We're also ignoring root joint acceleration
+               // We're computing just the linear component, ignore angular block. We're also ignoring root joint acceleration
                double jacobianEntry = jacobianMatrix.get(3 + linearCoordIndex, 5 + jacobianJointIndex);
 
                contactJacobian.set(linearCoordIndex, jointIndex, jacobianEntry);
@@ -172,6 +185,11 @@ public class MultiContactForceDistributionInput
    public FramePoint3DReadOnly getCenterOfMass()
    {
       return centerOfMassCalculator.getCenterOfMass();
+   }
+
+   public double getRobotMass()
+   {
+      return centerOfMassCalculator.getTotalMass();
    }
 
    public DMatrixRMaj getConstraintLowerBound()
@@ -208,5 +226,11 @@ public class MultiContactForceDistributionInput
    {
       return basisVectors.get(numberOfBasisVectors * contactPointIndex + basisVectorIndex);
    }
+
+   public GravityCoriolisExternalWrenchMatrixCalculator getGravityCalculator()
+   {
+      return gravityCoriolisExternalWrenchMatrixCalculator;
+   }
+
 }
 
