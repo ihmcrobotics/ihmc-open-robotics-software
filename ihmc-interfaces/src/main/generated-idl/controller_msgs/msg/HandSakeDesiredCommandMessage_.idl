@@ -22,8 +22,11 @@ module controller_msgs
       const octet COMMAND_OPTION_GRIP =
       2;
 
-      const octet COMMAND_OPTION_CUSTOM =
+      const octet COMMAND_OPTION_GOAL_POSITION =
       3;
+
+      const octet COMMAND_OPTION_GOAL_TORQUE =
+      4;
 
 
       /**
