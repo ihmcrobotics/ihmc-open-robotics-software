@@ -18,6 +18,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.opengl.GL41;
+import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -28,6 +29,7 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.vr.RDX3DSituatedVideoPanelMode;
 import us.ihmc.rdx.ui.vr.RDXVRModeManager;
 import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.robotics.interaction.BoxRayIntersection;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -72,6 +74,7 @@ public class RDX3DSituatedImagePanel
    private boolean justShown;
    private boolean isShowing;
    private Box3D frameOfVideo = new Box3D();
+   private BoxRayIntersection frameOfVideoIntersection = new BoxRayIntersection();
 
    /**
     * Create for a programmatically placed panel.
@@ -224,6 +227,7 @@ public class RDX3DSituatedImagePanel
       {
          context.getController(side).runIfConnected(controller ->
          {
+            Line3DReadOnly pickRay = controller.getPickRay();
             if (placementMode == MANUAL_PLACEMENT)
             {
                if (modelInstance != null)
@@ -254,7 +258,10 @@ public class RDX3DSituatedImagePanel
                }
             }
             // TODO: Make this context based, by pointing at the panel
-            else if (placementMode == FOLLOW_HEADSET && side == RobotSide.LEFT)
+            else if (frameOfVideoIntersection.intersect(frameOfVideo.getSizeX(), frameOfVideo.getSizeY(), frameOfVideo.getSizeZ(),
+                                                        floatingPanelFramePose.getReferenceFrame().getTransformToWorldFrame(), pickRay))
+            System.out.println("You be pointing");
+
             {
                if (controller.getTouchpadTouchedActionData().bState())
                {
