@@ -18,8 +18,6 @@ public class MultiContactForceDistributionCalculator
 {
    /* Maintain static equilibrium */
    private static final int staticEquilibriumConstraints = 6;
-   /* Forces are normalized in static equilibrium constraint */
-   private static final double mg = 1.0;
 
    private final DMatrixRMaj Aeq = new DMatrixRMaj(0);
    private final DMatrixRMaj beq = new DMatrixRMaj(0);
@@ -38,6 +36,8 @@ public class MultiContactForceDistributionCalculator
    public boolean solve(MultiContactForceDistributionInput input)
    {
       clear();
+
+      double mg = 9.81 * input.getRobotMass();
 
       int rhoSize = MultiContactForceDistributionInput.numberOfBasisVectors * input.getNumberOfContactPoints();
       int decisionVariables = rhoSize;
@@ -63,9 +63,10 @@ public class MultiContactForceDistributionCalculator
       DMatrixRMaj graspMatrixJacobianTranspose = input.getGraspMatrixJacobianTranspose();
 
       MatrixTools.setMatrixBlock(Ain, rhoSize, 0, graspMatrixJacobianTranspose, 0, 0, graspMatrixJacobianTranspose.getNumRows(), graspMatrixJacobianTranspose.getNumCols(), 1.0);
-      MatrixTools.setMatrixBlock(Ain, rhoSize + graspMatrixJacobianTranspose.getNumRows(), 0, graspMatrixJacobianTranspose, 0, 0, graspMatrixJacobianTranspose.getNumRows(), graspMatrixJacobianTranspose.getNumCols(), -1.0);
       MatrixTools.setMatrixBlock(bin, rhoSize, 0, constraintUpperBound, 0, 0, constraintUpperBound.getNumRows(), constraintUpperBound.getNumCols(), 1.0);
-      MatrixTools.setMatrixBlock(bin, rhoSize + constraintUpperBound.getNumRows(), 0, constraintLowerBound, 0, 0, constraintLowerBound.getNumRows(), constraintLowerBound.getNumCols(), -1.0);
+
+      MatrixTools.setMatrixBlock(Ain, rhoSize + graspMatrixJacobianTranspose.getNumRows(), 0, graspMatrixJacobianTranspose, 0, 0, graspMatrixJacobianTranspose.getNumRows(), graspMatrixJacobianTranspose.getNumCols(), -1.0);
+      MatrixTools.setMatrixBlock(bin, rhoSize + graspMatrixJacobianTranspose.getNumRows(), 0, constraintLowerBound, 0, 0, constraintLowerBound.getNumRows(), constraintLowerBound.getNumCols(), -1.0);
 
       for (int contactPointIndex = 0; contactPointIndex < input.getNumberOfContactPoints(); contactPointIndex++)
       {
@@ -111,6 +112,11 @@ public class MultiContactForceDistributionCalculator
 
       qpSolver.solve(rho);
       return !MatrixTools.containsNaN(rho);
+   }
+
+   public DMatrixRMaj getRho()
+   {
+      return rho;
    }
 
    private void clear()
