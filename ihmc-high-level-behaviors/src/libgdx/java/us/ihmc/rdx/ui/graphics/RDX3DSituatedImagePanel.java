@@ -223,7 +223,7 @@ public class RDX3DSituatedImagePanel
             }
          }
       });
-      frameOfVideo.set(floatingPanelFramePose, 0.15, Math.abs(topRightPosition.y - topLeftPosition.y), Math.abs(topRightPosition.y - bottomLeftPosition.y));
+      frameOfVideo.set(floatingPanelFramePose, 0.05, Math.abs(topRightPosition.y - topLeftPosition.y), Math.abs(topRightPosition.y - bottomLeftPosition.y));
       for (RobotSide side : RobotSide.values)
       {
          context.getController(side).runIfConnected(controller ->
