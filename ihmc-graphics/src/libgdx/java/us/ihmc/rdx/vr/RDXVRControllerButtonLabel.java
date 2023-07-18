@@ -6,15 +6,14 @@ import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.rdx.RDX3DSituatedText;
-import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RDXVRControllerButtonLabel
 {
-   private ModifiableReferenceFrame textFrame;
-   private RDX3DSituatedText situated3DText;
+   private final ModifiableReferenceFrame textFrame;
+   private final RDX3DSituatedText situatedText;
 
    public RDXVRControllerButtonLabel(ReferenceFrame controllerFrame, RobotSide side, Point3D labelOffset)
    {
@@ -28,28 +27,17 @@ public class RDXVRControllerButtonLabel
                                                        15.0);
       });
 
-      clearText();
-   }
-
-   public void clearText()
-   {
-      // Must not be empty string for now, else error.
-      // TODO: Fix RDX3DSituatedText to not be this dumb
-      setText(" ");
+      situatedText = new RDX3DSituatedText("", RDX3DSituatedText.DEFAULT_FONT, java.awt.Color.WHITE, 0.01f);
    }
 
    public void setText(String text)
    {
-      situated3DText = new RDX3DSituatedText(text, RDX3DSituatedText.DEFAULT_FONT, java.awt.Color.WHITE);
-      LibGDXTools.toLibGDX(textFrame.getReferenceFrame().getTransformToRoot(), situated3DText.getModelInstance().transform);
-      situated3DText.scale(0.01f);
+      situatedText.setText(text);
+      situatedText.setPoseToReferenceFrame(textFrame.getReferenceFrame());
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (situated3DText != null)
-      {
-         situated3DText.getRenderables(renderables, pool);
-      }
+      situatedText.getRenderables(renderables, pool);
    }
 }

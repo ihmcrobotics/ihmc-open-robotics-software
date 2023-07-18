@@ -177,9 +177,9 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
          for (int i = 0; i < footsteps.size(); i++)
          {
             MinimalFootstep minimalFootstep = footsteps.get(i);
-            RDX3DSituatedText footstepIndexText = new RDX3DSituatedText("" + i);
-            minimalFootstep.getSolePoseInWorld().get(tempTransform);
             double textHeight = 0.08;
+            RDX3DSituatedText footstepIndexText = new RDX3DSituatedText("" + i, (float) textHeight);
+            minimalFootstep.getSolePoseInWorld().get(tempTransform);
             footstepFrame.update();
             textFramePose.setToZero(footstepFrame);
             textFramePose.getOrientation().prependYawRotation(-Math.PI / 2.0);
@@ -187,18 +187,16 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
             textFramePose.getPosition().addY(textHeight / 4.0);
             textFramePose.getPosition().addX(-textHeight / 2.0);
             textFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-            LibGDXTools.toLibGDX(textFramePose, tempTransform, footstepIndexText.getModelInstance().transform);
-            footstepIndexText.scale((float) textHeight);
+            footstepIndexText.setPose(textFramePose);
             textRenderables.add(footstepIndexText);
 
             if (minimalFootstep.getDescription() != null && !minimalFootstep.getDescription().isEmpty())
             {
-               RDX3DSituatedText footstepListDescriptionText = new RDX3DSituatedText(minimalFootstep.getDescription());
+               RDX3DSituatedText footstepListDescriptionText = new RDX3DSituatedText(minimalFootstep.getDescription(), (float) textHeight);
                textFramePose.changeFrame(footstepFrame);
                textFramePose.getPosition().subY(0.12);
                textFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-               LibGDXTools.toLibGDX(textFramePose, tempTransform, footstepListDescriptionText.getModelInstance().transform);
-               footstepListDescriptionText.scale((float) textHeight);
+               footstepListDescriptionText.setPose(textFramePose);
                textRenderables.add(footstepListDescriptionText);
             }
          }
