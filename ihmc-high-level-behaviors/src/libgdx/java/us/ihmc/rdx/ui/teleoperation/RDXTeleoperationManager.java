@@ -289,7 +289,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       standPrepButton.setTooltipText("Stand prep");
 
       if (robotHasArms)
-         handManager.create(baseUI, communicationHelper);
+         handManager.create(baseUI, communicationHelper, syncedRobot);
 
       baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
    }

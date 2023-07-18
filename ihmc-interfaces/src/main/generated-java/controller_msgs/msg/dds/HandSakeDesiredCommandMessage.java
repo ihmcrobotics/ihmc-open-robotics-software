@@ -34,6 +34,7 @@ public class HandSakeDesiredCommandMessage extends Packet<HandSakeDesiredCommand
    /**
             * 0.0 is closed, 1.0 is open
             */
+   // TODO: Fix typo... :(
    public double postion_ratio_;
    /**
             * Specifies desired torque of grasp, if not specified by hand configuration. 0.0 min, 1.0 max
