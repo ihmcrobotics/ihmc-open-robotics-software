@@ -35,6 +35,7 @@ import us.ihmc.rdx.ui.footstepPlanner.RDXFootstepPlanning;
 import us.ihmc.rdx.ui.graphics.RDXBodyPathPlanGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXLegControlMode;
+import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -71,7 +72,7 @@ public class RDXLocomotionManager
    private final RDXBodyPathPlanGraphic bodyPathPlanGraphic = new RDXBodyPathPlanGraphic();
 
    private final SideDependentList<RDXInteractableFoot> interactableFeet = new SideDependentList<>();
-   private final RDXBallAndArrowPosePlacement ballAndArrowMidFeetPosePlacement = new RDXBallAndArrowPosePlacement();
+   private final RDXBallAndArrowGoalFootstepPlacement ballAndArrowMidFeetPosePlacement = new RDXBallAndArrowGoalFootstepPlacement();
    private final RDXInteractableFootstepPlan interactableFootstepPlan = new RDXInteractableFootstepPlan();
    private final RDXFootstepPlanning footstepPlanning;
    private final RDXManualFootstepPlacement manualFootstepPlacement = new RDXManualFootstepPlacement();
@@ -163,7 +164,7 @@ public class RDXLocomotionManager
       transferTimeSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.transferTime, 0.3, 1.5);
       turnAggressivenessSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.turnAggressiveness, 0.0, 10.0);
 
-      ballAndArrowMidFeetPosePlacement.create(Color.YELLOW);
+      ballAndArrowMidFeetPosePlacement.create(Color.YELLOW, syncedRobot);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
 
       interactableFootstepPlan.create(baseUI, communicationHelper, syncedRobot, locomotionParameters, footstepPlannerParameters, swingFootPlannerParameters);
@@ -392,6 +393,18 @@ public class RDXLocomotionManager
    public void updateWalkPathControlRing()
    {
       walkPathControlRing.update();
+   }
+   
+   public void calculateWalkPathControlRingVRPick(RDXVRContext vrContext)
+   {
+      if (!manualFootstepPlacement.isPlacingFootstep())
+         walkPathControlRing.calculateVRPick(vrContext);
+   }
+
+   public void processWalkPathControlRingVRInput(RDXVRContext vrContext)
+   {
+      if(!manualFootstepPlacement.isPlacingFootstep())
+         walkPathControlRing.processVRInput(vrContext);
    }
 
    public void calculateWalkPathControlRing3DViewPick(ImGui3DViewInput input)

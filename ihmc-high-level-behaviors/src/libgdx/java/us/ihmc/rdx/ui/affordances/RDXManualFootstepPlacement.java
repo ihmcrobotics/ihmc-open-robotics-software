@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
-import imgui.internal.ImGui;
+import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -21,10 +21,8 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.ImGui3DViewInput;
-import us.ihmc.rdx.tools.RDXIconTexture;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -47,11 +45,9 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    private RDXFootstepChecker stepChecker;
    private FootstepPlannerParametersReadOnly footstepPlannerParameters;
    private ImGui3DViewInput latestInput;
-   private RDX3DPanel primary3DPanel;
    private RDXInteractableFootstepPlan footstepPlan;
    private boolean renderTooltip = false;
    private final FramePose3D tempFramePose = new FramePose3D();
-   private RDXIconTexture feetIcon;
    private RDX3DPanelTooltip tooltip;
 
    public void create(ROS2SyncedRobotModel syncedRobot,
@@ -63,21 +59,19 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       this.baseUI = baseUI;
       this.footstepPlan = footstepPlan;
       this.footstepPlannerParameters = footstepPlannerParameters;
-      primary3DPanel = baseUI.getPrimary3DPanel();
-      tooltip = new RDX3DPanelTooltip(primary3DPanel);
-      primary3DPanel.addImGuiOverlayAddition(this::renderTooltips);
+      tooltip = new RDX3DPanelTooltip(baseUI.getPrimary3DPanel());
+      baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltips);
       stepChecker = footstepPlan.getStepChecker();
-      feetIcon = new RDXIconTexture("icons/feet.png");
 
       RDX3DPanelToolbarButton leftFootButton = baseUI.getPrimary3DPanel().addToolbarButton();
       leftFootButton.loadAndSetIcon("icons/leftFoot.png");
       leftFootButton.setTooltipText("Place left footstep");
-      leftFootButton.setOnPressed(() -> createNewFootStep(RobotSide.LEFT));
+      leftFootButton.setOnPressed(() -> createNewFootstep(RobotSide.LEFT));
 
       RDX3DPanelToolbarButton rightFootButton = baseUI.getPrimary3DPanel().addToolbarButton();
       rightFootButton.loadAndSetIcon("icons/rightFoot.png");
       rightFootButton.setTooltipText("Place right footstep");
-      rightFootButton.setOnPressed(() -> createNewFootStep(RobotSide.RIGHT));
+      rightFootButton.setOnPressed(() -> createNewFootstep(RobotSide.RIGHT));
    }
 
    public void update()
@@ -91,17 +85,19 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
    public void renderImGuiWidgets()
    {
+      boolean panel3DIsHovered = latestInput != null && latestInput.isWindowHovered();
+
       ImGui.text("Footstep Planning:");
       ImGui.sameLine();
-      if (ImGui.button(labels.get("Left")) || ImGui.isKeyPressed('R'))
+      if (ImGui.button(labels.get("Left")) || (panel3DIsHovered && ImGui.isKeyPressed('R')))
       {
-         createNewFootStep(RobotSide.LEFT);
+         createNewFootstep(RobotSide.LEFT);
       }
       ImGuiTools.previousWidgetTooltip("Keybind: R");
       ImGui.sameLine();
-      if (ImGui.button(labels.get("Right")) || ImGui.isKeyPressed('T'))
+      if (ImGui.button(labels.get("Right")) || (panel3DIsHovered && ImGui.isKeyPressed('T')))
       {
-         createNewFootStep(RobotSide.RIGHT);
+         createNewFootstep(RobotSide.RIGHT);
       }
       ImGuiTools.previousWidgetTooltip("Keybind: T");
       ImGui.sameLine();
@@ -111,7 +107,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       }
       ImGuiTools.previousWidgetTooltip("Keybind: Escape");
       ImGui.sameLine();
-      if (imgui.ImGui.button(labels.get("Delete Last")) || (ImGui.getIO().getKeyCtrl() && ImGui.isKeyPressed('Z')))
+      if (ImGui.button(labels.get("Delete Last")) || (ImGui.getIO().getKeyCtrl() && ImGui.isKeyPressed('Z')))
       {
          footstepPlan.removeLastStep();
       }
@@ -213,7 +209,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          addedStep.copyFrom(baseUI, footstepBeingPlaced);
          // Switch sides
          currentFootStepSide = currentFootStepSide.getOppositeSide();
-         createNewFootStep(currentFootStepSide);
+         createNewFootstep(currentFootStepSide);
       }
       else
       {
@@ -251,7 +247,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       footstepBeingPlaced = null;
    }
 
-   public void createNewFootStep(RobotSide footstepSide)
+   public void createNewFootstep(RobotSide footstepSide)
    {
       modeNewlyActivated = true;
       RigidBodyTransformReadOnly latestFootstepTransform = footstepPlan.getLastFootstepTransform(footstepSide.getOppositeSide());

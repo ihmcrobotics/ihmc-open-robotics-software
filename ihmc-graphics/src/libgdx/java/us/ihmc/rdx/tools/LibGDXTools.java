@@ -330,6 +330,14 @@ public class LibGDXTools
       toLibGDX(tempTransform, gdxAffine);
    }
 
+   /**
+    * Setting the position to NaN will mean it doesn't get shown.
+    */
+   public static void hideGraphic(ModelInstance modelInstance)
+   {
+      modelInstance.transform.setTranslation(Float.NaN, Float.NaN, Float.NaN);
+   }
+
    public static void toLibGDX(javafx.scene.paint.Color javaFXColor, Color gdxColor)
    {
       gdxColor.set((float) javaFXColor.getRed(), (float) javaFXColor.getGreen(), (float) javaFXColor.getBlue(), (float) javaFXColor.getOpacity());
