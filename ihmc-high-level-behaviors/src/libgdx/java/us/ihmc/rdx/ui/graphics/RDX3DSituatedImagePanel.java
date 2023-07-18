@@ -26,6 +26,7 @@ import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.vr.RDX3DSituatedVideoPanelMode;
 import us.ihmc.rdx.ui.vr.RDXVRModeManager;
 import us.ihmc.rdx.vr.RDXVRContext;
@@ -74,6 +75,10 @@ public class RDX3DSituatedImagePanel
    private boolean isShowing;
    private Box3D frameOfVideo = new Box3D();
    private BoxRayIntersection frameOfVideoIntersection = new BoxRayIntersection();
+   private final SideDependentList<Boolean>intersecting = new SideDependentList<>(false, false);
+   private final SideDependentList<Boolean>intersectVideo = new SideDependentList<>(false, false);
+   private Model hoverState;
+   private ModelInstance hoverModel;
 
    /**
     * Create for a programmatically placed panel.
@@ -228,21 +233,32 @@ public class RDX3DSituatedImagePanel
          context.getController(side).runIfConnected(controller ->
          {
             Line3DReadOnly pickRay = controller.getPickRay();
-            boolean intersecting = frameOfVideoIntersection.intersect(frameOfVideo.getSizeX(),
+            intersecting.put(side, frameOfVideoIntersection.intersect(frameOfVideo.getSizeX(),
                                                                       frameOfVideo.getSizeY(),
                                                                       frameOfVideo.getSizeZ(),
                                                                       floatingPanelFrame.getReferenceFrame().getTransformToWorldFrame(),
-                                                                      pickRay);
+                                                                      pickRay));
+            intersectVideo.put(side, frameOfVideo.isPointInside(controller.getPickPointPose().getPosition()));
+
+            if (intersecting.get(RobotSide.LEFT) || intersectVideo.get(RobotSide.LEFT) || intersecting.get(RobotSide.RIGHT) || intersectVideo.get(RobotSide.RIGHT))
+            {
+               hoverState = RDXModelBuilder.buildModel(meshBuilder ->
+                                                       {
+                                                          meshBuilder.addMultiLineBox(frameOfVideo.getVertices(), 0.005, new Color(Color.WHITE));
+                                                       });
+               hoverModel = new ModelInstance(hoverState);
+            }
+
             if (placementMode == MANUAL_PLACEMENT)
             {
                if (modelInstance != null)
                {
                   floatingPanelFramePose.setToZero(floatingPanelFrame.getReferenceFrame());
                   floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-                  boolean intersectVideo = frameOfVideo.isPointInside(controller.getPickPointPose().getPosition());
+
 
                   boolean isGripping = controller.getGripActionData().x() > 0.9;
-                  if ((grippedLastTime.get(side) || intersectVideo) && isGripping)
+                  if ((grippedLastTime.get(side) || intersectVideo.get(side)) && isGripping)
                   {
                      if (!grippedLastTime.get(side)) // set up offset
                      {
@@ -264,7 +280,7 @@ public class RDX3DSituatedImagePanel
                   }
                }
             }
-            else if (intersecting && placementMode == FOLLOW_HEADSET)
+            else if (intersecting.get(side) && placementMode == FOLLOW_HEADSET)
             {
                if (controller.getTouchpadTouchedActionData().bState())
                {
@@ -301,8 +317,13 @@ public class RDX3DSituatedImagePanel
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (modelInstance != null && isShowing && sceneLevels.contains(RDXSceneLevel.VIRTUAL))
-         modelInstance.getRenderables(renderables, pool);
+      if (isShowing && sceneLevels.contains(RDXSceneLevel.VIRTUAL))
+      {
+         if (modelInstance != null)
+            modelInstance.getRenderables(renderables, pool);
+         if (hoverModel != null)
+            hoverModel.getRenderables(renderables, pool);
+      }
    }
 
    public void setPoseToReferenceFrame(ReferenceFrame referenceFrame)
