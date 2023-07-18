@@ -396,8 +396,27 @@ public class RDXLocomotionManager
 
    public void processWalkPathControlRingVRInput(RDXVRContext vrContext)
    {
-      if(!manualFootstepPlacement.isPlacingFootstep())
+      if (!manualFootstepPlacement.isPlacingFootstep())
+      {
+         if (walkPathControlRing.getFootstepPlannerGoalGizmo().getPathControlRingGizmo().getIsGizmoHoveredVR().get(RobotSide.RIGHT))
+         {
+            vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
+            {
+               controller.setBButtonText("Delete all");
+               if (controller.getBButtonActionData().bChanged() && controller.getBButtonActionData().bState())
+               {
+                  deleteAll();
+               }
+               controller.setAButtonText("Walk");
+               if (controller.getAButtonActionData().bChanged() && controller.getAButtonActionData().bState())
+               {
+                  interactableFootstepPlan.walkFromSteps();
+               }
+            });
+         }
+
          walkPathControlRing.processVRInput(vrContext);
+      }
    }
 
    public void calculateWalkPathControlRing3DViewPick(ImGui3DViewInput input)
