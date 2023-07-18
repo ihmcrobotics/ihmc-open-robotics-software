@@ -187,7 +187,7 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
             textFramePose.getPosition().addY(textHeight / 4.0);
             textFramePose.getPosition().addX(-textHeight / 2.0);
             textFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-            footstepIndexText.setPose(textFramePose);
+            LibGDXTools.toLibGDX(textFramePose, tempTransform, footstepIndexText.getModelTransform());
             textRenderables.add(footstepIndexText);
 
             if (minimalFootstep.getDescription() != null && !minimalFootstep.getDescription().isEmpty())
@@ -196,7 +196,7 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
                textFramePose.changeFrame(footstepFrame);
                textFramePose.getPosition().subY(0.12);
                textFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-               footstepListDescriptionText.setPose(textFramePose);
+               LibGDXTools.toLibGDX(textFramePose, tempTransform, footstepListDescriptionText.getModelTransform());
                textRenderables.add(footstepListDescriptionText);
             }
          }
