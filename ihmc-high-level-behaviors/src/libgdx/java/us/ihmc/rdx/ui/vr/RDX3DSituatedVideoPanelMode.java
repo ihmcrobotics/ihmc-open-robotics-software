@@ -2,5 +2,5 @@ package us.ihmc.rdx.ui.vr;
 
 public enum RDX3DSituatedVideoPanelMode
 {
-   MANUAL_PLACEMENT, FOLLOW_HEADSET, RIGHT_HAND_DOCK
+   MANUAL_PLACEMENT, FOLLOW_HEADSET
 }

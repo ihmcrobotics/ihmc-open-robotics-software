@@ -130,10 +130,6 @@ public class RDXVRModeManager
          {
             panelPlacementMode = RDX3DSituatedVideoPanelMode.FOLLOW_HEADSET;
          }
-         if (ImGui.radioButton(labels.get("Right Hand Dock"), panelPlacementMode == RDX3DSituatedVideoPanelMode.RIGHT_HAND_DOCK))
-         {
-            panelPlacementMode = RDX3DSituatedVideoPanelMode.RIGHT_HAND_DOCK;
-         }
       }
 
       if (ImGui.radioButton(labels.get("Inputs disabled"), mode == RDXVRMode.INPUTS_DISABLED))

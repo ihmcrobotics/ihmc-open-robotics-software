@@ -333,16 +333,6 @@ public class RDX3DSituatedImagePanel
             {
                vrModeManager.setVideoPanelPlacementMode(MANUAL_PLACEMENT);
             }
-            else if (placementMode == RIGHT_HAND_DOCK)
-            {
-
-               floatingPanelFramePose.setToZero(controller.getXForwardZUpControllerFrame());
-               floatingPanelFramePose.getRotation().setYawPitchRoll(-Math.PI / 2.0, 0.0, -Math.PI / 4.0);
-               floatingPanelFramePose.getPosition().addY(0.05);
-               floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-               floatingPanelFramePose.get(floatingPanelFrame.getTransformToParent());
-               floatingPanelFrame.getReferenceFrame().update();
-            }
          });
       }
    }
