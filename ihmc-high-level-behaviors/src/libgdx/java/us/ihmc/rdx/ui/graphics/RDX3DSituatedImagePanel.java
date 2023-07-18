@@ -221,12 +221,8 @@ public class RDX3DSituatedImagePanel
             {
                Line3DReadOnly pickRay = controller.getPickRay();
                double distance = frameOfVideo.distance(pickRay.getPoint());
-               boolean intersect = frameOfVideoIntersection.intersect(frameOfVideo.getSizeX(),
-                                                                    frameOfVideo.getSizeY(),
-                                                                    frameOfVideo.getSizeZ(),
-                                                                    floatingPanelFrame.getReferenceFrame().getTransformToWorldFrame(),
-                                                                    pickRay);
-               if(intersect && distance > 0)
+
+               if(intersecting.get(side) && distance > 0)
                {
                   vrPickResult.get(side).setDistanceToControllerPickPoint(distance);
                   controller.addPickResult(vrPickResult.get(side));
@@ -271,9 +267,9 @@ public class RDX3DSituatedImagePanel
             if (intersecting.get(RobotSide.LEFT) || intersectVideo.get(RobotSide.LEFT) || intersecting.get(RobotSide.RIGHT) || intersectVideo.get(RobotSide.RIGHT))
             {
                hoverState = RDXModelBuilder.buildModel(meshBuilder ->
-                                                       {
-                                                          meshBuilder.addMultiLineBox(frameOfVideo.getVertices(), 0.0005, new Color(Color.WHITE));
-                                                       });
+               {
+                  meshBuilder.addMultiLineBox(frameOfVideo.getVertices(), 0.0005, new Color(Color.WHITE));
+               });
                hoverModel = new ModelInstance(hoverState);
             }
             else
