@@ -57,59 +57,66 @@ public class RDXVRTeleporter
    {
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
      {
-        InputDigitalActionData bButton = controller.getBButtonActionData();
-        InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
-
-        if(bButton.bChanged() && bButton.bState()) // Pressed B button
-           preparingToTeleport = true;
-        else if(bButton.bChanged() && !bButton.bState())
+        // Only enable teleportation when nothing is pick selected
+        if (controller.getSelectedPick() == null)
         {
-           vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
+           controller.setBButtonText("Teleport");
+           InputDigitalActionData bButton = controller.getBButtonActionData();
+           InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
+
+           if (bButton.bChanged() && bButton.bState()) // Pressed B button
            {
-              xyYawHeadsetToTeleportTransform.setIdentity();
-              vrContext.getHeadset().runIfConnected(headset -> // Teleport such that your headset ends up where you're trying to go
-              {
-                 headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
-                 xyYawHeadsetToTeleportTransform.getTranslation().setZ(0.0);
-                 xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
-              });
-              teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
-              teleportIHMCZUpToIHMCZUpWorld.invert();
-              proposedTeleportPose.get(tempTransform);
-              tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
-           });
-           preparingToTeleport = false;
-        }
-
-        // Pressed right joystick button
-        if (robotMidFeetZUpReferenceFrame != null && joystickButton.bChanged() && !joystickButton.bState())
-        {
-           snapToMidFeetZUp(vrContext);
-        }
-        else if (preparingToTeleport) // Holding B button
-        {
-           proposedTeleportPose.set(pickPlaneYawCalculator.calculate(controller.getPickPoseFrame(), vrContext.getTeleportFrameIHMCZUp()));
-
-           controller.setPickRayColliding(controller.getPickPointPose().getPosition().distance(proposedTeleportPose.getPosition()));
-
-           proposedTeleportPose.get(tempTransform);
-           LibGDXTools.toLibGDX(tempTransform, ring.transform);
-           LibGDXTools.toLibGDX(tempTransform, arrow.transform);
-        }
-
-        if (controller.getTouchpadTouchedActionData().bState())
-        {
-           double y = controller.getTouchpadActionData().y();
-           if (!Double.isNaN(lastTouchpadY))
-           {
-              double delta = y - lastTouchpadY;
-              vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld -> teleportIHMCZUpToIHMCZUpWorld.getTranslation().addZ(delta * 0.3));
+              preparingToTeleport = true;
            }
-           lastTouchpadY = y;
-        }
-        else
-        {
-           lastTouchpadY = Double.NaN;
+           else if (preparingToTeleport && bButton.bChanged() && !bButton.bState())
+           {
+              vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
+              {
+                 xyYawHeadsetToTeleportTransform.setIdentity();
+                 vrContext.getHeadset().runIfConnected(headset -> // Teleport such that your headset ends up where you're trying to go
+                 {
+                    headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
+                    xyYawHeadsetToTeleportTransform.getTranslation().setZ(0.0);
+                    xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
+                 });
+                 teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
+                 teleportIHMCZUpToIHMCZUpWorld.invert();
+                 proposedTeleportPose.get(tempTransform);
+                 tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
+              });
+              preparingToTeleport = false;
+           }
+
+           // Pressed right joystick button
+           if (robotMidFeetZUpReferenceFrame != null && joystickButton.bChanged() && !joystickButton.bState())
+           {
+              snapToMidFeetZUp(vrContext);
+           }
+           else if (preparingToTeleport) // Holding B button
+           {
+              proposedTeleportPose.set(pickPlaneYawCalculator.calculate(controller.getPickPoseFrame(), vrContext.getTeleportFrameIHMCZUp()));
+
+              controller.setPickRayColliding(controller.getPickPointPose().getPosition().distance(proposedTeleportPose.getPosition()));
+
+              proposedTeleportPose.get(tempTransform);
+              LibGDXTools.toLibGDX(tempTransform, ring.transform);
+              LibGDXTools.toLibGDX(tempTransform, arrow.transform);
+           }
+
+           if (controller.getTouchpadTouchedActionData().bState())
+           {
+              double y = controller.getTouchpadActionData().y();
+              if (!Double.isNaN(lastTouchpadY))
+              {
+                 double delta = y - lastTouchpadY;
+                 vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld -> teleportIHMCZUpToIHMCZUpWorld.getTranslation().addZ(delta * 0.3));
+              }
+              lastTouchpadY = y;
+           }
+           else
+           {
+              lastTouchpadY = Double.NaN;
+           }
         }
      });
    }
