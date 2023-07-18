@@ -38,10 +38,10 @@ import com.badlogic.gdx.utils.Pool;
 public class RDX3DSituatedText implements RenderableProvider
 {
    public static final Font DEFAULT_FONT = new Font("Arial", Font.PLAIN, 72);
-   public static final float DEFAULT_SCALE = 0.1f;
+   public static final Color DEFAULT_COLOR = Color.BLACK;
+   public static final float DEFAULT_HEIGHT = 0.1f;
 
    private final ModelBuilder modelBuilder = new ModelBuilder();
-
    private final HashMap<String, ModelInstance> textModelInstances = new HashMap<>();
    private ModelInstance modelInstance;
    private final Font awtFont;
@@ -50,22 +50,12 @@ public class RDX3DSituatedText implements RenderableProvider
 
    public RDX3DSituatedText(String text)
    {
-      this(text, DEFAULT_FONT);
-   }
-
-   public RDX3DSituatedText(String text, String font)
-   {
-      this(text, new Font(font, Font.PLAIN, 72));
-   }
-
-   public RDX3DSituatedText(String text, Font font)
-   {
-      this(text, font, Color.BLACK, DEFAULT_SCALE);
+      this(text, DEFAULT_FONT, DEFAULT_COLOR, DEFAULT_HEIGHT);
    }
 
    public RDX3DSituatedText(String text, float textHeightMeters)
    {
-      this(text, DEFAULT_FONT, Color.BLACK, textHeightMeters);
+      this(text, DEFAULT_FONT, DEFAULT_COLOR, textHeightMeters);
    }
 
    public RDX3DSituatedText(String text, Font awtFont, Color awtColor, float textHeightMeters)
