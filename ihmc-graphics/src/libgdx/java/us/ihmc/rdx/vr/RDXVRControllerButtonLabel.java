@@ -27,6 +27,15 @@ public class RDXVRControllerButtonLabel
                                                        0.0,
                                                        15.0);
       });
+
+      clearText();
+   }
+
+   public void clearText()
+   {
+      // Must not be empty string for now, else error.
+      // TODO: Fix RDX3DSituatedText to not be this dumb
+      setText(" ");
    }
 
    public void setText(String text)
