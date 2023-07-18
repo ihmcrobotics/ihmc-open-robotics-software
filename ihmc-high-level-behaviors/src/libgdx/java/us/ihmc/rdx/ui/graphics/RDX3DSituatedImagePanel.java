@@ -30,6 +30,7 @@ import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.vr.RDX3DSituatedVideoPanelMode;
 import us.ihmc.rdx.ui.vr.RDXVRModeManager;
 import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.rdx.vr.RDXVRDragData;
 import us.ihmc.robotics.interaction.BoxRayIntersection;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -253,32 +254,29 @@ public class RDX3DSituatedImagePanel
 
             if (placementMode == MANUAL_PLACEMENT)
             {
+               RDXVRDragData gripDragData = controller.getGripDragData();
                if (modelInstance != null)
                {
                   floatingPanelFramePose.setToZero(floatingPanelFrame.getReferenceFrame());
                   floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
 
 
-                  boolean isGripping = controller.getGripActionData().x() > 0.9;
-                  if ((grippedLastTime.get(side) || intersectVideo.get(side)) && isGripping)
+                  if (gripDragData.getDragJustStarted() && intersectVideo.get(side))
                   {
-                     if (!grippedLastTime.get(side)) // set up offset
-                     {
-                        floatingPanelFramePose.changeFrame(controller.getXForwardZUpControllerFrame());
-                        floatingPanelFramePose.get(gripOffsetTransform);
-                        floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-                     }
+                     gripDragData.setObjectBeingDragged(this);
+                     floatingPanelFramePose.changeFrame(controller.getXForwardZUpControllerFrame());
+                     floatingPanelFramePose.get(gripOffsetTransform);
+                     floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+                  }
+
+                  boolean isGripping = gripDragData.isBeingDragged(this);
+                  if ((intersectVideo.get(side)) && isGripping)
+                  {
                      floatingPanelFrame.getTransformToParent().set(gripOffsetTransform);
                      controller.getXForwardZUpControllerFrame()
                                .getTransformToWorldFrame()
                                .transform(floatingPanelFrame.getTransformToParent());
                      floatingPanelFrame.getReferenceFrame().update();
-
-                     grippedLastTime.put(side, true);
-                  }
-                  else
-                  {
-                     grippedLastTime.put(side, false);
                   }
                }
             }
