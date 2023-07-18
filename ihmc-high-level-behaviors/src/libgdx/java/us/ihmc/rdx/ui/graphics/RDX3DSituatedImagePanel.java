@@ -228,7 +228,7 @@ public class RDX3DSituatedImagePanel
                                                                     frameOfVideo.getSizeZ(),
                                                                     floatingPanelFrame.getReferenceFrame().getTransformToWorldFrame(),
                                                                     pickRay);
-               if(intersect)
+               if(intersect && distance > 0)
                {
                   vrPickResult.get(side).setDistanceToControllerPickPoint(distance);
                   controller.addPickResult(vrPickResult.get(side));
