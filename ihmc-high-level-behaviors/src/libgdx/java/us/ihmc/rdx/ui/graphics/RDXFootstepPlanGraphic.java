@@ -177,8 +177,8 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
          for (int i = 0; i < footsteps.size(); i++)
          {
             MinimalFootstep minimalFootstep = footsteps.get(i);
-            double textHeight = 0.08;
-            RDX3DSituatedText footstepIndexText = new RDX3DSituatedText("" + i, (float) textHeight);
+            float textHeight = 0.08f;
+            RDX3DSituatedText footstepIndexText = new RDX3DSituatedText("" + i, textHeight);
             minimalFootstep.getSolePoseInWorld().get(tempTransform);
             footstepFrame.update();
             textFramePose.setToZero(footstepFrame);
@@ -192,7 +192,7 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
 
             if (minimalFootstep.getDescription() != null && !minimalFootstep.getDescription().isEmpty())
             {
-               RDX3DSituatedText footstepListDescriptionText = new RDX3DSituatedText(minimalFootstep.getDescription(), (float) textHeight);
+               RDX3DSituatedText footstepListDescriptionText = new RDX3DSituatedText(minimalFootstep.getDescription(), textHeight);
                textFramePose.changeFrame(footstepFrame);
                textFramePose.getPosition().subY(0.12);
                textFramePose.changeFrame(ReferenceFrame.getWorldFrame());
