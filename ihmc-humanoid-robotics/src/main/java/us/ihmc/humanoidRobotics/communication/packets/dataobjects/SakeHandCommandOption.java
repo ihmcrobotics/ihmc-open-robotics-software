@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets.dataobjects;
 
 public enum SakeHandCommandOption
 {
-   OPEN, CLOSE, GRIP, GOAL_POSITION, GOAL_TORQUE;
+   OPEN, CLOSE, GRIP, GOAL_POSITION, SET_GOAL_TORQUE;
 
    public final static SakeHandCommandOption[] values = values();
 

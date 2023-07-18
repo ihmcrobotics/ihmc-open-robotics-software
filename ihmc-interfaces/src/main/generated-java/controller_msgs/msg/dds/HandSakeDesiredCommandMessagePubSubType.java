@@ -15,7 +15,7 @@ public class HandSakeDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d7b0d6458971be4e78dd205eeb985f8d29625a207457148fe2073105d42a51b7";
+   		return "4713776c5d8f90ec17b747f26c434fbddd36b196a15fc104800a27c0a88ec8de";
    }
    
    @Override
@@ -102,7 +102,7 @@ public class HandSakeDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_9(data.getDesiredCommandOption());
 
-      cdr.write_type_6(data.getPostionRatio());
+      cdr.write_type_6(data.getPositionRatio());
 
       cdr.write_type_6(data.getTorqueRatio());
 
@@ -116,7 +116,7 @@ public class HandSakeDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
       	
       data.setDesiredCommandOption(cdr.read_type_9());
       	
-      data.setPostionRatio(cdr.read_type_6());
+      data.setPositionRatio(cdr.read_type_6());
       	
       data.setTorqueRatio(cdr.read_type_6());
       	
@@ -129,7 +129,7 @@ public class HandSakeDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_9("desired_command_option", data.getDesiredCommandOption());
-      ser.write_type_6("postion_ratio", data.getPostionRatio());
+      ser.write_type_6("position_ratio", data.getPositionRatio());
       ser.write_type_6("torque_ratio", data.getTorqueRatio());
    }
 
@@ -139,7 +139,7 @@ public class HandSakeDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setRobotSide(ser.read_type_9("robot_side"));
       data.setDesiredCommandOption(ser.read_type_9("desired_command_option"));
-      data.setPostionRatio(ser.read_type_6("postion_ratio"));
+      data.setPositionRatio(ser.read_type_6("position_ratio"));
       data.setTorqueRatio(ser.read_type_6("torque_ratio"));
    }
 

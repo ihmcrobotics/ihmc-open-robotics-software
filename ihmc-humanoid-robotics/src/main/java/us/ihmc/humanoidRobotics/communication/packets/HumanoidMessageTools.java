@@ -1368,7 +1368,7 @@ public class HumanoidMessageTools
       HandSakeDesiredCommandMessage message = new HandSakeDesiredCommandMessage();
       message.setRobotSide(robotSide.toByte());
       message.setDesiredCommandOption(commandOption.toByte());
-      message.setPostionRatio(goalPosition);
+      message.setPositionRatio(goalPosition);
       message.setTorqueRatio(goalTorque);
       return message;
    }

@@ -16,6 +16,7 @@ import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.rdx.ui.interactable.RDXSakeHandPositionSlider;
+import us.ihmc.rdx.ui.interactable.RDXSakeHandTorqueSlider;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -38,9 +39,7 @@ public class RDXHandConfigurationManager
    private RobotSide toolbarSelectedSide = RobotSide.LEFT;
    private final SideDependentList<IHMCROS2Input<HandSakeStatusMessage>> sakeStatuses = new SideDependentList<>();
    private final SideDependentList<RDXSakeHandPositionSlider> handPositionSliders = new SideDependentList<>();
-
-   private final SideDependentList<ImFloat> goalPositions = new SideDependentList<>(new ImFloat(0f), new ImFloat(0f));
-   private final SideDependentList<ImFloat> goalTorques = new SideDependentList<>(new ImFloat(0f), new ImFloat(0f));
+   private final SideDependentList<RDXSakeHandTorqueSlider> handTorqueSliders = new SideDependentList<>();
 
    public void create(RDXBaseUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobot)
    {
@@ -68,15 +67,15 @@ public class RDXHandConfigurationManager
          leftRightHandToggleButton.setIconTexture(toggleIcons.get(toolbarSelectedSide));
       });
 
-      SideDependentList<Runnable> openCommands = new SideDependentList<>(() -> publishHandCommand(RobotSide.LEFT, SakeHandCommandOption.OPEN, 0.0, 0.5),
-                                                                          () -> publishHandCommand(RobotSide.RIGHT, SakeHandCommandOption.OPEN, 0.0, 0.5));
+      SideDependentList<Runnable> openCommands = new SideDependentList<>(() -> publishHandCommand(RobotSide.LEFT, SakeHandCommandOption.OPEN),
+                                                                          () -> publishHandCommand(RobotSide.RIGHT, SakeHandCommandOption.OPEN));
       RDX3DPanelToolbarButton openHandButton = baseUI.getPrimary3DPanel().addToolbarButton();
       openHandButton.loadAndSetIcon("icons/openGripper.png");
       openHandButton.setTooltipText("Open hand");
       openHandButton.setOnPressed(() -> openCommands.get(toolbarSelectedSide).run());
 
-      SideDependentList<Runnable> closeCommands = new SideDependentList<>(() -> publishHandCommand(RobotSide.LEFT, SakeHandCommandOption.CLOSE, 1.0, 0.5),
-                                                                          () -> publishHandCommand(RobotSide.RIGHT, SakeHandCommandOption.CLOSE, 1.0, 0.5));
+      SideDependentList<Runnable> closeCommands = new SideDependentList<>(() -> publishHandCommand(RobotSide.LEFT, SakeHandCommandOption.CLOSE),
+                                                                          () -> publishHandCommand(RobotSide.RIGHT, SakeHandCommandOption.CLOSE));
       RDX3DPanelToolbarButton closeHandButton = baseUI.getPrimary3DPanel().addToolbarButton();
       closeHandButton.loadAndSetIcon("icons/closeGripper.png");
       closeHandButton.setTooltipText("Close hand");
@@ -90,6 +89,7 @@ public class RDXHandConfigurationManager
       for (RobotSide handSide : RobotSide.values)
       {
          handPositionSliders.put(handSide, new RDXSakeHandPositionSlider(syncedRobot, communicationHelper, handSide));
+         handTorqueSliders.put(handSide, new RDXSakeHandTorqueSlider(communicationHelper, handSide));
       }
 
       if (ADD_SHIELD_BUTTON)
@@ -126,23 +126,20 @@ public class RDXHandConfigurationManager
          ImGui.sameLine();
          if (ImGui.button(labels.get("Open", side.getCamelCaseName())))
          {
-            publishHandCommand(side, SakeHandCommandOption.OPEN, 0.0, 0.5);
+            publishHandCommand(side, SakeHandCommandOption.OPEN);
          }
          ImGui.sameLine();
          if (ImGui.button(labels.get("Close", side.getCamelCaseName())))
          {
-            publishHandCommand(side, SakeHandCommandOption.CLOSE, 1.0, 0.5);
+            publishHandCommand(side, SakeHandCommandOption.CLOSE);
          }
          ImGui.sameLine();
          if (ImGui.button(labels.get("Grip", side.getCamelCaseName())))
          {
-            publishHandCommand(side, SakeHandCommandOption.GRIP, 1.0, 0.5);
+            publishHandCommand(side, SakeHandCommandOption.GRIP);
          }
          handPositionSliders.get(side).renderImGuiWidgets();
-         if (ImGui.sliderFloat(side.getPascalCaseName() + " torque", goalTorques.get(side).getData(), 0f, 1f))
-         {
-            publishHandCommand(side, SakeHandCommandOption.GOAL_TORQUE, 1.0, goalTorques.get(side).get());
-         }
+         handTorqueSliders.get(side).renderImGuiWidgets();
       }
       if (!sakeStatuses.isEmpty())
          ImGui.text("Sake EZGrippers:");
@@ -172,10 +169,10 @@ public class RDXHandConfigurationManager
       }
    }
 
-   private void publishHandCommand(RobotSide side, SakeHandCommandOption handCommandOption, double goalPosition, double goalTorque)
+   private void publishHandCommand(RobotSide side, SakeHandCommandOption handCommandOption)
    {
       communicationHelper.publish(ROS2Tools::getHandSakeCommandTopic,
-                                  HumanoidMessageTools.createHandSakeDesiredCommandMessage(side, handCommandOption, goalPosition, goalTorque));
+                                  HumanoidMessageTools.createHandSakeDesiredCommandMessage(side, handCommandOption, 0.0, 0.0));
    }
 
    /**

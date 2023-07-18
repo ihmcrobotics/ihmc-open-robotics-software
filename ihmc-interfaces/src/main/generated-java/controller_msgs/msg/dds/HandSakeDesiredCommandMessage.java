@@ -18,7 +18,7 @@ public class HandSakeDesiredCommandMessage extends Packet<HandSakeDesiredCommand
    public static final byte COMMAND_OPTION_CLOSE = (byte) 1;
    public static final byte COMMAND_OPTION_GRIP = (byte) 2;
    public static final byte COMMAND_OPTION_GOAL_POSITION = (byte) 3;
-   public static final byte COMMAND_OPTION_GOAL_TORQUE = (byte) 4;
+   public static final byte COMMAND_OPTION_SET_GOAL_TORQUE = (byte) 4;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
@@ -32,10 +32,9 @@ public class HandSakeDesiredCommandMessage extends Packet<HandSakeDesiredCommand
             */
    public byte desired_command_option_ = (byte) 255;
    /**
-            * 0.0 is closed, 1.0 is open
+            * 1.0 is closed, 0.0 is open
             */
-   // TODO: Fix typo... :(
-   public double postion_ratio_;
+   public double position_ratio_;
    /**
             * Specifies desired torque of grasp, if not specified by hand configuration. 0.0 min, 1.0 max
             */
@@ -59,7 +58,7 @@ public class HandSakeDesiredCommandMessage extends Packet<HandSakeDesiredCommand
 
       desired_command_option_ = other.desired_command_option_;
 
-      postion_ratio_ = other.postion_ratio_;
+      position_ratio_ = other.position_ratio_;
 
       torque_ratio_ = other.torque_ratio_;
 
@@ -111,18 +110,18 @@ public class HandSakeDesiredCommandMessage extends Packet<HandSakeDesiredCommand
    }
 
    /**
-            * 0.0 is closed, 1.0 is open
+            * 1.0 is closed, 0.0 is open
             */
-   public void setPostionRatio(double postion_ratio)
+   public void setPositionRatio(double position_ratio)
    {
-      postion_ratio_ = postion_ratio;
+      position_ratio_ = position_ratio;
    }
    /**
-            * 0.0 is closed, 1.0 is open
+            * 1.0 is closed, 0.0 is open
             */
-   public double getPostionRatio()
+   public double getPositionRatio()
    {
-      return postion_ratio_;
+      return position_ratio_;
    }
 
    /**
@@ -164,7 +163,7 @@ public class HandSakeDesiredCommandMessage extends Packet<HandSakeDesiredCommand
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.desired_command_option_, other.desired_command_option_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.postion_ratio_, other.postion_ratio_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.position_ratio_, other.position_ratio_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.torque_ratio_, other.torque_ratio_, epsilon)) return false;
 
@@ -187,7 +186,7 @@ public class HandSakeDesiredCommandMessage extends Packet<HandSakeDesiredCommand
 
       if(this.desired_command_option_ != otherMyClass.desired_command_option_) return false;
 
-      if(this.postion_ratio_ != otherMyClass.postion_ratio_) return false;
+      if(this.position_ratio_ != otherMyClass.position_ratio_) return false;
 
       if(this.torque_ratio_ != otherMyClass.torque_ratio_) return false;
 
@@ -207,8 +206,8 @@ public class HandSakeDesiredCommandMessage extends Packet<HandSakeDesiredCommand
       builder.append(this.robot_side_);      builder.append(", ");
       builder.append("desired_command_option=");
       builder.append(this.desired_command_option_);      builder.append(", ");
-      builder.append("postion_ratio=");
-      builder.append(this.postion_ratio_);      builder.append(", ");
+      builder.append("position_ratio=");
+      builder.append(this.position_ratio_);      builder.append(", ");
       builder.append("torque_ratio=");
       builder.append(this.torque_ratio_);
       builder.append("}");

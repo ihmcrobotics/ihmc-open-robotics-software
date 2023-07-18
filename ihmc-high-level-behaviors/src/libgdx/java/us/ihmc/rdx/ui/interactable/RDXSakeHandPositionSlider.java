@@ -19,14 +19,14 @@ public class RDXSakeHandPositionSlider
    private static final double ROBOT_DATA_EXPIRATION_DURATION = 1.0;
    private static final double ANGLE_AT_OPEN = Math.toRadians(102.0);
    private static final double ANGLE_AT_CLOSE = Math.toRadians(-3.0);
+   private static final float OPEN_POSITION_LIMIT = 0f;
+   private static final float CLOSED_POSITION_LIMIT = 1f;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ROS2SyncedRobotModel syncedRobot;
    private final CommunicationHelper communicationHelper;
    private final String sliderName;
    private final float[] sliderValue = new float[1];
-   private double openPositionLimit = 0.0;
-   private double closedPositionLimit = 1.0;
    private double valueFromRobot = Double.NaN;
    private final RobotSide handSide;
    private final Throttler updateThrottler = new Throttler();
@@ -75,7 +75,7 @@ public class RDXSakeHandPositionSlider
    private boolean renderImGuiSliderAndReturnChanged()
    {
       float previousValue = sliderValue[0];
-      ImGui.sliderFloat(labels.get(sliderName), sliderValue, (float) openPositionLimit, (float) closedPositionLimit);
+      ImGui.sliderFloat(labels.get(sliderName), sliderValue, OPEN_POSITION_LIMIT, CLOSED_POSITION_LIMIT);
       float currentValue = sliderValue[0];
       return !Double.isNaN(sliderValue[0]) && currentValue != previousValue;
    }
