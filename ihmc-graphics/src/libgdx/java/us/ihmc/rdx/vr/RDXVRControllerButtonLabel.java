@@ -28,7 +28,7 @@ public class RDXVRControllerButtonLabel
                                                        15.0);
       });
 
-      situatedText = new RDX3DSituatedText("", RDX3DSituatedText.DEFAULT_FONT, java.awt.Color.WHITE, 0.01f);
+      situatedText = new RDX3DSituatedText("", java.awt.Color.WHITE, 0.01f);
    }
 
    public void setText(String text)

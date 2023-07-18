@@ -40,7 +40,7 @@ import com.badlogic.gdx.utils.Pool;
  */
 public class RDX3DSituatedText implements RenderableProvider
 {
-   public static final Font DEFAULT_FONT = new Font("Arial", Font.PLAIN, 72);
+   public static final Font DEFAULT_FONT = new Font("Dialog", Font.PLAIN, 72);
    public static final Color DEFAULT_COLOR = Color.BLACK;
    public static final float DEFAULT_HEIGHT = 0.1f;
 
@@ -59,6 +59,12 @@ public class RDX3DSituatedText implements RenderableProvider
    public RDX3DSituatedText(String text, float textHeightMeters)
    {
       this(text, DEFAULT_FONT, DEFAULT_COLOR, textHeightMeters);
+   }
+
+   public RDX3DSituatedText(String text, Color awtColor, float textHeightMeters)
+   {
+
+      this(text, DEFAULT_FONT, awtColor, textHeightMeters);
    }
 
    public RDX3DSituatedText(String text, Font awtFont, Color awtColor, float textHeightMeters)
@@ -88,7 +94,7 @@ public class RDX3DSituatedText implements RenderableProvider
       Graphics2D awtGraphics2D = onePixelImage.createGraphics();
       awtGraphics2D.setFont(awtFont != null ? awtFont : DEFAULT_FONT);
       FontMetrics awtFontMetrics = awtGraphics2D.getFontMetrics();
-      int textWidthPixels = awtFontMetrics.stringWidth(text);
+      int textWidthPixels = text.isEmpty() ? 1 : awtFontMetrics.stringWidth(text);
       int textHeightPixels = awtFontMetrics.getHeight();
       awtGraphics2D.dispose();
 

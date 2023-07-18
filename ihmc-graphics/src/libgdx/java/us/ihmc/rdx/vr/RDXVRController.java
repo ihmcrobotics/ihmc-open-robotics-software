@@ -180,13 +180,6 @@ public class RDXVRController extends RDXVRTrackedDevice
       joystickActionData = InputAnalogActionData.create();
       VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_grip", gripActionHandle);
       gripActionData = InputAnalogActionData.create();
-
-      // These were tuned by @dcalvert using JRebel hand tweaking so they looked good
-      // for the Valve Index controllers.
-      Point3D aButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.085, -0.01, -0.02) : new Point3D(-0.082, -0.01, -0.017);
-      Point3D bButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.07, -0.013, -0.015) : new Point3D(-0.07, -0.007, -0.008);
-      aButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, aButtonOffset);
-      bButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, bButtonOffset);
    }
 
    public void update(TrackedDevicePose.Buffer trackedDevicePoses)
@@ -205,6 +198,13 @@ public class RDXVRController extends RDXVRTrackedDevice
             pickPoseSphere = new RDXModelInstance(RDXModelBuilder.createSphere(0.0025f, new Color(0x870707ff)));
             pickRayCollisionPointGraphic = new RDXModelInstance(RDXModelBuilder.createSphere(0.0015f, new Color(Color.WHITE)));
             LibGDXTools.hideGraphic(pickRayCollisionPointGraphic);
+
+            // These were tuned by @dcalvert using JRebel hand tweaking so they looked good
+            // for the Valve Index controllers.
+            Point3D aButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.085, -0.01, -0.02) : new Point3D(-0.082, -0.01, -0.017);
+            Point3D bButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.07, -0.013, -0.015) : new Point3D(-0.07, -0.007, -0.008);
+            aButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, aButtonOffset);
+            bButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, bButtonOffset);
          }
 
          pickPoseFrame.getReferenceFrame().update();
