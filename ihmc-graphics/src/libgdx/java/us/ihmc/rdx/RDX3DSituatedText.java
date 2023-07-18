@@ -30,6 +30,9 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
 /**
+ * Provides the ability to put text in the 3D scene.
+ * This text is only readable from the front and invisible from the back.
+ *
  * TODO: This class uses AWT to draw text.
  *   Instead we should try using ImGui to draw the text, which would allow us
  *   to use a consistent font with the rest of the UI, do FreeType rendering,
