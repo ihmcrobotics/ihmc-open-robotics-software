@@ -248,6 +248,8 @@ public class RDX3DSituatedImagePanel
                                                        });
                hoverModel = new ModelInstance(hoverState);
             }
+            else
+               hoverModel = null;
 
             if (placementMode == MANUAL_PLACEMENT)
             {
