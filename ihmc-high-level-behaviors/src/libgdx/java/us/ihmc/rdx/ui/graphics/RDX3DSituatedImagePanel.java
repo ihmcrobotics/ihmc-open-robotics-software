@@ -37,7 +37,6 @@ import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-import javax.sound.sampled.Line;
 import java.util.Set;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
@@ -73,11 +72,10 @@ public class RDX3DSituatedImagePanel
    private double lastTouchpadY = Double.NaN;
    private double panelZoom = 0;
    private double panelDistanceFromHeadset = 0.5;
-   private SideDependentList<Boolean> grippedLastTime = new SideDependentList<>(false, false);
    private boolean justShown;
    private boolean isShowing;
-   private Box3D frameOfVideo = new Box3D();
-   private BoxRayIntersection frameOfVideoIntersection = new BoxRayIntersection();
+   private final Box3D frameOfVideo = new Box3D();
+   private final BoxRayIntersection frameOfVideoIntersection = new BoxRayIntersection();
    private final SideDependentList<Boolean>intersecting = new SideDependentList<>(false, false);
    private final SideDependentList<Boolean>intersectVideo = new SideDependentList<>(false, false);
    private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
@@ -311,9 +309,6 @@ public class RDX3DSituatedImagePanel
             }
             else if (intersecting.get(side) && placementMode == FOLLOW_HEADSET)
             {
-               RDXVRDragData triggerDragData = controller.getTriggerDragData();
-
-               if (triggerDragData.getDragJustStarted())
                if (controller.getTouchpadTouchedActionData().bState())
                {
                   double y = controller.getTouchpadActionData().y();
