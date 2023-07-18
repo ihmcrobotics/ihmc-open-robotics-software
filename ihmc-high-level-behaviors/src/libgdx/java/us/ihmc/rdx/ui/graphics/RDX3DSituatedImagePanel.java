@@ -31,11 +31,13 @@ import us.ihmc.rdx.ui.vr.RDX3DSituatedVideoPanelMode;
 import us.ihmc.rdx.ui.vr.RDXVRModeManager;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRDragData;
+import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.interaction.BoxRayIntersection;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import javax.sound.sampled.Line;
 import java.util.Set;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
@@ -78,6 +80,7 @@ public class RDX3DSituatedImagePanel
    private BoxRayIntersection frameOfVideoIntersection = new BoxRayIntersection();
    private final SideDependentList<Boolean>intersecting = new SideDependentList<>(false, false);
    private final SideDependentList<Boolean>intersectVideo = new SideDependentList<>(false, false);
+   private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
    private Model hoverState;
    private ModelInstance hoverModel;
 
@@ -97,6 +100,7 @@ public class RDX3DSituatedImagePanel
    public RDX3DSituatedImagePanel(RDXVRContext context, RDXVRModeManager vrModeManager)
    {
       this.vrModeManager = vrModeManager;
+      context.addVRPickCalculator(this::calculateVRPick);
       context.addVRInputProcessor(this::addVRInputProcessor);
    }
 
@@ -209,6 +213,31 @@ public class RDX3DSituatedImagePanel
       setPoseToReferenceFrame(floatingPanelFrame.getReferenceFrame());
    }
 
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+      for (RobotSide side :RobotSide.values)
+      {
+         vrContext.getController(side).runIfConnected(controller ->
+         {
+            if(!controller.getTriggerDragData().isDragging())
+            {
+               Line3DReadOnly pickRay = controller.getPickRay();
+               double distance = frameOfVideo.distance(pickRay.getPoint());
+               boolean intersect = frameOfVideoIntersection.intersect(frameOfVideo.getSizeX(),
+                                                                    frameOfVideo.getSizeY(),
+                                                                    frameOfVideo.getSizeZ(),
+                                                                    floatingPanelFrame.getReferenceFrame().getTransformToWorldFrame(),
+                                                                    pickRay);
+               if(intersect)
+               {
+                  vrPickResult.get(side).setDistanceToControllerPickPoint(distance);
+                  controller.addPickResult(vrPickResult.get(side));
+               }
+            }
+         });
+      }
+   }
+
    public void addVRInputProcessor(RDXVRContext context)
    {
       RDX3DSituatedVideoPanelMode placementMode = vrModeManager.getVideoPanelPlacementMode();
@@ -245,7 +274,7 @@ public class RDX3DSituatedImagePanel
             {
                hoverState = RDXModelBuilder.buildModel(meshBuilder ->
                                                        {
-                                                          meshBuilder.addMultiLineBox(frameOfVideo.getVertices(), 0.005, new Color(Color.WHITE));
+                                                          meshBuilder.addMultiLineBox(frameOfVideo.getVertices(), 0.0005, new Color(Color.WHITE));
                                                        });
                hoverModel = new ModelInstance(hoverState);
             }
@@ -282,6 +311,9 @@ public class RDX3DSituatedImagePanel
             }
             else if (intersecting.get(side) && placementMode == FOLLOW_HEADSET)
             {
+               RDXVRDragData triggerDragData = controller.getTriggerDragData();
+
+               if (triggerDragData.getDragJustStarted())
                if (controller.getTouchpadTouchedActionData().bState())
                {
                   double y = controller.getTouchpadActionData().y();
