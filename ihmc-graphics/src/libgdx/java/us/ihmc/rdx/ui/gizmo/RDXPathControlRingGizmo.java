@@ -45,6 +45,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.util.Random;
 
 import static us.ihmc.rdx.ui.gizmo.RDXPathControlRingCollisionSelection.*;
+import static us.ihmc.rdx.ui.gizmo.RDXPathControlRingCollisionSelection.NEGATIVE_Y_ARROW;
 
 /**
  * A gizmo designed for specifying the walk goals of bipedal robots.
@@ -116,7 +117,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private FrameBasedGizmoModification frameBasedGizmoModification;
    private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
    private final SideDependentList<Boolean> isGizmoHoveredVR = new SideDependentList<>(false, false);
-   private final SideDependentList<Boolean> isBeingManipulatedVR = new SideDependentList<>(false, false);
+   private final SideDependentList<Boolean> isRingBeingDraggedVR = new SideDependentList<>(false, false);
    private final SideDependentList<RDXPathControlRingCollisionSelection> closestVRCollisionSelection = new SideDependentList<>(null, null);
 
    public RDXPathControlRingGizmo()
@@ -250,7 +251,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
             if (!controller.getTriggerDragData().isDragging())
             {
                Line3DReadOnly pickRay = controller.getPickRay();
-               if (!isBeingManipulatedVR.get(side.getOppositeSide()))
+               if (!isRingBeingDraggedVR.get(side.getOppositeSide()))
                   closestVRCollisionSelection.put(side, determineCurrentSelectionFromPickRay(pickRay));
             }
             if (closestVRCollisionSelection.get(side) != null)
@@ -284,8 +285,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
          {
             RDXVRDragData triggerDragData = controller.getTriggerDragData();
 
-            boolean isRingHovered = isGizmoHoveredVR.get(side) && closestVRCollisionSelection.get(side) == RING;
-            if (isGizmoHoveredVR.get(side))
+            if (closestVRCollisionSelection.get(side) == RING)
             {
                if (triggerDragData.getDragJustStarted())
                {
@@ -294,39 +294,36 @@ public class RDXPathControlRingGizmo implements RenderableProvider
                }
             }
 
-            if (triggerDragData.getDragJustStarted())
-            {
-               if (getNegativeXArrowHovered())
-               {
-                  frameBasedGizmoModification.yawInWorld(Math.PI);
-               }
-               if (getPositiveYArrowHovered())
-               {
-                  frameBasedGizmoModification.yawInWorld(Math.PI/2.0);
-               }
-               if (getNegativeYArrowHovered())
-               {
-                  frameBasedGizmoModification.yawInWorld(-Math.PI/2.0);
-               }
-            }
-
-            isBeingManipulatedVR.put(side, triggerDragData.isBeingDragged(this));
-
-            if (isBeingManipulatedVR.get(side))
+            isRingBeingDraggedVR.put(side, triggerDragData.isBeingDragged(this));
+            if (isRingBeingDraggedVR.get(side))
             {
                Line3DReadOnly pickRay = controller.getPickRay();
 
-               if (triggerDragData.isDragging())
+               if (triggerDragData.isDragging() && closestVRCollisionSelection.get(side) == RING)
                {
-                  if (isRingHovered)
-                  {
-                     Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
-                     frameBasedGizmoModification.translateInWorld(planarMotion);
-                     closestCollision.add(planarMotion);
-                     triggerDragData.updateZUpDrag(gizmoFrame);
-                     double deltaYaw = triggerDragData.getZUpDragPose().getOrientation().getYaw() - gizmoFrame.getTransformToRoot().getRotation().getYaw();
-                     frameBasedGizmoModification.yawInWorld(deltaYaw);
-                  }
+                  Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
+                  frameBasedGizmoModification.translateInWorld(planarMotion);
+                  closestCollision.add(planarMotion);
+                  controller.setPickRayColliding(pickRay.getPoint().distance(closestCollision));
+                  triggerDragData.updateZUpDrag(gizmoFrame);
+                  double deltaYaw = triggerDragData.getZUpDragPose().getOrientation().getYaw() - gizmoFrame.getTransformToRoot().getRotation().getYaw();
+                  frameBasedGizmoModification.yawInWorld(deltaYaw);
+               }
+               frameBasedGizmoModification.setAdjustmentNeedsToBeApplied();
+            }
+            else if (controller.getTriggerClickReleasedWithoutDrag())
+            {
+               if (closestVRCollisionSelection.get(side) == NEGATIVE_X_ARROW)
+               {
+                  frameBasedGizmoModification.yawInWorld(Math.PI);
+               }
+               else if (closestVRCollisionSelection.get(side) == POSITIVE_Y_ARROW)
+               {
+                  frameBasedGizmoModification.yawInWorld(Math.PI / 2.0);
+               }
+               else if (closestVRCollisionSelection.get(side) == NEGATIVE_Y_ARROW)
+               {
+                  frameBasedGizmoModification.yawInWorld(-Math.PI / 2.0);
                }
                frameBasedGizmoModification.setAdjustmentNeedsToBeApplied();
             }
@@ -791,9 +788,9 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       return gizmoModifiedByUser;
    }
 
-   public SideDependentList<Boolean> getIsGizmoManipulatedVR()
+   public SideDependentList<Boolean> getIsRingBeingDraggedVR()
    {
-      return isBeingManipulatedVR;
+      return isRingBeingDraggedVR;
    }
 
    public SideDependentList<Boolean> getIsGizmoHoveredVR()
