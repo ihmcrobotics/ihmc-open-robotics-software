@@ -102,7 +102,8 @@ public class RDXInteractableFootstep
       String text = plannedFootstepInternal.getRobotSide().getSideNameFirstLetter() + index;
       if (!textRenderablesMap.containsKey(text))
       {
-         footstepIndexText = new RDX3DSituatedText(text);
+         float textHeight = 0.08f;
+         footstepIndexText = new RDX3DSituatedText(text, textHeight);
          textRenderablesMap.put(text, footstepIndexText);
       }
       else
@@ -211,14 +212,11 @@ public class RDXInteractableFootstep
          wasPoseUpdated = true;
       plannedFootstepInternal.getFootstepPose().set(selectablePose3DGizmo.getPoseGizmo().getPose());
 
-      double textHeight = 0.08;
       textFramePose.setIncludingFrame(getFootPose());
-
       textFramePose.appendYawRotation(-Math.PI / 2.0);
       textFramePose.appendTranslation(-0.03, 0.0, 0.035); //note: Make text higher in z direction, so it's not inside the foot
       textFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-      LibGDXTools.toLibGDX(textFramePose, tempTransform, footstepIndexText.getModelInstance().transform);
-      footstepIndexText.scale((float) textHeight);
+      footstepIndexText.setPose(textFramePose);
 
       if (plannedFootstepInput.get() != null)
       {

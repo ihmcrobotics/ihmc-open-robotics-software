@@ -147,13 +147,6 @@ public class RDXVRController extends RDXVRTrackedDevice
 
       triggerDragData = new RDXVRDragData(() -> getClickTriggerActionData().bState(), pickPoseFrame.getReferenceFrame());
       gripDragData = new RDXVRDragData(this::getGripAsButtonDown, pickPoseFrame.getReferenceFrame());
-
-      // These were tuned by @dcalvert using JRebel hand tweaking so they looked good
-      // for the Valve Index controllers.
-      Point3D aButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.085, -0.01, -0.02) : new Point3D(-0.082, -0.01, -0.017);
-      Point3D bButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.07, -0.013, -0.015) : new Point3D(-0.07, -0.007, -0.008);
-      aButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, aButtonOffset);
-      bButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, bButtonOffset);
    }
 
    public void initSystem()
@@ -187,6 +180,13 @@ public class RDXVRController extends RDXVRTrackedDevice
       joystickActionData = InputAnalogActionData.create();
       VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_grip", gripActionHandle);
       gripActionData = InputAnalogActionData.create();
+
+      // These were tuned by @dcalvert using JRebel hand tweaking so they looked good
+      // for the Valve Index controllers.
+      Point3D aButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.085, -0.01, -0.02) : new Point3D(-0.082, -0.01, -0.017);
+      Point3D bButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.07, -0.013, -0.015) : new Point3D(-0.07, -0.007, -0.008);
+      aButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, aButtonOffset);
+      bButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, bButtonOffset);
    }
 
    public void update(TrackedDevicePose.Buffer trackedDevicePoses)
@@ -216,8 +216,8 @@ public class RDXVRController extends RDXVRTrackedDevice
          pickRay.getDirection().set(Axis3D.X);
          pickRay.changeFrame(ReferenceFrame.getWorldFrame());
 
-         aButtonLabel.clearText();
-         bButtonLabel.clearText();
+         aButtonLabel.setText("");
+         bButtonLabel.setText("");
       }
 
       VRInput.VRInput_GetDigitalActionData(clickTriggerActionHandle.get(0), clickTriggerActionData, VR.k_ulInvalidInputValueHandle);
