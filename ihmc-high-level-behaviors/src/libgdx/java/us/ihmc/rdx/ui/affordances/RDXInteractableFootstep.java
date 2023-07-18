@@ -214,9 +214,9 @@ public class RDXInteractableFootstep
 
       textFramePose.setIncludingFrame(getFootPose());
       textFramePose.appendYawRotation(-Math.PI / 2.0);
-      textFramePose.appendTranslation(-0.03, 0.0, 0.035); //note: Make text higher in z direction, so it's not inside the foot
+      textFramePose.appendTranslation(-0.04, 0.0, 0.035); // The text is higher in Z direction so it's not inside the foottt
       textFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-      footstepIndexText.setPose(textFramePose);
+      LibGDXTools.toLibGDX(textFramePose, tempTransform, footstepIndexText.getModelTransform());
 
       if (plannedFootstepInput.get() != null)
       {

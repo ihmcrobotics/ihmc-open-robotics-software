@@ -11,6 +11,7 @@ import java.util.HashMap;
 
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
+import com.badlogic.gdx.math.Matrix4;
 import org.bytedeco.javacpp.BytePointer;
 import org.lwjgl.opengl.GL41;
 
@@ -27,16 +28,12 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.rdx.tools.LibGDXTools;
 
 /**
  * TODO: This class uses AWT to draw text.
  *   Instead we should try using ImGui to draw the text, which would allow us
  *   to use a consistent font with the rest of the UI, do FreeType rendering,
- *   and enable cleaning up the API and resource usage of this class.
+ *   and potentially free up resource usage of this class.
  */
 public class RDX3DSituatedText implements RenderableProvider
 {
@@ -50,8 +47,6 @@ public class RDX3DSituatedText implements RenderableProvider
    private final Font awtFont;
    private final Color awtColor;
    private final float textHeightMeters;
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private int textHeightPixels;
 
    public RDX3DSituatedText(String text)
    {
@@ -90,7 +85,6 @@ public class RDX3DSituatedText implements RenderableProvider
          modelInstance = newText(text);
          textModelInstances.put(text, modelInstance);
       }
-      applyScaling();
    }
 
    private ModelInstance newText(String text)
@@ -102,7 +96,7 @@ public class RDX3DSituatedText implements RenderableProvider
       awtGraphics2D.setFont(awtFont != null ? awtFont : DEFAULT_FONT);
       FontMetrics awtFontMetrics = awtGraphics2D.getFontMetrics();
       int textWidthPixels = awtFontMetrics.stringWidth(text);
-      textHeightPixels = awtFontMetrics.getHeight();
+      int textHeightPixels = awtFontMetrics.getHeight();
       awtGraphics2D.dispose();
 
       // Create image for use in texture
@@ -139,17 +133,19 @@ public class RDX3DSituatedText implements RenderableProvider
                                        new BlendingAttribute(GL41.GL_SRC_ALPHA, GL41.GL_ONE_MINUS_SRC_ALPHA));
       long attributes = VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates;
 
+      float textWidthMeters = textHeightMeters * (float) textWidthPixels / (float) textHeightPixels;
+
       float x00 = 0.0f;
       float y00 = 0.0f;
       float z00 = 0.0f;
-      float x10 = textWidthPixels;
+      float x10 = textWidthMeters;
       float y10 = 0.0f;
       float z10 = 0.0f;
-      float x11 = textWidthPixels;
-      float y11 = textHeightPixels;
+      float x11 = textWidthMeters;
+      float y11 = textHeightMeters;
       float z11 = 0.0f;
       float x01 = 0.0f;
-      float y01 = textHeightPixels;
+      float y01 = textHeightMeters;
       float z01 = 0.0f;
       float normalX = 0.0f;
       float normalY = 0.0f;
@@ -158,27 +154,9 @@ public class RDX3DSituatedText implements RenderableProvider
       return new ModelInstance(model);
    }
 
-   private void applyScaling()
+   public Matrix4 getModelTransform()
    {
-      float modifiedScale = textHeightMeters / textHeightPixels;
-      modelInstance.transform.scale(modifiedScale, modifiedScale, modifiedScale);
-   }
-
-   public void setPoseToReferenceFrame(ReferenceFrame referenceFrame)
-   {
-      LibGDXTools.toLibGDX(referenceFrame.getTransformToRoot(), modelInstance.transform);
-      applyScaling();
-   }
-
-   public void setPose(Pose3DReadOnly pose)
-   {
-      LibGDXTools.toLibGDX(pose, tempTransform, modelInstance.transform);
-      applyScaling();
-   }
-
-   ModelInstance getModelInstance()
-   {
-      return modelInstance;
+      return modelInstance.transform;
    }
 
    @Override

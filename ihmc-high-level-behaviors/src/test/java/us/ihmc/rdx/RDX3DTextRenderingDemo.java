@@ -27,7 +27,7 @@ public class RDX3DTextRenderingDemo
          @Override
          public void render()
          {
-            text.getModelInstance().transform.rotate(0, 0, 1, 1);
+            text.getModelTransform().rotate(0.0f, 0.0f, 1.0f, 1.0f);
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();

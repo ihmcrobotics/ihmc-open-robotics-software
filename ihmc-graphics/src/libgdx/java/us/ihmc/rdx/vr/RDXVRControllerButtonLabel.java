@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.rdx.RDX3DSituatedText;
+import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -33,7 +34,7 @@ public class RDXVRControllerButtonLabel
    public void setText(String text)
    {
       situatedText.setText(text);
-      situatedText.setPoseToReferenceFrame(textFrame.getReferenceFrame());
+      LibGDXTools.toLibGDX(textFrame.getReferenceFrame().getTransformToRoot(), situatedText.getModelTransform());
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
