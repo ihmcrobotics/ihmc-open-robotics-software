@@ -1,8 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import java.util.List;
-import java.util.Map;
-
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
@@ -15,8 +13,6 @@ import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSol
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolverWithInactiveVariables;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 
 public interface ControllerCoreOptimizationSettings
 {
@@ -175,9 +171,9 @@ public interface ControllerCoreOptimizationSettings
    {
       return JointPowerLimitEnforcementMethod.NO_CONSTRAINTS;
    }
-   
+
    /** Gets the list of all joints with a constraint on power */
-   default Map<String,Double> getJointPowerLimits()
+   default TObjectDoubleHashMap<String> getJointPowerLimits()
    {
       return null;
    }

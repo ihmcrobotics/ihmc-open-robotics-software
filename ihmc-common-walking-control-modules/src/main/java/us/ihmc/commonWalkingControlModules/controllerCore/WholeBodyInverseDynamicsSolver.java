@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.ejml.data.DMatrixRMaj;
 
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
@@ -116,7 +117,7 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
     * after the QP inside the controller).
     */
    private final YoEnum<JointPowerLimitEnforcementMethod> jointPowerLimitEnforcementMethod;
-   private Map<String, Double> powerConstrainedJointLimits = new HashMap<>();
+   private final TObjectDoubleHashMap<String> powerConstrainedJointLimits = new TObjectDoubleHashMap<String>();
    /**
     * Whether {@link #dynamicsMatrixCalculator} is used for inverse dynamics.
     */
@@ -164,7 +165,16 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
 
       yoResidualRootJointForce = toolbox.getYoResidualRootJointForce();
       yoResidualRootJointTorque = toolbox.getYoResidualRootJointTorque();
-      powerConstrainedJointLimits = toolbox.getOptimizationSettings().getJointPowerLimits();
+
+      TObjectDoubleHashMap<String> jointPowerLimits = toolbox.getOptimizationSettings().getJointPowerLimits();
+      jointPowerLimits.forEachKey(jointName ->
+      {
+         double powerLimit = jointPowerLimits.get(jointName);
+         YoDouble powerConstraint = new YoDouble("powerLimit_" + jointName, registry);
+         powerConstraint.set(powerLimit);
+         powerConstrainedJointLimits.put(jointName, powerLimit);
+         return true;
+      });
 
       minimizeJointTorques = new YoBoolean("minimizeJointTorques", registry);
       minimizeJointTorques.set(toolbox.getOptimizationSettings().areJointTorquesMinimized());
@@ -275,41 +285,13 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
             JointDesiredOutputBasics jointDesiredOutput = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
             jointDesiredOutput.setDesiredAcceleration(jointAccelerations.get(jointAccelerationIndex, 0));
             double tau = tauSolution.get(jointIndex, 0);
-            double torqueLimitLower = Double.NEGATIVE_INFINITY;
-            double torqueLimitUpper = Double.POSITIVE_INFINITY;
-            double powerLimitLower = Double.NEGATIVE_INFINITY;
-            double powerLimitUpper = Double.POSITIVE_INFINITY;
             boolean hasTorqueLimits = (jointTorqueLimitEnforcementMethod.getValue() == JointTorqueLimitEnforcementMethod.CONSTRAINTS_IN_CONTROLLER);
             boolean hasPowerLimits = (jointPowerLimitEnforcementMethod.getValue() == JointPowerLimitEnforcementMethod.CONSTRAINTS_IN_CONTROLLER);
 
-            if (hasPowerLimits)
-            {
-               if (powerConstrainedJointLimits.containsKey(joint.getName()))
-               {
-                  //TODO does any of this generate garbage? Is this logic clear/clean enough?
-                  powerLimitLower = -powerConstrainedJointLimits.get(joint.getName()).doubleValue();
-                  powerLimitUpper = powerConstrainedJointLimits.get(joint.getName()).doubleValue();
-
-                  JointTorqueAndPowerConstraintHandler torqueConstraintHandler = new JointTorqueAndPowerConstraintHandler(joint,
-                                                                                                                          powerLimitLower,
-                                                                                                                          powerLimitUpper,
-                                                                                                                          hasTorqueLimits);
-                  torqueLimitLower = torqueConstraintHandler.getTorqueLimitLower();
-                  torqueLimitUpper = torqueConstraintHandler.getTorqueLimitUpper();
-
-               }
-               else if (hasTorqueLimits)
-               {
-                  torqueLimitLower = joint.getEffortLimitLower();
-                  torqueLimitUpper = joint.getEffortLimitUpper();
-               }
-            }
-
             if (hasTorqueLimits || hasPowerLimits)
-               jointDesiredOutput.setDesiredTorque(MathTools.clamp(tau, torqueLimitLower, torqueLimitUpper));
+               setClampedDesiredTorque(tau, joint, jointDesiredOutput, hasTorqueLimits, hasPowerLimits);
             else
                jointDesiredOutput.setDesiredTorque(tau);
-
          }
 
          if (!kinematicLoopFunctions.isEmpty())
@@ -331,38 +313,11 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
             JointDesiredOutputBasics jointDesiredOutput = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
             jointDesiredOutput.setDesiredAcceleration(jointAccelerations.get(jointIndex, 0));
             double tau = inverseDynamicsCalculator.getComputedJointTau(joint).get(0);
-            double torqueLimitLower = Double.NEGATIVE_INFINITY;
-            double torqueLimitUpper = Double.POSITIVE_INFINITY;
-            double powerLimitLower = Double.NEGATIVE_INFINITY;
-            double powerLimitUpper = Double.POSITIVE_INFINITY;
             boolean hasTorqueLimits = (jointTorqueLimitEnforcementMethod.getValue() == JointTorqueLimitEnforcementMethod.CONSTRAINTS_IN_CONTROLLER);
             boolean hasPowerLimits = (jointPowerLimitEnforcementMethod.getValue() == JointPowerLimitEnforcementMethod.CONSTRAINTS_IN_CONTROLLER);
 
-            if (hasPowerLimits)
-            {
-               if (powerConstrainedJointLimits.containsKey(joint.getName()))
-               {
-                  //TODO does any of this generate garbage? Is this logic clear/clean enough?
-                  powerLimitLower = -powerConstrainedJointLimits.get(joint.getName()).doubleValue();
-                  powerLimitUpper = powerConstrainedJointLimits.get(joint.getName()).doubleValue();
-
-                  JointTorqueAndPowerConstraintHandler torqueConstraintHandler = new JointTorqueAndPowerConstraintHandler(joint,
-                                                                                                                          powerLimitLower,
-                                                                                                                          powerLimitUpper,
-                                                                                                                          hasTorqueLimits);
-                  torqueLimitLower = torqueConstraintHandler.getTorqueLimitLower();
-                  torqueLimitUpper = torqueConstraintHandler.getTorqueLimitUpper();
-
-               }
-               else if (hasTorqueLimits)
-               {
-                  torqueLimitLower = joint.getEffortLimitLower();
-                  torqueLimitUpper = joint.getEffortLimitUpper();
-               }
-            }
-
             if (hasTorqueLimits || hasPowerLimits)
-               jointDesiredOutput.setDesiredTorque(MathTools.clamp(tau, torqueLimitLower, torqueLimitUpper));
+               setClampedDesiredTorque(tau, joint, jointDesiredOutput, hasTorqueLimits, hasPowerLimits);
             else
                jointDesiredOutput.setDesiredTorque(tau);
          }
@@ -581,5 +536,42 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(optimizationControlModule.getSCS2YoGraphics());
       return group;
+   }
+
+   private void setClampedDesiredTorque(double tau,
+                                        OneDoFJointBasics joint,
+                                        JointDesiredOutputBasics jointDesiredOutput,
+                                        boolean hasTorqueLimits,
+                                        boolean hasPowerLimits)
+   {
+      double torqueLimitLower = Double.NEGATIVE_INFINITY;
+      double torqueLimitUpper = Double.POSITIVE_INFINITY;
+      double powerLimitLower = Double.NEGATIVE_INFINITY;
+      double powerLimitUpper = Double.POSITIVE_INFINITY;
+
+      if (hasPowerLimits)
+      {
+         if (powerConstrainedJointLimits.containsKey(joint.getName()))
+         {
+            powerLimitLower = -powerConstrainedJointLimits.get(joint.getName());
+            powerLimitUpper = powerConstrainedJointLimits.get(joint.getName());
+
+            JointTorqueAndPowerConstraintHandler torqueConstraintHandler = new JointTorqueAndPowerConstraintHandler(joint,
+                                                                                                                    powerLimitLower,
+                                                                                                                    powerLimitUpper,
+                                                                                                                    hasTorqueLimits);
+            torqueLimitLower = torqueConstraintHandler.getTorqueLimitLower();
+            torqueLimitUpper = torqueConstraintHandler.getTorqueLimitUpper();
+
+         }
+         else if (hasTorqueLimits)
+         {
+            torqueLimitLower = joint.getEffortLimitLower();
+            torqueLimitUpper = joint.getEffortLimitUpper();
+         }
+      }
+
+      if (hasTorqueLimits || hasPowerLimits)
+         jointDesiredOutput.setDesiredTorque(MathTools.clamp(tau, torqueLimitLower, torqueLimitUpper));
    }
 }

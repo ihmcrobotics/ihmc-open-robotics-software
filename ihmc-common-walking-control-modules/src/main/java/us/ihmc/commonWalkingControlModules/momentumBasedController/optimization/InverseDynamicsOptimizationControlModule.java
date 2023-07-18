@@ -13,6 +13,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
@@ -100,7 +101,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    private final TIntArrayList inactiveJointIndices = new TIntArrayList();
    private final ArrayList<OneDoFJointBasics> torqueConstrainedJoints = new ArrayList<>();
    private final ArrayList<OneDoFJointBasics> powerConstrainedJoints = new ArrayList<>();
-   private final Map<OneDoFJointBasics, YoDouble> powerConstrainedJointLimits = new HashMap<>();
+   private final TObjectDoubleHashMap<OneDoFJointBasics> powerConstrainedJointLimits = new TObjectDoubleHashMap<OneDoFJointBasics>();
    private final JointTorqueCommand torqueConstraintMinimumCommand = new JointTorqueCommand();
    private final JointTorqueCommand torqueConstraintMaximumCommand = new JointTorqueCommand();
 
@@ -195,8 +196,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
             if (optimizationSettings.getJointPowerLimits().containsKey(joint.getName()))
             {
                powerConstrainedJoints.add(joint);
-               powerConstrainedJointLimits.put(joint, new YoDouble("power_limit_qp_" + joint.getName(), registry));
-               powerConstrainedJointLimits.get(joint).set(optimizationSettings.getJointPowerLimits().get(joint.getName()));
+               powerConstrainedJointLimits.put(joint, optimizationSettings.getJointPowerLimits().get(joint.getName()));
             }
          }
       }
@@ -495,8 +495,8 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       for (int i = 0; i < powerConstrainedJoints.size(); i++)
       {
          OneDoFJointBasics joint = powerConstrainedJoints.get(i);
-         powerLimitLower = -powerConstrainedJointLimits.get(joint).getValue();
-         powerLimitUpper = powerConstrainedJointLimits.get(joint).getValue();
+         powerLimitLower = -powerConstrainedJointLimits.get(joint);
+         powerLimitUpper = powerConstrainedJointLimits.get(joint);
 
          JointTorqueAndPowerConstraintHandler torqueConstraintHandler = new JointTorqueAndPowerConstraintHandler(joint,
                                                                                                                  powerLimitLower,
@@ -528,8 +528,8 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
          if (powerConstrainedJoints.contains(joint))
          {
             /* this joint has a power constraint and may have a torque constraint */
-            powerLimitLower = -powerConstrainedJointLimits.get(joint).getValue();
-            powerLimitUpper = powerConstrainedJointLimits.get(joint).getValue();
+            powerLimitLower = -powerConstrainedJointLimits.get(joint);
+            powerLimitUpper = powerConstrainedJointLimits.get(joint);
 
             JointTorqueAndPowerConstraintHandler torqueConstraintHandler = new JointTorqueAndPowerConstraintHandler(joint,
                                                                                                                     powerLimitLower,
