@@ -172,7 +172,7 @@ public class SixDoFMotionControlAnchorDescription
       if (contactNormal != null)
       {
          contactNormal.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-         this.contactNormal = contactNormal;
+         this.contactNormal = new FrameVector3D(contactNormal);
       }
    }
 
