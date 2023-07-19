@@ -25,6 +25,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Class for recording or replaying motions in the UI.
+ * Motions are represented as trajectories of frames and are loaded and saved as .csv files
+ */
 public class KinematicsRecordReplay
 {
    private final TrajectoryRecordReplay trajectoryRecorder = new TrajectoryRecordReplay("", 1);
@@ -43,6 +47,7 @@ public class KinematicsRecordReplay
    private boolean sceneNodeLocked = false;
    private ReferenceFrame sceneNodeFrame;
    private final HashMap<String, FramePose3D> previousFramePose = new HashMap<>();
+   private final HashMap<String, FramePose3D> firstFramePose = new HashMap<>();
 
    public KinematicsRecordReplay(ROS2PublishSubscribeAPI ros2, ImBoolean enabledKinematicsStreaming, int numberOfParts)
    {
@@ -102,6 +107,9 @@ public class KinematicsRecordReplay
       }
    }
 
+   /**
+    * Record frame
+    */
    public void framePoseToRecord(FramePose3DReadOnly framePose, String frameName)
    {
       if (isRecording)
@@ -125,12 +133,21 @@ public class KinematicsRecordReplay
       {
          trajectoryRecorder.concatenateData();
          trajectoryRecorder.saveRecording();
+         if (!firstFramePose.isEmpty() && !previousFramePose.isEmpty())
+         {
+            for (String frame : previousFramePose.keySet())
+               previousFramePose.replace(frame, firstFramePose.get(frame));
+         }
          isUserMoving = false;
          sceneNodeLocked = false;
          sceneNodeFrame = null;
       }
    }
 
+   /**
+    * Ensure that every recorded trajectory has the same quaternion sign (-pi/2,pi/2 range) to the previous recording
+    * introduce a rule that allows us to likely get the same quaternion sign if we ever want to expand the dataset
+    */
    private void ensureOrientationContinuity(FramePose3D frameToCheck, String frameName)
    {
       QuaternionReadOnly quaternionToCheck = frameToCheck.getOrientation();
@@ -165,9 +182,13 @@ public class KinematicsRecordReplay
          }
 
          previousFramePose.put(frameName, new FramePose3D(frameToCheck));
+         firstFramePose.put(frameName, new FramePose3D(frameToCheck));
       }
    }
 
+   /**
+    * Check if user is moving a certain bodyPart. Useful to start a recording only after the user started actually moving
+    */
    private boolean isMoving(FramePose3DReadOnly framePose)
    {
       if (!isUserMoving)
@@ -201,6 +222,9 @@ public class KinematicsRecordReplay
       return isUserMoving && partId == 0;
    }
 
+   /**
+    * Pack frame with frame from replay
+    */
    public void framePoseToPack(FramePose3D framePose)
    {
       framePose.setFromReferenceFrame(ReferenceFrame.getWorldFrame());
@@ -246,6 +270,11 @@ public class KinematicsRecordReplay
          this.enablerRecording.set(enablerRecording);
       if (enablerRecording)
          this.enablerReplay.set(false); // check no concurrency replay and record
+      else
+      {
+         firstFramePose.clear();
+         previousFramePose.clear();
+      }
    }
 
    public void setReplay(boolean enablerReplay)

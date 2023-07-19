@@ -130,17 +130,7 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
          leftForeArmControlFrameGraphic = new RDXReferenceFrameGraphic(length);
          rightForeArmControlFrameGraphic = new RDXReferenceFrameGraphic(length);
          chestControlFrameGraphic = new RDXReferenceFrameGraphic(length);
-         RigidBodyTransform wristToHandControlTransform = robotModel.getUIParameters().getTransformWristToHand(side);
          ModifiableReferenceFrame handDesiredControlFrame = new ModifiableReferenceFrame( side.getCamelCaseName() + "Hand", vrContext.getController(side).getXForwardZUpControllerFrame());
-         //            handDesiredControlFrame.getTransformToParent().set(robotModel.getJointMap().getHandControlFrameToWristTransform(side));
-         // Atlas
-         //         {
-         //            handDesiredControlFrame.getTransformToParent().getTranslation().setX(-0.1);
-         //            handDesiredControlFrame.getTransformToParent()
-         //                                   .getRotation()
-         //                                   .setYawPitchRoll(side == RobotSide.RIGHT ? 0.0 : Math.toRadians(180.0), side.negateIfLeftSide(Math.toRadians(90.0)), 0.0);
-         //         }
-         // Nadia
          {
             if (side == RobotSide.LEFT)
             {

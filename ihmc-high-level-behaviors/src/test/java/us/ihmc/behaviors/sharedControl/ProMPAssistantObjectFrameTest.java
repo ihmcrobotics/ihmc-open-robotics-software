@@ -43,7 +43,8 @@ public class ProMPAssistantObjectFrameTest
       assertTrue(proMPAssistant.getProMPManager(task) != null);
       // use a csv file with the trajectories of the hands of the robot for testing
       String etcDirectory = ProMPUtil.getEtcDirectory().toString();
-      String demoDirectory = etcDirectory + "/test/LeftPunchTest";
+      String demoDirectory = etcDirectory + "/test/ReachHandleTest";
+//      String demoDirectory = etcDirectory + "/test/LeftPunchTest";
       //get test number from config file
       String testFilePath = demoDirectory + "/" + proMPAssistant.getTestNumber() + ".csv";
       //copy test file to have it always under same name for faster plotting
@@ -55,9 +56,9 @@ public class ProMPAssistantObjectFrameTest
       List<String> bodyParts = new ArrayList<>();
       bodyParts.add("leftHand");
       bodyParts.add("rightHand");
-      bodyParts.add("leftForeArm");
-      bodyParts.add("rightForeArm");
-      bodyParts.add("chest");
+//      bodyParts.add("leftForeArm");
+//      bodyParts.add("rightForeArm");
+//      bodyParts.add("chest");
       // replay that file
       TrajectoryRecordReplay trajectoryPlayer = new TrajectoryRecordReplay(testFilePath, bodyParts.size());
       // start parsing data immedediately, assuming user is moving from beginning of recorded test trajectory
@@ -87,7 +88,7 @@ public class ProMPAssistantObjectFrameTest
             {
                assertTrue(!proMPAssistant.readyToPack());
                //do not change the frame, just observe it in order to generate a prediction later
-               proMPAssistant.processFrameAndObjectInformation(framePose, bodyPart,  "Target", objectFrame, null);
+               proMPAssistant.processFrameAndObjectInformation(framePose, bodyPart,  "PushDoorLeverHandle", objectFrame, null);
             }
             //record frame and store it in csv file
             framePose.changeFrame(objectFrame);

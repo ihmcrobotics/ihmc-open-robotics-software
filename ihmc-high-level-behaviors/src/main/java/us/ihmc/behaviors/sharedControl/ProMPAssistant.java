@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ProMPAssistant
 {
    private static final int INTERPOLATION_SAMPLES = 5;
-   public static final int AFFORDANCE_BLENDING_SAMPLES = 30;
+   public static final int AFFORDANCE_BLENDING_SAMPLES = 30; // TODO make this a fraction of the estimated timesteps 1/3 or 1/4
    private final HashMap<String, ProMPManager> proMPManagers = new HashMap<>(); // proMPManagers stores a proMPManager for each task
    private final HashMap<String, List<String>> contextTasksMap = new HashMap<>(); // map to store all the tasks available for each context (object)
    private final List<Double> distanceCandidateTasks = new ArrayList<>();
@@ -279,16 +279,29 @@ public class ProMPAssistant
          QuaternionReadOnly previousQuaternion = previousObservedPose.get(bodyPart).getOrientation();
          // Check that quaternion is not changing 2pi range. Even if q = -q, the observed motion has to be continuous
          lastObservedPose.getOrientation().interpolate(previousQuaternion,quaternionToCheck, 1.0);
-         if (quaternionToCheck.getX() < 0)
-            lastObservedPose.getOrientation().negate();
 
          previousObservedPose.get(bodyPart).set(lastObservedPose);
       }
       else
       {
-         previousObservedPose.put(bodyPart,new FramePose3D());
-         if (quaternionToCheck.getX() < 0)
-            lastObservedPose.getOrientation().negate();
+//         double x = quaternionToCheck.getX();
+//         double y = quaternionToCheck.getY();
+//         double z = quaternionToCheck.getZ();
+//         double s = quaternionToCheck.getS();
+//
+//         // Calculate the maximum absolute value
+//         double max = Math.max(Math.abs(x), Math.max(Math.abs(y), Math.max(Math.abs(z), Math.abs(s))));
+//
+//         // Check if the maximum absolute value is negative
+//         if ((Math.abs(x) == max && x < 0) ||
+//             (Math.abs(y) == max && y < 0) ||
+//             (Math.abs(z) == max && z < 0) ||
+//             (Math.abs(s) == max && s < 0))
+//         {
+//            lastObservedPose.getOrientation().negate();
+//         }
+
+         previousObservedPose.put(bodyPart,new FramePose3D(lastObservedPose));
       }
    }
 
@@ -327,8 +340,7 @@ public class ProMPAssistant
       }
    }
 
-   // TODO what if someone is lefthanded, or simply wants to use the left hand for that task?
-   //  Learn task for both hands and call them ...L and ...R, check initial pose of hands to determine which one is being used
+   // TODO learn mirrored version for left handed and distinguish between R and L version of that task
    private boolean taskDetected(Pose3DReadOnly observedPose, String bodyPart, String objectName, ReferenceFrame objectFrame)
    {
       if (currentTask.isEmpty())

@@ -1,11 +1,11 @@
 {
-  "testNumberUseOnlyForTesting": 2,
+  "testNumberUseOnlyForTesting": 1,
   "logging" : true,
   "numberBasisFunctions": 20,
-  "numberObservations": 15,
+  "numberObservations": 5,
   "conditionOnlyLastObservation": false,
-  "conditioningStep": 14,
-  "useCustomSpeed": true,
+  "conditioningStep": 1,
+  "useCustomSpeed": false,
   "numberOfInferredSpeeds": 0,
   "allowedIncreaseDecreaseSpeedFactor": 2,
   "tasks":[
@@ -21,6 +21,18 @@
         { "name":"leftHand", "geometry":"Pose" },
         { "name":"leftForeArm", "geometry":"Orientation" },
         { "name":"chest", "geometry":"Orientation" }
+      ]
+    },
+    {
+      "context": "PushDoorLeverHandle",
+      "name": "ReachHandle",
+      "bodyPartForInference": "rightHand",
+      "bodyPartWithObservableGoal": "rightHand",
+      "translationGoalToEE": [0.135, -0.027,  0.174],
+      "rotationGoalToEE": [-0.158, -0.691,  0.681, -0.185],
+      "customSpeed": 40,
+      "bodyParts":[
+        { "name":"rightHand", "geometry":"Pose" }
       ]
     }
   ]

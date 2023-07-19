@@ -30,6 +30,8 @@ public class ProMPAssistantWorldFrameTest
            "numberBasisFunctions": 20,
            "numberObservations": 50,
            "conditionOnlyLastObservation": true,
+            "conditioningStep": 3,
+            "useCustomSpeed": false,
            "numberOfInferredSpeeds": 30,
            "allowedIncreaseDecreaseSpeedFactor": 2,
            "tasks":[
@@ -40,6 +42,7 @@ public class ProMPAssistantWorldFrameTest
                "bodyPartWithObservableGoal": "rightHand",
                "translationGoalToEE": [0.135, -0.027,  0.174],
                "rotationGoalToEE": [-0.158, -0.691,  0.681, -0.185],
+               "customSpeed": 40,
                "bodyParts":[
                  { "name":"leftHand", "geometry":"Pose" },
                  { "name":"rightHand", "geometry":"Pose" }
