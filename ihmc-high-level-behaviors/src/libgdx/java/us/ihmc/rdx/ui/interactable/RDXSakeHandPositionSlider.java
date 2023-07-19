@@ -57,7 +57,6 @@ public class RDXSakeHandPositionSlider
    {
       if (renderImGuiSliderAndReturnChanged())
       {
-         System.out.println("TRUE");
          if (sendThrottler.run(SEND_PERIOD) && syncedRobot.getDataReceptionTimerSnapshot().isRunning(ROBOT_DATA_EXPIRATION_DURATION))
          {
             double positionRatio = 1.0 - (sliderValue[0] / MAX_ANGLE_LIMIT);
