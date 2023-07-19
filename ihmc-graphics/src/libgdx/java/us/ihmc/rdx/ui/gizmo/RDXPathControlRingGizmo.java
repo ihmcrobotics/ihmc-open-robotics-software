@@ -45,7 +45,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.util.Random;
 
 import static us.ihmc.rdx.ui.gizmo.RDXPathControlRingCollisionSelection.*;
-import static us.ihmc.rdx.ui.gizmo.RDXPathControlRingCollisionSelection.NEGATIVE_Y_ARROW;
 
 /**
  * A gizmo designed for specifying the walk goals of bipedal robots.
