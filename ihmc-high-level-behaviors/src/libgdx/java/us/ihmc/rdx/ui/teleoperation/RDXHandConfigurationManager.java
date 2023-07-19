@@ -1,26 +1,27 @@
 package us.ihmc.rdx.ui.teleoperation;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.msg.dds.HandSakeStatusMessage;
 import imgui.ImGui;
-import imgui.type.ImFloat;
-import imgui.type.ImInt;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.SakeHandCommandOption;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.tools.RDXIconTexture;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.rdx.ui.interactable.RDXSakeHandPositionSlider;
 import us.ihmc.rdx.ui.interactable.RDXSakeHandTorqueSlider;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.function.Consumer;
+
 import static us.ihmc.robotics.robotSide.RobotSide.LEFT;
 import static us.ihmc.robotics.robotSide.RobotSide.RIGHT;
 
@@ -32,8 +33,6 @@ public class RDXHandConfigurationManager
    private static final boolean ADD_SHIELD_BUTTON = false;
 
    private CommunicationHelper communicationHelper;
-   private final SideDependentList<ImInt> handCommandOptionIndices = new SideDependentList<>(new ImInt(9), new ImInt(9));
-   private final String[] handCommandOptionNames = new String[SakeHandCommandOption.values.length];
    private final SideDependentList<RDXIconTexture> handIcons = new SideDependentList<>();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private RobotSide toolbarSelectedSide = RobotSide.LEFT;
@@ -48,11 +47,6 @@ public class RDXHandConfigurationManager
       for (RobotSide side : RobotSide.values)
       {
          handIcons.put(side, new RDXIconTexture("icons/" + side.getLowerCaseName() + "Hand.png"));
-      }
-      SakeHandCommandOption[] commandOptionValues = SakeHandCommandOption.values;
-      for (int i = 0; i < commandOptionValues.length; ++i)
-      {
-         handCommandOptionNames[i] = commandOptionValues[i].name();
       }
 
       SideDependentList<RDXIconTexture> toggleIcons = new SideDependentList<>();
@@ -124,49 +118,55 @@ public class RDXHandConfigurationManager
       {
          ImGui.image(handIcons.get(side).getTexture().getTextureObjectHandle(), 22.0f, 22.0f);
          ImGui.sameLine();
-         if (ImGui.button(labels.get("Open", side.getCamelCaseName())))
-         {
-            publishHandCommand(side, SakeHandCommandOption.OPEN);
-         }
-         ImGui.sameLine();
          if (ImGui.button(labels.get("Close", side.getCamelCaseName())))
          {
             publishHandCommand(side, SakeHandCommandOption.CLOSE);
+         }
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Open", side.getCamelCaseName())))
+         {
+            publishHandCommand(side, SakeHandCommandOption.OPEN);
          }
          ImGui.sameLine();
          if (ImGui.button(labels.get("Grip", side.getCamelCaseName())))
          {
             publishHandCommand(side, SakeHandCommandOption.GRIP);
          }
-         handPositionSliders.get(side).renderImGuiWidgets();
-         handTorqueSliders.get(side).renderImGuiWidgets();
-      }
-      if (!sakeStatuses.isEmpty())
-         ImGui.text("Sake EZGrippers:");
-      for (RobotSide side : sakeStatuses.sides())
-      {
-         ImGui.text(side.getPascalCaseName() + ":");
          ImGui.sameLine();
-         IHMCROS2Input<HandSakeStatusMessage> status = sakeStatuses.get(side);
-         if (status.hasReceivedFirstMessage())
+         if (sakeStatuses.get(side).hasReceivedFirstMessage())
          {
-
-            ImGui.text("Temperature: " + FormattingTools.getFormattedDecimal1D(status.getLatest().getTemperature()));
+            // TODO: Add ratio to unit conversions enum or something
+            double temperature = 100 * sakeStatuses.get(side).getLatest().getTemperature();
+            boolean error = sakeStatuses.get(side).getLatest().getIsInErrorState();
+            double errorValue = error ? 1.0 : 0.0;
+            renderGradiatedImGuiText("Temperature: " + FormattingTools.getFormattedDecimal1D(temperature) + " C", temperature, 45.0, 50.0, 55.0);
+            ImGui.sameLine();
+            renderGradiatedImGuiText("Status: " + (error ? "ERROR" : "all good"), errorValue, 1.0);
          }
          else
          {
             ImGui.text("No status received.");
          }
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Reset", side.getCamelCaseName())))
-         {
-            HandSakeDesiredCommandMessage sakeCommand = new HandSakeDesiredCommandMessage();
-            sakeCommand.setRobotSide(side.toByte());
-            sakeCommand.setDesiredCommandOption(SakeHandCommandOption.CLOSE.toByte());
-            communicationHelper.publish(ROS2Tools.getControllerInputTopic(communicationHelper.getRobotName()).withTypeName(HandSakeDesiredCommandMessage.class),
-                                        sakeCommand);
-         }
+         handPositionSliders.get(side).renderImGuiWidgets();
+         handTorqueSliders.get(side).renderImGuiWidgets();
       }
+   }
+
+   private void renderGradiatedImGuiText(String text, double value, double... colorSwitchValues)
+   {
+      int redValue = 0;
+      int greenValue = 192;
+
+      for (double switchValue : colorSwitchValues)
+      {
+         if (value < switchValue)
+            break;
+
+         redValue = 192;
+         greenValue -= 192 / colorSwitchValues.length;
+      }
+
+      ImGui.textColored(redValue, greenValue, 0, 255, text);
    }
 
    private void publishHandCommand(RobotSide side, SakeHandCommandOption handCommandOption)
@@ -205,7 +205,6 @@ public class RDXHandConfigurationManager
          communicationHelper.publishToController(armTrajectoryMessage);
       };
 
-      shieldButton.setOnPressed(()-> armTrajectoryRunnable.accept(toolbarSelectedSide));
+      shieldButton.setOnPressed(() -> armTrajectoryRunnable.accept(toolbarSelectedSide));
    }
-
 }
