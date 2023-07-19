@@ -65,7 +65,7 @@ public class RDXSakeHandPositionSlider
                                         HumanoidMessageTools.createHandSakeDesiredCommandMessage(handSide,
                                                                                                  SakeHandCommandOption.GOAL_POSITION,
                                                                                                  positionRatio,
-                                                                                                 0.5));
+                                                                                                 0.0));
          }
       }
       else
