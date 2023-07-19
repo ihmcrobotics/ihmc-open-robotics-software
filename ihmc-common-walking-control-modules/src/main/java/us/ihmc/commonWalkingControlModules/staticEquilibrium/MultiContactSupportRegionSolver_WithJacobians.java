@@ -20,6 +20,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -79,6 +81,7 @@ public class MultiContactSupportRegionSolver_WithJacobians
    private final List<Vector2D> directionsToOptimize = new ArrayList<>();
    private boolean foundSolution = false;
 
+   private final ExecutionTimer executionTimer;
    private final List<Point2D> vertexList = new ArrayList<>();
 
    public MultiContactSupportRegionSolver_WithJacobians()
@@ -88,6 +91,13 @@ public class MultiContactSupportRegionSolver_WithJacobians
 
    public MultiContactSupportRegionSolver_WithJacobians(int numberOfDirectionsToOptimize)
    {
+      this(numberOfDirectionsToOptimize, null);
+   }
+
+   public MultiContactSupportRegionSolver_WithJacobians(int numberOfDirectionsToOptimize, YoRegistry registry)
+   {
+      executionTimer = registry == null ? null : new ExecutionTimer("comSolver", registry);
+
       for (int i = 0; i < MultiContactSupportRegionSolverInput.maxContactPoints; i++)
       {
          contactPoints.add(new ContactPoint(i, registry, graphicsListRegistry));
@@ -278,6 +288,18 @@ public class MultiContactSupportRegionSolver_WithJacobians
       solution.zero();
 
       vertexList.clear();
+   }
+
+   public void startTimer()
+   {
+      if (executionTimer != null)
+         executionTimer.startMeasurement();
+   }
+
+   public void stopTimer()
+   {
+      if (executionTimer != null)
+         executionTimer.stopMeasurement();
    }
 
    //////////////////////////////////////////////////////////////////////////////////////////
