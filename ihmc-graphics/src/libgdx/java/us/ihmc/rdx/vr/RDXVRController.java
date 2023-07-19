@@ -124,6 +124,8 @@ public class RDXVRController extends RDXVRTrackedDevice
    private RDXModelInstance pickPoseSphere;
    private RDXModelInstance pickRayGraphic;
    private RDXModelInstance pickRayCollisionPointGraphic;
+   private  RDXVRControllerButtonLabel aButtonLabel;
+   private  RDXVRControllerButtonLabel bButtonLabel;
    private final RDXVRDragData triggerDragData;
    private final RDXVRDragData gripDragData;
 
@@ -194,11 +196,15 @@ public class RDXVRController extends RDXVRTrackedDevice
          if (pickPoseSphere == null)
          {
             pickPoseSphere = new RDXModelInstance(RDXModelBuilder.createSphere(0.0025f, new Color(0x870707ff)));
-         }
-         if (pickRayCollisionPointGraphic == null)
-         {
             pickRayCollisionPointGraphic = new RDXModelInstance(RDXModelBuilder.createSphere(0.0015f, new Color(Color.WHITE)));
             LibGDXTools.hideGraphic(pickRayCollisionPointGraphic);
+
+            // These were tuned by @dcalvert using JRebel hand tweaking so they looked good
+            // for the Valve Index controllers.
+            Point3D aButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.085, -0.01, -0.02) : new Point3D(-0.082, -0.01, -0.017);
+            Point3D bButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.07, -0.013, -0.015) : new Point3D(-0.07, -0.007, -0.008);
+            aButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, aButtonOffset);
+            bButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, bButtonOffset);
          }
 
          pickPoseFrame.getReferenceFrame().update();
@@ -209,6 +215,9 @@ public class RDXVRController extends RDXVRTrackedDevice
          pickRay.setToZero(getPickPoseFrame());
          pickRay.getDirection().set(Axis3D.X);
          pickRay.changeFrame(ReferenceFrame.getWorldFrame());
+
+         aButtonLabel.setText("");
+         bButtonLabel.setText("");
       }
 
       VRInput.VRInput_GetDigitalActionData(clickTriggerActionHandle.get(0), clickTriggerActionData, VR.k_ulInvalidInputValueHandle);
@@ -283,7 +292,11 @@ public class RDXVRController extends RDXVRTrackedDevice
          if (pickRayGraphic != null)
             pickRayGraphic.getRenderables(renderables, pool);
          if (pickRayCollisionPointGraphic != null)
+         {
             pickRayCollisionPointGraphic.getRenderables(renderables, pool);
+            aButtonLabel.getRenderables(renderables, pool);
+            bButtonLabel.getRenderables(renderables, pool);
+         }
       }
    }
 
@@ -457,5 +470,15 @@ public class RDXVRController extends RDXVRTrackedDevice
    public FrameLine3DReadOnly getPickRay()
    {
       return pickRay;
+   }
+
+   public void setAButtonText(String text)
+   {
+      aButtonLabel.setText(text);
+   }
+
+   public void setBButtonText(String text)
+   {
+      bButtonLabel.setText(text);
    }
 }
