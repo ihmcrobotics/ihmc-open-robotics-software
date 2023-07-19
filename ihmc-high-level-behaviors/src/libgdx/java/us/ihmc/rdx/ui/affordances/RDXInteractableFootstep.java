@@ -320,7 +320,7 @@ public class RDXInteractableFootstep
                                     .getTransformToDesiredFrame(dragReferenceFrame.get(side).getTransformToParent(), controller.getPickPoseFrame());
                dragReferenceFrame.get(side).getReferenceFrame().update();
             }
-            if (triggerDragData.getDragJustStarted())
+            if (triggerDragData.getDragJustStarted() && vrContext.getController(side).getSelectedPick() == vrPickResult.get(side))
             {
                triggerDragData.setObjectBeingDragged(this);
             }
