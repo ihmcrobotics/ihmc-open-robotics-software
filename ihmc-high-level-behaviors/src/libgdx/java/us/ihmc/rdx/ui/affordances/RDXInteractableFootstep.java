@@ -93,8 +93,6 @@ public class RDXInteractableFootstep
    private final Point3D closestCollision = new Point3D();
    private double closestCollisionDistance;
    private final Plane3DMouseDragAlgorithm planeDragAlgorithm = new Plane3DMouseDragAlgorithm();
-   private FrameBasedGizmoModification frameBasedGizmoModification;
-   private final FramePose3D framePose3D = new FramePose3D();
 
    public RDXInteractableFootstep(RDXBaseUI baseUI, RobotSide footstepSide, int index, SideDependentList<ConvexPolygon2D> defaultPolygons)
    {
@@ -119,9 +117,6 @@ public class RDXInteractableFootstep
       selectionCollisionBox.getPose().getTranslation().set(0.010887, 0.0, footGraphicHeight / 2.0);
       collisionBoxFrame = new ModifiableReferenceFrame("collisionBoxFrame", selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
       mouseCollidable = new MouseCollidable(selectionCollisionBox);
-      RDXFocusBasedCamera camera3D = baseUI.getPrimary3DPanel().getCamera3D();
-      boolean yawOnly = true;
-      frameBasedGizmoModification = new FrameBasedGizmoModification(this::getFootFrame, () -> collisionBoxFrame.getReferenceFrame().getParent(), camera3D, yawOnly);
 
 
       updateFootstepIndexText(index);
@@ -334,9 +329,6 @@ public class RDXInteractableFootstep
                   selectablePose3DGizmo.getPoseGizmo().getTransformToParent().getTranslation().add(planarMotion);
                   double deltaYaw = -controller.getPickPointPose().getRoll();
                   selectablePose3DGizmo.getPoseGizmo().getTransformToParent().getRotation().setYawPitchRoll(deltaYaw, selectablePose3DGizmo.getPoseGizmo().getPose().getPitch(), selectablePose3DGizmo.getPoseGizmo().getPose().getRoll());
-
-
-
                }
             }
 
@@ -527,11 +519,6 @@ public class RDXInteractableFootstep
    public FramePose3DReadOnly getFootPose()
    {
       return plannedFootstepInternal.getFootstepPose();
-   }
-
-   public ReferenceFrame getFootFrame()
-   {
-      return collisionBoxFrame.getReferenceFrame();
    }
 
    public void updatePose(RigidBodyTransformReadOnly footstepPose)
