@@ -346,6 +346,11 @@ public class RDXVRController extends RDXVRTrackedDevice
       return triggerDragData;
    }
 
+   public boolean getTriggerClickReleasedWithoutDrag()
+   {
+      return clickTriggerActionData.bChanged() && !clickTriggerActionData.bState() && triggerDragData.isClickValid();
+   }
+
    public InputDigitalActionData getAButtonActionData()
    {
       return aButtonActionData;
