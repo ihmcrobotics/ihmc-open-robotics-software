@@ -4,6 +4,7 @@ import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.shape.primitives.interfaces.*;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.log.LogTools;
@@ -134,5 +135,10 @@ public class MouseCollidable
          LogTools.warn("Shape not handled: {}", shape);
       }
       return Double.NaN;
+   }
+
+   public Point3DReadOnly getClosestInteresection()
+   {
+      return boxRayIntersection.getFirstIntersectionToPack();
    }
 }
