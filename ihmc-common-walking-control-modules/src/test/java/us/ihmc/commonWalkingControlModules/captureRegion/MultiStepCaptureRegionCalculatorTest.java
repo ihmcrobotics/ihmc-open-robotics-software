@@ -126,8 +126,8 @@ public class MultiStepCaptureRegionCalculatorTest
 
       new DefaultParameterReader().readParametersInRegistry(registry);
 
-      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
-      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT);
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT);
 
       for (RobotSide swingSide : RobotSide.values())
       {
@@ -198,8 +198,8 @@ public class MultiStepCaptureRegionCalculatorTest
 
             YoVariableChangedListener updatedListener = v ->
             {
-               reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
-               reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
+               reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT);
+               reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT);
 
                updateRegions(yoSwingDuration.getDoubleValue(),
                              multiStepRegionCalculator,
@@ -279,8 +279,8 @@ public class MultiStepCaptureRegionCalculatorTest
 
       new DefaultParameterReader().readParametersInRegistry(registry);
 
-      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
-      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT);
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT);
 
       for (RobotSide swingSide : RobotSide.values())
       {
@@ -351,8 +351,8 @@ public class MultiStepCaptureRegionCalculatorTest
 
             YoVariableChangedListener updatedListener = v ->
             {
-               reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
-               reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
+               reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT);
+               reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT);
 
                updateRegions(yoSwingDuration.getDoubleValue(),
                              multiStepRegionCalculator,
@@ -429,8 +429,8 @@ public class MultiStepCaptureRegionCalculatorTest
 
       new DefaultParameterReader().readParametersInRegistry(registry);
 
-      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
-      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT);
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT);
 
       for (RobotSide swingSide : RobotSide.values())
       {
@@ -496,8 +496,8 @@ public class MultiStepCaptureRegionCalculatorTest
 
             YoVariableChangedListener updatedListener = v ->
             {
-               reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
-               reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
+               reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT);
+               reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT);
 
                updateRegions(yoSwingDuration.getDoubleValue(),
                              multiStepRegionCalculator,
@@ -574,8 +574,8 @@ public class MultiStepCaptureRegionCalculatorTest
 
       new DefaultParameterReader().readParametersInRegistry(registry);
 
-      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
-      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT);
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT);
 
       for (RobotSide swingSide : RobotSide.values())
       {
@@ -641,8 +641,8 @@ public class MultiStepCaptureRegionCalculatorTest
 
             YoVariableChangedListener updatedListener = v ->
             {
-               reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
-               reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
+               reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT);
+               reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT);
 
                updateRegions(yoSwingDuration.getDoubleValue(),
                              multiStepRegionCalculator,
@@ -727,8 +727,8 @@ public class MultiStepCaptureRegionCalculatorTest
 
       new DefaultParameterReader().readParametersInRegistry(registry);
 
-      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
-      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT);
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT);
 
       ArrayList<Point2D> listOfPoints = new ArrayList<Point2D>();
       listOfPoints.add(new Point2D(-footLength / 2.0, -footWidth / 2.0));
@@ -803,8 +803,8 @@ public class MultiStepCaptureRegionCalculatorTest
 
          YoVariableChangedListener updatedListener = v ->
          {
-            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
-            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
+            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT);
+            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT);
 
             updateRegions(yoSwingDuration.getDoubleValue(),
                           multiStepRegionCalculator,
@@ -888,8 +888,8 @@ public class MultiStepCaptureRegionCalculatorTest
 
       new DefaultParameterReader().readParametersInRegistry(registry);
 
-      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
-      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT);
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT);
 
       ArrayList<Point2D> listOfPoints = new ArrayList<Point2D>();
       listOfPoints.add(new Point2D(0.0, 0.0));
@@ -961,8 +961,8 @@ public class MultiStepCaptureRegionCalculatorTest
 
          YoVariableChangedListener updatedListener = v ->
          {
-            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
-            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
+            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT);
+            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT);
 
             updateRegions(yoSwingDuration.getDoubleValue(),
                           multiStepRegionCalculator,
@@ -1040,8 +1040,8 @@ public class MultiStepCaptureRegionCalculatorTest
 
       new DefaultParameterReader().readParametersInRegistry(registry);
 
-      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
-      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT);
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT);
 
       FrameConvexPolygon2D captureRegion = new FrameConvexPolygon2D(rightAnkleZUpFrame);
       captureRegion.addVertex(-0.4, -0.16);
@@ -1111,8 +1111,8 @@ public class MultiStepCaptureRegionCalculatorTest
 
          YoVariableChangedListener updatedListener = v ->
          {
-            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
-            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
+            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT);
+            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT);
 
             updateRegions(yoSwingDuration.getDoubleValue(),
                           multiStepRegionCalculator,
@@ -1189,8 +1189,8 @@ public class MultiStepCaptureRegionCalculatorTest
 
       new DefaultParameterReader().readParametersInRegistry(registry);
 
-      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
-      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT);
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT);
 
       FrameConvexPolygon2D captureRegion = new FrameConvexPolygon2D(ankleZUpFrames.get(swingSide.getOppositeSide()));
       captureRegion.addVertex(0.3, 0.3);
@@ -1258,8 +1258,8 @@ public class MultiStepCaptureRegionCalculatorTest
 
          YoVariableChangedListener updatedListener = v ->
          {
-            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
-            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
+            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT);
+            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT);
 
             updateRegions(yoSwingDuration.getDoubleValue(),
                           multiStepRegionCalculator,
@@ -1369,8 +1369,8 @@ public class MultiStepCaptureRegionCalculatorTest
 
       new DefaultParameterReader().readParametersInRegistry(registry);
 
-      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
-      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT);
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT);
 
       RigidBodyTransform crossOverTranslation = new RigidBodyTransform();
       crossOverTranslation.getTranslation().addY(-horiztonalOffset);
@@ -1379,8 +1379,8 @@ public class MultiStepCaptureRegionCalculatorTest
       leftAnkleZUpFrame.update();
       rightAnkleZUpFrame.update();
 
-      crossOverReachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D(worldFrame, crossOverTranslation));
-      crossOverReachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D(worldFrame, crossOverTranslation));
+      crossOverReachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT);
+      crossOverReachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT);
 
       ArrayList<Point2D> listOfPoints = new ArrayList<Point2D>();
       listOfPoints.add(new Point2D(-footLength / 2.0, -footWidth / 2.0));
@@ -1501,8 +1501,8 @@ public class MultiStepCaptureRegionCalculatorTest
 
          YoVariableChangedListener updatedListener = v ->
          {
-            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
-            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
+            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT);
+            reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT);
 
             updateRegionsForPaper(yoSwingDuration.getDoubleValue(),
                                   multiStepRegionCalculator,

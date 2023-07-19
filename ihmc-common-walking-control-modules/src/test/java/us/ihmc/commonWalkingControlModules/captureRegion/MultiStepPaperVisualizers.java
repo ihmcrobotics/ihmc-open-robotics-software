@@ -42,6 +42,7 @@ import java.util.List;
 public class MultiStepPaperVisualizers
 {
    double footWidth = 0.1;
+   double toeShrinkage = 0.02;
    double footLength = 0.2;
    double kinematicStepRange = 1.0;
    double forwardLimit = 1.0;
@@ -145,13 +146,14 @@ public class MultiStepPaperVisualizers
       scs.simulateNow(1);
    }
 
+<<<<<<< HEAD
    public void visualizeDynamicPlan()
    {
-
       leftAnkleZUpFrame.setOffset(-0.15, 0.1, 0.0);
       rightAnkleZUpFrame.setOffset(0.15, -0.1, 0.0);
       leftAnkleZUpFrame.update();
       rightAnkleZUpFrame.update();
+
       OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth,
                                                                                                   kinematicStepRange,
                                                                                                   ankleZUpFrames,
@@ -168,7 +170,6 @@ public class MultiStepPaperVisualizers
       FrameConvexPolygon2D rightFootPolygon = new FrameConvexPolygon2D(rightAnkleZUpFrame, createFootPolygon());
       leftFootPolygon.changeFrame(worldFrame);
       rightFootPolygon.changeFrame(worldFrame);
-
 
       double fastSwing = 0.55;
       double fastTransfer = 0.02;
@@ -199,11 +200,76 @@ public class MultiStepPaperVisualizers
       swingRegion.setMatchingFrame(captureRegionCalculator.getCaptureRegion(), false);
 
 
-
       YoFramePoint2D yoICP = new YoFramePoint2D("icp", worldFrame, registry);
       yoICP.set(currentICP);
 
       graphicsListRegistry.registerArtifact("regions", new YoArtifactPolygon("captureRegion", swingRegion, Color.YELLOW, false));
+
+      graphicsListRegistry.registerArtifact("regions", new YoGraphicPosition("capturePoint", yoICP, 0.025, YoAppearance.Blue(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS).createArtifact());
+
+
+      SimulationConstructionSet2 scs = new SimulationConstructionSet2();
+      scs.getRootRegistry().addChild(registry);
+      scs.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(graphicsListRegistry));
+      scs.startSimulationThread();
+      scs.simulateNow(1);
+   }
+
+   public void visualizeOneStepRegion()
+   {
+      leftAnkleZUpFrame.setOffset(-0.15, 0.1, 0.0);
+      rightAnkleZUpFrame.setOffset(0.15, -0.1, 0.0);
+      leftAnkleZUpFrame.update();
+      rightAnkleZUpFrame.update();
+
+      kinematicStepRange = 0.75;
+      OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth,
+                                                                                                  kinematicStepRange,
+                                                                                                  ankleZUpFrames,
+                                                                                                  registry,
+                                                                                                  null);
+
+
+      FrameConvexPolygon2D leftFootPolygon = new FrameConvexPolygon2D(leftAnkleZUpFrame, createFootPolygon());
+      FrameConvexPolygon2D rightFootPolygon = new FrameConvexPolygon2D(rightAnkleZUpFrame, createFootPolygon());
+      leftFootPolygon.changeFrame(worldFrame);
+      rightFootPolygon.changeFrame(worldFrame);
+
+      FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D(worldFrame);
+      supportPolygon.addVertices(leftFootPolygon);
+//      supportPolygon.addVertices(rightFootPolygon);
+      supportPolygon.update();
+
+      FramePoint2D currentICP = new FramePoint2D(worldFrame, 0.32, 0.05);
+
+      double swingDuration = 0.3;
+      double transferDuration = 0.25;
+      double omega = 3.0;
+
+
+      YoFrameConvexPolygon2D delayedRegion = new YoFrameConvexPolygon2D("oneStepCaptureRegion",worldFrame,  20, registry);
+
+//      captureRegionCalculator.calculateCaptureRegion(RobotSide.LEFT, transferDuration + swingDuration, currentICP, omega, rightFootPolygon);
+//      delayedRegion.setMatchingFrame(captureRegionCalculator.getCaptureRegion(), false);
+
+      captureRegionCalculator.calculateCaptureRegion(RobotSide.LEFT, swingDuration, currentICP, omega, rightFootPolygon);
+      delayedRegion.setMatchingFrame(captureRegionCalculator.getCaptureRegion(), false);
+
+      YoFrameConvexPolygon2D yoSupportPOlygon = new YoFrameConvexPolygon2D("supportPOlygon" ,worldFrame,  8, registry);
+      YoFrameConvexPolygon2D yoRightFoot = new YoFrameConvexPolygon2D("rightFoot", worldFrame, 4, registry);
+
+      YoFramePoint2D yoICP = new YoFramePoint2D("icp", worldFrame, registry);
+      yoICP.set(currentICP);
+
+
+      yoSupportPOlygon.setMatchingFrame(supportPolygon, false);
+      yoRightFoot.setMatchingFrame(rightFootPolygon, false);
+
+      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
+
+      graphicsListRegistry.registerArtifact("regions", new YoArtifactPolygon("rightFoot", yoRightFoot, Color.GRAY, true));
+//      graphicsListRegistry.registerArtifact("regions", new YoArtifactPolygon("supportPolygon", yoSupportPOlygon, Color.GRAY, false));
+      graphicsListRegistry.registerArtifact("regions", new YoArtifactPolygon("delayedCpatureRegion", delayedRegion, Color.RED, false));
       graphicsListRegistry.registerArtifact("regions", new YoGraphicPosition("capturePoint", yoICP, 0.025, YoAppearance.Blue(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS).createArtifact());
 
 
@@ -266,8 +332,8 @@ public class MultiStepPaperVisualizers
 
       new DefaultParameterReader().readParametersInRegistry(registry);
 
-      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
-      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT);
+      reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT);
 
       RigidBodyTransform crossOverTranslation = new RigidBodyTransform();
       crossOverTranslation.getTranslation().addY(-horiztonalOffset);
@@ -276,8 +342,8 @@ public class MultiStepPaperVisualizers
       leftAnkleZUpFrame.update();
       rightAnkleZUpFrame.update();
 
-      crossOverReachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D(worldFrame, crossOverTranslation));
-      crossOverReachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D(worldFrame, crossOverTranslation));
+      crossOverReachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT);
+      crossOverReachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT);
 
       FrameConvexPolygon2D supportFootPolygon = new FrameConvexPolygon2D(worldFrame, createFootPolygon());
 
@@ -356,8 +422,8 @@ public class MultiStepPaperVisualizers
 
       YoVariableChangedListener updatedListener = v ->
       {
-         reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT, new FramePose3D());
-         reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT, new FramePose3D());
+         reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT);
+         reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT);
 
          updateRegionsForPaper(yoSwingDuration.getDoubleValue(),
                                multiStepRegionCalculator,
@@ -388,13 +454,70 @@ public class MultiStepPaperVisualizers
       ThreadTools.sleepForever();
    }
 
+   public void visualizeReachableEllipse()
+   {
+      leftAnkleZUpFrame.setOffset(-0.15, 0.1, 0.0);
+      rightAnkleZUpFrame.setOffset(0.15, -0.1, 0.0);
+      leftAnkleZUpFrame.update();
+      rightAnkleZUpFrame.update();
+      kinematicStepRange = 0.75;
+      innerLimit = 0.1;
+      yoInnerLimit.set(innerLimit);
+
+
+      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
+
+      StepAdjustmentReachabilityConstraint crossOverReachabilityConstraint = new StepAdjustmentReachabilityConstraint(ankleZUpFrames,
+                                                                                                                      yoForwardLimit,
+                                                                                                                      yoBackwardLimit,
+                                                                                                                      yoInnerLimit,
+                                                                                                                      yoOuterLimit,
+                                                                                                                      yoNominalWidth,
+                                                                                                                      new CrossoverParametersForPaper(),
+                                                                                                                      "crossOverName",
+                                                                                                                      true,
+                                                                                                                      registry,
+                                                                                                                      graphicsListRegistry);
+
+      new DefaultParameterReader().readParametersInRegistry(registry);
+      crossOverReachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT);
+
+
+      FrameConvexPolygon2D leftFootPolygon = new FrameConvexPolygon2D(leftAnkleZUpFrame, createFootPolygon());
+      FrameConvexPolygon2D rightFootPolygon = new FrameConvexPolygon2D(rightAnkleZUpFrame, createFootPolygon());
+      leftFootPolygon.changeFrame(worldFrame);
+      rightFootPolygon.changeFrame(worldFrame);
+      FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D(worldFrame);
+      supportPolygon.addVertices(leftFootPolygon);
+      //      supportPolygon.addVertices(rightFootPolygon);
+      supportPolygon.update();
+
+
+
+      YoFrameConvexPolygon2D yoLeftFoot = new YoFrameConvexPolygon2D("leftFoot", worldFrame, 4, registry);
+
+      yoLeftFoot.setMatchingFrame(leftFootPolygon, false);
+
+
+      graphicsListRegistry.registerArtifact("regions", new YoArtifactPolygon("leftFoot", yoLeftFoot, Color.GRAY, true));
+      //      graphicsListRegistry.registerArtifact("regions", new YoArtifactPolygon("supportPolygon", yoSupportPOlygon, Color.GRAY, false));
+
+
+      SimulationConstructionSet2 scs = new SimulationConstructionSet2();
+      scs.getRootRegistry().addChild(registry);
+      scs.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(graphicsListRegistry));
+      scs.startSimulationThread();
+      scs.simulateNow(1);
+   }
+
+
    private ConvexPolygon2D createFootPolygon()
    {
       ConvexPolygon2D polygon2D = new ConvexPolygon2D();
       polygon2D.addVertex(-footLength / 2.0, -footWidth / 2.0);
       polygon2D.addVertex(-footLength / 2.0, footWidth / 2.0);
-      polygon2D.addVertex(footLength / 2.0, -footWidth / 2.0);
-      polygon2D.addVertex(footLength / 2.0, footWidth / 2.0);
+      polygon2D.addVertex(footLength / 2.0, -(footWidth - toeShrinkage) / 2.0);
+      polygon2D.addVertex(footLength / 2.0, (footWidth - toeShrinkage) / 2.0);
       polygon2D.update();
 
       return polygon2D;
