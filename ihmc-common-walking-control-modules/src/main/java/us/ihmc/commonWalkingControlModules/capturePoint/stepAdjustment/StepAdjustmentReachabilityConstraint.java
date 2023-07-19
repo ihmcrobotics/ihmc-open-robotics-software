@@ -170,7 +170,7 @@ public class StepAdjustmentReachabilityConstraint implements SCS2YoGraphicHolder
     *
     * @param  supportSide the current support side of the robot
     */
-   public FrameConvexPolygon2DReadOnly initializeReachabilityConstraint(RobotSide supportSide, FramePose3DReadOnly footstepPose)
+   public FrameConvexPolygon2DReadOnly initializeReachabilityConstraint(RobotSide supportSide)
    {
       reachabilityPolygon.setMatchingFrame(updateReachabilityPolygon(supportSide), false);
       forwardCrossOverReachability.setMatchingFrame(updateForwardCrossOverPolygon(supportSide), false);
