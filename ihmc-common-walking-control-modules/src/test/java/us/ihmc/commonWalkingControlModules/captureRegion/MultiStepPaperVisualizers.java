@@ -146,7 +146,6 @@ public class MultiStepPaperVisualizers
       scs.simulateNow(1);
    }
 
-<<<<<<< HEAD
    public void visualizeDynamicPlan()
    {
       leftAnkleZUpFrame.setOffset(-0.15, 0.1, 0.0);
