@@ -277,6 +277,16 @@ public class RDXInteractableFootstep
                {
                   closestCollisionDistance = distance;
                   closestCollision.set(mouseCollidable.getClosestInteresection());
+                  if (side == RobotSide.RIGHT)
+                  {
+                     controller.setBButtonText("Place Another");
+                     controller.setAButtonText("Walk");
+                  }
+                  else if (side == RobotSide.LEFT)
+                  {
+                     controller.setBButtonText("Place Another");
+                     controller.setAButtonText("Delete");
+                  }
                }
             }
             vrPickResult.get(side).setDistanceToControllerPickPoint(closestCollisionDistance);
