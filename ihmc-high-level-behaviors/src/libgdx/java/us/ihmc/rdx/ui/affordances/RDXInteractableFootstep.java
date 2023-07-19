@@ -326,7 +326,7 @@ public class RDXInteractableFootstep
                {
                   Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
                   closestCollision.add(planarMotion);
-                  selectablePose3DGizmo.getPoseGizmo().getTransformToParent().getTranslation().add(planarMotion);
+                  addGizmoPose(planarMotion);
                   double deltaYaw = -controller.getPickPointPose().getRoll();
                   selectablePose3DGizmo.getPoseGizmo().getTransformToParent().getRotation().setYawPitchRoll(deltaYaw, selectablePose3DGizmo.getPoseGizmo().getPose().getPitch(), selectablePose3DGizmo.getPoseGizmo().getPose().getRoll());
                }
@@ -435,6 +435,17 @@ public class RDXInteractableFootstep
 
       selectionCollisionBox.getPosition().set(x, y, z);
       collisionBoxFrame.getReferenceFrame().getTransformToWorldFrame().getTranslation().set(x, y, z);
+   }
+
+   public void addGizmoPose(Vector3DReadOnly planarMotion)
+   {
+      RigidBodyTransform gizmoTransform = selectablePose3DGizmo.getPoseGizmo().getTransformToParent();
+      gizmoTransform.getTranslation().add(planarMotion);
+      plannedFootstepInternal.getFootstepPose().set(gizmoTransform);
+      wasPoseUpdated = true;
+
+      selectionCollisionBox.getPosition().add(planarMotion);
+      collisionBoxFrame.getReferenceFrame().getTransformToWorldFrame().getTranslation().add(planarMotion);
    }
 
    public void flashFootstepWhenBadPlacement(BipedalFootstepPlannerNodeRejectionReason reason)
