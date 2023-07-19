@@ -6,6 +6,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.apache.commons.lang3.StringUtils;
@@ -100,7 +101,7 @@ public class RDXBaseUI
    private final ImBoolean vsync = new ImBoolean(false);
    private final ImBoolean middleClickOrbit = new ImBoolean(false);
    private final ImBoolean modelSceneMouseCollisionEnabled = new ImBoolean(false);
-   private final ImFloat view3DBackgroundShade = new ImFloat(RDX3DSceneTools.CLEAR_COLOR);
+   private final ImDouble view3DBackgroundShade = new ImDouble(RDX3DSceneTools.CLEAR_COLOR);
    private final ImInt libGDXLogLevel = new ImInt(LibGDXTools.toLibGDX(LogTools.getLevel()));
    private final ImFloat imguiFontScale = new ImFloat(1.0f);
    private final RDXImGuiLayoutManager layoutManager;
@@ -177,7 +178,7 @@ public class RDXBaseUI
       }
 
       primary3DPanel = new RDX3DPanel(VIEW_3D_WINDOW_NAME, ANTI_ALIASING, true);
-      primary3DPanel.setBackgroundShade(view3DBackgroundShade.get());
+      primary3DPanel.setBackgroundShade((float) view3DBackgroundShade.get());
    }
 
    /**
@@ -367,10 +368,9 @@ public class RDXBaseUI
          {
             setUseMiddleClickViewOrbit(middleClickOrbit.get());
          }
-         if (ImGuiTools.volatileInputFloat(labels.get("World shade"), view3DBackgroundShade))
-         {
-            settings.setView3DBackgroundShade(view3DBackgroundShade.get());
-            setView3DBackgroundShade(view3DBackgroundShade.get());
+         if (ImGuiTools.sliderDouble(labels.get("World shader"), view3DBackgroundShade, 0.0f, 1.0f)) {
+            settings.setView3DBackgroundShade((float) view3DBackgroundShade.get());
+            setView3DBackgroundShade((float) view3DBackgroundShade.get());
          }
          ImGui.separator();
          ImGui.text("Theme:");
