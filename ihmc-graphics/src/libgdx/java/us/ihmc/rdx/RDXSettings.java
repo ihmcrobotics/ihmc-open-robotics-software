@@ -14,6 +14,11 @@ import java.util.concurrent.CompletableFuture;
 
 public class RDXSettings
 {
+   static
+   {
+      deleteOldThemeFile();
+   }
+
    private static int deleteRetries = 0;
 
    // We save this as .ini, but it's actually interpreted as standard Java Properties
@@ -178,6 +183,17 @@ public class RDXSettings
             return; // Stop gap
          file.delete();
          save();
+      }
+   }
+
+   private static void deleteOldThemeFile()
+   {
+      File oldThemeFile = new File(IHMCCommonPaths.DOT_IHMC_DIRECTORY.toFile(), "themePreference.ini");
+
+      if (oldThemeFile.exists())
+      {
+         LogTools.info("Deleting old theme file: " + oldThemeFile.getAbsolutePath());
+         oldThemeFile.delete();
       }
    }
 }
