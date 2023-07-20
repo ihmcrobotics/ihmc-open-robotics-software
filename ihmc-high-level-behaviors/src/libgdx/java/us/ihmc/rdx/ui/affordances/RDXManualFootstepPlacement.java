@@ -129,6 +129,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
                                                       {
                                                          InputDigitalActionData aButton = controller.getAButtonActionData();
                                                          RDXVRDragData aButtonDragData = controller.getAButtonDragData();
+                                                         RDXVRDragData bButtonDragData = controller.getBButtonDragData();
 
                                                          if (aButtonDragData.getObjectBeingDragged() != null)
                                                          {
@@ -138,6 +139,16 @@ public class RDXManualFootstepPlacement implements RenderableProvider
                                                             {
                                                                createNewVRFootstep(controller.getPickCollisionPoint(), side);
                                                                aButtonDragData.setObjectBeingDragged(null);
+                                                            }
+                                                         }
+                                                         if (bButtonDragData.getObjectBeingDragged() != null)
+                                                         {
+                                                            if (bButtonDragData.getObjectBeingDragged()
+                                                                               .toString()
+                                                                               .startsWith("us.ihmc.rdx.ui.affordances.RDXInteractableFootstep"))
+                                                            {
+                                                               footstepPlan.removeLastStep();
+                                                               bButtonDragData.setObjectBeingDragged(null);
                                                             }
                                                          }
 

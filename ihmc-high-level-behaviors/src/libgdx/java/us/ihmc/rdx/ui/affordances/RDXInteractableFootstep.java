@@ -307,6 +307,7 @@ public class RDXInteractableFootstep
             RDXVRDragData gripDragData = controller.getGripDragData();
             RDXVRDragData triggerDragData = controller.getTriggerDragData();
             RDXVRDragData aButtonDragData = controller.getAButtonDragData();
+            RDXVRDragData bButtonDragData = controller.getBButtonDragData();
 
             if (gripDragData.getDragJustStarted() && isIntersectingVR.get(side))
             {
@@ -341,6 +342,11 @@ public class RDXInteractableFootstep
             if (aButtonDragData.getDragJustStarted() && vrContext.getController(side).getSelectedPick() == vrPickResult.get(side))
             {
                aButtonDragData.setObjectBeingDragged(this);
+            }
+
+            if (bButtonDragData.getDragJustStarted() && vrContext.getController(side).getSelectedPick() == vrPickResult.get(side))
+            {
+               bButtonDragData.setObjectBeingDragged(this);
             }
 
             boolean isGripping = gripDragData.isBeingDragged(this);
