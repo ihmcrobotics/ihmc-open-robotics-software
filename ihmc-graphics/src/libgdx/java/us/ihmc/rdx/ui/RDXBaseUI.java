@@ -418,6 +418,7 @@ public class RDXBaseUI
             ImGui.endTable();
          }
 
+         /* Start checkbox settings */
          if (ImGui.checkbox(labels.get("Frame rate plot"), plotFrameRate))
          {
             settings.setPlotFrameRate(plotFrameRate.get());
@@ -429,7 +430,7 @@ public class RDXBaseUI
             Gdx.graphics.setVSync(vsync.get());
          }
 
-         ImGui.separator();
+         ImGui.separator(); // Environment section
          boolean renderingGroundTruthEnvironment = primaryScene.getSceneLevelsToRender().contains(RDXSceneLevel.GROUND_TRUTH);
          if (ImGui.checkbox(labels.get("Render Ground Truth Environment"), renderingGroundTruthEnvironment))
          {
@@ -454,6 +455,7 @@ public class RDXBaseUI
             else
                primaryScene.getSceneLevelsToRender().add(RDXSceneLevel.VIRTUAL);
          }
+         ImGui.separator(); // Mouse behavior section
          if (ImGui.checkbox(labels.get("Model scene mouse collision enabled"), modelSceneMouseCollisionEnabled))
          {
             setModelSceneMouseCollisionEnabled(modelSceneMouseCollisionEnabled.get());
@@ -462,6 +464,7 @@ public class RDXBaseUI
          {
             setUseMiddleClickViewOrbit(middleClickOrbit.get());
          }
+         /* End checkbox settings */
 
          ImGui.endMenu();
       }
