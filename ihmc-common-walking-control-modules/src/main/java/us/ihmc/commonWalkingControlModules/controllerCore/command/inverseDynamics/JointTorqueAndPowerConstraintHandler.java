@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl;
+package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
