@@ -116,13 +116,13 @@ public class RDXSettings
       }
 
       Properties properties = new Properties();
-      properties.setProperty("plot-frame-rate", String.valueOf(plotFrameRate));
+      properties.setProperty("plotFrameRate", String.valueOf(plotFrameRate));
       properties.setProperty("vsync", String.valueOf(vsync));
-      properties.setProperty("foreground-fps-limit", String.valueOf(foregroundFPSLimit));
-      properties.setProperty("libgdx-log-level", String.valueOf(libGDXLogLevel));
-      properties.setProperty("imgui-font-scale", String.valueOf(imguiFontScale));
-      properties.setProperty("theme-name", String.valueOf(themeName));
-      properties.setProperty("view-3d-background-shade", String.valueOf(view3DBackgroundShade));
+      properties.setProperty("foregroundFPSLimit", String.valueOf(foregroundFPSLimit));
+      properties.setProperty("libgdxLogLevel", String.valueOf(libGDXLogLevel));
+      properties.setProperty("imguiFontScale", String.valueOf(imguiFontScale));
+      properties.setProperty("themeName", String.valueOf(themeName));
+      properties.setProperty("view3DBackgroundShade", String.valueOf(view3DBackgroundShade));
 
       try (FileOutputStream output = new FileOutputStream(file))
       {
@@ -163,13 +163,13 @@ public class RDXSettings
 
       try
       {
-         plotFrameRate = Boolean.parseBoolean(properties.getProperty("plot-frame-rate"));
+         plotFrameRate = Boolean.parseBoolean(properties.getProperty("plotFrameRate"));
          vsync = Boolean.parseBoolean(properties.getProperty("vsync"));
-         foregroundFPSLimit = Integer.parseInt(properties.getProperty("foreground-fps-limit"));
-         libGDXLogLevel = Integer.parseInt(properties.getProperty("libgdx-log-level"));
-         imguiFontScale = Float.parseFloat(properties.getProperty("imgui-font-scale"));
-         themeName = properties.getProperty("theme-name");
-         view3DBackgroundShade = Float.parseFloat(properties.getProperty("view-3d-background-shade"));
+         foregroundFPSLimit = Integer.parseInt(properties.getProperty("foregroundFPSLimit"));
+         libGDXLogLevel = Integer.parseInt(properties.getProperty("libgdxLogLevel"));
+         imguiFontScale = Float.parseFloat(properties.getProperty("imguiFontScale"));
+         themeName = properties.getProperty("themeName");
+         view3DBackgroundShade = Float.parseFloat(properties.getProperty("view3DBackgroundShade"));
       }
       catch (Exception e)
       {
