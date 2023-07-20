@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImGuiStyle;
@@ -564,12 +565,11 @@ public class RDXBaseUI
          case CLASSIC -> ImGui.styleColorsClassic();
       }
 
-      // Shift the FrameBg color a little bit, so it's visible with Light theme
+      // Add a 1px frame border around UI elements when using Light theme to make things more visible
       if (theme == Theme.LIGHT)
       {
          ImGuiStyle style = ImGui.getStyle();
-         ImVec4 newFrameBgColor = style.getColor(ImGuiCol.TableHeaderBg);
-         style.setColor(ImGuiCol.FrameBg, newFrameBgColor.x, newFrameBgColor.y, newFrameBgColor.z, 0.4f);
+         style.setFrameBorderSize(1.0f);
       }
 
       this.theme = theme;
