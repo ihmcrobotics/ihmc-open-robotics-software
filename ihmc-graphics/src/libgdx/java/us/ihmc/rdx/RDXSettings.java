@@ -118,6 +118,7 @@ public class RDXSettings
       Properties properties = new Properties();
       properties.setProperty("plot-frame-rate", String.valueOf(plotFrameRate));
       properties.setProperty("vsync", String.valueOf(vsync));
+      properties.setProperty("foreground-fps-limit", String.valueOf(foregroundFPSLimit));
       properties.setProperty("libgdx-log-level", String.valueOf(libGDXLogLevel));
       properties.setProperty("imgui-font-scale", String.valueOf(imguiFontScale));
       properties.setProperty("theme-name", String.valueOf(themeName));
@@ -164,6 +165,7 @@ public class RDXSettings
       {
          plotFrameRate = Boolean.parseBoolean(properties.getProperty("plot-frame-rate"));
          vsync = Boolean.parseBoolean(properties.getProperty("vsync"));
+         foregroundFPSLimit = Integer.parseInt(properties.getProperty("foreground-fps-limit"));
          libGDXLogLevel = Integer.parseInt(properties.getProperty("libgdx-log-level"));
          imguiFontScale = Float.parseFloat(properties.getProperty("imgui-font-scale"));
          themeName = properties.getProperty("theme-name");

@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
@@ -323,16 +324,30 @@ public class RDXBaseUI
             settings.setForegroundFPSLimit(foregroundFPSLimit.get());
             Gdx.graphics.setForegroundFPS(foregroundFPSLimit.get());
          }
-         if (ImGuiTools.volatileInputInt(labels.get("libGDX log level"), libGDXLogLevel, 1))
-         {
-            settings.setLibGDXLogLevel(libGDXLogLevel.get());
-            Gdx.app.setLogLevel(libGDXLogLevel.get());
-         }
          if (ImGuiTools.volatileInputFloat(labels.get("Font scale"), imguiFontScale, 0.1f))
          {
             settings.setImguiFontScale(imguiFontScale.get());
             ImGui.getIO().setFontGlobalScale(imguiFontScale.get());
          }
+         ImGui.text("LibGDX log level: ");
+         ImGui.sameLine();
+         for (int i = 0; i <= Application.LOG_DEBUG; i++)
+         {
+            String logLevelName = "";
+            switch (i)
+            {
+               case 0 -> logLevelName = "None";
+               case 1 -> logLevelName = "Error";
+               case 2 -> logLevelName = "Info";
+               case 3 -> logLevelName = "Debug";
+            }
+            if (ImGui.radioButton(labels.get(logLevelName), Gdx.app.getLogLevel() == i)) {
+               settings.setLibGDXLogLevel(i);
+               Gdx.app.setLogLevel(i);
+            }
+            ImGui.sameLine();
+         }
+         ImGui.newLine();
          ImGui.separator();
          boolean renderingGroundTruthEnvironment = primaryScene.getSceneLevelsToRender().contains(RDXSceneLevel.GROUND_TRUTH);
          if (ImGui.checkbox(labels.get("Render Ground Truth Environment"), renderingGroundTruthEnvironment))
@@ -374,7 +389,7 @@ public class RDXBaseUI
          ImGui.separator();
          ImGui.text("Theme:");
          ImGui.sameLine();
-         for (int i = 0; i < Theme.values().length; ++i)
+         for (int i = 0; i < Theme.values().length; i++)
          {
             if (ImGui.radioButton(labels.get(StringUtils.capitalize(Theme.values()[i].name().toLowerCase())), this.theme == Theme.values()[i])) {
                Theme newTheme = Theme.values()[i];
