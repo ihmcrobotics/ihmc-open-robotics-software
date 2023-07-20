@@ -116,11 +116,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       ImGuiTools.previousWidgetTooltip("Keybind: Ctrl + Z");
    }
 
-   public void calculateVRPick(RDXVRContext vrContext)
-   {
-
-   }
-
    public void processVRInput(RDXVRContext vrContext)
    {
       for (RobotSide side : RobotSide.values)
@@ -152,7 +147,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
                                                             }
                                                          }
 
-                                                         if (footstepPlan.getNumberOfFootsteps() == 0)
+                                                         if (footstepPlan.getLastFootstep() == null)
                                                          {
                                                             if (aButton.bState() && aButton.bChanged())
                                                             {

@@ -89,10 +89,10 @@ public class RDXInteractableFootstep
    private final SideDependentList<Boolean> isIntersectingVR = new SideDependentList<>(false, false);
    private final SideDependentList<ModifiableReferenceFrame> dragReferenceFrame = new SideDependentList<>();
    private final FramePose3D vrPickPose = new FramePose3D();
-   private final BoxRayIntersection footIntersection = new BoxRayIntersection();
    private final Point3D closestCollision = new Point3D();
    private double closestCollisionDistance;
    private final Plane3DMouseDragAlgorithm planeDragAlgorithm = new Plane3DMouseDragAlgorithm();
+   private final SideDependentList<RDXVRDragData> triggerDragData = new SideDependentList<>();
 
    public RDXInteractableFootstep(RDXBaseUI baseUI, RobotSide footstepSide, int index, SideDependentList<ConvexPolygon2D> defaultPolygons)
    {
@@ -261,9 +261,9 @@ public class RDXInteractableFootstep
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
-            vrPickResult.get(side).reset();
             if (!controller.getTriggerDragData().isDragging())
             {
+               vrPickResult.get(side).reset();
                Line3DReadOnly pickRay = controller.getPickRay();
                closestCollisionDistance = Double.POSITIVE_INFINITY;
 
@@ -284,7 +284,7 @@ public class RDXInteractableFootstep
                   }
                }
             }
-            vrPickResult.get(side).setDistanceToControllerPickPoint(closestCollisionDistance);
+            vrPickResult.get(side).addPickCollision(closestCollisionDistance);
             controller.addPickResult(vrPickResult.get(side));
 
             vrPickPose.setIncludingFrame(controller.getPickPointPose());
@@ -305,7 +305,7 @@ public class RDXInteractableFootstep
                dragReferenceFrame.put(side, new ModifiableReferenceFrame(controller.getPickPoseFrame()));
             }
             RDXVRDragData gripDragData = controller.getGripDragData();
-            RDXVRDragData triggerDragData = controller.getTriggerDragData();
+            triggerDragData.put(side, controller.getTriggerDragData());
             RDXVRDragData aButtonDragData = controller.getAButtonDragData();
             RDXVRDragData bButtonDragData = controller.getBButtonDragData();
 
@@ -317,11 +317,11 @@ public class RDXInteractableFootstep
                                     .getTransformToDesiredFrame(dragReferenceFrame.get(side).getTransformToParent(), controller.getPickPoseFrame());
                dragReferenceFrame.get(side).getReferenceFrame().update();
             }
-            if (triggerDragData.getDragJustStarted() && vrContext.getController(side).getSelectedPick() == vrPickResult.get(side))
+            if (triggerDragData.get(side).getDragJustStarted() && vrContext.getController(side).getSelectedPick() == vrPickResult.get(side))
             {
-               triggerDragData.setObjectBeingDragged(this);
+               triggerDragData.get(side).setObjectBeingDragged(this);
             }
-            if (triggerDragData.isBeingDragged(this))
+            if (triggerDragData.get(side).isBeingDragged(this))
             {
                Line3DReadOnly pickRay = controller.getPickRay();
                if (vrContext.getController(side).getSelectedPick() == vrPickResult.get(side))
@@ -330,8 +330,7 @@ public class RDXInteractableFootstep
                   closestCollision.add(planarMotion);
                   addGizmoPose(planarMotion);
                   double deltaYaw = -controller.getPickPointPose().getRoll();
-                  selectablePose3DGizmo.getPoseGizmo()
-                                       .getTransformToParent()
+                  selectablePose3DGizmo.getPoseGizmo().getTransformToParent()
                                        .getRotation()
                                        .setYawPitchRoll(deltaYaw,
                                                         selectablePose3DGizmo.getPoseGizmo().getPose().getPitch(),
