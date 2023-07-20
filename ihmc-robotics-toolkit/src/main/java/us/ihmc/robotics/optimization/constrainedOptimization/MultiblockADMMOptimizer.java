@@ -52,13 +52,39 @@ public class MultiblockADMMOptimizer
          optima[i] = new DMatrixRMaj(initialValues[i]);
       }
 
-      // Seed the admm optimization
+      // Seed the admm problem by running the optimization
       for (int i = 0; i < numBlocks; i++)
       {
          AugmentedLagrangeOptimizationProblem problem = admm.getIsolatedOptimizationProblems().get(i);
          optimizers[i].setCostFunction(problem.getAugmentedCostFunction());
-         optima[i].set(optimizers[i].optimize(initialValues[i]));
       }
+      if (runSubproblemsParallel)
+      {
+         // TODO this is terrible but it was the simplest fix
+         record OptimizerInitialValueCouple(Optimizer optimizer, DMatrixD1 initialValue){}
+         OptimizerInitialValueCouple[] optimizerCoupleList = new OptimizerInitialValueCouple[optimizers.length];
+         for (int i = 0; i < optimizerCoupleList.length; i++)
+         {
+            optimizerCoupleList[i] = new OptimizerInitialValueCouple(optimizers[i], initialValues[i]);
+         }
+         Arrays.stream(optimizerCoupleList).parallel().forEach((optimizerCouple)->{
+            optimizerCouple.optimizer().optimize(optimizerCouple.initialValue());
+         });
+      }
+      else
+      {
+         for (int i = 0; i < numBlocks; i++)
+         {
+            // seed optimization using last optimum found
+            optimizers[i].optimize(initialValues[i]);
+         }
+      }
+      // Save results
+      for (int i = 0; i < numBlocks; i++)
+      {
+         optima[i].set(optimizers[i].getOptimalParameters());
+      }
+
 
       if (verbose)
       {

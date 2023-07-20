@@ -19,6 +19,9 @@ public class WrappedGradientDescent implements Optimizer
    private double stepSize = 10.0;
    private double learningRate = 0.9;
    private int maxIterations;
+   private TDoubleArrayList lowerBound = null;
+   private TDoubleArrayList upperBound = null;
+   private boolean verbose = false;
 
    public WrappedGradientDescent()
    {
@@ -69,6 +72,11 @@ public class WrappedGradientDescent implements Optimizer
 
    public void setMaxIterations(int maxIterations) {this.maxIterations = maxIterations;}
 
+   public void setVerbose(boolean verbose)
+   {
+      this.verbose = verbose;
+   }
+
    /**
     * Not implemented
     * @return
@@ -85,9 +93,12 @@ public class WrappedGradientDescent implements Optimizer
       TDoubleArrayList initialArray = new TDoubleArrayList();
       convertMatrixToArray(initial, initialArray);
       gradientDescentModule = new GradientDescentModule(createUnwrappedCostFunction(costFunction), initialArray);
-      gradientDescentModule.setStepSize(stepSize);
+      gradientDescentModule.setUnboundedStepSize(stepSize);
       gradientDescentModule.setReducingStepSizeRatio(1.0/learningRate);
       gradientDescentModule.setMaximumIterations(maxIterations);
+      gradientDescentModule.setInputLowerLimit(lowerBound);
+      gradientDescentModule.setInputUpperLimit(upperBound);
+      gradientDescentModule.setVerbose(verbose);
 
       gradientDescentModule.run();
       return getOptimalParameters();
@@ -111,15 +122,12 @@ public class WrappedGradientDescent implements Optimizer
    {
       // assert that bounds is correct size
 
-      TDoubleArrayList lower = new TDoubleArrayList();
-      TDoubleArrayList upper = new TDoubleArrayList();
+      lowerBound = new TDoubleArrayList();
+      upperBound = new TDoubleArrayList();
       for (RealDomainBounds bound : bounds)
       {
-         lower.add(bound.min());
-         upper.add(bound.max());
+         lowerBound.add(bound.min());
+         upperBound.add(bound.max());
       }
-
-      gradientDescentModule.setInputLowerLimit(lower);
-      gradientDescentModule.setInputUpperLimit(upper);
    }
 }
