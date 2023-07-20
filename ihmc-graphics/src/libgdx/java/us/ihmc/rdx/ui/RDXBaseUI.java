@@ -382,7 +382,7 @@ public class RDXBaseUI
          {
             setUseMiddleClickViewOrbit(middleClickOrbit.get());
          }
-         if (ImGuiTools.sliderDouble(labels.get("World shader"), view3DBackgroundShade, 0.0f, 1.0f)) {
+         if (ImGuiTools.sliderDouble(labels.get("Background shade"), view3DBackgroundShade, 0.0f, 1.0f)) {
             settings.setView3DBackgroundShade((float) view3DBackgroundShade.get());
             setView3DBackgroundShade((float) view3DBackgroundShade.get());
          }
