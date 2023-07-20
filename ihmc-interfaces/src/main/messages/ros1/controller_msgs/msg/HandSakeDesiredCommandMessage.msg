@@ -15,6 +15,8 @@ int8 COMMAND_OPTION_GOAL_POSITION=3
 
 int8 COMMAND_OPTION_SET_GOAL_TORQUE=4
 
+int8 COMMAND_OPTION_CALIBRATE=5
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 

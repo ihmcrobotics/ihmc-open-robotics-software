@@ -28,6 +28,9 @@ module controller_msgs
       const octet COMMAND_OPTION_SET_GOAL_TORQUE =
       4;
 
+      const octet COMMAND_OPTION_CALIBRATE =
+      5;
+
 
       /**
        * Message for commanding the Sake hands to perform various predefined grasps.
