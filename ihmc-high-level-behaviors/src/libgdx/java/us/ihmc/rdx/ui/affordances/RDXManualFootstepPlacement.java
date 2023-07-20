@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.ImGui;
+import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -24,6 +25,8 @@ import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.rdx.vr.RDXVRDragData;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -111,6 +114,42 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          footstepPlan.removeLastStep();
       }
       ImGuiTools.previousWidgetTooltip("Keybind: Ctrl + Z");
+   }
+
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+
+   }
+
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         vrContext.getController(side).runIfConnected(controller ->
+                                                      {
+                                                         InputDigitalActionData aButton = controller.getAButtonActionData();
+                                                         RDXVRDragData aButtonDragData = controller.getAButtonDragData();
+
+                                                         if (aButtonDragData.getObjectBeingDragged() != null)
+                                                         {
+                                                            if (aButtonDragData.getObjectBeingDragged()
+                                                                               .toString()
+                                                                               .startsWith("us.ihmc.rdx.ui.affordances.RDXInteractableFootstep"))
+                                                            {
+                                                               createNewVRFootstep(controller.getPickCollisionPoint(), side);
+                                                               aButtonDragData.setObjectBeingDragged(null);
+                                                            }
+                                                         }
+
+                                                         if (footstepPlan.getNumberOfFootsteps() == 0)
+                                                         {
+                                                            if (aButton.bState() && aButton.bChanged())
+                                                            {
+                                                               createNewVRFootstep(controller.getPickPointPose().getPosition(), side);
+                                                            }
+                                                         }
+                                                      });
+      }
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
@@ -262,6 +301,19 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       tempFramePose.set(rigidBodyTransform);
       tempFramePose.getOrientation().setToYawOrientation(latestFootstepYaw);
       footstepBeingPlaced.updatePose(tempFramePose);
+   }
+
+   public void createNewVRFootstep(Point3DReadOnly pointedFoot, RobotSide side)
+   {
+      modeNewlyActivated = true;
+      footstepBeingPlaced = new RDXInteractableFootstep(baseUI, side, footstepPlan.getNumberOfFootsteps(), null);
+
+      tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
+      tempFramePose.getPosition().set(pointedFoot);
+      tempFramePose.getPosition().subZ(0.014617);
+      footstepBeingPlaced.updatePose(tempFramePose);
+      placeFootstep();
+      exitPlacement();
    }
 
    public boolean pollIsModeNewlyActivated()

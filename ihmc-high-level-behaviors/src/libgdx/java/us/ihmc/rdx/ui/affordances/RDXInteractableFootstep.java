@@ -306,8 +306,9 @@ public class RDXInteractableFootstep
             }
             RDXVRDragData gripDragData = controller.getGripDragData();
             RDXVRDragData triggerDragData = controller.getTriggerDragData();
+            RDXVRDragData aButtonDragData = controller.getAButtonDragData();
 
-            if (gripDragData.getDragJustStarted())
+            if (gripDragData.getDragJustStarted() && isIntersectingVR.get(side))
             {
                gripDragData.setObjectBeingDragged(this);
                selectablePose3DGizmo.getPoseGizmo()
@@ -328,15 +329,26 @@ public class RDXInteractableFootstep
                   closestCollision.add(planarMotion);
                   addGizmoPose(planarMotion);
                   double deltaYaw = -controller.getPickPointPose().getRoll();
-                  selectablePose3DGizmo.getPoseGizmo().getTransformToParent().getRotation().setYawPitchRoll(deltaYaw, selectablePose3DGizmo.getPoseGizmo().getPose().getPitch(), selectablePose3DGizmo.getPoseGizmo().getPose().getRoll());
+                  selectablePose3DGizmo.getPoseGizmo()
+                                       .getTransformToParent()
+                                       .getRotation()
+                                       .setYawPitchRoll(deltaYaw,
+                                                        selectablePose3DGizmo.getPoseGizmo().getPose().getPitch(),
+                                                        selectablePose3DGizmo.getPoseGizmo().getPose().getRoll());
                }
             }
 
-            boolean isGripping = gripDragData.isBeingDragged(this);
-            if(isIntersectingVR.get(side) && isGripping)
+            if (aButtonDragData.getDragJustStarted() && vrContext.getController(side).getSelectedPick() == vrPickResult.get(side))
             {
-               dragReferenceFrame.get(side).getReferenceFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
-                                                                                           ReferenceFrame.getWorldFrame());
+               aButtonDragData.setObjectBeingDragged(this);
+            }
+
+            boolean isGripping = gripDragData.isBeingDragged(this);
+            if (isIntersectingVR.get(side) && isGripping)
+            {
+               dragReferenceFrame.get(side)
+                                 .getReferenceFrame()
+                                 .getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(), ReferenceFrame.getWorldFrame());
             }
 
             if (isIntersectingVR.get(RobotSide.LEFT) || isIntersectingVR.get(RobotSide.RIGHT))
