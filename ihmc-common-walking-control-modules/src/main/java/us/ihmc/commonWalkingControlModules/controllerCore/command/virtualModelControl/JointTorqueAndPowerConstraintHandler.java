@@ -8,38 +8,56 @@ public class JointTorqueAndPowerConstraintHandler
    private double torqueLimitUpper;
    private double torqueLimitFromPowerLower;
    private double torqueLimitFromPowerUpper;
+   private double qd;
+
+   /**
+    * This class handles the computation of the more restrictive constraints on torque given a joint
+    * (which has a velocity and may have effort limits), power limits, and a boolean, which dictates
+    * whether the joint effort limits are considered. computeTorqueConstraints() must be called at each
+    * tick to update the limits.
+    */
+   public JointTorqueAndPowerConstraintHandler()
+   {
+      this.torqueLimitLower = Double.NEGATIVE_INFINITY;
+      this.torqueLimitUpper = Double.POSITIVE_INFINITY;
+      this.torqueLimitFromPowerLower = Double.NEGATIVE_INFINITY;
+      this.torqueLimitFromPowerUpper = Double.POSITIVE_INFINITY;
+      this.qd = 0.0;
+   }
 
    /**
     * Computes the more restrictive constraints on torque given a joint (which has a velocity and may
     * have effort limits), power limits, and a boolean, which dictates whether the joint effort limits
-    * are considered.
+    * are considered. You must call this each tick to update the torque limits.
     */
-   public JointTorqueAndPowerConstraintHandler(OneDoFJointBasics joint, double powerLimitLower, double powerLimitUpper, boolean hasTorqueConstraint)
+   public void computeTorqueConstraints(OneDoFJointBasics joint, double powerLimitLower, double powerLimitUpper, boolean hasTorqueConstraint)
    {
       if (powerLimitLower > powerLimitUpper)
          throw new RuntimeException("powerLimitLower cannot be larger than powerLimitUpper");
 
-      double qd = joint.getQd();
+      qd = joint.getQd();
+      torqueLimitFromPowerLower = powerLimitUpper / qd;
+      torqueLimitFromPowerUpper = powerLimitLower / qd;
       if (qd < 0)
       {
-         this.torqueLimitFromPowerLower = powerLimitUpper / qd;
-         this.torqueLimitFromPowerUpper = powerLimitLower / qd;
+         torqueLimitFromPowerLower = powerLimitUpper / qd;
+         torqueLimitFromPowerUpper = powerLimitLower / qd;
       }
       else
       {
-         this.torqueLimitFromPowerLower = powerLimitLower / qd;
-         this.torqueLimitFromPowerUpper = powerLimitUpper / qd;
+         torqueLimitFromPowerLower = powerLimitLower / qd;
+         torqueLimitFromPowerUpper = powerLimitUpper / qd;
       }
 
       if (hasTorqueConstraint)
       {
-         this.torqueLimitLower = Math.max(joint.getEffortLimitLower(), torqueLimitFromPowerLower);
-         this.torqueLimitUpper = Math.min(joint.getEffortLimitUpper(), torqueLimitFromPowerUpper);
+         torqueLimitLower = Math.max(joint.getEffortLimitLower(), torqueLimitFromPowerLower);
+         torqueLimitUpper = Math.min(joint.getEffortLimitUpper(), torqueLimitFromPowerUpper);
       }
       else
       {
-         this.torqueLimitLower = torqueLimitFromPowerLower;
-         this.torqueLimitUpper = torqueLimitFromPowerUpper;
+         torqueLimitLower = torqueLimitFromPowerLower;
+         torqueLimitUpper = torqueLimitFromPowerUpper;
       }
    }
 

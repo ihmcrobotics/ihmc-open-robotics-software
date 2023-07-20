@@ -85,6 +85,7 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
    private final OneDoFJointBasics[] controlledOneDoFJoints;
    private final JointBasics[] jointsToOptimizeFor;
    private final List<KinematicLoopFunction> kinematicLoopFunctions;
+   private final JointTorqueAndPowerConstraintHandler torqueConstraintHandler = new JointTorqueAndPowerConstraintHandler();
 
    private final YoFrameVector3D yoDesiredMomentumRateLinear;
    private final YoFrameVector3D yoDesiredMomentumRateAngular;
@@ -241,7 +242,9 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
          optimizationControlModule.setupTorqueMinimizationCommand();
       }
       if (jointTorqueLimitEnforcementMethod.getValue() == JointTorqueLimitEnforcementMethod.CONSTRAINTS_IN_QP
-          || jointPowerLimitEnforcementMethod.getValue() == JointPowerLimitEnforcementMethod.CONSTRAINTS_IN_QP)
+          || jointPowerLimitEnforcementMethod.getValue() == JointPowerLimitEnforcementMethod.CONSTRAINTS_IN_QP
+          || jointTorqueLimitEnforcementMethod.getValue() == JointTorqueLimitEnforcementMethod.CONSTRAINTS_IN_QP_AND_CONTROLLER
+          || jointPowerLimitEnforcementMethod.getValue() == JointPowerLimitEnforcementMethod.CONSTRAINTS_IN_QP_AND_CONTROLLER)
       {
          optimizationControlModule.setupTorqueConstraintCommand();
       }
@@ -285,11 +288,13 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
             JointDesiredOutputBasics jointDesiredOutput = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
             jointDesiredOutput.setDesiredAcceleration(jointAccelerations.get(jointAccelerationIndex, 0));
             double tau = tauSolution.get(jointIndex, 0);
-            boolean hasTorqueLimits = (jointTorqueLimitEnforcementMethod.getValue() == JointTorqueLimitEnforcementMethod.CONSTRAINTS_IN_CONTROLLER);
-            boolean hasPowerLimits = (jointPowerLimitEnforcementMethod.getValue() == JointPowerLimitEnforcementMethod.CONSTRAINTS_IN_CONTROLLER);
+            boolean hasTorqueLimits = (jointTorqueLimitEnforcementMethod.getValue() == JointTorqueLimitEnforcementMethod.CONSTRAINTS_IN_CONTROLLER
+                                       || jointTorqueLimitEnforcementMethod.getValue() == JointTorqueLimitEnforcementMethod.CONSTRAINTS_IN_QP_AND_CONTROLLER);
+            boolean hasPowerLimits = (jointPowerLimitEnforcementMethod.getValue() == JointPowerLimitEnforcementMethod.CONSTRAINTS_IN_CONTROLLER
+                                      || jointPowerLimitEnforcementMethod.getValue() == JointPowerLimitEnforcementMethod.CONSTRAINTS_IN_QP_AND_CONTROLLER);
 
             if (hasTorqueLimits || hasPowerLimits)
-               setClampedDesiredTorque(tau, joint, jointDesiredOutput, hasTorqueLimits, hasPowerLimits);
+               jointDesiredOutput.setDesiredTorque(getClampedDesiredTorque(tau, joint, jointDesiredOutput, hasTorqueLimits, hasPowerLimits));
             else
                jointDesiredOutput.setDesiredTorque(tau);
          }
@@ -313,11 +318,13 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
             JointDesiredOutputBasics jointDesiredOutput = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
             jointDesiredOutput.setDesiredAcceleration(jointAccelerations.get(jointIndex, 0));
             double tau = inverseDynamicsCalculator.getComputedJointTau(joint).get(0);
-            boolean hasTorqueLimits = (jointTorqueLimitEnforcementMethod.getValue() == JointTorqueLimitEnforcementMethod.CONSTRAINTS_IN_CONTROLLER);
-            boolean hasPowerLimits = (jointPowerLimitEnforcementMethod.getValue() == JointPowerLimitEnforcementMethod.CONSTRAINTS_IN_CONTROLLER);
+            boolean hasTorqueLimits = (jointTorqueLimitEnforcementMethod.getValue() == JointTorqueLimitEnforcementMethod.CONSTRAINTS_IN_CONTROLLER
+                                       || jointTorqueLimitEnforcementMethod.getValue() == JointTorqueLimitEnforcementMethod.CONSTRAINTS_IN_QP_AND_CONTROLLER);
+            boolean hasPowerLimits = (jointPowerLimitEnforcementMethod.getValue() == JointPowerLimitEnforcementMethod.CONSTRAINTS_IN_CONTROLLER
+                                      || jointPowerLimitEnforcementMethod.getValue() == JointPowerLimitEnforcementMethod.CONSTRAINTS_IN_QP_AND_CONTROLLER);
 
             if (hasTorqueLimits || hasPowerLimits)
-               setClampedDesiredTorque(tau, joint, jointDesiredOutput, hasTorqueLimits, hasPowerLimits);
+               jointDesiredOutput.setDesiredTorque(getClampedDesiredTorque(tau, joint, jointDesiredOutput, hasTorqueLimits, hasPowerLimits));
             else
                jointDesiredOutput.setDesiredTorque(tau);
          }
@@ -538,11 +545,11 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
       return group;
    }
 
-   private void setClampedDesiredTorque(double tau,
-                                        OneDoFJointBasics joint,
-                                        JointDesiredOutputBasics jointDesiredOutput,
-                                        boolean hasTorqueLimits,
-                                        boolean hasPowerLimits)
+   private double getClampedDesiredTorque(double tau,
+                                          OneDoFJointBasics joint,
+                                          JointDesiredOutputBasics jointDesiredOutput,
+                                          boolean hasTorqueLimits,
+                                          boolean hasPowerLimits)
    {
       double torqueLimitLower = Double.NEGATIVE_INFINITY;
       double torqueLimitUpper = Double.POSITIVE_INFINITY;
@@ -556,10 +563,7 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
             powerLimitLower = -powerConstrainedJointLimits.get(joint.getName());
             powerLimitUpper = powerConstrainedJointLimits.get(joint.getName());
 
-            JointTorqueAndPowerConstraintHandler torqueConstraintHandler = new JointTorqueAndPowerConstraintHandler(joint,
-                                                                                                                    powerLimitLower,
-                                                                                                                    powerLimitUpper,
-                                                                                                                    hasTorqueLimits);
+            torqueConstraintHandler.computeTorqueConstraints(joint, powerLimitLower, powerLimitUpper, hasTorqueLimits);
             torqueLimitLower = torqueConstraintHandler.getTorqueLimitLower();
             torqueLimitUpper = torqueConstraintHandler.getTorqueLimitUpper();
 
@@ -570,8 +574,6 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
             torqueLimitUpper = joint.getEffortLimitUpper();
          }
       }
-
-      if (hasTorqueLimits || hasPowerLimits)
-         jointDesiredOutput.setDesiredTorque(MathTools.clamp(tau, torqueLimitLower, torqueLimitUpper));
+      return MathTools.clamp(tau, torqueLimitLower, torqueLimitUpper);
    }
 }

@@ -16,6 +16,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 public class JointTorqueAndPowerConstraintHandlerTest
 {
+   private final JointTorqueAndPowerConstraintHandler handler = new JointTorqueAndPowerConstraintHandler();
+   
    @Test
    public void testJointTorqueAndPowerConstraintHandlerOnFixedBaseMechanism()
    {
@@ -47,7 +49,7 @@ public class JointTorqueAndPowerConstraintHandlerTest
          }
 
          // execute method we are testing
-         JointTorqueAndPowerConstraintHandler handler = new JointTorqueAndPowerConstraintHandler(joint, powerLimitLower, powerLimitUpper, hasTorqueConstraints);
+         handler.computeTorqueConstraints(joint, powerLimitLower, powerLimitUpper, hasTorqueConstraints);
          double torqueLimitLower = handler.getTorqueLimitLower();
          double torqueLimitUpper = handler.getTorqueLimitUpper();
          double torqueLimitFromPowerLower = handler.getTorqueLimitsFromPowerLower();
