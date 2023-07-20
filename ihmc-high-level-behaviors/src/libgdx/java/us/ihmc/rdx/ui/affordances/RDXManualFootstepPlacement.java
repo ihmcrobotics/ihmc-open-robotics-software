@@ -310,7 +310,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
       tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
       tempFramePose.getPosition().set(pointedFoot);
-      tempFramePose.getPosition().subZ(0.014617);
+      tempFramePose.getPosition().setZ(0.017);
       footstepBeingPlaced.updatePose(tempFramePose);
       placeFootstep();
       exitPlacement();

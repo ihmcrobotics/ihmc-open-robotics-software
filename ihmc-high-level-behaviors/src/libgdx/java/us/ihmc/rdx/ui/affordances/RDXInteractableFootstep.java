@@ -351,7 +351,9 @@ public class RDXInteractableFootstep
                                  .getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(), ReferenceFrame.getWorldFrame());
             }
 
-            if (isIntersectingVR.get(RobotSide.LEFT) || isIntersectingVR.get(RobotSide.RIGHT))
+            if (isIntersectingVR.get(RobotSide.LEFT) || isIntersectingVR.get(RobotSide.RIGHT)
+                || vrContext.getController(RobotSide.RIGHT).getSelectedPick() == vrPickResult.get(RobotSide.RIGHT)
+                || vrContext.getController(RobotSide.LEFT).getSelectedPick() == vrPickResult.get(RobotSide.LEFT))
             {
                if (getFootstepSide() == RobotSide.LEFT)
                   footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 1.0f, 0.0f, 0.0f, 0.0f));
