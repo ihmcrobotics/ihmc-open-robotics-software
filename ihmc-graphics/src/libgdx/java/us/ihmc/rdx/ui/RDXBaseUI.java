@@ -224,8 +224,8 @@ public class RDXBaseUI
       primaryScene.create(sceneLevels);
       primaryScene.addDefaultLighting();
       primary3DPanel.create(RDXInputMode.ImGui, glProfiler, primaryScene);
-      imGuiWindowAndDockSystem.getPanelManager().addPanel(primary3DPanel.getImGuiPanel());
-      primary3DPanel.getImGuiPanel().getIsShowing().set(true);
+      imGuiWindowAndDockSystem.getPanelManager().addPanel(primary3DPanel);
+      primary3DPanel.getIsShowing().set(true);
 
       Gdx.input.setInputProcessor(null); // detach from getting input events from GDX. TODO: Should we do this here?
 
@@ -454,7 +454,7 @@ public class RDXBaseUI
    {
       panel3D.create(RDXInputMode.ImGui, glProfiler, scene3D);
       panel3D.getCamera3D().changeCameraPosition(-isoZoomOut, -isoZoomOut, isoZoomOut);
-      imGuiWindowAndDockSystem.getPanelManager().addPanel(panel3D.getImGuiPanel());
+      imGuiWindowAndDockSystem.getPanelManager().addPanel(panel3D);
       additional3DPanels.add(panel3D);
    }
 
