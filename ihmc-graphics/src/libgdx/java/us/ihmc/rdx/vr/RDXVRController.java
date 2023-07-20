@@ -124,20 +124,21 @@ public class RDXVRController extends RDXVRTrackedDevice
    private RDXModelInstance pickPoseSphere;
    private RDXModelInstance pickRayGraphic;
    private RDXModelInstance pickRayCollisionPointGraphic;
-   private  RDXVRControllerButtonLabel aButtonLabel;
-   private  RDXVRControllerButtonLabel bButtonLabel;
+   private RDXVRControllerButtonLabel aButtonLabel;
+   private RDXVRControllerButtonLabel bButtonLabel;
    private final RDXVRDragData triggerDragData;
    private final RDXVRDragData gripDragData;
+   private final RDXVRDragData aButtonDragData;
+   private final RDXVRDragData bButtonDragData;
 
    public RDXVRController(RobotSide side, ReferenceFrame vrPlayAreaYUpZBackFrame)
    {
       super(vrPlayAreaYUpZBackFrame);
       this.side = side;
 
-      xForwardZUpControllerFrame
-            = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(side.getLowerCaseName() + "_xForwardZUpControllerFrame",
-                                                                                getDeviceYUpZBackFrame(),
-                                                                                controllerYBackZLeftXRightToXForwardZUp);
+      xForwardZUpControllerFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(side.getLowerCaseName() + "_xForwardZUpControllerFrame",
+                                                                                                     getDeviceYUpZBackFrame(),
+                                                                                                     controllerYBackZLeftXRightToXForwardZUp);
       pickPoseFrame = new ModifiableReferenceFrame(xForwardZUpControllerFrame);
       pickPoseFrame.getTransformToParent().getTranslation().setX(0.029);
       pickPoseFrame.getTransformToParent().getTranslation().setY(side.negateIfLeftSide(0.020));
@@ -147,6 +148,8 @@ public class RDXVRController extends RDXVRTrackedDevice
 
       triggerDragData = new RDXVRDragData(() -> getClickTriggerActionData().bState(), pickPoseFrame.getReferenceFrame());
       gripDragData = new RDXVRDragData(this::getGripAsButtonDown, pickPoseFrame.getReferenceFrame());
+      aButtonDragData = new RDXVRDragData(() -> getAButtonActionData().bState(), pickPoseFrame.getReferenceFrame());
+      bButtonDragData = new RDXVRDragData(() -> getBButtonActionData().bState(), pickPoseFrame.getReferenceFrame());
    }
 
    public void initSystem()
@@ -238,6 +241,8 @@ public class RDXVRController extends RDXVRTrackedDevice
 
       triggerDragData.update();
       gripDragData.update();
+      aButtonDragData.update();
+      bButtonDragData.update();
 
       pickRayGraphic = null;
       if (pickRayCollisionPointGraphic != null)
@@ -321,6 +326,11 @@ public class RDXVRController extends RDXVRTrackedDevice
       LibGDXTools.toLibGDX(pickCollisionPoint, pickRayCollisionPointGraphic.transform);
    }
 
+   public Point3DReadOnly getPickCollisionPoint()
+   {
+      return pickCollisionPoint;
+   }
+
    public RDXModelInstance getPickPoseSphere()
    {
       return pickPoseSphere;
@@ -361,6 +371,16 @@ public class RDXVRController extends RDXVRTrackedDevice
       return aTouchedActionData;
    }
 
+   public RDXVRDragData getAButtonDragData()
+   {
+      return aButtonDragData;
+   }
+
+   public boolean getAButtonClickReleasedWithoutDrag()
+   {
+      return aButtonActionData.bChanged() && !aButtonActionData.bState() && aButtonDragData.isClickValid();
+   }
+
    public InputDigitalActionData getBButtonActionData()
    {
       return bButtonActionData;
@@ -374,6 +394,16 @@ public class RDXVRController extends RDXVRTrackedDevice
    public InputDigitalActionData getBTouchedActionData()
    {
       return bTouchedActionData;
+   }
+
+   public RDXVRDragData getBButtonDragData()
+   {
+      return bButtonDragData;
+   }
+
+   public boolean getBButtonClickReleasedWithoutDrag()
+   {
+      return bButtonActionData.bChanged() && !bButtonActionData.bState() && bButtonDragData.isClickValid();
    }
 
    public InputDigitalActionData getJoystickPressActionData()
