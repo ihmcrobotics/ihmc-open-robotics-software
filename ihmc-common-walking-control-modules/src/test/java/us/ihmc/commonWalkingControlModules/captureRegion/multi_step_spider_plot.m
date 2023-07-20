@@ -1,3 +1,5 @@
+clear;
+clc;
 directions = [1.000, 0.000; % 0
               0.866, 0.500; % 1
               0.500, 0.866; % 2
@@ -48,39 +50,39 @@ magnitude_case3 = [0.64; % 0
                    0.23;  % 4
                    0.31;  % 5
                    0.59;  % 6
-                   0.55; % 7 stopped here (didn't do this one)
-                   0.55; % 8
-                   0.75; % 9
-                   0.7;  % 10
-                   0.5];  % 11
+                   0.57; % 7
+                   0.59; % 8
+                   0.76; % 9
+                   0.71;  % 10
+                   0.51];  % 11
 
 % case 4 = with step adjustment, with swing time adjustment, with transfer time adjustment, no cross over
-magnitude_case4 = [1.00; % 0
-                   0.35; % 1
-                   0.25; % 2
-                   0.25; % 3
-                   0.3;  % 4
-                   0.4;  % 5
-                   0.9;  % 6
+magnitude_case4 = [1.03; % 0
+                   0.36; % 1
+                   0.28; % 2
+                   0.26; % 3
+                   0.30;  % 4
+                   0.41;  % 5
+                   0.90;  % 6
                    0.95; % 7
-                   0.7;  % 8
-                   0.8;  % 9
-                   0.8;  % 10
-                   0.8];  % 11
+                   0.73;  % 8
+                   0.80;  % 9
+                   0.83;  % 10
+                   0.86];  % 11
 
 % case 5 = with step adjustment, with swing time adjustment, with transfer time adjustment, with cross over
-magnitude_case5 = [1.10; % 0
-                   0.75; % 1
-                   0.50; % 2
-                   0.40; % 3
+magnitude_case5 = [1.15; % 0
+                   0.78; % 1
+                   0.45; % 2
+                   0.41; % 3
                    0.30; % 4
                    0.55; % 5
-                   0.9;  % 6
+                   0.91;  % 6
                    0.95; % 7
-                   0.8;  % 8
+                   0.84;  % 8
                    0.85; % 9
                    1.0;  % 10
-                   1.05];% 11
+                   1.07];% 11
 
 values_case1 = zeros(12, 2);
 values_case2 = zeros(12, 2);
