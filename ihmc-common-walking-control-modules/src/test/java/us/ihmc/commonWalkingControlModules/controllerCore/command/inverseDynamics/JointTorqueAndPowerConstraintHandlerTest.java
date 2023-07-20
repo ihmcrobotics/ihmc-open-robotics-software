@@ -5,7 +5,6 @@ import java.util.Random;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueAndPowerConstraintHandler;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
