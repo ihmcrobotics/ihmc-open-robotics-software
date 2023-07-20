@@ -306,7 +306,6 @@ public class RDXBaseUI
          imGuiWindowAndDockSystem.renderMenuDockPanelItems();
          ImGui.endMenu();
       }
-      /* GDX savable Settings */
       if (ImGui.beginMenu("Settings"))
       {
          if (ImGui.checkbox(labels.get("Frame rate plot"), plotFrameRate))
