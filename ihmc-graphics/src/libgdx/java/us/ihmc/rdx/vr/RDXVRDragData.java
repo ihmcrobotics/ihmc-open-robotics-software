@@ -2,12 +2,16 @@ package us.ihmc.rdx.vr;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 
 import java.util.function.BooleanSupplier;
 
 public class RDXVRDragData
 {
+   public static final double DRAG_TRANSLATION_TOLERANCE = 0.02;
+   public static final double DRAG_ROTATION_TOLERANCE = Math.toRadians(3.0);
+
    private final BooleanSupplier isButtonDown;
    private boolean dragging = false;
    private boolean dragJustStarted = false;
@@ -33,6 +37,12 @@ public class RDXVRDragData
    private final RDXVRPickPlaneYawCalculator pickPlaneYawCalculator = new RDXVRPickPlaneYawCalculator();
    private final ModifiableReferenceFrame zUpDragParentFrame;
    private final FramePose3D zUpDragPose = new FramePose3D();
+   /**
+    * Used for detecting clicks, which are most robustly a press and release
+    * without a significant drag transform.
+    */
+   private final RigidBodyTransform dragStartToWorld = new RigidBodyTransform();
+   private boolean clickValid = false;
 
    public RDXVRDragData(BooleanSupplier isButtonDown, ReferenceFrame controllerPickFrame)
    {
@@ -48,6 +58,11 @@ public class RDXVRDragData
 
       if (buttonUp)
       {
+         // We want to invalidate the click, but leaving one frame
+         // where dragging is false first.
+         if (!dragging)
+            clickValid = false;
+
          dragging = false;
          dragJustStarted = false;
       }
@@ -55,12 +70,22 @@ public class RDXVRDragData
       {
          dragJustStarted = !dragging;
          dragging = true;
+         dragStartToWorld.set(controllerPickFrame.getTransformToRoot());
+         clickValid = true;
       }
 
       if (buttonUp || dragJustStarted)
       {
          // We really want to make sure this is null when nothing is being dragged
          objectBeingDragged = null;
+      }
+
+      if (dragging)
+      {
+         double translationError = dragStartToWorld.getTranslation().differenceNorm(controllerPickFrame.getTransformToRoot().getTranslation());
+         double rotationError = dragStartToWorld.getRotation().distance(controllerPickFrame.getTransformToRoot().getRotation(), true);
+         clickValid &= translationError <= DRAG_TRANSLATION_TOLERANCE;
+         clickValid &= rotationError <= DRAG_ROTATION_TOLERANCE;
       }
    }
 
@@ -151,5 +176,10 @@ public class RDXVRDragData
       zUpDragPose.setToZero(getZUpDragFrame());
       zUpDragPose.changeFrame(ReferenceFrame.getWorldFrame());
       return zUpDragPose;
+   }
+
+   /* package-private */ boolean isClickValid()
+   {
+      return clickValid;
    }
 }

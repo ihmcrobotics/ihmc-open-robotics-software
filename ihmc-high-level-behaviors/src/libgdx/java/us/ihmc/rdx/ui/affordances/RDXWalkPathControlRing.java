@@ -255,4 +255,9 @@ public class RDXWalkPathControlRing
    {
       return footstepPlannerGoalGizmo.getPathControlRingGizmo().getPose3D();
    }
+
+   public RDXSelectablePathControlRingGizmo getFootstepPlannerGoalGizmo()
+   {
+      return footstepPlannerGoalGizmo;
+   }
 }
