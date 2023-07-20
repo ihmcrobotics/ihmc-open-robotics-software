@@ -133,6 +133,11 @@ public class RDXHandConfigurationManager
             publishHandCommand(side, SakeHandCommandOption.GRIP);
          }
          ImGui.sameLine();
+         if (ImGui.button(labels.get("Calibrate", side.getCamelCaseName())))
+         {
+            publishHandCommand(side, SakeHandCommandOption.CALIBRATE);
+         }
+         ImGui.sameLine();
          if (sakeStatuses.get(side).hasReceivedFirstMessage())
          {
             // TODO: Add ratio to unit conversions enum or something
