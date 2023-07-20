@@ -5,6 +5,9 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import imgui.ImGuiStyle;
+import imgui.ImVec4;
+import imgui.flag.ImGuiCol;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
@@ -233,6 +236,7 @@ public class RDXBaseUI
       primaryScene.addCoordinateFrame(0.3);
 
       imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle());
+      setTheme(theme);
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
 
@@ -559,6 +563,15 @@ public class RDXBaseUI
          case DARK -> ImGui.styleColorsDark();
          case CLASSIC -> ImGui.styleColorsClassic();
       }
+
+      // Shift the FrameBg color a little bit, so it's visible with Light theme
+      if (theme == Theme.LIGHT)
+      {
+         ImGuiStyle style = ImGui.getStyle();
+         ImVec4 newFrameBgColor = style.getColor(ImGuiCol.TableHeaderBg);
+         style.setColor(ImGuiCol.FrameBg, newFrameBgColor.x, newFrameBgColor.y, newFrameBgColor.z, 0.4f);
+      }
+
       this.theme = theme;
    }
 }
