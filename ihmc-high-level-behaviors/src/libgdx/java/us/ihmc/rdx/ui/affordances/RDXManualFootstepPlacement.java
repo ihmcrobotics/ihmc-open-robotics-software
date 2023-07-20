@@ -101,6 +101,11 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       }
       ImGuiTools.previousWidgetTooltip("Keybind: T");
       ImGui.sameLine();
+      if (ImGui.button(labels.get("Square Up")))
+      {
+         squareUpFootstep();
+      }
+      ImGui.sameLine();
       if (ImGui.button(labels.get("Cancel")) || ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
       {
          exitPlacement();
