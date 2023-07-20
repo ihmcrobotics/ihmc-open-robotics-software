@@ -17,7 +17,7 @@ public class RDXSettings
    private static int deleteRetries = 0;
 
    // We save this as .ini, but it's actually interpreted as standard Java Properties
-   private static final Path PATH = IHMCCommonPaths.DOT_IHMC_DIRECTORY.resolve("RDXSettings.ini");
+   private static final Path RDX_SETTINGS_PATH = IHMCCommonPaths.DOT_IHMC_DIRECTORY.resolve("RDXSettings.ini");
 
    private boolean plotFrameRate = false;
    private boolean vsync = false;
@@ -106,7 +106,7 @@ public class RDXSettings
 
    public void save() throws IOException
    {
-      File file = PATH.toFile();
+      File file = RDX_SETTINGS_PATH.toFile();
 
       file.getParentFile().mkdirs();
 
@@ -146,7 +146,7 @@ public class RDXSettings
 
    public void load() throws IOException
    {
-      File file = PATH.toFile();
+      File file = RDX_SETTINGS_PATH.toFile();
 
       if (!file.exists())
       {
