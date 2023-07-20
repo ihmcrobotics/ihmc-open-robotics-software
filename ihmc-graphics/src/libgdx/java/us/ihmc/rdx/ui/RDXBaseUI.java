@@ -5,10 +5,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
+import imgui.flag.ImGuiSliderFlags;
+import imgui.flag.ImGuiStyleVar;
+import imgui.flag.ImGuiTableFlags;
 import imgui.internal.ImGui;
+import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
-import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.FormattingTools;
@@ -104,7 +107,7 @@ public class RDXBaseUI
    private final ImBoolean modelSceneMouseCollisionEnabled = new ImBoolean(false);
    private final ImDouble view3DBackgroundShade = new ImDouble(RDX3DSceneTools.CLEAR_COLOR);
    private final ImInt libGDXLogLevel = new ImInt(LibGDXTools.toLibGDX(LogTools.getLevel()));
-   private final ImFloat imguiFontScale = new ImFloat(1.0f);
+   private final ImDouble imguiFontScale = new ImDouble(1.0);
    private final RDXImGuiLayoutManager layoutManager;
    private long renderIndex = 0;
    private double isoZoomOut = 0.7;
@@ -259,7 +262,7 @@ public class RDXBaseUI
 
       imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle());
       setTheme(theme); // TODO: move theme stuff to RDXImGuiWindowAndDockSystem?
-      ImGui.getIO().setFontGlobalScale(imguiFontScale.get());
+      ImGui.getIO().setFontGlobalScale((float) imguiFontScale.get());
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
 
@@ -309,6 +312,97 @@ public class RDXBaseUI
       }
       if (ImGui.beginMenu("Settings"))
       {
+         ImGui.pushItemWidth(80.0f);
+
+         if (ImGui.beginTable("settingsTable", 2, ImGuiTableFlags.None))
+         {
+            // First row (libgdx log level)
+            ImGui.tableNextRow();
+            ImGui.tableSetColumnIndex(0);
+            ImGui.alignTextToFramePadding();
+            ImGui.text("LibGDX log level: ");
+            ImGui.tableSetColumnIndex(1);
+            for (int i = 0; i <= Application.LOG_DEBUG; i++)
+            {
+               String logLevelName = "";
+               switch (i)
+               {
+                  case 0 -> logLevelName = "None";
+                  case 1 -> logLevelName = "Error";
+                  case 2 -> logLevelName = "Info";
+                  case 3 -> logLevelName = "Debug";
+               }
+               if (ImGui.radioButton(labels.get(logLevelName), Gdx.app.getLogLevel() == i)) {
+                  settings.setLibGDXLogLevel(i);
+                  Gdx.app.setLogLevel(i);
+               }
+               ImGui.sameLine();
+            }
+
+            // Second row (theme)
+            ImGui.tableNextRow();
+            ImGui.tableSetColumnIndex(0);
+            ImGui.alignTextToFramePadding();
+            ImGui.text("Theme: ");
+            ImGui.tableSetColumnIndex(1);
+            for (int i = 0; i < Theme.values().length; i++)
+            {
+               if (ImGui.radioButton(labels.get(StringUtils.capitalize(Theme.values()[i].name().toLowerCase())), this.theme == Theme.values()[i])) {
+                  Theme newTheme = Theme.values()[i];
+                  setTheme(newTheme);
+               }
+               if (i < Theme.values().length - 1)
+                  ImGui.sameLine();
+            }
+
+            // Third row (background shade)
+            ImGui.tableNextRow();
+            ImGui.tableSetColumnIndex(0);
+            ImGui.alignTextToFramePadding();
+            ImGui.text("Background shade: ");
+            ImGui.tableSetColumnIndex(1);
+            if (ImGuiTools.sliderDouble(labels.get("##view3DBackgroundShadeSlider"), view3DBackgroundShade, 0.0f, 1.0f)) {
+               settings.setView3DBackgroundShade((float) view3DBackgroundShade.get());
+               setView3DBackgroundShade((float) view3DBackgroundShade.get());
+            }
+
+            // Fourth row (foreground FPS limit)
+            ImGui.tableNextRow();
+            ImGui.tableSetColumnIndex(0);
+            ImGui.alignTextToFramePadding();
+            ImGui.text("FPS limit: ");
+            // If vsync is enabled, disable the FPS limit slider
+            if (vsync.get())
+            {
+               ImGui.pushItemFlag(ImGuiItemFlags.Disabled, true);
+               ImGui.pushStyleVar(ImGuiStyleVar.Alpha, ImGui.getStyle().getAlpha() * 0.5f);
+            }
+            ImGui.tableSetColumnIndex(1);
+            if (ImGuiTools.sliderInt(labels.get("##foregroundFPSLimitSlider"), foregroundFPSLimit, 15, 240)) {
+               settings.setForegroundFPSLimit(foregroundFPSLimit.get());
+               Gdx.graphics.setForegroundFPS(foregroundFPSLimit.get());
+            }
+            if (vsync.get())
+            {
+               ImGui.popStyleVar();
+               ImGui.popItemFlag();
+            }
+
+            // Fifth row (font scale)
+            ImGui.tableNextRow();
+            ImGui.tableSetColumnIndex(0);
+            ImGui.alignTextToFramePadding();
+            ImGui.text("Font scale: ");
+            ImGui.tableSetColumnIndex(1);
+            // TODO: make it so the scale can't jump around between values as you're moving the slider
+            if (ImGuiTools.sliderDouble(labels.get("##imguiFontScaleSlider"), imguiFontScale, 1.0, 2.0, "%.1f", ImGuiSliderFlags.NoInput)) {
+               settings.setImguiFontScale(imguiFontScale.get());
+               ImGui.getIO().setFontGlobalScale((float) imguiFontScale.get());
+            }
+
+            ImGui.endTable();
+         }
+
          if (ImGui.checkbox(labels.get("Frame rate plot"), plotFrameRate))
          {
             settings.setPlotFrameRate(plotFrameRate.get());
@@ -316,38 +410,10 @@ public class RDXBaseUI
          if (ImGui.checkbox(labels.get("Vsync"), vsync))
          {
             settings.setVsync(vsync.get());
+            Gdx.graphics.setForegroundFPS(Integer.MAX_VALUE);
             Gdx.graphics.setVSync(vsync.get());
          }
-         ImGui.pushItemWidth(80.0f);
-         if (ImGuiTools.volatileInputInt(labels.get("Foreground FPS limit"), foregroundFPSLimit, 1))
-         {
-            settings.setForegroundFPSLimit(foregroundFPSLimit.get());
-            Gdx.graphics.setForegroundFPS(foregroundFPSLimit.get());
-         }
-         if (ImGuiTools.volatileInputFloat(labels.get("Font scale"), imguiFontScale, 0.1f))
-         {
-            settings.setImguiFontScale(imguiFontScale.get());
-            ImGui.getIO().setFontGlobalScale(imguiFontScale.get());
-         }
-         ImGui.text("LibGDX log level: ");
-         ImGui.sameLine();
-         for (int i = 0; i <= Application.LOG_DEBUG; i++)
-         {
-            String logLevelName = "";
-            switch (i)
-            {
-               case 0 -> logLevelName = "None";
-               case 1 -> logLevelName = "Error";
-               case 2 -> logLevelName = "Info";
-               case 3 -> logLevelName = "Debug";
-            }
-            if (ImGui.radioButton(labels.get(logLevelName), Gdx.app.getLogLevel() == i)) {
-               settings.setLibGDXLogLevel(i);
-               Gdx.app.setLogLevel(i);
-            }
-            ImGui.sameLine();
-         }
-         ImGui.newLine();
+
          ImGui.separator();
          boolean renderingGroundTruthEnvironment = primaryScene.getSceneLevelsToRender().contains(RDXSceneLevel.GROUND_TRUTH);
          if (ImGui.checkbox(labels.get("Render Ground Truth Environment"), renderingGroundTruthEnvironment))
@@ -377,28 +443,11 @@ public class RDXBaseUI
          {
             setModelSceneMouseCollisionEnabled(modelSceneMouseCollisionEnabled.get());
          }
-         ImGui.separator();
          if (ImGui.checkbox(labels.get("Middle-click view orbit"), middleClickOrbit))
          {
             setUseMiddleClickViewOrbit(middleClickOrbit.get());
          }
-         if (ImGuiTools.sliderDouble(labels.get("Background shade"), view3DBackgroundShade, 0.0f, 1.0f)) {
-            settings.setView3DBackgroundShade((float) view3DBackgroundShade.get());
-            setView3DBackgroundShade((float) view3DBackgroundShade.get());
-         }
-         ImGui.separator();
-         ImGui.text("Theme:");
-         ImGui.sameLine();
-         for (int i = 0; i < Theme.values().length; i++)
-         {
-            if (ImGui.radioButton(labels.get(StringUtils.capitalize(Theme.values()[i].name().toLowerCase())), this.theme == Theme.values()[i])) {
-               Theme newTheme = Theme.values()[i];
-               setTheme(newTheme);
-            }
-            if (i < Theme.values().length - 1)
-               ImGui.sameLine();
-         }
-         ImGui.popItemWidth();
+
          ImGui.endMenu();
       }
 
