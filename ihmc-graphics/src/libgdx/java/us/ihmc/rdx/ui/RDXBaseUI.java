@@ -362,6 +362,18 @@ public class RDXBaseUI
             ImGui.text("Background shade: ");
             ImGui.tableSetColumnIndex(1);
             if (ImGuiTools.sliderDouble(labels.get("##view3DBackgroundShadeSlider"), view3DBackgroundShade, 0.0f, 1.0f)) {
+               setView3DBackgroundShade((float) view3DBackgroundShade.get());
+            }
+            // Only update the settings (which saves to disk) after you've let go of the slider
+            if (ImGui.isItemDeactivatedAfterEdit())
+            {
+               settings.setView3DBackgroundShade((float) view3DBackgroundShade.get());
+            }
+
+            ImGui.sameLine();
+            if (ImGui.button("Reset"))
+            {
+               view3DBackgroundShade.set(RDX3DSceneTools.CLEAR_COLOR);
                settings.setView3DBackgroundShade((float) view3DBackgroundShade.get());
                setView3DBackgroundShade((float) view3DBackgroundShade.get());
             }
@@ -394,9 +406,12 @@ public class RDXBaseUI
             ImGui.alignTextToFramePadding();
             ImGui.text("Font scale: ");
             ImGui.tableSetColumnIndex(1);
-            // TODO: make it so the scale can't jump around between values as you're moving the slider
-            if (ImGuiTools.sliderDouble(labels.get("##imguiFontScaleSlider"), imguiFontScale, 1.0, 2.0, "%.1f", ImGuiSliderFlags.NoInput)) {
+            if (ImGuiTools.sliderDouble(labels.get("##imguiFontScaleSlider"), imguiFontScale, 1.0, 2.0, "%.1f")) {
                settings.setImguiFontScale(imguiFontScale.get());
+            }
+            // Change the font scale after you've let go of the slider
+            if (ImGui.isItemDeactivatedAfterEdit())
+            {
                ImGui.getIO().setFontGlobalScale((float) imguiFontScale.get());
             }
 
