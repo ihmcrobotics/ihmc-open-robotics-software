@@ -122,12 +122,7 @@ public class RDXArmManager
          if (indicateWrenchOnScreen.get())
             panelHandWrenchIndicator.renderImGuiOverlay();
       });
-      wrenchToolbarButton.setOnPressed(()->
-                                       {
-                                          boolean showWrench = !indicateWrenchOnScreen.get();
-                                          indicateWrenchOnScreen.set(showWrench);
-                                          panelHandWrenchIndicator.setShowAndUpdate(showWrench);
-                                       });
+
       baseUI.getPrimary3DPanel().addImGuiOverlayAddition(panelHandWrenchIndicator::renderImGuiOverlay);
 
       handManager.create(baseUI, communicationHelper);
