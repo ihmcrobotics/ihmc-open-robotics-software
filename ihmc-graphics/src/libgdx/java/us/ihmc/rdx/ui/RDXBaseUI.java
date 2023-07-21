@@ -614,12 +614,9 @@ public class RDXBaseUI
          case CLASSIC -> ImGui.styleColorsClassic();
       }
 
-      // Add a 1px frame border around UI elements when using Light theme to make things more visible
-      if (theme == Theme.LIGHT)
-      {
-         ImGuiStyle style = ImGui.getStyle();
-         style.setFrameBorderSize(1.0f);
-      }
+      // Add a 1px frame border to UI elements
+      ImGuiStyle style = ImGui.getStyle();
+      style.setFrameBorderSize(1.0f);
 
       this.theme = theme;
    }
