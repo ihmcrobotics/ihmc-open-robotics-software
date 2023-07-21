@@ -94,8 +94,8 @@ public class ROS2Heartbeat
 
    public void destroy()
    {
+      setAlive(false);
       if (heartbeatPublisher != null)
          heartbeatPublisher.destroy();
-      setAlive(false);
    }
 }
