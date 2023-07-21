@@ -355,4 +355,14 @@ public class MatrixMissingTools
    {
       matrix.data[ row * matrix.numCols + col ] += value;
    }
+
+   /**
+    * Negates the input matrix in-place.
+    *
+    * @param matrix the matrix to be negated.
+    */
+   public static void negate(DMatrixRMaj matrix)
+   {
+      CommonOps_DDRM.scale(-1.0, matrix);
+   }
 }

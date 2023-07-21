@@ -10,6 +10,7 @@ public class ArmJointAnglesActionData implements BehaviorActionData
 {
    public static final int NUMBER_OF_JOINTS = 7;
 
+   private String description = "Arm joint angles";
    private final double[] jointAngles = new double[NUMBER_OF_JOINTS];
    private RobotSide side = RobotSide.LEFT;
    private double trajectoryDuration = 4.0;
@@ -17,6 +18,7 @@ public class ArmJointAnglesActionData implements BehaviorActionData
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
+      jsonNode.put("description", description);
       jsonNode.put("side", side.getLowerCaseName());
       jsonNode.put("trajectoryDuration", trajectoryDuration);
       for (int i = 0; i < NUMBER_OF_JOINTS; i++)
@@ -28,6 +30,7 @@ public class ArmJointAnglesActionData implements BehaviorActionData
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
+      description = jsonNode.get("description").textValue();
       side = RobotSide.getSideFromString(jsonNode.get("side").asText());
       trajectoryDuration = jsonNode.get("trajectoryDuration").asDouble();
       for (int i = 0; i < NUMBER_OF_JOINTS; i++)
@@ -79,5 +82,17 @@ public class ArmJointAnglesActionData implements BehaviorActionData
    public void setSide(RobotSide side)
    {
       this.side = side;
+   }
+
+   @Override
+   public void setDescription(String description)
+   {
+      this.description = description;
+   }
+
+   @Override
+   public String getDescription()
+   {
+      return description;
    }
 }

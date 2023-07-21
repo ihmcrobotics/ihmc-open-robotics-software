@@ -10,6 +10,7 @@ import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sharedControl.*;
 import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -25,7 +26,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.perception.sceneGraph.SceneGraphAPI;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDX3DSituatedImGuiTransparentPanel;
 import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
@@ -107,7 +107,7 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
       ghostRobotGraphic.setActive(false);
       ghostRobotGraphic.create();
 
-      detectableSceneObjectsSubscription = ros2.subscribe(SceneGraphAPI.DETECTABLE_SCENE_NODES);
+      detectableSceneObjectsSubscription = ros2.subscribe(PerceptionAPI.DETECTABLE_SCENE_NODES.getStatusTopic());
       menuMode = new VRMenuGuideMode[1];
       menuMode[0] = VRMenuGuideMode.OFF;
 

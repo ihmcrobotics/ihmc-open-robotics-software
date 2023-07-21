@@ -12,10 +12,6 @@ module behavior_msgs
       struct ActionInformationMessage
       {
         /**
-         * Unique identifier of the sequence update used to make sure we got complete data
-         */
-        unsigned long long sequence_update_uuid;
-        /**
          * Index of the action within the sequence
          */
         unsigned long action_index;

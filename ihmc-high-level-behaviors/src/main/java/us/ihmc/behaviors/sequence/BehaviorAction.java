@@ -5,7 +5,7 @@ package us.ihmc.behaviors.sequence;
  */
 public interface BehaviorAction extends BehaviorActionData
 {
-   default void update()
+   default void update(int actionIndex, int nextExecutionIndex)
    {
 
    }

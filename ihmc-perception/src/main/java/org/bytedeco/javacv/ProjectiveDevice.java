@@ -65,7 +65,7 @@ public class ProjectiveDevice {
 
     public static class Settings extends BaseChildSettings {
         public Settings() { }
-        public Settings(Settings settings) {
+        public Settings(ProjectiveDevice.Settings settings) {
             this.name            = settings.name;
             this.responseGamma   = settings.responseGamma;
 //            this.nominalDistance = settings.nominalDistance;
@@ -98,7 +98,7 @@ public class ProjectiveDevice {
 
     public static class CalibrationSettings extends Settings {
         public CalibrationSettings() { }
-        public CalibrationSettings(CalibrationSettings settings) {
+        public CalibrationSettings(ProjectiveDevice.CalibrationSettings settings) {
             super(settings);
             this.initAspectRatio = settings.initAspectRatio;
             this.flags           = settings.flags;
@@ -272,7 +272,7 @@ public class ProjectiveDevice {
 
     public static class CalibratedSettings extends Settings {
         public CalibratedSettings() { }
-        public CalibratedSettings(CalibratedSettings settings) {
+        public CalibratedSettings(ProjectiveDevice.CalibratedSettings settings) {
             super(settings);
             this.parametersFile = settings.parametersFile;
         }

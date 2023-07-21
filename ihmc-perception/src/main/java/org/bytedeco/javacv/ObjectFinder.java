@@ -360,7 +360,7 @@ public class ObjectFinder {
         cvCopy(image, correspond);
         cvResetImageROI(correspond);
 
-        Settings settings = new Settings();
+        ObjectFinder.Settings settings = new ObjectFinder.Settings();
         settings.objectImage = object;
         settings.useFLANN = true;
         settings.ransacReprojThreshold = 5;

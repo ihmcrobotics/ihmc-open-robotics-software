@@ -14,7 +14,6 @@ import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.rdx.imgui.ImGuiEnumPlot;
@@ -34,8 +33,6 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.behaviors.door.DoorBehaviorAPI.*;
 
 public class RDXDoorBehaviorUI extends RDXBehaviorUIInterface
 {
@@ -63,13 +60,15 @@ public class RDXDoorBehaviorUI extends RDXBehaviorUIInterface
    {
       this.helper = helper;
       helper.subscribeToBehaviorStatusViaCallback(status::set);
-      distanceToDoor = helper.subscribeViaReference(DistanceToDoor, Double.NaN);
-      helper.subscribeViaCallback(DetectedDoorPose, detectedDoorPose ->
-      {
-         this.detectedDoorPose.set(detectedDoorPose);
-         doorDetectionMessageReceivedStopwatch.reset();
-         door.setPoseInWorld(detectedDoorPose.getRight());
-      });
+      // FIXME: subscribe distance to door
+      distanceToDoor = null;
+      // FIXME: subscribe detected door pose
+//      helper.subscribeViaCallback(DetectedDoorPose, detectedDoorPose ->
+//      {
+//         this.detectedDoorPose.set(detectedDoorPose);
+//         doorDetectionMessageReceivedStopwatch.reset();
+//         door.setPoseInWorld(detectedDoorPose.getRight());
+//      });
       helper.subscribeViaCallback(FiducialDetectorToolboxModule::getDetectedFiducialOutputTopic, detectedFiducialMessage ->
       {
          detectedFiducialMessageReceivedStopwatch.reset();
@@ -114,7 +113,7 @@ public class RDXDoorBehaviorUI extends RDXBehaviorUIInterface
 
       if (ImGui.checkbox(labels.get("Operator review"), reviewDoorPose))
       {
-         helper.publish(ReviewEnabled, reviewDoorPose.get());
+         // FIXME: publish operator review
       }
       ImGui.sameLine();
       if (ImGui.button(labels.get("Resend latest door location")))

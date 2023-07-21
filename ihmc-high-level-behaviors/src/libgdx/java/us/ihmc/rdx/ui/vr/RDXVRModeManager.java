@@ -49,8 +49,11 @@ public class RDXVRModeManager
       handPlacedFootstepMode = new RDXVRHandPlacedFootstepMode();
       handPlacedFootstepMode.create(syncedRobot.getRobotModel(), controllerHelper);
 
-      kinematicsStreamingMode = new RDXVRKinematicsStreamingMode(syncedRobot, controllerHelper, kinematicsStreamingToolboxProcess);
-      kinematicsStreamingMode.create(baseUI.getVRManager().getContext());
+      if (syncedRobot.getRobotModel().getRobotVersion().hasArms())
+      {
+         kinematicsStreamingMode = new RDXVRKinematicsStreamingMode(syncedRobot, controllerHelper, kinematicsStreamingToolboxProcess);
+         kinematicsStreamingMode.create(baseUI.getVRManager().getContext());
+      }
 
       joystickBasedStepping = new RDXJoystickBasedStepping(syncedRobot.getRobotModel());
       joystickBasedStepping.create(baseUI, controllerHelper, syncedRobot);
@@ -68,25 +71,39 @@ public class RDXVRModeManager
    {
       renderPanel = vrContext.getHeadset().isConnected() && vrContext.getController(RobotSide.LEFT).isConnected();
 
-      vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
+      for (RobotSide side : RobotSide.values)
       {
-         leftHandPanelPose.setToZero(controller.getXForwardZUpControllerFrame());
-         leftHandPanelPose.getOrientation().setYawPitchRoll(Math.PI / 2.0, 0.0, Math.PI / 4.0);
-         leftHandPanelPose.getPosition().addY(-0.05);
-         leftHandPanelPose.changeFrame(ReferenceFrame.getWorldFrame());
-         leftHandPanel.updateDesiredPose(leftHandPanelPose::get);
-      });
+         vrContext.getController(side).runIfConnected(controller ->
+         {
+            // During kinematic streaming, the only way to get out of it is the left hand panel.
+            controller.setExclusiveAccess(mode == RDXVRMode.WHOLE_BODY_IK_STREAMING ? leftHandPanel : null);
+
+            if (side == RobotSide.LEFT)
+            {
+               leftHandPanelPose.setToZero(controller.getXForwardZUpControllerFrame());
+               leftHandPanelPose.getOrientation().setYawPitchRoll(Math.PI / 2.0, 0.0, Math.PI / 4.0);
+               leftHandPanelPose.getPosition().addY(-0.05);
+               leftHandPanelPose.changeFrame(ReferenceFrame.getWorldFrame());
+               leftHandPanel.updateDesiredPose(leftHandPanelPose::get);
+            }
+         });
+      }
 
       switch (mode)
       {
          case FOOTSTEP_PLACEMENT -> handPlacedFootstepMode.processVRInput(vrContext);
-         case WHOLE_BODY_IK_STREAMING -> kinematicsStreamingMode.processVRInput(vrContext);
+         case WHOLE_BODY_IK_STREAMING ->
+         {
+            if (kinematicsStreamingMode != null)
+               kinematicsStreamingMode.processVRInput(vrContext);
+         }
       }
    }
 
    public void update()
    {
-      kinematicsStreamingMode.update(mode == RDXVRMode.WHOLE_BODY_IK_STREAMING);
+      if (kinematicsStreamingMode != null)
+         kinematicsStreamingMode.update(mode == RDXVRMode.WHOLE_BODY_IK_STREAMING);
       if (mode != RDXVRMode.WHOLE_BODY_IK_STREAMING)
          kinematicsStreamingMode.setEnabled(false);
       leftHandPanel.update();
@@ -149,7 +166,8 @@ public class RDXVRModeManager
          }
          case WHOLE_BODY_IK_STREAMING ->
          {
-            kinematicsStreamingMode.renderImGuiWidgets();
+            if (kinematicsStreamingMode != null)
+               kinematicsStreamingMode.renderImGuiWidgets();
          }
          case JOYSTICK_WALKING ->
          {
@@ -170,7 +188,8 @@ public class RDXVRModeManager
             }
             case WHOLE_BODY_IK_STREAMING ->
             {
-               kinematicsStreamingMode.getVirtualRenderables(renderables, pool, sceneLevels);
+               if (kinematicsStreamingMode != null)
+                  kinematicsStreamingMode.getVirtualRenderables(renderables, pool, sceneLevels);
             }
             case JOYSTICK_WALKING ->
             {
@@ -188,7 +207,8 @@ public class RDXVRModeManager
    public void destroy()
    {
       leftHandPanel.dispose();
-      kinematicsStreamingMode.destroy();
+      if (kinematicsStreamingMode != null)
+         kinematicsStreamingMode.destroy();
       joystickBasedStepping.destroy();
    }
 

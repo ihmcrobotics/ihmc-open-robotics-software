@@ -1,6 +1,6 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.7"
+   id("us.ihmc.ihmc-ci") version "8.3"
    id("us.ihmc.ihmc-cd") version "1.24"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
@@ -20,7 +20,7 @@ mainDependencies {
    api("org.ejml:ejml-core:0.39")
    api("net.sf.trove4j:trove4j:3.0.3")
 
-   api("us.ihmc:ihmc-realtime:1.5.1")
+   api("us.ihmc:ihmc-realtime:1.6.0")
    api("us.ihmc:ihmc-native-library-loader:2.0.2")
    api("us.ihmc:euclid:0.20.0")
    api("us.ihmc:euclid-geometry:0.20.0")
@@ -46,8 +46,8 @@ testDependencies {
 
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:simulation-construction-set:0.23.4")
-   api("us.ihmc:scs2-simulation-construction-set:17-0.14.6")
+   api("us.ihmc:simulation-construction-set:0.24.1")
+   api("us.ihmc:scs2-simulation-construction-set:17-0.15.1")
 
    var javaFXVersion = "17.0.2"
    api(ihmc.javaFXModule("base", javaFXVersion))

@@ -65,9 +65,9 @@ public class ExploreAreaLookAroundNode extends SequenceNode
       syncedRobot = helper.getOrCreateRobotInterface().newSyncedRobot();
       statusLogger = helper.getOrCreateStatusLogger();
 
-      helper.subscribeViaCallback(DoSlam, this::doSlam);
-      helper.subscribeViaCallback(ClearMap, this::clearMap);
-      helper.subscribeViaCallback(RandomPoseUpdate, this::randomPoseUpdate);
+//      helper.subscribeViaCallback(DoSlam, this::doSlam);
+//      helper.subscribeViaCallback(ClearMap, this::clearMap);
+//      helper.subscribeViaCallback(RandomPoseUpdate, this::randomPoseUpdate);
 
       lookRight = new LookInADirection(-40.0, -20.0);
       lookCenter = new LookInADirection(0.0, 0.0);
@@ -112,7 +112,7 @@ public class ExploreAreaLookAroundNode extends SequenceNode
          {
             currentState = ExploreAreaBehaviorState.LookLeft;
          }
-         helper.publish(CurrentState, currentState);
+//         helper.publish(CurrentState, currentState);
 
          turnChestWithRespectToMidFeetZUpFrame(chestYaw, parameters.getTurnChestTrajectoryDuration());
          pitchHeadWithRespectToChest(headPitch, parameters.getTurnChestTrajectoryDuration());
@@ -128,7 +128,7 @@ public class ExploreAreaLookAroundNode extends SequenceNode
          statusLogger.info("Perceiving for {} s", perceiveDuration);
          ThreadTools.sleepSeconds(perceiveDuration);
 
-         helper.publish(ClearPlanarRegions);
+//         helper.publish(ClearPlanarRegions);
          rememberObservationPoint();
          doSlam(true);
 
@@ -229,7 +229,7 @@ public class ExploreAreaLookAroundNode extends SequenceNode
       FramePoint3D midFeetLocation = new FramePoint3D(midFeetZUpFrame);
       midFeetLocation.changeFrame(worldFrame);
 
-      helper.publish(ObservationPosition, new Point3D(midFeetLocation));
+//      helper.publish(ObservationPosition, new Point3D(midFeetLocation));
 
       pointsObservedFrom.add(new Point3D(midFeetLocation));
    }
@@ -285,18 +285,18 @@ public class ExploreAreaLookAroundNode extends SequenceNode
       int index = 0;
       for (PlanarRegion planarRegion : planarRegionsAsList)
       {
-         helper.publish(AddPlanarRegionToMap, TemporaryPlanarRegionMessage.convertToTemporaryPlanarRegionMessage(planarRegion, index));
+//         helper.publish(AddPlanarRegionToMap, TemporaryPlanarRegionMessage.convertToTemporaryPlanarRegionMessage(planarRegion, index));
 
          List<ConvexPolygon2D> convexPolygons = planarRegion.getConvexPolygons();
          for (ConvexPolygon2D polygon : convexPolygons)
          {
-            helper.publish(AddPolygonToPlanarRegion, TemporaryConvexPolygon2DMessage.convertToTemporaryConvexPolygon2DMessage(polygon, index));
+//            helper.publish(AddPolygonToPlanarRegion, TemporaryConvexPolygon2DMessage.convertToTemporaryConvexPolygon2DMessage(polygon, index));
          }
 
          index++;
       }
 
-      helper.publish(DrawMap);
+//      helper.publish(DrawMap);
 
       // Send it to the GUI for a viz...
       //         PlanarRegionsListMessage concatenatedMapMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(concatenatedMap);
@@ -349,7 +349,7 @@ public class ExploreAreaLookAroundNode extends SequenceNode
 
    private void clearMap(boolean clearMap)
    {
-      helper.publish(ClearPlanarRegions);
+//      helper.publish(ClearPlanarRegions);
       concatenatedMap = null;
    }
 

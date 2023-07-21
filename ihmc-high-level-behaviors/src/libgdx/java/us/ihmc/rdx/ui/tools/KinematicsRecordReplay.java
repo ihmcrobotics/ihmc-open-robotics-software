@@ -7,6 +7,7 @@ import org.lwjgl.openvr.InputDigitalActionData;
 import perception_msgs.msg.dds.DetectableSceneNodesMessage;
 import us.ihmc.behaviors.tools.TrajectoryRecordReplay;
 import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -16,7 +17,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.perception.sceneGraph.SceneGraphAPI;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
@@ -57,8 +57,9 @@ public class KinematicsRecordReplay
       for (int n = 0; n < numberOfParts; n++)
          framesToRecordHistory.add(new ArrayList<>());
 
-      detectableSceneObjectsSubscription = ros2.subscribe(SceneGraphAPI.DETECTABLE_SCENE_NODES);
       trajectoryRecorder.setDoneReplay(true);
+      detectableSceneObjectsSubscription = ros2.subscribe(PerceptionAPI.DETECTABLE_SCENE_NODES.getStatusTopic());
+
    }
 
    public void processRecordReplayInput(InputDigitalActionData triggerButton)

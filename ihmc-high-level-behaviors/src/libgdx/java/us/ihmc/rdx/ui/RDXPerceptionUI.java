@@ -5,6 +5,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionDataLogger;
+import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.logging.RDXPerceptionDataLoaderPanel;
@@ -13,6 +14,7 @@ import us.ihmc.rdx.perception.RDXRemotePerceptionUI;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXBuildingConstructor;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.*;
 import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -50,9 +52,7 @@ public class RDXPerceptionUI
          @Override
          public void create()
          {
-            globalVisualizersUI.addVisualizer(new RDXROS2PlanarRegionsVisualizer("Rapid Regions",
-                                                                                 ros2Node,
-                                                                                 PerceptionAPI.PERSPECTIVE_RAPID_REGIONS));
+            globalVisualizersUI.addVisualizer(new RDXROS2FramePlanarRegionsVisualizer("Rapid Regions", ros2Node, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS));
 
             globalVisualizersUI.addVisualizer(new RDXROS2PlanarRegionsVisualizer("Rapid Regions",
                                                                                  ros2Node,
@@ -102,9 +102,18 @@ public class RDXPerceptionUI
                                                                                 PubSubImplementation.FAST_RTPS,
                                                                                 PerceptionAPI.D435_DEPTH_IMAGE));
 
+            RDXROS2ColoredPointCloudVisualizer ZEDColoredDepthVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED2 Colored Depth",
+                                                                                                                   PubSubImplementation.FAST_RTPS,
+                                                                                                                   PerceptionAPI.ZED2_DEPTH,
+                                                                                                                   PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
+            globalVisualizersUI.addVisualizer(ZEDColoredDepthVisualizer);
             globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("ZED2 Color Stereo",
                                                                                 PubSubImplementation.FAST_RTPS,
-                                                                                PerceptionAPI.ZED2_STEREO_COLOR));
+                                                                                PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT)));
+
+            globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("ZED2 Depth",
+                                                                                PubSubImplementation.FAST_RTPS,
+                                                                                PerceptionAPI.ZED2_DEPTH));
 
             RDXROS2BigVideoVisualizer blackflyRightVideoVisualizer = new RDXROS2BigVideoVisualizer("IHMC Blackfly Right",
                                                                                                    PubSubImplementation.FAST_RTPS,
@@ -168,7 +177,7 @@ public class RDXPerceptionUI
             baseUI.create();
             baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI);
 
-            remotePerceptionUI = new RDXRemotePerceptionUI(ros2Helper);
+            remotePerceptionUI = new RDXRemotePerceptionUI(ros2Helper, SensorHeadParameters.BENCHTOP_BLACKFLY_LENS_COMBO);
             baseUI.getImGuiPanelManager().addPanel(remotePerceptionUI.getPanel());
 
             environmentBuilder.create();

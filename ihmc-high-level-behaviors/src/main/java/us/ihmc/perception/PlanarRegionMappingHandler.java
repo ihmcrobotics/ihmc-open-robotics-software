@@ -27,9 +27,11 @@ import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
 import us.ihmc.perception.odometry.RapidPatchesBasedICP;
+import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PlaneRegistrationTools;
+import us.ihmc.robotics.geometry.PlanarLandmarkList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
@@ -56,6 +58,8 @@ public class PlanarRegionMappingHandler
 
    private final static long PUBLISH_MILLISECONDS = 100;
 
+   private int delayMilliseconds = 100;
+
    private ROS2Node ros2Node = null;
    private ROS2Helper ros2Helper = null;
    private IHMCROS2Publisher<PlanarRegionsListMessage> controllerRegionsPublisher;
@@ -71,7 +75,7 @@ public class PlanarRegionMappingHandler
    private final AtomicReference<RigidBodyTransform> latestKeyframePoseForRendering = new AtomicReference<>(new RigidBodyTransform());
 
    private boolean enableCapture = false;
-   private boolean enableLiveMode = false;
+   private boolean enableLiveMode = true;
 
    private static final File logDirectory = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator);
 
@@ -134,7 +138,7 @@ public class PlanarRegionMappingHandler
 
          launchMapper();
          controllerRegionsPublisher = ROS2Tools.createPublisher(ros2Node, StepGeneratorAPIDefinition.getTopic(PlanarRegionsListMessage.class, simpleRobotName));
-         ros2Helper.subscribeViaCallback(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS_WITH_POSE, latestIncomingRegions::set);
+         ros2Helper.subscribeViaCallback(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, latestIncomingRegions::set);
 
          ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(WalkingControllerFailureStatusMessage.class, simpleRobotName), message ->
          {
@@ -153,17 +157,14 @@ public class PlanarRegionMappingHandler
             Depth: [fx:730.7891, fy:731.0859, cx:528.6094, cy:408.1602, h:768, w:1024]
        */
 
-      rapidRegionsExtractor = new RapidPlanarRegionsExtractor();
-      rapidRegionsExtractor.getDebugger().setEnabled(true);
-
       openCLManager = new OpenCLManager();
       openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
 
       perceptionDataLoader = new PerceptionDataLoader();
       perceptionDataLoader.openLogFile(logFile);
 
-      perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionBuffer);
-      perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
+//      perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionBuffer);
+//      perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
 
       //createOuster(128, 1024, smoothing);
       createTerrain(720, 1280, smoothing, false);
@@ -171,12 +172,13 @@ public class PlanarRegionMappingHandler
 
    private void createTerrain(int depthHeight, int depthWidth, boolean smoothing, boolean simulation)
    {
-      planarRegionMap = new PlanarRegionMap(smoothing);
+      planarRegionMap = new PlanarRegionMap(smoothing, "Fast");
       sensorLogChannelName = PerceptionLoggerConstants.L515_DEPTH_NAME;
 
       String version = simulation ? "Simulation" : "";
 
-      rapidRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth, 654.29, 654.29, 651.14, 361.89, version);
+      rapidRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager, openCLProgram, depthHeight, depthWidth, 654.29, 654.29, 651.14, 361.89, version);
+      setupPlanarRegionsExtractor();
       rapidPatchesBasedICP.create(openCLManager, openCLProgram, depthHeight, depthWidth);
       depth16UC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
 
@@ -191,7 +193,8 @@ public class PlanarRegionMappingHandler
    {
       planarRegionMap = new PlanarRegionMap(smoothing, "Spherical");
       sensorLogChannelName = PerceptionLoggerConstants.OUSTER_DEPTH_NAME;
-      rapidRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth);
+      rapidRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager, openCLProgram, depthHeight, depthWidth);
+      setupPlanarRegionsExtractor();
       rapidPatchesBasedICP.create(openCLManager, openCLProgram, depthHeight, depthWidth);
       depth16UC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
 
@@ -200,6 +203,11 @@ public class PlanarRegionMappingHandler
       perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, sensorOrientationBuffer);
 
       totalDepthCount = perceptionDataLoader.getHDF5Manager().getCount(sensorLogChannelName);
+   }
+
+   private void setupPlanarRegionsExtractor()
+   {
+      rapidRegionsExtractor.getDebugger().setEnabled(true);
    }
 
    public PlanarRegionMappingHandler(File planarRegionLogDirectory, boolean smoothing)
@@ -269,7 +277,12 @@ public class PlanarRegionMappingHandler
 
    public void autoIncrementButtonCallback()
    {
-      updateMapFuture = executorService.scheduleAtFixedRate(this::nextButtonCallback, 0, 100, TimeUnit.MILLISECONDS);
+      updateMapFuture = executorService.scheduleAtFixedRate(this::nextButtonCallback, 0, 120, TimeUnit.MILLISECONDS);
+   }
+
+   public void pauseButtonCallback()
+   {
+      updateMapFuture.cancel(true);
    }
 
    public void nextButtonCallback()
@@ -322,7 +335,7 @@ public class PlanarRegionMappingHandler
 
    public void performMapCleanUp()
    {
-      planarRegionMap.performMapCleanUp();
+      planarRegionMap.performMapCleanUp(true, true);
       latestPlanarRegionsForRendering.set(planarRegionMap.getMapRegions().copy());
       planarRegionMap.setModified(true);
    }
@@ -367,17 +380,19 @@ public class PlanarRegionMappingHandler
 
    public void updateMapWithNewRegions(FramePlanarRegionsList regions)
    {
-      LogTools.debug("Adding Regions to Map.");
+      planarRegionMap.setModified(true);
 
-      RigidBodyTransform keyframePose = planarRegionMap.registerRegions(regions.getPlanarRegionsList(), regions.getSensorToWorldFrameTransform());
+      LogTools.debug("Updating Map with {} regions", regions.getPlanarRegionsList().getNumberOfPlanarRegions());
 
-      //planarRegionMap.submitRegionsUsingIterativeReduction(regions);
+      RigidBodyTransform keyframePose = planarRegionMap.registerRegions(regions.getPlanarRegionsList(), regions.getSensorToWorldFrameTransform(), null);
 
       if (keyframePose != null)
          latestKeyframePoseForRendering.set(keyframePose);
 
       latestPlanarRegionsForRendering.set(planarRegionMap.getMapRegions().copy());
       latestPlanarRegionsForPublishing.set(planarRegionMap.getMapRegions().copy());
+
+      LogTools.debug("Total Regions in Map: {}", planarRegionMap.getMapRegions().getNumberOfPlanarRegions());
    }
 
    public boolean isCaptured()
@@ -397,7 +412,7 @@ public class PlanarRegionMappingHandler
 
    public void resetMap()
    {
-      planarRegionMap.reset();
+      planarRegionMap.destroy();
       latestKeyframePoseForRendering.set(new RigidBodyTransform());
       latestPlanarRegionsForRendering.set(new PlanarRegionsList());
       planarRegionMap.setModified(true);
@@ -435,10 +450,13 @@ public class PlanarRegionMappingHandler
    public void computeICP()
    {
       RigidBodyTransform currentToPreviousTransform = new RigidBodyTransform();
-      boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(previousRegions.getPlanarRegionsList(),
-                                                                                                  currentRegions.getPlanarRegionsList(),
+      boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(new PlanarLandmarkList(previousRegions.getPlanarRegionsList()),
+                                                                                                  new PlanarLandmarkList(currentRegions.getPlanarRegionsList()),
                                                                                                   currentToPreviousTransform,
                                                                                                   getParameters());
+
+      if (valid)
+         currentRegions.getPlanarRegionsList().applyTransform(currentToPreviousTransform);
 
       PerceptionDebugTools.printTransform("ComputeICP", currentToPreviousTransform, true);
    }
@@ -510,5 +528,10 @@ public class PlanarRegionMappingHandler
    public int getTotalDepthCount()
    {
       return totalDepthCount;
+   }
+
+   public PlanarRegionMap getPlanarRegionMap()
+   {
+      return planarRegionMap;
    }
 }

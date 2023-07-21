@@ -101,9 +101,6 @@ public class RDXVRContext
       }
    }; // must use serial number, tracker role is not supported in org.lwjgl.openvr.VR
 
-   private final SideDependentList<ArrayList<RDXVRPickResult>> pickResults = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
-   private SideDependentList<RDXVRPickResult> selectedPick = new SideDependentList<>(null, null);
-
    public void initSystem()
    {
       LogTools.info("Initializing");
@@ -233,35 +230,17 @@ public class RDXVRContext
          entryTracker.getValue().update(trackedDevicePoses);
       }
 
-      for (RobotSide side : RobotSide.values)
-         pickResults.get(side).clear();
       for (Consumer<RDXVRContext> vrPickCalculator : vrPickCalculators)
       {
          vrPickCalculator.accept(this);
       }
-      calculateSelectedPick();
+      for (RobotSide side : RobotSide.values)
+      {
+         controllers.get(side).updatePickResults();
+      }
       for (Consumer<RDXVRContext> vrInputProcessor : vrInputProcessors)
       {
          vrInputProcessor.accept(this);
-      }
-   }
-
-   private void calculateSelectedPick()
-   {
-      for (RobotSide side : RobotSide.values)
-      {
-         selectedPick.set(side, null);
-         for (RDXVRPickResult pickResult : pickResults.get(side))
-         {
-            if (selectedPick.get(side) == null)
-            {
-               selectedPick.set(side, pickResult);
-            }
-            else if (pickResult.getDistanceToControllerPickPoint() < selectedPick.get(side).getDistanceToControllerPickPoint())
-            {
-               selectedPick.set(side, pickResult);
-            }
-         }
       }
    }
 
@@ -339,12 +318,7 @@ public class RDXVRContext
          RDXVRController controller = controllers.get(side);
          if (controller.isConnected())
          {
-            ModelInstance modelInstance = controller.getModelInstance();
-            if (modelInstance != null)
-            {
-               modelInstance.getRenderables(renderables, pool);
-               controller.getPickPoseSphere().getRenderables(renderables, pool);
-            }
+            controller.getRenderables(renderables, pool);
          }
       }
    }
@@ -421,16 +395,6 @@ public class RDXVRContext
    public RigidBodyTransform getTeleportIHMCZUpToIHMCZUpWorld()
    {
       return teleportIHMCZUpToIHMCZUpWorld;
-   }
-
-   public void addPickResult(RobotSide side, RDXVRPickResult pickResult)
-   {
-      pickResults.get(side).add(pickResult);
-   }
-
-   public SideDependentList<RDXVRPickResult> getSelectedPick()
-   {
-      return selectedPick;
    }
 
    public RDXVRControllerModel getControllerModel()

@@ -21,8 +21,6 @@ public class RDXHandConfigurationAction extends RDXBehaviorAction
 
    public RDXHandConfigurationAction()
    {
-      super("Hand Configuration");
-
       HandConfiguration[] values = HandConfiguration.values;
       for (int i = 0; i < values.length; i++)
       {
@@ -43,5 +41,11 @@ public class RDXHandConfigurationAction extends RDXBehaviorAction
    public HandConfigurationActionData getActionData()
    {
       return actionData;
+   }
+
+   @Override
+   public String getActionTypeTitle()
+   {
+      return "Hand Configuration";
    }
 }

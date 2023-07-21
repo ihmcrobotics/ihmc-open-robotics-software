@@ -10,7 +10,7 @@ import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -238,8 +238,8 @@ public class PerceptionDebugTools
       Mat finalDisplayDepth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC3);
 
       displayDepth.convertTo(displayDepth, opencv_core.CV_8UC1, 0.8, 50);
-      BytedecoOpenCVTools.clampTo8BitUnsignedChar(image, displayDepth, 0.0, 250.0);
-      BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
+      OpenCVTools.clampTo8BitUnsignedChar(image, displayDepth, 0.0, 250.0);
+      OpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
 
       opencv_imgproc.resize(finalDisplayDepth, finalDisplayDepth, new Size((int) (image.cols() * scale), (int) (image.rows() * scale)));
       display(tag, finalDisplayDepth, delay);
@@ -250,12 +250,12 @@ public class PerceptionDebugTools
       Mat displayDepth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC1);
       Mat finalDisplayDepth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC3);
 
-      BytedecoOpenCVTools.clampTo8BitUnsignedChar(image, displayDepth, 0.0, 250.0);
+      OpenCVTools.clampTo8BitUnsignedChar(image, displayDepth, 0.0, 250.0);
 
       opencv_imgproc.threshold(displayDepth, displayDepth, 100, 255, opencv_imgproc.CV_THRESH_TOZERO_INV);
       opencv_core.normalize(displayDepth, displayDepth, 255, 0, opencv_core.NORM_MINMAX, opencv_core.CV_8UC1, new Mat());
 
-      BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
+      OpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
 
       opencv_imgproc.resize(finalDisplayDepth, finalDisplayDepth, new Size((int) (image.cols() * scale), (int) (image.rows() * scale)));
       display(tag, finalDisplayDepth, delay);

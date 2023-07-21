@@ -194,7 +194,7 @@ public class PerceptionDataLogger
    {
       if (hdf5Manager != null)
       {
-         logResiduals();
+//         logResiduals();
 
          try
          {

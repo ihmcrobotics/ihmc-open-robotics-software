@@ -1,7 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyPoseController;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
@@ -10,28 +12,22 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LegTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class MoveViaWaypointsState extends AbstractFootControlState
 {
    private final YoBoolean isPerformingTouchdown;
    private final SoftTouchdownPositionTrajectoryGenerator positionTrajectoryForDisturbanceRecovery;
 
-   private final RigidBodyPoseController poseController;
-   private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
-
-   private Vector3DReadOnly angularWeight;
-   private Vector3DReadOnly linearWeight;
+   private final RigidBodyControlManager controlManager;
 
    private final FrameVector3DReadOnly touchdownVelocity;
    private final FrameVector3DReadOnly touchdownAcceleration;
@@ -40,13 +36,11 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    private final ReferenceFrame ankleFrame;
    private final WorkspaceLimiterControlModule workspaceLimiterControlModule;
 
-   private final PIDSE3GainsReadOnly gains;
-
-   public MoveViaWaypointsState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly gains, YoRegistry registry)
+   public MoveViaWaypointsState(FootControlHelper footControlHelper, RigidBodyControlManager controlManager, YoRegistry registry)
    {
       super(footControlHelper);
 
-      this.gains = gains;
+      this.controlManager = controlManager;
       this.touchdownVelocity = footControlHelper.getSwingTrajectoryParameters().getDesiredTouchdownVelocity();
       this.touchdownAcceleration = footControlHelper.getSwingTrajectoryParameters().getDesiredTouchdownAcceleration();
 
@@ -56,49 +50,29 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       isPerformingTouchdown = new YoBoolean(namePrefix + "IsPerformingTouchdown", registry);
       positionTrajectoryForDisturbanceRecovery = new SoftTouchdownPositionTrajectoryGenerator(namePrefix + "Touchdown", registry);
 
-      YoDouble yoTime = controllerToolbox.getYoTime();
-      YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
-      ReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
       ankleFrame = foot.getParentJoint().getFrameAfterJoint();
       controlFrame = ankleFrame;
 
-      poseController = new RigidBodyPoseController(foot, pelvis, rootBody, controlFrame, pelvisFrame, yoTime, null, graphicsListRegistry, registry);
-      poseController.setGains(gains.getOrientationGains(), gains.getPositionGains());
-
-      spatialFeedbackControlCommand.set(rootBody, foot);
-      spatialFeedbackControlCommand.setPrimaryBase(pelvis);
-
       workspaceLimiterControlModule = footControlHelper.getWorkspaceLimiterControlModule();
-   }
-
-   public void setWeights(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
-   {
-      this.angularWeight = angularWeight;
-      this.linearWeight = linearWeight;
-
-      poseController.setWeights(angularWeight, linearWeight);
-   }
-
-   public void holdCurrentPosition()
-   {
-      poseController.holdCurrent();
    }
 
    public void handleFootTrajectoryCommand(FootTrajectoryCommand command)
    {
       SE3TrajectoryControllerCommand se3Trajectory = command.getSE3Trajectory();
       se3Trajectory.setSequenceId(command.getSequenceId());
+      controlManager.handleTaskspaceTrajectoryCommand(se3Trajectory);
+   }
 
-      if (!poseController.handleTrajectoryCommand(se3Trajectory))
-      {
-         poseController.holdCurrent();
-      }
+   public void handleLegTrajectoryCommand(LegTrajectoryCommand command)
+   {
+      JointspaceTrajectoryCommand jointspaceTrajectory = command.getJointspaceTrajectory();
+      jointspaceTrajectory.setSequenceId(command.getSequenceId());
+      controlManager.handleJointspaceTrajectoryCommand(jointspaceTrajectory);
    }
 
    @Override
    public void onEntry()
    {
-      poseController.onEntry();
       isPerformingTouchdown.set(false);
 
       if (workspaceLimiterControlModule != null)
@@ -119,26 +93,25 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       }
       else
       {
-         poseController.doAction(timeInState);
-         spatialFeedbackControlCommand.set((SpatialFeedbackControlCommand) poseController.getFeedbackControlCommand());
-
-         if (poseController.abortState())
-            requestTouchdownForDisturbanceRecovery(timeInState);
+         controlManager.compute();
       }
 
-      doSingularityAvoidance(spatialFeedbackControlCommand);
+      doSingularityAvoidance();
    }
 
    private void packCommandForTouchdown()
    {
+      RigidBodyPoseController taskspaceControlState = (RigidBodyPoseController) controlManager.getTaskspaceControlState();
+      SpatialFeedbackControlCommand spatialFeedbackControlCommand = (SpatialFeedbackControlCommand) taskspaceControlState.getFeedbackControlCommand();
       spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation,
                                                        desiredPosition,
                                                        desiredAngularVelocity,
                                                        desiredLinearVelocity,
                                                        desiredAngularAcceleration,
                                                        desiredLinearAcceleration);
-      spatialFeedbackControlCommand.setWeightsForSolver(angularWeight, linearWeight);
-      spatialFeedbackControlCommand.setGains(gains);
+      spatialFeedbackControlCommand.setWeightsForSolver(taskspaceControlState.getAngularDefaultWeight(), taskspaceControlState.getLinearDefaultWeight());
+      spatialFeedbackControlCommand.setOrientationGains(taskspaceControlState.getOrientationGains());
+      spatialFeedbackControlCommand.setPositionGains(taskspaceControlState.getPositionGains());
    }
 
    public void requestTouchdownForDisturbanceRecovery(double timeInState)
@@ -160,8 +133,16 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    private final FramePoint3D desiredAnklePosition = new FramePoint3D();
    private final FramePose3D desiredPose = new FramePose3D();
 
-   private void doSingularityAvoidance(SpatialFeedbackControlCommand spatialFeedbackControlCommand)
+   private void doSingularityAvoidance()
    {
+      if (controlManager.getActiveControlMode() != RigidBodyControlMode.TASKSPACE)
+         return;
+      if (controlManager.getTaskspaceControlState().isHybridModeActive())
+         return; // If in hybrid, let's assume that the jointspace trajectory helps with the singularity
+
+      SpatialFeedbackControlCommand spatialFeedbackControlCommand = (SpatialFeedbackControlCommand) controlManager.getTaskspaceControlState()
+                                                                                                                  .getFeedbackControlCommand();
+
       if (workspaceLimiterControlModule != null)
       {
          desiredPosition.setIncludingFrame(spatialFeedbackControlCommand.getReferencePosition());
@@ -209,38 +190,43 @@ public class MoveViaWaypointsState extends AbstractFootControlState
 
    public void requestStopTrajectory()
    {
-      poseController.holdCurrent();
+      controlManager.hold();
    }
 
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return null;
+      return controlManager.getInverseDynamicsCommand();
    }
 
    @Override
-   public SpatialFeedbackControlCommand getFeedbackControlCommand()
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
-      return spatialFeedbackControlCommand;
+      return controlManager.getFeedbackControlCommand();
+   }
+
+   @Override
+   public FeedbackControlCommand<?> createFeedbackControlTemplate()
+   {
+      return controlManager.createFeedbackControlTemplate();
    }
 
    @Override
    public void onExit(double timeInState)
    {
-      poseController.onExit(timeInState);
    }
 
    @Override
-   public TaskspaceTrajectoryStatusMessage pollStatusToReport()
+   public Object pollStatusToReport()
    {
-      return poseController.pollStatusToReport();
+      return controlManager.pollStatusToReport();
    }
 
    @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
-      group.addChild(poseController.getSCS2YoGraphics());
+      group.addChild(controlManager.getSCS2YoGraphics());
       return group;
    }
 

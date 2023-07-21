@@ -94,6 +94,28 @@ public class PredefinedSceneNodeLibrary
       referenceFrames.add(detectableSceneNode.getNodeFrame());
    }
 
+   public void storeOverriddenPoses()
+   {
+      for (DetectableSceneNode detectableSceneNode : detectableSceneNodes)
+      {
+         if (detectableSceneNode.getPoseOverriddenByOperator())
+         {
+            detectableSceneNode.storeOverriddenPose();
+         }
+      }
+   }
+
+   public void restoreOverriddenPoses()
+   {
+      for (DetectableSceneNode detectableSceneNode : detectableSceneNodes)
+      {
+         if (detectableSceneNode.getPoseOverriddenByOperator())
+         {
+            detectableSceneNode.restoreOverriddenPose();
+         }
+      }
+   }
+
    public List<DetectableSceneNode> getDetectableSceneNodes()
    {
       return detectableSceneNodes;

@@ -1,6 +1,6 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.7"
+   id("us.ihmc.ihmc-ci") version "8.3"
    id("us.ihmc.ihmc-cd") version "1.24"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
@@ -22,15 +22,6 @@ mainDependencies {
    api("us.ihmc:promp:source")
 }
 
-javafxDependencies {
-   api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.3")
-   api("us.ihmc:ihmc-graphics-javafx:source")
-   api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
-   api("us.ihmc:ihmc-path-planning-visualizers:source")
-   api("us.ihmc:robot-environment-awareness-visualizers:source")
-}
-
 missionControlDependencies {
    api("us.ihmc:ihmc-commons:0.32.0")
    api("us.ihmc:log-tools:0.6.3")
@@ -47,7 +38,7 @@ libgdxDependencies {
    api("org.abego.treelayout:org.abego.treelayout.core:1.0.3")
    api("us.ihmc:ihmc-graphics-libgdx:source")
    api("us.ihmc:ihmc-graphics-libgdx:source")
-   api("us.ihmc:scs2-definition:17-0.14.6")
+   api("us.ihmc:scs2-definition:17-0.15.1")
    api("us.ihmc:mecano-graphviz:17-0.12.3")
    api("com.badlogicgames.gdx-controllers:gdx-controllers-core:2.2.1")
    api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.1")
@@ -63,8 +54,8 @@ testDependencies {
    api("us.ihmc:ihmc-path-planning-test:source")
    api("org.cartesiantheatrics:bag-reader-java:0.0.1")
    api("com.github.stephengold:Libbulletjme:12.6.0")
-   api("us.ihmc:scs2-examples:17-0.14.6")
-   api("us.ihmc:scs2-bullet-simulation-test:17-0.14.6")
+   api("us.ihmc:scs2-examples:17-0.15.1")
+   api("us.ihmc:scs2-bullet-simulation-test:17-0.15.1")
    api("us.ihmc:example-simulations:source")
 }
 

@@ -28,6 +28,7 @@ import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
 import us.ihmc.avatar.DRCSimulationOutputWriterForControllerThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.drcRobot.RobotVersion;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.kinematicsSimulation.SimulatedHandKinematicController;
@@ -350,6 +351,12 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    public AtlasRobotVersion getAtlasVersion()
+   {
+      return selectedVersion;
+   }
+
+   @Override
+   public RobotVersion getRobotVersion()
    {
       return selectedVersion;
    }

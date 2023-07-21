@@ -8,7 +8,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -18,10 +17,9 @@ import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
-import us.ihmc.rdx.ui.gizmo.BoxRayIntersection;
+import us.ihmc.robotics.interaction.BoxRayIntersection;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.robotics.EuclidCoreMissingTools;
-import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class RDXInteractableSakeGripper implements RenderableProvider
@@ -196,7 +194,7 @@ public class RDXInteractableSakeGripper implements RenderableProvider
 
    public RDXPose3DGizmo getPose3DGizmo()
    {
-      return interactableHandFrameModel.getPose3DGizmo();
+      return interactableHandFrameModel.getPoseGizmo();
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

@@ -20,7 +20,7 @@ public class RDXBuildingObject
    private final ArrayList<RDXSimpleObject> allObjects = new ArrayList<>();
    private final HashMap<ComponentType, ArrayList<RDXSimpleObject>> components = new HashMap<>();
 
-   private float height = 5.0f;
+   private float height = 2.5f;
 
    public RDXBuildingObject()
    {

@@ -30,6 +30,7 @@ public class RDXSwingPlanningModule
    private final SwingPlanningModule swingPlanningModule;
    private final ROS2SyncedRobotModel syncedRobot;
    private PlanarRegionsListMessage planarRegionsListMessage;
+   private PlanarRegionsList planarRegionsList;
    private HeightMapMessage heightMapMessage;
    private SwingPlannerParametersReadOnly swingPlannerParameters;
 
@@ -49,9 +50,9 @@ public class RDXSwingPlanningModule
       swingPlanningModule = new SwingPlanningModule(footstepPlannerParameters, swingPlannerParameters, walkingControllerParameters, footPolygons);
    }
 
-   public void setPlanarRegionList(PlanarRegionsListMessage planarRegionsListMessage)
+   public void setPlanarRegionList(PlanarRegionsList planarRegionsList)
    {
-      this.planarRegionsListMessage = planarRegionsListMessage;
+      this.planarRegionsList = planarRegionsList;
    }
 
    public void setHeightMapData(HeightMapMessage heightMapData)
@@ -80,7 +81,10 @@ public class RDXSwingPlanningModule
       setInitialFeet();
       FootstepPlan tempPlan = createFakeFootstepPlan(footstepPlan);
 
-      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
+      if (planarRegionsList == null && planarRegionsListMessage != null)
+      {
+         planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
+      }
       HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
       swingPlanningModule.getSwingPlannerParameters().set(swingPlannerParameters);
       swingPlanningModule.computeSwingWaypoints(planarRegionsList,
@@ -89,7 +93,7 @@ public class RDXSwingPlanningModule
                                                 startFootPoses,
                                                 swingPlannerType);
 
-      for (int i = 0; i < footstepPlan.size(); i++)
+      for (int i = 0; i < footstepPlan.size() && i < swingPlanningModule.getSwingTrajectories().size(); i++)
       {
          footstepPlan.get(i).updatePlannedTrajectory(Pair.of(tempPlan.getFootstep(i), swingPlanningModule.getSwingTrajectories().get(i)));
       }

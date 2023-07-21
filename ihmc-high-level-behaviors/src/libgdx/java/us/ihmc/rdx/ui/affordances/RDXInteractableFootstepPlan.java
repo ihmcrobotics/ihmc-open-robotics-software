@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import imgui.ImGui;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -20,12 +19,12 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -52,10 +51,10 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    private RDXSwingPlanningModule swingPlanningModule;
    private SideDependentList<ConvexPolygon2D> defaultPolygons;
    private RDXLocomotionParameters locomotionParameters;
+   private SwingPlannerParametersBasics swingFootPlannerParameters;
 
-   private final AtomicReference<HeightMapMessage> heightMapReference = new AtomicReference<>();
-   private final AtomicReference<PlanarRegionsListMessage> planarRegionsListReference = new AtomicReference<>();
-   private final AtomicReference<SwingPlannerParametersReadOnly> swingPlannerParametersReference = new AtomicReference<>();
+   private final AtomicReference<HeightMapMessage> heightMapDataReference = new AtomicReference<>();
+   private final AtomicReference<PlanarRegionsList> planarRegionsListReference = new AtomicReference<>();
 
    private int previousPlanLength;
    private boolean wasPlanUpdated = false;
@@ -64,12 +63,14 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
                       CommunicationHelper communicationHelper,
                       ROS2SyncedRobotModel syncedRobot,
                       RDXLocomotionParameters locomotionParameters,
-                      FootstepPlannerParametersReadOnly footstepPlannerParameters)
+                      FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                      SwingPlannerParametersBasics swingFootPlannerParameters)
    {
       this.baseUI = baseUI;
       this.communicationHelper = communicationHelper;
-      this.locomotionParameters = locomotionParameters;
       this.syncedRobot = syncedRobot;
+      this.locomotionParameters = locomotionParameters;
+      this.swingFootPlannerParameters = swingFootPlannerParameters;
 
       defaultPolygons = FootstepPlanningModuleLauncher.createFootPolygons(communicationHelper.getRobotModel());
       stepChecker = new RDXFootstepChecker(baseUI, syncedRobot, defaultPolygons, footstepPlannerParameters);
@@ -96,7 +97,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       }
    }
 
-   public void setPlanarRegionsList(PlanarRegionsListMessage planarRegionsList)
+   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
       planarRegionsListReference.set(planarRegionsList);
       if (swingPlanningModule != null)
@@ -105,14 +106,9 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
    public void setHeightMapMessage(HeightMapMessage heightMapMessage)
    {
-      heightMapReference.set(heightMapMessage);
+      heightMapDataReference.set(heightMapMessage);
       if (swingPlanningModule != null)
          swingPlanningModule.setHeightMapData(heightMapMessage);
-   }
-
-   public void setSwingPlannerParameters(SwingPlannerParametersReadOnly swingPlannarParameters)
-   {
-      swingPlannerParametersReference.set(swingPlannarParameters);
    }
 
    public void processImGui3DViewInput(ImGui3DViewInput input)
@@ -153,27 +149,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       }
    }
 
-   public void renderImGuiWidgets()
-   {
-      ImGui.text("Footstep plan:");
-      ImGui.sameLine();
-      if (footsteps.size() > 0)
-      {
-         // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
-         if (ImGui.button(labels.get("Walk")) || ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
-         {
-            walkFromSteps();
-         }
-         ImGuiTools.previousWidgetTooltip("Keybind: Space");
-         ImGui.sameLine();
-      }
-      if (ImGui.button(labels.get("Delete Last")) || ImGui.isKeyPressed(ImGuiTools.getDeleteKey()))
-      {
-         removeLastStep();
-      }
-      ImGuiTools.previousWidgetTooltip("Keybind: Delete");
-   }
-
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
@@ -212,6 +187,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
          addedStep.updateFromPlannedStep(baseUI, plannedStep, swingTrajectory, i);
       }
 
+      stepChecker.checkValidStepList(footsteps);
       wasPlanUpdated = true;
    }
 
@@ -233,18 +209,16 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       stepChecker.update(footsteps);
       if (wasPlanUpdated && locomotionParameters.getReplanSwingTrajectoryOnChange() && !swingPlanningModule.getIsCurrentlyPlanning())
       {
-         PlanarRegionsListMessage planarRegionsList = planarRegionsListReference.getAndSet(null);
+         PlanarRegionsList planarRegionsList = planarRegionsListReference.getAndSet(null);
+
          if (planarRegionsList != null)
             swingPlanningModule.setPlanarRegionList(planarRegionsList);
-         HeightMapMessage heightMapMessage = heightMapReference.getAndSet(null);
+         HeightMapMessage heightMapMessage = heightMapDataReference.getAndSet(null);
          if (heightMapMessage != null)
             swingPlanningModule.setHeightMapData(heightMapMessage);
-         SwingPlannerParametersReadOnly swingPlannerParameters = swingPlannerParametersReference.getAndSet(null);
-         if (swingPlannerParameters != null)
-         {
-            swingPlanningModule.setSwingPlannerParameters(swingPlannerParameters);
-            swingPlanningModule.updateAysnc(footsteps, SwingPlannerType.MULTI_WAYPOINT_POSITION);
-         }
+
+         swingPlanningModule.setSwingPlannerParameters(swingFootPlannerParameters);
+         swingPlanningModule.updateAysnc(footsteps, SwingPlannerType.MULTI_WAYPOINT_POSITION);
 
          wasPlanUpdated = false;
       }

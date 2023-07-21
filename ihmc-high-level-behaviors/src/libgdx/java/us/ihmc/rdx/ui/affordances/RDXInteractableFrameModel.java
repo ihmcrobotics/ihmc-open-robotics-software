@@ -22,11 +22,11 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
+import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
@@ -182,7 +182,7 @@ public class RDXInteractableFrameModel
       this.extendedContextMenu = runnable;
    }
 
-   public RDXPose3DGizmo getPose3DGizmo()
+   public RDXPose3DGizmo getPoseGizmo()
    {
       return selectablePose3DGizmo.getPoseGizmo();
    }

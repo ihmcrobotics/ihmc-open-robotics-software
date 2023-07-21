@@ -366,6 +366,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       {
          WalkingStateEnum stateEnum = WalkingStateEnum.getFlamingoSingleSupportState(supportSide);
          FlamingoStanceState singleSupportState = new FlamingoStanceState(stateEnum,
+                                                                          walkingControllerParameters,
                                                                           walkingMessageHandler,
                                                                           controllerToolbox,
                                                                           managerFactory,
@@ -514,7 +515,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       commandInputManager.clearAllCommands();
       commandConsumer.clearAllCommands();
       walkingMessageHandler.clearFootsteps();
-      walkingMessageHandler.clearFootTrajectory();
+      walkingMessageHandler.clearFlamingoCommands();
 
       privilegedConfigurationCommand.clear();
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
@@ -642,7 +643,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       commandConsumer.consumeManipulationCommands(currentState, allowUpperBodyMotionDuringLocomotion.getBooleanValue());
       commandConsumer.handleAutomaticManipulationAbortOnICPError(currentState);
       commandConsumer.consumeLoadBearingCommands();
-      commandConsumer.consumeEnvironmentalModelingCommands();
       commandConsumer.consumePrepareForLocomotionCommands();
 
       updateFailureDetection();
@@ -711,7 +711,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if (failureDetectionControlModule.isRobotFalling())
       {
          walkingMessageHandler.clearFootsteps();
-         walkingMessageHandler.clearFootTrajectory();
+         walkingMessageHandler.clearFlamingoCommands();
 
          commandInputManager.clearAllCommands();
 

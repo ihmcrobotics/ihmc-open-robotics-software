@@ -14,7 +14,15 @@ public interface HumanoidJointNameMap extends LeggedJointNameMap<RobotSide>
 {
    ImmutablePair<RobotSide, ArmJointName> getArmJointName(String jointName);
 
-   String getJointBeforeHandName(RobotSide robotSide);
+   default String getJointBeforeHandName(RobotSide robotSide)
+   {
+      if (getNameOfJointBeforeHands() == null)
+         return null;
+      else
+         return getNameOfJointBeforeHands().get(robotSide);
+   }
+
+   SideDependentList<String> getNameOfJointBeforeHands();
 
    RigidBodyTransform getHandControlFrameToWristTransform(RobotSide robotSide);
 
@@ -36,8 +44,6 @@ public interface HumanoidJointNameMap extends LeggedJointNameMap<RobotSide>
 
    String getNameOfJointBeforeChest();
 
-   SideDependentList<String> getNameOfJointBeforeHands();
-
    String[] getOrderedJointNames();
 
    String getLegJointName(RobotSide robotSide, LegJointName legJointName);
@@ -50,7 +56,10 @@ public interface HumanoidJointNameMap extends LeggedJointNameMap<RobotSide>
 
    String[] getPositionControlledJointsForSimulation();
 
-   List<ImmutablePair<String, YoPDGains>> getPassiveJointNameWithGains(YoRegistry registry);
+   default List<ImmutablePair<String, YoPDGains>> getPassiveJointNameWithGains(YoRegistry registry)
+   {
+      return null;
+   }
 
    String getHandName(RobotSide robotSide);
 

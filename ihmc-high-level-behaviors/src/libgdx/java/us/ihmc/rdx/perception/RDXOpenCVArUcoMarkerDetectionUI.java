@@ -22,8 +22,8 @@ import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.rdx.ui.yo.ImPlotDoublePlotLine;
 import us.ihmc.rdx.ui.yo.ImPlotPlot;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.OpenCVArUcoMarker;
-import us.ihmc.perception.OpenCVArUcoMarkerDetection;
+import us.ihmc.perception.opencv.OpenCVArUcoMarker;
+import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
 
 import java.util.ArrayList;
 import java.util.HashMap;

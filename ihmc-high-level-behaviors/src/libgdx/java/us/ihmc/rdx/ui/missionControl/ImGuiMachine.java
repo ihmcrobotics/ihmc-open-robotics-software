@@ -13,6 +13,7 @@ import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.ui.yo.ImPlotDoublePlotLine;
@@ -276,9 +277,7 @@ public class ImGuiMachine
 
       if (!message.getLogData().isEmpty())
       {
-         byte[] logData = message.getLogData().toArray();
-         String logLinesJoined = new String(logData, StandardCharsets.US_ASCII);
-         String[] logLines = logLinesJoined.split("\n");
+         String[] logLines = MessageTools.unpackLongStringFromByteSequence(message.getLogData()).split("\n");
          service.acceptLogLines(Arrays.stream(logLines).toList(), message.getRefresh());
       }
    }

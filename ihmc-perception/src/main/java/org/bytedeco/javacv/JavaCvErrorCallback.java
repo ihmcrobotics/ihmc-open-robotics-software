@@ -69,7 +69,7 @@ public class JavaCvErrorCallback extends CvErrorCallback {
                 " (" + err_msg.getString() + ")\nin function " +
                 func_name.getString() + ", " + file_name.getString() + "(" + line + ")";
         Logger.getLogger(JavaCvErrorCallback.class.getName()).log(Level.SEVERE,
-                title + ": " + message, new Exception("Strack trace"));
+                title + ": " + message, new java.lang.Exception("Strack trace"));
         if (showDialog) {
             // Show no more than 1 dialog per second since we cannot stop OpenCV
             // from processing and throwing more errors. Maybe in the future

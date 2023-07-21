@@ -222,6 +222,7 @@ public abstract class AvatarPushRecoveryWithCrossOverWalkingTest implements Mult
       }
 
       footsteps.setAreFootstepsAdjustable(true);
+      footsteps.setOffsetFootstepsWithExecutionError(true);
       simulationTestHelper.publishToController(footsteps);
    }
 

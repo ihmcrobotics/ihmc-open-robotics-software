@@ -24,7 +24,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.ImageEncodingTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.UnitConversions;
@@ -70,7 +69,7 @@ public class AtlasZED2LeftEyeToMultiSenseLeftEyeBridge
       ComponentColorModel colorModel = new ComponentColorModel(colorSpace, false, false, Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
 
       String bgr8Name = "bgr8";
-      int bgr8 = ImageEncodingTools.getCvType(bgr8Name);
+//      int bgr8 = ImageEncodingTools.getCvType(bgr8Name);
       Mat inputImageMat = new Mat(720, 1280, opencv_core.CV_8UC3);
       Mat decodedImageMat = new Mat(720, 1280, opencv_core.CV_8UC3);
       Mat compressedImageMat = new Mat(720, 1280, opencv_core.CV_8UC3);

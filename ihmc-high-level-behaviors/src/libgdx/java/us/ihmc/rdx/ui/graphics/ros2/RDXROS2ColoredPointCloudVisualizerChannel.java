@@ -7,9 +7,9 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.perception.CameraModel;
-import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.comms.ImageMessageFormat;
-import us.ihmc.perception.netty.NettyOuster;
+import us.ihmc.perception.ouster.NettyOuster;
 import us.ihmc.perception.tools.ImageMessageDecompressionInput;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.pubsub.common.SampleInfo;
@@ -124,6 +124,7 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
          // the unpacked result to a decompression input buffer.
          decompressionInputSwapReference.getForThreadOne().extract(imageMessage);
          decompressionInputSwapReference.swap();
+         // FIXME: This call prints "no afterExecute handlers" warnings whe the Ouster Fisheye point cloud's refresh rate is too fast
          channelDecompressionThreadExecutor.clearQueueAndExecute(decompressionAsynchronousThread);
 
          messageSizeReadout.update(imageMessage.getData().size());
