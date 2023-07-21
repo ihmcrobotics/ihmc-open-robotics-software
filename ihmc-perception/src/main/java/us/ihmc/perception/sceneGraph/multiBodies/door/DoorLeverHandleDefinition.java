@@ -48,7 +48,7 @@ public class DoorLeverHandleDefinition extends RigidBodyDefinition
             = new ModelFileGeometryDefinition(DoorSceneNodeDefinitions.DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH);
       modelVisualDefinitionOtherSide.setGeometryDefinition(geometryDefinitionOtherSide);
       modelVisualDefinitionOtherSide.getOriginPose().prependPitchRotation(Math.PI);
-      modelVisualDefinitionOtherSide.getOriginPose().getTranslation().setX(0.0508);
+      modelVisualDefinitionOtherSide.getOriginPose().getTranslation().setX(DoorModelParameters.DOOR_PANEL_THICKNESS);
       addVisualDefinition(modelVisualDefinitionOtherSide);
 
       // This code enables the full mesh collisions, but they aren't super useful, and they're slow

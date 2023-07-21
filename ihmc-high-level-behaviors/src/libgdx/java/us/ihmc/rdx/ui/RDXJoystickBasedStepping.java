@@ -22,7 +22,6 @@ import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -166,7 +165,7 @@ public class RDXJoystickBasedStepping
       {
          userNotClickingAnImGuiPanel = true;
          for (RobotSide side : RobotSide.values)
-            userNotClickingAnImGuiPanel =  userNotClickingAnImGuiPanel && context.getSelectedPick().get(side) == null;
+            userNotClickingAnImGuiPanel =  userNotClickingAnImGuiPanel && context.getController(side).getSelectedPick() == null;
       });
    }
 

@@ -14,7 +14,7 @@ import us.ihmc.robotics.physics.Collidable;
  */
 public class MouseCollidable
 {
-   private final FrameShape3DBasics shape;
+   private final FrameShape3DReadOnly shape;
    private SphereRayIntersection sphereRayIntersection;
    private CapsuleRayIntersection capsuleIntersection;
    private CylinderRayIntersection cylinderRayIntersection;
@@ -23,10 +23,10 @@ public class MouseCollidable
 
    public MouseCollidable(Collidable collidable)
    {
-      this((FrameShape3DBasics) collidable.getShape());
+      this(collidable.getShape());
    }
 
-   public MouseCollidable(FrameShape3DBasics shape)
+   public MouseCollidable(FrameShape3DReadOnly shape)
    {
       this.shape = shape;
 
