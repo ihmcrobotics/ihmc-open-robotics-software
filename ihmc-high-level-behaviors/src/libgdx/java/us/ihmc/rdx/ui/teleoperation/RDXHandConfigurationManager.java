@@ -118,6 +118,20 @@ public class RDXHandConfigurationManager
       {
          ImGui.image(handIcons.get(side).getTexture().getTextureObjectHandle(), 22.0f, 22.0f);
          ImGui.sameLine();
+         if (sakeStatuses.get(side).hasReceivedFirstMessage())
+         {
+            // TODO: Add ratio to unit conversions enum or something
+            double temperature = 100 * sakeStatuses.get(side).getLatest().getTemperature();
+            boolean error = sakeStatuses.get(side).getLatest().getIsInErrorState();
+            double errorValue = error ? 1.0 : 0.0;
+            renderGradiatedImGuiText("Temperature: " + FormattingTools.getFormattedDecimal1D(temperature) + " C  |", temperature, 45.0, 55.0);
+            ImGui.sameLine();
+            renderGradiatedImGuiText("Status: " + (error ? "ERROR" : "all good"), errorValue, 1.0);
+         }
+         else
+         {
+            ImGui.text("No status received.");
+         }
          if (ImGui.button(labels.get("Close", side.getCamelCaseName())))
          {
             publishHandCommand(side, SakeHandCommandOption.CLOSE);
@@ -136,21 +150,6 @@ public class RDXHandConfigurationManager
          if (ImGui.button(labels.get("Calibrate", side.getCamelCaseName())))
          {
             publishHandCommand(side, SakeHandCommandOption.CALIBRATE);
-         }
-         ImGui.sameLine();
-         if (sakeStatuses.get(side).hasReceivedFirstMessage())
-         {
-            // TODO: Add ratio to unit conversions enum or something
-            double temperature = 100 * sakeStatuses.get(side).getLatest().getTemperature();
-            boolean error = sakeStatuses.get(side).getLatest().getIsInErrorState();
-            double errorValue = error ? 1.0 : 0.0;
-            renderGradiatedImGuiText("Temperature: " + FormattingTools.getFormattedDecimal1D(temperature) + " C", temperature, 45.0, 50.0, 55.0);
-            ImGui.sameLine();
-            renderGradiatedImGuiText("Status: " + (error ? "ERROR" : "all good"), errorValue, 1.0);
-         }
-         else
-         {
-            ImGui.text("No status received.");
          }
          handPositionSliders.get(side).renderImGuiWidgets();
          handTorqueSliders.get(side).renderImGuiWidgets();
