@@ -5,7 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
-import imgui.flag.ImGuiSliderFlags;
+import imgui.ImGuiStyle;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiTableFlags;
 import imgui.internal.ImGui;
@@ -613,6 +613,11 @@ public class RDXBaseUI
          case DARK -> ImGui.styleColorsDark();
          case CLASSIC -> ImGui.styleColorsClassic();
       }
+
+      // Add a 1px frame border to UI elements
+      ImGuiStyle style = ImGui.getStyle();
+      style.setFrameBorderSize(1.0f);
+
       this.theme = theme;
    }
 }
