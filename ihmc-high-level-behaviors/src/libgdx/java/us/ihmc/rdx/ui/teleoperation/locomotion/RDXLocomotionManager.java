@@ -35,6 +35,7 @@ import us.ihmc.rdx.ui.footstepPlanner.RDXFootstepPlanning;
 import us.ihmc.rdx.ui.graphics.RDXBodyPathPlanGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXLegControlMode;
+import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -385,6 +386,37 @@ public class RDXLocomotionManager
    public void updateWalkPathControlRing()
    {
       walkPathControlRing.update();
+   }
+   
+   public void calculateWalkPathControlRingVRPick(RDXVRContext vrContext)
+   {
+      if (!manualFootstepPlacement.isPlacingFootstep())
+         walkPathControlRing.calculateVRPick(vrContext);
+   }
+
+   public void processWalkPathControlRingVRInput(RDXVRContext vrContext)
+   {
+      if (!manualFootstepPlacement.isPlacingFootstep())
+      {
+         if (walkPathControlRing.getFootstepPlannerGoalGizmo().getPathControlRingGizmo().getIsGizmoHoveredVR().get(RobotSide.RIGHT))
+         {
+            vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
+            {
+               controller.setBButtonText("Delete all");
+               if (controller.getBButtonActionData().bChanged() && controller.getBButtonActionData().bState())
+               {
+                  deleteAll();
+               }
+               controller.setAButtonText("Walk");
+               if (controller.getAButtonActionData().bChanged() && controller.getAButtonActionData().bState())
+               {
+                  interactableFootstepPlan.walkFromSteps();
+               }
+            });
+         }
+
+         walkPathControlRing.processVRInput(vrContext);
+      }
    }
 
    public void calculateWalkPathControlRing3DViewPick(ImGui3DViewInput input)
