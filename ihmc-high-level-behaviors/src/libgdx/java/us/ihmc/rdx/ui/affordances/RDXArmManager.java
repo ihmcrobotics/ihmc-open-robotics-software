@@ -10,7 +10,6 @@ import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.HandWrenchCalculator;
-import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -42,7 +41,6 @@ public class RDXArmManager
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final CommunicationHelper communicationHelper;
    private final ROS2ControllerHelper ros2Helper;
-   private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final RDXDesiredRobot desiredRobot;
 
@@ -76,7 +74,6 @@ public class RDXArmManager
    {
       this.communicationHelper = communicationHelper;
       this.ros2Helper = ros2Helper;
-      this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.desiredRobot = desiredRobot;
       this.teleoperationParameters = teleoperationParameters;
