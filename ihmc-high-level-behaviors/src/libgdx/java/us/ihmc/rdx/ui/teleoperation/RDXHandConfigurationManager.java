@@ -92,7 +92,8 @@ public class RDXHandConfigurationManager
          setupShieldButton(baseUI, communicationHelper);
       }
 
-      setupForSakeHands();
+      if (communicationHelper.getRobotModel().getHandModels().toString().contains("SakeHand"))
+         setupForSakeHands();
    }
 
    public void publishArmHomeCommand(RobotSide side)
