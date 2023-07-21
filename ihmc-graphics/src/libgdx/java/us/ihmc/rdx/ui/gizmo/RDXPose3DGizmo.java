@@ -111,6 +111,7 @@ public class RDXPose3DGizmo implements RenderableProvider
    private final Random random = new Random();
    private boolean proportionsNeedUpdate = false;
    private FrameBasedGizmoModification frameBasedGizmoModification;
+   private boolean showGraphics = true;
 
    public RDXPose3DGizmo()
    {
@@ -557,10 +558,13 @@ public class RDXPose3DGizmo implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (Axis3D axis : Axis3D.values)
+      if (showGraphics)
       {
-         arrowModels[axis.ordinal()].getOrCreateModelInstance().getRenderables(renderables, pool);
-         torusModels[axis.ordinal()].getOrCreateModelInstance().getRenderables(renderables, pool);
+         for (Axis3D axis : Axis3D.values)
+         {
+            arrowModels[axis.ordinal()].getOrCreateModelInstance().getRenderables(renderables, pool);
+            torusModels[axis.ordinal()].getOrCreateModelInstance().getRenderables(renderables, pool);
+         }
       }
    }
 
@@ -646,5 +650,15 @@ public class RDXPose3DGizmo implements RenderableProvider
    public Notification getGizmoModifiedByUser()
    {
       return gizmoModifiedByUser;
+   }
+
+   public void setShowGraphics(boolean show)
+   {
+      showGraphics = show;
+   }
+
+   public boolean isShowingGraphics()
+   {
+      return showGraphics;
    }
 }

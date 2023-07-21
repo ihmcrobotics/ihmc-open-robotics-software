@@ -464,21 +464,21 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
          }
       }
       //update menu
-      if (!enabled.get() && !objectName.isEmpty())
-      {
+      if (!enabled.get() && !objectName.isEmpty()) // if assistance not enabled and objects in the scene
+      { // Press left B button to activate
          if(menuMode[0] != VRMenuGuideMode.PRESS_LEFT_B)
             menu.resetTimer();
          menuMode[0] = VRMenuGuideMode.PRESS_LEFT_B;
       }
-      else if (!enabled.get())
-         menuMode[0] = VRMenuGuideMode.OFF;
-      else if (enabled.get() && proMPAssistant.startedProcessing() && !proMPAssistant.readyToPack())
-      {
-         if(menuMode[0] != VRMenuGuideMode.MOVE_RIGHT)
+      else if (!enabled.get()) // if assistance is off and no object in the scene
+         menuMode[0] = VRMenuGuideMode.OFF; // OFF
+      else if (enabled.get() && proMPAssistant.startedProcessing() && !proMPAssistant.readyToPack()) // if assistance is on and promp ready
+      { // move joysticks
+         if(menuMode[0] != VRMenuGuideMode.MOVE)
             menu.resetTimer();
-         menuMode[0] = VRMenuGuideMode.MOVE_RIGHT;
+         menuMode[0] = VRMenuGuideMode.MOVE;
       }
-      else if (!previewSetToActive || (previewSetToActive && previewValidated))
+      else if ((!previewSetToActive && proMPAssistant.readyToPack()) || (previewSetToActive && previewValidated)) // if assistance is on and no preview, or preview is validated
       {
          if(menuMode[0] != VRMenuGuideMode.PUSH_LEFT_JOYSTICK)
             menu.resetTimer();

@@ -47,12 +47,12 @@ public class RDXVRAssistanceMenu
 
       iconsJoysticks.add(new RDXIconTexture("icons/vrAssistance/" + "controllers.png"));
       iconsJoysticks.add(new RDXIconTexture("icons/vrAssistance/" + "pressBLeft.png"));
-      iconsJoysticks.add(new RDXIconTexture("icons/vrAssistance/" + "moveRight.png"));
+      iconsJoysticks.add(new RDXIconTexture("icons/vrAssistance/" + "move.png"));
       iconsJoysticks.add(new RDXIconTexture("icons/vrAssistance/" + "pushLeftJoystick.png"));
 
       iconsJoysticksHighlighted.add(new RDXIconTexture("icons/vrAssistance/" + "controllers.png"));
       iconsJoysticksHighlighted.add(new RDXIconTexture("icons/vrAssistance/" + "pressBLeftHighlight.png"));
-      iconsJoysticksHighlighted.add(new RDXIconTexture("icons/vrAssistance/" + "moveRightHighlight.png"));
+      iconsJoysticksHighlighted.add(new RDXIconTexture("icons/vrAssistance/" + "moveHighlight.png"));
       iconsJoysticksHighlighted.add(new RDXIconTexture("icons/vrAssistance/" + "pushLeftJoystickHighlight.png"));
 
       for (int i = 0; i <= 100; i += 5)
@@ -125,7 +125,7 @@ public class RDXVRAssistanceMenu
          ImGui.image(isHighlighted ?
                            iconsJoysticksHighlighted.get(1).getTexture().getTextureObjectHandle() :
                            iconsJoysticks.get(1).getTexture().getTextureObjectHandle(), 400.2f, 172.7f);
-      else if (mode[0].equals(VRMenuGuideMode.MOVE_RIGHT))
+      else if (mode[0].equals(VRMenuGuideMode.MOVE))
          ImGui.image(isHighlighted ?
                            iconsJoysticksHighlighted.get(2).getTexture().getTextureObjectHandle() :
                            iconsJoysticks.get(2).getTexture().getTextureObjectHandle(), 400.2f, 172.7f);

@@ -2,14 +2,12 @@ package us.ihmc.rdx.ui.interactable;
 
 import imgui.internal.ImGui;
 import perception_msgs.msg.dds.ManuallyPlacedSceneNodeMessage;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
-import us.ihmc.perception.sceneGraph.SceneGraphAPI;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -103,13 +101,6 @@ public class RDXInteractableObjectBuilder extends ImGuiPanel
       {
          selectedObject.switchGizmoVisualization();
       }
-   }
-
-   public void publishUpdate()
-   {
-         objectMessage.setName(selectedObjectName);
-         MessageTools.toMessage(this.getSelectedObject().getTransformToWorld(), objectMessage.getTransformToWorld());
-         ros2.publish(SceneGraphAPI.PLACED_SCENE_NODE, objectMessage);
    }
 
    public void reset()

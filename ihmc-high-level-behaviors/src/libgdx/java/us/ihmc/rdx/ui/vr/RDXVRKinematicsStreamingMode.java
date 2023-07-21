@@ -156,8 +156,8 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
       kinematicsRecorder = new KinematicsRecordReplay(ros2ControllerHelper, enabled, NUMBER_OF_PARTS_TO_RECORD);
       vrAssistant = new RDXVRAssistance(robotModel, ros2ControllerHelper, streamToController, kinematicsRecorder.isReplayingEnabled());
 
-      if (!kinematicsStreamingToolboxProcess.isStarted())
-         kinematicsStreamingToolboxProcess.start();
+//      if (!kinematicsStreamingToolboxProcess.isStarted())
+//         kinematicsStreamingToolboxProcess.start();
    }
 
    public void processVRInput(RDXVRContext vrContext)
