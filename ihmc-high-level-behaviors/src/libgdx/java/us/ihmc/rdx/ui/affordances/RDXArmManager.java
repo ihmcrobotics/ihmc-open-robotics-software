@@ -35,7 +35,7 @@ import us.ihmc.tools.thread.MissingThreadTools;
 /**
  * This class manages the UI for operating the arms of a humanoid robot.
  * This includes sending the arms to predefined joint angles poses and
- * operating a IK solver to acheive desired hand and elbow poses.
+ * operating a IK solver to achieve desired hand and elbow poses.
  */
 public class RDXArmManager
 {
@@ -53,8 +53,6 @@ public class RDXArmManager
    private final SideDependentList<double[]> armHomes = new SideDependentList<>();
    private final SideDependentList<double[]> doorAvoidanceArms = new SideDependentList<>();
    private final RDXHandConfigurationManager handManager;
-   private final HandWrenchCalculator handWrenchCalculator;
-   private final ImBoolean indicateWrenchOnScreen = new ImBoolean(false);
 
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final SideDependentList<OneDoFJointBasics[]> desiredRobotArmJoints = new SideDependentList<>();
