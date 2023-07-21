@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.teleoperation;
 import controller_msgs.msg.dds.*;
 import imgui.ImGui;
 import imgui.type.ImInt;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Input;
@@ -35,7 +36,7 @@ public class RDXHandConfigurationManager
    private RobotSide toolbarSelectedSide = RobotSide.LEFT;
    private final SideDependentList<IHMCROS2Input<HandSakeStatusMessage>> sakeStatuses = new SideDependentList<>();
 
-   public void create(RDXBaseUI baseUI, CommunicationHelper communicationHelper)
+   public void create(RDXBaseUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobotModel)
    {
       this.communicationHelper = communicationHelper;
 
@@ -92,7 +93,7 @@ public class RDXHandConfigurationManager
          setupShieldButton(baseUI, communicationHelper);
       }
 
-      if (communicationHelper.getRobotModel().getHandModels().toString().contains("SakeHand"))
+      if (syncedRobotModel.getRobotModel().getHandModels().toString().contains("SakeHand"))
          setupForSakeHands();
    }
 
