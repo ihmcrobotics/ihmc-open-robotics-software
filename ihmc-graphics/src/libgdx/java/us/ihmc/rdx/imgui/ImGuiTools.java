@@ -205,6 +205,21 @@ public class ImGuiTools
       return ImGui.sliderScalar(label, ImGuiDataType.Double, imDouble, minValue, maxValue, format, imGuiSliderFlags);
    }
 
+   public static boolean sliderInt(String label, ImInt imInt, int minValue, int maxValue)
+   {
+      return ImGui.sliderScalar(label, ImGuiDataType.U32, imInt, minValue, maxValue);
+   }
+
+   public static boolean sliderInt(String label, ImInt imInt, int minValue, int maxValue, String format)
+   {
+      return ImGui.sliderScalar(label, ImGuiDataType.U32, imInt, minValue, maxValue, format);
+   }
+
+   public static boolean sliderInt(String label, ImInt imInt, int minValue, int maxValue, String format, int imGuiSliderFlags)
+   {
+      return ImGui.sliderScalar(label, ImGuiDataType.U32, imInt, minValue, maxValue, format, imGuiSliderFlags);
+   }
+
    /**
     * Returns true if the user presses Enter, but unlike the EnterReturnsTrue flag,
     * using this method, the currently input text can be retrieved without the
@@ -294,14 +309,13 @@ public class ImGuiTools
 
 //      fontToReturn = fontAtlas.addFontDefault(); // Add a default font, which is 'ProggyClean.ttf, 13px'
 //      fontToReturn = fontAtlas.addFontFromMemoryTTF(loadFromResources("basis33.ttf"), 16, fontConfig);
-      String fontDir;
-      if (SystemUtils.IS_OS_WINDOWS) {
-         fontDir = System.getenv("WINDIR") + "/Fonts";
-      } else {
-         fontDir = "/usr/share/fonts/TTF/";
-      }
+      String fontDirectory;
+      if (SystemUtils.IS_OS_WINDOWS)
+         fontDirectory = System.getenv("WINDIR") + "/Fonts";
+      else
+         fontDirectory = "/usr/share/fonts/TTF/";
 
-      Path segoeui = Paths.get(fontDir, "segoeui.ttf");
+      Path segoeui = Paths.get(fontDirectory, "segoeui.ttf");
       if (Files.exists(segoeui))
       {
          fontConfig.setName("segoeui.ttf, 16px");
@@ -332,7 +346,7 @@ public class ImGuiTools
          nodeFontConfig.setName("DejaVuSans.ttf, 26px 1/2");
          nodeFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 26.0f, nodeFontConfig);
       }
-      Path lucidaConsole = Paths.get(fontDir, "lucon.ttf");
+      Path lucidaConsole = Paths.get(fontDirectory, "lucon.ttf");
 
       ImFontGlyphRangesBuilder glyphRangesBuilder = new ImFontGlyphRangesBuilder();
       glyphRangesBuilder.addRanges(ImGui.getIO().getFonts().getGlyphRangesDefault());

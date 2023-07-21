@@ -34,7 +34,6 @@ public class ImPlotYoGraphPanel
    private String[] serverGraphGroupNames = new String[0];
    private final HashMap<String, TreeSet<String>> serverGraphGroups = new HashMap<>();
    private final HashMap<String, ArrayList<ImGuiModifiableYoDouble>> modifiableVariables = new HashMap<>();
-   private ImPlotContext context = null;
    private final ImBoolean showAllVariables = new ImBoolean(false);
    private final ImString searchBar = new ImString();
    private ImPlotYoGraph graphRequesting = null;
@@ -54,7 +53,6 @@ public class ImPlotYoGraphPanel
 
    public void create()
    {
-      context = ImPlotTools.ensureImPlotInitialized();
       ImPlotStyle style = ImPlot.getStyle();
       style.setPlotPadding(new ImVec2(0, 0));
    }
@@ -172,7 +170,7 @@ public class ImPlotYoGraphPanel
          while (graphsIterator.hasNext())
          {
             ImPlotYoGraph graph = graphsIterator.next();
-            graph.render(context);
+            graph.render(ImPlotTools.getContext());
             if (!graph.shouldGraphExist())
                graphsIterator.remove();
             else if (graph.graphWantsVariable())
@@ -247,8 +245,6 @@ public class ImPlotYoGraphPanel
    public void destroy()
    {
       yoClientHelper.disconnect();
-      graphs.clear();
-      ImPlotTools.destroy();
    }
 
    public String getWindowName()
