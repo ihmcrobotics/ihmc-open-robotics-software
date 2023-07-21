@@ -7,7 +7,6 @@ import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
-import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.HandWrenchCalculator;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -40,7 +39,6 @@ public class RDXArmManager
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final CommunicationHelper communicationHelper;
-   private final ROS2ControllerHelper ros2Helper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final RDXDesiredRobot desiredRobot;
 
@@ -65,7 +63,6 @@ public class RDXArmManager
    private RDXArmControlMode armControlMode = RDXArmControlMode.JOINT_ANGLES;
 
    public RDXArmManager(CommunicationHelper communicationHelper,
-                        ROS2ControllerHelper ros2Helper,
                         DRCRobotModel robotModel,
                         ROS2SyncedRobotModel syncedRobot,
                         RDXDesiredRobot desiredRobot,
@@ -73,7 +70,6 @@ public class RDXArmManager
                         SideDependentList<RDXInteractableHand> interactableHands)
    {
       this.communicationHelper = communicationHelper;
-      this.ros2Helper = ros2Helper;
       this.syncedRobot = syncedRobot;
       this.desiredRobot = desiredRobot;
       this.teleoperationParameters = teleoperationParameters;
@@ -122,7 +118,7 @@ public class RDXArmManager
 
       baseUI.getPrimary3DPanel().addImGuiOverlayAddition(panelHandWrenchIndicator::renderImGuiOverlay);
 
-      handManager.create(baseUI, communicationHelper);
+      handManager.create(baseUI, communicationHelper, syncedRobot);
    }
 
    public void update()
@@ -205,24 +201,24 @@ public class RDXArmManager
       for (RobotSide side : RobotSide.values)
       {
          ImGui.sameLine();
-         if (ImGui.button("Home " + side.getPascalCaseName()))
+         if (ImGui.button(labels.get("Home "+ side.getPascalCaseName())))
          {
             ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
                                                                                                         teleoperationParameters.getTrajectoryTime(),
                                                                                                         armHomes.get(side));
-            ros2Helper.publishToController(armTrajectoryMessage);
+            communicationHelper.publishToController(armTrajectoryMessage);
          }
       }
       ImGui.text("Door avoidance arms:");
       for (RobotSide side : RobotSide.values)
       {
          ImGui.sameLine();
-         if (ImGui.button(side.getPascalCaseName()))
+         if (ImGui.button(labels.get(side.getPascalCaseName())))
          {
             ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
                                                                                                         teleoperationParameters.getTrajectoryTime(),
                                                                                                         doorAvoidanceArms.get(side));
-            ros2Helper.publishToController(armTrajectoryMessage);
+            communicationHelper.publishToController(armTrajectoryMessage);
          }
       }
 
@@ -263,7 +259,7 @@ public class RDXArmManager
             ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide,
                                                                                                         teleoperationParameters.getTrajectoryTime(),
                                                                                                         jointAngles);
-            ros2Helper.publishToController(armTrajectoryMessage);
+            communicationHelper.publishToController(armTrajectoryMessage);
          }
          else if (armControlMode == RDXArmControlMode.POSE_WORLD || armControlMode == RDXArmControlMode.POSE_CHEST)
          {
@@ -287,7 +283,7 @@ public class RDXArmManager
                                                                                                            frame);
             long dataFrameId = MessageTools.toFrameId(frame);
             handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(dataFrameId);
-            ros2Helper.publishToController(handTrajectoryMessage);
+            communicationHelper.publishToController(handTrajectoryMessage);
          }
       };
       return runnable;

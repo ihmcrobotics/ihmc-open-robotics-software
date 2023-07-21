@@ -66,6 +66,7 @@ import java.util.Set;
  * Sub managers:
  * <ul>
  * <li>{@link RDXArmManager Arm manager}</li>
+ * <li>{@link RDXHandConfigurationManager Hand configuration manager} - lives inside the arm manager</li>
  * <li>{@link RDXLocomotionManager Locomotion manager}</li>
  * </ul>
  *
@@ -174,7 +175,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
       {
          // create the manager for the desired arm setpoints
          armManager = new RDXArmManager(communicationHelper,
-                                        ros2Helper,
                                         robotModel,
                                         syncedRobot,
                                         desiredRobot,
@@ -263,7 +263,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
          if (robotHasArms)
          {
-
             armManager.create(baseUI);
             for (RobotSide side : interactableHands.sides())
             {
