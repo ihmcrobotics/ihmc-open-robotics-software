@@ -31,7 +31,7 @@ import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
-import us.ihmc.rdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
+import us.ihmc.robotics.interaction.StepCheckIsPointInsideAlgorithm;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.visualizers.RDXPolynomial;
 import us.ihmc.robotics.math.trajectories.core.Polynomial;
@@ -102,7 +102,8 @@ public class RDXInteractableFootstep
       String text = plannedFootstepInternal.getRobotSide().getSideNameFirstLetter() + index;
       if (!textRenderablesMap.containsKey(text))
       {
-         footstepIndexText = new RDX3DSituatedText(text);
+         float textHeight = 0.08f;
+         footstepIndexText = new RDX3DSituatedText(text, textHeight);
          textRenderablesMap.put(text, footstepIndexText);
       }
       else
@@ -116,6 +117,7 @@ public class RDXInteractableFootstep
       getFootstepModelInstance().transform.val[Matrix4.M03] = Float.NaN;
       plannedFootstepInternal.reset();
       plannedFootstepTrajectory.clear();
+      updateTrajectoryModel(plannedFootstepInternal, plannedFootstepTrajectory);
    }
 
    public PlannedFootstepReadOnly getPlannedFootstep()
@@ -167,11 +169,12 @@ public class RDXInteractableFootstep
       updateFootstepIndexText(footstepIndex);
 
       updatePose(plannedFootstep.getFootstepPose());
+
+      updateTrajectoryModel(plannedFootstepInternal, plannedFootstepTrajectory);
    }
 
    public void updatePlannedTrajectory(Pair<PlannedFootstep, EnumMap<Axis3D, List<PolynomialReadOnly>>> other)
    {
-      wasPoseUpdated = true;
       plannedFootstepInput.set(other);
    }
 
@@ -198,6 +201,8 @@ public class RDXInteractableFootstep
             plannedFootstepTrajectory.put(axis, polynomialListCopy);
          }
       }
+
+      updateTrajectoryModel(plannedFootstepInternal, plannedFootstepTrajectory);
    }
 
    public void update()
@@ -207,21 +212,17 @@ public class RDXInteractableFootstep
          wasPoseUpdated = true;
       plannedFootstepInternal.getFootstepPose().set(selectablePose3DGizmo.getPoseGizmo().getPose());
 
-      double textHeight = 0.08;
       textFramePose.setIncludingFrame(getFootPose());
-
       textFramePose.appendYawRotation(-Math.PI / 2.0);
-      textFramePose.appendTranslation(-0.03, 0.0, 0.035); //note: Make text higher in z direction, so it's not inside the foot
+      textFramePose.appendTranslation(-0.04, 0.0, 0.035); // The text is higher in Z direction so it's not inside the foot
       textFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-      LibGDXTools.toLibGDX(textFramePose, tempTransform, footstepIndexText.getModelInstance().transform);
-      footstepIndexText.scale((float) textHeight);
+      LibGDXTools.toLibGDX(textFramePose, tempTransform, footstepIndexText.getModelTransform());
 
       if (plannedFootstepInput.get() != null)
       {
          Pair<PlannedFootstep, EnumMap<Axis3D, List<PolynomialReadOnly>>> pair = plannedFootstepInput.getAndSet(null);
          updatePlannedTrajectoryInternal(pair.getLeft(), pair.getRight());
       }
-      updateTrajectoryModel(plannedFootstepInternal, plannedFootstepTrajectory);
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)

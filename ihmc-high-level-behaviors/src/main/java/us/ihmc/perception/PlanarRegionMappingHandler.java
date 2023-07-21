@@ -335,7 +335,7 @@ public class PlanarRegionMappingHandler
 
    public void performMapCleanUp()
    {
-      planarRegionMap.performMapCleanUp();
+      planarRegionMap.performMapCleanUp(true, true);
       latestPlanarRegionsForRendering.set(planarRegionMap.getMapRegions().copy());
       planarRegionMap.setModified(true);
    }
@@ -384,7 +384,7 @@ public class PlanarRegionMappingHandler
 
       LogTools.debug("Updating Map with {} regions", regions.getPlanarRegionsList().getNumberOfPlanarRegions());
 
-      RigidBodyTransform keyframePose = planarRegionMap.registerRegions(regions.getPlanarRegionsList(), regions.getSensorToWorldFrameTransform());
+      RigidBodyTransform keyframePose = planarRegionMap.registerRegions(regions.getPlanarRegionsList(), regions.getSensorToWorldFrameTransform(), null);
 
       if (keyframePose != null)
          latestKeyframePoseForRendering.set(keyframePose);
@@ -412,7 +412,7 @@ public class PlanarRegionMappingHandler
 
    public void resetMap()
    {
-      planarRegionMap.reset();
+      planarRegionMap.destroy();
       latestKeyframePoseForRendering.set(new RigidBodyTransform());
       latestPlanarRegionsForRendering.set(new PlanarRegionsList());
       planarRegionMap.setModified(true);

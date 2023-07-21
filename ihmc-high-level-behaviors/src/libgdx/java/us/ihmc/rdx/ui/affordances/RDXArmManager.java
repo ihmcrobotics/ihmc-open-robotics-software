@@ -6,7 +6,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.avatar.inverseKinematics.DDogLegArmIKSolver;
+import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.HandWrenchCalculator;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -15,11 +15,14 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -44,13 +47,14 @@ public class RDXArmManager
    private final SideDependentList<double[]> armHomes = new SideDependentList<>();
    private final SideDependentList<double[]> doorAvoidanceArms = new SideDependentList<>();
 
-   private final SideDependentList<DDogLegArmIKSolver> armIKSolvers = new SideDependentList<>();
+   private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
+   private final SideDependentList<OneDoFJointBasics[]> desiredRobotArmJoints = new SideDependentList<>();
 
    private volatile boolean readyToSolve = true;
    private volatile boolean readyToCopySolution = false;
 
    private final HandWrenchCalculator handWrenchCalculator;
-   private final ImBoolean indicateWrenchOnScreen = new ImBoolean(true);
+   private final ImBoolean indicateWrenchOnScreen = new ImBoolean(false);
    private RDX3DPanelToolbarButton wrenchToolbarButton;
    private RDX3DPanelHandWrenchIndicator panelHandWrenchIndicator;
 
@@ -86,12 +90,8 @@ public class RDXArmManager
 
       for (RobotSide side : RobotSide.values)
       {
-         armIKSolvers.put(side,
-                          new DDogLegArmIKSolver(side,
-                                                 robotModel,
-                                                 syncedRobot.getFullRobotModel(),
-                                                 desiredRobot,
-                                                 interactableHands.get(side).getControlReferenceFrame()));
+         armIKSolvers.put(side, new ArmIKSolver(side, robotModel, syncedRobot.getFullRobotModel()));
+         desiredRobotArmJoints.put(side, FullRobotModelUtils.getArmJoints(desiredRobot, side, robotModel.getJointMap().getArmJointNames()));
       }
    }
 
@@ -101,13 +101,12 @@ public class RDXArmManager
       wrenchToolbarButton = baseUI.getPrimary3DPanel().addToolbarButton();
       wrenchToolbarButton.loadAndSetIcon("icons/handWrench.png");
       wrenchToolbarButton.setTooltipText("Show / hide estimated hand wrench");
-      wrenchToolbarButton.setOnPressed(()->
-                                       {
-                                          boolean showWrench = !indicateWrenchOnScreen.get();
-                                          indicateWrenchOnScreen.set(showWrench);
-                                          panelHandWrenchIndicator.setShowAndUpdate(showWrench);
-                                       });
-      baseUI.getPrimary3DPanel().addImGuiOverlayAddition(panelHandWrenchIndicator::renderImGuiOverlay);
+      wrenchToolbarButton.setOnPressed(() -> indicateWrenchOnScreen.set(!indicateWrenchOnScreen.get()));
+      baseUI.getPrimary3DPanel().addImGuiOverlayAddition(() ->
+      {
+         if (indicateWrenchOnScreen.get())
+            panelHandWrenchIndicator.renderImGuiOverlay();
+      });
    }
 
    public void update()
@@ -118,7 +117,7 @@ public class RDXArmManager
 
       for (RobotSide side : interactableHands.sides())
       {
-         armIKSolvers.get(side).update();
+         armIKSolvers.get(side).update(interactableHands.get(side).getControlReferenceFrame());
 
          // wrench expressed in wrist pitch body fixed-frame
          boolean showWrench = indicateWrenchOnScreen.get();
@@ -134,9 +133,12 @@ public class RDXArmManager
             desiredHandPoseChanged |= armIKSolvers.get(side).getDesiredHandControlPoseChanged();
          }
 
-         panelHandWrenchIndicator.update(side,
-                                         handWrenchCalculator.getLinearWrenchMagnitude(side, true),
-                                         handWrenchCalculator.getAngularWrenchMagnitude(side, true));
+         if (showWrench)
+         {
+            panelHandWrenchIndicator.update(side,
+                                            handWrenchCalculator.getLinearWrenchMagnitude(side, true),
+                                            handWrenchCalculator.getAngularWrenchMagnitude(side, true));
+         }
       }
 
       // The following puts the solver on a thread as to not slow down the UI
@@ -168,16 +170,14 @@ public class RDXArmManager
          readyToCopySolution = false;
          for (RobotSide side : interactableHands.sides())
          {
-            armIKSolvers.get(side).copyWorkToDesired();
+            MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(armIKSolvers.get(side).getSolutionOneDoFJoints(), desiredRobotArmJoints.get(side));
          }
 
          readyToSolve = true;
       }
 
       desiredRobot.getRootJoint().setJointConfiguration(syncedRobot.getFullRobotModel().getRootJoint().getJointPose());
-
-      // TODO Update the spine joints
-      desiredRobot.getRootJoint().updateFramesRecursively();
+      desiredRobot.updateFrames();
    }
 
    public void renderImGuiWidgets()
@@ -224,10 +224,7 @@ public class RDXArmManager
          armControlMode = RDXArmControlMode.POSE_CHEST;
       }
 
-      if (ImGui.checkbox(labels.get("Hand wrench magnitudes on 3D View"), indicateWrenchOnScreen))
-      {
-         panelHandWrenchIndicator.setShowAndUpdate(indicateWrenchOnScreen.get());
-      }
+      ImGui.checkbox(labels.get("Hand wrench magnitudes on 3D View"), indicateWrenchOnScreen);
    }
 
    public Runnable getSubmitDesiredArmSetpointsCallback(RobotSide robotSide)
@@ -275,14 +272,6 @@ public class RDXArmManager
          }
       };
       return runnable;
-   }
-
-   public void setDesiredToCurrent()
-   {
-      for (RobotSide side : RobotSide.values)
-      {
-         armIKSolvers.get(side).setDesiredToCurrent();
-      }
    }
 
    public RDXArmControlMode getArmControlMode()

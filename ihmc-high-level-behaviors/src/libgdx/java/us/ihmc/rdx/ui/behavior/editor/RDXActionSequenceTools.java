@@ -5,8 +5,10 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
 import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
+import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.behavior.editor.actions.*;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 import java.util.ArrayList;
@@ -17,8 +19,10 @@ public class RDXActionSequenceTools
    public static RDXBehaviorAction createBlankAction(String actionType,
                                                      DRCRobotModel robotModel,
                                                      ROS2SyncedRobotModel syncedRobot,
+                                                     RobotCollisionModel selectionCollisionModel,
                                                      RDX3DPanel panel3D,
-                                                     ReferenceFrameLibrary referenceFrameLibrary)
+                                                     ReferenceFrameLibrary referenceFrameLibrary,
+                                                     ROS2ControllerPublishSubscribeAPI ros2)
    {
       boolean robotHasArms = robotModel.getRobotVersion().hasArms();
       switch (actionType)
@@ -41,7 +45,9 @@ public class RDXActionSequenceTools
          }
          case "RDXHandPoseAction" ->
          {
-            return robotHasArms ? new RDXHandPoseAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), referenceFrameLibrary) : null;
+            return robotHasArms ?
+                  new RDXHandPoseAction(panel3D, robotModel, syncedRobot.getFullRobotModel(), selectionCollisionModel, referenceFrameLibrary, ros2) :
+                  null;
          }
          case "RDXHandWrenchAction" ->
          {

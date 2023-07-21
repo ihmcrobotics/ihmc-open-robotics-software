@@ -12,7 +12,11 @@ import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -42,9 +46,10 @@ public class RDXBehaviorActionSequenceUI
    private DRCRobotModel robotModel;
    private ROS2Node ros2Node;
    private ROS2SyncedRobotModel syncedRobot;
+   private RobotCollisionModel selectionCollisionModel;
    private ReferenceFrameLibrary referenceFrameLibrary;
    private final ImString newSequenceName = new ImString(256);
-   private final ArrayList<RDXBehaviorActionSequenceEditor> editors = new ArrayList<>();
+   private final ArrayList<RDXAvailableActionSequence> availableSequences = new ArrayList<>();
    private RDXBehaviorActionSequenceEditor selectedEditor = null;
 
    public void create(WorkspaceResourceDirectory behaviorSequenceStorageDirectory,
@@ -52,6 +57,7 @@ public class RDXBehaviorActionSequenceUI
                       DRCRobotModel robotModel,
                       ROS2Node ros2Node,
                       ROS2SyncedRobotModel syncedRobot,
+                      RobotCollisionModel selectionCollisionModel,
                       ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.behaviorSequenceStorageDirectory = behaviorSequenceStorageDirectory;
@@ -59,6 +65,7 @@ public class RDXBehaviorActionSequenceUI
       this.robotModel = robotModel;
       this.ros2Node = ros2Node;
       this.syncedRobot = syncedRobot;
+      this.selectionCollisionModel = selectionCollisionModel;
       this.referenceFrameLibrary = referenceFrameLibrary;
 
       BehaviorActionSequence.addCommonFrames(referenceFrameLibrary, syncedRobot);
@@ -69,9 +76,8 @@ public class RDXBehaviorActionSequenceUI
 
    public void update()
    {
-      for (var editor : editors)
-         if (editor.getPanel().getIsShowing().get())
-            editor.update();
+      if (anEditorIsSelected())
+         selectedEditor.update();
    }
 
    private void renderImGuiWidgets()
@@ -82,20 +88,24 @@ public class RDXBehaviorActionSequenceUI
 
       if (ImGui.radioButton(labels.get("None"), selectedEditor == null))
       {
-         selectedEditor.getPanel().getIsShowing().set(false);
-         selectedEditor = null;
+         if (anEditorIsSelected())
+            destroyCurrentEditor();
       }
-      for (var editor : editors)
+      for (RDXAvailableActionSequence availableSequenceFile : availableSequences)
       {
-         if (ImGui.radioButton(labels.get(editor.getName()), selectedEditor == editor))
+         boolean selectedEditorFileNameMatches // Avoiding null pointer exception here
+               = anEditorIsSelected() && selectedEditor.getWorkspaceFile().getFileName().equals(availableSequenceFile.getSequenceFile().getFileName());
+         if (ImGui.radioButton(labels.get(availableSequenceFile.getName()), selectedEditorFileNameMatches))
          {
-            // Deselect previous one
-            if (selectedEditor != null)
-               selectedEditor.getPanel().getIsShowing().set(false);
+            if (!selectedEditorFileNameMatches)
+            {
+               destroyCurrentEditor();
 
-            // Select new one
-            selectedEditor = editor;
-            selectedEditor.getPanel().getIsShowing().set(true);
+               selectedEditor = new RDXBehaviorActionSequenceEditor(availableSequenceFile.getSequenceFile());
+               selectedEditor.create(panel3D, robotModel, ros2Node, syncedRobot, selectionCollisionModel, referenceFrameLibrary);
+               selectedEditor.loadActionsFromFile();
+               managerPanel.queueAddChild(selectedEditor.getPanel());
+            }
          }
       }
 
@@ -103,55 +113,81 @@ public class RDXBehaviorActionSequenceUI
       ImGui.sameLine();
       if (ImGui.button("Create new sequence"))
       {
-         var editor = new RDXBehaviorActionSequenceEditor(newSequenceName.get(), behaviorSequenceStorageDirectory);
-         editor.saveToFile();
-         addEditor(editor);
+         destroyCurrentEditor();
+
+         selectedEditor = new RDXBehaviorActionSequenceEditor(newSequenceName.get(), behaviorSequenceStorageDirectory);
+         selectedEditor.create(panel3D, robotModel, ros2Node, syncedRobot, selectionCollisionModel, referenceFrameLibrary);
+         selectedEditor.saveToFile();
+         managerPanel.queueAddChild(selectedEditor.getPanel());
+         availableSequences.add(new RDXAvailableActionSequence(selectedEditor.getWorkspaceFile()));
+      }
+   }
+
+   private void destroyCurrentEditor()
+   {
+      if (anEditorIsSelected())
+      {
+         managerPanel.queueRemoveChild(selectedEditor.getPanel());
+         selectedEditor.destroy();
+         selectedEditor = null;
       }
    }
 
    private void reindexSequences()
    {
+      availableSequences.clear();
       for (WorkspaceResourceFile queryContainedFile : behaviorSequenceStorageDirectory.queryContainedFiles())
       {
-         boolean alreadyLoaded = false;
-         for (var editor : editors)
-            alreadyLoaded |= editor.getWorkspaceFile().getFileName().equals(queryContainedFile.getFileName());
-
-         if (!alreadyLoaded)
-         {
-            var editor = new RDXBehaviorActionSequenceEditor(queryContainedFile);
-            addEditor(editor);
-            editor.loadActionsFromFile();
-         }
+         availableSequences.add(new RDXAvailableActionSequence(queryContainedFile));
       }
 
       // Keep them in alphabetical order
-      editors.sort(Comparator.comparing(RDXBehaviorActionSequenceEditor::getName));
+      availableSequences.sort(Comparator.comparing(RDXAvailableActionSequence::getName));
    }
 
-   private void addEditor(RDXBehaviorActionSequenceEditor editor)
+   public void createAndSetupDefault(RDXBaseUI baseUI)
    {
-      editor.create(panel3D, robotModel, ros2Node, syncedRobot, referenceFrameLibrary);
-      editors.add(editor);
-      managerPanel.queueAddChild(editor.getPanel());
+      baseUI.getImGuiPanelManager().addPanel(getManagerPanel());
+      baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables, RDXSceneLevel.VIRTUAL);
+      baseUI.getVRManager().getContext().addVRPickCalculator(this::calculateVRPick);
+      baseUI.getVRManager().getContext().addVRInputProcessor(this::processVRInput);
+      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
+   }
+
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+      if (selectedEditor != null)
+         selectedEditor.calculateVRPick(vrContext);
+   }
+
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      if (selectedEditor != null)
+         selectedEditor.processVRInput(vrContext);
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      for (var editor : editors)
-         editor.calculate3DViewPick(input);
+      if (anEditorIsSelected())
+         selectedEditor.calculate3DViewPick(input);
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      for (var editor : editors)
-         editor.process3DViewInput(input);
+      if (anEditorIsSelected())
+         selectedEditor.process3DViewInput(input);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (var editor : editors)
-         editor.getRenderables(renderables, pool);
+      if (anEditorIsSelected())
+         selectedEditor.getRenderables(renderables, pool);
+   }
+
+   private boolean anEditorIsSelected()
+   {
+      return selectedEditor != null;
    }
 
    public ImGuiPanel getManagerPanel()

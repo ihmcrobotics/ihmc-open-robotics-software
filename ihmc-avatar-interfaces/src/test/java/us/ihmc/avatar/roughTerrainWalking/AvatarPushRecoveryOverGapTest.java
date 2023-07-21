@@ -43,6 +43,8 @@ import us.ihmc.simulationToolkit.controllers.PushRobotControllerSCS2;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.List;
@@ -81,6 +83,8 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       simulationTestHelperFactory.setUseImpulseBasedPhysicsEngine(true);
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
+
+      ((YoBoolean) simulationTestHelper.findVariable("switchPlanarRegionConstraintsAutomatically")).set(true);
 
       SteppableRegionsCalculator stepConstraintCalculator = new SteppableRegionsCalculator(4.0, simulationTestHelper.getControllerRegistry());
 

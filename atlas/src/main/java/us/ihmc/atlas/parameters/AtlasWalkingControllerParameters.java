@@ -272,6 +272,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       jointspaceGains.add(new GroupParameter<>("SpineJoints", jointMap.getSpineJointNamesAsStrings()));
       jointspaceGains.add(new GroupParameter<>("NeckJoints", jointMap.getNeckJointNamesAsStrings()));
       jointspaceGains.add(new GroupParameter<>("ArmJoints", jointMap.getArmJointNamesAsStrings()));
+      jointspaceGains.add(new GroupParameter<>("LegJoints", jointMap.getLegJointNamesAsStrings()));
       return jointspaceGains;
    }
 

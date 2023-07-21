@@ -30,6 +30,26 @@ public class HandTransformTools
       graphicFrame.remove();
    }
 
+   public static void getHandControlToBodyFixedCoMFrameTransform(FullHumanoidRobotModel fullRobotModel,
+                                                                 RobotSide side,
+                                                                 RigidBodyTransform controlToBodyFixedCoMFrameTransform)
+   {
+      RigidBodyTransform controlToHandFrameTransform = fullRobotModel.getHandControlFrame(side).getTransformToParent();
+      RigidBodyTransform bodyFixedCoMToHandFrameTransform = fullRobotModel.getHand(side).getBodyFixedFrame().getTransformToParent();
+
+      ReferenceFrame handFrame = ReferenceFrame.getWorldFrame();
+      ReferenceFrame controlFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(handFrame, controlToHandFrameTransform);
+      ReferenceFrame bodyFixedCoMFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(handFrame, bodyFixedCoMToHandFrameTransform);
+
+      FramePose3D controlPose = new FramePose3D(controlFrame);
+      controlPose.changeFrame(bodyFixedCoMFrame);
+
+      controlPose.get(controlToBodyFixedCoMFrameTransform);
+
+      controlFrame.remove();
+      bodyFixedCoMFrame.remove();
+   }
+
    public static void getHandLinkToControlFrameTransform(FullHumanoidRobotModel fullRobotModel, RobotSide side, RigidBodyTransform linkToControlFrameTransform)
    {
       linkToControlFrameTransform.set(fullRobotModel.getHandControlFrame(side).getTransformToParent());

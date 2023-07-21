@@ -21,9 +21,9 @@ public class OpenCVArUcoMakerDetectionSwapData
 
    public OpenCVArUcoMakerDetectionSwapData()
    {
-      corners = new MatVector(new Mat(1, 1, opencv_core.CV_32FC2));
+      corners = new MatVector();
       ids = new Mat();
-      rejectedImagePoints = new MatVector(new Mat(1, 1, opencv_core.CV_32FC2));
+      rejectedImagePoints = new MatVector();
       detectorParameters = new DetectorParameters();
    }
 

@@ -119,9 +119,19 @@ public class RigidBodyOrientationControlHelper
       this.gains = gains;
    }
 
+   public PID3DGainsReadOnly getGains()
+   {
+      return gains;
+   }
+
    public void setWeights(Vector3DReadOnly weights)
    {
       this.defaultWeight = weights;
+   }
+
+   public Vector3DReadOnly getDefaultWeight()
+   {
+      return defaultWeight;
    }
 
    private void setDefaultControlFrame()
