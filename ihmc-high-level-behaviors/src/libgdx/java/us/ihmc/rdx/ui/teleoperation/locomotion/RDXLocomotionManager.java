@@ -281,10 +281,6 @@ public class RDXLocomotionManager
       transferTimeSlider.renderImGuiWidget();
       turnAggressivenessSlider.renderImGuiWidget();
 
-      ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
-      ImGui.checkbox(labels.get("Show body path planner parameter tuner"), bodyPathPlanningParametersTuner.getIsShowing());
-      ImGui.checkbox(labels.get("Show swing planner parameter tuner"), swingFootPlanningParametersTuner.getIsShowing());
-
       ImGui.text("Walking Options:");
       ImGui.sameLine();
 
