@@ -95,6 +95,7 @@ public class ControllerStatusTracker
    {
       triggerNotWalkingStateAnymoreCallbacks();
       statusLogger.error("Robot is falling! direction: {}", message.getFallingDirection());
+      footstepTracker.reset();
    }
 
    private void acceptPlanOffsetStatus(PlanOffsetStatus message)
