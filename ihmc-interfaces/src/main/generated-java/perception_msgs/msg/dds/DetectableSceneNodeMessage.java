@@ -7,39 +7,28 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * A detectable perception scene node
-       * The topic name identifies the node.
-       */
+ * A detectable perception scene node
+ * The topic name identifies the node.
+ */
 public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessage> implements Settable<DetectableSceneNodeMessage>, EpsilonComparable<DetectableSceneNodeMessage>
 {
    /**
-            * The name of the scene node
-            */
+    * The name of the scene node
+    */
    public java.lang.StringBuilder name_;
    /**
-            * Whether or not the node is currently detected
-            */
+    * Whether or not the node is currently detected
+    */
    public boolean currently_detected_;
    /**
-            * Transform of the node's frame to world frame
-            */
+    * Transform of the node's frame to world frame
+    */
    public controller_msgs.msg.dds.RigidBodyTransformMessage transform_to_world_;
-   /**
-            * If this node is trackable via an ArUco maker, this is the ArUco marker's
-            * transform to world frame. This is so we can reset overriden node
-            * poses back to ArUco relative ones.
-            */
-   public controller_msgs.msg.dds.RigidBodyTransformMessage aruco_marker_transform_to_world_;
-   /**
-            * Keeps track of when the operator has overridden the pose of this node
-            */
-   public boolean is_pose_overridden_by_operator_;
 
    public DetectableSceneNodeMessage()
    {
       name_ = new java.lang.StringBuilder(255);
       transform_to_world_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
-      aruco_marker_transform_to_world_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
 
    public DetectableSceneNodeMessage(DetectableSceneNodeMessage other)
@@ -56,14 +45,11 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       currently_detected_ = other.currently_detected_;
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_world_, transform_to_world_);
-      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.aruco_marker_transform_to_world_, aruco_marker_transform_to_world_);
-      is_pose_overridden_by_operator_ = other.is_pose_overridden_by_operator_;
-
    }
 
    /**
-            * The name of the scene node
-            */
+    * The name of the scene node
+    */
    public void setName(java.lang.String name)
    {
       name_.setLength(0);
@@ -71,30 +57,30 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
    }
 
    /**
-            * The name of the scene node
-            */
+    * The name of the scene node
+    */
    public java.lang.String getNameAsString()
    {
       return getName().toString();
    }
    /**
-            * The name of the scene node
-            */
+    * The name of the scene node
+    */
    public java.lang.StringBuilder getName()
    {
       return name_;
    }
 
    /**
-            * Whether or not the node is currently detected
-            */
+    * Whether or not the node is currently detected
+    */
    public void setCurrentlyDetected(boolean currently_detected)
    {
       currently_detected_ = currently_detected;
    }
    /**
-            * Whether or not the node is currently detected
-            */
+    * Whether or not the node is currently detected
+    */
    public boolean getCurrentlyDetected()
    {
       return currently_detected_;
@@ -102,37 +88,11 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
 
 
    /**
-            * Transform of the node's frame to world frame
-            */
+    * Transform of the node's frame to world frame
+    */
    public controller_msgs.msg.dds.RigidBodyTransformMessage getTransformToWorld()
    {
       return transform_to_world_;
-   }
-
-
-   /**
-            * If this node is trackable via an ArUco maker, this is the ArUco marker's
-            * transform to world frame. This is so we can reset overriden node
-            * poses back to ArUco relative ones.
-            */
-   public controller_msgs.msg.dds.RigidBodyTransformMessage getArucoMarkerTransformToWorld()
-   {
-      return aruco_marker_transform_to_world_;
-   }
-
-   /**
-            * Keeps track of when the operator has overridden the pose of this node
-            */
-   public void setIsPoseOverriddenByOperator(boolean is_pose_overridden_by_operator)
-   {
-      is_pose_overridden_by_operator_ = is_pose_overridden_by_operator;
-   }
-   /**
-            * Keeps track of when the operator has overridden the pose of this node
-            */
-   public boolean getIsPoseOverriddenByOperator()
-   {
-      return is_pose_overridden_by_operator_;
    }
 
 
@@ -158,9 +118,6 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.currently_detected_, other.currently_detected_, epsilon)) return false;
 
       if (!this.transform_to_world_.epsilonEquals(other.transform_to_world_, epsilon)) return false;
-      if (!this.aruco_marker_transform_to_world_.epsilonEquals(other.aruco_marker_transform_to_world_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_pose_overridden_by_operator_, other.is_pose_overridden_by_operator_, epsilon)) return false;
-
 
       return true;
    }
@@ -179,9 +136,6 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       if(this.currently_detected_ != otherMyClass.currently_detected_) return false;
 
       if (!this.transform_to_world_.equals(otherMyClass.transform_to_world_)) return false;
-      if (!this.aruco_marker_transform_to_world_.equals(otherMyClass.aruco_marker_transform_to_world_)) return false;
-      if(this.is_pose_overridden_by_operator_ != otherMyClass.is_pose_overridden_by_operator_) return false;
-
 
       return true;
    }
@@ -197,11 +151,7 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       builder.append("currently_detected=");
       builder.append(this.currently_detected_);      builder.append(", ");
       builder.append("transform_to_world=");
-      builder.append(this.transform_to_world_);      builder.append(", ");
-      builder.append("aruco_marker_transform_to_world=");
-      builder.append(this.aruco_marker_transform_to_world_);      builder.append(", ");
-      builder.append("is_pose_overridden_by_operator=");
-      builder.append(this.is_pose_overridden_by_operator_);
+      builder.append(this.transform_to_world_);
       builder.append("}");
       return builder.toString();
    }

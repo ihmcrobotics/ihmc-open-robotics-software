@@ -7,7 +7,9 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
 import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.msg.dds.ManuallyPlacedSceneNodeMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -29,6 +31,7 @@ import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
 import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
 import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesPublisher;
 import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesSubscription;
+import us.ihmc.perception.sceneGraph.SceneGraphAPI;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
@@ -101,6 +104,10 @@ public class DualBlackflyCamera
    private final Thread imageDeallocationThread;
    private volatile boolean destroyed = false;
 
+   private IHMCROS2Input<ManuallyPlacedSceneNodeMessage> placedSceneObjectSubscription;
+   private String placedObjectName = "";
+   private final RigidBodyTransform placedObjectTransformToWorld = new RigidBodyTransform();
+
    public DualBlackflyCamera(RobotSide side,
                              ROS2SyncedRobotModel syncedRobot,
                              RigidBodyTransform cameraTransformToParent,
@@ -119,6 +126,7 @@ public class DualBlackflyCamera
       ROS2Topic<ImageMessage> imageTopic = PerceptionAPI.BLACKFLY_FISHEYE_COLOR_IMAGE.get(side);
       ros2ImagePublisher = ROS2Tools.createPublisher(ros2Node, imageTopic, ROS2QosProfile.BEST_EFFORT());
       ros2Helper = new ROS2Helper(ros2Node);
+      placedSceneObjectSubscription = ros2Helper.subscribe(SceneGraphAPI.PLACED_SCENE_NODE);
       cudaImageEncoder = new CUDAImageEncoder();
 
       ousterFisheyeColoringIntrinsicsROS2 = new ROS2StoredPropertySet<>(ros2Helper,
@@ -484,9 +492,29 @@ public class DualBlackflyCamera
          // arUcoMarkerDetection.drawRejectedPoints(blackflySourceImage.getBytedecoOpenCVMat());
          arUcoMarkerPublisher.update();
 
-         detectableSceneNodesSubscription.update(); // Receive overridden poses from operator
          ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, predefinedSceneNodeLibrary);
-         detectableSceneObjectsPublisher.publish(predefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2Helper, ROS2IOTopicQualifier.STATUS);
+         // check if object has been manually placed in the UI
+         if (placedSceneObjectSubscription.getMessageNotification().poll())
+         {
+            ManuallyPlacedSceneNodeMessage placedSceneNodeMessage = placedSceneObjectSubscription.getMessageNotification().read();
+            placedObjectName = placedSceneNodeMessage.getNameAsString();
+            MessageTools.toEuclid(placedSceneNodeMessage.getTransformToWorld(), placedObjectTransformToWorld);
+         }
+         if (!placedObjectName.isEmpty())
+            detectableSceneObjectsPublisher.publish(placedObjectName,
+                                                    placedObjectTransformToWorld,
+                                                    predefinedSceneNodeLibrary.getDetectableSceneNodes(),
+                                                    ros2Helper);
+         else
+         {
+            detectableSceneNodesSubscription.update(); // Receive overridden poses from operator
+            ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, predefinedSceneNodeLibrary);
+            detectableSceneObjectsPublisher.publish(predefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2Helper);
+         }
+
+//         detectableSceneNodesSubscription.update(); // Receive overridden poses from operator
+//         ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, predefinedSceneNodeLibrary);
+//         detectableSceneObjectsPublisher.publish(predefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2Helper, ROS2IOTopicQualifier.STATUS);
       }
       // TODO: left behavior?
    }

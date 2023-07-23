@@ -39,7 +39,7 @@ public class ROS2DetectableSceneNodesPublisher
          DetectableSceneNodeMessage detectableSceneNodeMessage = detectableSceneNodesMessage.getDetectableSceneNodes().add();
          detectableSceneNodeMessage.setName(detectableSceneNode.getName());
          detectableSceneNodeMessage.setCurrentlyDetected(detectableSceneNode.getCurrentlyDetected());
-         detectableSceneNodeMessage.setIsPoseOverriddenByOperator(detectableSceneNode.getPoseOverriddenByOperator());
+//         detectableSceneNodeMessage.setIsPoseOverriddenByOperator(detectableSceneNode.getPoseOverriddenByOperator());
 
          sceneNodePose.setToZero(detectableSceneNode.getNodeFrame());
          sceneNodePose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -53,9 +53,50 @@ public class ROS2DetectableSceneNodesPublisher
             arUcoMarkerPose.setToZero(arUcoDetectableNode.getMarkerFrame());
             arUcoMarkerPose.changeFrame(ReferenceFrame.getWorldFrame());
             arUcoMarkerPose.get(arUcoMarkerToWorldTransform);
-            MessageTools.toMessage(arUcoMarkerToWorldTransform, detectableSceneNodeMessage.getArucoMarkerTransformToWorld());
+//            MessageTools.toMessage(arUcoMarkerToWorldTransform, detectableSceneNodeMessage.getArucoMarkerTransformToWorld());
          }
       }
       ros2PublishSubscribeAPI.publish(PerceptionAPI.DETECTABLE_SCENE_NODES.getTopic(ioQualifier), detectableSceneNodesMessage);
+   }
+
+   public void publish(Iterable<DetectableSceneNode> detectableSceneObjects, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
+   {
+      detectableSceneNodesMessage.getDetectableSceneNodes().clear();
+      for (DetectableSceneNode detectableSceneObject : detectableSceneObjects)
+      {
+         DetectableSceneNodeMessage detectableSceneNodeMessage = detectableSceneNodesMessage.getDetectableSceneNodes().add();
+         detectableSceneNodeMessage.setName(detectableSceneObject.getName());
+         detectableSceneNodeMessage.setCurrentlyDetected(detectableSceneObject.getCurrentlyDetected());
+         sceneNodePose.setToZero(detectableSceneObject.getNodeFrame());
+         sceneNodePose.changeFrame(ReferenceFrame.getWorldFrame());
+         sceneNodePose.get(sceneNodeToWorldTransform);
+         MessageTools.toMessage(sceneNodeToWorldTransform, detectableSceneNodeMessage.getTransformToWorld());
+      }
+      ros2PublishSubscribeAPI.publish(SceneGraphAPI.DETECTABLE_SCENE_NODES, detectableSceneNodesMessage);
+   }
+
+   public void publish(String manuallyPlacedObjectName, RigidBodyTransform manuallyPlacedObjectTransform, Iterable<DetectableSceneNode> detectableSceneObjects, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
+   {
+      detectableSceneNodesMessage.getDetectableSceneNodes().clear();
+      for (DetectableSceneNode detectableSceneObject : detectableSceneObjects)
+      {
+         DetectableSceneNodeMessage detectableSceneNodeMessage = detectableSceneNodesMessage.getDetectableSceneNodes().add();
+         if (manuallyPlacedObjectName.equals(detectableSceneObject.getName()))
+         {
+            detectableSceneNodeMessage.setName(manuallyPlacedObjectName);
+            detectableSceneNodeMessage.setCurrentlyDetected(true);
+            MessageTools.toMessage(manuallyPlacedObjectTransform, detectableSceneNodeMessage.getTransformToWorld());
+         }
+         else
+         {
+            detectableSceneNodeMessage.setName(detectableSceneObject.getName());
+            detectableSceneNodeMessage.setCurrentlyDetected(detectableSceneObject.getCurrentlyDetected());
+            sceneNodePose.setToZero(detectableSceneObject.getNodeFrame());
+            sceneNodePose.changeFrame(ReferenceFrame.getWorldFrame());
+            sceneNodePose.get(sceneNodeToWorldTransform);
+            MessageTools.toMessage(sceneNodeToWorldTransform, detectableSceneNodeMessage.getTransformToWorld());
+         }
+      }
+      ros2PublishSubscribeAPI.publish(SceneGraphAPI.DETECTABLE_SCENE_NODES, detectableSceneNodesMessage);
    }
 }

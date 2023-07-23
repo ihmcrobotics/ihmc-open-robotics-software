@@ -1,27 +1,27 @@
 package perception_msgs.msg.dds;
 
 /**
-* 
-* Topic data type of the struct "DetectableSceneNodesMessage" defined in "DetectableSceneNodesMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
-*
-* This file was automatically generated from DetectableSceneNodesMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit DetectableSceneNodesMessage_.idl instead.
-*
-*/
+ *
+ * Topic data type of the struct "DetectableSceneNodesMessage" defined in "DetectableSceneNodesMessage_.idl". Use this class to provide the TopicDataType to a Participant.
+ *
+ * This file was automatically generated from DetectableSceneNodesMessage_.idl by us.ihmc.idl.generator.IDLGenerator.
+ * Do not update this file directly, edit DetectableSceneNodesMessage_.idl instead.
+ *
+ */
 public class DetectableSceneNodesMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.DetectableSceneNodesMessage>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::DetectableSceneNodesMessage_";
-   
+
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "dbd4df7fa67eaf5bac28dc96cbf8e8e1fd82ae3ca7ae7d850645171c4e790261";
+      return "954761fb53f7c5cc4c7d86c1667c869b5e08692632160dbaa0378238787b5940";
    }
-   
+
    @Override
    public final java.lang.String getDefinitionVersion()
    {
-   		return "local";
+      return "local";
    }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
@@ -53,8 +53,8 @@ public class DetectableSceneNodesMessagePubSubType implements us.ihmc.pubsub.Top
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 5000; ++i0)
-      {
-          current_alignment += perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+   {
+      current_alignment += perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       return current_alignment - initial_alignment;
    }
 
@@ -70,7 +70,7 @@ public class DetectableSceneNodesMessagePubSubType implements us.ihmc.pubsub.Top
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getDetectableSceneNodes().size(); ++i0)
       {
-          current_alignment += perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.getCdrSerializedSize(data.getDetectableSceneNodes().get(i0), current_alignment);}
+         current_alignment += perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.getCdrSerializedSize(data.getDetectableSceneNodes().get(i0), current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -78,14 +78,14 @@ public class DetectableSceneNodesMessagePubSubType implements us.ihmc.pubsub.Top
    public static void write(perception_msgs.msg.dds.DetectableSceneNodesMessage data, us.ihmc.idl.CDR cdr)
    {
       if(data.getDetectableSceneNodes().size() <= 5000)
-      cdr.write_type_e(data.getDetectableSceneNodes());else
-          throw new RuntimeException("detectable_scene_nodes field exceeds the maximum length");
+         cdr.write_type_e(data.getDetectableSceneNodes());else
+         throw new RuntimeException("detectable_scene_nodes field exceeds the maximum length");
 
    }
 
    public static void read(perception_msgs.msg.dds.DetectableSceneNodesMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.read_type_e(data.getDetectableSceneNodes());	
+      cdr.read_type_e(data.getDetectableSceneNodes());
 
    }
 
@@ -122,7 +122,7 @@ public class DetectableSceneNodesMessagePubSubType implements us.ihmc.pubsub.Top
    {
       return name;
    }
-   
+
    public void serialize(perception_msgs.msg.dds.DetectableSceneNodesMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -132,7 +132,7 @@ public class DetectableSceneNodesMessagePubSubType implements us.ihmc.pubsub.Top
    {
       read(data, cdr);
    }
-   
+
    public void copy(perception_msgs.msg.dds.DetectableSceneNodesMessage src, perception_msgs.msg.dds.DetectableSceneNodesMessage dest)
    {
       staticCopy(src, dest);

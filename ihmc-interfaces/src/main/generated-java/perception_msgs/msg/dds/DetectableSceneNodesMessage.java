@@ -7,16 +7,16 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * Gives the current state of the complete collection of detectable scene nodes.
-       * Publishing all scene nodes in one messages can simplify synchronization and
-       * reduce the complexity of logic in figuring out when nodes are currently under
-       * consideration.
-       */
+ * Gives the current state of the complete collection of detectable scene nodes.
+ * Publishing all scene nodes in one messages can simplify synchronization and
+ * reduce the complexity of logic in figuring out when nodes are currently under
+ * consideration.
+ */
 public class DetectableSceneNodesMessage extends Packet<DetectableSceneNodesMessage> implements Settable<DetectableSceneNodesMessage>, EpsilonComparable<DetectableSceneNodesMessage>
 {
    /**
-            * The current state of the complete collection of detectable scene nodes
-            */
+    * The current state of the complete collection of detectable scene nodes
+    */
    public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.DetectableSceneNodeMessage>  detectable_scene_nodes_;
 
    public DetectableSceneNodesMessage()
@@ -38,8 +38,8 @@ public class DetectableSceneNodesMessage extends Packet<DetectableSceneNodesMess
 
 
    /**
-            * The current state of the complete collection of detectable scene nodes
-            */
+    * The current state of the complete collection of detectable scene nodes
+    */
    public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.DetectableSceneNodeMessage>  getDetectableSceneNodes()
    {
       return detectable_scene_nodes_;

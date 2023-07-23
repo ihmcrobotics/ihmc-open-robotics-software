@@ -41,6 +41,76 @@ public class ROS2DetectableSceneNodesSubscription
       detectableSceneNodesSubscription = ros2PublishSubscribeAPI.subscribe(PerceptionAPI.DETECTABLE_SCENE_NODES.getTopic(ioQualifier));
    }
 
+//   /**
+//    * Check for a new ROS 2 message and update the scene nodes with it.
+//    * @return if a new message was used to update the scene nodes on this call
+//    */
+//   public boolean update()
+//   {
+//      boolean newMessageAvailable = detectableSceneNodesSubscription.getMessageNotification().poll();
+//      if (newMessageAvailable)
+//      {
+//         ++numberOfMessagesReceived;
+//         DetectableSceneNodesMessage detectableSceneNodesMessage = detectableSceneNodesSubscription.getMessageNotification().read();
+//         IDLSequence.Object<DetectableSceneNodeMessage> detectableSceneNodeMessages = detectableSceneNodesMessage.getDetectableSceneNodes();
+//
+//         // We assume the nodes are in the same order on both sides. This is to avoid O(n^2) complexity.
+//         // We could improve on this design later.
+//         for (int i = 0; i < detectableSceneNodeMessages.size(); i++)
+//         {
+//            DetectableSceneNodeMessage detectableSceneNodeMessage = detectableSceneNodesMessage.getDetectableSceneNodes().get(i);
+//            DetectableSceneNode detectableSceneNode = detectableSceneNodes.get(i);
+//
+//            if (detectableSceneNodeMessage.getNameAsString().equals(detectableSceneNode.getName()))
+//            {
+//               detectableSceneNode.setCurrentlyDetected(detectableSceneNodeMessage.getCurrentlyDetected());
+//
+//               // We must syncronize the ArUco marker frames so we can reset overriden node
+//               // poses back to ArUco relative ones.
+//               // The ArUco frame is the parent so we should update it first.
+//               if (detectableSceneNode instanceof ArUcoDetectableNode arUcoDetectableNode)
+//               {
+//                  MessageTools.toEuclid(detectableSceneNodeMessage.getArucoMarkerTransformToWorld(), arUcoMarkerToWorldTransform);
+//                  arUcoMarkerPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), arUcoMarkerToWorldTransform);
+//                  arUcoMarkerPose.changeFrame(arUcoDetectableNode.getMarkerFrame().getParent());
+//                  arUcoMarkerPose.get(arUcoDetectableNode.getMarkerToWorldFrameTransform());
+//                  arUcoDetectableNode.getMarkerFrame().update();
+//               }
+//
+//               // If the node was recently modified by the operator, the node does not accept
+//               // updates of this variable. This is to allow the operator's changes to propagate.
+//               if (detectableSceneNode.noLongerFrozenByOperator())
+//               {
+//                  detectableSceneNode.setPoseOverriddenByOperator(detectableSceneNodeMessage.getIsPoseOverriddenByOperator());
+//               }
+//
+//               // If we just modified the override pose, wait for the timer to expire before accepting further changes.
+//               if (!detectableSceneNode.getPoseOverriddenByOperator() || detectableSceneNode.noLongerFrozenByOperator())
+//               {
+//                  MessageTools.toEuclid(detectableSceneNodeMessage.getTransformToWorld(), nodeToWorldTransform);
+//                  nodePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), nodeToWorldTransform);
+//                  nodePose.changeFrame(detectableSceneNode.getNodeFrame().getParent());
+//                  nodePose.get(detectableSceneNode.getNodeToParentFrameTransform());
+//                  detectableSceneNode.getNodeFrame().update();
+//               }
+//            }
+//            else
+//            {
+//               LogTools.warn("Scene graph nodes are out of sync. %s != %s".formatted(detectableSceneNodeMessage.getNameAsString(),
+//                                                                                     detectableSceneNode.getName()));
+//            }
+//         }
+//      }
+//      return newMessageAvailable;
+//   }
+
+   public ROS2DetectableSceneNodesSubscription(List<DetectableSceneNode> detectableSceneNodes, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
+   {
+      this.detectableSceneNodes = detectableSceneNodes;
+
+      detectableSceneNodesSubscription = ros2PublishSubscribeAPI.subscribe(SceneGraphAPI.DETECTABLE_SCENE_NODES);
+   }
+
    /**
     * Check for a new ROS 2 message and update the scene nodes with it.
     * @return if a new message was used to update the scene nodes on this call
@@ -65,34 +135,11 @@ public class ROS2DetectableSceneNodesSubscription
             {
                detectableSceneNode.setCurrentlyDetected(detectableSceneNodeMessage.getCurrentlyDetected());
 
-               // We must syncronize the ArUco marker frames so we can reset overriden node
-               // poses back to ArUco relative ones.
-               // The ArUco frame is the parent so we should update it first.
-               if (detectableSceneNode instanceof ArUcoDetectableNode arUcoDetectableNode)
-               {
-                  MessageTools.toEuclid(detectableSceneNodeMessage.getArucoMarkerTransformToWorld(), arUcoMarkerToWorldTransform);
-                  arUcoMarkerPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), arUcoMarkerToWorldTransform);
-                  arUcoMarkerPose.changeFrame(arUcoDetectableNode.getMarkerFrame().getParent());
-                  arUcoMarkerPose.get(arUcoDetectableNode.getMarkerToWorldFrameTransform());
-                  arUcoDetectableNode.getMarkerFrame().update();
-               }
-
-               // If the node was recently modified by the operator, the node does not accept
-               // updates of this variable. This is to allow the operator's changes to propagate.
-               if (detectableSceneNode.noLongerFrozenByOperator())
-               {
-                  detectableSceneNode.setPoseOverriddenByOperator(detectableSceneNodeMessage.getIsPoseOverriddenByOperator());
-               }
-
-               // If we just modified the override pose, wait for the timer to expire before accepting further changes.
-               if (!detectableSceneNode.getPoseOverriddenByOperator() || detectableSceneNode.noLongerFrozenByOperator())
-               {
-                  MessageTools.toEuclid(detectableSceneNodeMessage.getTransformToWorld(), nodeToWorldTransform);
-                  nodePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), nodeToWorldTransform);
-                  nodePose.changeFrame(detectableSceneNode.getNodeFrame().getParent());
-                  nodePose.get(detectableSceneNode.getNodeToParentFrameTransform());
-                  detectableSceneNode.getNodeFrame().update();
-               }
+               MessageTools.toEuclid(detectableSceneNodeMessage.getTransformToWorld(), nodeToWorldTransform);
+               nodePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), nodeToWorldTransform);
+               nodePose.changeFrame(detectableSceneNode.getNodeFrame().getParent());
+               nodePose.get(detectableSceneNode.getNodeToParentFrameTransform());
+               detectableSceneNode.getNodeFrame().update();
             }
             else
             {

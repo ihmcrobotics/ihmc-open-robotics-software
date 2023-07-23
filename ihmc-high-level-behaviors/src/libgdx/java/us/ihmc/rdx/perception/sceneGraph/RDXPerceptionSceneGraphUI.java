@@ -42,9 +42,11 @@ public class RDXPerceptionSceneGraphUI
       this.predefinedSceneNodeLibrary = predefinedSceneNodeLibrary;
       this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
 
+//      detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(predefinedSceneNodeLibrary.getDetectableSceneNodes(),
+//                                                                                  ros2PublishSubscribeAPI,
+//                                                                                  ROS2IOTopicQualifier.STATUS);
       detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(predefinedSceneNodeLibrary.getDetectableSceneNodes(),
-                                                                                  ros2PublishSubscribeAPI,
-                                                                                  ROS2IOTopicQualifier.STATUS);
+                                                                                  ros2PublishSubscribeAPI);
 
       for (DetectableSceneNode detectableSceneNode : predefinedSceneNodeLibrary.getDetectableSceneNodes())
       {
@@ -63,10 +65,20 @@ public class RDXPerceptionSceneGraphUI
       {
          predefinedRigidBodySceneNode.update();
       }
-
-      if (publishThrottler.run())
-         detectableSceneObjectsPublisher.publish(predefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2PublishSubscribeAPI, ROS2IOTopicQualifier.COMMAND);
    }
+
+//   public void update()
+//   {
+//      detectableSceneNodesSubscription.update();
+//
+//      for (RDXPredefinedRigidBodySceneNode predefinedRigidBodySceneNode : predefinedRigidBodySceneNodes)
+//      {
+//         predefinedRigidBodySceneNode.update();
+//      }
+//
+//      if (publishThrottler.run())
+//         detectableSceneObjectsPublisher.publish(predefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2PublishSubscribeAPI, ROS2IOTopicQualifier.COMMAND);
+//   }
 
    public void renderImGuiWidgets()
    {
