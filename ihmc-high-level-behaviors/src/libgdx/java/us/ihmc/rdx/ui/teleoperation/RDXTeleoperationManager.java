@@ -425,15 +425,16 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       if (interactablesAvailable)
       {
-         ImGui.checkbox("Interactables enabled", interactablesEnabled);
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Delete all")))
+         if (ImGui.button(labels.get("Delete all Interactables")))
          {
             locomotionManager.deleteAll();
 
             for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
                robotPartInteractable.delete();
          }
+
+         ImGui.sameLine();
+         ImGui.checkbox("Interactables enabled", interactablesEnabled);
       }
 
       ImGui.separator();
