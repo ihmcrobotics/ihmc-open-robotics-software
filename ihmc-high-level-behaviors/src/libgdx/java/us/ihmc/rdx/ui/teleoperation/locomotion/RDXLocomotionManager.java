@@ -8,6 +8,7 @@ import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -80,6 +81,7 @@ public class RDXLocomotionManager
    private RDXLegControlMode legControlMode = RDXLegControlMode.DISABLED;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   public static final ImBoolean collapsedHeader = new ImBoolean(true);
    private boolean isPlacingFootstep = false;
    private final PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
    private final AbortWalkingMessage abortWalkingMessage = new AbortWalkingMessage();
@@ -272,10 +274,15 @@ public class RDXLocomotionManager
       boolean continueAvailable = !pauseAvailable && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0;
       boolean walkAvailable = !continueAvailable && interactableFootstepPlan.getNumberOfFootsteps() > 0;
 
-      areFootstepsAdjustableCheckbox.renderImGuiWidget();
-      assumeFlatGroundCheckbox.renderImGuiWidget();
-      planSwingTrajectoriesCheckbox.renderImGuiWidget();
-      replanSwingTrajectoriesOnChangeCheckbox.renderImGuiWidget();
+      if (ImGui.collapsingHeader(labels.get("Additional Options"), collapsedHeader))
+      {
+         ImGui.indent();
+         areFootstepsAdjustableCheckbox.renderImGuiWidget();
+         assumeFlatGroundCheckbox.renderImGuiWidget();
+         planSwingTrajectoriesCheckbox.renderImGuiWidget();
+         replanSwingTrajectoriesOnChangeCheckbox.renderImGuiWidget();
+         ImGui.unindent();
+      }
 
       swingTimeSlider.renderImGuiWidget();
       transferTimeSlider.renderImGuiWidget();
