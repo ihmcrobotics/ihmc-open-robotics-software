@@ -41,6 +41,7 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.interaction.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -140,6 +141,12 @@ public class RDXPose3DGizmo implements RenderableProvider
    {
       this.transformToParent = gizmoTransformToParentFrameToModify;
       this.gizmoFrame = gizmoFrame;
+
+      RDXBaseUI.getInstance().getKeyBindings().nextSection("3D pose gizmo");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move gizmo away from camera", "Up arrow");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move gizmo toward from camera", "Down arrow");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move gizmo left", "Left arrow");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move gizmo right", "Right arrow");
    }
 
    public void setGizmoFrame(ReferenceFrame gizmoFrame)
