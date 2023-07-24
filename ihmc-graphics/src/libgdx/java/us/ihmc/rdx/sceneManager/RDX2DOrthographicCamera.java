@@ -9,6 +9,7 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import us.ihmc.commons.MathTools;
 import us.ihmc.rdx.input.ImGui2DViewInput;
+import us.ihmc.rdx.ui.RDXBaseUI;
 
 public class RDX2DOrthographicCamera extends OrthographicCamera
 {
@@ -34,6 +35,12 @@ public class RDX2DOrthographicCamera extends OrthographicCamera
       viewportHeight = Gdx.graphics.getHeight();
 
       update(true);
+
+      RDXBaseUI.getInstance().getKeyBindings().nextSection("2D orthographic camera");
+      RDXBaseUI.getInstance().getKeyBindings().register("2D view - Move forward", "W");
+      RDXBaseUI.getInstance().getKeyBindings().register("2D view - Move back", "S");
+      RDXBaseUI.getInstance().getKeyBindings().register("2D view - Move left", "A");
+      RDXBaseUI.getInstance().getKeyBindings().register("2D view - Move right", "D");
    }
 
    public InputProcessor setInputForLibGDX()

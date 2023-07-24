@@ -32,6 +32,7 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGuiMouseDragData;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class RDXFocusBasedCamera extends Camera
@@ -103,6 +104,16 @@ public class RDXFocusBasedCamera extends Camera
 
       updateCameraPose();
       update(true);
+
+      RDXBaseUI.getInstance().getKeyBindings().nextSection("3D focused based camera");
+      RDXBaseUI.getInstance().getKeyBindings().register("3D view - Move forward ", "W");
+      RDXBaseUI.getInstance().getKeyBindings().register("3D view - Move back", "S");
+      RDXBaseUI.getInstance().getKeyBindings().register("3D view - Move left", "A");
+      RDXBaseUI.getInstance().getKeyBindings().register("3D view - Move right", "D");
+      RDXBaseUI.getInstance().getKeyBindings().register("3D view - Move up", "Q");
+      RDXBaseUI.getInstance().getKeyBindings().register("3D view - Move down", "Z");
+      RDXBaseUI.getInstance().getKeyBindings().register("3D view - Zoom in", "C");
+      RDXBaseUI.getInstance().getKeyBindings().register("3D view - Zoom out", "E");
    }
 
    public InputProcessor setInputForLibGDX()

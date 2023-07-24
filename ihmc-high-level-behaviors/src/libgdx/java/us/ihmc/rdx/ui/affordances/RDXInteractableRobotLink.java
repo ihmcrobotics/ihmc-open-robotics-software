@@ -13,6 +13,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRDragData;
@@ -44,6 +45,13 @@ public class RDXInteractableRobotLink
    private boolean isMouseHovering;
    private final Notification contextMenuNotification = new Notification();
    private boolean isVRHovering;
+
+   public RDXInteractableRobotLink()
+   {
+      RDXBaseUI.getInstance().getKeyBindings().nextSection("Robot actions");
+      RDXBaseUI.getInstance().getKeyBindings().register("Execute / pause motion", "Space");
+      RDXBaseUI.getInstance().getKeyBindings().register("Delete selected gizmo", "Delete");
+   }
 
    /** For when the graphic, the link, and control frame are all the same. */
    public void create(RDXRobotCollidable robotCollidable, ReferenceFrame syncedControlFrame, String graphicFileName, RDX3DPanel panel3D)

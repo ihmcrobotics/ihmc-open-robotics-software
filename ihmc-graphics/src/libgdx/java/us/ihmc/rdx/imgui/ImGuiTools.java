@@ -3,10 +3,7 @@ package us.ihmc.rdx.imgui;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import imgui.*;
-import imgui.flag.ImGuiDataType;
-import imgui.flag.ImGuiFreeTypeBuilderFlags;
-import imgui.flag.ImGuiInputTextFlags;
-import imgui.flag.ImGuiKey;
+import imgui.flag.*;
 import imgui.internal.ImGuiContext;
 import imgui.type.*;
 import org.apache.commons.lang3.SystemUtils;
@@ -80,6 +77,8 @@ public class ImGuiTools
       ImGuiContext contextHolder = ImGui.getCurrentContext();
       contextHolder.ptr = context;
       ImGui.setCurrentContext(contextHolder);
+
+      ImGui.getIO().addConfigFlags(ImGuiConfigFlags.DockingEnable);
    }
 
    public static void parsePrimaryWindowSizeFromSettingsINI(String settingsINIAsString, ImGuiSize sizeToPack)

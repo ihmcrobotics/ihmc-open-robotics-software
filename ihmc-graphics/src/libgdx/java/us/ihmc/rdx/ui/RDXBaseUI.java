@@ -20,6 +20,7 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.RDXKeyBindings;
 import us.ihmc.rdx.RDXSettings;
 import us.ihmc.rdx.imgui.ImGuiPanelManager;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -84,8 +85,16 @@ public class RDXBaseUI
    public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
    private static final String VIEW_3D_WINDOW_NAME = "3D View";
 
+   private static RDXBaseUI instance;
+
+   public static RDXBaseUI getInstance()
+   {
+      return instance;
+   }
+
    private GLProfiler glProfiler;
    private RDXSettings settings;
+
    private final RDX3DScene primaryScene = new RDX3DScene();
    private final RDX3DPanel primary3DPanel;
    private final ArrayList<RDX3DPanel> additional3DPanels = new ArrayList<>();
@@ -109,6 +118,7 @@ public class RDXBaseUI
    private final ImInt libGDXLogLevel = new ImInt(LibGDXTools.toLibGDX(LogTools.getLevel()));
    private final ImDouble imguiFontScale = new ImDouble(1.0);
    private final RDXImGuiLayoutManager layoutManager;
+   private RDXKeyBindings keyBindings;
    private long renderIndex = 0;
    private double isoZoomOut = 0.7;
    private enum Theme
@@ -140,6 +150,8 @@ public class RDXBaseUI
     */
    /* package private*/ RDXBaseUI(int additionalStackHeightForFindingCaller, String windowTitle)
    {
+      instance = this;
+
       StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
       Class<?> classForLoading = ExceptionTools.handle(() -> Class.forName(stackTraceElements[3 + additionalStackHeightForFindingCaller].getClassName()),
                                                        DefaultExceptionHandler.RUNTIME_EXCEPTION);
@@ -183,6 +195,8 @@ public class RDXBaseUI
 
       primary3DPanel = new RDX3DPanel(VIEW_3D_WINDOW_NAME, ANTI_ALIASING, true);
       primary3DPanel.setBackgroundShade((float) view3DBackgroundShade.get());
+
+      this.keyBindings = new RDXKeyBindings();
    }
 
    /**
@@ -285,6 +299,8 @@ public class RDXBaseUI
          additional3DPanel.render();
       }
       renderMenuBar();
+
+      keyBindings.renderKeyBindingsTable();
    }
 
    public void renderEnd()
@@ -542,6 +558,11 @@ public class RDXBaseUI
    public RDXImGuiLayoutManager getLayoutManager()
    {
       return layoutManager;
+   }
+
+   public RDXKeyBindings getKeyBindings()
+   {
+      return keyBindings;
    }
 
    public RDX3DScene getPrimaryScene()
