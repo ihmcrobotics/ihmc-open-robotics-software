@@ -142,13 +142,10 @@ public class RDXPose3DGizmo implements RenderableProvider
       this.transformToParent = gizmoTransformToParentFrameToModify;
       this.gizmoFrame = gizmoFrame;
 
-      if (RDXBaseUI.getInstance().getKeyBindings().nextSection("3D pose gizmo"))
-      {
-         RDXBaseUI.getInstance().getKeyBindings().register("Move gizmo away from camera", "Up arrow");
-         RDXBaseUI.getInstance().getKeyBindings().register("Move gizmo toward from camera", "Down arrow");
-         RDXBaseUI.getInstance().getKeyBindings().register("Move gizmo left", "Left arrow");
-         RDXBaseUI.getInstance().getKeyBindings().register("Move gizmo right", "Right arrow");
-      }
+      RDXBaseUI.getInstance().getKeyBindings().register("Move gizmo away from camera", "Up arrow");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move gizmo toward from camera", "Down arrow");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move gizmo left", "Left arrow");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move gizmo right", "Right arrow");
    }
 
    public void setGizmoFrame(ReferenceFrame gizmoFrame)

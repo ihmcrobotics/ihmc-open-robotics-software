@@ -287,10 +287,7 @@ public class RDXBaseUI
       imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Thread Debugger", vrManager::renderImGuiDebugWidgets);
       imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Settings", vrManager::renderImGuiTunerWidgets);
 
-      if (keyBindings.nextSection("Global"))
-      {
-         keyBindings.register("Show key bindings", "Tab");
-      }
+      keyBindings.register("Show key bindings", "Tab");
    }
 
    public void renderBeforeOnScreenUI()

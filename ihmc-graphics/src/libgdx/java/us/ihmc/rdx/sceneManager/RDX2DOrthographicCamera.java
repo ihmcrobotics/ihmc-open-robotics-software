@@ -36,13 +36,10 @@ public class RDX2DOrthographicCamera extends OrthographicCamera
 
       update(true);
 
-      if (RDXBaseUI.getInstance().getKeyBindings().nextSection("2D orthographic camera"))
-      {
-         RDXBaseUI.getInstance().getKeyBindings().register("Move forward", "W");
-         RDXBaseUI.getInstance().getKeyBindings().register("Move back", "S");
-         RDXBaseUI.getInstance().getKeyBindings().register("Move left", "A");
-         RDXBaseUI.getInstance().getKeyBindings().register("Move right", "D");
-      }
+      RDXBaseUI.getInstance().getKeyBindings().register("Move forward", "W");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move back", "S");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move left", "A");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move right", "D");
    }
 
    public InputProcessor setInputForLibGDX()

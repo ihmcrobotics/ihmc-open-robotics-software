@@ -148,13 +148,10 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       this.transformToParent = gizmoTransformToParentFrameToModify;
       this.gizmoFrame = gizmoFrame;
 
-      if (RDXBaseUI.getInstance().getKeyBindings().nextSection("Control Ring"))
-      {
-         RDXBaseUI.getInstance().getKeyBindings().register("Move control ring away from camera", "Up arrow");
-         RDXBaseUI.getInstance().getKeyBindings().register("Move control ring toward from camera", "Down arrow");
-         RDXBaseUI.getInstance().getKeyBindings().register("Move control ring left", "Left arrow");
-         RDXBaseUI.getInstance().getKeyBindings().register("Move control ring right", "Right arrow");
-      }
+      RDXBaseUI.getInstance().getKeyBindings().register("Move control ring away from camera", "Up arrow");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move control ring toward from camera", "Down arrow");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move control ring left", "Left arrow");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move control ring right", "Right arrow");
    }
 
    public void setGizmoFrame(ReferenceFrame gizmoFrame)

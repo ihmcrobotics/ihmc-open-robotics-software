@@ -70,11 +70,8 @@ public class RDXInteractableRobotLink
       highlightModel = new RDXInteractableHighlightModel(modelFileName);
       selectablePose3DGizmo.create(panel3D);
 
-      if (RDXBaseUI.getInstance().getKeyBindings().nextSection("Robot actions"))
-      {
-         RDXBaseUI.getInstance().getKeyBindings().register("Execute / pause motion", "Space");
-         RDXBaseUI.getInstance().getKeyBindings().register("Delete selected gizmo", "Delete");
-      }
+      RDXBaseUI.getInstance().getKeyBindings().register("Execute / pause motion", "Space");
+      RDXBaseUI.getInstance().getKeyBindings().register("Delete selected gizmo", "Delete");
    }
 
    public void update()

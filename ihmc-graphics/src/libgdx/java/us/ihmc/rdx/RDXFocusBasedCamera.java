@@ -105,17 +105,14 @@ public class RDXFocusBasedCamera extends Camera
       updateCameraPose();
       update(true);
 
-      if (RDXBaseUI.getInstance().getKeyBindings().nextSection("3D focused based camera"))
-      {
-         RDXBaseUI.getInstance().getKeyBindings().register("Move forward ", "W");
-         RDXBaseUI.getInstance().getKeyBindings().register("Move back", "S");
-         RDXBaseUI.getInstance().getKeyBindings().register("Move left", "A");
-         RDXBaseUI.getInstance().getKeyBindings().register("Move right", "D");
-         RDXBaseUI.getInstance().getKeyBindings().register("Move up", "Q");
-         RDXBaseUI.getInstance().getKeyBindings().register("Move down", "Z");
-         RDXBaseUI.getInstance().getKeyBindings().register("Zoom in", "C");
-         RDXBaseUI.getInstance().getKeyBindings().register("Zoom out", "E");
-      }
+      RDXBaseUI.getInstance().getKeyBindings().register("Move forward ", "W");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move back", "S");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move left", "A");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move right", "D");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move up", "Q");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move down", "Z");
+      RDXBaseUI.getInstance().getKeyBindings().register("Zoom in", "C");
+      RDXBaseUI.getInstance().getKeyBindings().register("Zoom out", "E");
    }
 
    public InputProcessor setInputForLibGDX()
