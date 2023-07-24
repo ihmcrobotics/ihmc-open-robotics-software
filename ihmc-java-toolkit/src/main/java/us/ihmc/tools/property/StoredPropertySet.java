@@ -320,17 +320,32 @@ public class StoredPropertySet implements StoredPropertySetBasics
 
    public void updateBackingSaveFile(String versionSuffix)
    {
+      updateBackingSaveFileSilently(versionSuffix);
+      LogTools.info("Updated backing save file: {}", saveFileNameJSON);
+   }
+
+   private void updateBackingSaveFileSilently(String versionSuffix)
+   {
       currentVersionSuffix = versionSuffix;
       legacyFileNameINI = uncapitalizedClassName + currentVersionSuffix + ".ini";
       workspaceLegacyINIFile = new WorkspaceResourceFile(workspaceDirectory, legacyFileNameINI);
       saveFileNameJSON = basePropertySetClass.getSimpleName() + currentVersionSuffix + ".json";
-      LogTools.info("Updated backing save file: {}", saveFileNameJSON);
       workspaceJSONFile = new WorkspaceResourceFile(workspaceDirectory, saveFileNameJSON);
    }
 
    @Override
    public void load()
    {
+      // Load common properties from non-suffixed version, like bounds, description, etc.
+      if (!currentVersionSuffix.isEmpty())
+      {
+         String backupVersionSuffix = currentVersionSuffix;
+         updateBackingSaveFileSilently("");
+         if (jsonResourceExists())
+            load(true);
+         updateBackingSaveFileSilently(backupVersionSuffix);
+      }
+
       load(true);
    }
 
@@ -407,7 +422,9 @@ public class StoredPropertySet implements StoredPropertySetBasics
 
                      if (key instanceof DoubleStoredPropertyKey doubleKey)
                      {
-                        setInternal(key, valueNode.doubleValue());
+                        // Values are not present for common files that just provide bounds, description, etc.
+                        if (valueNode != null)
+                           setInternal(key, valueNode.doubleValue());
                         JsonNode lowerBound = keyObjectNode.get("lowerBound");
                         if (lowerBound != null)
                            doubleKey.setLowerBound(lowerBound.doubleValue());
@@ -418,7 +435,8 @@ public class StoredPropertySet implements StoredPropertySetBasics
                      }
                      else if (key instanceof IntegerStoredPropertyKey integerKey)
                      {
-                        setInternal(key, valueNode.intValue());
+                        if (valueNode != null)
+                           setInternal(key, valueNode.intValue());
                         JsonNode lowerBound = keyObjectNode.get("lowerBound");
                         if (lowerBound != null)
                            integerKey.setLowerBound(lowerBound.intValue());
@@ -438,7 +456,8 @@ public class StoredPropertySet implements StoredPropertySetBasics
                      }
                      else if (key instanceof BooleanStoredPropertyKey booleanKey)
                      {
-                        setInternal(key, valueNode.booleanValue());
+                        if (valueNode != null)
+                           setInternal(key, valueNode.booleanValue());
                      }
                   }
                   else

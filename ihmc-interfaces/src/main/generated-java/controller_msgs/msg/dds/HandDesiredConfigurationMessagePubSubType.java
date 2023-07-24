@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class HandDesiredConfigurationMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.HandDesiredConfigurationMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::HandDesiredConfigurationMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "45eb86fa4c42a0a26d3d0ae805a8ea381838ef3d65bad6806d7cb34ea15feec1";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

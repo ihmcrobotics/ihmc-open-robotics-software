@@ -1,292 +1,531 @@
 package us.ihmc.avatar.colorVision;
 
-import org.bytedeco.opencv.global.opencv_calib3d;
-import org.bytedeco.opencv.opencv_core.Scalar;
-import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_imgcodecs;
-import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.global.*;
+import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
-import org.bytedeco.spinnaker.global.Spinnaker_C;
 import perception_msgs.msg.dds.ImageMessage;
-import std_msgs.msg.dds.Float64;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
+import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.*;
+import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.comms.ImageMessageFormat;
+import us.ihmc.perception.cuda.CUDAImageEncoder;
+import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
+import us.ihmc.perception.opencv.OpenCVArUcoMarkerROS2Publisher;
+import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
+import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
+import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesPublisher;
+import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesSubscription;
+import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
+import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.tools.time.FrequencyCalculator;
+import us.ihmc.tools.thread.Throttler;
 
 import java.time.Instant;
-import java.util.List;
+import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class DualBlackflyCamera
 {
-   private final String serialNumber;
+   private static final double PUBLISH_RATE = 20.0;
+
+   private final RobotSide side;
    private final ROS2SyncedRobotModel syncedRobot;
-   private SpinnakerBlackfly blackfly;
-   private final spinImage spinImage = new spinImage();
-   private BytePointer spinImageDataPointer;
-   private RobotSide side;
-   private ROS2Helper ros2Helper;
-   private RealtimeROS2Node realtimeROS2Node;
-   private IHMCRealtimeROS2Publisher<ImageMessage> ros2ImagePublisher;
-   private long numberOfBytesInFrame;
-   private int imageWidth;
-   private int imageHeight;
-   private final FrequencyCalculator imagePublishRateCalculator = new FrequencyCalculator();
-   private BytedecoImage blackflySourceImage;
-   private Mat cameraMatrix;
-   private Mat newCameraMatrixEstimate;
-   private Mat distortionCoefficients;
-   private Size sourceImageSize;
-   private Size undistortedImageSize;
-   private Mat rectificationTransformation;
-   private Mat undistortionMap1;
-   private Mat undistortionMap2;
-   private Scalar undistortionRemapBorderValue;
-   private Mat distortedRGBImage;
-   private BytedecoImage undistortedImage;
-   private Mat yuv420Image;
-   private Mat rgbaMat;
-   private final RigidBodyTransform ousterToBlackflyTransfrom = new RigidBodyTransform();
-   private final ImageMessage imageMessage = new ImageMessage();
-   private final BytePointer jpegImageBytePointer = new BytePointer(imageMessage.getData().capacity());
-   private final ImageMessageDataPacker compressedImageDataPacker = new ImageMessageDataPacker(jpegImageBytePointer.capacity());
-   private IntPointer compressionParameters;
-   private final Stopwatch getNextImageDuration = new Stopwatch();
-   private final Stopwatch convertColorDuration = new Stopwatch();
-   private final Stopwatch encodingDuration = new Stopwatch();
-   private final Stopwatch copyDuration = new Stopwatch();
-   private long sequenceNumber = 0;
-   private List<OpenCVArUcoMarker> arUcoMarkersToTrack;
+   private SpinnakerBlackfly spinnakerBlackfly;
+   private final BlackflyLensProperties blackflyLensProperties;
+   private final ROS2StoredPropertySet<IntrinsicCameraMatrixProperties> ousterFisheyeColoringIntrinsicsROS2;
+
+   private final ROS2Helper ros2Helper;
+
+   private final IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
+
+   private final PredefinedSceneNodeLibrary predefinedSceneNodeLibrary;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
+   private final ROS2TunedRigidBodyTransform remoteTunableCameraTransform;
+   private final ROS2DetectableSceneNodesPublisher detectableSceneObjectsPublisher = new ROS2DetectableSceneNodesPublisher();
+   private final ROS2DetectableSceneNodesSubscription detectableSceneNodesSubscription;
 
-   public DualBlackflyCamera(String serialNumber, ROS2SyncedRobotModel syncedRobot)
-   {
-      this.serialNumber = serialNumber;
-      this.syncedRobot = syncedRobot;
-   }
+   private final AtomicReference<BytePointer> spinImageData = new AtomicReference<>();
+   private final AtomicReference<Instant> spinImageAcquisitionTime = new AtomicReference<>();
+   private final ImageMessage imageMessage = new ImageMessage();
+   private final IHMCROS2Publisher<ImageMessage> ros2ImagePublisher;
+   private long imageMessageSequenceNumber = 0;
 
-   public void create(SpinnakerBlackfly blackfly,
-                      RobotSide side,
-                      ROS2Helper ros2Helper,
-                      RealtimeROS2Node realtimeROS2Node,
-                      List<OpenCVArUcoMarker> arUcoMarkersToTrack)
+   private final CUDAImageEncoder cudaImageEncoder;
+
+   // These update when a camera image resolution change is detected
+   private int imageWidth = 0;
+   private int imageHeight = 0;
+   private long imageFrameSize = 0;
+   private GpuMat distortedRGBImage;
+   private GpuMat undistortedImage;
+   private BytedecoImage undistortedBytedecoImage;
+   private GpuMat undistortionMap1;
+   private GpuMat undistortionMap2;
+
+   // These are used to ensure safe deallocation of images
+   private GpuMat sourceImageBeingUsedForProcessing;
+   private GpuMat sourceImageBeingUsedForUndistortion;
+   private final LinkedList<GpuMat> receivedImagesDeque = new LinkedList<>(); /* deque of images received from the blackfly camera.
+                                                                               * last element = newest image received
+                                                                               * first element = oldest image received */
+   private final Object newImageReadNotifier = new Object();
+   private final Object encodingCompletionNotifier = new Object();   // sync objects are used to synchronize deallocation of images (GpuMats)
+   private final Object undistortionCompletionNotifier = new Object(); // notify the deallocation thread when a thread is finished using a source image
+   private long numberOfGpuMatsAllocated = 0L;   // keep count of images allocated and deallocated
+   private long numberOfGpuMatsDeallocated = 0L; // an exception is thrown if more than 100 images are allocated at a time
+
+   private final Thread cameraReadThread;
+   private final Thread imageEncodeAndPublishThread;
+   private final Thread imageUndistortAndUpdateArUcoThread;
+   private final Thread imageDeallocationThread;
+   private volatile boolean destroyed = false;
+
+   public DualBlackflyCamera(RobotSide side,
+                             ROS2SyncedRobotModel syncedRobot,
+                             RigidBodyTransform cameraTransformToParent,
+                             ROS2Node ros2Node,
+                             SpinnakerBlackfly spinnakerBlackfly,
+                             BlackflyLensProperties blackflyLensProperties,
+                             PredefinedSceneNodeLibrary predefinedSceneNodeLibrary)
    {
-      this.blackfly = blackfly;
       this.side = side;
-      this.ros2Helper = ros2Helper;
-      this.realtimeROS2Node = realtimeROS2Node;
-      this.arUcoMarkersToTrack = arUcoMarkersToTrack;
+      this.syncedRobot = syncedRobot;
+      this.spinnakerBlackfly = spinnakerBlackfly;
+      this.blackflyLensProperties = blackflyLensProperties;
+      this.ousterFisheyeColoringIntrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsOnRobot(blackflyLensProperties);
+      this.predefinedSceneNodeLibrary = predefinedSceneNodeLibrary;
 
-      blackfly.setAcquisitionMode(Spinnaker_C.spinAcquisitionModeEnums.AcquisitionMode_Continuous);
-      blackfly.setPixelFormat(Spinnaker_C.spinPixelFormatEnums.PixelFormat_BayerRG8);
-      blackfly.startAcquiringImages();
-   }
+      ROS2Topic<ImageMessage> imageTopic = PerceptionAPI.BLACKFLY_FISHEYE_COLOR_IMAGE.get(side);
+      ros2ImagePublisher = ROS2Tools.createPublisher(ros2Node, imageTopic, ROS2QosProfile.BEST_EFFORT());
+      ros2Helper = new ROS2Helper(ros2Node);
+      cudaImageEncoder = new CUDAImageEncoder();
 
-   public void update()
-   {
-      Instant now = Instant.now();
-      getNextImageDuration.start();
-      if (blackfly.getNextImage(spinImage))
+      ousterFisheyeColoringIntrinsicsROS2 = new ROS2StoredPropertySet<>(ros2Helper,
+                                                                        DualBlackflyComms.OUSTER_FISHEYE_COLORING_INTRINSICS,
+                                                                        ousterFisheyeColoringIntrinsics);
+
+      remoteTunableCameraTransform = ROS2TunedRigidBodyTransform.toBeTuned(ros2Helper,
+                                                                           ROS2Tools.OBJECT_DETECTION_CAMERA_TO_PARENT_TUNING,
+                                                                           cameraTransformToParent);
+
+      detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(predefinedSceneNodeLibrary.getDetectableSceneNodes(),
+                                                                                  ros2Helper,
+                                                                                  ROS2IOTopicQualifier.COMMAND);
+
+      // Camera read thread
+      cameraReadThread = new Thread(() ->
       {
-         getNextImageDuration.suspend();
+         Throttler cameraReadThrottler = new Throttler();
+         cameraReadThrottler.setFrequency(PUBLISH_RATE);
 
-         if (ros2ImagePublisher == null)
+         while (!destroyed)
          {
-            imageWidth = blackfly.getWidth(spinImage);
-            imageHeight = blackfly.getHeight(spinImage);
-            LogTools.info("Blackfly {} resolution detected: {} x {}", serialNumber, imageWidth, imageHeight);
-            numberOfBytesInFrame = imageWidth * imageHeight * 4;
-            spinImageDataPointer = new BytePointer(numberOfBytesInFrame);
+            // Read an image at PUBLISH_RATE hz
+            cameraReadThrottler.waitAndRun();
+            cameraRead();
 
-            blackflySourceImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8U);
-
-            yuv420Image = new Mat(imageHeight, imageWidth, opencv_core.CV_8U);
-            rgbaMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8U); // Mat for color conversion
-
-            compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
-
-            ROS2Topic<ImageMessage> imageTopic = ROS2Tools.BLACKFLY_FISHEYE_COLOR_IMAGE.get(side);
-            LogTools.info("Publishing ROS 2 color images: {}", imageTopic);
-            ros2ImagePublisher = ROS2Tools.createPublisher(realtimeROS2Node, imageTopic, ROS2QosProfile.BEST_EFFORT());
-         }
-         else // We don't want to publish until the node is spinning which will be next time
-         {
-            blackfly.setBytedecoPointerToSpinImageData(spinImage, spinImageDataPointer);
-            blackflySourceImage.rewind();
-            blackflySourceImage.changeAddress(spinImageDataPointer.address());
-
-            // TODO: Still need a flip anywhere?
-            // opencv_core.flip(blackflySourceImage.getBytedecoOpenCVMat(), blackflySourceImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_BOTH);
-
-            if (side == RobotSide.RIGHT)
+            // Notify threads when a new image is available
+            synchronized (newImageReadNotifier)
             {
-               ReferenceFrame blackflyCameraFrame = syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame();
-               ReferenceFrame ousterLidarFrame = syncedRobot.getReferenceFrames().getOusterLidarFrame();
-               if (arUcoMarkerDetection == null)
+               newImageReadNotifier.notifyAll();
+            }
+         }
+         System.out.println("Camera read thread has finished");
+      }, "SpinnakerCameraRead");
+
+      // Image process and publish thread
+      imageEncodeAndPublishThread = new Thread(() ->
+      {
+         while (!destroyed)
+         {
+            // Wait until new image is available
+            try
+            {
+               synchronized (newImageReadNotifier)
                {
-                  undistortedImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
-                  distortedRGBImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
-
-                  cameraMatrix = new Mat(3, 3, opencv_core.CV_64F);
-                  opencv_core.setIdentity(cameraMatrix);
-                  cameraMatrix.ptr(0, 0).putDouble(SensorHeadParameters.FOCAL_LENGTH_X_FOR_UNDISORTION);
-                  cameraMatrix.ptr(1, 1).putDouble(SensorHeadParameters.FOCAL_LENGTH_Y_FOR_UNDISORTION);
-                  cameraMatrix.ptr(0, 2).putDouble(SensorHeadParameters.PRINCIPAL_POINT_X_FOR_UNDISORTION);
-                  cameraMatrix.ptr(1, 2).putDouble(SensorHeadParameters.PRINCIPAL_POINT_Y_FOR_UNDISORTION);
-                  newCameraMatrixEstimate = new Mat(3, 3, opencv_core.CV_64F);
-                  opencv_core.setIdentity(newCameraMatrixEstimate);
-                  distortionCoefficients = new Mat(SensorHeadParameters.K1_FOR_UNDISORTION,
-                                                   SensorHeadParameters.K2_FOR_UNDISORTION,
-                                                   SensorHeadParameters.K3_FOR_UNDISORTION,
-                                                   SensorHeadParameters.K4_FOR_UNDISORTION);
-                  sourceImageSize = new Size(imageWidth, imageHeight);
-                  undistortedImageSize = new Size((int) (SensorHeadParameters.UNDISTORTED_IMAGE_SCALE * imageWidth),
-                                                  (int) (SensorHeadParameters.UNDISTORTED_IMAGE_SCALE * imageHeight));
-                  rectificationTransformation = new Mat(3, 3, opencv_core.CV_64F);
-                  opencv_core.setIdentity(rectificationTransformation);
-                  undistortionMap1 = new Mat();
-                  undistortionMap2 = new Mat();
-                  undistortionRemapBorderValue = new Scalar();
-
-                  double balanceNewFocalLength = 0.0;
-                  double fovScaleFocalLengthDivisor = 1.0;
-                  opencv_calib3d.fisheyeEstimateNewCameraMatrixForUndistortRectify(cameraMatrix,
-                                                                                   distortionCoefficients,
-                                                                                   sourceImageSize,
-                                                                                   rectificationTransformation,
-                                                                                   newCameraMatrixEstimate,
-                                                                                   balanceNewFocalLength,
-                                                                                   undistortedImageSize,
-                                                                                   fovScaleFocalLengthDivisor);
-                  // Fisheye undistortion
-                  // https://docs.opencv.org/4.6.0/db/d58/group__calib3d__fisheye.html#ga167df4b00a6fd55287ba829fbf9913b9
-                  opencv_calib3d.fisheyeInitUndistortRectifyMap(cameraMatrix,
-                                                                distortionCoefficients,
-                                                                rectificationTransformation,
-                                                                newCameraMatrixEstimate,
-                                                                undistortedImageSize,
-                                                                opencv_core.CV_16SC2,
-                                                                undistortionMap1,
-                                                                undistortionMap2);
-                  arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
-                  arUcoMarkerDetection.create(blackflyCameraFrame);
-                  arUcoMarkerDetection.setSourceImageForDetection(undistortedImage);
-                  newCameraMatrixEstimate.copyTo(arUcoMarkerDetection.getCameraMatrix());
-                  arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetection,
-                                                                            arUcoMarkersToTrack,
-                                                                            syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame(),
-                                                                            ros2Helper);
+                  newImageReadNotifier.wait();
                }
-
-               syncedRobot.update();
-               ousterLidarFrame.getTransformToDesiredFrame(ousterToBlackflyTransfrom, blackflyCameraFrame);
-
-               opencv_imgproc.cvtColor(blackflySourceImage.getBytedecoOpenCVMat(), distortedRGBImage, opencv_imgproc.COLOR_BayerBG2RGB);
-               opencv_imgproc.remap(distortedRGBImage,
-                                    undistortedImage.getBytedecoOpenCVMat(),
-                                    undistortionMap1,
-                                    undistortionMap2,
-                                    opencv_imgproc.INTER_LINEAR,
-                                    opencv_core.BORDER_CONSTANT,
-                                    undistortionRemapBorderValue);
-
-               arUcoMarkerDetection.update();
-               // TODO: Maybe publish a separate image for ArUco marker debugging sometime.
-               // arUcoMarkerDetection.drawDetectedMarkers(blackflySourceImage.getBytedecoOpenCVMat());
-               // arUcoMarkerDetection.drawRejectedPoints(blackflySourceImage.getBytedecoOpenCVMat());
-               arUcoMarkerPublisher.update();
+            }
+            catch (InterruptedException interruptedException)
+            {
+               LogTools.error(interruptedException);
             }
 
-            convertColorDuration.start();
-            // Converting BayerRG8 -> RGBA -> YUV
-            // Here we use COLOR_BayerBG2RGBA opencv conversion. The Blackfly cameras are set to use BayerRG pixel format.
-            // But, for some reason, it's actually BayerBG. Changing to COLOR_BayerRG2RGBA will result in the wrong colors.
-            opencv_imgproc.cvtColor(blackflySourceImage.getBytedecoOpenCVMat(), rgbaMat, opencv_imgproc.COLOR_BayerBG2RGBA);
-            opencv_imgproc.cvtColor(rgbaMat, yuv420Image, opencv_imgproc.COLOR_RGBA2YUV_I420);
-            convertColorDuration.suspend();
-
-            encodingDuration.start();
-            opencv_imgcodecs.imencode(".jpg", yuv420Image, jpegImageBytePointer, compressionParameters);
-            encodingDuration.suspend();
-
-            copyDuration.start();
-            compressedImageDataPacker.pack(imageMessage, jpegImageBytePointer);
-            copyDuration.suspend();
-            MessageTools.toMessage(now, imageMessage.getAcquisitionTime());
-            imageMessage.setImageWidth(imageWidth);
-            imageMessage.setImageHeight(imageHeight);
-            imageMessage.setFocalLengthXPixels((float) SensorHeadParameters.FOCAL_LENGTH_X_FOR_COLORING);
-            imageMessage.setFocalLengthYPixels((float) SensorHeadParameters.FOCAL_LENGTH_Y_FOR_COLORING);
-            imageMessage.setPrincipalPointXPixels((float) SensorHeadParameters.PRINCIPAL_POINT_X_FOR_COLORING);
-            imageMessage.setPrincipalPointYPixels((float) SensorHeadParameters.PRINCIPAL_POINT_Y_FOR_COLORING);
-            CameraModel.EQUIDISTANT_FISHEYE.packMessageFormat(imageMessage);
-            imageMessage.setSequenceNumber(sequenceNumber++);
-            ImageMessageFormat.COLOR_JPEG_YUVI420.packMessageFormat(imageMessage);
-            imageMessage.getPosition().set(ousterToBlackflyTransfrom.getTranslation());
-            imageMessage.getOrientation().set(ousterToBlackflyTransfrom.getRotation());
-            ros2ImagePublisher.publish(imageMessage);
-
-            imagePublishRateCalculator.ping();
+            // Process and publish the new image
+            imageProcessAndPublish();
          }
-      }
-      Spinnaker_C.spinImageRelease(spinImage);
+         System.out.println("Image encode and publish thread has finished");
+      }, "SpinnakerImageEncodeAndPublish");
 
-      sendStatisticMessage(getNextImageDuration, DualBlackflyComms.GET_IMAGE_DURATION);
-      sendStatisticMessage(convertColorDuration, DualBlackflyComms.CONVERT_COLOR_DURATION);
-      sendStatisticMessage(encodingDuration, DualBlackflyComms.ENCODING_DURATION);
-      sendStatisticMessage(copyDuration, DualBlackflyComms.COPY_DURATION);
-      sendStatisticMessage(imagePublishRateCalculator.getFrequency(), DualBlackflyComms.PUBLISH_RATE.get(side));
-   }
-
-   private void sendStatisticMessage(Stopwatch stopwatch, ROS2Topic<Float64> topic)
-   {
-      double elapsed = stopwatch.totalElapsed();
-      if (!Double.isNaN(elapsed))
+      // Undistort image and update aruco thread
+      imageUndistortAndUpdateArUcoThread = new Thread(() ->
       {
-         sendStatisticMessage(elapsed, topic);
-      }
+         while (!destroyed)
+         {
+            // Wait until new image is available
+            try
+            {
+               synchronized (newImageReadNotifier)
+               {
+                  newImageReadNotifier.wait();
+               }
+            }
+            catch (InterruptedException interruptedException)
+            {
+               LogTools.error(interruptedException);
+            }
+
+            // Undistort  the new image
+            undistortImageAndUpdateArUco();
+         }
+         System.out.println("Image undistort and update ArUco thread has finished");
+      }, "SpinnakerImageUndistortAndUpdateArUco");
+
+      // Deallocation thread
+      imageDeallocationThread = new Thread(() ->
+      {
+         while (!destroyed)
+         {
+            // Wait until process and undistort threads are done using the newest image
+            try
+            {
+               synchronized (encodingCompletionNotifier)
+               {
+                  encodingCompletionNotifier.wait(500);
+               }
+               synchronized (undistortionCompletionNotifier)
+               {
+                  undistortionCompletionNotifier.wait(500);
+               }
+            }
+            catch (InterruptedException interruptedException)
+            {
+               LogTools.error(interruptedException);
+            }
+
+            // Get the oldest image in the deque
+            GpuMat oldestGpuMat = receivedImagesDeque.peekFirst();
+            if (oldestGpuMat == null)
+               continue;
+
+            // While the threads aren't using the oldest image
+            while (!oldestGpuMat.equals(sourceImageBeingUsedForProcessing) && !oldestGpuMat.equals(sourceImageBeingUsedForUndistortion))
+            {
+               // Deallocate the oldest image
+               GpuMat gpuMat = receivedImagesDeque.pollFirst();
+               gpuMat.release();
+               gpuMat.close();
+               ++numberOfGpuMatsDeallocated;
+
+               // Get next oldest image
+               oldestGpuMat = receivedImagesDeque.peekFirst();
+               if (oldestGpuMat == null)
+                  break;
+            }
+         }
+         System.out.println("Deallocation thread has finished");
+      }, "SpinnakerImageDeallocation");
+
+      cameraReadThread.start();
+      imageEncodeAndPublishThread.start();
+      imageUndistortAndUpdateArUcoThread.start();
+      imageDeallocationThread.start();
    }
 
-   private void sendStatisticMessage(double value, ROS2Topic<Float64> topic)
+   /**
+    * Initializes variables that depend on image width and height.
+    * @param imageWidth the width, in pixels, of the image received
+    * @param imageHeight the height, in pixels, of the image received
+    */
+   private void initialize(int imageWidth, int imageHeight)
    {
-      Float64 float64Message = new Float64();
-      float64Message.setData(value);
-      ros2Helper.publish(topic, float64Message);
+      this.imageWidth = imageWidth;
+      this.imageHeight = imageHeight;
+      imageFrameSize = (long) imageWidth * imageHeight;
+      LogTools.info("Blackfly {} resolution detected: {} x {}", spinnakerBlackfly.getSerialNumber(), imageWidth, imageHeight);
+
+      distortedRGBImage = new GpuMat(imageWidth, imageHeight, opencv_core.CV_8UC3);
+      undistortedImage = new GpuMat(imageWidth, imageHeight, opencv_core.CV_8UC3);
+      undistortedBytedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
+
+      initializeImageUndistortion();
+   }
+
+   private void initializeImageUndistortion()
+   {
+      Mat cameraMatrix = new Mat(3, 3, opencv_core.CV_64F);
+      opencv_core.setIdentity(cameraMatrix);
+      cameraMatrix.ptr(0, 0).putDouble(blackflyLensProperties.getFocalLengthXForUndistortion());
+      cameraMatrix.ptr(1, 1).putDouble(blackflyLensProperties.getFocalLengthYForUndistortion());
+      cameraMatrix.ptr(0, 2).putDouble(blackflyLensProperties.getPrincipalPointXForUndistortion());
+      cameraMatrix.ptr(1, 2).putDouble(blackflyLensProperties.getPrincipalPointYForUndistortion());
+      Mat newCameraMatrixEstimate = new Mat(3, 3, opencv_core.CV_64F);
+      opencv_core.setIdentity(newCameraMatrixEstimate);
+      Mat distortionCoefficients = new Mat(blackflyLensProperties.getK1ForUndistortion(),
+                                           blackflyLensProperties.getK2ForUndistortion(),
+                                           blackflyLensProperties.getK3ForUndistortion(),
+                                           blackflyLensProperties.getK4ForUndistortion());
+      Size sourceImageSize = new Size(imageWidth, imageHeight);
+      Size undistortedImageSize = new Size((int) (SensorHeadParameters.UNDISTORTED_IMAGE_SCALE * imageWidth),
+                                           (int) (SensorHeadParameters.UNDISTORTED_IMAGE_SCALE * imageHeight));
+      Mat rectificationTransformation = new Mat(3, 3, opencv_core.CV_64F);
+      opencv_core.setIdentity(rectificationTransformation);
+
+      double balanceNewFocalLength = 0.0;
+      double fovScaleFocalLengthDivisor = 1.0;
+
+      opencv_calib3d.fisheyeEstimateNewCameraMatrixForUndistortRectify(cameraMatrix,
+                                                                       distortionCoefficients,
+                                                                       sourceImageSize,
+                                                                       rectificationTransformation,
+                                                                       newCameraMatrixEstimate,
+                                                                       balanceNewFocalLength,
+                                                                       undistortedImageSize,
+                                                                       fovScaleFocalLengthDivisor);
+      // Fisheye undistortion
+      // https://docs.opencv.org/4.7.0/db/d58/group__calib3d__fisheye.html#ga167df4b00a6fd55287ba829fbf9913b9
+      Mat tempUndistortionMat1 = new Mat();
+      Mat tempUndistortionMat2 = new Mat();
+
+      opencv_calib3d.fisheyeInitUndistortRectifyMap(cameraMatrix,
+                                                    distortionCoefficients,
+                                                    rectificationTransformation,
+                                                    newCameraMatrixEstimate,
+                                                    undistortedImageSize,
+                                                    opencv_core.CV_32F,
+                                                    tempUndistortionMat1,
+                                                    tempUndistortionMat2);
+
+      undistortionMap1 = new GpuMat();
+      undistortionMap1.upload(tempUndistortionMat1);
+      undistortionMap2 = new GpuMat();
+      undistortionMap2.upload(tempUndistortionMat2);
+
+      // Create arUco marker detection
+      ReferenceFrame blackflyCameraFrame = syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame();
+      arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
+      arUcoMarkerDetection.create(blackflyCameraFrame);
+      arUcoMarkerDetection.setSourceImageForDetection(undistortedBytedecoImage);
+      newCameraMatrixEstimate.copyTo(arUcoMarkerDetection.getCameraMatrix());
+      arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetection, ros2Helper, predefinedSceneNodeLibrary.getArUcoMarkerIDsToSizes());
+
+      // Close pointers
+      tempUndistortionMat2.close();
+      tempUndistortionMat1.close();
+      rectificationTransformation.close();
+      undistortedImageSize.close();
+      sourceImageSize.close();
+      distortionCoefficients.close();
+      newCameraMatrixEstimate.close();
+      cameraMatrix.close();
+   }
+
+   /**
+    * Read the latest image from the camera, deallocate
+    * the memory for the last image (if it existed), and
+    * set the atomic reference to the new image data
+    */
+   private void cameraRead()
+   {
+      // Get image from camera
+      spinImage spinImage = new spinImage(); // Release at the end
+      spinnakerBlackfly.getNextImage(spinImage);
+
+      // Initialize stuff on the first run
+      if (imageWidth == 0 || imageHeight == 0)
+      {
+         initialize(spinnakerBlackfly.getWidth(spinImage), spinnakerBlackfly.getHeight(spinImage));
+      }
+
+      // Get image data
+      BytePointer spinImageData = new BytePointer(imageFrameSize); // close at the end
+      spinnakerBlackfly.setPointerToSpinImageData(spinImage, spinImageData);
+      BytedecoImage sourceBytedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
+      sourceBytedecoImage.changeAddress(spinImageData.address());
+
+      // Upload image to GPU
+      GpuMat deviceSourceImage = new GpuMat(imageWidth, imageHeight, opencv_core.CV_8UC1);
+      deviceSourceImage.upload(sourceBytedecoImage.getBytedecoOpenCVMat());
+
+      // Convert from BayerRG8 to BGR for further conversion
+      GpuMat latestImageSetter = new GpuMat(imageWidth, imageHeight, opencv_core.CV_8UC3);
+      opencv_cudaimgproc.cvtColor(deviceSourceImage, latestImageSetter, opencv_imgproc.COLOR_BayerBG2BGR); // for some reason you need to convert BayerBG to BGR
+
+      // Add image to deque
+      receivedImagesDeque.offerLast(latestImageSetter);
+
+      // Ensure images are being deallocated
+      if (numberOfGpuMatsAllocated - numberOfGpuMatsDeallocated > 100)
+      {
+         throw new RuntimeException("GpuMats are not being released in time");
+      }
+      numberOfGpuMatsAllocated++;
+
+      spinImageAcquisitionTime.set(Instant.now());
+
+      // Close pointers
+      deviceSourceImage.release();
+      deviceSourceImage.close();
+      spinImageData.close();
+      spinnakerBlackfly.releaseImage(spinImage);
+   }
+
+   /**
+    * Get the last image read from the camera read thread, apply jpeg compression, and publish over the network
+    */
+   private void imageProcessAndPublish()
+   {
+      // Get newest image and ensure it's not null
+      sourceImageBeingUsedForProcessing = receivedImagesDeque.peekLast();
+      Instant spinImageAcquisitionTime = this.spinImageAcquisitionTime.get();
+      if (sourceImageBeingUsedForProcessing == null || spinImageAcquisitionTime == null)
+         return;
+
+      ReferenceFrame ousterLidarFrame = syncedRobot.getReferenceFrames().getOusterLidarFrame();
+      RigidBodyTransform ousterToBlackflyTransfrom = new RigidBodyTransform();
+
+      if (side == RobotSide.RIGHT)
+      {
+         ReferenceFrame blackflyCameraFrame = syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame();
+         ousterLidarFrame.getTransformToDesiredFrame(ousterToBlackflyTransfrom, blackflyCameraFrame);
+      }
+      // TODO: left behavior?
+
+      remoteTunableCameraTransform.update();
+      syncedRobot.update();
+
+      BytePointer jpegImageBytePointer = new BytePointer(imageFrameSize); // close at the end
+
+      // Encode the image
+      cudaImageEncoder.encodeBGR(sourceImageBeingUsedForProcessing.data(), jpegImageBytePointer, imageWidth, imageHeight, sourceImageBeingUsedForProcessing.step());
+
+      // Notify deallocation thread that the images has been processed, and is ready for deallocation
+      synchronized (encodingCompletionNotifier)
+      {
+         encodingCompletionNotifier.notify();
+      }
+
+      ousterFisheyeColoringIntrinsicsROS2.updateAndPublishThrottledStatus();
+
+      // Create and publish image message
+      ImageMessageDataPacker compressedImageDataPacker = new ImageMessageDataPacker(jpegImageBytePointer.limit());
+      compressedImageDataPacker.pack(imageMessage, jpegImageBytePointer);
+      MessageTools.toMessage(spinImageAcquisitionTime, imageMessage.getAcquisitionTime());
+      imageMessage.setImageWidth(imageWidth);
+      imageMessage.setImageHeight(imageHeight);
+      imageMessage.setFocalLengthXPixels((float) ousterFisheyeColoringIntrinsics.getFocalLengthX());
+      imageMessage.setFocalLengthYPixels((float) ousterFisheyeColoringIntrinsics.getFocalLengthY());
+      imageMessage.setPrincipalPointXPixels((float) ousterFisheyeColoringIntrinsics.getPrinciplePointX());
+      imageMessage.setPrincipalPointYPixels((float) ousterFisheyeColoringIntrinsics.getPrinciplePointY());
+      CameraModel.EQUIDISTANT_FISHEYE.packMessageFormat(imageMessage);
+      imageMessage.setSequenceNumber(imageMessageSequenceNumber++);
+      ImageMessageFormat.COLOR_JPEG_BGR8.packMessageFormat(imageMessage);
+      imageMessage.getPosition().set(ousterToBlackflyTransfrom.getTranslation());
+      imageMessage.getOrientation().set(ousterToBlackflyTransfrom.getRotation());
+      ros2ImagePublisher.publish(imageMessage);
+
+      // Close pointers
+      jpegImageBytePointer.close();
+   }
+
+   /**
+    * undistort fisheye, update arUco marker detection (if right fisheye camera)
+    */
+   private void undistortImageAndUpdateArUco()
+   {
+      // Get newest image and ensure it's not null
+      sourceImageBeingUsedForUndistortion = receivedImagesDeque.peekLast();
+      if (sourceImageBeingUsedForUndistortion == null)
+         return;
+
+      // Convert color from BGR to RGB
+      opencv_cudaimgproc.cvtColor(sourceImageBeingUsedForUndistortion, distortedRGBImage, opencv_imgproc.COLOR_BGR2RGB);
+
+      // Notify deallocation thread that the image has been used, and is ready for deallocation
+      synchronized (undistortionCompletionNotifier)
+      {
+         undistortionCompletionNotifier.notify();
+      }
+
+      opencv_cudawarping.remap(distortedRGBImage,
+                               undistortedImage,
+                               undistortionMap1,
+                               undistortionMap2,
+                               opencv_imgproc.INTER_LINEAR);
+
+      undistortedImage.download(undistortedBytedecoImage.getBytedecoOpenCVMat());
+
+      if (side == RobotSide.RIGHT)
+      {
+         arUcoMarkerDetection.update();
+         // TODO: Maybe publish a separate image for ArUco marker debugging sometime.
+         // arUcoMarkerDetection.drawDetectedMarkers(blackflySourceImage.getBytedecoOpenCVMat());
+         // arUcoMarkerDetection.drawRejectedPoints(blackflySourceImage.getBytedecoOpenCVMat());
+         arUcoMarkerPublisher.update();
+
+         detectableSceneNodesSubscription.update(); // Receive overridden poses from operator
+         ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, predefinedSceneNodeLibrary);
+         detectableSceneObjectsPublisher.publish(predefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2Helper, ROS2IOTopicQualifier.STATUS);
+      }
+      // TODO: left behavior?
    }
 
    public void destroy()
    {
-      if (blackfly != null)
-         blackfly.stopAcquiringImages();
-   }
+      System.out.println("Destroying dual blackfly camera");
+      destroyed = true;
 
-   public String getSerialNumber()
-   {
-      return serialNumber;
-   }
+      // Notify deallocation thread to ensure it doesn't hang
+      synchronized (encodingCompletionNotifier)
+      {
+         encodingCompletionNotifier.notify();
+      }
+      synchronized (undistortionCompletionNotifier)
+      {
+         undistortionCompletionNotifier.notify();
+      }
 
-   public IHMCRealtimeROS2Publisher<ImageMessage> getRos2ImagePublisher()
-   {
-      return ros2ImagePublisher;
+      // Wait until threads finish their loops
+      try
+      {
+         cameraReadThread.join();
+         imageEncodeAndPublishThread.join();
+         imageUndistortAndUpdateArUcoThread.join();
+         imageDeallocationThread.join();
+      }
+      catch (InterruptedException interruptedException)
+      {
+         LogTools.error(interruptedException);
+      }
+
+      // Destroy objects
+      cudaImageEncoder.destroy();
+      if (spinnakerBlackfly != null)
+         spinnakerBlackfly.stopAcquiringImages();
+      if (arUcoMarkerDetection != null)
+         arUcoMarkerDetection.destroy();
+      spinnakerBlackfly = null;
+      arUcoMarkerDetection = null;
    }
 }

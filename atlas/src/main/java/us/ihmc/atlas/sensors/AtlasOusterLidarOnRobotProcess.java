@@ -5,6 +5,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.perception.ouster.OusterDriverAndDepthPublisher;
@@ -30,7 +31,7 @@ public class AtlasOusterLidarOnRobotProcess
          ros2Node.destroy();
       }, getClass().getSimpleName() + "Shutdown"));
 
-      new OusterDriverAndDepthPublisher(controllerHelper, this::sensorFrameUpdater, ROS2Tools.OUSTER_DEPTH_IMAGE, ROS2Tools.OUSTER_LIDAR_SCAN);
+      new OusterDriverAndDepthPublisher(controllerHelper, this::sensorFrameUpdater, PerceptionAPI.OUSTER_DEPTH_IMAGE, PerceptionAPI.OUSTER_LIDAR_SCAN);
    }
 
    private HumanoidReferenceFrames sensorFrameUpdater()

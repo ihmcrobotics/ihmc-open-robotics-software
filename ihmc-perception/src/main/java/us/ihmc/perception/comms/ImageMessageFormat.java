@@ -5,6 +5,7 @@ import perception_msgs.msg.dds.ImageMessage;
 public enum ImageMessageFormat
 {
    COLOR_JPEG_YUVI420(3), // We usually compress/decompress this to/from RGB8
+   COLOR_JPEG_BGR8(3),
    COLOR_PNG_RGB8(3), // TODO: Implement receiver and visualizer
    DEPTH_PNG_16UC1(2),
    ;

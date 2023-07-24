@@ -18,8 +18,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.BytedecoTools;
-import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
@@ -33,7 +32,6 @@ import us.ihmc.rdx.ui.graphics.ros2.RDXHeightMapVisualizer;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.IHMCCommonPaths;
-import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -68,8 +66,6 @@ public class RDXRapidHeightMapExtractionDemo
 
    private final Notification heightMapUpdateNotification = new Notification();
 
-   private Activator nativesLoadedActivator;
-
    private BytedecoImage loadedDepthImage;
    private final BytePointer depthBytePointer = new BytePointer(1000000);
 
@@ -87,7 +83,6 @@ public class RDXRapidHeightMapExtractionDemo
          @Override
          public void create()
          {
-            nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
             baseUI.create();
 
             openCLManager = new OpenCLManager();
@@ -104,6 +99,8 @@ public class RDXRapidHeightMapExtractionDemo
             updateHeightMap();
 
             // testProjection(loadedDepthImage.getBytedecoOpenCVMat());
+
+            navigationPanel.setRenderMethod(this::renderNavigationPanel);
          }
 
          private void createForOuster(int depthHeight, int depthWidth)
@@ -129,25 +126,13 @@ public class RDXRapidHeightMapExtractionDemo
          @Override
          public void render()
          {
-            if (nativesLoadedActivator.poll())
+            if (userChangedIndex.poll())
             {
-               if (nativesLoadedActivator.isNewlyActivated())
-               {
-                  baseUI.getLayoutManager().reloadLayout();
-                  navigationPanel.setRenderMethod(this::renderNavigationPanel);
-               }
-
-               if (userChangedIndex.poll())
-               {
-                  loadAndDecompressThreadExecutor.clearQueueAndExecute(() ->
-                                                                       {
-                                                                          perceptionDataLoader.loadCompressedDepth(sensorTopicName,
+               loadAndDecompressThreadExecutor.clearQueueAndExecute(() -> perceptionDataLoader.loadCompressedDepth(sensorTopicName,
                                                                                                                    frameIndex.get(),
                                                                                                                    depthBytePointer,
-                                                                                                                   loadedDepthImage.getBytedecoOpenCVMat());
-                                                                       });
-                  updateHeightMap();
-               }
+                                                                                                                   loadedDepthImage.getBytedecoOpenCVMat()));
+               updateHeightMap();
             }
 
             baseUI.renderBeforeOnScreenUI();
@@ -158,8 +143,7 @@ public class RDXRapidHeightMapExtractionDemo
          {
             boolean changed = ImGui.sliderInt("Frame Index",
                                               frameIndex.getData(),
-                                              0,
-                                              (int) (perceptionDataLoader.getHDF5Manager().getCount(sensorTopicName) - 1));
+                                              0, perceptionDataLoader.getHDF5Manager().getCount(sensorTopicName) - 1);
 
             changed |= ImGui.sliderFloat("Plane Height", planeHeight.getData(), -3.0f, 3.0f);
 
@@ -198,28 +182,30 @@ public class RDXRapidHeightMapExtractionDemo
       if (!rapidHeightMapUpdater.isProcessing())
       {
          ThreadTools.startAsDaemon(() ->
-                                   {
-                                      LogTools.info("Update Height Map: " + frameIndex.get());
-                                      Point3D position = sensorPositionBuffer.get(frameIndex.get());
-                                      Quaternion orientation = sensorOrientationBuffer.get(frameIndex.get());
-                                      cameraPose.set(position, orientation);
-                                      cameraFrame.setPoseAndUpdate(cameraPose);
+         {
+            LogTools.info("Update Height Map: " + frameIndex.get());
+            Point3D position = sensorPositionBuffer.get(frameIndex.get());
+            Quaternion orientation = sensorOrientationBuffer.get(frameIndex.get());
+            cameraPose.set(position, orientation);
+            cameraFrame.setPoseAndUpdate(cameraPose);
 
-                                      long begin = System.nanoTime();
+            long begin = System.nanoTime();
 
+            RigidBodyTransform transform = new RigidBodyTransform(sensorOrientationBuffer.get(frameIndex.get()),
+                                                                  sensorPositionBuffer.get(frameIndex.get()));
 
-                                      // Point3D euler = new Point3D();
-                                      // sensorOrientationBuffer.get(frameIndex.get()).getEuler(euler);
-                                      // RigidBodyTransform transform = new RigidBodyTransform(new Quaternion(0.0, pitchAngle.get(), 0.0), new Point3D(0.0,0.0,1.0));
+            // Point3D euler = new Point3D();
+            // sensorOrientationBuffer.get(frameIndex.get()).getEuler(euler);
+            // RigidBodyTransform transform = new RigidBodyTransform(new Quaternion(0.0, pitchAngle.get(), 0.0), new Point3D(0.0,0.0,1.0));
 
-                                      // LogTools.info("Rotation: " + euler);
+            // LogTools.info("Rotation: " + euler);
 
-                                      rapidHeightMapUpdater.update(new RigidBodyTransform(cameraPose), planeHeight.get());
-                                      heightMapUpdateNotification.set();
+            rapidHeightMapUpdater.update(transform, planeHeight.get());
+            heightMapUpdateNotification.set();
 
-                                      long end = System.nanoTime();
-                                      LogTools.info("Update Height Map: {} ms", (end - begin) / 1e6);
-                                   }, getClass().getSimpleName() + "RapidHeightMap");
+            long end = System.nanoTime();
+            LogTools.info("Update Height Map: {} ms", (end - begin) / 1e6);
+         }, getClass().getSimpleName() + "RapidHeightMap");
       }
 
       if (heightMapUpdateNotification.poll())
@@ -239,7 +225,7 @@ public class RDXRapidHeightMapExtractionDemo
          PerceptionDebugTools.displayHeightMap("Output Height Map",
                                                rapidHeightMapUpdater.getOutputHeightMapImage().getBytedecoOpenCVMat(),
                                                1,
-                                              1 / (0.3f + 0.20f * rapidHeightMapUpdater.getCellSizeXYInMeters()));
+                                               1 / (0.3f + 0.20f * rapidHeightMapUpdater.getCellSizeXYInMeters()));
       }
    }
 

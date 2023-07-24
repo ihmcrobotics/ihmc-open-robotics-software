@@ -41,6 +41,7 @@ public class ImGuiTools
 
    private static ImFont consoleFont;
    private static ImFont smallFont;
+   private static ImFont smallBoldFont;
    private static ImFont mediumFont;
    private static ImFont bigFont;
    private static ImFont nodeFont;
@@ -55,6 +56,9 @@ public class ImGuiTools
    private static int leftArrowKey;
    private static int rightArrowKey;
    private static ImFontAtlas fontAtlas;
+
+   public static int RED = Color.RED.toIntBits();
+   public static int GREEN = Color.GREEN.toIntBits();
 
    public static long createContext()
    {
@@ -201,6 +205,21 @@ public class ImGuiTools
       return ImGui.sliderScalar(label, ImGuiDataType.Double, imDouble, minValue, maxValue, format, imGuiSliderFlags);
    }
 
+   public static boolean sliderInt(String label, ImInt imInt, int minValue, int maxValue)
+   {
+      return ImGui.sliderScalar(label, ImGuiDataType.U32, imInt, minValue, maxValue);
+   }
+
+   public static boolean sliderInt(String label, ImInt imInt, int minValue, int maxValue, String format)
+   {
+      return ImGui.sliderScalar(label, ImGuiDataType.U32, imInt, minValue, maxValue, format);
+   }
+
+   public static boolean sliderInt(String label, ImInt imInt, int minValue, int maxValue, String format, int imGuiSliderFlags)
+   {
+      return ImGui.sliderScalar(label, ImGuiDataType.U32, imInt, minValue, maxValue, format, imGuiSliderFlags);
+   }
+
    /**
     * Returns true if the user presses Enter, but unlike the EnterReturnsTrue flag,
     * using this method, the currently input text can be retrieved without the
@@ -262,6 +281,7 @@ public class ImGuiTools
    public static ImFont setupFonts(ImGuiIO io, int fontSizeLevel)
    {
       final ImFontConfig fontConfig = new ImFontConfig(); // Natively allocated object, should be explicitly destroyed
+      final ImFontConfig boldFontConfig = new ImFontConfig();
       final ImFontConfig consoleFontConfig = new ImFontConfig();
       final ImFontConfig mediumFontConfig = new ImFontConfig();
       final ImFontConfig bigFontConfig = new ImFontConfig();
@@ -281,6 +301,7 @@ public class ImGuiTools
 //      fontConfig.setRasterizerMultiply(2.0f);
 //      fontConfig.setPixelSnapH(true);
       fontConfig.setFontBuilderFlags(fontsFlags);
+      boldFontConfig.setFontBuilderFlags(fontsFlags + ImGuiFreeTypeBuilderFlags.Bold);
       consoleFontConfig.setFontBuilderFlags(fontsFlags);
       mediumFontConfig.setFontBuilderFlags(fontsFlags);
       bigFontConfig.setFontBuilderFlags(fontsFlags);
@@ -288,18 +309,18 @@ public class ImGuiTools
 
 //      fontToReturn = fontAtlas.addFontDefault(); // Add a default font, which is 'ProggyClean.ttf, 13px'
 //      fontToReturn = fontAtlas.addFontFromMemoryTTF(loadFromResources("basis33.ttf"), 16, fontConfig);
-      String fontDir;
-      if (SystemUtils.IS_OS_WINDOWS) {
-         fontDir = System.getenv("WINDIR") + "/Fonts";
-      } else {
-         fontDir = "/usr/share/fonts/TTF/";
-      }
+      String fontDirectory;
+      if (SystemUtils.IS_OS_WINDOWS)
+         fontDirectory = System.getenv("WINDIR") + "/Fonts";
+      else
+         fontDirectory = "/usr/share/fonts/TTF/";
 
-      Path segoeui = Paths.get(fontDir, "segoeui.ttf");
+      Path segoeui = Paths.get(fontDirectory, "segoeui.ttf");
       if (Files.exists(segoeui))
       {
          fontConfig.setName("segoeui.ttf, 16px");
          smallFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 16.0f, fontConfig);
+         smallBoldFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 16.0f, boldFontConfig);
 
          fontConfig.setName("segoeui.ttf, 20px");
          mediumFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 20.0f, mediumFontConfig);
@@ -314,6 +335,7 @@ public class ImGuiTools
       {
          fontConfig.setName("DejaVuSans.ttf, 13px");
          smallFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 13.0f, fontConfig);
+         smallBoldFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 13.0f, boldFontConfig);
 
          fontConfig.setName("DejaVuSans.ttf, 17px");
          mediumFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 17.0f, mediumFontConfig);
@@ -324,7 +346,7 @@ public class ImGuiTools
          nodeFontConfig.setName("DejaVuSans.ttf, 26px 1/2");
          nodeFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 26.0f, nodeFontConfig);
       }
-      Path lucidaConsole = Paths.get(fontDir, "lucon.ttf");
+      Path lucidaConsole = Paths.get(fontDirectory, "lucon.ttf");
 
       ImFontGlyphRangesBuilder glyphRangesBuilder = new ImFontGlyphRangesBuilder();
       glyphRangesBuilder.addRanges(ImGui.getIO().getFonts().getGlyphRangesDefault());
@@ -382,6 +404,11 @@ public class ImGuiTools
    public static ImFont getSmallFont()
    {
       return smallFont;
+   }
+
+   public static ImFont getSmallBoldFont()
+   {
+      return smallBoldFont;
    }
 
    public static ImFont getNodeFont() {

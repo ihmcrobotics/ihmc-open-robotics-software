@@ -11,11 +11,14 @@ import org.apache.logging.log4j.Level;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.behaviors.tools.BehaviorHelper;
+import us.ihmc.behaviors.tools.BehaviorMessageTools;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeBasics;
 import us.ihmc.behaviors.tools.yo.YoBooleanClientHelper;
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
 import us.ihmc.behaviors.tools.behaviorTree.FallbackNode;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.ros2.ROS2HeartbeatMonitor;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -25,7 +28,6 @@ import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIInterface;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIRegistry;
 import us.ihmc.rdx.ui.behavior.tree.RDXImNodesBehaviorTreeUI;
 import us.ihmc.rdx.ui.tools.ImGuiLogWidget;
-import us.ihmc.rdx.ui.tools.ImGuiMessagerManagerWidget;
 import us.ihmc.rdx.ui.yo.ImGuiYoVariableClientManagerWidget;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.log.LogTools;
@@ -35,18 +37,23 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-import static us.ihmc.behaviors.BehaviorModule.API.BehaviorTreeStatus;
-import static us.ihmc.behaviors.BehaviorModule.API.StatusLog;
+import static us.ihmc.behaviors.BehaviorModule.API.*;
 
+/**
+ * This is the UI for interacting with a remotely running behavior tree.
+ * TODO:
+ *   - Remove Kryo to simplify connection management -- use exclusively ROS 2
+ *   - Somehow rework the ImNodes area, it takes a lot of space. Perhaps showing the
+ *     nodes as normal panels as an option would be good.
+ */
 public class RDXBehaviorUIManager
 {
    private final ImString behaviorModuleHost = new ImString("localhost", 100);
-   private final AtomicReference<BehaviorTreeControlFlowNode> behaviorTreeStatus = new AtomicReference<>(new FallbackNode());
+   private final AtomicReference<BehaviorTreeNodeBasics> behaviorTreeStatus = new AtomicReference<>(new FallbackNode());
    private final Stopwatch statusStopwatch = new Stopwatch();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiMovingPlot statusReceivedPlot = new ImGuiMovingPlot("Tree status", 1000, 230, 15);
    private final ImGuiLogWidget logWidget;
-   private final ImGuiMessagerManagerWidget messagerManagerWidget;
    private final ImGuiYoVariableClientManagerWidget yoVariableClientManagerWidget;
    private RDXBehaviorUIInterface highestLevelUI;
    private final BehaviorHelper helper;
@@ -55,32 +62,30 @@ public class RDXBehaviorUIManager
    private final ImBoolean imEnabled = new ImBoolean(false);
    private final YoBooleanClientHelper yoEnabled;
    private final RDXBehaviorUIRegistry behaviorRegistry;
-   private RDXBehaviorUIInterface rootBehaviorUI;
+   private final RDXBehaviorUIInterface rootBehaviorUI;
+   /** For knowing when the robot's behavior module is running. */
+   private final ROS2HeartbeatMonitor heartbeatMonitor;
 
-   public RDXBehaviorUIManager(ROS2Node ros2Node,
-                               Supplier<? extends DRCRobotModel> robotModelSupplier,
-                               RDXBehaviorUIRegistry behaviorRegistry,
-                               boolean enableROS1)
+   public RDXBehaviorUIManager(ROS2Node ros2Node, Supplier<? extends DRCRobotModel> robotModelSupplier, RDXBehaviorUIRegistry behaviorRegistry)
    {
       this.behaviorRegistry = behaviorRegistry;
-      helper = new BehaviorHelper("Behaviors panel", robotModelSupplier.get(), ros2Node, enableROS1);
-      messagerManagerWidget = new ImGuiMessagerManagerWidget(helper.getMessagerHelper(),
-                                                             behaviorModuleHost::get,
-                                                             NetworkPorts.BEHAVIOR_MODULE_MESSAGER_PORT.getPort());
+      helper = new BehaviorHelper("Behaviors panel", robotModelSupplier.get(), ros2Node);
+      heartbeatMonitor = new ROS2HeartbeatMonitor(helper, BehaviorModule.API.HEARTBEAT);
       yoVariableClientManagerWidget = new ImGuiYoVariableClientManagerWidget(helper.getYoVariableClientHelper(),
                                                                              behaviorModuleHost::get,
                                                                              NetworkPorts.BEHAVIOR_MODULE_YOVARIABLESERVER_PORT.getPort());
       logWidget = new ImGuiLogWidget("Behavior status");
-      helper.subscribeViaCallback(StatusLog, logWidget::submitEntry);
+      helper.subscribeViaCallback(STATUS_LOG, message ->
+            logWidget.submitEntry(message.getLogLevel(), MessageTools.unpackLongStringFromByteSequence(message.getLogMessage())));
       helper.subscribeViaCallback(ROS2Tools.TEXT_STATUS, textStatus ->
       {
          LogTools.info("TextToSpeech: {}", textStatus.getTextToSpeakAsString());
          logWidget.submitEntry(Level.INFO, textStatus.getTextToSpeakAsString());
       });
-      helper.subscribeViaCallback(BehaviorTreeStatus, status ->
+      helper.subscribeViaCallback(BEHAVIOR_TREE_STATUS, behaviorTreeMessage ->
       {
          statusStopwatch.reset();
-         behaviorTreeStatus.set(status);
+         behaviorTreeStatus.set(BehaviorMessageTools.unpackBehaviorTreeMessage(behaviorTreeMessage));
       });
 
       treeViewPanel = new ImGuiPanel(ImGuiTools.uniqueLabel(getClass(), "Behavior Tree Panel"), this::renderBehaviorTreeImGuiWidgets, false, true);
@@ -178,7 +183,6 @@ public class RDXBehaviorUIManager
       ImGui.sameLine();
       ImGui.inputText(ImGuiTools.uniqueIDOnly(getClass(), "BehaviorModuleHostInput"), behaviorModuleHost, flags);
       ImGui.popItemWidth();
-      messagerManagerWidget.renderImGuiWidgets();
       yoVariableClientManagerWidget.renderImGuiWidgets();
       statusReceivedPlot.setNextValue((float) statusStopwatch.totalElapsed());
       statusReceivedPlot.calculate("");
@@ -210,22 +214,11 @@ public class RDXBehaviorUIManager
    public void connectViaKryo(String hostname)
    {
       behaviorModuleHost.set(hostname);
-      messagerManagerWidget.connect();
-   }
-
-   public void connectMessager()
-   {
-      messagerManagerWidget.connect();
    }
 
    public void connectYoVariableClient()
    {
       helper.getYoVariableClientHelper().start(behaviorModuleHost.get(), NetworkPorts.BEHAVIOR_MODULE_YOVARIABLESERVER_PORT.getPort());
-   }
-
-   public void disconnectMessager()
-   {
-      messagerManagerWidget.disconnectMessager();
    }
 
    public void destroy()
@@ -237,5 +230,10 @@ public class RDXBehaviorUIManager
    public ImGuiPanel getPanel()
    {
       return treeViewPanel;
+   }
+
+   public ROS2HeartbeatMonitor getHeartbeatMonitor()
+   {
+      return heartbeatMonitor;
    }
 }

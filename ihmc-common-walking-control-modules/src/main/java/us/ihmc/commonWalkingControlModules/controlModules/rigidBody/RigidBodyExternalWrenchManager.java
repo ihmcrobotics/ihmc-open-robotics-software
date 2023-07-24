@@ -61,13 +61,12 @@ public class RigidBodyExternalWrenchManager extends RigidBodyControlState
       super(null, bodyToControl.getName() + "Wrench", yoTime, parentRegistry);
 
       this.bodyToControl = bodyToControl;
+      String prefix = bodyToControl.getName() + "Wrench";
 
       bodyFrame = bodyToControl.getBodyFixedFrame();
       baseFrame = baseBody.getBodyFixedFrame();
       defaultControlFramePose = new FramePose3D(bodyFrame, controlFrame.getTransformToDesiredFrame(bodyFrame));
-      activeControlFrame = new PoseReferenceFrame("activeControlFrame", bodyToControl.getBodyFixedFrame());
-
-      String prefix = bodyToControl.getName() + "Wrench";
+      activeControlFrame = new PoseReferenceFrame(prefix + "activeControlFrame", bodyToControl.getBodyFixedFrame());
 
       numberOfPointsInQueue = new YoInteger(prefix + "NumberOfPointsInQueue", registry);
       numberOfPointsInGenerator = new YoInteger(prefix + "NumberOfPointsInGenerator", registry);

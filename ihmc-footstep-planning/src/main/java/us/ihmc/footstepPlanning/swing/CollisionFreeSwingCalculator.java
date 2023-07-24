@@ -218,7 +218,7 @@ public class CollisionFreeSwingCalculator
    public void computeSwingTrajectories(SideDependentList<? extends Pose3DReadOnly> initialStanceFootPoses, FootstepPlan footstepPlan)
    {
       swingTrajectories.clear();
-      if ((planarRegionsList == null || planarRegionsList.isEmpty()) && (heightMapData == null))
+      if ((planarRegionsList == null || planarRegionsList.isEmpty()) && (heightMapData == null || heightMapData.isEmpty()))
       {
          return;
       }
@@ -259,7 +259,8 @@ public class CollisionFreeSwingCalculator
          footstep.setSwingDuration(swingDuration);
 
          initializeKnotPoints();
-         optimizeKnotPoints();
+         // FIXME figure out how to avoid using the height map data when possible.
+         optimizeKnotPoints(planarRegionsList, heightMapData);
 
          if (!collisionFound.getValue())
          {
@@ -347,7 +348,7 @@ public class CollisionFreeSwingCalculator
 
    }
 
-   private void optimizeKnotPoints()
+   private void optimizeKnotPoints(PlanarRegionsList planarRegionsList, HeightMapData heightMapData)
    {
       collisionFound.set(false);
       planPhase.set(PlanPhase.PERFORM_COLLISION_CHECK);

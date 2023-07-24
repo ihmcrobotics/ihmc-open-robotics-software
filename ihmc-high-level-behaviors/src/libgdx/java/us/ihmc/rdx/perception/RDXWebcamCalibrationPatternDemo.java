@@ -1,18 +1,15 @@
 package us.ihmc.rdx.perception;
 
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
-import us.ihmc.tools.thread.Activator;
 
 /**
  * Interactive calibration pattern detection with a webcam.
  */
 public class RDXWebcamCalibrationPatternDemo
 {
-   private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
    private final RDXBaseUI baseUI = new RDXBaseUI("Webcam Calibration Pattern Demo");
    private RDXOpenCVWebcamReader webcamReader;
    private RDXCalibrationPatternDetectionUI calibrationPatternDetectionUI;
@@ -27,38 +24,31 @@ public class RDXWebcamCalibrationPatternDemo
          {
             baseUI.create();
 
-            webcamReader = new RDXOpenCVWebcamReader(nativesLoadedActivator);
+            webcamReader = new RDXOpenCVWebcamReader();
             webcamReader.setMonitorPanelUIThreadPreprocessor(this::monitorPanelUpdateOnUIThread);
             baseUI.getImGuiPanelManager().addPanel(webcamReader.getStatisticsPanel());
+
+            webcamReader.create();
+            baseUI.getImGuiPanelManager().addPanel(webcamReader.getSwapCVPanel().getImagePanel());
+
+            calibrationPatternDetectionUI = new RDXCalibrationPatternDetectionUI();
+            baseUI.getImGuiPanelManager().addPanel(calibrationPatternDetectionUI.getPanel());
+
+            ThreadTools.startAsDaemon(() ->
+            {
+               while (running)
+               {
+                  webcamReader.readWebcamImage();
+                  calibrationPatternDetectionUI.copyInSourceBGRImage(webcamReader.getBGRImage());
+               }
+            }, "CameraRead");
          }
 
          @Override
          public void render()
          {
-            if (nativesLoadedActivator.poll())
-            {
-               if (nativesLoadedActivator.isNewlyActivated())
-               {
-                  webcamReader.create();
-                  baseUI.getImGuiPanelManager().addPanel(webcamReader.getSwapCVPanel().getImagePanel());
-
-                  calibrationPatternDetectionUI = new RDXCalibrationPatternDetectionUI();
-                  baseUI.getImGuiPanelManager().addPanel(calibrationPatternDetectionUI.getPanel());
-                  baseUI.getLayoutManager().reloadLayout();
-
-                  ThreadTools.startAsDaemon(() ->
-                  {
-                     while (running)
-                     {
-                        webcamReader.readWebcamImage();
-                        calibrationPatternDetectionUI.copyInSourceBGRImage(webcamReader.getBGRImage());
-                     }
-                  }, "CameraRead");
-               }
-
-               calibrationPatternDetectionUI.update();
-               webcamReader.updateOnUIThread();
-            }
+            calibrationPatternDetectionUI.update();
+            webcamReader.updateOnUIThread();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();

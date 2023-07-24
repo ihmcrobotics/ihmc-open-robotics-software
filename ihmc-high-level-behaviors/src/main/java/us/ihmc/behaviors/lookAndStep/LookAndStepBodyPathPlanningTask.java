@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import ihmc_common_msgs.msg.dds.PoseListMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -27,6 +28,8 @@ import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -69,7 +72,7 @@ public class LookAndStepBodyPathPlanningTask
    protected YoDouble bodyPathPlanningDuration;
 
    protected PlanarRegionsList mapRegions;
-   protected HeightMapMessage heightMap;
+   protected HeightMapData heightMap;
    protected Pose3DReadOnly goal;
    protected ROS2SyncedRobotModel syncedRobot;
    protected boolean doBodyPathPlan;
@@ -80,7 +83,7 @@ public class LookAndStepBodyPathPlanningTask
    {
       private ResettableExceptionHandlingExecutorService executor;
       private final TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
-      private final TypedInput<HeightMapMessage> heightMapInput = new TypedInput<>();
+      private final TypedInput<HeightMapData> heightMapInput = new TypedInput<>();
       private final TypedInput<Pose3DReadOnly> goalInput = new TypedInput<>();
       private final Timer mapRegionsExpirationTimer = new Timer();
       private final Timer heightMapExpirationTimer = new Timer();
@@ -141,7 +144,11 @@ public class LookAndStepBodyPathPlanningTask
 //         }
          suppressor.addCondition("No goal specified",
                                  () -> !(goal != null && !goal.containsNaN()),
-                                 () -> uiPublisher.publishToUI(PlanarRegionsForUI, mapRegions));
+                                 () ->
+                                 {
+                                    if (mapRegions != null)
+                                       helper.publish(PLANAR_REGIONS_FOR_UI, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(mapRegions));
+                                 });
 //         suppressor.addCondition(() -> "Regions expired. haveReceivedAny: " + mapRegionsReceptionTimerSnapshot.hasBeenSet()
 //                                       + " timeSinceLastUpdate: " + mapRegionsReceptionTimerSnapshot.getTimePassedSinceReset(),
 //                                 () -> mapRegionsReceptionTimerSnapshot.isExpired());
@@ -164,7 +171,7 @@ public class LookAndStepBodyPathPlanningTask
 
       public void acceptHeightMap(HeightMapMessage heightMapMessage)
       {
-         heightMapInput.set(heightMapMessage);
+         heightMapInput.set(HeightMapMessageTools.unpackMessage(heightMapMessage));
          heightMapExpirationTimer.reset();
       }
 
@@ -239,7 +246,7 @@ public class LookAndStepBodyPathPlanningTask
       {
          if (mapRegions != null)
          {
-            uiPublisher.publishToUI(PlanarRegionsForUI, mapRegions);
+            helper.publish(PLANAR_REGIONS_FOR_UI, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(mapRegions));
             result = performTaskWithVisibilityGraphPlanner();
          }
          else
@@ -264,11 +271,13 @@ public class LookAndStepBodyPathPlanningTask
 
       if (result.getRight() != null)
       {
+         PoseListMessage bodyPathPlanForReviewMessage = new PoseListMessage();
          for (Pose3DReadOnly poseWaypoint : result.getRight())
          {
             bodyPathPlanForReview.add(new Pose3D(poseWaypoint));
+            bodyPathPlanForReviewMessage.getPoses().add().set(poseWaypoint);
          }
-         uiPublisher.publishToUI(BodyPathPlanForUI, bodyPathPlanForReview);
+         helper.publish(BODY_PATH_PLAN_FOR_UI, bodyPathPlanForReviewMessage);
       }
 
       if (bodyPathPlanForReview.size() >= 2)
@@ -381,7 +390,7 @@ public class LookAndStepBodyPathPlanningTask
       footstepPlannerRequest.setTimeout(10.0);
 
 //      heightMapMessage.setEstimatedGroundHeight(-1.0);
-      footstepPlannerRequest.setHeightMapMessage(heightMap);
+      footstepPlannerRequest.setHeightMapData(heightMap);
       footstepPlannerRequest.setPlanBodyPath(true);
       footstepPlannerRequest.setPlanFootsteps(false);
       footstepPlanningModule.handleRequest(footstepPlannerRequest);

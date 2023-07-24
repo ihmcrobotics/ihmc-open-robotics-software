@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class GoHomeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.GoHomeMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::GoHomeMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "2b36a536b555a13d4d74d286d92ffabc5bc58fe45b2f8c5b14c28fdbd4937453";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

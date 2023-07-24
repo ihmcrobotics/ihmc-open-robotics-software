@@ -63,20 +63,9 @@ public class PlanarRegionTestTools
       {
          ConvexPolygon2D expectedConvexPolygon = expected.getConvexPolygon(i);
          ConvexPolygon2D actualConvexPolygon = actual.getConvexPolygon(i);
+
          EuclidCoreTestTools.assertGeometricallyEquals(expectedConvexPolygon, actualConvexPolygon, epsilon);
       }
-   }
-
-   public PlanarRegion getTestRegion()
-   {
-      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
-      convexPolygon.addVertex(-0.1, 0.1);
-      convexPolygon.addVertex(0.1, 0.1);
-      convexPolygon.addVertex(0.1, -0.1);
-      convexPolygon.addVertex(-0.1, -0.1);
-      convexPolygon.update();
-
-      return new PlanarRegion(new RigidBodyTransform(new Quaternion(0.0, -Math.PI / 2, 0.0), new Point3D(1.0, 0.0, 0.0)), convexPolygon);
    }
 }
 

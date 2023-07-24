@@ -11,8 +11,8 @@ import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
-import us.ihmc.perception.OpenCLFloatBuffer;
-import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.opencl.OpenCLFloatBuffer;
+import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -175,9 +175,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
 
          ousterFisheyeKernel.getOusterToWorldTransformToPack().set(depthChannel.getRotationMatrixToWorld(), depthChannel.getTranslationToWorld());
          ousterFisheyeKernel.getOusterToFisheyeTransformToPack().set(colorChannel.getRotationMatrixToWorld(), colorChannel.getTranslationToWorld());
-         ousterFisheyeKernel.setInstrinsicParameters(depthChannel.getOusterPixelShiftsBuffer(),
-                                                     depthChannel.getOusterBeamAltitudeAnglesBuffer(),
-                                                     depthChannel.getOusterBeamAzimuthAnglesBuffer());
+         ousterFisheyeKernel.setInstrinsicParameters(depthChannel.getOusterBeamAltitudeAnglesBuffer(), depthChannel.getOusterBeamAzimuthAnglesBuffer());
          ousterFisheyeKernel.runKernel(0.0f,
                                        pointSize.get(),
                                        usingColor && useSensorColor.get(),

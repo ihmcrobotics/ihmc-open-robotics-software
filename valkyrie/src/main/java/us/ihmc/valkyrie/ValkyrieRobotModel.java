@@ -26,7 +26,7 @@ import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -108,6 +108,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private WallTimeBasedROSClockCalculator rosClockCalculator;
    private RobotInitialSetup<HumanoidFloatingRootJointRobot> valkyrieInitialSetup;
    private StepReachabilityData stepReachabilityData;
+   private RobotCollisionModel kinematicsCollisionModel;
 
    private SimulationLowLevelControllerFactory simulationLowLevelControllerFactory;
 
@@ -134,6 +135,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
       setModelMassScale(0.925170);
    }
 
+   @Override
    public ValkyrieRobotVersion getRobotVersion()
    {
       return robotVersion;
@@ -415,6 +417,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
+   public FullHumanoidRobotModel createFullRobotModel(boolean enforceUniqueReferenceFrames)
+   {
+      return new FullHumanoidRobotModelWrapper(getRobotDefinition(), getJointMap(), enforceUniqueReferenceFrames);
+   }
+
+   @Override
    public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes, boolean enableJointDamping)
    {
       boolean enableTorqueVelocityLimits = false;
@@ -664,6 +672,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.simulationLowLevelControllerFactory = simulationLowLevelControllerFactory;
    }
 
+   public void setHumanoidRobotKinematicsCollisionModel(RobotCollisionModel kinematicsCollisionModel)
+   {
+      this.kinematicsCollisionModel = kinematicsCollisionModel;
+   }
+
    @Override
    public WalkingControllerParameters getWalkingControllerParameters()
    {
@@ -691,7 +704,9 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public RobotCollisionModel getHumanoidRobotKinematicsCollisionModel()
    {
-      return new ValkyrieKinematicsCollisionModel(getJointMap());
+      if (kinematicsCollisionModel == null)
+         kinematicsCollisionModel = new ValkyrieKinematicsCollisionModel(getJointMap());
+      return kinematicsCollisionModel;
    }
 
    @Override
@@ -699,7 +714,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       if (robotVersion == ValkyrieRobotVersion.ARM_MASS_SIM)
       {
-         ValkyrieArmMassSimCollisionModel collisionModel = new ValkyrieArmMassSimCollisionModel(getJointMap(), true);
+         ValkyrieArmMassSimCollisionModel collisionModel = new ValkyrieArmMassSimCollisionModel(getJointMap(), getContactPointParameters(), true);
          collisionModel.setCollidableHelper(helper, robotCollisionMask, environmentCollisionMasks);
          return collisionModel;
       }

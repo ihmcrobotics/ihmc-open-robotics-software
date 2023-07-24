@@ -137,7 +137,7 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
 
       for (ImGuiStoredPropertySetWidget widget : imGuiWidgetRenderers)
       {
-         widget.render();
+         widget.renderImGuiWidget();
       }
 
       boolean returnAnyChanged = anyParameterChanged;
@@ -162,6 +162,11 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
    public ImGuiStoredPropertySetDoubleWidget createDoubleSlider(DoubleStoredPropertyKey key, double min, double max)
    {
       return new ImGuiStoredPropertySetDoubleWidget(storedPropertySet, key, min, max, onParametersUpdatedCallback);
+   }
+
+   public ImGuiStoredPropertySetBooleanWidget createBooleanCheckbox(BooleanStoredPropertyKey key)
+   {
+      return new ImGuiStoredPropertySetBooleanWidget(storedPropertySet, key, onParametersUpdatedCallback);
    }
 
    private void onParametersUpdatedCallbackAndMore()

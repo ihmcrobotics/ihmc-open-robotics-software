@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class ClearDelayQueueMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ClearDelayQueueMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::ClearDelayQueueMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "a6766df5dc9d2a1de8975947e742fcbefdf3e606c21d7f81288a2c36761882d7";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

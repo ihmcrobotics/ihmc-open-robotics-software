@@ -1,0 +1,24 @@
+#ifndef __behavior_msgs__msg__MinimalFootstepListMessage__idl__
+#define __behavior_msgs__msg__MinimalFootstepListMessage__idl__
+
+#include "behavior_msgs/msg/./MinimalFootstepMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::MinimalFootstepListMessage_")
+      struct MinimalFootstepListMessage
+      {
+        /**
+         * List of minimal footsteps
+         */
+        sequence<behavior_msgs::msg::dds::MinimalFootstepMessage, 200> minimal_footsteps;
+      };
+    };
+  };
+};
+
+#endif

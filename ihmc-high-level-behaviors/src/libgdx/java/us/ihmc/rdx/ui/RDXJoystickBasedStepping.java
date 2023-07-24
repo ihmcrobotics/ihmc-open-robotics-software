@@ -22,7 +22,6 @@ import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -166,7 +165,7 @@ public class RDXJoystickBasedStepping
       {
          userNotClickingAnImGuiPanel = true;
          for (RobotSide side : RobotSide.values)
-            userNotClickingAnImGuiPanel =  userNotClickingAnImGuiPanel && context.getSelectedPick().get(side) == null;
+            userNotClickingAnImGuiPanel =  userNotClickingAnImGuiPanel && context.getController(side).getSelectedPick() == null;
       });
    }
 
@@ -334,14 +333,15 @@ public class RDXJoystickBasedStepping
       footstepPlanGraphic.getRenderables(renderables, pool);
    }
 
-   private boolean adjustFootstep(FramePose3DReadOnly stanceFootPose, FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedFootstep)
+   private boolean adjustFootstep(FramePose3DReadOnly stanceFootPose, FramePose2DReadOnly footstepPose, RobotSide footSide, FootstepDataMessage adjustedFootstep)
    {
       FramePose3D adjustedBasedOnStanceFoot = new FramePose3D();
       adjustedBasedOnStanceFoot.getPosition().set(footstepPose.getPosition());
       adjustedBasedOnStanceFoot.setZ(stanceFootPose.getZ());
       adjustedBasedOnStanceFoot.getOrientation().set(footstepPose.getOrientation());
       
-      adjustedFootstep.set(adjustedBasedOnStanceFoot);
+      adjustedFootstep.getLocation().set(adjustedBasedOnStanceFoot.getPosition());
+      adjustedFootstep.getOrientation().set(adjustedBasedOnStanceFoot.getOrientation());
       return true;
 //      return adjustedBasedOnStanceFoot;
    }

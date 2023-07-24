@@ -20,7 +20,7 @@ public class RDXRobotLowLevelMessenger
    {
       this.communicationHelper = communicationHelper;
       this.teleoperationParameters = teleoperationParameters;
-      robotLowLevelMessenger = communicationHelper.newRobotLowLevelMessenger();
+      robotLowLevelMessenger = communicationHelper.getOrCreateRobotLowLevelMessenger();
 
       if (robotLowLevelMessenger == null)
       {
@@ -63,20 +63,7 @@ public class RDXRobotLowLevelMessenger
          sendStandRequest();
       }
       ImGui.sameLine();
-      if (ImGui.button(labels.get("Abort")))
-      {
-         robotLowLevelMessenger.sendAbortWalkingRequest();
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Pause")))
-      {
-         robotLowLevelMessenger.sendPauseWalkingRequest();
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Continue")))
-      {
-         robotLowLevelMessenger.sendContinueWalkingRequest();
-      }
+
       if (ImGui.button(labels.get("Freeze")))
       {
          robotLowLevelMessenger.sendFreezeRequest();
