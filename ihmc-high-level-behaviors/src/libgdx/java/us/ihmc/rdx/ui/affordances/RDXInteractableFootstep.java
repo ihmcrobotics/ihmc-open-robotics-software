@@ -285,8 +285,11 @@ public class RDXInteractableFootstep
                }
             }
             vrPickResult.get(side).addPickCollision(closestCollisionDistance);
-            controller.addPickResult(vrPickResult.get(side));
 
+            if (vrPickResult.get(side).getPickCollisionWasAddedSinceReset())
+            {
+               controller.addPickResult(vrPickResult.get(side));
+            }
             vrPickPose.setIncludingFrame(controller.getPickPointPose());
             vrPickPose.changeFrame(ReferenceFrame.getWorldFrame());
             isIntersectingVR.put(side, mouseCollidable.pointCollide(vrPickPose.getPosition()));
