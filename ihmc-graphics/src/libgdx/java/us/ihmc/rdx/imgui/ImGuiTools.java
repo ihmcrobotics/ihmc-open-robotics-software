@@ -77,8 +77,6 @@ public class ImGuiTools
       ImGuiContext contextHolder = ImGui.getCurrentContext();
       contextHolder.ptr = context;
       ImGui.setCurrentContext(contextHolder);
-
-      ImGui.getIO().addConfigFlags(ImGuiConfigFlags.DockingEnable);
    }
 
    public static void parsePrimaryWindowSizeFromSettingsINI(String settingsINIAsString, ImGuiSize sizeToPack)
