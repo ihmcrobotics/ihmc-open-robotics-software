@@ -450,7 +450,7 @@ public class CaptureRegionSafetyHeuristicsTest
       double swingTimeRemaining = -0.02169507837222262;
       double omega0 = 3.2;
       double feedbackAlpha = 0.9608231064369759;
-n
+
       OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicsStepRange,
                                                                                                   ankleZUpFrames, registry, null);
       CaptureRegionSafetyHeuristics heuristics = new CaptureRegionSafetyHeuristics(() -> kinematicsStepRange, registry);
