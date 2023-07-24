@@ -70,7 +70,6 @@ public abstract class StepAdjustmentParameters
     */
    public double getCoPDistanceFromOutsideOfFoot()
    {
-      RigidBodyTransformReadOnly
       return 0.03;
    }
 
