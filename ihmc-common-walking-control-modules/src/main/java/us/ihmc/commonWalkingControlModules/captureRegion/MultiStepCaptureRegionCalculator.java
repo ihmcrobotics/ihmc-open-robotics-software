@@ -43,7 +43,7 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
 
    private final FrameConvexPolygon2D multiStepRegion = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D regionToExpand = new FrameConvexPolygon2D();
-   private final YoFrameConvexPolygon2D yoMultiStepRegion = new YoFrameConvexPolygon2D("multiStepCaptureRegion", ReferenceFrame.getWorldFrame(), 100, registry);
+   private final YoFrameConvexPolygon2D yoMultiStepRegion = new YoFrameConvexPolygon2D("multiStepCaptureRegion", ReferenceFrame.getWorldFrame(), 50, registry);
 
    private final BooleanProvider useCrossOverSteps;
 
@@ -139,20 +139,22 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
       regionToExpand.setIncludingFrame(oneStepCaptureRegion);
       multiStepRegion.setReferenceFrame(oneStepCaptureRegion.getReferenceFrame());
 
+      // perform the expansion to get the second step capture region.
       if (stepsConsideringForRecovery.getIntegerValue() > 0)
       {
          expandCaptureRegion(regionToExpand,
                              reachabilityPolygonsWithOrigin.get(currentStanceSide.getOppositeSide()),
                              multiStepRegion,
                              oppositeSupportMultiplier);
-         regionToExpand.set(multiStepRegion);
       }
       else
       {
          multiStepRegion.set(regionToExpand);
       }
+      // perform an additional expansion to get the three step (or higher) capture region.
       if (stepsConsideringForRecovery.getIntegerValue() > 1)
       {
+         regionToExpand.set(multiStepRegion);
          expandCaptureRegion(regionToExpand, reachabilityPolygonsWithOrigin.get(currentStanceSide), multiStepRegion, currentSupportMultiplier);
       }
 
@@ -288,6 +290,7 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
       {
          Point2DReadOnly succeedingPointB = reachabilityRegion.getNextVertex(i);
 
+         // Filter out the point if it woudl end up being an interior point.
          if (!isRayPointingToTheInside(precedingPointB, vertex, succeedingPointB, otherEnd.getX() - pointToExpand.getX(), otherEnd.getY() - pointToExpand.getY()))
          {
             FramePoint2DBasics expansionVector = expansionPointsToPack.add();
@@ -321,6 +324,7 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
       {
          Point2DReadOnly succeedingPointB = reachabilityRegion.getNextVertex(i);
 
+         // Filter this reachability vertex if it would end up resulting in an interior point of the expanded region.
          if (isPointASharedNonIntersectingVertex(precedingPoint, cornerToExpand, succeedingPoint, precedingPointB, vertex, succeedingPointB))
          {
             FramePoint2DBasics expansionVector = expansionPointsToPack.add();
