@@ -517,6 +517,8 @@ public class RDXBaseUI
       imGuiWindowAndDockSystem.dispose();
       vrManager.dispose();
       primaryScene.dispose();
+
+      instance = null;
    }
 
    public void add3DPanel(RDX3DPanel panel3D)
