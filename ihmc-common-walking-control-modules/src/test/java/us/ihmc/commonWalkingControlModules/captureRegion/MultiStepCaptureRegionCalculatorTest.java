@@ -58,7 +58,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public class MultiStepCaptureRegionCalculatorTest
 {
-   private static final boolean PLOT_RESULTS = true;
+   private static final boolean PLOT_RESULTS = false;
    private static final boolean WAIT_FOR_BUTTON_PUSH = true;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -142,7 +142,7 @@ public class MultiStepCaptureRegionCalculatorTest
 
          captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
 
-         //         testTheRegions(multiStepRegionCalculator, captureRegion, swingDuration, omega0, kinematicStepRange, swingSide.getOppositeSide());
+         testTheRegions(multiStepRegionCalculator, captureRegion, swingDuration, omega0, kinematicStepRange, swingSide.getOppositeSide());
 
          if (PLOT_RESULTS)
          {
@@ -295,7 +295,7 @@ public class MultiStepCaptureRegionCalculatorTest
 
          captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
 
-         //         testTheRegions(multiStepRegionCalculator, captureRegion, swingDuration, omega0, kinematicStepRange, swingSide.getOppositeSide());
+         testTheRegions(multiStepRegionCalculator, captureRegion, swingDuration, omega0,  1.5 *kinematicStepRange, swingSide.getOppositeSide());
 
          if (PLOT_RESULTS)
          {
@@ -440,7 +440,7 @@ public class MultiStepCaptureRegionCalculatorTest
          captureRegion.addVertex(2.3916474477638046, 0.5996120819012615);
          captureRegion.update();
 
-         //         testTheRegions(multiStepRegionCalculator, captureRegion, swingDuration, omega0, kinematicStepRange, swingSide.getOppositeSide());
+         testTheRegions(multiStepRegionCalculator, captureRegion, swingDuration, omega0, 1.5 * forwardLimit, swingSide.getOppositeSide());
 
          if (PLOT_RESULTS)
          {
@@ -585,7 +585,7 @@ public class MultiStepCaptureRegionCalculatorTest
          captureRegion.addVertex(2.2106156464723465, 0.7705540580420254);
          captureRegion.update();
 
-         //         testTheRegions(multiStepRegionCalculator, captureRegion, swingDuration, omega0, kinematicStepRange, swingSide.getOppositeSide());
+         testTheRegions(multiStepRegionCalculator, captureRegion, swingDuration, omega0, 1.5 * forwardLimit, swingSide.getOppositeSide());
 
          if (PLOT_RESULTS)
          {

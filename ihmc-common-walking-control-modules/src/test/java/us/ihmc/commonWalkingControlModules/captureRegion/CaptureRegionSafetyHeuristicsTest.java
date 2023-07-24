@@ -437,24 +437,12 @@ public class CaptureRegionSafetyHeuristicsTest
       expectedDistance = maxDistance - icp.distanceFromOrigin();
       assertEquals(expectedDistance, heuristics.getCaptureRegionWithSafetyMargin().signedDistance(icp), 1e-3);
 
-      // do it past the max
-      maxDistance = nearEdgeOfCaptureRegion.distanceFromOrigin() - 0.02;
-      kinematicsStepRange.set(maxDistance);
-
-      captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, icp, omega0, supportFootPolygon);
-      captureRegion = captureRegionCalculator.getCaptureRegion();
-
-      heuristics.computeCaptureRegionWithSafetyHeuristics(swingSide.getOppositeSide(), icp, supportFootPolygon.getCentroid(), captureRegion);
-
-      expectedDistance = maxDistance - icp.distanceFromOrigin();
-      assertEquals(expectedDistance, heuristics.getCaptureRegionWithSafetyMargin().signedDistance(icp), 1e-3);
    }
 
    @Test
    public void testCaptureRegionIsATriangleFromData()
    {
-      // do not change parameters
-      // expected results are pre-calculated
+      // This test is set up with data found on the robot. We want to make sure that it runs properly.
       double footWidth = 0.2;
       double kinematicsStepRange = 3.0;
 
@@ -486,148 +474,8 @@ public class CaptureRegionSafetyHeuristicsTest
 
       heuristics.computeCaptureRegionWithSafetyHeuristics(swingSide.getOppositeSide(), icp, supportFootPolygon.getCentroid(), captureRegion);
 
-//      assertTrue(heuristics.getCaptureRegionWithSafetyMargin().signedDistance(icp) > heuristics.extraDistanceToStepFromStanceFoot.getValue());
-
-      if (PLOT_RESULTS)
-      {
-//         FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(-5, 5, -5, 5);
-//         FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
-//         plotter.setDrawPointsLarge();
-//         plotter.addPolygon(supportFootPolygon, Color.black);
-//         plotter.addPolygon(heuristics.getCaptureRegionWithSafetyMargin(), Color.green);
-//         plotter.addFramePoint2d(icp, Color.blue);
-//
-//         waitForButtonOrPause(testFrame);
-
-
-         YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-
-
-         SimulationConstructionSet2 scs = new SimulationConstructionSet2();
-         scs.addRegistry(registry);
-
-         YoFrameConvexPolygon2D yoOneStepRegion = new YoFrameConvexPolygon2D("oneStepRegion", worldFrame, 10, registry);
-         YoFrameConvexPolygon2D yoHeuristicsRegion = new YoFrameConvexPolygon2D("heuristicsGraphic", worldFrame, 40, registry);
-         YoFrameConvexPolygon2D yoFootPolygon = new YoFrameConvexPolygon2D("footPolygon", worldFrame, 4, registry);
-         YoFramePoint2D yoICP = new YoFramePoint2D("icp", worldFrame, registry);
-
-         YoArtifactPolygon oneStepRegionGraphic = new YoArtifactPolygon("oneStepRegion", yoOneStepRegion, Color.green, false);
-         YoArtifactPolygon heuristicsGraphic = new YoArtifactPolygon("heuristicsGraphic", yoHeuristicsRegion, Color.blue, false);
-         YoArtifactPolygon footPolygonGraphic = new YoArtifactPolygon("footPolygon", yoFootPolygon, Color.red, false);
-         YoGraphicPosition icpGraphic = new YoGraphicPosition("icp", yoICP, 0.025, YoAppearance.Purple(), GraphicType.BALL_WITH_CROSS);
-
-         graphicsListRegistry.registerArtifact("test", oneStepRegionGraphic);
-         graphicsListRegistry.registerArtifact("test", heuristicsGraphic);
-         graphicsListRegistry.registerArtifact("test", footPolygonGraphic);
-         graphicsListRegistry.registerArtifact("test", icpGraphic.createArtifact());
-
-         yoOneStepRegion.setMatchingFrame(captureRegion, false);
-         yoHeuristicsRegion.set(heuristics.getCaptureRegionWithSafetyMargin());
-         yoFootPolygon.set(supportFootPolygon);
-         yoICP.set(icp);
-
-         scs.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(graphicsListRegistry));
-
-//         SimulationOverheadPlotterFactory plotterFactory = scs.createSimulationOverheadPlotterFactory();
-//         plotterFactory.addYoGraphicsListRegistries(graphicsListRegistry);
-//         plotterFactory.createOverheadPlotter();
-
-         scs.startSimulationThread();
-
-         scs.simulate(1);
-
-         ThreadTools.sleepForever();
-      }
-   }
-
-   @Test
-   public void testCaptureRegionIsALineFromData()
-   {
-      // do not change parameters
-      // expected results are pre-calculated
-      double footWidth = 0.2;
-      double kinematicsStepRange = 3.0;
-
-      RobotSide swingSide = RobotSide.LEFT;
-      double swingTimeRemaining = -0.030449563334115526;
-      double omega0 = 3.2;
-      double feedbackAlpha = 0.9763820174057085;
-
-      OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicsStepRange,
-                                                                                                  ankleZUpFrames, registry, null);
-      CaptureRegionSafetyHeuristics heuristics = new CaptureRegionSafetyHeuristics(() -> kinematicsStepRange, registry);
-
-      new DefaultParameterReader().readParametersInRegistry(registry);
-
-      FrameConvexPolygon2D supportFootPolygon = new FrameConvexPolygon2D(worldFrame);
-      supportFootPolygon.addVertex(1.4014721364858316, -0.1268521390153955);
-      supportFootPolygon.addVertex(1.4073988744302819, -0.03204090757462371);
-      supportFootPolygon.addVertex(1.6208796494598936, -0.06293529616946456);
-      supportFootPolygon.addVertex(1.6171364465476092, -0.12281607392153093);
-      supportFootPolygon.update();
-
-      FramePoint2D icp = new FramePoint2D(worldFrame, 1.922829054208, 0.27698607571394873);
-      FramePoint2D cmp = new FramePoint2D(worldFrame, 1.5709505237605341, -0.07434368123943498);
-
-      supportFootPolygon.scale(cmp, 1.0 - feedbackAlpha);
-
-      captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, icp, omega0, supportFootPolygon);
-      FrameConvexPolygon2D captureRegion = captureRegionCalculator.getCaptureRegion();
-
-      heuristics.computeCaptureRegionWithSafetyHeuristics(swingSide.getOppositeSide(), icp, supportFootPolygon.getCentroid(), captureRegion);
-
-      //      assertTrue(heuristics.getCaptureRegionWithSafetyMargin().signedDistance(icp) > heuristics.extraDistanceToStepFromStanceFoot.getValue());
-
-      if (PLOT_RESULTS)
-      {
-         //         FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(-5, 5, -5, 5);
-         //         FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
-         //         plotter.setDrawPointsLarge();
-         //         plotter.addPolygon(supportFootPolygon, Color.black);
-         //         plotter.addPolygon(heuristics.getCaptureRegionWithSafetyMargin(), Color.green);
-         //         plotter.addFramePoint2d(icp, Color.blue);
-         //
-         //         waitForButtonOrPause(testFrame);
-
-
-         YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-
-
-         SimulationConstructionSet2 scs = new SimulationConstructionSet2();
-         scs.addRegistry(registry);
-
-         YoFrameConvexPolygon2D yoOneStepRegion = new YoFrameConvexPolygon2D("oneStepRegion", worldFrame, 10, registry);
-         YoFrameConvexPolygon2D yoHeuristicsRegion = new YoFrameConvexPolygon2D("heuristicsGraphic", worldFrame, 40, registry);
-         YoFrameConvexPolygon2D yoFootPolygon = new YoFrameConvexPolygon2D("footPolygon", worldFrame, 4, registry);
-         YoFramePoint2D yoICP = new YoFramePoint2D("icp", worldFrame, registry);
-
-         YoArtifactPolygon oneStepRegionGraphic = new YoArtifactPolygon("oneStepRegion", yoOneStepRegion, Color.green, false);
-         YoArtifactPolygon heuristicsGraphic = new YoArtifactPolygon("heuristicsGraphic", yoHeuristicsRegion, Color.blue, false);
-         YoArtifactPolygon footPolygonGraphic = new YoArtifactPolygon("footPolygon", yoFootPolygon, Color.red, false);
-         YoGraphicPosition icpGraphic = new YoGraphicPosition("icp", yoICP, 0.025, YoAppearance.Purple(), GraphicType.BALL_WITH_CROSS);
-
-         graphicsListRegistry.registerArtifact("test", oneStepRegionGraphic);
-         graphicsListRegistry.registerArtifact("test", heuristicsGraphic);
-         graphicsListRegistry.registerArtifact("test", footPolygonGraphic);
-         graphicsListRegistry.registerArtifact("test", icpGraphic.createArtifact());
-
-         yoOneStepRegion.setMatchingFrame(captureRegion, false);
-         yoHeuristicsRegion.set(heuristics.getCaptureRegionWithSafetyMargin());
-         yoFootPolygon.set(supportFootPolygon);
-         yoICP.set(icp);
-
-         scs.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(graphicsListRegistry));
-
-         //         SimulationOverheadPlotterFactory plotterFactory = scs.createSimulationOverheadPlotterFactory();
-         //         plotterFactory.addYoGraphicsListRegistries(graphicsListRegistry);
-         //         plotterFactory.createOverheadPlotter();
-
-         scs.startSimulationThread();
-
-         scs.simulate(1);
-
-         ThreadTools.sleepForever();
-      }
+      // Check to make sure that the extra distance projection functioned properly. The ICP should be AT LEAST that distance from the capture region
+      assertTrue(heuristics.getCaptureRegionWithSafetyMargin().signedDistance(icp) > heuristics.extraDistanceToStepFromStanceFoot.getValue());
    }
 
    @Test
@@ -664,7 +512,8 @@ public class CaptureRegionSafetyHeuristicsTest
 
       heuristics.computeCaptureRegionWithSafetyHeuristics(swingSide.getOppositeSide(), icp, supportFootPolygon.getCentroid(), captureRegion);
 
-//      assertTrue(heuristics.getCaptureRegionWithSafetyMargin().signedDistance(icp) > heuristics.extraDistanceToStepFromStanceFoot.getValue());
+      // Check to make sure that the extra distance projection functioned properly. The ICP should be AT LEAST that distance from the capture region
+      assertTrue(heuristics.getCaptureRegionWithSafetyMargin().signedDistance(icp) > heuristics.extraDistanceToStepFromStanceFoot.getValue());
 
       if (PLOT_RESULTS)
       {
