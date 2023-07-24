@@ -4,6 +4,8 @@ import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiKey;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.internal.ImGui;
+import imgui.type.ImString;
+import us.ihmc.rdx.imgui.ImGuiTools;
 
 import javax.annotation.Nullable;
 import java.util.HashSet;
@@ -20,6 +22,10 @@ public class RDXKeyBindings
    private KeyBindingsSection currentSection;
    private final Set<KeyBindingsSection> sections = new HashSet<>();
 
+   // Search filter
+   private final ImString filter = new ImString();
+   private boolean filterInputActive = false;
+
    private static class KeyBindingsSection
    {
       private final String description;
@@ -31,18 +37,23 @@ public class RDXKeyBindings
          this.description = description;
       }
 
-      public void renderSection()
+      public void renderSection(ImString filter)
       {
          for (Map.Entry<String, String> entry : registry.entrySet())
          {
             String function = entry.getKey();
             String key = entry.getValue();
+
+            if (!filter.isEmpty())
+               if (!function.toLowerCase().contains(filter.get()))
+                  continue;
+
             ImGui.tableNextRow();
             ImGui.tableSetColumnIndex(0);
             ImGui.alignTextToFramePadding();
             ImGui.text(function);
             ImGui.tableSetColumnIndex(1);
-            ImGui.text(key);
+            ImGui.button(key, 80, 0);
          }
       }
    }
@@ -75,7 +86,18 @@ public class RDXKeyBindings
 
    public void renderKeyBindingsTable()
    {
-      if (ImGui.isKeyDown(ImGui.getKeyIndex(ImGuiKey.Tab)))
+      // Escape should close the keybindings menu if it's staying active because of the filter input text box being active
+      if (filterInputActive)
+      {
+         if (ImGui.isKeyPressed(ImGui.getKeyIndex(ImGuiKey.Escape)))
+         {
+            filterInputActive = false;
+         }
+      }
+
+      boolean tabKeyIsDown = ImGui.isKeyDown(ImGui.getKeyIndex(ImGuiKey.Tab));
+
+      if (tabKeyIsDown || filterInputActive)
       {
          ImGui.setNextWindowViewport(ImGui.getMainViewport().getID());
          float x = ImGui.getMainViewport().getCenterX() - (WINDOW_WIDTH * 0.5f);
@@ -84,6 +106,29 @@ public class RDXKeyBindings
          ImGui.begin("##keyBindingsWindow", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize);
          ImGui.beginChild("##keyBindingsWindowChild", WINDOW_WIDTH, WINDOW_HEIGHT);
 
+         if (ImGui.beginTable("##keyBindingsSearch", 2))
+         {
+            ImGui.tableNextRow();
+            ImGui.tableSetColumnIndex(0);
+            ImGui.alignTextToFramePadding();
+            ImGui.pushFont(ImGuiTools.getMediumFont());
+            ImGui.text("Key Bindings");
+            ImGui.popFont();
+            ImGui.tableSetColumnIndex(1);
+
+            if (ImGui.inputText("Search", filter))
+            {
+               filterInputActive = true;
+            }
+
+            filterInputActive = ImGui.isItemFocused();
+
+            if (!filterInputActive)
+               filter.set("");
+
+            ImGui.endTable();
+         }
+
          for (KeyBindingsSection section : sections)
          {
             if (ImGui.beginTable("##keyBindingsTable_" + section.description, 2))
@@ -91,7 +136,7 @@ public class RDXKeyBindings
                ImGui.tableSetupColumn(section.description);
                ImGui.tableSetupColumn("Key");
                ImGui.tableHeadersRow();
-               section.renderSection();
+               section.renderSection(filter);
                ImGui.endTable();
             }
          }
