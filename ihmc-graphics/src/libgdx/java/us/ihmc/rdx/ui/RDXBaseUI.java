@@ -118,7 +118,7 @@ public class RDXBaseUI
    private final ImInt libGDXLogLevel = new ImInt(LibGDXTools.toLibGDX(LogTools.getLevel()));
    private final ImDouble imguiFontScale = new ImDouble(1.0);
    private final RDXImGuiLayoutManager layoutManager;
-   private RDXKeyBindings keyBindings;
+   private final RDXKeyBindings keyBindings = new RDXKeyBindings();
    private long renderIndex = 0;
    private double isoZoomOut = 0.7;
    private enum Theme
@@ -195,8 +195,6 @@ public class RDXBaseUI
 
       primary3DPanel = new RDX3DPanel(VIEW_3D_WINDOW_NAME, ANTI_ALIASING, true);
       primary3DPanel.setBackgroundShade((float) view3DBackgroundShade.get());
-
-      this.keyBindings = new RDXKeyBindings();
    }
 
    /**
