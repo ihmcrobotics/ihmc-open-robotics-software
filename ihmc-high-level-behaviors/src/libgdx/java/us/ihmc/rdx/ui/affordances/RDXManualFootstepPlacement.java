@@ -122,18 +122,31 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       {
          vrContext.getController(side).runIfConnected(controller ->
                                                       {
-                                                         InputDigitalActionData aButton = controller.getAButtonActionData();
+                                                         InputDigitalActionData bButton = controller.getBButtonActionData();
                                                          RDXVRDragData aButtonDragData = controller.getAButtonDragData();
                                                          RDXVRDragData bButtonDragData = controller.getBButtonDragData();
 
                                                          if (aButtonDragData.getObjectBeingDragged() != null)
                                                          {
-                                                            if (aButtonDragData.getObjectBeingDragged()
-                                                                               .toString()
-                                                                               .startsWith("us.ihmc.rdx.ui.affordances.RDXInteractableFootstep"))
+                                                            if (side == RobotSide.LEFT)
                                                             {
-                                                               createNewVRFootstep(controller.getPickCollisionPoint(), side);
-                                                               aButtonDragData.setObjectBeingDragged(null);
+                                                               if (aButtonDragData.getObjectBeingDragged()
+                                                                                  .toString()
+                                                                                  .startsWith("us.ihmc.rdx.ui.affordances.RDXInteractableFootstep"))
+                                                               {
+                                                                  footstepPlan.removeLastStep();
+                                                                  aButtonDragData.setObjectBeingDragged(null);
+                                                               }
+                                                            }
+                                                            else if (side == RobotSide.RIGHT)
+                                                            {
+                                                               if (aButtonDragData.getObjectBeingDragged()
+                                                                                  .toString()
+                                                                                  .startsWith("us.ihmc.rdx.ui.affordances.RDXInteractableFootstep"))
+                                                               {
+                                                                  footstepPlan.walkFromSteps();
+                                                                  aButtonDragData.setObjectBeingDragged(null);
+                                                               }
                                                             }
                                                          }
                                                          if (bButtonDragData.getObjectBeingDragged() != null)
@@ -142,14 +155,15 @@ public class RDXManualFootstepPlacement implements RenderableProvider
                                                                                .toString()
                                                                                .startsWith("us.ihmc.rdx.ui.affordances.RDXInteractableFootstep"))
                                                             {
-                                                               footstepPlan.removeLastStep();
+                                                               createNewVRFootstep(controller.getPickCollisionPoint(), side);
+
                                                                bButtonDragData.setObjectBeingDragged(null);
                                                             }
                                                          }
 
                                                          if (footstepPlan.getLastFootstep() == null)
                                                          {
-                                                            if (aButton.bState() && aButton.bChanged())
+                                                            if (bButton.bState() && bButton.bChanged())
                                                             {
                                                                createNewVRFootstep(controller.getPickPointPose().getPosition(), side);
                                                             }
