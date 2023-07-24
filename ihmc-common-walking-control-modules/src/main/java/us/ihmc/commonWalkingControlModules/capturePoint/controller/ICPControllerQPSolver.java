@@ -132,6 +132,7 @@ public class ICPControllerQPSolver
    /** Whether or not to use angular momentum during feedback. This means the CMP will be constrained to being in the support polygon. */
    private final YoBoolean useAngularMomentum;
 
+   private final DMatrixRMaj maxFeedbackTransform = new DMatrixRMaj(2, 2);
    private double maxFeedbackXMagnitude = Double.POSITIVE_INFINITY;
    private double maxFeedbackYMagnitude = Double.POSITIVE_INFINITY;
    private double maximumFeedbackRate = Double.POSITIVE_INFINITY;
@@ -277,11 +278,11 @@ public class ICPControllerQPSolver
    /**
     * Sets the maximum allowable feedback magnitude in X and Y. This defines an inequality constraint on the sum of the feedback terms in the QP.
     */
-   public void setMaximumFeedbackMagnitude(FrameVector2DReadOnly maximumFeedbackMagnitude)
+   public void setMaximumFeedbackMagnitude(DMatrixRMaj maxFeedbackTransform, double maximumFeedbackX, double maximumFeedbackY)
    {
-      maximumFeedbackMagnitude.checkReferenceFrameMatch(worldFrame);
-      this.maxFeedbackXMagnitude = Math.abs(maximumFeedbackMagnitude.getX());
-      this.maxFeedbackYMagnitude = Math.abs(maximumFeedbackMagnitude.getY());
+      this.maxFeedbackTransform.set(maxFeedbackTransform);
+      this.maxFeedbackXMagnitude = Math.abs(maximumFeedbackX);
+      this.maxFeedbackYMagnitude = Math.abs(maximumFeedbackY);
    }
 
    /**
@@ -758,6 +759,7 @@ public class ICPControllerQPSolver
          return;
 
       ICPControllerQPConstraintCalculator.calculateMaxFeedbackMagnitudeConstraint(feedbackLimitConstraint,
+                                                                                  maxFeedbackTransform,
                                                                                   maxFeedbackXMagnitude,
                                                                                   maxFeedbackYMagnitude,
                                                                                   useAngularMomentum.getBooleanValue());
