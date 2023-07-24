@@ -98,7 +98,7 @@ public abstract class StepAdjustmentParameters
        */
       public double getForwardCrossOverClearanceAngle()
       {
-         return Math.toRadians(20.0);
+         return Math.toRadians(35.0);
       }
 
       /**
@@ -115,7 +115,7 @@ public abstract class StepAdjustmentParameters
        */
       public double getBackwardCrossOverClearanceAngle()
       {
-         return Math.toRadians(30.0);
+         return Math.toRadians(45.0);
       }
    }
 }
