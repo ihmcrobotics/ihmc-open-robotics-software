@@ -51,6 +51,12 @@ public class RDXKeyBindings
    {
       if (currentSection != null)
       {
+         for (KeyBindingsSection section : sections)
+         {
+            if (section.description.equals(sectionName))
+               return;
+         }
+
          sections.add(currentSection);
       }
       currentSection = new KeyBindingsSection(sectionName);
@@ -75,22 +81,17 @@ public class RDXKeyBindings
          ImGui.setNextWindowPos(x, y, ImGuiCond.Always);
          ImGui.begin("##keyBindingsWindow", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize);
          ImGui.beginChild("##keyBindingsWindowChild", WINDOW_WIDTH, WINDOW_HEIGHT);
-         if (ImGui.beginTable("keyBindingsTable", 2))
+
+         for (KeyBindingsSection section : sections)
          {
-            ImGui.tableSetupColumn("Function");
-            ImGui.tableSetupColumn("Key");
-            ImGui.tableHeadersRow();
-
-            for (KeyBindingsSection section : sections)
+            if (ImGui.beginTable("##keyBindingsTable_" + section.description, 2))
             {
+               ImGui.tableSetupColumn(section.description);
+               ImGui.tableSetupColumn("Key");
+               ImGui.tableHeadersRow();
                section.renderSection();
-               ImGui.tableSetColumnIndex(0);
-               ImGui.separator();
-               ImGui.tableSetColumnIndex(1);
-               ImGui.separator();
+               ImGui.endTable();
             }
-
-            ImGui.endTable();
          }
 
          ImGui.endChild();
