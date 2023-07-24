@@ -52,10 +52,10 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    public RDXManualFootstepPlacement()
    {
       RDXBaseUI.getInstance().getKeyBindings().nextSection("Footstep placement");
-      RDXBaseUI.getInstance().getKeyBindings().register("3D view - Place left footstep", "R");
-      RDXBaseUI.getInstance().getKeyBindings().register("3D view - Place right footstep", "T");
-      RDXBaseUI.getInstance().getKeyBindings().register("3D view - Undo footstep placement", "Ctrl + Z");
-      RDXBaseUI.getInstance().getKeyBindings().register("3D view - Cancel footstep placement", "Escape");
+      RDXBaseUI.getInstance().getKeyBindings().register("Place left footstep", "R");
+      RDXBaseUI.getInstance().getKeyBindings().register("Place right footstep", "T");
+      RDXBaseUI.getInstance().getKeyBindings().register("Undo footstep placement", "Ctrl + Z");
+      RDXBaseUI.getInstance().getKeyBindings().register("Cancel footstep placement", "Escape");
    }
 
    public void create(ROS2SyncedRobotModel syncedRobot,
