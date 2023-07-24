@@ -83,6 +83,7 @@ public class FootstepSnapAndWigglerTest
       }
       else
       {
+         environmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
          snapAndWiggler = new FootstepSnapAndWiggler(footPolygons, parameters, environmentHandler);
       }
    }
