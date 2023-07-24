@@ -348,8 +348,7 @@ public class ICPControllerQPSolver
       feedbackRateMinimizationTask.reshape(problemSize);
 
       numberOfInequalityConstraints += (Double.isFinite(maximumFeedbackRate) && Double.isFinite(controlDT)) ? 4 : 0;
-      numberOfInequalityConstraints += Double.isFinite(maxFeedbackXMagnitude) ? 2 : 0;
-      numberOfInequalityConstraints += Double.isFinite(maxFeedbackYMagnitude) ? 2 : 0;
+      numberOfInequalityConstraints += Double.isFinite(maxFeedbackXMagnitude) || Double.isFinite(maxFeedbackYMagnitude) ? 4 : 0;
 
       solverInput_Aineq.reshape(numberOfInequalityConstraints, problemSize);
       solverInput_bineq.reshape(numberOfInequalityConstraints, 1);
@@ -549,7 +548,7 @@ public class ICPControllerQPSolver
       if (useAngularMomentum.getBooleanValue() && cmpLocationConstraint.getInequalityConstraintSize() > 0)
          addCMPLocationConstraint();
 
-      if (!previousTickFailed)
+//      if (!previousTickFailed)
       { // this can occasionally over-constrain the problem, so remove it if the previous tick failed.
          addMaximumFeedbackMagnitudeConstraint();
          addMaximumFeedbackRateConstraint();
@@ -805,7 +804,7 @@ public class ICPControllerQPSolver
                                                                              useAngularMomentum.getBooleanValue());
 
       int feedbackRateConstraintSize = feedbackRateLimitConstraint.getNumberOfConstraints();
-      int numberOfVariables = feedbackLimitConstraint.getNumberOfVariables();
+      int numberOfVariables = feedbackRateLimitConstraint.getNumberOfVariables();
 
       MatrixTools.setMatrixBlock(solverInput_Aineq,
                                  currentInequalityConstraintIndex,

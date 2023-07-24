@@ -127,6 +127,118 @@ public class ICPControllerTest
    }
 
    @Test
+   public void testStandingWithDifferentConstraintsOnMaximumFeedbackRate()
+   {
+      YoRegistry registry = new YoRegistry("robert");
+
+      double feedbackGain = 2.0;
+      ICPControlGains testGains = new ICPControlGains();
+      testGains.setKpParallelToMotion(feedbackGain);
+      testGains.setKpOrthogonalToMotion(feedbackGain);
+      TestICPOptimizationParameters optimizationParameters = new TestICPOptimizationParameters()
+      {
+         @Override
+         public ICPControlGainsReadOnly getICPFeedbackGains()
+         {
+            return testGains;
+         }
+
+         @Override
+         public double getFeedbackRateWeight()
+         {
+            return 0.0;
+         }
+      };
+
+      TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
+      SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
+      BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
+      FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
+
+      double controlDT = 0.001;
+      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, null, contactableFeet, controlDT, registry, null);
+      new DefaultParameterReader().readParametersInRegistry(registry);
+
+      double omega = walkingControllerParameters.getOmega0();
+
+      FramePoint2D desiredICP = new FramePoint2D(worldFrame, 0.0, 0.0);
+      FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.0, 0.0);
+      FrameVector2D desiredICPVelocity = new FrameVector2D();
+
+      desiredICPVelocity.set(desiredICP);
+      desiredICPVelocity.sub(perfectCMP);
+      desiredICPVelocity.scale(omega);
+
+      FrameVector2D icpError = new FrameVector2D(worldFrame, 0.02, 0.02);
+      FramePoint2D currentICP = new FramePoint2D();
+      currentICP.add(desiredICP, icpError);
+      FramePoint2D currentCoMPosition = new FramePoint2D(currentICP);
+
+      // do an initial test to initialize the controller.
+      FramePoint2D expectedCMP = new FramePoint2D();
+      expectedCMP.set(icpError);
+      expectedCMP.scale(1.0 + feedbackGain);
+      expectedCMP.add(perfectCMP);
+
+      controller.initialize();
+      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, new FramePoint2D(), perfectCMP, currentICP, currentCoMPosition, omega);
+
+      EuclidCoreTestTools.assertEquals(expectedCMP, controller.getDesiredCMP(), epsilon);
+
+      // ok, so now we're going to set the feedback max values. It should clamp to this. By having the error in the same direction, there should be little
+      // Rate regularization
+      double maxRate = 0.05;
+      ((YoDouble) registry.findVariable("feedbackPartMaxRate")).set(maxRate);
+
+      icpError = new FrameVector2D(worldFrame, -0.03, -0.03);
+      currentICP = new FramePoint2D();
+      currentICP.add(desiredICP, icpError);
+      currentCoMPosition = new FramePoint2D(currentICP);
+
+      FramePoint2D unclampedCMP = new FramePoint2D();
+      unclampedCMP.set(icpError);
+      unclampedCMP.scale(1.0 + feedbackGain);
+      unclampedCMP.add(perfectCMP);
+
+      FrameVector2D delta = new FrameVector2D();
+      delta.sub(unclampedCMP, expectedCMP);
+      delta.clipToMaxNorm(maxRate * controlDT);
+
+      FramePoint2D expectedClampedCMP = new FramePoint2D();
+
+      expectedClampedCMP.set(expectedCMP);
+      expectedClampedCMP.add(delta);
+
+      controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, new FramePoint2D(), perfectCMP, currentICP, currentCoMPosition, omega);
+
+      EuclidCoreTestTools.assertEquals(expectedClampedCMP, controller.getDesiredCMP(), epsilon);
+
+      // Add a bunch of random tests that continue to move the desired CMP around, but make sure to clamp it every time.
+      Random random = new Random(1738L);
+      for (int i = 0; i < 10; i++)
+      {
+         icpError = EuclidFrameRandomTools.nextFrameVector2D(random, worldFrame, new Point2D(0.05, 0.05));
+         currentICP = new FramePoint2D();
+         currentICP.add(desiredICP, icpError);
+         currentCoMPosition = new FramePoint2D(currentICP);
+
+         unclampedCMP = new FramePoint2D();
+         unclampedCMP.set(icpError);
+         unclampedCMP.scale(1.0 + feedbackGain);
+         unclampedCMP.add(perfectCMP);
+
+         delta.sub(unclampedCMP, expectedClampedCMP);
+         delta.clipToMaxNorm(maxRate * controlDT);
+
+         expectedClampedCMP.add(delta);
+
+         controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, new FramePoint2D(), perfectCMP, currentICP, currentCoMPosition, omega);
+
+         EuclidCoreTestTools.assertEquals("iter " + i + " failed", expectedClampedCMP, controller.getDesiredCMP(), epsilon);
+      }
+   }
+
+   @Test
    public void testStandingWithDifferentConstraintsOnMaximumFeedbackAmount()
    {
       YoRegistry registry = new YoRegistry("robert");
