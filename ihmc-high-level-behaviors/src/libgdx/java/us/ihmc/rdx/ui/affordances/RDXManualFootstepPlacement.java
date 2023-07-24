@@ -72,13 +72,10 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       rightFootButton.setTooltipText("Place right footstep");
       rightFootButton.setOnPressed(() -> createNewFootstep(RobotSide.RIGHT));
 
-      if (RDXBaseUI.getInstance().getKeyBindings().nextSection("Footstep placement"))
-      {
-         RDXBaseUI.getInstance().getKeyBindings().register("Place left footstep", "R");
-         RDXBaseUI.getInstance().getKeyBindings().register("Place right footstep", "T");
-         RDXBaseUI.getInstance().getKeyBindings().register("Undo footstep placement", "Ctrl + Z");
-         RDXBaseUI.getInstance().getKeyBindings().register("Cancel footstep placement", "Escape");
-      }
+      RDXBaseUI.getInstance().getKeyBindings().register("Place left footstep", "R");
+      RDXBaseUI.getInstance().getKeyBindings().register("Place right footstep", "T");
+      RDXBaseUI.getInstance().getKeyBindings().register("Undo footstep placement", "Ctrl + Z");
+      RDXBaseUI.getInstance().getKeyBindings().register("Cancel footstep placement", "Escape");
    }
 
    public void update()

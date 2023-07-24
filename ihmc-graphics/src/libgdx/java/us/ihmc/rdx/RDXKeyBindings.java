@@ -2,25 +2,27 @@ package us.ihmc.rdx;
 
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiKey;
+import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.internal.ImGui;
+import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImString;
 import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.tools.string.StringTools;
 
-import javax.annotation.Nullable;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
+/**
+ * Allows you to register key bindings which get rendered in a table menu
+ */
 public class RDXKeyBindings
 {
    private static final int WINDOW_WIDTH = 600;
    private static final int WINDOW_HEIGHT = 400;
 
-   @Nullable
-   private KeyBindingsSection currentSection;
-   private final Set<KeyBindingsSection> sections = new HashSet<>();
+   private final Map<String, KeyBindingsSection> sections = new HashMap<>();
 
    // Search filter
    private final ImString filter = new ImString();
@@ -32,7 +34,7 @@ public class RDXKeyBindings
       // Function to key map
       private final TreeMap<String, String> registry = new TreeMap<>();
 
-      public KeyBindingsSection(String description)
+      private KeyBindingsSection(String description)
       {
          this.description = description;
       }
@@ -53,35 +55,45 @@ public class RDXKeyBindings
             ImGui.alignTextToFramePadding();
             ImGui.text(function);
             ImGui.tableSetColumnIndex(1);
+            ImGui.pushItemFlag(ImGuiItemFlags.Disabled, true);
             ImGui.button(key, 80, 0);
+            ImGui.popItemFlag();
+//            ImGui.text(key);
          }
       }
    }
 
-   public boolean nextSection(String sectionName)
+   /**
+    * Register a new key bind
+    *
+    * @param function some description of what the key bind does
+    * @param key      the key (examples: "A", "Ctrl + Z", "Space")
+    * @return true if registered a new key binding, false if it already exists
+    */
+   public boolean register(String function, String key)
    {
-      if (currentSection != null)
+      String callingClassName = getCallingClassName();
+
+      final KeyBindingsSection section;
+
+      if (sections.containsKey(callingClassName))
       {
-         for (KeyBindingsSection section : sections)
-         {
-            if (section.description.equals(sectionName))
-               return false;
-         }
-
-         sections.add(currentSection);
+         section = sections.get(callingClassName);
       }
-      currentSection = new KeyBindingsSection(sectionName);
-
-      return true;
-   }
-
-   public void register(String function, String key) throws IllegalArgumentException
-   {
-      if (currentSection == null)
+      else
       {
-         throw new IllegalStateException("You must call RDXKeyBindings#nextSection() first before registering a key bind.");
+         String description = StringTools.pascalCaseToSentenceCase(callingClassName.replace("RDX", ""));
+         section = new KeyBindingsSection(description);
+         sections.put(callingClassName, section);
       }
-      currentSection.registry.put(function, key);
+
+      if (!section.registry.containsKey(function))
+      {
+         section.registry.put(function, key);
+         return true;
+      }
+
+      return false;
    }
 
    public void renderKeyBindingsTable()
@@ -129,8 +141,10 @@ public class RDXKeyBindings
             ImGui.endTable();
          }
 
-         for (KeyBindingsSection section : sections)
+         for (Map.Entry<String, KeyBindingsSection> entry : sections.entrySet())
          {
+            KeyBindingsSection section = entry.getValue();
+
             if (ImGui.beginTable("##keyBindingsTable_" + section.description, 2))
             {
                ImGui.tableSetupColumn(section.description);
@@ -144,5 +158,11 @@ public class RDXKeyBindings
          ImGui.endChild();
          ImGui.end();
       }
+   }
+
+   private static String getCallingClassName()
+   {
+      StackTraceElement callerStackElement = new Throwable().getStackTrace()[2];
+      return callerStackElement.getClassName().substring(callerStackElement.getClassName().lastIndexOf(".") + 1);
    }
 }
