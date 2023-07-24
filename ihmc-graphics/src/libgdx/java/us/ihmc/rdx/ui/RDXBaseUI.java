@@ -484,6 +484,11 @@ public class RDXBaseUI
          }
          /* End checkbox settings */
 
+         if (ImGui.button("Show key bindings"))
+         {
+            keyBindings.showKeybindings();
+         }
+
          ImGui.endMenu();
       }
 

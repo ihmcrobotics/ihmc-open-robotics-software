@@ -27,6 +27,7 @@ public class RDXKeyBindings
    // Search filter
    private final ImString filter = new ImString();
    private boolean filterInputActive = false;
+   private boolean forceActive = false;
 
    private static class KeyBindingsSection
    {
@@ -108,7 +109,7 @@ public class RDXKeyBindings
 
       boolean tabKeyIsDown = ImGui.isKeyDown(ImGui.getKeyIndex(ImGuiKey.Tab));
 
-      if (tabKeyIsDown || filterInputActive)
+      if (tabKeyIsDown || filterInputActive || forceActive)
       {
          ImGui.setNextWindowViewport(ImGui.getMainViewport().getID());
          float x = ImGui.getMainViewport().getCenterX() - (WINDOW_WIDTH * 0.5f);
@@ -127,12 +128,17 @@ public class RDXKeyBindings
             ImGui.popFont();
             ImGui.tableSetColumnIndex(1);
 
+            if (forceActive)
+            {
+               ImGui.setKeyboardFocusHere(1);
+            }
+
             if (ImGui.inputText("Search", filter))
             {
                filterInputActive = true;
             }
 
-            filterInputActive = ImGui.isItemFocused();
+            filterInputActive |= ImGui.isItemFocused();
 
             if (!filterInputActive)
                filter.set("");
@@ -156,7 +162,15 @@ public class RDXKeyBindings
 
          ImGui.endChild();
          ImGui.end();
+
+         forceActive = false;
       }
+   }
+
+   public void showKeybindings()
+   {
+      forceActive = true;
+      filterInputActive = true;
    }
 
    private static String getCallingClassName()
