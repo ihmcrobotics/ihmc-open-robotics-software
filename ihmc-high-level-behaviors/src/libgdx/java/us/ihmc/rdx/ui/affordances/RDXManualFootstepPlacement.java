@@ -49,6 +49,15 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    private final FramePose3D tempFramePose = new FramePose3D();
    private RDX3DPanelTooltip tooltip;
 
+   public RDXManualFootstepPlacement()
+   {
+      RDXBaseUI.getInstance().getKeyBindings().nextSection("Footstep placement");
+      RDXBaseUI.getInstance().getKeyBindings().register("3D view - Place left footstep", "R");
+      RDXBaseUI.getInstance().getKeyBindings().register("3D view - Place right footstep", "T");
+      RDXBaseUI.getInstance().getKeyBindings().register("3D view - Undo footstep placement", "Ctrl + Z");
+      RDXBaseUI.getInstance().getKeyBindings().register("3D view - Cancel footstep placement", "Escape");
+   }
+
    public void create(ROS2SyncedRobotModel syncedRobot,
                       RDXBaseUI baseUI,
                       RDXInteractableFootstepPlan footstepPlan,
