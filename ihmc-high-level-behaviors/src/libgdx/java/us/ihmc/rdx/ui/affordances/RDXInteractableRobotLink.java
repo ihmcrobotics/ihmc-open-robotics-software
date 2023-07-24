@@ -46,13 +46,6 @@ public class RDXInteractableRobotLink
    private final Notification contextMenuNotification = new Notification();
    private boolean isVRHovering;
 
-   public RDXInteractableRobotLink()
-   {
-      RDXBaseUI.getInstance().getKeyBindings().nextSection("Robot actions");
-      RDXBaseUI.getInstance().getKeyBindings().register("Execute / pause motion", "Space");
-      RDXBaseUI.getInstance().getKeyBindings().register("Delete selected gizmo", "Delete");
-   }
-
    /** For when the graphic, the link, and control frame are all the same. */
    public void create(RDXRobotCollidable robotCollidable, ReferenceFrame syncedControlFrame, String graphicFileName, RDX3DPanel panel3D)
    {
@@ -76,6 +69,12 @@ public class RDXInteractableRobotLink
                                                                                            linkToControlFrameTransform);
       highlightModel = new RDXInteractableHighlightModel(modelFileName);
       selectablePose3DGizmo.create(panel3D);
+
+      if (RDXBaseUI.getInstance().getKeyBindings().nextSection("Robot actions"))
+      {
+         RDXBaseUI.getInstance().getKeyBindings().register("Execute / pause motion", "Space");
+         RDXBaseUI.getInstance().getKeyBindings().register("Delete selected gizmo", "Delete");
+      }
    }
 
    public void update()

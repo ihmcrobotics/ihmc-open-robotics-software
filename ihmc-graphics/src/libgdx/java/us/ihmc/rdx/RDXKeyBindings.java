@@ -47,19 +47,21 @@ public class RDXKeyBindings
       }
    }
 
-   public void nextSection(String sectionName)
+   public boolean nextSection(String sectionName)
    {
       if (currentSection != null)
       {
          for (KeyBindingsSection section : sections)
          {
             if (section.description.equals(sectionName))
-               return;
+               return false;
          }
 
          sections.add(currentSection);
       }
       currentSection = new KeyBindingsSection(sectionName);
+
+      return true;
    }
 
    public void register(String function, String key) throws IllegalArgumentException

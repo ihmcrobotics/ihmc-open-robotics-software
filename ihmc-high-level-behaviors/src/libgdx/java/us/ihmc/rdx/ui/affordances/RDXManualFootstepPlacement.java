@@ -49,15 +49,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    private final FramePose3D tempFramePose = new FramePose3D();
    private RDX3DPanelTooltip tooltip;
 
-   public RDXManualFootstepPlacement()
-   {
-      RDXBaseUI.getInstance().getKeyBindings().nextSection("Footstep placement");
-      RDXBaseUI.getInstance().getKeyBindings().register("Place left footstep", "R");
-      RDXBaseUI.getInstance().getKeyBindings().register("Place right footstep", "T");
-      RDXBaseUI.getInstance().getKeyBindings().register("Undo footstep placement", "Ctrl + Z");
-      RDXBaseUI.getInstance().getKeyBindings().register("Cancel footstep placement", "Escape");
-   }
-
    public void create(ROS2SyncedRobotModel syncedRobot,
                       RDXBaseUI baseUI,
                       RDXInteractableFootstepPlan footstepPlan,
@@ -80,6 +71,14 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       rightFootButton.loadAndSetIcon("icons/rightFoot.png");
       rightFootButton.setTooltipText("Place right footstep");
       rightFootButton.setOnPressed(() -> createNewFootstep(RobotSide.RIGHT));
+
+      if (RDXBaseUI.getInstance().getKeyBindings().nextSection("Footstep placement"))
+      {
+         RDXBaseUI.getInstance().getKeyBindings().register("Place left footstep", "R");
+         RDXBaseUI.getInstance().getKeyBindings().register("Place right footstep", "T");
+         RDXBaseUI.getInstance().getKeyBindings().register("Undo footstep placement", "Ctrl + Z");
+         RDXBaseUI.getInstance().getKeyBindings().register("Cancel footstep placement", "Escape");
+      }
    }
 
    public void update()
