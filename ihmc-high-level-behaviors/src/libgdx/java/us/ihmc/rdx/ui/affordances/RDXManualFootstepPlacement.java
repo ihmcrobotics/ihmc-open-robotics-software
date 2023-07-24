@@ -101,6 +101,11 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       }
       ImGuiTools.previousWidgetTooltip("Keybind: T");
       ImGui.sameLine();
+      if (ImGui.button(labels.get("Square Up")))
+      {
+         squareUpFootstep();
+      }
+      ImGui.sameLine();
       if (ImGui.button(labels.get("Cancel")) || ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
       {
          exitPlacement();
@@ -267,6 +272,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
    public void squareUpFootstep()
    {
+      footstepPlan.clear();
       ReferenceFrame leftFootFrame = syncedRobot.getReferenceFrames().getFootFrame(RobotSide.LEFT);
       FramePose3D rightFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                   syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
