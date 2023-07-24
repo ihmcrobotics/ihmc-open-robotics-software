@@ -5,8 +5,8 @@ import imgui.ImGui;
 import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapStateRequestMessage;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ihmcPerception.heightMap.HeightMapAPI;
+import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.perception.heightMap.HeightMapAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -100,11 +100,11 @@ public class RDXRemoteHeightMapPanel
       remotePropertySets.renderImGuiWidgets();
 
       if (ImGui.button("Pause"))
-         ros2Helper.publish(ROS2Tools.HEIGHT_MAP_STATE_REQUEST, pauseMessage);
+         ros2Helper.publish(PerceptionAPI.HEIGHT_MAP_STATE_REQUEST, pauseMessage);
       if (ImGui.button("Resume"))
-         ros2Helper.publish(ROS2Tools.HEIGHT_MAP_STATE_REQUEST, resumeMessage);
+         ros2Helper.publish(PerceptionAPI.HEIGHT_MAP_STATE_REQUEST, resumeMessage);
       if (ImGui.button("Clear"))
-         ros2Helper.publish(ROS2Tools.HEIGHT_MAP_STATE_REQUEST, clearMessage);
+         ros2Helper.publish(PerceptionAPI.HEIGHT_MAP_STATE_REQUEST, clearMessage);
    }
 
    public void destroy()

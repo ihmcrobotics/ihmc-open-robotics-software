@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import gnu.trove.map.hash.TDoubleObjectHashMap;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -25,6 +26,7 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -33,7 +35,18 @@ import java.util.stream.Collectors;
 public class RDXVisualTools
 {
    public static final double NO_SCALING = 1.0;
+   /**
+    * Make the desired ghost robot a little larger, so it shows up more cleanly.
+    * This is because a desired ghost will generally be showing up partially colliding
+    * or overlapping with an opaque estimate of the robot's current state.
+    * It's possible that 10% is too much, if you feel it is, it probably is, and
+    * change it.
+    */
+   public static final double DESIRED_ROBOT_SCALING = 1.1;
    private static final Color DEFAULT_COLOR = Color.BLUE;
+
+   private static final Object modelDataLoadingSyncObject = new Object();
+   private static final HashMap<String, TDoubleObjectHashMap<Model>> modelFileNameToScaledModelMap = new HashMap<>();
 
    public static List<RDXVisualModelInstance> collectNodes(List<VisualDefinition> visualDefinitions)
    {
@@ -102,8 +115,24 @@ public class RDXVisualTools
 
          if (scaleNeeded)
          {
-            RDXModelInstanceScaler scaler = new RDXModelInstanceScaler(modelFileName);
-            model = scaler.scaleForModel(scaleFactor);
+            // Make loading faster by only loading each scaled model once each
+            synchronized (modelDataLoadingSyncObject)
+            {
+               TDoubleObjectHashMap<Model> scaleToModelMap = modelFileNameToScaledModelMap.get(modelFileName);
+               if (scaleToModelMap == null)
+               {
+                  scaleToModelMap = new TDoubleObjectHashMap<>();
+                  modelFileNameToScaledModelMap.put(modelFileName, scaleToModelMap);
+               }
+
+               model = scaleToModelMap.get(scaleFactor);
+               if (model == null)
+               {
+                  RDXModelInstanceScaler scaler = new RDXModelInstanceScaler(modelFileName);
+                  model = scaler.scaleForModel(scaleFactor);
+                  scaleToModelMap.put(scaleFactor, model);
+               }
+            }
          }
          else
          {

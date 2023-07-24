@@ -10,45 +10,67 @@ import org.bytedeco.spinnaker.Spinnaker_C.spinNodeHandle;
 import org.bytedeco.spinnaker.Spinnaker_C.spinNodeMapHandle;
 import org.bytedeco.spinnaker.global.Spinnaker_C;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.UnitConversions;
 
-import static us.ihmc.perception.spinnaker.SpinnakerTools.assertNoError;
+import static us.ihmc.perception.spinnaker.SpinnakerBlackflyTools.assertNoError;
 
 /**
  * Good reference: http://softwareservices.flir.com/BFS-U3-04S2/latest/Model/public/
- *
- * If you don't have it set on boot (didn't use official Spinnaker installation procedure) then
- * you need to run the following command before using this class. It will make sure the USB
- * buffers are large enough to handle the Blackfly stably.
- * <pre>sudo sh -c 'echo 2047 > /sys/module/usbcore/parameters/usbfs_memory_mb'</pre>
  *
  * Confluence page: https://confluence.ihmc.us/display/PER/Blackfly+Cameras
  */
 public class SpinnakerBlackfly
 {
-   public static final double BFLY_U3_23S6C_WIDTH_PIXELS = 1920.0;
-   public static final double BFLY_U3_23S6C_HEIGHT_PIXELS = 1200.0;
-   // https://www.flir.com/products/blackfly-usb3/?model=BFLY-U3-23S6C-C&vertical=machine+vision&segment=iis
-   public static final double BFLY_U3_23S6C_CMOS_SENSOR_FORMAT = UnitConversions.inchesToMeters(1.0 / 1.2);
-   public static final double BFLY_U3_23S6C_CMOS_SENSOR_WIDTH = 0.01067;
-   public static final double BFLY_U3_23S6C_CMOS_SENSOR_HEIGHT = 0.00800;
 
    private final spinCamera spinCamera;
    private final String serialNumber;
-   private spinNodeMapHandle transportLayerDeviceNodeMap = null;
-   private spinNodeMapHandle cameraNodeMap = null;
+   private final spinNodeMapHandle cameraNodeMap = new spinNodeMapHandle();
+   private final spinNodeMapHandle streamNodeMap = new spinNodeMapHandle();
    private final BytePointer isIncomplete = new BytePointer(1);
 
+   /**
+    * Use SpinnakerBlackflyManager#createBlackfly
+    */
    protected SpinnakerBlackfly(spinCamera spinCamera, String serialNumber)
    {
       this.spinCamera = spinCamera;
       this.serialNumber = serialNumber;
 
-      transportLayerDeviceNodeMap = new spinNodeMapHandle();
-      cameraNodeMap = new spinNodeMapHandle();
+      spinNodeMapHandle transportLayerDeviceNodeMap = new spinNodeMapHandle();
       assertNoError(Spinnaker_C.spinCameraGetTLDeviceNodeMap(spinCamera, transportLayerDeviceNodeMap), "Getting transport layer device node map");
       assertNoError(Spinnaker_C.spinCameraInit(spinCamera), "Initializing camera");
       assertNoError(Spinnaker_C.spinCameraGetNodeMap(spinCamera, cameraNodeMap), "Retrieving GenICam node map");
+      assertNoError(Spinnaker_C.spinCameraGetTLStreamNodeMap(spinCamera, streamNodeMap), "Retrieving stream node map");
+   }
+
+   public spinCamera getSpinCamera()
+   {
+      return spinCamera;
+   }
+
+   public String getSerialNumber()
+   {
+      return serialNumber;
+   }
+
+   /**
+    * Set the buffer handling mode
+    * @see Spinnaker_C.spinTLStreamBufferHandlingModeEnums
+    */
+   public void setBufferHandlingMode(Spinnaker_C.spinTLStreamBufferHandlingModeEnums bufferHandlingMode)
+   {
+      spinNodeHandle bufferHandlingModeNode = new spinNodeHandle();
+      assertNoError(Spinnaker_C.spinNodeMapGetNode(streamNodeMap, new BytePointer("StreamBufferHandlingMode"), bufferHandlingModeNode),
+                    "Getting stream buffer handling mode node map node");
+      spinNodeHandle setBufferHandlingMode = new spinNodeHandle();
+      String bufferHandlingModeString = bufferHandlingMode.toString();
+      String selectorString = bufferHandlingModeString.substring(bufferHandlingModeString.lastIndexOf("_") + 1);
+      assertNoError(Spinnaker_C.spinEnumerationGetEntryByName(bufferHandlingModeNode, new BytePointer(selectorString), setBufferHandlingMode),
+                    "Getting stream buffer handling mode entry by name: " + selectorString);
+      LongPointer bufferHandlingModePointer = new LongPointer(1);
+      assertNoError(Spinnaker_C.spinEnumerationEntryGetIntValue(setBufferHandlingMode, bufferHandlingModePointer),
+                    "Getting stream buffer handling mode int value");
+      assertNoError(Spinnaker_C.spinEnumerationSetIntValue(bufferHandlingModeNode, bufferHandlingModePointer.get()),
+                    "Setting stream buffer handling mode int value");
    }
 
    /**
@@ -72,13 +94,13 @@ public class SpinnakerBlackfly
       assertNoError(Spinnaker_C.spinEnumerationGetEntryByName(acquisitionModeNode, new BytePointer(selectorString), setAcquisitionMode),
                     "Getting acquisition mode entry by name: " + selectorString);
       LongPointer acquisitionModePointer = new LongPointer(1);
-      assertNoError(Spinnaker_C.spinEnumerationEntryGetIntValue(setAcquisitionMode, acquisitionModePointer),
-                    "Getting acquisition mode int value");
-      assertNoError(Spinnaker_C.spinEnumerationSetIntValue(acquisitionModeNode, acquisitionModePointer.get()),
-                    "Setting acquisition mode int value");
+      assertNoError(Spinnaker_C.spinEnumerationEntryGetIntValue(setAcquisitionMode, acquisitionModePointer), "Getting acquisition mode int value");
+      assertNoError(Spinnaker_C.spinEnumerationSetIntValue(acquisitionModeNode, acquisitionModePointer.get()), "Setting acquisition mode int value");
    }
 
-   /** See http://softwareservices.flir.com/BFS-U3-04S2/latest/Model/public/ImageFormatControl.html */
+   /**
+    * See http://softwareservices.flir.com/BFS-U3-04S2/latest/Model/public/ImageFormatControl.html
+    */
    public void setPixelFormat(Spinnaker_C.spinPixelFormatEnums pixelFormat)
    {
       // Pixel format
@@ -112,35 +134,40 @@ public class SpinnakerBlackfly
       return !incomplete;
    }
 
+   public void releaseImage(spinImage spinImage)
+   {
+      Spinnaker_C.spinImageRelease(spinImage);
+   }
+
    public int getHeight(spinImage spinImage)
    {
       SizeTPointer heightPointer = new SizeTPointer(1);
       assertNoError(Spinnaker_C.spinImageGetHeight(spinImage, heightPointer), "Getting image height");
-      return (int) heightPointer.get();
+      int height = (int) heightPointer.get();
+      heightPointer.close();
+      return height;
    }
 
    public int getWidth(spinImage spinImage)
    {
       SizeTPointer widthPointer = new SizeTPointer(1);
       assertNoError(Spinnaker_C.spinImageGetWidth(spinImage, widthPointer), "Getting image width");
-      return (int) widthPointer.get();
+      int width = (int) widthPointer.get();
+      widthPointer.close();
+      return width;
    }
 
    /**
     * It appears this call will return alternating memory segments, but can switch to different ones over time, too.
     */
-   public void setBytedecoPointerToSpinImageData(spinImage spinImage, Pointer pointer)
+   public void setPointerToSpinImageData(spinImage spinImage, Pointer pointer)
    {
       Spinnaker_C.spinImageGetData(spinImage, pointer);
    }
 
    public void stopAcquiringImages()
    {
+      System.out.println("Stopping spinnaker blackfly");
       assertNoError(Spinnaker_C.spinCameraEndAcquisition(spinCamera), "Ending camera acquisition");
-   }
-
-   public void destroy()
-   {
-      Spinnaker_C.spinCameraRelease(spinCamera);
    }
 }

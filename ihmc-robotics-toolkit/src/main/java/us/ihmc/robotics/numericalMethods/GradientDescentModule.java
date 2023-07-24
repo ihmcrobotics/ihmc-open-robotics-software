@@ -31,7 +31,7 @@ public class GradientDescentModule
    private int maximumIterations = 1000;
    private double alpha = -10;
    private double perturb = 0.001;
-   private int reducingStepSizeRatio = 2;
+   private double reducingStepSizeRatio = 1.1;
 
    public GradientDescentModule(SingleQueryFunction function, TDoubleArrayList initial)
    {
@@ -112,7 +112,7 @@ public class GradientDescentModule
          perturb = -value;
    }
 
-   public void setReducingStepSizeRatio(int value)
+   public void setReducingStepSizeRatio(double value)
    {
       reducingStepSizeRatio = value;
    }
@@ -138,6 +138,7 @@ public class GradientDescentModule
          iteration++;
          pastQuery = optimalQuery;
 
+         // Construct the gradient
          double tempSignForPerturb = 1.0;
          TDoubleArrayList gradient = new TDoubleArrayList();
          for (int j = 0; j < dimension; j++)
@@ -161,7 +162,19 @@ public class GradientDescentModule
 
             gradient.add((perturbedQuery - pastQuery) / (perturb * tempSignForPerturb));
          }
+         // Normalize the gradient
+         double gradientNorm = 0;
+         for (int j = 0; j < dimension; j++)
+         {
+            gradientNorm += gradient.get(j) * gradient.get(j);
+         }
+         gradientNorm = Math.sqrt(gradientNorm);
+         for (int j = 0; j < dimension; j++)
+         {
+            gradient.set(j, gradient.get(j) / gradientNorm);
+         }
 
+         // Construct next point to test
          optimalInput.clear();
          for (int j = 0; j < dimension; j++)
          {
@@ -173,27 +186,19 @@ public class GradientDescentModule
          if (DEBUG)
             LogTools.debug("cur Query " + pastQuery + " new Query " + newQuery);
 
-         if (newQuery > pastQuery)
-         {
-            reduceStepSize();
-            optimalInput.clear();
-            for (int j = 0; j < dimension; j++)
-               optimalInput.add(pastInput.get(j));
-         }
-         else
-         {
-            optimalQuery = newQuery;
-            double delta = Math.abs((pastQuery - optimalQuery) / optimalQuery);
+         reduceStepSize();
+         optimalQuery = newQuery;
+         double delta = Math.abs((pastQuery - optimalQuery) / optimalQuery);
 
-            if (DEBUG)
-            {
-               double iterationComputationTime = Conversions.nanosecondsToSeconds(System.nanoTime() - curTime);
-               LogTools.debug("iterations is " + i + " " + optimalQuery + " " + alpha + " " + delta + " " + iterationComputationTime);
-            }
-
-            if (delta < deltaThreshold)
-               break;
+         if (DEBUG)
+         {
+            double iterationComputationTime = Conversions.nanosecondsToSeconds(System.nanoTime() - curTime);
+            LogTools.debug("iterations is " + i + " " + optimalQuery + " " + alpha + " " + delta + " " + iterationComputationTime);
          }
+
+         if (delta < deltaThreshold)
+            break;
+
 
          pastInput.clear();
          for (int j = 0; j < dimension; j++)

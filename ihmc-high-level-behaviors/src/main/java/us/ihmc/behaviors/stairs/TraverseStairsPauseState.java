@@ -3,13 +3,11 @@ package us.ihmc.behaviors.stairs;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.TimeLeftInPause;
 
 public class TraverseStairsPauseState extends TraverseStairsState
 {
@@ -26,7 +24,7 @@ public class TraverseStairsPauseState extends TraverseStairsState
       this.parameters = parameters;
       this.statusLogger = helper.getOrCreateStatusLogger();
 
-      helper.subscribeViaCallback(ROS2Tools.LIDAR_REA_REGIONS, planarRegions::set);
+      helper.subscribeViaCallback(PerceptionAPI.LIDAR_REA_REGIONS, planarRegions::set);
    }
 
    public void reset()
@@ -44,7 +42,7 @@ public class TraverseStairsPauseState extends TraverseStairsState
       {
          REAStateRequestMessage clearMessage = new REAStateRequestMessage();
          clearMessage.setRequestClear(true);
-         helper.publish(ROS2Tools.REA_STATE_REQUEST, clearMessage);
+         helper.publish(PerceptionAPI.REA_STATE_REQUEST, clearMessage);
       }
    }
 
@@ -67,7 +65,7 @@ public class TraverseStairsPauseState extends TraverseStairsState
       else if (!minimumPauseTimeElapsed)
       {
          double totalPauseDuration = parameters.get(TraverseStairsBehaviorParameters.pauseTime);
-         helper.publish(TimeLeftInPause, totalPauseDuration - timeInState);
+//         helper.publish(TimeLeftInPause, totalPauseDuration - timeInState);
       }
       else if (!receivedAnyRegions)
       {

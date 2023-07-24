@@ -42,6 +42,19 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
     * is getNominalStandardDeviation() and m is this value.
     */
    public static final DoubleStoredPropertyKey mahalanobisScale = keys.addDoubleKey("Mahalanobis scale");
+   /**
+    * This is the variance added to all past measurements when a cell is translated
+    */
+   public static final DoubleStoredPropertyKey varianceAddedWhenTranslating = keys.addDoubleKey("Variance added when translating");
+   /**
+    * This is the measurement variance when the robot is standing
+    */
+   public static final DoubleStoredPropertyKey sensorVarianceWhenStanding = keys.addDoubleKey("Sensor variance when standing");
+   /**
+    * This is the measurement variance when the robot is moving
+    */
+   public static final DoubleStoredPropertyKey sensorVarianceWhenMoving = keys.addDoubleKey("Sensor variance when moving");
+   public static final BooleanStoredPropertyKey estimateHeightWithKalmanFilter = keys.addBooleanKey("Estimate height with kalman filter");
 
    /**
     * Loads this property set.

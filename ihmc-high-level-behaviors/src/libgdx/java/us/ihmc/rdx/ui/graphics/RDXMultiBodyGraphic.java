@@ -6,9 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.simulation.scs2.RDXMultiBodySystemFactories;
-import us.ihmc.rdx.simulation.scs2.RDXRigidBody;
-import us.ihmc.rdx.simulation.scs2.RDXVisualTools;
+import us.ihmc.rdx.simulation.scs2.*;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointReadOnly;
@@ -56,9 +54,9 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
 
    private RDXRigidBody loadRigidBody(RigidBodyBasics rigidBody, RobotDefinition robotDefinition, double scaleFactor, boolean createReferenceFrameGraphics)
    {
-      RDXRigidBody RDXRigidBody;
+      RDXRigidBody rdxRigidBody;
       Executor executorToRunLaterOnThreadWithGraphicsContext = Gdx.app::postRunnable;
-      RDXRigidBody = RDXMultiBodySystemFactories.toGDXRigidBody(rigidBody,
+      rdxRigidBody = RDXMultiBodySystemFactories.toRDXRigidBody(rigidBody,
                                                                 robotDefinition.getRigidBodyDefinition(rigidBody.getName()),
                                                                 executorToRunLaterOnThreadWithGraphicsContext,
                                                                 scaleFactor,
@@ -71,12 +69,12 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
             CrossFourBarJoint fourBarJoint = (CrossFourBarJoint) childrenJoint;
             CrossFourBarJointDefinition fourBarJointDefinition = (CrossFourBarJointDefinition) robotDefinition.getJointDefinition(fourBarJoint.getName());
 
-            fourBarJoint.getJointA().setSuccessor(RDXMultiBodySystemFactories.toGDXRigidBody(fourBarJoint.getBodyDA(),
+            fourBarJoint.getJointA().setSuccessor(RDXMultiBodySystemFactories.toRDXRigidBody(fourBarJoint.getBodyDA(),
                                                                                              fourBarJointDefinition.getBodyDA(),
                                                                                              executorToRunLaterOnThreadWithGraphicsContext,
                                                                                              scaleFactor,
                                                                                              createReferenceFrameGraphics));
-            fourBarJoint.getJointB().setSuccessor(RDXMultiBodySystemFactories.toGDXRigidBody(fourBarJoint.getBodyBC(),
+            fourBarJoint.getJointB().setSuccessor(RDXMultiBodySystemFactories.toRDXRigidBody(fourBarJoint.getBodyBC(),
                                                                                              fourBarJointDefinition.getBodyBC(),
                                                                                              executorToRunLaterOnThreadWithGraphicsContext,
                                                                                              scaleFactor,
@@ -86,7 +84,7 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
          childrenJoint.setSuccessor(loadRigidBody(childrenJoint.getSuccessor(), robotDefinition, scaleFactor, createReferenceFrameGraphics));
       }
 
-      return RDXRigidBody;
+      return rdxRigidBody;
    }
 
    @Override
@@ -126,6 +124,24 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
    public void destroy()
    {
 
+   }
+
+   public void setOpacity(float opacity)
+   {
+      for (RDXRigidBody rigidBody : multiBody.subtreeIterable())
+      {
+         RDXVisualTools.collectRDXRigidBodiesIncludingPossibleFourBars(rigidBody, rdxRigidBody ->
+         {
+            RDXFrameGraphicsNode visualGraphicsNode = rdxRigidBody.getVisualGraphicsNode();
+            if (visualGraphicsNode != null) // This is null for the elevator
+            {
+               for (RDXFrameNodePart part : visualGraphicsNode.getParts())
+               {
+                  part.getModelInstance().setOpacity(opacity);
+               }
+            }
+         });
+      }
    }
 
    public boolean isRobotLoaded()

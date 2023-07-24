@@ -208,6 +208,13 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
       return positionHelper.getLastTrajectoryPointTime();
    }
 
+   @Override
+   public boolean isHybridModeActive()
+   {
+      // TODO Need to implement the hybrid mode for this guy
+      return false;
+   }
+
    private void clear()
    {
       numberOfPointsInQueue.set(0);

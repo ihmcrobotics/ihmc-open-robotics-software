@@ -51,9 +51,16 @@ public abstract class AbstractFootControlState implements State, SCS2YoGraphicHo
 
    public abstract void doSpecificAction(double timeInState);
 
+   public abstract boolean isLoadBearing();
+
    public abstract InverseDynamicsCommand<?> getInverseDynamicsCommand();
 
    public abstract FeedbackControlCommand<?> getFeedbackControlCommand();
+
+   public FeedbackControlCommand<?> createFeedbackControlTemplate()
+   {
+      return getFeedbackControlCommand();
+   }
 
    @Override
    public void doAction(double timeInState)

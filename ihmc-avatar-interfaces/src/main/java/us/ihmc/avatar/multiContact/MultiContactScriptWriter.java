@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.commons.nio.FileTools;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
 
 public class MultiContactScriptWriter
@@ -72,7 +73,7 @@ public class MultiContactScriptWriter
       this.environmentShapes.add(environmentShape);
    }
 
-   public void setEnvironmentShapes(List<FrameShape3DReadOnly> environmentShapes)
+   public void setEnvironmentShapes(List<FrameShape3DBasics> environmentShapes)
    {
       this.environmentShapes.clear();
       this.environmentShapes.addAll(environmentShapes);

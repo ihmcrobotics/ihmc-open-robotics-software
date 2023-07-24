@@ -20,6 +20,9 @@ Install the python scripts into the binaries of your system using the install sc
 
 ### Features and Usage
 
+NOTE: By default, the plogs command will look for log files in the `~/.ihmc/logs/perception/`. 
+To use a different path use the `--path` argument. For more details, see the `plogs.py` script.
+
 <br>
 List groups and datasets inside any HDF5 log file using:
 
@@ -77,3 +80,6 @@ Plot signals using Matplotlib using:
 
     plogs --plot <filename>.hdf5
 
+Convert log files with old int32 based depth maps into new uint8 based depth maps using:
+
+    plogs --fix <filename>.hdf5 --dst <dst_filename>.hdf5

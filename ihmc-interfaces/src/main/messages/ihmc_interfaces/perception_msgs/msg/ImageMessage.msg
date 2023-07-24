@@ -26,10 +26,10 @@ byte[<=25000000] data
 # The image format. Ordinal of OpenCVImageFormat
 uint8 format
 
-# Position of the focal point at sensor data aquisition
+# Position of the focal point at sensor data acquisition
 geometry_msgs/Point position
 
-# Orientation of the focal point at sensor data aquisition
+# Orientation of the focal point at sensor data acquisition
 geometry_msgs/Quaternion orientation
 
 # Camera model of the sensor. Ordinal of us.ihmc.perception.CameraModel
@@ -46,9 +46,6 @@ float32 principal_point_x_pixels
 
 # Principal point Y in units of pixels (Cy)
 float32 principal_point_y_pixels
-
-# If Ouster camera model, the pixel offsets used to re-stagger the depth image.
-int8[<=128] ouster_pixel_shifts
 
 # If Ouster camera model, the calibrated beam altitude angles used to get 3D points.
 float32[<=128] ouster_beam_altitude_angles

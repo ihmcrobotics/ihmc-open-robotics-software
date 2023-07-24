@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Gdx2DPixmap;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.rdx.ui.RDXImagePanel;
 
@@ -27,7 +27,7 @@ public class RDXMatImagePanel
       panelTexture = new Texture(new PixmapTextureData(pixmap, null, false, false));
       imagePanel.setTexture(panelTexture);
 
-      BytedecoOpenCVTools.setRGBA8888ImageAlpha(image, 255);
+      OpenCVTools.setRGBA8888ImageAlpha(image, 255);
    }
 
    public void displayByte(Mat rgbImage)
@@ -68,12 +68,12 @@ public class RDXMatImagePanel
       panelTexture = new Texture(new PixmapTextureData(pixmap, null, false, false));
       imagePanel.setTexture(panelTexture);
 
-      BytedecoOpenCVTools.setRGBA8888ImageAlpha(image, 255);
+      OpenCVTools.setRGBA8888ImageAlpha(image, 255);
    }
 
    public void ensureDimensionsMatch(int imageWidth, int imageHeight)
    {
-      if (!BytedecoOpenCVTools.dimensionsMatch(image, imageWidth, imageHeight))
+      if (!OpenCVTools.dimensionsMatch(image, imageWidth, imageHeight))
       {
          resize(imageWidth, imageHeight);
       }
@@ -90,7 +90,7 @@ public class RDXMatImagePanel
 
       image = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, new MutableBytePointer(pixmap.getPixels()));
 
-      BytedecoOpenCVTools.setRGBA8888ImageAlpha(image, 255);
+      OpenCVTools.setRGBA8888ImageAlpha(image, 255);
    }
 
    public RDXImagePanel getImagePanel()

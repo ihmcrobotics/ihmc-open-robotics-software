@@ -162,7 +162,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       YoDouble controllerICPErrorX = (YoDouble) simulationTestHelper.findVariable("controllerICPErrorX");
       YoDouble controllerICPErrorY = (YoDouble) simulationTestHelper.findVariable("controllerICPErrorY");
 
-      simulationTestHelper.simulateNow(standingTimeDuration);
+      assertTrue(simulationTestHelper.simulateNow(standingTimeDuration), "Simulation has failed");
 
       walk.set(false);
 
@@ -170,31 +170,31 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       {
          userDesiredPelvisPoseTrajectoryTime.set(0.0);
          userUpdateDesiredPelvisPose.set(true);
-         simulationTestHelper.simulateNow(0.1);
+         assertTrue(simulationTestHelper.simulateNow(0.1), "Simulation has failed");
 
          double startingYaw = userDesiredPelvisPoseYaw.getDoubleValue();
          userDesiredPelvisPoseYaw.set(startingYaw + Math.PI / 4.0);
          userDoPelvisPose.set(true);
 
-         simulationTestHelper.simulateNow(yawingTimeDuration);
+         assertTrue(simulationTestHelper.simulateNow(yawingTimeDuration), "Simulation has failed");
 
          double icpError;
          if (icpErrorX != null && icpErrorY != null)
             icpError = Math.sqrt(icpErrorX.getDoubleValue() * icpErrorX.getDoubleValue() + icpErrorY.getDoubleValue() * icpErrorY.getDoubleValue());
          else
             icpError = Math.sqrt(controllerICPErrorX.getDoubleValue() * controllerICPErrorX.getDoubleValue()
-                  + controllerICPErrorY.getDoubleValue() * controllerICPErrorY.getDoubleValue());
+                                 + controllerICPErrorY.getDoubleValue() * controllerICPErrorY.getDoubleValue());
          assertTrue(icpError < 0.005, physicsEngineName + "icsError < 0.005 for startingYaw + pi/4.0 test");
 
          userDesiredPelvisPoseYaw.set(startingYaw);
          userDoPelvisPose.set(true);
-         simulationTestHelper.simulateNow(yawingTimeDuration + 0.3);
+         assertTrue(simulationTestHelper.simulateNow(yawingTimeDuration + 0.3), "Simulation has failed");
 
          if (icpErrorX != null && icpErrorY != null)
             icpError = Math.sqrt(icpErrorX.getDoubleValue() * icpErrorX.getDoubleValue() + icpErrorY.getDoubleValue() * icpErrorY.getDoubleValue());
          else
             icpError = Math.sqrt(controllerICPErrorX.getDoubleValue() * controllerICPErrorX.getDoubleValue()
-                  + controllerICPErrorY.getDoubleValue() * controllerICPErrorY.getDoubleValue());
+                                 + controllerICPErrorY.getDoubleValue() * controllerICPErrorY.getDoubleValue());
          assertTrue(icpError < 0.005, physicsEngineName + "icsError < 0.005 for startingYaw test");
       }
 
@@ -204,10 +204,10 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
       while (simulationTestHelper.getSimulationTime() - standingTimeDuration < defaultWalkingTimeDuration)
       {
-         simulationTestHelper.simulateNow(timeIncrement);
+         assertTrue(simulationTestHelper.simulateNow(timeIncrement), "Simulation has failed");
          if (Math.abs(comError.getDoubleValue()) > 0.06)
             fail(physicsEngineName + "Math.abs(comError.getDoubleValue()) > 0.06: " + comError.getDoubleValue() + " at t = "
-                  + simulationTestHelper.getSimulationTime());
+                 + simulationTestHelper.getSimulationTime());
       }
    }
 

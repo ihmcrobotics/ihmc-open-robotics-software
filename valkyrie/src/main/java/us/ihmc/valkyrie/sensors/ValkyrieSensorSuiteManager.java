@@ -12,14 +12,15 @@ import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPoi
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.avatar.sensors.multisense.MultiSenseSensorManager;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.ihmcPerception.camera.CameraDataReceiver;
-import us.ihmc.ihmcPerception.camera.SCSCameraDataReceiver;
-import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.ros1.camera.CameraDataReceiver;
+import us.ihmc.perception.ros1.camera.SCSCameraDataReceiver;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.ros2.ROS2Node;
@@ -208,7 +209,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    {
       StereoVisionPointCloudPublisher publisher = new StereoVisionPointCloudPublisher(fullRobotModelFactory,
                                                                                       ros2Node,
-                                                                                      ROS2Tools.MULTISENSE_STEREO_POINT_CLOUD,
+                                                                                      PerceptionAPI.MULTISENSE_STEREO_POINT_CLOUD,
                                                                                       ROS2QosProfile.BEST_EFFORT());
       publisher.setROSClockCalculator(rosClockCalculator);
       publisher.setCustomStereoVisionTransformer(createCustomStereoTransformCalculator());

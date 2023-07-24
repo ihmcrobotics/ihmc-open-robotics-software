@@ -12,9 +12,9 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.OpenCLFloatBuffer;
-import us.ihmc.perception.OpenCLManager;
-import us.ihmc.perception.netty.NettyOuster;
+import us.ihmc.perception.opencl.OpenCLFloatBuffer;
+import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.ouster.NettyOuster;
 import us.ihmc.perception.ouster.OusterDepthExtractionKernel;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -70,10 +70,7 @@ public class RDXNettyOusterUI
       ouster = new NettyOuster();
       ouster.setOnFrameReceived(this::onFrameReceived);
       ouster.bind();
-   }
 
-   public void createAfterNativesLoaded()
-   {
       openCLManager = new OpenCLManager();
       ousterFisheyeKernel = new RDXOusterFisheyeColoredPointCloudKernel(openCLManager);
    }
@@ -119,7 +116,7 @@ public class RDXNettyOusterUI
          pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
       }
 
-      ousterFisheyeKernel.setInstrinsicParameters(ouster.getPixelShiftBuffer(), ouster.getBeamAltitudeAnglesBuffer(), ouster.getBeamAzimuthAnglesBuffer());
+      ousterFisheyeKernel.setInstrinsicParameters(ouster.getBeamAltitudeAnglesBuffer(), ouster.getBeamAzimuthAnglesBuffer());
    }
 
    public void setFisheyeImageToColorPoints(BytedecoImage fThetaFisheyeRGBA8Image,

@@ -10,6 +10,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import us.ihmc.perception.opencl.OpenCLManager;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -18,7 +19,7 @@ import static org.bytedeco.opencl.global.OpenCL.*;
 
 public class OpenCLManagerTest
 {
-   @Tag("gui")
+   @Tag("opencl")
    @Test
    public void testLoadingAndPrintingParameters()
    {
@@ -26,7 +27,7 @@ public class OpenCLManagerTest
       openCLManager.destroy();
    }
 
-   @Tag("gui")
+   @Tag("opencl")
    @Test
    public void testOpenCLContext()
    {
@@ -53,7 +54,7 @@ public class OpenCLManagerTest
       openCLManager.destroy();
    }
 
-   @Tag("gui")
+   @Tag("opencl")
    @Test
    public void testOpenCLImageManipulation()
    {
@@ -96,7 +97,7 @@ public class OpenCLManagerTest
       openCLManager.destroy();
    }
 
-   @Tag("gui")
+   @Tag("opencl")
    @Test
    public void testOpenCLImageManipulation2()
    {

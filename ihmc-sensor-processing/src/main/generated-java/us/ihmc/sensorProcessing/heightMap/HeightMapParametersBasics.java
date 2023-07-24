@@ -55,4 +55,33 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    {
       set(HeightMapParameters.mahalanobisScale, mahalanobisScale);
    }
+
+   /**
+    * This is the variance added to all past measurements when a cell is translated
+    */
+   default void setVarianceAddedWhenTranslating(double varianceAddedWhenTranslating)
+   {
+      set(HeightMapParameters.varianceAddedWhenTranslating, varianceAddedWhenTranslating);
+   }
+
+   /**
+    * This is the measurement variance when the robot is standing
+    */
+   default void setSensorVarianceWhenStanding(double sensorVarianceWhenStanding)
+   {
+      set(HeightMapParameters.sensorVarianceWhenStanding, sensorVarianceWhenStanding);
+   }
+
+   /**
+    * This is the measurement variance when the robot is moving
+    */
+   default void setSensorVarianceWhenMoving(double sensorVarianceWhenMoving)
+   {
+      set(HeightMapParameters.sensorVarianceWhenMoving, sensorVarianceWhenMoving);
+   }
+
+   default void setEstimateHeightWithKalmanFilter(boolean estimateHeightWithKalmanFilter)
+   {
+      set(HeightMapParameters.estimateHeightWithKalmanFilter, estimateHeightWithKalmanFilter);
+   }
 }

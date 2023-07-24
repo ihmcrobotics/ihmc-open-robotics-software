@@ -10,9 +10,16 @@
     "lowerBound" : 1,
     "upperBound" : 10
   },
+  "Rapid regions enabled" : false,
   "Logging enabled" : false,
   "Publish color" : true,
   "Publish depth" : true,
   "Log color" : false,
-  "Log depth" : false
+  "Log depth" : false,
+  "SLAM enabled" : false,
+  "SLAM reset" : false,
+  "Support square enabled" : true,
+  "Bounding box filter" : true,
+  "Concave hull filters" : true,
+  "Active mapping" : false
 }

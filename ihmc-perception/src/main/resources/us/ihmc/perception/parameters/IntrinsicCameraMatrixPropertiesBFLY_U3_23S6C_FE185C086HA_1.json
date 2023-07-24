@@ -1,0 +1,27 @@
+{
+  "title" : "Intrinsic camera matrix properties",
+  "Focal length X" : {
+    "value" : 466.602707,
+    "lowerBound" : -100.0,
+    "upperBound" : 800.0,
+    "description" : "Focal length X"
+  },
+  "Focal length Y" : {
+    "value" : 458.293384,
+    "lowerBound" : -100.0,
+    "upperBound" : 800.0,
+    "description" : "Focal length Y"
+  },
+  "Principle point X" : {
+    "value" : 960.596734,
+    "lowerBound" : -100.0,
+    "upperBound" : 1200.0,
+    "description" : "Principle point X"
+  },
+  "Principle point Y" : {
+    "value" : 612.415159,
+    "lowerBound" : -100.0,
+    "upperBound" : 1200.0,
+    "description" : "Principle point Y"
+  }
+}

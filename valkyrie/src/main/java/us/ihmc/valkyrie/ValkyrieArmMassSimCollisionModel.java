@@ -5,6 +5,9 @@ import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FrameCapsule3D;
 import us.ihmc.euclid.referenceFrame.FrameEllipsoid3D;
 import us.ihmc.euclid.referenceFrame.FrameSphere3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -18,6 +21,7 @@ import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,14 +35,17 @@ public class ValkyrieArmMassSimCollisionModel implements RobotCollisionModel
    private String[] otherCollisionMasks;
    private String robotCollisionMask;
 
-   public ValkyrieArmMassSimCollisionModel(HumanoidJointNameMap jointMap)
+   private final RobotContactPointParameters<RobotSide> contactPointParameters;
+
+   public ValkyrieArmMassSimCollisionModel(HumanoidJointNameMap jointMap, RobotContactPointParameters<RobotSide> contactPointParameters)
    {
-      this(jointMap, false);
+      this(jointMap, contactPointParameters, false);
    }
 
-   public ValkyrieArmMassSimCollisionModel(HumanoidJointNameMap jointMap, boolean createForSimulation)
+   public ValkyrieArmMassSimCollisionModel(HumanoidJointNameMap jointMap, RobotContactPointParameters<RobotSide> contactPointParameters, boolean createForSimulation)
    {
       this.jointMap = jointMap;
+      this.contactPointParameters = contactPointParameters;
       this.createForSimulation = createForSimulation;
       // Setting default info.
       setCollidableHelper(new CollidableHelper(), jointMap.getModelName(), "other");
@@ -202,37 +209,57 @@ public class ValkyrieArmMassSimCollisionModel implements RobotCollisionModel
             JointBasics ankleRoll = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), multiBodySystem);
             MovingReferenceFrame ankleRollFrame = ankleRoll.getFrameAfterJoint();
 
-            Vector3D footShapePosition = new Vector3D(0.044, 0.0, -0.042);
-            Vector3D footShapeSize = new Vector3D(0.275, 0.16, 0.09);
+            boolean addFootBox = false;
+            boolean addFootPoints = true;
 
-            if (createForSimulation)
+            ArrayList<Point2D> footContactPointsInSoleFrame = contactPointParameters.getFootContactPoints().get(robotSide);
+            RigidBodyTransform soleToAnkleFrameTransform = jointMap.getSoleToParentFrameTransform(robotSide);
+
+            if (addFootBox)
             {
-               double[] xOffsets = new double[] { 0.163, -0.07};
-               double[] yOffsets = new double[] {- 0.067, 0.067};
-               double zOffset = -0.087;
+               Point3D footCenter = new Point3D();
 
-               for (double xOffset : xOffsets)
+               double boxLength = 0.0;
+               double boxWidth = 0.0;
+               double boxHeight = 0.03;
+
+               for (int i = 0; i < footContactPointsInSoleFrame.size(); i++)
                {
-                  for (double yOffset : yOffsets)
-                  {
-                     FrameSphere3D footContactPoint = new FrameSphere3D(ankleRollFrame, 0.005);
-                     footContactPoint.getPosition().set(xOffset, yOffset, zOffset);
-                     collidables.add(new Collidable(ankleRoll.getSuccessor(), collisionMask, collisionGroup, footContactPoint));
-                  }
+                  footCenter.add(footContactPointsInSoleFrame.get(i).getX(), footContactPointsInSoleFrame.get(i).getY(), 0.0);
+                  boxLength = Math.max(boxLength, Math.abs(footContactPointsInSoleFrame.get(i).getX() - footContactPointsInSoleFrame.get(0).getX()));
+                  boxWidth = Math.max(boxWidth, Math.abs(footContactPointsInSoleFrame.get(i).getY() - footContactPointsInSoleFrame.get(0).getY()));
                }
+               footCenter.scale(1.0 / footContactPointsInSoleFrame.size());
+               footCenter.addZ(boxHeight * 0.5);
+               soleToAnkleFrameTransform.transform(footCenter);
 
-               FrameSTPBox3D footShape = new FrameSTPBox3D(ankleRollFrame);
-               footShape.getSize().set(footShapeSize);
-               footShape.setMargins(1.0e-5, 4.0e-4);
-               footShape.getPosition().set(footShapePosition);
-               collidables.add(new Collidable(ankleRoll.getSuccessor(), collisionMask, collisionGroup, footShape));
+               // Using a STP box so the sole is slightly rounded allowing for continuous and smooth contact with the ground.
+               if (createForSimulation)
+               {
+                  FrameSTPBox3D footShape = new FrameSTPBox3D(ankleRollFrame, boxLength, boxWidth, boxHeight);
+                  footShape.setMargins(1.0e-5, 4.0e-4);
+                  footShape.getPosition().set(footCenter);
+                  collidables.add(new Collidable(ankleRoll.getSuccessor(), collisionMask, collisionGroup, footShape));
+               }
+               else
+               {
+                  FrameBox3D footShape = new FrameBox3D(ankleRollFrame, boxLength, boxWidth, boxHeight);
+                  footShape.getPosition().set(footCenter);
+                  collidables.add(new Collidable(ankleRoll.getSuccessor(), collisionMask, collisionGroup, footShape));
+               }
             }
-            else
+
+            if (addFootPoints)
             {
-               FrameBox3D footShape = new FrameBox3D(ankleRollFrame);
-               footShape.getSize().set(footShapeSize);
-               footShape.getPosition().set(footShapePosition);
-               collidables.add(new Collidable(ankleRoll.getSuccessor(), collisionMask, collisionGroup, footShape));
+               for (int i = 0; i < footContactPointsInSoleFrame.size(); i++)
+               {
+                  Point3D footContactPointInAnkleFrame = new Point3D(footContactPointsInSoleFrame.get(i));
+                  soleToAnkleFrameTransform.transform(footContactPointInAnkleFrame);
+
+                  double radius = 0.015;
+                  FrameSphere3D footCorner = new FrameSphere3D(ankleRollFrame, footContactPointInAnkleFrame, radius);
+                  collidables.add(new Collidable(ankleRoll.getSuccessor(), collisionMask, collisionGroup, footCorner));
+               }
             }
          }
       }

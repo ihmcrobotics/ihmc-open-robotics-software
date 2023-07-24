@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class VehiclePosePacketPubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.VehiclePosePacket>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::VehiclePosePacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "799c2a3e8c459a96f2e1e8e26750822a95b01887e69e8ea12d8f351ca0b5854e";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

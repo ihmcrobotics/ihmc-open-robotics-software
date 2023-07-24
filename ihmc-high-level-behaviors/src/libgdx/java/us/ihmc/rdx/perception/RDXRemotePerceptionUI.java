@@ -1,19 +1,21 @@
 package us.ihmc.rdx.perception;
 
+import us.ihmc.avatar.colorVision.DualBlackflyComms;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
+import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.rapidRegions.RapidRegionsExtractorParameters;
+import us.ihmc.perception.sensorHead.BlackflyLensProperties;
+import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.rdx.imgui.ImGuiPanel;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySetGroup;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 
 public class RDXRemotePerceptionUI
 {
-   private final ROS2Helper ros2Helper;
    private final ImGuiPanel panel = new ImGuiPanel("Perception Panel", this::renderImGuiWidgets);
 
    private final PerceptionConfigurationParameters perceptionConfigurationParameters = new PerceptionConfigurationParameters();
@@ -26,14 +28,14 @@ public class RDXRemotePerceptionUI
    private final RapidRegionsExtractorParameters sphericalRegionExtractorParameters = new RapidRegionsExtractorParameters("Spherical");
    private final PolygonizerParameters sphericalPolygonizerParameters = new PolygonizerParameters("ForSphericalRapidRegions");
    private final ConcaveHullFactoryParameters sphericalConcaveHullFactoryParameters = new ConcaveHullFactoryParameters("ForSphericalRapidRegions");
-   private final PlanarRegionMappingParameters sphericalRegionMappingParameters = new PlanarRegionMappingParameters();
+   private final PlanarRegionMappingParameters sphericalRegionMappingParameters = new PlanarRegionMappingParameters("Spherical");
+   private final IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
 
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiRemoteROS2StoredPropertySetGroup remotePropertySets;
 
-   public RDXRemotePerceptionUI(ROS2Helper ros2Helper)
+   public RDXRemotePerceptionUI(ROS2Helper ros2Helper, BlackflyLensProperties blackflyLensCombo)
    {
-      this.ros2Helper = ros2Helper;
+      ousterFisheyeColoringIntrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsOnRobot(blackflyLensCombo);
 
       remotePropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper);
 
@@ -48,6 +50,8 @@ public class RDXRemotePerceptionUI
       remotePropertySets.registerRemotePropertySet(sphericalPolygonizerParameters, PerceptionComms.SPHERICAL_POLYGONIZER_PARAMETERS);
       remotePropertySets.registerRemotePropertySet(sphericalConcaveHullFactoryParameters, PerceptionComms.SPHERICAL_CONVEX_HULL_FACTORY_PARAMETERS);
       remotePropertySets.registerRemotePropertySet(sphericalRegionMappingParameters, PerceptionComms.SPHERICAL_PLANAR_REGION_MAPPING_PARAMETERS);
+
+      remotePropertySets.registerRemotePropertySet(ousterFisheyeColoringIntrinsics, DualBlackflyComms.OUSTER_FISHEYE_COLORING_INTRINSICS);
    }
 
    public void renderImGuiWidgets()

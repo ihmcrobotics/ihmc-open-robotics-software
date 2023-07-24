@@ -15,10 +15,10 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIRegistry;
-import us.ihmc.rdx.ui.missionControl.MissionControlProcess;
-import us.ihmc.rdx.ui.missionControl.processes.*;
+import us.ihmc.rdx.ui.processes.RestartableProcess;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.impl.intraprocess.IntraProcessDomain;
+import us.ihmc.rdx.ui.processes.*;
 
 import java.util.ArrayList;
 
@@ -33,11 +33,10 @@ public abstract class RDXProcessManagerPanel
    protected final ImInt robotTarget = new ImInt(1);
    protected final String[] robotTargets = new String[] {"Real robot", "Simulation"};
    protected final ImInt ros2Mode = new ImInt(0);
-   protected final ImInt messagerMode = new ImInt(0);
    protected final ImBoolean enableROS1 = new ImBoolean(true);
    protected final ImBoolean logToFile = new ImBoolean(false);
 
-   protected final ArrayList<MissionControlProcess> processes = new ArrayList<>();
+   protected final ArrayList<RestartableProcess> processes = new ArrayList<>();
 
    private final ROS1MasterProcess ros1MasterProcess;
    private final BehaviorModuleProcess behaviorModuleProcess;
@@ -70,11 +69,11 @@ public abstract class RDXProcessManagerPanel
       RDXBehaviorUIRegistry behaviorRegistry = RDXBehaviorUIRegistry.DEFAULT_BEHAVIORS;
 
       ros1MasterProcess = new ROS1MasterProcess();
-      behaviorModuleProcess = new BehaviorModuleProcess(this::createRobotModel, ros2Mode, messagerMode, enableROS1, behaviorRegistry);
-      behaviorManagerProcess = new BehaviorManagerProcess(this::createRobotModel);
-      footstepPlanningModuleProcess = new FootstepPlanningModuleProcess(this::createRobotModel, this::getROS2Mode);
+      behaviorModuleProcess = new BehaviorModuleProcess(this::getRobotModel, ros2Mode, behaviorRegistry);
+      behaviorManagerProcess = new BehaviorManagerProcess(this::getRobotModel);
+      footstepPlanningModuleProcess = new FootstepPlanningModuleProcess(this::getRobotModel, this::getROS2Mode);
       mapsenseHeadlessProcess = new MapSenseHeadlessProcess();
-      objectDetectionProcess = new ObjectDetectionProcess(this::createRobotModel, this::getROS2Mode, this::getRobotTarget);
+      objectDetectionProcess = new ObjectDetectionProcess(this::getRobotModel, this::getROS2Mode, this::getRobotTarget);
       lidarREAProcess = new LidarREAProcess();
 
       processes.add(ros1MasterProcess);
@@ -121,7 +120,6 @@ public abstract class RDXProcessManagerPanel
       ImGui.combo(labels.get("ROS2Mode"), ros2Mode, CommunicationMode.ROS2_NAMES, CommunicationMode.VALUES.length);
       ImGui.text("Messager Mode: ");
       ImGui.sameLine();
-      ImGui.combo(labels.get("MessagerMode"), messagerMode, CommunicationMode.MESSAGER_NAMES, CommunicationMode.VALUES.length);
       ImGui.checkbox(labels.get("Enable ROS 1"), enableROS1);
       ImGui.popItemWidth();
 
@@ -129,7 +127,7 @@ public abstract class RDXProcessManagerPanel
 
       ImGui.checkbox(labels.get("Log to file"), logToFile);
 
-      for (MissionControlProcess process : processes)
+      for (RestartableProcess process : processes)
       {
          process.renderImGuiWidgets();
       }
@@ -139,7 +137,7 @@ public abstract class RDXProcessManagerPanel
 
    protected abstract String[] getRobotVersions();
 
-   protected abstract DRCRobotModel createRobotModel();
+   protected abstract DRCRobotModel getRobotModel();
 
    public void dispose()
    {
@@ -151,7 +149,7 @@ public abstract class RDXProcessManagerPanel
       lidarREAProcess.destroy();
 
       // destroy em all just in case
-      for (MissionControlProcess process : processes)
+      for (RestartableProcess process : processes)
       {
          process.destroy();
       }
@@ -162,11 +160,6 @@ public abstract class RDXProcessManagerPanel
    public void setRobotTarget(RobotTarget robotTarget)
    {
       this.robotTarget.set(robotTarget.ordinal());
-   }
-
-   public void setMessagerMode(CommunicationMode communicationMode)
-   {
-      messagerMode.set(communicationMode.ordinal());
    }
 
    public void setROS2Mode(CommunicationMode communicationMode)

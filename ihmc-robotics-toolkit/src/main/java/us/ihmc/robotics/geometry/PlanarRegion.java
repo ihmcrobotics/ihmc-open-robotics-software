@@ -45,6 +45,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
     */
    private final RigidBodyTransform fromLocalToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform fromWorldToLocalTransform = new RigidBodyTransform();
+
    private final RecyclingArrayList<Point2D> concaveHullsVertices = new RecyclingArrayList<>(Point2D::new);
    /**
     * List of the convex polygons representing this planar region. They are in the local frame of
@@ -880,7 +881,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       return containsNaN;
    }
 
-   public List<? extends Point2DReadOnly> getConcaveHull()
+   public List<Point2D> getConcaveHull()
    {
       return concaveHullsVertices;
    }
@@ -1180,7 +1181,9 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       updateBoundingBox();
       convexHull.set(other.convexHull);
 
-      updateArea();
+      this.area = other.area;
+      this.numberOfTimesMatched = other.numberOfTimesMatched;
+      this.tickOfLastMeasurement = other.tickOfLastMeasurement;
    }
 
    public void setTransformOnly(PlanarRegion other)

@@ -7,6 +7,7 @@ import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.Random;
 
+import controller_msgs.msg.dds.FootstepDataMessage;
 import org.bytedeco.librealsense2.rs2_error;
 import org.bytedeco.librealsense2.rs2_frame;
 import org.bytedeco.librealsense2.global.realsense2;
@@ -176,7 +177,7 @@ public class L515SimpleSnapperExample implements FootstepAdjustment, L515DepthIm
     * different Z heights at the specified sample locations 
     */
    @Override
-   public boolean adjustFootstep(FramePose3DReadOnly stancePose, FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedFootstep)
+   public boolean adjustFootstep(FramePose3DReadOnly stancePose, FramePose2DReadOnly footstepPose, RobotSide footSide, FootstepDataMessage adjustedFootstep)
    {
       desiredFootstepPose.set(footstepPose);
       desiredFootstepFrame.setPoseAndUpdate(desiredFootstepPose);
@@ -246,13 +247,14 @@ public class L515SimpleSnapperExample implements FootstepAdjustment, L515DepthIm
          return false;
       }
         
-      if(highestPoint.getZ() < adjustedFootstep.getZ() + 0.3)
+      if(highestPoint.getZ() < adjustedFootstep.getLocation().getZ() + 0.3)
       {
          //just update the Z height
          updatedFootStepPose.setIncludingFrame(footstepPose);
          updatedFootStepPose.getPosition().setZ(highestPoint.getZ());
          
-         adjustedFootstep.set(updatedFootStepPose);
+         adjustedFootstep.getLocation().set(updatedFootStepPose.getPosition());
+         adjustedFootstep.getOrientation().set(updatedFootStepPose.getOrientation());
          return true;
       }
       return false;

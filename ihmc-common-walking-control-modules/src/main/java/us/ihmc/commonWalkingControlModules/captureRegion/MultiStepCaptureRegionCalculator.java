@@ -21,8 +21,13 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -35,7 +40,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * you can't cross over, because only one side will allow you to step towards the goal. In this way, this class computes the reachability aware N-Step
  * capture region.
  */
-public class MultiStepCaptureRegionCalculator
+public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -49,7 +54,7 @@ public class MultiStepCaptureRegionCalculator
    private final BooleanProvider useCrossOverSteps;
 
    private final StepAdjustmentReachabilityConstraint reachabilityConstraint;
-
+   private final SideDependentList<? extends ReferenceFrame> soleFrames;
    final FrameVector2D vertexExtrusionVector = new FrameVector2D();
    final FramePoint2D extrudedFirstVertex = new FramePoint2D();
    final FramePoint2D extrudedSecondVertex = new FramePoint2D();
@@ -58,18 +63,21 @@ public class MultiStepCaptureRegionCalculator
 
    private MultiStepCaptureRegionVisualizer visualizer = null;
 
-   public MultiStepCaptureRegionCalculator(StepAdjustmentReachabilityConstraint reachabilityConstraint,
+   public MultiStepCaptureRegionCalculator(SideDependentList<? extends ReferenceFrame> soleFrames,
+                                           StepAdjustmentReachabilityConstraint reachabilityConstraint,
                                            BooleanProvider useCrossOverSteps,
                                            YoRegistry parentRegistry)
    {
-      this(reachabilityConstraint, useCrossOverSteps, parentRegistry, null);
+      this(soleFrames, reachabilityConstraint, useCrossOverSteps, parentRegistry, null);
    }
 
-   public MultiStepCaptureRegionCalculator(StepAdjustmentReachabilityConstraint reachabilityConstraint,
+   public MultiStepCaptureRegionCalculator(SideDependentList<? extends ReferenceFrame> soleFrames,
+                                           StepAdjustmentReachabilityConstraint reachabilityConstraint,
                                            BooleanProvider useCrossOverSteps,
                                            YoRegistry parentRegistry,
                                            YoGraphicsListRegistry graphicsListRegistry)
    {
+      this.soleFrames = soleFrames;
       this.reachabilityConstraint = reachabilityConstraint;
       this.useCrossOverSteps = useCrossOverSteps;
 
@@ -105,8 +113,8 @@ public class MultiStepCaptureRegionCalculator
     */
    public void compute(RobotSide currentStanceSide, FrameConvexPolygon2DReadOnly oneStepCaptureRegion, double stepDuration, double omega, int stepsInQueue)
    {
-      multiStepRegion.clear(oneStepCaptureRegion.getReferenceFrame());
-      vertexExtrusionVector.setReferenceFrame(oneStepCaptureRegion.getReferenceFrame());
+      multiStepRegion.clear(soleFrames.get(currentStanceSide));
+      vertexExtrusionVector.setReferenceFrame(soleFrames.get(currentStanceSide));
 
       stepsConsideringForRecovery.set(Math.min(stepsInQueue, maxStepsToConsider.getValue()));
       this.stepsInQueue.set(stepsInQueue);
@@ -144,10 +152,14 @@ public class MultiStepCaptureRegionCalculator
          polygon.update();
       }
 
+      extrudedFirstVertex.setReferenceFrame(soleFrames.get(currentStanceSide));
+      extrudedSecondVertex.setReferenceFrame(soleFrames.get(currentStanceSide));
+
       for (int i = 0; i < oneStepCaptureRegion.getNumberOfVertices(); i++)
       {
          // compute the current edge of the capture region, which will then be extruded in a certain direction.
          edgeToExtrude.setIncludingFrame(oneStepCaptureRegion.getVertex(i), oneStepCaptureRegion.getNextVertex(i));
+         edgeToExtrude.changeFrame(soleFrames.get(currentStanceSide));
 
          // compute how much additional capturability you get along that edge by considering how additional steps can be taken. These also consider the
          // reachability constraints of the robot during that expansion.
@@ -159,10 +171,10 @@ public class MultiStepCaptureRegionCalculator
                                         oppositeSupportMultiplier);
 
          // extrude that edge
-         extrudedFirstVertex.setIncludingFrame(oneStepCaptureRegion.getVertex(i));
+         extrudedFirstVertex.setMatchingFrame(oneStepCaptureRegion.getVertex(i));
          extrudedFirstVertex.add(vertexExtrusionVector);
 
-         extrudedSecondVertex.setIncludingFrame(oneStepCaptureRegion.getNextVertex(i));
+         extrudedSecondVertex.setMatchingFrame(oneStepCaptureRegion.getNextVertex(i));
          extrudedSecondVertex.add(vertexExtrusionVector);
 
          if (visualizer != null)
@@ -193,8 +205,8 @@ public class MultiStepCaptureRegionCalculator
                                                double oppositeSupportMultiplier)
    {
 
-      bestStepDirectionForStanceSide.setReferenceFrame(edgeToExtrude.getReferenceFrame());
-      bestStepDirectionForSwingSide.setReferenceFrame(edgeToExtrude.getReferenceFrame());
+      bestStepDirectionForStanceSide.setReferenceFrame(soleFrames.get(currentStanceSide));
+      bestStepDirectionForSwingSide.setReferenceFrame(soleFrames.get(currentStanceSide));
 
       // Compute the step for each side that would best help recover from additiional error in that direction.
       getDirectionOfFurthestReachableStepFromEdge(initialReachabilityRegions.get(currentStanceSide), edgeToExtrude, bestStepDirectionForStanceSide);
@@ -268,5 +280,13 @@ public class MultiStepCaptureRegionCalculator
                                                                  origin);
          stepToPack.setAndNegate(origin);
       }
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D("Multi Step Capture Region", yoMultiStepRegion, ColorDefinitions.Yellow()));
+      return group;
    }
 }

@@ -64,12 +64,9 @@ public class RapidPlanarRegionsCustomizer
    {
       return rapidRegion.getBoundaryVertices()
                         .stream()
-                        .map(boundaryVertex ->
-                             {
-                                return PolygonizerTools.toPointInPlane(new Point3D(boundaryVertex),
-                                                                       origin,
-                                                                       orientation);
-                             })
+                        .map(boundaryVertex -> PolygonizerTools.toPointInPlane(new Point3D(boundaryVertex),
+                                                               origin,
+                                                               orientation))
                         .filter(point2D -> Double.isFinite(point2D.getX()) && Double.isFinite(point2D.getY()))
                         .collect(Collectors.toList());
    }
@@ -119,19 +116,6 @@ public class RapidPlanarRegionsCustomizer
          hullCounter++;
          regionId = 31 * regionId + hullCounter;
       }
-   }
-
-   public void applyConcaveHullFilters(ConcaveHullCollection concaveHulls)
-   {
-      // Apply some simple filtering to reduce the number of vertices and hopefully the number of convex polygons.
-      double shallowAngleThreshold = polygonizerParameters.getShallowAngleThreshold();
-      double peakAngleThreshold = polygonizerParameters.getPeakAngleThreshold();
-      double lengthThreshold = polygonizerParameters.getLengthThreshold();
-
-      ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHulls);
-      ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHulls);
-      if (polygonizerParameters.getCutNarrowPassage())
-         concaveHulls = ConcaveHullPruningFilteringTools.concaveHullNarrowPassageCutter(lengthThreshold, concaveHulls);
    }
 
    public ConcaveHullFactoryParameters getConcaveHullFactoryParameters()
