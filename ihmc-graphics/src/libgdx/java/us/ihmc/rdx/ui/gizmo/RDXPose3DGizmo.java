@@ -41,6 +41,7 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRDragData;
 import us.ihmc.rdx.vr.RDXVRPickResult;
@@ -163,12 +164,14 @@ public class RDXPose3DGizmo implements RenderableProvider
       gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
    }
 
-   public void createAndSetupDefault(RDX3DPanel panel3D)
+   public void createAndSetupDefault(RDXBaseUI baseUI)
    {
-      create(panel3D);
-      panel3D.addImGui3DViewPickCalculator(this::calculate3DViewPick);
-      panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
-      panel3D.getScene().addRenderableProvider(this, RDXSceneLevel.VIRTUAL);
+      create(baseUI.getPrimary3DPanel());
+      baseUI.getVRManager().getContext().addVRPickCalculator(this::calculateVRViewPick);
+      baseUI.getVRManager().getContext().addVRInputProcessor(this::processVRViewInput);
+      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
+      baseUI.getPrimary3DPanel().getScene().addRenderableProvider(this, RDXSceneLevel.VIRTUAL);
    }
 
    public void create(RDX3DPanel panel3D)

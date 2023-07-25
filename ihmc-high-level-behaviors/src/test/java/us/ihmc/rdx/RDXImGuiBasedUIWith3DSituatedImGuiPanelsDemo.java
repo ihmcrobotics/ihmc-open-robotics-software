@@ -26,9 +26,9 @@ public class RDXImGuiBasedUIWith3DSituatedImGuiPanelsDemo
 
             baseUI.getImGuiPanelManager().addPanel("Window 1", this::renderWindow2);
 
-            poseGizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
+            poseGizmo.createAndSetupDefault(baseUI);
 
-            poseGizmo2.createAndSetupDefault(baseUI.getPrimary3DPanel());
+            poseGizmo2.createAndSetupDefault(baseUI);
             poseGizmo2.getTransformToParent().getTranslation().setZ(0.5);
 
             situatedImGuiPanel = new RDX3DSituatedImGuiPanel("Window 2", this::renderWindow2);

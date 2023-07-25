@@ -41,7 +41,7 @@ public class RDXModelScalingDemo
             baseUI.getImGuiPanelManager().addPanel("Scaling", this::renderImGuiWidgets);
 
             gizmo = new RDXPose3DGizmo();
-            gizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
+            gizmo.createAndSetupDefault(baseUI);
          }
 
          @Override
