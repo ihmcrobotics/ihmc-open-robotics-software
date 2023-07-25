@@ -50,12 +50,12 @@ public class RDXKeyBindings
             {
                boolean match = false;
 
-               if (function.toLowerCase().contains(filter.get()))
+               if (function.toLowerCase().contains(filter.get().toLowerCase()))
                {
                   match = true;
                }
 
-               if (description.toLowerCase().contains(filter.get()))
+               if (description.toLowerCase().contains(filter.get().toLowerCase()))
                {
                   match = true;
                }
