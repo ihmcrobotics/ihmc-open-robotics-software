@@ -31,7 +31,7 @@ public class GradientDescentModule
    private double deltaThreshold = 10E-10;
    private int maximumIterations = 1000;
    private double unboundedStepSize = -10.0; // TODO these signs are confusing...make everything positive
-   private double stepSizeRatio = 0.5; // Step size
+   private double stepSizeRatio = 0.3; // Step size is based on search space limits. Initial step size is ratio * (max - min).
    private double perturbRatio = 0.5; // ratio on step size for gradient check
    private double reducingStepSizeRatio = 1.1; // Learning rate reduction
    private boolean verbose = false;
@@ -51,7 +51,7 @@ public class GradientDescentModule
          this.optimalInput.add(0.0);
          this.inputUpperLimit.add(Double.POSITIVE_INFINITY);
          this.inputLowerLimit.add(Double.NEGATIVE_INFINITY);
-         this.stepSizes.add(stepSizeRatio);
+         this.stepSizes.add(unboundedStepSize);
       }
    }
 

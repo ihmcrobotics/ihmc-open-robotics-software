@@ -22,6 +22,7 @@ public class WrappedGradientDescent implements Optimizer
    private TDoubleArrayList lowerBound = null;
    private TDoubleArrayList upperBound = null;
    private boolean verbose = false;
+   private double stepSizeRatio = 0.5;
 
    public WrappedGradientDescent()
    {
@@ -72,6 +73,11 @@ public class WrappedGradientDescent implements Optimizer
 
    public void setMaxIterations(int maxIterations) {this.maxIterations = maxIterations;}
 
+   public void setSteSizeRatio(double stepSizeRatio)
+   {
+      this.stepSizeRatio = stepSizeRatio;
+   }
+
    public void setVerbose(boolean verbose)
    {
       this.verbose = verbose;
@@ -99,6 +105,7 @@ public class WrappedGradientDescent implements Optimizer
       gradientDescentModule.setInputLowerLimit(lowerBound);
       gradientDescentModule.setInputUpperLimit(upperBound);
       gradientDescentModule.setVerbose(verbose);
+      gradientDescentModule.setStepSizeRatio(stepSizeRatio);
 
       gradientDescentModule.run();
       return getOptimalParameters();

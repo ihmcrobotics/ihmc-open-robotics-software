@@ -46,6 +46,7 @@ public class AugmentedLagrangeOptimizationProblem
    private final List<ConstraintFunction> equalityConstraints = new ArrayList<>();
 
    private AugmentedLagrangeConstructor augmentedLagrangeConstructor;
+   private final static double CONSTRAINT_SATISFIED_THRESHOLD = 1e-6;
 
    // ============= Setup =======================
 
@@ -168,6 +169,27 @@ public class AugmentedLagrangeOptimizationProblem
    public void updateLagrangeMultipliers(DMatrixD1 xOptimal)
    {
       augmentedLagrangeConstructor.updateLagrangeMultipliers(evaluateEqualityConstraints(xOptimal), evaluateInequalityConstraints(xOptimal));
+   }
+
+   public boolean constraintsHaveBeenSatisfied(DMatrixD1 x)
+   {
+      DMatrixD1 inequalityConstraintEvaluations = evaluateInequalityConstraints(x);
+      DMatrixD1 equalityConstraintEvaluations = evaluateEqualityConstraints(x);
+      for (int i = 0; i < inequalityConstraintEvaluations.getNumElements(); i++)
+      {
+         if (inequalityConstraintEvaluations.get(i) < 0)
+         {
+            return false;
+         }
+      }
+      for (int i = 0; i < equalityConstraintEvaluations.getNumElements(); i++)
+      {
+         if (Math.abs(inequalityConstraintEvaluations.get(i)) > CONSTRAINT_SATISFIED_THRESHOLD)
+         {
+            return false;
+         }
+      }
+      return true;
    }
 
    // ================================ Getter/Setter ========================================
