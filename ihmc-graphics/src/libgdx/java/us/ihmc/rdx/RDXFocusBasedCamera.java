@@ -113,6 +113,7 @@ public class RDXFocusBasedCamera extends Camera
       RDXBaseUI.getInstance().getKeyBindings().register("Move down", "Z");
       RDXBaseUI.getInstance().getKeyBindings().register("Zoom in (broken?)", "C");
       RDXBaseUI.getInstance().getKeyBindings().register("Zoom out (broken?)", "E");
+      RDXBaseUI.getInstance().getKeyBindings().register("Zoom in / out", "Mouse scroll");
       RDXBaseUI.getInstance().getKeyBindings().register("Fine adjustment", "Shift");
       RDXBaseUI.getInstance().getKeyBindings().register("Drag to orient camera", "Left mouse");
       RDXBaseUI.getInstance().getKeyBindings().register("Drag to pan camera", "Middle mouse");
