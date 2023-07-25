@@ -171,6 +171,7 @@ public class RDXBaseUI
          ((Lwjgl3Graphics) Gdx.graphics).getWindow().setPosition(x, y);
          return true;
       });
+      layoutManager.getSaveListeners().add(imGuiWindowAndDockSystem::saveConfiguration);
       layoutManager.applyLayoutDirectory();
 
 //      guiRecorder = new RDXLinuxGUIRecorder(24, 0.8f, getClass().getSimpleName());
