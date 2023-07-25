@@ -4,7 +4,6 @@ import imgui.ImGui;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -94,7 +93,8 @@ public class RDXRapidHeightMapExtractionDemo
             baseUI.getPrimaryScene().addRenderableProvider(heightMapRenderer, RDXSceneLevel.VIRTUAL);
             baseUI.getPrimaryScene().addRenderableProvider(heightMapVisualizer);
 
-            createForOuster(128, 2048);
+            createForSpherical(128, 2048);
+            //createForPerspective(768, 1024);
 
             updateHeightMap();
 
@@ -103,7 +103,7 @@ public class RDXRapidHeightMapExtractionDemo
             navigationPanel.setRenderMethod(this::renderNavigationPanel);
          }
 
-         private void createForOuster(int depthHeight, int depthWidth)
+         private void createForSpherical(int depthHeight, int depthWidth)
          {
             sensorTopicName = PerceptionLoggerConstants.OUSTER_DEPTH_NAME;
             perceptionDataLoader.openLogFile(perceptionLogFile);
@@ -125,7 +125,7 @@ public class RDXRapidHeightMapExtractionDemo
             heightMapRenderer.create(rapidHeightMapUpdater.getCellsPerAxis() * rapidHeightMapUpdater.getCellsPerAxis());
          }
 
-         private void createForRealsense(int depthHeight, int depthWidth)
+         private void createForPerspective(int depthHeight, int depthWidth)
          {
             sensorTopicName = PerceptionLoggerConstants.L515_DEPTH_NAME;
             perceptionDataLoader.openLogFile(perceptionLogFile);
@@ -141,7 +141,8 @@ public class RDXRapidHeightMapExtractionDemo
                                                      loadedDepthImage.getBytedecoOpenCVMat());
             loadedDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
 
-            rapidHeightMapUpdater.setHeightMapResolution(3.0f, 0.1f);
+            rapidHeightMapUpdater.setDepthIntrinsics(654.29,654.29,651.14,361.89);
+            rapidHeightMapUpdater.setHeightMapResolution(3.0f, 0.01f);
             rapidHeightMapUpdater.create(openCLManager, loadedDepthImage, 1);
             heightMapRenderer.create(rapidHeightMapUpdater.getCellsPerAxis() * rapidHeightMapUpdater.getCellsPerAxis());
          }

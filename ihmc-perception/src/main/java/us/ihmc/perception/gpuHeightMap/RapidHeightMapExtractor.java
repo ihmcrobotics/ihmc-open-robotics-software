@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLManager;
@@ -22,8 +23,6 @@ public class RapidHeightMapExtractor
 {
    private float gridWidthInMeters = 8.0f;
    private float cellSizeXYInMeters = 0.02f;
-
-   private final int TOTAL_NUM_PARAMS = 8;
 
    private int centerIndex;
    private int cellsPerAxis;
@@ -44,6 +43,8 @@ public class RapidHeightMapExtractor
    private _cl_kernel heightMapUpdateKernel;
    private BytedecoImage inputDepthImage;
    private BytedecoImage outputHeightMapImage;
+
+   private final CameraIntrinsics cameraIntrinsics = new CameraIntrinsics();
 
    private boolean firstRun = true;
    private boolean patchSizeChanged = true;
@@ -89,6 +90,10 @@ public class RapidHeightMapExtractor
       parametersBuffer.setParameter((float) gridCenter.getX());
       parametersBuffer.setParameter((float) gridCenter.getY());
       parametersBuffer.setParameter((float) mode);
+      parametersBuffer.setParameter((float) cameraIntrinsics.getCx());
+      parametersBuffer.setParameter((float) cameraIntrinsics.getCy());
+      parametersBuffer.setParameter((float) cameraIntrinsics.getFx());
+      parametersBuffer.setParameter((float) cameraIntrinsics.getFy());
 
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
    }
@@ -226,5 +231,13 @@ public class RapidHeightMapExtractor
       this.cellSizeXYInMeters = cellSizeXYInMeters;
 
       this.cellsPerAxis = (int) (gridWidthInMeters / cellSizeXYInMeters);
+   }
+
+   public void setDepthIntrinsics(double fx, double fy, double cx, double cy)
+   {
+      cameraIntrinsics.setFx(fx);
+      cameraIntrinsics.setFy(fy);
+      cameraIntrinsics.setCx(cx);
+      cameraIntrinsics.setCy(cy);
    }
 }
