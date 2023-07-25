@@ -4,6 +4,7 @@
 #define DEPTH_INPUT_WIDTH 3
 #define HEIGHT_MAP_CENTER_X 4
 #define HEIGHT_MAP_CENTER_Y 5
+#define MODE 6
 
 #define VERTICAL_FOV M_PI_2_F
 #define HORIZONTAL_FOV (2.0f * M_PI_F)

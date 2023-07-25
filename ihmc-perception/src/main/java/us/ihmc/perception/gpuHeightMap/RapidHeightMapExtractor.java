@@ -20,11 +20,15 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 public class RapidHeightMapExtractor
 {
-   private static final float gridWidthInMeters = 8.0f;
-   private static final float cellSizeXYInMeters = 0.02f;
+   private float gridWidthInMeters = 8.0f;
+   private float cellSizeXYInMeters = 0.02f;
+
+   private final int TOTAL_NUM_PARAMS = 8;
 
    private int centerIndex;
    private int cellsPerAxis;
+
+   private int mode = 0; // 0 -> Ouster, 1 -> Realsense
 
    private OpenCLManager openCLManager;
    private OpenCLFloatParameters parametersBuffer;
@@ -48,8 +52,9 @@ public class RapidHeightMapExtractor
 
    private HeightMapData latestHeightMapData;
 
-   public void create(OpenCLManager openCLManager,  BytedecoImage depthImage)
+   public void create(OpenCLManager openCLManager,  BytedecoImage depthImage, int mode)
    {
+      this.mode = mode;
       this.inputDepthImage = depthImage;
       this.openCLManager = openCLManager;
       rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapExtractor", "HeightMapUtils.cl");
@@ -83,6 +88,7 @@ public class RapidHeightMapExtractor
       parametersBuffer.setParameter((float) inputDepthImage.getImageWidth());
       parametersBuffer.setParameter((float) gridCenter.getX());
       parametersBuffer.setParameter((float) gridCenter.getY());
+      parametersBuffer.setParameter((float) mode);
 
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
    }
@@ -212,5 +218,13 @@ public class RapidHeightMapExtractor
    public HeightMapData getLatestHeightMapData()
    {
       return latestHeightMapData;
+   }
+
+   public void setHeightMapResolution(float widthInMeters, float cellSizeXYInMeters)
+   {
+      this.gridWidthInMeters = widthInMeters;
+      this.cellSizeXYInMeters = cellSizeXYInMeters;
+
+      this.cellsPerAxis = (int) (gridWidthInMeters / cellSizeXYInMeters);
    }
 }

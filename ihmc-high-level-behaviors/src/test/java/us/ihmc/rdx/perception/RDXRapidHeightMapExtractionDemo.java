@@ -119,7 +119,30 @@ public class RDXRapidHeightMapExtractionDemo
                                                      loadedDepthImage.getBytedecoOpenCVMat());
             loadedDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
 
-            rapidHeightMapUpdater.create(openCLManager, loadedDepthImage);
+            rapidHeightMapUpdater.setHeightMapResolution(8.0f,0.02f);
+            rapidHeightMapUpdater.create(openCLManager, loadedDepthImage, 0);
+
+            heightMapRenderer.create(rapidHeightMapUpdater.getCellsPerAxis() * rapidHeightMapUpdater.getCellsPerAxis());
+         }
+
+         private void createForRealsense(int depthHeight, int depthWidth)
+         {
+            sensorTopicName = PerceptionLoggerConstants.L515_DEPTH_NAME;
+            perceptionDataLoader.openLogFile(perceptionLogFile);
+
+            loadedDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
+
+            perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer);
+            perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, sensorOrientationBuffer);
+
+            perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.L515_DEPTH_NAME,
+                                                     frameIndex.get(),
+                                                     depthBytePointer,
+                                                     loadedDepthImage.getBytedecoOpenCVMat());
+            loadedDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+
+            rapidHeightMapUpdater.setHeightMapResolution(3.0f, 0.1f);
+            rapidHeightMapUpdater.create(openCLManager, loadedDepthImage, 1);
             heightMapRenderer.create(rapidHeightMapUpdater.getCellsPerAxis() * rapidHeightMapUpdater.getCellsPerAxis());
          }
 
