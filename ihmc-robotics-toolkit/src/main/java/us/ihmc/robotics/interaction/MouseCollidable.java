@@ -4,6 +4,7 @@ import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.shape.primitives.interfaces.*;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.log.LogTools;
@@ -66,6 +67,10 @@ public class MouseCollidable
     *                            which is why we don't pass it in in the constructor
     * @return The closest collision distance of NaN if not colliding
     */
+   public boolean pointCollide(Point3DReadOnly pickPoint)
+   {
+      return shape.isPointInside(pickPoint);
+   }
    public double collide(Line3DReadOnly pickRayInWorld, ReferenceFrame collisionShapeFrame)
    {
       if (shape instanceof Sphere3DReadOnly sphere)
@@ -130,5 +135,10 @@ public class MouseCollidable
          LogTools.warn("Shape not handled: {}", shape);
       }
       return Double.NaN;
+   }
+
+   public Point3DReadOnly getClosestInteresection()
+   {
+      return boxRayIntersection.getFirstIntersectionToPack();
    }
 }
