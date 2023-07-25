@@ -57,7 +57,7 @@ public class RDXKeyBindings
             ImGui.text(function);
             ImGui.tableSetColumnIndex(1);
             ImGui.pushItemFlag(ImGuiItemFlags.Disabled, true);
-            ImGui.button(key, 80, 0);
+            ImGui.button(key, 85, 0);
             ImGui.popItemFlag();
          }
       }
