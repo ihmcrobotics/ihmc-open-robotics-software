@@ -492,7 +492,7 @@ public class RDXBaseUI
 
       if (plotFrameRate.get())
       {
-         // Currently we manually tune this value when we change the stuff in the status area
+         // Currently we manually tune this value when we change the stuff in the status a
          float menuBarStatusWidth = 320.0f;
          ImGui.sameLine(ImGui.getWindowSizeX() - menuBarStatusWidth);
          frameRateDisplay.renderPlot();
