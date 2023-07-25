@@ -478,6 +478,71 @@ public class CaptureRegionSafetyHeuristicsTest
       assertTrue(heuristics.getCaptureRegionWithSafetyMargin().signedDistance(icp) > heuristics.extraDistanceToStepFromStanceFoot.getValue());
    }
 
+
+   @Test
+   public void testCaptureRegionIsALineFromData()
+   {
+      // This test is set up with data found on the robot. We want to make sure that it runs properly.
+      double footWidth = 0.2;
+      double kinematicsStepRange = 3.0;
+
+      RobotSide swingSide = RobotSide.LEFT;
+      double swingTimeRemaining = 0.0;
+      double omega0 = 3.2;
+      double feedbackAlpha = 0.1298557947664173;
+
+      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
+
+      OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicsStepRange,
+                                                                                                  ankleZUpFrames, registry, graphicsListRegistry);
+      CaptureRegionSafetyHeuristics heuristics = new CaptureRegionSafetyHeuristics(() -> kinematicsStepRange, registry);
+
+      new DefaultParameterReader().readParametersInRegistry(registry);
+
+      FrameConvexPolygon2D supportFootPolygon = new FrameConvexPolygon2D(worldFrame);
+      supportFootPolygon.addVertex(-0.01602344598463528, 0.6540517921879537);
+      supportFootPolygon.addVertex(-0.009203592737966212, 0.655194692915839);
+      supportFootPolygon.addVertex(-0.002348625194784841, 0.6280353471984814);
+      supportFootPolygon.addVertex(-0.014468165165851851, 0.626003907028601);
+      supportFootPolygon.update();
+
+      FramePoint2D icp = new FramePoint2D(worldFrame, -0.056957325482394634, 0.8148115127926535);
+      FramePoint2D cmp = new FramePoint2D(worldFrame, -0.015133100475001895, 0.6487484280795994);
+
+//      supportFootPolygon.scale(cmp, feedbackAlpha);
+
+      captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, icp, omega0, supportFootPolygon);
+      FrameConvexPolygon2D captureRegion = captureRegionCalculator.getCaptureRegion();
+
+      heuristics.computeCaptureRegionWithSafetyHeuristics(swingSide.getOppositeSide(), icp, supportFootPolygon.getCentroid(), captureRegion);
+
+      assertTheShrunkenRegionIsInTheUnshrunkenRegion(captureRegion, heuristics.getCaptureRegionWithSafetyMargin(), 1e-5);
+      // Check to make sure that the extra distance projection functioned properly. The ICP should be AT LEAST that distance from the capture region
+      assertTrue(heuristics.getCaptureRegionWithSafetyMargin().signedDistance(icp) > heuristics.extraDistanceToStepFromStanceFoot.getValue());
+      // Shouldn't be that far away, though
+      assertTrue(heuristics.getCaptureRegionWithSafetyMargin().signedDistance(icp) < 2 * heuristics.extraDistanceToStepFromStanceFoot.getValue());
+
+      if (PLOT_RESULTS)
+      {
+         YoFrameConvexPolygon2D supportFootViz = new YoFrameConvexPolygon2D("supportFoot", worldFrame, 4, registry);
+         YoFrameConvexPolygon2D heuristicsViz = new YoFrameConvexPolygon2D("heuristicsViz", worldFrame, 50, registry);
+         heuristicsViz.setMatchingFrame(heuristics.getCaptureRegionWithSafetyMargin(), false);
+         supportFootViz.setMatchingFrame(supportFootPolygon, false);
+
+         graphicsListRegistry.registerArtifact("test", new YoArtifactPolygon("heuristics", heuristicsViz, Color.YELLOW, false));
+         graphicsListRegistry.registerArtifact("test", new YoArtifactPolygon("supportFoot", supportFootViz, Color.green, false));
+
+         SimulationConstructionSet2 scs = new SimulationConstructionSet2();
+         scs.getRootRegistry().addChild(registry);
+         scs.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(graphicsListRegistry));
+
+         scs.startSimulationThread();
+         scs.simulateNow(1);
+
+         ThreadTools.sleepForever();
+      }
+   }
+
    @Test
    public void testCaptureRegionWithNoTimeLeft()
    {
