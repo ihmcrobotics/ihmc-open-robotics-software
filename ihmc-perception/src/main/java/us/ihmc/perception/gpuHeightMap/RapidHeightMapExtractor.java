@@ -230,7 +230,8 @@ public class RapidHeightMapExtractor
       this.gridWidthInMeters = widthInMeters;
       this.cellSizeXYInMeters = cellSizeXYInMeters;
 
-      this.cellsPerAxis = (int) (gridWidthInMeters / cellSizeXYInMeters);
+      centerIndex = HeightMapTools.computeCenterIndex(gridWidthInMeters, cellSizeXYInMeters);
+      cellsPerAxis = 2 * centerIndex + 1;
    }
 
    public void setDepthIntrinsics(double fx, double fy, double cx, double cy)

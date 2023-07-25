@@ -38,16 +38,16 @@ float3 back_project_perspective(int2 pos, float Z, global float* params)
    float X = (pos.x - params[DEPTH_CX]) / params[DEPTH_FX] * Z;
    float Y = (pos.y - params[DEPTH_CY]) / params[DEPTH_FY] * Z;
 
-   float4 point = (float4) (Z, -X, -Y, 0);
+   float3 point = (float3) (Z, -X, -Y);
    return point;
 }
 
-float2 perspective_projection(float3 point, global float* params)
+int2 perspective_projection(float3 point, global float* params)
 {
    float x = point.x / point.z * params[DEPTH_FX] + params[DEPTH_CX];
    float y = point.y / point.z * params[DEPTH_FY] + params[DEPTH_CY];
 
-   return (float2) (x, y);
+   return (int2) (x, y);
 }
 
 /**
@@ -110,15 +110,14 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
       (float3)(worldToSensorTf[8], worldToSensorTf[9], worldToSensorTf[10]),
       (float3)(worldToSensorTf[3], worldToSensorTf[7], worldToSensorTf[11]));
 
-  //int2 projectedPoint = spherical_projection(cellCenterInSensor, params);
-
+  int2 projectedPoint;
   if (params[MODE] == 0) // Spherical Projection
   {
-     int2 projectedPoint = spherical_projection(cellCenterInSensor, params);
+     projectedPoint = spherical_projection(cellCenterInSensor, params);
   }
   else if (params[MODE] == 1) // Perspective Projection
   {
-     int2 projectedPoint = perspective_projection(cellCenterInSensor, params);
+     projectedPoint = perspective_projection(cellCenterInSensor, params);
   }
 
   int WINDOW_WIDTH = 20;
@@ -141,13 +140,14 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
       {
         float radius = ((float)read_imageui(in, (int2) (yaw_count, pitch_count)).x) / (float)1000;
 
+        float3 pointInWorld;
         if (params[MODE] == 0) // Spherical
         {
-            float3 pointInWorld; = back_project_spherical(yaw_count,pitch_count,radius,params);
+            pointInWorld = back_project_spherical(yaw_count,pitch_count,radius,params);
         }
         else if (params[MODE] == 1) // Perspective
         {
-            float3 pointInWorld; = back_project_perspective((int2) (yaw_count, pitch_count), radius, params);
+            pointInWorld = back_project_perspective((int2) (yaw_count, pitch_count), radius, params);
         }
 
         if (pointInWorld.x > minX && pointInWorld.x < maxX && pointInWorld.y > minY && pointInWorld.y < maxY)
