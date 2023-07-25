@@ -146,6 +146,9 @@ public class RDXPose3DGizmo implements RenderableProvider
       RDXBaseUI.getInstance().getKeyBindings().register("Move gizmo toward from camera", "Down arrow");
       RDXBaseUI.getInstance().getKeyBindings().register("Move gizmo left", "Left arrow");
       RDXBaseUI.getInstance().getKeyBindings().register("Move gizmo right", "Right arrow");
+      RDXBaseUI.getInstance().getKeyBindings().register("Drag gizmo", "Left mouse");
+      RDXBaseUI.getInstance().getKeyBindings().register("Drag gizmo (yaw)", "Right mouse");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move gizmo slowly", "Shift");
    }
 
    public void setGizmoFrame(ReferenceFrame gizmoFrame)
