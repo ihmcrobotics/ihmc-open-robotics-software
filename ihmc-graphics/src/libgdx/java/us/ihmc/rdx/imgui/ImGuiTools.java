@@ -205,6 +205,21 @@ public class ImGuiTools
       return ImGui.sliderScalar(label, ImGuiDataType.Double, imDouble, minValue, maxValue, format, imGuiSliderFlags);
    }
 
+   public static boolean sliderInt(String label, ImInt imInt, int minValue, int maxValue)
+   {
+      return ImGui.sliderScalar(label, ImGuiDataType.U32, imInt, minValue, maxValue);
+   }
+
+   public static boolean sliderInt(String label, ImInt imInt, int minValue, int maxValue, String format)
+   {
+      return ImGui.sliderScalar(label, ImGuiDataType.U32, imInt, minValue, maxValue, format);
+   }
+
+   public static boolean sliderInt(String label, ImInt imInt, int minValue, int maxValue, String format, int imGuiSliderFlags)
+   {
+      return ImGui.sliderScalar(label, ImGuiDataType.U32, imInt, minValue, maxValue, format, imGuiSliderFlags);
+   }
+
    /**
     * Returns true if the user presses Enter, but unlike the EnterReturnsTrue flag,
     * using this method, the currently input text can be retrieved without the
