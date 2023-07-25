@@ -117,8 +117,8 @@ public class RDXPose3DGizmo implements RenderableProvider
    private final Random random = new Random();
    private boolean proportionsNeedUpdate = false;
    private FrameBasedGizmoModification frameBasedGizmoModification;
-   private SideDependentList<SixDoFSelection> closestVRCollisionSelection = new SideDependentList<>(null, null);
-   private SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>();
+   private final SideDependentList<SixDoFSelection> closestVRCollisionSelection = new SideDependentList<>(null, null);
+   private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
 
    public RDXPose3DGizmo()
    {
@@ -211,18 +211,18 @@ public class RDXPose3DGizmo implements RenderableProvider
       for (RobotSide side : RobotSide.values)
       {
          vrContext.getController(side).runIfConnected(controller ->
-                                                      {
-                                                         if (!controller.getTriggerDragData().isDragging())
-                                                         {
-                                                            Line3DReadOnly pickRay = controller.getPickRay();
-                                                            closestVRCollisionSelection.put(side, determineCurrentSelectionFromPickRay(pickRay));
-                                                         }
-                                                         if (closestVRCollisionSelection.get(side) != null)
-                                                         {
-                                                            vrPickResult.get(side).setDistanceToControllerPickPoint(closestCollisionDistance);
-                                                            controller.addPickResult(vrPickResult.get(side));
-                                                         }
-                                                      });
+         {
+            if (!controller.getTriggerDragData().isDragging())
+            {
+               Line3DReadOnly pickRay = controller.getPickRay();
+               closestVRCollisionSelection.put(side, determineCurrentSelectionFromPickRay(pickRay));
+            }
+            if (closestVRCollisionSelection.get(side) != null)
+            {
+               vrPickResult.get(side).setDistanceToControllerPickPoint(closestCollisionDistance);
+               controller.addPickResult(vrPickResult.get(side));
+            }
+         });
       }
    }
 
@@ -231,43 +231,43 @@ public class RDXPose3DGizmo implements RenderableProvider
       for (RobotSide side : RobotSide.values)
       {
          vrContext.getController(side).runIfConnected(controller ->
-                                                      {
-                                                         RDXVRDragData triggerDragData = controller.getTriggerDragData();
+         {
+            RDXVRDragData triggerDragData = controller.getTriggerDragData();
 
-                                                         if (triggerDragData.getDragJustStarted())
-                                                         {
-                                                            triggerDragData.setObjectBeingDragged(this);
-                                                            triggerDragData.setZUpDragStart(gizmoFrame);
-                                                         }
+            if (triggerDragData.getDragJustStarted())
+            {
+               triggerDragData.setObjectBeingDragged(this);
+               triggerDragData.setZUpDragStart(gizmoFrame);
+            }
 
-                                                         if (triggerDragData.isBeingDragged(this))
-                                                         {
-                                                            Line3DReadOnly pickRay = controller.getPickRay();
+            if (triggerDragData.isBeingDragged(this))
+            {
+               Line3DReadOnly pickRay = controller.getPickRay();
 
-                                                            if (closestVRCollisionSelection.get(side).isLinear())
-                                                            {
-                                                               Vector3DReadOnly linearMotion = lineDragAlgorithm.calculate(pickRay,
-                                                                                                                           closestCollision,
-                                                                                                                           axisRotations.get(
-                                                                                                                                 closestVRCollisionSelection.get(
-                                                                                                                                       side).toAxis3D()),
-                                                                                                                           transformToWorld);
-                                                               frameBasedGizmoModification.translateInWorld(linearMotion);
-                                                               closestCollision.add(linearMotion);
-                                                            }
-                                                            else if (closestVRCollisionSelection.get(side).isAngular())
-                                                            {
-                                                               if (clockFaceDragAlgorithm.calculate(pickRay,
-                                                                                                    closestCollision,
-                                                                                                    axisRotations.get(closestVRCollisionSelection.get(side)
-                                                                                                                                                 .toAxis3D()),
-                                                                                                    transformToWorld))
-                                                               {
-                                                                  frameBasedGizmoModification.rotateInWorld(clockFaceDragAlgorithm.getMotion());
-                                                               }
-                                                            }
-                                                         }
-                                                      });
+               if (closestVRCollisionSelection.get(side) != null)
+               {
+                  if (closestVRCollisionSelection.get(side).isLinear())
+                  {
+                     Vector3DReadOnly linearMotion = lineDragAlgorithm.calculate(pickRay,
+                                                                                 closestCollision,
+                                                                                 axisRotations.get(closestVRCollisionSelection.get(side).toAxis3D()),
+                                                                                 transformToWorld);
+                     frameBasedGizmoModification.translateInWorld(linearMotion);
+                     closestCollision.add(linearMotion);
+                  }
+                  else if (closestVRCollisionSelection.get(side).isAngular())
+                  {
+                     if (clockFaceDragAlgorithm.calculate(pickRay,
+                                                          closestCollision,
+                                                          axisRotations.get(closestVRCollisionSelection.get(side).toAxis3D()),
+                                                          transformToWorld))
+                     {
+                        frameBasedGizmoModification.rotateInWorld(clockFaceDragAlgorithm.getMotion());
+                     }
+                  }
+               }
+            }
+         });
       }
    }
 
@@ -284,7 +284,7 @@ public class RDXPose3DGizmo implements RenderableProvider
          // on this gizmo at any time
 
          Line3DReadOnly pickRay = input.getPickRayInWorld();
-         determineCurrentSelectionFromPickRay(pickRay);
+         closestCollisionSelection = determineCurrentSelectionFromPickRay(pickRay);
 
          if (closestCollisionSelection != null)
          {
