@@ -68,7 +68,6 @@ public class RDXRobotLowLevelMessenger
       {
          robotLowLevelMessenger.sendFreezeRequest();
       }
-      ImGui.sameLine();
 
       if (teleoperationParameters.getPSIAdjustable())
       {

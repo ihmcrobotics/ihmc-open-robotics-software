@@ -13,7 +13,6 @@ public class RDXLocomotionParameters extends StoredPropertySet
    public static final BooleanStoredPropertyKey areFootstepsAdjustable = keys.addBooleanKey("Are footsteps adjustable");
    public static final DoubleStoredPropertyKey swingTime = keys.addDoubleKey("Swing time");
    public static final DoubleStoredPropertyKey transferTime = keys.addDoubleKey("Transfer time");
-   public static final DoubleStoredPropertyKey turnAggressiveness = keys.addDoubleKey("Turn aggressiveness");
    public static final DoubleStoredPropertyKey straightStepLength = keys.addDoubleKey("Straight step length");
    public static final DoubleStoredPropertyKey straightStepWidth = keys.addDoubleKey("Straight step width");
    public static final DoubleStoredPropertyKey reverseStepLength = keys.addDoubleKey("Reverse step length");
@@ -45,11 +44,6 @@ public class RDXLocomotionParameters extends StoredPropertySet
    public double getTransferTime()
    {
       return get(transferTime);
-   }
-
-   public double getTurnAggressiveness()
-   {
-      return get(turnAggressiveness);
    }
 
    public double getStraightStepLength()
