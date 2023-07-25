@@ -44,8 +44,8 @@ float3 back_project_perspective(int2 pos, float Z, global float* params)
 
 float2 perspective_projection(float3 point, global float* params)
 {
-   float x = point.y / point.x * params[DEPTH_FX] + params[DEPTH_CX];
-   float y = point.z / point.x * params[DEPTH_FY] + params[DEPTH_CY];
+   float x = point.x / point.z * params[DEPTH_FX] + params[DEPTH_CX];
+   float y = point.y / point.z * params[DEPTH_FY] + params[DEPTH_CY];
 
    return (float2) (x, y);
 }
