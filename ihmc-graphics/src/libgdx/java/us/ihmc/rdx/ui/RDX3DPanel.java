@@ -33,12 +33,11 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class RDX3DPanel
+public class RDX3DPanel extends ImGuiPanel
 {
    private final ImGuiPanelSizeHandler view3DPanelSizeHandler = new ImGuiPanelSizeHandler();
    private final String panelName;
    private final int antiAliasing;
-   private ImGuiPanel imGuiPanel;
    private RDX3DScene scene;
    private boolean modelSceneMouseCollisionEnabled = false;
    private GLProfiler glProfiler;
@@ -90,6 +89,8 @@ public class RDX3DPanel
     */
    public RDX3DPanel(String panelName, int antiAliasing, boolean addFocusSphere)
    {
+      super(panelName);
+      super.setRenderMethod(null);
       this.panelName = panelName;
       this.antiAliasing = antiAliasing;
       this.addFocusSphere = addFocusSphere;
@@ -99,8 +100,6 @@ public class RDX3DPanel
    {
       this.glProfiler = glProfiler;
       this.scene = scene;
-
-      imGuiPanel = new ImGuiPanel(panelName, null, false);
 
       camera3D = new RDXFocusBasedCamera();
       if (inputMode == RDXInputMode.libGDX)
@@ -121,8 +120,7 @@ public class RDX3DPanel
 
    public void render()
    {
-      ImBoolean isShowing = imGuiPanel.getIsShowing();
-      if (imGuiPanel.getIsShowing().get())
+      if (getIsShowing().get())
       {
          view3DPanelSizeHandler.handleSizeBeforeBegin();
          ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
@@ -366,11 +364,6 @@ public class RDX3DPanel
    public RDX3DScene getScene()
    {
       return scene;
-   }
-
-   public ImGuiPanel getImGuiPanel()
-   {
-      return imGuiPanel;
    }
 
    public SensorFrameBuffer getFrameBuffer()
