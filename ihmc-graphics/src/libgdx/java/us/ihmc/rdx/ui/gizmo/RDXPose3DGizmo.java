@@ -236,8 +236,8 @@ public class RDXPose3DGizmo implements RenderableProvider
 
             if (triggerDragData.getDragJustStarted())
             {
+               clockFaceDragAlgorithm.reset();
                triggerDragData.setObjectBeingDragged(this);
-               triggerDragData.setZUpDragStart(gizmoFrame);
             }
 
             if (triggerDragData.isBeingDragged(this))
@@ -265,10 +265,12 @@ public class RDXPose3DGizmo implements RenderableProvider
                         frameBasedGizmoModification.rotateInWorld(clockFaceDragAlgorithm.getMotion());
                      }
                   }
+                  frameBasedGizmoModification.setAdjustmentNeedsToBeApplied();
                }
             }
          });
       }
+      update();
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
