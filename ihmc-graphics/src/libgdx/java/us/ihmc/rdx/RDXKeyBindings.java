@@ -2,7 +2,6 @@ package us.ihmc.rdx;
 
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiKey;
-import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.internal.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
@@ -48,8 +47,22 @@ public class RDXKeyBindings
             String key = entry.getValue();
 
             if (!filter.isEmpty())
-               if (!function.toLowerCase().contains(filter.get()))
+            {
+               boolean match = false;
+
+               if (function.toLowerCase().contains(filter.get()))
+               {
+                  match = true;
+               }
+
+               if (description.toLowerCase().contains(filter.get()))
+               {
+                  match = true;
+               }
+
+               if (!match)
                   continue;
+            }
 
             ImGui.tableNextRow();
             ImGui.tableSetColumnIndex(0);
