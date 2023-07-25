@@ -105,15 +105,15 @@ public class RDXFocusBasedCamera extends Camera
       updateCameraPose();
       update(true);
 
-      RDXBaseUI.getInstance().getKeyBindings().register("Move forward ", "W");
-      RDXBaseUI.getInstance().getKeyBindings().register("Move back", "S");
-      RDXBaseUI.getInstance().getKeyBindings().register("Move left", "A");
-      RDXBaseUI.getInstance().getKeyBindings().register("Move right", "D");
-      RDXBaseUI.getInstance().getKeyBindings().register("Move up", "Q");
-      RDXBaseUI.getInstance().getKeyBindings().register("Move down", "Z");
-      RDXBaseUI.getInstance().getKeyBindings().register("Zoom in (broken?)", "C");
-      RDXBaseUI.getInstance().getKeyBindings().register("Zoom out (broken?)", "E");
-      RDXBaseUI.getInstance().getKeyBindings().register("Zoom in / out", "Mouse scroll");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move camera forward ", "W");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move camera back", "S");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move camera left", "A");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move camera right", "D");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move camera up", "Q");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move camera down", "Z");
+      RDXBaseUI.getInstance().getKeyBindings().register("Zoom camera in (broken?)", "C");
+      RDXBaseUI.getInstance().getKeyBindings().register("Zoom camera out (broken?)", "E");
+      RDXBaseUI.getInstance().getKeyBindings().register("Zoom camera in / out", "Mouse scroll");
       RDXBaseUI.getInstance().getKeyBindings().register("Fine adjustment", "Shift");
       RDXBaseUI.getInstance().getKeyBindings().register("Drag to orient camera", "Left mouse");
       RDXBaseUI.getInstance().getKeyBindings().register("Drag to pan camera", "Middle mouse");
