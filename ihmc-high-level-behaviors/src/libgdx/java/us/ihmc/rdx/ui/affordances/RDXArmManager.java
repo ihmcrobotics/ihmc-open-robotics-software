@@ -63,7 +63,6 @@ public class RDXArmManager
    private final ImBoolean indicateWrenchOnScreen = new ImBoolean(false);
    private RDX3DPanelToolbarButton wrenchToolbarButton;
    private RDX3DPanelHandWrenchIndicator panelHandWrenchIndicator;
-   private RDXArmControlMode armControlMode = RDXArmControlMode.JOINT_ANGLES;
 
    public RDXArmManager(CommunicationHelper communicationHelper,
                         DRCRobotModel robotModel,
