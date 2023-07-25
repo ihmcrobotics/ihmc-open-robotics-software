@@ -47,6 +47,8 @@ int2 perspective_projection(float3 point, global float* params)
    float x = point.x / point.z * params[DEPTH_FX] + params[DEPTH_CX];
    float y = point.y / point.z * params[DEPTH_FY] + params[DEPTH_CY];
 
+   printf("Point: (%f, %f, %f) -> (%f, %f)\n", point.x, point.y, point.z, x, y);
+
    return (int2) (x, y);
 }
 
@@ -117,6 +119,8 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
   }
   else if (params[MODE] == 1) // Perspective Projection
   {
+     // convert cellCenterInSensor to z-forward, x-right, y-down
+     cellCenterInSensor = (float3) (-cellCenterInSensor.y, -cellCenterInSensor.z, cellCenterInSensor.x);
      projectedPoint = perspective_projection(cellCenterInSensor, params);
   }
 
