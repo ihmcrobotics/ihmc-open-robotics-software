@@ -93,8 +93,8 @@ public class RDXRapidHeightMapExtractionDemo
             baseUI.getPrimaryScene().addRenderableProvider(heightMapRenderer, RDXSceneLevel.VIRTUAL);
             baseUI.getPrimaryScene().addRenderableProvider(heightMapVisualizer);
 
-            createForSpherical(128, 2048);
-            //createForPerspective(768, 1024);
+//            createForSpherical(128, 2048);
+            createForPerspective(768, 1024);
 
             updateHeightMap();
 
@@ -156,6 +156,7 @@ public class RDXRapidHeightMapExtractionDemo
                                                                                                                    frameIndex.get(),
                                                                                                                    depthBytePointer,
                                                                                                                    loadedDepthImage.getBytedecoOpenCVMat()));
+               PerceptionDebugTools.displayDepth("Depth", loadedDepthImage.getBytedecoOpenCVMat(), 1);
                updateHeightMap();
             }
 
