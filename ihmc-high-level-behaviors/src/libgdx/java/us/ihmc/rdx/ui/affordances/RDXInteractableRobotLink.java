@@ -96,6 +96,7 @@ public class RDXInteractableRobotLink
          highlightModel.setTransparency(0.5);
       }
    }
+
    public void processVRInput(RDXVRContext vrContext)
    {
       isVRHovering = false;
