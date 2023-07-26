@@ -47,8 +47,6 @@ int2 perspective_projection(float3 point, global float* params)
    float x = point.x / point.z * params[DEPTH_FX] + params[DEPTH_CX];
    float y = point.y / point.z * params[DEPTH_FY] + params[DEPTH_CY];
 
-   printf("Point: (%f, %f, %f) -> (%f, %f)\n", point.x, point.y, point.z, x, y);
-
    return (int2) (x, y);
 }
 
@@ -99,7 +97,7 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
   float3 centroid;
 
   float averageHeightZ = 0;
-  float3 cellCenterInWorld = (float3) (0.0f, 0.0f, -2.0f);;
+  float3 cellCenterInWorld = (float3) (0.0f, 0.0f, -2.0f);
   cellCenterInWorld.xy = indices_to_coordinate((int2) (xIndex, yIndex),
                                                (float2) (params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]),
                                                params[HEIGHT_MAP_RESOLUTION],
@@ -121,16 +119,21 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
   {
      // convert cellCenterInSensor to z-forward, x-right, y-down
      cellCenterInSensor = (float3) (-cellCenterInSensor.y, -cellCenterInSensor.z, cellCenterInSensor.x);
+
+     if (cellCenterInSensor.z < 0)
+        return;
+
      projectedPoint = perspective_projection(cellCenterInSensor, params);
   }
+
 
   int WINDOW_WIDTH = 20;
 
   float halfCellWidth = params[HEIGHT_MAP_RESOLUTION] / 2.0f;
-  float minX = cellCenterInSensor.x - halfCellWidth;
-  float maxX = cellCenterInSensor.x + halfCellWidth;
-  float minY = cellCenterInSensor.y - halfCellWidth;
-  float maxY = cellCenterInSensor.y + halfCellWidth;
+  float minX = cellCenterInWorld.x - halfCellWidth;
+  float maxX = cellCenterInWorld.x + halfCellWidth;
+  float minY = cellCenterInWorld.y - halfCellWidth;
+  float maxY = cellCenterInWorld.y + halfCellWidth;
 
   int count = 0;
 
@@ -144,20 +147,33 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
       {
         float radius = ((float)read_imageui(in, (int2) (yaw_count, pitch_count)).x) / (float)1000;
 
-        float3 pointInWorld;
+        float3 queryPointInSensor;
+        float3 queryPointInWorld;
         if (params[MODE] == 0) // Spherical
         {
-            pointInWorld = back_project_spherical(yaw_count,pitch_count,radius,params);
+            queryPointInSensor = back_project_spherical(yaw_count,pitch_count,radius,params);
         }
         else if (params[MODE] == 1) // Perspective
         {
-            pointInWorld = back_project_perspective((int2) (yaw_count, pitch_count), radius, params);
+            queryPointInSensor = back_project_perspective((int2) (yaw_count, pitch_count), radius, params);
+            queryPointInSensor = (float3) (queryPointInSensor.z, -queryPointInSensor.x, -queryPointInSensor.y);
+
+            queryPointInWorld = transformPoint3D32_2(
+                queryPointInSensor,
+                (float3)(sensorToWorldTf[0], sensorToWorldTf[1], sensorToWorldTf[2]),
+                (float3)(sensorToWorldTf[4], sensorToWorldTf[5], sensorToWorldTf[6]),
+                (float3)(sensorToWorldTf[8], sensorToWorldTf[9], sensorToWorldTf[10]),
+                (float3)(sensorToWorldTf[3], sensorToWorldTf[7], sensorToWorldTf[11]));
         }
 
-        if (pointInWorld.x > minX && pointInWorld.x < maxX && pointInWorld.y > minY && pointInWorld.y < maxY)
+//        printf("PointInWorld: (%f, %f, %f), minX: %f, maxX: %f, minY: %f, maxY: %f\n", queryPointInWorld.x, queryPointInWorld.y, queryPointInWorld.z, minX, maxX, minY, maxY);
+//            printf("World Point: (%f, %f, %f), Sensor Point (Z-fwd): (%f, %f, %f) -> Image Point: (%d, %d)\n",
+//            cellCenterInWorld.x, cellCenterInWorld.y, cellCenterInWorld.z, cellCenterInSensor.x, cellCenterInSensor.y, cellCenterInSensor.z, projectedPoint.x, projectedPoint.y);
+
+        if (queryPointInWorld.x > minX && queryPointInWorld.x < maxX && queryPointInWorld.y > minY && queryPointInWorld.y < maxY)
         {
            count++;
-           averageHeightZ += pointInWorld.z;
+           averageHeightZ += queryPointInWorld.z;
         }
       }
     }
@@ -165,7 +181,7 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
 
   if (count > 0)
   {
-    averageHeightZ = averageHeightZ / (float)(count) - get_height_on_plane(cellCenterInSensor.x, cellCenterInSensor.y, plane);
+    averageHeightZ = averageHeightZ / (float)(count) - get_height_on_plane(cellCenterInWorld.x, cellCenterInWorld.y, plane);
     averageHeightZ = clamp(averageHeightZ, -20.f, 1.5f);
 
     write_imageui(out, (int2)(xIndex, yIndex), (uint4)((int)((2.0f + averageHeightZ) * 10000.0f), 0, 0, 0));
