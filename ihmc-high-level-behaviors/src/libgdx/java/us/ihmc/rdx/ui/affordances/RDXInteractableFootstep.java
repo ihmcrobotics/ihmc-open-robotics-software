@@ -33,6 +33,9 @@ import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
+import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.rdx.vr.RDXVRDragData;
+import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.interaction.MouseCollidable;
 import us.ihmc.robotics.interaction.StepCheckIsPointInsideAlgorithm;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
@@ -78,6 +81,9 @@ public class RDXInteractableFootstep
 
    private final ModifiableReferenceFrame collisionBoxFrame;
    private final MouseCollidable mouseCollidable;
+   private final SideDependentList<Boolean> isIntersectingVR = new SideDependentList<>(false, false);
+   private final SideDependentList<ModifiableReferenceFrame> dragReferenceFrame = new SideDependentList<>();
+   private final FramePose3D vrPickPose = new FramePose3D();
 
    public RDXInteractableFootstep(RDXBaseUI baseUI, RobotSide footstepSide, int index, SideDependentList<ConvexPolygon2D> defaultPolygons)
    {
@@ -237,6 +243,55 @@ public class RDXInteractableFootstep
 
       selectionCollisionBox.getPose().getTranslation().set(selectablePose3DGizmo.getPoseGizmo().getPose().getTranslation());
       collisionBoxFrame.update(transformToParent -> transformToParent.set(selectionCollisionBox.getPose()));
+   }
+
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         vrContext.getController(side).runIfConnected(controller ->
+                                                      {
+                                                         vrPickPose.setIncludingFrame(controller.getPickPointPose());
+                                                         vrPickPose.changeFrame(ReferenceFrame.getWorldFrame());
+                                                         isIntersectingVR.put(side, mouseCollidable.pointCollide(vrPickPose.getPosition()));
+                                                      });
+      }
+   }
+
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         vrContext.getController(side).runIfConnected(controller ->
+                                                      {
+                                                         if (dragReferenceFrame.get(side) == null)
+                                                         {
+                                                            dragReferenceFrame.put(side, new ModifiableReferenceFrame(controller.getPickPoseFrame()));
+                                                         }
+                                                         RDXVRDragData gripDragData = controller.getGripDragData();
+
+                                                         if (gripDragData.getDragJustStarted() && isIntersectingVR.get(side))
+                                                         {
+                                                            gripDragData.setObjectBeingDragged(this);
+                                                            selectablePose3DGizmo.getPoseGizmo()
+                                                                                 .getGizmoFrame()
+                                                                                 .getTransformToDesiredFrame(dragReferenceFrame.get(side)
+                                                                                                                               .getTransformToParent(),
+                                                                                                             controller.getPickPoseFrame());
+                                                            dragReferenceFrame.get(side).getReferenceFrame().update();
+                                                         }
+
+                                                         boolean isGripping = gripDragData.isBeingDragged(this);
+                                                         if (isIntersectingVR.get(side) && isGripping)
+                                                         {
+                                                            dragReferenceFrame.get(side)
+                                                                              .getReferenceFrame()
+                                                                              .getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo()
+                                                                                                                               .getTransformToParent(),
+                                                                                                          ReferenceFrame.getWorldFrame());
+                                                         }
+                                                      });
+      }
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
