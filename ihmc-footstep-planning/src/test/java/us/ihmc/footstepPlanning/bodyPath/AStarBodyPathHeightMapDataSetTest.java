@@ -71,7 +71,8 @@ public class AStarBodyPathHeightMapDataSetTest
    public void testDatasetsWithoutOcclusion()
    {
       planningModule = new FootstepPlanningModule("testModule", false);
-      logger = new FootstepPlannerLogger(planningModule);
+      if (DEBUG)
+         logger = new FootstepPlannerLogger(planningModule);
       List<HeightMapDataSetName> allDatasets = Arrays.asList(HeightMapDataSetName.values());
       runAssertionsOnAllDatasets(allDatasets, this::runAssertionsWithoutOcclusion);
    }
@@ -80,7 +81,8 @@ public class AStarBodyPathHeightMapDataSetTest
    public void testDatasetsWithoutOcclusionOnGPU()
    {
       planningModule = new FootstepPlanningModule("testModule", true);
-      logger = new FootstepPlannerLogger(planningModule);
+      if (DEBUG)
+         logger = new FootstepPlannerLogger(planningModule);
       List<HeightMapDataSetName> allDatasets = Arrays.asList(HeightMapDataSetName.values());
       runAssertionsOnAllDatasets(allDatasets, this::runAssertionsWithoutOcclusion);
    }
@@ -92,7 +94,8 @@ public class AStarBodyPathHeightMapDataSetTest
    public void testDatasetsNoOcclusionSimulateDynamicReplanning()
    {
       planningModule = new FootstepPlanningModule("testModule", false);
-      logger = new FootstepPlannerLogger(planningModule);
+      if (DEBUG)
+         logger = new FootstepPlannerLogger(planningModule);
       List<HeightMapDataSetName> allDatasets = Arrays.asList(HeightMapDataSetName.values());
       runAssertionsOnAllDatasets(allDatasets, dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 10000));
    }
@@ -103,7 +106,8 @@ public class AStarBodyPathHeightMapDataSetTest
    public void testDatasetsNoOcclusionSimulateDynamicReplanningOnGPU()
    {
       planningModule = new FootstepPlanningModule("testModule", true);
-      logger = new FootstepPlannerLogger(planningModule);
+      if (DEBUG)
+         logger = new FootstepPlannerLogger(planningModule);
       List<HeightMapDataSetName> allDatasets = Arrays.asList(HeightMapDataSetName.values());
       runAssertionsOnAllDatasets(allDatasets, dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 10000));
    }
@@ -309,7 +313,8 @@ public class AStarBodyPathHeightMapDataSetTest
       FootstepPlannerOutput output = planningModule.getOutput();
       List<Pose3D> path = output.getBodyPath();
 
-      logger.logSession();
+      if (DEBUG)
+         logger.logSession();
 
       String errorMessages = basicBodyPathSanityChecks(datasetName, start, goal, path);
 
