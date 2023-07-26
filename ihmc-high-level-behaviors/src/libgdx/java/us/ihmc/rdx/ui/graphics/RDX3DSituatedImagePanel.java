@@ -18,12 +18,13 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.opengl.GL41;
-import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
@@ -32,7 +33,6 @@ import us.ihmc.rdx.ui.vr.RDXVRModeManager;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRDragData;
 import us.ihmc.rdx.vr.RDXVRPickResult;
-import us.ihmc.robotics.interaction.BoxRayIntersection;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -49,6 +49,7 @@ public class RDX3DSituatedImagePanel
    private static final double FOLLOW_HEADSET_OFFSET_Z = 0.17;
 
    private ModelInstance modelInstance;
+   private ModelInstance hoverBoxMesh;
    private Texture texture;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final FramePoint3D tempFramePoint = new FramePoint3D();
@@ -74,13 +75,9 @@ public class RDX3DSituatedImagePanel
    private double panelDistanceFromHeadset = 0.5;
    private boolean justShown;
    private boolean isShowing;
-   private final Box3D frameOfVideo = new Box3D();
-   private final BoxRayIntersection frameOfVideoIntersection = new BoxRayIntersection();
-   private final SideDependentList<Boolean>intersecting = new SideDependentList<>(false, false);
-   private final SideDependentList<Boolean>intersectVideo = new SideDependentList<>(false, false);
+   private final FrameBox3D selectionCollisionBox = new FrameBox3D();
    private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
-   private Model hoverState;
-   private ModelInstance hoverModel;
+   private boolean isHoveredByAnything = false;
 
    /**
     * Create for a programmatically placed panel.
@@ -183,6 +180,13 @@ public class RDX3DSituatedImagePanel
       // TODO: Rebuild the model if the camera parameters change.
       Model model = modelBuilder.end();
       modelInstance = new ModelInstance(model);
+
+      selectionCollisionBox.getSize().set(0.05,
+                                          Math.abs(topRightPosition.y - topLeftPosition.y),
+                                          Math.abs(topRightPosition.y - bottomLeftPosition.y));
+
+      hoverBoxMesh = new ModelInstance(RDXModelBuilder.buildModel(boxMeshBuilder ->
+             boxMeshBuilder.addMultiLineBox(selectionCollisionBox.getVertices(), 0.0005, new Color(Color.WHITE))));
    }
 
    public void update(Texture imageTexture)
@@ -209,24 +213,32 @@ public class RDX3DSituatedImagePanel
       }
 
       setPoseToReferenceFrame(floatingPanelFrame.getReferenceFrame());
+      selectionCollisionBox.getPose().set(floatingPanelFramePose);
+      floatingPanelFramePose.setFromReferenceFrame(floatingPanelFrame.getReferenceFrame());
+      isHoveredByAnything = false;
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
    {
-      for (RobotSide side :RobotSide.values)
+      for (RobotSide side : RobotSide.values)
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
-            if(!controller.getTriggerDragData().isDragging())
-            {
-               Line3DReadOnly pickRay = controller.getPickRay();
-               double distance = frameOfVideo.distance(pickRay.getPoint());
+            vrPickResult.get(side).reset();
 
-               if(intersecting.get(side) && distance > 0)
-               {
-                  vrPickResult.get(side).setDistanceToControllerPickPoint(distance);
-                  controller.addPickResult(vrPickResult.get(side));
-               }
+            Point3D closestPointOnSurface = new Point3D();
+            Vector3D normalAtClosestPoint = new Vector3D();
+            boolean isHovering = selectionCollisionBox.evaluatePoint3DCollision(controller.getPickPointPose().getPosition(),
+                                                                                closestPointOnSurface,
+                                                                                normalAtClosestPoint);
+            double distance = closestPointOnSurface.distance(controller.getPickPointPose().getPosition());
+            double distanceToSurface = isHovering ? -distance : distance;
+
+            if (isHovering)
+            {
+               vrPickResult.get(side).addPickCollision(distanceToSurface);
+               controller.addPickResult(vrPickResult.get(side));
+               controller.setPickCollisionPoint(closestPointOnSurface);
             }
          });
       }
@@ -251,76 +263,48 @@ public class RDX3DSituatedImagePanel
             }
          }
       });
-      frameOfVideo.set(floatingPanelFramePose, 0.05, Math.abs(topRightPosition.y - topLeftPosition.y), Math.abs(topRightPosition.y - bottomLeftPosition.y));
+
       for (RobotSide side : RobotSide.values)
       {
          context.getController(side).runIfConnected(controller ->
          {
-            Line3DReadOnly pickRay = controller.getPickRay();
-            intersecting.put(side, frameOfVideoIntersection.intersect(frameOfVideo.getSizeX(),
-                                                                      frameOfVideo.getSizeY(),
-                                                                      frameOfVideo.getSizeZ(),
-                                                                      floatingPanelFrame.getReferenceFrame().getTransformToWorldFrame(),
-                                                                      pickRay));
-            intersectVideo.put(side, frameOfVideo.isPointInside(controller.getPickPointPose().getPosition()));
-
-            if (intersecting.get(RobotSide.LEFT) || intersectVideo.get(RobotSide.LEFT) || intersecting.get(RobotSide.RIGHT) || intersectVideo.get(RobotSide.RIGHT))
-            {
-               hoverState = RDXModelBuilder.buildModel(meshBuilder ->
-               {
-                  meshBuilder.addMultiLineBox(frameOfVideo.getVertices(), 0.0005, new Color(Color.WHITE));
-               });
-               hoverModel = new ModelInstance(hoverState);
-            }
-            else
-               hoverModel = null;
+            boolean isHovering = controller.getSelectedPick() == vrPickResult.get(side);
+            isHoveredByAnything |= isHovering;
 
             if (placementMode == MANUAL_PLACEMENT)
             {
                RDXVRDragData gripDragData = controller.getGripDragData();
-               if (modelInstance != null)
+
+               if (isHovering && gripDragData.getDragJustStarted())
                {
-                  floatingPanelFramePose.setToZero(floatingPanelFrame.getReferenceFrame());
-                  floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+                  gripDragData.setObjectBeingDragged(this);
+                  gripDragData.setInteractableFrameOnDragStart(floatingPanelFrame.getReferenceFrame());
+               }
 
-
-                  if (gripDragData.getDragJustStarted() && intersectVideo.get(side))
-                  {
-                     gripDragData.setObjectBeingDragged(this);
-                     floatingPanelFramePose.changeFrame(controller.getXForwardZUpControllerFrame());
-                     floatingPanelFramePose.get(gripOffsetTransform);
-                     floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-                  }
-
-                  boolean isGripping = gripDragData.isBeingDragged(this);
-                  if ((intersectVideo.get(side)) && isGripping)
-                  {
-                     floatingPanelFrame.getTransformToParent().set(gripOffsetTransform);
-                     controller.getXForwardZUpControllerFrame()
-                               .getTransformToWorldFrame()
-                               .transform(floatingPanelFrame.getTransformToParent());
-                     floatingPanelFrame.getReferenceFrame().update();
-                  }
+               if (gripDragData.isDragging() && gripDragData.getObjectBeingDragged() == this)
+               {
+                  gripDragData.getDragFrame().getTransformToDesiredFrame(floatingPanelFrame.getTransformToParent(),
+                                                                         floatingPanelFrame.getReferenceFrame().getParent());
                }
             }
-            else if (intersecting.get(side) && placementMode == FOLLOW_HEADSET)
-            {
-               if (controller.getTouchpadTouchedActionData().bState())
-               {
-                  double y = controller.getTouchpadActionData().y();
-                  if (!Double.isNaN(lastTouchpadY))
-                  {
-                     panelZoom = y - lastTouchpadY;
-                  }
-                  lastTouchpadY = y;
-                  panelDistanceFromHeadset = panelDistanceFromHeadset + panelZoom;
-               }
-               else
-               {
-                  lastTouchpadY = Double.NaN;
-               }
-            }
-            else if(controller.getGripActionData().x() > 0.9 && frameOfVideo.isPointInside(controller.getPickPointPose().getPosition()))
+//            else if (vrPickPointHovering.get(side) && placementMode == FOLLOW_HEADSET)
+//            {
+//               if (controller.getTouchpadTouchedActionData().bState())
+//               {
+//                  double y = controller.getTouchpadActionData().y();
+//                  if (!Double.isNaN(lastTouchpadY))
+//                  {
+//                     panelZoom = y - lastTouchpadY;
+//                  }
+//                  lastTouchpadY = y;
+//                  panelDistanceFromHeadset = panelDistanceFromHeadset + panelZoom;
+//               }
+//               else
+//               {
+//                  lastTouchpadY = Double.NaN;
+//               }
+//            }
+            else if (controller.getGripActionData().x() > 0.9 && selectionCollisionBox.isPointInside(controller.getPickPointPose().getPosition()))
             {
                vrModeManager.setVideoPanelPlacementMode(MANUAL_PLACEMENT);
             }
@@ -334,8 +318,8 @@ public class RDX3DSituatedImagePanel
       {
          if (modelInstance != null)
             modelInstance.getRenderables(renderables, pool);
-         if (hoverModel != null)
-            hoverModel.getRenderables(renderables, pool);
+         if (hoverBoxMesh != null && isHoveredByAnything)
+            hoverBoxMesh.getRenderables(renderables, pool);
       }
    }
 
@@ -344,7 +328,6 @@ public class RDX3DSituatedImagePanel
       if (modelInstance != null)
       {
          referenceFrame.getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
-         LibGDXTools.toLibGDX(tempTransform, modelInstance.transform);
       }
    }
 
