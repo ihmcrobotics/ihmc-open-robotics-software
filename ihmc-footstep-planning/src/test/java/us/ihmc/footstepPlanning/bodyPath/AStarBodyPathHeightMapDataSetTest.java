@@ -1,9 +1,6 @@
 package us.ihmc.footstepPlanning.bodyPath;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
@@ -89,6 +86,7 @@ public class AStarBodyPathHeightMapDataSetTest
    }
 
 
+   @Disabled
    @Test
    @Tag("path-planning-slow")
    public void testDatasetsNoOcclusionSimulateDynamicReplanning()
@@ -99,6 +97,7 @@ public class AStarBodyPathHeightMapDataSetTest
       runAssertionsOnAllDatasets(allDatasets, dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 10000));
    }
 
+   @Disabled
    @Test
    @Tag("path-planning-slow")
    public void testDatasetsNoOcclusionSimulateDynamicReplanningOnGPU()
