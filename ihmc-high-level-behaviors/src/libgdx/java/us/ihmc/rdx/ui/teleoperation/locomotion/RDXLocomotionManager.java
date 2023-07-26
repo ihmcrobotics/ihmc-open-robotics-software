@@ -81,7 +81,7 @@ public class RDXLocomotionManager
    private RDXLegControlMode legControlMode = RDXLegControlMode.DISABLED;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   public static final ImBoolean collapsedHeader = new ImBoolean(true);
+   private final ImBoolean collapsedHeader = new ImBoolean(true);
    private boolean isPlacingFootstep = false;
    private final PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
    private final AbortWalkingMessage abortWalkingMessage = new AbortWalkingMessage();
