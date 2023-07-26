@@ -190,18 +190,19 @@ public class RDXRobotCollidable implements RenderableProvider
             closestPoint.changeFrame(ReferenceFrame.getWorldFrame());
             LibGDXTools.toLibGDX(closestPoint, pickRayCollisionPointGraphic.transform);
             Line3DReadOnly pickRay = controller.getPickRay();
-            double distancePoint = isVRPointing.put(side, mouseCollidable.collide(pickRay, shape.getReferenceFrame()));
+            isVRPointing.put(side, mouseCollidable.collide(pickRay, shape.getReferenceFrame()));
+            double distancePoint = isVRPointing.get(side);
 
-//            if (isInside)
-//            {
-//               vrPickResult.get(side).addPickCollision(distanceToSurface);
-//               pickRayCollisionPointGraphic.setColor(ColorDefinitions.Green());
-//               controller.setPickCollisionPoint(closestPoint);
-//            }
-//            else
-//            {
-//               pickRayCollisionPointGraphic.setColor(ColorDefinitions.White());
-//            }
+            if (isInside)
+            {
+               vrPickResult.get(side).addPickCollision(distanceToSurface);
+               pickRayCollisionPointGraphic.setColor(ColorDefinitions.Green());
+               controller.setPickCollisionPoint(closestPoint);
+            }
+            else
+            {
+               pickRayCollisionPointGraphic.setColor(ColorDefinitions.White());
+            }
 
             if(!Double.isNaN(distancePoint))
             {
