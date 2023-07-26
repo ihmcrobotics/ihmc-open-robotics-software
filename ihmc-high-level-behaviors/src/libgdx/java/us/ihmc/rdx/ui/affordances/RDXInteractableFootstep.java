@@ -325,7 +325,7 @@ public class RDXInteractableFootstep
                triggerDragData.setObjectBeingDragged(this);
                triggerDragData.setZUpDragStart(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
             }
-            if (triggerDragData.isBeingDragged(this))
+            if (triggerDragData.isBeingDragged(this) && side == RobotSide.LEFT)
             {
                Line3DReadOnly pickRay = controller.getPickRay();
                if (vrContext.getController(side).getSelectedPick() == vrPickResult.get(side))
