@@ -100,7 +100,7 @@ public class HeuristicICPControllerTest
          }
 
          @Override
-         public void createFeedForwardAlphaCalculator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         public void createFeedForwardAlphaCalculator(double controlDt, YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
          {
             feedForwardAlphaCalculator = new ErrorBasedFeedForwardAlphaCalculator("", registry);
          }

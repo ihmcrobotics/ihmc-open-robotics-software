@@ -114,7 +114,7 @@ public class HeuristicICPController implements ICPControllerInterface
       feedbackGains = new ParameterizedICPControlGains("", icpControllerParameters.getICPFeedbackGains(), registry);
 
       icpControllerParameters.createFeedbackProjectionOperator(registry, yoGraphicsListRegistry);
-      icpControllerParameters.createFeedForwardAlphaCalculator(registry, yoGraphicsListRegistry);
+      icpControllerParameters.createFeedForwardAlphaCalculator(controlDT, registry, yoGraphicsListRegistry);
       feedbackProjectionOperator = icpControllerParameters.getFeedbackProjectionOperator();
       feedForwardAlphaCalculator = icpControllerParameters.getFeedForwardAlphaCalculator();
 

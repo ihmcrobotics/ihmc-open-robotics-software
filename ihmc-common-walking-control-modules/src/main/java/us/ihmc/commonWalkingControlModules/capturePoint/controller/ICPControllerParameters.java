@@ -143,7 +143,7 @@ public abstract class ICPControllerParameters
       return 0.06;
    }
 
-   public void createFeedForwardAlphaCalculator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public void createFeedForwardAlphaCalculator(double controlDt, YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
    }
 

@@ -203,7 +203,7 @@ public class ICPController implements ICPControllerInterface
 
       copConstraintHandler = new ICPCoPConstraintHandler(icpControlPolygons, useICPControlPolygons, hasICPControlPolygons, registry);
 
-      parameters.createFeedForwardAlphaCalculator(registry, null);
+      parameters.createFeedForwardAlphaCalculator(controlDT, registry, null);
       parameters.createFeedbackAlphaCalculator(registry, null);
       parameters.createFeedbackProjectionOperator(registry, null);
 
