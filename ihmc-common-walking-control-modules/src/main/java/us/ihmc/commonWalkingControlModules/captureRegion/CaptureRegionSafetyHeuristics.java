@@ -5,6 +5,7 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
@@ -134,8 +135,7 @@ public class CaptureRegionSafetyHeuristics implements SCS2YoGraphicHolder
       }
       else if (saferCaptureRegion.getNumberOfVertices() == 3)
       {
-         if (computeClosestVertexOfTheTriangle(saferCaptureRegion))
-            projectVerticesVisibleToStanceAwayFromTheFoot();
+         projectClosestVertexOfTheTriangle(saferCaptureRegion);
       }
       else if (saferCaptureRegion.getNumberOfVertices() == 2)
       {
@@ -173,14 +173,42 @@ public class CaptureRegionSafetyHeuristics implements SCS2YoGraphicHolder
       return true;
    }
 
-   private boolean computeClosestVertexOfTheTriangle(FrameConvexPolygon2DBasics oneStepCaptureRegion)
+
+   private void projectClosestVertexOfTheTriangle(FrameConvexPolygon2DBasics oneStepCaptureRegion)
    {
-      verticesVisibleFromStance.clear();
-
       int closestVertexIndex = oneStepCaptureRegion.getClosestVertexIndex(stancePosition);
-      verticesVisibleFromStance.add(oneStepCaptureRegion.getVertexUnsafe(closestVertexIndex));
+      Point2DBasics closestVertex = oneStepCaptureRegion.getVertexUnsafe(closestVertexIndex);
 
-      return true;
+      // if it's zero, don't bother projecting
+      if (extraDistanceToStepFromStanceFoot.getValue() <= 0.0)
+         return;
+
+      vectorToVertex.setReferenceFrame(stancePosition.getReferenceFrame());
+
+      vectorToVertex.sub(closestVertex, stancePosition);
+
+      // if you're already near the reachability limit, don't do any projection, it's just likely to mess you up.
+      if (vectorToVertex.norm() > reachabilityLimit.getValue() - 0.42 * extraDistanceToStepFromStanceFoot.getValue())
+         return;
+
+      // Compute the maximum distance that the vertex can be projected along the line before hitting the reachability limit.
+      double maxProjectionDistance = Math.max(findMaximumProjectionDistance(vectorToVertex.norm(),
+                                                                            reachabilityLimit.getValue(),
+                                                                            vectorToVertex.angle(lineOfMinimalAction.getDirection())), 0.0);
+
+      // TODO get distance along this line to the line formed by the other two vertices. That is then also the max distance.
+
+
+      // project all the vertices visible to the foot away from the stance foot in the direction through the current ICP.
+      closestVertex.scaleAdd(Math.min(maxProjectionDistance, extraDistanceToStepFromStanceFoot.getValue()),
+                             lineOfMinimalAction.getDirection(),
+                             closestVertex);
+      saferCaptureRegion.notifyVerticesChanged();
+
+      saferCaptureRegion.update();
+      boolean notifyOfUpdate = false;
+
+      return;
    }
 
    /**
