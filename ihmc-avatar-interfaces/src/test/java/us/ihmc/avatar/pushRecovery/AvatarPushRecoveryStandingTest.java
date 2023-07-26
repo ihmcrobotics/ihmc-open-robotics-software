@@ -336,7 +336,6 @@ public abstract class AvatarPushRecoveryStandingTest
    public void testRecoveryPushForwardWhileInFlamingoStanceAndAfterTouchDown()
    {
       setupTest(null, true);
-      simulationTestHelper.setKeepSCSUp(true);
       assertTrue(simulationTestHelper.simulateNow(1.0));
       RobotSide footSide = RobotSide.LEFT;
       FramePose3D footPose = new FramePose3D(simulationTestHelper.getAvatarSimulation().getControllerFullRobotModel().getEndEffectorFrame(footSide,
