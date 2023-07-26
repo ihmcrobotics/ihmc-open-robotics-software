@@ -322,7 +322,7 @@ public class RDXInteractableFootstep
             if (triggerDragData.getDragJustStarted() && vrContext.getController(side).getSelectedPick() == vrPickResult.get(side))
             {
                triggerDragData.setObjectBeingDragged(this);
-               triggerDragData.setZUpDragStart(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
+               triggerDragData.setZUpDragStart(selectionCollisionBox.getPose().getReferenceFrame());
             }
             if (triggerDragData.isBeingDragged(this))
             {
@@ -332,8 +332,8 @@ public class RDXInteractableFootstep
                   Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
                   closestCollision.add(planarMotion);
                   addGizmoPose(planarMotion);
-                  triggerDragData.updateZUpDrag(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
-                  double deltaYaw = triggerDragData.getZUpDragPose().getOrientation().getYaw() - selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getTransformToRoot().getRotation().getYaw();
+                  triggerDragData.updateZUpDrag(selectionCollisionBox.getPose().getReferenceFrame());
+                  double deltaYaw = triggerDragData.getZUpDragPose().getOrientation().getYaw();
                   selectablePose3DGizmo.getPoseGizmo().getTransformToParent()
                                        .getRotation()
                                        .setYawPitchRoll(deltaYaw,
