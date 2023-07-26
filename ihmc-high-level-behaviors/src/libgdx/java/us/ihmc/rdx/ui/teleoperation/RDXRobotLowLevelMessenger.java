@@ -68,11 +68,6 @@ public class RDXRobotLowLevelMessenger
       {
          robotLowLevelMessenger.sendFreezeRequest();
       }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Shutdown")))
-      {
-         robotLowLevelMessenger.sendShutdownRequest();
-      }
 
       if (teleoperationParameters.getPSIAdjustable())
       {

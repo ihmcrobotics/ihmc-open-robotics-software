@@ -159,13 +159,11 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
                                                                bButtonDragData.setObjectBeingDragged(null);
                                                             }
-                                                         }
-
-                                                         if (footstepPlan.getLastFootstep() == null)
-                                                         {
-                                                            if (bButton.bState() && bButton.bChanged())
+                                                            else if (bButtonDragData.getObjectBeingDragged().toString().startsWith("us.ihmc.rdx.ui.affordances.RDXRobotCollidable"))
                                                             {
-                                                               createNewVRFootstep(controller.getPickPointPose().getPosition(), side);
+                                                               createNewVRFootstep(controller.getPickCollisionPoint(), side);
+
+                                                               bButtonDragData.setObjectBeingDragged(null);
                                                             }
                                                          }
                                                       });

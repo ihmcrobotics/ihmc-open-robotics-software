@@ -83,6 +83,7 @@ public class FootstepSnapAndWigglerTest
       }
       else
       {
+         environmentHandler = new FootstepPlannerEnvironmentHandler(footPolygons);
          snapAndWiggler = new FootstepSnapAndWiggler(footPolygons, parameters, environmentHandler);
       }
    }
@@ -121,12 +122,14 @@ public class FootstepSnapAndWigglerTest
       // test region meeting wiggleInsideDelta requirement doesn't call wiggle method
       DiscreteFootstep footstepNode = new DiscreteFootstep(0.0, 0.0, 0.0, RobotSide.LEFT);
       environmentHandler.setPrimaryPlanarRegions(new PlanarRegionsList(new PlanarRegion(new RigidBodyTransform(), largeEnoughPolygon)));
+      snapAndWiggler.clearSnapData();
       snapAndWiggler.snapFootstep(footstepNode, null, true);
       Assertions.assertFalse(snapAndWiggler.dirtyBit);
 
       // test region not meeting wiggleInsideDelta requirement calls wiggle method
       snapAndWiggler.snapFootstep(footstepNode);
       environmentHandler.setPrimaryPlanarRegions(new PlanarRegionsList(new PlanarRegion(new RigidBodyTransform(), tooSmallPolygon)));
+      snapAndWiggler.clearSnapData();
       snapAndWiggler.snapFootstep(footstepNode, null, true);
       Assertions.assertTrue(snapAndWiggler.dirtyBit);
    }
