@@ -105,7 +105,7 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
    private final List<BodyPathLatticePoint> neighbors = new ArrayList<>();
 
    /////// all the open cl memory, programs, and kernels /////
-   private final OpenCLManager openCLManager;
+   private final OpenCLManager openCLManager = new OpenCLManager();
    private _cl_program pathPlannerProgram;
    private _cl_kernel computeNormalsWithLeastSquaresKernel;
    private _cl_kernel computeNormalsWithRansacKernel;
@@ -183,7 +183,6 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       // These are the 16 neighbor offsets
       packNeighborOffsets(neighborsOffsetX, neighborsOffsetY);
 
-      openCLManager = new OpenCLManager();
       // Makes sure to destroy the open CL memory by adding a shutdown hook
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroyOpenCLStuff));
 
