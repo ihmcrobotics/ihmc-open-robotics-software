@@ -151,7 +151,7 @@ public class RDXKeyBindings
                filterInputActive = true;
             }
 
-            filterInputActive |= ImGui.isItemFocused();
+            filterInputActive = ImGui.isItemFocused();
 
             if (!filterInputActive)
                filter.set("");
