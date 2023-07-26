@@ -16,6 +16,7 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    private final YoDouble turnMaxAngleInward, turnMaxAngleOutward;
    private final YoBoolean stepsAreAdjustable;
    private final YoBoolean shiftUpcomingStepsWithTouchdown;
+   private final YoBoolean shiftUpcomingStepHeightsWithTouchdown;
    private final YoInteger ticksToUpdateTheEnvironment;
 
    public YoContinuousStepGeneratorParameters(String nameSuffix, YoRegistry registry)
@@ -33,6 +34,7 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
       turnMaxAngleInward = new YoDouble("maxAngleTurnInwards" + nameSuffix, registry);
       stepsAreAdjustable = new YoBoolean("stepsAreAdjustable" + nameSuffix, registry);
       shiftUpcomingStepsWithTouchdown = new YoBoolean("shiftUpcomingStepsWithTouchdown" + nameSuffix, registry);
+      shiftUpcomingStepHeightsWithTouchdown = new YoBoolean("shiftUpcomingStepHeightsWithTouchdown" + nameSuffix, registry);
       ticksToUpdateTheEnvironment = new YoInteger("ticksToUpdateTheEnvironment" + nameSuffix, registry);
    }
 
@@ -46,6 +48,12 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    public void setShiftUpcomingStepsWithTouchdown(boolean shiftUpcomingStepsWithTouchdown)
    {
       this.shiftUpcomingStepsWithTouchdown.set(shiftUpcomingStepsWithTouchdown);
+   }
+
+   @Override
+   public void setShiftUpcomingStepHeightsWithTouchdown(boolean shiftUpcomingStepHeightsWithTouchdown)
+   {
+      this.shiftUpcomingStepHeightsWithTouchdown.set(shiftUpcomingStepHeightsWithTouchdown);
    }
 
    @Override
@@ -202,6 +210,12 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    public boolean getShiftUpcomingStepsWithTouchdown()
    {
       return shiftUpcomingStepsWithTouchdown.getBooleanValue();
+   }
+
+   @Override
+   public boolean getShiftUpcomingStepHeightsWithTouchdown()
+   {
+      return shiftUpcomingStepHeightsWithTouchdown.getBooleanValue();
    }
 
    @Override

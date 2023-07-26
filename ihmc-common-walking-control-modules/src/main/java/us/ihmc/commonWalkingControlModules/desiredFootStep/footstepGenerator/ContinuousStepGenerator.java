@@ -199,6 +199,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       footstepDataListMessage.setFinalTransferDuration(parameters.getTransferDuration());
       footstepDataListMessage.setAreFootstepsAdjustable(parameters.getStepsAreAdjustable());
       footstepDataListMessage.setOffsetFootstepsWithExecutionError(parameters.getShiftUpcomingStepsWithTouchdown());
+      footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(parameters.getShiftUpcomingStepHeightsWithTouchdown());
 
       if (!ignoreWalkInputProvider.getBooleanValue() && walkInputProvider != null)
          walk.set(walkInputProvider.getValue());

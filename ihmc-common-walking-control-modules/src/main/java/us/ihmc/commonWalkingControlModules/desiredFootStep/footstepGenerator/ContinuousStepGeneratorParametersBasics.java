@@ -10,6 +10,7 @@ public interface ContinuousStepGeneratorParametersBasics
    public static final int DEFAULT_NUMBER_OF_FIXED_FOOTSTEPS = 0;
    public static final boolean DEFAULT_STEPS_ARE_ADJUSTABLE = false;
    public static final boolean DEFAULT_SHIFT_UPCOMING_STEPS_WITH_TOUCHDOWN = false;
+   public static final boolean DEFAULT_SHIFT_UPCOMING_STEP_HEIGHTS_WITH_TOUCHDOWN = false;
 
    default void clear()
    {
@@ -24,6 +25,7 @@ public interface ContinuousStepGeneratorParametersBasics
       setTurnMaxAngleInward(-Math.PI / 2.0);
       setStepsAreAdjustable(DEFAULT_STEPS_ARE_ADJUSTABLE);
       setShiftUpcomingStepsWithTouchdown(DEFAULT_SHIFT_UPCOMING_STEPS_WITH_TOUCHDOWN);
+      setShiftUpcomingStepHeightsWithTouchdown(DEFAULT_SHIFT_UPCOMING_STEP_HEIGHTS_WITH_TOUCHDOWN);
    }
 
    default void set(ContinuousStepGeneratorParametersBasics other)
@@ -42,6 +44,7 @@ public interface ContinuousStepGeneratorParametersBasics
       setTurnMaxAngleOutward(other.getTurnMaxAngleOutward());
       setStepsAreAdjustable(other.getStepsAreAdjustable());
       setShiftUpcomingStepsWithTouchdown(other.getShiftUpcomingStepsWithTouchdown());
+      setShiftUpcomingStepHeightsWithTouchdown(other.getShiftUpcomingStepHeightsWithTouchdown());
    }
 
    default void set(WalkingControllerParameters walkingControllerParameters)
@@ -51,6 +54,7 @@ public interface ContinuousStepGeneratorParametersBasics
       setTicksToUpdateTheEnvironment(DEFAULT_TICKS_TO_UPDATE_ENVIRONMENT);
       setStepsAreAdjustable(DEFAULT_STEPS_ARE_ADJUSTABLE);
       setShiftUpcomingStepsWithTouchdown(DEFAULT_SHIFT_UPCOMING_STEPS_WITH_TOUCHDOWN);
+      setShiftUpcomingStepHeightsWithTouchdown(DEFAULT_SHIFT_UPCOMING_STEP_HEIGHTS_WITH_TOUCHDOWN);
       setSwingDuration(walkingControllerParameters.getDefaultSwingTime());
       setTransferDuration(walkingControllerParameters.getDefaultTransferTime());
 
@@ -67,6 +71,8 @@ public interface ContinuousStepGeneratorParametersBasics
    void setStepsAreAdjustable(boolean stepsAreAdjustable);
 
    void setShiftUpcomingStepsWithTouchdown(boolean shiftUpcomingStepsWithTouchdown);
+
+   void setShiftUpcomingStepHeightsWithTouchdown(boolean shiftUpcomingStepHeightsWithTouchdown);
 
    void setNumberOfFootstepsToPlan(int numberOfFootstepsToPlan);
 
@@ -119,6 +125,8 @@ public interface ContinuousStepGeneratorParametersBasics
    boolean getStepsAreAdjustable();
 
    boolean getShiftUpcomingStepsWithTouchdown();
+
+   boolean getShiftUpcomingStepHeightsWithTouchdown();
 
    default String getString()
    {

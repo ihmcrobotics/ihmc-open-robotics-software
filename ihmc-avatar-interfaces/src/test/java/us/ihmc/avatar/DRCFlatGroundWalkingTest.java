@@ -111,6 +111,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
 
+      ((YoBoolean) simulationTestHelper.getRootRegistry().findVariable("shiftUpcomingStepHeightsWithTouchdownCSG")).set(true);
       if (CHECK_ICP_CONTINUITY)
          simulationTestHelper.addDesiredICPContinuityAssertion(3.0 * robotModel.getControllerDT());
 
