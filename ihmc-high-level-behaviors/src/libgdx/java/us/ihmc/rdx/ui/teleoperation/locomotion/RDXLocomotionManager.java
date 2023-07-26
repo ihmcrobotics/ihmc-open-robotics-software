@@ -337,6 +337,7 @@ public class RDXLocomotionManager
       manualFootstepPlacement.renderImGuiWidgets();
 
       ImGui.text("First stance side for planner:");
+      ImGui.sameLine();
 
       if (ImGui.radioButton(labels.get("Auto"), startStanceSide == RDXFootstepPlanning.InitialStanceSide.AUTO))
       {
