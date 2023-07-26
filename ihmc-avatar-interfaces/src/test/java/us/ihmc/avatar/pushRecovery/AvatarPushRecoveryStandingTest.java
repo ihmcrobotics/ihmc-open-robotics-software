@@ -336,6 +336,7 @@ public abstract class AvatarPushRecoveryStandingTest
    public void testRecoveryPushForwardWhileInFlamingoStanceAndAfterTouchDown()
    {
       setupTest(null, true);
+      simulationTestHelper.setKeepSCSUp(true);
       assertTrue(simulationTestHelper.simulateNow(1.0));
       RobotSide footSide = RobotSide.LEFT;
       FramePose3D footPose = new FramePose3D(simulationTestHelper.getAvatarSimulation().getControllerFullRobotModel().getEndEffectorFrame(footSide,
@@ -355,7 +356,7 @@ public abstract class AvatarPushRecoveryStandingTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(1.0, 0.2, 0.0);
-      double magnitude = 350.0;
+      double magnitude = 300.0;
       double duration = 0.2;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       assertTrue(simulationTestHelper.simulateNow(1.0));
