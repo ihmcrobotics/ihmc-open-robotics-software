@@ -90,7 +90,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final List<Consumer<SwingPlannerType>> swingReplanRequestCallbacks = new ArrayList<>();
    private final List<Consumer<FootstepPlan>> swingReplanStatusCallbacks = new ArrayList<>();
 
-   private final boolean useGPU = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+   private final boolean useGPU;
 
    public FootstepPlanningModule(String name)
    {
@@ -104,6 +104,19 @@ public class FootstepPlanningModule implements CloseableAndDisposable
            null);
    }
 
+   public FootstepPlanningModule(String name, boolean useGPU)
+   {
+      this(name,
+           new DefaultVisibilityGraphParameters(),
+           new AStarBodyPathPlannerParameters(),
+           new DefaultFootstepPlannerParameters(),
+           new DefaultSwingPlannerParameters(),
+           null,
+           PlannerTools.createDefaultFootPolygons(),
+           null,
+           useGPU);
+   }
+
    public FootstepPlanningModule(String name,
                                  VisibilityGraphsParametersBasics visibilityGraphParameters,
                                  AStarBodyPathPlannerParametersBasics aStarBodyPathPlannerParameters,
@@ -112,6 +125,27 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                                  WalkingControllerParameters walkingControllerParameters,
                                  SideDependentList<ConvexPolygon2D> footPolygons,
                                  StepReachabilityData stepReachabilityData)
+   {
+      this(name,
+           visibilityGraphParameters,
+           aStarBodyPathPlannerParameters,
+           footstepPlannerParameters,
+           swingPlannerParameters,
+           walkingControllerParameters,
+           footPolygons,
+           stepReachabilityData,
+           true);
+   }
+
+   public FootstepPlanningModule(String name,
+                                 VisibilityGraphsParametersBasics visibilityGraphParameters,
+                                 AStarBodyPathPlannerParametersBasics aStarBodyPathPlannerParameters,
+                                 FootstepPlannerParametersBasics footstepPlannerParameters,
+                                 SwingPlannerParametersBasics swingPlannerParameters,
+                                 WalkingControllerParameters walkingControllerParameters,
+                                 SideDependentList<ConvexPolygon2D> footPolygons,
+                                 StepReachabilityData stepReachabilityData,
+                                 boolean useGPU)
    {
       this.name = name;
       this.visibilityGraphParameters = visibilityGraphParameters;
@@ -122,13 +156,14 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       this.visibilityGraphPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters, pathPostProcessor);
       this.narrowPassageBodyPathOptimizer = new NarrowPassageBodyPathOptimizer(footstepPlannerParameters, null);
 
+      this.useGPU = useGPU;
       if (useGPU)
       {
-         this.bodyPathPlannerInterface = new AStarBodyPathPlanner(footstepPlannerParameters, aStarBodyPathPlannerParameters, footPolygons, stopwatch);
+         this.bodyPathPlannerInterface = new GPUAStarBodyPathPlanner(footstepPlannerParameters, aStarBodyPathPlannerParameters, footPolygons, stopwatch);
       }
       else
       {
-         this.bodyPathPlannerInterface = new GPUAStarBodyPathPlanner(footstepPlannerParameters, aStarBodyPathPlannerParameters, footPolygons, stopwatch);
+         this.bodyPathPlannerInterface = new AStarBodyPathPlanner(footstepPlannerParameters, aStarBodyPathPlannerParameters, footPolygons, stopwatch);
       }
       this.planThenSnapPlanner = new PlanThenSnapPlanner(footstepPlannerParameters, footPolygons);
       this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters,

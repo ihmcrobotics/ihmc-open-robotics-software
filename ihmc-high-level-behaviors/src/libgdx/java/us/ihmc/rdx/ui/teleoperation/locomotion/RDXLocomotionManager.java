@@ -67,7 +67,6 @@ public class RDXLocomotionManager
    private ImGuiStoredPropertySetBooleanWidget replanSwingTrajectoriesOnChangeCheckbox;
    private ImGuiStoredPropertySetDoubleWidget swingTimeSlider;
    private ImGuiStoredPropertySetDoubleWidget transferTimeSlider;
-   private ImGuiStoredPropertySetDoubleWidget turnAggressivenessSlider;
 
    private final RDXFootstepPlanGraphic footstepsSentToControllerGraphic;
    private final RDXBodyPathPlanGraphic bodyPathPlanGraphic = new RDXBodyPathPlanGraphic();
@@ -164,7 +163,6 @@ public class RDXLocomotionManager
       replanSwingTrajectoriesOnChangeCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.replanSwingTrajectoriesOnChange);
       swingTimeSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.swingTime, 0.3, 1.5);
       transferTimeSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.transferTime, 0.3, 1.5);
-      turnAggressivenessSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.turnAggressiveness, 0.0, 10.0);
 
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW, syncedRobot);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
@@ -286,11 +284,6 @@ public class RDXLocomotionManager
 
       swingTimeSlider.renderImGuiWidget();
       transferTimeSlider.renderImGuiWidget();
-      turnAggressivenessSlider.renderImGuiWidget();
-
-      ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
-      ImGui.checkbox(labels.get("Show body path planner parameter tuner"), bodyPathPlanningParametersTuner.getIsShowing());
-      ImGui.checkbox(labels.get("Show swing planner parameter tuner"), swingFootPlanningParametersTuner.getIsShowing());
 
       ImGui.text("Walking Options:");
       ImGui.sameLine();
@@ -301,14 +294,14 @@ public class RDXLocomotionManager
       }
       ImGui.sameLine();
 
-//      ImGui.beginDisabled(!walkAvailable);
+      ImGui.beginDisabled(!walkAvailable);
       if (ImGui.button(labels.get("Walk")))
       { // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
          interactableFootstepPlan.walkFromSteps();
       }
       ImGuiTools.previousWidgetTooltip("Keybind: Space");
       ImGui.sameLine();
-//      ImGui.endDisabled();
+      ImGui.endDisabled();
 
       ImGui.beginDisabled(!pauseAvailable);
       if (ImGui.button(labels.get("Pause")))
