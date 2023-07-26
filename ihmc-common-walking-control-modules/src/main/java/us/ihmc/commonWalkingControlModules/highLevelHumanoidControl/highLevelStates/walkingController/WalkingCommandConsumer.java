@@ -158,8 +158,6 @@ public class WalkingCommandConsumer
       commandsToRegister.add(MomentumTrajectoryCommand.class);
       commandsToRegister.add(CenterOfMassTrajectoryCommand.class);
       commandsToRegister.add(AbortWalkingCommand.class);
-      commandsToRegister.add(StepConstraintRegionCommand.class);
-      commandsToRegister.add(StepConstraintsListCommand.class);
       commandsToRegister.add(PrepareForLocomotionCommand.class);
       commandsToRegister.add(DirectionalControlInputCommand.class);
       commandsToRegister.add(FastWalkingGaitParametersCommand.class);
