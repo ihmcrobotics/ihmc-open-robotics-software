@@ -175,12 +175,15 @@ public class RDXBaseUI
       layoutManager.getLoadListeners().add(imGuiWindowAndDockSystem::loadConfiguration);
       layoutManager.getLoadListeners().add(loadConfigurationLocation ->
       {
-         Gdx.graphics.setWindowedMode(imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getWidth(),
-                                      imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getHeight());
-         ((Lwjgl3Graphics) Gdx.graphics).getWindow().setPosition(imGuiWindowAndDockSystem.getPrimaryWindowPosition().getX(),
-                                                                 imGuiWindowAndDockSystem.getPrimaryWindowPosition().getY());
+         int width = imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getWidth();
+         int height = imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getHeight();
+         Gdx.graphics.setWindowedMode(width, height);
+         int x = imGuiWindowAndDockSystem.getPrimaryWindowPosition().getX();
+         int y = imGuiWindowAndDockSystem.getPrimaryWindowPosition().getY();
+         ((Lwjgl3Graphics) Gdx.graphics).getWindow().setPosition(x, y);
          return true;
       });
+      layoutManager.getSaveListeners().add(imGuiWindowAndDockSystem::saveConfiguration);
       layoutManager.applyLayoutDirectory();
 
 //      guiRecorder = new RDXLinuxGUIRecorder(24, 0.8f, getClass().getSimpleName());
