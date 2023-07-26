@@ -26,7 +26,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class RDXRapidRegionsUI implements RenderableProvider
 {
-   private static final boolean RENDER_DEBUG_PLOTS = true;
+   private static final boolean RENDER_DEBUG_PLOTS = false;
 
    private RDXPlanarRegionsGraphic planarRegionsGraphic;
    private ModelInstance sensorFrameGraphic;
