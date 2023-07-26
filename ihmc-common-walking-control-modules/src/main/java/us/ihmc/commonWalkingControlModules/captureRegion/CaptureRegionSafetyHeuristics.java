@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import us.ihmc.commons.InterpolationTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
@@ -176,23 +177,23 @@ public class CaptureRegionSafetyHeuristics implements SCS2YoGraphicHolder
 
    private void projectClosestVertexOfTheTriangle(FrameConvexPolygon2DBasics oneStepCaptureRegion)
    {
-      int closestVertexIndex = oneStepCaptureRegion.getClosestVertexIndex(stancePosition);
-      Point2DBasics closestVertex = oneStepCaptureRegion.getVertexUnsafe(closestVertexIndex);
-
       // if it's zero, don't bother projecting
       if (extraDistanceToStepFromStanceFoot.getValue() <= 0.0)
          return;
 
-      vectorToVertex.setReferenceFrame(stancePosition.getReferenceFrame());
+      int closestVertexIndex = oneStepCaptureRegion.getClosestVertexIndex(stancePosition);
+      Point2DBasics closestVertex = oneStepCaptureRegion.getVertexUnsafe(closestVertexIndex);
 
+      vectorToVertex.setReferenceFrame(stancePosition.getReferenceFrame());
       vectorToVertex.sub(closestVertex, stancePosition);
 
       // if you're already near the reachability limit, don't do any projection, it's just likely to mess you up.
-      if (vectorToVertex.norm() > reachabilityLimit.getValue() - 0.42 * extraDistanceToStepFromStanceFoot.getValue())
+      double distanceSquared = vectorToVertex.normSquared();
+      if (distanceSquared > MathTools.square(reachabilityLimit.getValue()) - 0.42 * extraDistanceToStepFromStanceFoot.getValue())
          return;
 
       // Compute the maximum distance that the vertex can be projected along the line before hitting the reachability limit.
-      double maxProjectionDistance = Math.max(findMaximumProjectionDistance(vectorToVertex.norm(),
+      double maxProjectionDistance = Math.max(findMaximumProjectionDistance(Math.sqrt(distanceSquared),
                                                                             reachabilityLimit.getValue(),
                                                                             vectorToVertex.angle(lineOfMinimalAction.getDirection())), 0.0);
 
