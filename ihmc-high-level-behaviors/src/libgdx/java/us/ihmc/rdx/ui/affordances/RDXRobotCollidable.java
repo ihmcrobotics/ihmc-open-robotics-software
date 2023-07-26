@@ -23,7 +23,6 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.rdx.vr.RDXVRContext;
-import us.ihmc.rdx.vr.RDXVRDragData;
 import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.interaction.MouseCollidable;
 import us.ihmc.robotics.physics.Collidable;
@@ -55,7 +54,6 @@ public class RDXRobotCollidable implements RenderableProvider
    private boolean isHoveredByAnything = false;
    private boolean isMouseHovering = false;
    private final SideDependentList<Boolean> isVRHovering = new SideDependentList<>(false, false);
-   private final SideDependentList<Double> isVRPointing = new SideDependentList<>();
    private RDXModelInstance pickRayCollisionPointGraphic;
 
    public RDXRobotCollidable(us.ihmc.scs2.simulation.collision.Collidable collidable, Color color)
@@ -189,9 +187,6 @@ public class RDXRobotCollidable implements RenderableProvider
             double distanceToSurface = isInside ? -distance : distance;
             closestPoint.changeFrame(ReferenceFrame.getWorldFrame());
             LibGDXTools.toLibGDX(closestPoint, pickRayCollisionPointGraphic.transform);
-            Line3DReadOnly pickRay = controller.getPickRay();
-            isVRPointing.put(side, mouseCollidable.collide(pickRay, shape.getReferenceFrame()));
-            double distancePoint = isVRPointing.get(side);
 
             if (isInside)
             {
@@ -202,12 +197,6 @@ public class RDXRobotCollidable implements RenderableProvider
             else
             {
                pickRayCollisionPointGraphic.setColor(ColorDefinitions.White());
-            }
-
-            if(!Double.isNaN(distancePoint))
-            {
-               vrPickResult.get(side).setDistanceToControllerPickPoint(distancePoint);
-               controller.addPickResult(vrPickResult.get(side));
             }
             if (vrPickResult.get(side).getPickCollisionWasAddedSinceReset())
             {
@@ -221,20 +210,9 @@ public class RDXRobotCollidable implements RenderableProvider
    {
       for (RobotSide side : RobotSide.values)
       {
-         vrContext.getController(side).runIfConnected(controller ->
-                                                      {
-                                                         boolean isHovering = vrContext.getController(side).getSelectedPick() == vrPickResult.get(side);
-                                                         isVRHovering.set(side, isHovering);
-                                                         isHoveredByAnything |= isHovering;
-
-                                                         RDXVRDragData bButtonDragData = controller.getBButtonDragData();
-
-                                                         if (bButtonDragData.getDragJustStarted() && controller.getSelectedPick() == vrPickResult.get(side))
-                                                         {
-                                                            bButtonDragData.setObjectBeingDragged(this);
-                                                         }
-                                                      });
-
+         boolean isHovering = vrContext.getController(side).getSelectedPick() == vrPickResult.get(side);
+         isVRHovering.set(side, isHovering);
+         isHoveredByAnything |= isHovering;
       }
    }
 
@@ -308,10 +286,5 @@ public class RDXRobotCollidable implements RenderableProvider
    public FrameShape3DReadOnly getShape()
    {
       return shape;
-   }
-
-   public SideDependentList<Double> getIsVRPointing()
-   {
-      return isVRPointing;
    }
 }

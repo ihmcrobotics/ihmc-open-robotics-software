@@ -6,7 +6,6 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.ImGui;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -17,10 +16,8 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRDragData;
-import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 
@@ -47,7 +44,6 @@ public class RDXInteractableRobotLink
    private boolean isMouseHovering;
    private final Notification contextMenuNotification = new Notification();
    private boolean isVRHovering;
-   private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
 
    /** For when the graphic, the link, and control frame are all the same. */
    public void create(RDXRobotCollidable robotCollidable, ReferenceFrame syncedControlFrame, String graphicFileName, RDX3DPanel panel3D)
@@ -100,30 +96,6 @@ public class RDXInteractableRobotLink
          highlightModel.setTransparency(0.5);
       }
    }
-
-   public void calculateVRPick(RDXVRContext vrContext)
-   {
-      for (RobotSide side : RobotSide.values)
-      {
-         vrContext.getController(side).runIfConnected(controller ->
-         {
-            if (!controller.getBButtonDragData().isDragging())
-            {
-               Line3DReadOnly pickRay = controller.getPickRay();
-               for (RDXRobotCollidable robotCollidable : robotCollidables)
-               {
-                  double distance = robotCollidable.getIsVRPointing().get(side);
-
-                  if(!Double.isNaN(distance))
-                  {
-                     vrPickResult.get(side).setDistanceToControllerPickPoint(distance);
-                     controller.addPickResult(vrPickResult.get(side));
-                  }
-               }
-            }
-         });
-      }
-   }
    public void processVRInput(RDXVRContext vrContext)
    {
       isVRHovering = false;
@@ -140,13 +112,6 @@ public class RDXInteractableRobotLink
             isVRHovering |= isHovering;
 
             RDXVRDragData gripDragData = controller.getGripDragData();
-            RDXVRDragData bButtonDragData = controller.getBButtonDragData();
-
-            if (bButtonDragData.getDragJustStarted() && controller.getSelectedPick() == vrPickResult.get(side))
-            {
-               bButtonDragData.setObjectBeingDragged(this);
-               bButtonDragData.setInteractableFrameOnDragStart(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
-            }
 
             if (isHovering && gripDragData.getDragJustStarted())
             {
