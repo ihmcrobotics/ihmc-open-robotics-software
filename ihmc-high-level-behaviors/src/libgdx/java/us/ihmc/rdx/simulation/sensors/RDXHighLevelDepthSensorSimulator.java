@@ -793,6 +793,11 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
       this.renderPointCloudDirectly.set(renderPointCloudDirectly);
    }
 
+   public void setPointSize(double size)
+   {
+      pointSize.set((float) size);
+   }
+
    public void setRenderDepthVideoDirectly(boolean renderDepthVideoDirectly)
    {
       getLowLevelSimulator().getDepthPanel().getIsShowing().set(renderDepthVideoDirectly);

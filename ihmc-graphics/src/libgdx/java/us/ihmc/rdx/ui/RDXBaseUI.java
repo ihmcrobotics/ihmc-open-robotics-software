@@ -20,6 +20,7 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.RDXKeyBindings;
 import us.ihmc.rdx.RDXSettings;
 import us.ihmc.rdx.imgui.ImGuiPanelManager;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -84,8 +85,16 @@ public class RDXBaseUI
    public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
    private static final String VIEW_3D_WINDOW_NAME = "3D View";
 
+   private static RDXBaseUI instance;
+
+   public static RDXBaseUI getInstance()
+   {
+      return instance;
+   }
+
    private GLProfiler glProfiler;
    private RDXSettings settings;
+
    private final RDX3DScene primaryScene = new RDX3DScene();
    private final RDX3DPanel primary3DPanel;
    private final ArrayList<RDX3DPanel> additional3DPanels = new ArrayList<>();
@@ -109,6 +118,7 @@ public class RDXBaseUI
    private final ImInt libGDXLogLevel = new ImInt(LibGDXTools.toLibGDX(LogTools.getLevel()));
    private final ImDouble imguiFontScale = new ImDouble(1.0);
    private final RDXImGuiLayoutManager layoutManager;
+   private final RDXKeyBindings keyBindings = new RDXKeyBindings();
    private long renderIndex = 0;
    private double isoZoomOut = 0.7;
    private enum Theme
@@ -140,6 +150,8 @@ public class RDXBaseUI
     */
    /* package private*/ RDXBaseUI(int additionalStackHeightForFindingCaller, String windowTitle)
    {
+      instance = this;
+
       StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
       Class<?> classForLoading = ExceptionTools.handle(() -> Class.forName(stackTraceElements[3 + additionalStackHeightForFindingCaller].getClassName()),
                                                        DefaultExceptionHandler.RUNTIME_EXCEPTION);
@@ -163,12 +175,15 @@ public class RDXBaseUI
       layoutManager.getLoadListeners().add(imGuiWindowAndDockSystem::loadConfiguration);
       layoutManager.getLoadListeners().add(loadConfigurationLocation ->
       {
-         Gdx.graphics.setWindowedMode(imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getWidth(),
-                                      imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getHeight());
-         ((Lwjgl3Graphics) Gdx.graphics).getWindow().setPosition(imGuiWindowAndDockSystem.getPrimaryWindowPosition().getX(),
-                                                                 imGuiWindowAndDockSystem.getPrimaryWindowPosition().getY());
+         int width = imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getWidth();
+         int height = imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getHeight();
+         Gdx.graphics.setWindowedMode(width, height);
+         int x = imGuiWindowAndDockSystem.getPrimaryWindowPosition().getX();
+         int y = imGuiWindowAndDockSystem.getPrimaryWindowPosition().getY();
+         ((Lwjgl3Graphics) Gdx.graphics).getWindow().setPosition(x, y);
          return true;
       });
+      layoutManager.getSaveListeners().add(imGuiWindowAndDockSystem::saveConfiguration);
       layoutManager.applyLayoutDirectory();
 
 //      guiRecorder = new RDXLinuxGUIRecorder(24, 0.8f, getClass().getSimpleName());
@@ -272,6 +287,8 @@ public class RDXBaseUI
       primary3DPanel.addImGui3DViewInputProcessor(vrManager::process3DViewInput);
       imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Thread Debugger", vrManager::renderImGuiDebugWidgets);
       imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Settings", vrManager::renderImGuiTunerWidgets);
+
+      keyBindings.register("Show key bindings", "Tab");
    }
 
    public void renderBeforeOnScreenUI()
@@ -285,6 +302,8 @@ public class RDXBaseUI
          additional3DPanel.render();
       }
       renderMenuBar();
+
+      keyBindings.renderKeyBindingsTable();
    }
 
    public void renderEnd()
@@ -466,12 +485,17 @@ public class RDXBaseUI
          }
          /* End checkbox settings */
 
+         if (ImGui.menuItem("Show key bindings..."))
+         {
+            keyBindings.showKeybindings();
+         }
+
          ImGui.endMenu();
       }
 
       if (plotFrameRate.get())
       {
-         // Currently we manually tune this value when we change the stuff in the status area
+         // Currently we manually tune this value when we change the stuff in the status a
          float menuBarStatusWidth = 320.0f;
          ImGui.sameLine(ImGui.getWindowSizeX() - menuBarStatusWidth);
          frameRateDisplay.renderPlot();
@@ -496,6 +520,8 @@ public class RDXBaseUI
       imGuiWindowAndDockSystem.dispose();
       vrManager.dispose();
       primaryScene.dispose();
+
+      instance = null;
    }
 
    public void add3DPanel(RDX3DPanel panel3D)
@@ -542,6 +568,11 @@ public class RDXBaseUI
    public RDXImGuiLayoutManager getLayoutManager()
    {
       return layoutManager;
+   }
+
+   public RDXKeyBindings getKeyBindings()
+   {
+      return keyBindings;
    }
 
    public RDX3DScene getPrimaryScene()

@@ -32,6 +32,7 @@ import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectLibrary;
 import us.ihmc.rdx.simulation.environment.object.objects.RDXDirectionalLightObject;
 import us.ihmc.rdx.simulation.environment.object.objects.RDXPointLightObject;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
@@ -72,6 +73,7 @@ public class RDXEnvironmentBuilder extends ImGuiPanel
       this.panel3D = panel3D;
       setRenderMethod(this::renderImGuiWidgets);
       addChild(poseGizmoTunerPanel);
+      RDXBaseUI.getInstance().getKeyBindings().register("Delete selected object", "Delete");
    }
 
    public void create()
