@@ -274,7 +274,7 @@ public class RDXLocomotionManager
       boolean continueAvailable = !pauseAvailable && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0;
       boolean walkAvailable = !continueAvailable && interactableFootstepPlan.getNumberOfFootsteps() > 0;
 
-      if (ImGui.collapsingHeader(labels.get("Additional Options"), collapsedHeader))
+      if (ImGui.collapsingHeader(labels.get("Footstep Planning Options"), collapsedHeader))
       {
          ImGui.indent();
          areFootstepsAdjustableCheckbox.renderImGuiWidget();
