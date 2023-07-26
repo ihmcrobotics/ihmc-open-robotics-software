@@ -1,8 +1,5 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
-import static us.ihmc.robotics.Assert.assertFalse;
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +18,6 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -37,7 +33,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameGeometryTestFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -55,6 +50,8 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MultiStepCaptureRegionCalculatorTest
 {
@@ -77,8 +74,10 @@ public class MultiStepCaptureRegionCalculatorTest
 
    @SuppressWarnings("unused")
    @Test
-   public void testPointsInsideSimpleSquareRegion()
+   public void testExpansionOfSquareCaptureRegion()
    {
+      // In this test, we'll define the base region as a simple square, and then apply all the tests described in the test method to assert the multi-step
+      // regions are created correctly.
       double footWidth = 0.1;
       double footLength = 0.2;
       double kinematicStepRange = 1.0;
@@ -129,7 +128,7 @@ public class MultiStepCaptureRegionCalculatorTest
       reachabilityConstraint.initializeReachabilityConstraint(RobotSide.LEFT);
       reachabilityConstraint.initializeReachabilityConstraint(RobotSide.RIGHT);
 
-      for (RobotSide swingSide : RobotSide.values())
+      for (RobotSide swingSide : RobotSide.values)
       {
 
          ReferenceFrame stanceFrame = ankleZUpFrames.get(swingSide.getOppositeSide());
@@ -230,10 +229,10 @@ public class MultiStepCaptureRegionCalculatorTest
    }
 
    @Test
-   public void testPointsInsideSimpleLine()
+   public void testExpansionOfSimpleLineCaptureRegion()
    {
-      double footWidth = 0.1;
-      double footLength = 0.2;
+      // In this test, we'll define the base region as a simple line, and then apply all the tests described in the test method to assert the multi-step
+      // regions are created correctly. Lines require some different logic checks when doing the expansion properly.
       double kinematicStepRange = 1.0;
       double forwardLimit = 1.0;
       double backwardLimit = 0.8;
@@ -259,7 +258,6 @@ public class MultiStepCaptureRegionCalculatorTest
       yoNominalWidth.set(width);
       yoSwingDuration.set(swingDuration);
 
-      double swingTimeRemaining = 0.1;
       double omega0 = 3.0;
 
       StepAdjustmentReachabilityConstraint reachabilityConstraint = new StepAdjustmentReachabilityConstraint(ankleZUpFrames,
@@ -383,8 +381,10 @@ public class MultiStepCaptureRegionCalculatorTest
    }
 
    @Test
-   public void testPointsInsideFromDataAsALine()
+   public void testExpansionOfLineCaptureRegionFromRobotData()
    {
+      // In this test, we'll define the base region as a simple line from data captured on the hardware., and then apply all the tests described in the test
+      // method to assert the multi-step regions are created correctly. Lines require some different logic checks when doing the expansion properly.
       double forwardLimit = 1.0;
       double backwardLimit = 1.0;
       double innerLimit = 0.075;
@@ -528,8 +528,10 @@ public class MultiStepCaptureRegionCalculatorTest
    }
 
    @Test
-   public void testPointsInsideFromDataAsALine2()
+   public void testExpansionOfLineCaptureRegionFromRobotData2()
    {
+      // In this test, we'll define the base region as a simple line from data captured on the hardware., and then apply all the tests described in the test
+      // method to assert the multi-step regions are created correctly. Lines require some different logic checks when doing the expansion properly.
       double forwardLimit = 1.0;
       double backwardLimit = 1.0;
       double innerLimit = 0.075;
@@ -673,8 +675,10 @@ public class MultiStepCaptureRegionCalculatorTest
    }
 
    @Test
-   public void testPointsInsideCaptureRegion()
+   public void testExpansionOfRealCaptureRegion()
    {
+      // In this test, we'll expand an actual computed capture region. and then apply all the tests described in the test
+      // method to assert the multi-step regions are created correctly.
       double footWidth = 0.1;
       double footLength = 0.2;
       double kinematicStepRange = 1.0;
@@ -834,10 +838,11 @@ public class MultiStepCaptureRegionCalculatorTest
    }
 
    @Test
-   public void testCaptureRegionIsALine()
+   public void testExpansionOfLineCaptureRegion()
    {
+      // In this test, we'll expand an actual computed capture region, but one that should result in a line, and then apply all the tests described in the test
+      // method to assert the multi-step regions are created correctly.
       double footWidth = 0.1;
-      double footLength = 0.2;
       double kinematicStepRange = 1.0;
       double forwardLimit = 1.0;
       double backwardLimit = 0.8;
@@ -992,8 +997,10 @@ public class MultiStepCaptureRegionCalculatorTest
    }
 
    @Test
-   public void testCustomRegionSimple()
+   public void testExpansionOfSimpleTriangleCaptureRegion()
    {
+      // In this test, we'll define the base region as a simple triangle, and then apply all the tests described in the test method to assert the multi-step
+      // regions are created correctly.
       double forwardLimit = 0.8;
       double backwardLimit = 0.8;
       double innerLimit = 0.075;
@@ -1141,10 +1148,11 @@ public class MultiStepCaptureRegionCalculatorTest
       }
    }
 
-   @Disabled
    @Test
    public void testCaptureRegionIsAPoint()
    {
+      // In this test, we'll define the base region as a simple point, and then apply all the tests described in the test method to assert the multi-step
+      // regions are created correctly.
       double kinematicStepRange = 1.0;
       double forwardLimit = 1.0;
       double backwardLimit = 0.8;
@@ -1594,10 +1602,18 @@ public class MultiStepCaptureRegionCalculatorTest
       multiStepRegionCalculator.compute(stanceSide, captureRegion, swingDuration, omega0, 1);
       FrameConvexPolygon2DReadOnly oneStepRegion = new FrameConvexPolygon2D(multiStepRegionCalculator.getCaptureRegion());
 
+      // First, make sure that the capture region with only one step in queue that's produced by the multi-step calculator is the one step region.
+      // This means no expansion is done, which is what is desired.
       EuclidCoreTestTools.assertEquals(captureRegion, oneStepRegion, 1e-5);
 
-      // check that the polygons increase in size as you increase the steps
-      for (int i = 2; i < 6; i++)
+      int firstExpandedRegion = 2;
+      int expansionsToCheck = 6;
+      FrameConvexPolygon2D interiorRegion = new FrameConvexPolygon2D(captureRegion);
+      // check that the polygons increase in size as you increase the number of steps. Each new region should be bigger than the previous region, as well as
+      // bigger than the original capture region. We can do this by testing that all the vertices of the smaller region are inside the bigger region.
+      // In general, this doesn't guarantee that one is inside the other (e.g. if two rectanges of the same size overlap, but one is rotated 90 degrees), but
+      // based on the way these are expanded, this test should work.
+      for (int i = firstExpandedRegion; i < expansionsToCheck; i++)
       {
          multiStepRegionCalculator.compute(stanceSide, captureRegion, swingDuration, omega0, i);
          FrameConvexPolygon2DReadOnly biggerRegion = new FrameConvexPolygon2D(multiStepRegionCalculator.getCaptureRegion());
@@ -1605,32 +1621,38 @@ public class MultiStepCaptureRegionCalculatorTest
          for (int vertexId = 0; vertexId < captureRegion.getNumberOfVertices(); vertexId++)
          {
             double distanceInside = biggerRegion.signedDistance(captureRegion.getVertex(vertexId));
-            assertTrue("Distance outside is " + distanceInside, distanceInside < 5e-3);
+            assertTrue(distanceInside < 1e-3, "Distance outside is " + distanceInside);
          }
+         for (int vertexId = 0; vertexId < interiorRegion.getNumberOfVertices(); vertexId++)
+         {
+            double distanceInside = biggerRegion.signedDistance(interiorRegion.getVertex(vertexId));
+            assertTrue(distanceInside < 5e-3, "Distance outside is " + distanceInside);
+         }
+
+         // the next expansion should be bigger, so let's cache this region to test against.
+         interiorRegion.set(biggerRegion);
       }
 
+      // Now test that the expanded region is smaller than some absolute bounded distance from the one step region. We can compute this max value from the
+      // capture region paper, which is a circular expansion of an increasing amount.
       // check that it's inside the region that doesn't consider reachability limits
-      double exponential = Math.exp(-omega0 * swingDuration);
-      double scale = exponential;
-      ConvexPolygonScaler scaler = new ConvexPolygonScaler();
-      FrameConvexPolygon2D nStepRegionBound = new FrameConvexPolygon2D(oneStepRegion);
-      for (int i = 2; i < 6; i++)
+      double epsilonFudgeFactor = 1.05; // we're adding this, because the absolute inscribed distance by the interior polygon isn't quite right ,so this gives us
+                                        // flexibility
+      double nStepRegionDistance = Math.exp(-omega0 * swingDuration) * kinematicStepRange * epsilonFudgeFactor;
+      for (int i = firstExpandedRegion; i < expansionsToCheck; i++)
       {
          multiStepRegionCalculator.compute(stanceSide, captureRegion, swingDuration, omega0, i);
-         FrameConvexPolygon2DReadOnly interiorRegion = new FrameConvexPolygon2D(multiStepRegionCalculator.getCaptureRegion());
+         FrameConvexPolygon2DReadOnly multiStepRegion = new FrameConvexPolygon2D(multiStepRegionCalculator.getCaptureRegion());
 
-         FrameConvexPolygon2D scaledPolygon = new FrameConvexPolygon2D();
-         scaler.scaleConvexPolygon(nStepRegionBound, -scale * kinematicStepRange, scaledPolygon);
-
-         for (int vertexId = 0; vertexId < captureRegion.getNumberOfVertices(); vertexId++)
+         for (int vertexId = 0; vertexId < multiStepRegion.getNumberOfVertices(); vertexId++)
          {
-            double distanceInside = scaledPolygon.signedDistance(interiorRegion.getVertex(vertexId));
-            assertTrue("Distance outside is " + distanceInside, distanceInside < 5e-3);
+            double distanceOutside = captureRegion.signedDistance(multiStepRegion.getVertex(vertexId));
+            // make sure it's less than this distance
+            assertTrue(distanceOutside < nStepRegionDistance + 1e-5, "Distance outside is " + distanceOutside + ", but should be less than " + nStepRegionDistance);
          }
 
-         scale *= exponential;
-
-         nStepRegionBound.set(scaledPolygon);
+         // as we add more steps, this should increase in distance.
+         nStepRegionDistance += Math.exp(i * -omega0 * swingDuration) * kinematicStepRange * epsilonFudgeFactor;
       }
    }
 
