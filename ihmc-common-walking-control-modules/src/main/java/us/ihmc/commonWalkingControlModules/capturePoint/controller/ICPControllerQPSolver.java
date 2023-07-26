@@ -347,6 +347,7 @@ public class ICPControllerQPSolver
       cmpFeedbackMinimizationTask.reshape(2);
       feedbackRateMinimizationTask.reshape(problemSize);
 
+      // It's 4 becuase it's max and min.
       numberOfInequalityConstraints += (Double.isFinite(maximumFeedbackRate) && Double.isFinite(controlDT)) ? 4 : 0;
       numberOfInequalityConstraints += Double.isFinite(maxFeedbackXMagnitude) || Double.isFinite(maxFeedbackYMagnitude) ? 4 : 0;
 
