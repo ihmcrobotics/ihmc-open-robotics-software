@@ -99,7 +99,7 @@ public class RDXInteractableFootstep
       // Measured footstep.fbx in Blender
       double footGraphicHeight = 0.035;
       selectionCollisionBox.getSize().set(0.25, 0.12, footGraphicHeight);
-      selectionCollisionBox.getPose().getTranslation().set(0.010887, 0.0, footGraphicHeight / 1.5);
+      selectionCollisionBox.getPose().getTranslation().set(0.010887, 0.0, footGraphicHeight);
       collisionBoxFrame = new ModifiableReferenceFrame("collisionBoxFrame", selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
       mouseCollidable = new MouseCollidable(selectionCollisionBox);
 
