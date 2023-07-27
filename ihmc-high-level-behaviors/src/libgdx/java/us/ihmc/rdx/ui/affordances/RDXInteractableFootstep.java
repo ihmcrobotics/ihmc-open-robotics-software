@@ -103,7 +103,7 @@ public class RDXInteractableFootstep
       selectionCollisionBox = new FrameBox3D(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
       // Measured footstep.fbx in Blender
       selectionCollisionBox.getSize().set(footstepGraphicLength, footstepGraphicWidth, footstepGraphicHeight);
-      selectionCollisionBox.getPose().getTranslation().set(footstepGraphicTranslationX, footstepGraphicTranslationY, footstepGraphicTranslationZ);
+      selectionCollisionBox.getPose().getTranslation().add(footstepGraphicTranslationX, footstepGraphicTranslationY, footstepGraphicTranslationZ);
       collisionBoxFrame = new ModifiableReferenceFrame("collisionBoxFrame", selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
       mouseCollidable = new MouseCollidable(selectionCollisionBox);
 
@@ -240,10 +240,11 @@ public class RDXInteractableFootstep
       }
 
       selectionCollisionBox.changeFrame(ReferenceFrame.getWorldFrame());
-      selectionCollisionBox.getPosition().set(selectablePose3DGizmo.getPoseGizmo().getPose().getPosition());
+      selectionCollisionBox.getPose().getTranslation().set(selectablePose3DGizmo.getPoseGizmo().getPose().getTranslation());
       selectionCollisionBox.getPose().getTranslation().add(footstepGraphicTranslationX, footstepGraphicTranslationY, footstepGraphicTranslationZ);
-      selectionCollisionBox.changeFrame(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
+      //TODO fix this line here, depending on which frame selectionCollisoinBox is in makes a different thing work
       collisionBoxFrame.update(transformToParent -> transformToParent.set(selectionCollisionBox.getPose()));
+
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
@@ -332,10 +333,7 @@ public class RDXInteractableFootstep
       gizmoTransform.getRotation().set(transform.getRotation());
       plannedFootstepInternal.getFootstepPose().set(gizmoTransform);
       wasPoseUpdated = true;
-      selectionCollisionBox.changeFrame(ReferenceFrame.getWorldFrame());
       selectionCollisionBox.getPosition().set(x, y, z);
-      selectionCollisionBox.getPose().getTranslation().add(footstepGraphicTranslationX, footstepGraphicTranslationY, footstepGraphicTranslationZ);
-      selectionCollisionBox.changeFrame(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
       collisionBoxFrame.getReferenceFrame().getTransformToWorldFrame().getTranslation().set(x, y, z);
    }
 
@@ -430,11 +428,6 @@ public class RDXInteractableFootstep
 
       wasPoseUpdated = !plannedFootstepInternal.getFootstepPose().epsilonEquals(footstepPose, 1e-2);
       plannedFootstepInternal.getFootstepPose().set(footstepPose);
-
-      selectionCollisionBox.changeFrame(ReferenceFrame.getWorldFrame());
-      selectionCollisionBox.getPose().set(selectablePose3DGizmo.getPoseGizmo().getPose());
-      selectionCollisionBox.getPose().getTranslation().add(footstepGraphicTranslationX, footstepGraphicTranslationY, footstepGraphicTranslationZ);
-      selectionCollisionBox.changeFrame(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
    }
 
    public boolean pollWasPoseUpdated()
