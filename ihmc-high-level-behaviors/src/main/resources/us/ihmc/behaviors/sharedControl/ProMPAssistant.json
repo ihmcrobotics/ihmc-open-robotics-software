@@ -5,7 +5,7 @@
   "numberObservations": 5,
   "conditionOnlyLastObservation": true,
   "conditioningStep": 1,
-  "useCustomSpeed": true,
+  "useCustomSpeed": false,
   "numberOfInferredSpeeds": 0,
   "allowedIncreaseDecreaseSpeedFactor": 2,
   "tasks":[
