@@ -99,10 +99,15 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
    public void calculateVRPick(RDXVRContext vrContext)
    {
-      for (RDXInteractableFootstep singleFootstep : footsteps)
+      for (RDXInteractableFootstep footstep : footsteps)
       {
-         singleFootstep.calculateVRPick(vrContext);
-         //TODO check if singleFootstep is hovered in vr
+         footstep.calculateVRPick(vrContext);
+
+         //TODO check if footstep is hovered in vr
+         if (footstep.isHovered())
+         {
+            selectedFootstep = footstep;
+         }
       }
       if (selectedFootstep != null)
       {
@@ -114,8 +119,8 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    {
       for (int i = 0; i < footsteps.size(); i++)
       {
-         RDXInteractableFootstep singleFootstep = footsteps.get(i);
-         singleFootstep.processVRInput(vrContext);
+         RDXInteractableFootstep footstep = footsteps.get(i);
+         footstep.processVRInput(vrContext);
       }
 
       if (selectedFootstep != null)
@@ -126,12 +131,12 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      for (RDXInteractableFootstep singleFootstep : footsteps)
+      for (RDXInteractableFootstep footstep : footsteps)
       {
-         singleFootstep.calculate3DViewPick(input);
+         footstep.calculate3DViewPick(input);
 
-         if (singleFootstep.isHovered())
-            selectedFootstep = singleFootstep;
+         if (footstep.isHovered())
+            selectedFootstep = footstep;
       }
       if (selectedFootstep != null)
       {
@@ -146,10 +151,10 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       // Call each footstep's process3DViewInput
       for (int i = 0; i < footsteps.size(); i++)
       {
-         RDXInteractableFootstep singleFootstep = footsteps.get(i);
-         singleFootstep.process3DViewInput(input, false);
+         RDXInteractableFootstep footstep = footsteps.get(i);
+         footstep.process3DViewInput(input, false);
 
-         if (singleFootstep.isHovered())
+         if (footstep.isHovered())
          {
             stepChecker.setReasonFrom(i);
             stepChecker.setRenderTooltip(true);
@@ -285,7 +290,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       communicationHelper.publishToController(messageList);
 
       // Note: set stance and swing as last two steps of the footstepArrayList (if this list is not empty)
-      // Note: delete steps in singleFootStepAffordance.
+      // Note: delete steps in footStepAffordance.
 
       if (footsteps.size() == 1)
       {
