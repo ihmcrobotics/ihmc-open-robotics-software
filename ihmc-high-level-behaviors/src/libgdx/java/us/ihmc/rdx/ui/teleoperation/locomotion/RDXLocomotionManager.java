@@ -286,13 +286,13 @@ public class RDXLocomotionManager
       swingTimeSlider.renderImGuiWidget();
       transferTimeSlider.renderImGuiWidget();
 
-      ImGui.text("Leg control mode: " + legControlMode.name());
-      ImGui.sameLine();
 
-      if (ImGui.button(labels.get("Disable")))
+      if (ImGui.button(labels.get("Disable Leg Mode")))
       {
          legControlMode = RDXLegControlMode.DISABLED;
       }
+      ImGui.sameLine();
+      ImGui.text("Leg Mode: " + legControlMode.name());
 
       ImGui.text("Walking Options:");
       ImGui.sameLine();
