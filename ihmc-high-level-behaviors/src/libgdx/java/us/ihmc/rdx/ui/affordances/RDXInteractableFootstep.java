@@ -33,6 +33,7 @@ import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
+import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.interaction.MouseCollidable;
 import us.ihmc.robotics.interaction.StepCheckIsPointInsideAlgorithm;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
@@ -237,6 +238,16 @@ public class RDXInteractableFootstep
 
       selectionCollisionBox.getPose().getTranslation().set(selectablePose3DGizmo.getPoseGizmo().getPose().getTranslation());
       collisionBoxFrame.update(transformToParent -> transformToParent.set(selectionCollisionBox.getPose()));
+   }
+
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+
+   }
+
+   public void processVRInput(RDXVRContext vrContext)
+   {
+
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
