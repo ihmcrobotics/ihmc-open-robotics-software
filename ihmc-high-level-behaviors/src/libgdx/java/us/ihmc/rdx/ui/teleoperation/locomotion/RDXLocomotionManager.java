@@ -155,8 +155,8 @@ public class RDXLocomotionManager
       bodyPathPlanningParametersTuner.create(bodyPathPlannerParameters, false);
       swingFootPlanningParametersTuner.create(swingFootPlannerParameters, false);
 
-      areFootstepsAdjustableCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.areFootstepsAdjustable);
       assumeFlatGroundCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.assumeFlatGround);
+      areFootstepsAdjustableCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.areFootstepsAdjustable);
       planSwingTrajectoriesCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.planSwingTrajectories);
       replanSwingTrajectoriesOnChangeCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.replanSwingTrajectoriesOnChange);
       swingTimeSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.swingTime, 0.3, 1.5);
@@ -272,17 +272,13 @@ public class RDXLocomotionManager
       boolean continueAvailable = !pauseAvailable && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0;
       boolean walkAvailable = !continueAvailable && interactableFootstepPlan.getNumberOfFootsteps() > 0;
 
-      areFootstepsAdjustableCheckbox.renderImGuiWidget();
       assumeFlatGroundCheckbox.renderImGuiWidget();
+      areFootstepsAdjustableCheckbox.renderImGuiWidget();
       planSwingTrajectoriesCheckbox.renderImGuiWidget();
       replanSwingTrajectoriesOnChangeCheckbox.renderImGuiWidget();
 
       swingTimeSlider.renderImGuiWidget();
       transferTimeSlider.renderImGuiWidget();
-
-      ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
-      ImGui.checkbox(labels.get("Show body path planner parameter tuner"), bodyPathPlanningParametersTuner.getIsShowing());
-      ImGui.checkbox(labels.get("Show swing planner parameter tuner"), swingFootPlanningParametersTuner.getIsShowing());
 
       ImGui.text("Walking Options:");
       ImGui.sameLine();
@@ -293,14 +289,14 @@ public class RDXLocomotionManager
       }
       ImGui.sameLine();
 
-//      ImGui.beginDisabled(!walkAvailable);
+      ImGui.beginDisabled(!walkAvailable);
       if (ImGui.button(labels.get("Walk")))
       { // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
          interactableFootstepPlan.walkFromSteps();
       }
       ImGuiTools.previousWidgetTooltip("Keybind: Space");
       ImGui.sameLine();
-//      ImGui.endDisabled();
+      ImGui.endDisabled();
 
       ImGui.beginDisabled(!pauseAvailable);
       if (ImGui.button(labels.get("Pause")))
@@ -343,6 +339,7 @@ public class RDXLocomotionManager
       manualFootstepPlacement.renderImGuiWidgets();
 
       ImGui.text("First stance side for planner:");
+      ImGui.sameLine();
 
       if (ImGui.radioButton(labels.get("Auto"), startStanceSide == RDXFootstepPlanning.InitialStanceSide.AUTO))
       {

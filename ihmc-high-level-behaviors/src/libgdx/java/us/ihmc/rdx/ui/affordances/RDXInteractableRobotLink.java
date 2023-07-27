@@ -13,6 +13,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRDragData;
@@ -68,6 +69,9 @@ public class RDXInteractableRobotLink
                                                                                            linkToControlFrameTransform);
       highlightModel = new RDXInteractableHighlightModel(modelFileName);
       selectablePose3DGizmo.create(panel3D);
+
+      RDXBaseUI.getInstance().getKeyBindings().register("Execute / pause motion", "Space");
+      RDXBaseUI.getInstance().getKeyBindings().register("Delete selected gizmo", "Delete");
    }
 
    public void update()
