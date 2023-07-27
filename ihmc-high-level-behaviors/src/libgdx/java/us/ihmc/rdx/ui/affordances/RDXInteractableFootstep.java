@@ -21,6 +21,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
@@ -34,7 +35,11 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.rdx.vr.RDXVRDragData;
+import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.interaction.MouseCollidable;
+import us.ihmc.robotics.interaction.Plane3DMouseDragAlgorithm;
+import us.ihmc.robotics.interaction.SixDoFSelection;
 import us.ihmc.robotics.interaction.StepCheckIsPointInsideAlgorithm;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.visualizers.RDXPolynomial;
@@ -79,6 +84,11 @@ public class RDXInteractableFootstep
 
    private final ModifiableReferenceFrame collisionBoxFrame;
    private final MouseCollidable mouseCollidable;
+
+   private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
+   private double closestCollisionDistance;
+   private final Point3D closestCollision = new Point3D();
+   private final Plane3DMouseDragAlgorithm planeDragAlgorithm = new Plane3DMouseDragAlgorithm();
 
    public RDXInteractableFootstep(RDXBaseUI baseUI, RobotSide footstepSide, int index, SideDependentList<ConvexPolygon2D> defaultPolygons)
    {
@@ -242,12 +252,75 @@ public class RDXInteractableFootstep
 
    public void calculateVRPick(RDXVRContext vrContext)
    {
+      for (RobotSide side : RobotSide.values)
+      {
+         vrContext.getController(side).runIfConnected(controller ->
+         {
+            if (!controller.getTriggerDragData().isDragging())
+            {
+               vrPickResult.get(side).reset();
+               Line3DReadOnly pickRay = controller.getPickRay();
+               closestCollisionDistance = Double.POSITIVE_INFINITY;
 
+               double distance = mouseCollidable.collide(pickRay, collisionBoxFrame.getReferenceFrame());
+               if (!Double.isNaN(distance) && distance < closestCollisionDistance)
+               {
+                  closestCollisionDistance = distance;
+                  closestCollision.set(mouseCollidable.getClosestInteresection());
+                  if (side == RobotSide.RIGHT)
+                  {
+                     controller.setBButtonText("Place Another");
+                     controller.setAButtonText("Walk");
+                  }
+                  else if (side == RobotSide.LEFT)
+                  {
+                     controller.setBButtonText("Place Another");
+                     controller.setAButtonText("Delete");
+                  }
+               }
+            }
+            vrPickResult.get(side).addPickCollision(closestCollisionDistance);
+
+            if (vrPickResult.get(side).getPickCollisionWasAddedSinceReset())
+            {
+               controller.addPickResult(vrPickResult.get(side));
+            }
+         });
+      }
    }
 
    public void processVRInput(RDXVRContext vrContext)
    {
+      for (RobotSide side : RobotSide.values)
+      {
+         vrContext.getController(side).runIfConnected(controller ->
+         {
+            RDXVRDragData triggerDragData = controller.getTriggerDragData();
 
+            if (triggerDragData.getDragJustStarted() && vrContext.getController(side).getSelectedPick() == vrPickResult.get(side))
+            {
+               triggerDragData.setObjectBeingDragged(this);
+               triggerDragData.setZUpDragStart(selectionCollisionBox.getPose().getReferenceFrame());
+            }
+            if (triggerDragData.isBeingDragged(this))
+            {
+               Line3DReadOnly pickRay = controller.getPickRay();
+               if (vrContext.getController(side).getSelectedPick() == vrPickResult.get(side))
+               {
+                  Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
+                  closestCollision.add(planarMotion);
+                  addGizmoPose(planarMotion);
+                  triggerDragData.updateZUpDrag(selectionCollisionBox.getPose().getReferenceFrame());
+                  double deltaYaw = triggerDragData.getZUpDragPose().getOrientation().getYaw();
+                  selectablePose3DGizmo.getPoseGizmo().getTransformToParent()
+                                       .getRotation()
+                                       .setYawPitchRoll(deltaYaw,
+                                                        selectablePose3DGizmo.getPoseGizmo().getPose().getPitch(),
+                                                        selectablePose3DGizmo.getPoseGizmo().getPose().getRoll());
+               }
+            }
+         });
+      }
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
@@ -330,6 +403,17 @@ public class RDXInteractableFootstep
 
       selectionCollisionBox.getPosition().set(x, y, z);
       collisionBoxFrame.getReferenceFrame().getTransformToWorldFrame().getTranslation().set(x, y, z);
+   }
+
+   public void addGizmoPose(Vector3DReadOnly planarMotion)
+   {
+      RigidBodyTransform gizmoTransform = selectablePose3DGizmo.getPoseGizmo().getTransformToParent();
+      gizmoTransform.getTranslation().add(planarMotion);
+      plannedFootstepInternal.getFootstepPose().set(gizmoTransform);
+      wasPoseUpdated = true;
+
+      selectionCollisionBox.getPosition().add(planarMotion);
+      collisionBoxFrame.getReferenceFrame().getTransformToWorldFrame().getTranslation().add(planarMotion);
    }
 
    public void flashFootstepWhenBadPlacement(BipedalFootstepPlannerNodeRejectionReason reason)
