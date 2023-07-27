@@ -71,6 +71,11 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       rightFootButton.loadAndSetIcon("icons/rightFoot.png");
       rightFootButton.setTooltipText("Place right footstep");
       rightFootButton.setOnPressed(() -> createNewFootstep(RobotSide.RIGHT));
+
+      RDXBaseUI.getInstance().getKeyBindings().register("Place left footstep", "R");
+      RDXBaseUI.getInstance().getKeyBindings().register("Place right footstep", "T");
+      RDXBaseUI.getInstance().getKeyBindings().register("Undo footstep placement", "Ctrl + Z");
+      RDXBaseUI.getInstance().getKeyBindings().register("Cancel footstep placement", "Escape");
    }
 
    public void update()
