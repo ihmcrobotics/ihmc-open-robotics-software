@@ -242,6 +242,7 @@ public class RDXArmManager
       }
 
       ImGui.text("Arm & hand control mode:");
+      ImGui.sameLine();
       if (ImGui.radioButton(labels.get("Joint angles (DDogleg)"), armControlMode == RDXArmControlMode.JOINT_ANGLES))
       {
          armControlMode = RDXArmControlMode.JOINT_ANGLES;
