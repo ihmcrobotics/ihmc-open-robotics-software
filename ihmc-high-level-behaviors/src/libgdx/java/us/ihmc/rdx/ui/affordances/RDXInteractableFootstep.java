@@ -55,6 +55,12 @@ public class RDXInteractableFootstep
 {
    // Intended to reuse text renderables, as they are relatively expensive to create
    private static final Map<String, RDX3DSituatedText> textRenderablesMap = new HashMap<>();
+   private static final double footGraphicHeight = 0.035;
+   private static final double footGraphicLength = 0.25;
+   private static final double footGraphicWidth = 0.12;
+   private static final double footGraphicTranslationX = 0.0;
+   private static final double footGraphicTranslationY = 0.0;
+   private static final double footGraphicTranslationZ = footGraphicHeight/2.0;
    private RDX3DSituatedText footstepIndexText;
    private ModelInstance footstepModelInstance;
    private RDXSelectablePose3DGizmo selectablePose3DGizmo;
@@ -98,9 +104,8 @@ public class RDXInteractableFootstep
       selectablePose3DGizmo.create(baseUI.getPrimary3DPanel());
       selectionCollisionBox = new FrameBox3D(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
       // Measured footstep.fbx in Blender
-      double footGraphicHeight = 0.035;
-      selectionCollisionBox.getSize().set(0.25, 0.12, footGraphicHeight);
-      selectionCollisionBox.getPose().getTranslation().set(0.010887, 0.0, -footGraphicHeight/2);
+      selectionCollisionBox.getSize().set(footGraphicLength, footGraphicWidth, footGraphicHeight);
+      selectionCollisionBox.getPose().getTranslation().set(footGraphicTranslationX, footGraphicTranslationY, footGraphicTranslationZ);
       collisionBoxFrame = new ModifiableReferenceFrame("collisionBoxFrame", selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
       mouseCollidable = new MouseCollidable(selectionCollisionBox);
 
