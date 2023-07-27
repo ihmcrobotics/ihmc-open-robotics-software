@@ -60,7 +60,7 @@ public abstract class StepAdjustmentParameters
     */
    public double getCoPDistanceFromInsideOfFoot()
    {
-      return 0.02;
+      return 0.01;
    }
 
    /**
