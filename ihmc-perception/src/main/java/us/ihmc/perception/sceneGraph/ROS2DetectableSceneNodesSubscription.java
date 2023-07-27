@@ -38,7 +38,7 @@ public class ROS2DetectableSceneNodesSubscription
    {
       this.detectableSceneNodes = detectableSceneNodes;
 
-      detectableSceneNodesSubscription = ros2PublishSubscribeAPI.subscribe(PerceptionAPI.DETECTABLE_SCENE_NODES.getTopic(ioQualifier));
+      detectableSceneNodesSubscription = ros2PublishSubscribeAPI.subscribe(SceneGraphAPI.DETECTABLE_SCENE_NODES);
    }
 
 //   /**

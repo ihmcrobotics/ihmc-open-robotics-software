@@ -7,6 +7,7 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
 import us.ihmc.perception.sceneGraph.SceneGraphAPI;
@@ -73,8 +74,10 @@ public class RDXInteractableObjectBuilder extends ImGuiPanel
             List<DetectableSceneNode> detectableSceneObjects = predefinedSceneNodeLibrary.getDetectableSceneNodes();
             for (DetectableSceneNode detectableSceneObject : detectableSceneObjects)
             {
+               LogTools.info("{}, {}", detectableSceneObject.getName(), detectableSceneObject.getCurrentlyDetected());
                if (detectableSceneObject.getName().equals(selectedObjectName) && detectableSceneObject.getCurrentlyDetected())
                {
+                  LogTools.info(detectableSceneObject.getName());
                   FramePose3D sceneObjectPose = new FramePose3D(detectableSceneObject.getNodeFrame());
                   sceneObjectPose.changeFrame(ReferenceFrame.getWorldFrame());
                   RigidBodyTransform sceneObjectToWorldTransform = new RigidBodyTransform();
