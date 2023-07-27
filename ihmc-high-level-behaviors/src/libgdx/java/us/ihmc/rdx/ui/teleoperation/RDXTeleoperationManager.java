@@ -65,8 +65,8 @@ import java.util.Set;
  * <br/>
  * Sub managers:
  * <ul>
- * <li>{@link RDXHandConfigurationManager Hand manager} TODO: Perhaps this should go in arm manager?</li>
  * <li>{@link RDXArmManager Arm manager}</li>
+ * <li>{@link RDXHandConfigurationManager Hand configuration manager} - lives inside the arm manager</li>
  * <li>{@link RDXLocomotionManager Locomotion manager}</li>
  * </ul>
  *
@@ -95,7 +95,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final RDXChestOrientationSlider chestPitchSlider;
    private final RDXChestOrientationSlider chestYawSlider;
    private final RDXDesiredRobot desiredRobot;
-   private final RDXHandConfigurationManager handManager;
    private RDXRobotCollisionModel selfCollisionModel;
    private RDXRobotCollisionModel selectionCollisionModel;
    private RDXArmManager armManager;
@@ -173,9 +172,15 @@ public class RDXTeleoperationManager extends ImGuiPanel
       }
 
       if (robotHasArms)
-         handManager = new RDXHandConfigurationManager();
-      else
-         handManager = null;
+      {
+         // create the manager for the desired arm setpoints
+         armManager = new RDXArmManager(communicationHelper,
+                                        robotModel,
+                                        syncedRobot,
+                                        desiredRobot,
+                                        teleoperationParameters,
+                                        interactableHands);
+      }
    }
 
    public void create(RDXBaseUI baseUI)
@@ -258,13 +263,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
          if (robotHasArms)
          {
-            // create the manager for the desired arm setpoints
-            armManager = new RDXArmManager(robotModel,
-                                           syncedRobot,
-                                           desiredRobot.getDesiredFullRobotModel(),
-                                           ros2Helper,
-                                           teleoperationParameters,
-                                           interactableHands);
             armManager.create(baseUI);
             for (RobotSide side : interactableHands.sides())
             {
@@ -287,9 +285,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
       standPrepButton.loadAndSetIcon("icons/standPrep.png");
       standPrepButton.setOnPressed(robotLowLevelMessenger::sendStandRequest);
       standPrepButton.setTooltipText("Stand prep");
-
-      if (robotHasArms)
-         handManager.create(baseUI, communicationHelper, syncedRobot);
 
       baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
    }
@@ -419,29 +414,25 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       trajectoryTimeSlider.renderImGuiWidget();
 
-      ImGui.checkbox(labels.get("Show teleoperation parameter tuner"), teleoperationParametersTuner.getIsShowing());
-
       ImGui.separator();
 
       if (interactablesAvailable)
       {
-         ImGui.checkbox("Interactables enabled", interactablesEnabled);
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Delete all")))
+         if (ImGui.button(labels.get("Delete all Interactables")))
          {
             locomotionManager.deleteAll();
 
             for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
                robotPartInteractable.delete();
          }
+
+         ImGui.sameLine();
+         ImGui.checkbox("Interactables enabled", interactablesEnabled);
       }
 
       ImGui.separator();
       locomotionManager.renderImGuiWidgets();
       ImGui.separator();
-
-      if (robotHasArms)
-         handManager.renderImGuiWidgets();
 
       if (interactablesAvailable)
       {
@@ -611,11 +602,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
    public RDXRobotCollisionModel getSelfCollisionModel()
    {
       return selfCollisionModel;
-   }
-
-   public RDXHandConfigurationManager getHandManager()
-   {
-      return handManager;
    }
 
    public RDXLocomotionParameters getLocomotionParameters()

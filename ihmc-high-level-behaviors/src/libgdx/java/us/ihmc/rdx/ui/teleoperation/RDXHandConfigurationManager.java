@@ -1,9 +1,8 @@
 package us.ihmc.rdx.ui.teleoperation;
 
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.GoHomeMessage;
-import controller_msgs.msg.dds.HandSakeStatusMessage;
+import controller_msgs.msg.dds.*;
 import imgui.ImGui;
+import imgui.type.ImInt;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.FormattingTools;
@@ -21,7 +20,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.function.Consumer;
-
 import static us.ihmc.robotics.robotSide.RobotSide.LEFT;
 import static us.ihmc.robotics.robotSide.RobotSide.RIGHT;
 
@@ -40,7 +38,7 @@ public class RDXHandConfigurationManager
    private final SideDependentList<RDXSakeHandPositionSlider> handPositionSliders = new SideDependentList<>();
    private final SideDependentList<RDXSakeHandTorqueSlider> handTorqueSliders = new SideDependentList<>();
 
-   public void create(RDXBaseUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobot)
+   public void create(RDXBaseUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobotModel)
    {
       this.communicationHelper = communicationHelper;
 
@@ -82,7 +80,7 @@ public class RDXHandConfigurationManager
 
       for (RobotSide handSide : RobotSide.values)
       {
-         handPositionSliders.put(handSide, new RDXSakeHandPositionSlider(syncedRobot, communicationHelper, handSide));
+         handPositionSliders.put(handSide, new RDXSakeHandPositionSlider(syncedRobotModel, communicationHelper, handSide));
          handTorqueSliders.put(handSide, new RDXSakeHandTorqueSlider(communicationHelper, handSide));
       }
 
@@ -90,6 +88,9 @@ public class RDXHandConfigurationManager
       {
          setupShieldButton(baseUI, communicationHelper);
       }
+
+      if (syncedRobotModel.getRobotModel().getHandModels().toString().contains("SakeHand"))
+         setupForSakeHands();
    }
 
    public void publishArmHomeCommand(RobotSide side)
@@ -211,4 +212,5 @@ public class RDXHandConfigurationManager
 
       shieldButton.setOnPressed(() -> armTrajectoryRunnable.accept(toolbarSelectedSide));
    }
+
 }
