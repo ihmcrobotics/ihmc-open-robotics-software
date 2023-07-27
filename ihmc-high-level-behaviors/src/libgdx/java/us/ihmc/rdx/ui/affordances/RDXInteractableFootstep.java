@@ -55,12 +55,12 @@ public class RDXInteractableFootstep
 {
    // Intended to reuse text renderables, as they are relatively expensive to create
    private static final Map<String, RDX3DSituatedText> textRenderablesMap = new HashMap<>();
-   private static final double footGraphicHeight = 0.035;
-   private static final double footGraphicLength = 0.25;
-   private static final double footGraphicWidth = 0.12;
-   private static final double footGraphicTranslationX = 0.0;
+   private static final double footGraphicHeight = 0.033251;
+   private static final double footGraphicLength = 0.266301;
+   private static final double footGraphicWidth = 0.128225;
+   private static final double footGraphicTranslationX = 0.01;
    private static final double footGraphicTranslationY = 0.0;
-   private static final double footGraphicTranslationZ = footGraphicHeight/2.0;
+   private static final double footGraphicTranslationZ = footGraphicHeight / 2.0;
    private RDX3DSituatedText footstepIndexText;
    private ModelInstance footstepModelInstance;
    private RDXSelectablePose3DGizmo selectablePose3DGizmo;
@@ -242,6 +242,7 @@ public class RDXInteractableFootstep
       }
 
       selectionCollisionBox.getPose().getTranslation().set(selectablePose3DGizmo.getPoseGizmo().getPose().getTranslation());
+      selectionCollisionBox.getPose().getTranslation().add(footGraphicTranslationX, footGraphicTranslationY, footGraphicTranslationZ);
       collisionBoxFrame.update(transformToParent -> transformToParent.set(selectionCollisionBox.getPose()));
    }
 
@@ -309,6 +310,7 @@ public class RDXInteractableFootstep
                                                      selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getZ32());
       selectionCollisionBox.changeFrame(ReferenceFrame.getWorldFrame());
       selectionCollisionBox.getPosition().set(selectablePose3DGizmo.getPoseGizmo().getPose().getPosition());
+      selectionCollisionBox.getPose().getTranslation().add(footGraphicTranslationX, footGraphicTranslationY, footGraphicTranslationZ);
       selectionCollisionBox.changeFrame(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
    }
 
