@@ -414,21 +414,20 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       trajectoryTimeSlider.renderImGuiWidget();
 
-      ImGui.checkbox(labels.get("Show teleoperation parameter tuner"), teleoperationParametersTuner.getIsShowing());
-
       ImGui.separator();
 
       if (interactablesAvailable)
       {
-         ImGui.checkbox("Interactables enabled", interactablesEnabled);
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Delete all")))
+         if (ImGui.button(labels.get("Delete all Interactables")))
          {
             locomotionManager.deleteAll();
 
             for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
                robotPartInteractable.delete();
          }
+
+         ImGui.sameLine();
+         ImGui.checkbox("Interactables enabled", interactablesEnabled);
       }
 
       ImGui.separator();
