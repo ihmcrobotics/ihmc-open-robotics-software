@@ -259,6 +259,7 @@ public class RDXPose3DGizmo implements RenderableProvider
                                                                                  transformToWorld);
                      frameBasedGizmoModification.translateInWorld(linearMotion);
                      closestCollision.add(linearMotion);
+                     controller.setPickRayColliding(pickRay.getPoint().distance(closestCollision));
                   }
                   else if (closestVRCollisionSelection.get(side).isAngular())
                   {
@@ -268,6 +269,7 @@ public class RDXPose3DGizmo implements RenderableProvider
                                                           transformToWorld))
                      {
                         frameBasedGizmoModification.rotateInWorld(clockFaceDragAlgorithm.getMotion());
+                        controller.setPickRayColliding(pickRay.getPoint().distance(closestCollision));
                      }
                   }
                   frameBasedGizmoModification.setAdjustmentNeedsToBeApplied();
