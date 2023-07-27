@@ -16,7 +16,6 @@ import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -35,7 +34,6 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.interaction.MouseCollidable;
-import us.ihmc.robotics.interaction.StepCheckIsPointInsideAlgorithm;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.visualizers.RDXPolynomial;
 import us.ihmc.robotics.math.trajectories.core.Polynomial;
@@ -49,18 +47,17 @@ import us.ihmc.tools.Timer;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 
 public class RDXInteractableFootstep
 {
    // Intended to reuse text renderables, as they are relatively expensive to create
    private static final Map<String, RDX3DSituatedText> textRenderablesMap = new HashMap<>();
-   private static final double footGraphicHeight = 0.033251;
-   private static final double footGraphicLength = 0.266301;
-   private static final double footGraphicWidth = 0.128225;
-   private static final double footGraphicTranslationX = 0.01;
-   private static final double footGraphicTranslationY = 0.0;
-   private static final double footGraphicTranslationZ = footGraphicHeight / 2.0;
+   private static final double footstepGraphicHeight = 0.033251;
+   private static final double footstepGraphicLength = 0.266301;
+   private static final double footstepGraphicWidth = 0.128225;
+   private static final double footstepGraphicTranslationX = 0.01;
+   private static final double footstepGraphicTranslationY = 0.0;
+   private static final double footstepGraphicTranslationZ = footstepGraphicHeight / 2.0;
    private RDX3DSituatedText footstepIndexText;
    private ModelInstance footstepModelInstance;
    private RDXSelectablePose3DGizmo selectablePose3DGizmo;
@@ -104,8 +101,8 @@ public class RDXInteractableFootstep
       selectablePose3DGizmo.create(baseUI.getPrimary3DPanel());
       selectionCollisionBox = new FrameBox3D(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
       // Measured footstep.fbx in Blender
-      selectionCollisionBox.getSize().set(footGraphicLength, footGraphicWidth, footGraphicHeight);
-      selectionCollisionBox.getPose().getTranslation().set(footGraphicTranslationX, footGraphicTranslationY, footGraphicTranslationZ);
+      selectionCollisionBox.getSize().set(footstepGraphicLength, footstepGraphicWidth, footstepGraphicHeight);
+      selectionCollisionBox.getPose().getTranslation().set(footstepGraphicTranslationX, footstepGraphicTranslationY, footstepGraphicTranslationZ);
       collisionBoxFrame = new ModifiableReferenceFrame("collisionBoxFrame", selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
       mouseCollidable = new MouseCollidable(selectionCollisionBox);
 
@@ -242,7 +239,7 @@ public class RDXInteractableFootstep
       }
 
       selectionCollisionBox.getPose().getTranslation().set(selectablePose3DGizmo.getPoseGizmo().getPose().getTranslation());
-      selectionCollisionBox.getPose().getTranslation().add(footGraphicTranslationX, footGraphicTranslationY, footGraphicTranslationZ);
+      selectionCollisionBox.getPose().getTranslation().add(footstepGraphicTranslationX, footstepGraphicTranslationY, footstepGraphicTranslationZ);
       collisionBoxFrame.update(transformToParent -> transformToParent.set(selectionCollisionBox.getPose()));
    }
 
@@ -310,7 +307,7 @@ public class RDXInteractableFootstep
                                                      selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getZ32());
       selectionCollisionBox.changeFrame(ReferenceFrame.getWorldFrame());
       selectionCollisionBox.getPosition().set(selectablePose3DGizmo.getPoseGizmo().getPose().getPosition());
-      selectionCollisionBox.getPose().getTranslation().add(footGraphicTranslationX, footGraphicTranslationY, footGraphicTranslationZ);
+      selectionCollisionBox.getPose().getTranslation().add(footstepGraphicTranslationX, footstepGraphicTranslationY, footstepGraphicTranslationZ);
       selectionCollisionBox.changeFrame(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
    }
 
