@@ -590,8 +590,8 @@ public class RDXVRKinematicsStreamingMode implements HandConfigurationListener
             vrAssistant.getGhostPreviewGraphic().getRenderables(renderables, pool, sceneLevels);
             for (var spline : vrAssistant.getSplinePreviewGraphic().entrySet())
                spline.getValue().getRenderables(renderables, pool);
-            for (var stdDeviationRegion : vrAssistant.getStdDeviationGraphic().entrySet())
-               stdDeviationRegion.getValue().getRenderables(renderables, pool);
+//            for (var stdDeviationRegion : vrAssistant.getStdDeviationGraphic().entrySet())
+//               stdDeviationRegion.getValue().getRenderables(renderables, pool);
          }
          vrAssistant.getMenuPanel().getRenderables(renderables, pool);
       }
