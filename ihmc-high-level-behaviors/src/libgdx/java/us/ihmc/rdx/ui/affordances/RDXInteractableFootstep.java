@@ -45,6 +45,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.tools.Timer;
 
+import java.sql.Ref;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -238,8 +239,10 @@ public class RDXInteractableFootstep
          updatePlannedTrajectoryInternal(pair.getLeft(), pair.getRight());
       }
 
-      selectionCollisionBox.getPose().getTranslation().set(selectablePose3DGizmo.getPoseGizmo().getPose().getTranslation());
+      selectionCollisionBox.changeFrame(ReferenceFrame.getWorldFrame());
+      selectionCollisionBox.getPosition().set(selectablePose3DGizmo.getPoseGizmo().getPose().getPosition());
       selectionCollisionBox.getPose().getTranslation().add(footstepGraphicTranslationX, footstepGraphicTranslationY, footstepGraphicTranslationZ);
+      selectionCollisionBox.changeFrame(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
       collisionBoxFrame.update(transformToParent -> transformToParent.set(selectionCollisionBox.getPose()));
    }
 
@@ -329,8 +332,11 @@ public class RDXInteractableFootstep
       gizmoTransform.getRotation().set(transform.getRotation());
       plannedFootstepInternal.getFootstepPose().set(gizmoTransform);
       wasPoseUpdated = true;
-      selectionCollisionBox.getPose().set(gizmoTransform);
+      selectionCollisionBox.changeFrame(ReferenceFrame.getWorldFrame());
+      selectionCollisionBox.getPosition().set(x, y, z);
       selectionCollisionBox.getPose().getTranslation().add(footstepGraphicTranslationX, footstepGraphicTranslationY, footstepGraphicTranslationZ);
+      selectionCollisionBox.changeFrame(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
+      collisionBoxFrame.getReferenceFrame().getTransformToWorldFrame().getTranslation().set(x, y, z);
    }
 
    public void flashFootstepWhenBadPlacement(BipedalFootstepPlannerNodeRejectionReason reason)
