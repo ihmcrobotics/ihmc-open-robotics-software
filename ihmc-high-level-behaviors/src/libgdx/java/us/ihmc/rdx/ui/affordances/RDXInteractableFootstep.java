@@ -253,11 +253,14 @@ public class RDXInteractableFootstep
       for (RobotSide side : RobotSide.values)
       {
          vrContext.getController(side).runIfConnected(controller ->
-                                                      {
-                                                         vrPickPose.setIncludingFrame(controller.getPickPointPose());
-                                                         vrPickPose.changeFrame(ReferenceFrame.getWorldFrame());
-                                                         isIntersectingVR.put(side, mouseCollidable.pointCollide(vrPickPose.getPosition()));
-                                                      });
+         {
+            if (!controller.getGripAsButtonDown())
+            {
+               vrPickPose.setIncludingFrame(controller.getPickPointPose());
+               vrPickPose.changeFrame(ReferenceFrame.getWorldFrame());
+               isIntersectingVR.put(side, mouseCollidable.pointCollide(vrPickPose.getPosition()));
+            }
+         });
       }
    }
 
@@ -266,34 +269,38 @@ public class RDXInteractableFootstep
       for (RobotSide side : RobotSide.values)
       {
          vrContext.getController(side).runIfConnected(controller ->
-                                                      {
-                                                         if (dragReferenceFrame.get(side) == null)
-                                                         {
-                                                            dragReferenceFrame.put(side, new ModifiableReferenceFrame(controller.getPickPoseFrame()));
-                                                         }
-                                                         RDXVRDragData gripDragData = controller.getGripDragData();
+         {
+            if (dragReferenceFrame.get(side) == null)
+            {
+               dragReferenceFrame.put(side, new ModifiableReferenceFrame(controller.getPickPoseFrame()));
+            }
+            RDXVRDragData gripDragData = controller.getGripDragData();
 
-                                                         if (gripDragData.getDragJustStarted() && isIntersectingVR.get(side))
-                                                         {
-                                                            gripDragData.setObjectBeingDragged(this);
-                                                            selectablePose3DGizmo.getPoseGizmo()
-                                                                                 .getGizmoFrame()
-                                                                                 .getTransformToDesiredFrame(dragReferenceFrame.get(side)
-                                                                                                                               .getTransformToParent(),
-                                                                                                             controller.getPickPoseFrame());
-                                                            dragReferenceFrame.get(side).getReferenceFrame().update();
-                                                         }
+            if (gripDragData.getDragJustStarted() && isIntersectingVR.get(side))
+            {
+               gripDragData.setObjectBeingDragged(this);
+               selectablePose3DGizmo.getPoseGizmo()
+                                    .getGizmoFrame()
+                                    .getTransformToDesiredFrame(dragReferenceFrame.get(side)
+                                                                                  .getTransformToParent(),
+                                                                controller.getPickPoseFrame());
+               dragReferenceFrame.get(side).getReferenceFrame().update();
+            }
 
-                                                         boolean isGripping = gripDragData.isBeingDragged(this);
-                                                         if (isIntersectingVR.get(side) && isGripping)
-                                                         {
-                                                            dragReferenceFrame.get(side)
-                                                                              .getReferenceFrame()
-                                                                              .getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo()
-                                                                                                                               .getTransformToParent(),
-                                                                                                          ReferenceFrame.getWorldFrame());
-                                                         }
-                                                      });
+            boolean isGripping = gripDragData.isBeingDragged(this);
+            if (isIntersectingVR.get(side) && isGripping)
+            {
+               dragReferenceFrame.get(side)
+                                 .getReferenceFrame()
+                                 .getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo()
+                                                                                  .getTransformToParent(),
+                                                             ReferenceFrame.getWorldFrame());
+            }
+            selectionCollisionBox.changeFrame(ReferenceFrame.getWorldFrame());
+            selectionCollisionBox.getPosition().set(selectablePose3DGizmo.getPoseGizmo().getPose().getPosition());
+            selectionCollisionBox.getPose().getTranslation().add(footstepGraphicTranslationX, footstepGraphicTranslationY, footstepGraphicTranslationZ);
+            selectionCollisionBox.changeFrame(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
+         });
       }
    }
 
