@@ -158,8 +158,8 @@ public class RDXLocomotionManager
       bodyPathPlanningParametersTuner.create(bodyPathPlannerParameters, false);
       swingFootPlanningParametersTuner.create(swingFootPlannerParameters, false);
 
-      areFootstepsAdjustableCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.areFootstepsAdjustable);
       assumeFlatGroundCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.assumeFlatGround);
+      areFootstepsAdjustableCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.areFootstepsAdjustable);
       planSwingTrajectoriesCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.planSwingTrajectories);
       replanSwingTrajectoriesOnChangeCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.replanSwingTrajectoriesOnChange);
       swingTimeSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.swingTime, 0.3, 1.5);
@@ -276,8 +276,8 @@ public class RDXLocomotionManager
       if (ImGui.collapsingHeader(labels.get("Footstep Planning Options"), collapsedHeader, ImGuiTreeNodeFlags.DefaultOpen))
       {
          ImGui.indent();
-         areFootstepsAdjustableCheckbox.renderImGuiWidget();
          assumeFlatGroundCheckbox.renderImGuiWidget();
+         areFootstepsAdjustableCheckbox.renderImGuiWidget();
          planSwingTrajectoriesCheckbox.renderImGuiWidget();
          replanSwingTrajectoriesOnChangeCheckbox.renderImGuiWidget();
          ImGui.unindent();
@@ -345,6 +345,7 @@ public class RDXLocomotionManager
       manualFootstepPlacement.renderImGuiWidgets();
 
       ImGui.text("First stance side for planner:");
+      ImGui.sameLine();
 
       if (ImGui.radioButton(labels.get("Auto"), startStanceSide == RDXFootstepPlanning.InitialStanceSide.AUTO))
       {
