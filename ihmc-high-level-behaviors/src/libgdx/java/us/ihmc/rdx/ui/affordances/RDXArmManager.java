@@ -23,7 +23,6 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.teleoperation.RDXDesiredRobot;
 import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -47,7 +46,6 @@ public class RDXArmManager
    private final SideDependentList<RDXInteractableHand> interactableHands;
 
    private final ArmJointName[] armJointNames;
-   private final SideDependentList<double[]> armHomes = new SideDependentList<>();
    private RDXArmControlMode armControlMode = RDXArmControlMode.JOINT_ANGLES;
    private final SideDependentList<double[]> armsWide = new SideDependentList<>();
    private final SideDependentList<double[]> doorAvoidanceArms = new SideDependentList<>();
@@ -61,7 +59,6 @@ public class RDXArmManager
 
    private final HandWrenchCalculator handWrenchCalculator;
    private final ImBoolean indicateWrenchOnScreen = new ImBoolean(false);
-   private RDX3DPanelToolbarButton wrenchToolbarButton;
    private RDX3DPanelHandWrenchIndicator panelHandWrenchIndicator;
 
    public RDXArmManager(CommunicationHelper communicationHelper,
@@ -226,7 +223,7 @@ public class RDXArmManager
          {
             ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
                                                                                                         teleoperationParameters.getTrajectoryTime(),
-                                                                                                        armHomes.get(side));
+                                                                                                        armsWide.get(side));
             communicationHelper.publishToController(armTrajectoryMessage);
          }
       }
