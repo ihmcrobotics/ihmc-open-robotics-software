@@ -5,6 +5,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.ImGui;
+import org.lwjgl.openvr.InputAnalogActionData;
+import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -117,6 +119,7 @@ public class RDXInteractableRobotLink
             isVRHovering |= isHovering;
 
             RDXVRDragData gripDragData = controller.getGripDragData();
+            InputDigitalActionData aButton = controller.getAButtonActionData();
 
             if (isHovering && gripDragData.getDragJustStarted())
             {
@@ -129,6 +132,11 @@ public class RDXInteractableRobotLink
             {
                gripDragData.getDragFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
                                                                       selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getParent());
+            }
+
+            if (aButton.bChanged() && aButton.bState() && modified)
+            {
+               onSpacePressed.run();
             }
          });
       }
@@ -170,7 +178,7 @@ public class RDXInteractableRobotLink
          modified = true;
       }
 
-      if (selectablePose3DGizmo.isSelected() && executeMotionKeyPressed)
+      if (modified && executeMotionKeyPressed)
       {
          onSpacePressed.run();
       }
