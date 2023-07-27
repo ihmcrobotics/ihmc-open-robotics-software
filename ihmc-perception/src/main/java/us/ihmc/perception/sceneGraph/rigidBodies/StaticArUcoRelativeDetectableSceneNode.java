@@ -7,14 +7,14 @@ import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
  * This node stays in the same spot relative to a detected ArUco marker.
  *
  * Once the ArUco marker is seen, the pose of this node is set as known
- * and does not move until {@link #forgetPose} is called.
+ * and does not move until {@link #unlockPose} is called.
  *
  * The whole point of this is so we don't have to put markers on everything,
  * especially things that don't move.
  */
 public class StaticArUcoRelativeDetectableSceneNode extends ArUcoDetectableNode
 {
-   private boolean poseKnown = false;
+   private boolean poseIsLockedIn = false;
    /**
     * We don't want to lock in the static pose until we are close enough
     * for it to matter and also to get higher accuracy.
@@ -35,14 +35,14 @@ public class StaticArUcoRelativeDetectableSceneNode extends ArUcoDetectableNode
 
    public void lockInPose()
    {
-      poseKnown = true;
+      poseIsLockedIn = true;
       setCurrentlyDetected(true);
    }
 
-   public void forgetPose()
+   public void unlockPose()
    {
       setCurrentlyDetected(false);
-      poseKnown = false;
+      poseIsLockedIn = false;
    }
 
    public double getMaximumDistanceToLockIn()
@@ -50,8 +50,8 @@ public class StaticArUcoRelativeDetectableSceneNode extends ArUcoDetectableNode
       return maximumDistanceToLockIn;
    }
 
-   public boolean getPoseKnown()
+   public boolean getPoseIsLockedIn()
    {
-      return poseKnown;
+      return poseIsLockedIn;
    }
 }

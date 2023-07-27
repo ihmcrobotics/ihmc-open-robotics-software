@@ -29,13 +29,16 @@ public class ArUcoSceneTools
                                             arUcoDetectableNode.getMarkerToWorldFrameTransform());
                arUcoDetectableNode.getMarkerFrame().update();
 
-               StaticArUcoRelativeDetectableSceneNode staticArUcoRelativeDetectableSceneNode = predefinedSceneNodeLibrary.getStaticArUcoRelativeDetectableNodes()
-                                                                                                                         .get(arUcoDetectableNode.getMarkerID());
+               StaticArUcoRelativeDetectableSceneNode staticArUcoRelativeDetectableSceneNode
+                     = predefinedSceneNodeLibrary.getStaticArUcoRelativeDetectableNodes().get(arUcoDetectableNode.getMarkerID());
                if (staticArUcoRelativeDetectableSceneNode != null)
                {
-                  Pose3DReadOnly poseInSensorFrame = arUcoMarkerDetection.getPoseInSensorFrame(arUcoDetectableNode.getMarkerID(), arUcoDetectableNode.getMarkerSize());
-                  if (!staticArUcoRelativeDetectableSceneNode.getPoseKnown()
-                      && poseInSensorFrame.getPosition().norm() <= staticArUcoRelativeDetectableSceneNode.getMaximumDistanceToLockIn())
+                  Pose3DReadOnly poseInSensorFrame = arUcoMarkerDetection.getPoseInSensorFrame(arUcoDetectableNode.getMarkerID(),
+                                                                                               arUcoDetectableNode.getMarkerSize());
+                  boolean lockedIn = staticArUcoRelativeDetectableSceneNode.getPoseIsLockedIn();
+                  double markerToSensorDistance = poseInSensorFrame.getPosition().norm();
+                  double lockInDistance = staticArUcoRelativeDetectableSceneNode.getMaximumDistanceToLockIn();
+                  if (!lockedIn && markerToSensorDistance <= lockInDistance)
                   {
                      arUcoMarkerDetection.getPose(staticArUcoRelativeDetectableSceneNode.getMarkerID(),
                                                   staticArUcoRelativeDetectableSceneNode.getMarkerSize(),
