@@ -257,12 +257,10 @@ public class RDXInteractableFootstep
    {
       selectablePose3DGizmo.calculate3DViewPick(input);
       Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
-      pickResult.reset();
       double collision = mouseCollidable.collide(pickRayInWorld, collisionBoxFrame.getReferenceFrame());
       if (!Double.isNaN(collision))
-         pickResult.addPickCollision(collision);
-      if (pickResult.getPickCollisionWasAddedSinceReset())
       {
+         pickResult.addPickCollision(collision);
          input.addPickResult(pickResult);
       }
    }
@@ -331,9 +329,8 @@ public class RDXInteractableFootstep
       gizmoTransform.getRotation().set(transform.getRotation());
       plannedFootstepInternal.getFootstepPose().set(gizmoTransform);
       wasPoseUpdated = true;
-
-      selectionCollisionBox.getPosition().set(x, y, z);
-      collisionBoxFrame.getReferenceFrame().getTransformToWorldFrame().getTranslation().set(x, y, z);
+      selectionCollisionBox.getPose().set(gizmoTransform);
+      selectionCollisionBox.getPose().getTranslation().add(footstepGraphicTranslationX, footstepGraphicTranslationY, footstepGraphicTranslationZ);
    }
 
    public void flashFootstepWhenBadPlacement(BipedalFootstepPlannerNodeRejectionReason reason)
@@ -427,6 +424,11 @@ public class RDXInteractableFootstep
 
       wasPoseUpdated = !plannedFootstepInternal.getFootstepPose().epsilonEquals(footstepPose, 1e-2);
       plannedFootstepInternal.getFootstepPose().set(footstepPose);
+
+      selectionCollisionBox.changeFrame(ReferenceFrame.getWorldFrame());
+      selectionCollisionBox.getPose().set(selectablePose3DGizmo.getPoseGizmo().getPose());
+      selectionCollisionBox.getPose().getTranslation().add(footstepGraphicTranslationX, footstepGraphicTranslationY, footstepGraphicTranslationZ);
+      selectionCollisionBox.changeFrame(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
    }
 
    public boolean pollWasPoseUpdated()
