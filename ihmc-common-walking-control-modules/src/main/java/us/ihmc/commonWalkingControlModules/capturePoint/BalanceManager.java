@@ -436,6 +436,9 @@ public class BalanceManager implements SCS2YoGraphicHolder
       {
          return false;
       }
+      // FIXME For now, only compute this at the beginning of swing. Once the step is adjusted, it should likely increase, and anecdotally, we want to prevent
+      // FIXME this value from "running away" as the step continues to be adjusted. In theory, this should be ok, but it looks like it isn't. More
+      // FIXME experimentation is necessary. RJG 07/27/2023
       if (initializeOnStateChange && feedbackAlphaCalculator != null)
       {
          this.finalFeedbackAlpha.set(feedbackAlphaCalculator.computeAlpha(yoFinalDesiredICP, bipedSupportPolygons.getSupportPolygonInWorld()));
@@ -469,15 +472,17 @@ public class BalanceManager implements SCS2YoGraphicHolder
             // clamp it to be between the end points
             clampBetweenTwoPoints(yoEquivalentRemainingCoP, perfectCMP2d, yoFinalDesiredCoP);
 
-//            if (perfectCMP2d.distanceSquared(yoFinalDesiredCoP) > 1e-3)
-//            {
+            /* FIXME don't use this logic block, it doesn't work well, and results in significantly more scaling than we hsould use. RJG 07/27/2023
+            if (perfectCMP2d.distanceSquared(yoFinalDesiredCoP) > 1e-3)
+            {
                // if the CMP isn't at the end of the trajectory, figure out how far through the trajectory you are.
                double alphaRemaining = EuclidGeometryTools.percentageAlongLineSegment2D(yoEquivalentRemainingCoP, perfectCMP2d, yoFinalDesiredCoP);
                // Use this value to figure out what kind of support polygon scaling to do.
                feedbackAlpha = InterpolationTools.linearInterpolate(currentFeedbackAlpha.getDoubleValue(), maxAlpha, alphaRemaining);
-//            }
-//            else
-//            {
+            }
+            else
+            {
+            */
                feedbackAlpha = 0.5 * (currentFeedbackAlpha.getDoubleValue() + maxAlpha);
 //            }
             feedbackAlpha = MathTools.clamp(feedbackAlpha, 0.0, 1.0);
