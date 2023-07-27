@@ -282,6 +282,9 @@ public class FootstepChecker implements FootstepCheckerInterface
       collisionDetector.setPlanarRegionsList(regionsForCollisionChecking);
       obstacleBetweenStepsChecker.setPlanarRegions(regionsForCollisionChecking);
       cliffAvoider.setPlanarRegionsList(regionsForCollisionChecking);
+
+      // This should already be done elsewhere, but add this clear here for redundancy
+      snapper.clearSnapData();
    }
 
    private void clearLoggedVariables()
