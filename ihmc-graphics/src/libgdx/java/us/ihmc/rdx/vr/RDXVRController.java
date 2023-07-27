@@ -126,6 +126,7 @@ public class RDXVRController extends RDXVRTrackedDevice
    private RDXModelInstance pickRayCollisionPointGraphic;
    private RDXVRControllerButtonLabel aButtonLabel;
    private RDXVRControllerButtonLabel bButtonLabel;
+   private RDXVRControllerButtonLabel gripAmountLabel;
    private final RDXVRDragData triggerDragData;
    private final RDXVRDragData gripDragData;
    private final RDXVRDragData aButtonDragData;
@@ -136,9 +137,10 @@ public class RDXVRController extends RDXVRTrackedDevice
       super(vrPlayAreaYUpZBackFrame);
       this.side = side;
 
-      xForwardZUpControllerFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(side.getLowerCaseName() + "_xForwardZUpControllerFrame",
-                                                                                                     getDeviceYUpZBackFrame(),
-                                                                                                     controllerYBackZLeftXRightToXForwardZUp);
+      xForwardZUpControllerFrame
+            = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(side.getLowerCaseName() + "_xForwardZUpControllerFrame",
+                                                                                getDeviceYUpZBackFrame(),
+                                                                                controllerYBackZLeftXRightToXForwardZUp);
       pickPoseFrame = new ModifiableReferenceFrame(xForwardZUpControllerFrame);
       pickPoseFrame.getTransformToParent().getTranslation().setX(0.029);
       pickPoseFrame.getTransformToParent().getTranslation().setY(side.negateIfLeftSide(0.020));
@@ -206,8 +208,13 @@ public class RDXVRController extends RDXVRTrackedDevice
             // for the Valve Index controllers.
             Point3D aButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.085, -0.01, -0.02) : new Point3D(-0.082, -0.01, -0.017);
             Point3D bButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.07, -0.013, -0.015) : new Point3D(-0.07, -0.007, -0.008);
-            aButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, aButtonOffset);
-            bButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, bButtonOffset);
+            Point3D gripAmountOffset = side == RobotSide.LEFT ? new Point3D(-0.1, -0.0, -0.07) : new Point3D(-0.1, 0.0, -0.07);
+            YawPitchRoll gripAmountOrientation = side == RobotSide.LEFT ?
+                  new YawPitchRoll(Math.toRadians(90.0), Math.toRadians(-37.0), Math.toRadians(90.0))
+                  : new YawPitchRoll(Math.toRadians(-90.0), Math.toRadians(37.0), Math.toRadians(90.0));
+            aButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, aButtonOffset, new YawPitchRoll());
+            bButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, bButtonOffset, new YawPitchRoll());
+            gripAmountLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, gripAmountOffset, gripAmountOrientation);
          }
 
          pickPoseFrame.getReferenceFrame().update();
@@ -238,6 +245,7 @@ public class RDXVRController extends RDXVRTrackedDevice
       VRInput.VRInput_GetAnalogActionData(gripActionHandle.get(0), gripActionData, VR.k_ulInvalidInputValueHandle);
 
       gripAsButtonDown = gripActionData.x() > GRIP_AS_BUTTON_THRESHOLD;
+      gripAmountLabel.setText("%.1f".formatted(gripActionData.x()));
 
       triggerDragData.update();
       gripDragData.update();
@@ -301,6 +309,7 @@ public class RDXVRController extends RDXVRTrackedDevice
             pickRayCollisionPointGraphic.getRenderables(renderables, pool);
             aButtonLabel.getRenderables(renderables, pool);
             bButtonLabel.getRenderables(renderables, pool);
+            gripAmountLabel.getRenderables(renderables, pool);
          }
       }
    }
