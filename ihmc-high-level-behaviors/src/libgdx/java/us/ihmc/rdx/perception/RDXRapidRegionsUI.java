@@ -26,6 +26,8 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class RDXRapidRegionsUI implements RenderableProvider
 {
+   private static final boolean RENDER_DEBUG_PLOTS = false;
+
    private RDXPlanarRegionsGraphic planarRegionsGraphic;
    private ModelInstance sensorFrameGraphic;
    private final FramePose3D framePose = new FramePose3D();
@@ -166,21 +168,23 @@ public class RDXRapidRegionsUI implements RenderableProvider
       ImGui.checkbox(labels.get("Draw patches"), drawPatches);
       ImGui.checkbox(labels.get("Draw boundaries"), drawBoundaries);
 
-      wholeAlgorithmDurationPlot.render(rapidPlanarRegionsExtractor.getWholeAlgorithmDurationStopwatch().totalElapsed());
-      gpuDurationPlot.render(rapidPlanarRegionsExtractor.getGpuDurationStopwatch().totalElapsed());
-      depthFirstSearchDurationPlot.render(rapidPlanarRegionsExtractor.getDepthFirstSearchDurationStopwatch().totalElapsed());
-      planarRegionCustomizationDurationPlot.render(rapidPlanarRegionsCustomizer.getStopWatch().totalElapsed());
+      if (RENDER_DEBUG_PLOTS)
+      {
+         wholeAlgorithmDurationPlot.render(rapidPlanarRegionsExtractor.getWholeAlgorithmDurationStopwatch().totalElapsed());
+         gpuDurationPlot.render(rapidPlanarRegionsExtractor.getGpuDurationStopwatch().totalElapsed());
+         depthFirstSearchDurationPlot.render(rapidPlanarRegionsExtractor.getDepthFirstSearchDurationStopwatch().totalElapsed());
+         planarRegionCustomizationDurationPlot.render(rapidPlanarRegionsCustomizer.getStopWatch().totalElapsed());
 
-      numberOfPlanarRegionsPlot.render((float) rapidPlanarRegionsExtractor.getRapidPlanarRegions().size());
-      regionMaxSearchDepthPlot.render((float) rapidPlanarRegionsExtractor.getRegionMaxSearchDepth());
-      boundaryMaxSearchDepthPlot.render((float) rapidPlanarRegionsExtractor.getBoundaryMaxSearchDepth());
+         numberOfPlanarRegionsPlot.render((float) rapidPlanarRegionsExtractor.getRapidPlanarRegions().size());
+         regionMaxSearchDepthPlot.render((float) rapidPlanarRegionsExtractor.getRegionMaxSearchDepth());
+         boundaryMaxSearchDepthPlot.render((float) rapidPlanarRegionsExtractor.getBoundaryMaxSearchDepth());
+      }
 
       boolean anyParameterChanged = gpuRegionParametersTuner.renderImGuiWidgets();
       anyParameterChanged |= polygonizerParametersTuner.renderImGuiWidgets();
       anyParameterChanged |= concaveHullParametersTuner.renderImGuiWidgets();
 
       svdDurationPlot.render((float) rapidPlanarRegionsExtractor.getMaxSVDSolveTime());
-
    }
 
    public void destroy()

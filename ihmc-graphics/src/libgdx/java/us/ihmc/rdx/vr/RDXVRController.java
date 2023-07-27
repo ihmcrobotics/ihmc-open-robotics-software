@@ -224,6 +224,7 @@ public class RDXVRController extends RDXVRTrackedDevice
 
          aButtonLabel.setText("");
          bButtonLabel.setText("");
+         gripAmountLabel.setText("%.1f".formatted(gripActionData.x()));
       }
 
       VRInput.VRInput_GetDigitalActionData(clickTriggerActionHandle.get(0), clickTriggerActionData, VR.k_ulInvalidInputValueHandle);
@@ -241,7 +242,6 @@ public class RDXVRController extends RDXVRTrackedDevice
       VRInput.VRInput_GetAnalogActionData(gripActionHandle.get(0), gripActionData, VR.k_ulInvalidInputValueHandle);
 
       gripAsButtonDown = gripActionData.x() > GRIP_AS_BUTTON_THRESHOLD;
-      gripAmountLabel.setText("%.1f".formatted(gripActionData.x()));
 
       triggerDragData.update();
       gripDragData.update();
