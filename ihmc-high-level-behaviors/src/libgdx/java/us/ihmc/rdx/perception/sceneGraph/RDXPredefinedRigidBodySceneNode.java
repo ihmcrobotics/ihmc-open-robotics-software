@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.rigidBodies.StaticArUcoRelativeDetectableSceneNode;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiEnumPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -51,20 +52,32 @@ public class RDXPredefinedRigidBodySceneNode
    {
       this.sceneNode = predefinedRigidBodySceneNode;
 
-      originalTransformToParent.set(predefinedRigidBodySceneNode.getNodeToParentFrameTransform());
+      originalTransformToParent.set(sceneNode.getNodeToParentFrameTransform());
 
-      modelInstance = new RDXModelInstance(RDXModelLoader.load(predefinedRigidBodySceneNode.getVisualModelFilePath()));
+      modelInstance = new RDXModelInstance(RDXModelLoader.load(sceneNode.getVisualModelFilePath()));
       modelInstance.setColor(GHOST_COLOR);
 
       referenceFrameGraphic = new RDXReferenceFrameGraphic(0.05, Color.BLUE);
-      overridePoseGizmo = new RDXSelectablePose3DGizmo(predefinedRigidBodySceneNode.getNodeFrame(),
-                                                       predefinedRigidBodySceneNode.getNodeToParentFrameTransform());
+      overridePoseGizmo = new RDXSelectablePose3DGizmo(sceneNode.getNodeFrame(),
+                                                       sceneNode.getNodeToParentFrameTransform());
       overridePoseGizmo.createAndSetupDefault(panel3D);
-      overridePoseWrapper = new ImBooleanWrapper(predefinedRigidBodySceneNode::getPoseOverriddenByOperator,
+      overridePoseWrapper = new ImBooleanWrapper(sceneNode::getPoseOverriddenByOperator,
                                                  poseOverriddenByOperator ->
                                                  {
-                                                    predefinedRigidBodySceneNode.setPoseOverriddenByOperator(poseOverriddenByOperator);
-                                                    predefinedRigidBodySceneNode.markModifiedByOperator();
+                                                    sceneNode.setPoseOverriddenByOperator(poseOverriddenByOperator);
+                                                    sceneNode.markModifiedByOperator();
+
+                                                    if (sceneNode.getPoseOverriddenByOperator()) // Convenience
+                                                    {
+                                                       overridePoseGizmo.getSelected().set(true);
+                                                    }
+                                                    else
+                                                    {
+                                                       sceneNode.getNodeToParentFrameTransform().set(originalTransformToParent);
+                                                       sceneNode.getNodeFrame().update();
+                                                       overridePoseGizmo.getPoseGizmo().update();
+                                                       sceneNode.markModifiedByOperator();
+                                                    }
                                                  },
                                                  imBoolean -> ImGui.checkbox(labels.get("Override pose"), imBoolean));
 
@@ -105,14 +118,18 @@ public class RDXPredefinedRigidBodySceneNode
       ImGui.sameLine();
       ImGui.beginDisabled(!showing || !sceneNode.getPoseOverriddenByOperator());
       ImGui.checkbox(labels.get("Use gizmo"), overridePoseGizmo.getSelected());
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Reset pose")))
-      {
-         sceneNode.getNodeToParentFrameTransform().set(originalTransformToParent);
-         sceneNode.getNodeFrame().update();
-         sceneNode.markModifiedByOperator();
-      }
       ImGui.endDisabled();
+      if (sceneNode instanceof StaticArUcoRelativeDetectableSceneNode staticRelativeNode)
+      {
+         ImGui.sameLine();
+         ImGui.beginDisabled(!staticRelativeNode.getPoseIsLockedIn());
+         if (ImGui.button(labels.get("Unlock pose")))
+         {
+            staticRelativeNode.unlockPose();
+            sceneNode.markModifiedByOperator();
+         }
+         ImGui.endDisabled();
+      }
 
       ImGui.separator();
    }

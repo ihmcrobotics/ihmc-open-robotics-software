@@ -34,6 +34,10 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
             * Keeps track of when the operator has overridden the pose of this node
             */
    public boolean is_pose_overridden_by_operator_;
+   /**
+            * For static ArUco relative nodes, if it's currently locked in
+            */
+   public boolean is_static_relative_pose_locked_in_;
 
    public DetectableSceneNodeMessage()
    {
@@ -58,6 +62,8 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_world_, transform_to_world_);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.aruco_marker_transform_to_world_, aruco_marker_transform_to_world_);
       is_pose_overridden_by_operator_ = other.is_pose_overridden_by_operator_;
+
+      is_static_relative_pose_locked_in_ = other.is_static_relative_pose_locked_in_;
 
    }
 
@@ -135,6 +141,21 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       return is_pose_overridden_by_operator_;
    }
 
+   /**
+            * For static ArUco relative nodes, if it's currently locked in
+            */
+   public void setIsStaticRelativePoseLockedIn(boolean is_static_relative_pose_locked_in)
+   {
+      is_static_relative_pose_locked_in_ = is_static_relative_pose_locked_in;
+   }
+   /**
+            * For static ArUco relative nodes, if it's currently locked in
+            */
+   public boolean getIsStaticRelativePoseLockedIn()
+   {
+      return is_static_relative_pose_locked_in_;
+   }
+
 
    public static Supplier<DetectableSceneNodeMessagePubSubType> getPubSubType()
    {
@@ -161,6 +182,8 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       if (!this.aruco_marker_transform_to_world_.epsilonEquals(other.aruco_marker_transform_to_world_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_pose_overridden_by_operator_, other.is_pose_overridden_by_operator_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_static_relative_pose_locked_in_, other.is_static_relative_pose_locked_in_, epsilon)) return false;
+
 
       return true;
    }
@@ -182,6 +205,8 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       if (!this.aruco_marker_transform_to_world_.equals(otherMyClass.aruco_marker_transform_to_world_)) return false;
       if(this.is_pose_overridden_by_operator_ != otherMyClass.is_pose_overridden_by_operator_) return false;
 
+      if(this.is_static_relative_pose_locked_in_ != otherMyClass.is_static_relative_pose_locked_in_) return false;
+
 
       return true;
    }
@@ -201,7 +226,9 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       builder.append("aruco_marker_transform_to_world=");
       builder.append(this.aruco_marker_transform_to_world_);      builder.append(", ");
       builder.append("is_pose_overridden_by_operator=");
-      builder.append(this.is_pose_overridden_by_operator_);
+      builder.append(this.is_pose_overridden_by_operator_);      builder.append(", ");
+      builder.append("is_static_relative_pose_locked_in=");
+      builder.append(this.is_static_relative_pose_locked_in_);
       builder.append("}");
       return builder.toString();
    }

@@ -17,3 +17,6 @@ controller_msgs/RigidBodyTransformMessage aruco_marker_transform_to_world
 
 # Keeps track of when the operator has overridden the pose of this node
 bool is_pose_overridden_by_operator
+
+# For static ArUco relative nodes, if it's currently locked in
+bool is_static_relative_pose_locked_in

@@ -13,6 +13,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
+import us.ihmc.perception.sceneGraph.rigidBodies.StaticArUcoRelativeDetectableSceneNode;
 
 import java.util.List;
 
@@ -43,6 +44,7 @@ public class ROS2DetectableSceneNodesSubscription
 
    /**
     * Check for a new ROS 2 message and update the scene nodes with it.
+    * This method runs on the robot and on every connected UI.
     * @return if a new message was used to update the scene nodes on this call
     */
    public boolean update()
@@ -65,7 +67,7 @@ public class ROS2DetectableSceneNodesSubscription
             {
                detectableSceneNode.setCurrentlyDetected(detectableSceneNodeMessage.getCurrentlyDetected());
 
-               // We must syncronize the ArUco marker frames so we can reset overriden node
+               // We must synchronize the ArUco marker frames so we can reset overriden node
                // poses back to ArUco relative ones.
                // The ArUco frame is the parent so we should update it first.
                if (detectableSceneNode instanceof ArUcoDetectableNode arUcoDetectableNode)
@@ -78,14 +80,21 @@ public class ROS2DetectableSceneNodesSubscription
                }
 
                // If the node was recently modified by the operator, the node does not accept
-               // updates of this variable. This is to allow the operator's changes to propagate.
-               if (detectableSceneNode.noLongerFrozenByOperator())
+               // updates of the "override pose" setting. This is to allow the operator's changes to propagate
+               // and so it doesn't get overriden immediately by an out of date message coming from the robot.
+               // On the robot side, this will always get updated because there is no operator.
+               if (detectableSceneNode.operatorHasntTouchedThingsInABit())
                {
                   detectableSceneNode.setPoseOverriddenByOperator(detectableSceneNodeMessage.getIsPoseOverriddenByOperator());
+
+                  if (detectableSceneNode instanceof StaticArUcoRelativeDetectableSceneNode staticRelativeNode)
+                  {
+                     staticRelativeNode.setPoseIsLockedIn(detectableSceneNodeMessage.getIsStaticRelativePoseLockedIn());
+                  }
                }
 
-               // If we just modified the override pose, wait for the timer to expire before accepting further changes.
-               if (!detectableSceneNode.getPoseOverriddenByOperator() || detectableSceneNode.noLongerFrozenByOperator())
+               // Wait until we haven't touched things for a second to accept and update to it.
+               if (detectableSceneNode.operatorHasntTouchedThingsInABit())
                {
                   MessageTools.toEuclid(detectableSceneNodeMessage.getTransformToWorld(), nodeToWorldTransform);
                   nodePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), nodeToWorldTransform);
