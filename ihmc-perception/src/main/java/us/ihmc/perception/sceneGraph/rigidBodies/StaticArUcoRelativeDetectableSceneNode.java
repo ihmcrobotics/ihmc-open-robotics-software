@@ -33,6 +33,14 @@ public class StaticArUcoRelativeDetectableSceneNode extends ArUcoDetectableNode
       this.maximumDistanceToLockIn = maximumDistanceToLockIn;
    }
 
+   public void setPoseIsLockedIn(boolean poseIsLockedIn)
+   {
+      if (poseIsLockedIn)
+         lockInPose();
+      else
+         unlockPose();
+   }
+
    public void lockInPose()
    {
       poseIsLockedIn = true;

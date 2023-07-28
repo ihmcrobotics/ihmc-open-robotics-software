@@ -38,6 +38,10 @@ module perception_msgs
          * Keeps track of when the operator has overridden the pose of this node
          */
         boolean is_pose_overridden_by_operator;
+        /**
+         * For static ArUco relative nodes, if it's currently locked in
+         */
+        boolean is_static_relative_pose_locked_in;
       };
     };
   };

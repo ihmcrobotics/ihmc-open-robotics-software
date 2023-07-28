@@ -14,7 +14,7 @@ public abstract class DetectableSceneNode extends SceneNode
     * Scene nodes are usually being synced at 20 Hz or faster, so 1/5 of a second
     * should allow enough time for changes to propagate.
     */
-   public static final double OPERATOR_FREEZE_TIME = 0.2;
+   public static final double OPERATOR_FREEZE_TIME = 1.0;
 
    private boolean currentlyDetected;
    /**
@@ -80,7 +80,7 @@ public abstract class DetectableSceneNode extends SceneNode
       modifiedTimer.reset();
    }
 
-   public boolean noLongerFrozenByOperator()
+   public boolean operatorHasntTouchedThingsInABit()
    {
       return !modifiedTimer.isRunning(OPERATOR_FREEZE_TIME);
    }
