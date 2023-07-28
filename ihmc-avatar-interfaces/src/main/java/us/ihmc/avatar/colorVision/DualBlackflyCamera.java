@@ -507,8 +507,8 @@ public class DualBlackflyCamera
                                                     ros2Helper);
          else
          {
-//            detectableSceneNodesSubscription.update(); // Receive overridden poses from operator
-//            ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, predefinedSceneNodeLibrary);
+            detectableSceneNodesSubscription.update(); // Receive overridden poses from operator
+            ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, predefinedSceneNodeLibrary);
             detectableSceneObjectsPublisher.publish(predefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2Helper);
          }
 
