@@ -17,7 +17,6 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
@@ -39,14 +38,14 @@ import static us.ihmc.commonWalkingControlModules.staticEquilibrium.ContactPoint
 /**
  * This is an implementation of "Testing Static Equilibrium for Legged Robots", Bretl et al, 2008
  * {@see http://lall.stanford.edu/papers/bretl_eqmcut_ieee_tro_projection_2008_08_01_01/pubdata/entry.pdf}
- *
+ * <p>
  * It solves for the convex region of feasible CoM XY positions, modelling the robot as a point mass and imposing friction constraints.
  */
 public class MultiContactSupportRegionSolver
 {
    private static final double optimizedCoMGraphicScale = 0.03;
 
-   private static final int defaultNumberOfDirectionsToOptimize = 32;
+   private static final int defaultNumberOfDirectionsToOptimize = 4;
    private static final int centerOfMassDimensions = 2;
    private static final int staticEquilibriumConstraints = 6;
    static final double mg = 1.0;
@@ -219,6 +218,8 @@ public class MultiContactSupportRegionSolver
          }
          averageContactPointPosition.scale(1.0 / input.getNumberOfContacts());
       }
+
+      constructInitialApproximation();
    }
 
    private void addActuationConstraint(int contactPointIndex,
@@ -317,6 +318,128 @@ public class MultiContactSupportRegionSolver
          if (!foundMatch)
          {
             LogTools.error("Couldn't find match for vertex " + i);
+         }
+      }
+
+      return true;
+   }
+
+   // new
+   // compute an initial region by expanding along 0, 2pi/3, 4pi/3 degree directions
+   private boolean constructInitialApproximation()
+   {
+      // multiplier denotes the evenly spaced initial directions
+      final int multiplier = 3;
+      final double incrementAngle = 2 * Math.PI / multiplier;
+      for (int i = 0; i < multiplier; i++)
+      {
+         // unit vector in the desired direction
+         double x = Math.cos(incrementAngle * i);
+         double y = Math.sin(incrementAngle * i);
+
+         // find the extremal point in the (x, y) direction
+         costVectorC.set(nonNegativeDecisionVariables - 4, 0, x);
+         costVectorC.set(nonNegativeDecisionVariables - 3, 0, y);
+         costVectorC.set(nonNegativeDecisionVariables - 2, 0, -x);
+         costVectorC.set(nonNegativeDecisionVariables - 1, 0, -y);
+
+         if (linearProgramSolver.solve(costVectorC, Ain, bin, solution))
+         {
+            double x_sol = solution.get(nonNegativeDecisionVariables - 4) - solution.get(nonNegativeDecisionVariables - 2);
+            double y_sol = solution.get(nonNegativeDecisionVariables - 3) - solution.get(nonNegativeDecisionVariables - 1);
+
+            vertexList.add(new Point2D(x_sol, y_sol));
+            supportRegion.addVertex(x_sol, y_sol);
+            supportRegionVertices.add().setIncludingFrame(ReferenceFrame.getWorldFrame(), x_sol, y_sol, 0.0);
+            supportRegion.update();
+
+            updateGraphics();
+         }
+         else
+         {
+            LogTools.error("Solve iteration " + i + " failed");
+            return false;
+         }
+      }
+
+      return true;
+   }
+
+   //new
+   public boolean solveBretl(int maxSolveIterations)
+   {
+      int n = 0;
+      while (n < maxSolveIterations)
+      {
+         // make sure that the next vertex exists
+         if (n < supportRegionVertices.size())
+         {
+            double x1 = supportRegionVertices.get(n).getX();
+            double y1 = supportRegionVertices.get(n).getY();
+
+            double x2 = supportRegionVertices.get(0).getX();
+            double y2 = supportRegionVertices.get(0).getY();
+
+            if (n + 1 < supportRegionVertices.size())
+            {
+               // by default, (x2, y2) is the first vertex
+               // since we don't store the vertices in a circular buffer,
+               // this handles the edge case of optimizing normal to the last edge
+               x2 = supportRegionVertices.get(n + 1).getX();
+               y2 = supportRegionVertices.get(n + 1).getY();
+            }
+
+            // compute orthogonal direction to the edge
+            // (y2-y1, x1-x2) is normal to (x2-x1,y2-y1)
+            double normalX = y2 - y1;
+            double normalY = x1 - x2;
+
+            // find the extremal point along computed normal
+            costVectorC.set(nonNegativeDecisionVariables - 4, 0, normalX);
+            costVectorC.set(nonNegativeDecisionVariables - 3, 0, normalY);
+            costVectorC.set(nonNegativeDecisionVariables - 2, 0, -normalX);
+            costVectorC.set(nonNegativeDecisionVariables - 1, 0, -normalY);
+
+            if (linearProgramSolver.solve(costVectorC, Ain, bin, solution))
+            {
+               double x_sol = solution.get(nonNegativeDecisionVariables - 4) - solution.get(nonNegativeDecisionVariables - 2);
+               double y_sol = solution.get(nonNegativeDecisionVariables - 3) - solution.get(nonNegativeDecisionVariables - 1);
+
+               Point2D solVertex = new Point2D(x_sol, y_sol);
+
+               //TODO: change this to only add point if it's outside the current polygon
+               if (!vertexList.contains(solVertex))
+               {
+                  vertexList.add(solVertex);
+                  supportRegion.addVertex(x_sol, y_sol);
+                  supportRegionVertices.add().setIncludingFrame(ReferenceFrame.getWorldFrame(), x_sol, y_sol, 0.0);
+                  supportRegion.update();
+                  updateGraphics();
+               }
+
+               //TODO: this will assume early convergence and can leave out some regions, make sure that all vertices have converged
+
+               // check for convergence by computing area of triangle formed by (x_n, y_n), (x_n+1, y_n+1), (x_sol, y_sol)
+               // this (signed) area is given by 0.5 * det([x_n - x_sol, y_n - y_sol; x_n+1 - x_sol, y_n+1 - y_sol])
+               double area = 0.5 * (((x1 - x_sol) * (y2 - y_sol)) - ((y1 - y_sol) * (x2 - x_sol)));
+               if ((Math.abs(area) < 1e-3) && (n > 3))
+               {
+                  return true;
+               }
+
+               n++;
+            }
+            else
+            {
+               LogTools.error("Solve iteration " + n + " failed");
+               return false;
+            }
+         }
+         else
+         {
+            // we ran out of vertices to optimize before reaching the max number of iterations
+            LogTools.info("Finished in " + n + " iterations");
+            break;
          }
       }
 

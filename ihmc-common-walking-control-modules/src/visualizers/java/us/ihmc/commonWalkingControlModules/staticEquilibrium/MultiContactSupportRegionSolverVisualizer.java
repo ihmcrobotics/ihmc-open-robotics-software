@@ -40,8 +40,8 @@ public class MultiContactSupportRegionSolverVisualizer
 
    public MultiContactSupportRegionSolverVisualizer(MultiContactSupportRegionSolverInput input)
    {
-      runWithSCS1(input);
-//      runWithSCS2(input);
+//      runWithSCS1(input);
+      runWithSCS2(input);
    }
 
    private void runWithSCS1(MultiContactSupportRegionSolverInput input)
@@ -129,7 +129,7 @@ public class MultiContactSupportRegionSolverVisualizer
          }
       });
       solver.initialize(input);
-      solver.solve();
+      solver.solveBretl(10);
 
       LogTools.info("----- Support Region -----");
       ConvexPolygon2DReadOnly supportRegion0 = solver.getSupportRegion();
@@ -180,8 +180,6 @@ public class MultiContactSupportRegionSolverVisualizer
 
       scs2.addStaticVisuals(supportRegionGraphics.getVisualDefinitions());
       scs2.startSimulationThread();
-
-      ThreadTools.sleepForever();
    }
 
    public static void main(String[] args) throws Exception
@@ -195,21 +193,21 @@ public class MultiContactSupportRegionSolverVisualizer
 //      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createBipedFeet();
 //      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createBipedFeet(1.0, -1.0, 0.6);
 //      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createBipedFeetWithSingleHandhold();
-//      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createBipedFeetWithTwoHandholds();
+      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createBipedFeetWithTwoHandholds();
 
-      JFileChooser fileChooser = new JFileChooser();
-      File logDirectory = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator);
-
-      fileChooser.setCurrentDirectory(logDirectory);
-      int chooserState = fileChooser.showOpenDialog(null);
-
-      if (chooserState != JFileChooser.APPROVE_OPTION)
-         return;
-
-      File file = fileChooser.getSelectedFile();
-
-      BufferedReader dataFileReader = new BufferedReader(new FileReader(file));
-      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInput.loadFromFile(new BufferedReader(dataFileReader));
+//      JFileChooser fileChooser = new JFileChooser();
+//      File logDirectory = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator);
+//
+//      fileChooser.setCurrentDirectory(logDirectory);
+//      int chooserState = fileChooser.showOpenDialog(null);
+//
+//      if (chooserState != JFileChooser.APPROVE_OPTION)
+//         return;
+//
+//      File file = fileChooser.getSelectedFile();
+//
+//      BufferedReader dataFileReader = new BufferedReader(new FileReader(file));
+//      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInput.loadFromFile(new BufferedReader(dataFileReader));
 
       new MultiContactSupportRegionSolverVisualizer(input);
    }
