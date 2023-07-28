@@ -142,7 +142,7 @@ public class RDXRapidHeightMapExtractionDemo
             loadedDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
 
             rapidHeightMapUpdater.setDepthIntrinsics(654.29,654.29,651.14,361.89);
-            rapidHeightMapUpdater.setHeightMapResolution(3.0f, 0.01f);
+            rapidHeightMapUpdater.setHeightMapResolution(3.0f, 0.1f);
             rapidHeightMapUpdater.create(openCLManager, loadedDepthImage, 1);
             heightMapRenderer.create(rapidHeightMapUpdater.getCellsPerAxis() * rapidHeightMapUpdater.getCellsPerAxis());
          }
