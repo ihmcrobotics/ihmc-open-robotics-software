@@ -138,6 +138,8 @@ public class DoorSceneNodeDefinitions
                                      PUSH_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
    }
 
+   // TODO: Should actually have the parent be the door panel and not be updated by
+   //    an ArUco marker at all
    public static StaticArUcoRelativeDetectableSceneNode createPullDoorFrame()
    {
       return new StaticArUcoRelativeDetectableSceneNode("PullDoorFrame",
