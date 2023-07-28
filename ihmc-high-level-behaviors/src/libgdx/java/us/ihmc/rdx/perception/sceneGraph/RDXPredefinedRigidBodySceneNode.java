@@ -33,7 +33,7 @@ import java.util.Set;
  */
 public class RDXPredefinedRigidBodySceneNode
 {
-   private static final ColorDefinition GHOST_COLOR = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.5);
+   private static final ColorDefinition GHOST_COLOR = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.8);
    private final PredefinedRigidBodySceneNode sceneNode;
    private final RDXReferenceFrameGraphic referenceFrameGraphic;
    private boolean showing = false;
