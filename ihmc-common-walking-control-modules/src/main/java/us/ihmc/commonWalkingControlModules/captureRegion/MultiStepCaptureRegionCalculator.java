@@ -264,9 +264,9 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
       {
          Point2DReadOnly vertex = reachabilityRegion.getNextVertex(i);
 
-         FramePoint2DBasics expansionVector = expansionPointsToPack.add();
-         expansionVector.setReferenceFrame(referenceFrame);
-         expansionVector.scaleAdd(-expansionScalar, vertex, pointToExpand);
+         FramePoint2DBasics expansionPoint = expansionPointsToPack.add();
+         expansionPoint.setReferenceFrame(referenceFrame);
+         expansionPoint.scaleAdd(-expansionScalar, vertex, pointToExpand);
       }
 
       if (expansionPointsToPack.size() == 0)
@@ -293,9 +293,9 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
          // Filter out the point if it woudl end up being an interior point.
          if (!isRayPointingToTheInside(precedingPointB, vertex, succeedingPointB, otherEnd.getX() - pointToExpand.getX(), otherEnd.getY() - pointToExpand.getY()))
          {
-            FramePoint2DBasics expansionVector = expansionPointsToPack.add();
-            expansionVector.setReferenceFrame(referenceFrame);
-            expansionVector.scaleAdd(-expansionScalar, vertex, pointToExpand);
+            FramePoint2DBasics expansionPoint = expansionPointsToPack.add();
+            expansionPoint.setReferenceFrame(referenceFrame);
+            expansionPoint.scaleAdd(-expansionScalar, vertex, pointToExpand);
          }
 
          precedingPointB = vertex;
@@ -327,9 +327,9 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
          // Filter this reachability vertex if it would end up resulting in an interior point of the expanded region.
          if (isPointASharedNonIntersectingVertex(precedingPoint, cornerToExpand, succeedingPoint, precedingPointB, vertex, succeedingPointB))
          {
-            FramePoint2DBasics expansionVector = expansionPointsToPack.add();
-            expansionVector.setReferenceFrame(referenceFrame);
-            expansionVector.scaleAdd(-expansionScalar, vertex, cornerToExpand);
+            FramePoint2DBasics expansionPoint = expansionPointsToPack.add();
+            expansionPoint.setReferenceFrame(referenceFrame);
+            expansionPoint.scaleAdd(-expansionScalar, vertex, cornerToExpand);
          }
 
          precedingPointB = vertex;
