@@ -128,7 +128,7 @@ public class RapidHeightMapExtractor
          Vector3D groundNormalSensorFrame = new Vector3D(0.0, 0.0, 1.0);
          worldToSensorTransform.transform(groundNormalSensorFrame);
 
-         LogTools.info("Ground normal in sensor frame: " + groundNormalSensorFrame);
+         //LogTools.info("Ground normal in sensor frame: " + groundNormalSensorFrame);
 
          groundPlaneBuffer.getBytedecoFloatBufferPointer().asBuffer().put(new float[] {groundNormalSensorFrame.getX32(), groundNormalSensorFrame.getY32(),
                                                                                        groundNormalSensorFrame.getZ32(),

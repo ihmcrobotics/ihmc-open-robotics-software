@@ -81,7 +81,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
       int cellsPerAxis = 2 * centerIndex + 1;
       LogTools.info("Rendering Height Map: {} {} {}", cellsPerAxis, cellsPerAxis, cellSizeXYInMeters);
 
-      float maxHeight = 0.7f;
+      float maxHeight = 2.0f;
       float minHeight = 0.0f;
 
       for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
@@ -92,7 +92,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
          {
             int heightIndex = xIndex * cellsPerAxis + yIndex;
             int vertexIndex = heightIndex * FLOATS_PER_CELL;
-            float cellHeight = (float) (heightMapPointer.getShort(heightIndex * 2L)) / 10000.0f;
+            float cellHeight = (float) (heightMapPointer.getShort(heightIndex * 2L) / 10000.0f);
             cellHeight = (float) MathTools.clamp(cellHeight, minHeight, maxHeight);
             if (cellHeight > maxHeight - 0.01f)
                cellHeight = 0.0f;
