@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+
 public abstract class StepAdjustmentParameters
 {
    /**
