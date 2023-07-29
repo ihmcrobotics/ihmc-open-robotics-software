@@ -1,9 +1,6 @@
 package us.ihmc.footstepPlanning.bodyPath;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
@@ -56,8 +53,8 @@ public class AStarBodyPathHeightMapDataSetTest
    protected static double walkerMarchingSpeed = 0.25;
 
    // For the occlusion test
-   private final FootstepPlanningModule planningModule = new FootstepPlanningModule("testModule");
-   private final FootstepPlannerLogger logger = new FootstepPlannerLogger(planningModule);
+   private FootstepPlanningModule planningModule;
+   private FootstepPlannerLogger logger;
 
    @BeforeEach
    public void setup()
@@ -73,15 +70,44 @@ public class AStarBodyPathHeightMapDataSetTest
    @Test
    public void testDatasetsWithoutOcclusion()
    {
+      planningModule = new FootstepPlanningModule("testModule", false);
+      if (DEBUG)
+         logger = new FootstepPlannerLogger(planningModule);
+      List<HeightMapDataSetName> allDatasets = Arrays.asList(HeightMapDataSetName.values());
+      runAssertionsOnAllDatasets(allDatasets, this::runAssertionsWithoutOcclusion);
+   }
+
+   @Test
+   public void testDatasetsWithoutOcclusionOnGPU()
+   {
+      planningModule = new FootstepPlanningModule("testModule", true);
+      if (DEBUG)
+         logger = new FootstepPlannerLogger(planningModule);
       List<HeightMapDataSetName> allDatasets = Arrays.asList(HeightMapDataSetName.values());
       runAssertionsOnAllDatasets(allDatasets, this::runAssertionsWithoutOcclusion);
    }
 
 
+   @Disabled
    @Test
    @Tag("path-planning-slow")
    public void testDatasetsNoOcclusionSimulateDynamicReplanning()
    {
+      planningModule = new FootstepPlanningModule("testModule", false);
+      if (DEBUG)
+         logger = new FootstepPlannerLogger(planningModule);
+      List<HeightMapDataSetName> allDatasets = Arrays.asList(HeightMapDataSetName.values());
+      runAssertionsOnAllDatasets(allDatasets, dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 10000));
+   }
+
+   @Disabled
+   @Test
+   @Tag("path-planning-slow")
+   public void testDatasetsNoOcclusionSimulateDynamicReplanningOnGPU()
+   {
+      planningModule = new FootstepPlanningModule("testModule", true);
+      if (DEBUG)
+         logger = new FootstepPlannerLogger(planningModule);
       List<HeightMapDataSetName> allDatasets = Arrays.asList(HeightMapDataSetName.values());
       runAssertionsOnAllDatasets(allDatasets, dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 10000));
    }
@@ -287,7 +313,8 @@ public class AStarBodyPathHeightMapDataSetTest
       FootstepPlannerOutput output = planningModule.getOutput();
       List<Pose3D> path = output.getBodyPath();
 
-      logger.logSession();
+      if (DEBUG)
+         logger.logSession();
 
       String errorMessages = basicBodyPathSanityChecks(datasetName, start, goal, path);
 

@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.robotics.EuclidCoreMissingTools;
@@ -16,7 +17,7 @@ public class RDXVRControllerButtonLabel
    private final ModifiableReferenceFrame textFrame;
    private final RDX3DSituatedText situatedText;
 
-   public RDXVRControllerButtonLabel(ReferenceFrame controllerFrame, RobotSide side, Point3D labelOffset)
+   public RDXVRControllerButtonLabel(ReferenceFrame controllerFrame, RobotSide side, Point3D labelOffset, YawPitchRoll labelOrientation)
    {
       textFrame = new ModifiableReferenceFrame(controllerFrame);
       textFrame.update(transformToParent ->
@@ -26,6 +27,7 @@ public class RDXVRControllerButtonLabel
                                                        -90.0 + side.negateIfLeftSide(10.0),
                                                        0.0,
                                                        15.0);
+         transformToParent.getRotation().append(labelOrientation);
       });
 
       situatedText = new RDX3DSituatedText("", java.awt.Color.WHITE, 0.01f);

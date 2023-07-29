@@ -67,6 +67,7 @@ public class FootstepPoseCheckerTest
       PlanarRegionsList flatGround = planarRegionGenerator.getPlanarRegionsList();
 
       environmentHandler.setPrimaryPlanarRegions(flatGround);
+      snapper.clearSnapData();
 
       DiscreteFootstep stanceNode = new DiscreteFootstep(0.0, 0.15, 0.0, RobotSide.LEFT);
       DiscreteFootstep childNode = new DiscreteFootstep(0.3, -0.15, 0.0, RobotSide.RIGHT);
@@ -75,6 +76,7 @@ public class FootstepPoseCheckerTest
       assertNull(rejectionReason);
 
       environmentHandler.setPrimaryPlanarRegions(angledGround);
+      snapper.clearSnapData();
 
       rejectionReason = checker.snapAndCheckValidity(childNode, stanceNode, null);
       assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_LOW_AND_FORWARD_WHEN_PITCHED, rejectionReason);
@@ -297,6 +299,7 @@ public class FootstepPoseCheckerTest
       PlanarRegionsList planarRegionsList = planarRegionsListGenerator.getPlanarRegionsList();
 
       environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
+      snapper.clearSnapData();
 
       assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH, nodeChecker.snapAndCheckValidity(childNodeAtMaxYaw, parentNode, null));
    }
