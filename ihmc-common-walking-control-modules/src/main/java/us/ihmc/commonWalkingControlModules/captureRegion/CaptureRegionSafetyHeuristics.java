@@ -118,7 +118,11 @@ public class CaptureRegionSafetyHeuristics implements SCS2YoGraphicHolder
 
       saferCaptureRegion.update();
 
-      // If the safety capture region is bad, we can reset it to be a line. Likely, moving something towards to the center messed up, so this resets things.
+      // If the capture region that has been modified (the "safer capture region") is bad (by containing no value), we can reset it to be a line, where the line
+      // runs through the current capture point from the center of the foot, and is the two intersection points with the original capture region, plus some
+      // extra distance from the foot. Likely, when we moved the vertices of the safer region towards this middle line, something got messed up in the
+      // calculation. This shouldn't ever happen, and there are likely no edge cases where it does, but we don't it to brick the robot if it does happen, so
+      // we have this little safety check.
       if (saferCaptureRegion.getNumberOfVertices() < 1)
       {
          createTheCaptureLine(captureRegion, capturePoint, saferCaptureRegion);
@@ -263,86 +267,6 @@ public class CaptureRegionSafetyHeuristics implements SCS2YoGraphicHolder
                                                                        saferCaptureRegion.getVertex(firstVertexIndex),
                                                                        saferCaptureRegion.getNextVertex(firstVertexIndex),
                                                                        croppedPoint))
-         {
-            saferCaptureRegion.getVertexUnsafe(firstVertexIndex).set(croppedPoint);
-            notifyOfUpdate = true;
-         }
-      }
-
-      // make sure the last vertex doesn't cause a "wrinkle" by overextending the outer edge of the polygon.
-      {
-         int lastVertexIndex = saferCaptureRegion.getClosestVertexIndex(verticesVisibleFromStance.get(lastVisibleIndex));
-         Point2DReadOnly nextVertex = saferCaptureRegion.getNextVertex(lastVertexIndex);
-         Point2DReadOnly nextNextVertex = saferCaptureRegion.getNextVertex(saferCaptureRegion.getNextVertexIndex(lastVertexIndex));
-         tempVector.sub(nextVertex, nextNextVertex);
-         croppedPoint.setReferenceFrame(saferCaptureRegion.getReferenceFrame());
-         if (EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(nextVertex,
-                                                                           tempVector,
-                                                                           saferCaptureRegion.getVertex(lastVertexIndex),
-                                                                           saferCaptureRegion.getPreviousVertex(lastVertexIndex),
-                                                                           croppedPoint))
-         {
-            saferCaptureRegion.getVertexUnsafe(lastVertexIndex).set(croppedPoint);
-            notifyOfUpdate = true;
-         }
-      }
-
-      if (notifyOfUpdate)
-         saferCaptureRegion.notifyVerticesChanged();
-   }
-
-   /**
-    * This method projects the visible vertices into the  capture region by a distance of {@link #extraDistanceToStepFromStanceFoot}.
-    */
-   private void projectTriangleTipAwayFromTheFoot()
-   {
-      // if it's zero, don't bother projecting
-      if (extraDistanceToStepFromStanceFoot.getValue() <= 0.0)
-         return;
-
-      vectorToVertex.setReferenceFrame(stancePosition.getReferenceFrame());
-
-      for (int i = 0; i < verticesVisibleFromStance.size(); i++)
-      {
-         FixedFramePoint2DBasics vertexToProject = verticesVisibleFromStance.get(i);
-         vectorToVertex.sub(vertexToProject, stancePosition);
-
-         // if you're already near the reachability limit, don't do any projection, it's just likely to mess you up.
-         if (vectorToVertex.norm() > reachabilityLimit.getValue() - 0.42 * extraDistanceToStepFromStanceFoot.getValue())
-            continue;
-
-         // Compute the maximum distance that the vertex can be projected along the line before hitting the reachability limit.
-         double maxProjectionDistance = Math.max(findMaximumProjectionDistance(vectorToVertex.norm(),
-                                                                               reachabilityLimit.getValue(),
-                                                                               vectorToVertex.angle(lineOfMinimalAction.getDirection())), 0.0);
-
-         // project all the vertices visible to the foot away from the stance foot in the direction through the current ICP.
-         vertexToProject.scaleAdd(Math.min(maxProjectionDistance, extraDistanceToStepFromStanceFoot.getValue()),
-                                  lineOfMinimalAction.getDirection(),
-                                  vertexToProject);
-         saferCaptureRegion.notifyVerticesChanged();
-      }
-
-      saferCaptureRegion.update();
-      boolean notifyOfUpdate = false;
-
-      boolean visibleIndicesAreClockWise = checkIfClockWiseOrdered(verticesVisibleFromStance, saferCaptureRegion);
-      int firstVisibleIndex = visibleIndicesAreClockWise ? 0 : verticesVisibleFromStance.size() - 1;
-      int lastVisibleIndex = visibleIndicesAreClockWise ? verticesVisibleFromStance.size() - 1 : 0;
-
-      // TODO fix these conditions, as they're not completely right.
-      // make sure the first vertex doesn't cause a "wrinkle" by overextending the outer edge of the polygon.
-      {
-         int firstVertexIndex = saferCaptureRegion.getClosestVertexIndex(verticesVisibleFromStance.get(firstVisibleIndex));
-         Point2DReadOnly previousVertex = saferCaptureRegion.getPreviousVertex(firstVertexIndex);
-         Point2DReadOnly previousPreviousVertex = saferCaptureRegion.getPreviousVertex(saferCaptureRegion.getPreviousVertexIndex(firstVertexIndex));
-         tempVector.sub(previousVertex, previousPreviousVertex);
-         croppedPoint.setReferenceFrame(saferCaptureRegion.getReferenceFrame());
-         if (EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(previousVertex,
-                                                                           tempVector,
-                                                                           saferCaptureRegion.getVertex(firstVertexIndex),
-                                                                           saferCaptureRegion.getNextVertex(firstVertexIndex),
-                                                                           croppedPoint))
          {
             saferCaptureRegion.getVertexUnsafe(firstVertexIndex).set(croppedPoint);
             notifyOfUpdate = true;
