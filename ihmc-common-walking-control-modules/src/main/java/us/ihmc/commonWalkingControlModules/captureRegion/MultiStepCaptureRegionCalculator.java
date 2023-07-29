@@ -43,7 +43,7 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
 
    private final FrameConvexPolygon2D multiStepRegion = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D regionToExpand = new FrameConvexPolygon2D();
-   private final YoFrameConvexPolygon2D yoMultiStepRegion = new YoFrameConvexPolygon2D("multiStepCaptureRegion", ReferenceFrame.getWorldFrame(), 50, registry);
+   private final YoFrameConvexPolygon2D yoMultiStepRegion = new YoFrameConvexPolygon2D("multiStepCaptureRegion", ReferenceFrame.getWorldFrame(), 75, registry);
 
    private final BooleanProvider useCrossOverSteps;
 
