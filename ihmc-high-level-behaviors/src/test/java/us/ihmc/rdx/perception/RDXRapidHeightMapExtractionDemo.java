@@ -38,7 +38,7 @@ import java.util.ArrayList;
 
 public class RDXRapidHeightMapExtractionDemo
 {
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230117_161540_GoodPerceptionLog.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230517_114430_PerceptionLog_900_ms.hdf5").toString();
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private ImGuiPanel navigationPanel;
@@ -94,7 +94,7 @@ public class RDXRapidHeightMapExtractionDemo
             baseUI.getPrimaryScene().addRenderableProvider(heightMapVisualizer);
 
 //            createForSpherical(128, 2048);
-            createForPerspective(768, 1024);
+            createForPerspective(720, 1280);
 
             updateHeightMap();
 
@@ -142,7 +142,7 @@ public class RDXRapidHeightMapExtractionDemo
             loadedDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
 
             rapidHeightMapUpdater.setDepthIntrinsics(654.29,654.29,651.14,361.89);
-            rapidHeightMapUpdater.setHeightMapResolution(3.0f, 0.1f);
+            rapidHeightMapUpdater.setHeightMapResolution(3.0f, 0.01f);
             rapidHeightMapUpdater.create(openCLManager, loadedDepthImage, 1);
             heightMapRenderer.create(rapidHeightMapUpdater.getCellsPerAxis() * rapidHeightMapUpdater.getCellsPerAxis());
          }
@@ -219,13 +219,19 @@ public class RDXRapidHeightMapExtractionDemo
             RigidBodyTransform transform = new RigidBodyTransform(sensorOrientationBuffer.get(frameIndex.get()),
                                                                   sensorPositionBuffer.get(frameIndex.get()));
 
+
+            RigidBodyTransform sensorToGround = new RigidBodyTransform(transform);
+            sensorToGround.getTranslation().setX(0.0f);
+            sensorToGround.getTranslation().setY(0.0f);
+            sensorToGround.getRotation().set(new Quaternion(0.0f, sensorToGround.getRotation().getPitch(), sensorToGround.getRotation().getRoll()));
+
             // Point3D euler = new Point3D();
             // sensorOrientationBuffer.get(frameIndex.get()).getEuler(euler);
             // RigidBodyTransform transform = new RigidBodyTransform(new Quaternion(0.0, pitchAngle.get(), 0.0), new Point3D(0.0,0.0,1.0));
 
             // LogTools.info("Rotation: " + euler);
 
-            rapidHeightMapUpdater.update(transform, planeHeight.get());
+            rapidHeightMapUpdater.update(sensorToGround, planeHeight.get());
             heightMapUpdateNotification.set();
 
             long end = System.nanoTime();
@@ -236,6 +242,7 @@ public class RDXRapidHeightMapExtractionDemo
       if (heightMapUpdateNotification.poll())
       {
          Point2D gridCenter = rapidHeightMapUpdater.getLatestHeightMapData() != null ? rapidHeightMapUpdater.getLatestHeightMapData().getGridCenter() : new Point2D();
+         gridCenter.setToZero();
          heightMapRenderer.update(rapidHeightMapUpdater.getOutputHeightMapImage().getPointerForAccessSpeed(),
                                   gridCenter,
                                   rapidHeightMapUpdater.getCenterIndex(),
