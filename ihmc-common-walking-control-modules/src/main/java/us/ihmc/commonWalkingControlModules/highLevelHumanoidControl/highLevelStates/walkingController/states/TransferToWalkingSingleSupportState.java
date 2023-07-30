@@ -102,6 +102,16 @@ public class TransferToWalkingSingleSupportState extends TransferState
          walkingMessageHandler.reportWalkingStarted();
       }
 
+      if (isInitialTransfer())
+      {
+         pelvisOrientationManager.moveToAverageInSupportFoot(transferToSide);
+      }
+      else
+      {
+         // In middle of walking or leaving foot pose, pelvis is good leave it like that.
+         pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
+      }
+
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       balanceManager.setFinalTransferTime(finalTransferTime);
 
@@ -130,6 +140,9 @@ public class TransferToWalkingSingleSupportState extends TransferState
       currentTransferDuration.set(firstTiming.getTransferTime());
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.initializeICPPlanForTransfer();
+
+      pelvisOrientationManager.setUpcomingFootstep(footsteps[0]);
+      pelvisOrientationManager.initializeTransfer();
    }
 
    @Override
@@ -230,6 +243,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
    {
       super.onExit(timeInState);
 
+      touchdownErrorCompensator.commitToFootTouchdownError(transferToSide);
       touchdownErrorCompensator.clear();
       firstTickInState = true;
       balanceManager.minimizeAngularMomentumRateZ(false);

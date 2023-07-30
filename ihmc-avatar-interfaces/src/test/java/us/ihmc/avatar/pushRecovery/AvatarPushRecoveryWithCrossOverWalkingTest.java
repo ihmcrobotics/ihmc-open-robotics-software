@@ -109,7 +109,7 @@ public abstract class AvatarPushRecoveryWithCrossOverWalkingTest implements Mult
 
       // setup all parameters
       Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
-      double pushDuration = 0.8 * swingTime;
+      double pushDuration = 0.4 * swingTime;
       double percentInSwing = 0.1;
       RobotSide side = RobotSide.RIGHT;
 
@@ -222,6 +222,7 @@ public abstract class AvatarPushRecoveryWithCrossOverWalkingTest implements Mult
       }
 
       footsteps.setAreFootstepsAdjustable(true);
+      footsteps.setOffsetFootstepsWithExecutionError(true);
       simulationTestHelper.publishToController(footsteps);
    }
 

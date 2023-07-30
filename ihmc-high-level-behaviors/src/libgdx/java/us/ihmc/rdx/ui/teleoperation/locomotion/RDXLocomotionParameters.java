@@ -13,7 +13,6 @@ public class RDXLocomotionParameters extends StoredPropertySet
    public static final BooleanStoredPropertyKey areFootstepsAdjustable = keys.addBooleanKey("Are footsteps adjustable");
    public static final DoubleStoredPropertyKey swingTime = keys.addDoubleKey("Swing time");
    public static final DoubleStoredPropertyKey transferTime = keys.addDoubleKey("Transfer time");
-   public static final DoubleStoredPropertyKey turnAggressiveness = keys.addDoubleKey("Turn aggressiveness");
    public static final DoubleStoredPropertyKey straightStepLength = keys.addDoubleKey("Straight step length");
    public static final DoubleStoredPropertyKey straightStepWidth = keys.addDoubleKey("Straight step width");
    public static final DoubleStoredPropertyKey reverseStepLength = keys.addDoubleKey("Reverse step length");
@@ -23,6 +22,7 @@ public class RDXLocomotionParameters extends StoredPropertySet
    public static final DoubleStoredPropertyKey turningStepWidth = keys.addDoubleKey("Turning step width");
    public static final DoubleStoredPropertyKey footstepLengthMultiplier = keys.addDoubleKey("Footstep length multiplier");
    public static final BooleanStoredPropertyKey planWidthBodyPath = keys.addBooleanKey("Plan with body path");
+   public static final BooleanStoredPropertyKey planSwingTrajectories = keys.addBooleanKey("Plan swing trajectories");
    public static final BooleanStoredPropertyKey replanSwingTrajectoriesOnChange = keys.addBooleanKey("Replan swing trajectories on change");
    public static final BooleanStoredPropertyKey assumeFlatGround = keys.addBooleanKey("Assume flat ground");
 
@@ -44,11 +44,6 @@ public class RDXLocomotionParameters extends StoredPropertySet
    public double getTransferTime()
    {
       return get(transferTime);
-   }
-
-   public double getTurnAggressiveness()
-   {
-      return get(turnAggressiveness);
    }
 
    public double getStraightStepLength()
@@ -89,6 +84,11 @@ public class RDXLocomotionParameters extends StoredPropertySet
    public boolean getPlanWithBodyPath()
    {
       return get(planWidthBodyPath);
+   }
+
+   public boolean getPlanSwingTrajectories()
+   {
+      return get(planSwingTrajectories);
    }
 
    public boolean getReplanSwingTrajectoryOnChange()

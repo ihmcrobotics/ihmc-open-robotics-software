@@ -89,12 +89,14 @@ public class ControllerStatusTracker
       }
       statusLogger.info("Controller state changed from {} to {}", initialState, endState);
       latestKnownState = endState;
+      footstepTracker.reset();
    }
 
    private void acceptWalkingControllerFailureStatusMessage(WalkingControllerFailureStatusMessage message)
    {
       triggerNotWalkingStateAnymoreCallbacks();
       statusLogger.error("Robot is falling! direction: {}", message.getFallingDirection());
+      footstepTracker.reset();
    }
 
    private void acceptPlanOffsetStatus(PlanOffsetStatus message)
@@ -110,6 +112,7 @@ public class ControllerStatusTracker
    {
       statusLogger.error("Controller crashed! {}", message::toString);
       triggerNotWalkingStateAnymoreCallbacks();
+      footstepTracker.reset();
    }
 
    private void acceptCapturabilityBasedStatus(CapturabilityBasedStatus message)

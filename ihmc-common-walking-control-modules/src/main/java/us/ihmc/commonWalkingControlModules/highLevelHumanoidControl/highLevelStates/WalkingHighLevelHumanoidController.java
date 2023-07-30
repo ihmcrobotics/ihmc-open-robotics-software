@@ -63,7 +63,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -367,6 +366,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       {
          WalkingStateEnum stateEnum = WalkingStateEnum.getFlamingoSingleSupportState(supportSide);
          FlamingoStanceState singleSupportState = new FlamingoStanceState(stateEnum,
+                                                                          walkingControllerParameters,
                                                                           walkingMessageHandler,
                                                                           controllerToolbox,
                                                                           managerFactory,
@@ -515,7 +515,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       commandInputManager.clearAllCommands();
       commandConsumer.clearAllCommands();
       walkingMessageHandler.clearFootsteps();
-      walkingMessageHandler.clearFootTrajectory();
+      walkingMessageHandler.clearFlamingoCommands();
 
       privilegedConfigurationCommand.clear();
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
@@ -554,6 +554,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private void initializeManagers()
    {
       balanceManager.disablePelvisXYControl();
+
+      double stepTime = walkingMessageHandler.getDefaultStepTime();
+      pelvisOrientationManager.setTrajectoryTime(stepTime);
 
       for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
       {
@@ -640,7 +643,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       commandConsumer.consumeManipulationCommands(currentState, allowUpperBodyMotionDuringLocomotion.getBooleanValue());
       commandConsumer.handleAutomaticManipulationAbortOnICPError(currentState);
       commandConsumer.consumeLoadBearingCommands();
-      commandConsumer.consumeEnvironmentalModelingCommands();
       commandConsumer.consumePrepareForLocomotionCommands();
 
       updateFailureDetection();
@@ -709,7 +711,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if (failureDetectionControlModule.isRobotFalling())
       {
          walkingMessageHandler.clearFootsteps();
-         walkingMessageHandler.clearFootTrajectory();
+         walkingMessageHandler.clearFlamingoCommands();
 
          commandInputManager.clearAllCommands();
 

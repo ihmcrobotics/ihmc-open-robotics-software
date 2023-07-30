@@ -683,7 +683,8 @@ public class PlanarRegionMap
       {
          LogTools.warn("Initializing Planar Region Map");
          PlanarRegion initialSupportSquareRegion = PlanarRegionTools.createSquarePlanarRegion(0.6f,
-                 new Point3D(midFootTransform.getTranslation()), new Quaternion(midFootTransform.getRotation()));
+                                                                                              new Point3D(midFootTransform.getTranslation()),
+                                                                                              new Quaternion(midFootTransform.getRotation()));
          initialSupportSquareRegion.setRegionId(uniqueIDtracker++);
          initialSupportSquareRegion.incrementNumberOfTimesMatched();
          finalMap.addPlanarRegion(initialSupportSquareRegion);
@@ -822,6 +823,7 @@ public class PlanarRegionMap
          finalMap = crossReduceRegionsIteratively(finalMap, graphRegions);
          processUniqueRegions(finalMap);
 
+         // TODO: Improve the intersection based chopping tool before enabling this.
          //performMapCleanUp(false, true);
 
          mapLandmarks.clear();
@@ -864,8 +866,9 @@ public class PlanarRegionMap
          {
             // Region has not been matched enough in a while. Not good region.
             // Region has not been matched enough
-            boolean regionIsBad = (currentTimeIndex - region.getTickOfLastMeasurement() > 3)
-                                   && (region.getNumberOfTimesMatched() < 2) && (region.getRegionId() > 1);
+            boolean regionIsBad =
+                  (currentTimeIndex - region.getTickOfLastMeasurement() > 3) && (region.getNumberOfTimesMatched() < 2) && (region.getRegionId() > 1);
+
             if (!regionIsBad)
             {
                processedMap.addPlanarRegion(region);
@@ -990,8 +993,8 @@ public class PlanarRegionMap
    }
 
    public void setInitialSupportSquareEnabled(boolean supportSquareEnabled)
-    {
-        initialSupportSquareEnabled = supportSquareEnabled;
-    }
+   {
+      initialSupportSquareEnabled = supportSquareEnabled;
+   }
 }
 
