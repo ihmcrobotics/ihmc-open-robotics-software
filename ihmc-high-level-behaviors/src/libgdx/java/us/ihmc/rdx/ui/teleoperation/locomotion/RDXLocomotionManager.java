@@ -153,6 +153,8 @@ public class RDXLocomotionManager
    {
       this.baseUI = baseUI;
 
+      baseUI.getImGuiPanelManager().addPanel("Locomotion", this::renderImGuiWidgets);
+
       locomotionParametersTuner.create(locomotionParameters);
       footstepPlanningParametersTuner.create(footstepPlannerParameters, false);
       bodyPathPlanningParametersTuner.create(bodyPathPlannerParameters, false);
