@@ -29,14 +29,13 @@ public class RDXRemotePerceptionUI
    private final PolygonizerParameters sphericalPolygonizerParameters = new PolygonizerParameters("ForSphericalRapidRegions");
    private final ConcaveHullFactoryParameters sphericalConcaveHullFactoryParameters = new ConcaveHullFactoryParameters("ForSphericalRapidRegions");
    private final PlanarRegionMappingParameters sphericalRegionMappingParameters = new PlanarRegionMappingParameters("Spherical");
-   private final IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
+
+   private IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
 
    private final ImGuiRemoteROS2StoredPropertySetGroup remotePropertySets;
 
-   public RDXRemotePerceptionUI(ROS2Helper ros2Helper, BlackflyLensProperties blackflyLensCombo)
+   public RDXRemotePerceptionUI(ROS2Helper ros2Helper)
    {
-      ousterFisheyeColoringIntrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsOnRobot(blackflyLensCombo);
-
       remotePropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper);
 
       remotePropertySets.registerRemotePropertySet(perceptionConfigurationParameters, PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS);
@@ -50,7 +49,11 @@ public class RDXRemotePerceptionUI
       remotePropertySets.registerRemotePropertySet(sphericalPolygonizerParameters, PerceptionComms.SPHERICAL_POLYGONIZER_PARAMETERS);
       remotePropertySets.registerRemotePropertySet(sphericalConcaveHullFactoryParameters, PerceptionComms.SPHERICAL_CONVEX_HULL_FACTORY_PARAMETERS);
       remotePropertySets.registerRemotePropertySet(sphericalRegionMappingParameters, PerceptionComms.SPHERICAL_PLANAR_REGION_MAPPING_PARAMETERS);
+   }
 
+   public void setBlackflyLensProperties(BlackflyLensProperties blackflyLensCombo)
+   {
+      ousterFisheyeColoringIntrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsOnRobot(blackflyLensCombo);
       remotePropertySets.registerRemotePropertySet(ousterFisheyeColoringIntrinsics, DualBlackflyComms.OUSTER_FISHEYE_COLORING_INTRINSICS);
    }
 
