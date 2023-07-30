@@ -177,7 +177,8 @@ public class RDXPerceptionUI
             baseUI.create();
             baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI);
 
-            remotePerceptionUI = new RDXRemotePerceptionUI(ros2Helper, SensorHeadParameters.BENCHTOP_BLACKFLY_LENS_COMBO);
+            remotePerceptionUI = new RDXRemotePerceptionUI(ros2Helper);
+            remotePerceptionUI.setBlackflyLensProperties(SensorHeadParameters.BENCHTOP_BLACKFLY_LENS_COMBO);
             baseUI.getImGuiPanelManager().addPanel(remotePerceptionUI.getPanel());
 
             environmentBuilder.create();
