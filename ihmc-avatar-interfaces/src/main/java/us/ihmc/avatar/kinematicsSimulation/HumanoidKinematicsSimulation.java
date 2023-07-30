@@ -587,6 +587,7 @@ public class HumanoidKinematicsSimulation
       if (simulatedHandKinematicController != null)
          simulatedHandKinematicController.cleanup();
       controlThread.destroy();
+      heartbeat.destroy();
       ros2Node.destroy();
       realtimeROS2Node.destroy();
       if (yoVariableServer != null)

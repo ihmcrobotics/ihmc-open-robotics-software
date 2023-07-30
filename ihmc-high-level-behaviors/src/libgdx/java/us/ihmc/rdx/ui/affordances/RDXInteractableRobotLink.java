@@ -13,12 +13,12 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.vr.RDXVRContext;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.rdx.vr.RDXVRDragData;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 
@@ -45,8 +45,6 @@ public class RDXInteractableRobotLink
    private boolean isMouseHovering;
    private final Notification contextMenuNotification = new Notification();
    private boolean isVRHovering;
-   private boolean isVRDragging = false;
-   private final SideDependentList<ModifiableReferenceFrame> dragReferenceFrame = new SideDependentList<>();
 
    /** For when the graphic, the link, and control frame are all the same. */
    public void create(RDXRobotCollidable robotCollidable, ReferenceFrame syncedControlFrame, String graphicFileName, RDX3DPanel panel3D)
@@ -71,6 +69,9 @@ public class RDXInteractableRobotLink
                                                                                            linkToControlFrameTransform);
       highlightModel = new RDXInteractableHighlightModel(modelFileName);
       selectablePose3DGizmo.create(panel3D);
+
+      RDXBaseUI.getInstance().getKeyBindings().register("Execute / pause motion", "Space");
+      RDXBaseUI.getInstance().getKeyBindings().register("Delete selected gizmo", "Delete");
    }
 
    public void update()
@@ -111,40 +112,24 @@ public class RDXInteractableRobotLink
             boolean isHovering = false;
             for (RDXRobotCollidable robotCollidable : robotCollidables)
             {
-               isHovering |= robotCollidable.getVRPickSelected(side);
+               isHovering |= robotCollidable.getVRHovering(side);
             }
             isVRHovering |= isHovering;
 
-            boolean triggerDown = controller.getClickTriggerActionData().bState();
-            boolean triggerNewlyDown = triggerDown && controller.getClickTriggerActionData().bChanged();
-            boolean triggerNewlyUp = !triggerDown && controller.getClickTriggerActionData().bChanged();
+            RDXVRDragData gripDragData = controller.getGripDragData();
 
-            if (dragReferenceFrame.get(side) == null)
+            if (isHovering && gripDragData.getDragJustStarted())
             {
-               dragReferenceFrame.put(side, new ModifiableReferenceFrame(controller.getPickPoseFrame()));
+               modified = true;
+               gripDragData.setObjectBeingDragged(this);
+               gripDragData.setInteractableFrameOnDragStart(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
             }
 
-            if (isHovering && triggerNewlyDown)
+            if (gripDragData.isDragging() && gripDragData.getObjectBeingDragged() == this)
             {
-               if (!modified)
-               {
-                  modified = true;
-               }
-
-               selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getTransformToDesiredFrame(dragReferenceFrame.get(side).getTransformToParent(),
-                                                                                               controller.getPickPoseFrame());
-               dragReferenceFrame.get(side).getReferenceFrame().update();
-               isVRDragging = true;
+               gripDragData.getDragFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
+                                                                      selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getParent());
             }
-
-            if (isVRDragging)
-            {
-               dragReferenceFrame.get(side).getReferenceFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
-                                                                                           ReferenceFrame.getWorldFrame());
-            }
-
-            if (triggerNewlyUp)
-               isVRDragging = false;
          });
       }
    }
@@ -159,7 +144,7 @@ public class RDXInteractableRobotLink
       isMouseHovering = false;
       for (RDXRobotCollidable robotCollidable : robotCollidables)
       {
-         isMouseHovering |= robotCollidable.getMousePickSelected();
+         isMouseHovering |= robotCollidable.getMouseHovering();
       }
 
       if (isMouseHovering && ImGui.getMouseClickedCount(ImGuiMouseButton.Right) == 1)
@@ -226,7 +211,7 @@ public class RDXInteractableRobotLink
    {
       boolean anyRobotCollidableHovered = false;
       for (RDXRobotCollidable robotCollidable : robotCollidables)
-         anyRobotCollidableHovered |= robotCollidable.getAnyPickSelected();
+         anyRobotCollidableHovered |= robotCollidable.getIsHoveredByAnything();
 
       if (modified || anyRobotCollidableHovered)
       {

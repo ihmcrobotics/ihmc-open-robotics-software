@@ -6,6 +6,13 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 
 import java.util.function.Consumer;
 
+/**
+ * This class is for two reasons:
+ * - Having a single field for a transform with a changing transform to parent.
+ *   (Otherwise you need another field to store the transformToParent)
+ * - Being able to change the parent frame of this reference frame, which
+ *   is complicated and has constraints.
+ */
 public class ModifiableReferenceFrame
 {
    private final RigidBodyTransform transformToParent = new RigidBodyTransform();

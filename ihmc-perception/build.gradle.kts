@@ -49,6 +49,8 @@ mainDependencies {
    api("org.bytedeco:opencv:$opencvVersion:linux-x86_64")
    api("org.bytedeco:opencv:$opencvVersion:linux-arm64")
    api("org.bytedeco:opencv:$opencvVersion:windows-x86_64")
+   api("org.bytedeco:opencv:$opencvVersion:linux-x86_64-gpu")
+   api("org.bytedeco:opencv:$opencvVersion:windows-x86_64-gpu")
    val ffmpegVersion = "6.0-1.5.9"
    api("org.bytedeco:ffmpeg:$ffmpegVersion")
    api("org.bytedeco:ffmpeg:$ffmpegVersion:linux-x86_64")
@@ -74,9 +76,21 @@ mainDependencies {
    api("org.bytedeco:hdf5:$hdf5Version:linux-x86_64")
    // No arm64 version
    api("org.bytedeco:hdf5:$hdf5Version:windows-x86_64")
+   val cudaVersion = "12.1-8.9-1.5.9"
+   api("org.bytedeco:cuda:$cudaVersion")
+   api("org.bytedeco:cuda:$cudaVersion:linux-x86_64")
+   api("org.bytedeco:cuda:$cudaVersion:linux-arm64")
+   api("org.bytedeco:cuda:$cudaVersion:windows-x86_64")
+   val zedVersion = "4.0.5-1.5.9"
+   api("us.ihmc:zed:$zedVersion") {
+      exclude(group = "us.ihmc", module = "javacpp")
+   }
+   api("us.ihmc:zed:$zedVersion:linux-x86_64") {
+      exclude(group = "us.ihmc", module = "javacpp")
+   }
 
    api("us.ihmc:euclid:0.20.0")
-   api("us.ihmc:simulation-construction-set:0.23.4")
+   api("us.ihmc:simulation-construction-set:0.24.1")
    api("us.ihmc:ihmc-native-library-loader:2.0.2")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-communication:source")

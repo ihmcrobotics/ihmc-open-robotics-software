@@ -34,6 +34,7 @@ import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
 
@@ -107,6 +108,8 @@ public class TerrainPerceptionProcessWithDriver
    private long colorSequenceNumber = 0;
 
    public TerrainPerceptionProcessWithDriver(String serialNumber, String robotName,
+                                             CollisionBoxProvider collisionBoxProvider,
+                                             FullHumanoidRobotModel fullRobotModel,
                                              RealsenseConfiguration realsenseConfiguration,
                                              ROS2Topic<ImageMessage> depthTopic,
                                              ROS2Topic<ImageMessage> colorTopic,
@@ -118,15 +121,24 @@ public class TerrainPerceptionProcessWithDriver
       this.colorTopic = colorTopic;
       this.frameRegionsTopic = frameRegionsTopic;
       this.sensorFrameUpdater = sensorFrameUpdater;
+      this.fullRobotModel = fullRobotModel;
+      this.collisionBoxProvider = collisionBoxProvider;
+
+      if (fullRobotModel == null)
+         LogTools.info("Creating terrain process with no robot model.");
+      if (collisionBoxProvider == null)
+         LogTools.info("Creating terrain process with no collision provider.");
+
+      this.robotConfigurationData = new RobotConfigurationData();
 
       this.robotConfigurationData = new RobotConfigurationData();
 
       this.outputPeriod = UnitConversions.hertzToSeconds(31.0f);
 
+      openCLManager = new OpenCLManager();
+
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_videopub");
       realtimeROS2Node.spin();
-
-      openCLManager = new OpenCLManager();
 
       realSenseHardwareManager = new RealSenseHardwareManager();
 
@@ -228,6 +240,7 @@ public class TerrainPerceptionProcessWithDriver
             rapidRegionsExtractor.initializeBodyCollisionFilter(fullRobotModel, collisionBoxProvider);
 
             rapidRegionsExtractor.getDebugger().setEnabled(false);
+            rapidRegionsExtractor.initializeBodyCollisionFilter(fullRobotModel, collisionBoxProvider);
 
             ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
             ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
@@ -314,17 +327,14 @@ public class TerrainPerceptionProcessWithDriver
 
          if (parameters.getRapidRegionsEnabled())
          {
-            executorService.submit(() -> {
-
-               rapidRegionsExtractor.updateRobotConfigurationData(robotConfigurationData);
+            rapidRegionsExtractor.updateRobotConfigurationData(robotConfigurationData);
 
 //            PerceptionDebugTools.displayDepth("Depth", depth16UC1Image, 1);
                depth16UC1Image.convertTo(depthBytedecoImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1, 1, 0);
                FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
                extractFramePlanarRegionsList(depthBytedecoImage, cameraFrame, framePlanarRegionsList);
 
-               PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, frameRegionsTopic, ros2Helper);
-            });
+            PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, frameRegionsTopic, ros2Helper);
          }
 
          if (parameters.getPublishDepth() || parameters.getRapidRegionsEnabled())
@@ -365,10 +375,11 @@ public class TerrainPerceptionProcessWithDriver
 
    public static void main(String[] args)
    {
-      // Benchtop L515: F1120592, Tripod: F1121365, Local: F0245563, Nadia: F112114, D435: 108522071219, D455: 213522252883, 215122254074
+//       Benchtop L515: F1120592, Tripod: F1121365, Local: F0245563, Nadia: F112114, D435: 108522071219, D435: 213522252883, 215122254074
       String realsenseSerialNumber = System.getProperty("d455.serial.number", "213522252883");
       TerrainPerceptionProcessWithDriver process = new TerrainPerceptionProcessWithDriver(realsenseSerialNumber,
                                                                                           "Nadia",
+                                                                                          null, null,
                                                                                           RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
                                                                                           PerceptionAPI.D455_DEPTH_IMAGE,
                                                                                           PerceptionAPI.D455_COLOR_IMAGE,

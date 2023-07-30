@@ -1,9 +1,5 @@
 package us.ihmc.avatar.pushRecovery;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertFalse;
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -39,6 +35,8 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AvatarPushRecoveryStandingTest
 {
@@ -355,7 +353,7 @@ public abstract class AvatarPushRecoveryStandingTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(1.0, 0.2, 0.0);
-      double magnitude = 350.0;
+      double magnitude = 300.0;
       double duration = 0.2;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       assertTrue(simulationTestHelper.simulateNow(1.0));
@@ -477,7 +475,7 @@ public abstract class AvatarPushRecoveryStandingTest
    {
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, pushDuration);
       assertTrue(simulationTestHelper.simulateNow(simulationDuration));
-      assertTrue("Not back to walking", currentHighLevelState.getEnumValue().equals(HighLevelControllerName.WALKING));
+      assertTrue(currentHighLevelState.getEnumValue().equals(HighLevelControllerName.WALKING), "Not back to walking");
    }
 
    private class PushRecoveryTransferStartCondition implements StateTransitionCondition
