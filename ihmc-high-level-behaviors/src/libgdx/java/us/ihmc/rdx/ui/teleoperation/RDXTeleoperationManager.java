@@ -430,15 +430,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
          ImGui.checkbox("Interactables enabled", interactablesEnabled);
       }
 
-      ImGui.separator();
-      locomotionManager.renderImGuiWidgets();
-      ImGui.separator();
-
       if (interactablesAvailable)
       {
-         if (armManager != null)
-            armManager.renderImGuiWidgets();
-
          ImGui.text("Pelvis:");
          ImGuiTools.previousWidgetTooltip("Send with: Spacebar");
          ImGui.sameLine();
