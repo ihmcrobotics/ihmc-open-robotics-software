@@ -59,7 +59,7 @@ public abstract class DetectableSceneNode extends SceneNode
 
    public void setOriginalTransformToParent(RigidBodyTransform originalTransformToParent)
    {
-      originalTransformToParent.set(originalTransformToParent);
+      this.originalTransformToParent.set(originalTransformToParent);
    }
 
    public void setTrackDetectedPose(boolean trackDetectedPose)
@@ -100,7 +100,7 @@ public abstract class DetectableSceneNode extends SceneNode
       modifiedTimer.reset();
    }
 
-   public boolean operatorHasntTouchedThingsInABit()
+   public boolean operatorHasntModifiedThisRecently()
    {
       return !modifiedTimer.isRunning(OPERATOR_FREEZE_TIME);
    }

@@ -55,6 +55,15 @@ public class ROS2DetectableSceneNodesSubscription
          DetectableSceneNodesMessage detectableSceneNodesMessage = detectableSceneNodesSubscription.getMessageNotification().read();
          IDLSequence.Object<DetectableSceneNodeMessage> detectableSceneNodeMessages = detectableSceneNodesMessage.getDetectableSceneNodes();
 
+         // We group this because with a tree structure, modification propagate.
+         // Maybe we should build that in at some point instead of freezing the whole tree,
+         // but it's good enough for now.
+         boolean operatorHasntModifiedAnythingRecently = true;
+         for (DetectableSceneNode detectableSceneNode : detectableSceneNodes)
+         {
+            operatorHasntModifiedAnythingRecently &= detectableSceneNode.operatorHasntModifiedThisRecently();
+         }
+
          // We assume the nodes are in the same order on both sides. This is to avoid O(n^2) complexity.
          // We could improve on this design later.
          for (int i = 0; i < detectableSceneNodeMessages.size(); i++)
@@ -79,17 +88,13 @@ public class ROS2DetectableSceneNodesSubscription
                }
 
                // If the node was recently modified by the operator, the node does not accept
-               // updates of the "override pose" setting. This is to allow the operator's changes to propagate
+               // updates of the "track detected pose" setting. This is to allow the operator's changes to propagate
                // and so it doesn't get overriden immediately by an out of date message coming from the robot.
                // On the robot side, this will always get updated because there is no operator.
-               if (detectableSceneNode.operatorHasntTouchedThingsInABit())
+               if (operatorHasntModifiedAnythingRecently)
                {
                   detectableSceneNode.setTrackDetectedPose(detectableSceneNodeMessage.getTrackDetectedPose());
-               }
 
-               // Wait until we haven't touched things for a second to accept and update to it.
-               if (detectableSceneNode.operatorHasntTouchedThingsInABit())
-               {
                   MessageTools.toEuclid(detectableSceneNodeMessage.getTransformToWorld(), nodeToWorldTransform);
                   nodePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), nodeToWorldTransform);
                   nodePose.changeFrame(detectableSceneNode.getNodeFrame().getParent());
