@@ -34,6 +34,7 @@ import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
@@ -59,6 +60,7 @@ public class DualBlackflyCamera
    private final IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
 
    private final PredefinedSceneNodeLibrary predefinedSceneNodeLibrary;
+   private final ModifiableReferenceFrame blackflyFrameForSceneNodeUpdate = new ModifiableReferenceFrame();
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
    private final ROS2TunedRigidBodyTransform remoteTunableCameraTransform;
@@ -402,6 +404,9 @@ public class DualBlackflyCamera
       if (sourceImageBeingUsedForProcessing == null || spinImageAcquisitionTime == null)
          return;
 
+      remoteTunableCameraTransform.update();
+      syncedRobot.update();
+
       ReferenceFrame ousterLidarFrame = syncedRobot.getReferenceFrames().getOusterLidarFrame();
       RigidBodyTransform ousterToBlackflyTransfrom = new RigidBodyTransform();
 
@@ -409,11 +414,15 @@ public class DualBlackflyCamera
       {
          ReferenceFrame blackflyCameraFrame = syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame();
          ousterLidarFrame.getTransformToDesiredFrame(ousterToBlackflyTransfrom, blackflyCameraFrame);
+
+         synchronized (blackflyFrameForSceneNodeUpdate)
+         {
+            blackflyFrameForSceneNodeUpdate.getTransformToParent().set(blackflyCameraFrame.getTransformToRoot());
+            blackflyFrameForSceneNodeUpdate.getReferenceFrame().update();
+         }
       }
       // TODO: left behavior?
 
-      remoteTunableCameraTransform.update();
-      syncedRobot.update();
 
       BytePointer jpegImageBytePointer = new BytePointer(imageFrameSize); // close at the end
 
@@ -486,6 +495,10 @@ public class DualBlackflyCamera
 
          detectableSceneNodesSubscription.update(); // Receive overridden poses from operator
          ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, predefinedSceneNodeLibrary);
+         synchronized (blackflyFrameForSceneNodeUpdate)
+         {
+            predefinedSceneNodeLibrary.update(blackflyFrameForSceneNodeUpdate.getReferenceFrame());
+         }
          detectableSceneObjectsPublisher.publish(predefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2Helper, ROS2IOTopicQualifier.STATUS);
       }
       // TODO: left behavior?

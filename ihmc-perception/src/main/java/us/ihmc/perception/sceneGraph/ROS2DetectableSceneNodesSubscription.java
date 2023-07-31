@@ -13,7 +13,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
-import us.ihmc.perception.sceneGraph.rigidBodies.StaticArUcoRelativeDetectableSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 
 import java.util.List;
 
@@ -87,9 +87,9 @@ public class ROS2DetectableSceneNodesSubscription
                {
                   detectableSceneNode.setPoseOverriddenByOperator(detectableSceneNodeMessage.getIsPoseOverriddenByOperator());
 
-                  if (detectableSceneNode instanceof StaticArUcoRelativeDetectableSceneNode staticRelativeNode)
+                  if (detectableSceneNode instanceof StaticRelativeSceneNode staticRelativeNode)
                   {
-                     staticRelativeNode.setPoseIsLockedIn(detectableSceneNodeMessage.getIsStaticRelativePoseLockedIn());
+                     staticRelativeNode.setPoseIsStatic(detectableSceneNodeMessage.getIsStaticRelativePoseLockedIn());
                   }
                }
 

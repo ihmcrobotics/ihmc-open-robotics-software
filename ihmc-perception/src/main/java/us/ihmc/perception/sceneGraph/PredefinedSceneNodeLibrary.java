@@ -1,10 +1,11 @@
 package us.ihmc.perception.sceneGraph;
 
 import gnu.trove.map.hash.TIntDoubleHashMap;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
-import us.ihmc.perception.sceneGraph.rigidBodies.StaticArUcoRelativeDetectableSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
 
 import java.util.*;
@@ -28,16 +29,17 @@ public class PredefinedSceneNodeLibrary
    private final ArUcoDetectableNode pullDoorPanel;
    private final ArUcoDetectableNode pushDoorLeverHandle;
    private final ArUcoDetectableNode pullDoorLeverHandle;
-   private final StaticArUcoRelativeDetectableSceneNode pushDoorFrame;
-   private final StaticArUcoRelativeDetectableSceneNode pullDoorFrame;
+   private final StaticRelativeSceneNode pushDoorFrame;
+   private final StaticRelativeSceneNode pullDoorFrame;
    private final ArUcoDetectableNode box;
    private final ArUcoDetectableNode canOfSoup;
 
    private final ArrayList<DetectableSceneNode> detectableSceneNodes = new ArrayList<>();
    private final ArrayList<ArUcoDetectableNode> arUcoDetectableNodes = new ArrayList<>();
-   private final HashMap<Integer, StaticArUcoRelativeDetectableSceneNode> staticArUcoRelativeDetectableNodes = new HashMap<>();
+   private final ArrayList<StaticRelativeSceneNode> staticArUcoRelativeDetectableNodes = new ArrayList<>();
    private final TIntDoubleHashMap arUcoMarkerIDsToSizes = new TIntDoubleHashMap();
    private final List<ReferenceFrame> referenceFrames = new ArrayList<>();
+   private final FramePose3D arUcoMarkerPose = new FramePose3D();
 
    public static PredefinedSceneNodeLibrary defaultObjects()
    {
@@ -57,8 +59,8 @@ public class PredefinedSceneNodeLibrary
       registerArUcoDetectableSceneNode(pullDoorLeverHandle);
 
       // The frames stay in place after being seen
-      pushDoorFrame = DoorSceneNodeDefinitions.createPushDoorFrame();
-      pullDoorFrame = DoorSceneNodeDefinitions.createPullDoorFrame();
+      pushDoorFrame = DoorSceneNodeDefinitions.createPushDoorFrame(pushDoorPanel);
+      pullDoorFrame = DoorSceneNodeDefinitions.createPullDoorFrame(pullDoorPanel);
       registerStaticArUcoRelativeDetectableSceneNode(pushDoorFrame);
       registerStaticArUcoRelativeDetectableSceneNode(pullDoorFrame);
 
@@ -78,16 +80,37 @@ public class PredefinedSceneNodeLibrary
       arUcoMarkerIDsToSizes.put(arUcoDetectableNode.getMarkerID(), arUcoDetectableNode.getMarkerSize());
    }
 
-   public void registerStaticArUcoRelativeDetectableSceneNode(StaticArUcoRelativeDetectableSceneNode staticArUcoRelativeDetectableSceneNode)
+   public void registerStaticArUcoRelativeDetectableSceneNode(StaticRelativeSceneNode staticRelativeSceneNode)
    {
-      registerDetectableSceneNode(staticArUcoRelativeDetectableSceneNode);
-      staticArUcoRelativeDetectableNodes.put(staticArUcoRelativeDetectableSceneNode.getMarkerID(), staticArUcoRelativeDetectableSceneNode);
+      registerDetectableSceneNode(staticRelativeSceneNode);
+      staticArUcoRelativeDetectableNodes.add(staticRelativeSceneNode);
    }
 
    public void registerDetectableSceneNode(DetectableSceneNode detectableSceneNode)
    {
       detectableSceneNodes.add(detectableSceneNode);
       referenceFrames.add(detectableSceneNode.getNodeFrame());
+   }
+
+   public void update(ReferenceFrame sensorFrame)
+   {
+      for (StaticRelativeSceneNode staticRelativeNode : staticArUcoRelativeDetectableNodes)
+      {
+         // We assume that the parent node is always an ArUco node, which is a weak assummption,
+         // but the whole static relative thing is also weak.
+         if (staticRelativeNode.getParentNode() instanceof ArUcoDetectableNode parentArUcoNode)
+         {
+            if (parentArUcoNode.getCurrentlyDetected())
+            {
+               arUcoMarkerPose.setToZero(parentArUcoNode.getMarkerFrame());
+               arUcoMarkerPose.setFromReferenceFrame(sensorFrame);
+               if (arUcoMarkerPose.getPosition().norm() <= staticRelativeNode.getMaximumDistanceToLockIn())
+               {
+                  staticRelativeNode.setPoseToStatic();
+               }
+            }
+         }
+      }
    }
 
    public void storeOverriddenPoses()
@@ -122,7 +145,7 @@ public class PredefinedSceneNodeLibrary
       return arUcoDetectableNodes;
    }
 
-   public HashMap<Integer, StaticArUcoRelativeDetectableSceneNode> getStaticArUcoRelativeDetectableNodes()
+   public ArrayList<StaticRelativeSceneNode> getStaticArUcoRelativeDetectableNodes()
    {
       return staticArUcoRelativeDetectableNodes;
    }

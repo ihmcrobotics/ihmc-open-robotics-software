@@ -49,4 +49,9 @@ public abstract class SceneNode
    {
       nodeFrame.changeParentFrame(newParentFrame);
    }
+
+   protected void changeParentFrameWithoutMoving(ReferenceFrame newParentFrame)
+   {
+      nodeFrame.changeParentFrameWithoutMoving(newParentFrame);
+   }
 }

@@ -10,7 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
-import us.ihmc.perception.sceneGraph.rigidBodies.StaticArUcoRelativeDetectableSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 
 /**
  * Publishes the current state of the complete collection of detectable scene objects.
@@ -55,12 +55,10 @@ public class ROS2DetectableSceneNodesPublisher
             arUcoMarkerPose.changeFrame(ReferenceFrame.getWorldFrame());
             arUcoMarkerPose.get(arUcoMarkerToWorldTransform);
             MessageTools.toMessage(arUcoMarkerToWorldTransform, detectableSceneNodeMessage.getArucoMarkerTransformToWorld());
-
-
-            if (arUcoDetectableNode instanceof StaticArUcoRelativeDetectableSceneNode staticRelativeNode)
-            {
-               detectableSceneNodeMessage.setIsStaticRelativePoseLockedIn(staticRelativeNode.getPoseIsLockedIn());
-            }
+         }
+         if (detectableSceneNode instanceof StaticRelativeSceneNode staticRelativeNode)
+         {
+            detectableSceneNodeMessage.setIsStaticRelativePoseLockedIn(staticRelativeNode.getPoseIsStatic());
          }
       }
       ros2PublishSubscribeAPI.publish(PerceptionAPI.DETECTABLE_SCENE_NODES.getTopic(ioQualifier), detectableSceneNodesMessage);
