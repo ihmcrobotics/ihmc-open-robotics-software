@@ -35,13 +35,9 @@ module perception_msgs
          */
         controller_msgs::msg::dds::RigidBodyTransformMessage aruco_marker_transform_to_world;
         /**
-         * Keeps track of when the operator has overridden the pose of this node
+         * Nodes can be set to not track the detected pose
          */
-        boolean is_pose_overridden_by_operator;
-        /**
-         * For static ArUco relative nodes, if it's currently locked in
-         */
-        boolean is_static_relative_pose_locked_in;
+        boolean track_detected_pose;
       };
     };
   };

@@ -12,7 +12,6 @@ public class ArUcoSceneTools
    public static void updateLibraryPosesFromDetectionResults(OpenCVArUcoMarkerDetection arUcoMarkerDetection,
                                                              PredefinedSceneNodeLibrary predefinedSceneNodeLibrary)
    {
-      predefinedSceneNodeLibrary.storeOverriddenPoses();
       synchronized (arUcoMarkerDetection.getSyncObject())
       {
          for (ArUcoDetectableNode arUcoDetectableNode : predefinedSceneNodeLibrary.getArUcoDetectableNodes())
@@ -29,6 +28,5 @@ public class ArUcoSceneTools
             }
          }
       }
-      predefinedSceneNodeLibrary.restoreOverriddenPoses();
    }
 }

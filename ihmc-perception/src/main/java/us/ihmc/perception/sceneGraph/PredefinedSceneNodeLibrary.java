@@ -98,7 +98,7 @@ public class PredefinedSceneNodeLibrary
       {
          // We assume that the parent node is always an ArUco node, which is a weak assummption,
          // but the whole static relative thing is also weak.
-         if (staticRelativeNode.getParentNode() instanceof ArUcoDetectableNode parentArUcoNode)
+         if (staticRelativeNode.getOptionalParentNode() instanceof ArUcoDetectableNode parentArUcoNode)
          {
             if (parentArUcoNode.getCurrentlyDetected())
             {
@@ -106,31 +106,9 @@ public class PredefinedSceneNodeLibrary
                arUcoMarkerPose.setFromReferenceFrame(sensorFrame);
                if (arUcoMarkerPose.getPosition().norm() <= staticRelativeNode.getMaximumDistanceToLockIn())
                {
-                  staticRelativeNode.setPoseToStatic();
+                  staticRelativeNode.setTrackDetectedPose(false);
                }
             }
-         }
-      }
-   }
-
-   public void storeOverriddenPoses()
-   {
-      for (DetectableSceneNode detectableSceneNode : detectableSceneNodes)
-      {
-         if (detectableSceneNode.getPoseOverriddenByOperator())
-         {
-            detectableSceneNode.storeOverriddenPose();
-         }
-      }
-   }
-
-   public void restoreOverriddenPoses()
-   {
-      for (DetectableSceneNode detectableSceneNode : detectableSceneNodes)
-      {
-         if (detectableSceneNode.getPoseOverriddenByOperator())
-         {
-            detectableSceneNode.restoreOverriddenPose();
          }
       }
    }
@@ -143,11 +121,6 @@ public class PredefinedSceneNodeLibrary
    public List<ArUcoDetectableNode> getArUcoDetectableNodes()
    {
       return arUcoDetectableNodes;
-   }
-
-   public ArrayList<StaticRelativeSceneNode> getStaticArUcoRelativeDetectableNodes()
-   {
-      return staticArUcoRelativeDetectableNodes;
    }
 
    public TIntDoubleHashMap getArUcoMarkerIDsToSizes()

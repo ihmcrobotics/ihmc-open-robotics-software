@@ -2,6 +2,7 @@ package us.ihmc.perception.sceneGraph;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.Timer;
 
 /**
@@ -15,21 +16,21 @@ public abstract class DetectableSceneNode extends SceneNode
     * should allow enough time for changes to propagate.
     */
    public static final double OPERATOR_FREEZE_TIME = 1.0;
-
-   private boolean currentlyDetected;
-   /**
-    * We allow the operator to override the pose of a detectable scene node.
-    * This keeps the node in the reference frame tree but keeps the node pinned
-    * with respect to world frame.
-    */
-   private boolean isPoseOverriddenByOperator = false;
-   private final FramePose3D storedOverriddenPose = new FramePose3D();
    /**
     * This timer is used in the case that an operator can "mark modified" this node's
     * data so it won't accept updates from other sources for a short period of time.
     * This is to allow the changes to propagate elsewhere.
     */
    private final Timer modifiedTimer = new Timer();
+
+   private boolean currentlyDetected;
+   /**
+    * We allow the operator to disable tracking the detected pose.
+    */
+   private boolean trackDetectedPose = true;
+   private SceneNode optionalParentNode = null;
+   private final RigidBodyTransform originalTransformToParent = new RigidBodyTransform();
+   private transient final FramePose3D originalPose = new FramePose3D();
 
    public DetectableSceneNode(String name)
    {
@@ -51,27 +52,46 @@ public abstract class DetectableSceneNode extends SceneNode
       return currentlyDetected;
    }
 
-   public boolean getPoseOverriddenByOperator()
+   public boolean getTrackDetectedPose()
    {
-      return isPoseOverriddenByOperator;
+      return trackDetectedPose;
    }
 
-   public void setPoseOverriddenByOperator(boolean poseOverriddenByOperator)
+   public void setOriginalTransformToParent(RigidBodyTransform originalTransformToParent)
    {
-      this.isPoseOverriddenByOperator = poseOverriddenByOperator;
+      originalTransformToParent.set(originalTransformToParent);
    }
 
-   public void storeOverriddenPose()
+   public void setTrackDetectedPose(boolean trackDetectedPose)
    {
-      storedOverriddenPose.setIncludingFrame(getNodeFrame().getParent(), getNodeToParentFrameTransform());
-      storedOverriddenPose.changeFrame(ReferenceFrame.getWorldFrame()); // We need to store it in world frame
+      this.trackDetectedPose = trackDetectedPose;
+
+      if (optionalParentNode != null)
+      {
+         if (trackDetectedPose && optionalParentNode.getNodeFrame() != getNodeFrame().getParent())
+         {
+            changeParentFrameWithoutMoving(optionalParentNode.getNodeFrame());
+         }
+         else if (!trackDetectedPose && getNodeFrame().getParent() != ReferenceFrame.getWorldFrame())
+         {
+            changeParentFrameWithoutMoving(ReferenceFrame.getWorldFrame());
+         }
+      }
    }
 
-   public void restoreOverriddenPose()
+   public void clearOffset()
    {
-      // At this point the node frame parent has presumably moved, so let's go back to that frame.
-      storedOverriddenPose.changeFrame(getNodeFrame().getParent());
-      storedOverriddenPose.get(getNodeToParentFrameTransform());
+      if (optionalParentNode != null && optionalParentNode.getNodeFrame() != getNodeFrame().getParent())
+      {
+         originalPose.setToZero(optionalParentNode.getNodeFrame());
+         originalPose.set(originalTransformToParent);
+         originalPose.changeFrame(getNodeFrame().getParent());
+         originalPose.get(getNodeToParentFrameTransform());
+      }
+      else
+      {
+         getNodeToParentFrameTransform().set(originalTransformToParent);
+      }
       getNodeFrame().update();
    }
 
@@ -83,5 +103,15 @@ public abstract class DetectableSceneNode extends SceneNode
    public boolean operatorHasntTouchedThingsInABit()
    {
       return !modifiedTimer.isRunning(OPERATOR_FREEZE_TIME);
+   }
+
+   public void setOptionalParentNode(SceneNode sceneNode)
+   {
+      optionalParentNode = sceneNode;
+   }
+
+   public SceneNode getOptionalParentNode()
+   {
+      return optionalParentNode;
    }
 }
