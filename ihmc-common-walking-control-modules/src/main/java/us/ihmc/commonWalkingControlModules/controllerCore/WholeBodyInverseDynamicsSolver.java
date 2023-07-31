@@ -168,14 +168,17 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
       yoResidualRootJointTorque = toolbox.getYoResidualRootJointTorque();
 
       TObjectDoubleHashMap<String> jointPowerLimits = toolbox.getOptimizationSettings().getJointPowerLimits();
-      jointPowerLimits.forEachKey(jointName ->
+      if (jointPowerLimits != null)
       {
-         double powerLimit = jointPowerLimits.get(jointName);
-         YoDouble powerConstraint = new YoDouble("powerLimit_" + jointName, registry);
-         powerConstraint.set(powerLimit);
-         powerConstrainedJointLimits.put(jointName, powerLimit);
-         return true;
-      });
+         jointPowerLimits.forEachKey(jointName ->
+         {
+            double powerLimit = jointPowerLimits.get(jointName);
+            YoDouble powerConstraint = new YoDouble("powerLimit_" + jointName, registry);
+            powerConstraint.set(powerLimit);
+            powerConstrainedJointLimits.put(jointName, powerLimit);
+            return true;
+         });
+      }
 
       minimizeJointTorques = new YoBoolean("minimizeJointTorques", registry);
       minimizeJointTorques.set(toolbox.getOptimizationSettings().areJointTorquesMinimized());
