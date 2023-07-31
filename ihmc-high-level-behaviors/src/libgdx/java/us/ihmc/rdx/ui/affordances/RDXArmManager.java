@@ -115,8 +115,6 @@ public class RDXArmManager
             panelHandWrenchIndicator.renderImGuiOverlay();
       });
 
-      baseUI.getPrimary3DPanel().addImGuiOverlayAddition(panelHandWrenchIndicator::renderImGuiOverlay);
-
       handManager.create(baseUI, communicationHelper, syncedRobot);
    }
 
