@@ -70,7 +70,7 @@ public class MultiStepWithHeuristicsTest
                                                                                                              false,
                                                                                                              registry,
                                                                                                              null);
-      MultiStepCaptureRegionCalculator mutliStepCalculator = new MultiStepCaptureRegionCalculator(soleZUpFrames, reachabilityConstraint, () -> false, registry);
+      MultiStepCaptureRegionCalculator mutliStepCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraint, () -> false, registry);
       ((YoDouble) registry.findVariable("distanceIntoCaptureRegionForInside")).set(0.05);
       ((YoDouble) registry.findVariable("distanceIntoCaptureRegionForEverywhere")).set(0.02);
       ((YoDouble) registry.findVariable("extraDistanceToStepFromStanceFoot")).set(0.05);
