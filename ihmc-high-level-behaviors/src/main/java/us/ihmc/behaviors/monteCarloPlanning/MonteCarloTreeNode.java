@@ -11,14 +11,16 @@ public class MonteCarloTreeNode
    private MonteCarloTreeNode parent;
    private ArrayList<MonteCarloTreeNode> children;
 
+   private int id = 0;
    private float upperConfidenceBound = 0;
    private int visits = 0;
    private float value = 0;
 
    float exploration_weight = 2.0f;
 
-   public MonteCarloTreeNode(Point2D state, MonteCarloTreeNode parent)
+   public MonteCarloTreeNode(Point2D state, MonteCarloTreeNode parent, int id)
    {
+      this.id = id;
       this.parent = parent;
       this.agent = new Agent(state);
       children = new ArrayList<>();
@@ -83,6 +85,11 @@ public class MonteCarloTreeNode
    public MonteCarloTreeNode getParent()
    {
       return parent;
+   }
+
+   public int getId()
+   {
+      return id;
    }
 
 }

@@ -3,30 +3,40 @@ package us.ihmc.behaviors.monteCarloPlanning;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple4D.Vector4D32;
+import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 
 public class MonteCarloPlanner
 {
-   private int searchIterations;
-   private int simulationIterations;
+   private int searchIterations = 10;
+   private int simulationIterations = 10;
+   private int uniqueNodeId = 0;
 
    private World world;
    private Agent agent;
    private MonteCarloTreeNode root;
 
-   public MonteCarloPlanner(World world, Agent agent, int searchIterations, int simulationIterations)
-   {
-      this.world = world;
-      this.agent = agent;
-      this.searchIterations = searchIterations;
-      this.simulationIterations = simulationIterations;
+   int worldHeight = 100;
+   int worldWidth = 100;
+   int goalMargin = 5;
 
-      root = new MonteCarloTreeNode(agent.getPosition(), null);
+   private final Point2D agentPos = new Point2D(10, 10);
+   private final Point2D goal = new Point2D(10, worldHeight - 10);
+
+   public MonteCarloPlanner()
+   {
+      this.world = new World(new ArrayList<>(), goal, goalMargin, worldHeight, worldWidth);
+      this.agent = new Agent(agentPos);
+
+      root = new MonteCarloTreeNode(agent.getPosition(), null, uniqueNodeId++);
    }
 
    public Point2D plan()
    {
+      if (root == null)
+         return agent.getPosition();
+
       for (int i = 0; i < searchIterations; i++)
       {
          updateTree(root);
@@ -34,6 +44,10 @@ public class MonteCarloPlanner
 
       float bestScore = 0;
       MonteCarloTreeNode bestNode = null;
+
+      if (root.getChildren().size() == 0)
+         LogTools.warn("No Children Nodes Found");
+
       for (MonteCarloTreeNode node : root.getChildren())
       {
          node.updateUpperConfidenceBound();
@@ -45,6 +59,14 @@ public class MonteCarloPlanner
       }
 
       root = bestNode;
+
+      LogTools.info("Total Nodes in Tree: " + MonteCarloPlannerTools.getTotalNodes(root));
+
+      if (bestNode == null)
+         return agent.getPosition();
+
+      updateWorld(bestNode.getAgentState().getPosition());
+      updateAgent(bestNode.getAgentState().getPosition());
 
       return bestNode.getAgentState().getPosition();
    }
@@ -68,7 +90,7 @@ public class MonteCarloPlanner
          for (MonteCarloTreeNode child : node.getChildren())
          {
             child.updateUpperConfidenceBound();
-            if (child.getUpperConfidenceBound() > bestScore)
+            if (child.getUpperConfidenceBound() >= bestScore)
             {
                bestScore = child.getUpperConfidenceBound();
                bestNode = child;
@@ -78,6 +100,16 @@ public class MonteCarloPlanner
       }
    }
 
+   public void updateWorld(Point2D newState)
+   {
+      world.updateGrid(newState, agent.getRangeScanner().getMaxRange());
+   }
+
+   public void updateAgent(Point2D newState)
+   {
+      agent.updateState(newState);
+   }
+
    public MonteCarloTreeNode expand(MonteCarloTreeNode node)
    {
       ArrayList<Vector2D> availableActions = getAvailableActions(node);
@@ -85,7 +117,7 @@ public class MonteCarloPlanner
       for (Vector2D action : availableActions)
       {
          Point2D newState = computeActionResult(node.getAgentState().getPosition(), action);
-         MonteCarloTreeNode postNode = new MonteCarloTreeNode(newState, node);
+         MonteCarloTreeNode postNode = new MonteCarloTreeNode(newState, node, uniqueNodeId++);
 
          node.getChildren().add(postNode);
       }
@@ -111,7 +143,6 @@ public class MonteCarloPlanner
       }
 
       return availableActions;
-
    }
 
    public float simulate(MonteCarloTreeNode node)
@@ -219,4 +250,26 @@ public class MonteCarloPlanner
 
       return position.getX() >= 0 && position.getX() < gridWidth && position.getY() >= 0 && position.getY() < gridWidth;
    }
+
+   public void addObstacles(ArrayList<Vector4D32> obstacles)
+   {
+      this.world.getObstacles().addAll(obstacles);
+   }
+
+   public void collectObservations()
+   {
+      agent.measure(world.getObstacles());
+   }
+
+   public Agent getAgent()
+   {
+      return agent;
+   }
+
+   public World getWorld()
+   {
+      return world;
+   }
+
+
 }
