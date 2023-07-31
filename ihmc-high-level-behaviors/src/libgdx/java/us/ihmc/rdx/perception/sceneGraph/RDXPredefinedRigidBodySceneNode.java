@@ -9,7 +9,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
-import us.ihmc.perception.sceneGraph.rigidBodies.StaticArUcoRelativeDetectableSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiEnumPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -71,6 +71,10 @@ public class RDXPredefinedRigidBodySceneNode
                                                     {
                                                        overridePoseGizmo.getSelected().set(true);
                                                     }
+                                                    else if (sceneNode instanceof StaticRelativeSceneNode staticRelativeNode)
+                                                    {
+                                                       // TODO
+                                                    }
                                                     else
                                                     {
                                                        sceneNode.getNodeToParentFrameTransform().set(originalTransformToParent);
@@ -91,6 +95,7 @@ public class RDXPredefinedRigidBodySceneNode
       showing = sceneNode.getCurrentlyDetected() || sceneNode.getPoseOverriddenByOperator();
 
       referenceFrameGraphic.setToReferenceFrame(sceneNode.getNodeFrame());
+      ensureGizmoFrameIsSceneNodeFrame();
       if (!showing || !sceneNode.getPoseOverriddenByOperator())
          overridePoseGizmo.getSelected().set(false);
 
@@ -113,25 +118,30 @@ public class RDXPredefinedRigidBodySceneNode
       currentlyDetectedPlot.render(currentlyDetected ? 1 : 0, currentlyDetected ? "CURRENTLY DETECTED" : "NOT DETECTED");
 
       overridePoseWrapper.renderImGuiWidget();
-      if (overridePoseWrapper.changed() && sceneNode.getPoseOverriddenByOperator()) // Convenience
-         overridePoseGizmo.getSelected().set(true);
       ImGui.sameLine();
       ImGui.beginDisabled(!showing || !sceneNode.getPoseOverriddenByOperator());
       ImGui.checkbox(labels.get("Use gizmo"), overridePoseGizmo.getSelected());
       ImGui.endDisabled();
-      if (sceneNode instanceof StaticArUcoRelativeDetectableSceneNode staticRelativeNode)
+      if (sceneNode instanceof StaticRelativeSceneNode staticRelativeNode)
       {
          ImGui.sameLine();
-         ImGui.beginDisabled(!staticRelativeNode.getPoseIsLockedIn());
+         ImGui.beginDisabled(!staticRelativeNode.getPoseIsStatic());
          if (ImGui.button(labels.get("Unlock pose")))
          {
-            staticRelativeNode.unlockPose();
+            staticRelativeNode.invalidatePose();
+            ensureGizmoFrameIsSceneNodeFrame();
             sceneNode.markModifiedByOperator();
          }
          ImGui.endDisabled();
       }
 
       ImGui.separator();
+   }
+
+   private void ensureGizmoFrameIsSceneNodeFrame()
+   {
+      if (overridePoseGizmo.getPoseGizmo().getGizmoFrame() != sceneNode.getNodeFrame())
+         overridePoseGizmo.getPoseGizmo().setGizmoFrame(sceneNode.getNodeFrame());
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
