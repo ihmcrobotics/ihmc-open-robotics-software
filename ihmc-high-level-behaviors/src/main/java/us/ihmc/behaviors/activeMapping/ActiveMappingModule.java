@@ -3,7 +3,9 @@ package us.ihmc.behaviors.activeMapping;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.behaviors.monteCarloPlanning.Agent;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanner;
+import us.ihmc.behaviors.monteCarloPlanning.World;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -58,11 +60,25 @@ public class ActiveMappingModule
    private int gridSize = 20;
    private float gridResolution = 0.3f;
 
+   int goalMargin = 5;
+   int scale = 2;
+   int worldHeight = 100;
+   int worldWidth = 100;
+
+   int iterations = 10;
+   int simulationCount = 10;
+
+   private final Point2D agentPos = new Point2D(10, 10);
+   private final Point2D goal = new Point2D(10, worldHeight - 10);
+
    public ActiveMappingModule(DRCRobotModel robotModel, HumanoidReferenceFrames humanoidReferenceFrames)
    {
       this.referenceFrames = humanoidReferenceFrames;
       this.planarRegionMap = new PlanarRegionMap(true);
       this.robotModel = robotModel;
+
+
+      monteCarloPlanner = new MonteCarloPlanner();
 
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
 

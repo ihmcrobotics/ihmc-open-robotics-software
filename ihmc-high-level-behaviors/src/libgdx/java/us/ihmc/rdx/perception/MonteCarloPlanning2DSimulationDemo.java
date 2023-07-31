@@ -20,13 +20,6 @@ class MonteCarloPlanning2DSimulationDemo
 {
    public static void main(String[] args)
    {
-      int scale = 2;
-      int worldHeight = 100;
-      int worldWidth = 100;
-
-      int iterations = 10;
-      int simulationCount = 10;
-
       ArrayList<Vector4D32> obstacles = new ArrayList<>();
 
       obstacles.add(new Vector4D32(10, 20, 5, 5));
@@ -34,7 +27,6 @@ class MonteCarloPlanning2DSimulationDemo
       obstacles.add(new Vector4D32(70, 82, 10, 8));
       obstacles.add(new Vector4D32(90, 43, 3, 3));
       obstacles.add(new Vector4D32(20, 34, 6, 6));
-
 
       //obstacles.add(new Vector4D32(30, 10, 1, 10));
       //obstacles.add(new Vector4D32(30, 28, 1, 2));
@@ -46,25 +38,19 @@ class MonteCarloPlanning2DSimulationDemo
       //obstacles.add(new Vector4D32(30, 80, 30, 1));
       //obstacles.add(new Vector4D32(75, 80, 5, 1));
 
-      Point2D agentPos = new Point2D(10, 10);
-      Point2D goal = new Point2D(10, worldHeight - 10);
-      int goalMargin = 5;
-
-      Agent agent = new Agent(agentPos);
-      World world = new World(obstacles, goal, goalMargin, worldHeight, worldWidth);
-      MonteCarloPlanner planner = new MonteCarloPlanner(world, agent, iterations, simulationCount);
+      MonteCarloPlanner planner = new MonteCarloPlanner();
+      planner.addObstacles(obstacles);
 
       int screenSize = 1400;
       boolean running = true;
       int i = 0;
       while (running)
       {
-         agent.measure(world.getObstacles());
-         plotWorldCV(world, agent, screenSize);
+         planner.collectObservations();
+
+         plotWorldCV(planner.getWorld(), planner.getAgent(), screenSize);
 
          Point2D newState = planner.plan();
-         agent.updateState(newState);
-         world.updateGrid(newState, agent.getRangeScanner().getMaxRange());
 
          i += 1;
       }
