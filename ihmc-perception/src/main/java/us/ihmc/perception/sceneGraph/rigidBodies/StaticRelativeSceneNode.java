@@ -14,6 +14,8 @@ import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
  *
  * The whole point of this is so we don't have to put markers on everything,
  * especially things that don't move.
+ *
+ * TODO: Remove poseIsStatic and use "Track detected pose" built into parent.
  */
 public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
 {
