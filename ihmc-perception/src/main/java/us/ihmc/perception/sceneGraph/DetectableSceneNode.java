@@ -62,6 +62,12 @@ public abstract class DetectableSceneNode extends SceneNode
       this.originalTransformToParent.set(originalTransformToParent);
    }
 
+   /**
+    * Sets whether this node is tracking the detected pose.
+    * This works by detaching or reattaching this node to/from it's parent
+    * reference frame. Warning: ReferenceFrames have immutable parent reference,
+    * so the reference frame representing this node will get recreated.
+    */
    public void setTrackDetectedPose(boolean trackDetectedPose)
    {
       this.trackDetectedPose = trackDetectedPose;
@@ -79,6 +85,10 @@ public abstract class DetectableSceneNode extends SceneNode
       }
    }
 
+   /**
+    * This sets the transform to the parent node back to the original one.
+    * This is robust to whether or not this node is currently tracking the detected pose.
+    */
    public void clearOffset()
    {
       if (optionalParentNode != null && optionalParentNode.getNodeFrame() != getNodeFrame().getParent())
