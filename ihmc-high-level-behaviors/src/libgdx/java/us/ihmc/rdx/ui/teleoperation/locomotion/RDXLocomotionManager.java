@@ -286,6 +286,14 @@ public class RDXLocomotionManager
       swingTimeSlider.renderImGuiWidget();
       transferTimeSlider.renderImGuiWidget();
 
+
+      if (ImGui.button(labels.get("Disable Leg Mode")))
+      {
+         legControlMode = RDXLegControlMode.DISABLED;
+      }
+      ImGui.sameLine();
+      ImGui.text("Leg Mode: " + legControlMode.name());
+
       ImGui.text("Walking Options:");
       ImGui.sameLine();
 
@@ -320,27 +328,6 @@ public class RDXLocomotionManager
       }
       ImGuiTools.previousWidgetTooltip("Keybind: Space");
       ImGui.endDisabled();
-
-      ImGui.text("Leg control mode: " + legControlMode.name());
-      if (ImGui.radioButton(labels.get("Disabled"), legControlMode == RDXLegControlMode.DISABLED))
-      {
-         legControlMode = RDXLegControlMode.DISABLED;
-      }
-      ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Manual foostep placement"), legControlMode == RDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT))
-      {
-         legControlMode = RDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT;
-      }
-      if (ImGui.radioButton(labels.get("Path control ring"), legControlMode == RDXLegControlMode.PATH_CONTROL_RING))
-      {
-         legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
-         walkPathControlRing.becomeModified(true);
-      }
-      ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Single support foot posing"), legControlMode == RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING))
-      {
-         legControlMode = RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING;
-      }
 
       manualFootstepPlacement.renderImGuiWidgets();
 

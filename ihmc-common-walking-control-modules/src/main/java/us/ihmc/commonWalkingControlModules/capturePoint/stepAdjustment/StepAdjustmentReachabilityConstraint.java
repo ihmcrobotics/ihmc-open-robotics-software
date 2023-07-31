@@ -170,7 +170,7 @@ public class StepAdjustmentReachabilityConstraint implements SCS2YoGraphicHolder
     *
     * @param  supportSide the current support side of the robot
     */
-   public FrameConvexPolygon2DReadOnly initializeReachabilityConstraint(RobotSide supportSide, FramePose3DReadOnly footstepPose)
+   public FrameConvexPolygon2DReadOnly initializeReachabilityConstraint(RobotSide supportSide)
    {
       reachabilityPolygon.setMatchingFrame(updateReachabilityPolygon(supportSide), false);
       forwardCrossOverReachability.setMatchingFrame(updateForwardCrossOverPolygon(supportSide), false);
@@ -237,7 +237,7 @@ public class StepAdjustmentReachabilityConstraint implements SCS2YoGraphicHolder
    {
       YoFrameConvexPolygon2D forwardPolygon = forwardReachabilityPolygons.get(supportSide);
 
-      double forwardInnerRadius = inPlaceWidth.getValue() + forwardCrossOverDistance.getValue();
+      double forwardInnerRadius = (inPlaceWidth.getValue() + forwardCrossOverDistance.getValue()) / Math.cos(forwardCrossOverClearanceAngle.getValue());
       double outerRadius = outerLimit.getValue() - inPlaceWidth.getValue();
 
       forwardPolygon.clear();
@@ -271,7 +271,7 @@ public class StepAdjustmentReachabilityConstraint implements SCS2YoGraphicHolder
    {
       YoFrameConvexPolygon2D backwardPolygon = backwardReachabilityPolygons.get(supportSide);
 
-      double backwardInnerRadius = inPlaceWidth.getValue() + backwardCrossOverDistance.getValue();
+      double backwardInnerRadius = (inPlaceWidth.getValue() + backwardCrossOverDistance.getValue()) / Math.cos(backwardCrossOverClearanceAngle.getValue());
       double outerRadius = outerLimit.getValue() - inPlaceWidth.getValue();
 
       backwardPolygon.clear();
