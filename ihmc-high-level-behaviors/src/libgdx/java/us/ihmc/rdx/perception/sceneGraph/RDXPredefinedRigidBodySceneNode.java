@@ -9,7 +9,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
-import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiEnumPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -130,31 +129,5 @@ public class RDXPredefinedRigidBodySceneNode
          if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
             referenceFrameGraphic.getRenderables(renderables, pool);
       }
-   }
-
-   public void setShowing(boolean showing)
-   {
-      this.showing = showing;
-   }
-
-   public RigidBodyTransform getTransformToParent()
-   {
-      return sceneNode.getNodeToParentFrameTransform();
-   }
-
-   public void setTransformToParent(RigidBodyTransform transform)
-   {
-      sceneNode.getNodeToParentFrameTransform().set(transform);
-      sceneNode.getNodeFrame().update();
-   }
-
-   public ReferenceFrame getReferenceFrame()
-   {
-      return sceneNode.getNodeFrame();
-   }
-
-   public PredefinedRigidBodySceneNode getSceneNode()
-   {
-      return sceneNode;
    }
 }
