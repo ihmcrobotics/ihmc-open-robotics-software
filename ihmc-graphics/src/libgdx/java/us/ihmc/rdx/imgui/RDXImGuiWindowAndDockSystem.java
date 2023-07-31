@@ -213,17 +213,18 @@ public class RDXImGuiWindowAndDockSystem
       {
          String settingsINIAsString = ResourceTools.readResourceToString(inputStream);
          ImGuiTools.parsePrimaryWindowSizeFromSettingsINI(settingsINIAsString, calculatedPrimaryWindowSize);
-         calculatedPrimaryWindowSize.setWidth(calculatedPrimaryWindowSize.getWidth() + getFrameSizeLeft() + getFrameSizeRight());
-         calculatedPrimaryWindowSize.setHeight(calculatedPrimaryWindowSize.getHeight() + getFrameSizeTop() + getFrameSizeBottom()
-                                               + 22); // Menu bar height
+         int widthFromINI = calculatedPrimaryWindowSize.getWidth();
+         int heightFromINI = calculatedPrimaryWindowSize.getHeight();
+         int frameSizeLeft = getFrameSizeLeft();
+         int frameSizeTop = getFrameSizeTop();
+         int menuBarHeight = 22; // TODO: Get this from ImGui somehow
+         calculatedPrimaryWindowSize.setWidth(widthFromINI + frameSizeLeft + getFrameSizeRight());
+         calculatedPrimaryWindowSize.setHeight(heightFromINI + frameSizeTop + getFrameSizeBottom() + menuBarHeight);
          ImGuiTools.parsePrimaryWindowPositionFromSettingsINI(settingsINIAsString, primaryWindowPosition);
-         primaryWindowPosition.setX(primaryWindowPosition.getX() - getFrameSizeLeft());
-         primaryWindowPosition.setY(primaryWindowPosition.getY() - getFrameSizeTop() - 22);
-         LogTools.debug(String.format("Calculated x: %d y: %d, width: %d, height: %d",
-                                      primaryWindowPosition.getX(),
-                                      primaryWindowPosition.getY(),
-                                      calculatedPrimaryWindowSize.getWidth(),
-                                      calculatedPrimaryWindowSize.getHeight()));
+         int loadedX = primaryWindowPosition.getX();
+         int loadedY = primaryWindowPosition.getY();
+         primaryWindowPosition.setX(loadedX - frameSizeLeft);
+         primaryWindowPosition.setY(loadedY - frameSizeTop - menuBarHeight);
          ImGui.loadIniSettingsFromMemory(settingsINIAsString);
       });
 

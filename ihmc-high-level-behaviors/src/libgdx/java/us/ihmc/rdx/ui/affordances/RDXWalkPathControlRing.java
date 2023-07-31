@@ -21,9 +21,11 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePathControlRingGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 
@@ -63,6 +65,9 @@ public class RDXWalkPathControlRing
       rightGoalFootstepGraphic.create();
 
       halfIdealFootstepWidth = footstepPlannerParameters.getIdealFootstepWidth() / 2.0;
+
+      RDXBaseUI.getInstance().getKeyBindings().register("Deleted selected control ring", "Delete");
+      RDXBaseUI.getInstance().getKeyBindings().register("Unselect control ring", "Escape");
    }
 
    public void update()
@@ -74,6 +79,22 @@ public class RDXWalkPathControlRing
       else
       {
          updateStuff();
+      }
+   }
+
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+      footstepPlannerGoalGizmo.calculateVRPick(vrContext);
+   }
+
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      footstepPlannerGoalGizmo.processVRInput(vrContext);
+      boolean selected = footstepPlannerGoalGizmo.getSelected();
+
+      if (selected)
+      {
+         becomeModified(true);
       }
    }
 
@@ -237,5 +258,10 @@ public class RDXWalkPathControlRing
    public Pose3DReadOnly getGoalPose()
    {
       return footstepPlannerGoalGizmo.getPathControlRingGizmo().getPose3D();
+   }
+
+   public RDXSelectablePathControlRingGizmo getFootstepPlannerGoalGizmo()
+   {
+      return footstepPlannerGoalGizmo;
    }
 }

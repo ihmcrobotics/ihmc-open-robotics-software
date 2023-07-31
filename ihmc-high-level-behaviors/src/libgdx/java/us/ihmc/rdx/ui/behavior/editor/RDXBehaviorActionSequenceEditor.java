@@ -28,6 +28,7 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.behavior.editor.actions.*;
+import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -198,6 +199,17 @@ public class RDXBehaviorActionSequenceEditor
       }
    }
 
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+      for (var action : actionSequence)
+         action.calculateVRPick(vrContext);
+   }
+
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      for (var action : actionSequence)
+         action.processVRInput(vrContext);
+   }
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
       for (var action : actionSequence)
