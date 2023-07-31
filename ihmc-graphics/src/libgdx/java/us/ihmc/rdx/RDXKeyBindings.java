@@ -143,7 +143,7 @@ public class RDXKeyBindings
 
             if (forceActive)
             {
-               ImGui.setKeyboardFocusHere(1);
+               ImGui.setKeyboardFocusHere(0);
             }
 
             if (ImGui.inputText("Search", filter))
@@ -151,7 +151,7 @@ public class RDXKeyBindings
                filterInputActive = true;
             }
 
-            filterInputActive = ImGui.isItemFocused();
+            filterInputActive = ImGui.isItemFocused() || forceActive;
 
             if (!filterInputActive)
                filter.set("");
