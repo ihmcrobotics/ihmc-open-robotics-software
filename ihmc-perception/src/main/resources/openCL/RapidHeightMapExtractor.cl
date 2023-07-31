@@ -97,7 +97,7 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
   float3 centroid;
 
   float averageHeightZ = 0;
-  float3 cellCenterInWorld = (float3) (0.0f, 0.0f, -2.0f);
+  float3 cellCenterInWorld = (float3) (0.0f, 0.0f, 0.0f);
   cellCenterInWorld.xy = indices_to_coordinate((int2) (xIndex, yIndex),
                                                (float2) (0, 0), // params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]
                                                params[HEIGHT_MAP_RESOLUTION],
@@ -106,6 +106,7 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
   cellCenterInWorld.x += 1.5f;
 
    int WINDOW_WIDTH = 20;
+   int WINDOW_HEIGHT = 40;
 
    float halfCellWidth = params[HEIGHT_MAP_RESOLUTION] / 2.0f;
    float minX = cellCenterInWorld.x - halfCellWidth;
@@ -144,7 +145,7 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
 
   int count = 0;
 
-  for (int pitch_count_offset = -WINDOW_WIDTH / 2; pitch_count_offset < WINDOW_WIDTH / 2 + 1; pitch_count_offset++)
+  for (int pitch_count_offset = -WINDOW_HEIGHT / 2; pitch_count_offset < WINDOW_HEIGHT / 2 + 1; pitch_count_offset++)
   {
     for (int yaw_count_offset = -WINDOW_WIDTH / 2; yaw_count_offset < WINDOW_WIDTH / 2 + 1; yaw_count_offset++)
     {
@@ -178,10 +179,12 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
          //   yaw_count, pitch_count, radius, queryPointInSensor.x, queryPointInSensor.y, queryPointInSensor.z, minX, maxX, minY, maxY);
 
 
-//            printf("World Point: (%f, %f, %f), Sensor Point (Z-fwd): (%f, %f, %f) -> Image Point: (%d, %d)\n",
-//            cellCenterInWorld.x, cellCenterInWorld.y, cellCenterInWorld.z, cellCenterInSensor.x, cellCenterInSensor.y, cellCenterInSensor.z, projectedPoint.x, projectedPoint.y);
+         //printf("xIndex: %d, yIndex: %d \tWorld Point: (%f, %f, %f), Sensor Point (Z-fwd): (%f, %f, %f) -> Image Point: (%d, %d)\n", xIndex, yIndex,
+         //      cellCenterInWorld.x, cellCenterInWorld.y, cellCenterInWorld.z,
+         //      cellCenterInSensor.x, cellCenterInSensor.y, cellCenterInSensor.z,
+         //      projectedPoint.x, projectedPoint.y);
 
-        //if (queryPointInWorld.x > minX && queryPointInWorld.x < maxX && queryPointInWorld.y > minY && queryPointInWorld.y < maxY)
+        if (queryPointInWorld.x > minX && queryPointInWorld.x < maxX && queryPointInWorld.y > minY && queryPointInWorld.y < maxY)
         {
          //printf("HIT......: (%f, %f, %f), minX: %f, maxX: %f, minY: %f, maxY: %f\n", queryPointInWorld.x, queryPointInWorld.y, queryPointInWorld.z, minX, maxX, minY, maxY);
            count++;

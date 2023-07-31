@@ -142,7 +142,7 @@ public class RDXRapidHeightMapExtractionDemo
             loadedDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
 
             rapidHeightMapUpdater.setDepthIntrinsics(654.29,654.29,651.14,361.89);
-            rapidHeightMapUpdater.setHeightMapResolution(3.0f, 0.01f);
+            rapidHeightMapUpdater.setHeightMapResolution(3.0f, 0.1f);
             rapidHeightMapUpdater.create(openCLManager, loadedDepthImage, 1);
             heightMapRenderer.create(rapidHeightMapUpdater.getCellsPerAxis() * rapidHeightMapUpdater.getCellsPerAxis());
          }
@@ -224,6 +224,8 @@ public class RDXRapidHeightMapExtractionDemo
             sensorToGround.getTranslation().setX(0.0f);
             sensorToGround.getTranslation().setY(0.0f);
             sensorToGround.getRotation().set(new Quaternion(0.0f, sensorToGround.getRotation().getPitch(), sensorToGround.getRotation().getRoll()));
+
+            LogTools.info("Sensor to Ground: " + sensorToGround);
 
             // Point3D euler = new Point3D();
             // sensorOrientationBuffer.get(frameIndex.get()).getEuler(euler);
