@@ -13,7 +13,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
-import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 
 import java.util.List;
 
@@ -85,12 +84,7 @@ public class ROS2DetectableSceneNodesSubscription
                // On the robot side, this will always get updated because there is no operator.
                if (detectableSceneNode.operatorHasntTouchedThingsInABit())
                {
-                  detectableSceneNode.setPoseOverriddenByOperator(detectableSceneNodeMessage.getIsPoseOverriddenByOperator());
-
-                  if (detectableSceneNode instanceof StaticRelativeSceneNode staticRelativeNode)
-                  {
-                     staticRelativeNode.setPoseIsStatic(detectableSceneNodeMessage.getIsStaticRelativePoseLockedIn());
-                  }
+                  detectableSceneNode.setTrackDetectedPose(detectableSceneNodeMessage.getTrackDetectedPose());
                }
 
                // Wait until we haven't touched things for a second to accept and update to it.

@@ -15,7 +15,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "8d086371bbe100b021c962acda1da30cf09d04674632c885932120efbff7d5e8";
+   		return "adf2d7d78a110bbc49100f61c6d3cb5ea63ab07ad38400385043e2c65fee3521";
    }
    
    @Override
@@ -61,8 +61,6 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
       return current_alignment - initial_alignment;
    }
@@ -88,9 +86,6 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
 
       return current_alignment - initial_alignment;
    }
@@ -105,9 +100,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToWorld(), cdr);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getArucoMarkerTransformToWorld(), cdr);
-      cdr.write_type_7(data.getIsPoseOverriddenByOperator());
-
-      cdr.write_type_7(data.getIsStaticRelativePoseLockedIn());
+      cdr.write_type_7(data.getTrackDetectedPose());
 
    }
 
@@ -118,9 +111,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
       	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToWorld(), cdr);	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getArucoMarkerTransformToWorld(), cdr);	
-      data.setIsPoseOverriddenByOperator(cdr.read_type_7());
-      	
-      data.setIsStaticRelativePoseLockedIn(cdr.read_type_7());
+      data.setTrackDetectedPose(cdr.read_type_7());
       	
 
    }
@@ -134,8 +125,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
 
       ser.write_type_a("aruco_marker_transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getArucoMarkerTransformToWorld());
 
-      ser.write_type_7("is_pose_overridden_by_operator", data.getIsPoseOverriddenByOperator());
-      ser.write_type_7("is_static_relative_pose_locked_in", data.getIsStaticRelativePoseLockedIn());
+      ser.write_type_7("track_detected_pose", data.getTrackDetectedPose());
    }
 
    @Override
@@ -147,8 +137,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
 
       ser.read_type_a("aruco_marker_transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getArucoMarkerTransformToWorld());
 
-      data.setIsPoseOverriddenByOperator(ser.read_type_7("is_pose_overridden_by_operator"));
-      data.setIsStaticRelativePoseLockedIn(ser.read_type_7("is_static_relative_pose_locked_in"));
+      data.setTrackDetectedPose(ser.read_type_7("track_detected_pose"));
    }
 
    public static void staticCopy(perception_msgs.msg.dds.DetectableSceneNodeMessage src, perception_msgs.msg.dds.DetectableSceneNodeMessage dest)
