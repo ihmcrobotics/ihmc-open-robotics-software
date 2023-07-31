@@ -11,6 +11,7 @@ import us.ihmc.behaviors.sequence.BehaviorActionData;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.vr.RDXVRContext;
 
 /**
  * The UI representation of a robot behavior action. It provides a base
@@ -39,6 +40,16 @@ public abstract class RDXBehaviorAction
    }
 
    public void updateAfterLoading()
+   {
+
+   }
+
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+
+   }
+
+   public void processVRInput(RDXVRContext vrContext)
    {
 
    }

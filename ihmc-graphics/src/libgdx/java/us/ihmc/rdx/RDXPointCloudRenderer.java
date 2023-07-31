@@ -59,11 +59,13 @@ public class RDXPointCloudRenderer implements RenderableProvider
 
    public interface ColorProvider
    {
-      public float getNextR();
+      float getNextR();
 
-      public float getNextG();
+      float getNextG();
 
-      public float getNextB();
+      float getNextB();
+
+      float getNextA();
    }
 
    public void create(int size)
@@ -402,6 +404,12 @@ public class RDXPointCloudRenderer implements RenderableProvider
          {
             return Color.WHITE.b;
          }
+
+         @Override
+         public float getNextA()
+         {
+            return Color.WHITE.a;
+         }
       });
    }
 
@@ -425,6 +433,12 @@ public class RDXPointCloudRenderer implements RenderableProvider
          public float getNextB()
          {
             return color.b;
+         }
+
+         @Override
+         public float getNextA()
+         {
+            return color.a;
          }
       });
    }
