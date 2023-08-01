@@ -87,7 +87,7 @@ public class RDXActiveMappingUI implements RenderableProvider
          if (ImGui.button("Calculate Footstep Plan") || ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
          {
             LogTools.info("Triggered footstep plan calculation");
-            activeMappingModule.updateFootstepPlan();
+            activeMappingModule.updatePlan();
             activeMappingModule.setPlanAvailable(true);
          }
       }

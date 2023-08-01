@@ -3,9 +3,7 @@ package us.ihmc.behaviors.activeMapping;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
-import us.ihmc.behaviors.monteCarloPlanning.Agent;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanner;
-import us.ihmc.behaviors.monteCarloPlanning.World;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -93,7 +91,7 @@ public class ActiveMappingModule
       }
    }
 
-   public void updateFootstepPlan()
+   public void updatePlan()
    {
       if (active)
       {
