@@ -37,7 +37,6 @@ public class ActiveMappingRemoteProcess
 {
    private final static long STATISTICS_COLLECTION_PERIOD_MS = 500;
 
-   private final AtomicReference<FramePlanarRegionsListMessage> planarRegionsListMessage = new AtomicReference<>(null);
    private final AtomicReference<WalkingStatusMessage> walkingStatusMessage = new AtomicReference<>();
 
    private final ROS2PublisherMap publisherMap;
@@ -104,8 +103,6 @@ public class ActiveMappingRemoteProcess
    private void generalUpdate()
    {
       ros2PropertySetGroup.update();
-      syncedRobotModel.update();
-      referenceFrames.updateFrames();
       activeMappingModule.setActive(configurationParameters.getSLAMEnabled());
       //activeMappingModule.getPlanarRegionMap().printStatistics(true);
    }
@@ -155,7 +152,6 @@ public class ActiveMappingRemoteProcess
 
    public void updateActiveMappingPlan()
    {
-      LogTools.info("Updating Active Mapping Plan: " + configurationParameters.getActiveMapping());
       if (configurationParameters.getActiveMapping())
       {
          if (walkingStatusMessage.get() != null)
@@ -164,7 +160,7 @@ public class ActiveMappingRemoteProcess
 
             if (walkingStatusMessage.get().getWalkingStatus() == WalkingStatusMessage.COMPLETED && !activeMappingModule.isPlanAvailable())
             {
-               activeMappingModule.updateFootstepPlan();
+               activeMappingModule.updatePlan();
             }
          }
 

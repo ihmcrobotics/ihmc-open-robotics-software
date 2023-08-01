@@ -37,7 +37,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class HumanoidPerceptionModule
 {
-   private final AtomicReference<FramePlanarRegionsList> frameRegionsReference = new AtomicReference<>();
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
 
    private BytedecoImage bytedecoDepthImage;
@@ -195,7 +194,10 @@ public class HumanoidPerceptionModule
          throw new RuntimeException(e);
       }
 
-      rapidPlanarRegionsExtractor.destroy();
-      localizationAndMappingProcess.destroy();
+      if (rapidPlanarRegionsExtractor != null)
+         rapidPlanarRegionsExtractor.destroy();
+
+      if (localizationAndMappingProcess != null)
+         localizationAndMappingProcess.destroy();
    }
 }
