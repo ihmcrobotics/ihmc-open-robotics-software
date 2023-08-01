@@ -319,7 +319,7 @@ public class SwingState extends AbstractFootControlState
       swingTimeSpeedUpFactor.set(1.0);
       currentTimeWithSwingSpeedUp.set(Double.NaN);
       replanTrajectory.set(false);
-      footstepWasAdjusted.set(false);
+//      footstepWasAdjusted.set(false);
 
       if (workspaceLimiterControlModule != null)
       {
