@@ -33,7 +33,6 @@ import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBu
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class HumanoidPerceptionModule
 {
@@ -65,13 +64,10 @@ public class HumanoidPerceptionModule
    {
       this.robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
       this.robotConfigurationData = new RobotConfigurationData();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    RobotConfigurationData.class,
-                                                    ROS2Tools.getRobotConfigurationDataTopic(robotName),
-                                                    s ->
-                                                    {
-                                                       s.takeNextData(robotConfigurationData, null);
-                                                    });
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, ROS2Tools.getRobotConfigurationDataTopic(robotName), s ->
+      {
+         s.takeNextData(robotConfigurationData, null);
+      });
    }
 
    public void update(ROS2Helper ros2Helper, Mat depthImage, ReferenceFrame cameraFrame, boolean rapidRegionsEnabled, boolean mappingEnabled)
@@ -81,24 +77,28 @@ public class HumanoidPerceptionModule
 
       if (rapidRegionsEnabled)
       {
-         executorService.submit(() -> {
+         executorService.submit(() ->
+                                {
 
-            if (robotConfigurationData != null && robotConfigurationData.getJointNameHash() != 0)
-            {
-               robotConfigurationDataBuffer.update(robotConfigurationData);
-               long newestTimestamp = robotConfigurationDataBuffer.getNewestTimestamp();
-               long selectedTimestamp = robotConfigurationDataBuffer.updateFullRobotModel(waitIfNecessary, newestTimestamp, this.fullRobotModel, null);
-            }
+                                   if (robotConfigurationData != null && robotConfigurationData.getJointNameHash() != 0)
+                                   {
+                                      robotConfigurationDataBuffer.update(robotConfigurationData);
+                                      long newestTimestamp = robotConfigurationDataBuffer.getNewestTimestamp();
+                                      long selectedTimestamp = robotConfigurationDataBuffer.updateFullRobotModel(waitIfNecessary,
+                                                                                                                 newestTimestamp,
+                                                                                                                 this.fullRobotModel,
+                                                                                                                 null);
+                                   }
 
-            OpenCVTools.convertFloatToShort(depthImage, bytedecoDepthImage.getBytedecoOpenCVMat(),
-                                            1000.0,
-                                            0.0);
+                                   OpenCVTools.convertFloatToShort(depthImage, bytedecoDepthImage.getBytedecoOpenCVMat(), 1000.0, 0.0);
 
-            extractFramePlanarRegionsList(cameraFrame);
-            filterFramePlanarRegionsList();
+                                   extractFramePlanarRegionsList(cameraFrame);
+                                   filterFramePlanarRegionsList();
 
-            PerceptionMessageTools.publishFramePlanarRegionsList(this.sensorFrameRegions, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
-         });
+                                   PerceptionMessageTools.publishFramePlanarRegionsList(this.sensorFrameRegions,
+                                                                                        PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
+                                                                                        ros2Helper);
+                                });
       }
    }
 
@@ -109,9 +109,13 @@ public class HumanoidPerceptionModule
       this.sensorFrameRegions = new FramePlanarRegionsList();
       this.bytedecoDepthImage = new BytedecoImage(cameraIntrinsics.getWidth(), cameraIntrinsics.getHeight(), opencv_core.CV_16UC1);
       this.bytedecoDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      this.rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager, cameraIntrinsics.getHeight(), cameraIntrinsics.getWidth(),
-                                              cameraIntrinsics.getFx(), cameraIntrinsics.getFy(), cameraIntrinsics.getCx(),
-                                              cameraIntrinsics.getCy());
+      this.rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager,
+                                                                         cameraIntrinsics.getHeight(),
+                                                                         cameraIntrinsics.getWidth(),
+                                                                         cameraIntrinsics.getFx(),
+                                                                         cameraIntrinsics.getFy(),
+                                                                         cameraIntrinsics.getCx(),
+                                                                         cameraIntrinsics.getCy());
 
       this.rapidPlanarRegionsExtractor.getDebugger().setEnabled(false);
    }
@@ -127,14 +131,24 @@ public class HumanoidPerceptionModule
    public void initializeLocalizationAndMappingProcess(ROS2SyncedRobotModel syncedRobot, String robotName, ROS2Node ros2Node, boolean smoothing)
    {
       LogTools.info("Initializing Localization and Mapping Process (Smoothing: {})", smoothing);
-      localizationAndMappingProcess = new LocalizationAndMappingProcess(robotName, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
-              PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE, ros2Node, syncedRobot.getReferenceFrames(), () -> {}, smoothing);
+      localizationAndMappingProcess = new LocalizationAndMappingProcess(robotName,
+                                                                        PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
+                                                                        PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
+                                                                        ros2Node,
+                                                                        syncedRobot.getReferenceFrames(),
+                                                                        () ->
+                                                                        {
+                                                                        },
+                                                                        smoothing);
    }
 
-   public void initializeActiveMappingProcess(String robotName, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, ROS2Topic<FramePlanarRegionsListMessage> regionsTopic, ROS2Node ros2Node)
+   public void initializeActiveMappingProcess(String robotName, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, ROS2Node ros2Node)
    {
       LogTools.info("Initializing Active Mapping Process");
-      activeMappingRemoteProcess = new ActiveMappingRemoteProcess(robotName, robotModel, syncedRobot, regionsTopic, ros2Node);
+      activeMappingRemoteProcess = new ActiveMappingRemoteProcess(robotName, robotModel, syncedRobot,
+                                                                  PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
+                                                                  PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
+                                                                  ros2Node, syncedRobot.getReferenceFrames(), () -> {}, true);
    }
 
    public void extractFramePlanarRegionsList(ReferenceFrame cameraFrame)
@@ -187,10 +201,13 @@ public class HumanoidPerceptionModule
    {
       executorService.shutdownNow();
 
-      try {
+      try
+      {
          boolean result = executorService.awaitTermination(1, TimeUnit.SECONDS);
          Thread.sleep(1000);
-      } catch (InterruptedException e) {
+      }
+      catch (InterruptedException e)
+      {
          throw new RuntimeException(e);
       }
 
@@ -199,5 +216,8 @@ public class HumanoidPerceptionModule
 
       if (localizationAndMappingProcess != null)
          localizationAndMappingProcess.destroy();
+
+      if (activeMappingRemoteProcess != null)
+         activeMappingRemoteProcess.destroy();
    }
 }
