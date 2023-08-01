@@ -35,12 +35,13 @@ public class ControllerStatusTracker
    private final Vector3D lastPlanOffset = new Vector3D();
    private final Timer capturabilityBasedStatusTimer = new Timer();
    private final Timer robotConfigurationDataTimer = new Timer();
-   private volatile boolean walkingAborted = false;
    private volatile boolean isWalking = false;
    private volatile boolean isWalkingFromConfigurationData = false;
    private final Notification finishedWalkingNotification = new Notification();
    private final ArrayList<Runnable> notWalkingStateAnymoreCallbacks = new ArrayList<>();
    private final Throttler notWalkingStateAnymoreCallbackThrottler = new Throttler();
+
+   private final ArrayList<Notification> abortedListeners = new ArrayList<>();
 
    public ControllerStatusTracker(LogToolsWriteOnly statusLogger, ROS2NodeInterface ros2Node, String robotName)
    {
@@ -56,6 +57,11 @@ public class ControllerStatusTracker
       new IHMCROS2Callback<>(ros2Node, getTopic(ControllerCrashNotificationPacket.class, robotName), this::acceptControllerCrashNotificationPacket);
       new IHMCROS2Callback<>(ros2Node, getTopic(CapturabilityBasedStatus.class, robotName), this::acceptCapturabilityBasedStatus);
       new IHMCROS2Callback<>(ros2Node, getTopic(WalkingStatusMessage.class, robotName), this::acceptWalkingStatusMessage);
+   }
+
+   public void registerAbortedListener(Notification abortedListener)
+   {
+      abortedListeners.add(abortedListener);
    }
 
    // TODO: Make a "snapshot" or "view" that would hold perspective/thread sensitive data?
@@ -123,7 +129,6 @@ public class ControllerStatusTracker
 
    private void acceptWalkingStatusMessage(WalkingStatusMessage message)
    {
-      walkingAborted = false;
       isWalking = false;
 
       WalkingStatus walkingStatus = WalkingStatus.fromByte(message.getWalkingStatus());
@@ -133,7 +138,11 @@ public class ControllerStatusTracker
       }
       else if (walkingStatus == WalkingStatus.ABORT_REQUESTED)
       {
-         walkingAborted = true;
+         for (Notification abortedListener : abortedListeners)
+         {
+            abortedListener.set();
+         }
+
          footstepTracker.reset();
 
          LogTools.info("Walking Aborted.");
@@ -160,11 +169,6 @@ public class ControllerStatusTracker
    public Notification getFinishedWalkingNotification()
    {
       return finishedWalkingNotification;
-   }
-
-   public boolean getWalkingAborted()
-   {
-      return walkingAborted;
    }
 
    public boolean isInWalkingState()

@@ -17,6 +17,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
@@ -86,6 +87,7 @@ public class RDXLocomotionManager
    private final PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
    private final AbortWalkingMessage abortWalkingMessage = new AbortWalkingMessage();
    private final ControllerStatusTracker controllerStatusTracker;
+   public final Notification abortedNotification = new Notification();
    private boolean lastAssumeFlatGroundState;
 
    private RDXFootstepPlanning.InitialStanceSide startStanceSide = RDXFootstepPlanning.InitialStanceSide.AUTO;
@@ -153,6 +155,8 @@ public class RDXLocomotionManager
    {
       this.baseUI = baseUI;
 
+      controllerStatusTracker.registerAbortedListener(abortedNotification);
+
       locomotionParametersTuner.create(locomotionParameters);
       footstepPlanningParametersTuner.create(footstepPlannerParameters, false);
       bodyPathPlanningParametersTuner.create(bodyPathPlannerParameters, false);
@@ -183,7 +187,7 @@ public class RDXLocomotionManager
    {
       controllerStatusTracker.checkControllerIsRunning();
 
-      if (controllerStatusTracker.getWalkingAborted())
+      if (abortedNotification.poll())
       {
          deleteAll();
       }
