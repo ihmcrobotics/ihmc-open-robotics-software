@@ -266,4 +266,9 @@ public class RDXFootstepPlanning
    {
       this.initialStanceSide = initialStanceSide;
    }
+
+   public boolean isPlanning()
+   {
+      return executor.isExecuting();
+   }
 }

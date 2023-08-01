@@ -25,13 +25,11 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.ImGuiTextOverlay;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
-import us.ihmc.rdx.ui.ImGuiStoredPropertySetBooleanWidget;
-import us.ihmc.rdx.ui.ImGuiStoredPropertySetDoubleWidget;
-import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.*;
 import us.ihmc.rdx.ui.affordances.*;
 import us.ihmc.rdx.ui.footstepPlanner.RDXFootstepPlanning;
 import us.ihmc.rdx.ui.graphics.RDXBodyPathPlanGraphic;
@@ -87,6 +85,7 @@ public class RDXLocomotionManager
    private final AbortWalkingMessage abortWalkingMessage = new AbortWalkingMessage();
    private final ControllerStatusTracker controllerStatusTracker;
    private boolean lastAssumeFlatGroundState;
+   private final ImGuiTextOverlay statusOverlay = new ImGuiTextOverlay();
 
    private RDXFootstepPlanning.InitialStanceSide startStanceSide = RDXFootstepPlanning.InitialStanceSide.AUTO;
 
@@ -177,6 +176,8 @@ public class RDXLocomotionManager
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(manualFootstepPlacement::calculate3DViewPick);
 
       walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, footstepPlannerParameters);
+
+      baseUI.getPrimary3DPanel().addImGuiOverlayAddition(() -> renderOverlayElements(baseUI.getPrimary3DPanel()));
    }
 
    public void update()
@@ -480,6 +481,16 @@ public class RDXLocomotionManager
       // Only render when planning with body path
       if (locomotionParameters.getPlanWithBodyPath())
          bodyPathPlanGraphic.getRenderables(renderables, pool);
+   }
+
+   public void renderOverlayElements(RDX3DPanel panel3D)
+   {
+      if (footstepPlanning.isPlanning())
+      {
+         ImGui.pushFont(ImGuiTools.getMediumFont());
+         statusOverlay.render("Planning footsteps...", panel3D.getWindowDrawMinX(), panel3D.getWindowDrawMinY(), 20.0f, 20.0f);
+         ImGui.popFont();
+      }
    }
 
    public RDXLocomotionParameters getLocomotionParameters()
