@@ -1,5 +1,6 @@
 package us.ihmc.rdx;
 
+import imgui.ImVec2;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiKey;
 import imgui.flag.ImGuiWindowFlags;
@@ -33,6 +34,8 @@ public class RDXKeyBindings
       private final String description;
       // Function to key map
       private final TreeMap<String, String> registry = new TreeMap<>();
+      private transient final ImVec2 textSize = new ImVec2();
+      private int keyButtonWidth = 85;
 
       private KeyBindingsSection(String description)
       {
@@ -64,13 +67,17 @@ public class RDXKeyBindings
                   continue;
             }
 
+            // Make sure the buttons are big enough and all the same size
+            ImGui.calcTextSize(textSize, key);
+            keyButtonWidth = Math.max(keyButtonWidth, Math.round(textSize.x) + 10);
+
             ImGui.tableNextRow();
             ImGui.tableSetColumnIndex(0);
             ImGui.alignTextToFramePadding();
             ImGui.text(function);
             ImGui.tableSetColumnIndex(1);
             ImGui.pushItemFlag(ImGuiItemFlags.Disabled, true);
-            ImGui.button(key, 85, 0);
+            ImGui.button(key, keyButtonWidth, 0);
             ImGui.popItemFlag();
          }
       }
