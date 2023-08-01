@@ -130,9 +130,9 @@ public class ControllerStatusTracker
 
    private void acceptWalkingStatusMessage(WalkingStatusMessage message)
    {
-      isWalking = false;
-
+      boolean isWalking = false;
       WalkingStatus walkingStatus = WalkingStatus.fromByte(message.getWalkingStatus());
+
       if (walkingStatus == WalkingStatus.STARTED || walkingStatus == WalkingStatus.RESUMED)
       {
          isWalking = true;
@@ -157,6 +157,8 @@ public class ControllerStatusTracker
          footstepTracker.reset();
          finishedWalkingNotification.set();
       }
+
+      this.isWalking = isWalking;
    }
 
    public boolean isWalking()
