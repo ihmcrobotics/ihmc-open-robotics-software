@@ -103,10 +103,11 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
                                                params[HEIGHT_MAP_RESOLUTION],
                                                params[HEIGHT_MAP_CENTER_INDEX]);
 
+
   cellCenterInWorld.x += 1.5f;
 
-   int WINDOW_WIDTH = 20;
-   int WINDOW_HEIGHT = 40;
+   int WINDOW_WIDTH = 2;
+   int WINDOW_HEIGHT = 4;
 
    float halfCellWidth = params[HEIGHT_MAP_RESOLUTION] / 2.0f;
    float minX = cellCenterInWorld.x - halfCellWidth;
@@ -174,9 +175,9 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
          (float3)(sensorToWorldTf[8], sensorToWorldTf[9], sensorToWorldTf[10]),
          (float3)(sensorToWorldTf[3], sensorToWorldTf[7], sensorToWorldTf[11]));
 
-         //printf("xIndex: %d, yIndex: %d\tcellCenter: (%f, %f, %f)\tprojectedPoint: (%d, %d)\t(yaw: %d, pitch: %d)\tdepth: %f\tqueryPoint: (%f,%f,%f)\tLimits: (x:[%f,%f], y:[%f,%f])\n",
-         //   xIndex, yIndex, cellCenterInSensor.x, cellCenterInSensor.y, cellCenterInSensor.z, projectedPoint.x, projectedPoint.y,
-         //   yaw_count, pitch_count, radius, queryPointInSensor.x, queryPointInSensor.y, queryPointInSensor.z, minX, maxX, minY, maxY);
+         printf("xIndex: %d, yIndex: %d\tcellCenter: (%f, %f, %f)\tprojectedPoint: (%d, %d)\t(yaw: %d, pitch: %d)\tdepth: %f\tqueryPoint: (%f,%f,%f)\tLimits: (x:[%f,%f], y:[%f,%f])\n",
+            xIndex, yIndex, cellCenterInSensor.x, cellCenterInSensor.y, cellCenterInSensor.z, projectedPoint.x, projectedPoint.y,
+            yaw_count, pitch_count, radius, queryPointInSensor.x, queryPointInSensor.y, queryPointInSensor.z, minX, maxX, minY, maxY);
 
 
          //printf("xIndex: %d, yIndex: %d \tWorld Point: (%f, %f, %f), Sensor Point (Z-fwd): (%f, %f, %f) -> Image Point: (%d, %d)\n", xIndex, yIndex,
@@ -197,9 +198,9 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
   if (count > 0 && xIndex < (int)params[DEPTH_INPUT_WIDTH] && yIndex < (int)params[DEPTH_INPUT_HEIGHT])
   {
     averageHeightZ = averageHeightZ / (float)(count);
-    averageHeightZ = clamp(averageHeightZ, -20.f, 2.0f);
+    averageHeightZ = clamp(averageHeightZ, -4.f, 4.0f);
 
-    write_imageui(out, (int2)(xIndex, yIndex), (uint4)((int)(averageHeightZ * 10000.0f), 0, 0, 0));
+    write_imageui(out, (int2)(xIndex, yIndex), (uint4)((int)( (averageHeightZ) * 20000.0f), 0, 0, 0));
 
     //printf("xIndex: %d, yIndex: %d, count: %d, averageHeightZ: %f\n", xIndex, yIndex, count, averageHeightZ);
 
