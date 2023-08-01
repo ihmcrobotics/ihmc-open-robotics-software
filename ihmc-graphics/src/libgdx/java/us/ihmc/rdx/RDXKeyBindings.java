@@ -10,9 +10,10 @@ import imgui.type.ImString;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.tools.string.StringTools;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * Allows you to register key bindings which get rendered in a table menu
@@ -29,11 +30,19 @@ public class RDXKeyBindings
    private boolean filterInputActive = false;
    private boolean forceActive = false;
 
+   private record KeyBinding(String function, String key)
+   {
+      public String combined()
+      {
+         return function + key;
+      }
+   }
+
    private static class KeyBindingsSection
    {
       private final String description;
-      // Function to key map
-      private final TreeMap<String, String> registry = new TreeMap<>();
+      // Keybindings sorted alphabetically
+      private final TreeSet<KeyBinding> registry = new TreeSet<>(Comparator.comparing(KeyBinding::combined));
       private transient final ImVec2 textSize = new ImVec2();
       private int keyButtonWidth = 85;
 
@@ -44,16 +53,13 @@ public class RDXKeyBindings
 
       public void renderSection(ImString filter)
       {
-         for (Map.Entry<String, String> entry : registry.entrySet())
+         for (KeyBinding keyBinding : registry)
          {
-            String function = entry.getKey();
-            String key = entry.getValue();
-
             if (!filter.isEmpty())
             {
                boolean match = false;
 
-               if (function.toLowerCase().contains(filter.get().toLowerCase()))
+               if (keyBinding.function().toLowerCase().contains(filter.get().toLowerCase()))
                {
                   match = true;
                }
@@ -68,16 +74,16 @@ public class RDXKeyBindings
             }
 
             // Make sure the buttons are big enough and all the same size
-            ImGui.calcTextSize(textSize, key);
+            ImGui.calcTextSize(textSize, keyBinding.key());
             keyButtonWidth = Math.max(keyButtonWidth, Math.round(textSize.x) + 10);
 
             ImGui.tableNextRow();
             ImGui.tableSetColumnIndex(0);
             ImGui.alignTextToFramePadding();
-            ImGui.text(function);
+            ImGui.text(keyBinding.function());
             ImGui.tableSetColumnIndex(1);
             ImGui.pushItemFlag(ImGuiItemFlags.Disabled, true);
-            ImGui.button(key, keyButtonWidth, 0);
+            ImGui.button(keyBinding.key(), keyButtonWidth, 0);
             ImGui.popItemFlag();
          }
       }
@@ -107,9 +113,11 @@ public class RDXKeyBindings
          sections.put(callingClassName, section);
       }
 
-      if (!section.registry.containsKey(function))
+      KeyBinding keyBinding = new KeyBinding(function, key);
+
+      if (!section.registry.contains(keyBinding))
       {
-         section.registry.put(function, key);
+         section.registry.add(keyBinding);
          return true;
       }
 
