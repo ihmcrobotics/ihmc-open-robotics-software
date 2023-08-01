@@ -13,7 +13,6 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.tools.ActiveMappingTools;
-import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -32,7 +31,6 @@ public class ActiveMappingModule
    private final FootstepPlanningModule footstepPlanner;
    private final DRCRobotModel robotModel;
    private final HumanoidReferenceFrames referenceFrames;
-   private PlanarRegionMap planarRegionMap;
    private MonteCarloPlanner monteCarloPlanner;
 
    private FootstepPlannerRequest request;
@@ -72,9 +70,7 @@ public class ActiveMappingModule
    public ActiveMappingModule(DRCRobotModel robotModel, HumanoidReferenceFrames humanoidReferenceFrames)
    {
       this.referenceFrames = humanoidReferenceFrames;
-      this.planarRegionMap = new PlanarRegionMap(true);
       this.robotModel = robotModel;
-
 
       monteCarloPlanner = new MonteCarloPlanner();
 
@@ -83,15 +79,7 @@ public class ActiveMappingModule
       active = true;
    }
 
-   public void updateMap(FramePlanarRegionsList regions)
-   {
-      if (active)
-      {
-         planarRegionMap.registerRegions(regions.getPlanarRegionsList(), regions.getSensorToWorldFrameTransform(), null);
-      }
-   }
-
-   public void updatePlan()
+   public void updatePlan(PlanarRegionMap planarRegionMap)
    {
       if (active)
       {
@@ -142,20 +130,9 @@ public class ActiveMappingModule
       }
    }
 
-   public PlanarRegionMap getPlanarRegionMap()
-   {
-      return planarRegionMap;
-   }
-
    public FootstepDataListMessage getFootstepDataListMessage()
    {
       return FootstepDataMessageConverter.createFootstepDataListFromPlan(plannerOutput.getFootstepPlan(), 1.3, 0.4);
-   }
-
-   public void reset()
-   {
-      planarRegionMap.destroy();
-      planarRegionMap = new PlanarRegionMap(true);
    }
 
    public void setPlanAvailable(boolean planAvailable)
