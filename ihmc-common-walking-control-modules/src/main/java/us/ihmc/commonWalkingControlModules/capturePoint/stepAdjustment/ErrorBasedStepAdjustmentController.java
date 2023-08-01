@@ -352,12 +352,12 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                        double percentageToShrinkPolygon)
    {
       this.percentageToShrinkPolygon.set(percentageToShrinkPolygon);
+      footstepWasAdjusted.set(false);
 
       if (!isInSwing.getBooleanValue())
          return;
 
       controlTicksIntoStep.increment();
-      footstepWasAdjusted.set(false);
 
       computeTimeInCurrentState(currentTime);
       computeTimeRemainingInState();
@@ -436,7 +436,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
          }
       }
 
-      footstepWasAdjusted.set(wasAdjusted || previousFootstepSolution.distance(footstepSolution.getPosition()) > 1e-3);
+      footstepWasAdjusted.set(wasAdjusted || previousFootstepSolution.distanceXY(footstepSolution.getPosition()) > 1e-3);
 
       // Don't update the "upcoming footstep" if we're at the start of the control state. At this point, we haven't had our swing duration adjusted, so we want
       // to converge down to an intelligent time
