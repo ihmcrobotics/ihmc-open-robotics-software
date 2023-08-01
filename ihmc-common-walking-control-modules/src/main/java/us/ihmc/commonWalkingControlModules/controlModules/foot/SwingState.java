@@ -586,11 +586,6 @@ public class SwingState extends AbstractFootControlState
       radialFrame.setPoseAndUpdate(tempPoint, anklePitchRotationToParentFrame);
    }
 
-   public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, double swingTime)
-   {
-      setAdjustedFootstepAndTime(adjustedFootstep, null, null, swingTime);
-   }
-
    public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, FrameVector3DReadOnly finalCoMVelocity, FrameVector3DReadOnly finalCoMAcceleration, double swingTime)
    {
       replanTrajectory.set(true);
