@@ -292,7 +292,7 @@ public class RDXPose3DGizmo implements RenderableProvider
          if (ctrlHeld && input.getMouseWheelDelta() != 0.0f)
          {
             float deltaScroll = input.getMouseWheelDelta();
-            double amount = shiftHeld ? 0.001 :0.012;
+            double amount = shiftHeld ? 0.001 : 0.012;
             frameBasedGizmoModification.yawInWorld(Math.signum(deltaScroll) * amount * Math.PI);
          }
 
