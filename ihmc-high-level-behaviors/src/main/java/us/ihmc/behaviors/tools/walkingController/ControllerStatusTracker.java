@@ -144,7 +144,6 @@ public class ControllerStatusTracker
          }
 
          footstepTracker.reset();
-
          LogTools.info("Walking Aborted.");
       }
       else if (walkingStatus == WalkingStatus.PAUSED)
@@ -153,6 +152,7 @@ public class ControllerStatusTracker
       }
       else
       {
+         // Walking completed
          footstepTracker.reset();
          finishedWalkingNotification.set();
       }
