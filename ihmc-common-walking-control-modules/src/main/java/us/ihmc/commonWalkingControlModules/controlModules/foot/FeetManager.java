@@ -287,7 +287,7 @@ public class FeetManager implements SCS2YoGraphicHolder
                                      FrameVector3DReadOnly finalCoMAcceleration,
                                      double swingTime)
    {
-      if (!footControlModules.get(swingSide).getCurrentConstraintType().isLoadBearing())
+      if (!getCurrentConstraintType(swingSide).isLoadBearing())
          footControlModules.get(swingSide).setAdjustedFootstepAndTime(adjustedFootstep, finalCoMVelocity, finalCoMAcceleration, swingTime);
    }
 
