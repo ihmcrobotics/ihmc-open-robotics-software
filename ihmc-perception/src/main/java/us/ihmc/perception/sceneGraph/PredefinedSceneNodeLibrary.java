@@ -34,9 +34,9 @@ public class PredefinedSceneNodeLibrary
    private final ArUcoDetectableNode box;
    private final ArUcoDetectableNode canOfSoup;
 
-   private final ArrayList<DetectableSceneNode> detectableSceneNodes = new ArrayList<>();
-   private final ArrayList<ArUcoDetectableNode> arUcoDetectableNodes = new ArrayList<>();
-   private final ArrayList<StaticRelativeSceneNode> staticArUcoRelativeDetectableNodes = new ArrayList<>();
+   private final List<DetectableSceneNode> detectableSceneNodes = new ArrayList<>();
+   private final List<ArUcoDetectableNode> arUcoDetectableNodes = new ArrayList<>();
+   private final List<StaticRelativeSceneNode> staticArUcoRelativeDetectableNodes = new ArrayList<>();
    private final TIntDoubleHashMap arUcoMarkerIDsToSizes = new TIntDoubleHashMap();
    private final List<ReferenceFrame> referenceFrames = new ArrayList<>();
    private final FramePose3D arUcoMarkerPose = new FramePose3D();
