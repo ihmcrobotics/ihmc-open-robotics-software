@@ -98,7 +98,7 @@ public class PredefinedSceneNodeLibrary
       {
          // We assume that the parent node is always an ArUco node, which is a weak assummption,
          // but the whole static relative thing is also weak.
-         if (staticRelativeNode.getOptionalParentNode() instanceof ArUcoDetectableNode parentArUcoNode)
+         if (staticRelativeNode.getParentNode() instanceof ArUcoDetectableNode parentArUcoNode)
          {
             if (parentArUcoNode.getCurrentlyDetected())
             {
