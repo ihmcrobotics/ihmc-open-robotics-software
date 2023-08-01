@@ -37,13 +37,19 @@ public abstract class RDXVRTrackedDevice
       if (isConnected)
       {
          HmdMatrix34 openVRRigidBodyTransform = trackedDevicePoses.get(deviceIndex).mDeviceToAbsoluteTracking();
-         if (OpenVRTools.containsNaN(openVRRigidBodyTransform))
+
+         // We do this stuff to try and safely catch exceptions
+         LibGDXTools.toEuclidUnsafe(openVRRigidBodyTransform, deviceToPlayAreaTransform);
+         boolean matrixInvalid = deviceToPlayAreaTransform.containsNaN();
+         if (!matrixInvalid)
+            deviceToPlayAreaTransform.getRotation().normalize();
+
+         if (matrixInvalid)
          {
             isConnected = false;
          }
          else
          {
-            LibGDXTools.toEuclid(openVRRigidBodyTransform, deviceToPlayAreaTransform);
             deviceYUpZBackFrame.update();
 
             if (modelInstance == null)
