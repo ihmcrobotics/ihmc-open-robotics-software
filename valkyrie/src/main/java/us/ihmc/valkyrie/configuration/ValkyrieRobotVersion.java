@@ -108,8 +108,8 @@ public enum ValkyrieRobotVersion implements RobotVersion
       switch(this)
       {
          case DEFAULT:
-         case UPPER_BODY:
             return true;
+         case UPPER_BODY:
          case FINGERLESS:
          case ARM_MASS_SIM:
          case ARMLESS:
@@ -125,8 +125,8 @@ public enum ValkyrieRobotVersion implements RobotVersion
       {
          case DEFAULT:
          case FINGERLESS:
-         case UPPER_BODY:
             return true;
+         case UPPER_BODY:
          case ARM_MASS_SIM:
          case ARMLESS:
             return false;

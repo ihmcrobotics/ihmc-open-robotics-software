@@ -30,6 +30,7 @@ public class ValkyrieCalibrationControllerStateFactory implements HighLevelContr
       OneDoFJoint[] controlledJoints = MultiBodySystemTools.filterJoints(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getControlledJoints(),
                                                                          OneDoFJoint.class);
       calibrationControllerState = new ValkyrieCalibrationControllerState(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
+                                                                          controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getFullRobotModel(),
                                                                           controlledJoints,
                                                                           controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getYoTime(),
                                                                           controllerFactoryHelper.getHighLevelControllerParameters(),

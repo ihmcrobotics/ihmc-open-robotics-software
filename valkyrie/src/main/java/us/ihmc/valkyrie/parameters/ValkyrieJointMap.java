@@ -75,6 +75,7 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
                   ArmJointName.ELBOW_ROLL, ArmJointName.WRIST_ROLL, ArmJointName.FIRST_WRIST_PITCH};
             break;
          case ARM_MASS_SIM:
+         case UPPER_BODY:
             armJoints = new ArmJointName[] {ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.SHOULDER_YAW, ArmJointName.ELBOW_PITCH};
             break;
          case ARMLESS:
@@ -125,6 +126,7 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
                armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristPitch],
                                  new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.FIRST_WRIST_PITCH));
             case ARM_MASS_SIM:
+            case UPPER_BODY:
                armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftShoulderPitch],
                                  new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.SHOULDER_PITCH));
                armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftShoulderRoll],
@@ -144,6 +146,7 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
                handNames.put(robotSide, endEffectorName);
                break;
             case ARM_MASS_SIM:
+            case UPPER_BODY:
                endEffectorName = prefix + "ElbowPitchLink";
                handNames.put(robotSide, endEffectorName);
                break;
@@ -382,9 +385,9 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
       {
          case DEFAULT:
          case FINGERLESS:
-         case UPPER_BODY:
             return physicalProperties.getHandControlFrameToWristTransform(robotSide);
          case ARM_MASS_SIM:
+         case UPPER_BODY:
             return physicalProperties.getHandControlFrameToArmMassSimTransform(robotSide);
          default:
             return null;

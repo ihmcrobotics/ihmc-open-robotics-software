@@ -11,6 +11,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -52,6 +53,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
    private final JointDesiredOutputListReadOnly highLevelControlOutput;
 
    public ValkyrieCalibrationControllerState(HighLevelHumanoidControllerToolbox highLevelControllerToolbox,
+                                             FullHumanoidRobotModel fullHumanoidRobotModel,
                                              OneDoFJointBasics[] controlledJoints,
                                              DoubleProvider yoTime,
                                              HighLevelControllerParameters highLevelControllerParameters,
@@ -76,17 +78,23 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       timeForEstimatingOffset.set(highLevelControllerParameters.getCalibrationDuration());
 
       boolean useArms = ValkyrieRosControlController.VERSION.hasArms();
+      boolean useLegs = ValkyrieRosControlController.VERSION.hasLegs();
+
       JointTorqueOffsetEstimatorParameters parameters = new JointTorqueOffsetEstimatorParameters();
       if (!useArms)
          parameters.setArmJointsToRun(null);
+      if (!useLegs)
+         parameters.setLegJointsToRun(null);
+
+      // TODO set leg joints to null for upper body
 
       jointTorqueOffsetEstimatorController = new JointTorqueOffsetEstimatorController(calibrationParameters,
                                                                                       highLevelControllerToolbox,
                                                                                       footContactStates,
                                                                                       bipedSupportPolygons,
                                                                                       torqueOffsetPrinter,
-                                                                                      highLevelControllerToolbox.getFullRobotModel(),
-                                                                                      highLevelControllerToolbox.getYoTime(),
+                                                                                      fullHumanoidRobotModel,
+                                                                                      yoTime,
                                                                                       parameters);
       registry.addChild(jointTorqueOffsetEstimatorController.getYoRegistry());
 
