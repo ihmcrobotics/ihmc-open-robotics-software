@@ -16,6 +16,7 @@ import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.thread.Throttler;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition.getTopic;
 
@@ -41,7 +42,7 @@ public class ControllerStatusTracker
    private final ArrayList<Runnable> notWalkingStateAnymoreCallbacks = new ArrayList<>();
    private final Throttler notWalkingStateAnymoreCallbackThrottler = new Throttler();
 
-   private final ArrayList<Notification> abortedListeners = new ArrayList<>();
+   private final List<Notification> abortedListeners = new ArrayList<>();
 
    public ControllerStatusTracker(LogToolsWriteOnly statusLogger, ROS2NodeInterface ros2Node, String robotName)
    {
