@@ -5,6 +5,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.Timer;
 
+import javax.annotation.Nullable;
+
 /**
  * An object that is currently detected or not currently detected,
  * as such with objects tracked via ArUco markers or YOLO.
@@ -28,7 +30,8 @@ public abstract class DetectableSceneNode extends SceneNode
     * We allow the operator to disable tracking the detected pose.
     */
    private boolean trackDetectedPose = true;
-   private SceneNode optionalParentNode = null;
+   @Nullable
+   private SceneNode parentNode;
    private final RigidBodyTransform originalTransformToParent = new RigidBodyTransform();
    private transient final FramePose3D originalPose = new FramePose3D();
 
@@ -72,11 +75,11 @@ public abstract class DetectableSceneNode extends SceneNode
    {
       this.trackDetectedPose = trackDetectedPose;
 
-      if (optionalParentNode != null)
+      if (parentNode != null)
       {
-         if (trackDetectedPose && optionalParentNode.getNodeFrame() != getNodeFrame().getParent())
+         if (trackDetectedPose && parentNode.getNodeFrame() != getNodeFrame().getParent())
          {
-            changeParentFrameWithoutMoving(optionalParentNode.getNodeFrame());
+            changeParentFrameWithoutMoving(parentNode.getNodeFrame());
          }
          else if (!trackDetectedPose && getNodeFrame().getParent() != ReferenceFrame.getWorldFrame())
          {
@@ -91,9 +94,9 @@ public abstract class DetectableSceneNode extends SceneNode
     */
    public void clearOffset()
    {
-      if (optionalParentNode != null && optionalParentNode.getNodeFrame() != getNodeFrame().getParent())
+      if (parentNode != null && parentNode.getNodeFrame() != getNodeFrame().getParent())
       {
-         originalPose.setToZero(optionalParentNode.getNodeFrame());
+         originalPose.setToZero(parentNode.getNodeFrame());
          originalPose.set(originalTransformToParent);
          originalPose.changeFrame(getNodeFrame().getParent());
          originalPose.get(getNodeToParentFrameTransform());
@@ -115,13 +118,14 @@ public abstract class DetectableSceneNode extends SceneNode
       return !modifiedTimer.isRunning(OPERATOR_FREEZE_TIME);
    }
 
-   public void setOptionalParentNode(SceneNode sceneNode)
+   public void setParentNode(SceneNode sceneNode)
    {
-      optionalParentNode = sceneNode;
+      parentNode = sceneNode;
    }
 
-   public SceneNode getOptionalParentNode()
+   @Nullable
+   public SceneNode getParentNode()
    {
-      return optionalParentNode;
+      return parentNode;
    }
 }
