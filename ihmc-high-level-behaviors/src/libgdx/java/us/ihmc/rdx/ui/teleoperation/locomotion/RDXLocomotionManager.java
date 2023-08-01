@@ -183,6 +183,11 @@ public class RDXLocomotionManager
    {
       controllerStatusTracker.checkControllerIsRunning();
 
+      if (controllerStatusTracker.getWalkingAborted())
+      {
+         deleteAll();
+      }
+
       swingFootPlannerParameters.setMinimumSwingTime(locomotionParameters.getSwingTime());
 
       if (ballAndArrowMidFeetPosePlacement.getPlacedNotification().poll() || (lastAssumeFlatGroundState != locomotionParameters.getAssumeFlatGround()
