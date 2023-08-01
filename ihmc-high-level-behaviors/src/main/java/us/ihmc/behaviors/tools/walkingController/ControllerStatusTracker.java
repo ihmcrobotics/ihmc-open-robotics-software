@@ -35,6 +35,7 @@ public class ControllerStatusTracker
    private final Vector3D lastPlanOffset = new Vector3D();
    private final Timer capturabilityBasedStatusTimer = new Timer();
    private final Timer robotConfigurationDataTimer = new Timer();
+   private volatile boolean walkingAborted = false;
    private volatile boolean isWalking = false;
    private volatile boolean isWalkingFromConfigurationData = false;
    private final Notification finishedWalkingNotification = new Notification();
@@ -122,6 +123,9 @@ public class ControllerStatusTracker
 
    private void acceptWalkingStatusMessage(WalkingStatusMessage message)
    {
+      walkingAborted = false;
+      isWalking = false;
+
       WalkingStatus walkingStatus = WalkingStatus.fromByte(message.getWalkingStatus());
       if (walkingStatus == WalkingStatus.STARTED || walkingStatus == WalkingStatus.RESUMED)
       {
@@ -129,14 +133,18 @@ public class ControllerStatusTracker
       }
       else if (walkingStatus == WalkingStatus.ABORT_REQUESTED)
       {
-         isWalking = false;
+         walkingAborted = true;
          footstepTracker.reset();
 
          LogTools.info("Walking Aborted.");
       }
+      else if (walkingStatus == WalkingStatus.PAUSED)
+      {
+         LogTools.info("Walking Paused.");
+      }
       else
       {
-         isWalking = false;
+         footstepTracker.reset();
          finishedWalkingNotification.set();
       }
    }
@@ -152,6 +160,11 @@ public class ControllerStatusTracker
    public Notification getFinishedWalkingNotification()
    {
       return finishedWalkingNotification;
+   }
+
+   public boolean getWalkingAborted()
+   {
+      return walkingAborted;
    }
 
    public boolean isInWalkingState()
