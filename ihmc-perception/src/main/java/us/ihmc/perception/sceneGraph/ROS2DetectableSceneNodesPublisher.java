@@ -39,7 +39,7 @@ public class ROS2DetectableSceneNodesPublisher
          DetectableSceneNodeMessage detectableSceneNodeMessage = detectableSceneNodesMessage.getDetectableSceneNodes().add();
          detectableSceneNodeMessage.setName(detectableSceneNode.getName());
          detectableSceneNodeMessage.setCurrentlyDetected(detectableSceneNode.getCurrentlyDetected());
-         detectableSceneNodeMessage.setIsPoseOverriddenByOperator(detectableSceneNode.getPoseOverriddenByOperator());
+         detectableSceneNodeMessage.setTrackDetectedPose(detectableSceneNode.getTrackDetectedPose());
 
          sceneNodePose.setToZero(detectableSceneNode.getNodeFrame());
          sceneNodePose.changeFrame(ReferenceFrame.getWorldFrame());
