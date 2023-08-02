@@ -5,6 +5,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.arUco.ArUcoMarker;
 import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
 import us.ihmc.robotics.EuclidCoreMissingTools;
+import us.ihmc.robotics.math.filters.AlphaFilteredRigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 
 /**
@@ -18,6 +19,11 @@ public class ArUcoDetectableNode extends PredefinedRigidBodySceneNode
    private final int markerID;
    private final double markerSize;
    private final ModifiableReferenceFrame markerFrame;
+
+   private final AlphaFilteredRigidBodyTransform alphaFilteredTransformToParent = new AlphaFilteredRigidBodyTransform();
+   {
+      alphaFilteredTransformToParent.setAlpha(0.98); // Tuned in simulation by @dcalvert on 8/2/2023
+   }
 
    /**
     * Give the marker info directly from code.
@@ -72,6 +78,12 @@ public class ArUcoDetectableNode extends PredefinedRigidBodySceneNode
       setOriginalTransformToParent(getNodeToParentFrameTransform());
    }
 
+   public void applyFilter()
+   {
+      alphaFilteredTransformToParent.update(getMarkerToWorldFrameTransform());
+      getMarkerToWorldFrameTransform().set(alphaFilteredTransformToParent);
+   }
+
    public int getMarkerID()
    {
       return markerID;
@@ -95,5 +107,10 @@ public class ArUcoDetectableNode extends PredefinedRigidBodySceneNode
    public RigidBodyTransform getMarkerToWorldFrameTransform()
    {
       return markerFrame.getTransformToParent();
+   }
+
+   public AlphaFilteredRigidBodyTransform getAlphaFilteredTransformToParent()
+   {
+      return alphaFilteredTransformToParent;
    }
 }
