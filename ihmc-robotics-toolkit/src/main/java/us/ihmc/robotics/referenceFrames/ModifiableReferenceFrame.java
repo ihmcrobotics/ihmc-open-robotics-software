@@ -15,6 +15,10 @@ import java.util.function.Consumer;
  */
 public class ModifiableReferenceFrame
 {
+   /**
+    * This reference is final, meaning even when this class's ReferenceFrame
+    * is recreated, this is still the instance that represents the transformToParent.
+    */
    private final RigidBodyTransform transformToParent = new RigidBodyTransform();
    private final String frameName;
    private ReferenceFrame referenceFrame;

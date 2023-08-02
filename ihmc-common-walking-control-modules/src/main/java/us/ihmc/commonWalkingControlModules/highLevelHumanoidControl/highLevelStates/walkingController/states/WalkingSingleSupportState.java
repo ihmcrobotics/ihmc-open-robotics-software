@@ -130,7 +130,11 @@ public class WalkingSingleSupportState extends SingleSupportState
       balanceManager.updateTimeInState();
       boolean requestSwingSpeedUp = balanceManager.shouldAdjustTimeFromTrackingError();
 
-      boolean footstepIsBeingAdjusted = balanceManager.checkAndUpdateStepAdjustment(nextFootstep);
+      // in the first tick of single support, the state machine for the feet manager likely hasn't transitioned to swing yet. It's also possible this has been
+      // delayed for another reason. So we should check before updating step adjustment
+      boolean footstepIsBeingAdjusted = false;
+      if (!feetManager.getCurrentConstraintType(swingSide).isLoadBearing())
+         footstepIsBeingAdjusted = balanceManager.checkAndUpdateStepAdjustment(nextFootstep);
 
       if (footstepIsBeingAdjusted)
       {
