@@ -213,6 +213,7 @@ public class RDX3DSituatedImagePanel
       selectionCollisionBox.getPose().set(floatingPanelFramePose);
       floatingPanelFramePose.setFromReferenceFrame(floatingPanelFrame.getReferenceFrame());
       isHoveredByAnything = false;
+      LibGDXTools.toLibGDX(floatingPanelFrame.getReferenceFrame().getTransformToRoot(), hoverBoxMesh.transform);
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
