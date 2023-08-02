@@ -17,6 +17,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
@@ -25,13 +26,11 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.ImGuiTextOverlay;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
-import us.ihmc.rdx.ui.ImGuiStoredPropertySetBooleanWidget;
-import us.ihmc.rdx.ui.ImGuiStoredPropertySetDoubleWidget;
-import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
-import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.*;
 import us.ihmc.rdx.ui.affordances.*;
 import us.ihmc.rdx.ui.footstepPlanner.RDXFootstepPlanning;
 import us.ihmc.rdx.ui.graphics.RDXBodyPathPlanGraphic;
@@ -42,6 +41,7 @@ import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.Timer;
 
 /**
  * This class provides easy access to everything that involves mobility for the robot's legs.
@@ -86,7 +86,10 @@ public class RDXLocomotionManager
    private final PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
    private final AbortWalkingMessage abortWalkingMessage = new AbortWalkingMessage();
    private final ControllerStatusTracker controllerStatusTracker;
+   private final Notification abortedNotification = new Notification();
    private boolean lastAssumeFlatGroundState;
+   private final Timer footstepPlanningCompleteTimer = new Timer();
+   private final ImGuiTextOverlay statusOverlay = new ImGuiTextOverlay();
 
    private RDXFootstepPlanning.InitialStanceSide startStanceSide = RDXFootstepPlanning.InitialStanceSide.AUTO;
 
@@ -153,6 +156,8 @@ public class RDXLocomotionManager
    {
       this.baseUI = baseUI;
 
+      controllerStatusTracker.registerAbortedListener(abortedNotification);
+
       locomotionParametersTuner.create(locomotionParameters);
       footstepPlanningParametersTuner.create(footstepPlannerParameters, false);
       bodyPathPlanningParametersTuner.create(bodyPathPlannerParameters, false);
@@ -177,11 +182,18 @@ public class RDXLocomotionManager
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(manualFootstepPlacement::calculate3DViewPick);
 
       walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, footstepPlannerParameters);
+
+      baseUI.getPrimary3DPanel().addImGuiOverlayAddition(() -> renderOverlayElements(baseUI.getPrimary3DPanel()));
    }
 
    public void update()
    {
       controllerStatusTracker.checkControllerIsRunning();
+
+      if (abortedNotification.poll())
+      {
+         deleteAll();
+      }
 
       swingFootPlannerParameters.setMinimumSwingTime(locomotionParameters.getSwingTime());
 
@@ -286,6 +298,14 @@ public class RDXLocomotionManager
       swingTimeSlider.renderImGuiWidget();
       transferTimeSlider.renderImGuiWidget();
 
+
+      if (ImGui.button(labels.get("Disable Leg Mode")))
+      {
+         legControlMode = RDXLegControlMode.DISABLED;
+      }
+      ImGui.sameLine();
+      ImGui.text("Leg Mode: " + legControlMode.name());
+
       ImGui.text("Walking Options:");
       ImGui.sameLine();
 
@@ -320,27 +340,6 @@ public class RDXLocomotionManager
       }
       ImGuiTools.previousWidgetTooltip("Keybind: Space");
       ImGui.endDisabled();
-
-      ImGui.text("Leg control mode: " + legControlMode.name());
-      if (ImGui.radioButton(labels.get("Disabled"), legControlMode == RDXLegControlMode.DISABLED))
-      {
-         legControlMode = RDXLegControlMode.DISABLED;
-      }
-      ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Manual foostep placement"), legControlMode == RDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT))
-      {
-         legControlMode = RDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT;
-      }
-      if (ImGui.radioButton(labels.get("Path control ring"), legControlMode == RDXLegControlMode.PATH_CONTROL_RING))
-      {
-         legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
-         walkPathControlRing.becomeModified(true);
-      }
-      ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Single support foot posing"), legControlMode == RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING))
-      {
-         legControlMode = RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING;
-      }
 
       manualFootstepPlacement.renderImGuiWidgets();
 
@@ -493,6 +492,28 @@ public class RDXLocomotionManager
       // Only render when planning with body path
       if (locomotionParameters.getPlanWithBodyPath())
          bodyPathPlanGraphic.getRenderables(renderables, pool);
+   }
+
+   public void renderOverlayElements(RDX3DPanel panel3D)
+   {
+      boolean isPlanning = footstepPlanning.isPlanning();
+      boolean hasPlannedRecently = footstepPlanningCompleteTimer.isRunning(2.0);
+      if (isPlanning || hasPlannedRecently)
+      {
+         ImGui.pushFont(ImGuiTools.getMediumFont());
+         String text;
+         if (isPlanning)
+         {
+            footstepPlanningCompleteTimer.reset();
+            text = "Planning footsteps...";
+         }
+         else
+         {
+            text = "Footstep planning completed.";
+         }
+         statusOverlay.render(text, panel3D.getWindowDrawMinX(), panel3D.getWindowDrawMinY(), 20.0f, 20.0f);
+         ImGui.popFont();
+      }
    }
 
    public RDXLocomotionParameters getLocomotionParameters()
