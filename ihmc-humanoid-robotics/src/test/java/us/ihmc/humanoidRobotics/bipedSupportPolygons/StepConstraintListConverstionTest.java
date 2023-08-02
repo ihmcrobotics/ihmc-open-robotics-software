@@ -91,11 +91,22 @@ public class StepConstraintListConverstionTest
          stepConstraintRegionsList.getAsMessage(outputMessage2);
 
          assertMessageEquals(failureMessage, planarRegions, outputMessage1, 1e-5);
-         assertMessageEquals(failureMessage, planarRegions, outputMessage2, 1e-5);
+         assertMessageEqualsRegions(failureMessage, stepConstraintRegionsList.getAsList(), outputMessage2, 1e-5);
       }
    }
 
    private static void assertMessageEquals(String failureMessage, List<PlanarRegion> expected, StepConstraintsListMessage actual, double epsilon)
+   {
+      StepConstraintsListCommand command = new StepConstraintsListCommand();
+      command.setFromMessage(actual);
+
+      for (int i = 0; i < expected.size(); i++)
+      {
+         assertCommandEquals(failureMessage, expected.get(i), command.getStepConstraint(i), epsilon);
+      }
+   }
+
+   private static void assertMessageEqualsRegions(String failureMessage, List<StepConstraintRegion> expected, StepConstraintsListMessage actual, double epsilon)
    {
       StepConstraintsListCommand command = new StepConstraintsListCommand();
       command.setFromMessage(actual);
@@ -115,6 +126,29 @@ public class StepConstraintListConverstionTest
       {
          EuclidCoreTestTools.assertEquals(failureMessage, expected.getConcaveHullVertex(i), new Point2D(actual.getVertexBuffer().get(i)), epsilon);
       }
+   }
+
+   private static void assertCommandEquals(String failureMessage, StepConstraintRegion expected, StepConstraintRegionCommand actual, double epsilon)
+   {
+      EuclidCoreTestTools.assertGeometricallyEquals(failureMessage, expected.getPoint(), actual.getRegionOrigin(), epsilon);
+      EuclidCoreTestTools.assertGeometricallyEquals(failureMessage, expected.getNormal(), actual.getRegionNormal(), epsilon);
+
+      EuclidCoreTestTools.assertGeometricallyEquals(failureMessage, expected.getTransformToWorld(), actual.getTransformToWorld(), epsilon);
+      EuclidCoreTestTools.assertGeometricallyEquals(failureMessage, expected.getTransformToLocal(), actual.getTransformFromWorld(), epsilon);
+
+      assertEquals(failureMessage, expected.getConcaveHullSize(), actual.getConcaveHullVertices().size());
+      for (int i = 0; i < expected.getConcaveHullSize(); i++)
+      {
+         EuclidCoreTestTools.assertEquals(failureMessage, expected.getConcaveHullVertexInRegionFrame(i), actual.getConcaveHullVertices().get(i), epsilon);
+      }
+
+
+      //      assertEquals(expected.getNumberOfConvexPolygons(), actual.getNumberOfConvexPolygons());
+      //      for (int i = 0; i < expected.getNumberOfConvexPolygons(); i++)
+      //      {
+      //         EuclidCoreTestTools.assertEquals(actual.getConvexPolygon(i), expected.getConvexPolygon(i), epsilon);
+      //      }
+
    }
 
    private static void assertCommandEquals(String failureMessage, PlanarRegion expected, StepConstraintRegionCommand actual, double epsilon)
