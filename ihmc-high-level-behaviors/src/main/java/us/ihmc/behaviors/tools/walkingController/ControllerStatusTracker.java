@@ -130,6 +130,7 @@ public class ControllerStatusTracker
 
    private void acceptWalkingStatusMessage(WalkingStatusMessage message)
    {
+      // Declared locally since this represents the absolute state which other threads can access
       boolean isWalking = false;
       WalkingStatus walkingStatus = WalkingStatus.fromByte(message.getWalkingStatus());
 
