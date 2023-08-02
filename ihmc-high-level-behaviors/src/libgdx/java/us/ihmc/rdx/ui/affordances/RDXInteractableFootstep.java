@@ -53,9 +53,9 @@ public class RDXInteractableFootstep
    // Intended to reuse text renderables, as they are relatively expensive to create
    private static final Map<String, RDX3DSituatedText> textRenderablesMap = new HashMap<>();
    // Measured footstep.fbx in Blender
-   private static final double FOOTSTEP_GRAPHIC_HEIGHT = 0.033251;
-   private static final double FOOTSTEP_GRAPHIC_LENGTH = 0.266301;
-   private static final double FOOTSTEP_GRAPHIC_WIDTH = 0.128225;
+   private static final double FOOTSTEP_GRAPHIC_HEIGHT = 0.0287;
+   private static final double FOOTSTEP_GRAPHIC_LENGTH = 0.2565;
+   private static final double FOOTSTEP_GRAPHIC_WIDTH = 0.1248;
    private static final double FOOTSTEP_GRAPHIC_SOLE_OFFSET_X = 0.01;
    private static final double FOOTSTEP_GRAPHIC_SOLE_OFFSET_Y = 0.0;
    private static final double FOOTSTEP_GRAPHIC_SOLE_OFFSET_Z = FOOTSTEP_GRAPHIC_HEIGHT / 2.0;
