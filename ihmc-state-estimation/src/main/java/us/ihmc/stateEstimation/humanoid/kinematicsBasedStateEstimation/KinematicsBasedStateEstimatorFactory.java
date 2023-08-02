@@ -146,7 +146,7 @@ public class KinematicsBasedStateEstimatorFactory
       HumanoidRobotSensorInformation sensorInformation = sensorInformationField.get();
       ForceSensorDataHolderReadOnly estimatorForceSensorDataHolder = estimatorForceSensorDataHolderField.get();
       StateEstimatorParameters stateEstimatorParameters = stateEstimatorParametersField.get();
-      FootSwitchFactory footSwitchFactory = stateEstimatorParameters.getFootSwitchFactory();
+      SideDependentList<FootSwitchFactory> footSwitchFactories = stateEstimatorParameters.getFootSwitchFactories();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -156,6 +156,8 @@ public class KinematicsBasedStateEstimatorFactory
 
          RigidBodyBasics foot = bipedFeet.get(robotSide).getRigidBody();
          bipedFeetMap.put(foot, bipedFeet.get(robotSide));
+
+         FootSwitchFactory footSwitchFactory = footSwitchFactories.get(robotSide);
 
          Set<ContactableFoot> otherFoot = Collections.singleton(bipedFeet.get(robotSide.getOppositeSide()));
          FootSwitchInterface footSwitch = footSwitchFactory.newFootSwitch(namePrefix,
