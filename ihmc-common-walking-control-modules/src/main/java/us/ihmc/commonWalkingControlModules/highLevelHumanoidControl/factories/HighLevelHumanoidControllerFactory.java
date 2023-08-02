@@ -585,12 +585,13 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    {
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<FootSwitchInterface>();
 
-      FootSwitchFactory footSwitchFactory = walkingControllerParameters.getFootSwitchFactory();
+      SideDependentList<FootSwitchFactory> footSwitchFactories = walkingControllerParameters.getFootSwitchFactories();
 
       for (RobotSide robotSide : RobotSide.values)
       {
          String footName = bipedFeet.get(robotSide).getName();
          ForceSensorDataReadOnly footForceSensor = forceSensorDataHolder.getByName(footSensorNames.get(robotSide));
+         FootSwitchFactory footSwitchFactory = footSwitchFactories.get(robotSide);
          FootSwitchInterface footSwitch = footSwitchFactory.newFootSwitch(footName,
                                                                           bipedFeet.get(robotSide),
                                                                           Collections.singleton(bipedFeet.get(robotSide.getOppositeSide())),

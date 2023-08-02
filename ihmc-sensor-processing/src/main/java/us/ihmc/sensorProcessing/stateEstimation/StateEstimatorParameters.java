@@ -194,6 +194,12 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
 
    public abstract FootSwitchFactory getFootSwitchFactory();
 
+   public SideDependentList<FootSwitchFactory> getFootSwitchFactories()
+   {
+      FootSwitchFactory footSwitchFactory = getFootSwitchFactory();
+      return new SideDependentList<>(footSwitchFactory, footSwitchFactory);
+   }
+
    public abstract boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact();
 
    public abstract boolean useGroundReactionForcesToComputeCenterOfMassVelocity();
