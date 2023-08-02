@@ -431,10 +431,11 @@ public class FootstepCheckerTest
       FootstepChecker nodeChecker = new FootstepChecker(parameters, footPolygons, snapper, null, registry);
       nodeChecker.setPlanarRegions(planarRegionsList);
 
-      DiscreteFootstep step0 = new DiscreteFootstep(-0.1, -0.1, 0.0, RobotSide.RIGHT);
-      DiscreteFootstep step1 = new DiscreteFootstep(0.0, 0.1, 0.0, RobotSide.LEFT);
-      DiscreteFootstep step2 = new DiscreteFootstep(0.0, -0.1, 0.0, RobotSide.RIGHT);
+      DiscreteFootstep step0 = new DiscreteFootstep(-0.1, -0.1, 0.0, RobotSide.RIGHT); // the previous right foot position
+      DiscreteFootstep step1 = new DiscreteFootstep(0.0, 0.1, 0.0, RobotSide.LEFT); // the left foot stance position for executing step 2
+      DiscreteFootstep step2 = new DiscreteFootstep(0.0, -0.1, 0.0, RobotSide.RIGHT); // the candidate right foot position after the swing.
 
+      // This should be true, as it just a translation of 10 cm forward.
       // TODO add getter for rejection reason or retreive from
       assertTrue(nodeChecker.isStepValid(step2, step1, step0));
 //      assertEquals(null, nodeChecker.getRejectionReason());
@@ -450,18 +451,21 @@ public class FootstepCheckerTest
          nodeChecker.setPlanarRegions(planarRegionsList);
          environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
 
-         Assert.assertTrue(nodeChecker.isStepValid(step2, step1, step0));
-//         assertEquals(null, registry.getRejectionReason());
+         assertTrue(nodeChecker.isStepValid(step2, step1, step0));
+         //         assertEquals(null, registry.getRejectionReason());
 
          transformToWorld.setIdentity();
          transformToWorld.appendPitchRotation(rotationAngle);
          planarRegion.set(transformToWorld, polygons);
          nodeChecker.setPlanarRegions(planarRegionsList);
+         environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
+         snapper.clearSnapData();
 
-         Assert.assertTrue(nodeChecker.isStepValid(step2, step1, step0));
+         assertTrue(nodeChecker.isStepValid(step2, step1, step0));
 //         assertEquals(null, registry.getRejectionReason());
       }
 
+      // This should be false, as
       for (rotationAngle = parameters.getMinimumSurfaceInclineRadians() + 0.001; rotationAngle < Math.toRadians(75); rotationAngle += 0.001)
       {
          transformToWorld.setIdentity();
@@ -469,14 +473,17 @@ public class FootstepCheckerTest
          planarRegion.set(transformToWorld, polygons);
          environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
          nodeChecker.setPlanarRegions(planarRegionsList);
+         snapper.clearSnapData();
 
          assertFalse("rotation = " + rotationAngle, nodeChecker.isStepValid(step2, step1, step0));
-//         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, registry.getRejectionReason());
+         //         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, registry.getRejectionReason());
 
          transformToWorld.setIdentity();
          transformToWorld.appendPitchRotation(rotationAngle);
          planarRegion.set(transformToWorld, polygons);
          nodeChecker.setPlanarRegions(planarRegionsList);
+         environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
+         snapper.clearSnapData();
 
          assertFalse("rotation = " + rotationAngle, nodeChecker.isStepValid(step2, step1, step0));
 //         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, registry.getRejectionReason());
@@ -489,14 +496,17 @@ public class FootstepCheckerTest
          planarRegion.set(transformToWorld, polygons);
          nodeChecker.setPlanarRegions(planarRegionsList);
          environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
+         snapper.clearSnapData();
 
          assertFalse("rotation = " + rotationAngle, nodeChecker.isStepValid(step2, step1, step0));
-//         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, registry.getRejectionReason());
+         //         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, registry.getRejectionReason());
 
          transformToWorld.setIdentity();
          transformToWorld.appendPitchRotation(rotationAngle);
          planarRegion.set(transformToWorld, polygons);
          nodeChecker.setPlanarRegions(planarRegionsList);
+         environmentHandler.setPrimaryPlanarRegions(planarRegionsList);
+         snapper.clearSnapData();
 
          assertFalse("rotation = " + rotationAngle, nodeChecker.isStepValid(step2, step1, step0));
 //         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, registry.getRejectionReason());
