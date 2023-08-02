@@ -106,10 +106,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
          footstep.calculateVRPick(vrContext);
 
          //TODO check if footstep is hovered in vr
-         if (footstep.isHovered())
-         {
-            selectedFootstep = footstep;
-         }
       }
       if (selectedFootstep != null)
       {

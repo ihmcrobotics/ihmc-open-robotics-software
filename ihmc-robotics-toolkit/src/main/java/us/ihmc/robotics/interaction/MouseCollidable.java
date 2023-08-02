@@ -60,7 +60,7 @@ public class MouseCollidable
       }
    }
 
-   public boolean pointCollide(Point3DReadOnly pickPoint)
+   public boolean pointCollide(FramePoint3DReadOnly pickPoint)
    {
       return shape.isPointInside(pickPoint);
    }
