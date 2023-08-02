@@ -22,12 +22,12 @@ public class RDXSplineDemo
          public void create()
          {
             baseUI.create();
-            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
+            baseUI.getPrimary3DPanel().getScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
 
             spline = new RDXSplineGraphic();
             spline.createStart(new Point3D(0.1, 0.1, 0.1), Color.BLUE);
 
-            baseUI.getPrimaryScene().addRenderableProvider(spline);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(spline);
             startTime = System.currentTimeMillis();
          }
 

@@ -40,8 +40,8 @@ public class RDXImGuiBasedUIDemo
          {
             baseUI.create();
 
-            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
-            baseUI.getPrimaryScene().addModelInstance(new BoxesDemoModel().newInstance());
+            baseUI.getPrimary3DPanel().getScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
+            baseUI.getPrimary3DPanel().getScene().addModelInstance(new BoxesDemoModel().newInstance());
 
             baseUI.getImGuiPanelManager().addPanel("Window 1", RDXImGuiBasedUIDemo.this::renderWindow1);
             baseUI.getImGuiPanelManager().addPanel("Window 2", RDXImGuiBasedUIDemo.this::renderWindow2);
@@ -72,7 +72,7 @@ public class RDXImGuiBasedUIDemo
             hoverboardButton.loadAndSetIcon("icons/hoverboard.png");
 
             RDX3DPanel second3DPanel = new RDX3DPanel("Second 3D View", true);
-            baseUI.add3DPanel(second3DPanel);
+            baseUI.getImGuiPanelManager().addPanel(second3DPanel);
 
             logWidget.submitEntry(Level.WARN, "WARN at " + LocalDateTime.now());
             logWidget.submitEntry(Level.ERROR, "ERROR at " + LocalDateTime.now());

@@ -17,11 +17,11 @@ public class RDX3DTextRenderingDemo
          {
             baseUI.create();
 
-            baseUI.getPrimaryScene().addCoordinateFrame(0.3);
-            baseUI.getPrimaryScene().addModelInstance(new BoxesDemoModel().newInstance());
+            baseUI.getPrimary3DPanel().getScene().addCoordinateFrame(0.3);
+            baseUI.getPrimary3DPanel().getScene().addModelInstance(new BoxesDemoModel().newInstance());
 
             text = new RDX3DSituatedText("test");
-            baseUI.getPrimaryScene().addRenderableProvider(text);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(text);
          }
 
          @Override

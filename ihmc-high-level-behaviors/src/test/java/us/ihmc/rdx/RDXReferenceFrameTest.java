@@ -51,7 +51,7 @@ public class RDXReferenceFrameTest
             userReferenceFrameGraphic = new RDXReferenceFrameGraphic(0.2);
             userReferenceFrameGraphic.setToReferenceFrame(userReferenceFrame);
 
-            baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(this::getRenderables);
             baseUI.getImGuiPanelManager().addPanel("Reference Frames", this::renderImGuiWidgets);
          }
 

@@ -61,11 +61,11 @@ public class RDXVRDepthSensorDemo
          {
             baseUI.create();
 
-            baseUI.getPrimaryScene().addCoordinateFrame(1.0);
+            baseUI.getPrimary3DPanel().getScene().addCoordinateFrame(1.0);
             DepthSensorDemoObjectsModel depthSensorDemoObjectsModel = new DepthSensorDemoObjectsModel();
             cylinder = depthSensorDemoObjectsModel.buildCylinder();
-            baseUI.getPrimaryScene().addModelInstance(cylinder);
-            baseUI.getPrimaryScene().addModelInstance(depthSensorDemoObjectsModel.newInstance());
+            baseUI.getPrimary3DPanel().getScene().addModelInstance(cylinder);
+            baseUI.getPrimary3DPanel().getScene().addModelInstance(depthSensorDemoObjectsModel.newInstance());
 
             RigidBodyTransform initialCameraTransform = new RigidBodyTransform();
             initialCameraTransform.appendOrientation(new AxisAngle(Axis3D.Z, Math.PI / 2.0));
@@ -82,7 +82,7 @@ public class RDXVRDepthSensorDemo
             {
                ModelInstance coordinateFrameInstance = RDXModelBuilder.createCoordinateFrameInstance(0.1);
                controllerCoordinateFrames.put(side, coordinateFrameInstance);
-               baseUI.getPrimaryScene().addModelInstance(coordinateFrameInstance, RDXSceneLevel.VIRTUAL);
+               baseUI.getPrimary3DPanel().getScene().addModelInstance(coordinateFrameInstance, RDXSceneLevel.VIRTUAL);
             }
 
             baseUI.getVRManager().getContext().addVRInputProcessor(this::handleVREvents);
@@ -95,7 +95,7 @@ public class RDXVRDepthSensorDemo
             gizmo.getTransformToParent().set(initialCameraTransform);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(gizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(gizmo::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(this::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(this::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
          }
 
          private void handleVREvents(RDXVRContext vrContext)
@@ -145,7 +145,7 @@ public class RDXVRDepthSensorDemo
             {
                pointColorFromPicker.set(color[0], color[1], color[2], color[3]);
                Color pointColor = useSensorColor.get() ? null : pointColorFromPicker;
-               depthSensorSimulator.render(baseUI.getPrimaryScene(), colorBasedOnWorldZ.get(), pointColor, pointSize.get());
+               depthSensorSimulator.render(baseUI.getPrimary3DPanel().getScene(), colorBasedOnWorldZ.get(), pointColor, pointSize.get());
                pointCloudRenderer.updateMeshFastest(depthSensorSimulator.getNumberOfPoints());
             }
 

@@ -50,7 +50,7 @@ public class RDXHighLevelDepthSensorDemo
             sensorPoseGizmo.setResizeAutomatically(true);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
 //            sensorPoseGizmo.getTransformToParent().appendTranslation(2.2, 0.0, 1.0);
 //            sensorPoseGizmo.getTransformToParent().appendPitchRotation(Math.PI / 4.0);
 
@@ -85,10 +85,10 @@ public class RDXHighLevelDepthSensorDemo
             highLevelDepthSensorSimulator.setRenderDepthVideoDirectly(true);
             highLevelDepthSensorSimulator.setPublishColorImageROS1(false);
             highLevelDepthSensorSimulator.setPublishColorImageROS2(false);
-            baseUI.getPrimaryScene().addRenderableProvider(highLevelDepthSensorSimulator::getRenderables);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(highLevelDepthSensorSimulator::getRenderables);
 
             mousePickSphere = RDXModelBuilder.createSphere(0.03f, Color.RED);
-            baseUI.getPrimaryScene().addRenderableProvider(mousePickSphere, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(mousePickSphere, RDXSceneLevel.VIRTUAL);
 
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(input ->
             {
@@ -104,17 +104,17 @@ public class RDXHighLevelDepthSensorDemo
             });
 
             RDX3DPanel panel3D = new RDX3DPanel("3D View 2", true);
-            baseUI.add3DPanel(panel3D);
+            baseUI.getImGuiPanelManager().addPanel(panel3D);
 
             frustumVisualizer = new RDXFrustumGraphic();
-            baseUI.getPrimaryScene().addRenderableProvider(frustumVisualizer::getRenderables, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(frustumVisualizer::getRenderables, RDXSceneLevel.VIRTUAL);
          }
 
 
          @Override
          public void render()
          {
-            highLevelDepthSensorSimulator.render(baseUI.getPrimaryScene());
+            highLevelDepthSensorSimulator.render(baseUI.getPrimary3DPanel().getScene());
 
             int aliasedRenderedAreaWidth = (int) baseUI.getPrimary3DPanel().getRenderSizeX();
             int aliasedRenderedAreaHeight = (int) baseUI.getPrimary3DPanel().getRenderSizeY();

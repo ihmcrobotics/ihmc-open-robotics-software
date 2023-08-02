@@ -105,7 +105,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 
             //createOuster(128, 1024);
 
-            baseUI.getPrimaryScene().addRenderableProvider(RDXRapidRegionsExtractionDemo.this, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(RDXRapidRegionsExtractionDemo.this, RDXSceneLevel.VIRTUAL);
 
             if (!mocapPositionBuffer.isEmpty())
             {
@@ -114,10 +114,10 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
                mocapGraphic.generateMeshes(mocapPositionBuffer, 10);
                mocapGraphic.update();
 
-               baseUI.getPrimaryScene().addRenderableProvider(mocapGraphic, RDXSceneLevel.VIRTUAL);
+               baseUI.getPrimary3DPanel().getScene().addRenderableProvider(mocapGraphic, RDXSceneLevel.VIRTUAL);
             }
 
-            baseUI.getPrimaryScene().addRenderableProvider(rootJointGraphic, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(rootJointGraphic, RDXSceneLevel.VIRTUAL);
 
             rootJointGraphic.generateMeshes(sensorPositionBuffer, 5);
             rootJointGraphic.update();

@@ -77,7 +77,7 @@ public class RDXFootstepPlannerLogViewer
       scene3D.create(RDXSceneLevel.values());
       scene3D.addDefaultLighting();
       panel3D = new RDX3DPanel("Footstep Planner Log 3D View");
-      baseUI.add3DPanel(panel3D, scene3D);
+      baseUI.getImGuiPanelManager().addPanel(panel3D);
       panel3D.addChild(new ImGuiPanel("Footstep Planner Log Viewer Controls", this::renderImGuiWidgets));
       scene3D.addRenderableProvider(this::getRenderables);
       panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);

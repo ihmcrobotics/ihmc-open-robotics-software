@@ -42,7 +42,7 @@ public class RDXROS2VideoSensorDemo
             sensorPoseGizmo.setResizeAutomatically(true);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
 
             PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
             globalVisualizersPanel = new RDXGlobalVisualizersPanel();
@@ -89,13 +89,13 @@ public class RDXROS2VideoSensorDemo
             highLevelDepthSensorSimulator.setRenderDepthVideoDirectly(false);
             highLevelDepthSensorSimulator.setPublishColorImageROS1(false);
             highLevelDepthSensorSimulator.setPublishColorImageROS2(true);
-            baseUI.getPrimaryScene().addRenderableProvider(highLevelDepthSensorSimulator::getRenderables);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(highLevelDepthSensorSimulator::getRenderables);
          }
 
          @Override
          public void render()
          {
-            highLevelDepthSensorSimulator.render(baseUI.getPrimaryScene());
+            highLevelDepthSensorSimulator.render(baseUI.getPrimary3DPanel().getScene());
             globalVisualizersPanel.update();
 
             for (RDXEnvironmentObject allObject : environmentBuilder.getAllObjects())

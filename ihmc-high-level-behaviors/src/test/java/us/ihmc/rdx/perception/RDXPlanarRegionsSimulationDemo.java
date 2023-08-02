@@ -49,13 +49,13 @@ public class RDXPlanarRegionsSimulationDemo
             robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.getPrimary3DPanel());
             robotInteractableReferenceFrame.getTransformToParent().getTranslation().add(2.2, 0.0, 1.0);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(robotInteractableReferenceFrame::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(robotInteractableReferenceFrame::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(robotInteractableReferenceFrame::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
             l515PoseGizmo = new RDXPose3DGizmo(robotInteractableReferenceFrame.getRepresentativeReferenceFrame());
             l515PoseGizmo.create(baseUI.getPrimary3DPanel());
             l515PoseGizmo.setResizeAutomatically(false);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(l515PoseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(l515PoseGizmo::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(l515PoseGizmo, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(l515PoseGizmo, RDXSceneLevel.VIRTUAL);
             l515PoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(60.0));
          }
 
@@ -77,7 +77,7 @@ public class RDXPlanarRegionsSimulationDemo
                   steppingL515Simulator.setRenderDepthVideoDirectly(true);
                   steppingL515Simulator.setPublishColorImageROS1(false);
                   steppingL515Simulator.setPublishColorImageROS2(false);
-                  baseUI.getPrimaryScene().addRenderableProvider(steppingL515Simulator::getRenderables);
+                  baseUI.getPrimary3DPanel().getScene().addRenderableProvider(steppingL515Simulator::getRenderables);
 
                   bytedecoDepthImage = new BytedecoImage(steppingL515Simulator.getLowLevelSimulator().getImageWidth(),
                                                          steppingL515Simulator.getLowLevelSimulator().getImageHeight(),
@@ -87,14 +87,14 @@ public class RDXPlanarRegionsSimulationDemo
 
                   rapidRegionsUI.create(rapidPlanarRegionsExtractor);
                   baseUI.getImGuiPanelManager().addPanel(rapidRegionsUI.getPanel());
-                  baseUI.getPrimaryScene().addRenderableProvider(rapidRegionsUI, RDXSceneLevel.VIRTUAL);
+                  baseUI.getPrimary3DPanel().getScene().addRenderableProvider(rapidRegionsUI, RDXSceneLevel.VIRTUAL);
 
                   baseUI.getLayoutManager().reloadLayout();
 
                   initialized = true;
                }
 
-               steppingL515Simulator.render(baseUI.getPrimaryScene());
+               steppingL515Simulator.render(baseUI.getPrimary3DPanel().getScene());
 
                if (rapidRegionsUI.getEnabled().get())
                {

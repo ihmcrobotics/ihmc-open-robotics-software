@@ -55,7 +55,7 @@ public class RDXPerceptionSceneGraphDemo
 
             globalVisualizersUI = new RDXGlobalVisualizersPanel();
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersUI);
-            baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(globalVisualizersUI);
 
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();
@@ -66,12 +66,12 @@ public class RDXPerceptionSceneGraphDemo
             sensorPoseGizmo.setResizeAutomatically(true);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
 
             simulatedCamera = RDXSimulatedSensorFactory.createBlackflyFisheye(sensorPoseGizmo.getGizmoFrame(), System::nanoTime);
             simulatedCamera.setSensorEnabled(true);
             simulatedCamera.setRenderColorVideoDirectly(true);
-            baseUI.getPrimaryScene().addRenderableProvider(simulatedCamera::getRenderables);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(simulatedCamera::getRenderables);
 
             arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
             arUcoMarkerDetection.create(simulatedCamera.getSensorFrame());
@@ -95,7 +95,7 @@ public class RDXPerceptionSceneGraphDemo
                                                                                         ros2Helper,
                                                                                         ROS2IOTopicQualifier.COMMAND);
             perceptionSceneGraphUI = new RDXPerceptionSceneGraphUI(operatorPredefinedSceneNodeLibrary, ros2Helper, baseUI.getPrimary3DPanel());
-            baseUI.getPrimaryScene().addRenderableProvider(perceptionSceneGraphUI::getRenderables);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(perceptionSceneGraphUI::getRenderables);
             baseUI.getImGuiPanelManager().addPanel(perceptionSceneGraphUI.getPanel());
 
             openCVArUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI();
@@ -109,7 +109,7 @@ public class RDXPerceptionSceneGraphDemo
          public void render()
          {
             environmentBuilder.update();
-            simulatedCamera.render(baseUI.getPrimaryScene());
+            simulatedCamera.render(baseUI.getPrimary3DPanel().getScene());
             arUcoMarkerDetection.update();
             openCVArUcoMarkerDetectionUI.update();
 

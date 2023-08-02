@@ -50,7 +50,7 @@ public class RDXDoorHandleDetectionDemo
                   sensorPoseGizmo.process3DViewInput(input);
                }
             });
-            baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
             sensorPoseGizmo.getTransformToParent().appendTranslation(0.0, 0.0, 1.0);
 
             baseUI.getImGuiPanelManager().addPanel("Door Handle Tracking Demo", this::renderImGuiWidgets);
@@ -59,7 +59,7 @@ public class RDXDoorHandleDetectionDemo
             cameraSensor.setSensorEnabled(true);
             cameraSensor.setRenderColorVideoDirectly(true);
             baseUI.getImGuiPanelManager().addPanel(cameraSensor);
-            baseUI.getPrimaryScene().addRenderableProvider(cameraSensor::getRenderables);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(cameraSensor::getRenderables);
 
             doorHandleDetectionUI = new RDXOpenCVOpticalFlowTrackingUI();
             doorHandleDetectionUI.create(cameraSensor.getLowLevelSimulator().getRGBA8888ColorImage());
@@ -70,7 +70,7 @@ public class RDXDoorHandleDetectionDemo
          public void render()
          {
             environmentBuilder.update();
-            cameraSensor.render(baseUI.getPrimaryScene());
+            cameraSensor.render(baseUI.getPrimary3DPanel().getScene());
             doorHandleDetectionUI.update();
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();

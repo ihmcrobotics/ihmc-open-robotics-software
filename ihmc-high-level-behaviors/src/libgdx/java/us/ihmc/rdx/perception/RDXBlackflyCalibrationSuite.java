@@ -189,7 +189,7 @@ public class RDXBlackflyCalibrationSuite
             arUcoMarkerDetectionUI.create(openCVArUcoMarkerDetection);
             arUcoMarkerDetectionUI.setupForRenderingDetectedPosesIn3D(markersToTrack, blackflySensorFrame);
             baseUI.getImGuiPanelManager().addPanel(arUcoMarkerDetectionUI.getMainPanel());
-            baseUI.getPrimaryScene().addRenderableProvider(arUcoMarkerDetectionUI::getRenderables, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(arUcoMarkerDetectionUI::getRenderables, RDXSceneLevel.VIRTUAL);
 
             grayscaleImage = new Mat();
             calibrationPatternOutput = new Mat();
@@ -315,7 +315,7 @@ public class RDXBlackflyCalibrationSuite
                {
                   nettyOusterUI.createAfterOusterInitialized();
 
-                  baseUI.getPrimaryScene().addRenderableProvider(nettyOusterUI::getRenderables);
+                  baseUI.getPrimary3DPanel().getScene().addRenderableProvider(nettyOusterUI::getRenderables);
                   baseUI.getImGuiPanelManager().addPanel(nettyOusterUI.getImagePanel().getImagePanel());
                   baseUI.getLayoutManager().reloadLayout();
                }

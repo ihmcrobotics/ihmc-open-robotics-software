@@ -27,7 +27,7 @@ public class RDXSCS2DoorDemo
          public void create()
          {
             baseUI.create();
-            baseUI.getPrimaryScene().getSceneLevelsToRender().add(RDXSceneLevel.GROUND_TRUTH);
+            baseUI.getPrimary3DPanel().getScene().getSceneLevelsToRender().add(RDXSceneLevel.GROUND_TRUTH);
 
             visualOnlySession = new RDXSCS2Session();
             SimulationSession simulationSession = new SimulationSession(BulletPhysicsEngine::new);
@@ -49,7 +49,7 @@ public class RDXSCS2DoorDemo
 
             visualOnlySession.create(baseUI);
             visualOnlySession.startSession(simulationSession);
-            baseUI.getPrimaryScene().addRenderableProvider(visualOnlySession::getRenderables);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(visualOnlySession::getRenderables);
             baseUI.getImGuiPanelManager().addPanel(visualOnlySession.getControlPanel());
          }
 

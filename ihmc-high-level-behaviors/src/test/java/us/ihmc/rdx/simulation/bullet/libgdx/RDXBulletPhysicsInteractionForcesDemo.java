@@ -119,7 +119,7 @@ public class RDXBulletPhysicsInteractionForcesDemo
          public void create()
          {
             baseUI.create();
-            baseUI.getPrimaryScene().addCoordinateFrame(0.3);
+            baseUI.getPrimary3DPanel().getScene().addCoordinateFrame(0.3);
 
             environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder);
@@ -128,7 +128,7 @@ public class RDXBulletPhysicsInteractionForcesDemo
             environmentBuilder.addObject(labFloorObject);
             labFloorObject.copyThisTransformToBulletMultiBody();
 
-            baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(this::getRenderables);
 
             recreateAndPlace();
 

@@ -94,7 +94,7 @@ public class RDXNettyOusterFisheyeColorDemo
                {
                   nettyOusterUI.createAfterOusterInitialized();
 
-                  baseUI.getPrimaryScene().addRenderableProvider(nettyOusterUI::getRenderables);
+                  baseUI.getPrimary3DPanel().getScene().addRenderableProvider(nettyOusterUI::getRenderables);
                   baseUI.getImGuiPanelManager().addPanel(nettyOusterUI.getImagePanel().getImagePanel());
                   baseUI.getLayoutManager().reloadLayout();
                }

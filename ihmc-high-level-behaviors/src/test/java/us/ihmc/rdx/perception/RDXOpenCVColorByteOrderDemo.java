@@ -45,14 +45,14 @@ public class RDXOpenCVColorByteOrderDemo
             sensorPoseGizmo.setResizeAutomatically(true);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
 
             highLevelDepthSensorSimulator = RDXSimulatedSensorFactory.createRealsenseL515(sensorPoseGizmo.getGizmoFrame(), null);
             baseUI.getImGuiPanelManager().addPanel(highLevelDepthSensorSimulator);
             highLevelDepthSensorSimulator.setSensorEnabled(true);
             highLevelDepthSensorSimulator.getLowLevelSimulator().setDepthEnabled(false);
             highLevelDepthSensorSimulator.setRenderColorVideoDirectly(true);
-            baseUI.getPrimaryScene().addRenderableProvider(highLevelDepthSensorSimulator::getRenderables);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(highLevelDepthSensorSimulator::getRenderables);
 
             ImGuiPanel panel = new ImGuiPanel("Color Byte Order Debugging", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
@@ -116,7 +116,7 @@ public class RDXOpenCVColorByteOrderDemo
                allObject.getRealisticModelInstance().setDiffuseColor(gdxColor);
             }
 
-            highLevelDepthSensorSimulator.render(baseUI.getPrimaryScene());
+            highLevelDepthSensorSimulator.render(baseUI.getPrimary3DPanel().getScene());
 
             openCVImagePanel.draw();
 

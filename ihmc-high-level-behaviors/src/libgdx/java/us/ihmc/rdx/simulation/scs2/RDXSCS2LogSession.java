@@ -55,7 +55,7 @@ public class RDXSCS2LogSession extends RDXSCS2Session
 
       for (RDXOpenCVVideoVisualizer visualizer : imagePanels)
       {
-         baseUI.getPrimaryScene().addRenderableProvider(visualizer);
+         baseUI.getPrimary3DPanel().getScene().addRenderableProvider(visualizer);
       }
    }
 

@@ -89,7 +89,7 @@ public class RDXRapidHeightMapExtractionDemo
             navigationPanel = new ImGuiPanel("Dataset Navigation Panel");
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
 
-            baseUI.getPrimaryScene().addRenderableProvider(heightMapRenderer, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(heightMapRenderer, RDXSceneLevel.VIRTUAL);
 
             createForOuster(128, 2048);
 

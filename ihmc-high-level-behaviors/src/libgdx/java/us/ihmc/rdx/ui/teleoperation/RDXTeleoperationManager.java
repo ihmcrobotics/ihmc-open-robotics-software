@@ -286,7 +286,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       standPrepButton.setOnPressed(robotLowLevelMessenger::sendStandRequest);
       standPrepButton.setTooltipText("Stand prep");
 
-      baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
+      baseUI.getPrimary3DPanel().getScene().addRenderableProvider(this::getRenderables);
    }
 
    public void update()

@@ -87,11 +87,11 @@ public class RDXLoggingDevelopmentUI
          {
             baseUI.create();
 
-            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
-            baseUI.getPrimaryScene().addModelInstance(new BoxesDemoModel().newInstance());
+            baseUI.getPrimary3DPanel().getScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
+            baseUI.getPrimary3DPanel().getScene().addModelInstance(new BoxesDemoModel().newInstance());
 
             planarRegionsGraphic = new RDXPlanarRegionsGraphic();
-            baseUI.getPrimaryScene().addRenderableProvider(planarRegionsGraphic);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(planarRegionsGraphic);
 
             //Task gets state
             timer.scheduleAtFixedRate(new TimerTask()

@@ -39,12 +39,12 @@ public class RDXPlanarRegionLoggingDevelopmentUI
          {
             baseUI.create();
 
-            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
+            baseUI.getPrimary3DPanel().getScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
 
             panel = new RDXPlanarRegionLoggingPanel();
             panel.create();
             baseUI.getImGuiPanelManager().addPanel(panel.getWindowName(), panel::renderImGuiWidgets);
-            baseUI.getPrimaryScene().addRenderableProvider(panel);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(panel);
 
             timer.scheduleAtFixedRate(new TimerTask()
             {

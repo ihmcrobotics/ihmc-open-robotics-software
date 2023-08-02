@@ -19,7 +19,7 @@ public class RDXSCS2FlyingBallOrbitalEnergyTest
          public void create()
          {
             baseUI.create();
-            baseUI.getPrimaryScene().getSceneLevelsToRender().add(RDXSceneLevel.GROUND_TRUTH);
+            baseUI.getPrimary3DPanel().getScene().getSceneLevelsToRender().add(RDXSceneLevel.GROUND_TRUTH);
 
             scs2SimulationSession = new RDXSCS2SimulationSession();
             scs2SimulationSession.create(baseUI);

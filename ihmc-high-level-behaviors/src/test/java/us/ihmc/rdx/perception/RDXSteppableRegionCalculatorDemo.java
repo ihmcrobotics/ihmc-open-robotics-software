@@ -68,7 +68,7 @@ public class RDXSteppableRegionCalculatorDemo
       steppableRegionsVisualizer.setActive(true);
 
       baseUI.getImGuiPanelManager().addPanel(globalVisualizersUI);
-      baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI);
+      baseUI.getPrimary3DPanel().getScene().addRenderableProvider(globalVisualizersUI);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -108,13 +108,13 @@ public class RDXSteppableRegionCalculatorDemo
             robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.getPrimary3DPanel());
             robotInteractableReferenceFrame.getTransformToParent().getTranslation().add(2.2, 1.25, 1.0);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(robotInteractableReferenceFrame::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(robotInteractableReferenceFrame::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(robotInteractableReferenceFrame::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
             ousterPoseGizmo = new RDXPose3DGizmo(robotInteractableReferenceFrame.getRepresentativeReferenceFrame());
             ousterPoseGizmo.create(baseUI.getPrimary3DPanel());
             ousterPoseGizmo.setResizeAutomatically(false);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(ousterPoseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ousterPoseGizmo::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(ousterPoseGizmo, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(ousterPoseGizmo, RDXSceneLevel.VIRTUAL);
             ousterPoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(60.0));
 
             ousterLidarSimulator = RDXSimulatedSensorFactory.createOusterLidar(ousterPoseGizmo.getGizmoFrame(), () -> 0L);
@@ -131,7 +131,7 @@ public class RDXSteppableRegionCalculatorDemo
             globalVisualizersUI.addVisualizer(ousterPointCloudVisualizer);
 
             baseUI.getImGuiPanelManager().addPanel(ousterLidarSimulator);
-            baseUI.getPrimaryScene().addRenderableProvider(ousterLidarSimulator::getRenderables);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(ousterLidarSimulator::getRenderables);
 
             baseUI.getImGuiPanelManager().addPanel(steppableRegionsUI.getBasePanel());
 
@@ -142,7 +142,7 @@ public class RDXSteppableRegionCalculatorDemo
          @Override
          public void render()
          {
-            ousterLidarSimulator.render(baseUI.getPrimaryScene());
+            ousterLidarSimulator.render(baseUI.getPrimary3DPanel().getScene());
 
             heightMap.update();
             heightMapVisualizer.update();

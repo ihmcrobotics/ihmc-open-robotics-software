@@ -129,7 +129,7 @@ public class RDXBehaviorUIManager
       imNodeBehaviorTreeUI.create();
 
       highestLevelUI.create(baseUI);
-      baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
+      baseUI.getPrimary3DPanel().getScene().addRenderableProvider(this::getRenderables);
    }
 
    public void handleVREvents(RDXVRContext vrContext)

@@ -50,14 +50,14 @@ public class RDXArUcoMarkerDetectionDemo
             sensorPoseGizmo.setResizeAutomatically(true);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
             sensorPoseGizmo.getTransformToParent().appendTranslation(0.0, 0.0, 1.0);
 
             cameraSensor = RDXSimulatedSensorFactory.createBlackflyFisheyeImageOnlyNoComms(sensorPoseGizmo.getGizmoFrame());
             cameraSensor.setSensorEnabled(true);
             cameraSensor.setRenderColorVideoDirectly(true);
             baseUI.getImGuiPanelManager().addPanel(cameraSensor);
-            baseUI.getPrimaryScene().addRenderableProvider(cameraSensor::getRenderables);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(cameraSensor::getRenderables);
 
             arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
             arUcoMarkerDetection.create(cameraSensor.getSensorFrame());
@@ -70,7 +70,7 @@ public class RDXArUcoMarkerDetectionDemo
             arUcoMarkerDetectionUI.create(arUcoMarkerDetection);
             arUcoMarkerDetectionUI.setupForRenderingDetectedPosesIn3D(markersToTrack, sensorPoseGizmo.getGizmoFrame());
             baseUI.getImGuiPanelManager().addPanel(arUcoMarkerDetectionUI.getMainPanel());
-            baseUI.getPrimaryScene().addRenderableProvider(arUcoMarkerDetectionUI::getRenderables, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(arUcoMarkerDetectionUI::getRenderables, RDXSceneLevel.VIRTUAL);
 
             loadTestImage();
 
@@ -92,7 +92,7 @@ public class RDXArUcoMarkerDetectionDemo
          {
             environmentBuilder.update();
 
-            cameraSensor.render(baseUI.getPrimaryScene());
+            cameraSensor.render(baseUI.getPrimary3DPanel().getScene());
 
             arUcoMarkerDetection.update();
             arUcoMarkerDetectionUI.update();

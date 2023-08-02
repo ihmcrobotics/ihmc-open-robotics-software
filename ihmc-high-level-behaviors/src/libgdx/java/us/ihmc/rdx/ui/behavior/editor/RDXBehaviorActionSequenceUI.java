@@ -148,7 +148,7 @@ public class RDXBehaviorActionSequenceUI
    public void createAndSetupDefault(RDXBaseUI baseUI)
    {
       baseUI.getImGuiPanelManager().addPanel(getManagerPanel());
-      baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables, RDXSceneLevel.VIRTUAL);
+      baseUI.getPrimary3DPanel().getScene().addRenderableProvider(this::getRenderables, RDXSceneLevel.VIRTUAL);
       baseUI.getVRManager().getContext().addVRPickCalculator(this::calculateVRPick);
       baseUI.getVRManager().getContext().addVRInputProcessor(this::processVRInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);

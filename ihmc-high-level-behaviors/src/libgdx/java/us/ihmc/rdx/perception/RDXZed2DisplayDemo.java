@@ -57,7 +57,7 @@ public class RDXZed2DisplayDemo
 
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);
             baseUI.create();
-            baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersPanel);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(globalVisualizersPanel);
             globalVisualizersPanel.create();
          }
 

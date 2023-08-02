@@ -23,7 +23,7 @@ public class RDXSCS2BulletSimulationDemos
          public void create()
          {
             baseUI.create();
-            baseUI.getPrimaryScene().getSceneLevelsToRender().add(RDXSceneLevel.GROUND_TRUTH);
+            baseUI.getPrimary3DPanel().getScene().getSceneLevelsToRender().add(RDXSceneLevel.GROUND_TRUTH);
 
             baseUI.getImGuiPanelManager().addPanel("Session Selection", this::renderSessionSelectionPanelImGuiWidgets);
 

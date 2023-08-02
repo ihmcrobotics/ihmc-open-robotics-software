@@ -81,7 +81,7 @@ public class RDXLibGDXBulletPhysicsDemo4
                world.add("poloytope", polytopeTransformGDX);
             }
             
-            baseUI.getPrimaryScene().addRenderableProvider((renderables, pool) ->
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider((renderables, pool) ->
             {
                for (BulletEntity entity : world.getEntities())
                {

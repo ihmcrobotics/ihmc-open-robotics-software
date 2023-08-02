@@ -80,15 +80,15 @@ public class RDXPlanarRegionMappingDemo
             mappingUI = new RDXPlanarRegionMappingUI("Filtered Map", mappingManager);
             baseUI.getImGuiPanelManager().addPanel(mappingUI.getImGuiPanel());
 
-            baseUI.getPrimaryScene().addRenderableProvider(mappingUI, RDXSceneLevel.VIRTUAL);
-            baseUI.getPrimaryScene().addRenderableProvider(mapPlanarRegionsGraphic::getRenderables, RDXSceneLevel.VIRTUAL);
-            baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer::getRenderables, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(mappingUI, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(mapPlanarRegionsGraphic::getRenderables, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(pointCloudRenderer::getRenderables, RDXSceneLevel.VIRTUAL);
 
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(mapPlanarRegionsGraphic::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(mapPlanarRegionsGraphic::process3DViewInput);
 
-            baseUI.getPrimaryScene().addRenderableProvider(mocapGraphic, RDXSceneLevel.VIRTUAL);
-            baseUI.getPrimaryScene().addRenderableProvider(rootJointGraphic, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(mocapGraphic, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(rootJointGraphic, RDXSceneLevel.VIRTUAL);
          }
 
          public void renderPlanarRegions()
@@ -114,7 +114,7 @@ public class RDXPlanarRegionMappingDemo
 
                for (ModelInstance model : poseModels)
                {
-                  baseUI.getPrimaryScene().addRenderableProvider(model, RDXSceneLevel.VIRTUAL);
+                  baseUI.getPrimary3DPanel().getScene().addRenderableProvider(model, RDXSceneLevel.VIRTUAL);
                }
 
                if (mappingUI.getPointCloudRenderEnabled())

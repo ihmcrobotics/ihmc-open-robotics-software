@@ -70,7 +70,7 @@ public class RDXSCS2Session
 
    public void create(RDXBaseUI baseUI, ImGuiPanel plotManagerParentPanel)
    {
-      baseUI.getPrimaryScene().addRenderableAdapter(renderables);
+      baseUI.getPrimary3DPanel().getScene().addRenderableAdapter(renderables);
       plotManager.create(baseUI.getLayoutManager(), plotManagerParentPanel);
    }
 
@@ -381,7 +381,7 @@ public class RDXSCS2Session
 
    public void destroy(RDXBaseUI baseUI)
    {
-      baseUI.getPrimaryScene().removeRenderableAdapter(renderables);
+      baseUI.getPrimary3DPanel().getScene().removeRenderableAdapter(renderables);
 
       plotManager.destroy();
 

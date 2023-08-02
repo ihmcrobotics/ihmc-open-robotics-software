@@ -29,12 +29,12 @@ public class RDXModelScalingDemo
             baseUI.create();
 
             scaledModel = new RDXModelInstanceScaler("right_wrist_roll_gripper.g3dj");
-            baseUI.getPrimaryScene().addRenderableProvider(scaledModel::getRenderables);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(scaledModel::getRenderables);
 
             ModelInstance sphere = RDXModelBuilder.createSphere(0.015f, Color.RED);
             LibGDXTools.toLibGDX(scaledModel.getWholeModelCentroid(), sphere.transform);
             LogTools.info(scaledModel.getWholeModelCentroid());
-            baseUI.getPrimaryScene().addModelInstance(sphere);
+            baseUI.getPrimary3DPanel().getScene().addModelInstance(sphere);
 
             baseUI.getPrimary3DPanel().getCamera3D().changeCameraPosition(-5.0, 5.0, 3.0);
 

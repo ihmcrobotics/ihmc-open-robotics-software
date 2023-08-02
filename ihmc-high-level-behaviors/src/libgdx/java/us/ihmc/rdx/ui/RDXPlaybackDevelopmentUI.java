@@ -45,10 +45,10 @@ public class RDXPlaybackDevelopmentUI
 
             baseUI.create();
 
-            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
+            baseUI.getPrimary3DPanel().getScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
 
             planarRegionsGraphic = new RDXPlanarRegionsGraphic();
-            baseUI.getPrimaryScene().addRenderableProvider(planarRegionsGraphic);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(planarRegionsGraphic);
          }
 
          @Override

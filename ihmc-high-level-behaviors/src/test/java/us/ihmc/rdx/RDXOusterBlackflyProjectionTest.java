@@ -71,7 +71,7 @@ public class RDXOusterBlackflyProjectionTest
 
             pointOnCMOSGraphic = RDXModelBuilder.createSphere(0.01f, Color.RED);
 
-            baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(this::getRenderables);
             baseUI.getImGuiPanelManager().addPanel("Reference Frames", this::renderImGuiWidgets);
          }
 

@@ -76,7 +76,7 @@ public class RDXLibGDXBulletPhysicsDemo
                world.add("box", boxTransformGDX);
             }
 
-            baseUI.getPrimaryScene().addRenderableProvider((renderables, pool) ->
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider((renderables, pool) ->
             {
                for (BulletEntity entity : world.getEntities())
                {

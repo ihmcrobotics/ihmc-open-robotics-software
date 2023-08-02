@@ -123,7 +123,7 @@ public class RDXRealsenseL515UI
                   createPointCloudKernel = openCLManager.createKernel(openCLProgram, "createPointCloud");
 
                   pointCloudRenderer.create(numberOfDepthPoints);
-                  baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer, RDXSceneLevel.MODEL);
+                  baseUI.getPrimary3DPanel().getScene().addRenderableProvider(pointCloudRenderer, RDXSceneLevel.MODEL);
 
                   pointCloudRenderingBuffer = new OpenCLFloatBuffer(numberOfDepthPoints * 8, pointCloudRenderer.getVertexBuffer());
                   depth32FC1Image.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);

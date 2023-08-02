@@ -45,7 +45,7 @@ public class RDXROS2PointCloudSensorDemo
             sensorPoseGizmo.setResizeAutomatically(true);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
 
             globalVisualizersPanel = new RDXGlobalVisualizersPanel();
 
@@ -57,7 +57,7 @@ public class RDXROS2PointCloudSensorDemo
 
             globalVisualizersPanel.create();
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);
-            baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersPanel);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(globalVisualizersPanel);
 
             highLevelDepthSensorSimulator = RDXSimulatedSensorFactory.createOusterLidar(sensorPoseGizmo.getGizmoFrame(), () -> 0L);
             highLevelDepthSensorSimulator.setupForROS2PointCloud(ros2Node, PerceptionAPI.OUSTER_POINT_CLOUD);
@@ -65,13 +65,13 @@ public class RDXROS2PointCloudSensorDemo
             highLevelDepthSensorSimulator.setSensorEnabled(true);
             highLevelDepthSensorSimulator.setPublishPointCloudROS2(true);
             highLevelDepthSensorSimulator.setDebugCoordinateFrame(true);
-            baseUI.getPrimaryScene().addRenderableProvider(highLevelDepthSensorSimulator::getRenderables);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(highLevelDepthSensorSimulator::getRenderables);
          }
 
          @Override
          public void render()
          {
-            highLevelDepthSensorSimulator.render(baseUI.getPrimaryScene());
+            highLevelDepthSensorSimulator.render(baseUI.getPrimary3DPanel().getScene());
             globalVisualizersPanel.update();
 
             for (RDXEnvironmentObject allObject : environmentBuilder.getAllObjects())

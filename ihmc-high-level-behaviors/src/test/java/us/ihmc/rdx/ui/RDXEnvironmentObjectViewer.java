@@ -21,11 +21,11 @@ public class RDXEnvironmentObjectViewer
          public void create()
          {
             baseUI.create();
-            baseUI.getPrimaryScene().getSceneLevelsToRender().add(RDXSceneLevel.GROUND_TRUTH);
+            baseUI.getPrimary3DPanel().getScene().getSceneLevelsToRender().add(RDXSceneLevel.GROUND_TRUTH);
 
             // Swap out this string to load different models
             Model model = RDXModelLoader.load("environmentObjects/ousterSensor/Ouster.g3dj");
-            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(model));
+            baseUI.getPrimary3DPanel().getScene().addModelInstance(new ModelInstance(model));
          }
 
          @Override

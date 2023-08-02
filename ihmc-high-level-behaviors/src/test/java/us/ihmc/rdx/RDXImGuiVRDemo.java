@@ -76,10 +76,10 @@ public class RDXImGuiVRDemo
             rightEyeZUpFrameGraphic = new RDXReferenceFrameGraphic(0.2);
             rightEyeZBackFrameGraphic = new RDXReferenceFrameGraphic(0.2);
 
-            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
-            baseUI.getPrimaryScene().addModelInstance(new BoxesDemoModel().newInstance());
+            baseUI.getPrimary3DPanel().getScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
+            baseUI.getPrimary3DPanel().getScene().addModelInstance(new BoxesDemoModel().newInstance());
 
-            baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(this::getRenderables);
             baseUI.getImGuiPanelManager().addPanel("VR Test", this::renderImGuiWidgets);
          }
 

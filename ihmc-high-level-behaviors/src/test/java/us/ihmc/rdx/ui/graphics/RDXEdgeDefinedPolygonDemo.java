@@ -21,7 +21,7 @@ public class RDXEdgeDefinedPolygonDemo
          public void create()
          {
             baseUI.create();
-            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
+            baseUI.getPrimary3DPanel().getScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
 
             Point3D[] spline1 = new Point3D[] {new Point3D(0.1, 0.6, 0.1), new Point3D(0.2, 0.5, 0.1), new Point3D(0.3, 0.5, 0.2)};
             Point3D[] spline2 = new Point3D[] {new Point3D(0.1, 0.1, 0.1), new Point3D(0.3, 0.3, 0.2), new Point3D(0.5, 0.3, 0.3)};
@@ -37,7 +37,7 @@ public class RDXEdgeDefinedPolygonDemo
             shape.closeShape();
             shape.generateMesh();
 
-            baseUI.getPrimaryScene().addRenderableProvider(shape);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(shape);
          }
 
          @Override

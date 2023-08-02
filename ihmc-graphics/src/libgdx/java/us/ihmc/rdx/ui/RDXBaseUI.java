@@ -95,8 +95,7 @@ public class RDXBaseUI
    private GLProfiler glProfiler;
    private RDXSettings settings;
 
-   private final RDX3DScene primaryScene = new RDX3DScene();
-   private final RDX3DPanel primary3DPanel;
+   private RDX3DPanel primary3DPanel;
    private final ArrayList<RDX3DPanel> additional3DPanels = new ArrayList<>();
    private final RDXVRManager vrManager = new RDXVRManager();
    private final RDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem;
@@ -195,9 +194,6 @@ public class RDXBaseUI
          //         ThreadTools.scheduleSingleExecution("DelayRecordingStart", this::startRecording, 2.0);
 //         ThreadTools.scheduleSingleExecution("SafetyStop", guiRecorder::stop, 1200.0);
       }
-
-      primary3DPanel = new RDX3DPanel(VIEW_3D_WINDOW_NAME, ANTI_ALIASING, true);
-      primary3DPanel.setBackgroundShade((float) view3DBackgroundShade.get());
    }
 
    /**
@@ -258,42 +254,49 @@ public class RDXBaseUI
 
    public void create(RDXSceneLevel... sceneLevels)
    {
+      Gdx.input.setInputProcessor(null); // detach from getting input events from GDX. TODO: Should we do this here?
+
       LogTools.info("Creating...");
       LibGDXTools.printGLVersion();
 
       if (LibGDXTools.ENABLE_OPENGL_DEBUGGER)
          glProfiler = LibGDXTools.createGLProfiler();
 
-      primaryScene.create(sceneLevels);
-      primaryScene.addDefaultLighting();
-      primary3DPanel.create(RDXInputMode.ImGui, glProfiler, primaryScene);
-      imGuiWindowAndDockSystem.getPanelManager().addPanel(primary3DPanel);
+      // Setup 3D panel
+      RDX3DScene scene = new RDX3DScene();
+      scene.create(sceneLevels);
+      scene.addDefaultLighting();
+      scene.addCoordinateFrame(0.3);
+      scene.addRenderableProvider(vrManager::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+
+      primary3DPanel = new RDX3DPanel(VIEW_3D_WINDOW_NAME, ANTI_ALIASING, true);
+      primary3DPanel.setBackgroundShade((float) view3DBackgroundShade.get());
+      primary3DPanel.create(RDXInputMode.ImGui, glProfiler, scene);
       primary3DPanel.getIsShowing().set(true);
-
-      Gdx.input.setInputProcessor(null); // detach from getting input events from GDX. TODO: Should we do this here?
-
       primary3DPanel.getCamera3D().changeCameraPosition(-isoZoomOut, -isoZoomOut, isoZoomOut);
-      primaryScene.addCoordinateFrame(0.3);
-
-      imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle());
-      setTheme(theme); // TODO: move theme stuff to RDXImGuiWindowAndDockSystem?
-      ImGui.getIO().setFontGlobalScale((float) imguiFontScale.get());
-
-      Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
-
-      vrManager.create();
-      primaryScene.addRenderableProvider(vrManager::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
       primary3DPanel.addImGui3DViewPickCalculator(vrManager::calculate3DViewPick);
       primary3DPanel.addImGui3DViewInputProcessor(vrManager::process3DViewInput);
+
+      imGuiWindowAndDockSystem.getPanelManager().addPanel(primary3DPanel);
+
+      imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle());
+
+      vrManager.create();
+
       imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Thread Debugger", vrManager::renderImGuiDebugWidgets);
       imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Settings", vrManager::renderImGuiTunerWidgets);
 
       keyBindings.register("Show key bindings", "Tab");
+
+      setTheme(theme); // TODO: move theme stuff to RDXImGuiWindowAndDockSystem?
+      ImGui.getIO().setFontGlobalScale((float) imguiFontScale.get());
+
+      Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
    }
 
    public void renderBeforeOnScreenUI()
    {
-      vrManager.pollEventsAndRender(this, primaryScene);
+      vrManager.pollEventsAndRender(this, primary3DPanel.getScene());
       Gdx.graphics.setTitle(windowTitle);
       imGuiWindowAndDockSystem.beforeWindowManagement();
       primary3DPanel.render();
@@ -450,29 +453,29 @@ public class RDXBaseUI
          }
 
          ImGui.separator(); // Environment section
-         boolean renderingGroundTruthEnvironment = primaryScene.getSceneLevelsToRender().contains(RDXSceneLevel.GROUND_TRUTH);
+         boolean renderingGroundTruthEnvironment = primary3DPanel.getScene().getSceneLevelsToRender().contains(RDXSceneLevel.GROUND_TRUTH);
          if (ImGui.checkbox(labels.get("Render Ground Truth Environment"), renderingGroundTruthEnvironment))
          {
             if (renderingGroundTruthEnvironment)
-               primaryScene.getSceneLevelsToRender().remove(RDXSceneLevel.GROUND_TRUTH);
+               primary3DPanel.getScene().getSceneLevelsToRender().remove(RDXSceneLevel.GROUND_TRUTH);
             else
-               primaryScene.getSceneLevelsToRender().add(RDXSceneLevel.GROUND_TRUTH);
+               primary3DPanel.getScene().getSceneLevelsToRender().add(RDXSceneLevel.GROUND_TRUTH);
          }
-         boolean renderingModelEnvironment = primaryScene.getSceneLevelsToRender().contains(RDXSceneLevel.MODEL);
+         boolean renderingModelEnvironment = primary3DPanel.getScene().getSceneLevelsToRender().contains(RDXSceneLevel.MODEL);
          if (ImGui.checkbox(labels.get("Render Model Environment"), renderingModelEnvironment))
          {
             if (renderingModelEnvironment)
-               primaryScene.getSceneLevelsToRender().remove(RDXSceneLevel.MODEL);
+               primary3DPanel.getScene().getSceneLevelsToRender().remove(RDXSceneLevel.MODEL);
             else
-               primaryScene.getSceneLevelsToRender().add(RDXSceneLevel.MODEL);
+               primary3DPanel.getScene().getSceneLevelsToRender().add(RDXSceneLevel.MODEL);
          }
-         boolean renderingVirtualEnvironment = primaryScene.getSceneLevelsToRender().contains(RDXSceneLevel.VIRTUAL);
+         boolean renderingVirtualEnvironment = primary3DPanel.getScene().getSceneLevelsToRender().contains(RDXSceneLevel.VIRTUAL);
          if (ImGui.checkbox(labels.get("Render Virtual Environment"), renderingVirtualEnvironment))
          {
             if (renderingVirtualEnvironment)
-               primaryScene.getSceneLevelsToRender().remove(RDXSceneLevel.VIRTUAL);
+               primary3DPanel.getScene().getSceneLevelsToRender().remove(RDXSceneLevel.VIRTUAL);
             else
-               primaryScene.getSceneLevelsToRender().add(RDXSceneLevel.VIRTUAL);
+               primary3DPanel.getScene().getSceneLevelsToRender().add(RDXSceneLevel.VIRTUAL);
          }
          ImGui.separator(); // Mouse behavior section
          if (ImGui.checkbox(labels.get("Model scene mouse collision enabled"), modelSceneMouseCollisionEnabled))
@@ -519,22 +522,9 @@ public class RDXBaseUI
    {
       imGuiWindowAndDockSystem.dispose();
       vrManager.dispose();
-      primaryScene.dispose();
+      primary3DPanel.dispose();
 
       instance = null;
-   }
-
-   public void add3DPanel(RDX3DPanel panel3D)
-   {
-      add3DPanel(panel3D, primaryScene);
-   }
-
-   public void add3DPanel(RDX3DPanel panel3D, RDX3DScene scene3D)
-   {
-      panel3D.create(RDXInputMode.ImGui, glProfiler, scene3D);
-      panel3D.getCamera3D().changeCameraPosition(-isoZoomOut, -isoZoomOut, isoZoomOut);
-      imGuiWindowAndDockSystem.getPanelManager().addPanel(panel3D);
-      additional3DPanels.add(panel3D);
    }
 
    public void addOnCloseRequestListener(Runnable onCloseRequest)
@@ -573,11 +563,6 @@ public class RDXBaseUI
    public RDXKeyBindings getKeyBindings()
    {
       return keyBindings;
-   }
-
-   public RDX3DScene getPrimaryScene()
-   {
-      return primaryScene;
    }
 
    public RDX3DPanel getPrimary3DPanel()

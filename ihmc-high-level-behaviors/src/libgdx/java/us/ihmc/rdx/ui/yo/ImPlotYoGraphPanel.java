@@ -1,9 +1,5 @@
 package us.ihmc.rdx.ui.yo;
 
-import imgui.ImVec2;
-import imgui.extension.implot.ImPlot;
-import imgui.extension.implot.ImPlotContext;
-import imgui.extension.implot.ImPlotStyle;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
@@ -49,12 +45,6 @@ public class ImPlotYoGraphPanel
       this.title = title;
       this.bufferSize = bufferSize;
       this.yoClientHelper = yoClientHelper;
-   }
-
-   public void create()
-   {
-      ImPlotStyle style = ImPlot.getStyle();
-      style.setPlotPadding(new ImVec2(0, 0));
    }
 
    public void startYoVariableClient()

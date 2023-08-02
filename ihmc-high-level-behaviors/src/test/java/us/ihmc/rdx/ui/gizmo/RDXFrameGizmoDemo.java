@@ -22,7 +22,7 @@ public class RDXFrameGizmoDemo
          {
             baseUI.create();
 
-            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
+            baseUI.getPrimary3DPanel().getScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
 
             RigidBodyTransform transform = new RigidBodyTransform();
             ReferenceFrame referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), transform);
@@ -31,7 +31,7 @@ public class RDXFrameGizmoDemo
             interactableReferenceFrame.create(referenceFrame, transform, 1.0, baseUI.getPrimary3DPanel());
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(interactableReferenceFrame::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(interactableReferenceFrame::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(interactableReferenceFrame::getVirtualRenderables);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(interactableReferenceFrame::getVirtualRenderables);
 
             RigidBodyTransform transform2 = new RigidBodyTransform();
             transform2.getTranslation().add(0.5, 0.5, 0.5);
@@ -40,13 +40,13 @@ public class RDXFrameGizmoDemo
             interactableReferenceFrame2.create(referenceFrame2, transform2, 1.0, baseUI.getPrimary3DPanel());
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(interactableReferenceFrame2::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(interactableReferenceFrame2::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(interactableReferenceFrame2::getVirtualRenderables);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(interactableReferenceFrame2::getVirtualRenderables);
 
             RDXPose3DGizmo poseGizmo = new RDXPose3DGizmo(interactableReferenceFrame2.getSelectablePose3DGizmo().getPoseGizmo().getGizmoFrame());
             poseGizmo.create(baseUI.getPrimary3DPanel());
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(poseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(poseGizmo::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(poseGizmo);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(poseGizmo);
             baseUI.getImGuiPanelManager().addPanel(poseGizmo.createTunerPanel(RDXFrameGizmoDemo.class.getSimpleName()));
             poseGizmo.getTransformToParent().getTranslation().add(0.5, 0.5, 0.5);
 

@@ -91,12 +91,12 @@ public class RDXGPUHeightMapBodyPathPlanningDemo
             robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.getPrimary3DPanel());
             robotInteractableReferenceFrame.getTransformToParent().getTranslation().add(0.0, 0.0, 1.7);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(robotInteractableReferenceFrame::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(robotInteractableReferenceFrame::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(robotInteractableReferenceFrame::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
             ousterPoseGizmo = new RDXSelectablePose3DGizmo(robotInteractableReferenceFrame.getRepresentativeReferenceFrame());
             ousterPoseGizmo.create(baseUI.getPrimary3DPanel());
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(ousterPoseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(input -> ousterPoseGizmo.process3DViewInput(input));
-            baseUI.getPrimaryScene().addRenderableProvider(ousterPoseGizmo::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(ousterPoseGizmo::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
             ousterPoseGizmo.getPoseGizmo().getTransformToParent().appendPitchRotation(Math.toRadians(60.0));
 
             //            ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), "height_map_planning_demo_ui");
@@ -107,14 +107,14 @@ public class RDXGPUHeightMapBodyPathPlanningDemo
             ouster.setSensorEnabled(true);
             ouster.setRenderPointCloudDirectly(true);
             //                  ouster.setPublishPointCloudROS1(true);
-            baseUI.getPrimaryScene().addRenderableProvider(ouster::getRenderables);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(ouster::getRenderables);
 
             heightMapPoseGizmo = new RDXSelectablePose3DGizmo();
             heightMapPoseGizmo.create(baseUI.getPrimary3DPanel());
             heightMapPoseGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(1.7, 0.0, 0.0);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(heightMapPoseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(input -> heightMapPoseGizmo.process3DViewInput(input));
-            baseUI.getPrimaryScene().addRenderableProvider(heightMapPoseGizmo::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(heightMapPoseGizmo::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
 
             simpleGPUHeightMapParameters = new SimpleGPUHeightMapParameters();
             ImGuiStoredPropertySetTuner heightMapParameterTuner = new ImGuiStoredPropertySetTuner("Height Map Parameters");
@@ -140,7 +140,7 @@ public class RDXGPUHeightMapBodyPathPlanningDemo
 
             heightMapGraphic = new RDXHeightMapGraphic();
             heightMapGraphic.getRenderGroundPlane().set(false);
-            baseUI.getPrimaryScene().addRenderableProvider(heightMapGraphic, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(heightMapGraphic, RDXSceneLevel.VIRTUAL);
             baseUI.getImGuiPanelManager().addPanel("Height Map", this::renderHeightMapImGuiWidgets);
 
             FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
@@ -148,14 +148,14 @@ public class RDXGPUHeightMapBodyPathPlanningDemo
             bodyPathPlanner = new AStarBodyPathPlanner(footstepPlannerParameters, new AStarBodyPathPlannerParameters(), footPolygons, bodyPathPlannerStopwatch);
 
             bodyPathPlanGraphic = new RDXBodyPathPlanGraphic();
-            baseUI.getPrimaryScene().addRenderableProvider(bodyPathPlanGraphic, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(bodyPathPlanGraphic, RDXSceneLevel.VIRTUAL);
 
             startPoseGizmo = new RDXSelectablePose3DGizmo();
             startPoseGizmo.create(baseUI.getPrimary3DPanel());
             startPoseGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(0.0, 0.0, 0.0);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(startPoseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(input -> startPoseGizmo.process3DViewInput(input));
-            baseUI.getPrimaryScene().addRenderableProvider(startPoseGizmo::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(startPoseGizmo::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
 
             goalPoseGizmo = new RDXSelectablePose3DGizmo();
             goalPoseGizmo.create(baseUI.getPrimary3DPanel());
@@ -163,7 +163,7 @@ public class RDXGPUHeightMapBodyPathPlanningDemo
             goalPoseGizmo.getPoseGizmo().getTransformToParent().getRotation().appendYawRotation(-1.3767390862107274);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(goalPoseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(input -> goalPoseGizmo.process3DViewInput(input));
-            baseUI.getPrimaryScene().addRenderableProvider(goalPoseGizmo::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(goalPoseGizmo::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
 
             //                  ros1Node.execute();
          }
@@ -172,7 +172,7 @@ public class RDXGPUHeightMapBodyPathPlanningDemo
          public void render()
          {
 
-            ouster.render(baseUI.getPrimaryScene());
+            ouster.render(baseUI.getPrimary3DPanel().getScene());
 
             if (updateHeightMap.get())
             {

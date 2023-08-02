@@ -46,14 +46,14 @@ public class RDXROS2ARViaBackgroundDemo
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            baseUI.getPrimaryScene().getSceneLevelsToRender().remove(RDXSceneLevel.MODEL);
+            baseUI.getPrimary3DPanel().getScene().getSceneLevelsToRender().remove(RDXSceneLevel.MODEL);
             environmentBuilder.loadEnvironment("LookAndStepHard.json");
 
             sensorPoseGizmo.create(baseUI.getPrimary3DPanel());
             sensorPoseGizmo.setResizeAutomatically(true);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
 
             PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
             globalVisualizersPanel = new RDXGlobalVisualizersPanel();
@@ -101,7 +101,7 @@ public class RDXROS2ARViaBackgroundDemo
             highLevelDepthSensorSimulator.setPublishColorImageROS1(false);
             highLevelDepthSensorSimulator.setPublishColorImageROS2(true);
             highLevelDepthSensorSimulator.setUseSensorColor(true);
-            baseUI.getPrimaryScene().addRenderableProvider(highLevelDepthSensorSimulator::getRenderables);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(highLevelDepthSensorSimulator::getRenderables);
 
             sensorPoseGizmo.getTransformToParent().getTranslation().set(0.2, 0.0, 1.0);
             sensorPoseGizmo.getTransformToParent().getRotation().setToPitchOrientation(Math.toRadians(45.0));
@@ -109,7 +109,7 @@ public class RDXROS2ARViaBackgroundDemo
             BytedecoImage tempImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4);
             arPanel = new RDX3DPanel("AR View", false);
             pixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
-            baseUI.add3DPanel(arPanel);
+            baseUI.getImGuiPanelManager().addPanel(arPanel);
             arPanel.getCamera3D().setInputEnabled(false);
             arPanel.getCamera3D().setVerticalFieldOfView(verticalFOV);
             arPanel.setBackgroundRenderer(() ->
@@ -145,7 +145,7 @@ public class RDXROS2ARViaBackgroundDemo
          {
             arPanel.getCamera3D().setPose(highLevelDepthSensorSimulator.getSensorFrame().getTransformToWorldFrame());
 
-            highLevelDepthSensorSimulator.render(baseUI.getPrimaryScene());
+            highLevelDepthSensorSimulator.render(baseUI.getPrimary3DPanel().getScene());
             globalVisualizersPanel.update();
 
             baseUI.renderBeforeOnScreenUI();

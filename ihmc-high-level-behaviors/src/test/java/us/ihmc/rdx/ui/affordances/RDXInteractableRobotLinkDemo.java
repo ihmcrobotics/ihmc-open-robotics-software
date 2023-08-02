@@ -38,7 +38,7 @@ public class RDXInteractableRobotLinkDemo
             baseUI.getVRManager().getContext().addVRInputProcessor(robotRobotCollidable::processVRInput);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(robotRobotCollidable::calculatePick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(robotRobotCollidable::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(robotRobotCollidable, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(robotRobotCollidable, RDXSceneLevel.VIRTUAL);
 
             ModifiableReferenceFrame controlFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
             interactableRobotLink = new RDXInteractableRobotLink();
@@ -47,7 +47,7 @@ public class RDXInteractableRobotLinkDemo
                                          "environmentObjects/l515Sensor/L515Sensor.g3dj",
                                          baseUI.getPrimary3DPanel());
 
-            baseUI.getPrimaryScene().addRenderableProvider(interactableRobotLink::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(interactableRobotLink::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
             baseUI.getImGuiPanelManager().addPanel("Live Robot Part Interactable", interactableRobotLink::renderImGuiWidgets);
             baseUI.getVRManager().getContext().addVRInputProcessor(interactableRobotLink::processVRInput);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(interactableRobotLink::calculate3DViewPick);

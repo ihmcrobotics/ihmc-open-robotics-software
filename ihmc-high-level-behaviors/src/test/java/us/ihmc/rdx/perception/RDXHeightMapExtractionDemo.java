@@ -111,7 +111,7 @@ public class RDXHeightMapExtractionDemo
             baseUI.getImGuiPanelManager().addPanel(heightMapParameters);
             baseUI.getImGuiPanelManager().addPanel(heightMapFitlerParameters);
 
-            baseUI.getPrimaryScene().addRenderableProvider(heightMapVisualizer);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(heightMapVisualizer);
 
             createForOuster(128, 2048);
 
@@ -237,7 +237,7 @@ public class RDXHeightMapExtractionDemo
       double size = isMoving ? 0.05 : 0.1;
       RDXModelInstance coordinateFrame = new RDXModelInstance(RDXModelBuilder.createCoordinateFrameInstance(size));
       LibGDXTools.toLibGDX(new RigidBodyTransform(sensorPose), coordinateFrame.transform);
-      baseUI.getPrimaryScene().addRenderableProvider(coordinateFrame);
+      baseUI.getPrimary3DPanel().getScene().addRenderableProvider(coordinateFrame);
 
       heightMapUpdater.addPointCloudToQueue(inputData);
    }

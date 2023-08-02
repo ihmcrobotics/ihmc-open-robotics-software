@@ -175,7 +175,7 @@ public class RDXPerceptionUI
             baseUI.getImGuiPanelManager().addPanel(buildingConstructor.getPanelName(), buildingConstructor::renderImGuiWidgets);
 
             baseUI.create();
-            baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(globalVisualizersUI);
 
             remotePerceptionUI = new RDXRemotePerceptionUI(ros2Helper, SensorHeadParameters.BENCHTOP_BLACKFLY_LENS_COMBO);
             baseUI.getImGuiPanelManager().addPanel(remotePerceptionUI.getPanel());
@@ -184,8 +184,8 @@ public class RDXPerceptionUI
             environmentBuilder.loadEnvironment("DemoPullDoor.json");
 
             buildingConstructor.create();
-            baseUI.getPrimaryScene().addRenderableProvider(buildingConstructor::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
-            baseUI.getPrimaryScene().addRenderableProvider(buildingConstructor::getRealRenderables, RDXSceneLevel.MODEL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(buildingConstructor::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(buildingConstructor::getRealRenderables, RDXSceneLevel.MODEL);
 
             globalVisualizersUI.create();
          }

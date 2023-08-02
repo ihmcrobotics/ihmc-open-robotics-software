@@ -30,17 +30,17 @@ public class RDXGizmoDemo
             baseUI.create();
             focusBasedCamera = baseUI.getPrimary3DPanel().getCamera3D();
 
-            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
+            baseUI.getPrimary3DPanel().getScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
 
             clockHandTip = new ModelInstance(RDXModelBuilder.createSphere(0.1f, Color.RED));
-            baseUI.getPrimaryScene().addModelInstance(clockHandTip);
+            baseUI.getPrimary3DPanel().getScene().addModelInstance(clockHandTip);
             clockCenter = new ModelInstance(RDXModelBuilder.createSphere(0.1f, Color.BLUE));
-            baseUI.getPrimaryScene().addModelInstance(clockCenter);
+            baseUI.getPrimary3DPanel().getScene().addModelInstance(clockCenter);
 
             poseGizmo.create(baseUI.getPrimary3DPanel());
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(poseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(poseGizmo::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(poseGizmo);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(poseGizmo);
             baseUI.getImGuiPanelManager().addPanel(poseGizmo.createTunerPanel(RDXGizmoDemo.class.getSimpleName()));
 
             poseGizmo.getTransformToParent().getTranslation().set(-1.0, -2.0, 0.1);
@@ -48,13 +48,13 @@ public class RDXGizmoDemo
             footstepRingGizmo.create(baseUI.getPrimary3DPanel());
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(footstepRingGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(footstepRingGizmo::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(footstepRingGizmo);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(footstepRingGizmo);
             baseUI.getImGuiPanelManager().addPanel(footstepRingGizmo.createTunerPanel(RDXGizmoDemo.class.getSimpleName()));
 
             footstepRingGizmo.getTransformToParent().getTranslation().set(2.0, 1.0, 0.0);
 
             keyboardTransformationFrameGraphic = new RDXReferenceFrameGraphic(0.3, Color.SKY);
-            baseUI.getPrimaryScene().addRenderableProvider(keyboardTransformationFrameGraphic);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(keyboardTransformationFrameGraphic);
          }
 
          @Override

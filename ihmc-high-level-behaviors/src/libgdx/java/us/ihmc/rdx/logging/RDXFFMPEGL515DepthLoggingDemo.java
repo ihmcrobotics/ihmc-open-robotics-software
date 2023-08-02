@@ -60,13 +60,13 @@ public class RDXFFMPEGL515DepthLoggingDemo
             robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.getPrimary3DPanel());
             robotInteractableReferenceFrame.getTransformToParent().getTranslation().add(2.2, 0.0, 1.0);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(robotInteractableReferenceFrame::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(robotInteractableReferenceFrame::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(robotInteractableReferenceFrame::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
             l515PoseGizmo = new RDXPose3DGizmo(robotInteractableReferenceFrame.getRepresentativeReferenceFrame());
             l515PoseGizmo.create(baseUI.getPrimary3DPanel());
             l515PoseGizmo.setResizeAutomatically(false);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(l515PoseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(l515PoseGizmo::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(l515PoseGizmo, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(l515PoseGizmo, RDXSceneLevel.VIRTUAL);
             l515PoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(60.0));
 
             double publishRateHz = 5.0;
@@ -98,7 +98,7 @@ public class RDXFFMPEGL515DepthLoggingDemo
             l515.setPublishColorImageROS1(false);
             l515.setPublishColorImageROS2(false);
             CameraPinholeBrown cameraIntrinsics = l515.getDepthCameraIntrinsics();
-            baseUI.getPrimaryScene().addRenderableProvider(l515::getRenderables);
+            baseUI.getPrimary3DPanel().getScene().addRenderableProvider(l515::getRenderables);
 
             normalizedDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
             rgbaDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4);
@@ -118,7 +118,7 @@ public class RDXFFMPEGL515DepthLoggingDemo
          @Override
          public void render()
          {
-            l515.render(baseUI.getPrimaryScene());
+            l515.render(baseUI.getPrimary3DPanel().getScene());
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
          }

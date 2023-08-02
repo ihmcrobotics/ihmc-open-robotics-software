@@ -50,7 +50,7 @@ public class RDXLibGDXBulletPhysicsDemo3
             tempVector.set(groundSizeX / 2.0f, groundSizeY / 2.0f, groundSizeZ / 2.0f);
             btBoxShape groundBoxShape = new btBoxShape(tempVector);
             bulletPhysicsManager.addStaticObject(groundBoxShape, groundModelInstance.transform);
-            baseUI.getPrimaryScene().addModelInstance(groundModelInstance);
+            baseUI.getPrimary3DPanel().getScene().addModelInstance(groundModelInstance);
 
             int numberOfBlocks = 6;
             Random random = new Random(1886L);
@@ -75,7 +75,7 @@ public class RDXLibGDXBulletPhysicsDemo3
                btBoxShape boxShape = new btBoxShape(tempVector);
                float mass = 0.2f;
                bulletPhysicsManager.addRigidBody(boxShape, mass, boxModelInstance.transform);
-               baseUI.getPrimaryScene().addModelInstance(boxModelInstance);
+               baseUI.getPrimary3DPanel().getScene().addModelInstance(boxModelInstance);
             }
 
             baseUI.getImGuiPanelManager().addPanel("libGDX Bullet Physics", this::renderImGuiWidgets);
