@@ -119,24 +119,28 @@ public class RDXInteractableRobotLink
             isVRHovering |= isHovering;
 
             RDXVRDragData gripDragData = controller.getGripDragData();
-            InputDigitalActionData aButton = controller.getAButtonActionData();
+            InputDigitalActionData bButton = controller.getBButtonActionData();
 
-            if (isHovering && gripDragData.getDragJustStarted())
+            if (isHovering)
             {
-               modified = true;
-               gripDragData.setObjectBeingDragged(this);
-               gripDragData.setInteractableFrameOnDragStart(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
+               controller.setBButtonText("Execute");
+               if (gripDragData.getDragJustStarted())
+               {
+                  modified = true;
+                  gripDragData.setObjectBeingDragged(this);
+                  gripDragData.setInteractableFrameOnDragStart(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
+               }
+
+               if (bButton.bChanged() && bButton.bState() && modified)
+               {
+                  onSpacePressed.run();
+               }
             }
 
             if (gripDragData.isDragging() && gripDragData.getObjectBeingDragged() == this)
             {
                gripDragData.getDragFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
                                                                       selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getParent());
-            }
-
-            if (aButton.bChanged() && aButton.bState() && modified)
-            {
-               onSpacePressed.run();
             }
          });
       }
