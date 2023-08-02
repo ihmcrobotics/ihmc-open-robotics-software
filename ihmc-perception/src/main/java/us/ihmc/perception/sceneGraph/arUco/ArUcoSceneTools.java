@@ -24,6 +24,7 @@ public class ArUcoSceneTools
                                             arUcoDetectableNode.getMarkerSize(),
                                             arUcoDetectableNode.getMarkerFrame().getParent(),
                                             arUcoDetectableNode.getMarkerToWorldFrameTransform());
+               arUcoDetectableNode.applyFilter();
                arUcoDetectableNode.getMarkerFrame().update();
             }
          }

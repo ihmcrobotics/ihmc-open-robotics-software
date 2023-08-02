@@ -38,6 +38,10 @@ module perception_msgs
          * Nodes can be set to not track the detected pose
          */
         boolean track_detected_pose;
+        /**
+         * Alpha filter value for nodes that are alpha filtered
+         */
+        float alpha_filter_value;
       };
     };
   };
