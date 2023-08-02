@@ -3,24 +3,15 @@ package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
-import org.ejml.dense.row.misc.UnrolledInverseFromMinor_DDRM;
-import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.JointTorqueBasedTouchdownDetector;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
-import us.ihmc.mecano.tools.MecanoTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -34,15 +25,39 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 
    private final ReferenceFrame soleFrame;
 
-   public JointTorqueBasedFootSwitch(RobotSide footSide, FullHumanoidRobotModel fullRobotModel, OneDoFJointReadOnly jointToRead, YoRegistry parentRegistry)
+   public JointTorqueBasedFootSwitch(String jointNameToCheck,
+                                     RigidBodyBasics foot,
+                                     RigidBodyBasics rootBody,
+                                     ReferenceFrame soleFrame,
+                                     YoRegistry parentRegistry)
    {
-      registry = new YoRegistry(jointToRead.getName() + getClass().getSimpleName());
+      this.soleFrame = soleFrame;
+      if (rootBody == null)
+      {
+         throw new RuntimeException("This class needs an implementation of the root body to function!");
+      }
 
-      jointToRead = fullRobotModel.getLegJoint(footSide, LegJointName.KNEE_PITCH);
+      // we have to find the joint that we want to be checking in the kinematic chain for contact. We can't, however, pass in the full robot model without
+      // significantly modifying the factory interface. So we can get it from the kinematic chain.
+      OneDoFJointReadOnly jointToRead = null;
+      for (OneDoFJointReadOnly candidateJoint : MultiBodySystemTools.createOneDoFJointPath(foot, rootBody))
+      {
+         if (candidateJoint.getName().contains(jointNameToCheck))
+         {
+            jointToRead = candidateJoint;
+            break;
+         }
+      }
+
+      if (jointToRead == null)
+      {
+         throw new RuntimeException("Unable to find joint " + jointNameToCheck + " in kinematic chain from " + rootBody.getName() + " to " + foot.getName());
+      }
+
+      registry = new YoRegistry(jointToRead.getName() + getClass().getSimpleName());
       touchdownDetector = new JointTorqueBasedTouchdownDetector("", jointToRead, true, registry);
 
-      soleFrame = fullRobotModel.getSoleFrame(footSide);
-      wrenchCalculator = new JacobianBasedWrenchCalculator(footSide, fullRobotModel, soleFrame);
+      wrenchCalculator = new JacobianBasedWrenchCalculator(foot, rootBody, soleFrame);
 
       parentRegistry.addChild(registry);
    }
@@ -112,11 +127,8 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 
       private final Wrench wrench = new Wrench();
 
-      public JacobianBasedWrenchCalculator(RobotSide footSide, FullHumanoidRobotModel fullRobotModel, ReferenceFrame soleFrame)
+      public JacobianBasedWrenchCalculator(RigidBodyBasics foot, RigidBodyBasics pelvis, ReferenceFrame soleFrame)
       {
-         RigidBodyBasics  foot = fullRobotModel.getFoot(footSide);
-         RigidBodyBasics pelvis = fullRobotModel.getPelvis();
-
          footJacobian = new GeometricJacobian(pelvis, foot, soleFrame);
          wrench.setToZero(ReferenceFrame.getWorldFrame());
 
@@ -124,7 +136,8 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          isInvertible = legJoints.length == 6;
 
          if (!isInvertible)
-            throw new RuntimeException("We can't yet use the Jacobian Based Wrench calculator, becuase the Jacobian isn't square. We need to implement this with a pseudo inverse.");
+            throw new RuntimeException(
+                  "We can't yet use the Jacobian Based Wrench calculator, becuase the Jacobian isn't square. We need to implement this with a pseudo inverse.");
       }
 
       public void calculate()

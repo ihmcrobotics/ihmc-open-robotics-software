@@ -47,6 +47,7 @@ import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
@@ -577,6 +578,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    private SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<? extends ContactablePlaneBody> bipedFeet,
                                                                      ForceSensorDataHolderReadOnly forceSensorDataHolder,
+                                                                     RigidBodyBasics rootBody,
                                                                      double totalRobotWeight,
                                                                      YoGraphicsListRegistry yoGraphicsListRegistry,
                                                                      YoRegistry registry)
@@ -592,6 +594,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          FootSwitchInterface footSwitch = footSwitchFactory.newFootSwitch(footName,
                                                                           bipedFeet.get(robotSide),
                                                                           Collections.singleton(bipedFeet.get(robotSide.getOppositeSide())),
+                                                                          rootBody,
                                                                           footForceSensor,
                                                                           totalRobotWeight,
                                                                           yoGraphicsListRegistry,
