@@ -42,9 +42,12 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.interaction.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.Random;
 
@@ -112,6 +115,10 @@ public class RDXPose3DGizmo implements RenderableProvider
    private final Random random = new Random();
    private boolean proportionsNeedUpdate = false;
    private FrameBasedGizmoModification frameBasedGizmoModification;
+   private final SideDependentList<SixDoFSelection> closestVRCollisionSelection = new SideDependentList<>(null, null);
+   private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
+   private final SideDependentList<Boolean> vrAngular = new SideDependentList<>(false, false);
+   private final SideDependentList<Boolean> vrLinear = new SideDependentList<>(false, false);
 
    public RDXPose3DGizmo()
    {
@@ -212,6 +219,26 @@ public class RDXPose3DGizmo implements RenderableProvider
       }
 
       recreateGraphics();
+   }
+
+   public void calculateVRViewPick(RDXVRContext vrContext)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         vrContext.getController(side).runIfConnected(controller ->
+         {
+            if (!controller.getTriggerDragData().isDragging())
+            {
+               Line3DReadOnly pickRay = controller.getPickRay();
+               closestVRCollisionSelection.put(side, determineCurrentSelectionFromPickRay(pickRay));
+            }
+            if (closestVRCollisionSelection.get(side) != null)
+            {
+               vrPickResult.get(side).setDistanceToControllerPickPoint(closestCollisionDistance);
+               controller.addPickResult(vrPickResult.get(side));
+            }
+         });
+      }
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
