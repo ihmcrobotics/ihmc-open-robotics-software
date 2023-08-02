@@ -218,9 +218,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
                      else
                      {
                         LogTools.warn("Queued footstep previous command id {} != controller's previous command id {}."
-                                      + " Send an override message instead. Command ignored.",
-                                      command.getPreviousCommandId(),
-                                      lastCommandID.getValue());
+                                      + " Send an override message instead. Command ignored.", command.getPreviousCommandId(), lastCommandID.getValue());
                      }
                      return;
                   }
@@ -369,7 +367,6 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
    {
       momentumTrajectoryHandler.getAngularMomentumTrajectory(startTime, endTime, numberOfPoints, trajectoryToPack);
    }
-
 
    public FootstepQueueStatusMessage updateAndReturnFootstepQueueStatus()
    {
@@ -580,7 +577,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
    {
       return !upcomingFootTrajectoryCommandListForFlamingoStance.get(swingSide).isEmpty();
    }
-   
+
    public boolean hasLegTrajectoryForFlamingoStance(RobotSide swingSide)
    {
       return !upcomingLegTrajectoryCommandListForFlamingoStance.get(swingSide).isEmpty();
@@ -597,7 +594,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       for (RobotSide robotSide : RobotSide.values)
          clearFlamingoCommands(robotSide);
    }
-   
+
    public void clearFootsteps()
    {
       upcomingFootsteps.clear();
@@ -1083,8 +1080,9 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
                                                                                  location2.getY());
       if (distanceXY > maxDistance)
       {
-         LogTools.warn("Got a footstep with a trajectory that is far from the step origin and goal location. The XY distance from a straight line trajectory was "
-                       + distanceXY + ". If that is acceptable increase the MaxSwingDistance parameter.");
+         LogTools.warn(
+               "Got a footstep with a trajectory that is far from the step origin and goal location. The XY distance from a straight line trajectory was "
+               + distanceXY + ". If that is acceptable increase the MaxSwingDistance parameter.");
          return false;
       }
 
@@ -1092,8 +1090,9 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       double distanceZ = Math.min(Math.abs(location1.getZ() - positionToCheck.getZ()), Math.abs(location2.getZ() - positionToCheck.getZ()));
       if (distanceZ > maxDistance)
       {
-         LogTools.warn("Got a footstep with a trajectory that is far from the step origin and goal location. The Z distance from the closer location was "
-                       + distanceZ + ". If that is acceptable increase the MaxSwingDistance parameter.");
+         LogTools.warn(
+               "Got a footstep with a trajectory that is far from the step origin and goal location. The Z distance from the closer location was " + distanceZ
+               + ". If that is acceptable increase the MaxSwingDistance parameter.");
          return false;
       }
 
