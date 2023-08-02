@@ -242,6 +242,7 @@ public class RDXLocomotionManager
          interactableFootstepPlan.clear();
          bodyPathPlanGraphic.clear();
       }
+      
       manualFootstepPlacement.update();
       bodyPathPlanGraphic.update();
       interactableFootstepPlan.update();
