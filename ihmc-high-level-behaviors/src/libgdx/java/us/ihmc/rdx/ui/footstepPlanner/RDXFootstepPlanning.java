@@ -134,6 +134,7 @@ public class RDXFootstepPlanning
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
 
       footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), goalPose);
+      footstepPlannerRequest.setSnapGoalSteps(false);
 
       if (locomotionParameters.getPlanSwingTrajectories())
          footstepPlannerRequest.setSwingPlannerType(SwingPlannerType.MULTI_WAYPOINT_POSITION);
