@@ -2,6 +2,8 @@
   "dockspacePanels" : { },
   "windows" : {
     "3D View" : true,
+    "ArUco Marker Detection" : false,
+    "ArUco Marker Detection Image" : false,
     "Environment###java.lang.Class:Environment" : true,
     "Global Visualizers" : true,
     "Perception Scene Graph UI" : true,

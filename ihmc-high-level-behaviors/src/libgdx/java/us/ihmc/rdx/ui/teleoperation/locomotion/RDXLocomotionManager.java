@@ -8,6 +8,8 @@ import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import imgui.ImGui;
+import imgui.flag.ImGuiTreeNodeFlags;
+import imgui.type.ImBoolean;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -79,6 +81,7 @@ public class RDXLocomotionManager
    private RDXLegControlMode legControlMode = RDXLegControlMode.DISABLED;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImBoolean collapsedHeader = new ImBoolean(true);
    private boolean isPlacingFootstep = false;
    private final PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
    private final AbortWalkingMessage abortWalkingMessage = new AbortWalkingMessage();
@@ -272,13 +275,26 @@ public class RDXLocomotionManager
       boolean continueAvailable = !pauseAvailable && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0;
       boolean walkAvailable = !continueAvailable && interactableFootstepPlan.getNumberOfFootsteps() > 0;
 
-      assumeFlatGroundCheckbox.renderImGuiWidget();
-      areFootstepsAdjustableCheckbox.renderImGuiWidget();
-      planSwingTrajectoriesCheckbox.renderImGuiWidget();
-      replanSwingTrajectoriesOnChangeCheckbox.renderImGuiWidget();
+      if (ImGui.collapsingHeader(labels.get("Footstep Planning Options"), collapsedHeader, ImGuiTreeNodeFlags.DefaultOpen))
+      {
+         ImGui.indent();
+         assumeFlatGroundCheckbox.renderImGuiWidget();
+         areFootstepsAdjustableCheckbox.renderImGuiWidget();
+         planSwingTrajectoriesCheckbox.renderImGuiWidget();
+         replanSwingTrajectoriesOnChangeCheckbox.renderImGuiWidget();
+         ImGui.unindent();
+      }
 
       swingTimeSlider.renderImGuiWidget();
       transferTimeSlider.renderImGuiWidget();
+
+
+      if (ImGui.button(labels.get("Disable Leg Mode")))
+      {
+         legControlMode = RDXLegControlMode.DISABLED;
+      }
+      ImGui.sameLine();
+      ImGui.text("Leg Mode: " + legControlMode.name());
 
       ImGui.text("Walking Options:");
       ImGui.sameLine();
@@ -314,27 +330,6 @@ public class RDXLocomotionManager
       }
       ImGuiTools.previousWidgetTooltip("Keybind: Space");
       ImGui.endDisabled();
-
-      ImGui.text("Leg control mode: " + legControlMode.name());
-      if (ImGui.radioButton(labels.get("Disabled"), legControlMode == RDXLegControlMode.DISABLED))
-      {
-         legControlMode = RDXLegControlMode.DISABLED;
-      }
-      ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Manual foostep placement"), legControlMode == RDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT))
-      {
-         legControlMode = RDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT;
-      }
-      if (ImGui.radioButton(labels.get("Path control ring"), legControlMode == RDXLegControlMode.PATH_CONTROL_RING))
-      {
-         legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
-         walkPathControlRing.becomeModified(true);
-      }
-      ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Single support foot posing"), legControlMode == RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING))
-      {
-         legControlMode = RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING;
-      }
 
       manualFootstepPlacement.renderImGuiWidgets();
 
