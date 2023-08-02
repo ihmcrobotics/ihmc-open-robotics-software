@@ -7,7 +7,6 @@ import imgui.flag.*;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.type.ImString;
-import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.KHRDebug;
@@ -22,7 +21,6 @@ import us.ihmc.rdx.ui.RDXImGuiLayoutManager;
 import us.ihmc.tools.io.*;
 import us.ihmc.tools.io.resources.ResourceTools;
 
-import java.nio.IntBuffer;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -48,10 +46,10 @@ public class RDXImGuiWindowAndDockSystem
    private HybridResourceFile imGuiSettingsFile;
    private HybridResourceFile panelsFile;
    private Callback debugMessageCallback;
-   private final IntBuffer frameSizeLeft = BufferUtils.createIntBuffer(1);
-   private final IntBuffer frameSizeTop = BufferUtils.createIntBuffer(1);
-   private final IntBuffer frameSizeRight = BufferUtils.createIntBuffer(1);
-   private final IntBuffer frameSizeBottom = BufferUtils.createIntBuffer(1);
+   private final int[] decorationSizeLeft = new int[1];
+   private final int[] decorationSizeTop = new int[1];
+   private final int[] decorationSizeRight = new int[1];
+   private final int[] decorationSizeBottom = new int[1];
    private final ImGuiSize calculatedPrimaryWindowSize = new ImGuiSize(LibGDXApplicationCreator.DEFAULT_WINDOW_WIDTH,
                                                                        LibGDXApplicationCreator.DEFAULT_WINDOW_HEIGHT);
    private final ImGuiPosition primaryWindowPosition = new ImGuiPosition(0, 0);
@@ -81,6 +79,9 @@ public class RDXImGuiWindowAndDockSystem
 
       if (LibGDXTools.ENABLE_OPENGL_DEBUGGER)
          GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_DEBUG_CONTEXT, GLFW.GLFW_TRUE);
+
+      // Hide until we know where to put it from loading the settings
+      GLFW.glfwHideWindow(windowHandle);
 
       // TODO: Something needed here for Mac support?
       // glfwDefaultWindowHints();
@@ -126,8 +127,6 @@ public class RDXImGuiWindowAndDockSystem
 
       imGuiGlfw.init(windowHandle, true);
       imGuiGl3.init(glslVersion);
-
-      GLFW.glfwGetWindowFrameSize(windowHandle, frameSizeLeft, frameSizeTop, frameSizeRight, frameSizeBottom);
    }
 
    public void beforeWindowManagement()
@@ -138,7 +137,16 @@ public class RDXImGuiWindowAndDockSystem
       imGuiGlfw.newFrame();
       ImGui.newFrame();
 
-      layoutManager.loadInitialLayout();
+      GLFW.glfwGetWindowFrameSize(windowHandle, decorationSizeLeft, decorationSizeTop, decorationSizeRight, decorationSizeBottom);
+      if (decorationSizeTop[0] > 1)
+      { // We have to wait a few frames to get this info for some reason.
+         if (layoutManager.loadInitialLayout())
+         {
+            // We don't want to steal the focus, just show the window
+            GLFW.glfwSetWindowAttrib(windowHandle, GLFW.GLFW_FOCUS_ON_SHOW, GLFW.GLFW_FALSE);
+            GLFW.glfwShowWindow(windowHandle);
+         }
+      }
 
       ImGui.pushFont(imFont);
 
@@ -215,16 +223,15 @@ public class RDXImGuiWindowAndDockSystem
          ImGuiTools.parsePrimaryWindowSizeFromSettingsINI(settingsINIAsString, calculatedPrimaryWindowSize);
          int widthFromINI = calculatedPrimaryWindowSize.getWidth();
          int heightFromINI = calculatedPrimaryWindowSize.getHeight();
-         int frameSizeLeft = getFrameSizeLeft();
-         int frameSizeTop = getFrameSizeTop();
-         int menuBarHeight = 22; // TODO: Get this from ImGui somehow
-         calculatedPrimaryWindowSize.setWidth(widthFromINI + frameSizeLeft + getFrameSizeRight());
-         calculatedPrimaryWindowSize.setHeight(heightFromINI + frameSizeTop + getFrameSizeBottom() + menuBarHeight);
+         int noIdeaWhatThisIs = 19; // ???
+         calculatedPrimaryWindowSize.setWidth(widthFromINI);
+         calculatedPrimaryWindowSize.setHeight(heightFromINI + noIdeaWhatThisIs);
          ImGuiTools.parsePrimaryWindowPositionFromSettingsINI(settingsINIAsString, primaryWindowPosition);
          int loadedX = primaryWindowPosition.getX();
          int loadedY = primaryWindowPosition.getY();
-         primaryWindowPosition.setX(loadedX - frameSizeLeft);
-         primaryWindowPosition.setY(loadedY - frameSizeTop - menuBarHeight);
+         primaryWindowPosition.setX(loadedX);
+         int whatIsThis = 8; // ???
+         primaryWindowPosition.setY(loadedY - decorationSizeTop[0] + whatIsThis);
          ImGui.loadIniSettingsFromMemory(settingsINIAsString);
       });
 
@@ -345,25 +352,5 @@ public class RDXImGuiWindowAndDockSystem
    public ImGuiPosition getPrimaryWindowPosition()
    {
       return primaryWindowPosition;
-   }
-
-   public int getFrameSizeLeft()
-   {
-      return frameSizeLeft.get(0);
-   }
-
-   public int getFrameSizeRight()
-   {
-      return frameSizeRight.get(0);
-   }
-
-   public int getFrameSizeTop()
-   {
-      return frameSizeTop.get(0);
-   }
-
-   public int getFrameSizeBottom()
-   {
-      return frameSizeBottom.get(0);
    }
 }

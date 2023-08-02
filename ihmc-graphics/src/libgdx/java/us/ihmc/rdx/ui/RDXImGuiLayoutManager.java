@@ -234,14 +234,16 @@ public class RDXImGuiLayoutManager
    /**
     * Should only be called by before rendering the first ImGui frame.
     */
-   public void loadInitialLayout()
+   public boolean loadInitialLayout()
    {
-      if (!layoutHasBeenLoadedOnce)
+      boolean load = !layoutHasBeenLoadedOnce;
+      if (load)
       {
          layoutHasBeenLoadedOnce = true;
          LogTools.info(1, "Loading layout.");
          reloadLayoutInternal();
       }
+      return load;
    }
 
    /**
