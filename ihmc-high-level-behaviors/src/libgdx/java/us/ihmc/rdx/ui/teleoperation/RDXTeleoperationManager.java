@@ -578,15 +578,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
       locomotionManager.destroy();
    }
 
-   public List<RDXVisualizer> getVisualizers()
-   {
-      List<RDXVisualizer> visualizers = new ArrayList<>();
-      visualizers.add(desiredRobot);
-      desiredRobot.setActive(true);
-
-      return visualizers;
-   }
-
    public ImBoolean getInteractablesEnabled()
    {
       return interactablesEnabled;
