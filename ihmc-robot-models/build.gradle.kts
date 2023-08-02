@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build")
    id("us.ihmc.ihmc-ci") version "8.3"
-   id("us.ihmc.ihmc-cd") version "1.24"
+   id("us.ihmc.ihmc-cd") version "1.26"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
@@ -17,7 +17,7 @@ mainDependencies {
    api("com.google.guava:guava:18.0")
 
    api("us.ihmc:ihmc-robot-description:0.21.12")
-   api("us.ihmc:scs2-definition:17-0.15.1")
+   api("us.ihmc:scs2-definition:17-0.15.3")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 

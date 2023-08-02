@@ -41,6 +41,8 @@ public class ArUcoDetectableNode extends PredefinedRigidBodySceneNode
       this.markerSize = markerSize;
       getNodeToParentFrameTransform().setAndInvert(markerToNodeFrameTransform);
       getNodeFrame().update();
+
+      setOriginalTransformToParent(getNodeToParentFrameTransform());
    }
 
    /**
@@ -66,6 +68,8 @@ public class ArUcoDetectableNode extends PredefinedRigidBodySceneNode
                                                     arUcoMarker.getMarkerPitchRotationToParentDegrees(),
                                                     arUcoMarker.getMarkerRollRotationToParentDegrees());
       getNodeFrame().update();
+
+      setOriginalTransformToParent(getNodeToParentFrameTransform());
    }
 
    public int getMarkerID()
