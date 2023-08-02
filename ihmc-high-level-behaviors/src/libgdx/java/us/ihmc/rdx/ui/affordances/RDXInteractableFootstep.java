@@ -65,7 +65,7 @@ public class RDXInteractableFootstep
    private RDXSelectablePose3DGizmo selectablePose3DGizmo;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private boolean isHovered;
-   private final FrameBox3D selectionCollisionBox;
+   private FrameBox3D selectionCollisionBox;
    private boolean isClickedOn;
    private final FramePose3D textFramePose = new FramePose3D();
    private final Timer timerFlashingFootsteps = new Timer();
@@ -82,8 +82,8 @@ public class RDXInteractableFootstep
 
    private boolean wasPoseUpdated = false;
 
-   private final ModifiableReferenceFrame collisionBoxFrame;
-   private final MouseCollidable mouseCollidable;
+   private ModifiableReferenceFrame collisionBoxFrame;
+   private MouseCollidable mouseCollidable;
    private RDXLegControlMode legControlMode;
 
    public RDXInteractableFootstep(RDXBaseUI baseUI, RobotSide footstepSide, int index, SideDependentList<ConvexPolygon2D> defaultPolygons)
@@ -182,6 +182,15 @@ public class RDXInteractableFootstep
             footstepModelInstance = new RDXModelInstance(RDXModelLoader.load("models/footsteps/footstep_right.g3dj"));
          }
       }
+
+      selectablePose3DGizmo = new RDXSelectablePose3DGizmo();
+      selectablePose3DGizmo.create(baseUI.getPrimary3DPanel());
+      selectionCollisionBox = new FrameBox3D(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
+      // Measured footstep.fbx in Blender
+      selectionCollisionBox.getSize().set(footstepGraphicLength, footstepGraphicWidth, footstepGraphicHeight);
+      selectionCollisionBox.getPose().getTranslation().add(footstepGraphicTranslationX, footstepGraphicTranslationY, footstepGraphicTranslationZ);
+      collisionBoxFrame = new ModifiableReferenceFrame("collisionBoxFrame", selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
+      mouseCollidable = new MouseCollidable(selectionCollisionBox);
 
       updateFootstepIndexText(footstepIndex);
 
