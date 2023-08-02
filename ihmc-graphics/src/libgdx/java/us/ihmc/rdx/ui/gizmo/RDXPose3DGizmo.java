@@ -227,7 +227,7 @@ public class RDXPose3DGizmo implements RenderableProvider
          // on this gizmo at any time
 
          Line3DReadOnly pickRay = input.getPickRayInWorld();
-         determineCurrentSelectionFromPickRay(pickRay);
+         closestCollisionSelection = determineCurrentSelectionFromPickRay(pickRay);
 
          if (closestCollisionSelection != null)
          {
@@ -440,9 +440,9 @@ public class RDXPose3DGizmo implements RenderableProvider
       }
    }
 
-   private void determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay)
+   private SixDoFSelection determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay)
    {
-      closestCollisionSelection = null;
+      SixDoFSelection closestCollisionSelection = null;
       closestCollisionDistance = Double.POSITIVE_INFINITY;
 
       // Optimization: Do one large sphere collision to avoid completely far off picks
@@ -482,6 +482,7 @@ public class RDXPose3DGizmo implements RenderableProvider
             }
          }
       }
+      return closestCollisionSelection;
    }
 
    private void updateMaterialHighlighting()
