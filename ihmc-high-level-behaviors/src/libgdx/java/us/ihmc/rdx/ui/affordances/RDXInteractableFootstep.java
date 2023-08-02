@@ -254,6 +254,12 @@ public class RDXInteractableFootstep
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
+            selectionCollisionBox.changeFrame(ReferenceFrame.getWorldFrame());
+            selectionCollisionBox.getPosition().set(selectablePose3DGizmo.getPoseGizmo().getPose().getPosition());
+            selectionCollisionBox.getPose()
+                                 .getTranslation()
+                                 .add(FOOTSTEP_GRAPHIC_SOLE_OFFSET_X, FOOTSTEP_GRAPHIC_SOLE_OFFSET_Y, FOOTSTEP_GRAPHIC_SOLE_OFFSET_Z);
+            selectionCollisionBox.changeFrame(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
             if (!controller.getGripAsButtonDown())
             {
                vrPickPose.setIncludingFrame(controller.getPickPointPose());
