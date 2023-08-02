@@ -20,11 +20,11 @@ public class FootstepQueueStatusMessage extends Packet<FootstepQueueStatusMessag
    /**
             * Defines the list of footsteps contained in the queue.
             */
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.QueuedFootstepStatusMessage>  footstep_data_list_;
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.QueuedFootstepStatusMessage>  queued_footstep_list_;
 
    public FootstepQueueStatusMessage()
    {
-      footstep_data_list_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.QueuedFootstepStatusMessage> (50, new controller_msgs.msg.dds.QueuedFootstepStatusMessagePubSubType());
+      queued_footstep_list_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.QueuedFootstepStatusMessage> (50, new controller_msgs.msg.dds.QueuedFootstepStatusMessagePubSubType());
 
    }
 
@@ -38,7 +38,7 @@ public class FootstepQueueStatusMessage extends Packet<FootstepQueueStatusMessag
    {
       sequence_id_ = other.sequence_id_;
 
-      footstep_data_list_.set(other.footstep_data_list_);
+      queued_footstep_list_.set(other.queued_footstep_list_);
    }
 
    /**
@@ -60,9 +60,9 @@ public class FootstepQueueStatusMessage extends Packet<FootstepQueueStatusMessag
    /**
             * Defines the list of footsteps contained in the queue.
             */
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.QueuedFootstepStatusMessage>  getFootstepDataList()
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.QueuedFootstepStatusMessage>  getQueuedFootstepList()
    {
-      return footstep_data_list_;
+      return queued_footstep_list_;
    }
 
 
@@ -85,11 +85,11 @@ public class FootstepQueueStatusMessage extends Packet<FootstepQueueStatusMessag
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (this.footstep_data_list_.size() != other.footstep_data_list_.size()) { return false; }
+      if (this.queued_footstep_list_.size() != other.queued_footstep_list_.size()) { return false; }
       else
       {
-         for (int i = 0; i < this.footstep_data_list_.size(); i++)
-         {  if (!this.footstep_data_list_.get(i).epsilonEquals(other.footstep_data_list_.get(i), epsilon)) return false; }
+         for (int i = 0; i < this.queued_footstep_list_.size(); i++)
+         {  if (!this.queued_footstep_list_.get(i).epsilonEquals(other.queued_footstep_list_.get(i), epsilon)) return false; }
       }
 
 
@@ -107,7 +107,7 @@ public class FootstepQueueStatusMessage extends Packet<FootstepQueueStatusMessag
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if (!this.footstep_data_list_.equals(otherMyClass.footstep_data_list_)) return false;
+      if (!this.queued_footstep_list_.equals(otherMyClass.queued_footstep_list_)) return false;
 
       return true;
    }
@@ -120,8 +120,8 @@ public class FootstepQueueStatusMessage extends Packet<FootstepQueueStatusMessag
       builder.append("FootstepQueueStatusMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("footstep_data_list=");
-      builder.append(this.footstep_data_list_);
+      builder.append("queued_footstep_list=");
+      builder.append(this.queued_footstep_list_);
       builder.append("}");
       return builder.toString();
    }

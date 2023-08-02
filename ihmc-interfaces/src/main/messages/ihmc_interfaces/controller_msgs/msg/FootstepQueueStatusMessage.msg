@@ -6,4 +6,4 @@
 uint32 sequence_id
 
 # Defines the list of footsteps contained in the queue.
-QueuedFootstepStatusMessage[<=50] footstep_data_list
+QueuedFootstepStatusMessage[<=50] queued_footstep_list
