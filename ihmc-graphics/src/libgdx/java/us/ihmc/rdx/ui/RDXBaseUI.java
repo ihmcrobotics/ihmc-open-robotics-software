@@ -39,6 +39,7 @@ import us.ihmc.tools.io.HybridResourceDirectory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Method call order:
@@ -126,6 +127,7 @@ public class RDXBaseUI
    }
    private Theme theme = Theme.LIGHT;
    private final String shadePrefix = "shade=";
+   private List<Runnable> extraMenuBarRenderables = new ArrayList<>();
 
    public RDXBaseUI()
    {
@@ -440,7 +442,6 @@ public class RDXBaseUI
             ImGui.endTable();
          }
 
-         /* Start checkbox settings */
          if (ImGui.checkbox(labels.get("Frame rate plot"), plotFrameRate))
          {
             settings.setPlotFrameRate(plotFrameRate.get());
@@ -452,7 +453,16 @@ public class RDXBaseUI
             Gdx.graphics.setVSync(vsync.get());
          }
 
-         ImGui.separator(); // Environment section
+         if (ImGui.menuItem("Show key bindings..."))
+         {
+            keyBindings.showKeybindings();
+         }
+
+         ImGui.endMenu();
+      }
+
+      if (ImGui.beginMenu("Scene"))
+      {
          boolean renderingGroundTruthEnvironment = primary3DPanel.getScene().getSceneLevelsToRender().contains(RDXSceneLevel.GROUND_TRUTH);
          if (ImGui.checkbox(labels.get("Render Ground Truth Environment"), renderingGroundTruthEnvironment))
          {
@@ -486,14 +496,12 @@ public class RDXBaseUI
          {
             setUseMiddleClickViewOrbit(middleClickOrbit.get());
          }
-         /* End checkbox settings */
-
-         if (ImGui.menuItem("Show key bindings..."))
-         {
-            keyBindings.showKeybindings();
-         }
-
          ImGui.endMenu();
+      }
+
+      for (Runnable runnable : extraMenuBarRenderables)
+      {
+         runnable.run();
       }
 
       if (plotFrameRate.get())
@@ -635,5 +643,22 @@ public class RDXBaseUI
       style.setFrameBorderSize(1.0f);
 
       this.theme = theme;
+   }
+
+   /**
+    * For adding additional menu bar entries
+    * <pre>
+    * addExtraMenuBarRenderable(() -> {
+    *    if (ImGui.beginMenu("Scene"))
+    *    {
+    *       // Render more ImGui elements here
+    *       ImGui.endMenu();
+    *    }
+    * });
+    * </pre>
+    */
+   public void addExtraMenuBarRenderable(Runnable runnable)
+   {
+      extraMenuBarRenderables.add(runnable);
    }
 }
