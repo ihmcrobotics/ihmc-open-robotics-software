@@ -503,7 +503,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
       double totalRobotWeight = totalMass * gravityZ;
 
-      SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet, forceSensorDataHolder, totalRobotWeight, yoGraphicsListRegistry, registry);
+      SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet, forceSensorDataHolder, fullRobotModel.getRootBody(), totalRobotWeight, yoGraphicsListRegistry, registry);
       SideDependentList<ForceSensorDataReadOnly> wristForceSensors = createWristForceSensors(forceSensorDataHolder);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
