@@ -256,8 +256,12 @@ public class RDXInteractableFootstep
          {
             if (!controller.getGripAsButtonDown())
             {
+               selectionCollisionBox.getPose().getTranslation().set(selectablePose3DGizmo.getPoseGizmo().getPose().getTranslation());
+               selectionCollisionBox.getPose()
+                                    .getTranslation()
+                                    .add(FOOTSTEP_GRAPHIC_SOLE_OFFSET_X, FOOTSTEP_GRAPHIC_SOLE_OFFSET_Y, FOOTSTEP_GRAPHIC_SOLE_OFFSET_Z);
                vrPickPose.setIncludingFrame(controller.getPickPointPose());
-               vrPickPose.changeFrame(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
+               vrPickPose.changeFrame(selectionCollisionBox.getReferenceFrame());
                isIntersectingVR.put(side, mouseCollidable.pointCollide(vrPickPose.getPosition()));
             }
          });
@@ -288,7 +292,7 @@ public class RDXInteractableFootstep
             }
 
             boolean isGripping = gripDragData.isBeingDragged(this);
-            if (isIntersectingVR.get(side) && isGripping)
+            if (isGripping && isIntersectingVR.get(side))
             {
                dragReferenceFrame.get(side)
                                  .getReferenceFrame()
