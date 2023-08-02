@@ -253,12 +253,14 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
                                                                                                     controlledOneDoFJoints,
                                                                                                     yoTime,
                                                                                                     graphicsListRegistry);
+      factory.addState(manipulationState.getHighLevelControllerName(), manipulationState);
 
       // Smooth transition state
       SmoothTransitionControllerState standTransitionState = new SmoothTransitionControllerState("toWalking",
                                                                                                  HighLevelControllerName.STAND_TRANSITION_STATE,
                                                                                                  standReadyState,
-                                                                                                 manipulationState, controlledOneDoFJoints,
+                                                                                                 manipulationState,
+                                                                                                 controlledOneDoFJoints,
                                                                                                  robotModel.getHighLevelControllerParameters());
       factory.addState(standTransitionState.getHighLevelControllerName(), standTransitionState);
 
@@ -288,11 +290,10 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
       // Calibration -> Stand prep
       factory.addDoneTransition(calibrationControllerState.getHighLevelControllerName(), standPrepControllerState.getHighLevelControllerName());
 
-//      factory.addRequestedTransition(calibrationControllerState.getHighLevelControllerName(),   standPrepControllerState.getHighLevelControllerName(),   requestedHighLevelControllerState);
-//      factory.addRequestedTransition(standReadyState.getHighLevelControllerName(),              calibrationControllerState.getHighLevelControllerName(), requestedHighLevelControllerState);
-//      factory.addRequestedTransition(standReadyState.getHighLevelControllerName(),              standPrepControllerState.getHighLevelControllerName(),   requestedHighLevelControllerState);
+      // Stand ready -> Stand transition
+      factory.addRequestedTransition(standReadyState.getHighLevelControllerName(), standTransitionState.getHighLevelControllerName(), requestedHighLevelControllerState);
 
-      // Stand transition to manipulation
+      // Stand transition -> manipulation
       factory.addTransition(standTransitionState.getHighLevelControllerName(),
                             new StateTransition<>(manipulationState.getHighLevelControllerName(), new StateTransitionCondition()
                             {
@@ -317,6 +318,7 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
       registry.addChild(standReadyState.getYoRegistry());
       registry.addChild(standTransitionState.getYoRegistry());
       registry.addChild(calibrationControllerState.getYoRegistry());
+      registry.addChild(manipulationState.getYoRegistry());
 
       LogModelProvider logModelProvider = robotModel.getLogModelProvider();
       DataServerSettings logSettings = robotModel.getLogSettings();

@@ -43,7 +43,6 @@ public class ValkyrieUpperBodyManipulationState extends HighLevelControllerState
    public static final String rigidBodyGainRegistryName = "RigidBodyGains";
    public static final String comHeightGainRegistryName = "ComHeightGains";
 
-   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoRegistry momentumRegistry = new YoRegistry(weightRegistryName);
    private final YoRegistry jointGainRegistry = new YoRegistry(jointspaceGainRegistryName);
    private final YoRegistry bodyGainRegistry = new YoRegistry(rigidBodyGainRegistryName);
@@ -109,6 +108,11 @@ public class ValkyrieUpperBodyManipulationState extends HighLevelControllerState
          handManager.setDoPrepareForLocomotion(false);
          handManagers.put(robotSide, handManager);
       }
+
+      registry.addChild(jointGainRegistry);
+      registry.addChild(bodyGainRegistry);
+      registry.addChild(momentumRegistry);
+      registry.addChild(comHeightGainRegistry);
    }
 
    private RigidBodyControlManager createRigidBodyManager(RigidBodyBasics bodyToControl,
