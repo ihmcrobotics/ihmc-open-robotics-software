@@ -242,16 +242,6 @@ public class RDXInteractableFootstep
       }
    }
 
-   public void calculateVRPick(RDXVRContext vrContext)
-   {
-
-   }
-
-   public void processVRInput(RDXVRContext vrContext)
-   {
-
-   }
-
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
       selectablePose3DGizmo.calculate3DViewPick(input);
