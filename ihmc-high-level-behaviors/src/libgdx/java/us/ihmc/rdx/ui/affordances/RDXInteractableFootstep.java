@@ -246,6 +246,9 @@ public class RDXInteractableFootstep
          Pair<PlannedFootstep, EnumMap<Axis3D, List<PolynomialReadOnly>>> pair = plannedFootstepInput.getAndSet(null);
          updatePlannedTrajectoryInternal(pair.getLeft(), pair.getRight());
       }
+
+      if (collisionBoxFrame.getReferenceFrame() != selectablePose3DGizmo.getPoseGizmo().getGizmoFrame())
+         collisionBoxFrame.changeParentFrame(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
@@ -255,12 +258,6 @@ public class RDXInteractableFootstep
          vrContext.getController(side).runIfConnected(controller ->
          {
             //TODO probably an easier way to update selectionCollisonBox, but without this right now the selectionCollisionBox never updates
-            selectionCollisionBox.changeFrame(ReferenceFrame.getWorldFrame());
-            selectionCollisionBox.getPosition().set(selectablePose3DGizmo.getPoseGizmo().getPose().getPosition());
-            selectionCollisionBox.getPose()
-                                 .getTranslation()
-                                 .add(FOOTSTEP_GRAPHIC_SOLE_OFFSET_X, FOOTSTEP_GRAPHIC_SOLE_OFFSET_Y, FOOTSTEP_GRAPHIC_SOLE_OFFSET_Z);
-            selectionCollisionBox.changeFrame(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
             if (!controller.getGripAsButtonDown())
             {
                vrPickPose.setIncludingFrame(controller.getPickPointPose());
@@ -311,8 +308,6 @@ public class RDXInteractableFootstep
    {
       selectablePose3DGizmo.calculate3DViewPick(input);
       Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
-      if (collisionBoxFrame.getReferenceFrame() != selectablePose3DGizmo.getPoseGizmo().getGizmoFrame())
-         collisionBoxFrame.changeParentFrame(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
       double collision = mouseCollidable.collide(pickRayInWorld, collisionBoxFrame.getReferenceFrame());
       if (!Double.isNaN(collision))
       {
