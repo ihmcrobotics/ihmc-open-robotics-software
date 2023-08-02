@@ -244,7 +244,7 @@ public class RDXLocomotionManager
          interactableFootstepPlan.clear();
          bodyPathPlanGraphic.clear();
       }
-
+      interactableFootstepPlan.setLegControlMode(legControlMode);
       manualFootstepPlacement.update();
       bodyPathPlanGraphic.update();
       interactableFootstepPlan.update();
