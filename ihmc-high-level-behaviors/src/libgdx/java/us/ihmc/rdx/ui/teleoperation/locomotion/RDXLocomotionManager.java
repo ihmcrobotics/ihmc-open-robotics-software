@@ -41,6 +41,7 @@ import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.Timer;
 
 /**
  * This class provides easy access to everything that involves mobility for the robot's legs.
@@ -87,6 +88,7 @@ public class RDXLocomotionManager
    private final ControllerStatusTracker controllerStatusTracker;
    private final Notification abortedNotification = new Notification();
    private boolean lastAssumeFlatGroundState;
+   private final Timer footstepPlanningCompleteTimer = new Timer();
    private final ImGuiTextOverlay statusOverlay = new ImGuiTextOverlay();
 
    private RDXFootstepPlanning.InitialStanceSide startStanceSide = RDXFootstepPlanning.InitialStanceSide.AUTO;
@@ -494,10 +496,22 @@ public class RDXLocomotionManager
 
    public void renderOverlayElements(RDX3DPanel panel3D)
    {
-      if (footstepPlanning.isPlanning())
+      boolean isPlanning = footstepPlanning.isPlanning();
+      boolean hasPlannedRecently = footstepPlanningCompleteTimer.isRunning(2.0);
+      if (isPlanning || hasPlannedRecently)
       {
          ImGui.pushFont(ImGuiTools.getMediumFont());
-         statusOverlay.render("Planning footsteps...", panel3D.getWindowDrawMinX(), panel3D.getWindowDrawMinY(), 20.0f, 20.0f);
+         String text;
+         if (isPlanning)
+         {
+            footstepPlanningCompleteTimer.reset();
+            text = "Planning footsteps...";
+         }
+         else
+         {
+            text = "Footstep planning completed.";
+         }
+         statusOverlay.render(text, panel3D.getWindowDrawMinX(), panel3D.getWindowDrawMinY(), 20.0f, 20.0f);
          ImGui.popFont();
       }
    }
