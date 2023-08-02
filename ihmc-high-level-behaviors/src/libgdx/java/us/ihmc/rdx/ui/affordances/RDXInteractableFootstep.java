@@ -62,9 +62,9 @@ public class RDXInteractableFootstep
    private RDX3DSituatedText footstepIndexText;
    private ModelInstance footstepModelInstance;
    private RDXSelectablePose3DGizmo selectablePose3DGizmo;
-   private FrameBox3D selectionCollisionBox;
-   private ModifiableReferenceFrame collisionBoxFrame;
-   private MouseCollidable mouseCollidable;
+   private final FrameBox3D selectionCollisionBox;
+   private final ModifiableReferenceFrame collisionBoxFrame;
+   private final MouseCollidable mouseCollidable;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private boolean isHovered;
    private boolean isClickedOn;
