@@ -168,6 +168,7 @@ public class RDXFootstepPlanning
          }
       }
       footstepPlannerRequest.setAssumeFlatGround(assumeFlatGround);
+      footstepPlannerRequest.setSnapGoalSteps(!assumeFlatGround);
 
       footstepPlannerRequest.setPlanBodyPath(locomotionParameters.getPlanWithBodyPath());
 
