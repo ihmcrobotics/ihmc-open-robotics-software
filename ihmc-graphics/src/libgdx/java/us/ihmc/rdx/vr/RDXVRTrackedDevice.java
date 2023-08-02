@@ -7,9 +7,11 @@ import org.lwjgl.openvr.HmdMatrix34;
 import org.lwjgl.openvr.TrackedDevicePose;
 import org.lwjgl.openvr.VR;
 import org.lwjgl.openvr.VRSystem;
+import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelLoader;
 
@@ -37,13 +39,31 @@ public abstract class RDXVRTrackedDevice
       if (isConnected)
       {
          HmdMatrix34 openVRRigidBodyTransform = trackedDevicePoses.get(deviceIndex).mDeviceToAbsoluteTracking();
-         if (OpenVRTools.containsNaN(openVRRigidBodyTransform))
+
+         // We do this stuff to try and safely catch exceptions
+         LibGDXTools.toEuclidUnsafe(openVRRigidBodyTransform, deviceToPlayAreaTransform);
+         boolean matrixInvalid = deviceToPlayAreaTransform.containsNaN();
+         if (!matrixInvalid)
+         {
+            try
+            {
+               deviceToPlayAreaTransform.getRotation().normalize();
+            }
+            catch (NotARotationMatrixException notARotationMatrixException)
+            {
+               matrixInvalid = true;
+               LogTools.error(deviceToPlayAreaTransform.getRotation().containsNaN() ?
+                       "Not a rotation matrix: Normalization failed. Result contains NaN."
+                       : notARotationMatrixException.getMessage());
+            }
+         }
+
+         if (matrixInvalid)
          {
             isConnected = false;
          }
          else
          {
-            LibGDXTools.toEuclid(openVRRigidBodyTransform, deviceToPlayAreaTransform);
             deviceYUpZBackFrame.update();
 
             if (modelInstance == null)
