@@ -6,7 +6,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.tools.CommunicationHelper;
@@ -24,8 +23,6 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.teleoperation.RDXLegControlMode;
-import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
@@ -57,7 +54,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
    private final AtomicReference<HeightMapMessage> heightMapDataReference = new AtomicReference<>();
    private final AtomicReference<PlanarRegionsList> planarRegionsListReference = new AtomicReference<>();
-   private RDXLegControlMode legControlMode;
 
    private int previousPlanLength;
    private boolean wasPlanUpdated = false;
@@ -97,38 +93,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       heightMapDataReference.set(heightMapMessage);
       if (swingPlanningModule != null)
          swingPlanningModule.setHeightMapData(heightMapMessage);
-   }
-
-   public void calculateVRPick(RDXVRContext vrContext)
-   {
-      for (RDXInteractableFootstep footstep : footsteps)
-      {
-         footstep.calculateVRPick(vrContext);
-
-         //TODO check if footstep is hovered in vr
-         if (footstep.isHovered())
-         {
-            selectedFootstep = footstep;
-         }
-      }
-      if (selectedFootstep != null)
-      {
-         selectedFootstep.calculateVRPick(vrContext);
-      }
-   }
-
-   public void processVRInput(RDXVRContext vrContext)
-   {
-      for (int i = 0; i < footsteps.size(); i++)
-      {
-         RDXInteractableFootstep footstep = footsteps.get(i);
-         footstep.processVRInput(vrContext);
-      }
-
-      if (selectedFootstep != null)
-      {
-         selectedFootstep.processVRInput(vrContext);
-      }
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
@@ -378,15 +342,5 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    public void destroy()
    {
       swingPlanningModule.destroy();
-   }
-
-   public RDXLegControlMode getLegControlMode()
-   {
-      return legControlMode;
-   }
-
-   public void setLegControlMode(RDXLegControlMode legControlMode)
-   {
-      this.legControlMode = legControlMode;
    }
 }
