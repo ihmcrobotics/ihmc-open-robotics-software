@@ -154,7 +154,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       for (int i = 0; i < footsteps.size(); i++)
       {
          RDXInteractableFootstep footstep = footsteps.get(i);
-         footstep.setLegControlMode(legControlMode);
          footstep.process3DViewInput(input, false);
 
          if (footstep.isHovered())
