@@ -4,7 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
-import us.ihmc.commonWalkingControlModules.touchdownDetector.JointTorqueBasedTouchdownDetector;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
@@ -12,9 +12,13 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 {
@@ -29,6 +33,8 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
                                      RigidBodyBasics foot,
                                      RigidBodyBasics rootBody,
                                      ReferenceFrame soleFrame,
+                                     DoubleProvider torqueContactThreshold,
+                                     DoubleProvider torqueSecondContactThreshold,
                                      YoRegistry parentRegistry)
    {
       this.soleFrame = soleFrame;
@@ -55,7 +61,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
       }
 
       registry = new YoRegistry(jointToRead.getName() + getClass().getSimpleName());
-      touchdownDetector = new JointTorqueBasedTouchdownDetector("", jointToRead, true, registry);
+      touchdownDetector = new JointTorqueBasedTouchdownDetector("", jointToRead, true, torqueContactThreshold, torqueSecondContactThreshold, registry);
 
       wrenchCalculator = new JacobianBasedWrenchCalculator(foot, rootBody, soleFrame);
 
@@ -79,7 +85,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
    @Override
    public boolean hasFootHitGroundSensitive()
    {
-      return touchdownDetector.hasTouchedDown();
+      return touchdownDetector.hasTouchdedDownSensitive();
    }
 
    /**
@@ -88,7 +94,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
    @Override
    public boolean hasFootHitGroundFiltered()
    {
-      return touchdownDetector.hasForSureTouchedDown();
+      return touchdownDetector.hasTouchedDownFiltered();
    }
 
    @Override
@@ -113,6 +119,90 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
    public ReferenceFrame getMeasurementFrame()
    {
       return soleFrame;
+   }
+
+   private static class JointTorqueBasedTouchdownDetector
+   {
+      private final OneDoFJointReadOnly joint;
+      private final YoDouble jointTorque;
+      private final DoubleProvider torqueThreshold;
+      private final DoubleProvider torqueHigherThreshold;
+      private final YoBoolean touchdownDetected;
+      private final GlitchFilteredYoBoolean touchdownDetectedFiltered;
+      private final YoBoolean touchdownDetectedSecondThreshold;
+
+      private final boolean dontDetectTouchdownIfAtJointLimit;
+
+      /**
+       * @param joint joint used to detect touchdown
+       * @param dontDetectTouchdownIfAtJointLimit if true, this detector will not detect a touchdown if the joint is past a joint limit. this is to avoid
+       *                                          false-positive touchdown signals given by simulated torques at joint limits
+       * @param registry
+       */
+      public JointTorqueBasedTouchdownDetector(String suffix, OneDoFJointReadOnly joint, boolean dontDetectTouchdownIfAtJointLimit,
+                                               DoubleProvider torqueThreshold,
+                                               DoubleProvider torqueHigherThreshold,
+                                               YoRegistry registry)
+      {
+         this.joint = joint;
+         this.dontDetectTouchdownIfAtJointLimit = dontDetectTouchdownIfAtJointLimit;
+         this.torqueThreshold = torqueThreshold;
+         this.torqueHigherThreshold = torqueHigherThreshold;
+
+         jointTorque = new YoDouble(joint.getName() + "_torqueUsedForTouchdownDetection" + suffix, registry);
+         touchdownDetected = new YoBoolean(joint.getName() + "_torqueBasedTouchdownDetectedF" + suffix, registry);
+         touchdownDetectedFiltered = new GlitchFilteredYoBoolean(joint.getName() + "_torqueBasedTouchdownDetectedFiltered" + suffix, registry, touchdownDetected, 5);
+         touchdownDetectedSecondThreshold = new YoBoolean(joint.getName() + "_torqueBasedTouchdownSecondThreshold" + suffix, registry);
+      }
+
+      public boolean hasTouchedDownFiltered()
+      {
+         return touchdownDetectedFiltered.getBooleanValue();
+      }
+
+      public boolean hasTouchdedDownSensitive()
+      {
+         return touchdownDetectedSecondThreshold.getBooleanValue();
+      }
+
+      private boolean isAtJointLimit()
+      {
+         double q = joint.getQ();
+         double jointLimitLower = joint.getJointLimitLower();
+         double jointLimitUpper = joint.getJointLimitUpper();
+         return !MathTools.intervalContains(q, jointLimitLower, jointLimitUpper, false, false);
+      }
+
+      public void update()
+      {
+       jointTorque.set(joint.getTau());
+
+         if (dontDetectTouchdownIfAtJointLimit && isAtJointLimit())
+         {
+            touchdownDetected.set(false);
+            touchdownDetectedSecondThreshold.set(false);
+         }
+         else
+         {
+            touchdownDetected.set(Math.abs(joint.getTau()) > torqueThreshold.getValue());
+            touchdownDetectedSecondThreshold.set(Math.abs(joint.getTau()) > torqueHigherThreshold.getValue());
+         }
+
+         touchdownDetectedFiltered.update();
+      }
+
+      public void reset()
+      {
+         jointTorque.set(0.0);
+         touchdownDetected.set(false);
+         touchdownDetectedFiltered.set(false);
+         touchdownDetectedSecondThreshold.set(false);
+      }
+
+      public String getName()
+      {
+         return getClass().getSimpleName();
+      }
    }
 
    private static class JacobianBasedWrenchCalculator

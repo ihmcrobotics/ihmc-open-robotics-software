@@ -14,8 +14,10 @@ import java.util.Collection;
 
 public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
 {
-   private double defaultContactThresholdHeight = 0.05;
-   private DoubleProvider contactThresholdHeight;
+   private double defaultContactThresholdTorque = 50.0;
+   private double defaultHigherContactThresholdTorque = 100.0;
+   private DoubleProvider contactThresholdTorque;
+   private DoubleProvider higherContactThresholdTorque;
 
    private final String jointDescriptionToCheck;
 
@@ -25,13 +27,20 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
    }
 
    /**
-    * When determining whether a foot has hit the ground the controller can use the height difference
-    * between the swing foot and the lowest of the feet of the robot. If the difference falls below
-    * this threshold foot-ground contact is assumed.
+    * When determining whether a foot has hit the ground the controller can look at the knee torque. This value is then glitch filtered to verify.
     */
-   public void setDefaultContactThresholdHeight(double defaultContactThresholdHeight)
+   public void setDefaultContactThresholdTorque(double defaultContactThresholdTorque)
    {
-      this.defaultContactThresholdHeight = defaultContactThresholdHeight;
+      this.defaultContactThresholdTorque = defaultContactThresholdTorque;
+   }
+
+   /**
+    * When determining whether a foot has hit the ground the controller can look at the knee torque. This value is a higher threshold which instantaneously
+    * triggers the touchdown event.
+    */
+   public void setDefaultHigherContactThresholdTorque(double defaultHigherContactThresholdTorque)
+   {
+      this.defaultHigherContactThresholdTorque = defaultHigherContactThresholdTorque;
    }
 
    @Override
@@ -44,9 +53,13 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
                                             YoGraphicsListRegistry yoGraphicsListRegistry,
                                             YoRegistry registry)
    {
-      if (contactThresholdHeight == null)
-         contactThresholdHeight = new DoubleParameter("ContactThresholdHeight", registry, defaultContactThresholdHeight);
+      if (contactThresholdTorque == null)
+      {
+         contactThresholdTorque = new DoubleParameter("ContactThresholdJointTorque", registry, defaultContactThresholdTorque);
+         higherContactThresholdTorque = new DoubleParameter("HigherContactThresholdJointTorque", registry, defaultHigherContactThresholdTorque);
+      }
 
-      return new JointTorqueBasedFootSwitch(jointDescriptionToCheck, foot.getRigidBody(), rootBody, foot.getSoleFrame(), registry);
+      return new JointTorqueBasedFootSwitch(jointDescriptionToCheck, foot.getRigidBody(), rootBody, foot.getSoleFrame(), contactThresholdTorque, higherContactThresholdTorque,
+                                            registry);
    }
 }
