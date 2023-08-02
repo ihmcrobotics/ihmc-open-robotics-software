@@ -12,6 +12,7 @@ import us.ihmc.behaviors.activeMapping.ActiveMappingModule;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
+import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -39,8 +40,11 @@ public class RDXActiveMappingUI implements RenderableProvider
 
    private final ImBoolean renderEnabled = new ImBoolean(true);
 
-   public RDXActiveMappingUI(String name, ActiveMappingModule mappingManager)
+   private PlanarRegionMap planarRegionMap;
+
+   public RDXActiveMappingUI(String name, PlanarRegionMap planarRegionMap, ActiveMappingModule mappingManager)
    {
+      this.planarRegionMap = planarRegionMap;
       this.activeMappingModule = mappingManager;
       imGuiPanel = new ImGuiPanel(name, this::renderImGuiWidgets);
 
@@ -87,7 +91,7 @@ public class RDXActiveMappingUI implements RenderableProvider
          if (ImGui.button("Calculate Footstep Plan") || ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
          {
             LogTools.info("Triggered footstep plan calculation");
-            activeMappingModule.updatePlan();
+            activeMappingModule.updatePlan(planarRegionMap);
             activeMappingModule.setPlanAvailable(true);
          }
       }
@@ -101,7 +105,7 @@ public class RDXActiveMappingUI implements RenderableProvider
          {
             if (renderEnabled.get())
             {
-               mapPlanarRegionsGraphic.generateMeshes(activeMappingModule.getPlanarRegionMap().getMapRegions());
+               mapPlanarRegionsGraphic.generateMeshes(planarRegionMap.getMapRegions());
                mapPlanarRegionsGraphic.update();
             }
          }

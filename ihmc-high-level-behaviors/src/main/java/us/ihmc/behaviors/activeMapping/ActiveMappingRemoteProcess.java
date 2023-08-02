@@ -23,7 +23,7 @@ public class ActiveMappingRemoteProcess extends LocalizationAndMappingProcess
    private final static long UPDATE_PERIOD_MS = 500;
    private final static long PLANNING_PERIOD_MS = 500;
 
-   private final AtomicReference<WalkingStatusMessage> walkingStatusMessage = new AtomicReference<>();
+   private final AtomicReference<WalkingStatusMessage> walkingStatusMessage = new AtomicReference<>(new WalkingStatusMessage());
 
    private final ROS2PublisherMap publisherMap;
    private final ROS2SyncedRobotModel syncedRobotModel;
@@ -46,6 +46,8 @@ public class ActiveMappingRemoteProcess extends LocalizationAndMappingProcess
    {
       super(simpleRobotName, terrainRegionsTopic, structuralRegionsTopic, ros2Node, referenceFrames, referenceFramesUpdater, smoothing);
 
+      this.walkingStatusMessage.get().setWalkingStatus(WalkingStatus.COMPLETED.toByte());
+
       this.syncedRobotModel = syncedRobotModel;
       this.controllerFootstepDataTopic = ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
 
@@ -55,10 +57,16 @@ public class ActiveMappingRemoteProcess extends LocalizationAndMappingProcess
       publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
       ros2Helper.subscribeViaCallback(terrainRegionsTopic, this::onPlanarRegionsReceived);
 
-      ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(WalkingStatusMessage.class, robotModel.getSimpleRobotName()), walkingStatusMessage::set);
+      ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(WalkingStatusMessage.class, robotModel.getSimpleRobotName()), this::walkingStatusReceived);
 
       executorService.scheduleAtFixedRate(this::updateActiveMappingPlan, 0, PLANNING_PERIOD_MS, TimeUnit.MILLISECONDS);
       executorService.scheduleAtFixedRate(this::generalUpdate, 0, UPDATE_PERIOD_MS, TimeUnit.MILLISECONDS);
+   }
+
+   private void walkingStatusReceived(WalkingStatusMessage walkingStatusMessage)
+   {
+      LogTools.warn("Received Walking Status Message: {}", walkingStatusMessage);
+      this.walkingStatusMessage.set(walkingStatusMessage);
    }
 
    /**
@@ -66,7 +74,7 @@ public class ActiveMappingRemoteProcess extends LocalizationAndMappingProcess
     */
    private void generalUpdate()
    {
-      activeMappingModule.setActive(configurationParameters.getSLAMEnabled());
+//      activeMappingModule.setActive(configurationParameters.getSLAMEnabled());
       //activeMappingModule.getPlanarRegionMap().printStatistics(true);
    }
 
@@ -77,20 +85,25 @@ public class ActiveMappingRemoteProcess extends LocalizationAndMappingProcess
    {
       if (configurationParameters.getActiveMapping())
       {
-         LogTools.info("Active Mapping Enabled. Updating Plan");
+         LogTools.info("Active Mapping Enabled. Updating Plan. Walking Status: {}", walkingStatusMessage);
 
          if (walkingStatusMessage.get() != null)
          {
+            LogTools.info("Checking for Walking Status to be Complete");
+
             activeMappingModule.setWalkingStatus(WalkingStatus.fromByte(walkingStatusMessage.get().getWalkingStatus()));
 
             if (walkingStatusMessage.get().getWalkingStatus() == WalkingStatusMessage.COMPLETED && !activeMappingModule.isPlanAvailable())
             {
+               LogTools.info("Walking Status is Complete. Generating Plan");
                activeMappingModule.updatePlan(planarRegionMap);
             }
          }
 
          if (activeMappingModule.isPlanAvailable())
          {
+            LogTools.info("Plan Available. Publishing Plan");
+
             // Publishing Plan Result
             FootstepDataListMessage footstepDataList = activeMappingModule.getFootstepDataListMessage();
             publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
@@ -98,7 +111,7 @@ public class ActiveMappingRemoteProcess extends LocalizationAndMappingProcess
             activeMappingModule.setPlanAvailable(false);
          }
 
-         configurationParameters.setActiveMapping(false);
+//         configurationParameters.setActiveMapping(false);
       }
    }
 }

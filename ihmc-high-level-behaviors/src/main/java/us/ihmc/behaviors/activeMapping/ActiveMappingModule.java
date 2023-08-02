@@ -51,7 +51,7 @@ public class ActiveMappingModule
    private WalkingStatus walkingStatus = WalkingStatus.STARTED;
 
    private boolean planAvailable = false;
-   private boolean active = false;
+   private boolean active = true;
 
    private int gridSize = 20;
    private float gridResolution = 0.3f;
@@ -83,6 +83,8 @@ public class ActiveMappingModule
    {
       if (active)
       {
+         LogTools.info("Footstep Planning Request");
+
          leftSolePose.set(referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
          rightSolePose.set(referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
          leftGoalPose.setToZero();
