@@ -178,7 +178,7 @@ public class RDXInteractableRobotLink
          modified = true;
       }
 
-      if (modified && executeMotionKeyPressed)
+      if (selectablePose3DGizmo.isSelected() && executeMotionKeyPressed)
       {
          onSpacePressed.run();
       }
