@@ -43,6 +43,7 @@ import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.rdx.vr.RDXVRDragData;
 import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.interaction.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
@@ -239,6 +240,55 @@ public class RDXPose3DGizmo implements RenderableProvider
             }
          });
       }
+   }
+
+   public void processVRViewInput(RDXVRContext vrContext)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         vrContext.getController(side).runIfConnected(controller ->
+         {
+            RDXVRDragData triggerDragData = controller.getTriggerDragData();
+
+            if (triggerDragData.getDragJustStarted())
+            {
+               clockFaceDragAlgorithm.reset();
+               triggerDragData.setObjectBeingDragged(this);
+            }
+            updateMaterialHighlighting();
+            if (triggerDragData.isBeingDragged(this))
+            {
+               Line3DReadOnly pickRay = controller.getPickRay();
+
+               if (closestVRCollisionSelection.get(side) != null)
+               {
+                  if (closestVRCollisionSelection.get(side).isLinear())
+                  {
+                     Vector3DReadOnly linearMotion = lineDragAlgorithm.calculate(pickRay,
+                                                                                 closestCollision,
+                                                                                 axisRotations.get(closestVRCollisionSelection.get(side).toAxis3D()),
+                                                                                 transformToWorld);
+                     frameBasedGizmoModification.translateInWorld(linearMotion);
+                     closestCollision.add(linearMotion);
+                     controller.setPickRayColliding(pickRay.getPoint().distance(closestCollision));
+                  }
+                  else if (closestVRCollisionSelection.get(side).isAngular())
+                  {
+                     if (clockFaceDragAlgorithm.calculate(pickRay,
+                                                          closestCollision,
+                                                          axisRotations.get(closestVRCollisionSelection.get(side).toAxis3D()),
+                                                          transformToWorld))
+                     {
+                        frameBasedGizmoModification.rotateInWorld(clockFaceDragAlgorithm.getMotion());
+                        controller.setPickRayColliding(pickRay.getPoint().distance(closestCollision));
+                     }
+                  }
+                  frameBasedGizmoModification.setAdjustmentNeedsToBeApplied();
+               }
+            }
+         });
+      }
+      update();
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
