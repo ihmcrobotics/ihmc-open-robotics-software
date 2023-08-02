@@ -74,7 +74,6 @@ public class RDXInteractableObjectBuilder extends ImGuiPanel
             List<DetectableSceneNode> detectableSceneObjects = predefinedSceneNodeLibrary.getDetectableSceneNodes();
             for (DetectableSceneNode detectableSceneObject : detectableSceneObjects)
             {
-               LogTools.info("{}, {}", detectableSceneObject.getName(), detectableSceneObject.getCurrentlyDetected());
                if (detectableSceneObject.getName().equals(selectedObjectName) && detectableSceneObject.getCurrentlyDetected())
                {
                   LogTools.info(detectableSceneObject.getName());

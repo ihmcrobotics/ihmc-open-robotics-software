@@ -29,11 +29,11 @@ testcolorY='olive'
 testcolorZ='teal'
 testcolorS='palevioletred'
 
-n_demos=20
-# bodyParts = ['leftHand','rightHand','leftForeArm', 'rightForeArm', 'chest']
-bodyParts = ['leftHand','rightHand']
+n_demos=33
+bodyParts = ['leftHand','rightHand','leftForeArm', 'rightForeArm', 'chest']
+# bodyParts = ['leftHand','rightHand']
 for bodyPart in bodyParts:
-    # if 'right' not in bodyPart:
+    if 'right' not in bodyPart:
         demo = []
         for i in range(1,n_demos+1):
             demos_pathname = bodyPart + 'demo' + str(i) + '.csv'

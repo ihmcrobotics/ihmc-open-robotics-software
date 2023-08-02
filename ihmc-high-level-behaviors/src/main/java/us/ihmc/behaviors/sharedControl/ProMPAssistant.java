@@ -297,22 +297,10 @@ public class ProMPAssistant
       }
       else
       {
-//         double x = quaternionToCheck.getX();
-//         double y = quaternionToCheck.getY();
-//         double z = quaternionToCheck.getZ();
-//         double s = quaternionToCheck.getS();
-//
-//         // Calculate the maximum absolute value
-//         double max = Math.max(Math.abs(x), Math.max(Math.abs(y), Math.max(Math.abs(z), Math.abs(s))));
-//
-//         // Check if the maximum absolute value is negative
-//         if ((Math.abs(x) == max && x < 0) ||
-//             (Math.abs(y) == max && y < 0) ||
-//             (Math.abs(z) == max && z < 0) ||
-//             (Math.abs(s) == max && s < 0))
-//         {
-//            lastObservedPose.getOrientation().negate();
-//         }
+         if (Math.signum(proMPManagers.get(currentTask).getMeanEndValueQS() * quaternionToCheck.getS()) == -1)
+         {
+            lastObservedPose.getOrientation().negate();
+         }
 
          previousObservedPose.put(bodyPart,new FramePose3D(lastObservedPose));
       }

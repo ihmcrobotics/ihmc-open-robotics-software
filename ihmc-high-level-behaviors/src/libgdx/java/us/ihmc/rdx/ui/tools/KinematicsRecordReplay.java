@@ -17,6 +17,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.perception.sceneGraph.SceneGraphAPI;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
@@ -58,7 +59,7 @@ public class KinematicsRecordReplay
          framesToRecordHistory.add(new ArrayList<>());
 
       trajectoryRecorder.setDoneReplay(true);
-      detectableSceneObjectsSubscription = ros2.subscribe(PerceptionAPI.DETECTABLE_SCENE_NODES.getStatusTopic());
+      detectableSceneObjectsSubscription = ros2.subscribe(SceneGraphAPI.DETECTABLE_SCENE_NODES);
 
    }
 
