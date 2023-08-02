@@ -15,7 +15,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "88d9c02ac097a39db3fc2fc49ba973307e6038f89af1102e1c5a7fcf1d09f09e";
+   		return "adf2d7d78a110bbc49100f61c6d3cb5ea63ab07ad38400385043e2c65fee3521";
    }
    
    @Override
@@ -100,7 +100,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToWorld(), cdr);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getArucoMarkerTransformToWorld(), cdr);
-      cdr.write_type_7(data.getIsPoseOverriddenByOperator());
+      cdr.write_type_7(data.getTrackDetectedPose());
 
    }
 
@@ -111,7 +111,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
       	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToWorld(), cdr);	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getArucoMarkerTransformToWorld(), cdr);	
-      data.setIsPoseOverriddenByOperator(cdr.read_type_7());
+      data.setTrackDetectedPose(cdr.read_type_7());
       	
 
    }
@@ -125,7 +125,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
 
       ser.write_type_a("aruco_marker_transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getArucoMarkerTransformToWorld());
 
-      ser.write_type_7("is_pose_overridden_by_operator", data.getIsPoseOverriddenByOperator());
+      ser.write_type_7("track_detected_pose", data.getTrackDetectedPose());
    }
 
    @Override
@@ -137,7 +137,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
 
       ser.read_type_a("aruco_marker_transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getArucoMarkerTransformToWorld());
 
-      data.setIsPoseOverriddenByOperator(ser.read_type_7("is_pose_overridden_by_operator"));
+      data.setTrackDetectedPose(ser.read_type_7("track_detected_pose"));
    }
 
    public static void staticCopy(perception_msgs.msg.dds.DetectableSceneNodeMessage src, perception_msgs.msg.dds.DetectableSceneNodeMessage dest)
