@@ -54,6 +54,10 @@ public class StepConstraintRegionsList
       message.getRegionOrigin().clear();
       message.getRegionNormal().clear();
       message.getRegionOrientation().clear();
+      message.getConcaveHullsSize().clear();
+      message.getNumberOfHolesInRegion().clear();
+      message.getHolePolygonsSize().clear();
+
 
       for (int regionIndex = 0; regionIndex < stepConstraintRegions.size(); regionIndex++)
       {
@@ -63,7 +67,7 @@ public class StepConstraintRegionsList
          message.getRegionOrientation().add().set(stepConstraintRegion.getTransformToWorld().getRotation()); // TODO check this
          message.getRegionNormal().add().set(stepConstraintRegion.getNormal()); // TODO check this
 
-         int concaveHullSize = stepConstraintRegion.getConcaveHullVertices().size();
+         int concaveHullSize = stepConstraintRegion.getConcaveHullSize();
          message.getConcaveHullsSize().add(concaveHullSize);
          for (int vertexIndex = 0; vertexIndex < concaveHullSize; vertexIndex++)
             message.getVertexBuffer().add().set(stepConstraintRegion.getConcaveHullVertices().get(vertexIndex));

@@ -75,6 +75,9 @@ public class StepConstraintsListCommand implements Command<StepConstraintsListCo
       message.getRegionOrigin().clear();
       message.getRegionNormal().clear();
       message.getRegionOrientation().clear();
+      message.getConcaveHullsSize().clear();
+      message.getNumberOfHolesInRegion().clear();
+      message.getHolePolygonsSize().clear();
 
       for (int regionIndex = 0; regionIndex < stepsConstraints.size(); regionIndex++)
       {
