@@ -24,6 +24,7 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.teleoperation.RDXLegControlMode;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
@@ -56,6 +57,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
    private final AtomicReference<HeightMapMessage> heightMapDataReference = new AtomicReference<>();
    private final AtomicReference<PlanarRegionsList> planarRegionsListReference = new AtomicReference<>();
+   private RDXLegControlMode legControlMode;
 
    private int previousPlanLength;
    private boolean wasPlanUpdated = false;
@@ -152,6 +154,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       for (int i = 0; i < footsteps.size(); i++)
       {
          RDXInteractableFootstep footstep = footsteps.get(i);
+         footstep.setLegControlMode(legControlMode);
          footstep.process3DViewInput(input, false);
 
          if (footstep.isHovered())
@@ -376,5 +379,15 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    public void destroy()
    {
       swingPlanningModule.destroy();
+   }
+
+   public RDXLegControlMode getLegControlMode()
+   {
+      return legControlMode;
+   }
+
+   public void setLegControlMode(RDXLegControlMode legControlMode)
+   {
+      this.legControlMode = legControlMode;
    }
 }
