@@ -69,9 +69,6 @@ public class RDX3DSituatedImagePanel
    private final RDXVRModeManager vrModeManager;
    private final ModifiableReferenceFrame floatingPanelFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
    private final FramePose3D floatingPanelFramePose = new FramePose3D();
-   private final RigidBodyTransform gripOffsetTransform = new RigidBodyTransform();
-   private double lastTouchpadY = Double.NaN;
-   private double panelZoom = 0;
    private double panelDistanceFromHeadset = 0.5;
    private boolean justShown;
    private boolean isShowing;
@@ -287,23 +284,6 @@ public class RDX3DSituatedImagePanel
                                                                          floatingPanelFrame.getReferenceFrame().getParent());
                }
             }
-//            else if (vrPickPointHovering.get(side) && placementMode == FOLLOW_HEADSET)
-//            {
-//               if (controller.getTouchpadTouchedActionData().bState())
-//               {
-//                  double y = controller.getTouchpadActionData().y();
-//                  if (!Double.isNaN(lastTouchpadY))
-//                  {
-//                     panelZoom = y - lastTouchpadY;
-//                  }
-//                  lastTouchpadY = y;
-//                  panelDistanceFromHeadset = panelDistanceFromHeadset + panelZoom;
-//               }
-//               else
-//               {
-//                  lastTouchpadY = Double.NaN;
-//               }
-//            }
             else if (controller.getGripActionData().x() > 0.9 && selectionCollisionBox.isPointInside(controller.getPickPointPose().getPosition()))
             {
                vrModeManager.setVideoPanelPlacementMode(MANUAL_PLACEMENT);
