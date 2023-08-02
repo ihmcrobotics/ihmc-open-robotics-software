@@ -2,12 +2,9 @@ package us.ihmc.commonWalkingControlModules.messageHandlers;
 
 import java.util.List;
 
+import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.mutable.MutableDouble;
 
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.PlanOffsetStatus;
-import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
-import controller_msgs.msg.dds.WalkingStatusMessage;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
@@ -28,13 +25,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegionsList;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LegTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -84,6 +75,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
    private final SideDependentList<RecyclingArrayDeque<FootTrajectoryCommand>> upcomingFootTrajectoryCommandListForFlamingoStance = new SideDependentList<>();
    private final SideDependentList<RecyclingArrayDeque<LegTrajectoryCommand>> upcomingLegTrajectoryCommandListForFlamingoStance = new SideDependentList<>();
 
+   private final FootstepQueueStatusMessage footstepQueueStatusMessage = new FootstepQueueStatusMessage();
    private final StatusMessageOutputManager statusOutputManager;
    private final PlanOffsetStatus planOffsetStatus = new PlanOffsetStatus();
 
@@ -376,6 +368,42 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
    public void getAngularMomentumTrajectory(double startTime, double endTime, int numberOfPoints, RecyclingArrayList<EuclideanTrajectoryPoint> trajectoryToPack)
    {
       momentumTrajectoryHandler.getAngularMomentumTrajectory(startTime, endTime, numberOfPoints, trajectoryToPack);
+   }
+
+
+   public FootstepQueueStatusMessage updateAndReturnFootstepQueueStatus()
+   {
+      // TODO is the step being taken in swing currently packed inside the upcoming footstep
+      footstepQueueStatusMessage.getQueuedFootstepList().clear();
+      for (int i = 0; i < upcomingFootsteps.size(); i++)
+      {
+         QueuedFootstepStatusMessage queuedFootstepStatusMessage = footstepQueueStatusMessage.getQueuedFootstepList().add();
+         Footstep upcomingFootstep = upcomingFootsteps.get(i);
+         FootstepTiming upcomingTiming = upcomingFootstepTimings.get(i);
+         StepConstraintRegionsList stepConstraints = upcomingStepConstraints.get(i);
+
+         packQueuedFootstepStatus(queuedFootstepStatusMessage, upcomingFootstep, upcomingTiming, stepConstraints);
+      }
+
+      return footstepQueueStatusMessage;
+   }
+
+   private static void packQueuedFootstepStatus(QueuedFootstepStatusMessage messasgeToPack,
+                                                Footstep footstep,
+                                                FootstepTiming footstepTiming,
+                                                StepConstraintRegionsList stepConstraints)
+   {
+      messasgeToPack.setRobotSide(footstep.getRobotSide().toByte());
+      messasgeToPack.getLocation().set(footstep.getFootstepPose().getPosition());
+      messasgeToPack.getOrientation().set(footstep.getFootstepPose().getOrientation());
+      messasgeToPack.setSwingDuration(footstepTiming.getSwingTime());
+      messasgeToPack.setTransferDuration(footstepTiming.getTransferTime());
+
+      messasgeToPack.getPredictedContactPoints2d().clear();
+      for (int i = 0; i < footstep.getPredictedContactPoints().size(); i++)
+         messasgeToPack.getPredictedContactPoints2d().add().set(footstep.getPredictedContactPoints().get(i));
+
+      stepConstraints.getAsMessage(messasgeToPack.getStepConstraints());
    }
 
    public MomentumTrajectoryHandler getMomentumTrajectoryHandler()

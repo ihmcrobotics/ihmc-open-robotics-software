@@ -678,6 +678,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          controllerToolbox.getFootContactState(robotSide).pollContactHasChangedNotification();
       }
 
+      statusOutputManager.reportStatusMessage(walkingMessageHandler.updateAndReturnFootstepQueueStatus());
       statusOutputManager.reportStatusMessage(balanceManager.updateAndReturnCapturabilityBasedStatus());
 
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)

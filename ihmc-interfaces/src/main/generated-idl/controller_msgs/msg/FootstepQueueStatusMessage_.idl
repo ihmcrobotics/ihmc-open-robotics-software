@@ -24,7 +24,7 @@ module controller_msgs
         /**
          * Defines the list of footsteps contained in the queue.
          */
-        sequence<controller_msgs::msg::dds::QueuedFootstepStatusMessage, 50> footstep_data_list;
+        sequence<controller_msgs::msg::dds::QueuedFootstepStatusMessage, 50> queued_footstep_list;
       };
     };
   };
