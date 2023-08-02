@@ -275,7 +275,7 @@ public class RDXInteractableFootstep
             if (!controller.getGripAsButtonDown())
             {
                vrPickPose.setIncludingFrame(controller.getPickPointPose());
-               vrPickPose.changeFrame(ReferenceFrame.getWorldFrame());
+               vrPickPose.changeFrame(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
                isIntersectingVR.put(side, mouseCollidable.pointCollide(vrPickPose.getPosition()));
             }
          });
@@ -314,10 +314,6 @@ public class RDXInteractableFootstep
                                                                                   .getTransformToParent(),
                                                              ReferenceFrame.getWorldFrame());
             }
-            selectionCollisionBox.changeFrame(ReferenceFrame.getWorldFrame());
-            selectionCollisionBox.getPosition().set(selectablePose3DGizmo.getPoseGizmo().getPose().getPosition());
-            selectionCollisionBox.getPose().getTranslation().add(footstepGraphicTranslationX, footstepGraphicTranslationY, footstepGraphicTranslationZ);
-            selectionCollisionBox.changeFrame(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
          });
       }
    }
