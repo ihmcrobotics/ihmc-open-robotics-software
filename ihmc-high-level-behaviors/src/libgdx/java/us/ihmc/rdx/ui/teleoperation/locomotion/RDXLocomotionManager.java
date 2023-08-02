@@ -169,8 +169,6 @@ public class RDXLocomotionManager
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
 
       interactableFootstepPlan.create(baseUI, communicationHelper, syncedRobot, locomotionParameters, footstepPlannerParameters, swingFootPlannerParameters);
-      baseUI.getVRManager().getContext().addVRPickCalculator(interactableFootstepPlan::calculateVRPick);
-      baseUI.getVRManager().getContext().addVRInputProcessor(interactableFootstepPlan::processVRInput);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(interactableFootstepPlan::processImGui3DViewInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(interactableFootstepPlan::calculate3DViewPick);
 
@@ -244,7 +242,7 @@ public class RDXLocomotionManager
          interactableFootstepPlan.clear();
          bodyPathPlanGraphic.clear();
       }
-      interactableFootstepPlan.setLegControlMode(legControlMode);
+
       manualFootstepPlacement.update();
       bodyPathPlanGraphic.update();
       interactableFootstepPlan.update();
