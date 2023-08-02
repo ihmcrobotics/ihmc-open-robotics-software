@@ -155,6 +155,7 @@ public class RDXLocomotionManager
    public void create(RDXBaseUI baseUI)
    {
       this.baseUI = baseUI;
+      baseUI.getImGuiPanelManager().addPanel("Locomotion", this::renderImGuiWidgets);
 
       controllerStatusTracker.registerAbortedListener(abortedNotification);
 
