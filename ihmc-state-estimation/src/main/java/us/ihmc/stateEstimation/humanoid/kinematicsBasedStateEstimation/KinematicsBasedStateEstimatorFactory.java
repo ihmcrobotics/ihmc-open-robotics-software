@@ -161,6 +161,7 @@ public class KinematicsBasedStateEstimatorFactory
          FootSwitchInterface footSwitch = footSwitchFactory.newFootSwitch(namePrefix,
                                                                           bipedFeet.get(robotSide),
                                                                           otherFoot,
+                                                                          fullRobotModel.getRootBody(),
                                                                           footForceSensorForEstimator,
                                                                           totalRobotWeight,
                                                                           null,

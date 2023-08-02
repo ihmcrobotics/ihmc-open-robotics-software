@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 
-import java.util.Collection;
-
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -12,13 +10,18 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class KinematicsBasedFootSwitchFactory implements FootSwitchFactory
+import java.util.Collection;
+
+public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
 {
    private double defaultContactThresholdHeight = 0.05;
    private DoubleProvider contactThresholdHeight;
 
-   public KinematicsBasedFootSwitchFactory()
+   private final String jointDescriptionToCheck;
+
+   public JointTorqueBasedFootSwitchFactory(String jointDescriptionToCheck)
    {
+      this.jointDescriptionToCheck= jointDescriptionToCheck;
    }
 
    /**
@@ -32,15 +35,18 @@ public class KinematicsBasedFootSwitchFactory implements FootSwitchFactory
    }
 
    @Override
-   public FootSwitchInterface newFootSwitch(String namePrefix, ContactablePlaneBody foot, Collection<? extends ContactablePlaneBody> otherFeet,
+   public FootSwitchInterface newFootSwitch(String namePrefix,
+                                            ContactablePlaneBody foot,
+                                            Collection<? extends ContactablePlaneBody> otherFeet,
                                             RigidBodyBasics rootBody,
                                             ForceSensorDataReadOnly footForceSensor,
-                                            double totalRobotWeight, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                            double totalRobotWeight,
+                                            YoGraphicsListRegistry yoGraphicsListRegistry,
                                             YoRegistry registry)
    {
       if (contactThresholdHeight == null)
          contactThresholdHeight = new DoubleParameter("ContactThresholdHeight", registry, defaultContactThresholdHeight);
 
-      return new KinematicsBasedFootSwitch(namePrefix, foot, otherFeet, contactThresholdHeight, totalRobotWeight, registry);
+      return new JointTorqueBasedFootSwitch(jointDescriptionToCheck, foot.getRigidBody(), rootBody, foot.getSoleFrame(), registry);
    }
 }
