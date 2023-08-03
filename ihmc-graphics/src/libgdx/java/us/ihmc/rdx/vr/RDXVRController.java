@@ -124,6 +124,10 @@ public class RDXVRController extends RDXVRTrackedDevice
    private RDXModelInstance pickPoseSphere;
    private RDXModelInstance pickRayGraphic;
    private RDXModelInstance pickRayCollisionPointGraphic;
+   private RDXModelInstance joystickSphere;
+   private ModifiableReferenceFrame joystickSpherePoseFrame;
+   private ModifiableReferenceFrame joystickReferenceFrame;
+   private final FramePose3D joystickSphereFramePose = new FramePose3D();
    private  RDXVRControllerButtonLabel aButtonLabel;
    private  RDXVRControllerButtonLabel bButtonLabel;
    private RDXVRControllerButtonLabel topJoystickLabel;
@@ -149,6 +153,14 @@ public class RDXVRController extends RDXVRTrackedDevice
       pickPoseFrame.getTransformToParent().getTranslation().setZ(-0.017);
       pickPoseFrame.getReferenceFrame().update();
       pickPoseTransformTuner = new ImGuiRigidBodyTransformTuner(pickPoseFrame.getTransformToParent());
+
+      joystickReferenceFrame = new ModifiableReferenceFrame(xForwardZUpControllerFrame);
+      joystickReferenceFrame.getTransformToParent().getTranslation().setX(-0.04);
+      joystickReferenceFrame.getTransformToParent().getTranslation().setY(side.negateIfLeftSide(-0.015));
+      joystickReferenceFrame.getTransformToParent().getTranslation().setZ(-0.017);
+      joystickReferenceFrame.getReferenceFrame().update();
+      joystickSpherePoseFrame = new ModifiableReferenceFrame(joystickReferenceFrame.getReferenceFrame());
+
 
       triggerDragData = new RDXVRDragData(() -> getClickTriggerActionData().bState(), pickPoseFrame.getReferenceFrame());
       gripDragData = new RDXVRDragData(this::getGripAsButtonDown, pickPoseFrame.getReferenceFrame());
@@ -198,6 +210,10 @@ public class RDXVRController extends RDXVRTrackedDevice
 
       if (isConnected())
       {
+         if (joystickSphere == null)
+         {
+            joystickSphere = new RDXModelInstance(RDXModelBuilder.createSphere(0.0025f, new Color(Color.WHITE)));
+         }
          if (pickPoseSphere == null)
          {
             pickPoseSphere = new RDXModelInstance(RDXModelBuilder.createSphere(0.0025f, new Color(0x870707ff)));
@@ -208,21 +224,22 @@ public class RDXVRController extends RDXVRTrackedDevice
             // for the Valve Index controllers.
             Point3D aButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.085, -0.01, -0.02) : new Point3D(-0.082, -0.01, -0.017);
             Point3D bButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.07, -0.013, -0.015) : new Point3D(-0.07, -0.007, -0.008);
-            Point3D topJoystickOffset = side == RobotSide.LEFT ? new Point3D(-0.085, 0.0, -0.02) : new Point3D(0.0, 0.0, -0.004);
-            Point3D bottomJoystickOffset = side == RobotSide.LEFT ? new Point3D(-0.085, 0.0, -0.02) : new Point3D(-0.07, 0.0, -0.004);
-            Point3D rightJoystickOffset = side == RobotSide.LEFT ? new Point3D(-0.085, -0.052, -0.02) : new Point3D(-0.07, -0.052, -0.004);
-            Point3D leftJoystickOffset = side == RobotSide.LEFT ? new Point3D(-0.085, 0.052, -0.02) : new Point3D(-0.07, 0.052, -0.004);
+            Point3D topJoystickOffset = new Point3D(0.1, 0.0, 0.0);
+            Point3D bottomJoystickOffset = new Point3D(-0.1, 0.0, -0.006);
+            Point3D rightJoystickOffset = new Point3D(0.0, 0.1, -0.002);
+            Point3D leftJoystickOffset = new Point3D(0.0, -0.1, -0.002);
             Point3D gripAmountOffset = side == RobotSide.LEFT ? new Point3D(-0.1, -0.0, -0.07) : new Point3D(-0.1, 0.0, -0.07);
             YawPitchRoll gripAmountOrientation = side == RobotSide.LEFT ?
-                  new YawPitchRoll(Math.toRadians(90.0), Math.toRadians(-37.0), Math.toRadians(90.0))
-                  : new YawPitchRoll(Math.toRadians(-90.0), Math.toRadians(37.0), Math.toRadians(90.0));
+                  new YawPitchRoll(Math.toRadians(90.0), Math.toRadians(-37.0), Math.toRadians(90.0)) :
+                  new YawPitchRoll(Math.toRadians(-90.0), Math.toRadians(37.0), Math.toRadians(90.0));
             aButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, aButtonOffset, new YawPitchRoll());
             bButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, bButtonOffset, new YawPitchRoll());
-            topJoystickLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, topJoystickOffset, new YawPitchRoll());
-            bottomJoystickLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, bottomJoystickOffset, new YawPitchRoll());
-            rightJoystickLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, rightJoystickOffset, new YawPitchRoll());
-            leftJoystickLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, leftJoystickOffset, new YawPitchRoll());
+            topJoystickLabel = new RDXVRControllerButtonLabel(joystickReferenceFrame.getReferenceFrame(), side, topJoystickOffset, new YawPitchRoll());
+            bottomJoystickLabel = new RDXVRControllerButtonLabel(joystickReferenceFrame.getReferenceFrame(), side, bottomJoystickOffset, new YawPitchRoll());
+            rightJoystickLabel = new RDXVRControllerButtonLabel(joystickReferenceFrame.getReferenceFrame(), side, rightJoystickOffset, new YawPitchRoll());
+            leftJoystickLabel = new RDXVRControllerButtonLabel(joystickReferenceFrame.getReferenceFrame(), side, leftJoystickOffset, new YawPitchRoll());
             gripAmountLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, gripAmountOffset, gripAmountOrientation);
+
          }
 
          pickPoseFrame.getReferenceFrame().update();
@@ -233,6 +250,11 @@ public class RDXVRController extends RDXVRTrackedDevice
          pickRay.setToZero(getPickPoseFrame());
          pickRay.getDirection().set(Axis3D.X);
          pickRay.changeFrame(ReferenceFrame.getWorldFrame());
+
+         joystickSpherePoseFrame.getReferenceFrame().update();
+         joystickSphereFramePose.setToZero(joystickSpherePoseFrame.getReferenceFrame());
+         joystickSphereFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+         joystickSphere.setPoseInWorldFrame(joystickSphereFramePose);
 
          aButtonLabel.setText("");
          bButtonLabel.setText("");
@@ -294,24 +316,8 @@ public class RDXVRController extends RDXVRTrackedDevice
             setPickRayColliding(distance);
          }
       }
-
-      Point3D aButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.085, -0.01, -0.02) : new Point3D(-0.082, -0.01, -0.017);
-      Point3D bButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.07, -0.013, -0.015) : new Point3D(-0.07, -0.007, -0.008);
-      Point3D topJoystickOffset = side == RobotSide.LEFT ? new Point3D(0.0, 0.025, 0.0) : new Point3D(-0.02, 0, 0.0);
-      Point3D bottomJoystickOffset = side == RobotSide.LEFT ? new Point3D(-0.12, 0.04, -0.006) : new Point3D(-0.12, 0.0, -0.006);
-      Point3D rightJoystickOffset = side == RobotSide.LEFT ? new Point3D(-0.08, -0.03, -0.002) : new Point3D(-0.06, -0.052, -0.002);
-      Point3D leftJoystickOffset = side == RobotSide.LEFT ? new Point3D(-0.06, 0.075, -0.002) : new Point3D(-0.08, 0.052, -0.002);
-      Point3D gripAmountOffset = side == RobotSide.LEFT ? new Point3D(-0.1, -0.0, -0.07) : new Point3D(-0.1, 0.0, -0.07);
-      YawPitchRoll gripAmountOrientation = side == RobotSide.LEFT ?
-            new YawPitchRoll(Math.toRadians(90.0), Math.toRadians(-37.0), Math.toRadians(90.0)) :
-            new YawPitchRoll(Math.toRadians(-90.0), Math.toRadians(37.0), Math.toRadians(90.0));
-      aButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, aButtonOffset, new YawPitchRoll());
-      bButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, bButtonOffset, new YawPitchRoll());
-      topJoystickLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, topJoystickOffset, new YawPitchRoll());
-      bottomJoystickLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, bottomJoystickOffset, new YawPitchRoll());
-      rightJoystickLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, rightJoystickOffset, new YawPitchRoll());
-      leftJoystickLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, leftJoystickOffset, new YawPitchRoll());
-      gripAmountLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, gripAmountOffset, gripAmountOrientation);
+      joystickSpherePoseFrame.getTransformToParent().getTranslation().setX(0.1*joystickActionData.y());
+      joystickSpherePoseFrame.getTransformToParent().getTranslation().setY(-0.1*joystickActionData.x());
    }
 
    public void renderImGuiTunerWidgets()
@@ -325,6 +331,7 @@ public class RDXVRController extends RDXVRTrackedDevice
       {
          getModelInstance().getRenderables(renderables, pool);
          pickPoseSphere.getRenderables(renderables, pool);
+         joystickSphere.getRenderables(renderables, pool);
 
          if (pickRayGraphic != null)
             pickRayGraphic.getRenderables(renderables, pool);
