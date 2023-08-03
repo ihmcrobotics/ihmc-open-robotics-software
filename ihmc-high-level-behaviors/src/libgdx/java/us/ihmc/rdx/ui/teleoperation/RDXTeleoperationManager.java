@@ -408,6 +408,15 @@ public class RDXTeleoperationManager extends ImGuiPanel
    {
       robotLowLevelMessenger.renderImGuiWidgets();
 
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Delete all Graphics")))
+      {
+         locomotionManager.deleteAll();
+
+         for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
+            robotPartInteractable.delete();
+      }
+
       pelvisHeightSlider.renderImGuiWidgets();
       chestPitchSlider.renderImGuiWidgets();
       chestYawSlider.renderImGuiWidgets();
@@ -418,15 +427,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       if (interactablesAvailable)
       {
-         if (ImGui.button(labels.get("Delete all Interactables")))
-         {
-            locomotionManager.deleteAll();
-
-            for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
-               robotPartInteractable.delete();
-         }
-
-         ImGui.sameLine();
          ImGui.checkbox("Interactables enabled", interactablesEnabled);
       }
 
@@ -442,7 +442,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
          {
             for (RobotSide side : interactableHands.sides())
             {
-               ImGui.text(side.getPascalCaseName() + " hand:");
+               ImGui.text(side.getPascalCaseName() + " Hand:");
                ImGui.sameLine();
                interactableHands.get(side).renderImGuiWidgets();
                handInteractablesAreDeleted &= interactableHands.get(side).isDeleted();
@@ -452,17 +452,16 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
          if (!handInteractablesAreDeleted)
          {
-            // desiredRobot.setPelvisShowing(!pelvisInteractable.isDeleted());
             for (RobotSide side : interactableHands.sides())
+            {
                desiredRobot.setArmShowing(side, !interactableHands.get(side).isDeleted()
                                                 && armManager.getArmControlMode() == RDXArmControlMode.JOINT_ANGLES);
-            // for (RobotSide side : footInteractables.sides())
-            //    desiredRobot.setLegShowing(side, !footInteractables.get(side).isDeleted());
+            }
          }
 
          for (RobotSide side : interactableFeet.sides())
          {
-            ImGui.text(side.getPascalCaseName() + " foot:");
+            ImGui.text(side.getPascalCaseName() + " Foot:");
             ImGui.sameLine();
             if (interactableFeet.get(side).renderImGuiWidgets())
             {
