@@ -126,6 +126,10 @@ public class RDXVRController extends RDXVRTrackedDevice
    private RDXModelInstance pickRayCollisionPointGraphic;
    private  RDXVRControllerButtonLabel aButtonLabel;
    private  RDXVRControllerButtonLabel bButtonLabel;
+   private RDXVRControllerButtonLabel topJoystickLabel;
+   private RDXVRControllerButtonLabel bottomJoystickLabel;
+   private RDXVRControllerButtonLabel leftJoystickLabel;
+   private RDXVRControllerButtonLabel rightJoystickLabel;
    private  RDXVRControllerButtonLabel gripAmountLabel;
    private final RDXVRDragData triggerDragData;
    private final RDXVRDragData gripDragData;
@@ -200,16 +204,24 @@ public class RDXVRController extends RDXVRTrackedDevice
             pickRayCollisionPointGraphic = new RDXModelInstance(RDXModelBuilder.createSphere(0.0015f, new Color(Color.WHITE)));
             LibGDXTools.hideGraphic(pickRayCollisionPointGraphic);
 
-            // These were tuned by @dcalvert using JRebel hand tweaking so they looked good
+            // These were tuned by @dcalvert using JRebel and bringing them down to updatePickResult method hand tweaking so they looked good
             // for the Valve Index controllers.
             Point3D aButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.085, -0.01, -0.02) : new Point3D(-0.082, -0.01, -0.017);
             Point3D bButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.07, -0.013, -0.015) : new Point3D(-0.07, -0.007, -0.008);
+            Point3D topJoystickOffset = side == RobotSide.LEFT ? new Point3D(-0.085, 0.0, -0.02) : new Point3D(0.0, 0.0, -0.004);
+            Point3D bottomJoystickOffset = side == RobotSide.LEFT ? new Point3D(-0.085, 0.0, -0.02) : new Point3D(-0.07, 0.0, -0.004);
+            Point3D rightJoystickOffset = side == RobotSide.LEFT ? new Point3D(-0.085, -0.052, -0.02) : new Point3D(-0.07, -0.052, -0.004);
+            Point3D leftJoystickOffset = side == RobotSide.LEFT ? new Point3D(-0.085, 0.052, -0.02) : new Point3D(-0.07, 0.052, -0.004);
             Point3D gripAmountOffset = side == RobotSide.LEFT ? new Point3D(-0.1, -0.0, -0.07) : new Point3D(-0.1, 0.0, -0.07);
             YawPitchRoll gripAmountOrientation = side == RobotSide.LEFT ?
                   new YawPitchRoll(Math.toRadians(90.0), Math.toRadians(-37.0), Math.toRadians(90.0))
                   : new YawPitchRoll(Math.toRadians(-90.0), Math.toRadians(37.0), Math.toRadians(90.0));
             aButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, aButtonOffset, new YawPitchRoll());
             bButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, bButtonOffset, new YawPitchRoll());
+            topJoystickLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, topJoystickOffset, new YawPitchRoll());
+            bottomJoystickLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, bottomJoystickOffset, new YawPitchRoll());
+            rightJoystickLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, rightJoystickOffset, new YawPitchRoll());
+            leftJoystickLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, leftJoystickOffset, new YawPitchRoll());
             gripAmountLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, gripAmountOffset, gripAmountOrientation);
          }
 
@@ -282,6 +294,24 @@ public class RDXVRController extends RDXVRTrackedDevice
             setPickRayColliding(distance);
          }
       }
+
+      Point3D aButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.085, -0.01, -0.02) : new Point3D(-0.082, -0.01, -0.017);
+      Point3D bButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.07, -0.013, -0.015) : new Point3D(-0.07, -0.007, -0.008);
+      Point3D topJoystickOffset = side == RobotSide.LEFT ? new Point3D(0.0, 0.025, 0.0) : new Point3D(-0.02, 0, 0.0);
+      Point3D bottomJoystickOffset = side == RobotSide.LEFT ? new Point3D(-0.12, 0.04, -0.006) : new Point3D(-0.12, 0.0, -0.006);
+      Point3D rightJoystickOffset = side == RobotSide.LEFT ? new Point3D(-0.08, -0.03, -0.002) : new Point3D(-0.06, -0.052, -0.002);
+      Point3D leftJoystickOffset = side == RobotSide.LEFT ? new Point3D(-0.06, 0.075, -0.002) : new Point3D(-0.08, 0.052, -0.002);
+      Point3D gripAmountOffset = side == RobotSide.LEFT ? new Point3D(-0.1, -0.0, -0.07) : new Point3D(-0.1, 0.0, -0.07);
+      YawPitchRoll gripAmountOrientation = side == RobotSide.LEFT ?
+            new YawPitchRoll(Math.toRadians(90.0), Math.toRadians(-37.0), Math.toRadians(90.0)) :
+            new YawPitchRoll(Math.toRadians(-90.0), Math.toRadians(37.0), Math.toRadians(90.0));
+      aButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, aButtonOffset, new YawPitchRoll());
+      bButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, bButtonOffset, new YawPitchRoll());
+      topJoystickLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, topJoystickOffset, new YawPitchRoll());
+      bottomJoystickLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, bottomJoystickOffset, new YawPitchRoll());
+      rightJoystickLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, rightJoystickOffset, new YawPitchRoll());
+      leftJoystickLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, leftJoystickOffset, new YawPitchRoll());
+      gripAmountLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, gripAmountOffset, gripAmountOrientation);
    }
 
    public void renderImGuiTunerWidgets()
@@ -303,6 +333,10 @@ public class RDXVRController extends RDXVRTrackedDevice
             pickRayCollisionPointGraphic.getRenderables(renderables, pool);
             aButtonLabel.getRenderables(renderables, pool);
             bButtonLabel.getRenderables(renderables, pool);
+            topJoystickLabel.getRenderables(renderables, pool);
+            bottomJoystickLabel.getRenderables(renderables, pool);
+            leftJoystickLabel.getRenderables(renderables, pool);
+            rightJoystickLabel.getRenderables(renderables, pool);
             gripAmountLabel.getRenderables(renderables, pool);
          }
       }
@@ -493,5 +527,25 @@ public class RDXVRController extends RDXVRTrackedDevice
    public void setBButtonText(String text)
    {
       bButtonLabel.setText(text);
+   }
+
+   public void setTopJoystickText(String text)
+   {
+      topJoystickLabel.setText(text);
+   }
+
+   public void setBottomJoystickText(String text)
+   {
+      bottomJoystickLabel.setText(text);
+   }
+
+   public void setLeftJoystickText(String text)
+   {
+      leftJoystickLabel.setText(text);
+   }
+
+   public void setRightJoystickText(String text)
+   {
+      rightJoystickLabel.setText(text);
    }
 }
