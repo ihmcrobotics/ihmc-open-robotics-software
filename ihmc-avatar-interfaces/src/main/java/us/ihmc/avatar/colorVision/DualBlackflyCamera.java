@@ -151,7 +151,7 @@ public class DualBlackflyCamera
       RigidBodyTransform cameraTransformToParent = robotModel.getSensorInformation().getSituationalAwarenessCameraTransform(side);
 
       remoteTunableCameraTransform = ROS2TunedRigidBodyTransform.toBeTuned(ros2Helper,
-                                                                           ROS2Tools.OBJECT_DETECTION_CAMERA_TO_PARENT_TUNING,
+                                                                           PerceptionAPI.OBJECT_DETECTION_CAMERA_TO_PARENT_TUNING,
                                                                            cameraTransformToParent);
 
       detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(predefinedSceneNodeLibrary.getDetectableSceneNodes(),
