@@ -138,6 +138,9 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
    private final ValkyrieTorqueOffsetPrinter valkyrieTorqueOffsetPrinter = new ValkyrieTorqueOffsetPrinter();
    private StateMachine<HighLevelControllerName, HighLevelControllerState> controllerStateMachine;
 
+   private final CommandInputManager commandInputManager;
+   private final StatusMessageOutputManager statusMessageOutputManager;
+
    public ValkyrieUpperBodyController()
    {
       fullRobotModel = robotModel.createFullRobotModel();
@@ -146,8 +149,8 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
       JointBasics[] controlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
       controlledOneDoFJoints = MultiBodySystemTools.filterJoints(controlledJoints, OneDoFJointBasics.class);
 
-      CommandInputManager commandInputManager = new CommandInputManager(ControllerAPIDefinition.getControllerSupportedCommands());
-      StatusMessageOutputManager statusMessageOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
+      commandInputManager = new CommandInputManager(ControllerAPIDefinition.getControllerSupportedCommands());
+      statusMessageOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
 
       PeriodicRealtimeThreadSchedulerFactory realtimeThreadFactory = new PeriodicRealtimeThreadSchedulerFactory(ValkyriePriorityParameters.POSECOMMUNICATOR_PRIORITY);
       ros2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, realtimeThreadFactory, VALKYRIE_IHMC_ROS_CONTROLLER_NODE_NAME);
@@ -247,7 +250,9 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
       factory.addState(standReadyState.getHighLevelControllerName(), standReadyState);
 
       // Setup manipulation state
-      ValkyrieUpperBodyManipulationState manipulationState = new ValkyrieUpperBodyManipulationState(robotModel.getHighLevelControllerParameters(),
+      ValkyrieUpperBodyManipulationState manipulationState = new ValkyrieUpperBodyManipulationState(commandInputManager,
+                                                                                                    robotModel.getControllerDT(),
+                                                                                                    robotModel.getHighLevelControllerParameters(),
                                                                                                     robotModel.getWalkingControllerParameters(),
                                                                                                     fullRobotModel,
                                                                                                     controlledOneDoFJoints,
