@@ -35,7 +35,7 @@ public class RDXVRModeManager
    private final FramePose3D leftHandPanelPose = new FramePose3D();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private RDXVRMode mode = RDXVRMode.INPUTS_DISABLED;
-   private RDX3DSituatedVideoPanelMode panelPlacementMode = RDX3DSituatedVideoPanelMode.MANUAL_PLACEMENT;
+   private RDXVRPanelPlacementMode panelPlacementMode = RDXVRPanelPlacementMode.MANUAL_PLACEMENT;
    private boolean renderPanel;
    private final ImBoolean showFloatingVideoPanel = new ImBoolean(false);
    private final Notification showFloatVideoPanelNotification = new Notification();
@@ -121,14 +121,14 @@ public class RDXVRModeManager
       if (showFloatingVideoPanel.get())
       {
          ImGui.sameLine();
-         if (ImGui.radioButton(labels.get("Manually place"), panelPlacementMode == RDX3DSituatedVideoPanelMode.MANUAL_PLACEMENT))
+         if (ImGui.radioButton(labels.get("Manually place"), panelPlacementMode == RDXVRPanelPlacementMode.MANUAL_PLACEMENT))
          {
-            panelPlacementMode = RDX3DSituatedVideoPanelMode.MANUAL_PLACEMENT;
+            panelPlacementMode = RDXVRPanelPlacementMode.MANUAL_PLACEMENT;
          }
          ImGui.sameLine();
-         if (ImGui.radioButton(labels.get("Follow headset"), panelPlacementMode == RDX3DSituatedVideoPanelMode.FOLLOW_HEADSET))
+         if (ImGui.radioButton(labels.get("Follow headset"), panelPlacementMode == RDXVRPanelPlacementMode.FOLLOW_HEADSET))
          {
-            panelPlacementMode = RDX3DSituatedVideoPanelMode.FOLLOW_HEADSET;
+            panelPlacementMode = RDXVRPanelPlacementMode.FOLLOW_HEADSET;
          }
       }
 
@@ -224,12 +224,12 @@ public class RDXVRModeManager
       return showFloatVideoPanelNotification;
    }
 
-   public RDX3DSituatedVideoPanelMode getVideoPanelPlacementMode()
+   public RDXVRPanelPlacementMode getVideoPanelPlacementMode()
    {
       return panelPlacementMode;
    }
 
-   public void setVideoPanelPlacementMode(RDX3DSituatedVideoPanelMode panelPlacementMode)
+   public void setVideoPanelPlacementMode(RDXVRPanelPlacementMode panelPlacementMode)
    {
       this.panelPlacementMode = panelPlacementMode;
    }

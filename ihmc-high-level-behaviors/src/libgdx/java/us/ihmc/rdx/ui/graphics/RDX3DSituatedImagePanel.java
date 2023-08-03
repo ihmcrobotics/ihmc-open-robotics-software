@@ -28,7 +28,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.ui.vr.RDX3DSituatedVideoPanelMode;
+import us.ihmc.rdx.ui.vr.RDXVRPanelPlacementMode;
 import us.ihmc.rdx.ui.vr.RDXVRModeManager;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRDragData;
@@ -41,7 +41,7 @@ import java.util.Set;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.TextureCoordinates;
-import static us.ihmc.rdx.ui.vr.RDX3DSituatedVideoPanelMode.*;
+import static us.ihmc.rdx.ui.vr.RDXVRPanelPlacementMode.*;
 
 public class RDX3DSituatedImagePanel
 {
@@ -247,7 +247,7 @@ public class RDX3DSituatedImagePanel
 
    public void addVRInputProcessor(RDXVRContext context)
    {
-      RDX3DSituatedVideoPanelMode placementMode = vrModeManager.getVideoPanelPlacementMode();
+      RDXVRPanelPlacementMode placementMode = vrModeManager.getVideoPanelPlacementMode();
 
       context.getHeadset().runIfConnected(headset ->
       {
