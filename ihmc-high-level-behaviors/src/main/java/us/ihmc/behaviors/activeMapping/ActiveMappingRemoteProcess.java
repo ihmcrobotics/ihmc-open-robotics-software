@@ -6,6 +6,7 @@ import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
@@ -56,6 +57,7 @@ public class ActiveMappingRemoteProcess extends LocalizationAndMappingProcess
       publisherMap = new ROS2PublisherMap(ros2Node);
       publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
       ros2Helper.subscribeViaCallback(terrainRegionsTopic, this::onPlanarRegionsReceived);
+      ros2Helper.subscribeViaCallback(PerceptionAPI.OUSTER_DEPTH_IMAGE, this::onOusterDepthReceived);
 
       ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(WalkingStatusMessage.class, robotModel.getSimpleRobotName()), this::walkingStatusReceived);
 

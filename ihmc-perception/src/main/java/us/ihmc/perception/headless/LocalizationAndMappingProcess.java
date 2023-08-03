@@ -3,6 +3,7 @@ package us.ihmc.perception.headless;
 import controller_msgs.msg.dds.HighLevelStateMessage;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
+import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
@@ -61,6 +62,7 @@ public class LocalizationAndMappingProcess
 
    private final AtomicReference<HighLevelStateMessage> highLevelState = new AtomicReference<>();
    private final AtomicReference<WalkingControllerFailureStatusMessage> walkingFailureStatus = new AtomicReference<>();
+   private final AtomicReference<ImageMessage> latestDepthMessage = new AtomicReference<>(null);
    private final AtomicReference<FramePlanarRegionsListMessage> latestIncomingRegions = new AtomicReference<>(null);
    private final AtomicReference<PlanarRegionsList> latestPlanarRegionsForPublishing = new AtomicReference<>(null);
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters("ForGPURegions");
@@ -143,12 +145,25 @@ public class LocalizationAndMappingProcess
       }
    }
 
+   public void onOusterDepthReceived(ImageMessage depthMessage)
+   {
+      if (latestDepthMessage.get() == null)
+         latestDepthMessage.set(depthMessage);
+
+      executorService.submit(this::updateOccupancyGrid);
+   }
+
    public void onPlanarRegionsReceived(FramePlanarRegionsListMessage message)
    {
       if (latestIncomingRegions.get() == null)
          latestIncomingRegions.set(message);
 
       executorService.submit(this::updateMap);
+   }
+
+   public synchronized void updateOccupancyGrid()
+   {
+      //LogTools.debug("Ouster Depth Received!");
    }
 
    public synchronized void updateMap()
