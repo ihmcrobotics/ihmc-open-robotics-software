@@ -23,6 +23,7 @@ import us.ihmc.perception.headless.LocalizationAndMappingProcess;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionFilterTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -115,18 +116,8 @@ public class HumanoidPerceptionModule
 
    public void updateStructural(ROS2Helper ros2Helper, Mat ousterDepth, ReferenceFrame sensorFrame)
    {
-      executorService.submit(() ->
+//      executorService.submit(() ->
         {
-           if (robotConfigurationData != null && robotConfigurationData.getJointNameHash() != 0)
-           {
-              robotConfigurationDataBuffer.update(robotConfigurationData);
-              long newestTimestamp = robotConfigurationDataBuffer.getNewestTimestamp();
-              long selectedTimestamp = robotConfigurationDataBuffer.updateFullRobotModel(waitIfNecessary,
-                                                                                         newestTimestamp,
-                                                                                         this.fullRobotModel,
-                                                                                         null);
-           }
-
            Instant acquisitionTime = Instant.now();
 
            cameraPose.setToZero(sensorFrame);
@@ -136,19 +127,22 @@ public class HumanoidPerceptionModule
 
            extractOccupancyGrid(ousterDepthImage, occupancyGrid, sensorFrame);
 
-           OpenCVTools.compressImagePNG(occupancyGrid, compressedOccupancyGrid);
-           CameraModel.PINHOLE.packMessageFormat(occupancyGridMessage);
-           PerceptionMessageTools.publishCompressedDepthImage(compressedOccupancyGrid,
-                                                              PerceptionAPI.OCCUPANCY_GRID_MESSAGE,
-                                                              occupancyGridMessage,
-                                                              ros2Helper,
-                                                              cameraPose,
-                                                              acquisitionTime,
-                                                              0,
-                                                              ousterDepthImage.getImageHeight(),
-                                                              ousterDepthImage.getImageWidth(),
-                                                              (float) 0.05f);
-        });
+           PerceptionDebugTools.displayDepth("Occupancy Grid", occupancyGrid, 1);
+
+//           OpenCVTools.compressImagePNG(occupancyGrid, compressedOccupancyGrid);
+//           CameraModel.PINHOLE.packMessageFormat(occupancyGridMessage);
+//           PerceptionMessageTools.publishCompressedDepthImage(compressedOccupancyGrid,
+//                                                              PerceptionAPI.OCCUPANCY_GRID_MESSAGE,
+//                                                              occupancyGridMessage,
+//                                                              ros2Helper,
+//                                                              cameraPose,
+//                                                              acquisitionTime,
+//                                                              0,
+//                                                              ousterDepthImage.getImageHeight(),
+//                                                              ousterDepthImage.getImageWidth(),
+//                                                              (float) 0.05f);
+        }
+//        );
    }
 
    public void initializePerspectiveRapidRegionsExtractor(CameraIntrinsics cameraIntrinsics)
@@ -169,10 +163,11 @@ public class HumanoidPerceptionModule
       this.rapidPlanarRegionsExtractor.getDebugger().setEnabled(false);
    }
 
-   public void initializeOccupancyGrid(int height, int width)
+   public void initializeOccupancyGrid(int depthHeight, int depthWidth, int gridHeight, int gridWidth)
    {
       LogTools.info("Initializing Occupancy Grid");
-      this.occupancyGrid = new Mat(height, width, opencv_core.CV_16UC1);
+      this.ousterDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
+      this.occupancyGrid = new Mat(gridHeight, gridWidth, opencv_core.CV_16UC1);
       compressedOccupancyGrid = new BytePointer(); // deallocate later
    }
 
@@ -215,7 +210,37 @@ public class HumanoidPerceptionModule
 
    public void extractOccupancyGrid(BytedecoImage depthImage, Mat occupancyGrid, ReferenceFrame cameraFrame)
    {
-      // TODO: Implement depth map to occupancy map conversion.
+      for (int y = 0; y<depthImage.getImageHeight(); y+=2)
+      {
+         for (int x = 0; x<depthImage.getImageWidth(); x+=2)
+         {
+            double totalPitch = Math.PI / 2;
+            double totalYaw = 2 * Math.PI;
+
+            int xFromCenter = -x - (depthImage.getImageWidth() / 2);
+            int yFromCenter = -(y - (depthImage.getImageHeight() / 2));
+
+            double yaw = xFromCenter / (float) depthImage.getImageWidth() * totalYaw;
+            double pitch = yFromCenter / (float) depthImage.getImageHeight() * totalPitch;
+
+            short index = (short) (y * depthImage.getImageWidth() + x);
+            float depth = depthImage.getPointerForAccessSpeed().getShort(index) * 0.001f;
+
+            double r = depth * Math.cos(pitch);
+
+            double px = r * Math.cos(yaw);
+            double py = r * Math.sin(yaw);
+            double pz = depth * Math.sin(pitch);
+
+            int gridX = (int) (px / 0.05f + occupancyGrid.cols() / 2);
+            int gridY = (int) (py / 0.05f + occupancyGrid.rows() / 2);
+
+            if (pz > 0.5f && gridX >= 0 && gridX < occupancyGrid.cols() && gridY >= 0 && gridY < occupancyGrid.rows())
+            {
+               occupancyGrid.ptr(gridY, gridX).putShort((short) 1);
+            }
+         }
+      }
    }
 
    public void filterFramePlanarRegionsList()
