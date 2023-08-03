@@ -37,6 +37,7 @@ import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
@@ -65,11 +66,11 @@ public class RDX3DSituatedImagePanel
    private final Vector2 bottomRightUV = new Vector2();
    private final Vector2 topRightUV = new Vector2();
 
+   @Nullable
    private final RDXVRModeManager vrModeManager;
    private final ModifiableReferenceFrame floatingPanelFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
    private final FramePose3D floatingPanelFramePose = new FramePose3D();
    private double panelDistanceFromHeadset = 0.5;
-   private boolean justShown;
    private boolean isShowing;
    private final FrameBox3D selectionCollisionBox = new FrameBox3D();
    private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
@@ -191,7 +192,6 @@ public class RDX3DSituatedImagePanel
       if (vrModeManager != null)
       {
          isShowing = vrModeManager.getShowFloatingVideoPanel().get();
-         justShown = vrModeManager.getShowFloatVideoPanelNotification().poll();
       }
 
       if (isShowing && imageTexture != null && imageTexture != texture)
@@ -213,10 +213,7 @@ public class RDX3DSituatedImagePanel
       selectionCollisionBox.getPose().set(floatingPanelFramePose);
       floatingPanelFramePose.setFromReferenceFrame(floatingPanelFrame.getReferenceFrame());
       isHoveredByAnything = false;
-      if (modelInstance != null)
-         LibGDXTools.toLibGDX(floatingPanelFrame.getReferenceFrame().getTransformToRoot(), modelInstance.transform);
-      if (hoverBoxMesh != null)
-         LibGDXTools.toLibGDX(floatingPanelFrame.getReferenceFrame().getTransformToRoot(), hoverBoxMesh.transform);
+      updatePoses();
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
@@ -251,7 +248,7 @@ public class RDX3DSituatedImagePanel
 
       context.getHeadset().runIfConnected(headset ->
       {
-         if (placementMode == FOLLOW_HEADSET || (placementMode == MANUAL_PLACEMENT  && justShown))
+         if (placementMode == FOLLOW_HEADSET || (placementMode == MANUAL_PLACEMENT  && vrModeManager.getShowFloatVideoPanelNotification().poll()))
          {
             floatingPanelFramePose.setToZero(headset.getXForwardZUpHeadsetFrame());
             floatingPanelFramePose.getPosition()
@@ -259,6 +256,7 @@ public class RDX3DSituatedImagePanel
             floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
             floatingPanelFramePose.get(floatingPanelFrame.getTransformToParent());
             floatingPanelFrame.getReferenceFrame().update();
+            updatePoses();
          }
       });
 
@@ -284,6 +282,7 @@ public class RDX3DSituatedImagePanel
                   gripDragData.getDragFrame().getTransformToDesiredFrame(floatingPanelFrame.getTransformToParent(),
                                                                          floatingPanelFrame.getReferenceFrame().getParent());
                   floatingPanelFrame.getReferenceFrame().update();
+                  updatePoses();
                }
             }
             else if (controller.getGripActionData().x() > 0.9 && selectionCollisionBox.isPointInside(controller.getPickPointPose().getPosition()))
@@ -305,12 +304,17 @@ public class RDX3DSituatedImagePanel
       }
    }
 
+   private void updatePoses()
+   {
+      setPoseToReferenceFrame(floatingPanelFrame.getReferenceFrame());
+   }
+
    public void setPoseToReferenceFrame(ReferenceFrame referenceFrame)
    {
       if (modelInstance != null)
-      {
          LibGDXTools.toLibGDX(referenceFrame.getTransformToRoot(), modelInstance.transform);
-      }
+      if (hoverBoxMesh != null)
+         LibGDXTools.toLibGDX(referenceFrame.getTransformToRoot(), hoverBoxMesh.transform);
    }
 
    public ModelInstance getModelInstance()
