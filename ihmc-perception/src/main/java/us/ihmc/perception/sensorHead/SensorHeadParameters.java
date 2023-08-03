@@ -40,6 +40,12 @@ public class SensorHeadParameters
    /** From CAD by @rharkins and @eyu */
    public static final double OUSTER_PITCH_ANGLE_DEGREES = 35.0;
 
+   /**
+    * This one represents the one on Nadia
+    * Inverted y in respect to FISHEYE_RIGHT_TO_OUSTER_TRANSFORM_ON_ROBOT
+    *
+    * TODO: manually measure these
+    */
    public static final RigidBodyTransform FISHEYE_LEFT_TO_OUSTER_TRANSFORM_ON_ROBOT = new RigidBodyTransform();
    static
    {
@@ -49,6 +55,10 @@ public class SensorHeadParameters
       EuclidCoreMissingTools.setYawPitchRollDegrees(FISHEYE_LEFT_TO_OUSTER_TRANSFORM_ON_ROBOT.getRotation(), 0.000, -25.0, 0.000);
    }
 
+   /**
+    * This one represents the one on Nadia
+    * These numbers taken from CAD by @eyu, and entered by @dcalvert.
+    */
    public static final RigidBodyTransform FISHEYE_RIGHT_TO_OUSTER_TRANSFORM_ON_ROBOT = new RigidBodyTransform();
    static
    {
