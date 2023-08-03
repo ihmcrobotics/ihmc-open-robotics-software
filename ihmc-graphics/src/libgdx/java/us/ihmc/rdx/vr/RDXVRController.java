@@ -258,6 +258,7 @@ public class RDXVRController extends RDXVRTrackedDevice
 
          aButtonLabel.setText("");
          bButtonLabel.setText("");
+         setAllJoystickTextNull();
          gripAmountLabel.setText("%.1f".formatted(gripActionData.x()));
       }
 
