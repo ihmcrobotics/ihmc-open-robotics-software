@@ -455,6 +455,14 @@ public class RDXVRController extends RDXVRTrackedDevice
       return selectedPick;
    }
 
+   public boolean anythingElseBeingDragged(Object draggedObject)
+   {
+      boolean anythingElseBeingDragged = false;
+      anythingElseBeingDragged |= gripDragData.isDragging() && gripDragData.getObjectBeingDragged() != draggedObject;
+      anythingElseBeingDragged |= triggerDragData.isDragging() && triggerDragData.getObjectBeingDragged() != draggedObject;
+      return anythingElseBeingDragged;
+   }
+
    /**
     * Use to declare exclusive access to this controller.
     * This is useful to prevent unwanted actions from happening
