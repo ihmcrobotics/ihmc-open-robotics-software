@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.ImGui;
+import org.lwjgl.openvr.InputAnalogActionData;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -117,7 +118,31 @@ public class RDXInteractableRobotLink
             isVRHovering |= isHovering;
 
             RDXVRDragData gripDragData = controller.getGripDragData();
+            InputAnalogActionData joystick = controller.getJoystickActionData();
 
+            if (isHovering)
+            {
+               controller.setTopJoystickText("Open Hand");
+               controller.setBottomJoystickText("Close Hand");
+               controller.setLeftJoystickText("Delete Interactable");
+               controller.setRightJoystickText("Execute");
+               if (joystick.x() > 0 && Math.abs(joystick.x()) > Math.abs(joystick.y()))
+               {
+                  System.out.println("Execute");
+               }
+               else if (joystick.x() < 0 && Math.abs(joystick.x()) > Math.abs(joystick.y()))
+               {
+                  System.out.println("Delete");
+               }
+               else if (joystick.y() > 0 && Math.abs(joystick.y()) > Math.abs(joystick.x()))
+               {
+                  System.out.println("Open Hand");
+               }
+               else if (joystick.y() < 0 && Math.abs(joystick.y()) > Math.abs(joystick.x()))
+               {
+                  System.out.println("Close Hand");
+               }
+            }
             if (isHovering && gripDragData.getDragJustStarted())
             {
                modified = true;
