@@ -3,6 +3,7 @@ package us.ihmc.sensorProcessing.parameters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public interface HumanoidRobotSensorInformation extends AvatarRobotRosVisionSensorInformation, HumanoidForceSensorInformation, IMUSensorInformation
@@ -41,38 +42,21 @@ public interface HumanoidRobotSensorInformation extends AvatarRobotRosVisionSens
                                                                              getObjectDetectionCameraTransform());
    }
 
-   public default RigidBodyTransform getSituationalAwarenessLeftCameraTransform()
+   public default RigidBodyTransform getSituationalAwarenessCameraTransform(RobotSide side)
    {
       return new RigidBodyTransform();
    }
 
-   public default ReferenceFrame getSituationalAwarenessLeftCameraParentFrame(CommonHumanoidReferenceFrames referenceFrames)
+   public default ReferenceFrame getSituationalAwarenessCameraParentFrame(RobotSide side, CommonHumanoidReferenceFrames referenceFrames)
    {
       return referenceFrames.getChestFrame();
    }
 
-   public default ReferenceFrame getSituationalAwarenessLeftCameraFrame(CommonHumanoidReferenceFrames referenceFrames)
+   public default ReferenceFrame getSituationalAwarenessCameraFrame(RobotSide side, CommonHumanoidReferenceFrames referenceFrames)
    {
       return ReferenceFrameTools.constructFrameWithChangingTransformToParent("situationalAwarenessLeftCamera",
-                                                                             getSituationalAwarenessLeftCameraParentFrame(referenceFrames),
-                                                                             getSituationalAwarenessLeftCameraTransform());
-   }
-
-   public default RigidBodyTransform getSituationalAwarenessRightCameraTransform()
-   {
-      return new RigidBodyTransform();
-   }
-
-   public default ReferenceFrame getSituationalAwarenessRightCameraParentFrame(CommonHumanoidReferenceFrames referenceFrames)
-   {
-      return referenceFrames.getChestFrame();
-   }
-
-   public default ReferenceFrame getSituationalAwarenessRightCameraFrame(CommonHumanoidReferenceFrames referenceFrames)
-   {
-      return ReferenceFrameTools.constructFrameWithChangingTransformToParent("situationalAwarenessRightCamera",
-                                                                             getSituationalAwarenessRightCameraParentFrame(referenceFrames),
-                                                                             getSituationalAwarenessRightCameraTransform());
+                                                                             getSituationalAwarenessCameraParentFrame(side, referenceFrames),
+                                                                             getSituationalAwarenessCameraTransform(side));
    }
 
    public default RigidBodyTransform getExperimentalCameraTransform()
