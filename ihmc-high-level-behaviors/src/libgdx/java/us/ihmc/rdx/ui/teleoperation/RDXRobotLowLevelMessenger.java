@@ -31,6 +31,18 @@ public class RDXRobotLowLevelMessenger
 
    public void renderImGuiWidgets()
    {
+      if (ImGui.button(labels.get("Freeze")))
+      {
+         robotLowLevelMessenger.sendFreezeRequest();
+      }
+
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Stand prep")))
+      {
+         sendStandRequest();
+      }
+
+      ImGui.sameLine();
       if (ImGui.button(labels.get("Home Pose")))
       {
          double trajectoryTime = 3.5;
@@ -57,18 +69,8 @@ public class RDXRobotLowLevelMessenger
          homeChest.setTrajectoryTime(trajectoryTime);
          communicationHelper.publishToController(homeChest);
       }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Stand prep")))
-      {
-         sendStandRequest();
-      }
-      ImGui.sameLine();
 
-      if (ImGui.button(labels.get("Freeze")))
-      {
-         robotLowLevelMessenger.sendFreezeRequest();
-      }
-
+      ImGui.sameLine();
       if (teleoperationParameters.getPSIAdjustable())
       {
          if (ImGui.combo("PSI", pumpPSI, psiValues, psiValues.length))
