@@ -143,6 +143,10 @@ public class RDXInteractableRobotLink
                   System.out.println("Close Hand");
                }
             }
+            else
+            {
+               controller.setAllJoystickTextNull();
+            }
             if (isHovering && gripDragData.getDragJustStarted())
             {
                modified = true;
