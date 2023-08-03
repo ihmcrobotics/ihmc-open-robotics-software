@@ -173,6 +173,10 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
    public boolean renderPlaceGoalButton()
    {
       boolean placementStarted = false;
+
+      ImGui.text("Goal Planning");
+      ImGui.sameLine();
+
       if (locationFlagIcon != null)
       {
          ImGui.image(locationFlagIcon.getTexture().getTextureObjectHandle(), 22.0f, 22.0f);
