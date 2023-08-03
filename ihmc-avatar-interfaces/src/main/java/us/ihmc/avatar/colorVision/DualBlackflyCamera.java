@@ -154,7 +154,7 @@ public class DualBlackflyCamera
       RigidBodyTransform cameraTransformToParent = robotModel.getSensorInformation().getSituationalAwarenessCameraTransform(side);
 
       remoteTunableCameraTransform = ROS2TunedRigidBodyTransform.toBeTuned(ros2Helper,
-                                                                           PerceptionAPI.OBJECT_DETECTION_CAMERA_TO_PARENT_TUNING,
+                                                                           PerceptionAPI.SITUATIONAL_AWARENESS_CAMERA_TO_PARENT_TUNING.get(side),
                                                                            cameraTransformToParent);
 
       detectableSceneNodesSubscription = new ROS2DetectableSceneNodesSubscription(predefinedSceneNodeLibrary.getDetectableSceneNodes(),
@@ -457,12 +457,12 @@ public class DualBlackflyCamera
       }
       else if (side == RobotSide.RIGHT)
       {
-         ReferenceFrame blackflyCameraFrame = referenceFrameSupplier.get().getObjectDetectionCameraFrame();
-         ousterLidarFrame.getTransformToDesiredFrame(ousterToBlackflyTransfrom, blackflyCameraFrame);
+         ReferenceFrame rightBlackflyCameraFrame = referenceFrameSupplier.get().getSituationalAwarenessCameraFrame(RobotSide.RIGHT);
+         ousterLidarFrame.getTransformToDesiredFrame(ousterToBlackflyTransfrom, rightBlackflyCameraFrame);
 
          synchronized (blackflyFrameForSceneNodeUpdate)
          {
-            blackflyFrameForSceneNodeUpdate.getTransformToParent().set(blackflyCameraFrame.getTransformToRoot());
+            blackflyFrameForSceneNodeUpdate.getTransformToParent().set(rightBlackflyCameraFrame.getTransformToRoot());
             blackflyFrameForSceneNodeUpdate.getReferenceFrame().update();
          }
       }
