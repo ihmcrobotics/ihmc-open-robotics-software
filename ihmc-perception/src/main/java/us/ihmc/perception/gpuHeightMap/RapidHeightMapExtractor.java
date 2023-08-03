@@ -10,7 +10,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
@@ -32,11 +31,11 @@ public class RapidHeightMapExtractor
    private OpenCLManager openCLManager;
    private OpenCLFloatParameters parametersBuffer;
 
-   private OpenCLFloatBuffer worldToSensorTransformBuffer;
-   private float[] worldToSensorTransformArray = new float[16];
+   private OpenCLFloatBuffer groundToSensorTransformBuffer;
+   private float[] groundToSensorTransformArray = new float[16];
 
-   private OpenCLFloatBuffer sensorToWorldTransformBuffer;
-   private float[] sensorToWorldTransformArray = new float[16];
+   private OpenCLFloatBuffer sensorToGroundTransformBuffer;
+   private float[] sensorToGroundTransformArray = new float[16];
 
    private OpenCLFloatBuffer groundPlaneBuffer;
    private _cl_program rapidHeightMapUpdaterProgram;
@@ -65,11 +64,11 @@ public class RapidHeightMapExtractor
 
       parametersBuffer = new OpenCLFloatParameters();
 
-      worldToSensorTransformBuffer = new OpenCLFloatBuffer(16);
-      worldToSensorTransformBuffer.createOpenCLBufferObject(openCLManager);
+      groundToSensorTransformBuffer = new OpenCLFloatBuffer(16);
+      groundToSensorTransformBuffer.createOpenCLBufferObject(openCLManager);
 
-      sensorToWorldTransformBuffer = new OpenCLFloatBuffer(16);
-      sensorToWorldTransformBuffer.createOpenCLBufferObject(openCLManager);
+      sensorToGroundTransformBuffer = new OpenCLFloatBuffer(16);
+      sensorToGroundTransformBuffer.createOpenCLBufferObject(openCLManager);
 
       groundPlaneBuffer = new OpenCLFloatBuffer(4);
       groundPlaneBuffer.createOpenCLBufferObject(openCLManager);
@@ -99,7 +98,7 @@ public class RapidHeightMapExtractor
    }
 
 
-   public void update(RigidBodyTransform sensorToWorldTransform, float planeHeight)
+   public void update(RigidBodyTransform sensorToGroundTransform, float planeHeight)
    {
       if (!processing)
       {
@@ -107,40 +106,40 @@ public class RapidHeightMapExtractor
          inputDepthImage.writeOpenCLImage(openCLManager);
 
          // Fill ground plane buffer
-         RigidBodyTransform worldToSensorTransform = new RigidBodyTransform(sensorToWorldTransform);
-         worldToSensorTransform.invert();
+         RigidBodyTransform groundToSensorTransform = new RigidBodyTransform(sensorToGroundTransform);
+         groundToSensorTransform.invert();
 
-         Point3D gridCenter = new Point3D(sensorToWorldTransform.getTranslation());
+         Point3D gridCenter = new Point3D(sensorToGroundTransform.getTranslation());
 
          populateParameterBuffer(gridCenter);
 
          // Fill world-to-sensor transform buffer
-         worldToSensorTransform.get(worldToSensorTransformArray);
-         worldToSensorTransformBuffer.getBytedecoFloatBufferPointer().asBuffer().put(worldToSensorTransformArray);
-         worldToSensorTransformBuffer.writeOpenCLBufferObject(openCLManager);
+         groundToSensorTransform.get(groundToSensorTransformArray);
+         groundToSensorTransformBuffer.getBytedecoFloatBufferPointer().asBuffer().put(groundToSensorTransformArray);
+         groundToSensorTransformBuffer.writeOpenCLBufferObject(openCLManager);
 
          // Fill sensor-to-world transform buffer
-         sensorToWorldTransform.get(sensorToWorldTransformArray);
-         sensorToWorldTransformBuffer.getBytedecoFloatBufferPointer().asBuffer().put(sensorToWorldTransformArray);
-         sensorToWorldTransformBuffer.writeOpenCLBufferObject(openCLManager);
+         sensorToGroundTransform.get(sensorToGroundTransformArray);
+         sensorToGroundTransformBuffer.getBytedecoFloatBufferPointer().asBuffer().put(sensorToGroundTransformArray);
+         sensorToGroundTransformBuffer.writeOpenCLBufferObject(openCLManager);
 
          // Generate a +Z vector in world frame
          Vector3D groundNormalSensorFrame = new Vector3D(0.0, 0.0, 1.0);
-         worldToSensorTransform.transform(groundNormalSensorFrame);
+         groundToSensorTransform.transform(groundNormalSensorFrame);
 
          //LogTools.info("Ground normal in sensor frame: " + groundNormalSensorFrame);
 
          groundPlaneBuffer.getBytedecoFloatBufferPointer().asBuffer().put(new float[] {groundNormalSensorFrame.getX32(), groundNormalSensorFrame.getY32(),
                                                                                        groundNormalSensorFrame.getZ32(),
-                                                                                       (float) (planeHeight - sensorToWorldTransform.getTranslationZ())});
+                                                                                       (float) (planeHeight - sensorToGroundTransform.getTranslationZ())});
          groundPlaneBuffer.writeOpenCLBufferObject(openCLManager);
 
          // Set kernel arguments for the height map kernel
          openCLManager.setKernelArgument(heightMapUpdateKernel, 0, inputDepthImage.getOpenCLImageObject());
          openCLManager.setKernelArgument(heightMapUpdateKernel, 1, outputHeightMapImage.getOpenCLImageObject());
          openCLManager.setKernelArgument(heightMapUpdateKernel, 2, parametersBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(heightMapUpdateKernel, 3, sensorToWorldTransformBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(heightMapUpdateKernel, 4, worldToSensorTransformBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(heightMapUpdateKernel, 3, sensorToGroundTransformBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(heightMapUpdateKernel, 4, groundToSensorTransformBuffer.getOpenCLBufferObject());
          openCLManager.setKernelArgument(heightMapUpdateKernel, 5, groundPlaneBuffer.getOpenCLBufferObject());
 
          // Execute kernel with length and width parameters

@@ -92,7 +92,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
          {
             int heightIndex = xIndex * cellsPerAxis + yIndex;
             int vertexIndex = heightIndex * FLOATS_PER_CELL;
-            float cellHeight = (float) (heightMapPointer.getShort(heightIndex * 2L) / 20000.0f);
+            float cellHeight = (float) (heightMapPointer.getShort(heightIndex * 2L) / 10000.0f);
             cellHeight = (float) MathTools.clamp(cellHeight, minHeight, maxHeight);
             if (cellHeight > maxHeight - 0.01f)
                cellHeight = 0.0f;
@@ -107,12 +107,12 @@ public class RDXHeightMapRenderer implements RenderableProvider
             // Color (0.0 to 1.0)
             float heightRatio = (cellHeight / maxHeight);
             intermediateVertexBuffer[vertexIndex + 3] = Math.abs(1.0f - heightRatio);
-            intermediateVertexBuffer[vertexIndex + 4] = Math.abs(1.0f - heightRatio * 0.123f);
+            intermediateVertexBuffer[vertexIndex + 4] = Math.max(100.0f * heightRatio, 1.0f);
             intermediateVertexBuffer[vertexIndex + 5] = Math.abs(1.0f - heightRatio);
-            intermediateVertexBuffer[vertexIndex + 6] = Math.abs(0.3f + 0.5f * heightRatio);
+            intermediateVertexBuffer[vertexIndex + 6] = Math.abs(0.3f + 10.0f * heightRatio);
 
             // Size
-            intermediateVertexBuffer[vertexIndex + 7] = 0.03f;
+            intermediateVertexBuffer[vertexIndex + 7] = 0.02f;
          }
       }
 

@@ -97,7 +97,7 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
   float3 centroid;
 
   float averageHeightZ = 0;
-  float3 cellCenterInWorld = (float3) (0.0f, 0.0f, 0.0f);
+  float3 cellCenterInWorld = (float3) (0.0f, 0.0f, 0.65f);
   cellCenterInWorld.xy = indices_to_coordinate((int2) (xIndex, yIndex),
                                                (float2) (0, 0), // params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]
                                                params[HEIGHT_MAP_RESOLUTION],
@@ -106,8 +106,8 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
 
   cellCenterInWorld.x += 1.5f;
 
-   int WINDOW_WIDTH = 2;
-   int WINDOW_HEIGHT = 4;
+   int WINDOW_WIDTH = 80;
+   int WINDOW_HEIGHT = 150;
 
    float halfCellWidth = params[HEIGHT_MAP_RESOLUTION] / 2.0f;
    float minX = cellCenterInWorld.x - halfCellWidth;
@@ -142,8 +142,6 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
   //       xIndex, yIndex, cellCenterInWorld.x, cellCenterInWorld.y, cellCenterInWorld.z,
   //       cellCenterInSensor.x, cellCenterInSensor.y, cellCenterInSensor.z, projectedPoint.x, projectedPoint.y);
 
-
-
   int count = 0;
 
   for (int pitch_count_offset = -WINDOW_HEIGHT / 2; pitch_count_offset < WINDOW_HEIGHT / 2 + 1; pitch_count_offset++)
@@ -155,7 +153,7 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
 
       if ((yaw_count >= 0) && (yaw_count < (int)params[DEPTH_INPUT_WIDTH]) && (pitch_count >= 0) && (pitch_count < (int)params[DEPTH_INPUT_HEIGHT]))
       {
-        float radius = ((float)read_imageui(in, (int2) (yaw_count, pitch_count)).x) / (float)1000;
+        float radius = ((float)read_imageui(in, (int2) (yaw_count, pitch_count)).x) / (float) 1000;
 
         float3 queryPointInSensor;
         float3 queryPointInWorld;
@@ -175,9 +173,9 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
          (float3)(sensorToWorldTf[8], sensorToWorldTf[9], sensorToWorldTf[10]),
          (float3)(sensorToWorldTf[3], sensorToWorldTf[7], sensorToWorldTf[11]));
 
-         printf("xIndex: %d, yIndex: %d\tcellCenter: (%f, %f, %f)\tprojectedPoint: (%d, %d)\t(yaw: %d, pitch: %d)\tdepth: %f\tqueryPoint: (%f,%f,%f)\tLimits: (x:[%f,%f], y:[%f,%f])\n",
-            xIndex, yIndex, cellCenterInSensor.x, cellCenterInSensor.y, cellCenterInSensor.z, projectedPoint.x, projectedPoint.y,
-            yaw_count, pitch_count, radius, queryPointInSensor.x, queryPointInSensor.y, queryPointInSensor.z, minX, maxX, minY, maxY);
+         //printf("xIndex: %d, yIndex: %d\tcellCenter: (%f, %f, %f)\tprojectedPoint: (%d, %d)\t(yaw: %d, pitch: %d)\tdepth: %f\tqueryPoint: (%f,%f,%f)\tLimits: (x:[%f,%f], y:[%f,%f])\n",
+         //   xIndex, yIndex, cellCenterInWorld.x, cellCenterInWorld.y, cellCenterInWorld.z, projectedPoint.x, projectedPoint.y,
+         //   yaw_count, pitch_count, radius, queryPointInWorld.x, queryPointInWorld.y, queryPointInWorld.z, minX, maxX, minY, maxY);
 
 
          //printf("xIndex: %d, yIndex: %d \tWorld Point: (%f, %f, %f), Sensor Point (Z-fwd): (%f, %f, %f) -> Image Point: (%d, %d)\n", xIndex, yIndex,
@@ -195,16 +193,16 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
     }
   }
 
-  if (count > 0 && xIndex < (int)params[DEPTH_INPUT_WIDTH] && yIndex < (int)params[DEPTH_INPUT_HEIGHT])
+  int cellsPerAxis = 2 * params[HEIGHT_MAP_CENTER_INDEX] + 1;
+
+  if (count > 0)
   {
     averageHeightZ = averageHeightZ / (float)(count);
-    averageHeightZ = clamp(averageHeightZ, -4.f, 4.0f);
+    averageHeightZ = clamp(averageHeightZ, -5.f, 5.0f);
 
-    write_imageui(out, (int2)(xIndex, yIndex), (uint4)((int)( (averageHeightZ) * 20000.0f), 0, 0, 0));
+    write_imageui(out, (int2)(xIndex, yIndex), (uint4)((int)( (averageHeightZ - 0.65f) * 10000.0f), 0, 0, 0));
 
     //printf("xIndex: %d, yIndex: %d, count: %d, averageHeightZ: %f\n", xIndex, yIndex, count, averageHeightZ);
-
-
   }
   else
   {
