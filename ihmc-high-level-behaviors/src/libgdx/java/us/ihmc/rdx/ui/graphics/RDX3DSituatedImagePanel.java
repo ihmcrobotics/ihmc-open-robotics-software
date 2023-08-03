@@ -182,8 +182,6 @@ public class RDX3DSituatedImagePanel
                                           Math.abs(topRightPosition.y - topLeftPosition.y),
                                           Math.abs(topRightPosition.y - bottomLeftPosition.y));
 
-      hoverBoxMesh = new ModelInstance(RDXModelBuilder.buildModel(boxMeshBuilder ->
-             boxMeshBuilder.addMultiLineBox(selectionCollisionBox.getVertices(), 0.0005, new Color(Color.WHITE))));
    }
 
    public void update(Texture imageTexture)
@@ -268,6 +266,12 @@ public class RDX3DSituatedImagePanel
             boolean isHovering = controller.getSelectedPick() == vrPickResult.get(side);
             isHoveredByAnything |= isHovering;
 
+            if (isHovering)
+            {
+               hoverBoxMesh = new ModelInstance(RDXModelBuilder.buildModel(boxMeshBuilder ->
+                                                                                 boxMeshBuilder.addMultiLineBox(selectionCollisionBox.getVertices(),
+                                                                                                                0.0005, new Color(Color.WHITE))));
+            }
             if (placementMode == MANUAL_PLACEMENT)
             {
                RDXVRDragData gripDragData = controller.getGripDragData();
