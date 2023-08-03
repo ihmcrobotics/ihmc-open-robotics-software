@@ -181,6 +181,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
                                         teleoperationParameters,
                                         interactableHands);
       }
+
+      RDXBaseUI.getInstance().getKeyBindings().register("Delete all interactables", "Ctrl + L");
    }
 
    public void create(RDXBaseUI baseUI)
@@ -409,7 +411,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       robotLowLevelMessenger.renderImGuiWidgets();
 
       ImGui.sameLine();
-      if (ImGui.button(labels.get("Delete all Graphics")))
+      if (ImGui.button(labels.get("Delete all Graphics")) || ImGui.getIO().getKeyCtrl() && ImGui.isKeyReleased('L'))
       {
          locomotionManager.deleteAll();
 
@@ -427,6 +429,15 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       if (interactablesAvailable)
       {
+         if (ImGui.button(labels.get("Delete all Interactables")))
+         {
+            locomotionManager.deleteAll();
+
+            for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
+               robotPartInteractable.delete();
+         }
+
+         ImGui.sameLine();
          ImGui.checkbox("Interactables enabled", interactablesEnabled);
       }
 
