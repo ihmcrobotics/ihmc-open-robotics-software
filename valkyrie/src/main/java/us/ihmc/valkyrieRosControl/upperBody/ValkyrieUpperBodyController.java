@@ -38,6 +38,9 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.rosControl.EffortJointHandle;
 import us.ihmc.rosControl.wholeRobot.*;
+import us.ihmc.scs2.definition.robot.JointDefinition;
+import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
@@ -359,6 +362,17 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
       /* Update YoVariable server */
       yoVariableServer.update(monotonicTimeProvider.getTimestamp(), registry);
       robotConfigurationDataPublisher.write();
+   }
+
+   public static void mutateRobotDefinition(RobotDefinition robotDefinition)
+   {
+      RigidBodyDefinition elevator = robotDefinition.getRootBodyDefinition();
+      JointDefinition floatingJoint = elevator.getChildrenJoints().get(0);
+      JointDefinition torsoYaw = floatingJoint.getSuccessor().getChildrenJoints().get(0);
+
+      /* Replace floating joint with torso yaw joint */
+      elevator.getChildrenJoints().clear();
+      elevator.getChildrenJoints().add(torsoYaw);
    }
 
    public static void main(String[] args)

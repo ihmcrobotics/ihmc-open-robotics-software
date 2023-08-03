@@ -46,6 +46,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -154,17 +155,18 @@ public class ValkyrieUpperBodyManipulationState extends HighLevelControllerState
                                                            registry);
 
       FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
-      feedbackControlCommandList.addCommand(chestManager.getFeedbackControlCommand());
-      feedbackControlCommandList.addCommand(headManager.getFeedbackControlCommand());
+      feedbackControlCommandList.addCommand(chestManager.createFeedbackControlTemplate());
+      feedbackControlCommandList.addCommand(headManager.createFeedbackControlTemplate());
       for (RobotSide robotSide : RobotSide.values)
       {
-         feedbackControlCommandList.addCommand(handManagers.get(robotSide).getFeedbackControlCommand());
+         feedbackControlCommandList.addCommand(handManagers.get(robotSide).createFeedbackControlTemplate());
       }
 
       FeedbackControllerTemplate template = new FeedbackControllerTemplate(feedbackControlCommandList);
+
+      controlCoreToolbox.setupForInverseDynamicsSolver(new ArrayList<>());
+      controlCoreToolbox.setJointPrivilegedConfigurationParameters(walkingControllerParameters.getJointPrivilegedConfigurationParameters());
       controllerCore = new WholeBodyControllerCore(controlCoreToolbox, template, registry);
-
-
    }
 
    private RigidBodyControlManager createRigidBodyManager(RigidBodyBasics bodyToControl,
