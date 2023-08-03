@@ -532,8 +532,8 @@ public class DualBlackflyCamera
       {
          arUcoMarkerDetection.update();
          // TODO: Maybe publish a separate image for ArUco marker debugging sometime.
-         // arUcoMarkerDetection.drawDetectedMarkers(blackflySourceImage.getBytedecoOpenCVMat());
-         // arUcoMarkerDetection.drawRejectedPoints(blackflySourceImage.getBytedecoOpenCVMat());
+//          arUcoMarkerDetection.drawDetectedMarkers(undistortedBytedecoImage.getBytedecoOpenCVMat());
+//          arUcoMarkerDetection.drawRejectedPoints(undistortedBytedecoImage.getBytedecoOpenCVMat());
          arUcoMarkerPublisher.update();
 
          detectableSceneNodesSubscription.update(); // Receive overridden poses from operator
