@@ -7,7 +7,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -18,6 +18,7 @@ import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.CameraModel;
@@ -40,26 +41,32 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.Throttler;
+import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.time.Instant;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 public class DualBlackflyCamera
 {
-   private static final double PUBLISH_RATE = 20.0;
+   private static final int MAX_IMAGE_READ_FREQUENCY = 30;
 
    private final RobotSide side;
-   private final ROS2SyncedRobotModel syncedRobot;
-   private SpinnakerBlackfly spinnakerBlackfly;
-   private final BlackflyLensProperties blackflyLensProperties;
-   private final ROS2StoredPropertySet<IntrinsicCameraMatrixProperties> ousterFisheyeColoringIntrinsicsROS2;
+   private final Supplier<HumanoidReferenceFrames> referenceFrameSupplier;
 
    private final ROS2Helper ros2Helper;
 
+   private SpinnakerBlackfly spinnakerBlackfly;
+   private final BlackflyLensProperties blackflyLensProperties;
+   private final PredefinedSceneNodeLibrary predefinedSceneNodeLibrary;
+
+   private final FrequencyCalculator readFrequencyCalculator = new FrequencyCalculator();
+
+   private final ROS2StoredPropertySet<IntrinsicCameraMatrixProperties> ousterFisheyeColoringIntrinsicsROS2;
+
    private final IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
 
-   private final PredefinedSceneNodeLibrary predefinedSceneNodeLibrary;
    private final ModifiableReferenceFrame blackflyFrameForSceneNodeUpdate = new ModifiableReferenceFrame();
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
@@ -67,7 +74,7 @@ public class DualBlackflyCamera
    private final ROS2DetectableSceneNodesPublisher detectableSceneObjectsPublisher = new ROS2DetectableSceneNodesPublisher();
    private final ROS2DetectableSceneNodesSubscription detectableSceneNodesSubscription;
 
-   private final AtomicReference<BytePointer> spinImageData = new AtomicReference<>();
+   private final AtomicReference<BytePointer> spinImageData = new AtomicReference<>(); // TODO: remove?
    private final AtomicReference<Instant> spinImageAcquisitionTime = new AtomicReference<>();
    private final ImageMessage imageMessage = new ImageMessage();
    private final IHMCROS2Publisher<ImageMessage> ros2ImagePublisher;
@@ -88,31 +95,46 @@ public class DualBlackflyCamera
    // These are used to ensure safe deallocation of images
    private GpuMat sourceImageBeingUsedForProcessing;
    private GpuMat sourceImageBeingUsedForUndistortion;
-   private final LinkedList<GpuMat> receivedImagesDeque = new LinkedList<>(); /* deque of images received from the blackfly camera.
-                                                                               * last element = newest image received
-                                                                               * first element = oldest image received */
-   private final Object newImageReadNotifier = new Object();
-   private final Object encodingCompletionNotifier = new Object();   // sync objects are used to synchronize deallocation of images (GpuMats)
-   private final Object undistortionCompletionNotifier = new Object(); // notify the deallocation thread when a thread is finished using a source image
-   private long numberOfGpuMatsAllocated = 0L;   // keep count of images allocated and deallocated
-   private long numberOfGpuMatsDeallocated = 0L; // an exception is thrown if more than 100 images are allocated at a time
 
+   /**
+    * Deque of images received from the blackfly camera.
+    * last element = newest image received
+    * first element = oldest image received
+    */
+   private final LinkedList<GpuMat> receivedImagesDeque = new LinkedList<>();
+   private final Object newImageReadNotifier = new Object();
+   /**
+    * Sync objects are used to synchronize deallocation of images (GpuMats)
+    */
+   private final Object encodingCompletionNotifier = new Object();
+   /**
+    * Notify the deallocation thread when a thread is finished using a source image
+    */
+   private final Object undistortionCompletionNotifier = new Object();
+   /**
+    * Keep count of images allocated and deallocated
+    */
+   private long numberOfGpuMatsAllocated = 0L;
+   private long numberOfGpuMatsDeallocated = 0L;
+
+   // Threads
    private final Thread cameraReadThread;
    private final Thread imageEncodeAndPublishThread;
    private final Thread imageUndistortAndUpdateArUcoThread;
    private final Thread imageDeallocationThread;
    private volatile boolean destroyed = false;
 
-   public DualBlackflyCamera(RobotSide side,
-                             ROS2SyncedRobotModel syncedRobot,
-                             RigidBodyTransform cameraTransformToParent,
+   public DualBlackflyCamera(DRCRobotModel robotModel,
+                             RobotSide side,
+                             Supplier<HumanoidReferenceFrames> referenceFramesSupplier,
                              ROS2Node ros2Node,
                              SpinnakerBlackfly spinnakerBlackfly,
                              BlackflyLensProperties blackflyLensProperties,
                              PredefinedSceneNodeLibrary predefinedSceneNodeLibrary)
    {
       this.side = side;
-      this.syncedRobot = syncedRobot;
+      this.referenceFrameSupplier = referenceFramesSupplier;
+
       this.spinnakerBlackfly = spinnakerBlackfly;
       this.blackflyLensProperties = blackflyLensProperties;
       this.ousterFisheyeColoringIntrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsOnRobot(blackflyLensProperties);
@@ -127,6 +149,10 @@ public class DualBlackflyCamera
                                                                         DualBlackflyComms.OUSTER_FISHEYE_COLORING_INTRINSICS,
                                                                         ousterFisheyeColoringIntrinsics);
 
+      RigidBodyTransform cameraTransformToParent = side == RobotSide.LEFT ?
+            robotModel.getSensorInformation().getObjectDetectionCameraTransform() :
+            robotModel.getSensorInformation().getObjectDetectionCameraTransform(); // TODO transform for right camera; left is Object Detection Camera
+
       remoteTunableCameraTransform = ROS2TunedRigidBodyTransform.toBeTuned(ros2Helper,
                                                                            ROS2Tools.OBJECT_DETECTION_CAMERA_TO_PARENT_TUNING,
                                                                            cameraTransformToParent);
@@ -138,14 +164,22 @@ public class DualBlackflyCamera
       // Camera read thread
       cameraReadThread = new Thread(() ->
       {
-         Throttler cameraReadThrottler = new Throttler();
-         cameraReadThrottler.setFrequency(PUBLISH_RATE);
+         Throttler throttler = new Throttler();
+         throttler.setFrequency(MAX_IMAGE_READ_FREQUENCY);
 
          while (!destroyed)
          {
-            // Read an image at PUBLISH_RATE hz
-            cameraReadThrottler.waitAndRun();
+            throttler.waitAndRun();
             cameraRead();
+
+            // Calculate read frequency (maybe it's lower than MAX_IMAGE_READ_FREQUENCY)
+            readFrequencyCalculator.ping();
+
+            // Every so often show the read frequency in console
+            if (numberOfGpuMatsAllocated % 1000 == 0)
+            {
+               LogTools.info(side  + " Blackfly reading at " + String.format("%.2f", getReadFrequency()) + "hz");
+            }
 
             // Notify threads when a new image is available
             synchronized (newImageReadNotifier)
@@ -257,7 +291,8 @@ public class DualBlackflyCamera
 
    /**
     * Initializes variables that depend on image width and height.
-    * @param imageWidth the width, in pixels, of the image received
+    *
+    * @param imageWidth  the width, in pixels, of the image received
     * @param imageHeight the height, in pixels, of the image received
     */
    private void initialize(int imageWidth, int imageHeight)
@@ -325,7 +360,7 @@ public class DualBlackflyCamera
       undistortionMap2.upload(tempUndistortionMat2);
 
       // Create arUco marker detection
-      ReferenceFrame blackflyCameraFrame = syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame();
+      ReferenceFrame blackflyCameraFrame = referenceFrameSupplier.get().getObjectDetectionCameraFrame();
       arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
       arUcoMarkerDetection.create(blackflyCameraFrame);
       arUcoMarkerDetection.setSourceImageForDetection(undistortedBytedecoImage);
@@ -406,7 +441,7 @@ public class DualBlackflyCamera
 
       remoteTunableCameraTransform.update();
 
-      ReferenceFrame ousterLidarFrame = syncedRobot.getReferenceFrames().getOusterLidarFrame();
+      ReferenceFrame ousterLidarFrame = referenceFrameSupplier.get().getOusterLidarFrame();
       RigidBodyTransform ousterToBlackflyTransfrom = new RigidBodyTransform();
 
       if (side == RobotSide.LEFT)
@@ -415,7 +450,7 @@ public class DualBlackflyCamera
       }
       else if (side == RobotSide.RIGHT)
       {
-         ReferenceFrame blackflyCameraFrame = syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame();
+         ReferenceFrame blackflyCameraFrame = referenceFrameSupplier.get().getObjectDetectionCameraFrame();
          ousterLidarFrame.getTransformToDesiredFrame(ousterToBlackflyTransfrom, blackflyCameraFrame);
 
          synchronized (blackflyFrameForSceneNodeUpdate)
@@ -428,7 +463,11 @@ public class DualBlackflyCamera
       BytePointer jpegImageBytePointer = new BytePointer(imageFrameSize); // close at the end
 
       // Encode the image
-      cudaImageEncoder.encodeBGR(sourceImageBeingUsedForProcessing.data(), jpegImageBytePointer, imageWidth, imageHeight, sourceImageBeingUsedForProcessing.step());
+      cudaImageEncoder.encodeBGR(sourceImageBeingUsedForProcessing.data(),
+                                 jpegImageBytePointer,
+                                 imageWidth,
+                                 imageHeight,
+                                 sourceImageBeingUsedForProcessing.step());
 
       // Notify deallocation thread that the images has been processed, and is ready for deallocation
       synchronized (encodingCompletionNotifier)
@@ -478,11 +517,7 @@ public class DualBlackflyCamera
          undistortionCompletionNotifier.notify();
       }
 
-      opencv_cudawarping.remap(distortedRGBImage,
-                               undistortedImage,
-                               undistortionMap1,
-                               undistortionMap2,
-                               opencv_imgproc.INTER_LINEAR);
+      opencv_cudawarping.remap(distortedRGBImage, undistortedImage, undistortionMap1, undistortionMap2, opencv_imgproc.INTER_LINEAR);
 
       undistortedImage.download(undistortedBytedecoImage.getBytedecoOpenCVMat());
 
@@ -541,5 +576,14 @@ public class DualBlackflyCamera
          arUcoMarkerDetection.destroy();
       spinnakerBlackfly = null;
       arUcoMarkerDetection = null;
+   }
+
+   /**
+    * Get the rate at which images are being read from the camera. Changes over time.
+    * @return the frequency (hz)
+    */
+   public double getReadFrequency()
+   {
+      return readFrequencyCalculator.getFrequency();
    }
 }
