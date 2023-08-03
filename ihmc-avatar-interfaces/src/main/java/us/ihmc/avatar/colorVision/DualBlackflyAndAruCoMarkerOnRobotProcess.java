@@ -73,9 +73,10 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
          LogTools.warn("No serial number for right Blackfly specified. The sensor will not be available.");
       }
 
+      // We update the synced robot model either at 20 hz or the rate of the Blackfly that is reading images the fastest
       syncedRobotUpdateThread = new Thread(() ->
       {
-         // Represents the frequency at which images are read from the fastest blackfly
+         // Represents the frequency at which images are read from the fastest Blackfly
          double highestFrequency = 0;
 
          Throttler throttler = new Throttler();
