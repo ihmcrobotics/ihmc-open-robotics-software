@@ -603,6 +603,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          footSwitches.put(robotSide, footSwitch);
       }
 
+
       return footSwitches;
    }
 
