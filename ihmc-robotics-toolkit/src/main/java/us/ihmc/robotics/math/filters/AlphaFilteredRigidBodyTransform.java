@@ -4,22 +4,23 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 
 public class AlphaFilteredRigidBodyTransform extends RigidBodyTransform
 {
-   private boolean hasBeenCalled = false;
    /** Also think of it as max rate */
    private double alpha = 0.0;
    private final RigidBodyTransform previousFiltered = new RigidBodyTransform();
+   {
+      previousFiltered.setToNaN();
+   }
 
    public void update(RigidBodyTransform measured)
    {
-      if (hasBeenCalled)
+      if (previousFiltered.containsNaN())
       {
-         previousFiltered.set(this);
-         interpolate(measured, previousFiltered, alpha);
+         set(measured);
       }
       else
       {
-         hasBeenCalled = true;
-         set(measured);
+         previousFiltered.set(this);
+         interpolate(measured, previousFiltered, alpha);
       }
    }
 
