@@ -12,6 +12,7 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.tools.thread.Throttler;
 
 /**
  * To run this you have to download the Spinnaker SDK, move it to the robot computer, then run
@@ -22,9 +23,13 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    private static final String LEFT_SERIAL_NUMBER = System.getProperty("blackfly.left.serial.number", "00000000");
    private static final String RIGHT_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "00000000");
 
+   private final ROS2Node ros2Node;
+   private final Thread syncedRobotUpdateThread;
+
    private final SpinnakerBlackflyManager spinnakerBlackflyManager = new SpinnakerBlackflyManager();
    private final SideDependentList<DualBlackflyCamera> dualBlackflyCameras = new SideDependentList<>();
-   private final ROS2Node ros2Node;
+
+   private volatile boolean running = true;
 
    public DualBlackflyAndAruCoMarkerOnRobotProcess(DRCRobotModel robotModel,
                                                    PredefinedSceneNodeLibrary predefinedSceneNodeLibrary,
@@ -38,7 +43,20 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
 
       if (!LEFT_SERIAL_NUMBER.equals("00000000"))
       {
-         throw new RuntimeException("Left Blackfly not supported");
+         LogTools.info("Adding Blackfly left with serial number: {}", LEFT_SERIAL_NUMBER);
+         SpinnakerBlackfly spinnakerBlackfly = spinnakerBlackflyManager.createSpinnakerBlackfly(LEFT_SERIAL_NUMBER);
+         dualBlackflyCameras.put(RobotSide.LEFT,
+                                 new DualBlackflyCamera(RobotSide.LEFT,
+                                                        syncedRobotModel,
+                                                        robotModel.getSensorInformation().getObjectDetectionCameraTransform(),
+                                                        ros2Node,
+                                                        spinnakerBlackfly,
+                                                        blackflyLensProperties,
+                                                        predefinedSceneNodeLibrary));
+      }
+      else
+      {
+         LogTools.warn("No serial number for left Blackfly specified. The sensor will not be available.");
       }
 
       if (!RIGHT_SERIAL_NUMBER.equals("00000000"))
@@ -59,20 +77,47 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
          LogTools.warn("No serial number for right Blackfly specified. The sensor will not be available.");
       }
 
+      syncedRobotUpdateThread = new Thread(() ->
+      {
+         Throttler throttler = new Throttler();
+         throttler.setFrequency(20.0);
+
+         while (!running)
+         {
+            throttler.waitAndRun();
+            syncedRobotModel.update();
+         }
+      }, "ROS2SyncedRobotModel-update-thread");
+
+      syncedRobotUpdateThread.start();
+
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, getClass().getName() + "-Shutdown"));
    }
 
    private void destroy()
    {
-      System.out.println("Destroying dual blackfly process");
+      running = false;
+
+      try
+      {
+         syncedRobotUpdateThread.join();
+      }
+      catch (InterruptedException e)
+      {
+         LogTools.error(e);
+      }
+
+      System.out.println("Destroying dual blackfly processes");
 
       for (DualBlackflyCamera dualBlackflyCamera : dualBlackflyCameras)
       {
          if (dualBlackflyCamera != null)
             dualBlackflyCamera.destroy();
       }
-      ros2Node.destroy();
+
       spinnakerBlackflyManager.destroy();
+
+      ros2Node.destroy();
 
       System.out.println("All objects destroyed");
    }
