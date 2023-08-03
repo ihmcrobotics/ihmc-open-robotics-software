@@ -210,6 +210,9 @@ public class RDX3DSituatedImagePanel
       }
 
       setPoseToReferenceFrame(floatingPanelFrame.getReferenceFrame());
+      selectionCollisionBox.getPose().set(floatingPanelFramePose);
+      floatingPanelFramePose.setFromReferenceFrame(floatingPanelFrame.getReferenceFrame());
+      isHoveredByAnything = false;
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
@@ -279,6 +282,8 @@ public class RDX3DSituatedImagePanel
                {
                   gripDragData.getDragFrame().getTransformToDesiredFrame(floatingPanelFrame.getTransformToParent(),
                                                                          floatingPanelFrame.getReferenceFrame().getParent());
+
+                  floatingPanelFrame.getReferenceFrame().update();
                }
             }
             else if (controller.getGripActionData().x() > 0.9 && selectionCollisionBox.isPointInside(controller.getPickPointPose().getPosition()))
