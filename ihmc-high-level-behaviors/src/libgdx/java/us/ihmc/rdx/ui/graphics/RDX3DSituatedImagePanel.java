@@ -22,7 +22,7 @@ import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -51,7 +51,6 @@ public class RDX3DSituatedImagePanel
    private ModelInstance modelInstance;
    private ModelInstance hoverBoxMesh;
    private Texture texture;
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final FramePoint3D tempFramePoint = new FramePoint3D();
    private final Vector3 topLeftPosition = new Vector3();
    private final Vector3 bottomLeftPosition = new Vector3();
@@ -182,6 +181,9 @@ public class RDX3DSituatedImagePanel
                                           Math.abs(topRightPosition.y - topLeftPosition.y),
                                           Math.abs(topRightPosition.y - bottomLeftPosition.y));
 
+      FramePoint3DBasics[] vertices = selectionCollisionBox.getVertices();
+      hoverBoxMesh = new ModelInstance(RDXModelBuilder.buildModel(boxMeshBuilder ->
+                                               boxMeshBuilder.addMultiLineBox(vertices, 0.0005, new Color(Color.WHITE))));
    }
 
    public void update(Texture imageTexture)
@@ -211,6 +213,10 @@ public class RDX3DSituatedImagePanel
       selectionCollisionBox.getPose().set(floatingPanelFramePose);
       floatingPanelFramePose.setFromReferenceFrame(floatingPanelFrame.getReferenceFrame());
       isHoveredByAnything = false;
+      if (modelInstance != null)
+         LibGDXTools.toLibGDX(floatingPanelFrame.getReferenceFrame().getTransformToRoot(), modelInstance.transform);
+      if (hoverBoxMesh != null)
+         LibGDXTools.toLibGDX(floatingPanelFrame.getReferenceFrame().getTransformToRoot(), hoverBoxMesh.transform);
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
@@ -247,15 +253,12 @@ public class RDX3DSituatedImagePanel
       {
          if (placementMode == FOLLOW_HEADSET || (placementMode == MANUAL_PLACEMENT  && justShown))
          {
-            if (modelInstance != null)
-            {
-               floatingPanelFramePose.setToZero(headset.getXForwardZUpHeadsetFrame());
-               floatingPanelFramePose.getPosition()
-                                     .set(panelDistanceFromHeadset, FOLLOW_HEADSET_OFFSET_Y, FOLLOW_HEADSET_OFFSET_Z);
-               floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-               floatingPanelFramePose.get(floatingPanelFrame.getTransformToParent());
-               floatingPanelFrame.getReferenceFrame().update();
-            }
+            floatingPanelFramePose.setToZero(headset.getXForwardZUpHeadsetFrame());
+            floatingPanelFramePose.getPosition()
+                                  .set(panelDistanceFromHeadset, FOLLOW_HEADSET_OFFSET_Y, FOLLOW_HEADSET_OFFSET_Z);
+            floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+            floatingPanelFramePose.get(floatingPanelFrame.getTransformToParent());
+            floatingPanelFrame.getReferenceFrame().update();
          }
       });
 
@@ -266,12 +269,6 @@ public class RDX3DSituatedImagePanel
             boolean isHovering = controller.getSelectedPick() == vrPickResult.get(side);
             isHoveredByAnything |= isHovering;
 
-            if (isHovering)
-            {
-               hoverBoxMesh = new ModelInstance(RDXModelBuilder.buildModel(boxMeshBuilder ->
-                                                                                 boxMeshBuilder.addMultiLineBox(selectionCollisionBox.getVertices(),
-                                                                                                                0.0005, new Color(Color.WHITE))));
-            }
             if (placementMode == MANUAL_PLACEMENT)
             {
                RDXVRDragData gripDragData = controller.getGripDragData();
@@ -286,7 +283,6 @@ public class RDX3DSituatedImagePanel
                {
                   gripDragData.getDragFrame().getTransformToDesiredFrame(floatingPanelFrame.getTransformToParent(),
                                                                          floatingPanelFrame.getReferenceFrame().getParent());
-
                   floatingPanelFrame.getReferenceFrame().update();
                }
             }
@@ -313,8 +309,7 @@ public class RDX3DSituatedImagePanel
    {
       if (modelInstance != null)
       {
-         referenceFrame.getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
-         LibGDXTools.toLibGDX(tempTransform, modelInstance.transform);
+         LibGDXTools.toLibGDX(referenceFrame.getTransformToRoot(), modelInstance.transform);
       }
    }
 
