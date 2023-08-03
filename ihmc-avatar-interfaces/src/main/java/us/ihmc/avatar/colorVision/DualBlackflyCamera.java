@@ -40,6 +40,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.tools.Timer;
 import us.ihmc.tools.thread.Throttler;
 import us.ihmc.tools.time.FrequencyCalculator;
 
@@ -62,6 +63,7 @@ public class DualBlackflyCamera
    private final PredefinedSceneNodeLibrary predefinedSceneNodeLibrary;
 
    private final FrequencyCalculator readFrequencyCalculator = new FrequencyCalculator();
+   private final Timer printCameraReadRateTimer = new Timer();
 
    private final ROS2StoredPropertySet<IntrinsicCameraMatrixProperties> ousterFisheyeColoringIntrinsicsROS2;
 
@@ -164,6 +166,8 @@ public class DualBlackflyCamera
          Throttler throttler = new Throttler();
          throttler.setFrequency(MAX_IMAGE_READ_FREQUENCY);
 
+         printCameraReadRateTimer.reset();
+
          while (!destroyed)
          {
             throttler.waitAndRun();
@@ -173,9 +177,10 @@ public class DualBlackflyCamera
             readFrequencyCalculator.ping();
 
             // Every so often show the read frequency in console
-            if (numberOfGpuMatsAllocated % 1000 == 0)
+            if (printCameraReadRateTimer.getElapsedTime() > 10.0)
             {
                LogTools.info(side  + " Blackfly reading at " + String.format("%.2f", getReadFrequency()) + "hz");
+               printCameraReadRateTimer.reset();
             }
 
             // Notify threads when a new image is available
