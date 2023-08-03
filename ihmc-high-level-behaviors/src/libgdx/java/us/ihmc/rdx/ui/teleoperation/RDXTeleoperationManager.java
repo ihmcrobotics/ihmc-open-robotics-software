@@ -182,7 +182,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
                                         interactableHands);
       }
 
-      RDXBaseUI.getInstance().getKeyBindings().register("Clear all Interactables", "Ctrl + L");
+      RDXBaseUI.getInstance().getKeyBindings().register("Delete all Interactables", "Ctrl + L");
    }
 
    public void create(RDXBaseUI baseUI)
@@ -411,12 +411,9 @@ public class RDXTeleoperationManager extends ImGuiPanel
       robotLowLevelMessenger.renderImGuiWidgets();
 
       ImGui.sameLine();
-      if (ImGui.button(labels.get("Clear all Interactables")) || ImGui.getIO().getKeyCtrl() && ImGui.isKeyReleased('L'))
+      if (ImGui.button(labels.get("Delete all Interactables")) || ImGui.getIO().getKeyCtrl() && ImGui.isKeyReleased('L'))
       {
-         locomotionManager.deleteAll();
-
-         for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
-            robotPartInteractable.delete();
+         clearInteractablesAndLocomotionGraphics();
       }
 
       pelvisHeightSlider.renderImGuiWidgets();
@@ -573,6 +570,13 @@ public class RDXTeleoperationManager extends ImGuiPanel
       }
    }
 
+   public void clearInteractablesAndLocomotionGraphics()
+   {
+      locomotionManager.deleteAll();
+
+      for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
+         robotPartInteractable.delete();
+   }
    public void destroy()
    {
       desiredRobot.destroy();
