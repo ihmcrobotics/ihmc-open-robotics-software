@@ -195,6 +195,7 @@ public class RDX3DSituatedImagePanel
          isShowing = vrModeManager.getShowFloatingVideoPanel().get();
       }
 
+      // Update the texture if necessary
       if (isShowing && imageTexture != null && imageTexture != texture)
       {
          boolean flipY = false;
