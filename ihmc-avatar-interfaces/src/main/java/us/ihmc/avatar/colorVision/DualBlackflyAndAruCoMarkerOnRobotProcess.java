@@ -104,12 +104,12 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    private DualBlackflyCamera createDualBlackflyCamera(RobotSide side, SpinnakerBlackfly spinnakerBlackfly)
    {
       return new DualBlackflyCamera(robotModel,
-                             side,
-                             syncedRobot::getReferenceFrames,
-                             ros2Node,
-                             spinnakerBlackfly,
-                             blackflyLensProperties,
-                             predefinedSceneNodeLibrary);
+                                    side,
+                                    syncedRobot::getReferenceFrames,
+                                    ros2Node,
+                                    spinnakerBlackfly,
+                                    blackflyLensProperties,
+                                    predefinedSceneNodeLibrary);
    }
 
    private void destroy()
