@@ -105,7 +105,7 @@ public class RDXInteractableFootstep
 
       selectablePose3DGizmo = new RDXSelectablePose3DGizmo();
       selectablePose3DGizmo.create(baseUI.getPrimary3DPanel());
-      selectionCollisionBox = new FrameBox3D(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
+      selectionCollisionBox = new FrameBox3D(ReferenceFrame.getWorldFrame());
       selectionCollisionBox.getSize().set(FOOTSTEP_GRAPHIC_LENGTH, FOOTSTEP_GRAPHIC_WIDTH, FOOTSTEP_GRAPHIC_HEIGHT);
       selectionCollisionBox.getPose().getTranslation().add(FOOTSTEP_GRAPHIC_SOLE_OFFSET_X, FOOTSTEP_GRAPHIC_SOLE_OFFSET_Y, FOOTSTEP_GRAPHIC_SOLE_OFFSET_Z);
       collisionBoxFrame = new ModifiableReferenceFrame("collisionBoxFrame", selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
@@ -249,6 +249,10 @@ public class RDXInteractableFootstep
 
       if (collisionBoxFrame.getReferenceFrame() != selectablePose3DGizmo.getPoseGizmo().getGizmoFrame())
          collisionBoxFrame.changeParentFrame(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
+
+      //Updates selectionCollisionBox pose as it is used in mouse pointcollide
+      selectionCollisionBox.getPose().set(selectablePose3DGizmo.getPoseGizmo().getPose());
+      selectionCollisionBox.getPose().getTranslation().add(FOOTSTEP_GRAPHIC_SOLE_OFFSET_X, FOOTSTEP_GRAPHIC_SOLE_OFFSET_Y, FOOTSTEP_GRAPHIC_SOLE_OFFSET_Z);
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
@@ -261,7 +265,7 @@ public class RDXInteractableFootstep
             if (!controller.getGripAsButtonDown())
             {
                vrPickPose.setIncludingFrame(controller.getPickPointPose());
-               vrPickPose.changeFrame(selectionCollisionBox.getReferenceFrame());
+               vrPickPose.changeFrame(ReferenceFrame.getWorldFrame());
                isIntersectingVR.put(side, mouseCollidable.pointCollide(vrPickPose.getPosition()));
             }
          });
