@@ -131,4 +131,9 @@ public class MouseCollidable
       }
       return Double.NaN;
    }
+
+   public Point3DReadOnly getClosestInteresection()
+   {
+      return boxRayIntersection.getFirstIntersectionToPack();
+   }
 }
