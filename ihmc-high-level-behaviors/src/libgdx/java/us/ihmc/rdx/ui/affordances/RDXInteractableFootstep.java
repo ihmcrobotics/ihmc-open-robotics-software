@@ -261,7 +261,6 @@ public class RDXInteractableFootstep
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
-            //TODO probably an easier way to update selectionCollisonBox, but without this right now the selectionCollisionBox never updates
             if (!controller.getGripAsButtonDown())
             {
                vrPickPose.setIncludingFrame(controller.getPickPointPose());
