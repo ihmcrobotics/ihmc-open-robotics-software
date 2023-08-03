@@ -74,7 +74,8 @@ public class RDX3DSituatedImagePanel
    private boolean isShowing;
    private final FrameBox3D selectionCollisionBox = new FrameBox3D();
    private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
-   private boolean isHoveredByAnything = false;
+   /** If either VR controller is hovering the panel. */
+   private boolean isVRHovering = false;
 
    /**
     * Create for a programmatically placed panel.
@@ -212,7 +213,7 @@ public class RDX3DSituatedImagePanel
       setPoseToReferenceFrame(floatingPanelFrame.getReferenceFrame());
       selectionCollisionBox.getPose().set(floatingPanelFramePose);
       floatingPanelFramePose.setFromReferenceFrame(floatingPanelFrame.getReferenceFrame());
-      isHoveredByAnything = false;
+      isVRHovering = false;
       updatePoses();
    }
 
@@ -265,7 +266,7 @@ public class RDX3DSituatedImagePanel
          context.getController(side).runIfConnected(controller ->
          {
             boolean isHovering = controller.getSelectedPick() == vrPickResult.get(side);
-            isHoveredByAnything |= isHovering;
+            isVRHovering |= isHovering;
 
             if (placementMode == MANUAL_PLACEMENT)
             {
@@ -299,7 +300,7 @@ public class RDX3DSituatedImagePanel
       {
          if (modelInstance != null)
             modelInstance.getRenderables(renderables, pool);
-         if (hoverBoxMesh != null && isHoveredByAnything)
+         if (hoverBoxMesh != null && isVRHovering)
             hoverBoxMesh.getRenderables(renderables, pool);
       }
    }
