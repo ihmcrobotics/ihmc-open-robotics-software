@@ -405,12 +405,15 @@ public class DualBlackflyCamera
          return;
 
       remoteTunableCameraTransform.update();
-      syncedRobot.update();
 
       ReferenceFrame ousterLidarFrame = syncedRobot.getReferenceFrames().getOusterLidarFrame();
       RigidBodyTransform ousterToBlackflyTransfrom = new RigidBodyTransform();
 
-      if (side == RobotSide.RIGHT)
+      if (side == RobotSide.LEFT)
+      {
+         // TODO: left behavior
+      }
+      else if (side == RobotSide.RIGHT)
       {
          ReferenceFrame blackflyCameraFrame = syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame();
          ousterLidarFrame.getTransformToDesiredFrame(ousterToBlackflyTransfrom, blackflyCameraFrame);
@@ -421,8 +424,6 @@ public class DualBlackflyCamera
             blackflyFrameForSceneNodeUpdate.getReferenceFrame().update();
          }
       }
-      // TODO: left behavior?
-
 
       BytePointer jpegImageBytePointer = new BytePointer(imageFrameSize); // close at the end
 
