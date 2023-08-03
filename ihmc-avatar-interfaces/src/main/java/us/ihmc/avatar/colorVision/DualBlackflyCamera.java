@@ -359,7 +359,7 @@ public class DualBlackflyCamera
       undistortionMap2.upload(tempUndistortionMat2);
 
       // Create arUco marker detection
-      ReferenceFrame blackflyCameraFrame = referenceFrameSupplier.get().getObjectDetectionCameraFrame();
+      ReferenceFrame blackflyCameraFrame = referenceFrameSupplier.get().getSituationalAwarenessRightCameraFrame();
       arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
       arUcoMarkerDetection.create(blackflyCameraFrame);
       arUcoMarkerDetection.setSourceImageForDetection(undistortedBytedecoImage);
