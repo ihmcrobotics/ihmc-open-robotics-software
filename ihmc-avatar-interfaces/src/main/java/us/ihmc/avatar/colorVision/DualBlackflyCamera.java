@@ -51,6 +51,7 @@ import java.util.function.Supplier;
 
 public class DualBlackflyCamera
 {
+   private static final boolean DEBUG_SHUTDOWN = false;
    private static final int MAX_IMAGE_READ_FREQUENCY = 30;
 
    private final RobotSide side;
@@ -189,7 +190,8 @@ public class DualBlackflyCamera
                newImageReadNotifier.notifyAll();
             }
          }
-         System.out.println("Camera read thread has finished");
+         if (DEBUG_SHUTDOWN)
+            System.out.println("Camera read thread has finished");
       }, "SpinnakerCameraRead");
 
       // Image process and publish thread
@@ -213,7 +215,8 @@ public class DualBlackflyCamera
             // Process and publish the new image
             imageProcessAndPublish();
          }
-         System.out.println("Image encode and publish thread has finished");
+         if (DEBUG_SHUTDOWN)
+            System.out.println("Image encode and publish thread has finished");
       }, "SpinnakerImageEncodeAndPublish");
 
       // Undistort image and update aruco thread
@@ -237,7 +240,8 @@ public class DualBlackflyCamera
             // Undistort the new image
             undistortImageAndUpdateArUco();
          }
-         System.out.println("Image undistort and update ArUco thread has finished");
+         if (DEBUG_SHUTDOWN)
+            System.out.println("Image undistort and update ArUco thread has finished");
       }, "SpinnakerImageUndistortAndUpdateArUco");
 
       // Deallocation thread
@@ -282,7 +286,8 @@ public class DualBlackflyCamera
                   break;
             }
          }
-         System.out.println("Deallocation thread has finished");
+         if (DEBUG_SHUTDOWN)
+            System.out.println("Deallocation thread has finished");
       }, "SpinnakerImageDeallocation");
 
       cameraReadThread.start();
@@ -544,7 +549,8 @@ public class DualBlackflyCamera
 
    public void destroy()
    {
-      System.out.println("Destroying dual blackfly camera");
+      if (DEBUG_SHUTDOWN)
+         System.out.println("Destroying dual blackfly camera");
       destroyed = true;
 
       // Notify deallocation thread to ensure it doesn't hang
