@@ -9,6 +9,7 @@ import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.Collection;
 
@@ -16,8 +17,10 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
 {
    private double defaultContactThresholdTorque = 50.0;
    private double defaultHigherContactThresholdTorque = 100.0;
+   private int defaultContactWindowSize = 5;
    private DoubleProvider contactThresholdTorque;
    private DoubleProvider higherContactThresholdTorque;
+   private YoInteger contactWindowSize;
 
    private final String jointDescriptionToCheck;
 
@@ -43,6 +46,11 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
       this.defaultHigherContactThresholdTorque = defaultHigherContactThresholdTorque;
    }
 
+   public void setDefaultContactWindowSize(int defaultContactWindowSize)
+   {
+      this.defaultContactWindowSize = defaultContactWindowSize;
+   }
+
    @Override
    public FootSwitchInterface newFootSwitch(String namePrefix,
                                             ContactablePlaneBody foot,
@@ -55,11 +63,14 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
    {
       if (contactThresholdTorque == null)
       {
-         contactThresholdTorque = new DoubleParameter("ContactThresholdJointTorque", registry, defaultContactThresholdTorque);
-         higherContactThresholdTorque = new DoubleParameter("HigherContactThresholdJointTorque", registry, defaultHigherContactThresholdTorque);
+         contactThresholdTorque = new DoubleParameter(namePrefix + "ContactThresholdJointTorque", registry, defaultContactThresholdTorque);
+         higherContactThresholdTorque = new DoubleParameter(namePrefix + "HigherContactThresholdJointTorque", registry, defaultHigherContactThresholdTorque);
+         contactWindowSize = new YoInteger(namePrefix + "ContactThresholdJointTorqueWindowSize", registry);
+         contactWindowSize.set(defaultContactWindowSize);
       }
 
-      return new JointTorqueBasedFootSwitch(jointDescriptionToCheck, foot.getRigidBody(), rootBody, foot.getSoleFrame(), contactThresholdTorque, higherContactThresholdTorque,
+      return new JointTorqueBasedFootSwitch(namePrefix, jointDescriptionToCheck, foot.getRigidBody(), rootBody, foot.getSoleFrame(),
+                                            contactThresholdTorque, higherContactThresholdTorque, contactWindowSize,
                                             registry);
    }
 }

@@ -19,6 +19,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 {
@@ -29,12 +30,14 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 
    private final ReferenceFrame soleFrame;
 
-   public JointTorqueBasedFootSwitch(String jointNameToCheck,
+   public JointTorqueBasedFootSwitch(String namePrefix,
+                                     String jointNameToCheck,
                                      RigidBodyBasics foot,
                                      RigidBodyBasics rootBody,
                                      ReferenceFrame soleFrame,
                                      DoubleProvider torqueContactThreshold,
                                      DoubleProvider torqueSecondContactThreshold,
+                                     YoInteger contactThresholdWindowSize,
                                      YoRegistry parentRegistry)
    {
       this.soleFrame = soleFrame;
@@ -61,7 +64,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
       }
 
       registry = new YoRegistry(jointToRead.getName() + getClass().getSimpleName());
-      touchdownDetector = new JointTorqueBasedTouchdownDetector("", jointToRead, true, torqueContactThreshold, torqueSecondContactThreshold, registry);
+      touchdownDetector = new JointTorqueBasedTouchdownDetector(namePrefix, jointToRead, true, torqueContactThreshold, torqueSecondContactThreshold, contactThresholdWindowSize, registry);
 
       wrenchCalculator = new JacobianBasedWrenchCalculator(foot, rootBody, soleFrame);
 
@@ -85,7 +88,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
    @Override
    public boolean hasFootHitGroundSensitive()
    {
-      return touchdownDetector.hasTouchdedDownSensitive();
+      return touchdownDetector.hasTouchedDownSensitive();
    }
 
    /**
@@ -139,9 +142,10 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
        *                                          false-positive touchdown signals given by simulated torques at joint limits
        * @param registry
        */
-      public JointTorqueBasedTouchdownDetector(String suffix, OneDoFJointReadOnly joint, boolean dontDetectTouchdownIfAtJointLimit,
+      public JointTorqueBasedTouchdownDetector(String namePrefix, OneDoFJointReadOnly joint, boolean dontDetectTouchdownIfAtJointLimit,
                                                DoubleProvider torqueThreshold,
                                                DoubleProvider torqueHigherThreshold,
+                                               YoInteger contactThresholdWindowSize,
                                                YoRegistry registry)
       {
          this.joint = joint;
@@ -149,10 +153,10 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          this.torqueThreshold = torqueThreshold;
          this.torqueHigherThreshold = torqueHigherThreshold;
 
-         jointTorque = new YoDouble(joint.getName() + "_torqueUsedForTouchdownDetection" + suffix, registry);
-         touchdownDetected = new YoBoolean(joint.getName() + "_torqueBasedTouchdownDetectedF" + suffix, registry);
-         touchdownDetectedFiltered = new GlitchFilteredYoBoolean(joint.getName() + "_torqueBasedTouchdownDetectedFiltered" + suffix, registry, touchdownDetected, 5);
-         touchdownDetectedSecondThreshold = new YoBoolean(joint.getName() + "_torqueBasedTouchdownSecondThreshold" + suffix, registry);
+         jointTorque = new YoDouble(namePrefix + joint.getName() + "_torqueUsedForTouchdownDetection", registry);
+         touchdownDetected = new YoBoolean(namePrefix + joint.getName() + "_torqueBasedTouchdownDetected", registry);
+         touchdownDetectedFiltered = new GlitchFilteredYoBoolean(namePrefix + joint.getName() + "_torqueBasedTouchdownDetectedFiltered", registry, touchdownDetected, contactThresholdWindowSize);
+         touchdownDetectedSecondThreshold = new YoBoolean(namePrefix + joint.getName() + "_torqueBasedTouchdownSecondThreshold", registry);
       }
 
       public boolean hasTouchedDownFiltered()
@@ -160,7 +164,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          return touchdownDetectedFiltered.getBooleanValue();
       }
 
-      public boolean hasTouchdedDownSensitive()
+      public boolean hasTouchedDownSensitive()
       {
          return touchdownDetectedSecondThreshold.getBooleanValue();
       }
@@ -184,8 +188,9 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          }
          else
          {
-            touchdownDetected.set(Math.abs(joint.getTau()) > torqueThreshold.getValue());
-            touchdownDetectedSecondThreshold.set(Math.abs(joint.getTau()) > torqueHigherThreshold.getValue());
+            // This isn't an absolute value. When the robot is in support, the torque is negative, it's usually only positive in swing.
+            touchdownDetected.set(joint.getTau() < -torqueThreshold.getValue());
+            touchdownDetectedSecondThreshold.set(joint.getTau() < -torqueHigherThreshold.getValue());
          }
 
          touchdownDetectedFiltered.update();
