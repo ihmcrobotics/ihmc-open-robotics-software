@@ -50,14 +50,14 @@ public class HeightOffsetHandler
 
    private final DoubleProvider yoTime;
 
-   public HeightOffsetHandler(DoubleProvider yoTime, double defaultOffsetHeightAboveGround, YoRegistry parentRegistry)
+   public HeightOffsetHandler(DoubleProvider yoTime,YoRegistry parentRegistry)
    {
       this.yoTime = yoTime;
 
       offsetHeightAboveGroundChangedTime.set(yoTime.getValue());
       offsetHeightAboveGroundTrajectoryTimeProvider.set(0.5);
-      offsetHeightAboveGround.set(defaultOffsetHeightAboveGround);
-      offsetHeightAboveGroundPrevValue.set(defaultOffsetHeightAboveGround);
+      offsetHeightAboveGround.set(0.0);
+      offsetHeightAboveGroundPrevValue.set(0.0);
       offsetHeightAboveGround.addListener(new YoVariableChangedListener()
       {
          @Override

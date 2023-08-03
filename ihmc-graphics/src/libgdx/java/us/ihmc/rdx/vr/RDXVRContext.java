@@ -9,13 +9,10 @@ import java.util.function.Consumer;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
+import com.badlogic.gdx.utils.*;
 import org.lwjgl.opengl.GL41;
 import org.lwjgl.openvr.*;
 
-import com.badlogic.gdx.utils.BufferUtils;
-import com.badlogic.gdx.utils.GdxRuntimeException;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -26,8 +23,7 @@ import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.io.WorkspaceDirectory;
-import us.ihmc.tools.io.WorkspaceFile;
+import us.ihmc.tools.io.*;
 
 /**
  * Responsible for initializing the VR system, managing rendering surfaces,
@@ -86,13 +82,11 @@ public class RDXVRContext
          = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("vrPlayAreaFrame",
                                                                            teleportFrameIHMCZUp,
                                                                            openVRYUpToIHMCZUpSpace);
-
+   private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
    private final RDXVRHeadset headset = new RDXVRHeadset(vrPlayAreaYUpZBackFrame);
    private final SideDependentList<RDXVRController> controllers = new SideDependentList<>(new RDXVRController(RobotSide.LEFT, vrPlayAreaYUpZBackFrame),
                                                                                           new RDXVRController(RobotSide.RIGHT, vrPlayAreaYUpZBackFrame));
    private final HashMap<Integer, RDXVRBaseStation> baseStations = new HashMap<>();
-   private final SideDependentList<ArrayList<RDXVRPickResult>> pickResults = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
-   private SideDependentList<RDXVRPickResult> selectedPick = new SideDependentList<>(null, null);
 
    public void initSystem()
    {
@@ -117,9 +111,21 @@ public class RDXVRContext
       width = (int) (widthPointer.get(0) * renderTargetMultiplier);
       height = (int) (heightPointer.get(0) * renderTargetMultiplier);
 
-      WorkspaceDirectory directory = new WorkspaceDirectory("ihmc-open-robotics-software", "ihmc-graphics/src/libgdx/resources", getClass(), "/vr");
-      WorkspaceFile actionManifestFile = new WorkspaceFile(directory, "actions.json");
-      VRInput.VRInput_SetActionManifestPath(actionManifestFile.getFilePath().toString());
+      WorkspaceResourceDirectory directory = new WorkspaceResourceDirectory(getClass(), "/vr");
+      WorkspaceResourceFile actionManifestFile = new WorkspaceResourceFile(directory, "actions.json");
+      JSONFileTools.load(actionManifestFile, node ->
+      {
+         JSONTools.forEachArrayElement(node, "default_bindings", objectNode ->
+         {
+            String controllerBindings = objectNode.get("binding_url").asText();
+            if (controllerBindings.contains("focus3"))
+               controllerModel = RDXVRControllerModel.FOCUS3;
+            else
+               controllerModel = RDXVRControllerModel.INDEX;
+         });
+      });
+      LogTools.info("Using VR controller model: {}", controllerModel);
+      VRInput.VRInput_SetActionManifestPath(actionManifestFile.getFilesystemFile().toString());
 
       VRInput.VRInput_GetActionSetHandle("/actions/main", mainActionSetHandle);
       headset.initSystem();
@@ -198,35 +204,17 @@ public class RDXVRContext
          }
       }
 
-      for (RobotSide side : RobotSide.values)
-         pickResults.get(side).clear();
       for (Consumer<RDXVRContext> vrPickCalculator : vrPickCalculators)
       {
          vrPickCalculator.accept(this);
       }
-      calculateSelectedPick();
+      for (RobotSide side : RobotSide.values)
+      {
+         controllers.get(side).updatePickResults();
+      }
       for (Consumer<RDXVRContext> vrInputProcessor : vrInputProcessors)
       {
          vrInputProcessor.accept(this);
-      }
-   }
-
-   private void calculateSelectedPick()
-   {
-      for (RobotSide side : RobotSide.values)
-      {
-         selectedPick.set(side, null);
-         for (RDXVRPickResult pickResult : pickResults.get(side))
-         {
-            if (selectedPick.get(side) == null)
-            {
-               selectedPick.set(side, pickResult);
-            }
-            else if (pickResult.getDistanceToControllerPickPoint() < selectedPick.get(side).getDistanceToControllerPickPoint())
-            {
-               selectedPick.set(side, pickResult);
-            }
-         }
       }
    }
 
@@ -293,12 +281,7 @@ public class RDXVRContext
          RDXVRController controller = controllers.get(side);
          if (controller.isConnected())
          {
-            ModelInstance modelInstance = controller.getModelInstance();
-            if (modelInstance != null)
-            {
-               modelInstance.getRenderables(renderables, pool);
-               controller.getPickPoseSphere().getRenderables(renderables, pool);
-            }
+            controller.getRenderables(renderables, pool);
          }
       }
    }
@@ -350,13 +333,8 @@ public class RDXVRContext
       return teleportIHMCZUpToIHMCZUpWorld;
    }
 
-   public void addPickResult(RobotSide side, RDXVRPickResult pickResult)
+   public RDXVRControllerModel getControllerModel()
    {
-      pickResults.get(side).add(pickResult);
-   }
-
-   public SideDependentList<RDXVRPickResult> getSelectedPick()
-   {
-      return selectedPick;
+      return controllerModel;
    }
 }

@@ -6,6 +6,15 @@ public class ImNodesTools
 {
    private static boolean INITIALIZED = false;
 
+   public static void destroy()
+   {
+      if (INITIALIZED)
+      {
+         ImNodes.destroyContext();
+         INITIALIZED = false;
+      }
+   }
+
    public static void initialize()
    {
       if (!INITIALIZED)

@@ -13,24 +13,25 @@ import java.util.ArrayList;
 
 public class RDXFrameGraphicsNode
 {
-   private static final boolean ENABLE_REFERENCE_FRAME_GRAPHICS
-         = Boolean.parseBoolean(System.getProperty("frameGDXGraphicsNodeEnableReferenceFrameGraphics", "false"));
-
    private final ReferenceFrame referenceFrame;
-   private ModelInstance coordinateFrame;
    private final ArrayList<RDXFrameNodePart> parts = new ArrayList<>();
+   private final ModelInstance referenceFrameGraphic;
 
    public RDXFrameGraphicsNode(ReferenceFrame referenceFrame)
    {
-      this.referenceFrame = referenceFrame;
-
-      if (ENABLE_REFERENCE_FRAME_GRAPHICS)
-         coordinateFrame = RDXModelBuilder.createCoordinateFrameInstance(0.15);
+      this(referenceFrame, false);
    }
 
-   public void addModelPart(RDXVisualModelInstance model, String name, float x, float y, float z)
+   public RDXFrameGraphicsNode(ReferenceFrame referenceFrame, boolean createReferenceFrameGraphics)
    {
-      parts.add(new RDXFrameNodePart(referenceFrame, model, name, x, y, z));
+      this.referenceFrame = referenceFrame;
+
+      referenceFrameGraphic = createReferenceFrameGraphics ? RDXModelBuilder.createCoordinateFrameInstance(0.15) : null;
+   }
+
+   public void addModelPart(RDXVisualModelInstance model)
+   {
+      parts.add(new RDXFrameNodePart(referenceFrame, model));
    }
 
    public void addModelPart(RDXVisualModelInstance model, String name)
@@ -38,15 +39,15 @@ public class RDXFrameGraphicsNode
       parts.add(new RDXFrameNodePart(referenceFrame, model, name));
    }
 
-   public void updatePose()
+   public void update()
    {
       for (RDXFrameNodePart part : parts)
       {
          part.update();
       }
 
-      if (ENABLE_REFERENCE_FRAME_GRAPHICS)
-         LibGDXTools.toLibGDX(referenceFrame.getTransformToRoot(), coordinateFrame.transform);
+      if (referenceFrameGraphic != null)
+         LibGDXTools.toLibGDX(referenceFrame.getTransformToRoot(), referenceFrameGraphic.transform);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -55,22 +56,11 @@ public class RDXFrameGraphicsNode
       {
          part.getRenderables(renderables, pool);
       }
-
-      if (ENABLE_REFERENCE_FRAME_GRAPHICS)
-         coordinateFrame.getRenderables(renderables, pool);
    }
 
-   public void dispose()
+   public void getReferenceFrameRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (RDXFrameNodePart part : parts)
-      {
-         part.dispose();
-      }
-   }
-
-   public void scale(float x, float y ,float z)
-   {
-      coordinateFrame.transform.scale(x, y, z);
+      referenceFrameGraphic.getRenderables(renderables, pool);
    }
 
    public ArrayList<RDXFrameNodePart> getParts()

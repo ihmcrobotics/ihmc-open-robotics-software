@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.PlanarRegionsListMessage>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::PlanarRegionsListMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "ddb116e460c7a750349d8ffd2f769a2ae3b6d0710386959afbec713aa7485c08";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
@@ -41,6 +53,8 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (3000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -77,6 +91,8 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
+      current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getCdrSerializedSize(data.getLastUpdated(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getRegionId().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -122,6 +138,7 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       cdr.write_type_4(data.getSequenceId());
 
+      ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getLastUpdated(), cdr);
       if(data.getRegionId().size() <= 3000)
       cdr.write_type_e(data.getRegionId());else
           throw new RuntimeException("region_id field exceeds the maximum length");
@@ -160,6 +177,7 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       data.setSequenceId(cdr.read_type_4());
       	
+      ihmc_common_msgs.msg.dds.InstantMessagePubSubType.read(data.getLastUpdated(), cdr);	
       cdr.read_type_e(data.getRegionId());	
       cdr.read_type_e(data.getRegionOrigin());	
       cdr.read_type_e(data.getRegionOrientation());	
@@ -175,6 +193,8 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
    public final void serialize(perception_msgs.msg.dds.PlanarRegionsListMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_a("last_updated", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getLastUpdated());
+
       ser.write_type_e("region_id", data.getRegionId());
       ser.write_type_e("region_origin", data.getRegionOrigin());
       ser.write_type_e("region_orientation", data.getRegionOrientation());
@@ -189,6 +209,8 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.PlanarRegionsListMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
+      ser.read_type_a("last_updated", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getLastUpdated());
+
       ser.read_type_e("region_id", data.getRegionId());
       ser.read_type_e("region_origin", data.getRegionOrigin());
       ser.read_type_e("region_orientation", data.getRegionOrientation());

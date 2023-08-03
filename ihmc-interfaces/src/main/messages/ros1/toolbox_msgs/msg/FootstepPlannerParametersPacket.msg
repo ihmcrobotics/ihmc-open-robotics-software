@@ -407,6 +407,10 @@ float64 long_step_weight
 # Field default value -11.1
 float64 foothold_area_weight
 
+# When using a reference based ideal step calculator, alpha determines how much we value the reference plan vs. new plan. Value should be between 0 and 1
+# Field default value -11.1
+float64 reference_plan_alpha
+
 # When using a cost based planning approach this value defines the cost that is added for each step
 # taken. Setting this value to a high number will favor plans with less steps.
 # Field default value -11.1

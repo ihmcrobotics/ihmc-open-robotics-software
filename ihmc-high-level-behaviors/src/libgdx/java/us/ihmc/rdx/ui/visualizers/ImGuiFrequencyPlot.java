@@ -24,4 +24,9 @@ public class ImGuiFrequencyPlot
       ImGui.sameLine();
       receivedPlot.render((float) UnitConversions.secondsToHertz(elapsedSinceReceived));
    }
+
+   public boolean anyEventsYet()
+   {
+      return receivedCount > 0;
+   }
 }

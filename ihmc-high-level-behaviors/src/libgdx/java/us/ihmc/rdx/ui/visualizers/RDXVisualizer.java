@@ -1,7 +1,6 @@
 package us.ihmc.rdx.ui.visualizers;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
@@ -9,13 +8,18 @@ import imgui.type.ImBoolean;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 
-public abstract class RDXVisualizer implements RenderableProvider
+import java.util.Set;
+
+public abstract class RDXVisualizer implements RDXRenderableProvider
 {
-   private ImBoolean active = new ImBoolean(false);
+   private final ImBoolean active = new ImBoolean(false);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final String title;
    private boolean createdYet = false;
+   private Set<RDXSceneLevel> sceneLevels = Set.of(RDXSceneLevel.MODEL);
 
    public RDXVisualizer(String title)
    {
@@ -27,16 +31,22 @@ public abstract class RDXVisualizer implements RenderableProvider
       createdYet = true;
       if (getPanel() != null)
       {
-         active = getPanel().getIsShowing();
+         setActive(getPanel().getIsShowing().get());
       }
    }
 
    public void renderImGuiWidgets()
    {
-      ImGui.checkbox(labels.get(title), active);
+      if (ImGui.checkbox(labels.get(title), active))
+      {
+         setActive(active.get());
+      }
       ImGuiTools.previousWidgetTooltip("Active");
    }
 
+   /**
+    * Only called when active.
+    */
    public void update()
    {
       if (!createdYet)
@@ -45,6 +55,10 @@ public abstract class RDXVisualizer implements RenderableProvider
       }
    }
 
+   /**
+    * It is assumed by extending classes that this will be called when the active
+    * state changes.
+    */
    public void setActive(boolean active)
    {
       this.active.set(active);
@@ -55,10 +69,26 @@ public abstract class RDXVisualizer implements RenderableProvider
       return active.get();
    }
 
+   /**
+    * Only called when active.
+    */
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
 
+   }
+
+   public void setSceneLevels(RDXSceneLevel... sceneLevels)
+   {
+      this.sceneLevels = Set.of(sceneLevels);
+   }
+
+   public boolean sceneLevelCheck(Set<RDXSceneLevel> sceneLevels)
+   {
+      for (RDXSceneLevel sceneLevel : this.sceneLevels)
+         if (sceneLevels.contains(sceneLevel))
+            return true;
+      return false;
    }
 
    public ImGuiPanel getPanel()

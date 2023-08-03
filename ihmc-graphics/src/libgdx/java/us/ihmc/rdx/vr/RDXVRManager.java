@@ -111,7 +111,7 @@ public class RDXVRManager
 
             if (!Boolean.parseBoolean(System.getProperty("rdx.free.spin")))
             {
-               baseUI.setForegroundFPS(350); // TODO: Do something better with this
+               baseUI.setForegroundFPSLimit(350); // TODO: Do something better with this
             }
             baseUI.setVsync(false); // important to disable vsync for VR
             scenePoseGizmo = new RDXPose3DGizmo(context.getTeleportFrameIHMCZUp(), context.getTeleportIHMCZUpToIHMCZUpWorld());
@@ -282,5 +282,10 @@ public class RDXVRManager
    public ImBoolean getVREnabled()
    {
       return vrEnabled;
+   }
+
+   public RDXVRTeleporter getTeleporter()
+   {
+      return teleporter;
    }
 }

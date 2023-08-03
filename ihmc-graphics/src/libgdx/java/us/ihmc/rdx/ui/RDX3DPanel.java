@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.SensorFrameBuffer;
 import com.badlogic.gdx.graphics.glutils.SensorFrameBufferBuilder;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
@@ -33,12 +34,12 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class RDX3DPanel
+public class RDX3DPanel extends ImGuiPanel
 {
+   public static final int OVERLAY_BACKGROUND_COLOR = new Color(1.0f, 1.0f, 1.0f, 0.5f).toIntBits();
    private final ImGuiPanelSizeHandler view3DPanelSizeHandler = new ImGuiPanelSizeHandler();
    private final String panelName;
    private final int antiAliasing;
-   private ImGuiPanel imGuiPanel;
    private RDX3DScene scene;
    private boolean modelSceneMouseCollisionEnabled = false;
    private GLProfiler glProfiler;
@@ -68,9 +69,30 @@ public class RDX3DPanel
    private float windowDrawMinY;
    private float windowDrawMaxX;
    private float windowDrawMaxY;
+   private float windowPositionX;
+   private float windowPositionY;
 
+  public RDX3DPanel(String panelName)
+   {
+      this(panelName, RDXBaseUI.ANTI_ALIASING, true);
+   }
+
+   /**
+    * @param addFocusSphere show the little red sphere used to tell where the camera focus is
+    */
+   public RDX3DPanel(String panelName, boolean addFocusSphere)
+   {
+      this(panelName, RDXBaseUI.ANTI_ALIASING, addFocusSphere);
+   }
+
+   /**
+    * @param antiAliasing 1, 2, or 4
+    * @param addFocusSphere show the little red sphere used to tell where the camera focus is
+    */
    public RDX3DPanel(String panelName, int antiAliasing, boolean addFocusSphere)
    {
+      super(panelName);
+      super.setRenderMethod(null);
       this.panelName = panelName;
       this.antiAliasing = antiAliasing;
       this.addFocusSphere = addFocusSphere;
@@ -80,8 +102,6 @@ public class RDX3DPanel
    {
       this.glProfiler = glProfiler;
       this.scene = scene;
-
-      imGuiPanel = new ImGuiPanel(panelName, null, false);
 
       camera3D = new RDXFocusBasedCamera();
       if (inputMode == RDXInputMode.libGDX)
@@ -102,18 +122,17 @@ public class RDX3DPanel
 
    public void render()
    {
-      // NOTE: show panel(window) here
-      ImBoolean isShowing = imGuiPanel.getIsShowing();
-      if (imGuiPanel.getIsShowing().get())
+      if (getIsShowing().get())
       {
          view3DPanelSizeHandler.handleSizeBeforeBegin();
          ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
          int flags = ImGuiWindowFlags.None;
          ImGui.begin(panelName, flags);
          view3DPanelSizeHandler.handleSizeAfterBegin();
+         ImGui.popStyleVar();
 
-         float windowPositionX = ImGui.getWindowPosX();
-         float windowPositionY = ImGui.getWindowPosY() + ImGuiTools.TAB_BAR_HEIGHT;
+         windowPositionX = ImGui.getWindowPosX();
+         windowPositionY = ImGui.getWindowPosY() + ImGuiTools.TAB_BAR_HEIGHT;
          windowSizeX = ImGui.getWindowSizeX();
          windowSizeY = ImGui.getWindowSizeY() - ImGuiTools.TAB_BAR_HEIGHT;
          renderSizeX = windowSizeX * antiAliasing;
@@ -193,21 +212,19 @@ public class RDX3DPanel
          float uvMaxY = 0.0f;
 
          ImGui.getWindowDrawList().addImage(textureID, windowDrawMinX, windowDrawMinY, windowDrawMaxX, windowDrawMaxY, uvMinX, uvMinY, uvMaxX, uvMaxY);
-         ImGui.popStyleVar();
 
          for (Runnable imguiOverlayAddition : imGuiOverlayAdditions)
          {
             imguiOverlayAddition.run();
          }
+         toolbar.render(windowSizeX, windowPositionX, windowPositionY);
 
-         if (ImGui.isMouseDoubleClicked(ImGuiMouseButton.Right))
+         if (ImGui.isWindowHovered() && ImGui.isMouseDoubleClicked(ImGuiMouseButton.Right))
          {
             camera3D.setCameraFocusPoint(inputCalculator.getPickPointInWorld());
          }
 
          ImGui.end();
-
-         toolbar.render(windowSizeX, windowPositionX, windowPositionY);
       }
    }
 
@@ -351,11 +368,6 @@ public class RDX3DPanel
       return scene;
    }
 
-   public ImGuiPanel getImGuiPanel()
-   {
-      return imGuiPanel;
-   }
-
    public SensorFrameBuffer getFrameBuffer()
    {
       return frameBuffer;
@@ -409,5 +421,30 @@ public class RDX3DPanel
    public void setModelSceneMouseCollisionEnabled(boolean modelSceneMouseCollisionEnabled)
    {
       this.modelSceneMouseCollisionEnabled = modelSceneMouseCollisionEnabled;
+   }
+
+   public float getWindowSizeX()
+   {
+      return windowSizeX;
+   }
+
+   public float getWindowPositionX()
+   {
+      return windowPositionX;
+   }
+
+   public float getWindowPositionY()
+   {
+      return windowPositionY;
+   }
+
+   public RDX3DPanelToolbar getToolbar()
+   {
+      return toolbar;
+   }
+
+   public String getPanelName()
+   {
+      return panelName;
    }
 }

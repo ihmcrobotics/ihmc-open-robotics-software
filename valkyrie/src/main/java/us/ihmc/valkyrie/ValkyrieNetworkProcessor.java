@@ -20,7 +20,7 @@ import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
 public class ValkyrieNetworkProcessor
 {
-   private enum NetworkProcessorVersion
+   public enum NetworkProcessorVersion
    {
       IHMC, JSC;
 

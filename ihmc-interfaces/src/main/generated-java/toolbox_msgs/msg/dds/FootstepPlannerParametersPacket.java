@@ -423,6 +423,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double foothold_area_weight_ = -11.1;
    /**
+            * When using a reference based ideal step calculator, alpha determines how much we value the reference plan vs. new plan. Value should be between 0 and 1
+            */
+   public double reference_plan_alpha_ = -11.1;
+   /**
             * When using a cost based planning approach this value defines the cost that is added for each step
             * taken. Setting this value to a high number will favor plans with less steps.
             */
@@ -624,6 +628,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       long_step_weight_ = other.long_step_weight_;
 
       foothold_area_weight_ = other.foothold_area_weight_;
+
+      reference_plan_alpha_ = other.reference_plan_alpha_;
 
       cost_per_step_ = other.cost_per_step_;
 
@@ -1848,6 +1854,21 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    }
 
    /**
+            * When using a reference based ideal step calculator, alpha determines how much we value the reference plan vs. new plan. Value should be between 0 and 1
+            */
+   public void setReferencePlanAlpha(double reference_plan_alpha)
+   {
+      reference_plan_alpha_ = reference_plan_alpha;
+   }
+   /**
+            * When using a reference based ideal step calculator, alpha determines how much we value the reference plan vs. new plan. Value should be between 0 and 1
+            */
+   public double getReferencePlanAlpha()
+   {
+      return reference_plan_alpha_;
+   }
+
+   /**
             * When using a cost based planning approach this value defines the cost that is added for each step
             * taken. Setting this value to a high number will favor plans with less steps.
             */
@@ -2237,6 +2258,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.foothold_area_weight_, other.foothold_area_weight_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.reference_plan_alpha_, other.reference_plan_alpha_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cost_per_step_, other.cost_per_step_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.a_star_heuristics_weight_, other.a_star_heuristics_weight_, epsilon)) return false;
@@ -2402,6 +2425,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.foothold_area_weight_ != otherMyClass.foothold_area_weight_) return false;
 
+      if(this.reference_plan_alpha_ != otherMyClass.reference_plan_alpha_) return false;
+
       if(this.cost_per_step_ != otherMyClass.cost_per_step_) return false;
 
       if(this.a_star_heuristics_weight_ != otherMyClass.a_star_heuristics_weight_) return false;
@@ -2564,6 +2589,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.long_step_weight_);      builder.append(", ");
       builder.append("foothold_area_weight=");
       builder.append(this.foothold_area_weight_);      builder.append(", ");
+      builder.append("reference_plan_alpha=");
+      builder.append(this.reference_plan_alpha_);      builder.append(", ");
       builder.append("cost_per_step=");
       builder.append(this.cost_per_step_);      builder.append(", ");
       builder.append("a_star_heuristics_weight=");

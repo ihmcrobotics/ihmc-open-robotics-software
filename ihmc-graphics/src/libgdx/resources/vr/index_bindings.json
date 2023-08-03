@@ -731,6 +731,15 @@
                },
                "mode" : "trigger",
                "path" : "/user/hand/right/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "double" : {
+                     "output" : "/actions/main/in/right_bbuttondoubleclick"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/b"
             }
          ]
       }
@@ -738,6 +747,7 @@
    "category" : "steamvr_input",
    "controller_type" : "knuckles",
    "description" : "Binding values for IHMC apps using the Index controller.",
+   "interaction_profile" : "",
    "name" : "IHMC Index Controller Bindings",
    "options" : {
       "mirror_actions" : false,

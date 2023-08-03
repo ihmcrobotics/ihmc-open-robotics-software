@@ -2,32 +2,39 @@ package us.ihmc.rdx.ui.affordances;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import imgui.ImGui;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Manages and assists with the operator placement of footsteps.
@@ -41,20 +48,37 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    private CommunicationHelper communicationHelper;
    private ROS2SyncedRobotModel syncedRobot;
    private RDXFootstepChecker stepChecker;
-   private RDXTeleoperationParameters teleoperationParameters;
+   private RDXSwingPlanningModule swingPlanningModule;
+   private SideDependentList<ConvexPolygon2D> defaultPolygons;
+   private RDXLocomotionParameters locomotionParameters;
+   private SwingPlannerParametersBasics swingFootPlannerParameters;
+
+   private final AtomicReference<HeightMapMessage> heightMapDataReference = new AtomicReference<>();
+   private final AtomicReference<PlanarRegionsList> planarRegionsListReference = new AtomicReference<>();
+
+   private int previousPlanLength;
+   private boolean wasPlanUpdated = false;
 
    public void create(RDXBaseUI baseUI,
                       CommunicationHelper communicationHelper,
                       ROS2SyncedRobotModel syncedRobot,
-                      RDXTeleoperationParameters teleoperationParameters,
-                      FootstepPlannerParametersBasics footstepPlannerParameters)
+                      RDXLocomotionParameters locomotionParameters,
+                      FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                      SwingPlannerParametersBasics swingFootPlannerParameters)
    {
       this.baseUI = baseUI;
       this.communicationHelper = communicationHelper;
-      this.teleoperationParameters = teleoperationParameters;
       this.syncedRobot = syncedRobot;
+      this.locomotionParameters = locomotionParameters;
+      this.swingFootPlannerParameters = swingFootPlannerParameters;
 
-      stepChecker = new RDXFootstepChecker(baseUI, syncedRobot, footstepPlannerParameters);
+      defaultPolygons = FootstepPlanningModuleLauncher.createFootPolygons(communicationHelper.getRobotModel());
+      stepChecker = new RDXFootstepChecker(baseUI, syncedRobot, defaultPolygons, footstepPlannerParameters);
+      swingPlanningModule = new RDXSwingPlanningModule(syncedRobot,
+                                                       footstepPlannerParameters,
+                                                       communicationHelper.getRobotModel().getSwingPlannerParameters(),
+                                                       communicationHelper.getRobotModel().getWalkingControllerParameters(),
+                                                       defaultPolygons);
       clear();
    }
 
@@ -71,6 +95,20 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       {
          selectedFootstep.calculate3DViewPick(input);
       }
+   }
+
+   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
+   {
+      planarRegionsListReference.set(planarRegionsList);
+      if (swingPlanningModule != null)
+         swingPlanningModule.setPlanarRegionList(planarRegionsList);
+   }
+
+   public void setHeightMapMessage(HeightMapMessage heightMapMessage)
+   {
+      heightMapDataReference.set(heightMapMessage);
+      if (swingPlanningModule != null)
+         swingPlanningModule.setHeightMapData(heightMapMessage);
    }
 
    public void processImGui3DViewInput(ImGui3DViewInput input)
@@ -100,8 +138,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
          stepChecker.getInput(input);
       }
 
-      Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
-
       // Check validity of footsteps
       stepChecker.checkValidStepList(footsteps);
 
@@ -111,27 +147,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       {
          footsteps.get(i).flashFootstepWhenBadPlacement(temporaryReasons.get(i));
       }
-   }
-
-   public void renderImGuiWidgets()
-   {
-      ImGui.text("Footstep plan:");
-      ImGui.sameLine();
-      if (getFootsteps().size() > 0)
-      {
-         // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
-         if (ImGui.button(labels.get("Walk")) || ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
-         {
-            walkFromSteps();
-         }
-         ImGuiTools.previousWidgetTooltip("Keybind: Space");
-         ImGui.sameLine();
-      }
-      if (ImGui.button(labels.get("Delete Last")) || ImGui.isKeyPressed(ImGuiTools.getDeleteKey()))
-      {
-         removeLastStep();
-      }
-      ImGuiTools.previousWidgetTooltip("Keybind: Delete");
    }
 
    @Override
@@ -144,11 +159,11 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    }
 
    // NOTE: using RecyclingList to update planned footsteps. Make sure this only gets called when new plan comes in.
-   public void updateFromPlan(FootstepPlan footstepPlan)
+   public void updateFromPlan(FootstepPlan footstepPlan, List< EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories)
    {
       for (RDXInteractableFootstep step : footsteps)
       {
-         step.getFootstepModelInstance().transform.val[Matrix4.M03] = Float.NaN;
+         step.reset();
       }
       footsteps.clear();
 
@@ -156,8 +171,24 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       {
          PlannedFootstep plannedStep = footstepPlan.getFootstep(i);
          RDXInteractableFootstep addedStep = footsteps.add();
-         addedStep.updateFromPlannedStep(baseUI, plannedStep, i);
+         addedStep.reset();
+         EnumMap<Axis3D, List<PolynomialReadOnly>> swingTrajectory;
+         if (swingTrajectories == null)
+         {
+            swingTrajectory = null;
+         }
+         else
+         {
+            if (i < swingTrajectories.size())
+               swingTrajectory = swingTrajectories.get(i);
+            else
+               swingTrajectory = null;
+         }
+         addedStep.updateFromPlannedStep(baseUI, plannedStep, swingTrajectory, i);
       }
+
+      stepChecker.checkValidStepList(footsteps);
+      wasPlanUpdated = true;
    }
 
    public void update()
@@ -170,7 +201,35 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       if (selectedFootstep != null)
          selectedFootstep.update();
 
+      // check if the plan grew in length
+      wasPlanUpdated |= previousPlanLength < footsteps.size();
+      wasPlanUpdated |= pollIfAnyStepWasUpdated();
+      previousPlanLength = footsteps.size();
+
       stepChecker.update(footsteps);
+      if (wasPlanUpdated && locomotionParameters.getReplanSwingTrajectoryOnChange() && !swingPlanningModule.getIsCurrentlyPlanning())
+      {
+         PlanarRegionsList planarRegionsList = planarRegionsListReference.getAndSet(null);
+
+         if (planarRegionsList != null)
+            swingPlanningModule.setPlanarRegionList(planarRegionsList);
+         HeightMapMessage heightMapMessage = heightMapDataReference.getAndSet(null);
+         if (heightMapMessage != null)
+            swingPlanningModule.setHeightMapData(heightMapMessage);
+
+         swingPlanningModule.setSwingPlannerParameters(swingFootPlannerParameters);
+         swingPlanningModule.updateAysnc(footsteps, SwingPlannerType.MULTI_WAYPOINT_POSITION);
+
+         wasPlanUpdated = false;
+      }
+   }
+
+   private boolean pollIfAnyStepWasUpdated()
+   {
+      boolean wasUpdated = false;
+      for (int i = 0; i < footsteps.size(); i++)
+         wasUpdated |= footsteps.get(i).pollWasPoseUpdated();
+      return wasUpdated;
    }
 
    public void clear()
@@ -184,10 +243,17 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       FootstepDataListMessage messageList = new FootstepDataListMessage();
       for (RDXInteractableFootstep step : footsteps)
       {
-         generateFootStepDataMessage(messageList, step);
-         messageList.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
-         messageList.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
+         messageList.getFootstepDataList().add().set(step.getPlannedFootstep().getAsMessage());
       }
+      // TODO figure out some better logic here. For example, when footstep planning from the current pose, or using the control ring, this is probably pretty
+      // TODO dangerous. However when manually placing footsteps, this is great.
+      messageList.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
+      messageList.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
+      messageList.setOffsetFootstepsHeightWithExecutionError(true);
+      messageList.setDefaultSwingDuration(locomotionParameters.getSwingTime());
+      messageList.setDefaultTransferDuration(locomotionParameters.getTransferTime());
+      messageList.setAreFootstepsAdjustable(locomotionParameters.getAreFootstepsAdjustable());
+
       communicationHelper.publishToController(messageList);
 
       // Note: set stance and swing as last two steps of the footstepArrayList (if this list is not empty)
@@ -195,29 +261,57 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
       if (footsteps.size() == 1)
       {
-         stepChecker.setStanceStepTransform(footsteps.get(0).getFootTransformInWorld());
+         stepChecker.setPreviousStepPose(footsteps.get(0).getFootPose());
          stepChecker.setStanceSide(footsteps.get(0).getFootstepSide());
       }
       else if (footsteps.size() > 1)
       {
          int size = footsteps.size();
-         stepChecker.setStanceStepTransform(footsteps.get(size - 1).getFootTransformInWorld());
+         stepChecker.setPreviousStepPose(footsteps.get(size - 1).getFootPose());
          stepChecker.setStanceSide(footsteps.get(size - 1).getFootstepSide());
-         stepChecker.setSwingStepTransform(footsteps.get(size - 2).getFootTransformInWorld());
+         stepChecker.setSwingStepPose(footsteps.get(size - 2).getFootPose());
          stepChecker.setSwingSide(footsteps.get(size - 2).getFootstepSide());
       }
+
       stepChecker.clear(footsteps);
       clear();
    }
 
-   private void generateFootStepDataMessage(FootstepDataListMessage messageList, RDXInteractableFootstep step)
+   public RDXInteractableFootstep getNextFootstep()
    {
-      FootstepDataMessage stepMessage = messageList.getFootstepDataList().add();
-      stepMessage.setRobotSide(step.getFootstepSide().toByte());
-      stepMessage.getLocation().set(new Point3D(step.getSelectablePose3DGizmo().getPoseGizmo().getPose().getPosition()));
-      stepMessage.getOrientation().set(step.getPose().getOrientation());
-      stepMessage.setSwingDuration(teleoperationParameters.getSwingTime());
-      stepMessage.setTransferDuration(teleoperationParameters.getTransferTime());
+      RDXInteractableFootstep nextFootstep = footsteps.add();
+      nextFootstep.reset();
+      return nextFootstep;
+   }
+
+   public RDXInteractableFootstep getLastFootstep()
+   {
+      if (footsteps.size() > 0)
+      {
+         return footsteps.get(footsteps.size() - 1);
+      }
+      return null;
+   }
+
+   /**
+    * Gets the transform either from the footstep list, or from the synced robot.
+    * Never gets the transform from the footstep currently being placed.
+    */
+   public RigidBodyTransformReadOnly getLastFootstepTransform(RobotSide robotSide)
+   {
+      if (footsteps.size() > 0)
+      {
+         return getLastFootstep().getFootPose();
+      }
+      else
+      {
+         return syncedRobot.getReferenceFrames().getSoleFrame(robotSide).getTransformToWorldFrame();
+      }
+   }
+
+   public int getNumberOfFootsteps()
+   {
+      return footsteps.size();
    }
 
    public RecyclingArrayList<RDXInteractableFootstep> getFootsteps()
@@ -235,38 +329,19 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       }
    }
 
-   /**
-    * Gets the transform either from the footstep list, or from the synced robot.
-    * Never gets the transform from the footstep currently being placed.
-    */
-   public RigidBodyTransform getLastFootstepTransform(RobotSide robotSide)
-   {
-      if (footsteps.size() > 0)
-      {
-         return getLastFootstep().getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent();
-      }
-      else
-      {
-         return syncedRobot.getReferenceFrames().getSoleFrame(robotSide).getTransformToWorldFrame();
-      }
-   }
-
-   public RDXInteractableFootstep getLastFootstep()
-   {
-      if (footsteps.size() > 0)
-      {
-         return footsteps.get(footsteps.size() - 1);
-      }
-      return null;
-   }
-
    private RDXInteractableFootstep newPlannedFootstep()
    {
-      return new RDXInteractableFootstep(baseUI, RobotSide.LEFT, 0);
+      wasPlanUpdated = true;
+      return new RDXInteractableFootstep(baseUI, RobotSide.LEFT, 0, defaultPolygons);
    }
 
    public RDXFootstepChecker getStepChecker()
    {
       return stepChecker;
+   }
+
+   public void destroy()
+   {
+      swingPlanningModule.destroy();
    }
 }

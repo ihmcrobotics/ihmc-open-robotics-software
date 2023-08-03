@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class HandPowerCyclePacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.HandPowerCyclePacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::HandPowerCyclePacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "e1be3504de37b6b78638898b12d09f98ef64da6fcc1b770276c9592b7bc0d8bc";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

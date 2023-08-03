@@ -1,5 +1,0 @@
-<robot xmlns:xacro="http://ros.org/wiki/xacro" name="valkyrie_imu_test_ports">
-
-	<xacro:property name="pelvis_middle_imu_port" value="/dev/serial/by-id/usb-FTDI_USB-RS422_Cable_FTVR09ZC-if00-port0" />
-
-</robot>

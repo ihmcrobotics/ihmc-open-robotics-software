@@ -55,8 +55,8 @@ public class ManualFootstepAdjustmentListener extends AnimationTimer
       this.subScene = subScene;
       this.selectedStep = messager.createInput(FootstepPlannerMessagerAPI.SelectedFootstep, Pair.of(-1, null));
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.GlobalReset, r -> reset());
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, r -> reset());
+      messager.addTopicListener(FootstepPlannerMessagerAPI.GlobalReset, r -> reset());
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ComputePath, r -> reset());
 
       for (int i = 0; i < 200; i++)
       {

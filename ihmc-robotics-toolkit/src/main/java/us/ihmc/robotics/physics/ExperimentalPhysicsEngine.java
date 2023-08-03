@@ -45,6 +45,13 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class ExperimentalPhysicsEngine
 {
    private static final String collidableVisualizerGroupName = "Physics Engine - Active Collidable";
+
+   private static final AppearanceDefinition robotCollidableAppearance = YoAppearance.DarkGreen();
+   private static final AppearanceDefinition environmentCollidableAppearance = YoAppearance.AluminumMaterial();
+   private static final double robotTransparency = 0.5;
+   private static final double environmentTransparency = 0.5;
+   private static final boolean showRobotCollidables = true;
+
    private final ReferenceFrame rootFrame = ReferenceFrame.getWorldFrame();
 
    private final YoRegistry registry = new YoRegistry("PhysicsPlugins");
@@ -91,8 +98,7 @@ public class ExperimentalPhysicsEngine
       globalConstraintParameters = new YoConstraintParameters("globalConstraint", registry);
       multiContactImpulseCalculatorPool = new YoMultiContactImpulseCalculatorPool(1, rootFrame, multiContactCalculatorRegistry);
 
-      AppearanceDefinition environmentCollidableAppearance = YoAppearance.AluminumMaterial();
-      environmentCollidableAppearance.setTransparency(0.5);
+      environmentCollidableAppearance.setTransparency(environmentTransparency);
       environmentCollidableVisualizers = new CollidableListVisualizer(collidableVisualizerGroupName,
                                                                       environmentCollidableAppearance,
                                                                       registry,
@@ -128,14 +134,18 @@ public class ExperimentalPhysicsEngine
       robot.addPhysicsInputStateWriter(physicsInputStateWriter);
       robot.addPhysicsOutputStateReader(physicsOutputStateReader);
       robotMap.put(robot.getRootBody(), robot);
-      AppearanceDefinition robotCollidableAppearance = YoAppearance.DarkGreen();
-      robotCollidableAppearance.setTransparency(0.5);
-      CollidableListVisualizer collidableVisualizers = new CollidableListVisualizer(collidableVisualizerGroupName,
-                                                                                    robotCollidableAppearance,
-                                                                                    robotRegistry,
-                                                                                    physicsEngineGraphicsRegistry);
-      robot.getCollidables().forEach(collidableVisualizers::addCollidable);
-      robotCollidableVisualizers.add(collidableVisualizers);
+      robotCollidableAppearance.setTransparency(robotTransparency);
+
+      if (showRobotCollidables)
+      {
+         CollidableListVisualizer collidableVisualizers = new CollidableListVisualizer(collidableVisualizerGroupName,
+                                                                                       robotCollidableAppearance,
+                                                                                       robotRegistry,
+                                                                                       physicsEngineGraphicsRegistry);
+         robot.getCollidables().forEach(collidableVisualizers::addCollidable);
+         robotCollidableVisualizers.add(collidableVisualizers);
+      }
+
       registry.addChild(robotRegistry);
       robotList.add(robot);
    }

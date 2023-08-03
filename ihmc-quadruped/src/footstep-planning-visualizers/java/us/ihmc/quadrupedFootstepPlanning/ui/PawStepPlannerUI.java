@@ -1,5 +1,29 @@
 package us.ihmc.quadrupedFootstepPlanning.ui;
 
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI.BodyPathDataTopic;
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI.ComputePathTopic;
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI.EditModeEnabledTopic;
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI.FootstepPlanTopic;
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI.GoalOrientationEditModeEnabledTopic;
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI.GoalOrientationTopic;
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic;
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI.GoalPositionTopic;
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI.LowLevelGoalOrientationTopic;
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI.LowLevelGoalPositionTopic;
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI.PlanarRegionDataTopic;
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI.RobotConfigurationDataTopic;
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI.SelectedRegionTopic;
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI.ShowBodyPathTopic;
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI.ShowFootstepPlanTopic;
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI.ShowFootstepPreviewTopic;
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI.ShowPlanarRegionsTopic;
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI.StartFeetPositionTopic;
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI.StartOrientationEditModeEnabledTopic;
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI.StartOrientationTopic;
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI.StartPositionEditModeEnabledTopic;
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI.StartPositionTopic;
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI.XGaitSettingsTopic;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -7,10 +31,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.JavaFXQuadrupedVisualizer;
+import us.ihmc.messager.javafx.JavaFXMessager;
+import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
@@ -21,11 +45,23 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawS
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.tools.PawStepPlannerDataExporter;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.NodeCheckerEditor;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.StartGoalOrientationEditor;
-import us.ihmc.quadrupedFootstepPlanning.ui.controllers.*;
-import us.ihmc.quadrupedFootstepPlanning.ui.viewers.*;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.PawNodeCheckingUIController;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.PawStepPlannerDataExporterAnchorPaneController;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.PawStepPlannerMenuUIController;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.PawStepPlannerParametersUIController;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.PawStepPlannerVisualizationController;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.PlannerReachParametersUIController;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.QuadrupedMainTabController;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.VisibilityGraphsParametersUIController;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.VisualizationController;
+import us.ihmc.quadrupedFootstepPlanning.ui.viewers.BodyPawPathMeshViewer;
+import us.ihmc.quadrupedFootstepPlanning.ui.viewers.PawNodeCheckerRenderer;
+import us.ihmc.quadrupedFootstepPlanning.ui.viewers.PawPathMeshViewer;
+import us.ihmc.quadrupedFootstepPlanning.ui.viewers.PawStepPlannerProcessViewer;
+import us.ihmc.quadrupedFootstepPlanning.ui.viewers.StartGoalPawOrientationViewer;
+import us.ihmc.quadrupedFootstepPlanning.ui.viewers.StartGoalPawPositionViewer;
+import us.ihmc.quadrupedFootstepPlanning.ui.viewers.VisibilityGraphsRenderer;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
-
-import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI.*;
 
 /**
  * This class is the visualization element of the footstep planner. It also contains a graphical interface for
@@ -182,7 +218,7 @@ public class PawStepPlannerUI
       else
       {
          robotVisualizer = new JavaFXQuadrupedVisualizer(fullQuadrupedRobotModelFactory);
-         messager.registerTopicListener(RobotConfigurationDataTopic, robotVisualizer::submitNewConfiguration);
+         messager.addTopicListener(RobotConfigurationDataTopic, robotVisualizer::submitNewConfiguration);
          quadrupedMainTabController.setFullRobotModel(robotVisualizer.getFullRobotModel());
          view3dFactory.addNodeToView(robotVisualizer.getRootNode());
          robotVisualizer.start();

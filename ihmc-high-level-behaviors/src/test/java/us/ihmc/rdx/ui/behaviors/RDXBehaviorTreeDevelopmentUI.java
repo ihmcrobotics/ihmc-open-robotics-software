@@ -34,7 +34,7 @@ public class RDXBehaviorTreeDevelopmentUI
    public RDXBehaviorTreeDevelopmentUI()
    {
       LogTools.info("Starting UI");
-      baseUI = new RDXBaseUI(getClass(), "atlas-user-interface", "src/libgdx/resources", WINDOW_NAME);
+      baseUI = new RDXBaseUI(WINDOW_NAME);
 
       timer = new Timer();
 

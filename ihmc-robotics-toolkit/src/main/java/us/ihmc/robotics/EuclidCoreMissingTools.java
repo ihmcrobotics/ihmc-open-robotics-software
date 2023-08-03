@@ -2,6 +2,8 @@ package us.ihmc.robotics;
 
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.ONE_MILLIONTH;
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.ONE_TRILLIONTH;
+import static us.ihmc.euclid.tools.EuclidCoreRandomTools.nextDouble;
+import static us.ihmc.euclid.tools.EuclidCoreRandomTools.nextMatrix3D;
 import static us.ihmc.euclid.tools.EuclidCoreTools.normSquared;
 
 import org.ejml.data.DMatrixRMaj;
@@ -9,6 +11,7 @@ import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.CommonMatrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
@@ -18,6 +21,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameTuple3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -33,8 +37,12 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
+import java.util.Random;
+
 public class EuclidCoreMissingTools
 {
+   public static final String DEGREE_SYMBOL = "\u00B0";
+
    public static void transform(Matrix3DReadOnly matrix, double xOriginal, double yOriginal, double zOriginal, Tuple3DBasics tupleTransformed)
    {
       double x = matrix.getM00() * xOriginal + matrix.getM01() * yOriginal + matrix.getM02() * zOriginal;
@@ -1333,5 +1341,90 @@ public class EuclidCoreMissingTools
       E.set(3,0,-qz); E.set(3,1, qy); E.set(3,2,-qx); E.set(3,3, qs);
       
       return E;
+   }
+
+   /**
+    * Sets the yaw pitch roll but the doubles are given in degrees.
+    */
+   public static void setYawPitchRollDegrees(Orientation3DBasics orientation3DBasics, double yaw, double pitch, double roll)
+   {
+      orientation3DBasics.setYawPitchRoll(Math.toRadians(yaw), Math.toRadians(pitch), Math.toRadians(roll));
+   }
+
+   /**
+    * Get the orientation as yaw pitch roll String but they are in degrees.
+    * Says yaw-pitch-roll.
+    */
+   public static String getYawPitchRollStringDegrees(Orientation3DBasics orientation3DBasics)
+   {
+      // Degree symbol placed at the end so you don't have to remove it when copy and pasting
+      return EuclidCoreIOTools.getYawPitchRollString(EuclidCoreIOTools.DEFAULT_FORMAT,
+                                                     Math.toDegrees(orientation3DBasics.getYaw()),
+                                                     Math.toDegrees(orientation3DBasics.getPitch()),
+                                                     Math.toDegrees(orientation3DBasics.getRoll())) + DEGREE_SYMBOL;
+   }
+
+   /**
+    * Get the orientation as yaw pitch roll String but they are in degrees.
+    * Doesn't say yaw-pitch-roll.
+    */
+   public static String getYawPitchRollValuesStringDegrees(Orientation3DBasics orientation3DBasics)
+   {
+      // Degree symbol placed at the end so you don't have to remove it when copy and pasting
+      return EuclidCoreIOTools.getStringOf("(", ")", ", ",
+                                           EuclidCoreIOTools.DEFAULT_FORMAT,
+                                           Math.toDegrees(orientation3DBasics.getYaw()),
+                                           Math.toDegrees(orientation3DBasics.getPitch()),
+                                           Math.toDegrees(orientation3DBasics.getRoll())) + DEGREE_SYMBOL;
+   }
+
+   /**
+    * Generates a random positive definite matrix.
+    * <p>
+    * {@code matrix}<sub>ij</sub> &in; [-1.0; 1.0].
+    * </p>
+    * <p>
+    * The approach used here generates a random 3D matrix with values in [-1.0, 1.0], and then performs A * A<sup>T</sup> which is guaranteed to result in a
+    * symmetric positive semi-definite matrix. We then add diagonal terms to make the matrix positive definite, and finally scale the matrix by a random double
+    * that upper bounds the absolute values of the positive definite matrix elements to 1.0.
+    * </p>
+    *
+    * @param random the random generator to use.
+    * @return the random positive definite matrix.
+    */
+   public static Matrix3D nextPositiveDefiniteMatrix3D(Random random)
+   {
+      return nextPositiveDefiniteMatrix3D(random, 1.0);
+   }
+
+   /**
+    * Generates a random positive definite matrix.
+    * <p>
+    * {@code matrix}<sub>ij</sub> &in; [-minMaxValue, minMaxValue]
+    * </p>
+    * <p>
+    * The approach used here generates a random 3D matrix with values in [{@code -minMaxValue}, {@code minMaxValue}], and then performs A * A<sup>T</sup>,
+    * which is guaranteed to result in a symmetric positive semi-definite matrix. We then add diagonal terms to make the matrix positive definite, and finally
+    * scale the matrix by a random double that upper bounds the absolute values of the positive definite matrix elements to {@code minMaxValue}.
+    * </p>
+    *
+    * @param random      the random generator to use.
+    * @param minMaxValue the maximum value for each element.
+    * @return the random positive definite matrix.
+    * @throws RuntimeException if {@code minMaxValue < 0}.
+    */
+   public static Matrix3D nextPositiveDefiniteMatrix3D(Random random, double minMaxValue)
+   {
+      Matrix3D matrix3D = nextMatrix3D(random, minMaxValue);
+      matrix3D.multiplyTransposeOther(matrix3D);
+
+      double diagonalDominanceScalar = Math.abs(minMaxValue);
+      matrix3D.addM00(diagonalDominanceScalar);
+      matrix3D.addM11(diagonalDominanceScalar);
+      matrix3D.addM22(diagonalDominanceScalar);
+
+      double scalarToShrinkMatrixWithinBounds = nextDouble(random, 0.0, minMaxValue / matrix3D.maxAbsElement());
+      matrix3D.scale(scalarToShrinkMatrixWithinBounds);
+      return matrix3D;
    }
 }

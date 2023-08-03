@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class IntrinsicParametersMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.IntrinsicParametersMessage>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::IntrinsicParametersMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "17f6d71477efdfc35bc1ae412c2e7ffd5a772f8959a3f1c5ef4997ec6635a66a";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

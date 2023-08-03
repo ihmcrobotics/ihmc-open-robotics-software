@@ -9,6 +9,7 @@ import us.ihmc.euclid.geometry.interfaces.*;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -17,6 +18,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.*;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.RegionInWorldInterface;
 
@@ -32,8 +34,37 @@ public class PlanarRegionTools
    private final ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
    private final ConvexPolygon2D tempPolygon2 = new ConvexPolygon2D();
 
+   private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
+   private final ConvexPolygon2D regionBPolygonInRegionA = new ConvexPolygon2D();
+
    public PlanarRegionTools()
-   {}
+   {
+
+   }
+
+   public double getDistanceBetweenPlanarRegions(PlanarRegion regionA, PlanarRegion regionB)
+   {
+      double minDistance = Double.POSITIVE_INFINITY;
+
+      // Check the distance between the two regions' bounding boxes
+      for (int indexA = 0; indexA < regionA.getNumberOfConvexPolygons(); indexA++)
+      {
+         for (int indexB = 0; indexB < regionB.getNumberOfConvexPolygons(); indexB++)
+         {
+            regionBPolygonInRegionA.set(regionB.getConvexPolygon(indexB));
+            regionBPolygonInRegionA.applyTransform(regionB.getTransformToWorld(), false);
+            regionBPolygonInRegionA.applyTransform(regionA.getTransformToLocal(), false);
+            double distance = convexPolygonTools.distanceBetweenTwoConvexPolygon2Ds(regionA.getConvexPolygon(indexA), regionBPolygonInRegionA);
+
+            minDistance = Math.min(distance, minDistance);
+
+            if (minDistance < 1e-8)
+               return 0.0;
+         }
+      }
+
+      return minDistance;
+   }
 
    /**
     * Returns all the intersections when the convexPolygon is projected vertically onto this
@@ -634,6 +665,14 @@ public class PlanarRegionTools
       Box3D box = GeometryTools.convertBoundingBox3DToBox3D(boundingBox3DInLocal);
       box.applyTransform(planarRegion.getTransformToWorld());
       return box;
+   }
+   
+   public static BoundingBox3D getWorldBoundingBox3DWithMargin(PlanarRegion planarRegion, double margin)
+   {
+      BoundingBox3D boundingBox = planarRegion.getBoundingBox3dInWorldCopy();
+      boundingBox.getMaxPoint().add(margin, margin, margin);
+      boundingBox.getMinPoint().sub(margin, margin, margin);
+      return boundingBox;
    }
 
    public static List<PlanarRegion> filterPlanarRegionsByHullSize(int minNumberOfVertices, List<PlanarRegion> planarRegions)
@@ -1374,7 +1413,7 @@ public class PlanarRegionTools
       return highestIntersection;
    }
 
-   public static <T extends RegionInWorldInterface<T>> boolean projectPointToPlanesVertically(Point3DReadOnly pointInWorldToProject,
+   public static <T extends RegionInWorldInterface<T>> T projectPointToPlanesVertically(Point3DReadOnly pointInWorldToProject,
                                                                                               List<T> regions,
                                                                                               Point3DBasics projectedPointToPack,
                                                                                               T highestRegionToPack)
@@ -1382,13 +1421,15 @@ public class PlanarRegionTools
       if (regions == null)
       {
          projectedPointToPack.setToNaN();
-         return false;
+         return null;
       }
 
       double originalX = projectedPointToPack.getX();
       double originalY = projectedPointToPack.getY();
 
       double highestZ = Double.NEGATIVE_INFINITY;
+
+      T highestRegion = null;
 
       for (int i = 0; i < regions.size(); i++)
       {
@@ -1408,6 +1449,7 @@ public class PlanarRegionTools
          if (highestZ < height)
          {
             highestZ = height;
+            highestRegion = region;
             if (highestRegionToPack != null)
                highestRegionToPack.set(region);
          }
@@ -1416,17 +1458,29 @@ public class PlanarRegionTools
       if (Double.isInfinite(highestZ))
       {
          projectedPointToPack.setToNaN();
-         return false;
+         return null;
       }
 
       projectedPointToPack.set(originalX, originalY, highestZ);
 
-      return true;
+      return highestRegion;
    }
 
    public static boolean isPointOnRegion(PlanarRegion region, Point3D point, double epsilon)
    {
       Point3D closestPoint = closestPointOnPlanarRegion(point, region);
       return closestPoint.epsilonEquals(point, epsilon);
+   }
+
+   public static PlanarRegion createSquarePlanarRegion(float length, Point3D translation, Quaternion orientation)
+   {
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
+      convexPolygon.addVertex(-length / 2.0f, length / 2.0f);
+      convexPolygon.addVertex(length / 2.0f, length / 2.0f);
+      convexPolygon.addVertex(length / 2.0f, -length / 2.0f);
+      convexPolygon.addVertex(-length / 2.0f, -length / 2.0f);
+      convexPolygon.update();
+
+      return new PlanarRegion(new RigidBodyTransform(orientation, translation), convexPolygon);
    }
 }

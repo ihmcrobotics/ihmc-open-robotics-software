@@ -25,7 +25,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.valkyrie.ValkyrieSDFLoadingDemo.addKinematicsCollisionGraphics;
+import static us.ihmc.valkyrie.ValkyrieModelFileLoadingDemo.addKinematicsCollisionGraphics;
 
 public class ValkyrieContactPointProjectorTest
 {

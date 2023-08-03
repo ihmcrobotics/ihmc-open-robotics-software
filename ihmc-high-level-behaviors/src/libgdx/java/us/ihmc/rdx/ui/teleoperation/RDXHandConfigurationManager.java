@@ -1,9 +1,9 @@
 package us.ihmc.rdx.ui.teleoperation;
 
 import controller_msgs.msg.dds.*;
-import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import imgui.ImGui;
 import imgui.type.ImInt;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Input;
@@ -14,7 +14,6 @@ import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -22,6 +21,9 @@ import java.util.function.Consumer;
 import static us.ihmc.robotics.robotSide.RobotSide.LEFT;
 import static us.ihmc.robotics.robotSide.RobotSide.RIGHT;
 
+/**
+ * Manages the UI for a humanoid robot's hands. A hand configuration is like "open", "closed", etc.
+ */
 public class RDXHandConfigurationManager
 {
    private static final boolean ADD_SHIELD_BUTTON = false;
@@ -34,7 +36,7 @@ public class RDXHandConfigurationManager
    private RobotSide toolbarSelectedSide = RobotSide.LEFT;
    private final SideDependentList<IHMCROS2Input<HandSakeStatusMessage>> sakeStatuses = new SideDependentList<>();
 
-   public void create(RDXBaseUI baseUI, CommunicationHelper communicationHelper)
+   public void create(RDXBaseUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobotModel)
    {
       this.communicationHelper = communicationHelper;
 
@@ -48,15 +50,16 @@ public class RDXHandConfigurationManager
          handConfigurationNames[i] = values[i].name();
       }
 
-      SideDependentList<RDXIconTexture> toggleIcons = new SideDependentList<>(new RDXIconTexture("icons/leftToggle.jpg"),
-                                                                              new RDXIconTexture("icons/rightToggle.jpg"));
+      SideDependentList<RDXIconTexture> toggleIcons = new SideDependentList<>();
       RDX3DPanelToolbarButton leftRightHandToggleButton = baseUI.getPrimary3DPanel().addToolbarButton();
+      toggleIcons.set(LEFT, leftRightHandToggleButton.loadAndSetIcon("icons/leftToggle.png"));
+      toggleIcons.set(RIGHT, leftRightHandToggleButton.loadAndSetIcon("icons/rightToggle.png"));
       leftRightHandToggleButton.setTooltipText("Toggle hand. Red: Left | Green: Right");
-      leftRightHandToggleButton.setIcon(toggleIcons.get(toolbarSelectedSide));
+      leftRightHandToggleButton.setIconTexture(toggleIcons.get(toolbarSelectedSide));
       leftRightHandToggleButton.setOnPressed(() ->
       {
          toolbarSelectedSide = toolbarSelectedSide.getOppositeSide();
-         leftRightHandToggleButton.setIcon(toggleIcons.get(toolbarSelectedSide));
+         leftRightHandToggleButton.setIconTexture(toggleIcons.get(toolbarSelectedSide));
       });
 
       SideDependentList<Runnable> calibrateCommands = new SideDependentList<>(() -> publishHandCommand(RobotSide.LEFT, HandConfiguration.CALIBRATE),
@@ -69,20 +72,19 @@ public class RDXHandConfigurationManager
       SideDependentList<Runnable> openCommands = new SideDependentList<>(() -> publishHandCommand(RobotSide.LEFT, HandConfiguration.OPEN),
                                                                           () -> publishHandCommand(RobotSide.RIGHT, HandConfiguration.OPEN));
       RDX3DPanelToolbarButton openHandButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      openHandButton.loadAndSetIcon("icons/openGripper.jpg");
+      openHandButton.loadAndSetIcon("icons/openGripper.png");
       openHandButton.setTooltipText("Open hand");
       openHandButton.setOnPressed(() -> openCommands.get(toolbarSelectedSide).run());
 
       SideDependentList<Runnable> closeCommands = new SideDependentList<>(() -> publishHandCommand(RobotSide.LEFT, HandConfiguration.CLOSE),
                                                                           () -> publishHandCommand(RobotSide.RIGHT, HandConfiguration.CLOSE));
       RDX3DPanelToolbarButton closeHandButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      closeHandButton.loadAndSetIcon("icons/closeGripper.jpg");
+      closeHandButton.loadAndSetIcon("icons/closeGripper.png");
       closeHandButton.setTooltipText("Close hand");
       closeHandButton.setOnPressed(() -> closeCommands.get(toolbarSelectedSide).run());
 
-      RDXIconTexture homeIcon = new RDXIconTexture("icons/home.png");
       RDX3DPanelToolbarButton armHomeButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      armHomeButton.setIcon(homeIcon);
+      armHomeButton.loadAndSetIcon("icons/home.png");
       armHomeButton.setTooltipText("left/right arm home pose");
       armHomeButton.setOnPressed(() -> publishArmHomeCommand(toolbarSelectedSide));
 
@@ -90,6 +92,9 @@ public class RDXHandConfigurationManager
       {
          setupShieldButton(baseUI, communicationHelper);
       }
+
+      if (syncedRobotModel.getRobotModel().getHandModels().toString().contains("SakeHand"))
+         setupForSakeHands();
    }
 
    public void publishArmHomeCommand(RobotSide side)
@@ -187,8 +192,7 @@ public class RDXHandConfigurationManager
    private void setupShieldButton(RDXBaseUI baseUI, CommunicationHelper communicationHelper)
    {
       RDX3DPanelToolbarButton shieldButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      RDXIconTexture shieldIcon = new RDXIconTexture("icons/shield.png");
-      shieldButton.setIcon(shieldIcon);
+      shieldButton.loadAndSetIcon("icons/shield.png");
       shieldButton.setTooltipText("left/right side - testing shield lifting on Nadia");
 
       // Hand-tuned joint angles to hold the shield

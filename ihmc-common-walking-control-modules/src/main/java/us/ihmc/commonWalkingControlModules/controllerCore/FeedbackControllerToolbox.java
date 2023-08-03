@@ -88,6 +88,11 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       parentRegistry.addChild(registry);
    }
 
+   public YoRegistry getRegistry()
+   {
+      return registry;
+   }
+
    /**
     * Stores the feedback controllers' output for later access to the user.
     * 

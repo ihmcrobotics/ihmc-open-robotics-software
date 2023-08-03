@@ -1,9 +1,0 @@
-<?xml version="1.0" ?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="v1/waist/dh_parameters">
-  
-  <xacro:property name="TorsoYawParentLinkName" value="${waist_root_link}" />
-  <xacro:property name="TorsoYawLinkName" value="torsoYawLink" />
-  <xacro:property name="TorsoPitchLinkName" value="torsoPitchLink" />
-  <xacro:property name="TorsoRollLinkName" value="torso" />
-
-</robot>

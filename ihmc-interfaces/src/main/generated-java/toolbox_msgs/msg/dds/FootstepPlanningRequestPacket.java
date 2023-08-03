@@ -59,6 +59,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public boolean plan_body_path_;
    /**
+            * If true, will plan footsteps. If false, will not plan footsteps
+            */
+   public boolean plan_footsteps_ = true;
+   /**
             * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
             */
    public boolean perform_a_star_search_ = true;
@@ -113,6 +117,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public byte requested_swing_planner_;
    /**
+            * Reference plan to be used in ReferenceBasedIdealStepCalculator.
+            */
+   public controller_msgs.msg.dds.FootstepDataListMessage reference_plan_;
+   /**
             * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
             * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
             */
@@ -127,6 +135,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       body_path_waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (50, new geometry_msgs.msg.dds.PosePubSubType());
       planar_regions_list_message_ = new perception_msgs.msg.dds.PlanarRegionsListMessage();
       height_map_message_ = new perception_msgs.msg.dds.HeightMapMessage();
+      reference_plan_ = new controller_msgs.msg.dds.FootstepDataListMessage();
 
    }
 
@@ -154,6 +163,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       plan_body_path_ = other.plan_body_path_;
 
+      plan_footsteps_ = other.plan_footsteps_;
+
       perform_a_star_search_ = other.perform_a_star_search_;
 
       body_path_waypoints_.set(other.body_path_waypoints_);
@@ -177,6 +188,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       requested_swing_planner_ = other.requested_swing_planner_;
 
+      controller_msgs.msg.dds.FootstepDataListMessagePubSubType.staticCopy(other.reference_plan_, reference_plan_);
       generate_log_ = other.generate_log_;
 
    }
@@ -305,6 +317,21 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public boolean getPlanBodyPath()
    {
       return plan_body_path_;
+   }
+
+   /**
+            * If true, will plan footsteps. If false, will not plan footsteps
+            */
+   public void setPlanFootsteps(boolean plan_footsteps)
+   {
+      plan_footsteps_ = plan_footsteps;
+   }
+   /**
+            * If true, will plan footsteps. If false, will not plan footsteps
+            */
+   public boolean getPlanFootsteps()
+   {
+      return plan_footsteps_;
    }
 
    /**
@@ -487,6 +514,15 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       return requested_swing_planner_;
    }
 
+
+   /**
+            * Reference plan to be used in ReferenceBasedIdealStepCalculator.
+            */
+   public controller_msgs.msg.dds.FootstepDataListMessage getReferencePlan()
+   {
+      return reference_plan_;
+   }
+
    /**
             * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
             * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
@@ -538,6 +574,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.plan_body_path_, other.plan_body_path_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.plan_footsteps_, other.plan_footsteps_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.perform_a_star_search_, other.perform_a_star_search_, epsilon)) return false;
 
       if (this.body_path_waypoints_.size() != other.body_path_waypoints_.size()) { return false; }
@@ -567,6 +605,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_swing_planner_, other.requested_swing_planner_, epsilon)) return false;
 
+      if (!this.reference_plan_.epsilonEquals(other.reference_plan_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.generate_log_, other.generate_log_, epsilon)) return false;
 
 
@@ -598,6 +637,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if(this.plan_body_path_ != otherMyClass.plan_body_path_) return false;
 
+      if(this.plan_footsteps_ != otherMyClass.plan_footsteps_) return false;
+
       if(this.perform_a_star_search_ != otherMyClass.perform_a_star_search_) return false;
 
       if (!this.body_path_waypoints_.equals(otherMyClass.body_path_waypoints_)) return false;
@@ -621,6 +662,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if(this.requested_swing_planner_ != otherMyClass.requested_swing_planner_) return false;
 
+      if (!this.reference_plan_.equals(otherMyClass.reference_plan_)) return false;
       if(this.generate_log_ != otherMyClass.generate_log_) return false;
 
 
@@ -653,6 +695,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.abort_if_body_path_planner_fails_);      builder.append(", ");
       builder.append("plan_body_path=");
       builder.append(this.plan_body_path_);      builder.append(", ");
+      builder.append("plan_footsteps=");
+      builder.append(this.plan_footsteps_);      builder.append(", ");
       builder.append("perform_a_star_search=");
       builder.append(this.perform_a_star_search_);      builder.append(", ");
       builder.append("body_path_waypoints=");
@@ -679,6 +723,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.status_publish_period_);      builder.append(", ");
       builder.append("requested_swing_planner=");
       builder.append(this.requested_swing_planner_);      builder.append(", ");
+      builder.append("reference_plan=");
+      builder.append(this.reference_plan_);      builder.append(", ");
       builder.append("generate_log=");
       builder.append(this.generate_log_);
       builder.append("}");

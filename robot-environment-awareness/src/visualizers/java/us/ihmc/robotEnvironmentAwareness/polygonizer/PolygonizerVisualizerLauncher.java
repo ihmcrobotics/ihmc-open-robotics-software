@@ -1,9 +1,9 @@
 package us.ihmc.robotEnvironmentAwareness.polygonizer;
 
 import javafx.stage.Stage;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javafx.ApplicationNoModule;
+import us.ihmc.messager.javafx.JavaFXMessager;
+import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 
 public class PolygonizerVisualizerLauncher extends ApplicationNoModule
 {

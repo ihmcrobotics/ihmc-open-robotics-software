@@ -1,6 +1,6 @@
 package us.ihmc.avatar.reachabilityMap;
 
-import static us.ihmc.avatar.scs2.YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3DDefinition;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,6 +64,7 @@ import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.TextureDefinition;
 import us.ihmc.scs2.definition.visual.TriangleMesh3DBuilder;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerControls;
 import us.ihmc.scs2.sharedMemory.interfaces.YoBufferPropertiesReadOnly;
@@ -215,11 +216,8 @@ public class ReachabilityMapVisualizer
       session.stopSessionThread();
 
       guiControls.addStaticVisuals(ReachabilityMapTools.createReachibilityColorScaleVisuals());
-      guiControls.addYoGraphic(newYoGraphicCoordinateSystem3DDefinition("currentEvaluationPose", currentEvaluationPose, 0.15, ColorDefinitions.HotPink()));
-      guiControls.addYoGraphic(newYoGraphicCoordinateSystem3DDefinition("controlFrame",
-                                                                        new FramePose3D(controlFrame),
-                                                                        0.05,
-                                                                        ColorDefinitions.parse("#A1887F")));
+      guiControls.addYoGraphic(newYoGraphicCoordinateSystem3D("currentEvaluationPose", currentEvaluationPose, 0.15, ColorDefinitions.HotPink()));
+      guiControls.addYoGraphic(newYoGraphicCoordinateSystem3D("controlFrame", new FramePose3D(controlFrame), 0.05, ColorDefinitions.parse("#A1887F")));
 
       createVisualizationControls();
 

@@ -1,0 +1,32 @@
+#ifndef __ihmc_common_msgs__msg__InstantMessage__idl__
+#define __ihmc_common_msgs__msg__InstantMessage__idl__
+
+module ihmc_common_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * An instantaneous point on the time-line.
+       * Corresponds to java.time.Instant. Read about it:
+       * https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/Instant.html
+       */
+      @TypeCode(type="ihmc_common_msgs::msg::dds_::InstantMessage_")
+      struct InstantMessage
+      {
+        /**
+         * Seconds elapsed since the standard Java epoch of 1970-01-01T00:00:00Z
+         */
+        long long seconds_since_epoch;
+        /**
+         * Additional nanoseconds which will always be between 0 and 999,999,999
+         */
+        long long additional_nanos;
+      };
+    };
+  };
+};
+
+#endif

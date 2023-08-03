@@ -19,7 +19,7 @@ import java.util.Map;
  * <p>
  * This class is iterable over the registered target state keys.
  * </p>
- * 
+ *
  * @author Sylvain
  * @param <K> Type of {@link Enum} that lists the potential states and that is used by the state
  *            machine this listener is to be added to.
@@ -28,13 +28,14 @@ public final class StateTransition<K extends Enum<K>> implements Iterable<K>
 {
    private final List<K> toStateKeys = new ArrayList<>();
    private final Map<K, List<StateTransitionCondition>> allConditions;
+   private final TransitionRequestImpl transitionRequest = new TransitionRequestImpl();
 
    /**
     * Creates an empty state transition.
     * <p>
     * When a state has an empty state transition, it cannot be exited.
     * </p>
-    * 
+    *
     * @param keyType the type of the key to use, it is only used to create an {@code EnumMap} which
     *                requires it.
     */
@@ -45,7 +46,7 @@ public final class StateTransition<K extends Enum<K>> implements Iterable<K>
 
    /**
     * Creates a state transition and initializes it with a target state and a condition.
-    * 
+    *
     * @param to        key of the target state.
     * @param condition the condition that when fulfilled, the state machine will trigger a transition
     *                  to the target state.
@@ -59,7 +60,7 @@ public final class StateTransition<K extends Enum<K>> implements Iterable<K>
    /**
     * Extracts the conditions and target states from {@code other} and adds them to this state
     * transition.
-    * 
+    *
     * @param other the other state transition used to extend this.
     */
    public void completeWith(StateTransition<K> other)
@@ -73,7 +74,7 @@ public final class StateTransition<K extends Enum<K>> implements Iterable<K>
     * It is enough to have a single condition out of the given ones to be fulfilled to trigger a
     * transition to the target state.
     * </p>
-    * 
+    *
     * @param to         key of the target state.
     * @param conditions the different conditions to reach the target state.
     */
@@ -88,7 +89,7 @@ public final class StateTransition<K extends Enum<K>> implements Iterable<K>
     * If conditions were already added for the same target state, only one of them has to be fulfilled
     * to trigger a transition.
     * </p>
-    * 
+    *
     * @param to        key of the target state.
     * @param condition the new condition to reach the target state.
     */
@@ -105,12 +106,12 @@ public final class StateTransition<K extends Enum<K>> implements Iterable<K>
 
    /**
     * Invoked by the state machine to identify when to trigger a transition and to which state.
-    * 
+    *
     * @param timeInCurrentState the time spent in the current state or {@link Double#NaN} if the time
     *                           information is unavailable.
     * @return {@code null} is no transition is requested, or the key of the state to transition to.
     */
-   TransitionRequest isTransitionRequested(double timeInCurrentState)
+   TransitionRequest<K> isTransitionRequested(double timeInCurrentState)
    {
       for (int i = 0; i < toStateKeys.size(); i++)
       {
@@ -122,7 +123,12 @@ public final class StateTransition<K extends Enum<K>> implements Iterable<K>
          {
             StateTransitionCondition toStateCondition = toStateConditions.get(j);
             if (toStateCondition.testCondition(timeInCurrentState))
-               return new TransitionRequest(to, toStateCondition.performOnExit(), toStateCondition.performOnEntry());
+            {
+               transitionRequest.destinationKey = to;
+               transitionRequest.performOnExit = toStateCondition.performOnExit();
+               transitionRequest.performOnEntry = toStateCondition.performOnEntry();
+               return transitionRequest;
+            }
          }
       }
 
@@ -135,7 +141,7 @@ public final class StateTransition<K extends Enum<K>> implements Iterable<K>
     * Assuming all the conditions are fulfillable, each of the target state can be transitioned into
     * from the source state to which this state transition is associated.
     * </p>
-    * 
+    *
     * @return the number of target states registered in this state transition.
     */
    public int getNumberOfTargetStates()
@@ -153,32 +159,41 @@ public final class StateTransition<K extends Enum<K>> implements Iterable<K>
       return toStateKeys.iterator();
    }
 
-   class TransitionRequest
+   private class TransitionRequestImpl implements TransitionRequest<K>
    {
-      private final K destinationKey;
-      private final boolean performOnExit;
-      private final boolean performOnEntry;
+      private K destinationKey;
+      private boolean performOnExit;
+      private boolean performOnEntry;
 
-      public TransitionRequest(K destinationKey, boolean performOnExit, boolean performOnEntry)
+      public TransitionRequestImpl()
       {
-         this.destinationKey = destinationKey;
-         this.performOnExit = performOnExit;
-         this.performOnEntry = performOnEntry;
       }
 
+      @Override
       public K getDestinationKey()
       {
          return destinationKey;
       }
 
+      @Override
       public boolean isPerformOnExit()
       {
          return performOnExit;
       }
 
+      @Override
       public boolean isPerformOnEntry()
       {
          return performOnEntry;
       }
+   }
+
+   interface TransitionRequest<K>
+   {
+      K getDestinationKey();
+
+      boolean isPerformOnExit();
+
+      boolean isPerformOnEntry();
    }
 }

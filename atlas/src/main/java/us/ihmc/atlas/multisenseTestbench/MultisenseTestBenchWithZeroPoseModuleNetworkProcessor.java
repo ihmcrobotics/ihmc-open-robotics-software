@@ -2,6 +2,7 @@ package us.ihmc.atlas.multisenseTestbench;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
@@ -22,15 +23,15 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
-import us.ihmc.ihmcPerception.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
+import us.ihmc.perception.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosJointStatePublisher;
 import us.ihmc.utilities.ros.publisher.RosOdometryPublisher;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -57,7 +58,7 @@ public class MultisenseTestBenchWithZeroPoseModuleNetworkProcessor implements Pa
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider = new AlwaysZeroOffsetPPSTimestampOffsetProvider();
    private final HumanoidJointNameMap jointMap;
 
-   private final ArrayList<ImmutableTriple<String, String, RigidBodyTransform>> staticTransforms;
+   private final List<ImmutableTriple<String, String, RigidBodyTransform>> staticTransforms;
 
    public MultisenseTestBenchWithZeroPoseModuleNetworkProcessor(DRCRobotModel robotModel, String rosNamespace)
    {

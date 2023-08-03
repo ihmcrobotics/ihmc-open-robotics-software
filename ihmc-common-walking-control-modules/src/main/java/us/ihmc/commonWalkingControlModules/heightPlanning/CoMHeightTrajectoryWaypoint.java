@@ -7,6 +7,10 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicListDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -124,5 +128,14 @@ public class CoMHeightTrajectoryWaypoint
       yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointD0Viz);
       yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointD0MinViz);
       yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointD0MaxViz);
+   }
+
+   public YoGraphicDefinition createSCS2YoGraphics(String name, ColorDefinition color)
+   {
+      double pointSize = 0.03;
+
+      return new YoGraphicListDefinition(YoGraphicDefinitionFactory.newYoGraphicPoint3D(name, yoWaypoint, pointSize, color),
+                                         YoGraphicDefinitionFactory.newYoGraphicPoint3D(name + "Min", yoMinWaypoint, 0.8 * pointSize, color),
+                                         YoGraphicDefinitionFactory.newYoGraphicPoint3D(name + "Max", yoMaxWaypoint, 0.9 * pointSize, color));
    }
 }

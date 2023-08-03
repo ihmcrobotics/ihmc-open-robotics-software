@@ -1,7 +1,0 @@
-<robot xmlns:xacro="http://ros.org/wiki/xacro" name="valkyrie_sim_api">
-
-	<xacro:property name="SimApi" value="robot_hardware_interface/TurbodriverSimAPI" />
-    <xacro:property name="ImuSensorSimApi" value="val_imu_gazebo_interface/ImuGazeboInterface" />
-    <xacro:property name="AtiSensorApi" value="TurbodriverForceTorqueSensor" />
-    
-</robot>

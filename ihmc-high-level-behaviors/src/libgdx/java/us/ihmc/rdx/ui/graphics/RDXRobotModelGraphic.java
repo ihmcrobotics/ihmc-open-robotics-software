@@ -1,15 +1,16 @@
 package us.ihmc.rdx.ui.graphics;
 
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.rdx.RDXGraphics3DNode;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -20,7 +21,7 @@ import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 import us.ihmc.tools.thread.Activator;
 
 @Deprecated // Use RDXMultiBodyGraphic instead.
-public class RDXRobotModelGraphic extends RDXVisualizer implements RenderableProvider
+public class RDXRobotModelGraphic extends RDXVisualizer
 {
    private RDXGraphics3DNode robotRootNode;
    private GraphicsRobot graphicsRobot;
@@ -29,6 +30,7 @@ public class RDXRobotModelGraphic extends RDXVisualizer implements RenderablePro
    public RDXRobotModelGraphic(String title)
    {
       super(title);
+      setSceneLevels(RDXSceneLevel.GROUND_TRUTH, RDXSceneLevel.MODEL);
    }
 
    public void loadRobotModelAndGraphics(RobotDefinition robotDefinition, RigidBodyBasics rootBody)
@@ -92,9 +94,9 @@ public class RDXRobotModelGraphic extends RDXVisualizer implements RenderablePro
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (isActive() && robotLoadedActivator.poll())
+      if (isActive() && robotLoadedActivator.poll() && sceneLevelCheck(sceneLevels))
       {
          robotRootNode.getRenderables(renderables, pool);
       }

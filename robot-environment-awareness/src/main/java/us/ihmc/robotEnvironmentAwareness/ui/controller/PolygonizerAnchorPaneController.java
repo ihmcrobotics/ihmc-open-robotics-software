@@ -1,13 +1,17 @@
 package us.ihmc.robotEnvironmentAwareness.ui.controller;
 
+import controller_msgs.msg.dds.ConcaveHullFactoryParametersMessage;
+import controller_msgs.msg.dds.ConcaveHullFactoryParametersStringMessage;
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.control.ToggleButton;
+import perception_msgs.msg.dds.PolygonizerParametersMessage;
 import us.ihmc.javaFXToolkit.StringConverterTools;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.REAParametersMessageHelper;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.IntersectionEstimationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
@@ -91,8 +95,8 @@ public class PolygonizerAnchorPaneController extends REABasicUIController
    private Topic<Boolean> planarRegionsIntersectionEnableTopic = REAModuleAPI.PlanarRegionsIntersectionEnable;
    private Topic<Boolean> uiPlanarRegionHideNodesTopic = REAModuleAPI.UIPlanarRegionHideNodes;
    private Topic<Boolean> saveRegionUpdaterConfigurationTopic = REAModuleAPI.SaveRegionUpdaterConfiguration;
-   private Topic<ConcaveHullFactoryParameters> planarRegionsConcaveHullParametersTopic = REAModuleAPI.PlanarRegionsConcaveHullParameters;
-   private Topic<PolygonizerParameters> planarRegionsPolygonizerParametersTopic = REAModuleAPI.PlanarRegionsPolygonizerParameters;
+   private Topic<ConcaveHullFactoryParametersMessage> planarRegionsConcaveHullParametersTopic = REAModuleAPI.PlanarRegionsConcaveHullParameters;
+   private Topic<PolygonizerParametersMessage> planarRegionsPolygonizerParametersTopic = REAModuleAPI.PlanarRegionsPolygonizerParameters;
    private Topic<IntersectionEstimationParameters> planarRegionsIntersectionParametersTopic = REAModuleAPI.PlanarRegionsIntersectionParameters;
 
    public void setPlanarRegionsPolygonizerEnableTopic(Topic<Boolean> planarRegionsPolygonizerEnableTopic)
@@ -120,12 +124,12 @@ public class PolygonizerAnchorPaneController extends REABasicUIController
       this.saveRegionUpdaterConfigurationTopic = saveRegionUpdaterConfigurationTopic;
    }
 
-   public void setPlanarRegionsConcaveHullParametersTopic(Topic<ConcaveHullFactoryParameters> planarRegionsConcaveHullParametersTopic)
+   public void setPlanarRegionsConcaveHullParametersTopic(Topic<ConcaveHullFactoryParametersMessage> planarRegionsConcaveHullParametersTopic)
    {
       this.planarRegionsConcaveHullParametersTopic = planarRegionsConcaveHullParametersTopic;
    }
 
-   public void setPlanarRegionsPolygonizerParametersTopic(Topic<PolygonizerParameters> planarRegionsPolygonizerParametersTopic)
+   public void setPlanarRegionsPolygonizerParametersTopic(Topic<PolygonizerParametersMessage> planarRegionsPolygonizerParametersTopic)
    {
       this.planarRegionsPolygonizerParametersTopic = planarRegionsPolygonizerParametersTopic;
    }
@@ -144,7 +148,12 @@ public class PolygonizerAnchorPaneController extends REABasicUIController
       uiMessager.bindBidirectionalGlobal(planarRegionsIntersectionEnableTopic, enableIntersectionCalculatorButton.selectedProperty());
 
       concaveHullFactoryParametersProperty.bindBidirectionalEdgeLengthThreshold(concaveHullThresholdSpinner.getValueFactory().valueProperty());
-      uiMessager.bindBidirectionalGlobal(planarRegionsConcaveHullParametersTopic, concaveHullFactoryParametersProperty);
+
+      uiMessager.registerTopicListener(planarRegionsConcaveHullParametersTopic, message -> concaveHullFactoryParametersProperty.set(REAParametersMessageHelper.convertFromMessage(message)));
+      concaveHullFactoryParametersProperty.addListener((obs, oldValue, newValue) -> uiMessager.submitMessageToModule(planarRegionsConcaveHullParametersTopic, REAParametersMessageHelper.convertToMessage(newValue)));
+
+      uiMessager.registerTopicListener(planarRegionsPolygonizerParametersTopic, parametersMessage -> polygonizerParametersProperty.set(REAParametersMessageHelper.convertFromMessage(parametersMessage)));
+      polygonizerParametersProperty.addListener((obs, oldValue, newValue) -> uiMessager.submitMessageToModule(planarRegionsPolygonizerParametersTopic, REAParametersMessageHelper.convertToMessage(newValue)));
 
       polygonizerParametersProperty.bindBidirectionalMinNumberOfNodes(minRegionSizePolygonizerSpinner.getValueFactory().valueProperty());
       polygonizerParametersProperty.bindBidirectionalPeakAngleThreshold(peakAngleThresholdSpinner.getValueFactory().valueProperty());
@@ -152,7 +161,6 @@ public class PolygonizerAnchorPaneController extends REABasicUIController
       polygonizerParametersProperty.bindBidirectionalLengthThreshold(minEdgeLengthSpinner.getValueFactory().valueProperty());
       polygonizerParametersProperty.bindBidirectionalDepthThreshold(depthThresholdSpinner.getValueFactory().valueProperty());
       polygonizerParametersProperty.bindBidirectionalEnableNarrowPassageFilter(enableNarrowPassageFilterButton.selectedProperty());
-      uiMessager.bindBidirectionalGlobal(planarRegionsPolygonizerParametersTopic, polygonizerParametersProperty);
 
       intersectionEstimationParametersProperty.bindBidirectionalMaxDistanceToRegion(maxDistanceToRegionSpinner.getValueFactory().valueProperty());
       intersectionEstimationParametersProperty.bindBidirectionalMinRegionSize(minRegionSizeIntersectionSpinner.getValueFactory().valueProperty());

@@ -25,10 +25,10 @@ public class FlatGroundDefinition extends TerrainObjectDefinition
 
 //      ModelFileGeometryDefinition modelFileGeometryDefinition = new ModelFileGeometryDefinition("environmentObjects/flatGround/FlatGround.obj");
       ModelFileGeometryDefinition modelFileGeometryDefinition = new ModelFileGeometryDefinition("environmentObjects/flatGround/FlatGround.g3dj");
-      AffineTransformDefinition originTransform = new AffineTransformDefinition(new YawPitchRoll(), new Point3D());
-      getVisualDefinitions().add(new VisualDefinition(originTransform, modelFileGeometryDefinition, new MaterialDefinition(ColorDefinitions.White())));
-      YawPitchRollTransformDefinition originPose = new YawPitchRollTransformDefinition(0.0, 0.0, -sizeZ / 2.0);
-      getCollisionShapeDefinitions().add(new CollisionShapeDefinition(originPose, box3DDefinition));
+      AffineTransformDefinition visualOriginPose = new AffineTransformDefinition(new YawPitchRoll(), new Point3D());
+      getVisualDefinitions().add(new VisualDefinition(visualOriginPose, modelFileGeometryDefinition, new MaterialDefinition(ColorDefinitions.White())));
+      YawPitchRollTransformDefinition collisionShapeOriginPose = new YawPitchRollTransformDefinition(0.0, 0.0, -sizeZ / 2.0);
+      getCollisionShapeDefinitions().add(new CollisionShapeDefinition(collisionShapeOriginPose, box3DDefinition));
    }
 
    public void translate(double x, double y, double z)

@@ -228,9 +228,9 @@ public class IntraprocessYoVariableLogger
       long numberOfYoGraphics = 0;
       for (RegistrySendBufferBuilder registrySendBufferBuilder : registrySendBufferBuilders)
       {
-         if (registrySendBufferBuilder.getYoGraphicsListRegistry() != null)
+         if (registrySendBufferBuilder.getSCS1YoGraphics() != null)
          {
-            for (YoGraphicsList yoGraphicsList : registrySendBufferBuilder.getYoGraphicsListRegistry().getYoGraphicsLists())
+            for (YoGraphicsList yoGraphicsList : registrySendBufferBuilder.getSCS1YoGraphics().getYoGraphicsLists())
             {
                numberOfYoGraphics += yoGraphicsList.getYoGraphics().size();
             }

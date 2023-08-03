@@ -90,7 +90,6 @@ namespace promp
     {
         assert(obs_traj.cols() == this->dims());
         assert(obs_traj.rows() > 0);
-
         Eigen::VectorXd alphas = Eigen::VectorXd::LinSpaced(steps, lb, ub);
         
         // Find the alpha that minimizes the distance between the 
@@ -99,17 +98,17 @@ namespace promp
         for (int i=0; i < alphas.size(); i++)
         {
             double ratio = this->speed() / alphas[i];
-
             // compute promp trajectory given a certain alpha
             Eigen::MatrixXd mod_traj = this->modulate(ratio * this->timesteps(), true).matrix();
 
             // compute derivate mean traj of promp
             int min_size = std::min(obs_traj.rows(), mod_traj.rows());
 
-            Eigen::MatrixXd dm_traj = mod_traj.topRows(min_size-1) - mod_traj.middleRows(1, min_size-1);
-            Eigen::MatrixXd do_traj = obs_traj.topRows(min_size-1) - obs_traj.middleRows(1, min_size-1);
-
-            scores[i] = (do_traj - dm_traj).cwiseAbs().sum();
+//            Eigen::MatrixXd dm_traj = mod_traj.topRows(min_size-1) - mod_traj.middleRows(1, min_size-1);
+//            Eigen::MatrixXd do_traj = obs_traj.topRows(min_size-1) - obs_traj.middleRows(1, min_size-1);
+//
+//            scores[i] = (do_traj - dm_traj).cwiseAbs().sum();
+            scores[i] = (obs_traj.topRows(min_size-1) - mod_traj.topRows(min_size-1)).cwiseAbs().sum();
         }
 
         int min_distance_idx = std::min_element(scores.begin(), scores.end()) - scores.begin();

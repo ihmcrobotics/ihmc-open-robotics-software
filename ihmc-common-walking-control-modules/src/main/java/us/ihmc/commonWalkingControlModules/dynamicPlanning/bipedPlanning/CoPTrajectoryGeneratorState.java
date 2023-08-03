@@ -75,7 +75,7 @@ public class CoPTrajectoryGeneratorState extends YoSaveableModuleState
 
          List<YoFramePoint2D> vertexBuffer = new ArrayList<>();
          String prefix = robotSide.getCamelCaseName() + "FootPolygonInSole";
-         for (int i = 0; i < 6; i++)
+         for (int i = 0; i < 8; i++)
          {
             YoFramePoint2D vertex = new YoFramePoint2D(prefix + "_" + i, soleFrame, registry);
             YoSaveableModuleStateTools.registerYoTuple2DToSave(vertex, this);

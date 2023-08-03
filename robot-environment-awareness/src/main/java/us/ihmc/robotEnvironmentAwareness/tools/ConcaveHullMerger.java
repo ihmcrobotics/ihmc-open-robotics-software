@@ -73,6 +73,7 @@ public class ConcaveHullMerger
       List<? extends Point2DReadOnly> concaveHullTwoVertices = regionTwo.getConcaveHull();
       ArrayList<Point2D> concaveHullTwoVerticesTransformed = new ArrayList<Point2D>(concaveHullTwoVertices.size());
 
+      // Transform the vertices of the second hull to the frame of the first hull
       for (int i = 0; i < concaveHullTwoVertices.size(); i++)
       {
          Point3D point3D = new Point3D(concaveHullTwoVertices.get(i));
@@ -89,9 +90,9 @@ public class ConcaveHullMerger
          return null;
 
       if (mergedConcaveHull.isEmpty())
-         return new ArrayList<PlanarRegion>();
+         return new ArrayList<>();
 
-      ArrayList<ConvexPolygon2D> newPolygonsFromConcaveHull = new ArrayList<ConvexPolygon2D>();
+      ArrayList<ConvexPolygon2D> newPolygonsFromConcaveHull = new ArrayList<>();
 
       ConcaveHullDecomposition.recursiveApproximateDecomposition(mergedConcaveHull, depthThresholdForConcaveHullDecomposition, newPolygonsFromConcaveHull);
 
@@ -101,7 +102,7 @@ public class ConcaveHullMerger
       PlanarRegion planarRegion = new PlanarRegion(transformOneToWorld, mergedConcaveHull, newPolygonsFromConcaveHull);
       planarRegion.setRegionId(regionOne.getRegionId());
 
-      ArrayList<PlanarRegion> planarRegions = new ArrayList<PlanarRegion>();
+      ArrayList<PlanarRegion> planarRegions = new ArrayList<>();
       planarRegions.add(planarRegion);
 
       return planarRegions;
@@ -114,8 +115,8 @@ public class ConcaveHullMerger
     * preprocessing, both hulls are invalid, returns null. If one hull is invalid, returns the other.
     * If there is no intersection of the preprocessed hulls, returns an empty list.
     * 
-    * @param hullOne One hull to merge.
-    * @param hullTwo The other hull to merge.
+    * @param hullOneIn One hull to merge.
+    * @param hullTwoIn The other hull to merge.
     * @return Merged hull. Returns null if they do not intersect.
     */
    public static List<Point2D> mergeConcaveHulls(List<? extends Point2DReadOnly> hullOneIn, List<? extends Point2DReadOnly> hullTwoIn, ConcaveHullMergerListener listener)

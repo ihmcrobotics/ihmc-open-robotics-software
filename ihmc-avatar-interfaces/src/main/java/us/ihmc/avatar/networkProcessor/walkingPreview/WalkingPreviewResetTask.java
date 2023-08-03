@@ -30,7 +30,11 @@ public class WalkingPreviewResetTask implements WalkingPreviewTask
       walkingController.requestImmediateTransitionToStandingAndHoldCurrent();
 
       for (RobotSide robotSide : RobotSide.values)
-         contactStateHolders.put(robotSide, WalkingPreviewContactStateHolder.holdAtCurrent(footContactStates.get(robotSide)));
+      {
+         if (contactStateHolders.get(robotSide) != null)
+            contactStateHolders.get(robotSide).clearFrames();
+         contactStateHolders.put(robotSide, WalkingPreviewContactStateHolder.holdAtCurrent(robotSide.getSideNameFirstLowerCaseLetter() + "_current", footContactStates.get(robotSide)));
+      }
    }
 
    @Override

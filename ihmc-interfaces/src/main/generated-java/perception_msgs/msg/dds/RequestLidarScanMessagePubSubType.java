@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class RequestLidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.RequestLidarScanMessage>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::RequestLidarScanMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "20d16eaccf074335d5db020b02bb556567c48e45c318fd30396ba5dbc65ef748";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

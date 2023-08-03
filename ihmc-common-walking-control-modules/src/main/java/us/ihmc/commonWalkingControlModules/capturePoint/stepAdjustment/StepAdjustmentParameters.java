@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+
 public abstract class StepAdjustmentParameters
 {
    /**
@@ -19,15 +21,6 @@ public abstract class StepAdjustmentParameters
     * Enabling this boolean enables the use of crossover steps when performing step adjustment.
     */
    public boolean allowCrossOverSteps()
-   {
-      return false;
-   }
-
-   /**
-    * Sets whether to use the ICP control plane for step adjustment. This projects the center of pressure and step adjustment algorithm into the control plane,
-    * and performs all the math there, when set to try
-    */
-   public boolean useICPControlPlane()
    {
       return false;
    }
@@ -69,7 +62,7 @@ public abstract class StepAdjustmentParameters
     */
    public double getCoPDistanceFromInsideOfFoot()
    {
-      return 0.02;
+      return 0.01;
    }
 
    /**
@@ -77,7 +70,7 @@ public abstract class StepAdjustmentParameters
     */
    public double getCoPDistanceFromOutsideOfFoot()
    {
-      return 0.035;
+      return 0.03;
    }
 
    /**
@@ -96,7 +89,7 @@ public abstract class StepAdjustmentParameters
        */
       public double getForwardCrossOverDistance()
       {
-         return 0.05;
+         return 0.0;
       }
 
       /**
@@ -105,7 +98,7 @@ public abstract class StepAdjustmentParameters
        */
       public double getForwardCrossOverClearanceAngle()
       {
-         return Math.toRadians(25.0);
+         return Math.toRadians(35.0);
       }
 
       /**

@@ -1,4 +1,4 @@
-# This message is part of the collection of platform-independent ROS messages.
+# This is part of the IHMC Common message package.
 # This class is used to build 1D trajectory messages including jointspace trajectory messages.
 # For 3D trajectory points look at:
 # - EuclideanTrajectoryMessage (translational),

@@ -8,6 +8,7 @@ import us.ihmc.tools.UnitConversions;
 public class KinematicsStreamingToolboxParameters
 {
    private double centerOfMassSafeMargin;
+   private double centerOfMassHoldWeight;
    private double publishingSolutionPeriod;
 
    private double defaultArmMessageWeight;
@@ -25,6 +26,11 @@ public class KinematicsStreamingToolboxParameters
    private double defaultLinearRateLimit;
    private double defaultAngularRateLimit;
    private double outputJointVelocityScale;
+
+   private boolean minimizeAngularMomentum;
+   private boolean minimizeLinearMomentum;
+   private double angularMomentumWeight;
+   private double linearMomentumWeight;
 
    private double defaultStreamingBlendingDuration;
 
@@ -46,6 +52,7 @@ public class KinematicsStreamingToolboxParameters
    public void setDefault()
    {
       centerOfMassSafeMargin = 0.05;
+      centerOfMassHoldWeight = 0.001;
       publishingSolutionPeriod = UnitConversions.hertzToSeconds(60.0);
       defaultArmMessageWeight = 10.0;
       defaultNeckMessageWeight = 10.0;
@@ -62,6 +69,11 @@ public class KinematicsStreamingToolboxParameters
       defaultLinearRateLimit = 1.5;
       defaultAngularRateLimit = 10.0;
       outputJointVelocityScale = 0.75;
+
+      minimizeAngularMomentum = true;
+      minimizeLinearMomentum = false;
+      angularMomentumWeight = 0.125;
+      linearMomentumWeight = 0.0;
 
       defaultStreamingBlendingDuration = 2.0;
 
@@ -81,15 +93,20 @@ public class KinematicsStreamingToolboxParameters
       defaultConfiguration.setEnableRightHandTaskspace(true);
       defaultConfiguration.setEnableChestTaskspace(true);
       defaultConfiguration.setEnablePelvisTaskspace(true);
-      defaultConfiguration.setLeftHandTrajectoryFrameId(ReferenceFrame.getWorldFrame().hashCode());
-      defaultConfiguration.setRightHandTrajectoryFrameId(ReferenceFrame.getWorldFrame().hashCode());
-      defaultConfiguration.setChestTrajectoryFrameId(ReferenceFrame.getWorldFrame().hashCode());
-      defaultConfiguration.setPelvisTrajectoryFrameId(ReferenceFrame.getWorldFrame().hashCode());
+      defaultConfiguration.setLeftHandTrajectoryFrameId(ReferenceFrame.getWorldFrame().getFrameNameHashCode());
+      defaultConfiguration.setRightHandTrajectoryFrameId(ReferenceFrame.getWorldFrame().getFrameNameHashCode());
+      defaultConfiguration.setChestTrajectoryFrameId(ReferenceFrame.getWorldFrame().getFrameNameHashCode());
+      defaultConfiguration.setPelvisTrajectoryFrameId(ReferenceFrame.getWorldFrame().getFrameNameHashCode());
    }
 
    public double getCenterOfMassSafeMargin()
    {
       return centerOfMassSafeMargin;
+   }
+
+   public double getCenterOfMassHoldWeight()
+   {
+      return centerOfMassHoldWeight;
    }
 
    public double getPublishingSolutionPeriod()
@@ -157,6 +174,26 @@ public class KinematicsStreamingToolboxParameters
       return outputJointVelocityScale;
    }
 
+   public boolean isMinimizeAngularMomentum()
+   {
+      return minimizeAngularMomentum;
+   }
+
+   public boolean isMinimizeLinearMomentum()
+   {
+      return minimizeLinearMomentum;
+   }
+
+   public double getAngularMomentumWeight()
+   {
+      return angularMomentumWeight;
+   }
+
+   public double getLinearMomentumWeight()
+   {
+      return linearMomentumWeight;
+   }
+
    public double getDefaultStreamingBlendingDuration()
    {
       return defaultStreamingBlendingDuration;
@@ -190,6 +227,11 @@ public class KinematicsStreamingToolboxParameters
    public void setCenterOfMassSafeMargin(double centerOfMassSafeMargin)
    {
       this.centerOfMassSafeMargin = centerOfMassSafeMargin;
+   }
+
+   public void setCenterOfMassHoldWeight(double centerOfMassHoldWeight)
+   {
+      this.centerOfMassHoldWeight = centerOfMassHoldWeight;
    }
 
    public void setPublishingSolutionPeriod(double publishingSolutionPeriod)
@@ -255,6 +297,26 @@ public class KinematicsStreamingToolboxParameters
    public void setOutputJointVelocityScale(double outputJointVelocityScale)
    {
       this.outputJointVelocityScale = outputJointVelocityScale;
+   }
+
+   public void setMinimizeAngularMomentum(boolean minimizeAngularMomentum)
+   {
+      this.minimizeAngularMomentum = minimizeAngularMomentum;
+   }
+
+   public void setMinimizeLinearMomentum(boolean minimizeLinearMomentum)
+   {
+      this.minimizeLinearMomentum = minimizeLinearMomentum;
+   }
+
+   public void setAngularMomentumWeight(double angularMomentumWeight)
+   {
+      this.angularMomentumWeight = angularMomentumWeight;
+   }
+
+   public void setLinearMomentumWeight(double linearMomentumWeight)
+   {
+      this.linearMomentumWeight = linearMomentumWeight;
    }
 
    public void setDefaultStreamingBlendingDuration(double defaultStreamingBlendingDuration)

@@ -65,7 +65,8 @@ public class ImGuiMovingPlot
       calculate(valueText, true);
    }
 
-   public void calculate(String valueText) {
+   public void calculate(String valueText)
+   {
       calculate(valueText, true);
    }
 

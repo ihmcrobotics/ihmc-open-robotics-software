@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the collection of platform-independent ROS messages.
+       * This is part of the IHMC Common message package.
        * It is a lightweight version of EuclideanTrajectoryMessage designed for streaming.
        */
 public class EuclideanStreamingMessage extends Packet<EuclideanStreamingMessage> implements Settable<EuclideanStreamingMessage>, EpsilonComparable<EuclideanStreamingMessage>

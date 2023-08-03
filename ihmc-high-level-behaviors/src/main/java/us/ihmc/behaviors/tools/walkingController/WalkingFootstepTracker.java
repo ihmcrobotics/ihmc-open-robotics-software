@@ -25,13 +25,12 @@ public class WalkingFootstepTracker
 {
    private final ArrayList<FootstepDataMessage> footsteps = new ArrayList<>();
    private volatile int completedIndex = 0;
+   private volatile int totalStepsCompleted = 0;
 
    public WalkingFootstepTracker(ROS2NodeInterface ros2Node, String robotName)
    {
       new IHMCROS2Callback<>(ros2Node, getTopic(FootstepDataListMessage.class, robotName), this::interceptFootstepDataListMessage);
       new IHMCROS2Callback<>(ros2Node, getTopic(FootstepStatusMessage.class, robotName), this::acceptFootstepStatusMessage);
-
-      // TODO: Observe when footsteps are cancelled / walking aborted?
    }
 
    private void acceptFootstepStatusMessage(FootstepStatusMessage footstepStatusMessage)
@@ -51,15 +50,18 @@ public class WalkingFootstepTracker
                   break;
                }
             }
+
+            totalStepsCompleted++;
          }
 
-         LogTools.info(format("{} footstep completed. Completion: {}/{} -> {}/{}. ID: {}",
+         LogTools.info(format("{} footstep completed. Completion: {}/{} -> {}/{}. ID: {} Total steps completed: {}",
                               RobotSide.fromByte(footstepStatusMessage.getRobotSide()),
                               priorNumerator,
                               priorDenominator,
                               completedIndex,
                               footsteps.size(),
-                              footstepStatusMessage.getSequenceId()));
+                              footstepStatusMessage.getSequenceId(),
+                              totalStepsCompleted));
       }
    }
 

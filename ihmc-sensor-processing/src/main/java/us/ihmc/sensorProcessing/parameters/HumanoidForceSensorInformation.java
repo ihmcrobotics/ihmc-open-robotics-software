@@ -11,7 +11,5 @@ public interface HumanoidForceSensorInformation
 
    public SideDependentList<String> getFeetForceSensorNames();
 
-   public SideDependentList<String> getFeetContactSensorNames();
-
    public SideDependentList<String> getWristForceSensorNames();
 }

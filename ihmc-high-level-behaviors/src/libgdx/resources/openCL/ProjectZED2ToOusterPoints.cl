@@ -13,9 +13,7 @@ __kernel void projectZED2ToOusterPoints(__global unsigned char* ousterIn, __glob
    float ousterY = ousterFloats[1];
    float ousterZ = ousterFloats[2];
 
-
    // TODO: transform 3D point to camera
-
 
    int zed2InIndex = gid * 3;
    float zed2B;
@@ -23,15 +21,15 @@ __kernel void projectZED2ToOusterPoints(__global unsigned char* ousterIn, __glob
    float zed2R;
    if (gid >= 921600)
    {
-       zed2B = 1.0f;
-       zed2G = 1.0f;
-       zed2R = 1.0f;
+      zed2B = 1.0f;
+      zed2G = 1.0f;
+      zed2R = 1.0f;
    }
    else
    {
-       zed2B = convert_float(zed2In[zed2InIndex]) / 255.0f;
-       zed2G = convert_float(zed2In[zed2InIndex + 1]) / 255.0f;
-       zed2R = convert_float(zed2In[zed2InIndex + 2]) / 255.0f;
+      zed2B = convert_float(zed2In[zed2InIndex]) / 255.0f;
+      zed2G = convert_float(zed2In[zed2InIndex + 1]) / 255.0f;
+      zed2R = convert_float(zed2In[zed2InIndex + 2]) / 255.0f;
    }
 
    if (gid == 2000)

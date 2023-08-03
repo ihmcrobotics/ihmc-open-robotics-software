@@ -2,14 +2,17 @@ package us.ihmc.rdx.logging;
 
 import org.bytedeco.ffmpeg.avutil.AVRational;
 import org.bytedeco.opencv.global.opencv_core;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.logging.HDF5Tools;
+import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.tools.thread.Throttler;
 
 public class FFMPEGVideoPlaybackManager
 {
-   private final FFMPEGFileReader file;
+   private final IFFMPEGFileReader file;
    private final BytedecoImage image;
    private final AVRational timeBase;
    private long previousBaseUnitsTimestamp;
@@ -21,7 +24,11 @@ public class FFMPEGVideoPlaybackManager
 
    public FFMPEGVideoPlaybackManager(String file)
    {
-      this.file = new FFMPEGFileReader(file);
+      if (file.endsWith(PerceptionLoggerConstants.HDF5_FILE_EXTENSION))
+         this.file = new FFMPEGHDF5FileReader(file);
+      else
+         this.file = new FFMPEGFileReader(file);
+
       timeBase = this.file.getTimeBase();
 
       image = new BytedecoImage(getWidth(), getHeight(), opencv_core.CV_8UC4, this.file.getFrameDataBuffer());
@@ -29,9 +36,16 @@ public class FFMPEGVideoPlaybackManager
       treatAsStream = this.file.getDuration() < 0;
    }
 
-   public void seek(long milliseconds)
+   public void seekFrame(long frameNumber)
    {
-      long returnCode = file.seek(millisToBaseUnits(milliseconds) + file.getStartTime());
+      seek((long) Math.floor(frameNumber * Conversions.secondsToMilliseconds(calculateVideoFramePeriod())));
+   }
+
+   public void seek(long timebaseUnit)
+   {
+//      pause(); // Currently pausing is required to seek
+
+      long returnCode = file.seek(timebaseUnit + file.getStartTime());
 
       if (returnCode == -1) //EOF
       {
@@ -54,11 +68,11 @@ public class FFMPEGVideoPlaybackManager
 
    private void playbackThread()
    {
-      double period = 1 / FFMPEGTools.rationalToFloatingPoint(file.getFramerate());
+      double period = calculateVideoFramePeriod();
 
       while (!isPaused)
       {
-         long returnCode = file.getNextFrame();
+         long returnCode = file.getNextFrame(true);
 
          if (returnCode == -1) //EOF
          {
@@ -89,18 +103,54 @@ public class FFMPEGVideoPlaybackManager
       }
    }
 
-   public boolean hasDuration() {
-      return !treatAsStream;
+   public double calculateTimeBaseSeconds()
+   {
+      return FFMPEGTools.rationalToFloatingPoint(file.getTimeBase());
+   }
+
+   public double calculateAverageFramerateHz()
+   {
+      return FFMPEGTools.rationalToFloatingPoint(file.getAverageFramerate());
+   }
+
+   public double calculateVideoFramePeriod()
+   {
+      return 1.0 / calculateAverageFramerateHz();
+   }
+
+   public IFFMPEGFileReader getFile()
+   {
+      return file;
+   }
+
+   public double calculateVideoDuration()
+   {
+      return file.getDuration() * calculateTimeBaseSeconds();
+   }
+
+   public double calculateNumberOfFrames()
+   {
+      return calculateVideoDuration() / calculateVideoFramePeriod();
+   }
+
+   public boolean isAStream()
+   {
+      return treatAsStream;
    }
 
    public long getVideoDurationInMillis()
    {
-      return baseUnitsToMillis(file.getDuration());
+      return file.getDuration();
    }
 
    public long getCurrentTimestampInMillis()
    {
-      return baseUnitsToMillis(previousBaseUnitsTimestamp - file.getStartTime());
+      return previousBaseUnitsTimestamp - file.getStartTime();
+   }
+
+   public double getCurrentTimestamp()
+   {
+      return Conversions.millisecondsToSeconds(getCurrentTimestampInMillis());
    }
 
    private long millisToBaseUnits(long millis)

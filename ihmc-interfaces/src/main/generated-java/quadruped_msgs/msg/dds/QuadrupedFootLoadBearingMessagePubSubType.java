@@ -11,6 +11,18 @@ package quadruped_msgs.msg.dds;
 public class QuadrupedFootLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDataType<quadruped_msgs.msg.dds.QuadrupedFootLoadBearingMessage>
 {
    public static final java.lang.String name = "quadruped_msgs::msg::dds_::QuadrupedFootLoadBearingMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "5fa7c91760f4f14a43b7cb47cf16d7ef600d92831ec49301fbbba12664de044c";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

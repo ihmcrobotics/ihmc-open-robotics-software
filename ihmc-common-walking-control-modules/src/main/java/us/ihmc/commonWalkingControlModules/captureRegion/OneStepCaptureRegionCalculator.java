@@ -4,23 +4,32 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.EuclidCoreMissingTools;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class OneStepCaptureRegionCalculator
+public class OneStepCaptureRegionCalculator implements SCS2YoGraphicHolder
 {
    private final CaptureRegionMathTools captureRegionMath = new CaptureRegionMathTools();
 
@@ -37,12 +46,25 @@ public class OneStepCaptureRegionCalculator
    private CaptureRegionVisualizer captureRegionVisualizer = null;
    private final FrameConvexPolygon2D captureRegionPolygon = new FrameConvexPolygon2D(worldFrame);
 
+   // variables for the capture region calculation
+   private static final int APPROXIMATION_MULTIPLIER = 1;
+   private final FrameConvexPolygon2D supportFootPolygon = new FrameConvexPolygon2D();
+   private final FramePoint2D footCentroid = new FramePoint2D(worldFrame);
+   private final FramePoint2D predictedICP = new FramePoint2D(worldFrame);
+   private final FramePoint2D capturePoint = new FramePoint2D(worldFrame);
+   private final FramePoint2D kinematicExtreme = new FramePoint2D(worldFrame);
+   private final FramePoint2D additionalKinematicPoint = new FramePoint2D(worldFrame);
+   private final FrameVector2D firstKinematicExtremeDirection = new FrameVector2D(worldFrame);
+   private final FrameVector2D lastKinematicExtremeDirection = new FrameVector2D(worldFrame);
+   private final FrameConvexPolygon2D rawCaptureRegion = new FrameConvexPolygon2D(worldFrame);
+
    // necessary variables for the reachable region and capture calculation:
-//   private final double midFootAnkleXOffset;
+   //   private final double midFootAnkleXOffset;
    private final double footWidth;
    private final DoubleProvider kinematicStepRange;
    private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
    private final SideDependentList<FrameConvexPolygon2D> reachableRegions = new SideDependentList<>(new FrameConvexPolygon2D(), new FrameConvexPolygon2D());
+   private final Point2DBasics tempPoint = new Point2D();
 
    private final RecyclingArrayList<FramePoint2D> visibleVertices = new RecyclingArrayList<>(MAX_CAPTURE_REGION_POLYGON_POINTS, FramePoint2D.class);
 
@@ -52,8 +74,10 @@ public class OneStepCaptureRegionCalculator
 
    private final boolean useInternalReachableRegions;
 
-   public OneStepCaptureRegionCalculator(CommonHumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters,
-         YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public OneStepCaptureRegionCalculator(CommonHumanoidReferenceFrames referenceFrames,
+                                         WalkingControllerParameters walkingControllerParameters,
+                                         YoRegistry parentRegistry,
+                                         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(walkingControllerParameters.getSteppingParameters().getFootWidth(),
            () -> walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
@@ -64,9 +88,11 @@ public class OneStepCaptureRegionCalculator
            yoGraphicsListRegistry);
    }
 
-
-   public OneStepCaptureRegionCalculator(SideDependentList<? extends ReferenceFrame> soleZUpFrames, WalkingControllerParameters walkingControllerParameters,
-                                         String suffix, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public OneStepCaptureRegionCalculator(SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                                         WalkingControllerParameters walkingControllerParameters,
+                                         String suffix,
+                                         YoRegistry parentRegistry,
+                                         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(walkingControllerParameters.getSteppingParameters().getFootWidth(),
            () -> walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
@@ -77,9 +103,12 @@ public class OneStepCaptureRegionCalculator
            yoGraphicsListRegistry);
    }
 
-   public OneStepCaptureRegionCalculator(SideDependentList<? extends ReferenceFrame> soleZUpFrames, WalkingControllerParameters walkingControllerParameters,
+   public OneStepCaptureRegionCalculator(SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                                         WalkingControllerParameters walkingControllerParameters,
                                          boolean useInternalReachableRegions,
-                                         String suffix, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                         String suffix,
+                                         YoRegistry parentRegistry,
+                                         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(walkingControllerParameters.getSteppingParameters().getFootWidth(),
            () -> walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
@@ -90,9 +119,11 @@ public class OneStepCaptureRegionCalculator
            yoGraphicsListRegistry);
    }
 
-
-   public OneStepCaptureRegionCalculator(double footWidth, double kinematicStepRange,
-                                         SideDependentList<? extends ReferenceFrame> soleZUpFrames, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public OneStepCaptureRegionCalculator(double footWidth,
+                                         double kinematicStepRange,
+                                         SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                                         YoRegistry parentRegistry,
+                                         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(footWidth, () -> kinematicStepRange, soleZUpFrames, true, "", parentRegistry, yoGraphicsListRegistry);
    }
@@ -101,13 +132,14 @@ public class OneStepCaptureRegionCalculator
                                          DoubleProvider kinematicStepRange,
                                          SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                          boolean useInternalReachableRegions,
-                                         String suffix, YoRegistry parentRegistry,
+                                         String suffix,
+                                         YoRegistry parentRegistry,
                                          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.kinematicStepRange = kinematicStepRange;
       this.soleZUpFrames = soleZUpFrames;
       this.useInternalReachableRegions = useInternalReachableRegions;
-//      this.midFootAnkleXOffset = midFootAnkleXOffset;
+      //      this.midFootAnkleXOffset = midFootAnkleXOffset;
       this.footWidth = footWidth;
 
       // set up registry and visualizer
@@ -116,6 +148,11 @@ public class OneStepCaptureRegionCalculator
       {
          captureRegionVisualizer = new CaptureRegionVisualizer(this::getCaptureRegion, suffix, yoGraphicsListRegistry, registry);
       }
+   }
+
+   public void calculateReachableRegions()
+   {
+      calculateReachableRegions(footWidth);
    }
 
    private void calculateReachableRegions(double footWidth)
@@ -140,19 +177,24 @@ public class OneStepCaptureRegionCalculator
       }
    }
 
-   // variables for the capture region calculation
-   private static final int APPROXIMATION_MULTIPLIER = 1;
-   private final FrameConvexPolygon2D supportFootPolygon = new FrameConvexPolygon2D();
-   private final FramePoint2D footCentroid = new FramePoint2D(worldFrame);
-   private final FramePoint2D predictedICP = new FramePoint2D(worldFrame);
-   private final FramePoint2D capturePoint = new FramePoint2D(worldFrame);
-   private final FramePoint2D kinematicExtreme = new FramePoint2D(worldFrame);
-   private final FramePoint2D additionalKinematicPoint = new FramePoint2D(worldFrame);
-   private final FrameVector2D firstKinematicExtremeDirection = new FrameVector2D(worldFrame);
-   private final FrameVector2D lastKinematicExtremeDirection = new FrameVector2D(worldFrame);
-   private final FrameConvexPolygon2D rawCaptureRegion = new FrameConvexPolygon2D(worldFrame);
-
-   public void calculateCaptureRegion(RobotSide swingSide, double swingTimeRemaining, FramePoint2DReadOnly icp, double omega0, FrameConvexPolygon2DReadOnly footPolygon)
+   /**
+    * This method computes the one step capture region. It uses the algorithm outlined in "Capturability-based analysis and control of legged locomotion,
+    * Part 2: Application to M2V2, a lower-body humanoid", where the visible vertices of the foot, which are visible to {@param icp} and the vertices contained
+    * in {@param footPolygon}, are used to compute the edges of the capture region using the remaining time {@param swingTimeRemaining} and time constant
+    * {@param omega0}. The rigid is then limited to the distance defined in the constructor, {@link OneStepCaptureRegionCalculator#kinematicStepRange}.
+    * {@param swingSide} defines a cut-off for the width of the region relative to the stance foot.
+    *
+    * After calculated, the capture region can be returned with {@link OneStepCaptureRegionCalculator#getCaptureRegion()}. Note that this region will always
+    * contain area. If none of the capture region is reachable (all outside the {@link OneStepCaptureRegionCalculator#kinematicStepRange}), this algorithm
+    * returns the point that at the maximum reach closest to the capture region. If this happens, the algorithm returns false.
+    *
+    * @return boolean true if the capture region was reachable, false if the capture region wasn't reachable.
+    */
+   public boolean calculateCaptureRegion(RobotSide swingSide,
+                                         double swingTimeRemaining,
+                                         FramePoint2DReadOnly icp,
+                                         double omega0,
+                                         FrameConvexPolygon2DReadOnly footPolygon)
    {
       globalTimer.startMeasurement();
 
@@ -164,7 +206,7 @@ public class OneStepCaptureRegionCalculator
 
       // 1. Set up all needed variables and reference frames for the calculation:
       ReferenceFrame supportSoleZUp = soleZUpFrames.get(swingSide.getOppositeSide());
-         // change the support foot polygon only if the swing side changed to avoid garbage every tick.
+      // change the support foot polygon only if the swing side changed to avoid garbage every tick.
       this.supportFootPolygon.setIncludingFrame(footPolygon);
       this.supportFootPolygon.changeFrameAndProjectToXYPlane(supportSoleZUp);
 
@@ -192,7 +234,7 @@ public class OneStepCaptureRegionCalculator
          globalTimer.stopMeasurement();
          captureRegionPolygon.setIncludingFrame(reachableRegion);
          updateVisualizer();
-         return;
+         return true;
       }
 
       // 3. For every possible extreme CoP predict the corresponding ICP given the remaining swing time
@@ -204,8 +246,12 @@ public class OneStepCaptureRegionCalculator
          rawCaptureRegion.addVertexMatchingFrame(predictedICP, false);
 
          // 4. Project the predicted ICP on a circle around the foot with the radius of the step range.
-         int intersections = EuclidCoreMissingTools.intersectionBetweenRay2DAndCircle(APPROXIMATION_MULTIPLIER * kinematicStepRange.getValue(), footCentroid, copExtreme,
-                                                                                      predictedICP, kinematicExtreme, null);
+         int intersections = EuclidCoreMissingTools.intersectionBetweenRay2DAndCircle(APPROXIMATION_MULTIPLIER * kinematicStepRange.getValue(),
+                                                                                      footCentroid,
+                                                                                      copExtreme,
+                                                                                      predictedICP,
+                                                                                      kinematicExtreme,
+                                                                                      null);
 
          // When the predicted ICP distance is outside the circle radius, the extreme CoP defaults to the circle but paralell with both predictedICP values
          if (predictedICP.distanceFromOriginSquared() > kinematicExtreme.distanceFromOriginSquared())
@@ -220,7 +266,7 @@ public class OneStepCaptureRegionCalculator
          {
             globalTimer.stopMeasurement();
             captureRegionPolygon.update();
-            return;
+            return false;
          }
          rawCaptureRegion.addVertexMatchingFrame(kinematicExtreme, false);
 
@@ -243,18 +289,27 @@ public class OneStepCaptureRegionCalculator
 
          if (distanceRight >= distanceLeft)
          {
-            captureRegionMath.getPointBetweenVectorsAtDistanceFromOriginCircular(lastKinematicExtremeDirection, firstKinematicExtremeDirection, alphaFromAToB,
-                                                                                 APPROXIMATION_MULTIPLIER * kinematicStepRange.getValue(), footCentroid, additionalKinematicPoint);
+            captureRegionMath.getPointBetweenVectorsAtDistanceFromOriginCircular(lastKinematicExtremeDirection,
+                                                                                 firstKinematicExtremeDirection,
+                                                                                 alphaFromAToB,
+                                                                                 APPROXIMATION_MULTIPLIER * kinematicStepRange.getValue(),
+                                                                                 footCentroid,
+                                                                                 additionalKinematicPoint);
          }
          else
          {
-            captureRegionMath.getPointBetweenVectorsAtDistanceFromOriginCircular(firstKinematicExtremeDirection, lastKinematicExtremeDirection, alphaFromAToB,
-                                                                                 APPROXIMATION_MULTIPLIER * kinematicStepRange.getValue(), footCentroid, additionalKinematicPoint);
+            captureRegionMath.getPointBetweenVectorsAtDistanceFromOriginCircular(firstKinematicExtremeDirection,
+                                                                                 lastKinematicExtremeDirection,
+                                                                                 alphaFromAToB,
+                                                                                 APPROXIMATION_MULTIPLIER * kinematicStepRange.getValue(),
+                                                                                 footCentroid,
+                                                                                 additionalKinematicPoint);
          }
 
          rawCaptureRegion.addVertexMatchingFrame(additionalKinematicPoint, false);
       }
 
+      boolean reachable = true;
       // 6. Intersect the capture region with the reachable region
       if (!rawCaptureRegion.isEmpty())
       {
@@ -266,7 +321,14 @@ public class OneStepCaptureRegionCalculator
             // This assumes that once there is no capture region the robot will fall for sure.
             rawCaptureRegion.checkReferenceFrameMatch(reachableRegion);
             captureRegionPolygon.clear(rawCaptureRegion.getReferenceFrame());
-            convexPolygonTools.computeIntersectionOfPolygons(rawCaptureRegion, reachableRegion, captureRegionPolygon);
+            if (!convexPolygonTools.computeIntersectionOfPolygons(rawCaptureRegion, reachableRegion, captureRegionPolygon))
+            {
+               // OK, so there was no intersection. We should set the closest point
+               getClosestPointOnPolygonToPoint(rawCaptureRegion, footCentroid, tempPoint);
+               reachableRegion.orthogonalProjection(tempPoint);
+               captureRegionPolygon.addVertex(tempPoint);
+               reachable = false;
+            }
          }
          else
          {
@@ -278,6 +340,17 @@ public class OneStepCaptureRegionCalculator
 
       globalTimer.stopMeasurement();
       updateVisualizer();
+
+      return reachable;
+   }
+
+   private static void getClosestPointOnPolygonToPoint(ConvexPolygon2DReadOnly polygon, Point2DReadOnly pointToCheck, Point2DBasics closestPointToPack)
+   {
+      int edgeIndex = polygon.getClosestEdgeIndex(pointToCheck);
+      Point2DReadOnly startVertex = polygon.getVertex(edgeIndex);
+      Point2DReadOnly endVertex = polygon.getNextVertex(edgeIndex);
+
+      EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(pointToCheck, startVertex, endVertex, closestPointToPack);
    }
 
    private void updateVisualizer()
@@ -328,8 +401,8 @@ public class OneStepCaptureRegionCalculator
    }
 
    /**
-    * Returns all of the vertices that are visible from the observerPoint2d, in left to right order.
-    * If the observerPoint2d is inside the polygon, returns null.
+    * Returns all of the vertices that are visible from the observerPoint2d, in left to right order. If
+    * the observerPoint2d is inside the polygon, returns null.
     *
     * @param observerFramePoint Point2d
     * @return Point2d[]
@@ -358,5 +431,13 @@ public class OneStepCaptureRegionCalculator
       }
 
       return true;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(captureRegionVisualizer.getSCS2YoGraphics());
+      return group;
    }
 }

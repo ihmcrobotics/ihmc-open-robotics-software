@@ -6,7 +6,6 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.ImGui;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -14,11 +13,12 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
-import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
+import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.vr.RDXVRContext;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.rdx.vr.RDXVRDragData;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 
@@ -31,55 +31,65 @@ import java.util.ArrayList;
  */
 public class RDXInteractableRobotLink
 {
-   private static final boolean SHOW_DEBUG_FRAMES = false;
    private final ArrayList<RDXRobotCollidable> robotCollidables = new ArrayList<>();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   /** The frame tracks the real robot's live pose. */
+   private ReferenceFrame syncedControlFrame;
    private ReferenceFrame graphicFrame;
-   private ReferenceFrame collisionFrame;
-   private ReferenceFrame controlFrame;
-   private boolean hasMultipleFrames;
-   private RigidBodyTransform controlToGraphicTransform;
-   private RigidBodyTransform controlToCollisionTransform;
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private final FramePose3D tempFramePose = new FramePose3D();
+   /** Link frame is used to specify the collidables for user selection. */
+   private ReferenceFrame linkFrame;
    private RDXInteractableHighlightModel highlightModel;
    private boolean modified = false;
-   private final RDXSelectablePose3DGizmo selectablePose3DGizmo = new RDXSelectablePose3DGizmo();
+   private RDXSelectablePose3DGizmo selectablePose3DGizmo;
    private Runnable onSpacePressed;
-   private RDXReferenceFrameGraphic graphicReferenceFrameGraphic;
-   private RDXReferenceFrameGraphic controlReferenceFrameGraphic;
    private boolean isMouseHovering;
    private final Notification contextMenuNotification = new Notification();
    private boolean isVRHovering;
-   private boolean isVRDragging = false;
-   private final SideDependentList<ModifiableReferenceFrame> dragReferenceFrame = new SideDependentList<>();
 
-   public void create(RDXRobotCollidable robotCollidable, ReferenceFrame controlFrame, String graphicFileName, RDX3DPanel panel3D)
+   /** For when the graphic, the link, and control frame are all the same. */
+   public void create(RDXRobotCollidable robotCollidable, ReferenceFrame syncedControlFrame, String graphicFileName, RDX3DPanel panel3D)
    {
-      create(robotCollidable, controlFrame, controlFrame, controlFrame, graphicFileName, panel3D);
+      create(robotCollidable, syncedControlFrame, new RigidBodyTransform(), new RigidBodyTransform(), graphicFileName, panel3D);
    }
 
+   /** Used for the hands especially, which have 3 frames each. */
    public void create(RDXRobotCollidable robotCollidable,
-                      ReferenceFrame graphicFrame,
-                      ReferenceFrame collisionFrame,
-                      ReferenceFrame controlFrame,
+                      ReferenceFrame syncedControlFrame,
+                      RigidBodyTransform graphicToControlFrameTransform,
+                      RigidBodyTransform linkToControlFrameTransform,
                       String modelFileName,
                       RDX3DPanel panel3D)
    {
+      this.syncedControlFrame = syncedControlFrame;
+      selectablePose3DGizmo = new RDXSelectablePose3DGizmo();
       robotCollidables.add(robotCollidable);
-      this.graphicFrame = graphicFrame;
-      this.collisionFrame = collisionFrame;
-      this.controlFrame = controlFrame;
-      hasMultipleFrames = !(graphicFrame == collisionFrame && collisionFrame == controlFrame);
+      graphicFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame(),
+                                                                                              graphicToControlFrameTransform);
+      linkFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame(),
+                                                                                           linkToControlFrameTransform);
       highlightModel = new RDXInteractableHighlightModel(modelFileName);
       selectablePose3DGizmo.create(panel3D);
-      graphicReferenceFrameGraphic = new RDXReferenceFrameGraphic(0.2);
-      controlReferenceFrameGraphic = new RDXReferenceFrameGraphic(0.2);
+
+      RDXBaseUI.getInstance().getKeyBindings().register("Execute / pause motion", "Space");
+      RDXBaseUI.getInstance().getKeyBindings().register("Delete selected gizmo", "Delete");
    }
 
    public void update()
    {
-      ensureMutlipleFramesAreSetup();
+      if (!modified) // Ensure the gizmo is at the hand when not modified
+      {
+         selectablePose3DGizmo.getPoseGizmo().getTransformToParent().set(syncedControlFrame.getTransformToRoot());
+      }
+      selectablePose3DGizmo.getPoseGizmo().update();
+      for (RDXRobotCollidable robotCollidable : robotCollidables)
+      {
+         if (modified)
+            robotCollidable.setDetached(linkFrame);
+         else
+            robotCollidable.setAttachedToSyncedLink();
+      }
+
+      highlightModel.setPose(graphicFrame);
 
       if (modified && !selectablePose3DGizmo.isSelected() && (isMouseHovering || isVRHovering))
       {
@@ -102,47 +112,24 @@ public class RDXInteractableRobotLink
             boolean isHovering = false;
             for (RDXRobotCollidable robotCollidable : robotCollidables)
             {
-               isHovering |= robotCollidable.getVRPickSelected(side);
+               isHovering |= robotCollidable.getVRHovering(side);
             }
             isVRHovering |= isHovering;
 
-            boolean triggerDown = controller.getClickTriggerActionData().bState();
-            boolean triggerNewlyDown = triggerDown && controller.getClickTriggerActionData().bChanged();
-            boolean triggerNewlyUp = !triggerDown && controller.getClickTriggerActionData().bChanged();
+            RDXVRDragData gripDragData = controller.getGripDragData();
 
-            if (dragReferenceFrame.get(side) == null)
+            if (isHovering && gripDragData.getDragJustStarted())
             {
-               dragReferenceFrame.put(side, new ModifiableReferenceFrame(controller.getPickPoseFrame()));
+               modified = true;
+               gripDragData.setObjectBeingDragged(this);
+               gripDragData.setInteractableFrameOnDragStart(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
             }
 
-            if (!modified && isHovering)
+            if (gripDragData.isDragging() && gripDragData.getObjectBeingDragged() == this)
             {
-               updateUnmodifiedButHovered();
+               gripDragData.getDragFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
+                                                                      selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getParent());
             }
-
-            if (isHovering && triggerNewlyDown)
-            {
-               if (!modified)
-               {
-                  onBecomesModified();
-               }
-
-               selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getTransformToDesiredFrame(dragReferenceFrame.get(side).getTransformToParent(),
-                                                                                               controller.getPickPoseFrame());
-               dragReferenceFrame.get(side).getReferenceFrame().update();
-               isVRDragging = true;
-            }
-
-            if (isVRDragging)
-            {
-               dragReferenceFrame.get(side).getReferenceFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
-                                                                                           ReferenceFrame.getWorldFrame());
-               selectablePose3DGizmo.getPoseGizmo().updateTransforms();
-               updateModified();
-            }
-
-            if (triggerNewlyUp)
-               isVRDragging = false;
          });
       }
    }
@@ -157,7 +144,7 @@ public class RDXInteractableRobotLink
       isMouseHovering = false;
       for (RDXRobotCollidable robotCollidable : robotCollidables)
       {
-         isMouseHovering |= robotCollidable.getMousePickSelected();
+         isMouseHovering |= robotCollidable.getMouseHovering();
       }
 
       if (isMouseHovering && ImGui.getMouseClickedCount(ImGuiMouseButton.Right) == 1)
@@ -178,19 +165,9 @@ public class RDXInteractableRobotLink
 
       selectablePose3DGizmo.process3DViewInput(input, isMouseHovering);
 
-      if (unmodifiedButHovered)
-      {
-         updateUnmodifiedButHovered();
-      }
-
       if (becomesModified)
       {
-         onBecomesModified();
-      }
-
-      if (modified)
-      {
-         updateModified();
+         modified = true;
       }
 
       if (selectablePose3DGizmo.isSelected() && executeMotionKeyPressed)
@@ -198,66 +175,6 @@ public class RDXInteractableRobotLink
          onSpacePressed.run();
       }
       return becomesModified;
-   }
-
-   private void updateModified()
-   {
-      if (hasMultipleFrames)
-      {
-         tempTransform.set(controlToCollisionTransform);
-         selectablePose3DGizmo.getPoseGizmo().getTransformToParent().transform(tempTransform);
-         for (RDXRobotCollidable robotCollidable : robotCollidables)
-         {
-            robotCollidable.setDetachedTransform(true).set(tempTransform);
-         }
-         highlightModel.setPose(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(), controlToGraphicTransform);
-      }
-      else
-      {
-         for (RDXRobotCollidable robotCollidable : robotCollidables)
-         {
-            robotCollidable.setDetachedTransform(true).set(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
-         }
-         highlightModel.setPose(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
-      }
-   }
-
-   private void updateUnmodifiedButHovered()
-   {
-      if (hasMultipleFrames)
-      {
-         highlightModel.setPose(controlFrame.getTransformToWorldFrame(), controlToGraphicTransform);
-      }
-      else
-      {
-         highlightModel.setPose(controlFrame.getTransformToWorldFrame());
-      }
-   }
-
-   private void ensureMutlipleFramesAreSetup()
-   {
-      if (hasMultipleFrames && controlToGraphicTransform == null) // we just need to do this once
-      {
-         controlToGraphicTransform = new RigidBodyTransform();
-         tempFramePose.setToZero(graphicFrame);
-         tempFramePose.changeFrame(controlFrame);
-         tempFramePose.get(controlToGraphicTransform);
-         controlToCollisionTransform = new RigidBodyTransform();
-         tempFramePose.setToZero(collisionFrame);
-         tempFramePose.changeFrame(controlFrame);
-         tempFramePose.get(controlToCollisionTransform);
-      }
-   }
-
-   private void onBecomesModified()
-   {
-      modified = true;
-      for (RDXRobotCollidable robotCollidable : robotCollidables)
-      {
-         robotCollidable.setDetachedTransform(true);
-      }
-      selectablePose3DGizmo.getPoseGizmo().getTransformToParent().set(controlFrame.getTransformToWorldFrame());
-      selectablePose3DGizmo.getPoseGizmo().updateTransforms();
    }
 
    public boolean renderImGuiWidgets()
@@ -274,7 +191,7 @@ public class RDXInteractableRobotLink
          if (!modified)
          {
             becomesModified = true;
-            onBecomesModified();
+            modified = true;
          }
       }
       ImGui.sameLine();
@@ -284,7 +201,7 @@ public class RDXInteractableRobotLink
          if (!modified)
          {
             becomesModified = true;
-            onBecomesModified();
+            modified = true;
          }
       }
       return becomesModified;
@@ -292,20 +209,9 @@ public class RDXInteractableRobotLink
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (SHOW_DEBUG_FRAMES)
-      {
-         if (hasMultipleFrames)
-         {
-            graphicReferenceFrameGraphic.setToReferenceFrame(graphicFrame);
-            graphicReferenceFrameGraphic.getRenderables(renderables, pool);
-         }
-         controlReferenceFrameGraphic.setToReferenceFrame(controlFrame);
-         controlReferenceFrameGraphic.getRenderables(renderables, pool);
-      }
-
       boolean anyRobotCollidableHovered = false;
       for (RDXRobotCollidable robotCollidable : robotCollidables)
-         anyRobotCollidableHovered |= robotCollidable.getAnyPickSelected();
+         anyRobotCollidableHovered |= robotCollidable.getIsHoveredByAnything();
 
       if (modified || anyRobotCollidableHovered)
       {
@@ -318,10 +224,6 @@ public class RDXInteractableRobotLink
    {
       modified = false;
       selectablePose3DGizmo.getSelected().set(false);
-      for (RDXRobotCollidable robotCollidable : robotCollidables)
-      {
-         robotCollidable.setDetachedTransform(false);
-      }
    }
 
    public boolean isDeleted()
@@ -332,11 +234,6 @@ public class RDXInteractableRobotLink
    public void destroy()
    {
       highlightModel.dispose();
-      if (hasMultipleFrames)
-      {
-         graphicReferenceFrameGraphic.dispose();
-      }
-      controlReferenceFrameGraphic.dispose();
    }
 
    public FramePose3DReadOnly getPose()
@@ -362,5 +259,10 @@ public class RDXInteractableRobotLink
    public Notification getContextMenuNotification()
    {
       return contextMenuNotification;
+   }
+
+   public Notification getGizmoModifiedByUser()
+   {
+      return selectablePose3DGizmo.getPoseGizmo().getGizmoModifiedByUser();
    }
 }

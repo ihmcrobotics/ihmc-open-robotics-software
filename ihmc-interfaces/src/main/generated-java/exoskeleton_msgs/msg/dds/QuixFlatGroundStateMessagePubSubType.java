@@ -11,6 +11,18 @@ package exoskeleton_msgs.msg.dds;
 public class QuixFlatGroundStateMessagePubSubType implements us.ihmc.pubsub.TopicDataType<exoskeleton_msgs.msg.dds.QuixFlatGroundStateMessage>
 {
    public static final java.lang.String name = "exoskeleton_msgs::msg::dds_::QuixFlatGroundStateMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "0292bb6f67875735254bd906a421a218bf2e069744ef55c1cd1fcb85bc587ddc";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

@@ -188,16 +188,23 @@ public class LibGDXTools
 
    public static void toEuclid(HmdMatrix34 openVRRigidBodyTransform, RigidBodyTransform rigidBodyTransformToPack)
    {
+      toEuclidUnsafe(openVRRigidBodyTransform, rigidBodyTransformToPack);
+      if (!rigidBodyTransformToPack.getRotation().isIdentity())
+         rigidBodyTransformToPack.getRotation().normalize();
+   }
+
+   public static void toEuclidUnsafe(HmdMatrix34 openVRRigidBodyTransform, RigidBodyTransform rigidBodyTransformToPack)
+   {
       FloatBuffer openVRValueBuffer = openVRRigidBodyTransform.m();
-      rigidBodyTransformToPack.getRotation().setAndNormalize(openVRValueBuffer.get(0),
-                                                             openVRValueBuffer.get(1),
-                                                             openVRValueBuffer.get(2),
-                                                             openVRValueBuffer.get(4),
-                                                             openVRValueBuffer.get(5),
-                                                             openVRValueBuffer.get(6),
-                                                             openVRValueBuffer.get(8),
-                                                             openVRValueBuffer.get(9),
-                                                             openVRValueBuffer.get(10));
+      rigidBodyTransformToPack.getRotation().setUnsafe(openVRValueBuffer.get(0),
+                                                       openVRValueBuffer.get(1),
+                                                       openVRValueBuffer.get(2),
+                                                       openVRValueBuffer.get(4),
+                                                       openVRValueBuffer.get(5),
+                                                       openVRValueBuffer.get(6),
+                                                       openVRValueBuffer.get(8),
+                                                       openVRValueBuffer.get(9),
+                                                       openVRValueBuffer.get(10));
       rigidBodyTransformToPack.getTranslation().setX(openVRValueBuffer.get(3));
       rigidBodyTransformToPack.getTranslation().setY(openVRValueBuffer.get(7));
       rigidBodyTransformToPack.getTranslation().setZ(openVRValueBuffer.get(11));
@@ -318,10 +325,24 @@ public class LibGDXTools
       gdxAffine.setTranslation(euclidPoint.getX32(), euclidPoint.getY32(), euclidPoint.getZ32());
    }
 
+   /**
+    * Converts the euclid pose to a rigid body transform and a Matrix4 gdxAffine
+    * @param euclidPose input pose. Not modified.
+    * @param tempTransform temporary rigid body transform. Modified.
+    * @param gdxAffine Matrix4 representation. Modified.
+    */
    public static void toLibGDX(Pose3DReadOnly euclidPose, RigidBodyTransform tempTransform, Matrix4 gdxAffine)
    {
-      euclidPose.get(tempTransform);
+      tempTransform.set(euclidPose);
       toLibGDX(tempTransform, gdxAffine);
+   }
+
+   /**
+    * Setting the position to NaN will mean it doesn't get shown.
+    */
+   public static void hideGraphic(ModelInstance modelInstance)
+   {
+      modelInstance.transform.setTranslation(Float.NaN, Float.NaN, Float.NaN);
    }
 
    public static void toLibGDX(javafx.scene.paint.Color javaFXColor, Color gdxColor)

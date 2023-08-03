@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class StepConstraintsListMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.StepConstraintsListMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::StepConstraintsListMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "3fe208c7f6281c52c0b29e408f52b8c8874f0ade2832823a64485d73552c6e30";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
@@ -57,7 +69,7 @@ public class StepConstraintsListMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 500; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50000; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
 
@@ -140,7 +152,7 @@ public class StepConstraintsListMessagePubSubType implements us.ihmc.pubsub.Topi
       cdr.write_type_e(data.getHolePolygonsSize());else
           throw new RuntimeException("hole_polygons_size field exceeds the maximum length");
 
-      if(data.getVertexBuffer().size() <= 500)
+      if(data.getVertexBuffer().size() <= 50000)
       cdr.write_type_e(data.getVertexBuffer());else
           throw new RuntimeException("vertex_buffer field exceeds the maximum length");
 
