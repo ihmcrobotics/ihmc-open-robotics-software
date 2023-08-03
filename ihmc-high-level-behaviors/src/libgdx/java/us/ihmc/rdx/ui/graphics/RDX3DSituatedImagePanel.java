@@ -210,10 +210,6 @@ public class RDX3DSituatedImagePanel
       }
 
       setPoseToReferenceFrame(floatingPanelFrame.getReferenceFrame());
-      selectionCollisionBox.getPose().set(floatingPanelFramePose);
-      floatingPanelFramePose.setFromReferenceFrame(floatingPanelFrame.getReferenceFrame());
-      isHoveredByAnything = false;
-      LibGDXTools.toLibGDX(floatingPanelFrame.getReferenceFrame().getTransformToRoot(), hoverBoxMesh.transform);
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
@@ -309,6 +305,7 @@ public class RDX3DSituatedImagePanel
       if (modelInstance != null)
       {
          referenceFrame.getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
+         LibGDXTools.toLibGDX(tempTransform, modelInstance.transform);
       }
    }
 
