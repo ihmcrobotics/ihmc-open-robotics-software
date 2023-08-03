@@ -99,6 +99,8 @@ public abstract class CommunicationsSyncedRobotModel
       for (int i = 0; i < robotConfigurationData.getJointAngles().size(); i++)
       {
          allJoints[i].setQ(robotConfigurationData.getJointAngles().get(i));
+         allJoints[i].setQd(robotConfigurationData.getJointVelocities().get(i));
+         allJoints[i].setTau(robotConfigurationData.getJointTorques().get(i));
       }
 
       forceSensorData.clear();
@@ -118,10 +120,9 @@ public abstract class CommunicationsSyncedRobotModel
 
    private void updateFramesForFullRobotModel()
    {
-      fullRobotModel.getElevator().updateFramesRecursively();
-
       try
       {
+         fullRobotModel.getElevator().updateFramesRecursively();
          referenceFrames.updateFrames();
       }
       catch (NotARotationMatrixException e)

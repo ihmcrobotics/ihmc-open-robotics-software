@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class FisheyePacketPubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.FisheyePacket>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::FisheyePacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "8826de9c0fa5378e1025cdc1d7350798a9b0c40ec772dc805b909c01a3891d95";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

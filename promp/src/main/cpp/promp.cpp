@@ -111,6 +111,7 @@ void ProMP::init(const std::vector<Trajectory>& data, double std_bf)
 	_phase = compute_phase();
 	_phi = generate_basis_function(_phase);
 	train(data);
+	_default_std_via_point = 1e-5 * Eigen::MatrixXd::Identity(_dims, _dims);
 } 
 
 ProMP::ProMP(const Eigen::VectorXd& w, const Eigen::MatrixXd& cov_w, double std_bf, int n_sample, size_t dims, double time_mod) :
@@ -128,6 +129,7 @@ ProMP::ProMP(const Eigen::VectorXd& w, const Eigen::MatrixXd& cov_w, double std_
 
 	_phase = compute_phase();
 	_phi = generate_basis_function(_phase);
+	_default_std_via_point = 1e-5 * Eigen::MatrixXd::Identity(_dims, _dims);
 }
 
 Eigen::VectorXd ProMP::compute_phase(size_t timesteps) const
@@ -295,9 +297,19 @@ void ProMP::condition_start(const Eigen::VectorXd& start, const Eigen::MatrixXd&
 	condition_via_point(0.0, start, std);
 }
 
+void ProMP::condition_start(const Eigen::VectorXd& start)
+{
+	condition_via_point(0.0, start);
+}
+
 void ProMP::condition_goal(const Eigen::VectorXd& goal ,const Eigen::MatrixXd& std)
 {
 	condition_via_point(this->get_traj_length()-1, goal, std);
+}
+
+void ProMP::condition_goal(const Eigen::VectorXd& goal)
+{
+	condition_via_point(this->get_traj_length()-1, goal);
 }
 
 Eigen::MatrixXd ProMP::generate_trajectory(size_t req_num_steps) const
@@ -415,6 +427,11 @@ void ProMP::condition_via_point(int time, const Eigen::VectorXd& via_point, cons
 	condition_via_points({std::make_tuple<>(time, via_point, std)});
 }
 
+void ProMP::condition_via_point(int time, const Eigen::VectorXd& via_point)
+{
+	condition_via_points({std::make_tuple<>(time, via_point, _default_std_via_point)});
+}
+
 void ProMP::condition_via_points(const std::vector<std::tuple<int, Eigen::VectorXd, Eigen::MatrixXd>>& via_points)
 {
 	for(const auto& via_point : via_points)
@@ -430,7 +447,7 @@ void ProMP::condition_via_points(const std::vector<std::tuple<int, Eigen::Vector
 		// equivalent to
 		// auto phi_obs = repeat_block_diagonal(generate_basis_function(phase_obs), _dims);  // TODO optimize (this matrix grow a lot)
 
-		RepeatBlockDiagonalMatrix phi_obs(generate_basis_function(phase_obs), _dims);
+                                                                                                                                                                                                                                                RepeatBlockDiagonalMatrix phi_obs(generate_basis_function(phase_obs), _dims);
 		Eigen::MatrixXd ridge = _conditioning_ridge_factor * Eigen::MatrixXd::Identity(_dims, _dims);
 		Eigen::MatrixXd L = _cov_w * phi_obs * (sig_obs + phi_obs.transpose() * _cov_w * phi_obs +ridge).inverse(); // NOT use auto, broken with RepeatBlockDiagonalMatrix
 

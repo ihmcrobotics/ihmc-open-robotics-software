@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
@@ -19,9 +21,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
@@ -29,7 +33,7 @@ import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-public class AvatarEstimatorThread extends ModularRobotController
+public class AvatarEstimatorThread extends ModularRobotController implements SCS2YoGraphicHolder
 {
    private final YoRegistry estimatorRegistry;
    private final YoBoolean firstTick;
@@ -203,9 +207,23 @@ public class AvatarEstimatorThread extends ModularRobotController
       return estimatorRegistry;
    }
 
-   public YoGraphicsListRegistry getYoGraphicsListRegistry()
+   public YoGraphicsListRegistry getSCS1YoGraphicsListRegistry()
    {
       return yoGraphicsListRegistry;
+   }
+
+   @Override
+   public YoGraphicGroupDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(mainStateEstimator.getSCS2YoGraphics());
+      for (ImmutablePair<BooleanSupplier, StateEstimatorController> entry : secondaryStateEstimators)
+      {
+         group.addChild(entry.getRight().getSCS2YoGraphics());
+      }
+      if (forceSensorStateUpdater != null)
+         group.addChild(forceSensorStateUpdater.getSCS2YoGraphics());
+      return group;
    }
 
    public HumanoidRobotContextData getHumanoidRobotContextData()

@@ -13,8 +13,13 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -22,12 +27,12 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 /*
  * FIXME: not rewindable!
  */
-public class BipedSupportPolygons
+public class BipedSupportPolygons implements SCS2YoGraphicHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static boolean VISUALIZE = true;
-   private static final int maxNumberOfContactPointsPerFoot = 6;
+   private static final int maxNumberOfContactPointsPerFoot = 8;
 
    private final YoRegistry registry = new YoRegistry("BipedSupportPolygons");
 
@@ -49,8 +54,10 @@ public class BipedSupportPolygons
       this(referenceFrames.getMidFeetZUpFrame(), referenceFrames.getSoleZUpFrames(), referenceFrames.getSoleFrames(), parentRegistry, yoGraphicsListRegistry);
    }
 
-   public BipedSupportPolygons(ReferenceFrame midFeetZUpFrame, SideDependentList<? extends ReferenceFrame> soleZUpFrames,
-                               SideDependentList<? extends ReferenceFrame> soleFrames, YoRegistry parentRegistry,
+   public BipedSupportPolygons(ReferenceFrame midFeetZUpFrame,
+                               SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                               SideDependentList<? extends ReferenceFrame> soleFrames,
+                               YoRegistry parentRegistry,
                                YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       supportPolygonViz = new YoFrameConvexPolygon2D("combinedPolygon", "", worldFrame, 2 * maxNumberOfContactPointsPerFoot, registry);
@@ -71,11 +78,16 @@ public class BipedSupportPolygons
          footPolygonsInMidFeetZUp.put(robotSide, new FrameConvexPolygon2D(midFeetZUpFrame));
          String robotSidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
 
-         YoFrameConvexPolygon2D footPolygonViz = new YoFrameConvexPolygon2D(robotSidePrefix + "FootPolygon", "", worldFrame, maxNumberOfContactPointsPerFoot,
+         YoFrameConvexPolygon2D footPolygonViz = new YoFrameConvexPolygon2D(robotSidePrefix + "FootPolygon",
+                                                                            "",
+                                                                            worldFrame,
+                                                                            maxNumberOfContactPointsPerFoot,
                                                                             registry);
          footPolygonsViz.put(robotSide, footPolygonViz);
-         YoArtifactPolygon footPolygonArtifact = new YoArtifactPolygon(robotSide.getCamelCaseNameForMiddleOfExpression() + " Foot Polygon", footPolygonViz,
-                                                                       defaultFeetColors.get(robotSide), false);
+         YoArtifactPolygon footPolygonArtifact = new YoArtifactPolygon(robotSide.getCamelCaseNameForMiddleOfExpression() + " Foot Polygon",
+                                                                       footPolygonViz,
+                                                                       defaultFeetColors.get(robotSide),
+                                                                       false);
          artifactList.add(footPolygonArtifact);
       }
 
@@ -248,6 +260,11 @@ public class BipedSupportPolygons
       return footPolygonsInSoleZUpFrame.get(robotSide);
    }
 
+   public SideDependentList<? extends FrameConvexPolygon2DReadOnly> getFootPolygonsInSoleFrame()
+   {
+      return footPolygonsInSoleFrame;
+   }
+
    public SideDependentList<? extends FrameConvexPolygon2DReadOnly> getFootPolygonsInSoleZUpFrame()
    {
       return footPolygonsInSoleZUpFrame;
@@ -267,5 +284,20 @@ public class BipedSupportPolygons
    public String toString()
    {
       return "supportPolygonInMidFeetZUp = " + supportPolygonInMidFeetZUp;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D("combinedPolygon", supportPolygonViz, ColorDefinitions.Pink()));
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D(robotSide.getCamelCaseName() + " Foot Polyon",
+                                                                         footPolygonsViz.get(robotSide),
+                                                                         ColorDefinitions.argb(defaultFeetColors.get(robotSide).getRGB())));
+      }
+      return group;
    }
 }

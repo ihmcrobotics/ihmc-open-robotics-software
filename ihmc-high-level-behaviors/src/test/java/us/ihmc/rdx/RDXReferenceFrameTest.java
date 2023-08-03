@@ -19,9 +19,7 @@ import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 public class RDXReferenceFrameTest
 {
 
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private RigidBodyTransform userTransformToParent;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean showWorldFrame = new ImBoolean(true);

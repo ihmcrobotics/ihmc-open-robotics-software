@@ -1,39 +1,28 @@
 package us.ihmc.rdx.ui.visualizers;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.utilities.ros.ROS1Helper;
+import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 
 import java.util.ArrayList;
+import java.util.Set;
 
-public class RDXGlobalVisualizersPanel extends ImGuiPanel implements RenderableProvider
+public class RDXGlobalVisualizersPanel extends ImGuiPanel implements RDXRenderableProvider
 {
    private static final String WINDOW_NAME = "Global Visualizers";
 
    private final ArrayList<RDXVisualizer> visualizers = new ArrayList<>();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ROS1Helper ros1Helper;
    private boolean created = false;
 
    public RDXGlobalVisualizersPanel()
    {
-      this(new ROS1Helper("global_visualizers"));
-   }
-
-   public RDXGlobalVisualizersPanel(boolean enableROS1)
-   {
-      this(enableROS1 ? new ROS1Helper("global_visualizers") : null);
-   }
-
-   public RDXGlobalVisualizersPanel(ROS1Helper ros1Helper)
-   {
       super(WINDOW_NAME);
-      this.ros1Helper = ros1Helper;
       setRenderMethod(this::renderImGuiWidgets);
    }
 
@@ -60,10 +49,6 @@ public class RDXGlobalVisualizersPanel extends ImGuiPanel implements RenderableP
    {
       for (RDXVisualizer visualizer : visualizers)
       {
-         if (visualizer instanceof RDXROS1VisualizerInterface && ros1Helper != null)
-         {
-            ((RDXROS1VisualizerInterface) visualizer).updateSubscribers(ros1Helper);
-         }
          if (visualizer.getPanel() != null)
             visualizer.getPanel().getIsShowing().set(visualizer.isActive());
          if (visualizer.isActive())
@@ -75,10 +60,6 @@ public class RDXGlobalVisualizersPanel extends ImGuiPanel implements RenderableP
 
    public void renderImGuiWidgets()
    {
-      if (ros1Helper != null && ImGui.button(labels.get("Reconnect ROS 1 Node")))
-      {
-         ros1Helper.reconnectEverything();
-      }
       for (RDXVisualizer visualizer : visualizers)
       {
          visualizer.renderImGuiWidgets();
@@ -87,13 +68,13 @@ public class RDXGlobalVisualizersPanel extends ImGuiPanel implements RenderableP
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       for (RDXVisualizer visualizer : visualizers)
       {
          if (visualizer.isActive())
          {
-            visualizer.getRenderables(renderables, pool);
+            visualizer.getRenderables(renderables, pool, sceneLevels);
          }
       }
    }
@@ -104,6 +85,5 @@ public class RDXGlobalVisualizersPanel extends ImGuiPanel implements RenderableP
       {
          visualizer.destroy();
       }
-      ros1Helper.destroy();
    }
 }

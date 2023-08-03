@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
+import us.ihmc.atlas.behaviors.AtlasLookAndStepParameters;
 import us.ihmc.atlas.diagnostic.AtlasDiagnosticParameters;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.AtlasCoPTrajectoryParameters;
@@ -27,6 +28,7 @@ import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
 import us.ihmc.avatar.DRCSimulationOutputWriterForControllerThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.drcRobot.RobotVersion;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.kinematicsSimulation.SimulatedHandKinematicController;
@@ -36,6 +38,7 @@ import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityIOHelper;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.RobotROSClockCalculatorFromPPSOffset;
+import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
@@ -46,9 +49,11 @@ import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityDa
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFModelLoader;
@@ -351,6 +356,12 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
+   public RobotVersion getRobotVersion()
+   {
+      return selectedVersion;
+   }
+
+   @Override
    public String toString()
    {
       return selectedVersion.toString();
@@ -391,7 +402,18 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public FullHumanoidRobotModel createFullRobotModel()
    {
-      FullHumanoidRobotModel fullRobotModel = new FullHumanoidRobotModelWrapper(getRobotDefinition(), getJointMap());
+      return createFullRobotModel(true);
+   }
+
+   @Override
+   public FullHumanoidRobotModel createFullRobotModel(boolean enforceUniqueReferenceFrames)
+   {
+      FullHumanoidRobotModel fullRobotModel = new FullHumanoidRobotModelWrapper(getRobotDefinition(), getJointMap(), enforceUniqueReferenceFrames);
+      return doArmJointRestriction(fullRobotModel);
+   }
+
+   private FullHumanoidRobotModel doArmJointRestriction(FullHumanoidRobotModel fullRobotModel)
+   {
       for (RobotSide robotSide : RobotSide.values())
       {
          ArmJointName[] armJointNames = new ArmJointName[] {ArmJointName.FIRST_WRIST_PITCH, ArmJointName.WRIST_ROLL, ArmJointName.SECOND_WRIST_PITCH};
@@ -584,6 +606,12 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
+   public AStarBodyPathPlannerParametersBasics getAStarBodyPathPlannerParameters()
+   {
+      return new AStarBodyPathPlannerParameters();
+   }
+
+   @Override
    public DataServerSettings getLogSettings()
    {
 
@@ -625,6 +653,12 @@ public class AtlasRobotModel implements DRCRobotModel
    public FootstepPlannerParametersBasics getFootstepPlannerParameters(String fileNameSuffix)
    {
       return new AtlasFootstepPlannerParameters(fileNameSuffix);
+   }
+
+   @Override
+   public LookAndStepBehaviorParameters getLookAndStepParameters()
+   {
+      return new AtlasLookAndStepParameters();
    }
 
    @Override

@@ -9,7 +9,7 @@ module ihmc_common_msgs
     {
 
       /**
-       * This message is part of the collection of platform-independent ROS messages.
+       * This is part of the IHMC Common message package.
        * This message allows the user to precisely choose the priority of each component of a taskspace command.
        */
       @TypeCode(type="ihmc_common_msgs::msg::dds_::WeightMatrix3DMessage_")

@@ -9,20 +9,28 @@ import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXRenderableAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.log.LogTools;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.session.Session;
 import us.ihmc.scs2.session.SessionMode;
+import us.ihmc.scs2.session.log.LogSession;
+import us.ihmc.scs2.session.remote.RemoteSession;
 import us.ihmc.scs2.sharedMemory.CropBufferRequest;
+import us.ihmc.scs2.simulation.SimulationDataSession;
+import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
+import us.ihmc.scs2.simulation.physicsEngine.DoNothingPhysicsEngine;
+import us.ihmc.scs2.simulation.physicsEngine.contactPointBased.ContactPointBasedPhysicsEngine;
+import us.ihmc.scs2.simulation.physicsEngine.impulseBased.ImpulseBasedPhysicsEngine;
 import us.ihmc.tools.UnitConversions;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +39,7 @@ import java.util.Set;
 public class RDXSCS2Session
 {
    protected Session session;
+   private String sessionInfo = "";
    private final ImBoolean runAtRealtimeRate = new ImBoolean(true);
    private final ImDouble playbackRealtimeRate = new ImDouble(1.0);
    private final ImGuiPanel controlPanel = new ImGuiPanel("SCS 2 Session", this::renderImGuiWidgets);
@@ -47,8 +56,8 @@ public class RDXSCS2Session
    private final ImBoolean showVirtualRenderables = new ImBoolean(true);
    private final ImBoolean showCollisionMeshes = new ImBoolean(false);
    protected final RDXYoManager yoManager = new RDXYoManager();
-   private final ArrayList<RDXSimulatedRobot> robots = new ArrayList<>();
-   private final ArrayList<RDXSimulatedTerrainObject> terrainObjects = new ArrayList<>();
+   private final ArrayList<RDXSCS2Robot> robots = new ArrayList<>();
+   private final ArrayList<RDXSCS2TerrainObject> terrainObjects = new ArrayList<>();
    private final SCS2YoImPlotManager plotManager = new SCS2YoImPlotManager();
    private boolean sessionStartedHandled = false;
    private final RDXRenderableAdapter renderables = new RDXRenderableAdapter(this::getRenderables);
@@ -62,7 +71,7 @@ public class RDXSCS2Session
    public void create(RDXBaseUI baseUI, ImGuiPanel plotManagerParentPanel)
    {
       baseUI.getPrimaryScene().addRenderableAdapter(renderables);
-      plotManager.create(baseUI.getPerspectiveManager(), plotManagerParentPanel);
+      plotManager.create(baseUI.getLayoutManager(), plotManagerParentPanel);
    }
 
    /**
@@ -73,6 +82,53 @@ public class RDXSCS2Session
       sessionStartedHandled = false;
 
       this.session = session;
+
+      if (session instanceof SimulationSession)
+      {
+         sessionInfo += "Simulation session";
+      }
+      else if (session instanceof SimulationDataSession)
+      {
+         sessionInfo += "Simulation data session";
+      }
+      else if (session instanceof LogSession)
+      {
+         sessionInfo += "Log session";
+      }
+      else if (session instanceof RemoteSession)
+      {
+         sessionInfo += "Remote session";
+      }
+      else
+      {
+         sessionInfo += session.getClass().getSimpleName();
+      }
+      sessionInfo += ": " + session.getSessionName();
+      if (session instanceof SimulationSession simulationSession)
+      {
+         sessionInfo += "\nPhysics engine: ";
+         if (simulationSession.getPhysicsEngine() instanceof BulletPhysicsEngine)
+         {
+            sessionInfo += "Bullet";
+         }
+         else if (simulationSession.getPhysicsEngine() instanceof ContactPointBasedPhysicsEngine)
+         {
+            sessionInfo += "Contact point";
+         }
+         else if (simulationSession.getPhysicsEngine() instanceof DoNothingPhysicsEngine)
+         {
+            sessionInfo += "Do nothing";
+         }
+         else if (simulationSession.getPhysicsEngine() instanceof ImpulseBasedPhysicsEngine)
+         {
+            sessionInfo += "Impulse based";
+         }
+         else
+         {
+            sessionInfo += simulationSession.getPhysicsEngine().getClass().getSimpleName();
+         }
+      }
+
       dtHz.set((int) UnitConversions.secondsToHertz(session.getSessionDTSeconds()));
 
       yoManager.startSession(session); // TODO: Add to controls?
@@ -80,17 +136,24 @@ public class RDXSCS2Session
       robots.clear();
       for (RobotDefinition robotDefinition : session.getRobotDefinitions())
       {
-         RDXSimulatedRobot robot = new RDXSimulatedRobot(robotDefinition);
+         RDXSCS2Robot robot = new RDXSCS2Robot(robotDefinition);
          robots.add(robot);
          robot.create(yoManager);
       }
 
       terrainObjects.clear();
+      int terrainObjectIndex = 0;
       for (TerrainObjectDefinition terrainObjectDefinition : session.getTerrainObjectDefinitions())
       {
-         RDXSimulatedTerrainObject simulatedTerrainObject = new RDXSimulatedTerrainObject(terrainObjectDefinition);
+         RDXSCS2TerrainObject simulatedTerrainObject = new RDXSCS2TerrainObject(terrainObjectDefinition);
+         if (session instanceof SimulationSession simulationSession
+          && simulationSession.getPhysicsEngine() instanceof BulletPhysicsEngine bulletPhysicsEngine)
+         { // Support moving terrain objects when using Bullet physics
+            simulatedTerrainObject.setBulletTerrainObject(bulletPhysicsEngine.getTerrainObjects().get(terrainObjectIndex));
+         }
          terrainObjects.add(simulatedTerrainObject);
          simulatedTerrainObject.create();
+         ++terrainObjectIndex;
       }
 
       bufferRecordTickPeriod.set(session.getBufferRecordTickPeriod());
@@ -123,15 +186,15 @@ public class RDXSCS2Session
          sessionStartedHandled = true;
          LogTools.info("Session started.");
          plotManager.initializeLinkedVariables();
-         for (Runnable onSessionStartedRunnable : onSessionStartedRunnables)
-         {
-            onSessionStartedRunnable.run();
-         }
       }
 
-      for (RDXSimulatedRobot robot : robots)
+      for (RDXSCS2Robot robot : robots)
       {
          robot.update();
+      }
+      for (RDXSCS2TerrainObject terrainObject : terrainObjects)
+      {
+         terrainObject.update();
       }
    }
 
@@ -139,7 +202,7 @@ public class RDXSCS2Session
    {
       if (sceneLevels.contains(RDXSceneLevel.GROUND_TRUTH))
       {
-         for (RDXSimulatedRobot robot : robots)
+         for (RDXSCS2Robot robot : robots)
          {
             ImBoolean showRobot = showRobotMap.get(robot.getRobotDefinition().getName());
             if (showRobot != null && showRobot.get()) // Sometimes it's not ready yet and can be null
@@ -149,7 +212,7 @@ public class RDXSCS2Session
          }
          if (showTerrain.get())
          {
-            for (RDXSimulatedTerrainObject terrainObject : terrainObjects)
+            for (RDXSCS2TerrainObject terrainObject : terrainObjects)
             {
                terrainObject.getRealRenderables(renderables, pool);
             }
@@ -159,11 +222,11 @@ public class RDXSCS2Session
       {
          if (showCollisionMeshes.get())
          {
-            for (RDXSimulatedRobot robot : robots)
+            for (RDXSCS2Robot robot : robots)
             {
                robot.getCollisionMeshRenderables(renderables, pool);
             }
-            for (RDXSimulatedTerrainObject terrainObject : terrainObjects)
+            for (RDXSCS2TerrainObject terrainObject : terrainObjects)
             {
                terrainObject.getCollisionRenderables(renderables, pool);
             }
@@ -179,8 +242,9 @@ public class RDXSCS2Session
 
    protected void renderImGuiWidgetsPartOne()
    {
+      ImGui.text(sessionInfo);
       ImGui.pushItemWidth(110);
-      if (ImGuiTools.volatileInputInt("Bullet simulation dt (Hz)", dtHz))
+      if (ImGuiTools.volatileInputInt("DT (Hz)", dtHz))
       {
          changeDT();
       }
@@ -189,6 +253,7 @@ public class RDXSCS2Session
          updateDTFromSession();
       }
       ImGui.popItemWidth();
+      ImGui.text("Session Time: " + session.getTime().getValue());
       if (ImGui.radioButton("Run", session.getActiveMode() == SessionMode.RUNNING))
       {
          session.submitBufferIndexRequest(yoManager.getOutPoint());
@@ -322,6 +387,11 @@ public class RDXSCS2Session
 
       showRobotMap.clear();
       showRobotPairs.clear();
+   }
+
+   public ArrayList<RDXSCS2Robot> getRobots()
+   {
+      return robots;
    }
 
    public Session getSession()

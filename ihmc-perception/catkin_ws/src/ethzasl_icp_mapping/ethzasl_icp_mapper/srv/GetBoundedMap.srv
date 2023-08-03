@@ -1,5 +1,0 @@
-geometry_msgs/Pose mapCenter
-geometry_msgs/Point topRightCorner
-geometry_msgs/Point bottomLeftCorner
----
-sensor_msgs/PointCloud2 boundedMap

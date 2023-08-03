@@ -194,7 +194,7 @@ public class LogVisualizer
       scs.setDT(dt, 1);
       scs.setPlaybackDesiredFrameRate(0.04);
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = parser.getYoGraphicsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = parser.getSCS1YoGraphics();
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, false);
       scs.attachPlaybackListener(createYoGraphicsUpdater(yoGraphicsListRegistry));
       SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();

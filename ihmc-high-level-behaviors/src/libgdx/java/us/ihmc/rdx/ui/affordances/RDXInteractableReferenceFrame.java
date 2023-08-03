@@ -12,6 +12,7 @@ import us.ihmc.rdx.input.ImGui3DViewPickResult;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.collidables.RDXCoordinateFrameIntersection;
+import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 

@@ -4,6 +4,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.rdx.simulation.scs2.RDXVisualTools;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -22,7 +23,7 @@ import java.util.List;
  *  This is the class that is updated based on the desired values of the robot. If poses get sent to the robot, it should be these poses.
  *
  *  TODO make this robot color differently.
-  */
+ */
 public class RDXDesiredRobot extends RDXMultiBodyGraphic
 {
    private final ROS2SyncedRobotModel syncedRobotModel;
@@ -67,8 +68,9 @@ public class RDXDesiredRobot extends RDXMultiBodyGraphic
       ColorDefinition ghostColor = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.5);
       MaterialDefinition material = new MaterialDefinition(ghostColor);
       SCS2DefinitionMissingTools.forEachRigidBodyDefinitionIncludingFourBars(robotDefinition.getRootBodyDefinition(),
-                                                 body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
-      loadRobotModelAndGraphics(robotDefinition, desiredFullRobotModel.getElevator(), true);
+                                                                             body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
+      boolean createReferenceFrameGraphics = false;
+      loadRobotModelAndGraphics(robotDefinition, desiredFullRobotModel.getElevator(), RDXVisualTools.DESIRED_ROBOT_SCALING, createReferenceFrameGraphics);
    }
 
    @Override
@@ -114,13 +116,6 @@ public class RDXDesiredRobot extends RDXMultiBodyGraphic
    public void destroy()
    {
       super.destroy();
-   }
-
-   public void setDesiredToCurrent()
-   {
-      desiredFullRobotModel.getRootJoint().setJointConfiguration(syncedRobotModel.getFullRobotModel().getRootJoint());
-      for (OneDoFJointBasics joint : syncedRobotModel.getFullRobotModel().getOneDoFJoints())
-         desiredFullRobotModel.getOneDoFJointByName(joint.getName()).setJointConfiguration(joint);
    }
 
    @Override

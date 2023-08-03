@@ -11,7 +11,7 @@ make install
 
 # Use the latest release on GitHub
 # https://github.com/bytedeco/javacpp/releases
-JAVACPP_VERSION=1.5.7
+JAVACPP_VERSION=1.5.8
 
 # Copy javacpp InfoMap into Java package in build dir
 mkdir -p java/us/ihmc/promp/presets

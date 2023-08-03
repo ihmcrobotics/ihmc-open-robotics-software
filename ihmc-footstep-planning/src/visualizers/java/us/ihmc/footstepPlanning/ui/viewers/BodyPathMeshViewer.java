@@ -63,10 +63,10 @@ public class BodyPathMeshViewer extends AnimationTimer
       defaultSize.scale(1.5 * BODYPATH_LINE_THICKNESS);
 
       show = messager.createInput(FootstepPlannerMessagerAPI.ShowBodyPath, true);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.BodyPathData, this::processBodyPathOnThread);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.BodyPathData, this::processBodyPathOnThread);
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, data -> reset.set(true));
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.GlobalReset, data -> reset.set(true));
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ComputePath, data -> reset.set(true));
+      messager.addTopicListener(FootstepPlannerMessagerAPI.GlobalReset, data -> reset.set(true));
 
       root.getChildren().addAll(bodyPathMeshView);
    }

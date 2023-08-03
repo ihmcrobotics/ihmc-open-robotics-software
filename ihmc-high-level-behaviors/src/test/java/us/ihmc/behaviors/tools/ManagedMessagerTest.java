@@ -38,7 +38,7 @@ public class ManagedMessagerTest
 
       TypedNotification<String> messageNotification = new TypedNotification<>();
       TopicListener<String> stringTopicListener = messageNotification::set;
-      managedMessager.registerTopicListener(TopicOne, stringTopicListener);
+      managedMessager.addTopicListener(TopicOne, stringTopicListener);
 
       managedMessager.submitMessage(TopicOne, "1");
 
@@ -82,7 +82,7 @@ public class ManagedMessagerTest
       AtomicReference<String> input2 = managedMessager.createInput(TopicThree);
       TypedNotification<String> messageNotification2 = new TypedNotification<>();
       TopicListener<String> stringTopicListener2 = messageNotification2::set;
-      managedMessager.registerTopicListener(TopicThree, stringTopicListener2);
+      managedMessager.addTopicListener(TopicThree, stringTopicListener2);
 
       managedMessager.submitMessage(TopicThree, "8");
 

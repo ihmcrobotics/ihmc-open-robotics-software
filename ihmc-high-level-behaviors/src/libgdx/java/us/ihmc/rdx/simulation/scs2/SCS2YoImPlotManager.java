@@ -1,6 +1,5 @@
 package us.ihmc.rdx.simulation.scs2;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.flag.ImGuiInputTextFlags;
@@ -9,56 +8,52 @@ import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.RDXImGuiPerspectiveManager;
+import us.ihmc.rdx.ui.RDXImGuiLayoutManager;
 import us.ihmc.rdx.ui.ImGuiConfigurationLocation;
 import us.ihmc.rdx.ui.yo.*;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.io.HybridDirectory;
-import us.ihmc.tools.io.HybridFile;
-import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.*;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 public class SCS2YoImPlotManager
 {
-   private RDXImGuiPerspectiveManager perspectiveManager;
+   private RDXImGuiLayoutManager layoutManager;
    private final ArrayList<ImPlotModifiableYoPlotPanel> plotPanels = new ArrayList<>();
    private RDXYoManager yoManager;
    private ImGuiYoVariableSearchPanel yoVariableSearchPanel;
    private ImGuiPanel parentPanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString panelToCreateName = new ImString("", 100);
-   private HybridFile configurationFile;
-   private boolean perspectiveReloadQueued = false;
-   private int delayedPerspectiveReloadCounter = 0;
+   private HybridResourceFile configurationFile;
+   private boolean layoutReloadQueued = false;
+   private int delayedLayoutReloadCounter = 0;
 
-   public void create(RDXImGuiPerspectiveManager perspectiveManager, ImGuiPanel parentPanel)
+   public void create(RDXImGuiLayoutManager layoutManager, ImGuiPanel parentPanel)
    {
-      this.perspectiveManager = perspectiveManager;
+      this.layoutManager = layoutManager;
       this.parentPanel = parentPanel;
 
-      updateConfigurationFile(perspectiveManager.getPerspectiveDirectory());
-      perspectiveManager.getPerspectiveDirectoryUpdatedListeners().add(this::updateConfigurationFile);
-      perspectiveManager.getLoadListeners().add(this::loadConfiguration);
-      perspectiveManager.getSaveListeners().add(this::saveConfiguration);
+      updateConfigurationFile(layoutManager.getLayoutDirectory());
+      layoutManager.getLayoutDirectoryUpdatedListeners().add(this::updateConfigurationFile);
+      layoutManager.getLoadListeners().add(this::loadConfiguration);
+      layoutManager.getSaveListeners().add(this::saveConfiguration);
    }
 
    public void update()
    {
       // This is because the panel changes get queued, so we need to wait a couple frames
       // to make sure we are ready to reload.
-      if (perspectiveReloadQueued)
+      if (layoutReloadQueued)
       {
-         ++delayedPerspectiveReloadCounter;
-         if (delayedPerspectiveReloadCounter == 2)
+         ++delayedLayoutReloadCounter;
+         if (delayedLayoutReloadCounter == 2)
          {
-            delayedPerspectiveReloadCounter = 0;
-            perspectiveReloadQueued = false;
-            perspectiveManager.reloadPerspective();
+            delayedLayoutReloadCounter = 0;
+            layoutReloadQueued = false;
+            layoutManager.reloadLayout();
          }
       }
    }
@@ -78,51 +73,43 @@ public class SCS2YoImPlotManager
          removeAllPlotPanels();
          yoVariableSearchPanel.changeYoRegistry(yoManager.getRootRegistry());
 
-         perspectiveReloadQueued = true;
-         delayedPerspectiveReloadCounter = 0;
+         layoutReloadQueued = true;
+         delayedLayoutReloadCounter = 0;
       }
 
-      loadConfiguration(perspectiveManager.getCurrentConfigurationLocation());
+      loadConfiguration(layoutManager.getCurrentConfigurationLocation());
    }
 
-   private void updateConfigurationFile(HybridDirectory perspectiveDirectory)
+   private void updateConfigurationFile(HybridResourceDirectory layoutDirectory)
    {
-      configurationFile = new HybridFile(perspectiveDirectory, getClass().getSimpleName() + ".json");
+      configurationFile = new HybridResourceFile(layoutDirectory, getClass().getSimpleName() + ".json");
    }
 
-   private void loadConfiguration(ImGuiConfigurationLocation configurationLocation)
+   private boolean loadConfiguration(ImGuiConfigurationLocation configurationLocation)
    {
       configurationFile.setMode(configurationLocation.toHybridResourceMode());
-      InputStream inputStream = configurationFile.getInputStream();
-      if (inputStream != null)
+      LogTools.info("Loading plot panels from {}", configurationFile.getLocationOfResourceForReading());
+      return configurationFile.getInputStream(inputStream ->
       {
-         LogTools.info("Loading {}", configurationFile.getLocationOfResourceForReading());
          plotPanels.clear();
          JSONFileTools.load(inputStream, node ->
          {
-            for (Iterator<JsonNode> panelNodeIterator = node.withArray("panels").elements(); panelNodeIterator.hasNext(); )
+            JSONTools.forEachArrayElement(node, "panels", panelNode ->
             {
-               JsonNode panelNode = panelNodeIterator.next();
                String panelName = panelNode.get("name").asText();
                ImPlotModifiableYoPlotPanel plotPanel = addPlotPanel(panelName);
-               for (Iterator<JsonNode> plotsNodeInterator = panelNode.withArray("plots").elements(); plotsNodeInterator.hasNext(); )
+               JSONTools.forEachArrayElement(panelNode, "plots", plotNode ->
                {
-                  JsonNode plotNode = plotsNodeInterator.next();
                   ImPlotModifiableYoPlot imPlotModifiableYoPlot = plotPanel.addPlot();
-                  for (Iterator<JsonNode> variablesNodeInterator = plotNode.withArray("variables").elements(); variablesNodeInterator.hasNext(); )
+                  JSONTools.forEachArrayElement(plotNode, "variables", variableNode ->
                   {
-                     JsonNode variableNode = variablesNodeInterator.next();
                      // We are using getRootRegistry which is the session's working copy; i.e. not linked
                      imPlotModifiableYoPlot.addVariable(yoManager.getRootRegistry().findVariable(variableNode.get("variableName").asText()), false);
-                  }
-               }
-            }
+                  });
+               });
+            });
          });
-      }
-      else
-      {
-         LogTools.error("Failed to load {}", configurationFile.getLocationOfResourceForReading());
-      }
+      });
    }
 
    private void saveConfiguration(ImGuiConfigurationLocation configurationLocation)

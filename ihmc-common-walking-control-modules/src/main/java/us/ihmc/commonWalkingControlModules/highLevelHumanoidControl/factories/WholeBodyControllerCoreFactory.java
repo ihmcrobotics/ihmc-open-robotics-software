@@ -109,6 +109,11 @@ public class WholeBodyControllerCoreFactory
       return toolbox;
    }
 
+   public WholeBodyControllerCore getWholeBodyControllerCore()
+   {
+      return controllerCore;
+   }
+
    public WholeBodyControllerCore getOrCreateWholeBodyControllerCore()
    {
       if (controllerCore != null)
@@ -143,6 +148,11 @@ public class WholeBodyControllerCoreFactory
       controllerCore = new WholeBodyControllerCore(toolbox, template, lowLevelControllerOutput, registry);
 
       return controllerCore;
+   }
+
+   public LinearMomentumRateControlModule getLinearMomentumRateControlModule()
+   {
+      return linearMomentumRateControlModule;
    }
 
    public LinearMomentumRateControlModule getOrCreateLinearMomentumRateControlModule(YoRegistry registry)

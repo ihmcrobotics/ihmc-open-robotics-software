@@ -1,4 +1,4 @@
-# This message is part of the collection of platform-independent ROS messages.
+# This is part of the IHMC Common message package.
 # This message is used mainly with the IHMC whole-body controller.
 # When the execution of a collection of messages is to be synchronized, these messages should be attributed
 # a unique sequence ID. Then by sending beforehand a MessageCollection holding onto the sequence IDs of all these messages,

@@ -29,12 +29,11 @@ public class ImPlotYoGraphPanel
    private final String controllerHost = NetworkParameters.getHost(NetworkParameterKeys.robotController);
    private final int bufferSize;
    private final HashMap<String, ArrayList<ImPlotYoGraph>> graphs = new HashMap<>();
-   private final YoVariableClientHelper yoClientHelper = new YoVariableClientHelper(getClass().getSimpleName());
+   private final YoVariableClientHelper yoClientHelper;
    private final ImInt serverSelectedIndex = new ImInt(0);
    private String[] serverGraphGroupNames = new String[0];
    private final HashMap<String, TreeSet<String>> serverGraphGroups = new HashMap<>();
    private final HashMap<String, ArrayList<ImGuiModifiableYoDouble>> modifiableVariables = new HashMap<>();
-   private ImPlotContext context = null;
    private final ImBoolean showAllVariables = new ImBoolean(false);
    private final ImString searchBar = new ImString();
    private ImPlotYoGraph graphRequesting = null;
@@ -42,13 +41,18 @@ public class ImPlotYoGraphPanel
 
    public ImPlotYoGraphPanel(String title, int bufferSize)
    {
+      this(title, bufferSize, new YoVariableClientHelper(ImPlotYoGraphPanel.class.getSimpleName()));
+   }
+
+   public ImPlotYoGraphPanel(String title, int bufferSize, YoVariableClientHelper yoClientHelper)
+   {
       this.title = title;
       this.bufferSize = bufferSize;
+      this.yoClientHelper = yoClientHelper;
    }
 
    public void create()
    {
-      context = ImPlotTools.ensureImPlotInitialized();
       ImPlotStyle style = ImPlot.getStyle();
       style.setPlotPadding(new ImVec2(0, 0));
    }
@@ -166,7 +170,7 @@ public class ImPlotYoGraphPanel
          while (graphsIterator.hasNext())
          {
             ImPlotYoGraph graph = graphsIterator.next();
-            graph.render(context);
+            graph.render(ImPlotTools.getContext());
             if (!graph.shouldGraphExist())
                graphsIterator.remove();
             else if (graph.graphWantsVariable())
@@ -233,11 +237,14 @@ public class ImPlotYoGraphPanel
       return modifiableYoDouble;
    }
 
+   public YoVariableClientHelper getYoClientHelper()
+   {
+      return yoClientHelper;
+   }
+
    public void destroy()
    {
       yoClientHelper.disconnect();
-      graphs.clear();
-      ImPlot.destroyContext(context);
    }
 
    public String getWindowName()

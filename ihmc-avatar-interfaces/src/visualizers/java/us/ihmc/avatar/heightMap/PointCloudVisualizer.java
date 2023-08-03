@@ -7,31 +7,28 @@ import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import org.apache.commons.lang3.tuple.Pair;
-import org.opencv.core.Mat;
-import sensor_msgs.PointCloud2;
-import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
-import us.ihmc.commons.MathTools;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.perception.heightMap.HeightMapInputData;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.avatar.heightMap.HeightMapUpdater.APPROX_OUSTER_TRANSFORM;
-import static us.ihmc.avatar.heightMap.HeightMapUpdater.USE_OUSTER_FRAME;
+import static us.ihmc.perception.heightMap.HeightMapUpdater.APPROX_OUSTER_TRANSFORM;
+import static us.ihmc.perception.heightMap.HeightMapUpdater.USE_OUSTER_FRAME;
 
 public class PointCloudVisualizer extends AnimationTimer
 {
@@ -45,17 +42,15 @@ public class PointCloudVisualizer extends AnimationTimer
    private final PoseReferenceFrame ousterFrame = new PoseReferenceFrame("ousterFrame", ReferenceFrame.getWorldFrame());
 
    private final AtomicReference<Point2D> gridCenter = new AtomicReference<>(new Point2D());
-   private final double gridSizeXY;
 
    private final ExecutorService pointCloudUpdater = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
 
    public PointCloudVisualizer(Messager messager, HeightMapParameters parameters)
    {
       rootNode.getChildren().add(meshView);
-      messager.registerTopicListener(HeightMapMessagerAPI.PointCloudData, this::processPointCloud);
-      messager.registerTopicListener(HeightMapMessagerAPI.GridCenterX, x -> gridCenter.set(new Point2D(x, gridCenter.get().getY())));
-      messager.registerTopicListener(HeightMapMessagerAPI.GridCenterY, y -> gridCenter.set(new Point2D(gridCenter.get().getX(), y)));
-      gridSizeXY = parameters.getGridSizeXY();
+      messager.addTopicListener(HeightMapMessagerAPI.PointCloudData, this::processPointCloud);
+      messager.addTopicListener(HeightMapMessagerAPI.GridCenterX, x -> gridCenter.set(new Point2D(x, gridCenter.get().getY())));
+      messager.addTopicListener(HeightMapMessagerAPI.GridCenterY, y -> gridCenter.set(new Point2D(gridCenter.get().getX(), y)));
    }
 
    @Override
@@ -69,7 +64,7 @@ public class PointCloudVisualizer extends AnimationTimer
       }
    }
 
-   public void processPointCloud(Pair<PointCloud2, FramePose3D> pointCloudData)
+   public void processPointCloud(HeightMapInputData pointCloudData)
    {
       if (isProcessing.getAndSet(true))
       {
@@ -81,30 +76,39 @@ public class PointCloudVisualizer extends AnimationTimer
 
    private final AtomicBoolean isProcessing = new AtomicBoolean(false);
 
-   private void processPointCloudInternal(Pair<PointCloud2, FramePose3D> pointCloudData)
+   private void processPointCloudInternal(HeightMapInputData pointCloudData)
+   {
+      processPointCloudInternal(pointCloudData.pointCloud.getPointCloud(), pointCloudData.sensorPose);
+   }
+
+   private final Random random = new Random(1738L);
+   private void processPointCloudInternal(Point3D[] pointCloud, FramePose3DReadOnly ousterPose)
    {
       /* Compute mesh */
       meshBuilder.clear();
 
-      PointCloudData pointCloud = new PointCloudData(pointCloudData.getKey(), 1000000, false);
-
       if (USE_OUSTER_FRAME)
       {
-         ousterFrame.setPoseAndUpdate(pointCloudData.getRight());
+         ousterFrame.setPoseAndUpdate(ousterPose);
 
-         for (int i = 0; i < 64; i++)
+         int pointsToProcess = 50;
+//         for (int i = 0; i < 64; i++)
+//         {
+//            int v = 10;
+//            for (int j = 0; j < 2048; j++)
+//            {
+
+         for (int i = 0; i < pointsToProcess; i++)
          {
-            int v = 10;
-            for (int j = 0; j < 2048; j++)
-            {
-               FramePoint3D point = new FramePoint3D(ousterFrame, pointCloud.getPointCloud()[2048 * i + j]);
-               point.changeFrame(ReferenceFrame.getWorldFrame());
-               pointCloud.getPointCloud()[i].set(point);
+            int j = RandomNumbers.nextInt(random, 0, pointCloud.length - 1);
+            FramePoint3D point = new FramePoint3D(ousterFrame, pointCloud[j]);
+            point.changeFrame(ReferenceFrame.getWorldFrame());
 
-               double alpha = i / 65.0;
-               meshBuilder.addCube(POINT_SIZE, point, Color.RED.interpolate(Color.BLUE, alpha));
-            }
+            double alpha = i / 65.0;
+            meshBuilder.addCube(POINT_SIZE, point, Color.RED.interpolate(Color.BLUE, alpha));
          }
+//            }
+//         }
 
          //         for (int i = 0; i < pointCloud.getPointCloud().length; i++)
 //         {
@@ -126,9 +130,9 @@ public class PointCloudVisualizer extends AnimationTimer
       }
       else
       {
-         for (int i = 0; i < pointCloud.getPointCloud().length; i++)
+         for (int i = 0; i < pointCloud.length; i++)
          {
-            pointCloud.getPointCloud()[i].applyTransform(APPROX_OUSTER_TRANSFORM);
+            pointCloud[i].applyTransform(APPROX_OUSTER_TRANSFORM);
          }
       }
 

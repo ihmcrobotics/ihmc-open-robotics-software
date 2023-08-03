@@ -1,6 +1,7 @@
 package us.ihmc.rdx.simulation.sensors;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.pubsub.DomainFactory;
@@ -37,7 +38,7 @@ public class RDXSimulatedSensorFactory
                                                                                                             0.001,
                                                                                                             false,
                                                                                                             publishRateHz);
-      highLevelDepthSensorSimulator.setupForROS2PointCloud(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN);
+      highLevelDepthSensorSimulator.setupForROS2PointCloud(ros2Node, PerceptionAPI.MULTISENSE_LIDAR_SCAN);
       return highLevelDepthSensorSimulator;
    }
 
@@ -103,7 +104,7 @@ public class RDXSimulatedSensorFactory
 
    public static RDXHighLevelDepthSensorSimulator createRealsenseL515(ReferenceFrame sensorFrame, LongSupplier timestampSupplier)
    {
-      double publishRateHz = 4.0;
+      double publishRateHz = 20.0;
       double verticalFOV = 55.0;
       int imageWidth = 1024;
       int imageHeight = 768;
@@ -207,7 +208,7 @@ public class RDXSimulatedSensorFactory
                                                                                                             0.01,
                                                                                                             false,
                                                                                                             publishRateHz);
-      highLevelDepthSensorSimulator.setupForROS2Color(pubSubImplementation, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT));
+      highLevelDepthSensorSimulator.setupForROS2Color(pubSubImplementation, PerceptionAPI.BLACKFLY_VIDEO.get(RobotSide.RIGHT));
       return highLevelDepthSensorSimulator;
    }
 }

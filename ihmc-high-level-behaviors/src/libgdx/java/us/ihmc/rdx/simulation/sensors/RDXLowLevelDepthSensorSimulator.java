@@ -18,19 +18,21 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.imgui.ImGuiVideoPanel;
-import us.ihmc.rdx.perception.RDXCVImagePanel;
+import us.ihmc.rdx.ui.RDXImagePanel;
+import us.ihmc.rdx.perception.RDXBytedecoImagePanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.rdx.simulation.DepthSensorShaderProvider;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.visualizers.RDXFrustumVisualizer;
-import us.ihmc.perception.BytedecoOpenCVTools;
-import us.ihmc.perception.OpenCLFloatBuffer;
-import us.ihmc.perception.OpenCLManager;
+import us.ihmc.rdx.visualizers.RDXFrustumGraphic;
+import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.opencl.OpenCLFloatBuffer;
+import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.UnitConversions;
 
@@ -43,6 +45,9 @@ import java.util.Random;
  */
 public class RDXLowLevelDepthSensorSimulator
 {
+   // Each point contains {X, Y, Z, R, G, B, A, Size}
+   public static final int FLOATS_PER_POINT = RDXPointCloudRenderer.FLOATS_PER_VERTEX;
+
    private final String depthWindowName;
    private final String colorWindowName;
 
@@ -73,9 +78,9 @@ public class RDXLowLevelDepthSensorSimulator
    private boolean depthEnabled = true;
    private final ImBoolean renderFrustum = new ImBoolean(false);
 
-   private RDXCVImagePanel depthPanel;
-   private ImGuiVideoPanel colorPanel;
-   private RDXFrustumVisualizer frustumVisualizer;
+   private RDXBytedecoImagePanel depthPanel;
+   private RDXImagePanel colorPanel;
+   private RDXFrustumGraphic frustumVisualizer;
 
    private OpenCLManager openCLManager;
    private _cl_kernel openCLKernel;
@@ -147,8 +152,7 @@ public class RDXLowLevelDepthSensorSimulator
       frameBuffer = frameBufferBuilder.build();
 
       openCLManager = new OpenCLManager();
-      openCLManager.create();
-      openCLKernel = openCLManager.loadSingleFunctionProgramAndCreateKernel("LowLevelDepthSensorSimulator");
+      openCLKernel = openCLManager.loadSingleFunctionProgramAndCreateKernel("LowLevelDepthSensorSimulator", "PerceptionCommon.cl");
 
       normalizedDeviceCoordinateDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
       noiseImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
@@ -159,17 +163,17 @@ public class RDXLowLevelDepthSensorSimulator
       metersDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
       rgba8888ColorImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4);
       if (pointCloudRenderingBufferToPack != null)
-         pointCloudRenderingBuffer = new OpenCLFloatBuffer(numberOfPoints * 8, pointCloudRenderingBufferToPack);
+         pointCloudRenderingBuffer = new OpenCLFloatBuffer(numberOfPoints * FLOATS_PER_POINT, pointCloudRenderingBufferToPack);
       else
          pointCloudRenderingBuffer = new OpenCLFloatBuffer(1);
       parametersBuffer = new OpenCLFloatBuffer(29);
 
       // TODO these panels should be removable to a separate class
-      depthPanel = new RDXCVImagePanel(depthWindowName, imageWidth, imageHeight);
-      colorPanel = new ImGuiVideoPanel(colorWindowName, true);
+      depthPanel = new RDXBytedecoImagePanel(depthWindowName, imageWidth, imageHeight);
+      colorPanel = new RDXImagePanel(colorWindowName, RDXImagePanel.FLIP_Y);
       colorPanel.setTexture(frameBuffer.getColorTexture());
 
-      frustumVisualizer = new RDXFrustumVisualizer();
+      frustumVisualizer = new RDXFrustumGraphic();
    }
 
    private void calculateFocalLength()
@@ -235,10 +239,10 @@ public class RDXLowLevelDepthSensorSimulator
 
       // libGDX renders this stuff upside down, so let's flip them right side up.
       // TODO: Does it really? Sneaking suspicion that it doesn't and we end up flipping things again later on.
-      opencv_core.flip(rgba8888ColorImage.getBytedecoOpenCVMat(), rgba8888ColorImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_Y);
+      opencv_core.flip(rgba8888ColorImage.getBytedecoOpenCVMat(), rgba8888ColorImage.getBytedecoOpenCVMat(), OpenCVTools.FLIP_Y);
       opencv_core.flip(normalizedDeviceCoordinateDepthImage.getBytedecoOpenCVMat(),
                        normalizedDeviceCoordinateDepthImage.getBytedecoOpenCVMat(),
-                       BytedecoOpenCVTools.FLIP_Y);
+                       OpenCVTools.FLIP_Y);
 
       opencv_core.randu(noiseImage.getBytedecoOpenCVMat(), noiseLow, noiseHigh);
 
@@ -298,10 +302,9 @@ public class RDXLowLevelDepthSensorSimulator
       openCLManager.execute2D(openCLKernel, imageWidth, imageHeight);
       metersDepthImage.readOpenCLImage(openCLManager);
       pointCloudRenderingBuffer.readOpenCLBufferObject(openCLManager);
-      openCLManager.finish();
 
-      if (depthPanel.getVideoPanel().getIsShowing().get())
-         depthPanel.drawFloatImage(metersDepthImage.getBytedecoOpenCVMat());
+      if (depthPanel.getImagePanel().getIsShowing().get())
+         depthPanel.drawDepthImage(metersDepthImage.getBytedecoOpenCVMat());
    }
 
    public void renderTuningSliders()
@@ -386,12 +389,12 @@ public class RDXLowLevelDepthSensorSimulator
       return farPlaneDistance.get();
    }
 
-   public ImGuiVideoPanel getDepthPanel()
+   public RDXImagePanel getDepthPanel()
    {
-      return depthPanel.getVideoPanel();
+      return depthPanel.getImagePanel();
    }
 
-   public ImGuiVideoPanel getColorPanel()
+   public RDXImagePanel getColorPanel()
    {
       return colorPanel;
    }

@@ -87,7 +87,6 @@ public abstract class DRCSimulationTools
          boolean startREAModule = modulesToStart.contains(Modules.REA_MODULE) && !modulesToStart.contains(Modules.REA_UI);
          networkProcessorParameters.setUseRobotEnvironmentAwerenessModule(startREAModule);
          networkProcessorParameters.setUseBipedalSupportPlanarRegionPublisherModule(modulesToStart.contains(Modules.SENSOR_MODULE));
-         networkProcessorParameters.setUseMocapModule(modulesToStart.contains(Modules.MOCAP_MODULE));
          networkProcessorParameters.setUseFiducialDetectorToolboxModule(modulesToStart.contains(Modules.FIDUCIAL_DETECTOR));
          networkProcessorParameters.setUseObjectDetectorToolboxModule(modulesToStart.contains(Modules.OBJECT_DETECTOR));
          networkProcessorParameters.setUseDirectionalControlModule(modulesToStart.contains(Modules.DIRECTIONAL_CONTROL_TOOLBOX));
@@ -175,7 +174,6 @@ public abstract class DRCSimulationTools
       ZERO_POSE_PRODUCER,
       REA_MODULE,
       REA_UI,
-      MOCAP_MODULE,
       KINEMATICS_TOOLBOX,
       KINEMATICS_PLANNING_TOOLBOX,
       FOOTSTEP_PLANNING_TOOLBOX,

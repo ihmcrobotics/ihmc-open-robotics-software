@@ -209,12 +209,12 @@ public class DynamicsMatrixCalculator
       return jointTorques;
    }
 
-   public DMatrixRMaj getTorqueMinimizationAccelerationJacobian()
+   public DMatrixRMaj getBodyMassMatrix()
    {
       return bodyMassMatrix;
    }
 
-   public DMatrixRMaj getTorqueMinimizationRhoJacobian()
+   public DMatrixRMaj getBodyContactForceJacobianTranspose()
    {
       return bodyContactForceJacobianTranspose;
    }
@@ -222,6 +222,11 @@ public class DynamicsMatrixCalculator
    public DMatrixRMaj getTorqueMinimizationObjective()
    {
       return torqueMinimizationObjective;
+   }
+
+   public DMatrixRMaj getBodyGravityCoriolisMatrix()
+   {
+      return bodyCoriolisMatrix;
    }
 
    private static final int large = 1000;

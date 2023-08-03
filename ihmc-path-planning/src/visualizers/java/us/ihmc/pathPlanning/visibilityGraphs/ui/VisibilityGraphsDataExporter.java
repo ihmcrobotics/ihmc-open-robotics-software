@@ -30,7 +30,7 @@ public class VisibilityGraphsDataExporter
       start = messager.createInput(UIVisibilityGraphsTopics.StartPosition);
       goal = messager.createInput(UIVisibilityGraphsTopics.GoalPosition);
       dataDirectoryPath = messager.createInput(UIVisibilityGraphsTopics.exportUnitTestPath, null);
-      messager.registerTopicListener(UIVisibilityGraphsTopics.exportUnitTestDataFile, this::exportVisibilityGraphsData);
+      messager.addTopicListener(UIVisibilityGraphsTopics.exportUnitTestDataFile, this::exportVisibilityGraphsData);
    }
 
    private void exportVisibilityGraphsData(boolean export)

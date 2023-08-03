@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.genericQuadruped;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
-import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
@@ -18,6 +17,7 @@ import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedSi
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedStateEstimatorParameters;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedXGaitSettings;
 import us.ihmc.exampleSimulations.genericQuadruped.simulation.GenericQuadrupedGroundContactParameters;
+import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
@@ -45,7 +45,6 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -85,7 +84,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
    public GenericQuadrupedTestFactory()
    {
-      simulationTestingParameters.setKeepSCSUp(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+      simulationTestingParameters.setKeepSCSUp(false);
    }
 
    @Override
@@ -111,7 +110,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters = new GenericQuadrupedPrivilegedConfigurationParameters();
       QuadrupedFallDetectionParameters fallDetectionParameters = new GenericQuadrupedFallDetectionParameters();
 
-      fullRobotModel = modelFactory.createFullRobotModel();
+      fullRobotModel = modelFactory.createFullRobotModel(false);
       RobotDefinition robotDefinition = modelFactory.getRobotDefinition();
       initialPositionParameters.offsetInitialConfiguration(initialOffset.get());
       QuadrupedSimulationFactory.setRobotDefinitionInitialJointStates(initialPositionParameters, modelFactory.getQuadrupedJointNames(), modelFactory::getSDFNameForJointName, robotDefinition);
@@ -200,7 +199,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
       simulationFactory.setUsePushRobotController(usePushRobotController.get());
       GoalOrientedTestConductor goalOrientedTestConductor = new GoalOrientedTestConductor(simulationFactory.createSimulation(), simulationTestingParameters);
-      goalOrientedTestConductor.getScs().addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(graphicsListRegistry));
+      goalOrientedTestConductor.getScs().addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(graphicsListRegistry));
 
       FactoryTools.disposeFactory(this);
 

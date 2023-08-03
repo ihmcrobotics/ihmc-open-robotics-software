@@ -1,22 +1,22 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
+import java.util.List;
+
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.util.List;
-
-public interface StepAdjustmentController
+public interface StepAdjustmentController extends SCS2YoGraphicHolder
 {
    void reset();
 
-   void setFootstepAfterTheCurrentOne(SimpleFootstep nextFootstep, FootstepTiming nextFootstepTiming);
+   void setFootstepQueueInformation(int numberOfStepsInQueue, double subsequentStepDuration);
 
-   void setFootstepToAdjust(SimpleFootstep footstep, double swingDuration, double nextTransferDuration);
+   void setFootstepToAdjust(SimpleFootstep footstep, double swingDuration);
 
    void submitSwingSpeedUpUnderDisturbance(double remainingTimeForSwing);
 
@@ -25,15 +25,15 @@ public interface StepAdjustmentController
    void initialize(double initialTime, RobotSide supportSide);
 
    void compute(double currentTime,
-                       FramePoint2DReadOnly desiredICP,
-                       FramePoint2DReadOnly currentICP,
-                       double omega0);
+                FramePoint2DReadOnly desiredICP,
+                FramePoint2DReadOnly currentICP,
+                double omega0,
+                FramePoint2DReadOnly copToShrinkAbout,
+                double percentageToShrinkPolygon);
 
    FramePose3DReadOnly getFootstepSolution();
 
    boolean wasFootstepAdjusted();
 
    boolean useStepAdjustment();
-
-
 }

@@ -1,8 +1,8 @@
 package us.ihmc.avatar.joystickBasedJavaFXController;
 
 import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.SteppingParameters;
-import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.WalkingTrajectoryDuration;
 import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.StepsAreAdjustable;
+import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.WalkingTrajectoryDuration;
 import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.ButtonBState;
 import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.ButtonLeftBumperState;
 import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.ButtonRightBumperState;
@@ -23,9 +23,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.*;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import perception_msgs.msg.dds.REAStateRequestMessage;
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import javafx.animation.AnimationTimer;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
@@ -34,6 +38,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -48,9 +54,9 @@ import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javafx.JavaFXRobotVisualizer;
 import us.ihmc.log.LogTools;
+import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
@@ -121,7 +127,7 @@ public class StepGeneratorJavaFXController
       this.footPolygons = footPolygons;
       continuousStepController = new ContinuousStepController(walkingControllerParameters);
 
-      messager.registerTopicListener(SteppingParameters, continuousStepController::setJoystickStepParameters);
+      messager.addTopicListener(SteppingParameters, continuousStepController::setJoystickStepParameters);
       ROS2Topic<?> controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
       ROS2Topic<?> controllerInputTopic = ROS2Tools.getControllerInputTopic(robotName);
 
@@ -167,13 +173,13 @@ public class StepGeneratorJavaFXController
       setupKickAction(messager);
       setupPunchAction(messager);
 
-      messager.registerTopicListener(ButtonLeftBumperState, state ->
+      messager.addTopicListener(ButtonLeftBumperState, state ->
       {
          if (state == ButtonState.PRESSED)
             sendArmHomeConfiguration(RobotSide.values);
       });
 
-      messager.registerTopicListener(ButtonRightBumperState, state ->
+      messager.addTopicListener(ButtonRightBumperState, state ->
       {
          if (state == ButtonState.PRESSED)
             continuousStepController.submitWalkingRequest(true);
@@ -181,20 +187,20 @@ public class StepGeneratorJavaFXController
             continuousStepController.submitWalkingRequest(false);
       });
 
-      messager.registerJavaFXSyncedTopicListener(LeftStickYAxis, continuousStepController::updateForwardVelocity);
-      messager.registerJavaFXSyncedTopicListener(LeftStickXAxis, continuousStepController::updateLateralVelocity);
-      messager.registerJavaFXSyncedTopicListener(RightStickXAxis, continuousStepController::updateTurningVelocity);
-      messager.registerTopicListener(DPadLeftState, state -> sendREAResumeRequest());
-      messager.registerTopicListener(DPadDownState, state -> sendREAClearRequest());
+      messager.addFXTopicListener(LeftStickYAxis, continuousStepController::updateForwardVelocity);
+      messager.addFXTopicListener(LeftStickXAxis, continuousStepController::updateLateralVelocity);
+      messager.addFXTopicListener(RightStickXAxis, continuousStepController::updateTurningVelocity);
+      messager.addTopicListener(DPadLeftState, state -> sendREAResumeRequest());
+      messager.addTopicListener(DPadDownState, state -> sendREAClearRequest());
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     WalkingControllerFailureStatusMessage.class,
                                                     controllerOutputTopic,
                                                     s -> continuousStepController.submitWalkingRequest(false));
-      messager.registerTopicListener(ButtonSelectState, state -> continuousStepController.submitWalkingRequest(false));
-      messager.registerTopicListener(ButtonSelectState, state -> lowLevelMessenger.sendFreezeRequest());
-      messager.registerTopicListener(ButtonStartState, state -> continuousStepController.submitWalkingRequest(false));
-      messager.registerTopicListener(ButtonStartState, state -> lowLevelMessenger.sendStandRequest());
+      messager.addTopicListener(ButtonSelectState, state -> continuousStepController.submitWalkingRequest(false));
+      messager.addTopicListener(ButtonSelectState, state -> lowLevelMessenger.sendFreezeRequest());
+      messager.addTopicListener(ButtonStartState, state -> continuousStepController.submitWalkingRequest(false));
+      messager.addTopicListener(ButtonStartState, state -> lowLevelMessenger.sendStandRequest());
    }
 
    private YoVariableServer yoVariableServer = null;
@@ -277,15 +283,15 @@ public class StepGeneratorJavaFXController
 
    private void setupPunchAction(JavaFXMessager messager)
    {
-      messager.registerTopicListener(ButtonXState, state -> processPunch(RobotSide.LEFT, state));
-      messager.registerTopicListener(ButtonYState, state -> processPunch(RobotSide.RIGHT, state));
+      messager.addTopicListener(ButtonXState, state -> processPunch(RobotSide.LEFT, state));
+      messager.addTopicListener(ButtonYState, state -> processPunch(RobotSide.RIGHT, state));
    }
 
    private void setupKickAction(JavaFXMessager messager)
    {
-      messager.registerTopicListener(ButtonXState, state -> processToggleFlamingoMode(RobotSide.LEFT, state));
-      messager.registerTopicListener(ButtonBState, state -> processToggleFlamingoMode(RobotSide.RIGHT, state));
-      messager.registerTopicListener(ButtonYState, state -> processKick(state));
+      messager.addTopicListener(ButtonXState, state -> processToggleFlamingoMode(RobotSide.LEFT, state));
+      messager.addTopicListener(ButtonBState, state -> processToggleFlamingoMode(RobotSide.RIGHT, state));
+      messager.addTopicListener(ButtonYState, state -> processKick(state));
    }
 
    private void prepareFootsteps(FootstepDataListMessage footstepDataListMessage)

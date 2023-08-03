@@ -1,17 +1,16 @@
 package us.ihmc.quadrupedUI.uiControllers;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.messager.TopicListener;
-import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
+import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedUI.QuadrupedUIMessagerAPI;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 public class RobotControlTabController
 {
@@ -49,8 +48,8 @@ public class RobotControlTabController
       this.messager = messager;
       currentControllerState = messager.createInput(QuadrupedUIMessagerAPI.CurrentControllerNameTopic, null);
 
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.EnableBodyTeleopTopic, this::validateBodyTopic);
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, this::validateWalkingTopic);
+      messager.addTopicListener(QuadrupedUIMessagerAPI.EnableBodyTeleopTopic, this::validateBodyTopic);
+      messager.addTopicListener(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, this::validateWalkingTopic);
    }
 
    private void validateBodyTopic(boolean request)
@@ -98,7 +97,7 @@ public class RobotControlTabController
 
    public void bindControls()
    {
-      messager.registerJavaFXSyncedTopicListener(QuadrupedUIMessagerAPI.CurrentControllerNameTopic, new TextViewerListener<>(currentStateViewer));
+      messager.addFXTopicListener(QuadrupedUIMessagerAPI.CurrentControllerNameTopic, new TextViewerListener<>(currentStateViewer));
       messager.bindBidirectional(QuadrupedUIMessagerAPI.EnableBodyTeleopTopic, enablePoseTeleopControl.selectedProperty(), true);
       messager.bindBidirectional(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, enableStepTeleopControl.selectedProperty(), true);
       messager.bindBidirectional(QuadrupedUIMessagerAPI.EnableHeightTeleopTopic, enableHeightTeleopControl.selectedProperty(), true);

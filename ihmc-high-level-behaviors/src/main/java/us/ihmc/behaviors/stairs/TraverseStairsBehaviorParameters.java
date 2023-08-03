@@ -24,7 +24,7 @@ public class TraverseStairsBehaviorParameters extends StoredPropertySet
 
    public TraverseStairsBehaviorParameters()
    {
-      super(keys, TraverseStairsBehaviorParameters.class, "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
+      super(keys, TraverseStairsBehaviorParameters.class);
       load();
    }
 

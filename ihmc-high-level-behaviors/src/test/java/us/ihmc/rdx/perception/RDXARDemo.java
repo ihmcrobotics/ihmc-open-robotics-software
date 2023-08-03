@@ -1,5 +1,6 @@
 package us.ihmc.rdx.perception;
 
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -9,13 +10,13 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDX3DSituatedImagePanel;
-import us.ihmc.rdx.ui.graphics.live.RDXROS2BigVideoVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2BigVideoVisualizer;
 import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.pubsub.DomainFactory;
 
 public class RDXARDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private RDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator;
    private final RDXPose3DGizmo sensorPoseGizmo = new RDXPose3DGizmo();
    private RDXEnvironmentBuilder environmentBuilder;
@@ -45,9 +46,14 @@ public class RDXARDemo
             baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
 
             DomainFactory.PubSubImplementation pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
-            globalVisualizersPanel = new RDXGlobalVisualizersPanel(false);
-            RDXROS2BigVideoVisualizer videoVisualizer = new RDXROS2BigVideoVisualizer("Video", pubSubImplementation, ROS2Tools.BIG_VIDEO);
+            globalVisualizersPanel = new RDXGlobalVisualizersPanel();
+
+            RDXROS2BigVideoVisualizer videoVisualizer = new RDXROS2BigVideoVisualizer("Video",
+                                                                                      pubSubImplementation,
+                                                                                      PerceptionAPI.BIG_VIDEO);
+            videoVisualizer.setSubscribed(true);
             globalVisualizersPanel.addVisualizer(videoVisualizer);
+
             globalVisualizersPanel.create();
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);
 
@@ -72,7 +78,7 @@ public class RDXARDemo
                                                                                  0.05,
                                                                                  true,
                                                                                  publishRateHz);
-            highLevelDepthSensorSimulator.setupForROS2Color(pubSubImplementation, ROS2Tools.BIG_VIDEO);
+            highLevelDepthSensorSimulator.setupForROS2Color(pubSubImplementation, PerceptionAPI.BIG_VIDEO);
             baseUI.getImGuiPanelManager().addPanel(highLevelDepthSensorSimulator);
             highLevelDepthSensorSimulator.setSensorEnabled(true);
             highLevelDepthSensorSimulator.setPublishPointCloudROS2(false);
@@ -98,7 +104,7 @@ public class RDXARDemo
             baseUI.getPrimaryScene().addCoordinateFrame(0.3);
 
             // TODO: Make a new scene for this panel
-            arPanel = new RDX3DPanel("AR View", 2, false);
+            arPanel = new RDX3DPanel("AR View", false);
 
             baseUI.add3DPanel(arPanel);
             arPanel.getCamera3D().setInputEnabled(false);

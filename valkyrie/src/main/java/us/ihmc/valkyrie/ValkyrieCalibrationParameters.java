@@ -5,6 +5,7 @@ import java.util.HashMap;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
@@ -44,6 +45,10 @@ public class ValkyrieCalibrationParameters implements WholeBodySetpointParameter
          setSetpoint(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL), 0.0);
          setSetpoint(jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH), 0.0);
       }
+
+      // Not useful for calibration itself, but helps checking that the neck J3 is working.
+      setSetpoint(jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH), 0.25);
+      setSetpoint(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_PITCH), -0.25);
    }
 
    private void setSetpoint(String jointName, double value)

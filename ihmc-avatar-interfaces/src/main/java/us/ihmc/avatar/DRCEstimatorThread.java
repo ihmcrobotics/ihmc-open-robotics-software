@@ -32,6 +32,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -44,6 +45,8 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
@@ -73,7 +76,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
-public class DRCEstimatorThread implements MultiThreadedRobotControlElement
+public class DRCEstimatorThread implements MultiThreadedRobotControlElement, SCS2YoGraphicHolder
 {
    private static final boolean USE_FORCE_SENSOR_TO_JOINT_TORQUE_PROJECTOR = false;
 
@@ -88,6 +91,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final ForceSensorDataHolder forceSensorDataHolderForEstimator;
    private final ModularRobotController estimatorController;
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+   private final YoGraphicGroupDefinition scs2YoGraphics = new YoGraphicGroupDefinition(getClass().getSimpleName());
 
    private final StateEstimatorController drcStateEstimator;
    private final StateEstimatorController ekfStateEstimator;
@@ -122,11 +126,18 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
    private final SensorDataContext sensorDataContext = new SensorDataContext();
 
-   public DRCEstimatorThread(String robotName, HumanoidRobotSensorInformation sensorInformation, RobotContactPointParameters<RobotSide> contactPointParameters,
-                             DRCRobotModel robotModel, StateEstimatorParameters stateEstimatorParameters, SensorReaderFactory sensorReaderFactory,
-                             ThreadDataSynchronizerInterface threadDataSynchronizer, RealtimeROS2Node realtimeROS2Node,
-                             PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber, JointDesiredOutputWriter outputWriter,
-                             RobotVisualizer robotVisualizer, double gravity)
+   public DRCEstimatorThread(String robotName,
+                             HumanoidRobotSensorInformation sensorInformation,
+                             RobotContactPointParameters<RobotSide> contactPointParameters,
+                             DRCRobotModel robotModel,
+                             StateEstimatorParameters stateEstimatorParameters,
+                             SensorReaderFactory sensorReaderFactory,
+                             ThreadDataSynchronizerInterface threadDataSynchronizer,
+                             RealtimeROS2Node realtimeROS2Node,
+                             PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber,
+                             JointDesiredOutputWriter outputWriter,
+                             RobotVisualizer robotVisualizer,
+                             double gravity)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.robotVisualizer = robotVisualizer;
@@ -153,7 +164,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
       if (realtimeROS2Node != null)
          controllerCrashPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node,
-                                                                       ControllerCrashNotificationPacket.class, ROS2Tools.getControllerOutputTopic(robotName));
+                                                                       ControllerCrashNotificationPacket.class,
+                                                                       ROS2Tools.getControllerOutputTopic(robotName));
       else
          controllerCrashPublisher = null;
 
@@ -169,6 +181,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
                                                                   robotMotionStatusFromController,
                                                                   yoGraphicsListRegistry,
                                                                   estimatorRegistry);
+            scs2YoGraphics.addChild(forceSensorStateUpdater.getSCS2YoGraphics());
          }
          else
          {
@@ -182,7 +195,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
             ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
                                                           RequestWristForceSensorCalibrationPacket.class,
                                                           inputTopic,
-                                                 subscriber -> requestWristForceSensorCalibrationSubscriber.receivedPacket(subscriber.takeNextData()));
+                                                          subscriber -> requestWristForceSensorCalibrationSubscriber.receivedPacket(subscriber.takeNextData()));
             forceSensorStateUpdater.setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
          }
       }
@@ -208,13 +221,18 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
                                                                additionalContactTransforms.get(i));
          CenterOfPressureDataHolder centerOfPressureDataHolderFromController = threadDataSynchronizer.getEstimatorCenterOfPressureDataHolder();
          CenterOfMassDataHolder centerOfMassDataHolderForEstimator = threadDataSynchronizer.getEstimatorCenterOfMassDataHolder();
-         estimatorFactory.setEstimatorFullRobotModel(estimatorFullRobotModel).setSensorInformation(sensorInformation)
-                         .setSensorOutputMapReadOnly(processedSensorOutputMap).setGravity(gravity).setStateEstimatorParameters(stateEstimatorParameters)
-                         .setContactableBodiesFactory(contactableBodiesFactory).setEstimatorForceSensorDataHolder(forceSensorDataHolderForEstimator)
+         estimatorFactory.setEstimatorFullRobotModel(estimatorFullRobotModel)
+                         .setSensorInformation(sensorInformation)
+                         .setSensorOutputMapReadOnly(processedSensorOutputMap)
+                         .setGravity(gravity)
+                         .setStateEstimatorParameters(stateEstimatorParameters)
+                         .setContactableBodiesFactory(contactableBodiesFactory)
+                         .setEstimatorForceSensorDataHolder(forceSensorDataHolderForEstimator)
                          .setEstimatorCenterOfMassDataHolderToUpdate(centerOfMassDataHolderForEstimator)
                          .setCenterOfPressureDataHolderFromController(centerOfPressureDataHolderFromController)
                          .setRobotMotionStatusFromController(robotMotionStatusFromController);
          drcStateEstimator = estimatorFactory.createStateEstimator(estimatorRegistry, yoGraphicsListRegistry);
+         scs2YoGraphics.addChild(drcStateEstimator.getSCS2YoGraphics());
          estimatorController.addRobotController(drcStateEstimator);
       }
       else
@@ -351,7 +369,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       }
    }
 
-   public void setupHighLevelControllerCallback(String robotName, RealtimeROS2Node realtimeROS2Node,
+   public void setupHighLevelControllerCallback(String robotName,
+                                                RealtimeROS2Node realtimeROS2Node,
                                                 Map<HighLevelControllerName, StateEstimatorMode> stateModeMap)
    {
       ROS2Topic outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
@@ -499,6 +518,12 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    public YoGraphicsListRegistry getYoGraphicsListRegistry()
    {
       return yoGraphicsListRegistry;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      return scs2YoGraphics;
    }
 
    public ForceSensorCalibrationModule getForceSensorCalibrationModule()

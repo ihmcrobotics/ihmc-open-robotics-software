@@ -21,10 +21,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.yoVariables.parameters.BooleanParameter;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.providers.BooleanProvider;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -68,9 +64,7 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
    private final ReferenceFrame nextSoleZUpFrame;
    private final ReferenceFrame nextSoleFrame;
 
-   public ControllerPelvisOrientationManager(PID3DGainsReadOnly gains,
-                                             HighLevelHumanoidControllerToolbox controllerToolbox,
-                                             YoRegistry parentRegistry)
+   public ControllerPelvisOrientationManager(PID3DGainsReadOnly gains, HighLevelHumanoidControllerToolbox controllerToolbox, YoRegistry parentRegistry)
    {
       yoTime = controllerToolbox.getYoTime();
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();

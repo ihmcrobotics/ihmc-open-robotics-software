@@ -45,6 +45,11 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
       create(storedPropertySet, true, onParametersUpdatedCallback);
    }
 
+   /**
+    * This method allows to decide whether to make some radio buttons that allow you to switch between
+    * versions of a stored property set. That is, if there's several suffixes found, in addition to the
+    * possibility that one without a suffix is found, which we call the "Primary" version.
+    */
    public void create(StoredPropertySetBasics storedPropertySet, boolean buildSelectorForMultipleVersions, Runnable onParametersUpdatedCallback)
    {
       this.storedPropertySet = storedPropertySet;
@@ -64,12 +69,6 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
             }
             return FileVisitResult.CONTINUE;
          });
-         String currentWorkingVersion = versions.first();
-         if (!storedPropertySet.getCurrentVersionSuffix().equals(currentWorkingVersion))
-         {
-            storedPropertySet.updateBackingSaveFile(currentWorkingVersion);
-            storedPropertySet.load();
-         }
       }
 
       for (StoredPropertyKey<?> propertyKey : storedPropertySet.getKeyList().keys())
@@ -138,7 +137,7 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
 
       for (ImGuiStoredPropertySetWidget widget : imGuiWidgetRenderers)
       {
-         widget.render();
+         widget.renderImGuiWidget();
       }
 
       boolean returnAnyChanged = anyParameterChanged;
@@ -160,9 +159,23 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
       return new ImGuiStoredPropertySetDoubleWidget(storedPropertySet, doubleKey, step, stepFast, format, unitString, onParametersUpdatedCallback);
    }
 
+   public ImGuiStoredPropertySetDoubleWidget createDoubleInput(DoubleStoredPropertyKey doubleKey,
+                                                               double step,
+                                                               double stepFast,
+                                                               String unitString,
+                                                               String format)
+   {
+      return new ImGuiStoredPropertySetDoubleWidget(storedPropertySet, doubleKey, step, stepFast, format, unitString, onParametersUpdatedCallback, true);
+   }
+
    public ImGuiStoredPropertySetDoubleWidget createDoubleSlider(DoubleStoredPropertyKey key, double min, double max)
    {
       return new ImGuiStoredPropertySetDoubleWidget(storedPropertySet, key, min, max, onParametersUpdatedCallback);
+   }
+
+   public ImGuiStoredPropertySetBooleanWidget createBooleanCheckbox(BooleanStoredPropertyKey key)
+   {
+      return new ImGuiStoredPropertySetBooleanWidget(storedPropertySet, key, onParametersUpdatedCallback);
    }
 
    private void onParametersUpdatedCallbackAndMore()

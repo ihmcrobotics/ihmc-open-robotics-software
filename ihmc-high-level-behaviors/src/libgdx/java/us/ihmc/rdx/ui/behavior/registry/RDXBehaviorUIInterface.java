@@ -1,21 +1,23 @@
 package us.ihmc.rdx.ui.behavior.registry;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.vr.RDXVRContext;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * The UI has a tree structure, but not a decision or search one.
  * Currently calls propagate down to all the nodes so they can decide to take action.
  */
-public abstract class RDXBehaviorUIInterface extends BehaviorTreeNode implements RenderableProvider
+public abstract class RDXBehaviorUIInterface extends BehaviorTreeNode implements RDXRenderableProvider
 {
    private final ArrayList<RDXBehaviorUIInterface> children = new ArrayList<>();
 
@@ -79,7 +81,7 @@ public abstract class RDXBehaviorUIInterface extends BehaviorTreeNode implements
    {
       setPreviousStatus(externalNode.getPreviousStatus());
       setName(externalNode.getName());
-      setLastTickMillis(externalNode.getLastTickMillis());
+      setLastTickInstant(externalNode.getLastTickInstant());
       setType(externalNode.getType());
 
       if (externalNode instanceof BehaviorTreeControlFlowNodeBasics)
@@ -105,7 +107,7 @@ public abstract class RDXBehaviorUIInterface extends BehaviorTreeNode implements
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
 
    }

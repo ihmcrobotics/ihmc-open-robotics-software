@@ -1,0 +1,92 @@
+{
+  "title" : "Rapid region extractor parameters",
+  "Normal pack range" : {
+    "value" : 10,
+    "lowerBound" : 1,
+    "upperBound" : 10
+  },
+  "Centroid pack range" : {
+    "value" : 1,
+    "lowerBound" : 1,
+    "upperBound" : 10
+  },
+  "Merge range" : {
+    "value" : 1,
+    "lowerBound" : 1,
+    "upperBound" : 10
+  },
+  "Merge orthogonal threshold" : {
+    "value" : 0.123711,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.5
+  },
+  "Merge distance threshold" : {
+    "value" : 2.0,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.0
+  },
+  "Merge angular threshold" : {
+    "value" : 0.977346,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.0
+  },
+  "Connection threshold" : {
+    "value" : 6,
+    "lowerBound" : 0,
+    "upperBound" : 8
+  },
+  "Patch size" : {
+    "value" : 4,
+    "lowerBound" : 2,
+    "upperBound" : 20
+  },
+  "Dead pixel filter patch size" : {
+    "value" : 1,
+    "lowerBound" : 1,
+    "upperBound" : 20
+  },
+  "Focal length X pixels" : {
+    "value" : 730.7891,
+    "lowerBound" : -1000.0,
+    "upperBound" : 1000.0
+  },
+  "Focal length Y pixels" : {
+    "value" : 731.0859,
+    "lowerBound" : -1000.0,
+    "upperBound" : 1000.0
+  },
+  "Principal offset X pixels" : 528.6094,
+  "Principal offset Y pixels" : 408.1602,
+  "Use filtered image" : true,
+  "Use SVD normals" : true,
+  "SVD reduction factor" : {
+    "value" : 20,
+    "lowerBound" : 1,
+    "upperBound" : 100
+  },
+  "Internal search depth limit" : {
+    "value" : 35000,
+    "lowerBound" : 1,
+    "upperBound" : 50000
+  },
+  "Boundary search depth limit" : {
+    "value" : 8000,
+    "lowerBound" : 1,
+    "upperBound" : 15000
+  },
+  "Region min patches" : {
+    "value" : 72,
+    "lowerBound" : 1,
+    "upperBound" : 3000
+  },
+  "Boundary min patches" : {
+    "value" : 50,
+    "lowerBound" : 1,
+    "upperBound" : 1000
+  },
+  "Region growth factor" : {
+    "value" : 0.0,
+    "lowerBound" : 0.0,
+    "upperBound" : 0.1
+  }
+}

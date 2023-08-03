@@ -5,17 +5,21 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TableView;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyMap;
 import us.ihmc.javafx.parameter.StoredPropertyTableViewWrapper;
+import us.ihmc.messager.javafx.JavaFXMessager;
+import us.ihmc.sensorProcessing.heightMap.HeightMapFilterParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
 public class HeightMapParametersUIController
 {
    private JavaFXMessager messager;
    private HeightMapParameters parameters;
-   private JavaFXStoredPropertyMap javaFXStoredPropertyMap;
-   private StoredPropertyTableViewWrapper tableViewWrapper;
+   private HeightMapFilterParameters filterParameters;
+   private JavaFXStoredPropertyMap javaFXStoredPropertyParameterMap;
+   private JavaFXStoredPropertyMap javaFXStoredPropertyFilterParameterMap;
+   private StoredPropertyTableViewWrapper parameterTableViewWrapper;
+   private StoredPropertyTableViewWrapper filterParameterTableViewWrapper;
 
    @FXML
    private Spinner<Integer> publishFreq;
@@ -36,6 +40,8 @@ public class HeightMapParametersUIController
 
    @FXML
    private TableView<StoredPropertyTableViewWrapper.ParametersTableRow> parameterTable;
+   @FXML
+   private TableView<StoredPropertyTableViewWrapper.ParametersTableRow> filterParameterTable;
 
    public void attachMessager(JavaFXMessager messager)
    {
@@ -45,13 +51,22 @@ public class HeightMapParametersUIController
    public void setParameters(HeightMapParameters parameters)
    {
       this.parameters = parameters;
-      this.javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(parameters);
+      this.javaFXStoredPropertyParameterMap = new JavaFXStoredPropertyMap(parameters);
+   }
+
+   public void setFilterParameters(HeightMapFilterParameters parameters)
+   {
+      this.filterParameters = parameters;
+      this.javaFXStoredPropertyFilterParameterMap = new JavaFXStoredPropertyMap(parameters);
    }
 
    public void bindControls()
    {
-      tableViewWrapper = new StoredPropertyTableViewWrapper(340.0, 180.0, 2, parameterTable, javaFXStoredPropertyMap, 3);
-      tableViewWrapper.setTableUpdatedCallback(() -> messager.submitMessage(HeightMapMessagerAPI.parameters, parameters));
+      parameterTableViewWrapper = new StoredPropertyTableViewWrapper(340.0, 180.0, 2, parameterTable, javaFXStoredPropertyParameterMap, 3);
+      parameterTableViewWrapper.setTableUpdatedCallback(() -> messager.submitMessage(HeightMapMessagerAPI.parameters, parameters));
+
+      filterParameterTableViewWrapper = new StoredPropertyTableViewWrapper(340.0, 180.0, 2, filterParameterTable, javaFXStoredPropertyFilterParameterMap, 3);
+      filterParameterTableViewWrapper.setTableUpdatedCallback(() -> messager.submitMessage(HeightMapMessagerAPI.filterParameters, filterParameters));
 
       publishFreq.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE));
       gridCenterX.setValueFactory(createGridCenterFactory());
@@ -76,20 +91,24 @@ public class HeightMapParametersUIController
 
    public void onPrimaryStageLoaded()
    {
-      tableViewWrapper.removeHeader();
+      parameterTableViewWrapper.removeHeader();
+      filterParameterTableViewWrapper.removeHeader();
    }
 
    @FXML
    public void saveParameters()
    {
       parameters.save();
+      filterParameters.save();
    }
 
    @FXML
    public void loadFile()
    {
-      tableViewWrapper.loadNewFile();
+      parameterTableViewWrapper.loadNewFile();
+      filterParameterTableViewWrapper.loadNewFile();
       messager.submitMessage(HeightMapMessagerAPI.parameters, parameters);
+      messager.submitMessage(HeightMapMessagerAPI.filterParameters, filterParameters);
    }
 
    @FXML

@@ -5,8 +5,8 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
+import us.ihmc.messager.javafx.JavaFXMessager;
+import us.ihmc.messager.javafx.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 
 public class GraspingFingerPaneController
 {

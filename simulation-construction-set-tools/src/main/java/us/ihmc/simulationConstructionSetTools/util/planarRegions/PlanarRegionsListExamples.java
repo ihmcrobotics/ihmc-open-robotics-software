@@ -827,34 +827,36 @@ public class PlanarRegionsListExamples
 
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
 
-      double cinderBlockSize = 0.08;
-      double cinderBlockHeight = 0.015;
-      double courseLength = 3.25;
-      double courseWidth = 0.9;
-      double heightVariation = 0.0;
-      double extrusionLength = -0.01;
-      double percentageAbsent = 0.22;
-      double minTilt = Math.toRadians(10.0);
-      double maxTilt = Math.toRadians(75.0);
-      double randomHeightVariation = 0.0;
-      boolean onlyGenerateTopOfBlock = false;
+//      double cinderBlockSize = 0.08;
+//      double cinderBlockHeight = 0.015;
+//      double courseLength = 3.25;
+//      double courseWidth = 0.9;
+//      double heightVariation = 0.0;
+//      double extrusionLength = -0.01;
+//      double percentageAbsent = 0.22;
+//      double minTilt = Math.toRadians(10.0);
+//      double maxTilt = Math.toRadians(75.0);
+//      double randomHeightVariation = 0.0;
+//      boolean onlyGenerateTopOfBlock = false;
+//
+//      PlanarRegionsListExamples.generateCinderBlockField(generator,
+//                                                         cinderBlockSize,
+//                                                         cinderBlockHeight,
+//                                                         (int) (courseLength / cinderBlockSize),
+//                                                         (int) (courseWidth / cinderBlockSize),
+//                                                         heightVariation,
+//                                                         extrusionLength,
+//                                                         0.5,
+//                                                         percentageAbsent,
+//                                                         minTilt,
+//                                                         maxTilt,
+//                                                         randomHeightVariation,
+//                                                         onlyGenerateTopOfBlock);
 
-      PlanarRegionsListExamples.generateCinderBlockField(generator,
-                                                         cinderBlockSize,
-                                                         cinderBlockHeight,
-                                                         (int) (courseLength / cinderBlockSize),
-                                                         (int) (courseWidth / cinderBlockSize),
-                                                         heightVariation,
-                                                         extrusionLength,
-                                                         0.5,
-                                                         percentageAbsent,
-                                                         minTilt,
-                                                         maxTilt,
-                                                         randomHeightVariation,
-                                                         onlyGenerateTopOfBlock);
+      PlanarRegionsList tiltedHandholds = PlanarRegionsListExamples.createTiltedHandholds();
 
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("ExamplePlanarRegionsListEnvironment",
-                                                                                                new PlanarRegionsList[] {generator.getPlanarRegionsList()},
+                                                                                                new PlanarRegionsList[] {tiltedHandholds},
                                                                                                 null,
                                                                                                 1e-5,
                                                                                                 false);

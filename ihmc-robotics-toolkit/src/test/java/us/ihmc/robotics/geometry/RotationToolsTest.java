@@ -3,8 +3,10 @@ package us.ihmc.robotics.geometry;
 import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Random;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -13,10 +15,13 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.RotationTools.AxisAngleComparisonMode;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -506,6 +511,43 @@ public class RotationToolsTest
       }
    }
 
+   @Test
+   public void testQuaternionAveraging() throws Exception
+   {
+      ArrayList<QuaternionReadOnly> quaternions = new ArrayList<>();
+      TDoubleArrayList weights = new TDoubleArrayList();
+
+      int totalQuaternions = 10;
+
+      Point3D averageEulerAngles = new Point3D();
+      for (int i = 0; i < totalQuaternions; i++)
+      {
+         averageEulerAngles.add(0.1 * i, i*0.02, i*0.03);
+         Quaternion quaternion = new Quaternion(0.1 * i, i*0.02, i*0.03);
+         quaternions.add(quaternion);
+      }
+
+      //Fill weights with ones of the same length as quaternions
+      for (int i = 0; i < totalQuaternions; i++)
+      {
+         weights.add(1.0);
+      }
+
+      averageEulerAngles.scale(1.0 / (float) totalQuaternions);
+
+      Point3D averageQuaternionEulerAngles = new Point3D();
+      Quaternion averageQuaternion = RotationTools.computeAverageQuaternion(quaternions, weights);
+      averageQuaternion.getEuler(averageQuaternionEulerAngles);
+
+      LogTools.info("Average Euler angles: " + averageEulerAngles);
+      LogTools.info("Average quaternion: " + averageQuaternion);
+      LogTools.info("Average Quaternion Euler Angles: " + averageQuaternionEulerAngles);
+
+      assertEquals(averageEulerAngles.getX(), averageQuaternionEulerAngles.getZ(), 1e-1);
+      assertEquals(averageEulerAngles.getY(), averageQuaternionEulerAngles.getY(), 1e-1);
+      assertEquals(averageEulerAngles.getZ(), averageQuaternionEulerAngles.getX(), 1e-1);
+   }
+
    /**
     * Test that has for only purpose to highlight a bug in Java3d.
     */
@@ -521,7 +563,6 @@ public class RotationToolsTest
       m2.set(a);
 
       assertTrue(m2.epsilonEquals(m, 1e-5));
-
    }
 
    /**
@@ -539,7 +580,6 @@ public class RotationToolsTest
       m2.set(a);
 
       assertTrue(m2.epsilonEquals(m, 1e-5));
-
    }
 
    public static void assertAxisAngleEquivalent(String errorMsg, AxisAngle axisAngleExpected, AxisAngle axisAngleActual, AxisAngleComparisonMode mode, double epsilon)

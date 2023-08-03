@@ -1,9 +1,0 @@
-<?xml version="1.0" ?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="v1/middle_finger/dh_parameters">
-  
-  <xacro:property name="MiddleFingerPitch1ParentLinkName" value="${middle_finger_root_link}" />
-  <xacro:property name="MiddleFingerPitch1LinkName" value="${prefix}MiddleFingerPitch1Link" />
-  <xacro:property name="MiddleFingerPitch2LinkName" value="${prefix}MiddleFingerPitch2Link" />
-  <xacro:property name="MiddleFingerPitch3LinkName" value="${prefix}MiddleFingerPitch3Link" />
-
-</robot>

@@ -17,7 +17,9 @@ import org.bytedeco.javacpp.tools.InfoMapper;
             include = {"promp/trajectory.hpp",
                        "promp/trajectory_group.hpp",
                        "promp/promp.hpp",},
-            link = "promp"),
+            link = "promp",
+            preload = "jnipromp"
+      ),
       @Platform(
             value = "linux",
             includepath = "../include",
@@ -34,19 +36,17 @@ public class ProMPInfoMapper implements InfoMapper
 {
    public void map(InfoMap infoMap)
    {
-      infoMap.put(new Info("promp::TrajectoryGroup::normalize_length").javaText("public native long normalize_length();"));
-      // For some reason, normalize_length(size_t) isn't treated as a method when javacpp generates the C++ jni code
-      // It's referenced like: ptr->normalize_length;
-      // Which obviously can't compile, so for now, we skip it
-      infoMap.put(new Info("promp::TrajectoryGroup::normalize_length(size_t)").skip());
+      infoMap.put(new Info("PROMPEXPORT", "PROMPCALL").cppTypes().annotations());
+      infoMap.put(new Info("promp::TrajectoryGroup::normalize_length").annotations("@Function"));
+      infoMap.put(new Info("std::vector<promp::Trajectory>").pointerTypes("TrajectoryVector").define());
+
+      infoMap.put(new Info("std::vector<std::string>").pointerTypes("StringVector").define());
+      infoMap.put(new Info("std::vector<size_t>").pointerTypes("SizeTVector").define());
+
       infoMap.put(new Info("Eigen::MatrixXd").pointerTypes("EigenMatrixXd"));
       infoMap.put(new Info("Eigen::VectorXd").pointerTypes("EigenVectorXd"));
       infoMap.put(new Info("std::tuple<int,Eigen::VectorXd,Eigen::MatrixXd>").pointerTypes("IntVectorMatrixTuple").define());
       infoMap.put(new Info("std::pair<Eigen::VectorXd,Eigen::VectorXd>").pointerTypes("VectorVectorPair").define());
-      infoMap.put(new Info("std::vector<std::string>").pointerTypes("StringVector").define());
-      infoMap.put(new Info("std::vector<size_t>").pointerTypes("SizeTVector").define());
-      infoMap.put(new Info("std::vector<promp::Trajectory>").pointerTypes("TrajectoryVector").define());
-      infoMap.put(new Info("PROMPEXPORT", "PROMPCALL").cppTypes().annotations());
    }
 
    /*
@@ -98,7 +98,7 @@ public class ProMPInfoMapper implements InfoMapper
 
       public native @Name("operator ()") @ByRef EigenDoubleScalar apply(int rowId, int colId);
 
-      public void debugPrint(String name)
+      public void debugPrintMatrix(String name)
       {
          System.out.println(name);
 
@@ -123,6 +123,9 @@ public class ProMPInfoMapper implements InfoMapper
 
       private native void allocate(int length);
 
+      // Calls coeff(Index id) on the C++ side
+      public native double coeff(int id);
+
       // Calls data() on the C++ side
       public native DoublePointer data();
 
@@ -130,5 +133,15 @@ public class ProMPInfoMapper implements InfoMapper
       public native long size();
 
       public native @Name("operator ()") @ByRef EigenDoubleScalar apply(int id);
+
+      public void debugPrintVector(String name)
+      {
+         System.out.println(name);
+
+         for (int idx = 0; idx < size(); idx++)
+         {
+            System.out.println(coeff(idx) + " ");
+         }
+      }
    }
 }

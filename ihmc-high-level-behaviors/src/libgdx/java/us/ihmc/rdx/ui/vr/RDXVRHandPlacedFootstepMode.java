@@ -18,8 +18,9 @@ import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
-import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
+import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
 import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -41,7 +42,9 @@ public class RDXVRHandPlacedFootstepMode
    private DRCRobotModel robotModel;
    private ROS2ControllerHelper controllerHelper;
    private long sequenceId = (UUID.randomUUID().getLeastSignificantBits() % Integer.MAX_VALUE) + Integer.MAX_VALUE;
-   private RDXTeleoperationParameters teleoperationParameters;
+   private RDXLocomotionParameters locomotionParameters;
+   private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
+
 
    public void create(DRCRobotModel robotModel, ROS2ControllerHelper controllerHelper)
    {
@@ -60,16 +63,18 @@ public class RDXVRHandPlacedFootstepMode
       }
    }
 
-   public void setTeleoperationParameters(RDXTeleoperationParameters teleoperationParameters)
+   public void setLocomotionParameters(RDXLocomotionParameters locomotionParameters)
    {
-      this.teleoperationParameters = teleoperationParameters;
+      this.locomotionParameters = locomotionParameters;
    }
 
    public void processVRInput(RDXVRContext vrContext)
    {
+      if (controllerModel == RDXVRControllerModel.UNKNOWN)
+         controllerModel = vrContext.getControllerModel();
       boolean noSelectedPick = true;
       for (RobotSide side : RobotSide.values)
-         noSelectedPick =  noSelectedPick && vrContext.getSelectedPick().get(side) == null;
+         noSelectedPick =  noSelectedPick && vrContext.getController(side).getSelectedPick() == null;
       if (noSelectedPick)
       {
          for (RobotSide side : RobotSide.values)
@@ -110,10 +115,10 @@ public class RDXVRHandPlacedFootstepMode
                {
                   // send the placed footsteps
                   FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-                  if (teleoperationParameters != null)
+                  if (locomotionParameters != null)
                   {
-                     footstepDataListMessage.setDefaultSwingDuration(teleoperationParameters.getSwingTime());
-                     footstepDataListMessage.setDefaultTransferDuration(teleoperationParameters.getTransferTime());
+                     footstepDataListMessage.setDefaultSwingDuration(locomotionParameters.getSwingTime());
+                     footstepDataListMessage.setDefaultTransferDuration(locomotionParameters.getTransferTime());
                   }
                   else
                   {
@@ -153,8 +158,16 @@ public class RDXVRHandPlacedFootstepMode
    public void renderImGuiWidgets()
    {
       ImGui.text("Footstep placement: Hold and release respective trigger");
-      ImGui.text("Clear footsteps: Left B button");
-      ImGui.text("Walk: Right A button");
+      if (controllerModel == RDXVRControllerModel.FOCUS3)
+      {
+         ImGui.text("Clear footsteps: Y button");
+         ImGui.text("Walk: A button");
+      }
+      else {
+         ImGui.text("Clear footsteps: Left B button");
+         ImGui.text("Walk: Right A button");
+      }
+
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

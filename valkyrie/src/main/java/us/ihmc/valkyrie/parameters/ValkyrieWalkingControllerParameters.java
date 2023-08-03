@@ -7,7 +7,6 @@ import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
@@ -82,9 +81,9 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       icpControllerParameters = new ValkyrieICPControllerParameters(target);
       stepAdjustmentParameters = new ValkyrieStepAdjustmentParameters(target);
 
-      minimumHeightAboveGround = jointMap.getModelScale() * (0.595 + 0.23 + 0.08);
-      nominalHeightAboveGround = jointMap.getModelScale() * (0.675 + 0.23 - 0.01 + 0.08);
-      maximumHeightAboveGround = jointMap.getModelScale() * (0.735 + 0.23 + 0.08);
+      minimumHeightAboveGround = jointMap.getModelScale() * (0.595 + 0.23 + 0.08) + 0.09;
+      nominalHeightAboveGround = jointMap.getModelScale() * (0.675 + 0.23 - 0.01 + 0.08) + 0.09;
+      maximumHeightAboveGround = jointMap.getModelScale() * (0.735 + 0.23 + 0.08) + 0.09;
 
 
       kneePrivilegedConfigurationParameters = new OneDoFJointPrivilegedConfigurationParameters();
@@ -172,12 +171,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public double defaultOffsetHeightAboveAnkle()
-   {
-      return 0.0;
-   }
-
-   @Override
    public double getMaximumLegLengthForSingularityAvoidance()
    {
       return physicalProperties.getThighLength() + physicalProperties.getShinLength();
@@ -228,11 +221,13 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       PIDGains spineGains = createSpineControlGains();
       PIDGains neckGains = createNeckControlGains();
       PIDGains armGains = createArmControlGains();
+      PIDGains legGains = createLegControlGains();
 
       List<GroupParameter<PIDGainsReadOnly>> jointspaceGains = new ArrayList<>();
       jointspaceGains.add(new GroupParameter<>("SpineJoints", spineGains, jointMap.getSpineJointNamesAsStrings()));
       jointspaceGains.add(new GroupParameter<>("NeckJoints", neckGains, jointMap.getNeckJointNamesAsStrings()));
       jointspaceGains.add(new GroupParameter<>("ArmJoints", armGains, jointMap.getArmJointNamesAsStrings()));
+      jointspaceGains.add(new GroupParameter<>("LegJoints", legGains, jointMap.getLegJointNamesAsStrings()));
 
       return jointspaceGains;
    }
@@ -296,6 +291,28 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       armGains.setMaximumFeedback(maxAccel);
       armGains.setMaximumFeedbackRate(maxJerk);
 
+      return armGains;
+   }
+
+   private PIDGains createLegControlGains()
+   {
+      PIDGains armGains = new PIDGains();
+      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
+      
+      double kp = runningOnRealRobot ? 200.0 : 120.0; // 200.0
+      double zeta = runningOnRealRobot ? 1.0 : 0.7;
+      double ki = runningOnRealRobot ? 0.0 : 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 2000.0 : Double.POSITIVE_INFINITY;
+      
+      armGains.setKp(kp);
+      armGains.setZeta(zeta);
+      armGains.setKi(ki);
+      armGains.setMaxIntegralError(maxIntegralError);
+      armGains.setMaximumFeedback(maxAccel);
+      armGains.setMaximumFeedbackRate(maxJerk);
+      
       return armGains;
    }
 
@@ -447,6 +464,16 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH), 0.75);
       jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_YAW), 0.0);
       jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_PITCH), -0.1);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW), 0);
+         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 0);
+         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH), -0.5);
+         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), 1.0);
+         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH), -0.5);
+         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), 0);
+      }
 
       for (RobotSide robotSide : RobotSide.values)
       {

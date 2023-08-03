@@ -1,19 +1,22 @@
 package us.ihmc.behaviors.tools;
 
-import org.apache.commons.lang3.tuple.Pair;
-import us.ihmc.messager.*;
-import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.tools.thread.ActivationReference;
-
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.apache.commons.lang3.tuple.Pair;
+
+import us.ihmc.messager.Messager;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.messager.TopicListener;
+import us.ihmc.messager.TopicListenerBase;
+import us.ihmc.tools.thread.ActivationReference;
 
 public class MessagerCallbackManager
 {
    protected Messager messager;
    protected volatile boolean enabled = true;
 
-   private final HashSet<Pair<Topic, TopicListener>> topicListeners = new HashSet<>();
+   private final HashSet<Pair<Topic, TopicListenerBase>> topicListeners = new HashSet<>();
    private final HashSet<Pair<Topic, AtomicReference>> topicInputs = new HashSet<>();
 
    public void setMessager(Messager messager)
@@ -30,7 +33,7 @@ public class MessagerCallbackManager
 
    private void update()
    {
-      for (Pair<Topic, TopicListener> listenerPair : topicListeners)
+      for (Pair<Topic, TopicListenerBase> listenerPair : topicListeners)
       {
          updateEnabledForListener(listenerPair);
       }
@@ -41,12 +44,12 @@ public class MessagerCallbackManager
       }
    }
 
-   private void updateEnabledForListener(Pair<Topic, TopicListener> listenerPair)
+   private void updateEnabledForListener(Pair<Topic, TopicListenerBase> listenerPair)
    {
       if (messager != null)
       {
          if (enabled)
-            messager.registerTopicListener(listenerPair.getLeft(), listenerPair.getRight());
+            messager.addTopicListenerBase(listenerPair.getLeft(), listenerPair.getRight());
          else
             messager.removeTopicListener(listenerPair.getLeft(), listenerPair.getRight());
       }
@@ -93,14 +96,14 @@ public class MessagerCallbackManager
       return messager == null || messager.removeInput(topic, input);
    }
 
-   public <T> void registerTopicListener(Topic<T> topic, TopicListener<T> listener)
+   public <T> void addTopicListenerBase(Topic<T> topic, TopicListenerBase<T> listener)
    {
-      Pair<Topic, TopicListener> listenerPair = Pair.of(topic, listener);
+      Pair<Topic, TopicListenerBase> listenerPair = Pair.of(topic, listener);
       topicListeners.add(listenerPair);
       updateEnabledForListener(listenerPair);
    }
 
-   public <T> boolean removeTopicListener(Topic<T> topic, TopicListener<T> listener)
+   public <T> boolean removeTopicListener(Topic<T> topic, TopicListenerBase<T> listener)
    {
       topicListeners.remove(Pair.of(topic, listener));
       return messager == null || messager.removeTopicListener(topic, listener);

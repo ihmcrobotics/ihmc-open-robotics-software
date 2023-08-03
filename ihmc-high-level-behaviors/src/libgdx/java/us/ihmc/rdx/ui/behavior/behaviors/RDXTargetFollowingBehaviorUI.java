@@ -18,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -29,6 +30,7 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.targetFollowing.TargetFollowingBehaviorAPI.*;
@@ -43,7 +45,7 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
    private final TargetFollowingBehaviorParameters targetFollowingParameters = new TargetFollowingBehaviorParameters();
    private final ImGuiStoredPropertySetTuner targetFollowingParameterTuner = new ImGuiStoredPropertySetTuner("Target Following Parameters");
    private final RDXBallAndArrowPosePlacement manualTargetAffordance = new RDXBallAndArrowPosePlacement();
-   private final RosTopicPublisher<PoseStamped> manualTargetPublisher;
+   private final RosTopicPublisher<PoseStamped> manualTargetPublisher = null;
    private int pointNumber;
    private final FramePose3D testLoopTargetPose = new FramePose3D();
    private final FramePose3D manualTargetPose = new FramePose3D();
@@ -62,8 +64,8 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
       lookAndStepUI = new RDXLookAndStepBehaviorUI(helper);
       addChild(lookAndStepUI);
 
-      manualTargetPublisher = helper.getROS1Helper().publishPose(RosTools.SEMANTIC_TARGET_POSE);
-      helper.subscribeViaCallback(TargetPose, latestTargetPoseFromBehaviorReference::set);
+//      manualTargetPublisher = helper.getROS1Helper().publishPose(RosTools.SEMANTIC_TARGET_POSE);
+//      helper.subscribeViaCallback(TargetPose, latestTargetPoseFromBehaviorReference::set);
 
       pointNumber = 0;
       int numberOfPoints = 20;
@@ -93,9 +95,12 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
    public void create(RDXBaseUI baseUI)
    {
       targetFollowingParameterTuner.create(targetFollowingParameters,
-                                           () -> helper.publish(TargetFollowingParameters, targetFollowingParameters.getAllAsStrings()));
+                                           () ->
+                                           {
+//                                              helper.publish(TargetFollowingParameters, targetFollowingParameters.getAllAsStrings());
+                                           });
       targetApproachPoseGraphic = RDXModelBuilder.createCoordinateFrameInstance(0.1);
-      targetApproachPoseReference = helper.subscribeViaReference(TargetApproachPose, BehaviorTools.createNaNPose());
+//      targetApproachPoseReference = helper.subscribeViaReference(TargetApproachPose, BehaviorTools.createNaNPose());
       manualTargetAffordance.create(placedTargetPose ->
       {
          syncedRobot.update();
@@ -140,14 +145,17 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (areGraphicsEnabled())
+      if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
       {
-         targetApproachPoseGraphic.getRenderables(renderables, pool);
+         if (areGraphicsEnabled())
+         {
+            targetApproachPoseGraphic.getRenderables(renderables, pool);
+         }
+         manualTargetAffordance.getRenderables(renderables, pool);
       }
-      manualTargetAffordance.getRenderables(renderables, pool);
-      lookAndStepUI.getRenderables(renderables, pool);
+      lookAndStepUI.getRenderables(renderables, pool, sceneLevels);
    }
 
    private boolean areGraphicsEnabled()

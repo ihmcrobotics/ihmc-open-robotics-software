@@ -1,4 +1,4 @@
-# This message is part of the collection of platform-independent ROS messages.
+# This is part of the IHMC Common message package.
 # This message allows the user to precisely select what component in taskspace are to be achieved.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.

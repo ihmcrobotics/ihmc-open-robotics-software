@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -16,7 +17,6 @@ import us.ihmc.rdx.tools.RDXModelInstanceScaler;
  */
 public class RDXInteractableHighlightModel implements RenderableProvider
 {
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final RDXModelInstanceScaler scaledModelInstance;
 
    public RDXInteractableHighlightModel(String modelFileName)
@@ -27,15 +27,14 @@ public class RDXInteractableHighlightModel implements RenderableProvider
    public RDXInteractableHighlightModel(ModelData modelData)
    {
       double startingScaleFactor = 1.01;
-      scaledModelInstance = new RDXModelInstanceScaler(modelData, startingScaleFactor);
+      scaledModelInstance = new RDXModelInstanceScaler(modelData);
+      scaledModelInstance.scale(startingScaleFactor);
       setTransparency(0.5);
    }
 
-   public void setPose(RigidBodyTransform transformToWorld, RigidBodyTransform additionalTransform)
+   public void setPose(ReferenceFrame referenceFrame)
    {
-      tempTransform.set(additionalTransform);
-      transformToWorld.transform(tempTransform);
-      setPose(tempTransform);
+      setPose(referenceFrame.getTransformToRoot());
    }
 
    public void setPose(RigidBodyTransform transformToWorld)

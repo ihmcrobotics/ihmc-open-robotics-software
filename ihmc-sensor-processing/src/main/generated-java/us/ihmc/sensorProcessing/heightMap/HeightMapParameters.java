@@ -16,10 +16,6 @@ import us.ihmc.tools.property.*;
  */
 public class HeightMapParameters extends StoredPropertySet implements HeightMapParametersBasics
 {
-   public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "ihmc-open-robotics-software";
-   public static final String SUBSEQUENT_PATH_TO_RESOURCE_FOLDER = "ihmc-sensor-processing/src/main/resources";
-   public static final String SUBSEQUENT_PATH_TO_JAVA_FOLDER = "ihmc-sensor-processing/src/main/generated-java";
-
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    /**
@@ -46,30 +42,54 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
     * is getNominalStandardDeviation() and m is this value.
     */
    public static final DoubleStoredPropertyKey mahalanobisScale = keys.addDoubleKey("Mahalanobis scale");
+   /**
+    * This is the variance added to all past measurements when a cell is translated
+    */
+   public static final DoubleStoredPropertyKey varianceAddedWhenTranslating = keys.addDoubleKey("Variance added when translating");
+   /**
+    * This is the measurement variance when the robot is standing
+    */
+   public static final DoubleStoredPropertyKey sensorVarianceWhenStanding = keys.addDoubleKey("Sensor variance when standing");
+   /**
+    * This is the measurement variance when the robot is moving
+    */
+   public static final DoubleStoredPropertyKey sensorVarianceWhenMoving = keys.addDoubleKey("Sensor variance when moving");
+   public static final BooleanStoredPropertyKey estimateHeightWithKalmanFilter = keys.addBooleanKey("Estimate height with kalman filter");
 
+   /**
+    * Loads this property set.
+    */
    public HeightMapParameters()
    {
       this("");
    }
 
-   public HeightMapParameters(String versionSpecifier)
+   /**
+    * Loads an alternate version of this property set in the same folder.
+    */
+   public HeightMapParameters(String versionSuffix)
    {
-      super(keys, HeightMapParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
+      this(HeightMapParameters.class, versionSuffix);
+   }
+
+   /**
+    * Loads an alternate version of this property set in other folders.
+    */
+   public HeightMapParameters(Class<?> classForLoading, String versionSuffix)
+   {
+      super(keys, classForLoading, HeightMapParameters.class, versionSuffix);
       load();
    }
 
    public HeightMapParameters(StoredPropertySetReadOnly other)
    {
-      super(keys, HeightMapParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, other.getCurrentVersionSuffix());
+      super(keys, HeightMapParameters.class, other.getCurrentVersionSuffix());
       set(other);
    }
 
    public static void main(String[] args)
    {
-      StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           HeightMapParameters.class,
-                                                           DIRECTORY_NAME_TO_ASSUME_PRESENT,
-                                                           SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
-      parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);
+      StoredPropertySet parameters = new StoredPropertySet(keys, HeightMapParameters.class);
+      parameters.generateJavaFiles();
    }
 }

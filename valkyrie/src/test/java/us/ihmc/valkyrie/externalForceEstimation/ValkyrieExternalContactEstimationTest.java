@@ -1,7 +1,7 @@
 package us.ihmc.valkyrie.externalForceEstimation;
 
-import static us.ihmc.avatar.scs2.YoGraphicDefinitionFactory.newYoGraphicArrow3DDefinition;
-import static us.ihmc.avatar.scs2.YoGraphicDefinitionFactory.newYoGraphicPoint3DDefinition;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicArrow3D;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint3D;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,11 +13,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import toolbox_msgs.msg.dds.ExternalForceEstimationConfigurationMessage;
-import toolbox_msgs.msg.dds.ExternalForceEstimationOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.RobotDesiredConfigurationData;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import toolbox_msgs.msg.dds.ExternalForceEstimationConfigurationMessage;
+import toolbox_msgs.msg.dds.ExternalForceEstimationOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalForceEstimationToolboxController;
@@ -39,6 +39,7 @@ import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.robot.ExternalWrenchPointDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointBasics;
 import us.ihmc.scs2.simulation.robot.trackers.ExternalWrenchPoint;
@@ -147,7 +148,8 @@ public class ValkyrieExternalContactEstimationTest
       YoGraphicsList externalForcePointViz = new YoGraphicsList("externalForceVectors");
 
       TIntObjectHashMap<RigidBodyBasics> rigidBodyHashMap = new TIntObjectHashMap<>();
-      MultiBodySystemTools.getRootBody(fullRobotModel.getElevator()).subtreeIterable()
+      MultiBodySystemTools.getRootBody(fullRobotModel.getElevator())
+                          .subtreeIterable()
                           .forEach(rigidBody -> rigidBodyHashMap.put(rigidBody.hashCode(), rigidBody));
 
       for (int i = 0; i < testConfigs.size(); i++)
@@ -158,15 +160,15 @@ public class ValkyrieExternalContactEstimationTest
          testConfig.externalWrenchPoint = scsEndEffector.getAuxialiryData().addExternalWrenchPoint(testConfig.externalWrenchPointDefinition);
 
          ColorDefinition simulatedForceColor = ColorDefinitions.Red();
-         simulationTestHelper.addYoGraphicDefinition(newYoGraphicArrow3DDefinition("simulatedForceVector",
-                                                                                   testConfig.externalWrenchPoint.getOffset().getPosition(),
-                                                                                   testConfig.externalWrenchPoint.getWrench().getLinearPart(),
-                                                                                   forceGraphicScale,
-                                                                                   simulatedForceColor));
-         simulationTestHelper.addYoGraphicDefinition(newYoGraphicPoint3DDefinition("simulatedForcePoint",
-                                                                                   testConfig.externalWrenchPoint.getOffset().getPosition(),
-                                                                                   0.025,
-                                                                                   simulatedForceColor));
+         simulationTestHelper.addYoGraphicDefinition(newYoGraphicArrow3D("simulatedForceVector",
+                                                                         testConfig.externalWrenchPoint.getOffset().getPosition(),
+                                                                         testConfig.externalWrenchPoint.getWrench().getLinearPart(),
+                                                                         forceGraphicScale,
+                                                                         simulatedForceColor));
+         simulationTestHelper.addYoGraphicDefinition(newYoGraphicPoint3D("simulatedForcePoint",
+                                                                         testConfig.externalWrenchPoint.getOffset().getPosition(),
+                                                                         0.025,
+                                                                         simulatedForceColor));
       }
 
       graphicsListRegistry.registerYoGraphicsList(externalForcePointViz);

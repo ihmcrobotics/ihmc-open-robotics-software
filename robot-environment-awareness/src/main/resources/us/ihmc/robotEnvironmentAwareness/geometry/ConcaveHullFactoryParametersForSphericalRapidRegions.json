@@ -1,0 +1,16 @@
+{
+  "title" : "Concave hull factory parameters for Spherical Rapid Regions",
+  "Edge length threshold" : {
+    "value" : 10.0,
+    "lowerBound" : 0.0,
+    "upperBound" : 0.5
+  },
+  "Remove all triangles with two border edges" : false,
+  "Allow splitting concave hull" : false,
+  "Max number of iterations" : {
+    "value" : 4898,
+    "lowerBound" : 2000,
+    "upperBound" : 6000
+  },
+  "Triangulation tolerance" : 0.0
+}

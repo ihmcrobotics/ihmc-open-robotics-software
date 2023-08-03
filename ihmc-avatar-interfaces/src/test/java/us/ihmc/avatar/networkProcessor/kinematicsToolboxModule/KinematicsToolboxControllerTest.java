@@ -36,6 +36,7 @@ import us.ihmc.euclid.shape.primitives.Capsule3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -62,7 +63,6 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
-import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.tools.MemoryTools;
@@ -139,7 +139,7 @@ public final class KinematicsToolboxControllerTest
          if (ghost != null)
             scs.addRobot(ghost);
          scs.addRobot(robot);
-         scs.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
+         scs.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
 
          scs.start(true, true, true);
          scs.setCameraFocusPosition(0.0, 0.0, 1.0);
@@ -273,7 +273,7 @@ public final class KinematicsToolboxControllerTest
          LogTools.info("Entering: testRandomJointPositionWithInputcollection");
       Random random = new Random(2135);
       KinematicsToolboxTestRobot randomizedFullRobotModel = createFullRobotModelAtInitialConfiguration(robotDescription);
-      Map<Integer, OneDoFJointBasics> hashCodeToSolverJointMap = Stream.of(toolboxController.getDesiredOneDoFJoint())
+      Map<Integer, OneDoFJointBasics> hashCodeToSolverJointMap = Stream.of(toolboxController.getDesiredOneDoFJoints())
                                                                        .collect(Collectors.toMap(JointReadOnly::hashCode, Function.identity()));
 
       for (int i = 0; i < 10; i++)

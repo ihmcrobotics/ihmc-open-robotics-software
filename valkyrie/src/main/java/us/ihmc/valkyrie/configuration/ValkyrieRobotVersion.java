@@ -1,6 +1,8 @@
 package us.ihmc.valkyrie.configuration;
 
-public enum ValkyrieRobotVersion
+import us.ihmc.avatar.drcRobot.RobotVersion;
+
+public enum ValkyrieRobotVersion implements RobotVersion
 {
    DEFAULT,
    FINGERLESS,
@@ -25,35 +27,35 @@ public enum ValkyrieRobotVersion
          return DEFAULT;
    }
 
-   public String getRealRobotSdfFile()
+   public String getRealRobotURDFFile()
    {
       switch(this)
       {
          case DEFAULT:
-            return "models/val_description/sdf/valkyrie_sim.sdf";
+            return "models/val_description/urdf/valkyrie_sim.urdf";
          case FINGERLESS:
-            return "models/val_description/sdf/valkyrie_sim_no_fingers.sdf";
+            return "models/val_description/urdf/valkyrie_sim_no_fingers.urdf";
          case ARM_MASS_SIM:
-            return "models/val_description/sdf/valkyrie_sim_arm_mass_sim.sdf";
+            return "models/val_description/urdf/valkyrie_sim_arm_mass_sim.urdf";
          case ARMLESS:
-            return "models/val_description/sdf/valkyrie_sim_no_arms.sdf";
+            return "models/val_description/urdf/valkyrie_sim_no_arms.urdf";
          default:
             throw new RuntimeException("ValkyrieRobotVersion: Unimplemented enumeration case : " + this);
       }
    }
 
-   public String getSimSdfFile()
+   public String getSimURDFFile()
    {
       switch(this)
       {
          case DEFAULT:
-            return "models/val_description/sdf/valkyrie_sim.sdf";
+            return "models/val_description/urdf/valkyrie_sim.urdf";
          case FINGERLESS:
-            return "models/val_description/sdf/valkyrie_sim_no_fingers.sdf";
+            return "models/val_description/urdf/valkyrie_sim_no_fingers.urdf";
          case ARM_MASS_SIM:
-            return "models/val_description/sdf/valkyrie_sim_arm_mass_sim.sdf";
+            return "models/val_description/urdf/valkyrie_sim_arm_mass_sim.urdf";
          case ARMLESS:
-            return "models/val_description/sdf/valkyrie_sim_no_arms.sdf";
+            return "models/val_description/urdf/valkyrie_sim_no_arms.urdf";
          default:
             throw new RuntimeException("ValkyrieRobotVersion: Unimplemented enumeration case : " + this);
       }

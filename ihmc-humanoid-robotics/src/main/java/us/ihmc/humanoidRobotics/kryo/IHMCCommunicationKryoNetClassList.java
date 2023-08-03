@@ -245,6 +245,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(RigidBodyExplorationConfigurationMessagePubSubType.class);
       registerPacketField(RequestWristForceSensorCalibrationPacketPubSubType.class);
       registerPacketField(FootTrajectoryMessagePubSubType.class);
+      registerPacketField(LegTrajectoryMessagePubSubType.class);
       registerPacketField(JoyPubSubType.class);
       registerPacketField(BehaviorStatusPacketPubSubType.class);
       registerPacketField(BehaviorControlModeResponsePacketPubSubType.class);
@@ -514,6 +515,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(TransitionPubSubType.class);
       registerPacketField(InteractiveMarkerPosePubSubType.class);
       registerPacketField(DrillDetectionPacketPubSubType.class);
+      registerPacketField(InstantMessage.class);
 
       registerPacketClass(Packet.class);
 
@@ -584,6 +586,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(PelvisTrajectoryMessage.class);
       registerPacketClass(PelvisOrientationTrajectoryMessage.class);
       registerPacketClass(FootTrajectoryMessage.class);
+      registerPacketClass(LegTrajectoryMessage.class);
       registerPacketClass(WholeBodyTrajectoryMessage.class);
       registerPacketClass(PelvisHeightTrajectoryMessage.class);
       registerPacketClass(StopAllTrajectoryMessage.class);
@@ -602,6 +605,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(PelvisTrajectoryMessage.class);
       registerPacketField(SpineTrajectoryMessage.class);
       registerPacketField(FootTrajectoryMessage.class);
+      registerPacketField(LegTrajectoryMessage.class);
       registerPacketField(NeckTrajectoryMessage.class);
       registerPacketField(HeadTrajectoryMessage.class);
       registerPacketField(SE3TrajectoryMessage.class);

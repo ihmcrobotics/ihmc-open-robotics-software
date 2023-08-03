@@ -4,7 +4,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.simulation.environment.object.objects.LabFloorDefinition;
-import us.ihmc.rdx.simulation.environment.object.objects.door.DoorDefinition;
+import us.ihmc.perception.sceneGraph.multiBodies.door.DoorDefinition;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
@@ -13,10 +13,8 @@ import us.ihmc.tools.UnitConversions;
 
 public class RDXSCS2BulletPhysicsDoorDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources");
-   private final RDXSCS2BulletSimulationSession scs2SimulationSession = new RDXSCS2BulletSimulationSession();
+   private final RDXBaseUI baseUI = new RDXBaseUI();
+   private final RDXSCS2SimulationSession scs2SimulationSession = new RDXSCS2SimulationSession();
 
    public RDXSCS2BulletPhysicsDoorDemo()
    {
@@ -31,7 +29,7 @@ public class RDXSCS2BulletPhysicsDoorDemo
             SimulationSession simulationSession = new SimulationSession(BulletPhysicsEngine::new);
 
             DoorDefinition doorDefinition = new DoorDefinition();
-            doorDefinition.getDoorPanelDefinition().setAddFiducials(false);
+            doorDefinition.getDoorPanelDefinition().setAddArUcoMarkers(false);
             doorDefinition.build();
             doorDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(0.1, 0.1, 0.1), new Point3D(0.0, 0.0, 0.5));
             doorDefinition.getInitialHingeState().setEffort(15.0);

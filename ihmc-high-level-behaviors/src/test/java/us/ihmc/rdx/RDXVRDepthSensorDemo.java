@@ -25,10 +25,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class RDXVRDepthSensorDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources",
-                                                  "VR Depth Sensor Demo");
+   private final RDXBaseUI baseUI = new RDXBaseUI("VR Depth Sensor Demo");
    private ModelInstance cylinder;
    private boolean moveWithController = true;
    private final Matrix4 tempTransform = new Matrix4();

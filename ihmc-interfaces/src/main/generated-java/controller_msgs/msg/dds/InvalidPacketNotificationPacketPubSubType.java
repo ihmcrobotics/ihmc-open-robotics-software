@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class InvalidPacketNotificationPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.InvalidPacketNotificationPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::InvalidPacketNotificationPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "9e38233cb0fb3bfc9183e0c41cce0d0a8e12f9bdde32e8dfb504b92f6698dc3c";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

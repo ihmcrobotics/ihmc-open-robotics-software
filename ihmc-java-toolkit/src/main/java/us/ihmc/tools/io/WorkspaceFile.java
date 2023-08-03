@@ -1,39 +1,34 @@
 package us.ihmc.tools.io;
 
-import java.io.InputStream;
-import java.net.URL;
+import javax.annotation.Nullable;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.function.Supplier;
 
+/**
+ * This is used with WorkspaceDirectory to work with source files in version control.
+ */
 public class WorkspaceFile
 {
-   private final Supplier<InputStream> getResourceAsStream;
-   private final Supplier<URL> getResource;
-   private final Path workspaceFile;
-   private final String pathForResourceLoadingPathFiltered;
+   /**
+    * Should be kept absolute, otherwise will break Windows because it won't
+    * have the drive letter i.e. "C:"
+    *
+    * This will be null in the case where filesystem access of this file
+    * is not available, such as when this file refers to a resource on the classpath
+    * and, in this process, that classpath resource is loaded from a JAR file.
+    */
+   @Nullable
+   private final Path filesystemFile;
 
    public WorkspaceFile(WorkspaceDirectory directory, String subsequentPathToFile)
    {
-      String pathForResourceLoading = Paths.get(directory.getPathNecessaryForClasspathLoading()).resolve(subsequentPathToFile).toString();
-      // Get rid of Windows \ slashes; they don't work with classloader
-      pathForResourceLoadingPathFiltered = pathForResourceLoading.replaceAll("\\\\", "/");
-      if (directory.getClassForLoading() == null) // TODO: This is broken
+      if (directory.isFileAccessAvailable())
       {
-         getResourceAsStream = () -> ClassLoader.getSystemResourceAsStream(pathForResourceLoadingPathFiltered);
-         getResource = () -> ClassLoader.getSystemResource(pathForResourceLoadingPathFiltered);
+         filesystemFile = directory.getFilesystemDirectory().resolve(subsequentPathToFile).toAbsolutePath();
       }
       else
       {
-         getResourceAsStream = () -> directory.getClassForLoading().getResourceAsStream(pathForResourceLoadingPathFiltered);
-         getResource = () -> directory.getClassForLoading().getResource(pathForResourceLoadingPathFiltered);
+         filesystemFile = null;
       }
-
-      Path directoryPath = directory.getDirectoryPath();
-      if (directoryPath != null)
-         workspaceFile = directoryPath.resolve(subsequentPathToFile);
-      else
-         workspaceFile = null;
    }
 
    /** If the directory is available for reading/writing using files.
@@ -41,34 +36,11 @@ public class WorkspaceFile
     *  or the working directory is wrong. */
    public boolean isFileAccessAvailable()
    {
-      return workspaceFile != null;
+      return filesystemFile != null;
    }
 
-   public InputStream getClasspathResourceAsStream()
+   public Path getFilesystemFile()
    {
-      return getResourceAsStream.get();
-   }
-
-   /**
-    * @return null if not found
-    */
-   public URL getClasspathResource()
-   {
-      return getResource.get();
-   }
-
-   public String getFileName()
-   {
-      return pathForResourceLoadingPathFiltered.substring(pathForResourceLoadingPathFiltered.lastIndexOf("/"));
-   }
-
-   public Path getFilePath()
-   {
-      return workspaceFile;
-   }
-
-   public String getPathForResourceLoadingPathFiltered()
-   {
-      return pathForResourceLoadingPathFiltered;
+      return filesystemFile;
    }
 }

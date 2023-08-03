@@ -1,0 +1,13 @@
+{
+  "numberBasisFunctions": 20,
+  "logging" : true,
+  "tasks":[
+    {
+      "name":"PushDoor",
+      "bodyParts":[
+        { "name":"leftHand", "geometry":"Pose" },
+        { "name":"rightHand", "geometry":"Pose" }
+      ]
+    }
+  ]
+}

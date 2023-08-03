@@ -40,8 +40,19 @@ public class WrenchDistributorTools
       return pseudoCMP3d;
    }
 
-   public static void computePseudoCMP3d(FramePoint3DBasics pseudoCMP3dToPack, FramePoint3DReadOnly centerOfMass, FramePoint2DReadOnly cmp, double fZ,
-                                         double totalMass, double omega0)
+   /**
+    * <img src=
+    * "https://latex.codecogs.com/png.image?e_{CMP}=\begin{bmatrix}x_{CMP}\\y_{CMP}\\z_{CoM}-\frac{f_z}{m
+    * \omega_0^2}\end{bmatrix}"/><br>
+    * Where:<br>
+    * <img src= "https://latex.codecogs.com/png.image?\omega_0=\sqrt{\frac{g}{z_0}}"/>
+    */
+   public static void computePseudoCMP3d(FramePoint3DBasics pseudoCMP3dToPack,
+                                         FramePoint3DReadOnly centerOfMass,
+                                         FramePoint2DReadOnly cmp,
+                                         double fZ,
+                                         double totalMass,
+                                         double omega0)
    {
       double zCMP = centerOfMass.getZ() - fZ / (totalMass * MathTools.square(omega0));
       pseudoCMP3dToPack.setIncludingFrame(cmp.getReferenceFrame(), cmp.getX(), cmp.getY(), 0.0);
@@ -88,8 +99,9 @@ public class WrenchDistributorTools
       normalizedSupportVectorToPack.normalize();
    }
 
-   public static void computeSupportVectorMatrixBlock(DMatrixRMaj supportVectorMatrixBlock, ArrayList<FrameVector3D> normalizedSupportVectors,
-         ReferenceFrame referenceFrame)
+   public static void computeSupportVectorMatrixBlock(DMatrixRMaj supportVectorMatrixBlock,
+                                                      ArrayList<FrameVector3D> normalizedSupportVectors,
+                                                      ReferenceFrame referenceFrame)
    {
       for (int i = 0; i < normalizedSupportVectors.size(); i++)
       {

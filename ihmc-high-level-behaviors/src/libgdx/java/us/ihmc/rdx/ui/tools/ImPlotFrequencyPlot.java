@@ -32,4 +32,9 @@ public class ImPlotFrequencyPlot
       plotLine.addValue(frequencyCalculator.getFrequency());
       plot.render();
    }
+
+   public boolean anyPingsYet()
+   {
+      return frequencyCalculator.anyPingsYet();
+   }
 }

@@ -262,4 +262,48 @@ public class PlannerTools
       double alphaToQuery = MathTools.clamp(alpha + horizonDistanceToCheck / totalPathLength, 0.0, 1.0);
       bodyPathPlanHolder.getPointAlongPath(alphaToQuery, poseToPack);
    }
+
+   public static double calculateNominalTotalPlanExecutionDuration(FootstepPlan footstepPlan,
+                                                                   double defaultSwingDuration,
+                                                                   double defaultInitialTransferDuration,
+                                                                   double defaultTransferDuration,
+                                                                   double defaultFinalTransferDuration)
+   {
+      int numberOfSteps = footstepPlan.getNumberOfSteps();
+      double planExecutionTime = 0.0;
+      for (int i = 0; i < numberOfSteps; i++)
+      {
+         PlannedFootstep footstep = footstepPlan.getFootstep(i);
+
+         if (footstep.getTransferDuration() < 0.0)
+         {
+            if (i == 0)
+            {
+               planExecutionTime += defaultInitialTransferDuration;
+            }
+            else if (i == numberOfSteps - 1)
+            {
+               planExecutionTime += defaultFinalTransferDuration;
+            }
+            else
+            {
+               planExecutionTime += defaultTransferDuration;
+            }
+         }
+         else
+         {
+            planExecutionTime += footstep.getTransferDuration();
+         }
+
+         if (footstep.getSwingDuration() < 0.0)
+         {
+            planExecutionTime += defaultSwingDuration;
+         }
+         else
+         {
+            planExecutionTime += footstep.getSwingDuration();
+         }
+      }
+      return planExecutionTime;
+   }
 }

@@ -4,7 +4,12 @@ import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
@@ -14,8 +19,15 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicPoint3DDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
@@ -25,7 +37,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class FootCoPOccupancyGrid
+public class FootCoPOccupancyGrid implements SCS2YoGraphicHolder
 {
    private static final boolean VISUALIZE = false;
    private static final double defaultThresholdForCellActivation = 1.0;
@@ -61,9 +73,14 @@ public class FootCoPOccupancyGrid
    private final YoDouble decayRate;
    private final YoBoolean resetGridToEmpty;
 
-   public FootCoPOccupancyGrid(String namePrefix, ReferenceFrame soleFrame, int nLengthSubdivisions, int nWidthSubdivisions,
-                               WalkingControllerParameters walkingControllerParameters, ExplorationParameters explorationParameters,
-                               YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
+   public FootCoPOccupancyGrid(String namePrefix,
+                               ReferenceFrame soleFrame,
+                               int nLengthSubdivisions,
+                               int nWidthSubdivisions,
+                               WalkingControllerParameters walkingControllerParameters,
+                               ExplorationParameters explorationParameters,
+                               YoGraphicsListRegistry yoGraphicsListRegistry,
+                               YoRegistry parentRegistry)
    {
       this.footLength = walkingControllerParameters.getSteppingParameters().getFootLength();
       this.footWidth = walkingControllerParameters.getSteppingParameters().getFootWidth();
@@ -298,7 +315,9 @@ public class FootCoPOccupancyGrid
    private final FramePoint2D cellCenter = new FramePoint2D();
 
    /**
-    * This algorithm is stupid because it checks for every cell if the cell is on the right side and if it is activated.
+    * This algorithm is stupid because it checks for every cell if the cell is on the right side and if
+    * it is activated.
+    * 
     * @param frameLine
     * @param sideToLookAt
     * @return
@@ -351,7 +370,9 @@ public class FootCoPOccupancyGrid
    }
 
    /**
-    * This algorithm is smarter since it doesn't go through all the cells, but it probably doesn't work :/
+    * This algorithm is smarter since it doesn't go through all the cells, but it probably doesn't work
+    * :/
+    * 
     * @param frameLine
     * @param sideToLookAt
     * @return
@@ -480,7 +501,8 @@ public class FootCoPOccupancyGrid
    public void update()
    {
       double decay = decayRate.getDoubleValue();
-      if (decay == 1.0) return;
+      if (decay == 1.0)
+         return;
 
       for (int xIndex = 0; xIndex < nLengthSubdivisions.getIntegerValue(); xIndex++)
       {
@@ -516,6 +538,7 @@ public class FootCoPOccupancyGrid
    }
 
    private final FramePoint2D tempCellCenter = new FramePoint2D();
+
    public void computeConvexHull(FrameConvexPolygon2D convexHullToPack)
    {
       convexHullToPack.clear(soleFrame);
@@ -616,5 +639,27 @@ public class FootCoPOccupancyGrid
       lineToPack.getPoint().set(lineOrigin);
       lineToPack.getDirection().set(lineDirection);
       return true;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      if (!VISUALIZE)
+         return null;
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      for (int i = 0; i < cellViz.length; i++)
+      {
+         for (int j = 0; j < cellViz[0].length; j++)
+         {
+            String namePrefix = "CellViz_X" + String.valueOf(i) + "Y" + String.valueOf(j);
+            YoGraphicPoint3DDefinition yoGraphicPoint3D = YoGraphicDefinitionFactory.newYoGraphicPoint3D(namePrefix,
+                                                                                                         cellViz[i][j],
+                                                                                                         0.008,
+                                                                                                         ColorDefinitions.Orange());
+            group.addChild(yoGraphicPoint3D);
+            group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D(yoGraphicPoint3D, DefaultPoint2DGraphic.CIRCLE));
+         }
+      }
+      return group;
    }
 }

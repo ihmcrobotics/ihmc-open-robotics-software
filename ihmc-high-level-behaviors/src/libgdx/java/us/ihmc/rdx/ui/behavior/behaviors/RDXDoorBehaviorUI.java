@@ -13,12 +13,13 @@ import us.ihmc.behaviors.door.DoorType;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.rdx.imgui.ImGuiEnumPlot;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
 import us.ihmc.rdx.imgui.ImGuiMovingPlot;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.object.objects.door.RDXDoorObject;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIDefinition;
@@ -30,9 +31,8 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehavior
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.behaviors.door.DoorBehaviorAPI.*;
 
 public class RDXDoorBehaviorUI extends RDXBehaviorUIInterface
 {
@@ -60,13 +60,15 @@ public class RDXDoorBehaviorUI extends RDXBehaviorUIInterface
    {
       this.helper = helper;
       helper.subscribeToBehaviorStatusViaCallback(status::set);
-      distanceToDoor = helper.subscribeViaReference(DistanceToDoor, Double.NaN);
-      helper.subscribeViaCallback(DetectedDoorPose, detectedDoorPose ->
-      {
-         this.detectedDoorPose.set(detectedDoorPose);
-         doorDetectionMessageReceivedStopwatch.reset();
-         door.setPoseInWorld(detectedDoorPose.getRight());
-      });
+      // FIXME: subscribe distance to door
+      distanceToDoor = null;
+      // FIXME: subscribe detected door pose
+//      helper.subscribeViaCallback(DetectedDoorPose, detectedDoorPose ->
+//      {
+//         this.detectedDoorPose.set(detectedDoorPose);
+//         doorDetectionMessageReceivedStopwatch.reset();
+//         door.setPoseInWorld(detectedDoorPose.getRight());
+//      });
       helper.subscribeViaCallback(FiducialDetectorToolboxModule::getDetectedFiducialOutputTopic, detectedFiducialMessage ->
       {
          detectedFiducialMessageReceivedStopwatch.reset();
@@ -111,12 +113,12 @@ public class RDXDoorBehaviorUI extends RDXBehaviorUIInterface
 
       if (ImGui.checkbox(labels.get("Operator review"), reviewDoorPose))
       {
-         helper.publish(ReviewEnabled, reviewDoorPose.get());
+         // FIXME: publish operator review
       }
       ImGui.sameLine();
       if (ImGui.button(labels.get("Resend latest door location")))
       {
-         helper.publish(ROS2Tools::getDoorLocationTopic,
+         helper.publish(PerceptionAPI::getDoorLocationTopic,
                         HumanoidMessageTools.createDoorLocationPacket(detectedDoorPose.get().getRight(), detectedDoorPose.get().getLeft().toByte()));
       }
       ImGui.text("Behavior types:");
@@ -180,9 +182,9 @@ public class RDXDoorBehaviorUI extends RDXBehaviorUIInterface
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (showDetectedDoorGraphic.get() && !distanceToDoor.get().isNaN())
+      if (showDetectedDoorGraphic.get() && !distanceToDoor.get().isNaN() && sceneLevels.contains(RDXSceneLevel.MODEL))
          door.getCollisionMeshRenderables(renderables, pool);
    }
 
