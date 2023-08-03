@@ -411,7 +411,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       robotLowLevelMessenger.renderImGuiWidgets();
 
       ImGui.sameLine();
-      if (ImGui.button(labels.get("Delete all Graphics")) || ImGui.getIO().getKeyCtrl() && ImGui.isKeyReleased('L'))
+      if (ImGui.button(labels.get("Clear all Graphics")) || ImGui.getIO().getKeyCtrl() && ImGui.isKeyReleased('L'))
       {
          locomotionManager.deleteAll();
 
