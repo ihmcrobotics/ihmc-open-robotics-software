@@ -555,4 +555,12 @@ public class RDXVRController extends RDXVRTrackedDevice
    {
       rightJoystickLabel.setText(text);
    }
+
+   public void setAllJoystickTextNull()
+   {
+      topJoystickLabel.setText("");
+      bottomJoystickLabel.setText("");
+      leftJoystickLabel.setText("");
+      rightJoystickLabel.setText("");
+   }
 }
