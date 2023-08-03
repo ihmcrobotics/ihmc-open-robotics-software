@@ -126,26 +126,22 @@ public class RDXInteractableRobotLink
                controller.setBottomJoystickText("Close Hand");
                controller.setLeftJoystickText("Delete Interactable");
                controller.setRightJoystickText("Execute");
-               if (joystick.x() > 0 && Math.abs(joystick.x()) > Math.abs(joystick.y()))
+               if (joystick.x() > 0 && joystick.deltaX() > joystick.deltaY())
                {
                   System.out.println("Execute");
                }
-               else if (joystick.x() < 0 && Math.abs(joystick.x()) > Math.abs(joystick.y()))
+               else if (joystick.x() < 0 && joystick.deltaX() > joystick.deltaY())
                {
                   System.out.println("Delete");
                }
-               else if (joystick.y() > 0 && Math.abs(joystick.y()) > Math.abs(joystick.x()))
+               else if (joystick.y() > 0 && joystick.deltaY() > joystick.deltaX())
                {
                   System.out.println("Open Hand");
                }
-               else if (joystick.y() < 0 && Math.abs(joystick.y()) > Math.abs(joystick.x()))
+               else if (joystick.y() < 0 && joystick.deltaY() > joystick.deltaX())
                {
                   System.out.println("Close Hand");
                }
-            }
-            else
-            {
-               controller.setAllJoystickTextNull();
             }
             if (isHovering && gripDragData.getDragJustStarted())
             {
