@@ -148,9 +148,7 @@ public class DualBlackflyCamera
                                                                         DualBlackflyComms.OUSTER_FISHEYE_COLORING_INTRINSICS,
                                                                         ousterFisheyeColoringIntrinsics);
 
-      RigidBodyTransform cameraTransformToParent = side == RobotSide.LEFT ?
-            robotModel.getSensorInformation().getSituationalAwarenessLeftCameraTransform() :
-            robotModel.getSensorInformation().getSituationalAwarenessRightCameraTransform();
+      RigidBodyTransform cameraTransformToParent = robotModel.getSensorInformation().getSituationalAwarenessCameraTransform(side);
 
       remoteTunableCameraTransform = ROS2TunedRigidBodyTransform.toBeTuned(ros2Helper,
                                                                            ROS2Tools.OBJECT_DETECTION_CAMERA_TO_PARENT_TUNING,
@@ -359,9 +357,9 @@ public class DualBlackflyCamera
       undistortionMap2.upload(tempUndistortionMat2);
 
       // Create arUco marker detection
-      ReferenceFrame blackflyCameraFrame = referenceFrameSupplier.get().getSituationalAwarenessRightCameraFrame();
+      ReferenceFrame rightBlackflyCameraFrame = referenceFrameSupplier.get().getSituationalAwarenessCameraFrame(RobotSide.RIGHT);
       arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
-      arUcoMarkerDetection.create(blackflyCameraFrame);
+      arUcoMarkerDetection.create(rightBlackflyCameraFrame);
       arUcoMarkerDetection.setSourceImageForDetection(undistortedBytedecoImage);
       newCameraMatrixEstimate.copyTo(arUcoMarkerDetection.getCameraMatrix());
       arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetection, ros2Helper, predefinedSceneNodeLibrary.getArUcoMarkerIDsToSizes());
