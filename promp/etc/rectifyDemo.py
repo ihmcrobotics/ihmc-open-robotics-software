@@ -6,6 +6,7 @@ Created on Wed Aug  2 15:32:16 2023
 """
 
 import csv
+n = 10
 
 def negate_columns_in_csv(input_file, output_file, column_indices):
     # Read and process the CSV file, saving the results to a new CSV file
@@ -29,7 +30,7 @@ def negate_columns_in_csv(input_file, output_file, column_indices):
             writer.writerow(modified_row)
 
 if __name__ == "__main__":
-    input_csv_file = "28.csv"
-    output_csv_file = "output.csv"
+    input_csv_file = str(n) + ".csv"
+    output_csv_file = "o" + str(n) + ".csv"
     indices_to_negate = [0, 1, 2, 3]  # Specify the column indices to negate here
     negate_columns_in_csv(input_csv_file, output_csv_file, indices_to_negate)
