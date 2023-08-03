@@ -89,6 +89,10 @@ public class ROS2Tools
                                                                                                     .withModule("transform_tuning");
    public static final ROS2IOTopicPair<RigidBodyTransformMessage> OBJECT_DETECTION_CAMERA_TO_PARENT_TUNING
          = new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix("object_detection_camera_to_parent"));
+   public static final ROS2IOTopicPair<RigidBodyTransformMessage> SITUATIONAL_AWARENESS_LEFT_CAMERA_TO_PARENT_TUNING
+         = new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix("situational_awareness_left_camera_to_parent"));
+   public static final ROS2IOTopicPair<RigidBodyTransformMessage> SITUATIONAL_AWARENESS_RIGHT_CAMERA_TO_PARENT_TUNING
+         = new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix("situational_awareness_right_camera_to_parent"));
    public static final ROS2IOTopicPair<RigidBodyTransformMessage> STEPPING_CAMERA_TO_PARENT_TUNING
          = new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix("stepping_camera_to_parent"));
    public static final ROS2IOTopicPair<RigidBodyTransformMessage> EXPERIMENTAL_CAMERA_TO_PARENT_TUNING
