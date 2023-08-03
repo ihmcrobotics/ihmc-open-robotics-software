@@ -121,7 +121,7 @@ public class RDXInteractableRobotLink
             RDXVRDragData gripDragData = controller.getGripDragData();
             InputDigitalActionData aButton = controller.getAButtonActionData();
 
-            if (isHovering)
+            if (isHovering || gripDragData.getObjectBeingDragged() == this)
             {
                controller.setAButtonText("Execute");
                if (gripDragData.getDragJustStarted())
