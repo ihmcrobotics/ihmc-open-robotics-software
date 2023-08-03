@@ -455,11 +455,18 @@ public class RDXVRController extends RDXVRTrackedDevice
       return selectedPick;
    }
 
-   public boolean anythingElseBeingDragged(Object draggedObject)
+   /**
+    * This is used to prevent UI components from responding to events or
+    * getting initiated when other things are being interacted with already.
+    * @param callersObject Pass your object in so we can exclude results that are already the caller's
+    *                     object being dragged.
+    * @return If anything else in the scene is being dragged.
+    */
+   public boolean anythingElseBeingDragged(Object callersObject)
    {
       boolean anythingElseBeingDragged = false;
-      anythingElseBeingDragged |= gripDragData.isDragging() && gripDragData.getObjectBeingDragged() != draggedObject;
-      anythingElseBeingDragged |= triggerDragData.isDragging() && triggerDragData.getObjectBeingDragged() != draggedObject;
+      anythingElseBeingDragged |= gripDragData.isDragging() && gripDragData.getObjectBeingDragged() != callersObject;
+      anythingElseBeingDragged |= triggerDragData.isDragging() && triggerDragData.getObjectBeingDragged() != callersObject;
       return anythingElseBeingDragged;
    }
 
