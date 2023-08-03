@@ -253,6 +253,26 @@ public class RDXInteractableFootstep
       //Updates selectionCollisionBox pose as it is used in mouse pointcollide
       selectionCollisionBox.getPose().set(selectablePose3DGizmo.getPoseGizmo().getPose());
       selectionCollisionBox.getPose().getTranslation().add(FOOTSTEP_GRAPHIC_SOLE_OFFSET_X, FOOTSTEP_GRAPHIC_SOLE_OFFSET_Y, FOOTSTEP_GRAPHIC_SOLE_OFFSET_Z);
+
+      updateHoverState();
+   }
+
+   public void updateHoverState()
+   {
+      if (isIntersectingVR.get(RobotSide.RIGHT) || isIntersectingVR.get(RobotSide.LEFT) || isHovered)
+      {
+         if (getFootstepSide() == RobotSide.LEFT)
+            footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 1.0f, 0.0f, 0.0f, 0.0f));
+         else
+            footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 1.0f, 0.0f, 0.0f));
+      }
+      else
+      {
+         if (plannedFootstepInternal.getRobotSide() == RobotSide.LEFT)
+            footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.5f, 0.0f, 0.0f, 0.0f));
+         else
+            footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 0.5f, 0.0f, 0.0f));
+      }
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
@@ -304,20 +324,7 @@ public class RDXInteractableFootstep
                                                              ReferenceFrame.getWorldFrame());
             }
 
-            if (isIntersectingVR.get(RobotSide.RIGHT) || isIntersectingVR.get(RobotSide.LEFT))
-            {
-               if (getFootstepSide() == RobotSide.LEFT)
-                  footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 1.0f, 0.0f, 0.0f, 0.0f));
-               else
-                  footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 1.0f, 0.0f, 0.0f));
-            }
-            else
-            {
-               if (plannedFootstepInternal.getRobotSide() == RobotSide.LEFT)
-                  footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.5f, 0.0f, 0.0f, 0.0f));
-               else
-                  footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 0.5f, 0.0f, 0.0f));
-            }
+
          });
       }
    }
@@ -338,22 +345,6 @@ public class RDXInteractableFootstep
    {
       isHovered = pickResult == input.getClosestPick();
       isClickedOn = isHovered && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
-
-      // TODO: mouse hovering on the footstep. (get foot validity warning text when this happens)
-      if (isHovered)
-      {
-         if (plannedFootstepInternal.getRobotSide() == RobotSide.LEFT)
-            footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 1.0f, 0.0f, 0.0f, 0.0f));
-         else
-            footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 1.0f, 0.0f, 0.0f));
-      }
-      else
-      {
-         if (plannedFootstepInternal.getRobotSide() == RobotSide.LEFT)
-            footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.5f, 0.0f, 0.0f, 0.0f));
-         else
-            footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 0.5f, 0.0f, 0.0f));
-      }
 
       // FIXME:
       if (currentlyPlacingFootstep)
