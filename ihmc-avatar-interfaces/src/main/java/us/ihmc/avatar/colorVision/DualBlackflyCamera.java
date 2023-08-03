@@ -74,7 +74,6 @@ public class DualBlackflyCamera
    private final ROS2DetectableSceneNodesPublisher detectableSceneObjectsPublisher = new ROS2DetectableSceneNodesPublisher();
    private final ROS2DetectableSceneNodesSubscription detectableSceneNodesSubscription;
 
-   private final AtomicReference<BytePointer> spinImageData = new AtomicReference<>(); // TODO: remove?
    private final AtomicReference<Instant> spinImageAcquisitionTime = new AtomicReference<>();
    private final ImageMessage imageMessage = new ImageMessage();
    private final IHMCROS2Publisher<ImageMessage> ros2ImagePublisher;
@@ -150,8 +149,8 @@ public class DualBlackflyCamera
                                                                         ousterFisheyeColoringIntrinsics);
 
       RigidBodyTransform cameraTransformToParent = side == RobotSide.LEFT ?
-            robotModel.getSensorInformation().getObjectDetectionCameraTransform() :
-            robotModel.getSensorInformation().getObjectDetectionCameraTransform(); // TODO transform for right camera; left is Object Detection Camera
+            robotModel.getSensorInformation().getSituationalAwarenessLeftCameraTransform() :
+            robotModel.getSensorInformation().getSituationalAwarenessRightCameraTransform();
 
       remoteTunableCameraTransform = ROS2TunedRigidBodyTransform.toBeTuned(ros2Helper,
                                                                            ROS2Tools.OBJECT_DETECTION_CAMERA_TO_PARENT_TUNING,
@@ -232,7 +231,7 @@ public class DualBlackflyCamera
                LogTools.error(interruptedException);
             }
 
-            // Undistort  the new image
+            // Undistort the new image
             undistortImageAndUpdateArUco();
          }
          System.out.println("Image undistort and update ArUco thread has finished");

@@ -41,6 +41,40 @@ public interface HumanoidRobotSensorInformation extends AvatarRobotRosVisionSens
                                                                              getObjectDetectionCameraTransform());
    }
 
+   public default RigidBodyTransform getSituationalAwarenessLeftCameraTransform()
+   {
+      return new RigidBodyTransform();
+   }
+
+   public default ReferenceFrame getSituationalAwarenessLeftCameraParentFrame(CommonHumanoidReferenceFrames referenceFrames)
+   {
+      return referenceFrames.getChestFrame();
+   }
+
+   public default ReferenceFrame getSituationalAwarenessLeftCameraFrame(CommonHumanoidReferenceFrames referenceFrames)
+   {
+      return ReferenceFrameTools.constructFrameWithChangingTransformToParent("situationalAwarenessLeftCamera",
+                                                                             getSituationalAwarenessLeftCameraParentFrame(referenceFrames),
+                                                                             getSituationalAwarenessLeftCameraTransform());
+   }
+
+   public default RigidBodyTransform getSituationalAwarenessRightCameraTransform()
+   {
+      return new RigidBodyTransform();
+   }
+
+   public default ReferenceFrame getSituationalAwarenessRightCameraParentFrame(CommonHumanoidReferenceFrames referenceFrames)
+   {
+      return referenceFrames.getChestFrame();
+   }
+
+   public default ReferenceFrame getSituationalAwarenessRightCameraFrame(CommonHumanoidReferenceFrames referenceFrames)
+   {
+      return ReferenceFrameTools.constructFrameWithChangingTransformToParent("situationalAwarenessRightCamera",
+                                                                             getSituationalAwarenessRightCameraParentFrame(referenceFrames),
+                                                                             getSituationalAwarenessRightCameraTransform());
+   }
+
    public default RigidBodyTransform getExperimentalCameraTransform()
    {
       return new RigidBodyTransform();

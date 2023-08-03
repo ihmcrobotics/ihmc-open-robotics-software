@@ -59,6 +59,8 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    private ReferenceFrame headCameraFrame;
    private ReferenceFrame steppingCameraFrame;
    private ReferenceFrame objectDetectionCameraFrame;
+   private ReferenceFrame situationalAwarenessLeftCameraFrame;
+   private ReferenceFrame situationalAwarenessRightCameraFrame;
    private ReferenceFrame experimentalCameraFrame;
    private ReferenceFrame ousterLidarFrame;
 
@@ -233,6 +235,8 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       {
          steppingCameraFrame = sensorInformation.getSteppingCameraFrame(this);
          objectDetectionCameraFrame = sensorInformation.getObjectDetectionCameraFrame(this);
+         situationalAwarenessLeftCameraFrame = sensorInformation.getSituationalAwarenessLeftCameraFrame(this);
+         situationalAwarenessRightCameraFrame = sensorInformation.getSituationalAwarenessRightCameraFrame(this);
          experimentalCameraFrame = sensorInformation.getExperimentalCameraFrame(this);
          ousterLidarFrame = sensorInformation.getOusterLidarFrame(this);
       }
@@ -397,12 +401,17 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       if (lidarSensorFrame != null)
          lidarSensorFrame.update();
       if (steppingCameraFrame != null)
-      {
          steppingCameraFrame.update();
+      if (objectDetectionCameraFrame != null)
          objectDetectionCameraFrame.update();
+      if (situationalAwarenessLeftCameraFrame != null)
+         situationalAwarenessLeftCameraFrame.update();
+      if (situationalAwarenessRightCameraFrame != null)
+         situationalAwarenessRightCameraFrame.update();
+      if (experimentalCameraFrame != null)
          experimentalCameraFrame.update();
+      if (ousterLidarFrame != null)
          ousterLidarFrame.update();
-      }
    }
 
    @Override
@@ -471,6 +480,16 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    public ReferenceFrame getObjectDetectionCameraFrame()
    {
       return objectDetectionCameraFrame;
+   }
+
+   public ReferenceFrame getSituationalAwarenessLeftCameraFrame()
+   {
+      return situationalAwarenessLeftCameraFrame;
+   }
+
+   public ReferenceFrame getSituationalAwarenessRightCameraFrame()
+   {
+      return situationalAwarenessRightCameraFrame;
    }
 
    public ReferenceFrame getExperimentalCameraFrame()
