@@ -96,7 +96,7 @@ public class MotionQPInputCalculator
 
    private final NativeNullspaceProjector accelerationNativeNullspaceProjector;
    private final NativeNullspaceProjector velocityNativeNullspaceProjector;
-   
+
    private final YoInteger sizeOfAllTasksJacobian = new YoInteger("sizeOfAllTasksJacobian", registry);
 
    public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame,
@@ -274,7 +274,8 @@ public class MotionQPInputCalculator
       tempTaskVelocityJacobianNative.set(qpInputToPack.taskJacobian);
 
       mergeAllTaskJacobians();
-      velocityNativeNullspaceProjector.project(tempTaskVelocityJacobianNative, nativeAllTaskJacobian,
+      velocityNativeNullspaceProjector.project(tempTaskVelocityJacobianNative,
+                                               nativeAllTaskJacobian,
                                                projectedTaskJacobian,
                                                nullspaceProjectionAlpha.getValue());
 
@@ -299,7 +300,8 @@ public class MotionQPInputCalculator
       {
          tempTaskVelocityJacobianNative.set(qpInputToPack.taskJacobian);
          mergeAllTaskJacobians();
-         velocityNativeNullspaceProjector.project(tempTaskVelocityJacobianNative, nativeAllTaskJacobian,
+         velocityNativeNullspaceProjector.project(tempTaskVelocityJacobianNative,
+                                                  nativeAllTaskJacobian,
                                                   projectedTaskJacobian,
                                                   nullspaceProjectionAlpha.getValue());
          projectedTaskJacobian.get(qpInputToPack.taskJacobian);
@@ -330,7 +332,8 @@ public class MotionQPInputCalculator
       {
          tempTaskVelocityJacobianNative.set(qpInputToPack.taskJacobian);
          mergeAllTaskJacobians();
-         velocityNativeNullspaceProjector.project(tempTaskVelocityJacobianNative, nativeAllTaskJacobian,
+         velocityNativeNullspaceProjector.project(tempTaskVelocityJacobianNative,
+                                                  nativeAllTaskJacobian,
                                                   projectedTaskJacobian,
                                                   nullspaceProjectionAlpha.getValue());
          projectedTaskJacobian.get(qpInputToPack.taskJacobian);
@@ -365,15 +368,15 @@ public class MotionQPInputCalculator
 
       if (loopJacobian.getNumRows() != loopConvectiveTerm.getNumRows())
          throw new IllegalArgumentException("Inconsistent dimensions: number of rows in Jacobian: " + loopJacobian.getNumRows() + ", number of joints: "
-               + loopJoints.size());
+                                            + loopJoints.size());
 
       if (loopJacobian.getNumRows() != loopConvectiveTerm.getNumRows())
          throw new MatrixDimensionException("Inconsistent dimensions: loopJacobian.numRows=" + loopJacobian.getNumRows() + ", loopConvectiveTerm.numRows="
-               + loopConvectiveTerm.getNumRows());
+                                            + loopConvectiveTerm.getNumRows());
 
       if (actuatedJointIndices.length != loopJacobian.getNumCols())
          throw new IllegalArgumentException("Inconsistent dimensions: number of actuated joints: " + actuatedJointIndices.length
-               + ", number of columns in Jacobian: " + loopJacobian.getNumCols());
+                                            + ", number of columns in Jacobian: " + loopJacobian.getNumCols());
 
       qpVariableSubstitutionToPack.reshape(loopJoints.size(), loopJacobian.getNumRows());
 
@@ -393,12 +396,12 @@ public class MotionQPInputCalculator
 
    public boolean convertQPObjectiveCommand(QPObjectiveCommand commandToConvert, NativeQPInputTypeA qpInputToPack)
    {
-//      LogTools.info("-------------------------WBCC------------------------------------");
-//      LogTools.info("-------------------------WBCC------------------------------------");
-//      LogTools.info(EuclidCoreIOTools.getArrayString(", ", jointIndexHandler.getIndexedJoints(), j -> j.getName()));
-//      LogTools.info("-------------------------WBCC------------------------------------");
-//      LogTools.info("-------------------------WBCC------------------------------------");
-//      LogTools.info("-------------------------WBCC------------------------------------");
+      //      LogTools.info("-------------------------WBCC------------------------------------");
+      //      LogTools.info("-------------------------WBCC------------------------------------");
+      //      LogTools.info(EuclidCoreIOTools.getArrayString(", ", jointIndexHandler.getIndexedJoints(), j -> j.getName()));
+      //      LogTools.info("-------------------------WBCC------------------------------------");
+      //      LogTools.info("-------------------------WBCC------------------------------------");
+      //      LogTools.info("-------------------------WBCC------------------------------------");
       DMatrixRMaj jacobian = commandToConvert.getJacobian();
       DMatrixRMaj objective = commandToConvert.getObjective();
       DMatrixRMaj selectionMatrix = commandToConvert.getSelectionMatrix();
@@ -433,15 +436,15 @@ public class MotionQPInputCalculator
       // b = S * b
       qpInputToPack.taskObjective.mult(nativeTempSelectionMatrix, nativeTempTaskObjective);
 
-//<<<<<<< HEAD
-////      tempTaskJacobian.reshape(taskSize, jacobianCalculator.getNumberOfDegreesOfFreedom());
-//      CommonOps_DDRM.mult(selectionMatrix, jacobian, qpInputToPack.taskJacobian);
+      //<<<<<<< HEAD
+      ////      tempTaskJacobian.reshape(taskSize, jacobianCalculator.getNumberOfDegreesOfFreedom());
+      //      CommonOps_DDRM.mult(selectionMatrix, jacobian, qpInputToPack.taskJacobian);
 
-//=======
+      //=======
       // J = S * J
       qpInputToPack.taskJacobian.reshape(taskSize, jacobianCalculator.getNumberOfDegreesOfFreedom());
       qpInputToPack.taskJacobian.mult(nativeTempSelectionMatrix, nativeTempJacobian);
-//>>>>>>> refs/heads/develop
+      //>>>>>>> refs/heads/develop
       if (commandToConvert.isNullspaceProjected())
       {
          mergeAllTaskJacobians();
@@ -449,14 +452,14 @@ public class MotionQPInputCalculator
                                                       nativeAllTaskJacobian,
                                                       qpInputToPack.taskJacobian,
                                                       nullspaceProjectionAlpha.getValue());
-//<<<<<<< HEAD
-//         
-//         projectedTaskJacobian.get(qpInputToPack.taskJacobian);
+         //<<<<<<< HEAD
+         //         
+         //         projectedTaskJacobian.get(qpInputToPack.taskJacobian);
 
          // Testing
-//         recordTaskJacobian(qpInputToPack.taskJacobian);
-//=======
-//>>>>>>> refs/heads/develop
+         //         recordTaskJacobian(qpInputToPack.taskJacobian);
+         //=======
+         //>>>>>>> refs/heads/develop
       }
       else
       {
@@ -547,15 +550,15 @@ public class MotionQPInputCalculator
 
       if (primaryBase == null)
       { // No primary base provided for this task.
-         // Record the resulting Jacobian matrix for the privileged configuration.
+        // Record the resulting Jacobian matrix for the privileged configuration.
          tempTaskJacobian.set(qpInputToPack.taskJacobian);
          recordTaskJacobian(tempTaskJacobian);
          // We're done!
       }
       else
       { // A primary base has been provided, two things are happening here:
-         // 1- A weight is applied on the joints between the base and the primary base with objective to reduce their involvement for this task.
-         // 2- The Jacobian is transformed before being recorded such that the privileged configuration is only applied from the primary base to the end-effector.
+        // 1- A weight is applied on the joints between the base and the primary base with objective to reduce their involvement for this task.
+        // 2- The Jacobian is transformed before being recorded such that the privileged configuration is only applied from the primary base to the end-effector.
          nativeTempPrimaryTaskJacobian.set(qpInputToPack.taskJacobian);
 
          boolean isJointUpstreamOfPrimaryBase = false;
@@ -568,7 +571,7 @@ public class MotionQPInputCalculator
 
             if (isJointUpstreamOfPrimaryBase)
             { // The current joint is located between the base and the primary base:
-               // Find the column indices corresponding to this joint (it is usually only one index except for the floating joint which has 6).
+              // Find the column indices corresponding to this joint (it is usually only one index except for the floating joint which has 6).
                int[] jointIndices = jointIndexHandler.getJointIndices(joint);
 
                for (int dofIndex : jointIndices)
@@ -731,7 +734,6 @@ public class MotionQPInputCalculator
       if (taskSize == 0)
          return false;
 
-
       qpInputToPack.reshape(taskSize);
       qpInputToPack.setUseWeightScalar(false);
       qpInputToPack.setConstraintType(ConstraintType.OBJECTIVE);
@@ -803,6 +805,7 @@ public class MotionQPInputCalculator
    }
 
    private final QPInputTypeB tempBInput = new QPInputTypeB(6);
+
    /**
     * Converts a {@link LinearMomentumRateCostCommand} into a {@link NativeQPInputTypeB}.
     *
@@ -1119,15 +1122,15 @@ public class MotionQPInputCalculator
    /**
     * Sets up an objective for matching a desired set of joint torques. <br>
     * Given a desired torque vector tau_d, this task is: <br>
+    * [M (-J^T beta)] [q_dd^T rho^T]^T = tau_d - (Cq_d + G) <br>
     *
-    * [M (-J^T beta)] [q_dd^T rho^T]^T = tau_d - (Cq_d + G)  <br>
-    *
-    * @param jointTorqueCommand desired joint torque command to convert
-    * @param hasFloatingBase whether the robot has a floating base, used for indexing the mass matrix
-    * @param qpInputToPack the result of the conversion.
-    * @param bodyMassMatrix, M in the above equation
+    * @param jointTorqueCommand                 desired joint torque command to convert
+    * @param hasFloatingBase                    whether the robot has a floating base, used for
+    *                                           indexing the mass matrix
+    * @param qpInputToPack                      the result of the conversion.
+    * @param bodyMassMatrix,                    M in the above equation
     * @param bodyContactForceJacobianTranspose, J^T beta in the above equation
-    * @param bodyGravityCoriolisMatrix, {Cq_d + G} in the above equation
+    * @param bodyGravityCoriolisMatrix,         {Cq_d + G} in the above equation
     */
    public boolean convertJointTorqueCommand(JointTorqueCommand jointTorqueCommand,
                                             boolean hasFloatingBase,
@@ -1210,7 +1213,7 @@ public class MotionQPInputCalculator
          nativeAllTaskJacobian.insert(allTaskJacobian, nativeSize, 0);
       }
 
-      if (nativeSize + ejmlSize> sizeOfAllTasksJacobian.getIntegerValue())
+      if (nativeSize + ejmlSize > sizeOfAllTasksJacobian.getIntegerValue())
          sizeOfAllTasksJacobian.set(nativeSize + ejmlSize);
    }
 
