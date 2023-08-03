@@ -23,7 +23,12 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    private static final String LEFT_SERIAL_NUMBER = System.getProperty("blackfly.left.serial.number", "00000000");
    private static final String RIGHT_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "00000000");
 
+   private final DRCRobotModel robotModel;
+   private final PredefinedSceneNodeLibrary predefinedSceneNodeLibrary;
+   private final BlackflyLensProperties blackflyLensProperties;
+
    private final ROS2Node ros2Node;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final Thread syncedRobotUpdateThread;
 
    private final SpinnakerBlackflyManager spinnakerBlackflyManager = new SpinnakerBlackflyManager();
@@ -35,24 +40,21 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
                                                    PredefinedSceneNodeLibrary predefinedSceneNodeLibrary,
                                                    BlackflyLensProperties blackflyLensProperties)
    {
-      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "blackfly_node");
+      this.robotModel = robotModel;
+      this.predefinedSceneNodeLibrary = predefinedSceneNodeLibrary;
+      this.blackflyLensProperties = blackflyLensProperties;
 
-      ROS2SyncedRobotModel syncedRobotModel = new ROS2SyncedRobotModel(robotModel, ros2Node);
+      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "blackfly_node");
+      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
       // Helpful to view relative sensor transforms when robot controller is not running
-      syncedRobotModel.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);
+      syncedRobot.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);
 
       if (!LEFT_SERIAL_NUMBER.equals("00000000"))
       {
          LogTools.info("Adding Blackfly left with serial number: {}", LEFT_SERIAL_NUMBER);
          SpinnakerBlackfly spinnakerBlackfly = spinnakerBlackflyManager.createSpinnakerBlackfly(LEFT_SERIAL_NUMBER);
-         dualBlackflyCameras.put(RobotSide.LEFT,
-                                 new DualBlackflyCamera(RobotSide.LEFT,
-                                                        syncedRobotModel,
-                                                        robotModel.getSensorInformation().getObjectDetectionCameraTransform(),
-                                                        ros2Node,
-                                                        spinnakerBlackfly,
-                                                        blackflyLensProperties,
-                                                        predefinedSceneNodeLibrary));
+         DualBlackflyCamera dualBlackflyCamera = createDualBlackflyCamera(RobotSide.LEFT, spinnakerBlackfly);
+         dualBlackflyCameras.set(RobotSide.LEFT, dualBlackflyCamera);
       }
       else
       {
@@ -63,14 +65,8 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
       {
          LogTools.info("Adding Blackfly right with serial number: {}", RIGHT_SERIAL_NUMBER);
          SpinnakerBlackfly spinnakerBlackfly = spinnakerBlackflyManager.createSpinnakerBlackfly(RIGHT_SERIAL_NUMBER);
-         dualBlackflyCameras.put(RobotSide.RIGHT,
-                                 new DualBlackflyCamera(RobotSide.RIGHT,
-                                                        syncedRobotModel,
-                                                        robotModel.getSensorInformation().getObjectDetectionCameraTransform(),
-                                                        ros2Node,
-                                                        spinnakerBlackfly,
-                                                        blackflyLensProperties,
-                                                        predefinedSceneNodeLibrary));
+         DualBlackflyCamera dualBlackflyCamera = createDualBlackflyCamera(RobotSide.RIGHT, spinnakerBlackfly);
+         dualBlackflyCameras.set(RobotSide.RIGHT, dualBlackflyCamera);
       }
       else
       {
@@ -79,19 +75,40 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
 
       syncedRobotUpdateThread = new Thread(() ->
       {
-         Throttler throttler = new Throttler();
-         throttler.setFrequency(20.0);
+         // Represents the frequency at which images are read from the fastest blackfly
+         double highestFrequency = 0;
 
-         while (!running)
+         Throttler throttler = new Throttler();
+
+         while (running)
          {
+            for (DualBlackflyCamera dualBlackflyCamera : dualBlackflyCameras.values())
+            {
+               // min of 20 hz
+               highestFrequency = Math.max(20, Math.max(highestFrequency, dualBlackflyCamera.getReadFrequency()));
+            }
+
+            throttler.setFrequency(highestFrequency);
             throttler.waitAndRun();
-            syncedRobotModel.update();
+
+            syncedRobot.update();
          }
       }, "ROS2SyncedRobotModel-update-thread");
 
       syncedRobotUpdateThread.start();
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, getClass().getName() + "-Shutdown"));
+   }
+
+   private DualBlackflyCamera createDualBlackflyCamera(RobotSide side, SpinnakerBlackfly spinnakerBlackfly)
+   {
+      return new DualBlackflyCamera(robotModel,
+                             side,
+                             syncedRobot::getReferenceFrames,
+                             ros2Node,
+                             spinnakerBlackfly,
+                             blackflyLensProperties,
+                             predefinedSceneNodeLibrary);
    }
 
    private void destroy()
