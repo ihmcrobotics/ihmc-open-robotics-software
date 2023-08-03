@@ -303,7 +303,7 @@ public class RDXInteractableFootstep
             }
             RDXVRDragData gripDragData = controller.getGripDragData();
 
-            if (gripDragData.getDragJustStarted() && isIntersectingVR.get(side))
+            if (gripDragData.getDragJustStarted() && isIntersectingVR.get(side) && !vrContext.getController(side.getOppositeSide()).getGripDragData().isBeingDragged(this))
             {
                gripDragData.setObjectBeingDragged(this);
                selectablePose3DGizmo.getPoseGizmo()
