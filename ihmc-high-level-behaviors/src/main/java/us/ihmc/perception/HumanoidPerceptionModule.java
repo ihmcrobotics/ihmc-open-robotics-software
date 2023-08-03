@@ -1,10 +1,11 @@
 package us.ihmc.perception;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
+import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.activeMapping.ActiveMappingRemoteProcess;
@@ -12,6 +13,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
@@ -27,9 +29,9 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 
+import java.time.Instant;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -38,7 +40,14 @@ public class HumanoidPerceptionModule
 {
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
 
-   private BytedecoImage bytedecoDepthImage;
+   private BytedecoImage realsenseDepthImage;
+   private BytedecoImage ousterDepthImage;
+   private Mat occupancyGrid;
+   private BytePointer compressedOccupancyGrid;
+   private ImageMessage occupancyGridMessage;
+
+   private final FramePose3D cameraPose = new FramePose3D();
+
    private OpenCLManager openCLManager;
    private LocalizationAndMappingProcess localizationAndMappingProcess;
    private ActiveMappingRemoteProcess activeMappingRemoteProcess;
@@ -70,7 +79,7 @@ public class HumanoidPerceptionModule
       });
    }
 
-   public void update(ROS2Helper ros2Helper, Mat depthImage, ReferenceFrame cameraFrame, boolean rapidRegionsEnabled, boolean mappingEnabled)
+   public void updateTerrain(ROS2Helper ros2Helper, Mat depthImage, ReferenceFrame cameraFrame, boolean rapidRegionsEnabled, boolean mappingEnabled)
    {
       if (localizationAndMappingProcess != null)
          localizationAndMappingProcess.setEnableLiveMode(mappingEnabled);
@@ -78,28 +87,68 @@ public class HumanoidPerceptionModule
       if (rapidRegionsEnabled)
       {
          executorService.submit(() ->
-                                {
+           {
+              if (robotConfigurationData != null && robotConfigurationData.getJointNameHash() != 0)
+              {
+                 robotConfigurationDataBuffer.update(robotConfigurationData);
+                 long newestTimestamp = robotConfigurationDataBuffer.getNewestTimestamp();
+                 long selectedTimestamp = robotConfigurationDataBuffer.updateFullRobotModel(waitIfNecessary,
+                                                                                            newestTimestamp,
+                                                                                            this.fullRobotModel,
+                                                                                            null);
+              }
 
-                                   if (robotConfigurationData != null && robotConfigurationData.getJointNameHash() != 0)
-                                   {
-                                      robotConfigurationDataBuffer.update(robotConfigurationData);
-                                      long newestTimestamp = robotConfigurationDataBuffer.getNewestTimestamp();
-                                      long selectedTimestamp = robotConfigurationDataBuffer.updateFullRobotModel(waitIfNecessary,
-                                                                                                                 newestTimestamp,
-                                                                                                                 this.fullRobotModel,
-                                                                                                                 null);
-                                   }
-
-                                   OpenCVTools.convertFloatToShort(depthImage, bytedecoDepthImage.getBytedecoOpenCVMat(), 1000.0, 0.0);
-
-                                   extractFramePlanarRegionsList(cameraFrame);
-                                   filterFramePlanarRegionsList();
-
-                                   PerceptionMessageTools.publishFramePlanarRegionsList(this.sensorFrameRegions,
-                                                                                        PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
-                                                                                        ros2Helper);
-                                });
+              OpenCVTools.convertFloatToShort(depthImage, realsenseDepthImage.getBytedecoOpenCVMat(), 1000.0, 0.0);
+              extractFramePlanarRegionsList(rapidPlanarRegionsExtractor,
+                                            realsenseDepthImage,
+                                            sensorFrameRegions,
+                                            regionsInWorldFrame,
+                                            regionsInSensorFrame,
+                                            cameraFrame);
+              filterFramePlanarRegionsList();
+              PerceptionMessageTools.publishFramePlanarRegionsList(sensorFrameRegions,
+                                                                   PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
+                                                                   ros2Helper);
+           });
       }
+   }
+
+   public void updateStructural(ROS2Helper ros2Helper, Mat ousterDepth, ReferenceFrame sensorFrame)
+   {
+      executorService.submit(() ->
+        {
+           if (robotConfigurationData != null && robotConfigurationData.getJointNameHash() != 0)
+           {
+              robotConfigurationDataBuffer.update(robotConfigurationData);
+              long newestTimestamp = robotConfigurationDataBuffer.getNewestTimestamp();
+              long selectedTimestamp = robotConfigurationDataBuffer.updateFullRobotModel(waitIfNecessary,
+                                                                                         newestTimestamp,
+                                                                                         this.fullRobotModel,
+                                                                                         null);
+           }
+
+           Instant acquisitionTime = Instant.now();
+
+           cameraPose.setToZero(sensorFrame);
+           cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+           OpenCVTools.convertFloatToShort(ousterDepth, ousterDepthImage.getBytedecoOpenCVMat(), 1000.0, 0.0);
+
+           extractOccupancyGrid(ousterDepthImage, occupancyGrid, sensorFrame);
+
+           OpenCVTools.compressImagePNG(occupancyGrid, compressedOccupancyGrid);
+           CameraModel.PINHOLE.packMessageFormat(occupancyGridMessage);
+           PerceptionMessageTools.publishCompressedDepthImage(compressedOccupancyGrid,
+                                                              PerceptionAPI.OCCUPANCY_GRID_MESSAGE,
+                                                              occupancyGridMessage,
+                                                              ros2Helper,
+                                                              cameraPose,
+                                                              acquisitionTime,
+                                                              0,
+                                                              ousterDepthImage.getImageHeight(),
+                                                              ousterDepthImage.getImageWidth(),
+                                                              (float) 0.05f);
+        });
    }
 
    public void initializePerspectiveRapidRegionsExtractor(CameraIntrinsics cameraIntrinsics)
@@ -107,8 +156,8 @@ public class HumanoidPerceptionModule
       LogTools.info("Initializing Perspective Rapid Regions: {}", cameraIntrinsics);
 
       this.sensorFrameRegions = new FramePlanarRegionsList();
-      this.bytedecoDepthImage = new BytedecoImage(cameraIntrinsics.getWidth(), cameraIntrinsics.getHeight(), opencv_core.CV_16UC1);
-      this.bytedecoDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+      this.realsenseDepthImage = new BytedecoImage(cameraIntrinsics.getWidth(), cameraIntrinsics.getHeight(), opencv_core.CV_16UC1);
+      this.realsenseDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
       this.rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager,
                                                                          cameraIntrinsics.getHeight(),
                                                                          cameraIntrinsics.getWidth(),
@@ -118,6 +167,13 @@ public class HumanoidPerceptionModule
                                                                          cameraIntrinsics.getCy());
 
       this.rapidPlanarRegionsExtractor.getDebugger().setEnabled(false);
+   }
+
+   public void initializeOccupancyGrid(int height, int width)
+   {
+      LogTools.info("Initializing Occupancy Grid");
+      this.occupancyGrid = new Mat(height, width, opencv_core.CV_16UC1);
+      compressedOccupancyGrid = new BytePointer(); // deallocate later
    }
 
    public void initializeBodyCollisionFilter(FullHumanoidRobotModel fullRobotModel, CollisionBoxProvider collisionBoxProvider)
@@ -134,12 +190,7 @@ public class HumanoidPerceptionModule
       localizationAndMappingProcess = new LocalizationAndMappingProcess(robotName,
                                                                         PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
                                                                         PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
-                                                                        ros2Node,
-                                                                        syncedRobot.getReferenceFrames(),
-                                                                        () ->
-                                                                        {
-                                                                        },
-                                                                        smoothing);
+                                                                        ros2Node, syncedRobot.getReferenceFrames(), () -> {}, smoothing);
    }
 
    public void initializeActiveMappingProcess(String robotName, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, ROS2Node ros2Node)
@@ -151,14 +202,20 @@ public class HumanoidPerceptionModule
                                                                   ros2Node, syncedRobot.getReferenceFrames(), () -> {}, true);
    }
 
-   public void extractFramePlanarRegionsList(ReferenceFrame cameraFrame)
+   public void extractFramePlanarRegionsList(RapidPlanarRegionsExtractor extractor, BytedecoImage depthImage, FramePlanarRegionsList sensorFrameRegions,
+                                             PlanarRegionsList worldRegions, PlanarRegionsList sensorRegions, ReferenceFrame cameraFrame)
    {
-      this.rapidPlanarRegionsExtractor.update(bytedecoDepthImage, cameraFrame, this.sensorFrameRegions);
-      this.rapidPlanarRegionsExtractor.setProcessing(false);
+      extractor.update(depthImage, cameraFrame, sensorFrameRegions);
+      extractor.setProcessing(false);
 
-      this.regionsInSensorFrame = this.sensorFrameRegions.getPlanarRegionsList();
-      this.regionsInWorldFrame = this.regionsInSensorFrame.copy();
-      this.regionsInWorldFrame.applyTransform(cameraFrame.getTransformToWorldFrame());
+      sensorRegions = sensorFrameRegions.getPlanarRegionsList();
+      worldRegions = sensorRegions.copy();
+      worldRegions.applyTransform(cameraFrame.getTransformToWorldFrame());
+   }
+
+   public void extractOccupancyGrid(BytedecoImage depthImage, Mat occupancyGrid, ReferenceFrame cameraFrame)
+   {
+      // TODO: Implement depth map to occupancy map conversion.
    }
 
    public void filterFramePlanarRegionsList()
@@ -187,9 +244,9 @@ public class HumanoidPerceptionModule
       return this.regionsInWorldFrame;
    }
 
-   public BytedecoImage getBytedecoDepthImage()
+   public BytedecoImage getRealsenseDepthImage()
    {
-      return this.bytedecoDepthImage;
+      return this.realsenseDepthImage;
    }
 
    public RapidPlanarRegionsExtractor getRapidRegionsExtractor()
