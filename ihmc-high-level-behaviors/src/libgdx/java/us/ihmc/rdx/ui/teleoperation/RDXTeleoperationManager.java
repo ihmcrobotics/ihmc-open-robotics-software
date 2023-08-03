@@ -181,6 +181,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
                                         teleoperationParameters,
                                         interactableHands);
       }
+
+      RDXBaseUI.getInstance().getKeyBindings().register("Delete all interactables", "Ctrl + L");
    }
 
    public void create(RDXBaseUI baseUI)
@@ -418,7 +420,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       if (interactablesAvailable)
       {
-         if (ImGui.button(labels.get("Delete all Interactables")))
+         if (ImGui.button(labels.get("Delete all Interactables")) || ImGui.getIO().getKeyCtrl() && ImGui.isKeyReleased('L'))
          {
             locomotionManager.deleteAll();
 
@@ -430,15 +432,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
          ImGui.checkbox("Interactables enabled", interactablesEnabled);
       }
 
-      ImGui.separator();
-      locomotionManager.renderImGuiWidgets();
-      ImGui.separator();
-
       if (interactablesAvailable)
       {
-         if (armManager != null)
-            armManager.renderImGuiWidgets();
-
          ImGui.text("Pelvis:");
          ImGuiTools.previousWidgetTooltip("Send with: Spacebar");
          ImGui.sameLine();
