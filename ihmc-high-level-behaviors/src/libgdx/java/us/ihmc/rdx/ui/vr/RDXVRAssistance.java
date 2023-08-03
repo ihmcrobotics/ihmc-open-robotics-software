@@ -10,7 +10,6 @@ import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sharedControl.*;
 import us.ihmc.communication.IHMCROS2Input;
-import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -309,7 +308,7 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
 
          if (previewSetToActive)
          {
-            if (containsBodyPart(bodyPart))
+            if (containsBodyPart(bodyPart) && proMPAssistant.hasPosition(bodyPart))
             {
                // start storing current frames for replay preview with splines
                if (!bodyPartReplayMotionMap.containsKey(bodyPart))
@@ -467,9 +466,9 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
       //update menu
       if (!enabled.get() && !objectName.isEmpty()) // if assistance not enabled and objects in the scene
       { // Press left B button to activate
-         if(menuMode[0] != VRMenuGuideMode.PRESS_LEFT_B)
+         if(menuMode[0] != VRMenuGuideMode.ACTIVATE)
             menu.resetTimer();
-         menuMode[0] = VRMenuGuideMode.PRESS_LEFT_B;
+         menuMode[0] = VRMenuGuideMode.ACTIVATE;
       }
       else if (!enabled.get()) // if assistance is off and no object in the scene
          menuMode[0] = VRMenuGuideMode.OFF; // OFF
@@ -481,11 +480,17 @@ public class RDXVRAssistance implements TeleoperationAssistant, ControlStreamer
       }
       else if ((!previewSetToActive && proMPAssistant.readyToPack()) || (previewSetToActive && previewValidated)) // if assistance is on and no preview, or preview is validated
       {
-         if(menuMode[0] != VRMenuGuideMode.PUSH_LEFT_JOYSTICK)
+         if(menuMode[0] != VRMenuGuideMode.DIRECT_WITH_JOYSTICK)
             menu.resetTimer();
-         menuMode[0] = VRMenuGuideMode.PUSH_LEFT_JOYSTICK;
+         menuMode[0] = VRMenuGuideMode.DIRECT_WITH_JOYSTICK;
          menu.setJoystickPressed(play);
 
+      }
+      else if (previewSetToActive && proMPAssistant.readyToPack() && !previewValidated) // if assistance is on and preview
+      {
+         if(menuMode[0] != VRMenuGuideMode.VALIDATE)
+            menu.resetTimer();
+         menuMode[0] = VRMenuGuideMode.VALIDATE;
       }
       else
          menuMode[0] = VRMenuGuideMode.IDLE;

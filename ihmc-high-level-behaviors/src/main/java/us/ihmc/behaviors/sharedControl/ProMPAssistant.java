@@ -563,6 +563,11 @@ public class ProMPAssistant
       return (proMPManagers.get(currentTask).getBodyPartsGeometry()).containsKey(bodyPart);
    }
 
+   public boolean hasPosition(String bodyPart)
+   {
+      return !((proMPManagers.get(currentTask).getBodyPartsGeometry()).get(bodyPart).equals("Orientation"));
+   }
+
    public boolean isCurrentTaskDone()
    {
       return this.doneCurrentTask;
