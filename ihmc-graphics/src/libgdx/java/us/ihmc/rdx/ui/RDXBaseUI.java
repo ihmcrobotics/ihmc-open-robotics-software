@@ -513,7 +513,15 @@ public class RDXBaseUI
       ImGui.sameLine(ImGui.getWindowSizeX() - enoughWidthForVRButton);
       vrManager.renderImGuiEnableWidget();
       ImGui.endMainMenuBar();
+
+      fontSize = ImGui.getFontSize();
+      framePadding = ImGui.getStyle().getFramePaddingY();
+      frameHeight = ImGui.getFrameHeight();
    }
+
+   float frameHeight;
+   float framePadding;
+   int fontSize;
 
    public void dispose()
    {
