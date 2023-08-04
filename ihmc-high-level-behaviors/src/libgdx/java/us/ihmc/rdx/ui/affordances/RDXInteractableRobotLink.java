@@ -147,7 +147,9 @@ public class RDXInteractableRobotLink
                {
                   joystickSelection.put(side, RDXVRJoystickSelection.CLOSE_HAND);
                }
-
+            }
+            else
+            {
                switch (joystickSelection.get(side))
                {
                   case EXECUTE:
@@ -162,30 +164,27 @@ public class RDXInteractableRobotLink
                   case CLOSE_HAND:
                      controller.setAButtonText("Close Hand");
                      break;
-                  case NONE:
-                     controller.setAButtonText("");
                }
-
                if (aButton.bChanged() && aButton.bState())
                {
                   switch (joystickSelection.get(side))
                   {
                      case EXECUTE:
                         onSpacePressed.run();
+                        joystickSelection.put(side, RDXVRJoystickSelection.NONE);
                         break;
                      case DELETE_INTERACTABLE:
                         delete();
+                        joystickSelection.put(side, RDXVRJoystickSelection.NONE);
                         break;
                      case OPEN_HAND:
+                        joystickSelection.put(side, RDXVRJoystickSelection.NONE);
                         break;
                      case CLOSE_HAND:
+                        joystickSelection.put(side, RDXVRJoystickSelection.NONE);
                         break;
                   }
                }
-            }
-            else
-            {
-               joystickSelection.put(side, RDXVRJoystickSelection.NONE);
             }
             if (isHovering && gripDragData.getDragJustStarted())
             {
