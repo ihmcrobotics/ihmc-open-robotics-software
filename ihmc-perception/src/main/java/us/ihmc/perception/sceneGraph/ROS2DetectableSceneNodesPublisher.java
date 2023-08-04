@@ -55,7 +55,7 @@ public class ROS2DetectableSceneNodesPublisher
             arUcoMarkerPose.get(arUcoMarkerToWorldTransform);
             MessageTools.toMessage(arUcoMarkerToWorldTransform, detectableSceneNodeMessage.getArucoMarkerTransformToWorld());
 
-            detectableSceneNodeMessage.setAlphaFilterValue((float) arUcoDetectableNode.getAlphaFilteredTransformToParent().getAlpha());
+            detectableSceneNodeMessage.setAlphaFilterValue((float) arUcoDetectableNode.getBreakFrequency());
          }
       }
       ros2PublishSubscribeAPI.publish(PerceptionAPI.DETECTABLE_SCENE_NODES.getTopic(ioQualifier), detectableSceneNodesMessage);

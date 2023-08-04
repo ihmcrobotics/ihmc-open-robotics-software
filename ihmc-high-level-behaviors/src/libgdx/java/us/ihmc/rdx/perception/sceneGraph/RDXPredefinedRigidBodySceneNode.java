@@ -70,9 +70,9 @@ public class RDXPredefinedRigidBodySceneNode
 
       if (sceneNode instanceof ArUcoDetectableNode arUcoDetectableNode)
       {
-         alphaFilterValueSlider = new ImGuiSliderDoubleWrapper("Alpha filter", "%.2f", 0.0, 1.0,
-                                                               arUcoDetectableNode.getAlphaFilteredTransformToParent()::getAlpha,
-                                                               arUcoDetectableNode.getAlphaFilteredTransformToParent()::setAlpha);
+         alphaFilterValueSlider = new ImGuiSliderDoubleWrapper("Break frequency", "%.2f", 0.2, 5.0,
+                                                               arUcoDetectableNode::getBreakFrequency,
+                                                               arUcoDetectableNode::setBreakFrequency);
       }
    }
 

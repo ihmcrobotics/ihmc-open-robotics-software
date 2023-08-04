@@ -18,5 +18,5 @@ controller_msgs/RigidBodyTransformMessage aruco_marker_transform_to_world
 # Nodes can be set to not track the detected pose
 bool track_detected_pose
 
-# Alpha filter value for nodes that are alpha filtered
-float32 alpha_filter_value
+# Break frequency filter value for nodes that are alpha filtered
+float32 break_frequency

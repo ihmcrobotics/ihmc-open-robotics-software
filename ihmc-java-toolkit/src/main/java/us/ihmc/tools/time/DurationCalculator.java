@@ -6,14 +6,36 @@ import java.util.ArrayDeque;
 
 public class DurationCalculator
 {
-   private volatile double duration;
+   private volatile double duration = Double.NaN;
    private final ArrayDeque<Double> deltas = new ArrayDeque<>();
    private final Stopwatch stopwatch = new Stopwatch().start();
-   private int history = 3;
+   private final int history;
+
+   /**
+    * History of 3.
+    */
+   public DurationCalculator()
+   {
+      this(3);
+   }
+
+   /**
+    * History if one yields the latest calculation only.
+    * @param history 1 or more.
+    */
+   public DurationCalculator(int history)
+   {
+      this.history = history;
+   }
 
    public synchronized void pause()
    {
       stopwatch.suspend();
+   }
+
+   public void reset()
+   {
+      stopwatch.reset();
    }
 
    public synchronized void ping()

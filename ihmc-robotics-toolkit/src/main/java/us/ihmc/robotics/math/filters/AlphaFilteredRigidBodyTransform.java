@@ -4,16 +4,17 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 
 public class AlphaFilteredRigidBodyTransform extends RigidBodyTransform
 {
-   /** Also think of it as max rate */
    private double alpha = 0.0;
    private final RigidBodyTransform previousFiltered = new RigidBodyTransform();
+
+   public AlphaFilteredRigidBodyTransform()
    {
-      previousFiltered.setToNaN();
+      setToNaN();
    }
 
    public void update(RigidBodyTransform measured)
    {
-      if (previousFiltered.containsNaN())
+      if (containsNaN())
       {
          set(measured);
       }
