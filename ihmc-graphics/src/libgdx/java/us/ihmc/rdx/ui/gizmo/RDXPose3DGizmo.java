@@ -41,6 +41,7 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.interaction.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -140,6 +141,25 @@ public class RDXPose3DGizmo implements RenderableProvider
    {
       this.transformToParent = gizmoTransformToParentFrameToModify;
       this.gizmoFrame = gizmoFrame;
+
+      RDXBaseUI.getInstance().getKeyBindings().register("Translation adjustment X+", "Up arrow");
+      RDXBaseUI.getInstance().getKeyBindings().register("Translation adjustment X-", "Down arrow");
+      RDXBaseUI.getInstance().getKeyBindings().register("Translation adjustment Y+", "Left arrow");
+      RDXBaseUI.getInstance().getKeyBindings().register("Translation adjustment Y-", "Right arrow");
+      RDXBaseUI.getInstance().getKeyBindings().register("Translation adjustment Z+", "Ctrl + Up arrow");
+      RDXBaseUI.getInstance().getKeyBindings().register("Translation adjustment Z-", "Ctrl + Down arrow");
+      RDXBaseUI.getInstance().getKeyBindings().register("Pitch adjustment +", "Alt + Up arrow");
+      RDXBaseUI.getInstance().getKeyBindings().register("Pitch adjustment -", "Alt + Down arrow");
+      RDXBaseUI.getInstance().getKeyBindings().register("Roll adjustment +", "Alt + Right arrow");
+      RDXBaseUI.getInstance().getKeyBindings().register("Roll adjustment -", "Alt + Left arrow");
+      RDXBaseUI.getInstance().getKeyBindings().register("Yaw adjustment +", "Ctrl + Alt + Left arrow");
+      RDXBaseUI.getInstance().getKeyBindings().register("Yaw adjustment -", "Ctrl + Alt + Right arrow");
+      RDXBaseUI.getInstance().getKeyBindings().register("Yaw adjustment +", "Ctrl + Mouse scroll down");
+      RDXBaseUI.getInstance().getKeyBindings().register("Yaw adjustment -", "Ctrl + Mouse scroll up");
+      RDXBaseUI.getInstance().getKeyBindings().register("Fine adjustment modifier", "Shift");
+      RDXBaseUI.getInstance().getKeyBindings().register("Manipulate axes", "Left mouse drag");
+      RDXBaseUI.getInstance().getKeyBindings().register("Open context menu", "Right mouse click");
+      RDXBaseUI.getInstance().getKeyBindings().register("Open context menu", "Right mouse click");
    }
 
    public void setGizmoFrame(ReferenceFrame gizmoFrame)
@@ -265,14 +285,15 @@ public class RDXPose3DGizmo implements RenderableProvider
 
       if (isWindowHovered)
       {
+         boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
+         boolean shiftHeld = ImGui.getIO().getKeyShift();
+
          // Use mouse wheel to yaw when ctrl key is held
-         if (ImGui.getIO().getKeyCtrl() && input.getMouseWheelDelta() != 0.0f)
+         if (ctrlHeld && input.getMouseWheelDelta() != 0.0f)
          {
             float deltaScroll = input.getMouseWheelDelta();
-            // Add some noise to not get stuck in discrete space
-            double noise = random.nextDouble() * 0.005;
-            double speed = 0.012 + noise;
-            frameBasedGizmoModification.yawInWorld(Math.signum(deltaScroll) * speed * Math.PI);
+            double amount = shiftHeld ? 0.001 : 0.012;
+            frameBasedGizmoModification.yawInWorld(Math.signum(deltaScroll) * amount * Math.PI);
          }
 
          // keyboard based controls
@@ -283,9 +304,7 @@ public class RDXPose3DGizmo implements RenderableProvider
          boolean anyArrowHeld = upArrowHeld || downArrowHeld || leftArrowHeld || rightArrowHeld;
          if (anyArrowHeld) // only the arrow keys do the moving
          {
-            boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
             boolean altHeld = ImGui.getIO().getKeyAlt();
-            boolean shiftHeld = ImGui.getIO().getKeyShift();
             double deltaTime = Gdx.graphics.getDeltaTime();
             if (altHeld) // orientation
             {

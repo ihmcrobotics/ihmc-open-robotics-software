@@ -3,10 +3,7 @@ package us.ihmc.rdx.imgui;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import imgui.*;
-import imgui.flag.ImGuiDataType;
-import imgui.flag.ImGuiFreeTypeBuilderFlags;
-import imgui.flag.ImGuiInputTextFlags;
-import imgui.flag.ImGuiKey;
+import imgui.flag.*;
 import imgui.internal.ImGuiContext;
 import imgui.type.*;
 import org.apache.commons.lang3.SystemUtils;
@@ -57,6 +54,7 @@ public class ImGuiTools
    private static int rightArrowKey;
    private static ImFontAtlas fontAtlas;
 
+   public static int WHITE = Color.WHITE.toIntBits();
    public static int RED = Color.RED.toIntBits();
    public static int GREEN = Color.GREEN.toIntBits();
 

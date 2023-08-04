@@ -23,7 +23,6 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.teleoperation.RDXDesiredRobot;
 import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -47,7 +46,6 @@ public class RDXArmManager
    private final SideDependentList<RDXInteractableHand> interactableHands;
 
    private final ArmJointName[] armJointNames;
-   private final SideDependentList<double[]> armHomes = new SideDependentList<>();
    private RDXArmControlMode armControlMode = RDXArmControlMode.JOINT_ANGLES;
    private final SideDependentList<double[]> armsWide = new SideDependentList<>();
    private final SideDependentList<double[]> doorAvoidanceArms = new SideDependentList<>();
@@ -61,7 +59,6 @@ public class RDXArmManager
 
    private final HandWrenchCalculator handWrenchCalculator;
    private final ImBoolean indicateWrenchOnScreen = new ImBoolean(false);
-   private RDX3DPanelToolbarButton wrenchToolbarButton;
    private RDX3DPanelHandWrenchIndicator panelHandWrenchIndicator;
 
    public RDXArmManager(CommunicationHelper communicationHelper,
@@ -105,7 +102,7 @@ public class RDXArmManager
 
    public void create(RDXBaseUI baseUI)
    {
-      baseUI.getImGuiPanelManager().addPanel("Arms", this::renderImGuiWidgets);
+      baseUI.getImGuiPanelManager().addPanel("Arms & Hands", this::renderImGuiWidgets);
 
       panelHandWrenchIndicator = new RDX3DPanelHandWrenchIndicator(baseUI.getPrimary3DPanel());
       RDX3DPanelToolbarButton wrenchToolbarButton = baseUI.getPrimary3DPanel().addToolbarButton();
@@ -117,8 +114,6 @@ public class RDXArmManager
          if (indicateWrenchOnScreen.get())
             panelHandWrenchIndicator.renderImGuiOverlay();
       });
-
-      baseUI.getPrimary3DPanel().addImGuiOverlayAddition(panelHandWrenchIndicator::renderImGuiOverlay);
 
       handManager.create(baseUI, communicationHelper, syncedRobot);
    }
@@ -226,7 +221,7 @@ public class RDXArmManager
          {
             ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
                                                                                                         teleoperationParameters.getTrajectoryTime(),
-                                                                                                        armHomes.get(side));
+                                                                                                        armsWide.get(side));
             communicationHelper.publishToController(armTrajectoryMessage);
          }
       }
@@ -245,6 +240,7 @@ public class RDXArmManager
       }
 
       ImGui.text("Arm & hand control mode:");
+      ImGui.sameLine();
       if (ImGui.radioButton(labels.get("Joint angles (DDogleg)"), armControlMode == RDXArmControlMode.JOINT_ANGLES))
       {
          armControlMode = RDXArmControlMode.JOINT_ANGLES;

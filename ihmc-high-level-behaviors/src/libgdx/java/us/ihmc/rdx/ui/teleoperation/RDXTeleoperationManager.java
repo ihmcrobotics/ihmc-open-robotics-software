@@ -181,6 +181,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
                                         teleoperationParameters,
                                         interactableHands);
       }
+
+      RDXBaseUI.getInstance().getKeyBindings().register("Delete all interactables", "Ctrl + L");
    }
 
    public void create(RDXBaseUI baseUI)
@@ -192,7 +194,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       teleoperationParametersTuner.create(teleoperationParameters);
 
-      trajectoryTimeSlider = teleoperationParametersTuner.createDoubleSlider(RDXTeleoperationParameters.trajectoryTime, 0.1, 0.5, "s", "%.2f");
+      trajectoryTimeSlider = teleoperationParametersTuner.createDoubleInput(RDXTeleoperationParameters.trajectoryTime, 0.1, 0.5, "s", "%.2f");
 
       if (interactablesAvailable)
       {
@@ -414,32 +416,24 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       trajectoryTimeSlider.renderImGuiWidget();
 
-      ImGui.checkbox(labels.get("Show teleoperation parameter tuner"), teleoperationParametersTuner.getIsShowing());
-
       ImGui.separator();
 
       if (interactablesAvailable)
       {
-         ImGui.checkbox("Interactables enabled", interactablesEnabled);
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Delete all")))
+         if (ImGui.button(labels.get("Delete all Interactables")) || ImGui.getIO().getKeyCtrl() && ImGui.isKeyReleased('L'))
          {
             locomotionManager.deleteAll();
 
             for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
                robotPartInteractable.delete();
          }
-      }
 
-      ImGui.separator();
-      locomotionManager.renderImGuiWidgets();
-      ImGui.separator();
+         ImGui.sameLine();
+         ImGui.checkbox("Interactables enabled", interactablesEnabled);
+      }
 
       if (interactablesAvailable)
       {
-         if (armManager != null)
-            armManager.renderImGuiWidgets();
-
          ImGui.text("Pelvis:");
          ImGuiTools.previousWidgetTooltip("Send with: Spacebar");
          ImGui.sameLine();
@@ -584,15 +578,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
    {
       desiredRobot.destroy();
       locomotionManager.destroy();
-   }
-
-   public List<RDXVisualizer> getVisualizers()
-   {
-      List<RDXVisualizer> visualizers = new ArrayList<>();
-      visualizers.add(desiredRobot);
-      desiredRobot.setActive(true);
-
-      return visualizers;
    }
 
    public ImBoolean getInteractablesEnabled()

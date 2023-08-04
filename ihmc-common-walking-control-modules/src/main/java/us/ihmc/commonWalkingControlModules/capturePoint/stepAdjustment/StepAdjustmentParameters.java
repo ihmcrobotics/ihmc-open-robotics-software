@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+
 public abstract class StepAdjustmentParameters
 {
    /**
@@ -60,7 +62,7 @@ public abstract class StepAdjustmentParameters
     */
    public double getCoPDistanceFromInsideOfFoot()
    {
-      return 0.02;
+      return 0.01;
    }
 
    /**

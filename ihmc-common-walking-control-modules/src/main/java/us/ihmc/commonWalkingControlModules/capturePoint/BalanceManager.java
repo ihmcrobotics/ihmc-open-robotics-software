@@ -432,13 +432,19 @@ public class BalanceManager implements SCS2YoGraphicHolder
    {
       boolean usingStepAdjustment = stepAdjustmentController.useStepAdjustment();
 
-      if (!usingStepAdjustment || initializeOnStateChange)
+      if (!usingStepAdjustment)
       {
          return false;
       }
+      // FIXME For now, only compute this at the beginning of swing. Once the step is adjusted, it should likely increase, and anecdotally, we want to prevent
+      // FIXME this value from "running away" as the step continues to be adjusted. In theory, this should be ok, but it looks like it isn't. More
+      // FIXME experimentation is necessary. RJG 07/27/2023
+      if (initializeOnStateChange && feedbackAlphaCalculator != null)
+      {
+         this.finalFeedbackAlpha.set(feedbackAlphaCalculator.computeAlpha(yoFinalDesiredICP, bipedSupportPolygons.getSupportPolygonInWorld()));
+      }
 
-      double omega0 = linearMomentumRateControlModuleInput.getOmega0();
-      FramePoint2D desiredCapturePoint = linearMomentumRateControlModuleInput.getDesiredCapturePoint();
+      double omega0 = controllerToolbox.getOmega0();
 
       controllerToolbox.getCapturePoint(capturePoint2d);
       icpControlPlane.setOmega0(omega0);
@@ -451,7 +457,6 @@ public class BalanceManager implements SCS2YoGraphicHolder
       double feedbackAlpha = Double.NaN;
       if (feedbackAlphaCalculator != null)
       {
-         this.finalFeedbackAlpha.set(feedbackAlphaCalculator.computeAlpha(yoFinalDesiredICP, bipedSupportPolygons.getSupportPolygonInWorld()));
          this.currentFeedbackAlpha.set(feedbackAlphaCalculator.computeAlpha(capturePoint2d, bipedSupportPolygons.getSupportPolygonInWorld()));
          double maxAlpha = Math.max(currentFeedbackAlpha.getDoubleValue(), finalFeedbackAlpha.getDoubleValue());
 
@@ -461,12 +466,13 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
             // Compute the CoP that is equivalent to having a constant COP for the duration of the support phase.
             double exponential = Math.exp(omega0 * getAdjustedTimeRemainingInCurrentSupportSequence());
-            yoEquivalentRemainingCoP.scaleAdd(-exponential, desiredCapturePoint, yoFinalDesiredICP);
+            yoEquivalentRemainingCoP.scaleAdd(-exponential, yoDesiredCapturePoint, yoFinalDesiredICP);
             yoEquivalentRemainingCoP.scale(1.0 / (1.0 - exponential));
 
             // clamp it to be between the end points
             clampBetweenTwoPoints(yoEquivalentRemainingCoP, perfectCMP2d, yoFinalDesiredCoP);
 
+            /* FIXME don't use this logic block, it doesn't work well, and results in significantly more scaling than we hsould use. RJG 07/27/2023
             if (perfectCMP2d.distanceSquared(yoFinalDesiredCoP) > 1e-3)
             {
                // if the CMP isn't at the end of the trajectory, figure out how far through the trajectory you are.
@@ -476,8 +482,9 @@ public class BalanceManager implements SCS2YoGraphicHolder
             }
             else
             {
+            */
                feedbackAlpha = 0.5 * (currentFeedbackAlpha.getDoubleValue() + maxAlpha);
-            }
+//            }
             feedbackAlpha = MathTools.clamp(feedbackAlpha, 0.0, 1.0);
          }
          else
@@ -489,7 +496,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
       // use 1.0 - feedback alpha, because 0.0 feedback alpha does nothing, while 1.0 should allow no feedback.
       stepAdjustmentController.compute(yoTime.getDoubleValue(),
-                                       desiredCapturePoint,
+                                       yoDesiredCapturePoint,
                                        capturePoint2d,
                                        omega0,
                                        yoEquivalentRemainingCoP,
