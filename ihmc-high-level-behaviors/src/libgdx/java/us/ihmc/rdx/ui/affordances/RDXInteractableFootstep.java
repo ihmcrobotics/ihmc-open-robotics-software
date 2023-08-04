@@ -85,9 +85,10 @@ public class RDXInteractableFootstep
 
    private boolean wasPoseUpdated = false;
 
-   private final SideDependentList<Boolean> isIntersectingVR = new SideDependentList<>(false, false);
    private final SideDependentList<ModifiableReferenceFrame> dragReferenceFrame = new SideDependentList<>();
    private final FramePose3D vrPickPose = new FramePose3D();
+   private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
+   private SideDependentList<Boolean> isHoveredVR = new SideDependentList<>(false, false);
 
    public RDXInteractableFootstep(RDXBaseUI baseUI, RobotSide footstepSide, int index, SideDependentList<ConvexPolygon2D> defaultPolygons)
    {
@@ -259,7 +260,7 @@ public class RDXInteractableFootstep
 
    public void updateHoverState()
    {
-      if (isIntersectingVR.get(RobotSide.RIGHT) || isIntersectingVR.get(RobotSide.LEFT) || isHovered)
+      if (isHovered || isHoveredVR.get(RobotSide.RIGHT) || isHoveredVR.get(RobotSide.LEFT))
       {
          if (getFootstepSide() == RobotSide.LEFT)
             footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 1.0f, 0.0f, 0.0f, 0.0f));
@@ -285,7 +286,11 @@ public class RDXInteractableFootstep
             {
                vrPickPose.setIncludingFrame(controller.getPickPointPose());
                vrPickPose.changeFrame(ReferenceFrame.getWorldFrame());
-               isIntersectingVR.put(side, mouseCollidable.pointCollide(vrPickPose.getPosition()));
+               if (mouseCollidable.pointCollide(vrPickPose.getPosition()))
+               {
+                  vrPickResult.get(side).addPickCollision(0);
+                  controller.addPickResult(vrPickResult.get(side));
+               }
             }
          });
       }
@@ -303,7 +308,7 @@ public class RDXInteractableFootstep
             }
             RDXVRDragData gripDragData = controller.getGripDragData();
 
-            if (gripDragData.getDragJustStarted() && isIntersectingVR.get(side) && !vrContext.getController(side.getOppositeSide()).getGripDragData().isBeingDragged(this))
+            if (gripDragData.getDragJustStarted() && vrPickResult.get(side)== controller.getSelectedPick() && !vrContext.getController(side.getOppositeSide()).getGripDragData().isBeingDragged(this))
             {
                gripDragData.setObjectBeingDragged(this);
                selectablePose3DGizmo.getPoseGizmo()
@@ -315,7 +320,7 @@ public class RDXInteractableFootstep
             }
 
             boolean isGripping = gripDragData.isBeingDragged(this);
-            if (isGripping && isIntersectingVR.get(side))
+            if (isGripping && vrPickResult.get(side)== controller.getSelectedPick())
             {
                dragReferenceFrame.get(side)
                                  .getReferenceFrame()
@@ -323,8 +328,7 @@ public class RDXInteractableFootstep
                                                                                   .getTransformToParent(),
                                                              ReferenceFrame.getWorldFrame());
             }
-
-
+            isHoveredVR.put(side, vrPickResult.get(side)== controller.getSelectedPick());
          });
       }
    }
