@@ -3,22 +3,20 @@ package us.ihmc.valkyrieRosControl.upperBody;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
@@ -28,13 +26,6 @@ import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.controller.SimControllerInput;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimOneDoFJointBasics;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
-import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
-import us.ihmc.sensorProcessing.sensorProcessors.FloatingJointStateReadOnly;
-import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
-import us.ihmc.sensorProcessing.simulatedSensors.SCS2SensorReader;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
@@ -43,8 +34,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ValkyrieUpperBodySimulation
@@ -67,6 +56,11 @@ public class ValkyrieUpperBodySimulation
    private final YoBoolean initializeRequestYoVariable = new YoBoolean("requestInitialize", registry);
    private RealtimeROS2Node ros2Node;
    private RobotConfigurationDataPublisher robotConfigurationDataPublisher;
+
+   private final YoBoolean submitChestCommand = new YoBoolean("submitChestCommand", registry);
+   private final YoDouble chestPitch = new YoDouble("chestPitch", registry);
+   private final YoDouble chestRoll = new YoDouble("chestRoll", registry);
+   private final YoDouble chestYaw = new YoDouble("chestYaw", registry);
 
    private final int simulationTicksPerControlTicks;
    private final YoLong doControlCounter = new YoLong("doControlCounter", registry);
@@ -126,6 +120,16 @@ public class ValkyrieUpperBodySimulation
          @Override
          public void doControl()
          {
+            if (submitChestCommand.getValue())
+            {
+               submitChestCommand.set(false);
+               ChestTrajectoryCommand chestTrajectoryCommand = new ChestTrajectoryCommand();
+               SO3TrajectoryControllerCommand chestTrajectory = chestTrajectoryCommand.getSO3Trajectory();
+               chestTrajectory.setTrajectoryFrame(ReferenceFrame.getWorldFrame());
+               chestTrajectory.addTrajectoryPoint(3.0, new Quaternion(chestYaw.getDoubleValue(), chestPitch.getDoubleValue(), chestRoll.getDoubleValue()), new Vector3D());
+               commandInputManager.submitCommand(chestTrajectoryCommand);
+            }
+
             // read robot state
             for (int i = 0; i < controlledOneDoFJoints.length; i++)
             {
