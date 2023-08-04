@@ -119,6 +119,7 @@ public class ValkyrieUpperBodySimulation
                                                                  new YoGraphicsListRegistry());
 
       controllerInput = simulationRobot.getControllerManager().getControllerInput();
+      simulationRobot.getRegistry().addChild(manipulationState.getYoRegistry());
 
       simulationRobot.addController(new Controller()
       {
