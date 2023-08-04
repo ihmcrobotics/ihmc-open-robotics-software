@@ -191,10 +191,6 @@ public class RDXArmManager
       desiredRobot.getDesiredFullRobotModel().updateFrames();
    }
 
-   public void processVRInput(RDXVRContext vrContext)
-   {
-      handManager.processVRInput(vrContext);
-   }
    public void renderImGuiWidgets()
    {
       handManager.renderImGuiWidgets();
@@ -310,6 +306,16 @@ public class RDXArmManager
          }
       };
       return runnable;
+   }
+
+   public Runnable getOpenCommands(RobotSide side)
+   {
+      return handManager.getOpenCommands(side);
+   }
+
+   public Runnable getCloseCommands(RobotSide side)
+   {
+      return handManager.getCloseCommands(side);
    }
 
    public RDXArmControlMode getArmControlMode()

@@ -271,6 +271,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
                // TODO this should probably not handle the space event!
                // This sends a command to the controller.
                interactableHands.get(side).setOnSpacePressed(armManager.getSubmitDesiredArmSetpointsCallback(side));
+               interactableHands.get(side).setOpenCommands(armManager.getOpenCommands(side));
+               interactableHands.get(side).setCloseCommands(armManager.getCloseCommands(side));
             }
          }
 
@@ -352,7 +354,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
          for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
          {
             robotPartInteractable.processVRInput(vrContext);
-            armManager.processVRInput(vrContext);
          }
 
          if (interactablesEnabled.get())

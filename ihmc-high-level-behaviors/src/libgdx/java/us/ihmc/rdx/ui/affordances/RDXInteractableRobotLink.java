@@ -11,6 +11,7 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -49,6 +50,8 @@ public class RDXInteractableRobotLink
    private boolean isMouseHovering;
    private final Notification contextMenuNotification = new Notification();
    private boolean isVRHovering;
+   private Runnable openCommands;
+   private Runnable closeCommands;
 
    /** For when the graphic, the link, and control frame are all the same. */
    public void create(RDXRobotCollidable robotCollidable, ReferenceFrame syncedControlFrame, String graphicFileName, RDX3DPanel panel3D)
@@ -169,6 +172,18 @@ public class RDXInteractableRobotLink
                         delete();
                         controller.setJoystickSelection(RDXVRJoystickSelection.NONE);
                         break;
+                     case OPEN_HAND:
+                        if (openCommands != null)
+                        {
+                           openCommands.run();
+                           break;
+                        }
+                     case CLOSE_HAND:
+                        if (closeCommands != null)
+                        {
+                           closeCommands.run();
+                           break;
+                        }
                   }
                }
             }
@@ -307,6 +322,16 @@ public class RDXInteractableRobotLink
    public void setOnSpacePressed(Runnable onSpacePressed)
    {
       this.onSpacePressed = onSpacePressed;
+   }
+
+   public void setOpenCommands(Runnable openCommands)
+   {
+      this.openCommands = openCommands;
+   }
+
+   public void setCloseCommands(Runnable closeCommands)
+   {
+      this.closeCommands = closeCommands;
    }
 
    public void addAdditionalRobotCollidable(RDXRobotCollidable robotCollidable)
