@@ -23,6 +23,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.teleoperation.RDXDesiredRobot;
 import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
+import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -190,6 +191,10 @@ public class RDXArmManager
       desiredRobot.getDesiredFullRobotModel().updateFrames();
    }
 
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      handManager.processVRInput(vrContext);
+   }
    public void renderImGuiWidgets()
    {
       handManager.renderImGuiWidgets();

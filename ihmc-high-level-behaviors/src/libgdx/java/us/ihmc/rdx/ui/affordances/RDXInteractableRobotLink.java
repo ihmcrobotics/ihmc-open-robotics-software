@@ -49,7 +49,6 @@ public class RDXInteractableRobotLink
    private boolean isMouseHovering;
    private final Notification contextMenuNotification = new Notification();
    private boolean isVRHovering;
-   private final SideDependentList<RDXVRJoystickSelection> joystickSelection = new SideDependentList<>(RDXVRJoystickSelection.NONE, RDXVRJoystickSelection.NONE);
 
    /** For when the graphic, the link, and control frame are all the same. */
    public void create(RDXRobotCollidable robotCollidable, ReferenceFrame syncedControlFrame, String graphicFileName, RDX3DPanel panel3D)
@@ -127,7 +126,7 @@ public class RDXInteractableRobotLink
 
             if (isHovering)
             {
-               if (joystickSelection.get(side) == RDXVRJoystickSelection.NONE)
+               if (controller.getJoystickSelection() == RDXVRJoystickSelection.NONE)
                {
                   controller.setTopJoystickText("Open Hand");
                   controller.setBottomJoystickText("Close Hand");
@@ -137,51 +136,45 @@ public class RDXInteractableRobotLink
                if (joystick.x() < 0 && Math.abs(joystick.x()) > Math.abs(joystick.y()))
                {
                   controller.setRightJoystickText("Execute");
-                  joystickSelection.put(side, RDXVRJoystickSelection.EXECUTE);
+                  controller.setJoystickSelection(RDXVRJoystickSelection.EXECUTE);
                }
                else if (joystick.x() > 0 && Math.abs(joystick.x()) > Math.abs(joystick.y()))
                {
                   controller.setLeftJoystickText("Delete Interactable");
-                  joystickSelection.put(side, RDXVRJoystickSelection.DELETE_INTERACTABLE);
+                  controller.setJoystickSelection(RDXVRJoystickSelection.DELETE_INTERACTABLE);
                }
                else if (joystick.y() > 0 && Math.abs(joystick.y()) > Math.abs(joystick.x()))
                {
                   controller.setTopJoystickText("Open Hand");
-                  joystickSelection.put(side, RDXVRJoystickSelection.OPEN_HAND);
+                  controller.setJoystickSelection(RDXVRJoystickSelection.OPEN_HAND);
                }
                else if (joystick.y() < 0 && Math.abs(joystick.y()) > Math.abs(joystick.x()))
                {
                   controller.setBottomJoystickText("Close Hand");
-                  joystickSelection.put(side, RDXVRJoystickSelection.CLOSE_HAND);
+                  controller.setJoystickSelection(RDXVRJoystickSelection.CLOSE_HAND);
                }
                else if (joystick.x() == 0 && joystick.y() == 0)
                {
-                  joystickSelection.put(side, RDXVRJoystickSelection.NONE);
+                  controller.setJoystickSelection(RDXVRJoystickSelection.NONE);
                }
                if (joystickButton.bChanged() && joystickButton.bState())
                {
-                  switch (joystickSelection.get(side))
+                  switch (controller.getJoystickSelection())
                   {
                      case EXECUTE:
                         onSpacePressed.run();
-                        joystickSelection.put(side, RDXVRJoystickSelection.NONE);
+                        controller.setJoystickSelection(RDXVRJoystickSelection.NONE);
                         break;
                      case DELETE_INTERACTABLE:
                         delete();
-                        joystickSelection.put(side, RDXVRJoystickSelection.NONE);
-                        break;
-                     case OPEN_HAND:
-                        joystickSelection.put(side, RDXVRJoystickSelection.NONE);
-                        break;
-                     case CLOSE_HAND:
-                        joystickSelection.put(side, RDXVRJoystickSelection.NONE);
+                        controller.setJoystickSelection(RDXVRJoystickSelection.NONE);
                         break;
                   }
                }
             }
             else
             {
-               joystickSelection.put(side, RDXVRJoystickSelection.NONE);
+               controller.setJoystickSelection(RDXVRJoystickSelection.NONE);
             }
             if (isHovering && gripDragData.getDragJustStarted())
             {

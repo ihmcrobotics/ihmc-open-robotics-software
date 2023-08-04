@@ -89,6 +89,7 @@ public class RDXVRController extends RDXVRTrackedDevice
    private InputAnalogActionData joystickActionData;
    private final LongBuffer gripActionHandle = BufferUtils.newLongBuffer(1);
    private InputAnalogActionData gripActionData;
+   private RDXVRJoystickSelection joystickSelection = RDXVRJoystickSelection.NONE;
 
    private boolean gripAsButtonDown = false;
 
@@ -555,6 +556,16 @@ public class RDXVRController extends RDXVRTrackedDevice
    public void setRightJoystickText(String text)
    {
       rightJoystickLabel.setText(text);
+   }
+
+   public RDXVRJoystickSelection getJoystickSelection()
+   {
+      return joystickSelection;
+   }
+
+   public void setJoystickSelection(RDXVRJoystickSelection joystickSelection)
+   {
+      this.joystickSelection = joystickSelection;
    }
 
    public void setAllJoystickTextNull()
