@@ -350,7 +350,10 @@ public class RDXTeleoperationManager extends ImGuiPanel
       {
          locomotionManager.processWalkPathControlRingVRInput(vrContext);
          for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
+         {
             robotPartInteractable.processVRInput(vrContext);
+            armManager.processVRInput(vrContext);
+         }
 
          if (interactablesEnabled.get())
             selectionCollisionModel.processVRInput(vrContext);

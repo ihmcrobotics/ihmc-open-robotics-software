@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.teleoperation;
 import controller_msgs.msg.dds.*;
 import imgui.ImGui;
 import imgui.type.ImInt;
+import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.FormattingTools;
@@ -14,6 +15,8 @@ import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
+import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.rdx.vr.RDXVRJoystickSelection;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -180,6 +183,21 @@ public class RDXHandConfigurationManager
       }
    }
 
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      for (RobotSide side : RobotSide.values())
+      {
+         InputDigitalActionData joystickButton = vrContext.getController(side).getJoystickPressActionData();
+
+         if (joystickButton.bChanged() && joystickButton.bState())
+         {
+            if (vrContext.getController(side).getJoystickSelection() == RDXVRJoystickSelection.OPEN_HAND)
+               publishHandCommand(side, HandConfiguration.OPEN);
+            else if (vrContext.getController(side).getJoystickSelection() == RDXVRJoystickSelection.CLOSE_HAND)
+               publishHandCommand(side, HandConfiguration.CLOSE);
+         }
+      }
+   }
    private void publishHandCommand(RobotSide side, HandConfiguration handDesiredConfiguration)
    {
       communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
