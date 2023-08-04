@@ -127,25 +127,36 @@ public class RDXInteractableRobotLink
 
             if (isHovering)
             {
-               controller.setTopJoystickText("Open Hand");
-               controller.setBottomJoystickText("Close Hand");
-               controller.setLeftJoystickText("Delete Interactable");
-               controller.setRightJoystickText("Execute");
+               if (joystickSelection.get(side) == RDXVRJoystickSelection.NONE)
+               {
+                  controller.setTopJoystickText("Open Hand");
+                  controller.setBottomJoystickText("Close Hand");
+                  controller.setLeftJoystickText("Delete Interactable");
+                  controller.setRightJoystickText("Execute");
+               }
                if (joystick.x() < 0 && Math.abs(joystick.x()) > Math.abs(joystick.y()))
                {
+                  controller.setRightJoystickText("Execute");
                   joystickSelection.put(side, RDXVRJoystickSelection.EXECUTE);
                }
                else if (joystick.x() > 0 && Math.abs(joystick.x()) > Math.abs(joystick.y()))
                {
+                  controller.setLeftJoystickText("Delete Interactable");
                   joystickSelection.put(side, RDXVRJoystickSelection.DELETE_INTERACTABLE);
                }
                else if (joystick.y() > 0 && Math.abs(joystick.y()) > Math.abs(joystick.x()))
                {
+                  controller.setTopJoystickText("Open Hand");
                   joystickSelection.put(side, RDXVRJoystickSelection.OPEN_HAND);
                }
                else if (joystick.y() < 0 && Math.abs(joystick.y()) > Math.abs(joystick.x()))
                {
+                  controller.setBottomJoystickText("Close Hand");
                   joystickSelection.put(side, RDXVRJoystickSelection.CLOSE_HAND);
+               }
+               else if (joystick.x() == 0 && joystick.y() == 0)
+               {
+                  joystickSelection.put(side, RDXVRJoystickSelection.NONE);
                }
                if (joystickButton.bChanged() && joystickButton.bState())
                {
