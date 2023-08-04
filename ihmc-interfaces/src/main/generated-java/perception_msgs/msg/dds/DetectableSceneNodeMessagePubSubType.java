@@ -15,7 +15,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e25e35ccada35c8056e2433c7c4e46e028e7f49d7087c9158e72705b970111d2";
+   		return "99e9e2ab7580087c0dcc4415738ceb91e7f94876f69b7e93c7df382aded785e7";
    }
    
    @Override
@@ -107,7 +107,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getArucoMarkerTransformToWorld(), cdr);
       cdr.write_type_7(data.getTrackDetectedPose());
 
-      cdr.write_type_5(data.getAlphaFilterValue());
+      cdr.write_type_5(data.getBreakFrequency());
 
    }
 
@@ -120,7 +120,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getArucoMarkerTransformToWorld(), cdr);	
       data.setTrackDetectedPose(cdr.read_type_7());
       	
-      data.setAlphaFilterValue(cdr.read_type_5());
+      data.setBreakFrequency(cdr.read_type_5());
       	
 
    }
@@ -135,7 +135,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
       ser.write_type_a("aruco_marker_transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getArucoMarkerTransformToWorld());
 
       ser.write_type_7("track_detected_pose", data.getTrackDetectedPose());
-      ser.write_type_5("alpha_filter_value", data.getAlphaFilterValue());
+      ser.write_type_5("break_frequency", data.getBreakFrequency());
    }
 
    @Override
@@ -148,7 +148,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
       ser.read_type_a("aruco_marker_transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getArucoMarkerTransformToWorld());
 
       data.setTrackDetectedPose(ser.read_type_7("track_detected_pose"));
-      data.setAlphaFilterValue(ser.read_type_5("alpha_filter_value"));
+      data.setBreakFrequency(ser.read_type_5("break_frequency"));
    }
 
    public static void staticCopy(perception_msgs.msg.dds.DetectableSceneNodeMessage src, perception_msgs.msg.dds.DetectableSceneNodeMessage dest)

@@ -35,9 +35,9 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
             */
    public boolean track_detected_pose_;
    /**
-            * Alpha filter value for nodes that are alpha filtered
+            * Break frequency filter value for nodes that are alpha filtered
             */
-   public float alpha_filter_value_;
+   public float break_frequency_;
 
    public DetectableSceneNodeMessage()
    {
@@ -63,7 +63,7 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.aruco_marker_transform_to_world_, aruco_marker_transform_to_world_);
       track_detected_pose_ = other.track_detected_pose_;
 
-      alpha_filter_value_ = other.alpha_filter_value_;
+      break_frequency_ = other.break_frequency_;
 
    }
 
@@ -142,18 +142,18 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
    }
 
    /**
-            * Alpha filter value for nodes that are alpha filtered
+            * Break frequency filter value for nodes that are alpha filtered
             */
-   public void setAlphaFilterValue(float alpha_filter_value)
+   public void setBreakFrequency(float break_frequency)
    {
-      alpha_filter_value_ = alpha_filter_value;
+      break_frequency_ = break_frequency;
    }
    /**
-            * Alpha filter value for nodes that are alpha filtered
+            * Break frequency filter value for nodes that are alpha filtered
             */
-   public float getAlphaFilterValue()
+   public float getBreakFrequency()
    {
-      return alpha_filter_value_;
+      return break_frequency_;
    }
 
 
@@ -182,7 +182,7 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       if (!this.aruco_marker_transform_to_world_.epsilonEquals(other.aruco_marker_transform_to_world_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.track_detected_pose_, other.track_detected_pose_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.alpha_filter_value_, other.alpha_filter_value_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.break_frequency_, other.break_frequency_, epsilon)) return false;
 
 
       return true;
@@ -205,7 +205,7 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       if (!this.aruco_marker_transform_to_world_.equals(otherMyClass.aruco_marker_transform_to_world_)) return false;
       if(this.track_detected_pose_ != otherMyClass.track_detected_pose_) return false;
 
-      if(this.alpha_filter_value_ != otherMyClass.alpha_filter_value_) return false;
+      if(this.break_frequency_ != otherMyClass.break_frequency_) return false;
 
 
       return true;
@@ -227,8 +227,8 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       builder.append(this.aruco_marker_transform_to_world_);      builder.append(", ");
       builder.append("track_detected_pose=");
       builder.append(this.track_detected_pose_);      builder.append(", ");
-      builder.append("alpha_filter_value=");
-      builder.append(this.alpha_filter_value_);
+      builder.append("break_frequency=");
+      builder.append(this.break_frequency_);
       builder.append("}");
       return builder.toString();
    }
