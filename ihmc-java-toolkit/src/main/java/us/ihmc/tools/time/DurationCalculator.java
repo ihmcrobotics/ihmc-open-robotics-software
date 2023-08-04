@@ -20,7 +20,7 @@ public class DurationCalculator
    }
 
    /**
-    * History if one yields the latest calculation only.
+    * History of one yields the latest calculation only.
     * @param history 1 or more.
     */
    public DurationCalculator(int history)
