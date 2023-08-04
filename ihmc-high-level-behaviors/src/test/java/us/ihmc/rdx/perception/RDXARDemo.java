@@ -96,7 +96,7 @@ public class RDXARDemo
 
             situatedImage3DPanel = new RDX3DSituatedImagePanel();
 
-            baseUI.getPrimaryScene().addRenderableProvider(situatedImage3DPanel::getRenderables, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(situatedImage3DPanel::getRenderables);
 
             sensorPoseGizmo.getTransformToParent().getTranslation().set(0.2, 0.0, 1.0);
             sensorPoseGizmo.getTransformToParent().getRotation().setToPitchOrientation(Math.toRadians(45.0));
