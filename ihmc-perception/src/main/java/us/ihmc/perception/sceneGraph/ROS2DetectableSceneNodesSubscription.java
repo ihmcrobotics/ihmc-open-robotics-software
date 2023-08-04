@@ -96,7 +96,7 @@ public class ROS2DetectableSceneNodesSubscription
                   detectableSceneNode.setTrackDetectedPose(detectableSceneNodeMessage.getTrackDetectedPose());
                   if (detectableSceneNode instanceof ArUcoDetectableNode arUcoDetectableNode)
                   {
-                     arUcoDetectableNode.setBreakFrequency(detectableSceneNodeMessage.getAlphaFilterValue());
+                     arUcoDetectableNode.setBreakFrequency(detectableSceneNodeMessage.getBreakFrequency());
                   }
 
                   MessageTools.toEuclid(detectableSceneNodeMessage.getTransformToWorld(), nodeToWorldTransform);
