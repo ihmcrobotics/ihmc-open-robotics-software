@@ -131,25 +131,21 @@ public class RDXInteractableRobotLink
                controller.setBottomJoystickText("Close Hand");
                controller.setLeftJoystickText("Delete Interactable");
                controller.setRightJoystickText("Execute");
-               if (joystick.x() > 0 && joystick.deltaX() > joystick.deltaY())
+               if (joystick.x() < 0 && Math.abs(joystick.x()) > Math.abs(joystick.y()))
                {
                   joystickSelection.put(side, RDXVRJoystickSelection.EXECUTE);
                }
-               else if (joystick.x() < 0 && joystick.deltaX() > joystick.deltaY())
+               else if (joystick.x() > 0 && Math.abs(joystick.x()) > Math.abs(joystick.y()))
                {
                   joystickSelection.put(side, RDXVRJoystickSelection.DELETE_INTERACTABLE);
                }
-               else if (joystick.y() > 0 && joystick.deltaY() > joystick.deltaX())
+               else if (joystick.y() > 0 && Math.abs(joystick.y()) > Math.abs(joystick.x()))
                {
                   joystickSelection.put(side, RDXVRJoystickSelection.OPEN_HAND);
                }
-               else if (joystick.y() < 0 && joystick.deltaY() > joystick.deltaX())
+               else if (joystick.y() < 0 && Math.abs(joystick.y()) > Math.abs(joystick.x()))
                {
-                  joystickSelection.put(side, RDXVRJoystickSelection.OPEN_HAND);
-               }
-               else
-               {
-                  joystickSelection.put(side, RDXVRJoystickSelection.NONE);
+                  joystickSelection.put(side, RDXVRJoystickSelection.CLOSE_HAND);
                }
 
                switch (joystickSelection.get(side))
@@ -166,7 +162,7 @@ public class RDXInteractableRobotLink
                   case CLOSE_HAND:
                      controller.setAButtonText("Close Hand");
                      break;
-                  default:
+                  case NONE:
                      controller.setAButtonText("");
                }
 
@@ -184,10 +180,12 @@ public class RDXInteractableRobotLink
                         break;
                      case CLOSE_HAND:
                         break;
-                     default:
-                        break;
                   }
                }
+            }
+            else
+            {
+               joystickSelection.put(side, RDXVRJoystickSelection.NONE);
             }
             if (isHovering && gripDragData.getDragJustStarted())
             {
