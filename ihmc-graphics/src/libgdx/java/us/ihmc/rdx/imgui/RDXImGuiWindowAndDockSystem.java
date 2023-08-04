@@ -223,9 +223,9 @@ public class RDXImGuiWindowAndDockSystem
          ImGuiTools.parsePrimaryWindowSizeFromSettingsINI(settingsINIAsString, calculatedPrimaryWindowSize);
          int widthFromINI = calculatedPrimaryWindowSize.getWidth();
          int heightFromINI = calculatedPrimaryWindowSize.getHeight();
-         int noIdeaWhatThisIs = 19; // ???
+         int menuBarHeight = (int) ImGui.getFrameHeight();
          calculatedPrimaryWindowSize.setWidth(widthFromINI);
-         calculatedPrimaryWindowSize.setHeight(heightFromINI + noIdeaWhatThisIs);
+         calculatedPrimaryWindowSize.setHeight(heightFromINI + menuBarHeight);
          ImGuiTools.parsePrimaryWindowPositionFromSettingsINI(settingsINIAsString, primaryWindowPosition);
          int loadedX = primaryWindowPosition.getX();
          int loadedY = primaryWindowPosition.getY();
