@@ -194,17 +194,11 @@ public class RDXInteractableRobotLink
             }
             if (isHovering || gripDragData.getObjectBeingDragged() == this)
             {
-               controller.setAButtonText("Execute");
                if (gripDragData.getDragJustStarted())
                {
                   modified = true;
                   gripDragData.setObjectBeingDragged(this);
                   gripDragData.setInteractableFrameOnDragStart(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
-               }
-
-               if (aButton.bChanged() && aButton.bState() && modified)
-               {
-                  onSpacePressed.run();
                }
             }
 
