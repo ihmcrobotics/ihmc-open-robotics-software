@@ -18,19 +18,40 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.opengl.GL41;
+import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.tools.RDXModelBuilder;
+import us.ihmc.rdx.ui.vr.RDXVRPanelPlacementMode;
+import us.ihmc.rdx.ui.vr.RDXVRModeManager;
+import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.rdx.vr.RDXVRDragData;
+import us.ihmc.rdx.vr.RDXVRPickResult;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+
+import javax.annotation.Nullable;
+import java.util.Set;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.TextureCoordinates;
+import static us.ihmc.rdx.ui.vr.RDXVRPanelPlacementMode.*;
 
 public class RDX3DSituatedImagePanel
 {
+   private static final double FOLLOW_HEADSET_OFFSET_Y = 0.0;
+   private static final double FOLLOW_HEADSET_OFFSET_Z = 0.17;
+
    private ModelInstance modelInstance;
+   private ModelInstance hoverBoxMesh;
    private Texture texture;
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final FramePoint3D tempFramePoint = new FramePoint3D();
    private final Vector3 topLeftPosition = new Vector3();
    private final Vector3 bottomLeftPosition = new Vector3();
@@ -44,6 +65,37 @@ public class RDX3DSituatedImagePanel
    private final Vector2 bottomLeftUV = new Vector2();
    private final Vector2 bottomRightUV = new Vector2();
    private final Vector2 topRightUV = new Vector2();
+
+   @Nullable
+   private final RDXVRModeManager vrModeManager;
+   private final ModifiableReferenceFrame floatingPanelFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
+   private final FramePose3D floatingPanelFramePose = new FramePose3D();
+   private double panelDistanceFromHeadset = 0.5;
+   private boolean isShowing;
+   private final FrameBox3D selectionCollisionBox = new FrameBox3D();
+   private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
+   /** If either VR controller is hovering the panel. */
+   private boolean isVRHovering = false;
+
+   /**
+    * Create for a programmatically placed panel.
+    */
+   public RDX3DSituatedImagePanel()
+   {
+      vrModeManager = null;
+      isShowing = true;
+   }
+
+   /**
+    * Create and enable VR interaction.
+    * @param vrModeManager TODO: Remove this and replace with context based manipulation
+    */
+   public RDX3DSituatedImagePanel(RDXVRContext context, RDXVRModeManager vrModeManager)
+   {
+      this.vrModeManager = vrModeManager;
+      context.addVRPickCalculator(this::calculateVRPick);
+      context.addVRInputProcessor(this::addVRInputProcessor);
+   }
 
    public void create(Texture texture, Frustum frustum, ReferenceFrame referenceFrame, boolean flipY)
    {
@@ -126,21 +178,145 @@ public class RDX3DSituatedImagePanel
       // TODO: Rebuild the model if the camera parameters change.
       Model model = modelBuilder.end();
       modelInstance = new ModelInstance(model);
+
+      selectionCollisionBox.getSize().set(0.05,
+                                          Math.abs(topRightPosition.y - topLeftPosition.y),
+                                          Math.abs(topRightPosition.y - bottomLeftPosition.y));
+
+      FramePoint3DBasics[] vertices = selectionCollisionBox.getVertices();
+      hoverBoxMesh = new ModelInstance(RDXModelBuilder.buildModel(boxMeshBuilder ->
+                                               boxMeshBuilder.addMultiLineBox(vertices, 0.0005, new Color(Color.WHITE))));
    }
 
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void update(Texture imageTexture)
    {
-      if (modelInstance != null)
-         modelInstance.getRenderables(renderables, pool);
+      if (vrModeManager != null)
+      {
+         isShowing = vrModeManager.getShowFloatingVideoPanel().get();
+      }
+
+      // Update the texture if necessary
+      if (isShowing && imageTexture != null && imageTexture != texture)
+      {
+         boolean flipY = false;
+         float multiplier = 2.0f;
+         float halfWidth = imageTexture.getWidth() / 10000.0f * multiplier;
+         float halfHeight = imageTexture.getHeight() / 10000.0f * multiplier;
+         create(imageTexture,
+                new Vector3[] {new Vector3(0.0f, halfWidth, halfHeight),
+                               new Vector3(0.0f, halfWidth, -halfHeight),
+                               new Vector3(0.0f, -halfWidth, -halfHeight),
+                               new Vector3(0.0f, -halfWidth, halfHeight)},
+                floatingPanelFrame.getReferenceFrame(),
+                flipY);
+      }
+
+      setPoseToReferenceFrame(floatingPanelFrame.getReferenceFrame());
+      selectionCollisionBox.getPose().set(floatingPanelFramePose);
+      floatingPanelFramePose.setFromReferenceFrame(floatingPanelFrame.getReferenceFrame());
+      isVRHovering = false;
+      updatePoses();
+   }
+
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         vrContext.getController(side).runIfConnected(controller ->
+         {
+            vrPickResult.get(side).reset();
+
+            Point3D closestPointOnSurface = new Point3D();
+            Vector3D normalAtClosestPoint = new Vector3D();
+            boolean isHovering = selectionCollisionBox.evaluatePoint3DCollision(controller.getPickPointPose().getPosition(),
+                                                                                closestPointOnSurface,
+                                                                                normalAtClosestPoint);
+            double distance = closestPointOnSurface.distance(controller.getPickPointPose().getPosition());
+            double distanceToSurface = isHovering ? -distance : distance;
+
+            if (isHovering)
+            {
+               vrPickResult.get(side).addPickCollision(distanceToSurface);
+               controller.addPickResult(vrPickResult.get(side));
+               controller.setPickCollisionPoint(closestPointOnSurface);
+            }
+         });
+      }
+   }
+
+   public void addVRInputProcessor(RDXVRContext context)
+   {
+      RDXVRPanelPlacementMode placementMode = vrModeManager.getVideoPanelPlacementMode();
+
+      context.getHeadset().runIfConnected(headset ->
+      {
+         if (placementMode == FOLLOW_HEADSET || (placementMode == MANUAL_PLACEMENT  && vrModeManager.getShowFloatVideoPanelNotification().poll()))
+         {
+            floatingPanelFramePose.setToZero(headset.getXForwardZUpHeadsetFrame());
+            floatingPanelFramePose.getPosition()
+                                  .set(panelDistanceFromHeadset, FOLLOW_HEADSET_OFFSET_Y, FOLLOW_HEADSET_OFFSET_Z);
+            floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+            floatingPanelFramePose.get(floatingPanelFrame.getTransformToParent());
+            floatingPanelFrame.getReferenceFrame().update();
+            updatePoses();
+         }
+      });
+
+      for (RobotSide side : RobotSide.values)
+      {
+         context.getController(side).runIfConnected(controller ->
+         {
+            boolean isHovering = controller.getSelectedPick() == vrPickResult.get(side);
+            isVRHovering |= isHovering;
+
+            if (placementMode == MANUAL_PLACEMENT)
+            {
+               RDXVRDragData gripDragData = controller.getGripDragData();
+
+               if (isHovering && gripDragData.getDragJustStarted())
+               {
+                  gripDragData.setObjectBeingDragged(this);
+                  gripDragData.setInteractableFrameOnDragStart(floatingPanelFrame.getReferenceFrame());
+               }
+
+               if (gripDragData.isDragging() && gripDragData.getObjectBeingDragged() == this)
+               {
+                  gripDragData.getDragFrame().getTransformToDesiredFrame(floatingPanelFrame.getTransformToParent(),
+                                                                         floatingPanelFrame.getReferenceFrame().getParent());
+                  floatingPanelFrame.getReferenceFrame().update();
+                  updatePoses();
+               }
+            }
+            else if (controller.getGripActionData().x() > 0.9 && selectionCollisionBox.isPointInside(controller.getPickPointPose().getPosition()))
+            {
+               vrModeManager.setVideoPanelPlacementMode(MANUAL_PLACEMENT);
+            }
+         });
+      }
+   }
+
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
+   {
+      if (isShowing && sceneLevels.contains(RDXSceneLevel.VIRTUAL))
+      {
+         if (modelInstance != null)
+            modelInstance.getRenderables(renderables, pool);
+         if (hoverBoxMesh != null && isVRHovering)
+            hoverBoxMesh.getRenderables(renderables, pool);
+      }
+   }
+
+   private void updatePoses()
+   {
+      setPoseToReferenceFrame(floatingPanelFrame.getReferenceFrame());
    }
 
    public void setPoseToReferenceFrame(ReferenceFrame referenceFrame)
    {
       if (modelInstance != null)
-      {
-         referenceFrame.getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
-         LibGDXTools.toLibGDX(tempTransform, modelInstance.transform);
-      }
+         LibGDXTools.toLibGDX(referenceFrame.getTransformToRoot(), modelInstance.transform);
+      if (hoverBoxMesh != null)
+         LibGDXTools.toLibGDX(referenceFrame.getTransformToRoot(), hoverBoxMesh.transform);
    }
 
    public ModelInstance getModelInstance()
