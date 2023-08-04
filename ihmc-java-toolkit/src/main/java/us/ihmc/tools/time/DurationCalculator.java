@@ -12,14 +12,6 @@ public class DurationCalculator
    private final int history;
 
    /**
-    * History of 3.
-    */
-   public DurationCalculator()
-   {
-      this(3);
-   }
-
-   /**
     * History of one yields the latest calculation only.
     * @param history 1 or more.
     */
