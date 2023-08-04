@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.ImGui;
 import org.lwjgl.openvr.InputAnalogActionData;
+import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -18,8 +19,10 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRDragData;
+import us.ihmc.rdx.vr.RDXVRJoystickSelection;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 
@@ -46,6 +49,7 @@ public class RDXInteractableRobotLink
    private boolean isMouseHovering;
    private final Notification contextMenuNotification = new Notification();
    private boolean isVRHovering;
+   private final SideDependentList<RDXVRJoystickSelection> joystickSelection = new SideDependentList<>(RDXVRJoystickSelection.NONE, RDXVRJoystickSelection.NONE);
 
    /** For when the graphic, the link, and control frame are all the same. */
    public void create(RDXRobotCollidable robotCollidable, ReferenceFrame syncedControlFrame, String graphicFileName, RDX3DPanel panel3D)
@@ -119,6 +123,7 @@ public class RDXInteractableRobotLink
 
             RDXVRDragData gripDragData = controller.getGripDragData();
             InputAnalogActionData joystick = controller.getJoystickActionData();
+            InputDigitalActionData aButton = controller.getAButtonActionData();
 
             if (isHovering)
             {
@@ -128,19 +133,60 @@ public class RDXInteractableRobotLink
                controller.setRightJoystickText("Execute");
                if (joystick.x() > 0 && joystick.deltaX() > joystick.deltaY())
                {
-                  System.out.println("Execute");
+                  joystickSelection.put(side, RDXVRJoystickSelection.EXECUTE);
                }
                else if (joystick.x() < 0 && joystick.deltaX() > joystick.deltaY())
                {
-                  System.out.println("Delete");
+                  joystickSelection.put(side, RDXVRJoystickSelection.DELETE_INTERACTABLE);
                }
                else if (joystick.y() > 0 && joystick.deltaY() > joystick.deltaX())
                {
-                  System.out.println("Open Hand");
+                  joystickSelection.put(side, RDXVRJoystickSelection.OPEN_HAND);
                }
                else if (joystick.y() < 0 && joystick.deltaY() > joystick.deltaX())
                {
-                  System.out.println("Close Hand");
+                  joystickSelection.put(side, RDXVRJoystickSelection.OPEN_HAND);
+               }
+               else
+               {
+                  joystickSelection.put(side, RDXVRJoystickSelection.NONE);
+               }
+
+               switch (joystickSelection.get(side))
+               {
+                  case EXECUTE:
+                     controller.setAButtonText("Execute");
+                     break;
+                  case DELETE_INTERACTABLE:
+                     controller.setAButtonText("Delete Interactable");
+                     break;
+                  case OPEN_HAND:
+                     controller.setAButtonText("Open Hand");
+                     break;
+                  case CLOSE_HAND:
+                     controller.setAButtonText("Close Hand");
+                     break;
+                  default:
+                     controller.setAButtonText("");
+               }
+
+               if (aButton.bChanged() && aButton.bState())
+               {
+                  switch (joystickSelection.get(side))
+                  {
+                     case EXECUTE:
+                        onSpacePressed.run();
+                        break;
+                     case DELETE_INTERACTABLE:
+                        delete();
+                        break;
+                     case OPEN_HAND:
+                        break;
+                     case CLOSE_HAND:
+                        break;
+                     default:
+                        break;
+                  }
                }
             }
             if (isHovering && gripDragData.getDragJustStarted())
