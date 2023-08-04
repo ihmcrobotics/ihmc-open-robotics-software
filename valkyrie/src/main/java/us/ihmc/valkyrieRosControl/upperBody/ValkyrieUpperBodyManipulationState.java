@@ -25,16 +25,21 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.frames.FixedMovingReferenceFrame;
 import us.ihmc.mecano.frames.MovingCenterOfMassReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -48,6 +53,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ValkyrieUpperBodyManipulationState extends HighLevelControllerState
@@ -79,25 +85,26 @@ public class ValkyrieUpperBodyManipulationState extends HighLevelControllerState
    private final Map<String, DoubleProvider> userModeWeightMap = new HashMap<>();
 
    private final CommandInputManager commandInputManager;
-   private final FullHumanoidRobotModel fullRobotModel;
    private final HighLevelControllerParameters highLevelControllerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
 
+   private final MultiBodySystemBasics controllerSystem;
    private final ReferenceFrame centerOfMassFrame;
    private final WholeBodyControllerCore controllerCore;
+   private SideDependentList<MovingReferenceFrame> handControlFrames = new SideDependentList<>();
 
    private final RigidBodyControlManager chestManager;
    private final RigidBodyControlManager headManager;
-   private final MovingZUpFrame pelvisZUpFrame;
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
 
    private final WholeBodyControlCoreToolbox controlCoreToolbox;
 
    public ValkyrieUpperBodyManipulationState(CommandInputManager commandInputManager,
                                              double controlDT,
+                                             HumanoidJointNameMap jointNameMap,
                                              HighLevelControllerParameters highLevelControllerParameters,
                                              WalkingControllerParameters walkingControllerParameters,
-                                             FullHumanoidRobotModel fullRobotModel,
+                                             RigidBodyBasics rootBody,
                                              OneDoFJointBasics[] controlledJoints,
                                              YoDouble yoTime,
                                              YoGraphicsListRegistry graphicsListRegistry)
@@ -105,7 +112,6 @@ public class ValkyrieUpperBodyManipulationState extends HighLevelControllerState
       super(controllerName, highLevelControllerParameters, controlledJoints);
 
       this.commandInputManager = commandInputManager;
-      this.fullRobotModel = fullRobotModel;
       this.highLevelControllerParameters = highLevelControllerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
 
@@ -119,24 +125,43 @@ public class ValkyrieUpperBodyManipulationState extends HighLevelControllerState
       ParameterTools.extract3DWeightMap("AngularWeight", momentumOptimizationSettings.getTaskspaceAngularWeights(), taskspaceAngularWeightMap, momentumRegistry);
       ParameterTools.extract3DWeightMap("LinearWeight", momentumOptimizationSettings.getTaskspaceLinearWeights(), taskspaceLinearWeightMap, momentumRegistry);
 
-      RigidBodyBasics chest = fullRobotModel.getChest();
-      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
-      RigidBodyBasics head = fullRobotModel.getHead();
+      String chestName = jointNameMap.getChestName();
+      String pelvisName = jointNameMap.getPelvisName();
+      String headName = jointNameMap.getHeadName();
 
-      MovingReferenceFrame pelvisFrame = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint();
-      ReferenceFrame modelStationaryFrame = fullRobotModel.getModelStationaryFrame();
-      pelvisZUpFrame = new MovingZUpFrame(pelvisFrame, modelStationaryFrame, "pelvisZUpFrame");
+      controllerSystem = MultiBodySystemBasics.toMultiBodySystemBasics(rootBody);
 
-      chestManager = createRigidBodyManager(chest, pelvis, chest.getBodyFixedFrame(), pelvisZUpFrame, yoTime, fullRobotModel.getElevator(), graphicsListRegistry);
-      headManager = createRigidBodyManager(head, chest, head.getBodyFixedFrame(), chest.getBodyFixedFrame(), yoTime, fullRobotModel.getElevator(), graphicsListRegistry);
+      RigidBodyBasics elevator = controllerSystem.getRootBody();
+      RigidBodyBasics chest = controllerSystem.findRigidBody(chestName);
+      RigidBodyBasics head = controllerSystem.findRigidBody(headName);
 
+      chestManager = createRigidBodyManager(chest, elevator, chest.getBodyFixedFrame(), elevator.getBodyFixedFrame(), yoTime, elevator, graphicsListRegistry);
+      headManager = createRigidBodyManager(head, chest, head.getBodyFixedFrame(), chest.getBodyFixedFrame(), yoTime, elevator, graphicsListRegistry);
+
+      privilegedConfigurationCommand.clear();
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
-         ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
-         RigidBodyControlManager handManager = createRigidBodyManager(hand, chest, handControlFrame, chest.getBodyFixedFrame(), yoTime, fullRobotModel.getElevator(), graphicsListRegistry);
+         RigidBodyBasics hand = controllerSystem.findRigidBody(jointNameMap.getHandName(robotSide));
+
+         RigidBodyTransform handControlFrameTransform = jointNameMap.getHandControlFrameToWristTransform(robotSide);
+         if (handControlFrameTransform != null)
+         {
+            handControlFrames.put(robotSide,
+                                  new FixedMovingReferenceFrame(robotSide.getCamelCaseName() + "HandControlFrame",
+                                                                hand.getParentJoint().getFrameAfterJoint(),
+                                                                handControlFrameTransform));
+         }
+
+         RigidBodyControlManager handManager = createRigidBodyManager(hand, chest, handControlFrames.get(robotSide), chest.getBodyFixedFrame(), yoTime, elevator, graphicsListRegistry);
          handManager.setDoPrepareForLocomotion(false);
          handManagers.put(robotSide, handManager);
+
+         List<String> armJointNames = jointNameMap.getArmJointNamesAsStrings(robotSide);
+         for (int i = 0; i < armJointNames.size(); i++)
+         {
+            privilegedConfigurationCommand.addJoint((OneDoFJointBasics) controllerSystem.findJoint(armJointNames.get(i)),
+                                                    PrivilegedConfigurationCommand.PrivilegedConfigurationOption.AT_MID_RANGE);
+         }
       }
 
       registry.addChild(jointGainRegistry);
@@ -144,10 +169,10 @@ public class ValkyrieUpperBodyManipulationState extends HighLevelControllerState
       registry.addChild(momentumRegistry);
       registry.addChild(comHeightGainRegistry);
 
-      centerOfMassFrame = new MovingCenterOfMassReferenceFrame("centerOfMass", fullRobotModel.getElevatorFrame(), fullRobotModel.getElevator());
+      centerOfMassFrame = new MovingCenterOfMassReferenceFrame("centerOfMass", elevator.getBodyFixedFrame(), elevator);
       controlCoreToolbox = new WholeBodyControlCoreToolbox(controlDT,
                                                            ValkyrieRosControlController.gravity,
-                                                           fullRobotModel.getRootJoint(),
+                                                           null,
                                                            controlledJoints,
                                                            centerOfMassFrame,
                                                            walkingControllerParameters.getMomentumOptimizationSettings(),
@@ -230,18 +255,17 @@ public class ValkyrieUpperBodyManipulationState extends HighLevelControllerState
 
       privilegedConfigurationCommand.clear();
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationCommand.PrivilegedConfigurationOption.AT_ZERO);
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
-         for (int i = 0; i < armJointNames.length; i++)
-            privilegedConfigurationCommand.addJoint(fullRobotModel.getArmJoint(robotSide, armJointNames[i]), PrivilegedConfigurationCommand.PrivilegedConfigurationOption.AT_MID_RANGE);
-      }
    }
 
    @Override
    public void doAction(double timeInState)
    {
+      centerOfMassFrame.update();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         handControlFrames.get(robotSide).update();
+      }
+
       chestManager.compute();
       headManager.compute();
 

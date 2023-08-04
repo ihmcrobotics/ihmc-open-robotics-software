@@ -253,14 +253,14 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
       factory.addState(standReadyState.getHighLevelControllerName(), standReadyState);
 
       // Setup manipulation state
-      ValkyrieUpperBodyManipulationState manipulationState = new ValkyrieUpperBodyManipulationState(commandInputManager,
-                                                                                                    robotModel.getControllerDT(),
-                                                                                                    robotModel.getHighLevelControllerParameters(),
-                                                                                                    robotModel.getWalkingControllerParameters(),
-                                                                                                    fullRobotModel,
-                                                                                                    controlledOneDoFJoints,
-                                                                                                    yoTime,
-                                                                                                    graphicsListRegistry);
+      ValkyrieUpperBodyManipulationState manipulationState = null; // new ValkyrieUpperBodyManipulationState(commandInputManager,
+//                                                                                                    robotModel.getControllerDT(),
+//                                                                                                    robotModel.getHighLevelControllerParameters(),
+//                                                                                                    robotModel.getWalkingControllerParameters(),
+//                                                                                                    fullRobotModel,
+//                                                                                                    controlledOneDoFJoints,
+//                                                                                                    yoTime,
+//                                                                                                    graphicsListRegistry);
       factory.addState(manipulationState.getHighLevelControllerName(), manipulationState);
 
       // Smooth transition state
@@ -373,6 +373,7 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
       /* Replace floating joint with torso yaw joint */
       elevator.getChildrenJoints().clear();
       elevator.getChildrenJoints().add(torsoYaw);
+      torsoYaw.setPredecessor(elevator);
    }
 
    public static void main(String[] args)
