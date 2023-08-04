@@ -101,8 +101,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       for (RDXInteractableFootstep footstep : footsteps)
       {
          footstep.calculateVRPick(vrContext);
-
-         //TODO check if footstep is hovered in vr
       }
       if (selectedFootstep != null)
       {
@@ -112,9 +110,8 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
    public void processVRInput(RDXVRContext vrContext)
    {
-      for (int i = 0; i < footsteps.size(); i++)
+      for (RDXInteractableFootstep footstep : footsteps)
       {
-         RDXInteractableFootstep footstep = footsteps.get(i);
          footstep.processVRInput(vrContext);
       }
 
