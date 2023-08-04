@@ -123,7 +123,7 @@ public class RDXInteractableRobotLink
 
             RDXVRDragData gripDragData = controller.getGripDragData();
             InputAnalogActionData joystick = controller.getJoystickActionData();
-            InputDigitalActionData aButton = controller.getAButtonActionData();
+            InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
 
             if (isHovering)
             {
@@ -147,25 +147,7 @@ public class RDXInteractableRobotLink
                {
                   joystickSelection.put(side, RDXVRJoystickSelection.CLOSE_HAND);
                }
-            }
-            else
-            {
-               switch (joystickSelection.get(side))
-               {
-                  case EXECUTE:
-                     controller.setAButtonText("Execute");
-                     break;
-                  case DELETE_INTERACTABLE:
-                     controller.setAButtonText("Delete Interactable");
-                     break;
-                  case OPEN_HAND:
-                     controller.setAButtonText("Open Hand");
-                     break;
-                  case CLOSE_HAND:
-                     controller.setAButtonText("Close Hand");
-                     break;
-               }
-               if (aButton.bChanged() && aButton.bState())
+               if (joystickButton.bChanged() && joystickButton.bState())
                {
                   switch (joystickSelection.get(side))
                   {
@@ -185,6 +167,10 @@ public class RDXInteractableRobotLink
                         break;
                   }
                }
+            }
+            else
+            {
+               joystickSelection.put(side, RDXVRJoystickSelection.NONE);
             }
             if (isHovering && gripDragData.getDragJustStarted())
             {
