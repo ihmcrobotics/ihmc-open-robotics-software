@@ -84,9 +84,7 @@ public class RDXInteractableFootstep
    private final EnumMap<Axis3D, List<PolynomialReadOnly>> plannedFootstepTrajectory = new EnumMap<>(Axis3D.class);
 
    private boolean wasPoseUpdated = false;
-
-   private final SideDependentList<ModifiableReferenceFrame> dragReferenceFrame = new SideDependentList<>();
-   private final FramePose3D vrPickPose = new FramePose3D();
+   
    private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
    private SideDependentList<Boolean> isHoveredVR = new SideDependentList<>(false, false);
 
@@ -282,15 +280,10 @@ public class RDXInteractableFootstep
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
-            if (!controller.getGripAsButtonDown())
+            if (mouseCollidable.pointCollide(controller.getPickPointPose().getPosition()))
             {
-               vrPickPose.setIncludingFrame(controller.getPickPointPose());
-               vrPickPose.changeFrame(ReferenceFrame.getWorldFrame());
-               if (mouseCollidable.pointCollide(vrPickPose.getPosition()))
-               {
-                  vrPickResult.get(side).addPickCollision(0);
-                  controller.addPickResult(vrPickResult.get(side));
-               }
+               vrPickResult.get(side).addPickCollision(0);
+               controller.addPickResult(vrPickResult.get(side));
             }
          });
       }
@@ -302,31 +295,16 @@ public class RDXInteractableFootstep
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
-            if (dragReferenceFrame.get(side) == null)
-            {
-               dragReferenceFrame.put(side, new ModifiableReferenceFrame(controller.getPickPoseFrame()));
-            }
             RDXVRDragData gripDragData = controller.getGripDragData();
 
-            if (gripDragData.getDragJustStarted() && vrPickResult.get(side)== controller.getSelectedPick() && !vrContext.getController(side.getOppositeSide()).getGripDragData().isBeingDragged(this))
+            if (gripDragData.getDragJustStarted() && vrPickResult.get(side)== controller.getSelectedPick())
             {
                gripDragData.setObjectBeingDragged(this);
-               selectablePose3DGizmo.getPoseGizmo()
-                                    .getGizmoFrame()
-                                    .getTransformToDesiredFrame(dragReferenceFrame.get(side)
-                                                                                  .getTransformToParent(),
-                                                                controller.getPickPoseFrame());
-               dragReferenceFrame.get(side).getReferenceFrame().update();
+               gripDragData.setInteractableFrameOnDragStart(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
             }
-
-            boolean isGripping = gripDragData.isBeingDragged(this);
-            if (isGripping && vrPickResult.get(side)== controller.getSelectedPick())
+            if (gripDragData.isDragging() && gripDragData.getObjectBeingDragged() == this)
             {
-               dragReferenceFrame.get(side)
-                                 .getReferenceFrame()
-                                 .getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo()
-                                                                                  .getTransformToParent(),
-                                                             ReferenceFrame.getWorldFrame());
+               gripDragData.getDragFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(), ReferenceFrame.getWorldFrame());
             }
             isHoveredVR.put(side, vrPickResult.get(side)== controller.getSelectedPick());
          });
