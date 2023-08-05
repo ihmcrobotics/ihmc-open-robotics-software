@@ -3,16 +3,16 @@ package us.ihmc.vulkan;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWVulkan;
-import org.lwjgl.system.Configuration;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.vulkan.*;
+import us.ihmc.log.LogTools;
 
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Taken from https://github.com/Naitsirc98/Vulkan-Tutorial-Java
@@ -22,51 +22,10 @@ public class HelloVulkan
    private static final int WIDTH = 800;
    private static final int HEIGHT = 600;
 
-   private static final boolean ENABLE_VALIDATION_LAYERS = Configuration.DEBUG.get(true);
-
-   private static final Set<String> VALIDATION_LAYERS;
-
-   static
-   {
-      if (ENABLE_VALIDATION_LAYERS)
-      {
-         VALIDATION_LAYERS = new HashSet<>();
-         VALIDATION_LAYERS.add("VK_LAYER_KHRONOS_validation");
-      }
-      else
-      {
-         // We are not going to use it, so we don't create it
-         VALIDATION_LAYERS = null;
-      }
-   }
-
-   private static int debugCallback(int messageSeverity, int messageType, long pCallbackData, long pUserData)
-   {
-      VkDebugUtilsMessengerCallbackDataEXT callbackData = VkDebugUtilsMessengerCallbackDataEXT.create(pCallbackData);
-      System.err.println("Validation layer: " + callbackData.pMessageString());
-      return VK10.VK_FALSE;
-   }
-
-   private static int createDebugUtilsMessengerEXT(VkInstance instance,
-                                                   VkDebugUtilsMessengerCreateInfoEXT createInfo,
-                                                   VkAllocationCallbacks allocationCallbacks,
-                                                   LongBuffer pDebugMessenger)
-   {
-      if (VK10.vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT") != MemoryUtil.NULL)
-         return EXTDebugUtils.vkCreateDebugUtilsMessengerEXT(instance, createInfo, allocationCallbacks, pDebugMessenger);
-
-      return VK10.VK_ERROR_EXTENSION_NOT_PRESENT;
-   }
-
-   private static void destroyDebugUtilsMessengerEXT(VkInstance instance, long debugMessenger, VkAllocationCallbacks allocationCallbacks)
-   {
-      if (VK10.vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT") != MemoryUtil.NULL)
-         EXTDebugUtils.vkDestroyDebugUtilsMessengerEXT(instance, debugMessenger, allocationCallbacks);
-   }
-
    private long window;
    private VkInstance vulkanInstance;
    private long debugMessenger;
+   private VkPhysicalDevice physicalDevice;
 
    public void run()
    {
@@ -97,7 +56,33 @@ public class HelloVulkan
 
    private void initVulkan()
    {
-      if (ENABLE_VALIDATION_LAYERS && !checkValidationLayerSupport())
+      createInstance();
+      setupDebugMessenger();
+      pickPhysicalDevice();
+   }
+
+   private void mainLoop()
+   {
+      while (!GLFW.glfwWindowShouldClose(window))
+      {
+         GLFW.glfwPollEvents();
+      }
+   }
+
+   private void cleanup()
+   {
+      if (VulkanTools.ENABLE_VALIDATION_LAYERS)
+         VulkanTools.destroyDebugUtilsMessengerEXT(vulkanInstance, debugMessenger, null);
+
+      VK10.vkDestroyInstance(vulkanInstance, null);
+
+      GLFW.glfwDestroyWindow(window);
+      GLFW.glfwTerminate();
+   }
+
+   private void createInstance()
+   {
+      if (VulkanTools.ENABLE_VALIDATION_LAYERS && !checkValidationLayerSupport())
          throw new RuntimeException("Validation requested but not supported. Make sure to install the vulkan validation layers on your system");
 
       try (MemoryStack stack = MemoryStack.stackPush())
@@ -119,7 +104,7 @@ public class HelloVulkan
          // enabledExtensionCount is implicitly set when you call ppEnabledExtensionNames
          createInfo.ppEnabledExtensionNames(getRequiredExtensions(stack));
 
-         if (ENABLE_VALIDATION_LAYERS)
+         if (VulkanTools.ENABLE_VALIDATION_LAYERS)
          {
             createInfo.ppEnabledLayerNames(validationLayersAsPointerBuffer(stack));
 
@@ -138,32 +123,11 @@ public class HelloVulkan
 
          vulkanInstance = new VkInstance(instancePointerBuffer.get(0), createInfo);
       }
-
-      setupDebugMessenger();
-   }
-
-   private void mainLoop()
-   {
-      while (!GLFW.glfwWindowShouldClose(window))
-      {
-         GLFW.glfwPollEvents();
-      }
-   }
-
-   private void cleanup()
-   {
-      if (ENABLE_VALIDATION_LAYERS)
-         destroyDebugUtilsMessengerEXT(vulkanInstance, debugMessenger, null);
-
-      VK10.vkDestroyInstance(vulkanInstance, null);
-
-      GLFW.glfwDestroyWindow(window);
-      GLFW.glfwTerminate();
    }
 
    private void setupDebugMessenger()
    {
-      if (!ENABLE_VALIDATION_LAYERS)
+      if (!VulkanTools.ENABLE_VALIDATION_LAYERS)
       {
          return;
       }
@@ -174,12 +138,71 @@ public class HelloVulkan
          populateDebugMessengerCreateInfo(createInfo);
          LongBuffer pDebugMessenger = stack.longs(VK10.VK_NULL_HANDLE);
 
-         if (createDebugUtilsMessengerEXT(vulkanInstance, createInfo, null, pDebugMessenger) != VK10.VK_SUCCESS)
+         if (VulkanTools.createDebugUtilsMessengerEXT(vulkanInstance, createInfo, null, pDebugMessenger) != VK10.VK_SUCCESS)
          {
             throw new RuntimeException("Failed to set up debug messenger");
          }
 
          debugMessenger = pDebugMessenger.get(0);
+      }
+   }
+
+   private void pickPhysicalDevice()
+   {
+      try (MemoryStack stack = MemoryStack.stackPush())
+      {
+         IntBuffer deviceCount = stack.ints(0);
+         VK10.vkEnumeratePhysicalDevices(vulkanInstance, deviceCount, null);
+         if (deviceCount.get(0) == 0)
+         {
+            throw new RuntimeException("Failed to find GPUs with Vulkan support");
+         }
+
+         PointerBuffer ppPhysicalDevices = stack.mallocPointer(deviceCount.get(0));
+         VK10.vkEnumeratePhysicalDevices(vulkanInstance, deviceCount, ppPhysicalDevices);
+         for (int i = 0; i < ppPhysicalDevices.capacity(); i++)
+         {
+            VkPhysicalDevice device = new VkPhysicalDevice(ppPhysicalDevices.get(i), vulkanInstance);
+
+            if (isDeviceSuitable(device))
+            {
+               VkPhysicalDeviceProperties deviceProperties = VkPhysicalDeviceProperties.create();
+               VK10.vkGetPhysicalDeviceProperties(device, deviceProperties);
+
+               LogTools.info("Using {}", deviceProperties.deviceNameString());
+
+               physicalDevice = device;
+               return;
+            }
+         }
+
+         throw new RuntimeException("Failed to find a suitable GPU");
+      }
+   }
+
+   private boolean isDeviceSuitable(VkPhysicalDevice device)
+   {
+      QueueFamilyIndices indices = findQueueFamilies(device);
+      return indices.isComplete();
+   }
+
+   private QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device)
+   {
+      QueueFamilyIndices indices = new QueueFamilyIndices();
+
+      try (MemoryStack stack = MemoryStack.stackPush())
+      {
+         IntBuffer queueFamilyCount = stack.ints(0);
+         VK10.vkGetPhysicalDeviceQueueFamilyProperties(device, queueFamilyCount, null);
+
+         VkQueueFamilyProperties.Buffer queueFamilies = VkQueueFamilyProperties.malloc(queueFamilyCount.get(0), stack);
+         VK10.vkGetPhysicalDeviceQueueFamilyProperties(device, queueFamilyCount, queueFamilies);
+
+         IntStream.range(0, queueFamilies.capacity())
+                  .filter(index -> (queueFamilies.get(index).queueFlags() & VK10.VK_QUEUE_GRAPHICS_BIT) != 0)
+                  .findFirst()
+                  .ifPresent(indices::setGraphicsFamily);
+         return indices;
       }
    }
 
@@ -192,20 +215,20 @@ public class HelloVulkan
       debugCreateInfo.messageType(EXTDebugUtils.VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT
                                 | EXTDebugUtils.VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT
                                 | EXTDebugUtils.VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT);
-      debugCreateInfo.pfnUserCallback(HelloVulkan::debugCallback);
+      debugCreateInfo.pfnUserCallback(VulkanTools::debugCallback);
    }
 
    private PointerBuffer validationLayersAsPointerBuffer(MemoryStack stack)
    {
-      PointerBuffer buffer = stack.mallocPointer(VALIDATION_LAYERS.size());
-      VALIDATION_LAYERS.stream().map(stack::UTF8).forEach(buffer::put);
+      PointerBuffer buffer = stack.mallocPointer(VulkanTools.VALIDATION_LAYERS.size());
+      VulkanTools.VALIDATION_LAYERS.stream().map(stack::UTF8).forEach(buffer::put);
       return buffer.rewind();
    }
 
    private PointerBuffer getRequiredExtensions(MemoryStack stack)
    {
       PointerBuffer glfwExtensions = GLFWVulkan.glfwGetRequiredInstanceExtensions();
-      if (ENABLE_VALIDATION_LAYERS)
+      if (VulkanTools.ENABLE_VALIDATION_LAYERS)
       {
          PointerBuffer extensions = stack.mallocPointer(glfwExtensions.capacity() + 1);
          extensions.put(glfwExtensions);
@@ -225,7 +248,7 @@ public class HelloVulkan
          VkLayerProperties.Buffer availableLayers = VkLayerProperties.malloc(layerCount.get(0), stack);
          VK10.vkEnumerateInstanceLayerProperties(layerCount, availableLayers);
          Set<String> availableLayerNames = availableLayers.stream().map(VkLayerProperties::layerNameString).collect(Collectors.toSet());
-         return availableLayerNames.containsAll(VALIDATION_LAYERS);
+         return availableLayerNames.containsAll(VulkanTools.VALIDATION_LAYERS);
       }
    }
 
