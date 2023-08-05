@@ -25,7 +25,11 @@ public class HelloVulkan
    private long window;
    private VkInstance vulkanInstance;
    private long debugMessenger;
+   private long surface;
    private VkPhysicalDevice physicalDevice;
+   private VkDevice device;
+   private VkQueue graphicsQueue;
+   private VkQueue presentQueue;
 
    public void run()
    {
@@ -58,7 +62,9 @@ public class HelloVulkan
    {
       createInstance();
       setupDebugMessenger();
+      createSurface();
       pickPhysicalDevice();
+      createLogicalDevice();
    }
 
    private void mainLoop()
@@ -71,8 +77,12 @@ public class HelloVulkan
 
    private void cleanup()
    {
+      VK10.vkDestroyDevice(device, null);
+
       if (VulkanTools.ENABLE_VALIDATION_LAYERS)
          VulkanTools.destroyDebugUtilsMessengerEXT(vulkanInstance, debugMessenger, null);
+
+      KHRSurface.vkDestroySurfaceKHR(vulkanInstance, surface, null);
 
       VK10.vkDestroyInstance(vulkanInstance, null);
 
@@ -147,6 +157,17 @@ public class HelloVulkan
       }
    }
 
+   private void createSurface()
+   {
+      try (MemoryStack stack = MemoryStack.stackPush())
+      {
+         LongBuffer pSurface = stack.longs(VK10.VK_NULL_HANDLE);
+         if (GLFWVulkan.glfwCreateWindowSurface(vulkanInstance, window, null, pSurface) != VK10.VK_SUCCESS)
+            throw new RuntimeException("Failed to create window surface");
+         surface = pSurface.get(0);
+      }
+   }
+
    private void pickPhysicalDevice()
    {
       try (MemoryStack stack = MemoryStack.stackPush())
@@ -166,10 +187,10 @@ public class HelloVulkan
 
             if (isDeviceSuitable(device))
             {
-               VkPhysicalDeviceProperties deviceProperties = VkPhysicalDeviceProperties.create();
+               VkPhysicalDeviceProperties deviceProperties = VkPhysicalDeviceProperties.calloc(stack);
                VK10.vkGetPhysicalDeviceProperties(device, deviceProperties);
-
                LogTools.info("Using {}", deviceProperties.deviceNameString());
+
 
                physicalDevice = device;
                return;
@@ -177,6 +198,47 @@ public class HelloVulkan
          }
 
          throw new RuntimeException("Failed to find a suitable GPU");
+      }
+   }
+
+   private void createLogicalDevice()
+   {
+      try (MemoryStack stack = MemoryStack.stackPush())
+      {
+         QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+         int[] uniqueQueueFamilies = indices.unique();
+         VkDeviceQueueCreateInfo.Buffer queueCreateInfos = VkDeviceQueueCreateInfo.calloc(uniqueQueueFamilies.length, stack);
+
+         for (int i = 0; i < uniqueQueueFamilies.length; i++)
+         {
+            VkDeviceQueueCreateInfo queueCreateInfo = queueCreateInfos.get(i);
+            queueCreateInfo.sType(VK10.VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO);
+            queueCreateInfo.queueFamilyIndex(uniqueQueueFamilies[i]);
+            queueCreateInfo.pQueuePriorities(stack.floats(1.0f));
+         }
+
+         VkPhysicalDeviceFeatures deviceFeatures = VkPhysicalDeviceFeatures.calloc(stack);
+
+         VkDeviceCreateInfo createInfo = VkDeviceCreateInfo.calloc(stack);
+         createInfo.sType(VK10.VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO);
+         createInfo.pQueueCreateInfos(queueCreateInfos);
+         // queueCreateInfoCount is automatically set
+         createInfo.pEnabledFeatures(deviceFeatures);
+         if (VulkanTools.ENABLE_VALIDATION_LAYERS)
+            createInfo.ppEnabledLayerNames(validationLayersAsPointerBuffer(stack));
+
+         PointerBuffer pDevice = stack.pointers(VK10.VK_NULL_HANDLE);
+         if (VK10.vkCreateDevice(physicalDevice, createInfo, null, pDevice) != VK10.VK_SUCCESS)
+         {
+            throw new RuntimeException("Failed to create logical device");
+         }
+
+         device = new VkDevice(pDevice.get(0), physicalDevice, createInfo);
+         PointerBuffer pQueue = stack.pointers(VK10.VK_NULL_HANDLE);
+         VK10.vkGetDeviceQueue(device, indices.getGraphicsFamily(), 0, pQueue);
+         graphicsQueue = new VkQueue(pQueue.get(0), device);
+         VK10.vkGetDeviceQueue(device, indices.getPresentFamily(), 0, pQueue);
+         presentQueue = new VkQueue(pQueue.get(0), device);
       }
    }
 
@@ -196,12 +258,25 @@ public class HelloVulkan
          VK10.vkGetPhysicalDeviceQueueFamilyProperties(device, queueFamilyCount, null);
 
          VkQueueFamilyProperties.Buffer queueFamilies = VkQueueFamilyProperties.malloc(queueFamilyCount.get(0), stack);
+
          VK10.vkGetPhysicalDeviceQueueFamilyProperties(device, queueFamilyCount, queueFamilies);
 
-         IntStream.range(0, queueFamilies.capacity())
-                  .filter(index -> (queueFamilies.get(index).queueFlags() & VK10.VK_QUEUE_GRAPHICS_BIT) != 0)
-                  .findFirst()
-                  .ifPresent(indices::setGraphicsFamily);
+         IntBuffer presentSupport = stack.ints(VK10.VK_FALSE);
+         for (int i = 0; i < queueFamilies.capacity() || !indices.isComplete(); i++)
+         {
+            if ((queueFamilies.get(i).queueFlags() & VK10.VK_QUEUE_GRAPHICS_BIT) != 0)
+            {
+               indices.setGraphicsFamily(i);
+            }
+
+            KHRSurface.vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, presentSupport);
+
+            if (presentSupport.get(0) == VK10.VK_TRUE)
+            {
+               indices.setPresentFamily(i);
+            }
+         }
+
          return indices;
       }
    }
