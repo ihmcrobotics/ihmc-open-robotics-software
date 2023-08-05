@@ -1,13 +1,13 @@
 package us.ihmc.perception.filters;
 
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.tools.time.DurationCalculator;
+import us.ihmc.tools.time.MovingAverageDurationCalculator;
 
 public class BreakFrequencyAlphaCalculator
 {
-   private final int DT_AVERAGING_HISTORY = 3;
+   private final int DT_WINDOW_SIZE = 3;
    private boolean firstRun = true;
-   private final DurationCalculator periodCalculator = new DurationCalculator(DT_AVERAGING_HISTORY);
+   private final MovingAverageDurationCalculator periodCalculator = new MovingAverageDurationCalculator(DT_WINDOW_SIZE);
 
    public double calculateAlpha(double breakFrequency)
    {
