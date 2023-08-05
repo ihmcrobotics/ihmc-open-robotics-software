@@ -34,4 +34,9 @@ public class AlphaFilteredRigidBodyTransform extends RigidBodyTransform
    {
       this.alpha = alpha;
    }
+
+   public void reset()
+   {
+      setToNaN();
+   }
 }
