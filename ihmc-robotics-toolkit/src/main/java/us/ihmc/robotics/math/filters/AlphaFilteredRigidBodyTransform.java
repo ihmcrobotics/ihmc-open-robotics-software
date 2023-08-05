@@ -9,7 +9,7 @@ public class AlphaFilteredRigidBodyTransform extends RigidBodyTransform
 
    public AlphaFilteredRigidBodyTransform()
    {
-      setToNaN();
+      reset();
    }
 
    public void update(RigidBodyTransform measured)
