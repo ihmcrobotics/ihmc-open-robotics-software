@@ -112,6 +112,11 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
       planarRegionDecider.setConstraintRegions(stepConstraintRegions);
    }
 
+   public List<StepConstraintRegion> getStepConstraintRegions()
+   {
+      return planarRegionDecider.getStepConstraintRegions();
+   }
+
    public boolean hasStepConstraintRegion()
    {
       return planarRegionDecider.getConstraintRegion() != null && !planarRegionDecider.isStepFarEnoughInsideToIgnoreConstraint();

@@ -50,6 +50,11 @@ public class StepConstraintRegionsList
 
    public void getAsMessage(StepConstraintsListMessage message)
    {
+      getAsMessage(stepConstraintRegions, message);
+   }
+
+   public static void getAsMessage(List<StepConstraintRegion> stepConstraintRegions, StepConstraintsListMessage message)
+   {
       message.getVertexBuffer().clear();
       message.getRegionOrigin().clear();
       message.getRegionNormal().clear();

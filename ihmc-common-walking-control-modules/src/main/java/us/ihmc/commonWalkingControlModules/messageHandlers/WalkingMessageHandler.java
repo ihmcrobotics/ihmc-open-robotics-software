@@ -24,6 +24,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegionsList;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -368,10 +369,20 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       momentumTrajectoryHandler.getAngularMomentumTrajectory(startTime, endTime, numberOfPoints, trajectoryToPack);
    }
 
-   public FootstepQueueStatusMessage updateAndReturnFootstepQueueStatus()
+   public FootstepQueueStatusMessage updateAndReturnFootstepQueueStatus(Footstep footstepBeingExecuted,
+                                                                        FootstepTiming footstepTimingBeingExecuted,
+                                                                        List<StepConstraintRegion> stepConstraintsBeingExecuted,
+                                                                        double timeInSupportSequence)
    {
-      // TODO is the step being taken in swing currently packed inside the upcoming footstep
       footstepQueueStatusMessage.getQueuedFootstepList().clear();
+      // This foot is currently being taken. Add it to the front of the queue.
+      if (footstepBeingExecuted != null)
+      {
+         QueuedFootstepStatusMessage queuedFootstepStatusMessage = footstepQueueStatusMessage.getQueuedFootstepList().add();
+         packQueuedFootstepStatus(queuedFootstepStatusMessage, footstepBeingExecuted, footstepTimingBeingExecuted, stepConstraintsBeingExecuted);
+
+      }
+      // Add the other steps to the queue.
       for (int i = 0; i < upcomingFootsteps.size(); i++)
       {
          QueuedFootstepStatusMessage queuedFootstepStatusMessage = footstepQueueStatusMessage.getQueuedFootstepList().add();
@@ -390,6 +401,14 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
                                                 FootstepTiming footstepTiming,
                                                 StepConstraintRegionsList stepConstraints)
    {
+      packQueuedFootstepStatus(messasgeToPack, footstep, footstepTiming, stepConstraints.getAsList());
+   }
+
+   private static void packQueuedFootstepStatus(QueuedFootstepStatusMessage messasgeToPack,
+                                                Footstep footstep,
+                                                FootstepTiming footstepTiming,
+                                                List<StepConstraintRegion> stepConstraints)
+   {
       messasgeToPack.setRobotSide(footstep.getRobotSide().toByte());
       messasgeToPack.getLocation().set(footstep.getFootstepPose().getPosition());
       messasgeToPack.getOrientation().set(footstep.getFootstepPose().getOrientation());
@@ -403,7 +422,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
             messasgeToPack.getPredictedContactPoints2d().add().set(footstep.getPredictedContactPoints().get(i));
       }
 
-      stepConstraints.getAsMessage(messasgeToPack.getStepConstraints());
+      StepConstraintRegionsList.getAsMessage(stepConstraints, messasgeToPack.getStepConstraints());
    }
 
    public MomentumTrajectoryHandler getMomentumTrajectoryHandler()
