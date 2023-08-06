@@ -4,7 +4,9 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -15,6 +17,8 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
@@ -33,9 +37,12 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_GRAY2RGB;
 
 public class HumanoidPerceptionModule
 {
@@ -44,6 +51,7 @@ public class HumanoidPerceptionModule
    private BytedecoImage realsenseDepthImage;
    private BytedecoImage ousterDepthImage;
    private Mat occupancyGrid;
+   private Mat gridColor = new Mat();
    private BytePointer compressedOccupancyGrid;
    private ImageMessage occupancyGridMessage;
 
@@ -114,7 +122,7 @@ public class HumanoidPerceptionModule
       }
    }
 
-   public void updateStructural(ROS2Helper ros2Helper, Mat ousterDepth, ReferenceFrame sensorFrame)
+   public void updateStructural(ROS2Helper ros2Helper, ArrayList<Point3D> pointCloud, ReferenceFrame sensorFrame, float thresholdHeight)
    {
 //      executorService.submit(() ->
         {
@@ -123,11 +131,13 @@ public class HumanoidPerceptionModule
            cameraPose.setToZero(sensorFrame);
            cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-           OpenCVTools.convertFloatToShort(ousterDepth, ousterDepthImage.getBytedecoOpenCVMat(), 1000.0, 0.0);
+           occupancyGrid.put(new Scalar(0));
+           extractOccupancyGrid(pointCloud, occupancyGrid, sensorFrame.getTransformToWorldFrame(), thresholdHeight);
 
-           extractOccupancyGrid(ousterDepthImage, occupancyGrid, sensorFrame);
 
-           PerceptionDebugTools.displayDepth("Occupancy Grid", occupancyGrid, 1);
+
+           opencv_imgproc.cvtColor(occupancyGrid, gridColor, COLOR_GRAY2RGB);
+           PerceptionDebugTools.display("Occupancy Grid", gridColor, 1, 1400);
 
 //           OpenCVTools.compressImagePNG(occupancyGrid, compressedOccupancyGrid);
 //           CameraModel.PINHOLE.packMessageFormat(occupancyGridMessage);
@@ -167,7 +177,7 @@ public class HumanoidPerceptionModule
    {
       LogTools.info("Initializing Occupancy Grid");
       this.ousterDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
-      this.occupancyGrid = new Mat(gridHeight, gridWidth, opencv_core.CV_16UC1);
+      this.occupancyGrid = new Mat(gridHeight, gridWidth, opencv_core.CV_8UC1, new Scalar(0));
       compressedOccupancyGrid = new BytePointer(); // deallocate later
    }
 
@@ -208,37 +218,19 @@ public class HumanoidPerceptionModule
       worldRegions.applyTransform(cameraFrame.getTransformToWorldFrame());
    }
 
-   public void extractOccupancyGrid(BytedecoImage depthImage, Mat occupancyGrid, ReferenceFrame cameraFrame)
+   public void extractOccupancyGrid(ArrayList<Point3D> pointCloud, Mat occupancyGrid, RigidBodyTransform sensorToWorldTransform, float thresholdHeight)
    {
-      for (int y = 0; y<depthImage.getImageHeight(); y+=2)
+      for (int i = 0; i<pointCloud.size(); i+=2)
       {
-         for (int x = 0; x<depthImage.getImageWidth(); x+=2)
+         Point3D point = pointCloud.get(i);
+         //sensorToWorldTransform.transform(point);
+
+         int gridX = (int) (point.getX() * 10 + 50);
+         int gridY = (int) (point.getY() * 10 + 50);
+
+         if (point.getZ() > thresholdHeight && gridX >= 0 && gridX < occupancyGrid.cols() && gridY >= 0 && gridY < occupancyGrid.rows())
          {
-            double totalPitch = Math.PI / 2;
-            double totalYaw = 2 * Math.PI;
-
-            int xFromCenter = -x - (depthImage.getImageWidth() / 2);
-            int yFromCenter = -(y - (depthImage.getImageHeight() / 2));
-
-            double yaw = xFromCenter / (float) depthImage.getImageWidth() * totalYaw;
-            double pitch = yFromCenter / (float) depthImage.getImageHeight() * totalPitch;
-
-            short index = (short) (y * depthImage.getImageWidth() + x);
-            float depth = depthImage.getPointerForAccessSpeed().getShort(index) * 0.001f;
-
-            double r = depth * Math.cos(pitch);
-
-            double px = r * Math.cos(yaw);
-            double py = r * Math.sin(yaw);
-            double pz = depth * Math.sin(pitch);
-
-            int gridX = (int) (px / 0.05f + occupancyGrid.cols() / 2);
-            int gridY = (int) (py / 0.05f + occupancyGrid.rows() / 2);
-
-            if (pz > 0.5f && gridX >= 0 && gridX < occupancyGrid.cols() && gridY >= 0 && gridY < occupancyGrid.rows())
-            {
-               occupancyGrid.ptr(gridY, gridX).putShort((short) 1);
-            }
+            occupancyGrid.ptr(gridY, gridX).putInt(100);
          }
       }
    }

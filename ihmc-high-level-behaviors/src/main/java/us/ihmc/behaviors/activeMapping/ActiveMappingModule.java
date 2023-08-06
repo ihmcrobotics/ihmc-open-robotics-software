@@ -54,7 +54,7 @@ public class ActiveMappingModule
    private boolean active = true;
 
    private int gridSize = 20;
-   private float gridResolution = 0.3f;
+   private float gridResolution = 1.0f;
 
    int goalMargin = 5;
    int scale = 2;

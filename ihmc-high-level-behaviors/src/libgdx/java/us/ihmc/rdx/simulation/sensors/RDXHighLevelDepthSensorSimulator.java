@@ -79,6 +79,7 @@ import us.ihmc.utilities.ros.types.PointType;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.function.LongSupplier;
@@ -172,6 +173,7 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final float[] color = new float[] {1.0f, 1.0f, 1.0f, 1.0f};
    private final ImInt segmentationDivisor = new ImInt(8);
+   private final ArrayList<Point3D> pointCloud = new ArrayList<>();
    private int segmentIndex = 0;
    private OpenCLManager openCLManager;
    private _cl_program openCLProgram;
@@ -749,6 +751,21 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
             });
          }
       }
+   }
+
+   public ArrayList<Point3D> getPointCloud()
+   {
+      pointCloud.clear();
+      for (int i = 0; i < depthSensorSimulator.getNumberOfPoints()
+                      && (FLOATS_PER_POINT * i + 2) < depthSensorSimulator.getPointCloudBuffer().limit(); i++)
+      {
+         float x = depthSensorSimulator.getPointCloudBuffer().get(FLOATS_PER_POINT * i);
+         float y = depthSensorSimulator.getPointCloudBuffer().get(FLOATS_PER_POINT * i + 1);
+         float z = depthSensorSimulator.getPointCloudBuffer().get(FLOATS_PER_POINT * i + 2);
+         pointCloud.add(new Point3D(x, y, z));
+      }
+
+      return pointCloud;
    }
 
    public void dispose()

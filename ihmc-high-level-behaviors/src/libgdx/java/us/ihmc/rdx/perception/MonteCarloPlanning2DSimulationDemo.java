@@ -56,7 +56,7 @@ class MonteCarloPlanning2DSimulationDemo
       }
    }
 
-   public static void plotWorldCV(World world, Agent agent, int scale)
+   public static void plotWorldCV(World world, Agent agent, int screenSize)
    {
       // Convert the floating point grid to 8-bit grayscale then convert it to RGB image
       Mat gridColor = new Mat();
@@ -107,6 +107,6 @@ class MonteCarloPlanning2DSimulationDemo
          }
       }
 
-      PerceptionDebugTools.display("Grid", gridColor, 50, scale);
+      PerceptionDebugTools.display("Grid", gridColor, 50, screenSize);
    }
 }
