@@ -76,6 +76,11 @@ public class RDXRemotePerceptionUI
    {
    }
 
+   public PerceptionConfigurationParameters getPerceptionConfigurationParameters()
+   {
+      return perceptionConfigurationParameters;
+   }
+
    public ImGuiPanel getPanel()
    {
       return panel;

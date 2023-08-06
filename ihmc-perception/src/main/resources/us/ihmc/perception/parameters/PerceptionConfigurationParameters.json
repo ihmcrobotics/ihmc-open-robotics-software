@@ -10,6 +10,11 @@
     "lowerBound" : 1,
     "upperBound" : 10
   },
+  "Occupancy Grid Resolution" : {
+    "value" : 10,
+    "lowerBound" : 1,
+    "upperBound" : 100
+  },
   "Rapid regions enabled" : false,
   "Logging enabled" : false,
   "Publish color" : true,

@@ -26,6 +26,7 @@ import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.perception.headless.LocalizationAndMappingProcess;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionFilterTools;
@@ -70,6 +71,8 @@ public class HumanoidPerceptionModule
 
    private RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private RobotConfigurationData robotConfigurationData;
+
+   private PerceptionConfigurationParameters perceptionConfigurationParameters;
 
    boolean waitIfNecessary = false; // dangerous if true! need a timeout
 
@@ -132,7 +135,8 @@ public class HumanoidPerceptionModule
            cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
            occupancyGrid.put(new Scalar(0));
-           extractOccupancyGrid(pointCloud, occupancyGrid, sensorFrame.getTransformToWorldFrame(), thresholdHeight);
+           extractOccupancyGrid(pointCloud, occupancyGrid, sensorFrame.getTransformToWorldFrame(), thresholdHeight,
+                                perceptionConfigurationParameters.getOccupancyGridResolution());
 
 
 
@@ -218,15 +222,16 @@ public class HumanoidPerceptionModule
       worldRegions.applyTransform(cameraFrame.getTransformToWorldFrame());
    }
 
-   public void extractOccupancyGrid(ArrayList<Point3D> pointCloud, Mat occupancyGrid, RigidBodyTransform sensorToWorldTransform, float thresholdHeight)
+   public void extractOccupancyGrid(ArrayList<Point3D> pointCloud, Mat occupancyGrid, RigidBodyTransform sensorToWorldTransform, float thresholdHeight,
+                                    float occupancyGridResolution)
    {
-      for (int i = 0; i<pointCloud.size(); i+=2)
+      for (int i = 0; i<pointCloud.size(); i++)
       {
          Point3D point = pointCloud.get(i);
          //sensorToWorldTransform.transform(point);
 
-         int gridX = (int) (point.getX() * 10 + 50);
-         int gridY = (int) (point.getY() * 10 + 50);
+         int gridX = (int) (point.getX() * occupancyGridResolution + 50);
+         int gridY = (int) (point.getY() * occupancyGridResolution + 50);
 
          if (point.getZ() > thresholdHeight && gridX >= 0 && gridX < occupancyGrid.cols() && gridY >= 0 && gridY < occupancyGrid.rows())
          {
@@ -293,5 +298,10 @@ public class HumanoidPerceptionModule
 
       if (activeMappingRemoteProcess != null)
          activeMappingRemoteProcess.destroy();
+   }
+
+   public void setPerceptionConfigurationParameters(PerceptionConfigurationParameters perceptionConfigurationParameters)
+   {
+      this.perceptionConfigurationParameters = perceptionConfigurationParameters;
    }
 }
