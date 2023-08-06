@@ -1,12 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -61,8 +55,12 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegionsList;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -678,7 +676,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          controllerToolbox.getFootContactState(robotSide).pollContactHasChangedNotification();
       }
 
-      statusOutputManager.reportStatusMessage(walkingMessageHandler.updateAndReturnFootstepQueueStatus());
+
+      updateAndPublishFootstepQueueStatus();
       statusOutputManager.reportStatusMessage(balanceManager.updateAndReturnCapturabilityBasedStatus());
 
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
@@ -704,6 +703,27 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       balanceManager.computeICPPlan();
    }
 
+   private void updateAndPublishFootstepQueueStatus()
+   {
+      Footstep footstepBeingExecuted = null;
+      FootstepTiming footstepTimingBeingExecuted = null;
+      List<StepConstraintRegion> stepConstraintsBeingExecuted = null;
+
+      WalkingStateEnum currentStateKey = stateMachine.getCurrentStateKey();
+      // WHen we are currently in swing, that footstep has been removed from the walking message handler. We must then get it from the balance manager.
+      if (currentStateKey == WalkingStateEnum.WALKING_RIGHT_SUPPORT || currentStateKey == WalkingStateEnum.WALKING_LEFT_SUPPORT)
+      {
+         footstepBeingExecuted = balanceManager.getFootstep(0);
+         footstepTimingBeingExecuted = balanceManager.getFootstepTiming(0);
+         stepConstraintsBeingExecuted = balanceManager.getCurrentStepConstraints();
+      }
+
+      statusOutputManager.reportStatusMessage(walkingMessageHandler.updateAndReturnFootstepQueueStatus(footstepBeingExecuted,
+                                                                                                       footstepTimingBeingExecuted,
+                                                                                                       stepConstraintsBeingExecuted,
+                                                                                                       balanceManager.getTimeIntoCurrentSupportSequence()));
+
+   }
    public void updateFailureDetection()
    {
       capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
