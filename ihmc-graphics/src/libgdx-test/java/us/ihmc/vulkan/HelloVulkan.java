@@ -6,19 +6,20 @@ import org.lwjgl.glfw.GLFWVulkan;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.vulkan.*;
+import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
 
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Taken from https://github.com/Naitsirc98/Vulkan-Tutorial-Java
  */
 public class HelloVulkan
 {
+   private static final int UINT32_MAX = 0xFFFFFFFF;
    private static final int WIDTH = 800;
    private static final int HEIGHT = 600;
 
@@ -30,6 +31,10 @@ public class HelloVulkan
    private VkDevice device;
    private VkQueue graphicsQueue;
    private VkQueue presentQueue;
+   private long swapChain;
+   private List<Long> swapChainImages;
+   private int swapChainImageFormat;
+   private VkExtent2D swapChainExtent;
 
    public void run()
    {
@@ -65,6 +70,7 @@ public class HelloVulkan
       createSurface();
       pickPhysicalDevice();
       createLogicalDevice();
+      createSwapChain();
    }
 
    private void mainLoop()
@@ -77,6 +83,8 @@ public class HelloVulkan
 
    private void cleanup()
    {
+      KHRSwapchain.vkDestroySwapchainKHR(device, swapChain, null);
+
       VK10.vkDestroyDevice(device, null);
 
       if (VulkanTools.ENABLE_VALIDATION_LAYERS)
@@ -92,7 +100,7 @@ public class HelloVulkan
 
    private void createInstance()
    {
-      if (VulkanTools.ENABLE_VALIDATION_LAYERS && !checkValidationLayerSupport())
+      if (VulkanTools.ENABLE_VALIDATION_LAYERS && !VulkanTools.checkValidationLayerSupport())
          throw new RuntimeException("Validation requested but not supported. Make sure to install the vulkan validation layers on your system");
 
       try (MemoryStack stack = MemoryStack.stackPush())
@@ -112,14 +120,14 @@ public class HelloVulkan
          createInfo.sType(VK10.VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO);
          createInfo.pApplicationInfo(applicationInfo);
          // enabledExtensionCount is implicitly set when you call ppEnabledExtensionNames
-         createInfo.ppEnabledExtensionNames(getRequiredExtensions(stack));
+         createInfo.ppEnabledExtensionNames(VulkanTools.getRequiredExtensions(stack));
 
          if (VulkanTools.ENABLE_VALIDATION_LAYERS)
          {
-            createInfo.ppEnabledLayerNames(validationLayersAsPointerBuffer(stack));
+            createInfo.ppEnabledLayerNames(VulkanTools.asPointerBuffer(stack, VulkanTools.VALIDATION_LAYERS));
 
             VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo = VkDebugUtilsMessengerCreateInfoEXT.calloc(stack);
-            populateDebugMessengerCreateInfo(debugCreateInfo);
+            VulkanTools.populateDebugMessengerCreateInfo(debugCreateInfo);
             createInfo.pNext(debugCreateInfo.address());
          }
 
@@ -145,7 +153,7 @@ public class HelloVulkan
       try (MemoryStack stack = MemoryStack.stackPush())
       {
          VkDebugUtilsMessengerCreateInfoEXT createInfo = VkDebugUtilsMessengerCreateInfoEXT.calloc(stack);
-         populateDebugMessengerCreateInfo(createInfo);
+         VulkanTools.populateDebugMessengerCreateInfo(createInfo);
          LongBuffer pDebugMessenger = stack.longs(VK10.VK_NULL_HANDLE);
 
          if (VulkanTools.createDebugUtilsMessengerEXT(vulkanInstance, createInfo, null, pDebugMessenger) != VK10.VK_SUCCESS)
@@ -224,8 +232,9 @@ public class HelloVulkan
          createInfo.pQueueCreateInfos(queueCreateInfos);
          // queueCreateInfoCount is automatically set
          createInfo.pEnabledFeatures(deviceFeatures);
+         createInfo.ppEnabledExtensionNames(VulkanTools.asPointerBuffer(stack, VulkanTools.DEVICE_EXTENSIONS));
          if (VulkanTools.ENABLE_VALIDATION_LAYERS)
-            createInfo.ppEnabledLayerNames(validationLayersAsPointerBuffer(stack));
+            createInfo.ppEnabledLayerNames(VulkanTools.validationLayersAsPointerBuffer(stack));
 
          PointerBuffer pDevice = stack.pointers(VK10.VK_NULL_HANDLE);
          if (VK10.vkCreateDevice(physicalDevice, createInfo, null, pDevice) != VK10.VK_SUCCESS)
@@ -242,10 +251,120 @@ public class HelloVulkan
       }
    }
 
+   private void createSwapChain()
+   {
+      try (MemoryStack stack = MemoryStack.stackPush())
+      {
+         SwapChainSupportDetails swapChainSupport = VulkanTools.querySwapChainSupport(physicalDevice, stack, surface);
+         VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.getFormats());
+         int presentMode = chooseSwapPresentMode(swapChainSupport.getPresentModes());
+         VkExtent2D extent = chooseSwapExtent(stack, swapChainSupport.getCapabilities());
+
+         IntBuffer imageCount = stack.ints(swapChainSupport.getCapabilities().minImageCount() + 1);
+         if (swapChainSupport.getCapabilities().maxImageCount() > 0 && imageCount.get(0) > swapChainSupport.getCapabilities().maxImageCount())
+         {
+            imageCount.put(0, swapChainSupport.getCapabilities().maxImageCount());
+         }
+
+         VkSwapchainCreateInfoKHR createInfo = VkSwapchainCreateInfoKHR.calloc(stack);
+         createInfo.sType(KHRSwapchain.VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR);
+         createInfo.surface(surface);
+         // Image settings
+         createInfo.minImageCount(imageCount.get(0));
+         createInfo.imageFormat(surfaceFormat.format());
+         createInfo.imageColorSpace(surfaceFormat.colorSpace());
+         createInfo.imageExtent(extent);
+         createInfo.imageArrayLayers(1);
+         createInfo.imageUsage(VK10.VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+         QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+         if (!indices.getGraphicsFamily().equals(indices.getPresentFamily()))
+         {
+            createInfo.imageSharingMode(VK10.VK_SHARING_MODE_CONCURRENT);
+            createInfo.pQueueFamilyIndices(stack.ints(indices.getGraphicsFamily(), indices.getPresentFamily()));
+         }
+         else
+         {
+            createInfo.imageSharingMode(VK10.VK_SHARING_MODE_EXCLUSIVE);
+         }
+         createInfo.preTransform(swapChainSupport.getCapabilities().currentTransform());
+         createInfo.compositeAlpha(KHRSurface.VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR);
+         createInfo.presentMode(presentMode);
+         createInfo.clipped(true);
+         createInfo.oldSwapchain(VK10.VK_NULL_HANDLE);
+
+         LongBuffer pSwapChain = stack.longs(VK10.VK_NULL_HANDLE);
+         if (KHRSwapchain.vkCreateSwapchainKHR(device, createInfo, null, pSwapChain) != VK10.VK_SUCCESS)
+         {
+            throw new RuntimeException("Failed to create swap chain");
+         }
+
+         swapChain = pSwapChain.get(0);
+         KHRSwapchain.vkGetSwapchainImagesKHR(device, swapChain, imageCount, null);
+         LongBuffer pSwapchainImages = stack.mallocLong(imageCount.get(0));
+         KHRSwapchain.vkGetSwapchainImagesKHR(device, swapChain, imageCount, pSwapchainImages);
+
+         swapChainImages = new ArrayList<>(imageCount.get(0));
+         for (int i = 0; i < pSwapchainImages.capacity(); i++)
+         {
+            swapChainImages.add(pSwapchainImages.get(i));
+         }
+
+         swapChainImageFormat = surfaceFormat.format();
+         swapChainExtent = VkExtent2D.create().set(extent);
+      }
+   }
+
+   private VkSurfaceFormatKHR chooseSwapSurfaceFormat(VkSurfaceFormatKHR.Buffer availableFormats)
+   {
+      return availableFormats.stream()
+                             .filter(availableFormat -> availableFormat.format() == VK10.VK_FORMAT_B8G8R8_UNORM)
+                             .filter(availableFormat -> availableFormat.colorSpace() == KHRSurface.VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+                             .findAny()
+                             .orElse(availableFormats.get(0));
+   }
+
+   private int chooseSwapPresentMode(IntBuffer availablePresentModes)
+   {
+      for (int i = 0; i < availablePresentModes.capacity(); i++)
+      {
+         if (availablePresentModes.get(i) == KHRSurface.VK_PRESENT_MODE_MAILBOX_KHR)
+         {
+            return availablePresentModes.get(i);
+         }
+      }
+      return KHRSurface.VK_PRESENT_MODE_FIFO_KHR;
+   }
+
+   private VkExtent2D chooseSwapExtent(MemoryStack stack, VkSurfaceCapabilitiesKHR capabilities)
+   {
+      if (capabilities.currentExtent().width() != UINT32_MAX)
+      {
+         return capabilities.currentExtent();
+      }
+
+      VkExtent2D actualExtent = VkExtent2D.malloc(stack).set(WIDTH, HEIGHT);
+      VkExtent2D minExtent = capabilities.minImageExtent();
+      VkExtent2D maxExtent = capabilities.maxImageExtent();
+      actualExtent.width(MathTools.clamp(minExtent.width(), maxExtent.width(), actualExtent.width()));
+      actualExtent.height(MathTools.clamp(minExtent.height(), maxExtent.height(), actualExtent.height()));
+      return actualExtent;
+   }
+
    private boolean isDeviceSuitable(VkPhysicalDevice device)
    {
       QueueFamilyIndices indices = findQueueFamilies(device);
-      return indices.isComplete();
+
+      boolean extensionsSupported = VulkanTools.checkDeviceExtensionSupport(device);
+      boolean swapChainAdequate = false;
+      if (extensionsSupported)
+      {
+         try (MemoryStack stack = MemoryStack.stackPush())
+         {
+            SwapChainSupportDetails swapChainSupport = VulkanTools.querySwapChainSupport(device, stack, surface);
+            swapChainAdequate = swapChainSupport.getFormats().hasRemaining() && swapChainSupport.getPresentModes().hasRemaining();
+         }
+      }
+      return indices.isComplete() && extensionsSupported && swapChainAdequate;
    }
 
    private QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device)
@@ -278,52 +397,6 @@ public class HelloVulkan
          }
 
          return indices;
-      }
-   }
-
-   private void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo)
-   {
-      debugCreateInfo.sType(EXTDebugUtils.VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT);
-      debugCreateInfo.messageSeverity(EXTDebugUtils.VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
-                                    | EXTDebugUtils.VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
-                                    | EXTDebugUtils.VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT);
-      debugCreateInfo.messageType(EXTDebugUtils.VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT
-                                | EXTDebugUtils.VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT
-                                | EXTDebugUtils.VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT);
-      debugCreateInfo.pfnUserCallback(VulkanTools::debugCallback);
-   }
-
-   private PointerBuffer validationLayersAsPointerBuffer(MemoryStack stack)
-   {
-      PointerBuffer buffer = stack.mallocPointer(VulkanTools.VALIDATION_LAYERS.size());
-      VulkanTools.VALIDATION_LAYERS.stream().map(stack::UTF8).forEach(buffer::put);
-      return buffer.rewind();
-   }
-
-   private PointerBuffer getRequiredExtensions(MemoryStack stack)
-   {
-      PointerBuffer glfwExtensions = GLFWVulkan.glfwGetRequiredInstanceExtensions();
-      if (VulkanTools.ENABLE_VALIDATION_LAYERS)
-      {
-         PointerBuffer extensions = stack.mallocPointer(glfwExtensions.capacity() + 1);
-         extensions.put(glfwExtensions);
-         extensions.put(stack.UTF8(EXTDebugUtils.VK_EXT_DEBUG_UTILS_EXTENSION_NAME));
-         // Rewind the buffer before returning it to reset its position back to 0
-         return extensions.rewind();
-      }
-      return glfwExtensions;
-   }
-
-   private boolean checkValidationLayerSupport()
-   {
-      try (MemoryStack stack = MemoryStack.stackPush())
-      {
-         IntBuffer layerCount = stack.ints(0);
-         VK10.vkEnumerateInstanceLayerProperties(layerCount, null);
-         VkLayerProperties.Buffer availableLayers = VkLayerProperties.malloc(layerCount.get(0), stack);
-         VK10.vkEnumerateInstanceLayerProperties(layerCount, availableLayers);
-         Set<String> availableLayerNames = availableLayers.stream().map(VkLayerProperties::layerNameString).collect(Collectors.toSet());
-         return availableLayerNames.containsAll(VulkanTools.VALIDATION_LAYERS);
       }
    }
 

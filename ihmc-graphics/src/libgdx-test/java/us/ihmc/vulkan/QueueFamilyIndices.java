@@ -37,4 +37,9 @@ public class QueueFamilyIndices
    {
       return IntStream.of(graphicsFamily, presentFamily).distinct().toArray();
    }
+
+   public int[] array()
+   {
+      return new int[] {graphicsFamily, presentFamily};
+   }
 }
