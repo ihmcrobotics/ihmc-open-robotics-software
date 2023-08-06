@@ -1,5 +1,7 @@
 package us.ihmc.rdx.perception;
 
+import imgui.ImGui;
+import imgui.type.ImFloat;
 import us.ihmc.avatar.colorVision.DualBlackflyComms;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.comms.PerceptionComms;
@@ -30,6 +32,8 @@ public class RDXRemotePerceptionUI
    private final ConcaveHullFactoryParameters sphericalConcaveHullFactoryParameters = new ConcaveHullFactoryParameters("ForSphericalRapidRegions");
    private final PlanarRegionMappingParameters sphericalRegionMappingParameters = new PlanarRegionMappingParameters("Spherical");
 
+   private ImFloat thresholdHeight = new ImFloat(1.0f);
+
    private IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
 
    private final ImGuiRemoteROS2StoredPropertySetGroup remotePropertySets;
@@ -59,7 +63,13 @@ public class RDXRemotePerceptionUI
 
    public void renderImGuiWidgets()
    {
+      ImGui.sliderFloat("Threshold Height", thresholdHeight.getData(), 0.0f, 2.0f);
       remotePropertySets.renderImGuiWidgets();
+   }
+
+   public float getThresholdHeight()
+   {
+      return thresholdHeight.get();
    }
 
    public void destroy()

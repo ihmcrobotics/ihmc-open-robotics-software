@@ -37,14 +37,14 @@ public class RDXHumanoidPerceptionUI
       rapidRegionsUI.render();
    }
 
-   public void initializePerspectiveRegionsVisualizer(ROS2Node ros2Node, RDXGlobalVisualizersPanel globalVisualizersUI, boolean render)
+   public void initializeMapRegionsVisualizer(ROS2Node ros2Node, RDXGlobalVisualizersPanel globalVisualizersUI, boolean render)
    {
       rapidRegionsMapVisualizer = new RDXROS2PlanarRegionsVisualizer("SLAM Rapid Regions", ros2Node, PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS);
       rapidRegionsMapVisualizer.setActive(render);
       globalVisualizersUI.addVisualizer(rapidRegionsMapVisualizer);
    }
 
-   public void initializeMapRegionsVisualizer(ROS2Node ros2Node, RDXGlobalVisualizersPanel globalVisualizersUI, boolean render)
+   public void initializePerspectiveRegionsVisualizer(ROS2Node ros2Node, RDXGlobalVisualizersPanel globalVisualizersUI, boolean render)
    {
       rapidRegionsVisualizer = new RDXROS2FramePlanarRegionsVisualizer("Rapid Regions", ros2Node, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS);
       rapidRegionsVisualizer.setActive(render);
@@ -72,6 +72,11 @@ public class RDXHumanoidPerceptionUI
    public RDXActiveMappingUI getActiveMappingUI()
    {
       return activeMappingUI;
+   }
+
+   public float getThresholdHeight()
+   {
+      return remotePerceptionUI.getThresholdHeight();
    }
 
    public void destroy()
