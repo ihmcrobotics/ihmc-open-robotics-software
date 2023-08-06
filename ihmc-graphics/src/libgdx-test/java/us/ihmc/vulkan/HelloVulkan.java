@@ -33,6 +33,7 @@ public class HelloVulkan
    private VkQueue presentQueue;
    private long swapChain;
    private List<Long> swapChainImages;
+   private List<Long> swapChainImageViews;
    private int swapChainImageFormat;
    private VkExtent2D swapChainExtent;
 
@@ -71,6 +72,7 @@ public class HelloVulkan
       pickPhysicalDevice();
       createLogicalDevice();
       createSwapChain();
+      createImageViews();
    }
 
    private void mainLoop()
@@ -83,6 +85,7 @@ public class HelloVulkan
 
    private void cleanup()
    {
+      swapChainImageViews.forEach(imageView -> VK10.vkDestroyImageView(device, imageView, null));
       KHRSwapchain.vkDestroySwapchainKHR(device, swapChain, null);
 
       VK10.vkDestroyDevice(device, null);
@@ -311,6 +314,38 @@ public class HelloVulkan
 
          swapChainImageFormat = surfaceFormat.format();
          swapChainExtent = VkExtent2D.create().set(extent);
+      }
+   }
+
+   private void createImageViews()
+   {
+      swapChainImageViews = new ArrayList<>(swapChainImages.size());
+      try (MemoryStack stack = MemoryStack.stackPush())
+      {
+         LongBuffer pImageView = stack.mallocLong(1);
+
+         for (long swapChainImage : swapChainImages)
+         {
+            VkImageViewCreateInfo createInfo = VkImageViewCreateInfo.calloc(stack);
+            createInfo.sType(VK10.VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO);
+            createInfo.image(swapChainImage);
+            createInfo.viewType(VK10.VK_IMAGE_VIEW_TYPE_2D);
+            createInfo.format(swapChainImageFormat);
+            createInfo.components().r(VK10.VK_COMPONENT_SWIZZLE_IDENTITY);
+            createInfo.components().g(VK10.VK_COMPONENT_SWIZZLE_IDENTITY);
+            createInfo.components().b(VK10.VK_COMPONENT_SWIZZLE_IDENTITY);
+            createInfo.components().a(VK10.VK_COMPONENT_SWIZZLE_IDENTITY);
+            createInfo.subresourceRange().aspectMask(VK10.VK_IMAGE_ASPECT_COLOR_BIT);
+            createInfo.subresourceRange().baseMipLevel(0);
+            createInfo.subresourceRange().levelCount(1);
+            createInfo.subresourceRange().baseArrayLayer(0);
+            createInfo.subresourceRange().layerCount(1);
+
+            if (VK10.vkCreateImageView(device, createInfo, null, pImageView) != VK10.VK_SUCCESS)
+               throw new RuntimeException("Failed to create image views");
+
+            swapChainImageViews.add(pImageView.get(0));
+         }
       }
    }
 
