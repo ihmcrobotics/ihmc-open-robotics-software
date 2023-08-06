@@ -397,8 +397,11 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       messasgeToPack.setTransferDuration(footstepTiming.getTransferTime());
 
       messasgeToPack.getPredictedContactPoints2d().clear();
-      for (int i = 0; i < footstep.getPredictedContactPoints().size(); i++)
-         messasgeToPack.getPredictedContactPoints2d().add().set(footstep.getPredictedContactPoints().get(i));
+      if (footstep.getPredictedContactPoints() != null)
+      {
+         for (int i = 0; i < footstep.getPredictedContactPoints().size(); i++)
+            messasgeToPack.getPredictedContactPoints2d().add().set(footstep.getPredictedContactPoints().get(i));
+      }
 
       stepConstraints.getAsMessage(messasgeToPack.getStepConstraints());
    }

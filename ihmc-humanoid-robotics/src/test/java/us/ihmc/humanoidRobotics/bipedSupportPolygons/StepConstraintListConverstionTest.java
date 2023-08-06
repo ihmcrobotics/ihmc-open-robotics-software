@@ -8,7 +8,6 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StepConstraintRegionCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StepConstraintsListCommand;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 import java.util.ArrayList;
@@ -16,7 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import static org.jcodec.common.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class StepConstraintListConverstionTest
 {
@@ -121,7 +120,7 @@ public class StepConstraintListConverstionTest
    {
       EuclidCoreTestTools.assertGeometricallyEquals(failureMessage, expected.getNormal(), actual.getRegionNormal(), epsilon);
       EuclidCoreTestTools.assertGeometricallyEquals(failureMessage, expected.getPoint(), actual.getRegionOrigin(), epsilon);
-      assertEquals(failureMessage, expected.getConcaveHullSize(), actual.getConcaveHullSize());
+      assertEquals(expected.getConcaveHullSize(), actual.getConcaveHullSize(), failureMessage);
       for (int i = 0; i < expected.getConcaveHullSize(); i++)
       {
          EuclidCoreTestTools.assertEquals(failureMessage, expected.getConcaveHullVertex(i), new Point2D(actual.getVertexBuffer().get(i)), epsilon);
@@ -136,7 +135,7 @@ public class StepConstraintListConverstionTest
       EuclidCoreTestTools.assertGeometricallyEquals(failureMessage, expected.getTransformToWorld(), actual.getTransformToWorld(), epsilon);
       EuclidCoreTestTools.assertGeometricallyEquals(failureMessage, expected.getTransformToLocal(), actual.getTransformFromWorld(), epsilon);
 
-      assertEquals(failureMessage, expected.getConcaveHullSize(), actual.getConcaveHullVertices().size());
+      assertEquals(expected.getConcaveHullSize(), actual.getConcaveHullVertices().size(), failureMessage);
       for (int i = 0; i < expected.getConcaveHullSize(); i++)
       {
          EuclidCoreTestTools.assertEquals(failureMessage, expected.getConcaveHullVertexInRegionFrame(i), actual.getConcaveHullVertices().get(i), epsilon);
@@ -159,7 +158,7 @@ public class StepConstraintListConverstionTest
       EuclidCoreTestTools.assertGeometricallyEquals(failureMessage, expected.getTransformToWorld(), actual.getTransformToWorld(), epsilon);
       EuclidCoreTestTools.assertGeometricallyEquals(failureMessage, expected.getTransformToLocal(), actual.getTransformFromWorld(), epsilon);
 
-      assertEquals(failureMessage, expected.getConcaveHullSize(), actual.getConcaveHullVertices().size());
+      assertEquals(expected.getConcaveHullSize(), actual.getConcaveHullVertices().size(), failureMessage);
       for (int i = 0; i < expected.getConcaveHullSize(); i++)
       {
          EuclidCoreTestTools.assertEquals(failureMessage, expected.getConcaveHullVertex(i), actual.getConcaveHullVertices().get(i), epsilon);
@@ -181,7 +180,7 @@ public class StepConstraintListConverstionTest
 
       EuclidCoreTestTools.assertEquals(failureMessage, expected.getTransformToWorld(), actual.getTransformToWorld(), epsilon);
       EuclidCoreTestTools.assertEquals(failureMessage, expected.getTransformToLocal(), actual.getTransformToLocal(), epsilon);
-      assertEquals(failureMessage, expected.getConcaveHullSize(), actual.getConcaveHullSize());
+      assertEquals(expected.getConcaveHullSize(), actual.getConcaveHullSize(), failureMessage);
       for (int i = 0; i < expected.getConcaveHullSize(); i++)
       {
          EuclidCoreTestTools.assertEquals(failureMessage, expected.getConcaveHullVertex(i), actual.getConcaveHullVertexInRegionFrame(i), epsilon);
@@ -201,12 +200,12 @@ public class StepConstraintListConverstionTest
 
       EuclidCoreTestTools.assertEquals(failureMessage, expected.getTransformToWorld(), actual.getTransformToWorld(), epsilon);
       EuclidCoreTestTools.assertEquals(failureMessage, expected.getTransformToLocal(), actual.getTransformToLocal(), epsilon);
-      assertEquals(failureMessage, expected.getConcaveHullSize(), actual.getConcaveHullSize());
+      assertEquals(expected.getConcaveHullSize(), actual.getConcaveHullSize(), failureMessage);
       for (int i = 0; i < expected.getConcaveHullSize(); i++)
       {
          EuclidCoreTestTools.assertEquals(failureMessage, expected.getConcaveHullVertex(i), actual.getConcaveHullVertex(i), epsilon);
       }
-      assertEquals(failureMessage, expected.getNumberOfConvexPolygons(), actual.getNumberOfConvexPolygons());
+      assertEquals(expected.getNumberOfConvexPolygons(), actual.getNumberOfConvexPolygons(), failureMessage);
       for (int i = 0; i < expected.getNumberOfConvexPolygons(); i++)
       {
          EuclidCoreTestTools.assertEquals(failureMessage, actual.getConvexPolygon(i), expected.getConvexPolygon(i), epsilon);
