@@ -18,6 +18,11 @@ public interface PerceptionConfigurationParametersBasics extends PerceptionConfi
       set(PerceptionConfigurationParameters.ousterThrottlerFrequency, ousterThrottlerFrequency);
    }
 
+   default void setOccupancyGridResolution(int occupancyGridResolution)
+   {
+      set(PerceptionConfigurationParameters.occupancyGridResolution, occupancyGridResolution);
+   }
+
    default void setRapidRegionsEnabled(boolean rapidRegionsEnabled)
    {
       set(PerceptionConfigurationParameters.rapidRegionsEnabled, rapidRegionsEnabled);

@@ -25,6 +25,8 @@ public class RDXHumanoidPerceptionUI
       this.rapidRegionsUI = new RDXRapidRegionsUI();
       this.rapidRegionsUI.create(humanoidPerception.getRapidRegionsExtractor());
       this.activeMappingUI = new RDXActiveMappingUI("Active Mapping", ros2Helper);
+
+      this.humanoidPerception.setPerceptionConfigurationParameters(remotePerceptionUI.getPerceptionConfigurationParameters());
    }
 
    public void renderImGuiWidgets()
