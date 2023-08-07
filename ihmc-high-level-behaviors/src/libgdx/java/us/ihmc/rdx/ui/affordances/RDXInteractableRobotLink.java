@@ -6,7 +6,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.ImGui;
-import org.lwjgl.openvr.InputAnalogActionData;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.FrameBox3D;
@@ -16,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.Run;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -59,7 +59,8 @@ public class RDXInteractableRobotLink
    private boolean isVRHovering;
    private Runnable openCommands;
    private Runnable closeCommands;
-   private Runnable armExecutable;
+   private Runnable doorAvoidenceExecutable;
+   private Runnable homePositionExecutable;
    private RDXModelInstance wordsBoxMesh;
    private final FrameBox3D selectionCollisionBox = new FrameBox3D();
    private final SideDependentList<Point3D> boxOffset = new SideDependentList<>();
@@ -174,7 +175,7 @@ public class RDXInteractableRobotLink
                      switch (controller.getJoystickSelection())
                      {
                         case LEFT_RING:
-                           armExecutable.run();
+                           doorAvoidenceExecutable.run();
                            break;
                         case RIGHT_RING:
                            changePage(pageNumber);
@@ -196,13 +197,13 @@ public class RDXInteractableRobotLink
                }
                else if (pageNumber == 1)
                {
-                  controller.controlOfRadialMenu("Open Hand", "Close Hand", "Change Page", "Door Avoidance");
+                  controller.controlOfRadialMenu("Open Hand", "Close Hand", "Change Page", "Home Positon");
                   if (joystickButton.bChanged() && joystickButton.bState())
                   {
                      switch (controller.getJoystickSelection())
                      {
                         case LEFT_RING:
-                           armExecutable.run();
+                           homePositionExecutable.run();
                            break;
                         case RIGHT_RING:
                            changePage(pageNumber);
@@ -405,9 +406,14 @@ public class RDXInteractableRobotLink
       this.closeCommands = closeCommands;
    }
 
-   public void setArmExecutable(Runnable armExecutable)
+   public void setDoorAvoidenceExecutable(Runnable doorAvoidenceExecutable)
    {
-      this.armExecutable = armExecutable;
+      this.doorAvoidenceExecutable = doorAvoidenceExecutable;
+   }
+
+   public void setHomePositionExecutable(Runnable homePositionExecutable)
+   {
+      this.homePositionExecutable = homePositionExecutable;
    }
 
    private void updateHoverBoxFramePose(RobotSide side)
