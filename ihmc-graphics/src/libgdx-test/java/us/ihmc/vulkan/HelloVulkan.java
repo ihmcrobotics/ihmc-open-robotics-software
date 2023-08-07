@@ -9,6 +9,7 @@ import org.lwjgl.vulkan.*;
 import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
 
+import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.util.ArrayList;
@@ -73,6 +74,7 @@ public class HelloVulkan
       createLogicalDevice();
       createSwapChain();
       createImageViews();
+      createGraphicsPipeline();
    }
 
    private void mainLoop()
@@ -346,6 +348,59 @@ public class HelloVulkan
 
             swapChainImageViews.add(pImageView.get(0));
          }
+      }
+   }
+
+   private void createGraphicsPipeline()
+   {
+      try (MemoryStack stack = MemoryStack.stackPush())
+      {
+         // Let's compile the GLSL shaders into SPIR-V at runtime using the shaderc library
+         // Check ShaderSPIRVUtils class to see how it can be done
+         ShaderSPIRVUtils.SPIRV vertShaderSPIRV
+               = ShaderSPIRVUtils.compileShaderFile("shaders/09_shader_base.vert", ShaderSPIRVUtils.ShaderKind.VERTEX_SHADER);
+         ShaderSPIRVUtils.SPIRV fragShaderSPIRV
+               = ShaderSPIRVUtils.compileShaderFile("shaders/09_shader_base.frag", ShaderSPIRVUtils.ShaderKind.FRAGMENT_SHADER);
+         long vertShaderModule = createShaderModule(vertShaderSPIRV.bytecode());
+         long fragShaderModule = createShaderModule(fragShaderSPIRV.bytecode());
+
+         ByteBuffer entryPoint = stack.UTF8("main");
+         VkPipelineShaderStageCreateInfo.Buffer shaderStages = VkPipelineShaderStageCreateInfo.calloc(2, stack);
+
+         VkPipelineShaderStageCreateInfo vertShaderStageInfo = shaderStages.get(0);
+         vertShaderStageInfo.sType(VK10.VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO);
+         vertShaderStageInfo.stage(VK10.VK_SHADER_STAGE_VERTEX_BIT);
+         vertShaderStageInfo.module(vertShaderModule);
+         vertShaderStageInfo.pName(entryPoint);
+
+         VkPipelineShaderStageCreateInfo fragShaderStageInfo = shaderStages.get(1);
+         fragShaderStageInfo.sType(VK10.VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO);
+         fragShaderStageInfo.stage(VK10.VK_SHADER_STAGE_FRAGMENT_BIT);
+         fragShaderStageInfo.module(fragShaderModule);
+         fragShaderStageInfo.pName(entryPoint);
+
+         VK10.vkDestroyShaderModule(device, vertShaderModule, null);
+         VK10.vkDestroyShaderModule(device, fragShaderModule, null);
+
+         vertShaderSPIRV.free();
+         fragShaderSPIRV.free();
+      }
+   }
+
+   private long createShaderModule(ByteBuffer spirvCode)
+   {
+      try (MemoryStack stack = MemoryStack.stackPush())
+      {
+         VkShaderModuleCreateInfo createInfo = VkShaderModuleCreateInfo.calloc(stack);
+         createInfo.sType(VK10.VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO);
+         createInfo.pCode(spirvCode);
+
+         LongBuffer pShaderModule = stack.mallocLong(1);
+         if (VK10.vkCreateShaderModule(device, createInfo, null, pShaderModule) != VK10.VK_SUCCESS)
+         {
+            throw new RuntimeException("Failed to create shader module");
+         }
+         return pShaderModule.get(0);
       }
    }
 

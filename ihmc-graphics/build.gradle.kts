@@ -95,4 +95,5 @@ libgdxTestDependencies {
    api(ihmc.sourceSetProject("libgdx"))
 
    api("org.lwjgl:lwjgl-vulkan:$lwjglVersion")
+   api("org.lwjgl:lwjgl-shaderc:$lwjglVersion")
 }
