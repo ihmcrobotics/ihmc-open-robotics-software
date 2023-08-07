@@ -288,7 +288,7 @@ public class RDXBuildingConstructor extends ImGuiPanel
          if (ImGui.button("Load Building"))
          {
             LogTools.info("Loading building from JSON: {}", "building.json");
-            building = loadFromJSON("building.json");
+            loadFromJSON("building.json");
             LogTools.info("Building Found with {} Corners", building.getCorners().size());
          }
 
@@ -381,9 +381,9 @@ public class RDXBuildingConstructor extends ImGuiPanel
          });
    }
 
-   public RDXBuildingObject loadFromJSON(String fileNameToLoad)
+   public void loadFromJSON(String fileNameToLoad)
    {
-      RDXBuildingObject building = new RDXBuildingObject();
+      building = new RDXBuildingObject();
       JSONFileTools.load(new WorkspaceResourceFile(environmentFilesDirectory, fileNameToLoad),
        rootNode ->
        {
@@ -399,6 +399,5 @@ public class RDXBuildingConstructor extends ImGuiPanel
        });
 
       building.construct();
-      return building;
    }
 }
