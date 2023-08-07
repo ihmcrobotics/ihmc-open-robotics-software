@@ -38,6 +38,16 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
             * Break frequency filter value for nodes that are alpha filtered
             */
    public float break_frequency_;
+   /**
+            * Distance to robot to disable tracking.
+            * Used for automatically disabling tracking for static relative objects.
+            */
+   public float distance_to_disable_tracking_;
+   /**
+            * Current distance to robot.
+            * Used for automatically disabling tracking for static relative objects.
+            */
+   public float current_distance_to_robot_;
 
    public DetectableSceneNodeMessage()
    {
@@ -64,6 +74,10 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       track_detected_pose_ = other.track_detected_pose_;
 
       break_frequency_ = other.break_frequency_;
+
+      distance_to_disable_tracking_ = other.distance_to_disable_tracking_;
+
+      current_distance_to_robot_ = other.current_distance_to_robot_;
 
    }
 
@@ -156,6 +170,40 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       return break_frequency_;
    }
 
+   /**
+            * Distance to robot to disable tracking.
+            * Used for automatically disabling tracking for static relative objects.
+            */
+   public void setDistanceToDisableTracking(float distance_to_disable_tracking)
+   {
+      distance_to_disable_tracking_ = distance_to_disable_tracking;
+   }
+   /**
+            * Distance to robot to disable tracking.
+            * Used for automatically disabling tracking for static relative objects.
+            */
+   public float getDistanceToDisableTracking()
+   {
+      return distance_to_disable_tracking_;
+   }
+
+   /**
+            * Current distance to robot.
+            * Used for automatically disabling tracking for static relative objects.
+            */
+   public void setCurrentDistanceToRobot(float current_distance_to_robot)
+   {
+      current_distance_to_robot_ = current_distance_to_robot;
+   }
+   /**
+            * Current distance to robot.
+            * Used for automatically disabling tracking for static relative objects.
+            */
+   public float getCurrentDistanceToRobot()
+   {
+      return current_distance_to_robot_;
+   }
+
 
    public static Supplier<DetectableSceneNodeMessagePubSubType> getPubSubType()
    {
@@ -184,6 +232,10 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.break_frequency_, other.break_frequency_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_to_disable_tracking_, other.distance_to_disable_tracking_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_distance_to_robot_, other.current_distance_to_robot_, epsilon)) return false;
+
 
       return true;
    }
@@ -207,6 +259,10 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
 
       if(this.break_frequency_ != otherMyClass.break_frequency_) return false;
 
+      if(this.distance_to_disable_tracking_ != otherMyClass.distance_to_disable_tracking_) return false;
+
+      if(this.current_distance_to_robot_ != otherMyClass.current_distance_to_robot_) return false;
+
 
       return true;
    }
@@ -228,7 +284,11 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       builder.append("track_detected_pose=");
       builder.append(this.track_detected_pose_);      builder.append(", ");
       builder.append("break_frequency=");
-      builder.append(this.break_frequency_);
+      builder.append(this.break_frequency_);      builder.append(", ");
+      builder.append("distance_to_disable_tracking=");
+      builder.append(this.distance_to_disable_tracking_);      builder.append(", ");
+      builder.append("current_distance_to_robot=");
+      builder.append(this.current_distance_to_robot_);
       builder.append("}");
       return builder.toString();
    }
