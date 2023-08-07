@@ -1,9 +1,6 @@
 package us.ihmc.avatar.controllerAPI;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepQueueStatusMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,12 +11,14 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -34,6 +33,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -93,7 +93,9 @@ public abstract class EndToEndFootstepQueueStatusMessageTest implements MultiRob
          frameLocation.changeFrame(ReferenceFrame.getWorldFrame());
          FrameQuaternion frameOrientation = new FrameQuaternion(midFeetFrame);
          frameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+         int id = RandomNumbers.nextInt(random, 1, 5000);
          FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(stepSide, frameLocation, frameOrientation);
+         footstep.setSequenceId(id);
 
          // between 0.75 and 1.25 times the nominal time:
          double swingTime = (1.0 + 0.5 * (random.nextDouble() + 0.5)) * nominalSwingTime;
@@ -158,12 +160,28 @@ public abstract class EndToEndFootstepQueueStatusMessageTest implements MultiRob
          assertEquals(controllerSideQueueSize, currentFootstepQueue.size(), "The actual footstep queue is wrong.");
          assertEquals(controllerSideQueueSize, currentFootstepQueueStatus.getQueuedFootstepList().size());
 
+         for (int i =- 0; i < currentFootstepQueue.size(); i++)
+         {
+            FootstepDataMessage expectedStep = currentFootstepQueue.get(i);
+            QueuedFootstepStatusMessage queuedStep = currentFootstepQueueStatus.getQueuedFootstepList().get(i);
+            assertFootstepsEqual(expectedStep, queuedStep, 1e-5);
+         }
+
          simTime += simDt;
       }
 
 
       assertTrue(simulationTestHelper.simulateNow(0.25));
       assertEquals(0, (int) numberOfStepsInController.getValueAsLongBits());
+   }
+
+   private static  void assertFootstepsEqual(FootstepDataMessage expected, QueuedFootstepStatusMessage queuedStep, double epsilon)
+   {
+      assertEquals(expected.getSequenceId(), queuedStep.getSequenceId());
+      EuclidCoreTestTools.assertEquals(expected.getLocation(), queuedStep.getLocation(), epsilon);
+      EuclidCoreTestTools.assertEquals(expected.getOrientation(), queuedStep.getOrientation(), epsilon);
+      assertEquals(expected.getSwingDuration(), queuedStep.getSwingDuration(), epsilon);
+      assertEquals(expected.getTransferDuration(), queuedStep.getTransferDuration(), epsilon);
    }
 
 

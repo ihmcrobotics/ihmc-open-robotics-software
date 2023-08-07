@@ -378,7 +378,6 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       footstepQueueStatusMessage.setTimeInSupportSequence(timeInSupportSequence);
       footstepQueueStatusMessage.setIsFirstStepInSwing(isFirstSTepCurrentlyInSwing);
 
-      footstepStatus.getUniqueId()
       footstepQueueStatusMessage.getQueuedFootstepList().clear();
       // This foot is currently being taken. Add it to the front of the queue.
       if (footstepBeingExecuted != null)
