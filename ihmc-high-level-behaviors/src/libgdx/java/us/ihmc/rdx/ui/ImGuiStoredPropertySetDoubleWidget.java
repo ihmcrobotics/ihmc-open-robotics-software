@@ -193,7 +193,8 @@ public class ImGuiStoredPropertySetDoubleWidget implements ImGuiStoredPropertySe
 
    private void clamp(ImDouble imDouble)
    {
-      imDouble.set(MathTools.clamp(imDouble.get(), min, max));
+      if (!Double.isNaN(min) && !Double.isNaN(max))
+         imDouble.set(MathTools.clamp(imDouble.get(), min, max));
    }
 
    private void fancyBefore()
