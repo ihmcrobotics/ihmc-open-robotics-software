@@ -58,7 +58,7 @@ public class RDXVRTeleporter
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
      {
         // Only enable teleportation when nothing is pick selected
-        if (controller.getSelectedPick() == null)
+        if (controller.getSelectedPick() == null && !controller.anythingElseBeingDragged(this))
         {
            controller.setBButtonText("Teleport");
            InputDigitalActionData bButton = controller.getBButtonActionData();

@@ -359,7 +359,7 @@ public class RDXLocomotionManager
          startStanceSide = RDXFootstepPlanning.InitialStanceSide.RIGHT;
       }
 
-      if (ImGui.collapsingHeader(labels.get("Footstep Planning Options"), collapsedHeader))
+      if (ImGui.collapsingHeader(labels.get("Footstep Planning Options"), collapsedHeader, ImGuiTreeNodeFlags.DefaultOpen))
       {
          ImGui.indent();
          assumeFlatGroundCheckbox.renderImGuiWidget();

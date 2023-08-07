@@ -456,6 +456,21 @@ public class RDXVRController extends RDXVRTrackedDevice
    }
 
    /**
+    * This is used to prevent UI components from responding to events or
+    * getting initiated when other things are being interacted with already.
+    * @param callersObject Pass your object in so we can exclude results that are already the caller's
+    *                     object being dragged.
+    * @return If anything else in the scene is being dragged.
+    */
+   public boolean anythingElseBeingDragged(Object callersObject)
+   {
+      boolean anythingElseBeingDragged = false;
+      anythingElseBeingDragged |= gripDragData.isDragging() && gripDragData.getObjectBeingDragged() != callersObject;
+      anythingElseBeingDragged |= triggerDragData.isDragging() && triggerDragData.getObjectBeingDragged() != callersObject;
+      return anythingElseBeingDragged;
+   }
+
+   /**
     * Use to declare exclusive access to this controller.
     * This is useful to prevent unwanted actions from happening
     * when using the controller for specific functions.
