@@ -40,10 +40,10 @@ public class ValkyrieUpperBodyStateEstimator
       imuOutputs = processedSensorOutputMap.getIMUOutputs();
       sensorReader.initialize();
 
-      if (imuOutputs.size() != EXPECTED_NUMBER_OF_IMUS)
-      {
-         throw new RuntimeException("Expecting " + EXPECTED_NUMBER_OF_IMUS + " IMU's, but there are " + imuOutputs.size());
-      }
+//      if (imuOutputs.size() != EXPECTED_NUMBER_OF_IMUS)
+//      {
+//         throw new RuntimeException("Expecting " + EXPECTED_NUMBER_OF_IMUS + " IMU's, but there are " + imuOutputs.size());
+//      }
    }
 
    public void update()

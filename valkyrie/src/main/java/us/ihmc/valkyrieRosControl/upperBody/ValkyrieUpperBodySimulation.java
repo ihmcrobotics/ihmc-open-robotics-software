@@ -1,21 +1,31 @@
 package us.ihmc.valkyrieRosControl.upperBody;
 
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -35,6 +45,7 @@ import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimOneDoFJointBa
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
 import us.ihmc.sensorProcessing.sensorProcessors.FloatingJointStateReadOnly;
+import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
@@ -44,6 +55,8 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ValkyrieUpperBodySimulation
@@ -105,7 +118,7 @@ public class ValkyrieUpperBodySimulation
          elbowPitch.get(robotSide).set(robotSide.negateIfRightSide(-1.3));
       }
 
-      simulation = new SimulationConstructionSet2(robotModel.getSimpleRobotName() + "MultiContactSimulation");
+      simulation = new SimulationConstructionSet2(robotModel.getSimpleRobotName() + "ValkyrieUpperBody");
       simulation.changeBufferSize(bufferSize);
       simulation.addRegistry(registry);
 
@@ -139,32 +152,21 @@ public class ValkyrieUpperBodySimulation
             if (submitChestCommand.getValue())
             {
                submitChestCommand.set(false);
-               ChestTrajectoryCommand chestTrajectoryCommand = new ChestTrajectoryCommand();
-               SO3TrajectoryControllerCommand chestTrajectory = chestTrajectoryCommand.getSO3Trajectory();
-               chestTrajectory.setTrajectoryFrame(ReferenceFrame.getWorldFrame());
-               chestTrajectory.addTrajectoryPoint(3.0, new Quaternion(chestYaw.getDoubleValue(), chestPitch.getDoubleValue(), chestRoll.getDoubleValue()), new Vector3D());
-               commandInputManager.submitCommand(chestTrajectoryCommand);
+               ChestTrajectoryMessage chestTrajectory = HumanoidMessageTools.createChestTrajectoryMessage(3.0, new Quaternion(chestYaw.getDoubleValue(), chestPitch.getDoubleValue(), chestRoll.getDoubleValue()), ReferenceFrame.getWorldFrame());
+               commandInputManager.submitMessage(chestTrajectory);
             }
             for (RobotSide robotSide : RobotSide.values)
             {
                if (submitArmCommand.get(robotSide).getValue())
                {
                   submitArmCommand.get(robotSide).set(false);
-                  ArmTrajectoryCommand armTrajectoryCommand = new ArmTrajectoryCommand();
-                  armTrajectoryCommand.setRobotSide(robotSide);
-                  RecyclingArrayList<OneDoFJointTrajectoryCommand> trajectoryPointLists = armTrajectoryCommand.getJointspaceTrajectory().getTrajectoryPointLists();
 
-                  OneDoFJointTrajectoryCommand shoulderPitchTrajectory = trajectoryPointLists.add();
-                  OneDoFJointTrajectoryCommand shoulderRollTrajectory = trajectoryPointLists.add();
-                  OneDoFJointTrajectoryCommand shoulderYawTrajectory = trajectoryPointLists.add();
-                  OneDoFJointTrajectoryCommand elbowPitchTrajectory = trajectoryPointLists.add();
-
-                  shoulderPitchTrajectory.addTrajectoryPoint(3.0, shoulderPitch.get(robotSide).getValue(), 0.0);
-                  shoulderRollTrajectory.addTrajectoryPoint(3.0, shoulderRoll.get(robotSide).getValue(), 0.0);
-                  shoulderYawTrajectory.addTrajectoryPoint(3.0, shoulderYaw.get(robotSide).getValue(), 0.0);
-                  elbowPitchTrajectory.addTrajectoryPoint(3.0, elbowPitch.get(robotSide).getValue(), 0.0);
-
-                  commandInputManager.submitCommand(armTrajectoryCommand);
+                  double[] desiredJointPositions = {shoulderPitch.get(robotSide).getValue(),
+                                                    shoulderRoll.get(robotSide).getValue(),
+                                                    shoulderYaw.get(robotSide).getValue(),
+                                                    elbowPitch.get(robotSide).getValue()};
+                  ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, 3.0, desiredJointPositions);
+                  commandInputManager.submitMessage(armTrajectoryMessage);
                }
             }
 
@@ -210,6 +212,7 @@ public class ValkyrieUpperBodySimulation
       });
 
       new DefaultParameterReader().readParametersInRegistry(manipulationState.getYoRegistry());
+      setupROSComms();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -222,9 +225,6 @@ public class ValkyrieUpperBodySimulation
       simulation.setCameraFocusPosition(0.5, 0.0, 0.7);
       simulation.start(true, false, false);
    }
-
-//   abstract void initialize();
-//   abstract void doControl();
 
    public DRCRobotModel getRobotModel()
    {
@@ -244,6 +244,20 @@ public class ValkyrieUpperBodySimulation
    public SimulationSessionControls getSessionControls()
    {
       return sessionControls;
+   }
+
+   private void setupROSComms()
+   {
+      ros2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "valkyrie_upper_body_simulation");
+      robotConfigurationDataPublisher = ValkyrieUpperBodyController.createRobotConfigurationDataPublisher(robotModel,
+                                                                                                          commandInputManager,
+                                                                                                          statusMessageOutputManager,
+                                                                                                          ros2Node,
+                                                                                                          controlledOneDoFJoints,
+                                                                                                          System::currentTimeMillis,
+                                                                                                          System::currentTimeMillis);
+
+      ros2Node.spin();
    }
 
    public static void main(String[] args)
