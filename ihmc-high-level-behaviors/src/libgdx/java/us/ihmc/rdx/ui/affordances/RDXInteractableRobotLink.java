@@ -66,6 +66,7 @@ public class RDXInteractableRobotLink
    private ModifiableReferenceFrame wordsBoxReferenceFrame;
    private final FramePose3D wordsBoxFramePose = new FramePose3D();
    private RDXVRJoystickSelection pastJoystickSelection;
+   private int pageNumber;
 
    /** For when the graphic, the link, and control frame are all the same. */
    public void create(RDXRobotCollidable robotCollidable, ReferenceFrame syncedControlFrame, String graphicFileName, RDX3DPanel panel3D)
@@ -154,7 +155,7 @@ public class RDXInteractableRobotLink
             if (isHovering || gripDragData.getObjectBeingDragged() == this)
             {
 
-               controller.controlOfRadialMenu("Open Hand", "Close Hand", "Execute Placement", "Door Avoidance");
+
                if (gripDragData.getDragJustStarted())
                {
                   modified = true;
@@ -162,28 +163,52 @@ public class RDXInteractableRobotLink
                   gripDragData.setInteractableFrameOnDragStart(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
                }
 
-               if (joystickButton.bChanged() && joystickButton.bState())
+               if (pageNumber == 0)
                {
-                  switch (controller.getJoystickSelection())
+                  controller.controlOfRadialMenu("Open Hand", "Close Hand", "Change Page", "Door Avoidance");
+                  if (joystickButton.bChanged() && joystickButton.bState())
                   {
-                     case LEFT_RING:
-                        armExecutable.run();
-                        break;
-                     case RIGHT_RING:
-                        onSpacePressed.run();
-                        break;
-                     case TOP_RING:
-                        if (openCommands != null)
-                        {
-                           openCommands.run();
+                     switch (controller.getJoystickSelection())
+                     {
+                        case LEFT_RING:
+                           armExecutable.run();
                            break;
-                        }
-                     case BOTTOM_RING:
-                        if (closeCommands != null)
-                        {
-                           closeCommands.run();
+                        case RIGHT_RING:
+                           changePage(pageNumber);
                            break;
-                        }
+                        case TOP_RING:
+                           if (openCommands != null)
+                           {
+                              openCommands.run();
+                              break;
+                           }
+                        case BOTTOM_RING:
+                           if (closeCommands != null)
+                           {
+                              closeCommands.run();
+                              break;
+                           }
+                     }
+                  }
+               }
+               else if (pageNumber == 1)
+               {
+                  controller.controlOfRadialMenu("", "", "Change Page", "Execute");
+                  if (joystickButton.bChanged() && joystickButton.bState())
+                  {
+                     switch (controller.getJoystickSelection())
+                     {
+                        case LEFT_RING:
+                           onSpacePressed.run();
+                           break;
+                        case RIGHT_RING:
+                           changePage(pageNumber);
+                           break;
+                        case TOP_RING:
+                           break;
+                        case BOTTOM_RING:
+                           break;
+                     }
                   }
                }
             }
@@ -335,6 +360,17 @@ public class RDXInteractableRobotLink
       return selectablePose3DGizmo.getPoseGizmo().getGizmoFrame();
    }
 
+   public void changePage(int pageNumber)
+   {
+      if (pageNumber > 0)
+      {
+         this.pageNumber = pageNumber - 1;
+      }
+      else
+      {
+         this.pageNumber = pageNumber + 1;
+      }
+   }
    public void setOnSpacePressed(Runnable onSpacePressed)
    {
       this.onSpacePressed = onSpacePressed;
