@@ -64,7 +64,6 @@ public abstract class EndToEndFootstepQueueStatusMessageTest implements MultiRob
       createSimulationTestHelper(environment, location);
       simulationTestHelper.start();
       ThreadTools.sleep(1000);
-      simulationTestHelper.setKeepSCSUp(true);
 
       // do the initial simulation
       assertTrue(simulationTestHelper.simulateNow(0.25));
@@ -145,7 +144,7 @@ public abstract class EndToEndFootstepQueueStatusMessageTest implements MultiRob
 
       currentFootstepQueue.addAll(footstepList);
 
-      simulationTestHelper.simulateNow(10);
+      simulationTestHelper.simulateNow(50);
 
       double simTime = 0.0;
       while (simTime <= totalTime)
@@ -155,6 +154,7 @@ public abstract class EndToEndFootstepQueueStatusMessageTest implements MultiRob
 
          // check that the Queue size is accurate
          int controllerSideQueueSize = numberOfStepsInController.getIntegerValue() + (isInSwing.get() ? 1 : 0);
+         assertEquals(isInSwing.get(), currentFootstepQueueStatus.getIsFirstStepInSwing());
          assertEquals(controllerSideQueueSize, currentFootstepQueue.size(), "The actual footstep queue is wrong.");
          assertEquals(controllerSideQueueSize, currentFootstepQueueStatus.getQueuedFootstepList().size());
 

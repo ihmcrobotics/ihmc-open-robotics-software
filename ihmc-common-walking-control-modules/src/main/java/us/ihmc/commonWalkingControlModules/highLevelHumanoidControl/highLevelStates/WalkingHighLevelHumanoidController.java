@@ -708,6 +708,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       Footstep footstepBeingExecuted = null;
       FootstepTiming footstepTimingBeingExecuted = null;
       List<StepConstraintRegion> stepConstraintsBeingExecuted = null;
+      boolean isFirstStepInSwing = false;
 
       WalkingStateEnum currentStateKey = stateMachine.getCurrentStateKey();
       // WHen we are currently in swing, that footstep has been removed from the walking message handler. We must then get it from the balance manager.
@@ -716,13 +717,14 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          footstepBeingExecuted = balanceManager.getFootstep(0);
          footstepTimingBeingExecuted = balanceManager.getFootstepTiming(0);
          stepConstraintsBeingExecuted = balanceManager.getCurrentStepConstraints();
+         isFirstStepInSwing = true;
       }
 
       statusOutputManager.reportStatusMessage(walkingMessageHandler.updateAndReturnFootstepQueueStatus(footstepBeingExecuted,
                                                                                                        footstepTimingBeingExecuted,
                                                                                                        stepConstraintsBeingExecuted,
-                                                                                                       balanceManager.getTimeIntoCurrentSupportSequence()));
-
+                                                                                                       balanceManager.getTimeIntoCurrentSupportSequence(),
+                                                                                                       isFirstStepInSwing));
    }
    public void updateFailureDetection()
    {
