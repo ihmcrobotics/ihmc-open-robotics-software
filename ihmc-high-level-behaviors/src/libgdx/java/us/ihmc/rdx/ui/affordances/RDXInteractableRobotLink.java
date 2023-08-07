@@ -151,11 +151,14 @@ public class RDXInteractableRobotLink
 
             RDXVRDragData gripDragData = controller.getGripDragData();
             InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
+            InputDigitalActionData aButton = controller.getAButtonActionData();
+            InputDigitalActionData bButton = controller.getBButtonActionData();
 
             if (isHovering || gripDragData.getObjectBeingDragged() == this)
             {
 
-
+               controller.setBButtonText("Delete Interactable");
+               controller.setAButtonText("Execute");
                if (gripDragData.getDragJustStarted())
                {
                   modified = true;
@@ -193,21 +196,29 @@ public class RDXInteractableRobotLink
                }
                else if (pageNumber == 1)
                {
-                  controller.controlOfRadialMenu("", "", "Change Page", "Execute");
+                  controller.controlOfRadialMenu("Open Hand", "Close Hand", "Change Page", "Door Avoidance");
                   if (joystickButton.bChanged() && joystickButton.bState())
                   {
                      switch (controller.getJoystickSelection())
                      {
                         case LEFT_RING:
-                           onSpacePressed.run();
+                           armExecutable.run();
                            break;
                         case RIGHT_RING:
                            changePage(pageNumber);
                            break;
                         case TOP_RING:
-                           break;
+                           if (openCommands != null)
+                           {
+                              openCommands.run();
+                              break;
+                           }
                         case BOTTOM_RING:
-                           break;
+                           if (closeCommands != null)
+                           {
+                              closeCommands.run();
+                              break;
+                           }
                      }
                   }
                }
@@ -217,6 +228,14 @@ public class RDXInteractableRobotLink
                controller.setJoystickSelection(null);
             }
 
+            if (aButton.bState() && aButton.bChanged())
+            {
+               onSpacePressed.run();
+            }
+            if (bButton.bChanged() && bButton.bState())
+            {
+               delete();
+            }
             if (gripDragData.isDragging() && gripDragData.getObjectBeingDragged() == this)
             {
                gripDragData.getDragFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
