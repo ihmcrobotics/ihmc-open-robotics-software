@@ -45,9 +45,12 @@ public class ZED2ColorStereoDepthPublisher
 {
    private static final int CAMERA_FPS = 30;
    private static final float MILLIMETER_TO_METERS = 0.001f;
-   private static final double ZED_2I_CENTER_TO_CAMERA_DISTANCE = 0.06;
+   private static final double ZED_CENTER_TO_CAMERA_DISTANCE = 0.06;
+   private static final double ZED_MINI_CENTER_TO_CAMERA_DISTANCE = 0.0315;
+   private static final double ZED_X_MINI_CENTER_TO_CAMERA_DISTANCE = 0.025;
 
    private final int cameraID;
+   private double centerToCameraDistance;
    private final SL_RuntimeParameters zedRuntimeParameters = new SL_RuntimeParameters();
 
    private final int imageWidth; // Width of rectified image in pixels (color image width == depth image width)
@@ -90,6 +93,13 @@ public class ZED2ColorStereoDepthPublisher
 
       // Create and initialize the camera
       sl_create_camera(cameraID);
+
+      switch (sl_get_camera_model(cameraID))
+      {
+         case 1 -> centerToCameraDistance = ZED_MINI_CENTER_TO_CAMERA_DISTANCE;
+         case 5 -> centerToCameraDistance = ZED_X_MINI_CENTER_TO_CAMERA_DISTANCE;
+         default -> centerToCameraDistance = ZED_CENTER_TO_CAMERA_DISTANCE;
+      }
 
       SL_InitParameters zedInitializationParameters = new SL_InitParameters();
       zedInitializationParameters.camera_fps(CAMERA_FPS);
@@ -144,7 +154,7 @@ public class ZED2ColorStereoDepthPublisher
 
       // Setup other things
       imageEncoder = new CUDAImageEncoder();
-      cameraPosesInDepthFrame.get(RobotSide.RIGHT).getPosition().subY(2.0 * ZED_2I_CENTER_TO_CAMERA_DISTANCE);
+      cameraPosesInDepthFrame.get(RobotSide.RIGHT).getPosition().subY(2.0 * centerToCameraDistance);
       throttler.setFrequency(CAMERA_FPS);
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, getClass().getName() + "-Shutdown"));
@@ -159,7 +169,7 @@ public class ZED2ColorStereoDepthPublisher
 
             // Frame supplier provides frame pose of center of camera. Add Y to get left camera's frame pose
             leftCameraFramePose.setToZero(sensorFrameSupplier.get());
-            leftCameraFramePose.getPosition().addY(ZED_2I_CENTER_TO_CAMERA_DISTANCE);
+            leftCameraFramePose.getPosition().addY(centerToCameraDistance);
             leftCameraFramePose.changeFrame(ReferenceFrame.getWorldFrame());
          }
       }, "ZED2ImageGrabThread");
