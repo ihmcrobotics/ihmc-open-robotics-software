@@ -8,7 +8,6 @@ import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import imgui.ImGui;
-import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.type.ImBoolean;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -155,7 +154,6 @@ public class RDXLocomotionManager
    public void create(RDXBaseUI baseUI)
    {
       this.baseUI = baseUI;
-      baseUI.getImGuiPanelManager().addPanel("Locomotion", this::renderImGuiWidgets);
 
       controllerStatusTracker.registerAbortedListener(abortedNotification);
 
@@ -359,7 +357,7 @@ public class RDXLocomotionManager
          startStanceSide = RDXFootstepPlanning.InitialStanceSide.RIGHT;
       }
 
-      if (ImGui.collapsingHeader(labels.get("Footstep Planning Options"), collapsedHeader, ImGuiTreeNodeFlags.DefaultOpen))
+      if (ImGui.collapsingHeader(labels.get("Footstep Planning Options"), collapsedHeader))
       {
          ImGui.indent();
          assumeFlatGroundCheckbox.renderImGuiWidget();

@@ -102,8 +102,6 @@ public class RDXArmManager
 
    public void create(RDXBaseUI baseUI)
    {
-      baseUI.getImGuiPanelManager().addPanel("Arms & Hands", this::renderImGuiWidgets);
-
       panelHandWrenchIndicator = new RDX3DPanelHandWrenchIndicator(baseUI.getPrimary3DPanel());
       RDX3DPanelToolbarButton wrenchToolbarButton = baseUI.getPrimary3DPanel().addToolbarButton();
       wrenchToolbarButton.loadAndSetIcon("icons/handWrench.png");
