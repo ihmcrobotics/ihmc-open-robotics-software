@@ -20,6 +20,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -151,7 +152,7 @@ public abstract class EndToEndFootstepQueueStatusMessageTest implements MultiRob
       double simTime = 0.0;
       while (simTime <= totalTime)
       {
-         simulationTestHelper.simulateNow(simTime);
+         simulationTestHelper.simulateNow(simDt);
          ThreadTools.sleep(50);
 
          // check that the Queue size is accurate
@@ -170,6 +171,7 @@ public abstract class EndToEndFootstepQueueStatusMessageTest implements MultiRob
          simTime += simDt;
       }
 
+      LogTools.info("Finished, now check to make sure it went forward and all the steps are executed.");
 
       assertTrue(simulationTestHelper.simulateNow(0.25));
       assertEquals(0, (int) numberOfStepsInController.getValueAsLongBits());
