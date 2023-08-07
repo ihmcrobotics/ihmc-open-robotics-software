@@ -59,6 +59,7 @@ public class RDXInteractableRobotLink
    private boolean isVRHovering;
    private Runnable openCommands;
    private Runnable closeCommands;
+   private Runnable armExecutable;
    private RDXModelInstance wordsBoxMesh;
    private final FrameBox3D selectionCollisionBox = new FrameBox3D();
    private final SideDependentList<Point3D> boxOffset = new SideDependentList<>();
@@ -157,11 +158,12 @@ public class RDXInteractableRobotLink
                controller.setBottomJoystickText("Close Hand");
                controller.setRightJoystickText("Delete Interactable");
                controller.setLeftJoystickText("Execute");
-               if (joystick.x() < 0 && Math.abs(joystick.x()) > Math.abs(joystick.y()) || controller.getJoystickSelection() == RDXVRJoystickSelection.EXECUTE)
+               if (joystick.x() < 0 && Math.abs(joystick.x()) > Math.abs(joystick.y())
+                   || controller.getJoystickSelection() == RDXVRJoystickSelection.DOOR_AVOIDANCE)
                {
                   controller.setAllJoystickTextNull();
                   controller.setLeftJoystickText("Execute");
-                  controller.setJoystickSelection(RDXVRJoystickSelection.EXECUTE);
+                  controller.setJoystickSelection(RDXVRJoystickSelection.DOOR_AVOIDANCE);
                }
                if (joystick.x() > 0 && Math.abs(joystick.x()) > Math.abs(joystick.y())
                    || controller.getJoystickSelection() == RDXVRJoystickSelection.DELETE_INTERACTABLE)
@@ -191,9 +193,8 @@ public class RDXInteractableRobotLink
                {
                   switch (controller.getJoystickSelection())
                   {
-                     case EXECUTE:
-                        onSpacePressed.run();
-                        controller.setJoystickSelection(RDXVRJoystickSelection.NONE);
+                     case DOOR_AVOIDANCE:
+                        armExecutable.run();
                         break;
                      case DELETE_INTERACTABLE:
                         delete();
@@ -386,6 +387,11 @@ public class RDXInteractableRobotLink
    public void setCloseCommands(Runnable closeCommands)
    {
       this.closeCommands = closeCommands;
+   }
+
+   public void setArmExecutable(Runnable armExecutable)
+   {
+      this.armExecutable = armExecutable;
    }
 
    private void updateHoverBoxFramePose(RobotSide side)

@@ -273,6 +273,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
                interactableHands.get(side).setOnSpacePressed(armManager.getSubmitDesiredArmSetpointsCallback(side));
                interactableHands.get(side).setOpenCommands(armManager.getOpenCommands(side));
                interactableHands.get(side).setCloseCommands(armManager.getCloseCommands(side));
+               interactableHands.get(side).setArmExecutable(armManager.executeDoorAvoidance(side));
             }
          }
 
