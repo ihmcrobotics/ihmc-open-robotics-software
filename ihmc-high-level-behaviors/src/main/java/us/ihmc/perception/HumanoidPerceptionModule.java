@@ -230,8 +230,8 @@ public class HumanoidPerceptionModule
          Point3D point = pointCloud.get(i);
          //sensorToWorldTransform.transform(point);
 
-         int gridX = (int) (point.getX() * occupancyGridResolution + 50);
-         int gridY = (int) (point.getY() * occupancyGridResolution + 50);
+         int gridX = (int) (point.getX() * occupancyGridResolution + 70);
+         int gridY = (int) (point.getY() * occupancyGridResolution + 70);
 
          if (point.getZ() > thresholdHeight && gridX >= 0 && gridX < occupancyGrid.cols() && gridY >= 0 && gridY < occupancyGrid.rows())
          {
