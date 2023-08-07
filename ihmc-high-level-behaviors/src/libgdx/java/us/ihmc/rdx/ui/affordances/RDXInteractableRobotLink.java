@@ -1,5 +1,7 @@
 package us.ihmc.rdx.ui.affordances;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -8,19 +10,27 @@ import imgui.ImGui;
 import org.lwjgl.openvr.InputAnalogActionData;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.euclid.referenceFrame.FrameBox3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.tools.RDXModelBuilder;
+import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRDragData;
 import us.ihmc.rdx.vr.RDXVRJoystickSelection;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -52,6 +62,11 @@ public class RDXInteractableRobotLink
    private boolean isVRHovering;
    private Runnable openCommands;
    private Runnable closeCommands;
+   private RDXModelInstance hoverBoxMesh;
+   private final FrameBox3D selectionCollisionBox = new FrameBox3D();
+   private Point3D boxOffset;
+   private ModifiableReferenceFrame hoverBoxReferenceFrame;
+   private final FramePose3D hoverBoxFramePose = new FramePose3D();
 
    /** For when the graphic, the link, and control frame are all the same. */
    public void create(RDXRobotCollidable robotCollidable, ReferenceFrame syncedControlFrame, String graphicFileName, RDX3DPanel panel3D)
@@ -79,6 +94,12 @@ public class RDXInteractableRobotLink
 
       RDXBaseUI.getInstance().getKeyBindings().register("Execute / pause motion", "Space");
       RDXBaseUI.getInstance().getKeyBindings().register("Delete selected gizmo", "Delete");
+
+      selectionCollisionBox.getSize().set(0.0125, 0.075, 0.025);
+      FramePoint3DBasics[] vertices = selectionCollisionBox.getVertices();
+      hoverBoxMesh = new RDXModelInstance(RDXModelBuilder.buildModel(boxMeshBuilder -> boxMeshBuilder.addMultiLineBox(vertices,
+                                                                                                                      0.0005,
+                                                                                                                      new Color(Color.WHITE))));
    }
 
    public void update()
@@ -116,7 +137,12 @@ public class RDXInteractableRobotLink
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
+            if (controller.getJoystickSelection() == null)
+            {
+               controller.setJoystickSelection(RDXVRJoystickSelection.NONE);
+            }
             boolean isHovering = false;
+            hoverBoxReferenceFrame = new ModifiableReferenceFrame(controller.getJoystickReferenceFrame().getReferenceFrame());
             for (RDXRobotCollidable robotCollidable : robotCollidables)
             {
                isHovering |= robotCollidable.getVRHovering(side);
@@ -124,42 +150,40 @@ public class RDXInteractableRobotLink
             isVRHovering |= isHovering;
 
             RDXVRDragData gripDragData = controller.getGripDragData();
-            InputDigitalActionData aButton = controller.getAButtonActionData();
             InputAnalogActionData joystick = controller.getJoystickActionData();
             InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
 
             if (isHovering)
             {
+               selectionCollisionBox.getPose().set(controller.getJoystickFramePose());
                if (controller.getJoystickSelection() == RDXVRJoystickSelection.NONE)
                {
                   controller.setTopJoystickText("Open Hand");
                   controller.setBottomJoystickText("Close Hand");
-                  controller.setLeftJoystickText("Delete Interactable");
-                  controller.setRightJoystickText("Execute");
+                  controller.setRightJoystickText("Delete Interactable");
+                  controller.setLeftJoystickText("Execute");
                }
-               if (joystick.x() < 0 && Math.abs(joystick.x()) > Math.abs(joystick.y()))
+               if (joystick.x() < 0 && Math.abs(joystick.x()) > Math.abs(joystick.y()) || controller.getJoystickSelection() == RDXVRJoystickSelection.EXECUTE)
                {
-                  controller.setRightJoystickText("Execute");
+                  controller.setLeftJoystickText("Execute");
                   controller.setJoystickSelection(RDXVRJoystickSelection.EXECUTE);
                }
-               else if (joystick.x() > 0 && Math.abs(joystick.x()) > Math.abs(joystick.y()))
+               if (joystick.x() > 0 && Math.abs(joystick.x()) > Math.abs(joystick.y())
+                   || controller.getJoystickSelection() == RDXVRJoystickSelection.DELETE_INTERACTABLE)
                {
-                  controller.setLeftJoystickText("Delete Interactable");
+                  controller.setRightJoystickText("Delete Interactable");
                   controller.setJoystickSelection(RDXVRJoystickSelection.DELETE_INTERACTABLE);
                }
-               else if (joystick.y() > 0 && Math.abs(joystick.y()) > Math.abs(joystick.x()))
+               if (joystick.y() > 0 && Math.abs(joystick.y()) > Math.abs(joystick.x()) || controller.getJoystickSelection() == RDXVRJoystickSelection.OPEN_HAND)
                {
                   controller.setTopJoystickText("Open Hand");
                   controller.setJoystickSelection(RDXVRJoystickSelection.OPEN_HAND);
                }
-               else if (joystick.y() < 0 && Math.abs(joystick.y()) > Math.abs(joystick.x()))
+               if (joystick.y() < 0 && Math.abs(joystick.y()) > Math.abs(joystick.x())
+                   || controller.getJoystickSelection() == RDXVRJoystickSelection.CLOSE_HAND)
                {
                   controller.setBottomJoystickText("Close Hand");
                   controller.setJoystickSelection(RDXVRJoystickSelection.CLOSE_HAND);
-               }
-               else if (joystick.x() == 0 && joystick.y() == 0)
-               {
-                  controller.setJoystickSelection(RDXVRJoystickSelection.NONE);
                }
                if (joystickButton.bChanged() && joystickButton.bState())
                {
@@ -167,11 +191,9 @@ public class RDXInteractableRobotLink
                   {
                      case EXECUTE:
                         onSpacePressed.run();
-                        controller.setJoystickSelection(RDXVRJoystickSelection.NONE);
                         break;
                      case DELETE_INTERACTABLE:
                         delete();
-                        controller.setJoystickSelection(RDXVRJoystickSelection.NONE);
                         break;
                      case OPEN_HAND:
                         if (openCommands != null)
@@ -190,8 +212,10 @@ public class RDXInteractableRobotLink
             }
             else
             {
-               controller.setJoystickSelection(RDXVRJoystickSelection.NONE);
+               controller.setJoystickSelection(null);
+               controller.setAllJoystickTextNull();
             }
+
             if (isHovering || gripDragData.getObjectBeingDragged() == this)
             {
                if (gripDragData.getDragJustStarted())
@@ -206,6 +230,14 @@ public class RDXInteractableRobotLink
             {
                gripDragData.getDragFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
                                                                       selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getParent());
+            }
+            if (controller.offset() != null)
+            {
+               updateHoverBoxFramePose(controller.offset());
+            }
+            else
+            {
+               boxOffset = null;
             }
          });
       }
@@ -294,6 +326,9 @@ public class RDXInteractableRobotLink
       {
          highlightModel.getRenderables(renderables, pool);
       }
+
+      if (hoverBoxMesh != null && boxOffset != null)
+         hoverBoxMesh.getRenderables(renderables, pool);
       selectablePose3DGizmo.getVirtualRenderables(renderables, pool);
    }
 
@@ -336,6 +371,21 @@ public class RDXInteractableRobotLink
    public void setCloseCommands(Runnable closeCommands)
    {
       this.closeCommands = closeCommands;
+   }
+
+   private void updateHoverBoxFramePose(Point3D offset)
+   {
+      boxOffset = offset;
+      selectionCollisionBox.getPose().getTranslation().add(boxOffset);
+      hoverBoxReferenceFrame.getReferenceFrame().getTransformToParent().getTranslation().set(boxOffset);
+      hoverBoxReferenceFrame.getReferenceFrame().update();
+      hoverBoxFramePose.setToZero(hoverBoxReferenceFrame.getReferenceFrame());
+      hoverBoxFramePose.getTranslation().add(boxOffset);
+      hoverBoxFramePose.getTranslation().subY(0.03);
+      hoverBoxFramePose.getTranslation().addX(0.01);
+      hoverBoxFramePose.getRotation().setToYawOrientation(0.2);
+      hoverBoxFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      hoverBoxMesh.setPoseInWorldFrame(hoverBoxFramePose);
    }
 
    public void addAdditionalRobotCollidable(RDXRobotCollidable robotCollidable)
