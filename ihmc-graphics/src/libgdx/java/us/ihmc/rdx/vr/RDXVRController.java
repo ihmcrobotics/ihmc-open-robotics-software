@@ -611,7 +611,7 @@ public class RDXVRController extends RDXVRTrackedDevice
       return joystickReferenceFrame;
    }
 
-   public Point3D offset()
+   public Point3D getOffset()
    {
       if (joystickSelection != null)
       {

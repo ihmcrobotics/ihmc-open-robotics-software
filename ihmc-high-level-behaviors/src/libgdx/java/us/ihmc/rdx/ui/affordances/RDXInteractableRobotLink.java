@@ -1,7 +1,6 @@
 package us.ihmc.rdx.ui.affordances;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -17,11 +16,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
-import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDX3DPanel;
@@ -33,7 +30,6 @@ import us.ihmc.rdx.vr.RDXVRJoystickSelection;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 
@@ -62,11 +58,12 @@ public class RDXInteractableRobotLink
    private boolean isVRHovering;
    private Runnable openCommands;
    private Runnable closeCommands;
-   private RDXModelInstance hoverBoxMesh;
+   private RDXModelInstance wordsBoxMesh;
    private final FrameBox3D selectionCollisionBox = new FrameBox3D();
    private Point3D boxOffset;
-   private ModifiableReferenceFrame hoverBoxReferenceFrame;
-   private final FramePose3D hoverBoxFramePose = new FramePose3D();
+   private ModifiableReferenceFrame wordsBoxReferenceFrame;
+   private final FramePose3D wordsBoxFramePose = new FramePose3D();
+   private RDXVRJoystickSelection pastJoystickSelection;
 
    /** For when the graphic, the link, and control frame are all the same. */
    public void create(RDXRobotCollidable robotCollidable, ReferenceFrame syncedControlFrame, String graphicFileName, RDX3DPanel panel3D)
@@ -97,7 +94,7 @@ public class RDXInteractableRobotLink
 
       selectionCollisionBox.getSize().set(0.0125, 0.075, 0.025);
       FramePoint3DBasics[] vertices = selectionCollisionBox.getVertices();
-      hoverBoxMesh = new RDXModelInstance(RDXModelBuilder.buildModel(boxMeshBuilder -> boxMeshBuilder.addMultiLineBox(vertices,
+      wordsBoxMesh = new RDXModelInstance(RDXModelBuilder.buildModel(boxMeshBuilder -> boxMeshBuilder.addMultiLineBox(vertices,
                                                                                                                       0.0005,
                                                                                                                       new Color(Color.WHITE))));
    }
@@ -142,7 +139,7 @@ public class RDXInteractableRobotLink
                controller.setJoystickSelection(RDXVRJoystickSelection.NONE);
             }
             boolean isHovering = false;
-            hoverBoxReferenceFrame = new ModifiableReferenceFrame(controller.getJoystickReferenceFrame().getReferenceFrame());
+            wordsBoxReferenceFrame = new ModifiableReferenceFrame(controller.getJoystickReferenceFrame().getReferenceFrame());
             for (RDXRobotCollidable robotCollidable : robotCollidables)
             {
                isHovering |= robotCollidable.getVRHovering(side);
@@ -165,25 +162,33 @@ public class RDXInteractableRobotLink
                }
                if (joystick.x() < 0 && Math.abs(joystick.x()) > Math.abs(joystick.y()) || controller.getJoystickSelection() == RDXVRJoystickSelection.EXECUTE)
                {
+                  controller.setAllJoystickTextNull();
                   controller.setLeftJoystickText("Execute");
                   controller.setJoystickSelection(RDXVRJoystickSelection.EXECUTE);
                }
                if (joystick.x() > 0 && Math.abs(joystick.x()) > Math.abs(joystick.y())
                    || controller.getJoystickSelection() == RDXVRJoystickSelection.DELETE_INTERACTABLE)
                {
+                  controller.setAllJoystickTextNull();
                   controller.setRightJoystickText("Delete Interactable");
                   controller.setJoystickSelection(RDXVRJoystickSelection.DELETE_INTERACTABLE);
                }
                if (joystick.y() > 0 && Math.abs(joystick.y()) > Math.abs(joystick.x()) || controller.getJoystickSelection() == RDXVRJoystickSelection.OPEN_HAND)
                {
+                  controller.setAllJoystickTextNull();
                   controller.setTopJoystickText("Open Hand");
                   controller.setJoystickSelection(RDXVRJoystickSelection.OPEN_HAND);
                }
                if (joystick.y() < 0 && Math.abs(joystick.y()) > Math.abs(joystick.x())
                    || controller.getJoystickSelection() == RDXVRJoystickSelection.CLOSE_HAND)
                {
+                  controller.setAllJoystickTextNull();
                   controller.setBottomJoystickText("Close Hand");
                   controller.setJoystickSelection(RDXVRJoystickSelection.CLOSE_HAND);
+               }
+               if (joystick.x() == 0 && joystick.y() == 0)
+               {
+                  controller.setJoystickSelection(RDXVRJoystickSelection.NONE);
                }
                if (joystickButton.bChanged() && joystickButton.bState())
                {
@@ -191,9 +196,11 @@ public class RDXInteractableRobotLink
                   {
                      case EXECUTE:
                         onSpacePressed.run();
+                        controller.setJoystickSelection(RDXVRJoystickSelection.NONE);
                         break;
                      case DELETE_INTERACTABLE:
                         delete();
+                        controller.setJoystickSelection(RDXVRJoystickSelection.NONE);
                         break;
                      case OPEN_HAND:
                         if (openCommands != null)
@@ -231,11 +238,22 @@ public class RDXInteractableRobotLink
                gripDragData.getDragFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
                                                                       selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getParent());
             }
-            if (controller.offset() != null)
+            if (controller.getOffset() != null)
             {
-               updateHoverBoxFramePose(controller.offset());
+               boxOffset = controller.getOffset();
+               pastJoystickSelection = controller.getJoystickSelection();
+               updateHoverBoxFramePose();
             }
-            else
+            else if (controller.getOffset() == null && isHovering)
+            {
+               if (pastJoystickSelection != null && pastJoystickSelection != RDXVRJoystickSelection.NONE)
+               {
+                  controller.setJoystickSelection(pastJoystickSelection);
+                  boxOffset = controller.getOffset();
+                  updateHoverBoxFramePose();
+               }
+            }
+            else if (controller.getJoystickSelection() == null)
             {
                boxOffset = null;
             }
@@ -327,8 +345,8 @@ public class RDXInteractableRobotLink
          highlightModel.getRenderables(renderables, pool);
       }
 
-      if (hoverBoxMesh != null && boxOffset != null)
-         hoverBoxMesh.getRenderables(renderables, pool);
+      if (wordsBoxMesh != null && boxOffset != null)
+         wordsBoxMesh.getRenderables(renderables, pool);
       selectablePose3DGizmo.getVirtualRenderables(renderables, pool);
    }
 
@@ -373,19 +391,18 @@ public class RDXInteractableRobotLink
       this.closeCommands = closeCommands;
    }
 
-   private void updateHoverBoxFramePose(Point3D offset)
+   private void updateHoverBoxFramePose()
    {
-      boxOffset = offset;
       selectionCollisionBox.getPose().getTranslation().add(boxOffset);
-      hoverBoxReferenceFrame.getReferenceFrame().getTransformToParent().getTranslation().set(boxOffset);
-      hoverBoxReferenceFrame.getReferenceFrame().update();
-      hoverBoxFramePose.setToZero(hoverBoxReferenceFrame.getReferenceFrame());
-      hoverBoxFramePose.getTranslation().add(boxOffset);
-      hoverBoxFramePose.getTranslation().subY(0.03);
-      hoverBoxFramePose.getTranslation().addX(0.01);
-      hoverBoxFramePose.getRotation().setToYawOrientation(0.2);
-      hoverBoxFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-      hoverBoxMesh.setPoseInWorldFrame(hoverBoxFramePose);
+      wordsBoxReferenceFrame.getReferenceFrame().getTransformToParent().getTranslation().set(boxOffset);
+      wordsBoxReferenceFrame.getReferenceFrame().update();
+      wordsBoxFramePose.setToZero(wordsBoxReferenceFrame.getReferenceFrame());
+      wordsBoxFramePose.getTranslation().add(boxOffset);
+      wordsBoxFramePose.getTranslation().subY(0.03);
+      wordsBoxFramePose.getTranslation().addX(0.01);
+      wordsBoxFramePose.getRotation().setToYawOrientation(0.2);
+      wordsBoxFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      wordsBoxMesh.setPoseInWorldFrame(wordsBoxFramePose);
    }
 
    public void addAdditionalRobotCollidable(RDXRobotCollidable robotCollidable)
