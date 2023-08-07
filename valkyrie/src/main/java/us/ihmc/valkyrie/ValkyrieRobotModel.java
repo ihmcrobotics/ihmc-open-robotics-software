@@ -681,7 +681,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public WalkingControllerParameters getWalkingControllerParameters()
    {
       if (walkingControllerParameters == null)
-         walkingControllerParameters = new ValkyrieWalkingControllerParameters(getJointMap(), getRobotPhysicalProperties(), target);
+         walkingControllerParameters = new ValkyrieWalkingControllerParameters(getJointMap(), getRobotPhysicalProperties(), target, robotVersion);
       return walkingControllerParameters;
    }
 

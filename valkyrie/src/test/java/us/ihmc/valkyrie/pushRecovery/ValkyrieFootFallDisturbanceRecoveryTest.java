@@ -30,7 +30,7 @@ public class ValkyrieFootFallDisturbanceRecoveryTest extends HumanoidFootFallDis
          @Override
          public WalkingControllerParameters getWalkingControllerParameters()
          {
-            return new ValkyrieWalkingControllerParameters(getJointMap(), getRobotPhysicalProperties(), getTarget())
+            return new ValkyrieWalkingControllerParameters(getJointMap(), getRobotPhysicalProperties(), getTarget(), getRobotVersion())
             {
                @Override
                public double getInitialICPErrorToSlowDownTransfer()

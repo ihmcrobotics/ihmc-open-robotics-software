@@ -22,7 +22,7 @@ public class ValkyrieQuickPushRecoveryWalkingTest extends AvatarQuickPushRecover
       {
          public WalkingControllerParameters getWalkingControllerParameters()
          {
-            return new ValkyrieWalkingControllerParameters(getJointMap(), getRobotPhysicalProperties(), getTarget())
+            return new ValkyrieWalkingControllerParameters(getJointMap(), getRobotPhysicalProperties(), getTarget(), getRobotVersion())
             {
                @Override
                public SteppingParameters getSteppingParameters()

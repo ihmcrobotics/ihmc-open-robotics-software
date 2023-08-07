@@ -28,7 +28,7 @@ public class ValkyriePushRecoveryStandingTest extends AvatarPushRecoveryStanding
       {
          public WalkingControllerParameters getWalkingControllerParameters()
          {
-            return new ValkyrieWalkingControllerParameters(getJointMap(), getRobotPhysicalProperties(), getTarget())
+            return new ValkyrieWalkingControllerParameters(getJointMap(), getRobotPhysicalProperties(), getTarget(), getRobotVersion())
             {
                @Override
                public SteppingParameters getSteppingParameters()

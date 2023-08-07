@@ -65,7 +65,7 @@ public class ValkyrieFlatGroundQuickWalkingTest extends AvatarFlatGroundQuickWal
          @Override
          public WalkingControllerParameters getWalkingControllerParameters()
          {
-            return new ValkyrieWalkingControllerParameters(getJointMap(), getRobotPhysicalProperties(), getTarget())
+            return new ValkyrieWalkingControllerParameters(getJointMap(), getRobotPhysicalProperties(), getTarget(), getRobotVersion())
             {
                @Override
                public SwingTrajectoryParameters getSwingTrajectoryParameters()

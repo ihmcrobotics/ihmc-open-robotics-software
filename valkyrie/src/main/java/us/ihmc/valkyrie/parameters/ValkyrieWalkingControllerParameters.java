@@ -36,12 +36,14 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
+import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 
 public class ValkyrieWalkingControllerParameters extends WalkingControllerParameters
 {
    private final RobotTarget target;
 
    protected final ValkyrieJointMap jointMap;
+   private final ValkyrieRobotVersion robotVerion;
 
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
    private Map<String, Pose3D> bodyHomeConfiguration = null;
@@ -63,16 +65,17 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    private boolean doPrepareManipulationForLocomotion;
 
-   public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap, ValkyriePhysicalProperties physicalProperties)
+   public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap, ValkyriePhysicalProperties physicalProperties, ValkyrieRobotVersion robotVersion)
    {
-      this(jointMap, physicalProperties, RobotTarget.SCS);
+      this(jointMap, physicalProperties, RobotTarget.SCS, robotVersion);
    }
 
-   public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap, ValkyriePhysicalProperties physicalProperties, RobotTarget target)
+   public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap, ValkyriePhysicalProperties physicalProperties, RobotTarget target, ValkyrieRobotVersion robotVersion)
    {
       this.jointMap = jointMap;
       this.physicalProperties = physicalProperties;
       this.target = target;
+      this.robotVerion = robotVersion;
       doPrepareManipulationForLocomotion = target == RobotTarget.SCS;
 
       toeOffParameters = new ValkyrieToeOffParameters(physicalProperties, target);
@@ -461,7 +464,8 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       jointHomeConfiguration.put(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), 0.0);
       jointHomeConfiguration.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), 0.0);
 
-      jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH), 0.75);
+      double neckPitchHome = robotVerion == ValkyrieRobotVersion.UPPER_BODY ? 0.2 : 0.75;
+      jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH), neckPitchHome);
       jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_YAW), 0.0);
       jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_PITCH), -0.1);
 
@@ -477,7 +481,8 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH), 0.4);
+         double shoulderPitchHome = robotVerion == ValkyrieRobotVersion.UPPER_BODY ? 0.1 : 0.4;
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH), shoulderPitchHome);
          jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfRightSide(-1.0));
          jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), 0.1);
          jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), robotSide.negateIfRightSide(-1.3));
