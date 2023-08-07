@@ -34,7 +34,7 @@ public final class JointOfflineCommand implements Command<JointOfflineCommand, J
    {
       //TODO set all fields to 0 and null
       sequenceId = other.sequenceId;
-      // set jointToGoOffline to null or do nothing
+      jointToGoOffline = other.jointToGoOffline;
    }
 
    @Override
@@ -50,7 +50,7 @@ public final class JointOfflineCommand implements Command<JointOfflineCommand, J
    {
       //TODO copied from foot load bearing message
       sequenceId = 0;
-      //      jointToGoOffline = null; //dont do this
+      //      jointToGoOffline = null; //dont do this for now
    }
 
    @Override
