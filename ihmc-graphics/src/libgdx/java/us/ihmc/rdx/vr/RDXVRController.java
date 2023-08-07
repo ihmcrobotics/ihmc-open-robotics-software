@@ -617,7 +617,7 @@ public class RDXVRController extends RDXVRTrackedDevice
       {
          switch (joystickSelection)
          {
-            case EXECUTE:
+            case DOOR_AVOIDANCE:
                return leftJoystickOffset;
             case DELETE_INTERACTABLE:
                return rightJoystickOffset;
