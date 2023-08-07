@@ -18,17 +18,6 @@ geometry_msgs/Point location
 # Specifies the orientation of the footstep (sole frame) in world frame.
 geometry_msgs/Quaternion orientation
 
-# Predicted contact points represent the vertices of the expected contact polygon between the foot and the world.
-# An empty list will request the controller to use the default foot support polygon.
-# Contact points  are expressed in sole frame. The ordering does not matter.
-# For example: to tell the controller to use the entire foot, the predicted contact points would be:
-# - x: 0.5 * foot_length, y: -0.5 * toe_width
-# - x: 0.5 * foot_length, y: 0.5 * toe_width
-# - x: -0.5 * foot_length, y: -0.5 * heel_width
-# - x: -0.5 * foot_length, y: 0.5 * heel_width
-# Note: The z coordinate of each point is ignored.
-geometry_msgs/Point[] predicted_contact_points_2d
-
 # The swingDuration is the time a foot is not in ground contact during a step.
 # If the value of this field is invalid (not positive) it will be replaced by a default swing_duration.
 # Field default value -1.0
@@ -38,8 +27,5 @@ float64 swing_duration
 # If the value of this field is invalid (not positive) it will be replaced by a default transfer_duration.
 # Field default value -1.0
 float64 transfer_duration
-
-# Step constraint regions to be used by this footstep
-controller_msgs/StepConstraintsListMessage step_constraints
 
 

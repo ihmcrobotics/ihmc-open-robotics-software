@@ -15,7 +15,7 @@ public class FootstepQueueStatusMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b62955e8ff2af8e30e3b8aef3ec2c1993b3589ffceb2bef354cf769e4eb19a70";
+   		return "7b3887fef1dd4335e08d80e77b18d71478a4841208d5864dc6b1bc780167a97c";
    }
    
    @Override

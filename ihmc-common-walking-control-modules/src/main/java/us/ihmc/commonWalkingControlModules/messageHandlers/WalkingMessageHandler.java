@@ -419,14 +419,15 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       messasgeToPack.setSwingDuration(footstepTiming.getSwingTime());
       messasgeToPack.setTransferDuration(footstepTiming.getTransferTime());
 
-      messasgeToPack.getPredictedContactPoints2d().clear();
-      if (footstep.getPredictedContactPoints() != null)
-      {
-         for (int i = 0; i < footstep.getPredictedContactPoints().size(); i++)
-            messasgeToPack.getPredictedContactPoints2d().add().set(footstep.getPredictedContactPoints().get(i));
-      }
+      // TODO : don't include this stuff for now. It makes the message too large to get sent for some reason.
+//      messasgeToPack.getPredictedContactPoints2d().clear();
+//      if (footstep.getPredictedContactPoints() != null)
+//      {
+//         for (int i = 0; i < footstep.getPredictedContactPoints().size(); i++)
+//            messasgeToPack.getPredictedContactPoints2d().add().set(footstep.getPredictedContactPoints().get(i));
+//      }
 
-      StepConstraintRegionsList.getAsMessage(stepConstraints, messasgeToPack.getStepConstraints());
+//      StepConstraintRegionsList.getAsMessage(stepConstraints, messasgeToPack.getStepConstraints());
    }
 
    public MomentumTrajectoryHandler getMomentumTrajectoryHandler()
