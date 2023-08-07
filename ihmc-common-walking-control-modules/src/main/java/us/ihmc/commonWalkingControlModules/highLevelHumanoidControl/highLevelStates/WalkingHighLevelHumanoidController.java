@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManage
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.JointOfflineManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
@@ -101,6 +102,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final FeetManager feetManager;
    private final BalanceManager balanceManager;
    private final CenterOfMassHeightManager comHeightManager;
+   private final JointOfflineManager jointOfflineManager;
 
    private final TouchdownErrorCompensator touchdownErrorCompensator;
 
@@ -144,7 +146,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
    private final DoubleProvider unloadFraction;
-   private final JointTorqueCommand jointOfflineTorqueCommand = new JointTorqueCommand();
 
    private final ParameterizedControllerCoreOptimizationSettings controllerCoreOptimizationSettings;
 
@@ -230,6 +231,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       balanceManager = managerFactory.getOrCreateBalanceManager();
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
+      jointOfflineManager = managerFactory.getOrCreateJointOfflineManager();
 
       this.commandInputManager = commandInputManager;
       this.statusOutputManager = statusOutputManager;
@@ -905,19 +907,15 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
       controllerCoreCommand.addFeedbackControlCommand(comHeightManager.getFeedbackControlCommand());
 
+      if (jointOfflineManager != null && jointOfflineManager.isJointOffline())
+      {
+         controllerCoreCommand.addInverseDynamicsCommand(jointOfflineManager.getInverseDynamicsCommand());
+      }
+
       controllerCoreCommand.addInverseDynamicsCommand(controllerCoreOptimizationSettings.getCommand());
 
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
          controllerCoreCommand.addInverseDynamicsCommand(legElasticityDebuggator.getInverseDynamicsCommand());
-      
-      if (commandConsumer.isJointOffline())
-      {
-         jointOfflineTorqueCommand.clear();
-         jointOfflineTorqueCommand.addJoint(commandConsumer.getJointOffline(), 0.0);
-         jointOfflineTorqueCommand.setWeight(1000.0);
-         
-         controllerCoreCommand.addInverseDynamicsCommand(jointOfflineTorqueCommand);
-      }
    }
 
    public ControllerCoreCommand getControllerCoreCommand()

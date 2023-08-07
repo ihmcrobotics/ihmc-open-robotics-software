@@ -7,6 +7,7 @@ import controller_msgs.msg.dds.ManipulationAbortedStatus;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.JointOfflineManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
@@ -90,15 +91,13 @@ public class WalkingCommandConsumer
    private final FeetManager feetManager;
    private final BalanceManager balanceManager;
    private final CenterOfMassHeightManager comHeightManager;
+   private final JointOfflineManager jointOfflineManager;
 
    private final RigidBodyControlManager chestManager;
    private final RigidBodyControlManager headManager;
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
 
    private final ManipulationAbortedStatus manipulationAbortedStatus = new ManipulationAbortedStatus();
-   
-   private OneDoFJointBasics jointOffline;
-   private final YoBoolean isJointOffline = new YoBoolean("isJointOffline", registry);
 
    public WalkingCommandConsumer(CommandInputManager commandInputManager,
                                  StatusMessageOutputManager statusMessageOutputManager,
@@ -210,6 +209,7 @@ public class WalkingCommandConsumer
       feetManager = managerFactory.getOrCreateFeetManager();
       balanceManager = managerFactory.getOrCreateBalanceManager();
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
+      jointOfflineManager = managerFactory.getOrCreateJointOfflineManager();
 
       isAutomaticManipulationAbortEnabled.set(walkingControllerParameters.allowAutomaticManipulationAbort());
       icpErrorThresholdToAbortManipulation.set(walkingControllerParameters.getICPErrorThresholdForManipulationAbort());
@@ -556,23 +556,13 @@ public class WalkingCommandConsumer
    
    public void consumeJointOfflineCommand()
    {
-//    fields for OneDoFJoint offlineJoint, boolean field with getter for "is a joint offline"
-      
+      if (jointOfflineManager == null)
+         return;
       if (!commandConsumerWithDelayBuffers.isNewCommandAvailable(JointOfflineCommand.class))
          return;
       
       JointOfflineCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(JointOfflineCommand.class);
-      jointOffline = command.getJointToGoOffline(); //this shouldnt be returning null
-   }
-   
-   public boolean isJointOffline()
-   {
-      return jointOffline != null;
-   }
-   
-   public OneDoFJointBasics getJointOffline()
-   {
-      return jointOffline;
+      jointOfflineManager.setJointOffline(command.getJointOfflineHashCode());
    }
    
    public void consumeStopAllTrajectoryCommands()

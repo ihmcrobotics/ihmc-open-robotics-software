@@ -1,63 +1,55 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import controller_msgs.msg.dds.JointOfflineMessage;
-import controller_msgs.msg.dds.LoadBearingMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
-public final class JointOfflineCommand implements Command<JointOfflineCommand, JointOfflineMessage>
+public class JointOfflineCommand implements Command<JointOfflineCommand, JointOfflineMessage>
 {
    private long sequenceId;
 
-   /** the joint which should be considered unusable/dead */
-   private OneDoFJointBasics jointToGoOffline;
+   /* Hash-code of the joint that is offline/dead */
+   private int jointOfflineHashCode;
 
    public JointOfflineCommand()
    {
-      //TODO This constructor needs to exist, is it ok to do nothing here?
+      clear();
    }
 
-   public JointOfflineCommand(OneDoFJointBasics jointToGoOffline)
+   public int getJointOfflineHashCode()
    {
-      this.jointToGoOffline = jointToGoOffline;
+      return jointOfflineHashCode;
    }
 
-   public OneDoFJointBasics getJointToGoOffline()
+   public void setJointOfflineHashCode(int jointOfflineHashCode)
    {
-      return jointToGoOffline;
+      this.jointOfflineHashCode = jointOfflineHashCode;
    }
 
    @Override
    public void set(JointOfflineCommand other)
    {
-      //TODO set all fields to 0 and null
       sequenceId = other.sequenceId;
-      jointToGoOffline = other.jointToGoOffline;
+      jointOfflineHashCode = other.jointOfflineHashCode;
    }
 
    @Override
    public void setFromMessage(JointOfflineMessage message)
    {
-      //TODO if anything is done with the message, update this
-      //      sequenceId = message.getSequenceId();
-      //      jointToGoOffline = message.getJointToGoOffline();
+      sequenceId = message.getSequenceId();
+      jointOfflineHashCode = message.getJointOfflineHashCode();
    }
 
    @Override
    public void clear()
    {
-      //TODO copied from foot load bearing message
       sequenceId = 0;
-      //      jointToGoOffline = null; //dont do this for now
+      jointOfflineHashCode = -1;
    }
 
    @Override
    public boolean isCommandValid()
    {
-      if (jointToGoOffline == null)
-         return false;
       return true;
    }
 
