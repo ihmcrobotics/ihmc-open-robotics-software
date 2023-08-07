@@ -15,7 +15,7 @@ public class FootstepQueueStatusMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "29ba3fb382e1214f8686ae1f533431471169cd9d424c2a54c559d1a8b4469911";
+   		return "b62955e8ff2af8e30e3b8aef3ec2c1993b3589ffceb2bef354cf769e4eb19a70";
    }
    
    @Override
@@ -54,6 +54,10 @@ public class FootstepQueueStatusMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.QueuedFootstepStatusMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -73,6 +77,12 @@ public class FootstepQueueStatusMessagePubSubType implements us.ihmc.pubsub.Topi
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getQueuedFootstepList().size(); ++i0)
       {
@@ -86,6 +96,10 @@ public class FootstepQueueStatusMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       cdr.write_type_4(data.getSequenceId());
 
+      cdr.write_type_7(data.getIsFirstStepInSwing());
+
+      cdr.write_type_6(data.getTimeInSupportSequence());
+
       if(data.getQueuedFootstepList().size() <= 50)
       cdr.write_type_e(data.getQueuedFootstepList());else
           throw new RuntimeException("queued_footstep_list field exceeds the maximum length");
@@ -96,6 +110,10 @@ public class FootstepQueueStatusMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       data.setSequenceId(cdr.read_type_4());
       	
+      data.setIsFirstStepInSwing(cdr.read_type_7());
+      	
+      data.setTimeInSupportSequence(cdr.read_type_6());
+      	
       cdr.read_type_e(data.getQueuedFootstepList());	
 
    }
@@ -104,6 +122,8 @@ public class FootstepQueueStatusMessagePubSubType implements us.ihmc.pubsub.Topi
    public final void serialize(controller_msgs.msg.dds.FootstepQueueStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_7("is_first_step_in_swing", data.getIsFirstStepInSwing());
+      ser.write_type_6("time_in_support_sequence", data.getTimeInSupportSequence());
       ser.write_type_e("queued_footstep_list", data.getQueuedFootstepList());
    }
 
@@ -111,6 +131,8 @@ public class FootstepQueueStatusMessagePubSubType implements us.ihmc.pubsub.Topi
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.FootstepQueueStatusMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setIsFirstStepInSwing(ser.read_type_7("is_first_step_in_swing"));
+      data.setTimeInSupportSequence(ser.read_type_6("time_in_support_sequence"));
       ser.read_type_e("queued_footstep_list", data.getQueuedFootstepList());
    }
 

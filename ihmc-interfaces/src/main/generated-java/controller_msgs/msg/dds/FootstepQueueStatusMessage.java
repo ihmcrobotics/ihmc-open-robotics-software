@@ -18,6 +18,14 @@ public class FootstepQueueStatusMessage extends Packet<FootstepQueueStatusMessag
             */
    public long sequence_id_;
    /**
+            * Specifies whether the first step in the queue list is currently being taken in swing
+            */
+   public boolean is_first_step_in_swing_;
+   /**
+            * Specifies the time in the current support sequence of the current step. This could be in transfer, or in swing
+            */
+   public double time_in_support_sequence_;
+   /**
             * Defines the list of footsteps contained in the queue.
             */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.QueuedFootstepStatusMessage>  queued_footstep_list_;
@@ -38,6 +46,10 @@ public class FootstepQueueStatusMessage extends Packet<FootstepQueueStatusMessag
    {
       sequence_id_ = other.sequence_id_;
 
+      is_first_step_in_swing_ = other.is_first_step_in_swing_;
+
+      time_in_support_sequence_ = other.time_in_support_sequence_;
+
       queued_footstep_list_.set(other.queued_footstep_list_);
    }
 
@@ -54,6 +66,36 @@ public class FootstepQueueStatusMessage extends Packet<FootstepQueueStatusMessag
    public long getSequenceId()
    {
       return sequence_id_;
+   }
+
+   /**
+            * Specifies whether the first step in the queue list is currently being taken in swing
+            */
+   public void setIsFirstStepInSwing(boolean is_first_step_in_swing)
+   {
+      is_first_step_in_swing_ = is_first_step_in_swing;
+   }
+   /**
+            * Specifies whether the first step in the queue list is currently being taken in swing
+            */
+   public boolean getIsFirstStepInSwing()
+   {
+      return is_first_step_in_swing_;
+   }
+
+   /**
+            * Specifies the time in the current support sequence of the current step. This could be in transfer, or in swing
+            */
+   public void setTimeInSupportSequence(double time_in_support_sequence)
+   {
+      time_in_support_sequence_ = time_in_support_sequence;
+   }
+   /**
+            * Specifies the time in the current support sequence of the current step. This could be in transfer, or in swing
+            */
+   public double getTimeInSupportSequence()
+   {
+      return time_in_support_sequence_;
    }
 
 
@@ -85,6 +127,10 @@ public class FootstepQueueStatusMessage extends Packet<FootstepQueueStatusMessag
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_first_step_in_swing_, other.is_first_step_in_swing_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.time_in_support_sequence_, other.time_in_support_sequence_, epsilon)) return false;
+
       if (this.queued_footstep_list_.size() != other.queued_footstep_list_.size()) { return false; }
       else
       {
@@ -107,6 +153,10 @@ public class FootstepQueueStatusMessage extends Packet<FootstepQueueStatusMessag
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
+      if(this.is_first_step_in_swing_ != otherMyClass.is_first_step_in_swing_) return false;
+
+      if(this.time_in_support_sequence_ != otherMyClass.time_in_support_sequence_) return false;
+
       if (!this.queued_footstep_list_.equals(otherMyClass.queued_footstep_list_)) return false;
 
       return true;
@@ -120,6 +170,10 @@ public class FootstepQueueStatusMessage extends Packet<FootstepQueueStatusMessag
       builder.append("FootstepQueueStatusMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
+      builder.append("is_first_step_in_swing=");
+      builder.append(this.is_first_step_in_swing_);      builder.append(", ");
+      builder.append("time_in_support_sequence=");
+      builder.append(this.time_in_support_sequence_);      builder.append(", ");
       builder.append("queued_footstep_list=");
       builder.append(this.queued_footstep_list_);
       builder.append("}");
