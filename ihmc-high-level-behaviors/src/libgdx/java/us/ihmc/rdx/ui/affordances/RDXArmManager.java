@@ -23,7 +23,6 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.teleoperation.RDXDesiredRobot;
 import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
-import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -201,16 +200,7 @@ public class RDXArmManager
          ImGui.sameLine();
          if (ImGui.button(labels.get("Home " + side.getPascalCaseName())))
          {
-            GoHomeMessage armHomeMessage = new GoHomeMessage();
-            armHomeMessage.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
-
-            if (side == RobotSide.LEFT)
-               armHomeMessage.setRobotSide(GoHomeMessage.ROBOT_SIDE_LEFT);
-            else
-               armHomeMessage.setRobotSide(GoHomeMessage.ROBOT_SIDE_RIGHT);
-
-            armHomeMessage.setTrajectoryTime(teleoperationParameters.getTrajectoryTime());
-            communicationHelper.publishToController(armHomeMessage);
+            homePosition(side);
          }
       }
 
@@ -256,6 +246,29 @@ public class RDXArmManager
       }
 
       ImGui.checkbox(labels.get("Hand wrench magnitudes on 3D View"), indicateWrenchOnScreen);
+   }
+
+   public Runnable executeHomePosition(RobotSide side)
+   {
+      Runnable runnable = () ->
+      {
+         homePosition(side);
+      };
+      return runnable;
+   }
+
+   private void homePosition(RobotSide side)
+   {
+      GoHomeMessage armHomeMessage = new GoHomeMessage();
+      armHomeMessage.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
+
+      if (side == RobotSide.LEFT)
+         armHomeMessage.setRobotSide(GoHomeMessage.ROBOT_SIDE_LEFT);
+      else
+         armHomeMessage.setRobotSide(GoHomeMessage.ROBOT_SIDE_RIGHT);
+
+      armHomeMessage.setTrajectoryTime(teleoperationParameters.getTrajectoryTime());
+      communicationHelper.publishToController(armHomeMessage);
    }
 
    public Runnable executeDoorAvoidance(RobotSide side)
