@@ -1,7 +1,6 @@
 #ifndef __controller_msgs__msg__QueuedFootstepStatusMessage__idl__
 #define __controller_msgs__msg__QueuedFootstepStatusMessage__idl__
 
-#include "controller_msgs/msg/./StepConstraintsListMessage_.idl"
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Quaternion_.idl"
 module controller_msgs
@@ -42,18 +41,6 @@ module controller_msgs
          */
         geometry_msgs::msg::dds::Quaternion orientation;
         /**
-         * Predicted contact points represent the vertices of the expected contact polygon between the foot and the world.
-         * An empty list will request the controller to use the default foot support polygon.
-         * Contact points  are expressed in sole frame. The ordering does not matter.
-         * For example: to tell the controller to use the entire foot, the predicted contact points would be:
-         * - x: 0.5 * foot_length, y: -0.5 * toe_width
-         * - x: 0.5 * foot_length, y: 0.5 * toe_width
-         * - x: -0.5 * foot_length, y: -0.5 * heel_width
-         * - x: -0.5 * foot_length, y: 0.5 * heel_width
-         * Note: The z coordinate of each point is ignored.
-         */
-        sequence<geometry_msgs::msg::dds::Point, 10> predicted_contact_points_2d;
-        /**
          * The swingDuration is the time a foot is not in ground contact during a step.
          * If the value of this field is invalid (not positive) it will be replaced by a default swing_duration.
          */
@@ -65,10 +52,6 @@ module controller_msgs
          */
         @defaultValue(value=-1.0)
         double transfer_duration;
-        /**
-         * Step constraint regions to be used by this footstep
-         */
-        controller_msgs::msg::dds::StepConstraintsListMessage step_constraints;
       };
     };
   };

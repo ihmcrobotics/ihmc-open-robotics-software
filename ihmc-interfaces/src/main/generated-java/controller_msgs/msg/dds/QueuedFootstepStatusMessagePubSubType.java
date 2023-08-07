@@ -15,7 +15,7 @@ public class QueuedFootstepStatusMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c3bbea7ceec4840fe0d5b67412f5cb4a79665e02362462feab1f1048796cfb8e";
+   		return "1a019ecab63ba5a0fad83ac9bd253d3bca048060f7ce7fe0b994626649418dda";
    }
    
    @Override
@@ -60,14 +60,9 @@ public class QueuedFootstepStatusMessagePubSubType implements us.ihmc.pubsub.Top
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
-      {
-          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += controller_msgs.msg.dds.StepConstraintsListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -92,18 +87,11 @@ public class QueuedFootstepStatusMessagePubSubType implements us.ihmc.pubsub.Top
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getOrientation(), current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getPredictedContactPoints2d().size(); ++i0)
-      {
-          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getPredictedContactPoints2d().get(i0), current_alignment);}
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-
-      current_alignment += controller_msgs.msg.dds.StepConstraintsListMessagePubSubType.getCdrSerializedSize(data.getStepConstraints(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -117,15 +105,10 @@ public class QueuedFootstepStatusMessagePubSubType implements us.ihmc.pubsub.Top
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getLocation(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getOrientation(), cdr);
-      if(data.getPredictedContactPoints2d().size() <= 10)
-      cdr.write_type_e(data.getPredictedContactPoints2d());else
-          throw new RuntimeException("predicted_contact_points_2d field exceeds the maximum length");
-
       cdr.write_type_6(data.getSwingDuration());
 
       cdr.write_type_6(data.getTransferDuration());
 
-      controller_msgs.msg.dds.StepConstraintsListMessagePubSubType.write(data.getStepConstraints(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.QueuedFootstepStatusMessage data, us.ihmc.idl.CDR cdr)
@@ -136,12 +119,10 @@ public class QueuedFootstepStatusMessagePubSubType implements us.ihmc.pubsub.Top
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getLocation(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientation(), cdr);	
-      cdr.read_type_e(data.getPredictedContactPoints2d());	
       data.setSwingDuration(cdr.read_type_6());
       	
       data.setTransferDuration(cdr.read_type_6());
       	
-      controller_msgs.msg.dds.StepConstraintsListMessagePubSubType.read(data.getStepConstraints(), cdr);	
 
    }
 
@@ -154,11 +135,8 @@ public class QueuedFootstepStatusMessagePubSubType implements us.ihmc.pubsub.Top
 
       ser.write_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
 
-      ser.write_type_e("predicted_contact_points_2d", data.getPredictedContactPoints2d());
       ser.write_type_6("swing_duration", data.getSwingDuration());
       ser.write_type_6("transfer_duration", data.getTransferDuration());
-      ser.write_type_a("step_constraints", new controller_msgs.msg.dds.StepConstraintsListMessagePubSubType(), data.getStepConstraints());
-
    }
 
    @Override
@@ -170,11 +148,8 @@ public class QueuedFootstepStatusMessagePubSubType implements us.ihmc.pubsub.Top
 
       ser.read_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
 
-      ser.read_type_e("predicted_contact_points_2d", data.getPredictedContactPoints2d());
       data.setSwingDuration(ser.read_type_6("swing_duration"));
       data.setTransferDuration(ser.read_type_6("transfer_duration"));
-      ser.read_type_a("step_constraints", new controller_msgs.msg.dds.StepConstraintsListMessagePubSubType(), data.getStepConstraints());
-
    }
 
    public static void staticCopy(controller_msgs.msg.dds.QueuedFootstepStatusMessage src, controller_msgs.msg.dds.QueuedFootstepStatusMessage dest)
