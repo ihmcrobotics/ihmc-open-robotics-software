@@ -262,10 +262,7 @@ public class RDXArmManager
    {
       Runnable runnable = () ->
       {
-         ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
-                                                                                                     teleoperationParameters.getTrajectoryTime(),
-                                                                                                     doorAvoidanceArms.get(side));
-         communicationHelper.publishToController(armTrajectoryMessage);
+         doorAvoidance(side);
       };
       return runnable;
    }
