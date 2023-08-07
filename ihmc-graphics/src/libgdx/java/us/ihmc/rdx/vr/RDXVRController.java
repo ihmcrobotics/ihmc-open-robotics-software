@@ -89,7 +89,11 @@ public class RDXVRController extends RDXVRTrackedDevice
    private InputAnalogActionData joystickActionData;
    private final LongBuffer gripActionHandle = BufferUtils.newLongBuffer(1);
    private InputAnalogActionData gripActionData;
-   private RDXVRJoystickSelection joystickSelection = RDXVRJoystickSelection.NONE;
+   private RDXVRJoystickSelection joystickSelection;
+   private Point3D topJoystickOffset;
+   private Point3D bottomJoystickOffset;
+   private Point3D leftJoystickOffset;
+   private Point3D rightJoystickOffset;
 
    private boolean gripAsButtonDown = false;
 
@@ -128,6 +132,7 @@ public class RDXVRController extends RDXVRTrackedDevice
    private RDXModelInstance joystickSphere;
    private ModifiableReferenceFrame joystickSpherePoseFrame;
    private ModifiableReferenceFrame joystickReferenceFrame;
+   private final FramePose3D joystickFramePose = new FramePose3D();
    private final FramePose3D joystickSphereFramePose = new FramePose3D();
    private  RDXVRControllerButtonLabel aButtonLabel;
    private  RDXVRControllerButtonLabel bButtonLabel;
@@ -225,10 +230,10 @@ public class RDXVRController extends RDXVRTrackedDevice
             // for the Valve Index controllers.
             Point3D aButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.085, -0.01, -0.02) : new Point3D(-0.082, -0.01, -0.017);
             Point3D bButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.07, -0.013, -0.015) : new Point3D(-0.07, -0.007, -0.008);
-            Point3D topJoystickOffset = new Point3D(0.1, 0.0, 0.0);
-            Point3D bottomJoystickOffset = new Point3D(-0.1, 0.0, -0.006);
-            Point3D rightJoystickOffset = new Point3D(0.0, 0.1, -0.002);
-            Point3D leftJoystickOffset = new Point3D(0.0, -0.1, -0.002);
+            topJoystickOffset = new Point3D(0.1, 0.0, 0.0);
+            bottomJoystickOffset = new Point3D(-0.1, 0.0, -0.006);
+            rightJoystickOffset = new Point3D(0.0, -0.1, -0.002);
+            leftJoystickOffset = new Point3D(0.0, 0.1, -0.002);
             Point3D gripAmountOffset = side == RobotSide.LEFT ? new Point3D(-0.1, -0.0, -0.07) : new Point3D(-0.1, 0.0, -0.07);
             YawPitchRoll gripAmountOrientation = side == RobotSide.LEFT ?
                   new YawPitchRoll(Math.toRadians(90.0), Math.toRadians(-37.0), Math.toRadians(90.0)) :
@@ -251,6 +256,11 @@ public class RDXVRController extends RDXVRTrackedDevice
          pickRay.setToZero(getPickPoseFrame());
          pickRay.getDirection().set(Axis3D.X);
          pickRay.changeFrame(ReferenceFrame.getWorldFrame());
+
+         joystickReferenceFrame.getReferenceFrame().update();
+         joystickFramePose.setToZero(joystickReferenceFrame.getReferenceFrame());
+         joystickFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+
 
          joystickSpherePoseFrame.getReferenceFrame().update();
          joystickSphereFramePose.setToZero(joystickSpherePoseFrame.getReferenceFrame());
@@ -589,5 +599,36 @@ public class RDXVRController extends RDXVRTrackedDevice
       bottomJoystickLabel.setText("");
       leftJoystickLabel.setText("");
       rightJoystickLabel.setText("");
+   }
+
+   public FramePose3D getJoystickFramePose()
+   {
+      return joystickFramePose;
+   }
+
+   public ModifiableReferenceFrame getJoystickReferenceFrame()
+   {
+      return joystickReferenceFrame;
+   }
+
+   public Point3D offset()
+   {
+      if (joystickSelection != null)
+      {
+         switch (joystickSelection)
+         {
+            case EXECUTE:
+               return leftJoystickOffset;
+            case DELETE_INTERACTABLE:
+               return rightJoystickOffset;
+            case OPEN_HAND:
+               return topJoystickOffset;
+            case CLOSE_HAND:
+               return bottomJoystickOffset;
+            default:
+               return null;
+         }
+      }
+      return null;
    }
 }
