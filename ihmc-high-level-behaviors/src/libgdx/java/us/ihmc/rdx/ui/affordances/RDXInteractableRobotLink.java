@@ -149,64 +149,29 @@ public class RDXInteractableRobotLink
             isVRHovering |= isHovering;
 
             RDXVRDragData gripDragData = controller.getGripDragData();
-            InputAnalogActionData joystick = controller.getJoystickActionData();
             InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
 
             if (isHovering)
             {
-               controller.setTopJoystickText("Open Hand");
-               controller.setBottomJoystickText("Close Hand");
-               controller.setRightJoystickText("Delete Interactable");
-               controller.setLeftJoystickText("Execute");
-               if (joystick.x() < 0 && Math.abs(joystick.x()) > Math.abs(joystick.y())
-                   || controller.getJoystickSelection() == RDXVRJoystickSelection.DOOR_AVOIDANCE)
-               {
-                  controller.setAllJoystickTextNull();
-                  controller.setLeftJoystickText("Execute");
-                  controller.setJoystickSelection(RDXVRJoystickSelection.DOOR_AVOIDANCE);
-               }
-               if (joystick.x() > 0 && Math.abs(joystick.x()) > Math.abs(joystick.y())
-                   || controller.getJoystickSelection() == RDXVRJoystickSelection.DELETE_INTERACTABLE)
-               {
-                  controller.setAllJoystickTextNull();
-                  controller.setRightJoystickText("Delete Interactable");
-                  controller.setJoystickSelection(RDXVRJoystickSelection.DELETE_INTERACTABLE);
-               }
-               if (joystick.y() > 0 && Math.abs(joystick.y()) > Math.abs(joystick.x()) || controller.getJoystickSelection() == RDXVRJoystickSelection.OPEN_HAND)
-               {
-                  controller.setAllJoystickTextNull();
-                  controller.setTopJoystickText("Open Hand");
-                  controller.setJoystickSelection(RDXVRJoystickSelection.OPEN_HAND);
-               }
-               if (joystick.y() < 0 && Math.abs(joystick.y()) > Math.abs(joystick.x())
-                   || controller.getJoystickSelection() == RDXVRJoystickSelection.CLOSE_HAND)
-               {
-                  controller.setAllJoystickTextNull();
-                  controller.setBottomJoystickText("Close Hand");
-                  controller.setJoystickSelection(RDXVRJoystickSelection.CLOSE_HAND);
-               }
-               if (joystick.x() == 0 && joystick.y() == 0)
-               {
-                  controller.setJoystickSelection(RDXVRJoystickSelection.NONE);
-               }
+               controller.controlOfRadialMenu("Open Hand", "Close Hand", "Delete Interactable", "Door Avoidance");
                if (joystickButton.bChanged() && joystickButton.bState())
                {
                   switch (controller.getJoystickSelection())
                   {
-                     case DOOR_AVOIDANCE:
+                     case LEFT_RING:
                         armExecutable.run();
                         break;
-                     case DELETE_INTERACTABLE:
+                     case RIGHT_RING:
                         delete();
                         controller.setJoystickSelection(RDXVRJoystickSelection.NONE);
                         break;
-                     case OPEN_HAND:
+                     case TOP_RING:
                         if (openCommands != null)
                         {
                            openCommands.run();
                            break;
                         }
-                     case CLOSE_HAND:
+                     case BOTTOM_RING:
                         if (closeCommands != null)
                         {
                            closeCommands.run();

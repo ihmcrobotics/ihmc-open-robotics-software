@@ -593,6 +593,45 @@ public class RDXVRController extends RDXVRTrackedDevice
       this.joystickSelection = joystickSelection;
    }
 
+   public void controlOfRadialMenu(String text1, String text2, String text3, String text4)
+   {
+      setTopJoystickText(text1);
+      setBottomJoystickText(text2);
+      setRightJoystickText(text3);
+      setLeftJoystickText(text4);
+      if (joystickActionData.x() < 0 && Math.abs(joystickActionData.x()) > Math.abs(joystickActionData.y())
+          || joystickSelection == RDXVRJoystickSelection.LEFT_RING)
+      {
+         setAllJoystickTextNull();
+         setLeftJoystickText(text4);
+         setJoystickSelection(RDXVRJoystickSelection.LEFT_RING);
+      }
+      if (joystickActionData.x() > 0 && Math.abs(joystickActionData.x()) > Math.abs(joystickActionData.y())
+          || joystickSelection == RDXVRJoystickSelection.RIGHT_RING)
+      {
+         setAllJoystickTextNull();
+         setRightJoystickText(text3);
+         setJoystickSelection(RDXVRJoystickSelection.RIGHT_RING);
+      }
+      if (joystickActionData.y() > 0 && Math.abs(joystickActionData.y()) > Math.abs(joystickActionData.x())
+          || joystickSelection == RDXVRJoystickSelection.TOP_RING)
+      {
+         setAllJoystickTextNull();
+         setTopJoystickText(text1);
+         setJoystickSelection(RDXVRJoystickSelection.TOP_RING);
+      }
+      if (joystickActionData.y() < 0 && Math.abs(joystickActionData.y()) > Math.abs(joystickActionData.x())
+          || joystickSelection == RDXVRJoystickSelection.BOTTOM_RING)
+      {
+         setAllJoystickTextNull();
+         setBottomJoystickText(text2);
+         setJoystickSelection(RDXVRJoystickSelection.BOTTOM_RING);
+      }
+      if (joystickActionData.x() == 0 && joystickActionData.y() == 0)
+      {
+         setJoystickSelection(RDXVRJoystickSelection.NONE);
+      }
+   }
    public void setAllJoystickTextNull()
    {
       topJoystickLabel.setText("");
@@ -617,13 +656,13 @@ public class RDXVRController extends RDXVRTrackedDevice
       {
          switch (joystickSelection)
          {
-            case DOOR_AVOIDANCE:
+            case LEFT_RING:
                return leftJoystickOffset;
-            case DELETE_INTERACTABLE:
+            case RIGHT_RING:
                return rightJoystickOffset;
-            case OPEN_HAND:
+            case TOP_RING:
                return topJoystickOffset;
-            case CLOSE_HAND:
+            case BOTTOM_RING:
                return bottomJoystickOffset;
             default:
                return null;
