@@ -36,6 +36,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajecto
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandWrenchTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadHybridJointspaceTaskspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointOfflineCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LegTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LoadBearingCommand;
@@ -51,13 +52,12 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3Trajector
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StepConstraintRegionCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StepConstraintsListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WrenchTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
 import us.ihmc.humanoidRobotics.communication.fastWalkingAPI.FastWalkingGaitParametersCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -96,6 +96,9 @@ public class WalkingCommandConsumer
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
 
    private final ManipulationAbortedStatus manipulationAbortedStatus = new ManipulationAbortedStatus();
+   
+   private OneDoFJointBasics jointOffline;
+   private final YoBoolean isJointOffline = new YoBoolean("isJointOffline", registry);
 
    public WalkingCommandConsumer(CommandInputManager commandInputManager,
                                  StatusMessageOutputManager statusMessageOutputManager,
@@ -161,6 +164,7 @@ public class WalkingCommandConsumer
       commandsToRegister.add(PrepareForLocomotionCommand.class);
       commandsToRegister.add(DirectionalControlInputCommand.class);
       commandsToRegister.add(FastWalkingGaitParametersCommand.class);
+      commandsToRegister.add(JointOfflineCommand.class);
 
       commandConsumerWithDelayBuffers = new CommandConsumerWithDelayBuffers(commandInputManager, commandsToRegister, yoTime);
 
@@ -234,7 +238,7 @@ public class WalkingCommandConsumer
 
       commandConsumerWithDelayBuffers.update();
    }
-
+   
    public void consumeHeadCommands()
    {
       if (headManager == null)
@@ -548,6 +552,29 @@ public class WalkingCommandConsumer
       }
    }
 
+   
+   
+   public void consumeJointOfflineCommand()
+   {
+//    fields for OneDoFJoint offlineJoint, boolean field with getter for "is a joint offline"
+      
+      if (!commandConsumerWithDelayBuffers.isNewCommandAvailable(JointOfflineCommand.class))
+         return;
+      
+      JointOfflineCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(JointOfflineCommand.class);
+      jointOffline = command.getJointToGoOffline(); //this shouldnt be returning null
+   }
+   
+   public boolean isJointOffline()
+   {
+      return jointOffline != null;
+   }
+   
+   public OneDoFJointBasics getJointOffline()
+   {
+      return jointOffline;
+   }
+   
    public void consumeStopAllTrajectoryCommands()
    {
       if (!commandConsumerWithDelayBuffers.isNewCommandAvailable(StopAllTrajectoryCommand.class))

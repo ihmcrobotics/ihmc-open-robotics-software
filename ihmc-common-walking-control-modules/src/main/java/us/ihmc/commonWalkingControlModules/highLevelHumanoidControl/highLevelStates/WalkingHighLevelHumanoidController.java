@@ -30,6 +30,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.WalkingCommandConsumer;
@@ -143,6 +144,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
    private final DoubleProvider unloadFraction;
+   private final JointTorqueCommand jointOfflineTorqueCommand = new JointTorqueCommand();
 
    private final ParameterizedControllerCoreOptimizationSettings controllerCoreOptimizationSettings;
 
@@ -644,7 +646,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       commandConsumer.handleAutomaticManipulationAbortOnICPError(currentState);
       commandConsumer.consumeLoadBearingCommands();
       commandConsumer.consumePrepareForLocomotionCommands();
-
+      commandConsumer.consumeJointOfflineCommand();
+      
       updateFailureDetection();
 
       walkingStateTimer.startMeasurement();
@@ -906,6 +909,15 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
          controllerCoreCommand.addInverseDynamicsCommand(legElasticityDebuggator.getInverseDynamicsCommand());
+      
+      if (commandConsumer.isJointOffline())
+      {
+         jointOfflineTorqueCommand.clear();
+         jointOfflineTorqueCommand.addJoint(commandConsumer.getJointOffline(), 0.0);
+         jointOfflineTorqueCommand.setWeight(1000.0);
+         
+         controllerCoreCommand.addInverseDynamicsCommand(jointOfflineTorqueCommand);
+      }
    }
 
    public ControllerCoreCommand getControllerCoreCommand()
