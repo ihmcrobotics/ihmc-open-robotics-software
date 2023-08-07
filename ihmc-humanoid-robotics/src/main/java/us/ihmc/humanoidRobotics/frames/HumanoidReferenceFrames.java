@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.frames;
 
-import java.util.EnumMap;
-
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -12,12 +10,7 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.partNames.LimbName;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.partNames.RobotSpecificJointNames;
-import us.ihmc.robotics.partNames.SpineJointName;
+import us.ihmc.robotics.partNames.*;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingMidFootZUpGroundFrame;
@@ -27,6 +20,8 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.containers.ContainerTools;
+
+import java.util.EnumMap;
 
 public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 {
@@ -59,6 +54,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    private ReferenceFrame headCameraFrame;
    private ReferenceFrame steppingCameraFrame;
    private ReferenceFrame objectDetectionCameraFrame;
+   private SideDependentList<ReferenceFrame> situationalAwarenessCameraFrame = new SideDependentList<>();
    private ReferenceFrame experimentalCameraFrame;
    private ReferenceFrame ousterLidarFrame;
 
@@ -233,6 +229,8 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       {
          steppingCameraFrame = sensorInformation.getSteppingCameraFrame(this);
          objectDetectionCameraFrame = sensorInformation.getObjectDetectionCameraFrame(this);
+         situationalAwarenessCameraFrame.set(RobotSide.LEFT, sensorInformation.getSituationalAwarenessCameraFrame(RobotSide.LEFT, this));
+         situationalAwarenessCameraFrame.set(RobotSide.RIGHT, sensorInformation.getSituationalAwarenessCameraFrame(RobotSide.RIGHT, this));
          experimentalCameraFrame = sensorInformation.getExperimentalCameraFrame(this);
          ousterLidarFrame = sensorInformation.getOusterLidarFrame(this);
       }
@@ -397,12 +395,18 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       if (lidarSensorFrame != null)
          lidarSensorFrame.update();
       if (steppingCameraFrame != null)
-      {
          steppingCameraFrame.update();
+      if (objectDetectionCameraFrame != null)
          objectDetectionCameraFrame.update();
+      situationalAwarenessCameraFrame.forEach((side, frame) ->
+      {
+         if (frame != null)
+            frame.update();
+      });
+      if (experimentalCameraFrame != null)
          experimentalCameraFrame.update();
+      if (ousterLidarFrame != null)
          ousterLidarFrame.update();
-      }
    }
 
    @Override
@@ -471,6 +475,11 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    public ReferenceFrame getObjectDetectionCameraFrame()
    {
       return objectDetectionCameraFrame;
+   }
+
+   public ReferenceFrame getSituationalAwarenessCameraFrame(RobotSide side)
+   {
+      return situationalAwarenessCameraFrame.get(side);
    }
 
    public ReferenceFrame getExperimentalCameraFrame()

@@ -41,26 +41,31 @@ public class SensorHeadParameters
    public static final double OUSTER_PITCH_ANGLE_DEGREES = 35.0;
 
    /**
-    * Blackfly fisheye pose is tuned relative to Ouster here, by using the RDXBlackflyCalibrationSuite, visual alignment, and CAD measurement.
+    * This one represents the one on Nadia
+    * Inverted y in respect to FISHEYE_RIGHT_TO_OUSTER_TRANSFORM_ON_ROBOT
+    *
+    * TODO: manually measure these
     */
-   public static final RigidBodyTransform FISHEYE_TO_OUSTER_TRANSFORM_BENCHTOP = new RigidBodyTransform();
+   public static final RigidBodyTransform FISHEYE_LEFT_TO_OUSTER_TRANSFORM_ON_ROBOT = new RigidBodyTransform();
    static
    {
-      FISHEYE_TO_OUSTER_TRANSFORM_BENCHTOP.getTranslation().set(0.001668, -0.070, -0.077);
-      EuclidCoreMissingTools.setYawPitchRollDegrees(FISHEYE_TO_OUSTER_TRANSFORM_BENCHTOP.getRotation(), 0.000, -25.0, 0.000);
+      FISHEYE_LEFT_TO_OUSTER_TRANSFORM_ON_ROBOT.getTranslation().set(-0.001668, 0.0675, -0.043698);
+      Tuple3DReadOnly ousterBaseToBeamTranslation = getOusterBaseToBeamTranslation(OUSTER_PITCH_ANGLE_DEGREES);
+      FISHEYE_LEFT_TO_OUSTER_TRANSFORM_ON_ROBOT.getTranslation().sub(ousterBaseToBeamTranslation);
+      EuclidCoreMissingTools.setYawPitchRollDegrees(FISHEYE_LEFT_TO_OUSTER_TRANSFORM_ON_ROBOT.getRotation(), 0.000, -25.0, 0.000);
    }
 
    /**
-    * This one represents the one on Nadia, with different mounting parts than the benchtop.
+    * This one represents the one on Nadia
     * These numbers taken from CAD by @eyu, and entered by @dcalvert.
     */
-   public static final RigidBodyTransform FISHEYE_TO_OUSTER_TRANSFORM_ON_ROBOT = new RigidBodyTransform();
+   public static final RigidBodyTransform FISHEYE_RIGHT_TO_OUSTER_TRANSFORM_ON_ROBOT = new RigidBodyTransform();
    static
    {
-      FISHEYE_TO_OUSTER_TRANSFORM_ON_ROBOT.getTranslation().set(-0.001668, -0.0675, -0.043698);
+      FISHEYE_RIGHT_TO_OUSTER_TRANSFORM_ON_ROBOT.getTranslation().set(-0.001668, -0.0675, -0.043698);
       Tuple3DReadOnly ousterBaseToBeamTranslation = getOusterBaseToBeamTranslation(OUSTER_PITCH_ANGLE_DEGREES);
-      FISHEYE_TO_OUSTER_TRANSFORM_ON_ROBOT.getTranslation().sub(ousterBaseToBeamTranslation);
-      EuclidCoreMissingTools.setYawPitchRollDegrees(FISHEYE_TO_OUSTER_TRANSFORM_ON_ROBOT.getRotation(), 0.000, -25.0, 0.000);
+      FISHEYE_RIGHT_TO_OUSTER_TRANSFORM_ON_ROBOT.getTranslation().sub(ousterBaseToBeamTranslation);
+      EuclidCoreMissingTools.setYawPitchRollDegrees(FISHEYE_RIGHT_TO_OUSTER_TRANSFORM_ON_ROBOT.getRotation(), 0.000, -25.0, 0.000);
    }
 
    /**
