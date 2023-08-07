@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImFloat;
@@ -17,16 +19,23 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
+import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectLibrary;
 import us.ihmc.rdx.simulation.environment.object.RDXSimpleObject;
 import us.ihmc.rdx.simulation.environment.object.objects.RDXBuildingObject;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.robotics.interaction.StepCheckIsPointInsideAlgorithm;
+import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.JSONTools;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.tools.io.WorkspaceResourceFile;
 
 import java.util.ArrayList;
 
@@ -37,6 +46,7 @@ public class RDXBuildingConstructor extends ImGuiPanel
       NONE, CONSTRUCTING, PLACING, DONE
    }
 
+   private final WorkspaceResourceDirectory environmentFilesDirectory = new WorkspaceResourceDirectory(getClass(), "/environments");
    private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(RDXEnvironmentBuilder.class, "Constructor");
    private final ArrayList<RDXSimpleObject> virtualObjects = new ArrayList<>();
    private RDXSimpleObject selectedObject;
@@ -47,8 +57,6 @@ public class RDXBuildingConstructor extends ImGuiPanel
 
    private final RDX3DPanel panel3D;
    private final Point3D tempIntersection = new Point3D();
-
-   private final RigidBodyTransform translationTransform = new RigidBodyTransform();
 
    private Point3D lastPickPoint = new Point3D();
 
@@ -239,47 +247,7 @@ public class RDXBuildingConstructor extends ImGuiPanel
             }
             case DONE:
             {
-               for (int i = 0; i < building.getCorners().size(); i++)
-               {
-                  Point3D corner = building.getCorners().get( (i + 1) % building.getCorners().size());
-                  Point3D previousCorner = building.getCorners().get(i % building.getCorners().size());
-                  double yaw = EuclidGeometryTools.angleFromFirstToSecondVector2D(corner.getX() - previousCorner.getX(),
-                                                                                  corner.getY() - previousCorner.getY(),
-                                                                                  1,
-                                                                                  0);
-                  float length = (float)EuclidGeometryTools.distanceBetweenPoint3Ds(corner.getX(),
-                                                                                corner.getY(),
-                                                                                corner.getZ(),
-                                                                                previousCorner.getX(),
-                                                                                previousCorner.getY(),
-                                                                                previousCorner.getZ());
-                  Point3D midPoint = new Point3D(0.0, 0.0, 0.0);
-                  midPoint.add(corner);
-                  midPoint.add(previousCorner);
-                  midPoint.scale(0.5);
-
-
-                  RDXSimpleObject objectToPlace = new RDXSimpleObject("BuildingWall_" + i);
-                  Model objectModel = RDXModelBuilder.createBox(length, 0.1f, building.getHeight(), Color.LIGHT_GRAY).model;
-
-                  Vector3DBasics translation = objectToPlace.getObjectTransform().getTranslation();
-                  translationTransform.setTranslationAndIdentityRotation(translation);
-                  objectToPlace.getObjectTransform().setRotationYawAndZeroTranslation(-yaw);
-                  objectToPlace.getObjectTransform().multiply(translationTransform);
-                  objectToPlace.setRealisticModel(objectModel);
-//                  objectToPlace.setCollisionModel(objectModel);
-
-                  Box3D collisionBox = new Box3D(length, 0.1f, building.getHeight());
-                  objectToPlace.setCollisionGeometryObject(collisionBox);
-                  objectToPlace.setCollisionModelColor(highlightColor, 0.2f);
-
-                  objectToPlace.getCollisionShapeOffset().getTranslation().add(0.0f, 0.0f, building.getHeight() / 2.0f);
-                  objectToPlace.getRealisticModelOffset().getTranslation().add(0.0f, 0.0f, building.getHeight() / 2.0f);
-                  objectToPlace.setPositionInWorld(midPoint);
-                  objectToPlace.getBoundingSphere().setRadius(building.getHeight() / 2.0f);
-
-                  building.insertComponent(RDXBuildingObject.ComponentType.WALLS, objectToPlace);
-               }
+               building.construct();
 
                selectedObject = null;
                virtualObjects.clear();
@@ -309,6 +277,19 @@ public class RDXBuildingConstructor extends ImGuiPanel
          if(ImGui.button("Create Stairs"))
          {
             constructStairwell(3, 4, 10, 3.0f, 3.0f, 12.0f);
+         }
+
+         if (ImGui.button("Save Building"))
+         {
+            LogTools.info("Saving building to JSON: {}", "building.json");
+            saveAsJSON("building.json");
+         }
+
+         if (ImGui.button("Load Building"))
+         {
+            LogTools.info("Loading building from JSON: {}", "building.json");
+            building = loadFromJSON("building.json");
+            LogTools.info("Building Found with {} Corners", building.getCorners().size());
          }
 
          ImGui.separator();
@@ -379,5 +360,45 @@ public class RDXBuildingConstructor extends ImGuiPanel
             building.insertComponent(RDXBuildingObject.ComponentType.PLATFORMS, platformObject);
          }
       }
+   }
+
+   public void saveAsJSON(String fileNameToSave)
+   {
+      JSONFileTools.saveToClasspath("ihmc-open-robotics-software",
+         "ihmc-high-level-behaviors/src/libgdx/resources",
+         "environments/" + fileNameToSave,
+         rootNode ->
+         {
+            ArrayNode objectsArrayNode = rootNode.putArray("objects");
+            for (Point3D corner : building.getCorners())
+            {
+               ObjectNode objectNode = objectsArrayNode.addObject();
+               objectNode.put("type", "Corner");
+               objectNode.put("x", corner.getX());
+               objectNode.put("y", corner.getY());
+               objectNode.put("z", corner.getZ());
+            }
+         });
+   }
+
+   public RDXBuildingObject loadFromJSON(String fileNameToLoad)
+   {
+      RDXBuildingObject building = new RDXBuildingObject();
+      JSONFileTools.load(new WorkspaceResourceFile(environmentFilesDirectory, fileNameToLoad),
+       rootNode ->
+       {
+          JSONTools.forEachArrayElement(rootNode, "objects", objectNode ->
+          {
+             float x = objectNode.get("x").floatValue();
+             float y = objectNode.get("y").floatValue();
+             float z = objectNode.get("z").floatValue();
+
+             building.addCorner(new Point3D(x, y, z));
+          });
+
+       });
+
+      building.construct();
+      return building;
    }
 }
