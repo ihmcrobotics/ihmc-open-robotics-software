@@ -153,11 +153,10 @@ public class RDXInteractableRobotLink
 
             if (isHovering)
             {
-               selectionCollisionBox.getPose().set(controller.getJoystickFramePose());
-                  controller.setTopJoystickText("Open Hand");
-                  controller.setBottomJoystickText("Close Hand");
-                  controller.setRightJoystickText("Delete Interactable");
-                  controller.setLeftJoystickText("Execute");
+               controller.setTopJoystickText("Open Hand");
+               controller.setBottomJoystickText("Close Hand");
+               controller.setRightJoystickText("Delete Interactable");
+               controller.setLeftJoystickText("Execute");
                if (joystick.x() < 0 && Math.abs(joystick.x()) > Math.abs(joystick.y()) || controller.getJoystickSelection() == RDXVRJoystickSelection.EXECUTE)
                {
                   controller.setAllJoystickTextNull();
@@ -391,13 +390,16 @@ public class RDXInteractableRobotLink
 
    private void updateHoverBoxFramePose(RobotSide side)
    {
-      selectionCollisionBox.getPose().getTranslation().add(boxOffset.get(side));
       wordsBoxReferenceFrame.getReferenceFrame().getTransformToParent().getTranslation().set(boxOffset.get(side));
       wordsBoxReferenceFrame.getReferenceFrame().update();
       wordsBoxFramePose.setToZero(wordsBoxReferenceFrame.getReferenceFrame());
       wordsBoxFramePose.getTranslation().add(boxOffset.get(side));
       wordsBoxFramePose.getTranslation().subY(0.03);
-      wordsBoxFramePose.getRotation().setToYawOrientation(-0.2);
+      if (side == RobotSide.RIGHT)
+      {
+         wordsBoxFramePose.getTranslation().addX(0.01);
+      }
+      wordsBoxFramePose.getRotation().setToYawOrientation(side.negateIfLeftSide(0.2));
       wordsBoxFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       wordsBoxMesh.setPoseInWorldFrame(wordsBoxFramePose);
    }
