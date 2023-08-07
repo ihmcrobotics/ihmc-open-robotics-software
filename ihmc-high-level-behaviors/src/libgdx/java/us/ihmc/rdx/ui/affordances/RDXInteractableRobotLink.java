@@ -151,9 +151,17 @@ public class RDXInteractableRobotLink
             RDXVRDragData gripDragData = controller.getGripDragData();
             InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
 
-            if (isHovering)
+            if (isHovering || gripDragData.getObjectBeingDragged() == this)
             {
+
                controller.controlOfRadialMenu("Open Hand", "Close Hand", "Delete Interactable", "Door Avoidance");
+               if (gripDragData.getDragJustStarted())
+               {
+                  modified = true;
+                  gripDragData.setObjectBeingDragged(this);
+                  gripDragData.setInteractableFrameOnDragStart(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
+               }
+
                if (joystickButton.bChanged() && joystickButton.bState())
                {
                   switch (controller.getJoystickSelection())
@@ -183,17 +191,6 @@ public class RDXInteractableRobotLink
             else
             {
                controller.setJoystickSelection(null);
-               controller.setAllJoystickTextNull();
-            }
-
-            if (isHovering || gripDragData.getObjectBeingDragged() == this)
-            {
-               if (gripDragData.getDragJustStarted())
-               {
-                  modified = true;
-                  gripDragData.setObjectBeingDragged(this);
-                  gripDragData.setInteractableFrameOnDragStart(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
-               }
             }
 
             if (gripDragData.isDragging() && gripDragData.getObjectBeingDragged() == this)
