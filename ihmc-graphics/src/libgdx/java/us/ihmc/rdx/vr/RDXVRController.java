@@ -269,7 +269,6 @@ public class RDXVRController extends RDXVRTrackedDevice
 
          aButtonLabel.setText("");
          bButtonLabel.setText("");
-         setAllJoystickTextNull();
          gripAmountLabel.setText("%.1f".formatted(gripActionData.x()));
       }
 
@@ -348,16 +347,21 @@ public class RDXVRController extends RDXVRTrackedDevice
          if (pickRayGraphic != null)
             pickRayGraphic.getRenderables(renderables, pool);
          if (pickRayCollisionPointGraphic != null)
-         {
             pickRayCollisionPointGraphic.getRenderables(renderables, pool);
+         if (aButtonLabel != null)
             aButtonLabel.getRenderables(renderables, pool);
+         if (bButtonLabel != null)
             bButtonLabel.getRenderables(renderables, pool);
+         if (topJoystickLabel != null)
             topJoystickLabel.getRenderables(renderables, pool);
+         if (bottomJoystickLabel != null)
             bottomJoystickLabel.getRenderables(renderables, pool);
-            leftJoystickLabel.getRenderables(renderables, pool);
+         if (rightJoystickLabel != null)
             rightJoystickLabel.getRenderables(renderables, pool);
+         if (leftJoystickLabel != null)
+            leftJoystickLabel.getRenderables(renderables, pool);
+         if (gripAmountLabel != null)
             gripAmountLabel.getRenderables(renderables, pool);
-         }
       }
    }
 
