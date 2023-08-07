@@ -378,11 +378,13 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       footstepQueueStatusMessage.setTimeInSupportSequence(timeInSupportSequence);
       footstepQueueStatusMessage.setIsFirstStepInSwing(isFirstSTepCurrentlyInSwing);
 
+      footstepStatus.getUniqueId()
       footstepQueueStatusMessage.getQueuedFootstepList().clear();
       // This foot is currently being taken. Add it to the front of the queue.
       if (footstepBeingExecuted != null)
       {
          QueuedFootstepStatusMessage queuedFootstepStatusMessage = footstepQueueStatusMessage.getQueuedFootstepList().add();
+         queuedFootstepStatusMessage.setSequenceId(footstepBeingExecuted.getSequenceID());
          packQueuedFootstepStatus(queuedFootstepStatusMessage, footstepBeingExecuted, footstepTimingBeingExecuted, stepConstraintsBeingExecuted);
 
       }
@@ -394,6 +396,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
          FootstepTiming upcomingTiming = upcomingFootstepTimings.get(i);
          StepConstraintRegionsList stepConstraints = upcomingStepConstraints.get(i);
 
+         queuedFootstepStatusMessage.setSequenceId(upcomingFootstep.getSequenceID());
          packQueuedFootstepStatus(queuedFootstepStatusMessage, upcomingFootstep, upcomingTiming, stepConstraints);
       }
 
