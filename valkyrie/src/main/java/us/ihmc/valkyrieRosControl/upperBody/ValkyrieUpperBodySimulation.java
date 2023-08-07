@@ -6,6 +6,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -13,14 +14,15 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.SimulationConstructionSet2;
@@ -69,6 +71,12 @@ public class ValkyrieUpperBodySimulation
    private final YoDouble chestRoll = new YoDouble("chestRoll", registry);
    private final YoDouble chestYaw = new YoDouble("chestYaw", registry);
 
+   private final SideDependentList<YoBoolean> submitArmCommand = new SideDependentList<>();
+   private final SideDependentList<YoDouble> shoulderPitch = new SideDependentList<>();
+   private final SideDependentList<YoDouble> shoulderRoll = new SideDependentList<>();
+   private final SideDependentList<YoDouble> shoulderYaw = new SideDependentList<>();
+   private final SideDependentList<YoDouble> elbowPitch = new SideDependentList<>();
+
    private final int simulationTicksPerControlTicks;
    private final YoLong doControlCounter = new YoLong("doControlCounter", registry);
 
@@ -82,6 +90,20 @@ public class ValkyrieUpperBodySimulation
       Pair<RigidBodyBasics, OneDoFJointBasics[]> upperBodySystem = ValkyrieUpperBodyController.createUpperBodySystem(robotModel);
       rootBody = upperBodySystem.getLeft();
       controlledOneDoFJoints = upperBodySystem.getRight();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         submitArmCommand.put(robotSide, new YoBoolean("submit" + robotSide.getCamelCaseNameForMiddleOfExpression() + "ArmCommand", registry));
+         shoulderPitch.put(robotSide, new YoDouble(robotSide.getCamelCaseNameForStartOfExpression() + "ShoulderPitch", registry));
+         shoulderRoll.put(robotSide, new YoDouble(robotSide.getCamelCaseNameForStartOfExpression() + "ShoulderRoll", registry));
+         shoulderYaw.put(robotSide, new YoDouble(robotSide.getCamelCaseNameForStartOfExpression() + "ShoulderYaw", registry));
+         elbowPitch.put(robotSide, new YoDouble(robotSide.getCamelCaseNameForStartOfExpression() + "ElbowPitch", registry));
+
+         shoulderPitch.get(robotSide).set(0.1);
+         shoulderRoll.get(robotSide).set(robotSide.negateIfRightSide(-1.0));
+         shoulderYaw.get(robotSide).set(0.1);
+         elbowPitch.get(robotSide).set(robotSide.negateIfRightSide(-1.3));
+      }
 
       simulation = new SimulationConstructionSet2(robotModel.getSimpleRobotName() + "MultiContactSimulation");
       simulation.changeBufferSize(bufferSize);
@@ -122,6 +144,28 @@ public class ValkyrieUpperBodySimulation
                chestTrajectory.setTrajectoryFrame(ReferenceFrame.getWorldFrame());
                chestTrajectory.addTrajectoryPoint(3.0, new Quaternion(chestYaw.getDoubleValue(), chestPitch.getDoubleValue(), chestRoll.getDoubleValue()), new Vector3D());
                commandInputManager.submitCommand(chestTrajectoryCommand);
+            }
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               if (submitArmCommand.get(robotSide).getValue())
+               {
+                  submitArmCommand.get(robotSide).set(false);
+                  ArmTrajectoryCommand armTrajectoryCommand = new ArmTrajectoryCommand();
+                  armTrajectoryCommand.setRobotSide(robotSide);
+                  RecyclingArrayList<OneDoFJointTrajectoryCommand> trajectoryPointLists = armTrajectoryCommand.getJointspaceTrajectory().getTrajectoryPointLists();
+
+                  OneDoFJointTrajectoryCommand shoulderPitchTrajectory = trajectoryPointLists.add();
+                  OneDoFJointTrajectoryCommand shoulderRollTrajectory = trajectoryPointLists.add();
+                  OneDoFJointTrajectoryCommand shoulderYawTrajectory = trajectoryPointLists.add();
+                  OneDoFJointTrajectoryCommand elbowPitchTrajectory = trajectoryPointLists.add();
+
+                  shoulderPitchTrajectory.addTrajectoryPoint(3.0, shoulderPitch.get(robotSide).getValue(), 0.0);
+                  shoulderRollTrajectory.addTrajectoryPoint(3.0, shoulderRoll.get(robotSide).getValue(), 0.0);
+                  shoulderYawTrajectory.addTrajectoryPoint(3.0, shoulderYaw.get(robotSide).getValue(), 0.0);
+                  elbowPitchTrajectory.addTrajectoryPoint(3.0, elbowPitch.get(robotSide).getValue(), 0.0);
+
+                  commandInputManager.submitCommand(armTrajectoryCommand);
+               }
             }
 
             // read robot state
