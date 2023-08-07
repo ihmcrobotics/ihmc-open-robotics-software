@@ -150,48 +150,57 @@ public class RDXInteractableRobotLink
             InputAnalogActionData joystick = controller.getJoystickActionData();
             InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
 
-            if (isHovering && (Math.abs(joystick.x()) > 0 || Math.abs(joystick.y()) > 0))
+            if (isHovering)
             {
                selectionCollisionBox.getPose().set(controller.getJoystickFramePose());
+               if (controller.getJoystickSelection() == RDXVRJoystickSelection.NONE)
+               {
+                  controller.setTopJoystickText("Open Hand");
+                  controller.setBottomJoystickText("Close Hand");
+                  controller.setRightJoystickText("Delete Interactable");
+                  controller.setLeftJoystickText("Execute");
+               }
                if (joystick.x() < 0 && Math.abs(joystick.x()) > Math.abs(joystick.y()) || controller.getJoystickSelection() == RDXVRJoystickSelection.EXECUTE)
                {
+                  controller.setAllJoystickTextNull();
                   controller.setLeftJoystickText("Execute");
                   controller.setJoystickSelection(RDXVRJoystickSelection.EXECUTE);
                }
                if (joystick.x() > 0 && Math.abs(joystick.x()) > Math.abs(joystick.y())
                    || controller.getJoystickSelection() == RDXVRJoystickSelection.DELETE_INTERACTABLE)
                {
+                  controller.setAllJoystickTextNull();
                   controller.setRightJoystickText("Delete Interactable");
                   controller.setJoystickSelection(RDXVRJoystickSelection.DELETE_INTERACTABLE);
                }
                if (joystick.y() > 0 && Math.abs(joystick.y()) > Math.abs(joystick.x()) || controller.getJoystickSelection() == RDXVRJoystickSelection.OPEN_HAND)
                {
+                  controller.setAllJoystickTextNull();
                   controller.setTopJoystickText("Open Hand");
                   controller.setJoystickSelection(RDXVRJoystickSelection.OPEN_HAND);
                }
                if (joystick.y() < 0 && Math.abs(joystick.y()) > Math.abs(joystick.x())
                    || controller.getJoystickSelection() == RDXVRJoystickSelection.CLOSE_HAND)
                {
+                  controller.setAllJoystickTextNull();
                   controller.setBottomJoystickText("Close Hand");
                   controller.setJoystickSelection(RDXVRJoystickSelection.CLOSE_HAND);
                }
                if (joystick.x() == 0 && joystick.y() == 0)
                {
-                  controller.setJoystickSelection(null);
+                  controller.setJoystickSelection(RDXVRJoystickSelection.NONE);
                }
-               if (joystickButton.bChanged() && joystickButton.bState() && controller.getJoystickSelection() != null)
+               if (joystickButton.bChanged() && joystickButton.bState())
                {
                   switch (controller.getJoystickSelection())
                   {
                      case EXECUTE:
                         onSpacePressed.run();
-                        pastJoystickSelection = null;
-                        controller.setJoystickSelection(null);
+                        controller.setJoystickSelection(RDXVRJoystickSelection.NONE);
                         break;
                      case DELETE_INTERACTABLE:
                         delete();
-                        pastJoystickSelection = null;
-                        controller.setJoystickSelection(null);
+                        controller.setJoystickSelection(RDXVRJoystickSelection.NONE);
                         break;
                      case OPEN_HAND:
                         if (openCommands != null)
@@ -246,7 +255,6 @@ public class RDXInteractableRobotLink
             }
             else if (controller.getJoystickSelection() == null)
             {
-               pastJoystickSelection = null;
                boxOffset = null;
             }
          });
