@@ -1,10 +1,12 @@
 package us.ihmc.valkyrieRosControl.upperBody;
 
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -15,8 +17,11 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTraject
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
@@ -26,6 +31,9 @@ import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.controller.SimControllerInput;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimOneDoFJointBasics;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
+import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
+import us.ihmc.sensorProcessing.sensorProcessors.FloatingJointStateReadOnly;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
@@ -42,7 +50,6 @@ public class ValkyrieUpperBodySimulation
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.UPPER_BODY);
-   private final RobotDefinition robotDefinition;
    private final Robot simulationRobot;
    private final SimControllerInput controllerInput;
 
@@ -72,31 +79,18 @@ public class ValkyrieUpperBodySimulation
 
    public ValkyrieUpperBodySimulation()
    {
-      FullHumanoidRobotModel tmpFullHumanoidRobotModel = robotModel.createFullRobotModel();
-
-      ValkyrieUpperBodyController.mutateRobotDefinition(robotModel.getRobotDefinition());
-      robotDefinition = robotModel.getRobotDefinition();
-
-      rootBody = robotDefinition.newInstance(ReferenceFrame.getWorldFrame());
-      MultiBodySystemBasics controllerSystem = MultiBodySystemBasics.toMultiBodySystemBasics(rootBody);
+      Pair<RigidBodyBasics, OneDoFJointBasics[]> upperBodySystem = ValkyrieUpperBodyController.createUpperBodySystem(robotModel);
+      rootBody = upperBodySystem.getLeft();
+      controlledOneDoFJoints = upperBodySystem.getRight();
 
       simulation = new SimulationConstructionSet2(robotModel.getSimpleRobotName() + "MultiContactSimulation");
       simulation.changeBufferSize(bufferSize);
       simulation.addRegistry(registry);
 
-      simulation.addRobot(robotDefinition);
+      simulation.addRobot(robotModel.getRobotDefinition());
       simulationRobot = simulation.getRobots().get(0);
       sessionControls = simulation.getSimulationSession().getSimulationSessionControls();
 
-      JointBasics[] tmpJointsToIgnore = AvatarControllerThread.createListOfJointsToIgnore(tmpFullHumanoidRobotModel, robotModel, robotModel.getSensorInformation());
-      JointBasics[] tmpControlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(tmpFullHumanoidRobotModel, tmpJointsToIgnore);
-      OneDoFJointBasics[] tmpJoints = MultiBodySystemTools.filterJoints(tmpControlledJoints, OneDoFJointBasics.class);
-
-      controlledOneDoFJoints = new OneDoFJointBasics[tmpJoints.length];
-      for (int i = 0; i < tmpJoints.length; i++)
-      {
-         controlledOneDoFJoints[i] = (OneDoFJointBasics) controllerSystem.findJoint(tmpJoints[i].getName());
-      }
 
       simulationTicksPerControlTicks = (int) (robotModel.getControllerDT() / robotModel.getSimulateDT());
       simulation.setDT(robotModel.getSimulateDT());
@@ -195,7 +189,7 @@ public class ValkyrieUpperBodySimulation
 
    public RobotDefinition getRobotDefinition()
    {
-      return robotDefinition;
+      return robotModel.getRobotDefinition();
    }
 
    public SimulationConstructionSet2 getSimulation()
@@ -206,54 +200,6 @@ public class ValkyrieUpperBodySimulation
    public SimulationSessionControls getSessionControls()
    {
       return sessionControls;
-   }
-
-   public void setupROSComms()
-   {
-//      String robotName = robotModel.getSimpleRobotName();
-//      ros2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "multi_contact_position_control_sim");
-//      ROS2Topic<?> controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
-//      ROS2Topic<?> controllerInputTopic = ROS2Tools.getControllerInputTopic(robotName);
-//
-//      RobotConfigurationDataPublisherFactory rcdPublisherFactory = new RobotConfigurationDataPublisherFactory();
-//      rcdPublisherFactory.setDefinitionsToPublish(controllerRobot);
-//
-//      FloatingJointStateReadOnly rootJointStateOutput = FloatingJointStateReadOnly.fromFloatingJoint(controllerRobot.getRootJoint());
-//      List<OneDoFJointStateReadOnly> jointSensorOutputs = new ArrayList<>();
-//
-//      OneDoFJointBasics[] oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(controllerRobot);
-//      for (OneDoFJointReadOnly joint : oneDoFJoints)
-//      {
-//         jointSensorOutputs.add(OneDoFJointStateReadOnly.createFromOneDoFJoint(joint, true));
-//      }
-//
-//      SensorTimestampHolder timestampHolder = new SensorTimestampHolder()
-//      {
-//         @Override
-//         public long getWallTime()
-//         {
-//            return System.currentTimeMillis();
-//         }
-//
-//         @Override
-//         public long getSyncTimestamp()
-//         {
-//            return 0;
-//         }
-//
-//         @Override
-//         public long getMonotonicTime()
-//         {
-//            return getWallTime();
-//         }
-//      };
-//
-//      rcdPublisherFactory.setSensorSource(timestampHolder, rootJointStateOutput, jointSensorOutputs, null, null);
-//      rcdPublisherFactory.setROS2Info(ros2Node, controllerOutputTopic);
-//      robotConfigurationDataPublisher = rcdPublisherFactory.createRobotConfigurationDataPublisher();
-//      ros2Node.spin();
-
-//      new ControllerNetworkSubscriber(controllerInputTopic, )
    }
 
    public static void main(String[] args)

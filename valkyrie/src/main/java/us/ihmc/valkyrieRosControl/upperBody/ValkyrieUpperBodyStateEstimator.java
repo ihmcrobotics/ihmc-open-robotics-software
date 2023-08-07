@@ -16,7 +16,6 @@ public class ValkyrieUpperBodyStateEstimator
    private static final int EXPECTED_NUMBER_OF_IMUS = 1;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final FloatingJointBasics rootJoint;
    private final RigidBodyBasics rootBody;
    private final OneDoFJointBasics[] controlledOneDoFJoints;
    private SensorOutputMapReadOnly processedSensorOutputMap;
@@ -24,12 +23,11 @@ public class ValkyrieUpperBodyStateEstimator
    private ValkyrieRosControlSensorReader sensorReader;
    private List<? extends IMUSensorReadOnly> imuOutputs;
 
-   public ValkyrieUpperBodyStateEstimator(FloatingJointBasics rootJoint,
+   public ValkyrieUpperBodyStateEstimator(RigidBodyBasics rootBody,
                                           OneDoFJointBasics[] controlledOneDoFJoints,
                                           YoRegistry registry)
    {
-      this.rootJoint = rootJoint;
-      this.rootBody = rootJoint.getPredecessor();
+      this.rootBody = rootBody;
       this.controlledOneDoFJoints = controlledOneDoFJoints;
 
 //      registry.addChild(this.registry);

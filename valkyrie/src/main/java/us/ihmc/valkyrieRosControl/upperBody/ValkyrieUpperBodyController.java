@@ -1,5 +1,7 @@
 package us.ihmc.valkyrieRosControl.upperBody;
 
+import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
@@ -20,7 +22,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
@@ -121,11 +125,14 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
 
    private static final ValkyrieRobotVersion VERSION = ValkyrieRobotVersion.UPPER_BODY;
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, VERSION);
-   private final FullHumanoidRobotModel fullRobotModel;
+
+   private final RigidBodyBasics rootBody;
+   private final OneDoFJointBasics[] controlledOneDoFJoints;
+
    private final ValkyrieUpperBodyStateEstimator stateEstimator;
    private ValkyrieUpperBodyOutputWriter outputWriter;
    private final RealtimeROS2Node ros2Node;
-   private final RobotConfigurationDataPublisher robotConfigurationDataPublisher;
+//   private final RobotConfigurationDataPublisher robotConfigurationDataPublisher;
 
    private final YoDouble yoTime = new YoDouble("yoTime", registry);
    private final SettableTimestampProvider wallTimeProvider = new SettableTimestampProvider();
@@ -136,7 +143,6 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
    private final HashMap<String, PositionJointHandle> positionJointHandles = new HashMap<>();
    private final HashMap<String, JointStateHandle> jointStateHandles = new HashMap<>();
 
-   private final OneDoFJointBasics[] controlledOneDoFJoints;
    private YoVariableServer yoVariableServer;
    private final ValkyrieTorqueOffsetPrinter valkyrieTorqueOffsetPrinter = new ValkyrieTorqueOffsetPrinter();
    private StateMachine<HighLevelControllerName, HighLevelControllerState> controllerStateMachine;
@@ -146,18 +152,16 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
 
    public ValkyrieUpperBodyController()
    {
-      fullRobotModel = robotModel.createFullRobotModel();
-
-      JointBasics[] jointsToIgnore = DRCControllerThread.createListOfJointsToIgnore(fullRobotModel, robotModel, robotModel.getSensorInformation());
-      JointBasics[] controlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
-      controlledOneDoFJoints = MultiBodySystemTools.filterJoints(controlledJoints, OneDoFJointBasics.class);
+      Pair<RigidBodyBasics, OneDoFJointBasics[]> upperBodySystem = ValkyrieUpperBodyController.createUpperBodySystem(robotModel);
+      rootBody = upperBodySystem.getLeft();
+      controlledOneDoFJoints = upperBodySystem.getRight();
 
       commandInputManager = new CommandInputManager(ControllerAPIDefinition.getControllerSupportedCommands());
       statusMessageOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
 
       PeriodicRealtimeThreadSchedulerFactory realtimeThreadFactory = new PeriodicRealtimeThreadSchedulerFactory(ValkyriePriorityParameters.POSECOMMUNICATOR_PRIORITY);
       ros2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, realtimeThreadFactory, VALKYRIE_IHMC_ROS_CONTROLLER_NODE_NAME);
-      stateEstimator = new ValkyrieUpperBodyStateEstimator(fullRobotModel.getRootJoint(), controlledOneDoFJoints, registry);
+      stateEstimator = new ValkyrieUpperBodyStateEstimator(rootBody, controlledOneDoFJoints, registry);
 
       jointDesiredOutputList = new YoLowLevelOneDoFJointDesiredDataHolder(controlledOneDoFJoints, registry);
 
@@ -171,14 +175,15 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
       controllerNetworkSubscriber.addMessageCollectors(ControllerAPIDefinition.createDefaultMessageIDExtractor(), 3);
       controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
 
-      RobotConfigurationDataPublisherFactory robotConfigurationDataPublisherFactory = new RobotConfigurationDataPublisherFactory();
-      robotConfigurationDataPublisherFactory.setDefinitionsToPublish(fullRobotModel);
-      robotConfigurationDataPublisherFactory.setROS2Info(ros2Node, outputTopic);
-      ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(fullRobotModel.getForceSensorDefinitions());
-      StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
-      SensorProcessing sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, robotModel.getStateEstimatorParameters(), registry);
-      robotConfigurationDataPublisherFactory.setSensorSource(fullRobotModel, forceSensorDataHolder, sensorProcessing);
-      robotConfigurationDataPublisher = robotConfigurationDataPublisherFactory.createRobotConfigurationDataPublisher();
+      // TODO
+//      RobotConfigurationDataPublisherFactory robotConfigurationDataPublisherFactory = new RobotConfigurationDataPublisherFactory();
+//      robotConfigurationDataPublisherFactory.setDefinitionsToPublish(fullRobotModel);
+//      robotConfigurationDataPublisherFactory.setROS2Info(ros2Node, outputTopic);
+//      ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(fullRobotModel.getForceSensorDefinitions());
+//      StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
+//      SensorProcessing sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, robotModel.getStateEstimatorParameters(), registry);
+//      robotConfigurationDataPublisherFactory.setSensorSource(fullRobotModel, forceSensorDataHolder, sensorProcessing);
+//      robotConfigurationDataPublisher = robotConfigurationDataPublisherFactory.createRobotConfigurationDataPublisher();
 
       ros2Node.spin();
    }
@@ -231,7 +236,7 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
                                                                                                             forceTorqueSensorHandles,
                                                                                                             robotModel.getJointMap(),
                                                                                                             sensorInformation);
-      sensorReaderFactory.build(fullRobotModel.getRootJoint(), fullRobotModel.getIMUDefinitions(), fullRobotModel.getForceSensorDefinitions(), jointDesiredOutputList, registry);
+//      sensorReaderFactory.build(fullRobotModel.getRootJoint(), fullRobotModel.getIMUDefinitions(), fullRobotModel.getForceSensorDefinitions(), jointDesiredOutputList, registry);
       ValkyrieRosControlSensorReader sensorReader = sensorReaderFactory.getSensorReader();
       stateEstimator.init(sensorReader);
 
@@ -274,7 +279,7 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
 
       // Setup calibration state
       ValkyrieCalibrationControllerState calibrationControllerState = new ValkyrieCalibrationControllerState(null,
-                                                                                                             fullRobotModel,
+                                                                                                             null,
                                                                                                              controlledOneDoFJoints,
                                                                                                              yoTime,
                                                                                                              robotModel.getHighLevelControllerParameters(),
@@ -335,10 +340,10 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       yoVariableServer = new YoVariableServer(getClass(), logModelProvider, logSettings, estimatorDT);
-      yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), graphicsListRegistry);
+//      yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), graphicsListRegistry);
       yoVariableServer.start();
 
-      robotConfigurationDataPublisher.initialize();
+//      robotConfigurationDataPublisher.initialize();
 
       outputWriter = new ValkyrieUpperBodyOutputWriter(controlledOneDoFJoints, jointDesiredOutputList, effortJointHandles);
    }
@@ -361,10 +366,10 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
 
       /* Update YoVariable server */
       yoVariableServer.update(monotonicTimeProvider.getTimestamp(), registry);
-      robotConfigurationDataPublisher.write();
+//      robotConfigurationDataPublisher.write();
    }
 
-   public static void mutateRobotDefinition(RobotDefinition robotDefinition)
+   private static void mutateRobotDefinition(RobotDefinition robotDefinition)
    {
       RigidBodyDefinition elevator = robotDefinition.getRootBodyDefinition();
       JointDefinition floatingJoint = elevator.getChildrenJoints().get(0);
@@ -374,6 +379,33 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
       elevator.getChildrenJoints().clear();
       elevator.getChildrenJoints().add(torsoYaw);
       torsoYaw.setPredecessor(elevator);
+   }
+
+   public static Pair<RigidBodyBasics, OneDoFJointBasics[]> createUpperBodySystem(ValkyrieRobotModel robotModel)
+   {
+      /* Create un-mutated robot model to determine which joints are controllable using the method below */
+      FullHumanoidRobotModel tmpFullHumanoidRobotModel = robotModel.createFullRobotModel();
+
+      /* Mutate robot model to remove floating root joint */
+      mutateRobotDefinition(robotModel.getRobotDefinition());
+
+      /* Create multi-body system for upper body */
+      RobotDefinition robotDefinition = robotModel.getRobotDefinition();
+      RigidBodyBasics upperBodyRoot = robotDefinition.newInstance(ReferenceFrame.getWorldFrame());
+      MultiBodySystemBasics upperBodySystem = MultiBodySystemBasics.toMultiBodySystemBasics(upperBodyRoot);
+
+      /* Filter out unwanted joints */
+      JointBasics[] tmpJointsToIgnore = AvatarControllerThread.createListOfJointsToIgnore(tmpFullHumanoidRobotModel, robotModel, robotModel.getSensorInformation());
+      JointBasics[] tmpControlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(tmpFullHumanoidRobotModel, tmpJointsToIgnore);
+      OneDoFJointBasics[] tmpJoints = MultiBodySystemTools.filterJoints(tmpControlledJoints, OneDoFJointBasics.class);
+
+      OneDoFJointBasics[] controlledOneDoFJoints = new OneDoFJointBasics[tmpJoints.length];
+      for (int i = 0; i < tmpJoints.length; i++)
+      {
+         controlledOneDoFJoints[i] = (OneDoFJointBasics) upperBodySystem.findJoint(tmpJoints[i].getName());
+      }
+
+      return Pair.of(upperBodyRoot, controlledOneDoFJoints);
    }
 
    public static void main(String[] args)
