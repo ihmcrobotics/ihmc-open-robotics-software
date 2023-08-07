@@ -94,6 +94,7 @@ public class ZEDColorStereoDepthPublisher
       SL_InitParameters zedInitializationParameters = new SL_InitParameters();
 
       // Open camera with default parameters to find model
+      // Can't get the model number without opening the camera first
       checkError("sl_open_camera", sl_open_camera(cameraID, zedInitializationParameters, 0, "", "", 0, "", "", ""));
       setZEDConfiguration(cameraID);
       sl_close_camera(cameraID);

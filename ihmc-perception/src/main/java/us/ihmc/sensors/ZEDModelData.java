@@ -5,6 +5,8 @@ public enum ZEDModelData
    /**
     * Values used in initializing each camera model.
     * For sensors with wide and narrow FOV lens options, values from the wide lens models have been used.
+    * This has been done as sl_get_camera_model() does not differentiate between 2.2mm and 4mm lens models.
+    * Assuming the use of wide angle (2.2mm) models seems safe for now (2023).
     */
    ZED(0.6, 0.2f, 40.0f),
    ZED_MINI(0.315, 0.1f, 20.0f),
