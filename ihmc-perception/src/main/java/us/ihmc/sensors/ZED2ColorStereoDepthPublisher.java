@@ -45,7 +45,7 @@ public class ZED2ColorStereoDepthPublisher
 {
    private static final int CAMERA_FPS = 30;
    private static final float MILLIMETER_TO_METERS = 0.001f;
-   private static final double ZED_2I_CENTER_TO_CAMERA_DISTANCE = 0.06;
+   private static final double ZED_2I_CENTER_TO_CAMERA_DISTANCE = 0.035;
 
    private final int cameraID;
    private final SL_RuntimeParameters zedRuntimeParameters = new SL_RuntimeParameters();
@@ -102,8 +102,8 @@ public class ZED2ColorStereoDepthPublisher
       zedInitializationParameters.svo_real_time_mode(true);
       zedInitializationParameters.depth_mode(SL_DEPTH_MODE_ULTRA);
       zedInitializationParameters.depth_stabilization(1);
-      zedInitializationParameters.depth_maximum_distance(40);
-      zedInitializationParameters.depth_minimum_distance(-1);
+      zedInitializationParameters.depth_maximum_distance(10);
+      zedInitializationParameters.depth_minimum_distance(0.15f);
       zedInitializationParameters.coordinate_unit(SL_UNIT_METER);
       zedInitializationParameters.coordinate_system(SL_COORDINATE_SYSTEM_RIGHT_HANDED_Z_UP_X_FWD);
       zedInitializationParameters.sdk_gpu_id(-1); // Will find and use the best available GPU
