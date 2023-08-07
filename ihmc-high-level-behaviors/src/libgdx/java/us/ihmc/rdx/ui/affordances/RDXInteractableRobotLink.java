@@ -94,7 +94,7 @@ public class RDXInteractableRobotLink
       RDXBaseUI.getInstance().getKeyBindings().register("Execute / pause motion", "Space");
       RDXBaseUI.getInstance().getKeyBindings().register("Delete selected gizmo", "Delete");
 
-      selectionCollisionBox.getSize().set(0.0125, 0.075, 0.025);
+      selectionCollisionBox.getSize().set(0.0125, 0.075, 0.0025);
       FramePoint3DBasics[] vertices = selectionCollisionBox.getVertices();
       wordsBoxMesh = new RDXModelInstance(RDXModelBuilder.buildModel(boxMeshBuilder -> boxMeshBuilder.addMultiLineBox(vertices,
                                                                                                                       0.0005,
@@ -154,7 +154,7 @@ public class RDXInteractableRobotLink
             if (isHovering || gripDragData.getObjectBeingDragged() == this)
             {
 
-               controller.controlOfRadialMenu("Open Hand", "Close Hand", "Delete Interactable", "Door Avoidance");
+               controller.controlOfRadialMenu("Open Hand", "Close Hand", "Execute Placement", "Door Avoidance");
                if (gripDragData.getDragJustStarted())
                {
                   modified = true;
@@ -170,8 +170,7 @@ public class RDXInteractableRobotLink
                         armExecutable.run();
                         break;
                      case RIGHT_RING:
-                        delete();
-                        controller.setJoystickSelection(RDXVRJoystickSelection.NONE);
+                        onSpacePressed.run();
                         break;
                      case TOP_RING:
                         if (openCommands != null)
@@ -213,7 +212,7 @@ public class RDXInteractableRobotLink
                   updateHoverBoxFramePose(side);
                }
             }
-            else if (controller.getJoystickSelection() == null)
+            else if (controller.getJoystickSelection() == null || controller.getJoystickSelection() == RDXVRJoystickSelection.NONE)
             {
                boxOffset.put(side, null);
             }
