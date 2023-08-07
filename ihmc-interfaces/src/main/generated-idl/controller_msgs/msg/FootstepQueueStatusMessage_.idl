@@ -22,6 +22,14 @@ module controller_msgs
          */
         unsigned long sequence_id;
         /**
+         * Specifies whether the first step in the queue list is currently being taken in swing
+         */
+        boolean is_first_step_in_swing;
+        /**
+         * Specifies the time in the current support sequence of the current step. This could be in transfer, or in swing
+         */
+        double time_in_support_sequence;
+        /**
          * Defines the list of footsteps contained in the queue.
          */
         sequence<controller_msgs::msg::dds::QueuedFootstepStatusMessage, 50> queued_footstep_list;
