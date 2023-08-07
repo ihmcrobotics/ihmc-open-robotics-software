@@ -30,6 +30,7 @@ import us.ihmc.rdx.vr.RDXVRJoystickSelection;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 
@@ -60,7 +61,7 @@ public class RDXInteractableRobotLink
    private Runnable closeCommands;
    private RDXModelInstance wordsBoxMesh;
    private final FrameBox3D selectionCollisionBox = new FrameBox3D();
-   private Point3D boxOffset;
+   private final SideDependentList<Point3D> boxOffset = new SideDependentList<>();
    private ModifiableReferenceFrame wordsBoxReferenceFrame;
    private final FramePose3D wordsBoxFramePose = new FramePose3D();
    private RDXVRJoystickSelection pastJoystickSelection;
@@ -153,13 +154,10 @@ public class RDXInteractableRobotLink
             if (isHovering)
             {
                selectionCollisionBox.getPose().set(controller.getJoystickFramePose());
-               if (controller.getJoystickSelection() == RDXVRJoystickSelection.NONE)
-               {
                   controller.setTopJoystickText("Open Hand");
                   controller.setBottomJoystickText("Close Hand");
                   controller.setRightJoystickText("Delete Interactable");
                   controller.setLeftJoystickText("Execute");
-               }
                if (joystick.x() < 0 && Math.abs(joystick.x()) > Math.abs(joystick.y()) || controller.getJoystickSelection() == RDXVRJoystickSelection.EXECUTE)
                {
                   controller.setAllJoystickTextNull();
@@ -240,22 +238,22 @@ public class RDXInteractableRobotLink
             }
             if (controller.getOffset() != null)
             {
-               boxOffset = controller.getOffset();
+               boxOffset.put(side, controller.getOffset());
                pastJoystickSelection = controller.getJoystickSelection();
-               updateHoverBoxFramePose();
+               updateHoverBoxFramePose(side);
             }
             else if (controller.getOffset() == null && isHovering)
             {
                if (pastJoystickSelection != null && pastJoystickSelection != RDXVRJoystickSelection.NONE)
                {
                   controller.setJoystickSelection(pastJoystickSelection);
-                  boxOffset = controller.getOffset();
-                  updateHoverBoxFramePose();
+                  boxOffset.put(side, controller.getOffset());
+                  updateHoverBoxFramePose(side);
                }
             }
             else if (controller.getJoystickSelection() == null)
             {
-               boxOffset = null;
+               boxOffset.put(side, null);
             }
          });
       }
@@ -345,7 +343,7 @@ public class RDXInteractableRobotLink
          highlightModel.getRenderables(renderables, pool);
       }
 
-      if (wordsBoxMesh != null && boxOffset != null)
+      if (wordsBoxMesh != null && (boxOffset.get(RobotSide.LEFT) != null || boxOffset.get(RobotSide.RIGHT) != null))
          wordsBoxMesh.getRenderables(renderables, pool);
       selectablePose3DGizmo.getVirtualRenderables(renderables, pool);
    }
@@ -391,16 +389,15 @@ public class RDXInteractableRobotLink
       this.closeCommands = closeCommands;
    }
 
-   private void updateHoverBoxFramePose()
+   private void updateHoverBoxFramePose(RobotSide side)
    {
-      selectionCollisionBox.getPose().getTranslation().add(boxOffset);
-      wordsBoxReferenceFrame.getReferenceFrame().getTransformToParent().getTranslation().set(boxOffset);
+      selectionCollisionBox.getPose().getTranslation().add(boxOffset.get(side));
+      wordsBoxReferenceFrame.getReferenceFrame().getTransformToParent().getTranslation().set(boxOffset.get(side));
       wordsBoxReferenceFrame.getReferenceFrame().update();
       wordsBoxFramePose.setToZero(wordsBoxReferenceFrame.getReferenceFrame());
-      wordsBoxFramePose.getTranslation().add(boxOffset);
+      wordsBoxFramePose.getTranslation().add(boxOffset.get(side));
       wordsBoxFramePose.getTranslation().subY(0.03);
-      wordsBoxFramePose.getTranslation().addX(0.01);
-      wordsBoxFramePose.getRotation().setToYawOrientation(0.2);
+      wordsBoxFramePose.getRotation().setToYawOrientation(-0.2);
       wordsBoxFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       wordsBoxMesh.setPoseInWorldFrame(wordsBoxFramePose);
    }
