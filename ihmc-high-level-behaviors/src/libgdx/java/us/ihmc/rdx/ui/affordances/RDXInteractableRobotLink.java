@@ -1,6 +1,5 @@
 package us.ihmc.rdx.ui.affordances;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -8,29 +7,19 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.ImGui;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.euclid.referenceFrame.FrameBox3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.Run;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
-import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRDragData;
-import us.ihmc.rdx.vr.RDXVRJoystickSelection;
-import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 
@@ -156,8 +145,8 @@ public class RDXInteractableRobotLink
                   controller.controlOfRadialMenu("Open Hand", "Close Hand", "Change Page", "Door Avoidance");
                   if (joystickButton.bChanged() && joystickButton.bState())
                   {
-                     if (controller.getSwitchcaseAnswer(doorAvoidenceExecutable, openCommands, closeCommands) != null)
-                        controller.getSwitchcaseAnswer(doorAvoidenceExecutable, openCommands, closeCommands).run();
+                     if (controller.getChoosenRunnable(doorAvoidenceExecutable, openCommands, closeCommands) != null)
+                        controller.getChoosenRunnable(doorAvoidenceExecutable, openCommands, closeCommands).run();
                   }
                }
                else if (controller.getPageNumber() == 1)
@@ -165,8 +154,8 @@ public class RDXInteractableRobotLink
                   controller.controlOfRadialMenu("Open Hand", "Close Hand", "Change Page", "Home Positon");
                   if (joystickButton.bChanged() && joystickButton.bState())
                   {
-                     if (controller.getSwitchcaseAnswer(homePositionExecutable, openCommands, closeCommands) != null)
-                        controller.getSwitchcaseAnswer(homePositionExecutable, openCommands, closeCommands).run();
+                     if (controller.getChoosenRunnable(homePositionExecutable, openCommands, closeCommands) != null)
+                        controller.getChoosenRunnable(homePositionExecutable, openCommands, closeCommands).run();
                   }
                }
             }
