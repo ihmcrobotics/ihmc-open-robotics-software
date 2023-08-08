@@ -7,7 +7,6 @@ import imgui.flag.*;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.type.ImString;
-import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.KHRDebug;
@@ -22,7 +21,6 @@ import us.ihmc.rdx.ui.RDXImGuiLayoutManager;
 import us.ihmc.tools.io.*;
 import us.ihmc.tools.io.resources.ResourceTools;
 
-import java.nio.IntBuffer;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -48,13 +46,9 @@ public class RDXImGuiWindowAndDockSystem
    private HybridResourceFile imGuiSettingsFile;
    private HybridResourceFile panelsFile;
    private Callback debugMessageCallback;
-   private final IntBuffer frameSizeLeft = BufferUtils.createIntBuffer(1);
-   private final IntBuffer frameSizeTop = BufferUtils.createIntBuffer(1);
-   private final IntBuffer frameSizeRight = BufferUtils.createIntBuffer(1);
-   private final IntBuffer frameSizeBottom = BufferUtils.createIntBuffer(1);
    private final ImGuiSize calculatedPrimaryWindowSize = new ImGuiSize(LibGDXApplicationCreator.DEFAULT_WINDOW_WIDTH,
                                                                        LibGDXApplicationCreator.DEFAULT_WINDOW_HEIGHT);
-   private final ImGuiPosition primaryWindowPosition = new ImGuiPosition(0, 0);
+   private final ImGuiPosition primaryWindowContentAreaPosition = new ImGuiPosition(0, 0);
 
    public RDXImGuiWindowAndDockSystem(RDXImGuiLayoutManager layoutManager)
    {
@@ -126,8 +120,6 @@ public class RDXImGuiWindowAndDockSystem
 
       imGuiGlfw.init(windowHandle, true);
       imGuiGl3.init(glslVersion);
-
-      GLFW.glfwGetWindowFrameSize(windowHandle, frameSizeLeft, frameSizeTop, frameSizeRight, frameSizeBottom);
    }
 
    public void beforeWindowManagement()
@@ -215,16 +207,14 @@ public class RDXImGuiWindowAndDockSystem
          ImGuiTools.parsePrimaryWindowSizeFromSettingsINI(settingsINIAsString, calculatedPrimaryWindowSize);
          int widthFromINI = calculatedPrimaryWindowSize.getWidth();
          int heightFromINI = calculatedPrimaryWindowSize.getHeight();
-         int frameSizeLeft = getFrameSizeLeft();
-         int frameSizeTop = getFrameSizeTop();
-         int menuBarHeight = 22; // TODO: Get this from ImGui somehow
-         calculatedPrimaryWindowSize.setWidth(widthFromINI + frameSizeLeft + getFrameSizeRight());
-         calculatedPrimaryWindowSize.setHeight(heightFromINI + frameSizeTop + getFrameSizeBottom() + menuBarHeight);
-         ImGuiTools.parsePrimaryWindowPositionFromSettingsINI(settingsINIAsString, primaryWindowPosition);
-         int loadedX = primaryWindowPosition.getX();
-         int loadedY = primaryWindowPosition.getY();
-         primaryWindowPosition.setX(loadedX - frameSizeLeft);
-         primaryWindowPosition.setY(loadedY - frameSizeTop - menuBarHeight);
+         int menuBarHeight = (int) ImGui.getFrameHeight();
+         calculatedPrimaryWindowSize.setWidth(widthFromINI);
+         calculatedPrimaryWindowSize.setHeight(heightFromINI + menuBarHeight);
+         ImGuiTools.parsePrimaryWindowPositionFromSettingsINI(settingsINIAsString, primaryWindowContentAreaPosition);
+         int loadedX = primaryWindowContentAreaPosition.getX();
+         int loadedY = primaryWindowContentAreaPosition.getY();
+         primaryWindowContentAreaPosition.setX(loadedX);
+         primaryWindowContentAreaPosition.setY(loadedY - menuBarHeight);
          ImGui.loadIniSettingsFromMemory(settingsINIAsString);
       });
 
@@ -342,28 +332,8 @@ public class RDXImGuiWindowAndDockSystem
       return calculatedPrimaryWindowSize;
    }
 
-   public ImGuiPosition getPrimaryWindowPosition()
+   public ImGuiPosition getPrimaryWindowContentAreaPosition()
    {
-      return primaryWindowPosition;
-   }
-
-   public int getFrameSizeLeft()
-   {
-      return frameSizeLeft.get(0);
-   }
-
-   public int getFrameSizeRight()
-   {
-      return frameSizeRight.get(0);
-   }
-
-   public int getFrameSizeTop()
-   {
-      return frameSizeTop.get(0);
-   }
-
-   public int getFrameSizeBottom()
-   {
-      return frameSizeBottom.get(0);
+      return primaryWindowContentAreaPosition;
    }
 }

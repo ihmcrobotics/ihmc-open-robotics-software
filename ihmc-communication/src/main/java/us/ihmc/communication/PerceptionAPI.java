@@ -8,6 +8,7 @@ import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.*;
 
@@ -187,6 +188,29 @@ public class PerceptionAPI
    public static final ROS2Topic<Empty> PUBLISH_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("publish_height_map").withType(Empty.class);
 
    public static final ROS2Topic<ArUcoMarkerPoses> ARUCO_MARKER_POSES = PERCEPTION_MODULE.withType(ArUcoMarkerPoses.class).withSuffix("aruco_marker_poses");
+
+   private static final ROS2Topic<RigidBodyTransformMessage> TRANSFORM_TUNING_BASE_TOPIC = IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class)
+                                                                                                    .withModule("transform_tuning");
+   public static final ROS2IOTopicPair<RigidBodyTransformMessage> OBJECT_DETECTION_CAMERA_TO_PARENT_TUNING
+         = new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix("object_detection_camera_to_parent"));
+
+   public static final SideDependentList<ROS2IOTopicPair<RigidBodyTransformMessage>> SITUATIONAL_AWARENESS_CAMERA_TO_PARENT_TUNING = new SideDependentList<>();
+   static
+   {
+      SITUATIONAL_AWARENESS_CAMERA_TO_PARENT_TUNING.set(RobotSide.LEFT,
+                                                        new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix(
+                                                              "situational_awareness_left_camera_to_parent")));
+      SITUATIONAL_AWARENESS_CAMERA_TO_PARENT_TUNING.set(RobotSide.RIGHT,
+                                                        new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix(
+                                                              "situational_awareness_right_camera_to_parent")));
+   }
+
+   public static final ROS2IOTopicPair<RigidBodyTransformMessage> STEPPING_CAMERA_TO_PARENT_TUNING
+         = new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix("stepping_camera_to_parent"));
+   public static final ROS2IOTopicPair<RigidBodyTransformMessage> EXPERIMENTAL_CAMERA_TO_PARENT_TUNING
+         = new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix("experimental_camera_to_parent"));
+   public static final ROS2IOTopicPair<RigidBodyTransformMessage> OUSTER_TO_CHEST_TUNING
+         = new ROS2IOTopicPair<>(TRANSFORM_TUNING_BASE_TOPIC.withSuffix("ouster_to_chest"));
 
    public static ROS2Topic<DoorLocationPacket> getDoorLocationTopic(String robotName)
    {
