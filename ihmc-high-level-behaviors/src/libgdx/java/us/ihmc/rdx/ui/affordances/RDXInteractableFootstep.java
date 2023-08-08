@@ -301,7 +301,7 @@ public class RDXInteractableFootstep
                gripDragData.setObjectBeingDragged(this);
                gripDragData.setInteractableFrameOnDragStart(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
             }
-            if (gripDragData.isDragging() && gripDragData.getObjectBeingDragged() == this)
+            if (gripDragData.isDraggingSomething() && gripDragData.getObjectBeingDragged() == this)
             {
                gripDragData.getDragFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(), ReferenceFrame.getWorldFrame());
             }
