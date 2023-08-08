@@ -200,7 +200,7 @@ public class RDXArmManager
          ImGui.sameLine();
          if (ImGui.button(labels.get("Home " + side.getPascalCaseName())))
          {
-            homePosition(side);
+            executeArmHome(side);
          }
       }
 
@@ -223,7 +223,7 @@ public class RDXArmManager
          ImGui.sameLine();
          if (ImGui.button(labels.get(side.getPascalCaseName())))
          {
-            doorAvoidance(side);
+            executeDoorAvoidanceArmAngles(side);
          }
       }
 
@@ -248,16 +248,7 @@ public class RDXArmManager
       ImGui.checkbox(labels.get("Hand wrench magnitudes on 3D View"), indicateWrenchOnScreen);
    }
 
-   public Runnable executeHomePosition(RobotSide side)
-   {
-      Runnable runnable = () ->
-      {
-         homePosition(side);
-      };
-      return runnable;
-   }
-
-   private void homePosition(RobotSide side)
+   public void executeArmHome(RobotSide side)
    {
       GoHomeMessage armHomeMessage = new GoHomeMessage();
       armHomeMessage.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
@@ -271,16 +262,7 @@ public class RDXArmManager
       communicationHelper.publishToController(armHomeMessage);
    }
 
-   public Runnable executeDoorAvoidance(RobotSide side)
-   {
-      Runnable runnable = () ->
-      {
-         doorAvoidance(side);
-      };
-      return runnable;
-   }
-
-   private void doorAvoidance(RobotSide side)
+   public void executeDoorAvoidanceArmAngles(RobotSide side)
    {
       ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
                                                                                                   teleoperationParameters.getTrajectoryTime(),

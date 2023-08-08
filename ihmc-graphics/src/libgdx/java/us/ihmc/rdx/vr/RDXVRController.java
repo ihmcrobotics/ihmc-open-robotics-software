@@ -344,8 +344,8 @@ public class RDXVRController extends RDXVRTrackedDevice
          }
       }
 
-      joystickSpherePoseFrame.getTransformToParent().getTranslation().setX(0.1*joystickActionData.y());
-      joystickSpherePoseFrame.getTransformToParent().getTranslation().setY(-0.1*joystickActionData.x());
+      joystickSpherePoseFrame.getTransformToParent().getTranslation().setX(0.1 * joystickActionData.y());
+      joystickSpherePoseFrame.getTransformToParent().getTranslation().setY(-0.1 * joystickActionData.x());
    }
 
    public void renderImGuiTunerWidgets()
