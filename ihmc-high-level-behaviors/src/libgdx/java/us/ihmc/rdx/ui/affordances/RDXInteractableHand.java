@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.affordances;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
@@ -11,6 +12,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXSpatialVectorArrows;
+import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.rdx.vr.RDXVRDragData;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -34,6 +37,10 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
    private RDXSpatialVectorArrows sensorWristWrenchArrows;
    private final RDXSpatialVectorArrows estimatedHandWrenchArrows;
    private final String contextMenuName;
+   private Runnable openCommands;
+   private Runnable closeCommands;
+   private Runnable doorAvoidenceExecutable;
+   private Runnable homePositionExecutable;
 
    public static boolean robotCollidableIsHand(RobotSide side, RDXRobotCollidable robotCollidable, FullHumanoidRobotModel fullRobotModel)
    {
@@ -125,5 +132,53 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
    public RDXSpatialVectorArrows getEstimatedHandWrenchArrows()
    {
       return estimatedHandWrenchArrows;
+   }
+
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      super.processVRInput(vrContext);
+      for (RobotSide side : RobotSide.values)
+      {
+         vrContext.getController(side).runIfConnected(controller ->
+         {
+            InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
+            RDXVRDragData gripDragData = controller.getGripDragData();
+            if (isVRHovering() || gripDragData.getObjectBeingDragged() == this)
+            {
+
+               controller.controlOfRadialMenu("Open Hand", "Close Hand", "Door Avoidance", "Home Position");
+               if (joystickButton.bChanged() && joystickButton.bState())
+               {
+                  if (controller.getChoosenRunnable( openCommands, closeCommands, doorAvoidenceExecutable,  homePositionExecutable) != null)
+                     controller.getChoosenRunnable( openCommands, closeCommands, doorAvoidenceExecutable,  homePositionExecutable).run();
+               }
+            }
+            else
+            {
+               controller.setJoystickSelection(null);
+            }
+            controller.setBoxPosition(isVRHovering());
+         });
+      }
+   }
+
+   public void setOpenCommands(Runnable openCommands)
+   {
+      this.openCommands = openCommands;
+   }
+
+   public void setCloseCommands(Runnable closeCommands)
+   {
+      this.closeCommands = closeCommands;
+   }
+
+   public void setDoorAvoidenceExecutable(Runnable doorAvoidenceExecutable)
+   {
+      this.doorAvoidenceExecutable = doorAvoidenceExecutable;
+   }
+
+   public void setHomePositionExecutable(Runnable homePositionExecutable)
+   {
+      this.homePositionExecutable = homePositionExecutable;
    }
 }

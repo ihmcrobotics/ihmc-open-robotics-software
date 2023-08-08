@@ -46,10 +46,7 @@ public class RDXInteractableRobotLink
    private boolean isMouseHovering;
    private final Notification contextMenuNotification = new Notification();
    private boolean isVRHovering;
-   private Runnable openCommands;
-   private Runnable closeCommands;
-   private Runnable doorAvoidenceExecutable;
-   private Runnable homePositionExecutable;
+
 
    /** For when the graphic, the link, and control frame are all the same. */
    public void create(RDXRobotCollidable robotCollidable, ReferenceFrame syncedControlFrame, String graphicFileName, RDX3DPanel panel3D)
@@ -122,7 +119,6 @@ public class RDXInteractableRobotLink
             isVRHovering |= isHovering;
 
             RDXVRDragData gripDragData = controller.getGripDragData();
-            InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
             InputDigitalActionData aButton = controller.getAButtonActionData();
             InputDigitalActionData bButton = controller.getBButtonActionData();
 
@@ -137,17 +133,6 @@ public class RDXInteractableRobotLink
                   gripDragData.setObjectBeingDragged(this);
                   gripDragData.setInteractableFrameOnDragStart(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
                }
-
-                  controller.controlOfRadialMenu("Open Hand", "Close Hand", "Door Avoidance", "Home Position");
-                  if (joystickButton.bChanged() && joystickButton.bState())
-                  {
-                     if (controller.getChoosenRunnable( openCommands, closeCommands, doorAvoidenceExecutable,  homePositionExecutable) != null)
-                        controller.getChoosenRunnable( openCommands, closeCommands, doorAvoidenceExecutable,  homePositionExecutable).run();
-                  }
-            }
-            else
-            {
-               controller.setJoystickSelection(null);
             }
 
             if (aButton.bState() && aButton.bChanged())
@@ -164,8 +149,6 @@ public class RDXInteractableRobotLink
                gripDragData.getDragFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
                                                                       selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getParent());
             }
-
-            controller.setBoxPosition(isHovering);
          });
       }
    }
@@ -283,29 +266,14 @@ public class RDXInteractableRobotLink
       return selectablePose3DGizmo.getPoseGizmo().getGizmoFrame();
    }
 
+   public boolean isVRHovering()
+   {
+      return isVRHovering;
+   }
+
    public void setOnSpacePressed(Runnable onSpacePressed)
    {
       this.onSpacePressed = onSpacePressed;
-   }
-
-   public void setOpenCommands(Runnable openCommands)
-   {
-      this.openCommands = openCommands;
-   }
-
-   public void setCloseCommands(Runnable closeCommands)
-   {
-      this.closeCommands = closeCommands;
-   }
-
-   public void setDoorAvoidenceExecutable(Runnable doorAvoidenceExecutable)
-   {
-      this.doorAvoidenceExecutable = doorAvoidenceExecutable;
-   }
-
-   public void setHomePositionExecutable(Runnable homePositionExecutable)
-   {
-      this.homePositionExecutable = homePositionExecutable;
    }
 
    public void addAdditionalRobotCollidable(RDXRobotCollidable robotCollidable)
