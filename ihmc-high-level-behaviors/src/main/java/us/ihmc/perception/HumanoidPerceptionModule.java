@@ -134,14 +134,14 @@ public class HumanoidPerceptionModule
            cameraPose.setToZero(sensorFrame);
            cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-           occupancyGrid.put(new Scalar(0));
+//           occupancyGrid.put(new Scalar(0));
            extractOccupancyGrid(pointCloud, occupancyGrid, sensorFrame.getTransformToWorldFrame(), thresholdHeight,
                                 perceptionConfigurationParameters.getOccupancyGridResolution());
 
 
 
            opencv_imgproc.cvtColor(occupancyGrid, gridColor, COLOR_GRAY2RGB);
-           PerceptionDebugTools.display("Occupancy Grid", gridColor, 1, 1400);
+           PerceptionDebugTools.display("Occupancy Grid", gridColor, 1, 800);
 
 //           OpenCVTools.compressImagePNG(occupancyGrid, compressedOccupancyGrid);
 //           CameraModel.PINHOLE.packMessageFormat(occupancyGridMessage);

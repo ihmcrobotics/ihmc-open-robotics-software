@@ -16,28 +16,24 @@ import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
-import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectLibrary;
 import us.ihmc.rdx.simulation.environment.object.RDXSimpleObject;
 import us.ihmc.rdx.simulation.environment.object.objects.RDXBuildingObject;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.robotics.interaction.StepCheckIsPointInsideAlgorithm;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class RDXBuildingConstructor extends ImGuiPanel
 {
@@ -46,7 +42,8 @@ public class RDXBuildingConstructor extends ImGuiPanel
       NONE, CONSTRUCTING, PLACING, DONE
    }
 
-   private final WorkspaceResourceDirectory environmentFilesDirectory = new WorkspaceResourceDirectory(getClass(), "/environments");
+   private String selectedFileName = "";
+   private final WorkspaceResourceDirectory environmentFilesDirectory = new WorkspaceResourceDirectory(getClass(), "/buildings");
    private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(RDXEnvironmentBuilder.class, "Constructor");
    private final ArrayList<RDXSimpleObject> virtualObjects = new ArrayList<>();
    private RDXSimpleObject selectedObject;
@@ -63,6 +60,7 @@ public class RDXBuildingConstructor extends ImGuiPanel
    private Point3D cornerPoint;
 
    private final ColorAttribute highlightColor = ColorAttribute.createDiffuse(0.8f, 0.6f, 0.2f, 1.0f);
+   List<WorkspaceResourceFile> buildingFilesInDirectory = new ArrayList<WorkspaceResourceFile>();
 
    private RDXBuildingObject building;
    private RDXSimpleObject lastWallBase;
@@ -74,6 +72,8 @@ public class RDXBuildingConstructor extends ImGuiPanel
       this.panel3D = panel3D;
       setRenderMethod(this::renderImGuiWidgets);
       addChild(poseGizmoTunerPanel);
+
+      buildingFilesInDirectory = environmentFilesDirectory.queryContainedFiles();
    }
 
    public void create()
@@ -167,23 +167,6 @@ public class RDXBuildingConstructor extends ImGuiPanel
                updateObjectSelected(selectedObject, intersectedObject);
                pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
             }
-
-//            if(viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
-//            {
-//               float value = 0.0f;
-//               if (ImGui.beginChild("item context menu"))
-//               {
-//                  if(ImGui.beginPopupContextWindow())
-//                  {
-//                     if (ImGui.selectable("Copy")) value = 0.0f;
-//                     if (ImGui.selectable("Paste")) value = 3.1415f;
-//                     ImGui.endPopup();
-//                  }
-//                  ImGui.endChild();
-//               }
-//
-//               LogTools.info("Click Registered: {}", value);
-//            }
          }
       }
    }
@@ -292,6 +275,19 @@ public class RDXBuildingConstructor extends ImGuiPanel
             LogTools.info("Building Found with {} Corners", building.getCorners().size());
          }
 
+         if (ImGui.button("Reset Building"))
+         {
+            building = null;
+         }
+
+         for (WorkspaceResourceFile buildingFileName : buildingFilesInDirectory)
+         {
+            if (ImGui.radioButton(buildingFileName.getFileName(), selectedFileName.equals(buildingFileName.getFileName())))
+            {
+               loadFromJSON(buildingFileName.getFileName());
+            }
+         }
+
          ImGui.separator();
       }
       if (selectedObject != null && (ImGui.button("Delete selected") || ImGui.isKeyReleased(ImGuiTools.getDeleteKey())))
@@ -383,6 +379,7 @@ public class RDXBuildingConstructor extends ImGuiPanel
 
    public void loadFromJSON(String fileNameToLoad)
    {
+      selectedFileName = fileNameToLoad;
       building = new RDXBuildingObject();
       JSONFileTools.load(new WorkspaceResourceFile(environmentFilesDirectory, fileNameToLoad),
        rootNode ->
