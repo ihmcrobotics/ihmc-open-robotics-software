@@ -605,11 +605,6 @@ public class RDXVRController extends RDXVRTrackedDevice
       rightJoystickLabel.setText(text);
    }
 
-   public RDXVRJoystickSelection getJoystickSelection()
-   {
-      return joystickSelection;
-   }
-
    public void setJoystickSelection(RDXVRJoystickSelection joystickSelection)
    {
       this.joystickSelection = joystickSelection;
@@ -619,7 +614,7 @@ public class RDXVRController extends RDXVRTrackedDevice
    {
       if (joystickSelection == null)
       {
-         setJoystickSelection(RDXVRJoystickSelection.NONE);
+         joystickSelection = RDXVRJoystickSelection.NONE;
       }
       if (joystickActionData.x() != 0.0 || joystickActionData.y() != 0.0)
       {
@@ -632,26 +627,26 @@ public class RDXVRController extends RDXVRTrackedDevice
       if (joystickActionData.x() < 0 && Math.abs(joystickActionData.x()) > Math.abs(joystickActionData.y())
           || joystickSelection == RDXVRJoystickSelection.LEFT_RING)
       {
-         setJoystickSelection(RDXVRJoystickSelection.LEFT_RING);
+         joystickSelection = RDXVRJoystickSelection.LEFT_RING;
       }
       if (joystickActionData.x() > 0 && Math.abs(joystickActionData.x()) > Math.abs(joystickActionData.y())
           || joystickSelection == RDXVRJoystickSelection.RIGHT_RING)
       {
-         setJoystickSelection(RDXVRJoystickSelection.RIGHT_RING);
+         joystickSelection = RDXVRJoystickSelection.RIGHT_RING;
       }
       if (joystickActionData.y() > 0 && Math.abs(joystickActionData.y()) > Math.abs(joystickActionData.x())
           || joystickSelection == RDXVRJoystickSelection.TOP_RING)
       {
-         setJoystickSelection(RDXVRJoystickSelection.TOP_RING);
+         joystickSelection = RDXVRJoystickSelection.TOP_RING;
       }
       if (joystickActionData.y() < 0 && Math.abs(joystickActionData.y()) > Math.abs(joystickActionData.x())
           || joystickSelection == RDXVRJoystickSelection.BOTTOM_RING)
       {
-         setJoystickSelection(RDXVRJoystickSelection.BOTTOM_RING);
+         joystickSelection = RDXVRJoystickSelection.BOTTOM_RING;
       }
    }
 
-   public Runnable getSwitchcaseAnswer(Runnable option1, Runnable option3, Runnable option4)
+   public Runnable getChoosenRunnable(Runnable option1, Runnable option3, Runnable option4)
    {
       switch (joystickSelection)
       {
@@ -697,19 +692,19 @@ public class RDXVRController extends RDXVRTrackedDevice
       if (getOffset() != null)
       {
          boxOffset.put(side, getOffset());
-         pastJoystickSelection = getJoystickSelection();
+         pastJoystickSelection = joystickSelection;
          updateHoverBoxFramePose(side);
       }
       else if (getOffset() == null && isHovering)
       {
          if (pastJoystickSelection != null && pastJoystickSelection != RDXVRJoystickSelection.NONE)
          {
-            setJoystickSelection(pastJoystickSelection);
+            joystickSelection = pastJoystickSelection;
             boxOffset.put(side, getOffset());
             updateHoverBoxFramePose(side);
          }
       }
-      else if (getJoystickSelection() == null || getJoystickSelection() == RDXVRJoystickSelection.NONE)
+      else if (joystickSelection == null || joystickSelection == RDXVRJoystickSelection.NONE)
       {
          boxOffset.put(side, null);
       }
@@ -737,16 +732,6 @@ public class RDXVRController extends RDXVRTrackedDevice
       bottomJoystickLabel.setText("");
       leftJoystickLabel.setText("");
       rightJoystickLabel.setText("");
-   }
-
-   public FramePose3D getJoystickFramePose()
-   {
-      return joystickFramePose;
-   }
-
-   public ModifiableReferenceFrame getJoystickReferenceFrame()
-   {
-      return joystickReferenceFrame;
    }
 
    public Point3D getOffset()
