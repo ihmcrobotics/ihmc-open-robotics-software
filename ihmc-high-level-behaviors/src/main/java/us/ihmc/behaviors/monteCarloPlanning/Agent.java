@@ -38,6 +38,12 @@ public class Agent
       points.addAll(rangeScanner.scan(position, obstacles));
    }
 
+   public void addMeasurements(ArrayList<Point2D> measurements)
+   {
+      points.clear();
+      points.addAll(measurements);
+   }
+
    public Point2D getPosition()
    {
       return position;
