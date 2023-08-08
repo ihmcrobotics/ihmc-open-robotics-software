@@ -70,7 +70,7 @@ public class RDXHandConfigurationManager
       calibrateButton.setOnPressed(() -> calibrateCommands.get(toolbarSelectedSide).run());
 
       SideDependentList<Runnable> openCommands = new SideDependentList<>(() -> publishHandCommand(RobotSide.LEFT, HandConfiguration.OPEN),
-                                                                         () -> publishHandCommand(RobotSide.RIGHT, HandConfiguration.OPEN));
+                                                                          () -> publishHandCommand(RobotSide.RIGHT, HandConfiguration.OPEN));
       RDX3DPanelToolbarButton openHandButton = baseUI.getPrimary3DPanel().addToolbarButton();
       openHandButton.loadAndSetIcon("icons/openGripper.png");
       openHandButton.setTooltipText("Open hand");
@@ -218,4 +218,5 @@ public class RDXHandConfigurationManager
 
       shieldButton.setOnPressed(()-> armTrajectoryRunnable.accept(toolbarSelectedSide));
    }
+   
 }
