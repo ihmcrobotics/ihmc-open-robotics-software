@@ -306,7 +306,32 @@ public class RDXTeleoperationManager extends ImGuiPanel
          if (interactablesAvailable)
          {
             if (robotHasArms)
+            {
                armManager.update();
+               
+               boolean handInteractablesAreDeleted = true;
+               for (RobotSide side : interactableHands.sides())
+               {
+                  handInteractablesAreDeleted &= interactableHands.get(side).isDeleted();
+               }
+               desiredRobot.setActive(!handInteractablesAreDeleted);
+
+               if (!handInteractablesAreDeleted)
+               {
+                  for (RobotSide side : interactableHands.sides())
+                  {
+                     desiredRobot.setArmShowing(side, !interactableHands.get(side).isDeleted() && armManager.getArmControlMode() == RDXArmControlMode.JOINT_ANGLES);
+                  }
+               }
+            }
+
+            for (RobotSide side : interactableFeet.sides())
+            {
+               if (interactableFeet.get(side).getBecomesModified().poll())
+               {
+                  locomotionManager.setLegControlModeToSingleSupportFootPosing();
+               }
+            }
 
             selfCollisionModel.update();
             selectionCollisionModel.update();
@@ -442,7 +467,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
             ImGui.sameLine();
             interactablePelvis.renderImGuiWidgets();
 
-            boolean handInteractablesAreDeleted = true;
             if (robotHasArms)
             {
                for (RobotSide side : interactableHands.sides())
@@ -450,16 +474,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
                   ImGui.text(side.getPascalCaseName() + " Hand:");
                   ImGui.sameLine();
                   interactableHands.get(side).renderImGuiWidgets();
-                  handInteractablesAreDeleted &= interactableHands.get(side).isDeleted();
-               }
-            }
-            desiredRobot.setActive(!handInteractablesAreDeleted);
-
-            if (!handInteractablesAreDeleted)
-            {
-               for (RobotSide side : interactableHands.sides())
-               {
-                  desiredRobot.setArmShowing(side, !interactableHands.get(side).isDeleted() && armManager.getArmControlMode() == RDXArmControlMode.JOINT_ANGLES);
                }
             }
 
@@ -467,10 +481,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
             {
                ImGui.text(side.getPascalCaseName() + " Foot:");
                ImGui.sameLine();
-               if (interactableFeet.get(side).renderImGuiWidgets())
-               {
-                  locomotionManager.setLegControlModeToSingleSupportFootPosing();
-               }
+               interactableFeet.get(side).renderImGuiWidgets();
             }
          }
          ImGui.unindent();
