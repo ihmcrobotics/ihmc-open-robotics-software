@@ -622,7 +622,10 @@ public class RDXVRController extends RDXVRTrackedDevice
          setBottomJoystickText(text2);
          setRightJoystickText(text3);
          setLeftJoystickText(text4);
-         joystickSelection = null;
+      }
+      else if (joystickActionData.x() == 0.0 || joystickActionData.y() == 0.0)
+      {
+         wordsBoxMesh = null;
       }
       if (joystickActionData.x() < 0 && Math.abs(joystickActionData.x()) > Math.abs(joystickActionData.y())
           || joystickSelection == RDXVRJoystickSelection.LEFT_RING)
@@ -686,14 +689,15 @@ public class RDXVRController extends RDXVRTrackedDevice
       return pageNumber;
    }
 
-   public void setBoxOfChoice(boolean isHovering)
+   public void setBoxPosition(boolean isHovering)
    {
       wordsBoxReferenceFrame = new ModifiableReferenceFrame(joystickReferenceFrame.getReferenceFrame());
       if (getOffset() != null)
       {
          boxOffset.put(side, getOffset());
          pastJoystickSelection = joystickSelection;
-         updateHoverBoxFramePose(side);
+         if (wordsBoxMesh != null)
+            updateHoverBoxFramePose(side);
       }
       else if (getOffset() == null && isHovering)
       {
@@ -701,7 +705,8 @@ public class RDXVRController extends RDXVRTrackedDevice
          {
             joystickSelection = pastJoystickSelection;
             boxOffset.put(side, getOffset());
-            updateHoverBoxFramePose(side);
+            if (wordsBoxMesh != null)
+               updateHoverBoxFramePose(side);
          }
       }
       else if (joystickSelection == null || joystickSelection == RDXVRJoystickSelection.NONE)

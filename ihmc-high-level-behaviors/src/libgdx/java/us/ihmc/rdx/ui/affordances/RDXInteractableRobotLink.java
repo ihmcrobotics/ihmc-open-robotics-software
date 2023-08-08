@@ -179,7 +179,7 @@ public class RDXInteractableRobotLink
                                                                       selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getParent());
             }
 
-            controller.setBoxOfChoice(isHovering);
+            controller.setBoxPosition(isHovering);
          });
       }
    }
