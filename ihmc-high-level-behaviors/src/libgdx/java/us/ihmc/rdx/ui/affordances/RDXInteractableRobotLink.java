@@ -61,13 +61,6 @@ public class RDXInteractableRobotLink
    private Runnable closeCommands;
    private Runnable doorAvoidenceExecutable;
    private Runnable homePositionExecutable;
-   private RDXModelInstance wordsBoxMesh;
-   private final FrameBox3D selectionCollisionBox = new FrameBox3D();
-   private final SideDependentList<Point3D> boxOffset = new SideDependentList<>();
-   private ModifiableReferenceFrame wordsBoxReferenceFrame;
-   private final FramePose3D wordsBoxFramePose = new FramePose3D();
-   private RDXVRJoystickSelection pastJoystickSelection;
-   private int pageNumber;
 
    /** For when the graphic, the link, and control frame are all the same. */
    public void create(RDXRobotCollidable robotCollidable, ReferenceFrame syncedControlFrame, String graphicFileName, RDX3DPanel panel3D)
@@ -96,11 +89,7 @@ public class RDXInteractableRobotLink
       RDXBaseUI.getInstance().getKeyBindings().register("Execute / pause motion", "Space");
       RDXBaseUI.getInstance().getKeyBindings().register("Delete selected gizmo", "Delete");
 
-      selectionCollisionBox.getSize().set(0.0125, 0.075, 0.0025);
-      FramePoint3DBasics[] vertices = selectionCollisionBox.getVertices();
-      wordsBoxMesh = new RDXModelInstance(RDXModelBuilder.buildModel(boxMeshBuilder -> boxMeshBuilder.addMultiLineBox(vertices,
-                                                                                                                      0.0005,
-                                                                                                                      new Color(Color.WHITE))));
+
    }
 
    public void update()
@@ -138,12 +127,7 @@ public class RDXInteractableRobotLink
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
-            if (controller.getJoystickSelection() == null)
-            {
-               controller.setJoystickSelection(RDXVRJoystickSelection.NONE);
-            }
             boolean isHovering = false;
-            wordsBoxReferenceFrame = new ModifiableReferenceFrame(controller.getJoystickReferenceFrame().getReferenceFrame());
             for (RDXRobotCollidable robotCollidable : robotCollidables)
             {
                isHovering |= robotCollidable.getVRHovering(side);
@@ -167,60 +151,22 @@ public class RDXInteractableRobotLink
                   gripDragData.setInteractableFrameOnDragStart(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
                }
 
-               if (pageNumber == 0)
+               if (controller.getPageNumber() == 0)
                {
                   controller.controlOfRadialMenu("Open Hand", "Close Hand", "Change Page", "Door Avoidance");
                   if (joystickButton.bChanged() && joystickButton.bState())
                   {
-                     switch (controller.getJoystickSelection())
-                     {
-                        case LEFT_RING:
-                           doorAvoidenceExecutable.run();
-                           break;
-                        case RIGHT_RING:
-                           changePage(pageNumber);
-                           break;
-                        case TOP_RING:
-                           if (openCommands != null)
-                           {
-                              openCommands.run();
-                              break;
-                           }
-                        case BOTTOM_RING:
-                           if (closeCommands != null)
-                           {
-                              closeCommands.run();
-                              break;
-                           }
-                     }
+                     if (controller.getSwitchcaseAnswer(doorAvoidenceExecutable, openCommands, closeCommands) != null)
+                        controller.getSwitchcaseAnswer(doorAvoidenceExecutable, openCommands, closeCommands).run();
                   }
                }
-               else if (pageNumber == 1)
+               else if (controller.getPageNumber() == 1)
                {
                   controller.controlOfRadialMenu("Open Hand", "Close Hand", "Change Page", "Home Positon");
                   if (joystickButton.bChanged() && joystickButton.bState())
                   {
-                     switch (controller.getJoystickSelection())
-                     {
-                        case LEFT_RING:
-                           homePositionExecutable.run();
-                           break;
-                        case RIGHT_RING:
-                           changePage(pageNumber);
-                           break;
-                        case TOP_RING:
-                           if (openCommands != null)
-                           {
-                              openCommands.run();
-                              break;
-                           }
-                        case BOTTOM_RING:
-                           if (closeCommands != null)
-                           {
-                              closeCommands.run();
-                              break;
-                           }
-                     }
+                     if (controller.getSwitchcaseAnswer(homePositionExecutable, openCommands, closeCommands) != null)
+                        controller.getSwitchcaseAnswer(homePositionExecutable, openCommands, closeCommands).run();
                   }
                }
             }
@@ -237,30 +183,14 @@ public class RDXInteractableRobotLink
             {
                delete();
             }
+
             if (gripDragData.isDragging() && gripDragData.getObjectBeingDragged() == this)
             {
                gripDragData.getDragFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
                                                                       selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getParent());
             }
-            if (controller.getOffset() != null)
-            {
-               boxOffset.put(side, controller.getOffset());
-               pastJoystickSelection = controller.getJoystickSelection();
-               updateHoverBoxFramePose(side);
-            }
-            else if (controller.getOffset() == null && isHovering)
-            {
-               if (pastJoystickSelection != null && pastJoystickSelection != RDXVRJoystickSelection.NONE)
-               {
-                  controller.setJoystickSelection(pastJoystickSelection);
-                  boxOffset.put(side, controller.getOffset());
-                  updateHoverBoxFramePose(side);
-               }
-            }
-            else if (controller.getJoystickSelection() == null || controller.getJoystickSelection() == RDXVRJoystickSelection.NONE)
-            {
-               boxOffset.put(side, null);
-            }
+
+            controller.setBoxOfChoice(isHovering);
          });
       }
    }
@@ -349,8 +279,6 @@ public class RDXInteractableRobotLink
          highlightModel.getRenderables(renderables, pool);
       }
 
-      if (wordsBoxMesh != null && (boxOffset.get(RobotSide.LEFT) != null || boxOffset.get(RobotSide.RIGHT) != null))
-         wordsBoxMesh.getRenderables(renderables, pool);
       selectablePose3DGizmo.getVirtualRenderables(renderables, pool);
    }
 
@@ -380,17 +308,6 @@ public class RDXInteractableRobotLink
       return selectablePose3DGizmo.getPoseGizmo().getGizmoFrame();
    }
 
-   public void changePage(int pageNumber)
-   {
-      if (pageNumber > 0)
-      {
-         this.pageNumber = pageNumber - 1;
-      }
-      else
-      {
-         this.pageNumber = pageNumber + 1;
-      }
-   }
    public void setOnSpacePressed(Runnable onSpacePressed)
    {
       this.onSpacePressed = onSpacePressed;
@@ -414,22 +331,6 @@ public class RDXInteractableRobotLink
    public void setHomePositionExecutable(Runnable homePositionExecutable)
    {
       this.homePositionExecutable = homePositionExecutable;
-   }
-
-   private void updateHoverBoxFramePose(RobotSide side)
-   {
-      wordsBoxReferenceFrame.getReferenceFrame().getTransformToParent().getTranslation().set(boxOffset.get(side));
-      wordsBoxReferenceFrame.getReferenceFrame().update();
-      wordsBoxFramePose.setToZero(wordsBoxReferenceFrame.getReferenceFrame());
-      wordsBoxFramePose.getTranslation().add(boxOffset.get(side));
-      wordsBoxFramePose.getTranslation().subY(0.03);
-      if (side == RobotSide.RIGHT)
-      {
-         wordsBoxFramePose.getTranslation().addX(0.01);
-      }
-      wordsBoxFramePose.getRotation().setToYawOrientation(side.negateIfLeftSide(0.2));
-      wordsBoxFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-      wordsBoxMesh.setPoseInWorldFrame(wordsBoxFramePose);
    }
 
    public void addAdditionalRobotCollidable(RDXRobotCollidable robotCollidable)
