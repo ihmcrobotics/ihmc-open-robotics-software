@@ -73,21 +73,11 @@ public class RDXVRTeleporter
                   vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
                   {
                      xyYawHeadsetToTeleportTransform.setIdentity();
-                     vrContext.getHeadset()
-                              .runIfConnected(headset -> // Teleport such that your headset ends up where you're trying to go
+                     vrContext.getHeadset().runIfConnected(headset -> // Teleport such that your headset ends up where you're trying to go
                      {
-                        headset.getXForwardZUpHeadsetFrame()
-                               .getTransformToDesiredFrame(
-                                     xyYawHeadsetToTeleportTransform,
-                                     vrContext.getTeleportFrameIHMCZUp());
-                        xyYawHeadsetToTeleportTransform.getTranslation()
-                                                       .setZ(0.0);
-                        xyYawHeadsetToTeleportTransform.getRotation()
-                                                       .setYawPitchRoll(
-                                                             xyYawHeadsetToTeleportTransform.getRotation()
-                                                                                            .getYaw(),
-                                                             0.0,
-                                                             0.0);
+                        headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
+                        xyYawHeadsetToTeleportTransform.getTranslation().setZ(0.0);
+                        xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
                      });
                      teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
                      teleportIHMCZUpToIHMCZUpWorld.invert();
