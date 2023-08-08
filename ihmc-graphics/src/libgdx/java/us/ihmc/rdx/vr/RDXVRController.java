@@ -142,7 +142,6 @@ public class RDXVRController extends RDXVRTrackedDevice
    private  RDXVRControllerButtonLabel gripAmountLabel;
    private final RDXVRDragData triggerDragData;
    private final RDXVRDragData gripDragData;
-   private int pageNumber;
    private RDXModelInstance wordsBoxMesh;
    private final FrameBox3D selectionCollisionBox = new FrameBox3D();
    private final SideDependentList<Point3D> boxOffset = new SideDependentList<>();
@@ -650,44 +649,28 @@ public class RDXVRController extends RDXVRTrackedDevice
       }
    }
 
-   public Runnable getChoosenRunnable(Runnable option1, Runnable option3, Runnable option4)
+   public Runnable getChoosenRunnable(Runnable option1, Runnable option2, Runnable option3, Runnable option4)
    {
       switch (joystickSelection)
       {
-         case LEFT_RING:
+         case TOP_RING:
             if (option1 != null)
                return option1;
             break;
-         case RIGHT_RING:
-            changePage(pageNumber);
+         case BOTTOM_RING:
+            if (option2 != null)
+               return option2;
             break;
-         case TOP_RING:
+         case RIGHT_RING:
             if (option3 != null)
                return option3;
             break;
-         case BOTTOM_RING:
+         case LEFT_RING:
             if (option4 != null)
                return option4;
             break;
       }
       return null;
-   }
-
-   public void changePage(int pageNumber)
-   {
-      if (pageNumber > 0)
-      {
-         this.pageNumber = pageNumber - 1;
-      }
-      else
-      {
-         this.pageNumber = pageNumber + 1;
-      }
-   }
-
-   public int getPageNumber()
-   {
-      return pageNumber;
    }
 
    public void setBoxPosition(boolean isHovering)
