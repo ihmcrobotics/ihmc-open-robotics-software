@@ -46,7 +46,7 @@ public class RDXInteractableRobotLink
    private boolean isMouseHovering;
    private final Notification contextMenuNotification = new Notification();
    private boolean isVRHovering;
-
+   private final Notification becomesModified = new Notification();
 
    /** For when the graphic, the link, and control frame are all the same. */
    public void create(RDXRobotCollidable robotCollidable, ReferenceFrame syncedControlFrame, String graphicFileName, RDX3DPanel panel3D)
@@ -196,9 +196,8 @@ public class RDXInteractableRobotLink
       return becomesModified;
    }
 
-   public boolean renderImGuiWidgets()
+   public void renderImGuiWidgets()
    {
-      boolean becomesModified = false;
       if (ImGui.radioButton(labels.get("Deleted"), isDeleted()))
       {
          delete();
@@ -209,7 +208,7 @@ public class RDXInteractableRobotLink
          selectablePose3DGizmo.getSelected().set(false);
          if (!modified)
          {
-            becomesModified = true;
+            becomesModified.set();
             modified = true;
          }
       }
@@ -219,11 +218,10 @@ public class RDXInteractableRobotLink
          selectablePose3DGizmo.getSelected().set(true);
          if (!modified)
          {
-            becomesModified = true;
+            becomesModified.set();
             modified = true;
          }
       }
-      return becomesModified;
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -269,6 +267,11 @@ public class RDXInteractableRobotLink
    public boolean isVRHovering()
    {
       return isVRHovering;
+   }
+
+   public Notification getBecomesModified()
+   {
+      return becomesModified;
    }
 
    public void setOnSpacePressed(Runnable onSpacePressed)
