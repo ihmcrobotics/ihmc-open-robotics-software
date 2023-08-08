@@ -360,17 +360,17 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
       factory.addState(standTransitionState.getHighLevelControllerName(), standTransitionState);
 
       // Setup calibration state
-      ValkyrieCalibrationControllerState calibrationControllerState = new ValkyrieCalibrationControllerState(null,
-                                                                                                             null,
-                                                                                                             controlledOneDoFJoints,
-                                                                                                             yoTime,
-                                                                                                             robotModel.getHighLevelControllerParameters(),
-                                                                                                             jointDesiredOutputList,
-                                                                                                             null,
-                                                                                                             null,
-                                                                                                             robotModel.getCalibrationParameters(),
-                                                                                                             valkyrieTorqueOffsetPrinter);
-      factory.addState(calibrationControllerState.getHighLevelControllerName(), calibrationControllerState);
+//      ValkyrieCalibrationControllerState calibrationControllerState = new ValkyrieCalibrationControllerState(null,
+//                                                                                                             null,
+//                                                                                                             controlledOneDoFJoints,
+//                                                                                                             yoTime,
+//                                                                                                             robotModel.getHighLevelControllerParameters(),
+//                                                                                                             jointDesiredOutputList,
+//                                                                                                             null,
+//                                                                                                             null,
+//                                                                                                             robotModel.getCalibrationParameters(),
+//                                                                                                             valkyrieTorqueOffsetPrinter);
+//      factory.addState(calibrationControllerState.getHighLevelControllerName(), calibrationControllerState);
 
       // Setup transitions
       YoEnum<HighLevelControllerName> requestedHighLevelControllerState = new YoEnum<>("requestedHighLevelControllerState", registry, HighLevelControllerName.class, true);
@@ -379,11 +379,11 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
       factory.addDoneTransition(standPrepControllerState.getHighLevelControllerName(), standReadyState.getHighLevelControllerName());
 
       // Calibration Request
-      factory.addRequestedTransition(standPrepControllerState.getHighLevelControllerName(),     calibrationControllerState.getHighLevelControllerName(), requestedHighLevelControllerState);
-      factory.addRequestedTransition(standReadyState.getHighLevelControllerName(),              calibrationControllerState.getHighLevelControllerName(), requestedHighLevelControllerState);
+//      factory.addRequestedTransition(standPrepControllerState.getHighLevelControllerName(),     calibrationControllerState.getHighLevelControllerName(), requestedHighLevelControllerState);
+//      factory.addRequestedTransition(standReadyState.getHighLevelControllerName(),              calibrationControllerState.getHighLevelControllerName(), requestedHighLevelControllerState);
 
       // Calibration -> Stand prep
-      factory.addDoneTransition(calibrationControllerState.getHighLevelControllerName(), standPrepControllerState.getHighLevelControllerName());
+//      factory.addDoneTransition(calibrationControllerState.getHighLevelControllerName(), standPrepControllerState.getHighLevelControllerName());
 
       // Stand ready -> Stand transition
       factory.addRequestedTransition(standReadyState.getHighLevelControllerName(), standTransitionState.getHighLevelControllerName(), requestedHighLevelControllerState);
@@ -412,7 +412,7 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
       registry.addChild(standPrepControllerState.getYoRegistry());
       registry.addChild(standReadyState.getYoRegistry());
       registry.addChild(standTransitionState.getYoRegistry());
-      registry.addChild(calibrationControllerState.getYoRegistry());
+//      registry.addChild(calibrationControllerState.getYoRegistry());
       registry.addChild(manipulationState.getYoRegistry());
 
       LogModelProvider logModelProvider = robotModel.getLogModelProvider();
@@ -422,10 +422,10 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       yoVariableServer = new YoVariableServer(getClass(), logModelProvider, logSettings, estimatorDT);
-//      yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), graphicsListRegistry);
+      yoVariableServer.setMainRegistry(registry, rootBody, graphicsListRegistry);
       yoVariableServer.start();
 
-//      robotConfigurationDataPublisher.initialize();
+      robotConfigurationDataPublisher.initialize();
 
       outputWriter = new ValkyrieUpperBodyOutputWriter(controlledOneDoFJoints, jointDesiredOutputList, effortJointHandles);
    }
@@ -448,7 +448,7 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
 
       /* Update YoVariable server */
       yoVariableServer.update(monotonicTimeProvider.getTimestamp(), registry);
-//      robotConfigurationDataPublisher.write();
+      robotConfigurationDataPublisher.write();
    }
 
    private static void mutateRobotDefinition(RobotDefinition robotDefinition)
