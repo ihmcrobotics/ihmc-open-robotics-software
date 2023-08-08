@@ -307,8 +307,9 @@ public class RDXTeleoperationManager extends ImGuiPanel
          {
             if (robotHasArms)
             {
-               boolean handInteractablesAreDeleted = true;
                armManager.update();
+               
+               boolean handInteractablesAreDeleted = true;
                for (RobotSide side : interactableHands.sides())
                {
                   handInteractablesAreDeleted &= interactableHands.get(side).isDeleted();
