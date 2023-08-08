@@ -543,8 +543,8 @@ public class RDXVRController extends RDXVRTrackedDevice
    public boolean anythingElseBeingDragged(Object callersObject)
    {
       boolean anythingElseBeingDragged = false;
-      anythingElseBeingDragged |= gripDragData.isDragging() && gripDragData.getObjectBeingDragged() != callersObject;
-      anythingElseBeingDragged |= triggerDragData.isDragging() && triggerDragData.getObjectBeingDragged() != callersObject;
+      anythingElseBeingDragged |= gripDragData.isDraggingSomething() && gripDragData.getObjectBeingDragged() != callersObject;
+      anythingElseBeingDragged |= triggerDragData.isDraggingSomething() && triggerDragData.getObjectBeingDragged() != callersObject;
       return anythingElseBeingDragged;
    }
 
