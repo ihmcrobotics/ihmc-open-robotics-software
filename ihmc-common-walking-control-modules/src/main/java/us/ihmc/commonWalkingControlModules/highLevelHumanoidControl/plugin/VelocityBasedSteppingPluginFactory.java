@@ -149,7 +149,7 @@ public class VelocityBasedSteppingPluginFactory implements HumanoidSteppingPlugi
 
       fastWalkingJoystickPlugin.setStopWalkingMessenger(new StopWalkingMessenger()
       {
-         private final PauseWalkingMessage message = HumanoidMessageTools.createPauseWalkingMessage(true);
+         private final AbortWalkingMessage message = new AbortWalkingMessage();
 
          @Override
          public void submitStopWalkingRequest()
