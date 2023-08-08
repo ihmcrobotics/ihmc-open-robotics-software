@@ -696,10 +696,6 @@ public class RDXVRController extends RDXVRTrackedDevice
                updateHoverBoxFramePose(side);
          }
       }
-      else if (joystickSelection == null || joystickSelection == RDXVRRadialMenuSelection.NONE)
-      {
-         boxOffset.put(side, null);
-      }
    }
 
    private void updateHoverBoxFramePose(RobotSide side)
