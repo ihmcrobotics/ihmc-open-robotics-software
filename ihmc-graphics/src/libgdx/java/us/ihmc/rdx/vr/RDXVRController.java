@@ -88,7 +88,7 @@ public class RDXVRController extends RDXVRTrackedDevice
    private InputAnalogActionData joystickActionData;
    private final LongBuffer gripActionHandle = BufferUtils.newLongBuffer(1);
    private InputAnalogActionData gripActionData;
-   private RDXVRJoystickSelection joystickSelection;
+   private RDXVRRadialMenuSelection joystickSelection;
    private Point3D topJoystickOffset;
    private Point3D bottomJoystickOffset;
    private Point3D leftJoystickOffset;
@@ -147,7 +147,7 @@ public class RDXVRController extends RDXVRTrackedDevice
    private final SideDependentList<Point3D> boxOffset = new SideDependentList<>();
    private ModifiableReferenceFrame wordsBoxReferenceFrame;
    private final FramePose3D wordsBoxFramePose = new FramePose3D();
-   private RDXVRJoystickSelection pastJoystickSelection;
+   private RDXVRRadialMenuSelection pastJoystickSelection;
 
    public RDXVRController(RobotSide side, ReferenceFrame vrPlayAreaYUpZBackFrame)
    {
@@ -605,7 +605,7 @@ public class RDXVRController extends RDXVRTrackedDevice
       rightJoystickLabel.setText(text);
    }
 
-   public void setJoystickSelection(RDXVRJoystickSelection joystickSelection)
+   public void setJoystickSelection(RDXVRRadialMenuSelection joystickSelection)
    {
       this.joystickSelection = joystickSelection;
    }
@@ -614,7 +614,7 @@ public class RDXVRController extends RDXVRTrackedDevice
    {
       if (joystickSelection == null)
       {
-         joystickSelection = RDXVRJoystickSelection.NONE;
+         joystickSelection = RDXVRRadialMenuSelection.NONE;
       }
       if (joystickActionData.x() != 0.0 || joystickActionData.y() != 0.0)
       {
@@ -628,24 +628,24 @@ public class RDXVRController extends RDXVRTrackedDevice
          wordsBoxMesh = null;
       }
       if (joystickActionData.x() < 0 && Math.abs(joystickActionData.x()) > Math.abs(joystickActionData.y())
-          || joystickSelection == RDXVRJoystickSelection.LEFT_RING)
+          || joystickSelection == RDXVRRadialMenuSelection.LEFT_RING)
       {
-         joystickSelection = RDXVRJoystickSelection.LEFT_RING;
+         joystickSelection = RDXVRRadialMenuSelection.LEFT_RING;
       }
       if (joystickActionData.x() > 0 && Math.abs(joystickActionData.x()) > Math.abs(joystickActionData.y())
-          || joystickSelection == RDXVRJoystickSelection.RIGHT_RING)
+          || joystickSelection == RDXVRRadialMenuSelection.RIGHT_RING)
       {
-         joystickSelection = RDXVRJoystickSelection.RIGHT_RING;
+         joystickSelection = RDXVRRadialMenuSelection.RIGHT_RING;
       }
       if (joystickActionData.y() > 0 && Math.abs(joystickActionData.y()) > Math.abs(joystickActionData.x())
-          || joystickSelection == RDXVRJoystickSelection.TOP_RING)
+          || joystickSelection == RDXVRRadialMenuSelection.TOP_RING)
       {
-         joystickSelection = RDXVRJoystickSelection.TOP_RING;
+         joystickSelection = RDXVRRadialMenuSelection.TOP_RING;
       }
       if (joystickActionData.y() < 0 && Math.abs(joystickActionData.y()) > Math.abs(joystickActionData.x())
-          || joystickSelection == RDXVRJoystickSelection.BOTTOM_RING)
+          || joystickSelection == RDXVRRadialMenuSelection.BOTTOM_RING)
       {
-         joystickSelection = RDXVRJoystickSelection.BOTTOM_RING;
+         joystickSelection = RDXVRRadialMenuSelection.BOTTOM_RING;
       }
    }
 
@@ -685,7 +685,7 @@ public class RDXVRController extends RDXVRTrackedDevice
       }
       else if (getOffset() == null && isHovering)
       {
-         if (pastJoystickSelection != null && pastJoystickSelection != RDXVRJoystickSelection.NONE)
+         if (pastJoystickSelection != null && pastJoystickSelection != RDXVRRadialMenuSelection.NONE)
          {
             joystickSelection = pastJoystickSelection;
             boxOffset.put(side, getOffset());
@@ -693,7 +693,7 @@ public class RDXVRController extends RDXVRTrackedDevice
                updateHoverBoxFramePose(side);
          }
       }
-      else if (joystickSelection == null || joystickSelection == RDXVRJoystickSelection.NONE)
+      else if (joystickSelection == null || joystickSelection == RDXVRRadialMenuSelection.NONE)
       {
          boxOffset.put(side, null);
       }
