@@ -178,8 +178,8 @@ public class RDXBaseUI
          int width = imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getWidth();
          int height = imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getHeight();
          Gdx.graphics.setWindowedMode(width, height);
-         int x = imGuiWindowAndDockSystem.getPrimaryWindowPosition().getX();
-         int y = imGuiWindowAndDockSystem.getPrimaryWindowPosition().getY();
+         int x = imGuiWindowAndDockSystem.getPrimaryWindowContentAreaPosition().getX();
+         int y = imGuiWindowAndDockSystem.getPrimaryWindowContentAreaPosition().getY();
          ((Lwjgl3Graphics) Gdx.graphics).getWindow().setPosition(x, y);
          return true;
       });

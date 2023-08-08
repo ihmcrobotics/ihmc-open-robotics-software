@@ -9,10 +9,8 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
-import us.ihmc.rdx.imgui.ImBooleanWrapper;
-import us.ihmc.rdx.imgui.ImGuiEnumPlot;
-import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
+import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
@@ -44,6 +42,7 @@ public class RDXPredefinedRigidBodySceneNode
    private final ImGuiEnumPlot currentlyDetectedPlot;
    private final RDXSelectablePose3DGizmo offsetPoseGizmo;
    private final ImBooleanWrapper trackDetectedPoseWrapper;
+   private ImGuiSliderDoubleWrapper alphaFilterValueSlider;
 
    public RDXPredefinedRigidBodySceneNode(PredefinedRigidBodySceneNode predefinedRigidBodySceneNode, RDX3DPanel panel3D)
    {
@@ -68,6 +67,13 @@ public class RDXPredefinedRigidBodySceneNode
       int bufferSize = 1000;
       int heightPixels = 20;
       currentlyDetectedPlot = new ImGuiEnumPlot(predefinedRigidBodySceneNode.getName(), bufferSize, heightPixels);
+
+      if (sceneNode instanceof ArUcoDetectableNode arUcoDetectableNode)
+      {
+         alphaFilterValueSlider = new ImGuiSliderDoubleWrapper("Break frequency", "%.2f", 0.2, 5.0,
+                                                               arUcoDetectableNode::getBreakFrequency,
+                                                               arUcoDetectableNode::setBreakFrequency);
+      }
    }
 
    public void update()
@@ -107,6 +113,11 @@ public class RDXPredefinedRigidBodySceneNode
       {
          sceneNode.clearOffset();
          ensureGizmoFrameIsSceneNodeFrame();
+         sceneNode.markModifiedByOperator();
+      }
+      if (sceneNode instanceof ArUcoDetectableNode)
+      {
+         alphaFilterValueSlider.render();
          sceneNode.markModifiedByOperator();
       }
 

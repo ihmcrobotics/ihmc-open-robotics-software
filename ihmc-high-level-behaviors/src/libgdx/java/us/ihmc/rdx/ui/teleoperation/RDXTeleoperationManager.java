@@ -110,6 +110,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final SideDependentList<double[]> armHomes = new SideDependentList<>();
    private final SideDependentList<double[]> doorAvoidanceArms = new SideDependentList<>();
    private final ImString tempImGuiText = new ImString(1000);
+   private final ImBoolean interactableSelections = new ImBoolean(true);
    private final boolean interactablesAvailable;
    private ImGuiStoredPropertySetDoubleWidget trajectoryTimeSlider;
 
@@ -182,7 +183,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
                                         interactableHands);
       }
 
-      RDXBaseUI.getInstance().getKeyBindings().register("Delete all interactables", "Ctrl + L");
+      RDXBaseUI.getInstance().getKeyBindings().register("Delete all Interactables", "Ctrl + L");
    }
 
    public void create(RDXBaseUI baseUI)
@@ -305,7 +306,32 @@ public class RDXTeleoperationManager extends ImGuiPanel
          if (interactablesAvailable)
          {
             if (robotHasArms)
+            {
                armManager.update();
+               
+               boolean handInteractablesAreDeleted = true;
+               for (RobotSide side : interactableHands.sides())
+               {
+                  handInteractablesAreDeleted &= interactableHands.get(side).isDeleted();
+               }
+               desiredRobot.setActive(!handInteractablesAreDeleted);
+
+               if (!handInteractablesAreDeleted)
+               {
+                  for (RobotSide side : interactableHands.sides())
+                  {
+                     desiredRobot.setArmShowing(side, !interactableHands.get(side).isDeleted() && armManager.getArmControlMode() == RDXArmControlMode.JOINT_ANGLES);
+                  }
+               }
+            }
+
+            for (RobotSide side : interactableFeet.sides())
+            {
+               if (interactableFeet.get(side).getBecomesModified().poll())
+               {
+                  locomotionManager.setLegControlModeToSingleSupportFootPosing();
+               }
+            }
 
             selfCollisionModel.update();
             selectionCollisionModel.update();
@@ -408,7 +434,17 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
    public void renderImGuiWidgets()
    {
+      ImGui.pushFont(ImGuiTools.getMediumFont());
+      ImGui.text("Whole Body");
+      ImGui.popFont();
+
       robotLowLevelMessenger.renderImGuiWidgets();
+
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Delete all Interactables")) || ImGui.getIO().getKeyCtrl() && ImGui.isKeyReleased('L'))
+      {
+         clearInteractablesAndLocomotionGraphics();
+      }
 
       pelvisHeightSlider.renderImGuiWidgets();
       chestPitchSlider.renderImGuiWidgets();
@@ -416,73 +452,59 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       trajectoryTimeSlider.renderImGuiWidget();
 
-      ImGui.separator();
-
       if (interactablesAvailable)
       {
-         if (ImGui.button(labels.get("Delete all Interactables")) || ImGui.getIO().getKeyCtrl() && ImGui.isKeyReleased('L'))
-         {
-            locomotionManager.deleteAll();
-
-            for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
-               robotPartInteractable.delete();
-         }
-
-         ImGui.sameLine();
-         ImGui.checkbox("Interactables enabled", interactablesEnabled);
+         ImGui.checkbox("Interactables Enabled", interactablesEnabled);
       }
 
-      if (interactablesAvailable)
+      if (ImGui.collapsingHeader(labels.get("Interactable Selections"), interactableSelections))
       {
-         ImGui.text("Pelvis:");
-         ImGuiTools.previousWidgetTooltip("Send with: Spacebar");
-         ImGui.sameLine();
-         interactablePelvis.renderImGuiWidgets();
-
-         boolean handInteractablesAreDeleted = true;
-         if (robotHasArms)
+         ImGui.indent();
+         if (interactablesAvailable)
          {
-            for (RobotSide side : interactableHands.sides())
-            {
-               ImGui.text(side.getPascalCaseName() + " hand:");
-               ImGui.sameLine();
-               interactableHands.get(side).renderImGuiWidgets();
-               handInteractablesAreDeleted &= interactableHands.get(side).isDeleted();
-            }
-         }
-         desiredRobot.setActive(!handInteractablesAreDeleted);
-
-         if (!handInteractablesAreDeleted)
-         {
-            // desiredRobot.setPelvisShowing(!pelvisInteractable.isDeleted());
-            for (RobotSide side : interactableHands.sides())
-               desiredRobot.setArmShowing(side, !interactableHands.get(side).isDeleted()
-                                                && armManager.getArmControlMode() == RDXArmControlMode.JOINT_ANGLES);
-            // for (RobotSide side : footInteractables.sides())
-            //    desiredRobot.setLegShowing(side, !footInteractables.get(side).isDeleted());
-         }
-
-         for (RobotSide side : interactableFeet.sides())
-         {
-            ImGui.text(side.getPascalCaseName() + " foot:");
+            ImGui.text("Pelvis:");
+            ImGuiTools.previousWidgetTooltip("Send with: Spacebar");
             ImGui.sameLine();
-            if (interactableFeet.get(side).renderImGuiWidgets())
+            interactablePelvis.renderImGuiWidgets();
+
+            if (robotHasArms)
             {
-               locomotionManager.setLegControlModeToSingleSupportFootPosing();
+               for (RobotSide side : interactableHands.sides())
+               {
+                  ImGui.text(side.getPascalCaseName() + " Hand:");
+                  ImGui.sameLine();
+                  interactableHands.get(side).renderImGuiWidgets();
+               }
+            }
+
+            for (RobotSide side : interactableFeet.sides())
+            {
+               ImGui.text(side.getPascalCaseName() + " Foot:");
+               ImGui.sameLine();
+               interactableFeet.get(side).renderImGuiWidgets();
             }
          }
-
-         ImGui.separator();
-
-         ImGui.text("Show collisions:");
-         ImGui.sameLine();
-         ImGui.checkbox("Contact", showEnvironmentCollisionMeshes);
-         ImGui.sameLine();
-         ImGui.checkbox("Avoidance", showSelfCollisionMeshes);
+         ImGui.unindent();
       }
+
+      ImGui.text("Show collisions:");
+      ImGui.sameLine();
+      ImGui.checkbox("Contact", showEnvironmentCollisionMeshes);
+      ImGui.sameLine();
+      ImGui.checkbox("Avoidance", showSelfCollisionMeshes);
 
       // TODO: Add transparency sliders
       // TODO: Add motion previews
+
+      ImGui.pushFont(ImGuiTools.getMediumFont());
+      ImGui.text("Locomotion");
+      ImGui.popFont();
+      locomotionManager.renderImGuiWidgets();
+
+      ImGui.pushFont(ImGuiTools.getMediumFont());
+      ImGui.text("Arms & Hands");
+      ImGui.popFont();
+      armManager.renderImGuiWidgets();
    }
 
    private void renderTooltipsAndContextMenus()
@@ -574,6 +596,13 @@ public class RDXTeleoperationManager extends ImGuiPanel
       }
    }
 
+   public void clearInteractablesAndLocomotionGraphics()
+   {
+      locomotionManager.deleteAll();
+
+      for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
+         robotPartInteractable.delete();
+   }
    public void destroy()
    {
       desiredRobot.destroy();
