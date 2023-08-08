@@ -140,24 +140,12 @@ public class RDXInteractableRobotLink
                   gripDragData.setInteractableFrameOnDragStart(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
                }
 
-               if (controller.getPageNumber() == 0)
-               {
-                  controller.controlOfRadialMenu("Open Hand", "Close Hand", "Change Page", "Door Avoidance");
+                  controller.controlOfRadialMenu("Open Hand", "Close Hand", "Door Avoidance", "Home Position");
                   if (joystickButton.bChanged() && joystickButton.bState())
                   {
-                     if (controller.getChoosenRunnable(doorAvoidenceExecutable, openCommands, closeCommands) != null)
-                        controller.getChoosenRunnable(doorAvoidenceExecutable, openCommands, closeCommands).run();
+                     if (controller.getChoosenRunnable( openCommands, closeCommands, doorAvoidenceExecutable,  homePositionExecutable) != null)
+                        controller.getChoosenRunnable( openCommands, closeCommands, doorAvoidenceExecutable,  homePositionExecutable).run();
                   }
-               }
-               else if (controller.getPageNumber() == 1)
-               {
-                  controller.controlOfRadialMenu("Open Hand", "Close Hand", "Change Page", "Home Positon");
-                  if (joystickButton.bChanged() && joystickButton.bState())
-                  {
-                     if (controller.getChoosenRunnable(homePositionExecutable, openCommands, closeCommands) != null)
-                        controller.getChoosenRunnable(homePositionExecutable, openCommands, closeCommands).run();
-                  }
-               }
             }
             else
             {
