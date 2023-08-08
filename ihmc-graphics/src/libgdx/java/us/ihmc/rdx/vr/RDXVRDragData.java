@@ -89,9 +89,9 @@ public class RDXVRDragData
       }
    }
 
-   public boolean isDragging()
+   public boolean isDraggingSomething()
    {
-      return dragging;
+      return dragging && objectBeingDragged != null;
    }
 
    public boolean isBeingDragged(Object objectInQuestion)

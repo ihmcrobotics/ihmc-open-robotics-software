@@ -279,7 +279,7 @@ public class RDX3DSituatedImagePanel
                   gripDragData.setInteractableFrameOnDragStart(floatingPanelFrame.getReferenceFrame());
                }
 
-               if (gripDragData.isDragging() && gripDragData.getObjectBeingDragged() == this)
+               if (gripDragData.isBeingDragged(this))
                {
                   gripDragData.getDragFrame().getTransformToDesiredFrame(floatingPanelFrame.getTransformToParent(),
                                                                          floatingPanelFrame.getReferenceFrame().getParent());

@@ -255,7 +255,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
-            if (!controller.getTriggerDragData().isDragging())
+            if (!controller.getTriggerDragData().isDraggingSomething())
             {
                Line3DReadOnly pickRay = controller.getPickRay();
                if (!isRingBeingDraggedVR.get(side.getOppositeSide()))
@@ -306,7 +306,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
             {
                Line3DReadOnly pickRay = controller.getPickRay();
 
-               if (triggerDragData.isDragging() && closestVRCollisionSelection.get(side) == RING)
+               if (triggerDragData.isDraggingSomething() && closestVRCollisionSelection.get(side) == RING)
                {
                   Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
                   frameBasedGizmoModification.translateInWorld(planarMotion);
