@@ -64,28 +64,28 @@ public class RDXVRTeleporter
            InputDigitalActionData bButton = controller.getBButtonActionData();
            InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
 
-               if (bButton.bChanged() && bButton.bState()) // Pressed B button
-               {
-                  preparingToTeleport = true;
-               }
-               else if (preparingToTeleport && bButton.bChanged() && !bButton.bState())
-               {
-                  vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
-                  {
-                     xyYawHeadsetToTeleportTransform.setIdentity();
-                     vrContext.getHeadset().runIfConnected(headset -> // Teleport such that your headset ends up where you're trying to go
-                     {
-                        headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
-                        xyYawHeadsetToTeleportTransform.getTranslation().setZ(0.0);
-                        xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
-                     });
-                     teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
-                     teleportIHMCZUpToIHMCZUpWorld.invert();
-                     proposedTeleportPose.get(tempTransform);
-                     tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
-                  });
-                  preparingToTeleport = false;
-               }
+           if (bButton.bChanged() && bButton.bState()) // Pressed B button
+           {
+              preparingToTeleport = true;
+           }
+           else if (preparingToTeleport && bButton.bChanged() && !bButton.bState())
+           {
+              vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
+              {
+                 xyYawHeadsetToTeleportTransform.setIdentity();
+                 vrContext.getHeadset().runIfConnected(headset -> // Teleport such that your headset ends up where you're trying to go
+                 {
+                    headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
+                    xyYawHeadsetToTeleportTransform.getTranslation().setZ(0.0);
+                    xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
+                 });
+                 teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
+                 teleportIHMCZUpToIHMCZUpWorld.invert();
+                 proposedTeleportPose.get(tempTransform);
+                 tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
+              });
+              preparingToTeleport = false;
+           }
 
            // Pressed right joystick button
            if (robotMidFeetZUpReferenceFrame != null && joystickButton.bChanged() && !joystickButton.bState())
