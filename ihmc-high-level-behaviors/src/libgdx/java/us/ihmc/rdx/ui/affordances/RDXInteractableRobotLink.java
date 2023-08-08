@@ -5,7 +5,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.ImGui;
-import org.lwjgl.openvr.InputAnalogActionData;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -137,7 +136,7 @@ public class RDXInteractableRobotLink
                }
             }
 
-            if (gripDragData.isDragging() && gripDragData.getObjectBeingDragged() == this)
+            if (gripDragData.isBeingDragged(this))
             {
                gripDragData.getDragFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
                                                                       selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getParent());
