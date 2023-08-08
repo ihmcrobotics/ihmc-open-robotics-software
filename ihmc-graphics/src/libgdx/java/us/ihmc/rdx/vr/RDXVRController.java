@@ -10,11 +10,9 @@ import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.openvr.*;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FrameLine3D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -28,6 +26,7 @@ import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.nio.LongBuffer;
 import java.util.ArrayList;
@@ -143,6 +142,13 @@ public class RDXVRController extends RDXVRTrackedDevice
    private  RDXVRControllerButtonLabel gripAmountLabel;
    private final RDXVRDragData triggerDragData;
    private final RDXVRDragData gripDragData;
+   private int pageNumber;
+   private RDXModelInstance wordsBoxMesh;
+   private final FrameBox3D selectionCollisionBox = new FrameBox3D();
+   private final SideDependentList<Point3D> boxOffset = new SideDependentList<>();
+   private ModifiableReferenceFrame wordsBoxReferenceFrame;
+   private final FramePose3D wordsBoxFramePose = new FramePose3D();
+   private RDXVRJoystickSelection pastJoystickSelection;
 
    public RDXVRController(RobotSide side, ReferenceFrame vrPlayAreaYUpZBackFrame)
    {
@@ -170,6 +176,8 @@ public class RDXVRController extends RDXVRTrackedDevice
 
       triggerDragData = new RDXVRDragData(() -> getClickTriggerActionData().bState(), pickPoseFrame.getReferenceFrame());
       gripDragData = new RDXVRDragData(this::getGripAsButtonDown, pickPoseFrame.getReferenceFrame());
+
+      selectionCollisionBox.getSize().set(0.0125, 0.075, 0.0025);
    }
 
    public void initSystem()
@@ -219,6 +227,13 @@ public class RDXVRController extends RDXVRTrackedDevice
          if (joystickSphere == null)
          {
             joystickSphere = new RDXModelInstance(RDXModelBuilder.createSphere(0.0025f, new Color(Color.WHITE)));
+         }
+         if (wordsBoxMesh == null)
+         {
+            FramePoint3DBasics[] vertices = selectionCollisionBox.getVertices();
+            wordsBoxMesh = new RDXModelInstance(RDXModelBuilder.buildModel(boxMeshBuilder -> boxMeshBuilder.addMultiLineBox(vertices,
+                                                                                                                            0.0005,
+                                                                                                                            new Color(Color.WHITE))));
          }
          if (pickPoseSphere == null)
          {
@@ -363,6 +378,8 @@ public class RDXVRController extends RDXVRTrackedDevice
             leftJoystickLabel.getRenderables(renderables, pool);
          if (gripAmountLabel != null)
             gripAmountLabel.getRenderables(renderables, pool);
+         if (wordsBoxMesh != null && (boxOffset.get(RobotSide.LEFT) != null || boxOffset.get(RobotSide.RIGHT) != null))
+            wordsBoxMesh.getRenderables(renderables, pool);
       }
    }
 
@@ -600,43 +617,120 @@ public class RDXVRController extends RDXVRTrackedDevice
 
    public void controlOfRadialMenu(String text1, String text2, String text3, String text4)
    {
-      setTopJoystickText(text1);
-      setBottomJoystickText(text2);
-      setRightJoystickText(text3);
-      setLeftJoystickText(text4);
+      if (joystickSelection == null)
+      {
+         setJoystickSelection(RDXVRJoystickSelection.NONE);
+      }
+      if (joystickActionData.x() != 0.0 || joystickActionData.y() != 0.0)
+      {
+         setTopJoystickText(text1);
+         setBottomJoystickText(text2);
+         setRightJoystickText(text3);
+         setLeftJoystickText(text4);
+         joystickSelection = null;
+      }
       if (joystickActionData.x() < 0 && Math.abs(joystickActionData.x()) > Math.abs(joystickActionData.y())
           || joystickSelection == RDXVRJoystickSelection.LEFT_RING)
       {
-         setAllJoystickTextNull();
-         setLeftJoystickText(text4);
          setJoystickSelection(RDXVRJoystickSelection.LEFT_RING);
       }
       if (joystickActionData.x() > 0 && Math.abs(joystickActionData.x()) > Math.abs(joystickActionData.y())
           || joystickSelection == RDXVRJoystickSelection.RIGHT_RING)
       {
-         setAllJoystickTextNull();
-         setRightJoystickText(text3);
          setJoystickSelection(RDXVRJoystickSelection.RIGHT_RING);
       }
       if (joystickActionData.y() > 0 && Math.abs(joystickActionData.y()) > Math.abs(joystickActionData.x())
           || joystickSelection == RDXVRJoystickSelection.TOP_RING)
       {
-         setAllJoystickTextNull();
-         setTopJoystickText(text1);
          setJoystickSelection(RDXVRJoystickSelection.TOP_RING);
       }
       if (joystickActionData.y() < 0 && Math.abs(joystickActionData.y()) > Math.abs(joystickActionData.x())
           || joystickSelection == RDXVRJoystickSelection.BOTTOM_RING)
       {
-         setAllJoystickTextNull();
-         setBottomJoystickText(text2);
          setJoystickSelection(RDXVRJoystickSelection.BOTTOM_RING);
       }
-      if (joystickActionData.x() == 0 && joystickActionData.y() == 0)
+   }
+
+   public Runnable getSwitchcaseAnswer(Runnable option1, Runnable option3, Runnable option4)
+   {
+      switch (joystickSelection)
       {
-         setJoystickSelection(RDXVRJoystickSelection.NONE);
+         case LEFT_RING:
+            if (option1 != null)
+               return option1;
+            break;
+         case RIGHT_RING:
+            changePage(pageNumber);
+            break;
+         case TOP_RING:
+            if (option3 != null)
+               return option3;
+            break;
+         case BOTTOM_RING:
+            if (option4 != null)
+               return option4;
+            break;
+      }
+      return null;
+   }
+
+   public void changePage(int pageNumber)
+   {
+      if (pageNumber > 0)
+      {
+         this.pageNumber = pageNumber - 1;
+      }
+      else
+      {
+         this.pageNumber = pageNumber + 1;
       }
    }
+
+   public int getPageNumber()
+   {
+      return pageNumber;
+   }
+
+   public void setBoxOfChoice(boolean isHovering)
+   {
+      wordsBoxReferenceFrame = new ModifiableReferenceFrame(joystickReferenceFrame.getReferenceFrame());
+      if (getOffset() != null)
+      {
+         boxOffset.put(side, getOffset());
+         pastJoystickSelection = getJoystickSelection();
+         updateHoverBoxFramePose(side);
+      }
+      else if (getOffset() == null && isHovering)
+      {
+         if (pastJoystickSelection != null && pastJoystickSelection != RDXVRJoystickSelection.NONE)
+         {
+            setJoystickSelection(pastJoystickSelection);
+            boxOffset.put(side, getOffset());
+            updateHoverBoxFramePose(side);
+         }
+      }
+      else if (getJoystickSelection() == null || getJoystickSelection() == RDXVRJoystickSelection.NONE)
+      {
+         boxOffset.put(side, null);
+      }
+   }
+
+   private void updateHoverBoxFramePose(RobotSide side)
+   {
+      wordsBoxReferenceFrame.getReferenceFrame().getTransformToParent().getTranslation().set(boxOffset.get(side));
+      wordsBoxReferenceFrame.getReferenceFrame().update();
+      wordsBoxFramePose.setToZero(wordsBoxReferenceFrame.getReferenceFrame());
+      wordsBoxFramePose.getTranslation().add(boxOffset.get(side));
+      wordsBoxFramePose.getTranslation().subY(0.03);
+      if (side == RobotSide.RIGHT)
+      {
+         wordsBoxFramePose.getTranslation().addX(0.01);
+      }
+      wordsBoxFramePose.getRotation().setToYawOrientation(side.negateIfLeftSide(0.2));
+      wordsBoxFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      wordsBoxMesh.setPoseInWorldFrame(wordsBoxFramePose);
+   }
+
    public void setAllJoystickTextNull()
    {
       topJoystickLabel.setText("");
