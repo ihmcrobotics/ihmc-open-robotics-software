@@ -77,8 +77,6 @@ public class RDXInteractableRobotLink
 
       RDXBaseUI.getInstance().getKeyBindings().register("Execute / pause motion", "Space");
       RDXBaseUI.getInstance().getKeyBindings().register("Delete selected gizmo", "Delete");
-
-
    }
 
    public void update()

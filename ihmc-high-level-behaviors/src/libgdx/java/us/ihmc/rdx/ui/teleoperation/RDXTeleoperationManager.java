@@ -267,8 +267,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
                // TODO this should probably not handle the space event!
                // This sends a command to the controller.
                interactableHands.get(side).setOnSpacePressed(armManager.getSubmitDesiredArmSetpointsCallback(side));
-               interactableHands.get(side).setOpenCommands(armManager.getOpenCommands(side));
-               interactableHands.get(side).setCloseCommands(armManager.getCloseCommands(side));
+               interactableHands.get(side).setOpenCommands(armManager.executeOpenHandConfiguration(side));
+               interactableHands.get(side).setCloseCommands(armManager.executeCloseHandConfiguration(side));
                interactableHands.get(side).setDoorAvoidenceExecutable(() -> armManager.executeDoorAvoidanceArmAngles(side));
                interactableHands.get(side).setHomePositionExecutable(() -> armManager.executeArmHome(side));
             }
