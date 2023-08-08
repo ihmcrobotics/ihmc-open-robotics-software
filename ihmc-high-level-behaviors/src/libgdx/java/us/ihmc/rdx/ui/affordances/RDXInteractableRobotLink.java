@@ -144,7 +144,7 @@ public class RDXInteractableRobotLink
                delete();
             }
 
-            if (gripDragData.isDragging() && gripDragData.getObjectBeingDragged() == this)
+            if (gripDragData.isBeingDragged(this))
             {
                gripDragData.getDragFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
                                                                       selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getParent());
