@@ -25,16 +25,14 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.FixedMovingReferenceFrame;
 import us.ihmc.mecano.frames.MovingCenterOfMassReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -48,6 +46,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingZUpFrame;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -117,6 +116,18 @@ public class ValkyrieUpperBodyManipulationState extends HighLevelControllerState
       this.commandInputManager = commandInputManager;
       this.highLevelControllerParameters = highLevelControllerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
+
+      ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver();
+      referenceFrameHashCodeResolver.put(rootBody.getBodyFixedFrame());
+
+      for (int i = 0; i < controlledJoints.length; i++)
+      {
+         referenceFrameHashCodeResolver.put(controlledJoints[i].getFrameBeforeJoint());
+         referenceFrameHashCodeResolver.put(controlledJoints[i].getFrameAfterJoint());
+         referenceFrameHashCodeResolver.put(controlledJoints[i].getSuccessor().getBodyFixedFrame());
+      }
+
+      commandInputManager.registerConversionHelper(new FrameMessageCommandConverter(referenceFrameHashCodeResolver));
 
       momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       ParameterTools.extractJointGainMap(walkingControllerParameters.getHighLevelJointSpaceControlGains(), jointspaceHighLevelGainMap, jointGainRegistry);

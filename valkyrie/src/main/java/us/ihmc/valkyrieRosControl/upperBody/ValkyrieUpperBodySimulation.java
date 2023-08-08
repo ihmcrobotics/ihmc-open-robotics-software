@@ -2,6 +2,7 @@ package us.ihmc.valkyrieRosControl.upperBody;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.NeckTrajectoryMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -20,6 +21,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
@@ -44,6 +46,7 @@ import us.ihmc.scs2.simulation.robot.controller.SimControllerInput;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimOneDoFJointBasics;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.sensorProcessors.FloatingJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
@@ -83,6 +86,11 @@ public class ValkyrieUpperBodySimulation
    private final YoDouble chestPitch = new YoDouble("chestPitch", registry);
    private final YoDouble chestRoll = new YoDouble("chestRoll", registry);
    private final YoDouble chestYaw = new YoDouble("chestYaw", registry);
+
+   private final YoBoolean submitNeckCommand = new YoBoolean("submitNeckCommand", registry);
+   private final YoDouble neckPitch = new YoDouble("neckPitch", registry);
+   private final YoDouble neckRoll = new YoDouble("neckRoll", registry);
+   private final YoDouble neckYaw = new YoDouble("neckYaw", registry);
 
    private final SideDependentList<YoBoolean> submitArmCommand = new SideDependentList<>();
    private final SideDependentList<YoDouble> shoulderPitch = new SideDependentList<>();
@@ -155,6 +163,14 @@ public class ValkyrieUpperBodySimulation
                ChestTrajectoryMessage chestTrajectory = HumanoidMessageTools.createChestTrajectoryMessage(3.0, new Quaternion(chestYaw.getDoubleValue(), chestPitch.getDoubleValue(), chestRoll.getDoubleValue()), ReferenceFrame.getWorldFrame());
                commandInputManager.submitMessage(chestTrajectory);
             }
+
+            if (submitNeckCommand.getValue())
+            {
+               submitNeckCommand.set(false);
+               NeckTrajectoryMessage neckTrajectory = HumanoidMessageTools.createNeckTrajectoryMessage(3.0, new double[]{neckYaw.getDoubleValue(), neckPitch.getDoubleValue(), neckRoll.getDoubleValue()});
+               commandInputManager.submitMessage(neckTrajectory);
+            }
+
             for (RobotSide robotSide : RobotSide.values)
             {
                if (submitArmCommand.get(robotSide).getValue())
