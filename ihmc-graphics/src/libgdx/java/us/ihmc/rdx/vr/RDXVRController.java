@@ -250,8 +250,8 @@ public class RDXVRController extends RDXVRTrackedDevice
             leftJoystickOffset = new Point3D(0.0, 0.1, -0.002);
             Point3D gripAmountOffset = side == RobotSide.LEFT ? new Point3D(-0.1, -0.0, -0.07) : new Point3D(-0.1, 0.0, -0.07);
             YawPitchRoll gripAmountOrientation = side == RobotSide.LEFT ?
-                  new YawPitchRoll(Math.toRadians(90.0), Math.toRadians(-37.0), Math.toRadians(90.0)) :
-                  new YawPitchRoll(Math.toRadians(-90.0), Math.toRadians(37.0), Math.toRadians(90.0));
+                  new YawPitchRoll(Math.toRadians(90.0), Math.toRadians(-37.0), Math.toRadians(90.0))
+                  : new YawPitchRoll(Math.toRadians(-90.0), Math.toRadians(37.0), Math.toRadians(90.0));
             aButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, aButtonOffset, new YawPitchRoll());
             bButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, bButtonOffset, new YawPitchRoll());
             topJoystickLabel = new RDXVRControllerButtonLabel(joystickReferenceFrame.getReferenceFrame(), side, topJoystickOffset, new YawPitchRoll());
@@ -613,7 +613,7 @@ public class RDXVRController extends RDXVRTrackedDevice
       this.joystickSelection = joystickSelection;
    }
 
-   public void controlOfRadialMenu(String text1, String text2, String text3, String text4)
+   public void controlOfRadialMenu(String topText, String bottomText, String rightText, String leftText)
    {
       if (joystickSelection == null)
       {
@@ -621,10 +621,10 @@ public class RDXVRController extends RDXVRTrackedDevice
       }
       if (joystickActionData.x() != 0.0 || joystickActionData.y() != 0.0)
       {
-         setTopJoystickText(text1);
-         setBottomJoystickText(text2);
-         setRightJoystickText(text3);
-         setLeftJoystickText(text4);
+         setTopJoystickText(topText);
+         setBottomJoystickText(bottomText);
+         setRightJoystickText(rightText);
+         setLeftJoystickText(leftText);
       }
       else if (joystickActionData.x() == 0.0 || joystickActionData.y() == 0.0)
       {
@@ -652,25 +652,25 @@ public class RDXVRController extends RDXVRTrackedDevice
       }
    }
 
-   public Runnable getChoosenRunnable(Runnable option1, Runnable option2, Runnable option3, Runnable option4)
+   public Runnable getChoosenRunnable(Runnable topChoice, Runnable bottomChoice, Runnable rightChoice, Runnable leftChoice)
    {
       switch (joystickSelection)
       {
          case TOP_RING:
-            if (option1 != null)
-               return option1;
+            if (topChoice != null)
+               return topChoice;
             break;
          case BOTTOM_RING:
-            if (option2 != null)
-               return option2;
+            if (bottomChoice != null)
+               return bottomChoice;
             break;
          case RIGHT_RING:
-            if (option3 != null)
-               return option3;
+            if (rightChoice != null)
+               return rightChoice;
             break;
          case LEFT_RING:
-            if (option4 != null)
-               return option4;
+            if (leftChoice != null)
+               return leftChoice;
             break;
       }
       return null;
