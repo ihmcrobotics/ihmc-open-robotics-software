@@ -2,6 +2,7 @@ package us.ihmc.behaviors.monteCarloPlanning;
 
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Vector4D32;
 import us.ihmc.log.LogTools;
 
@@ -259,6 +260,19 @@ public class MonteCarloPlanner
    public void collectObservations()
    {
       agent.measure(world.getObstacles());
+   }
+
+   public void addMeasurements(ArrayList<Point3D> measurements)
+   {
+      ArrayList<Point2D> points = new ArrayList<>();
+
+      for (int i = 0; i<measurements.size(); i+=2)
+      {
+         Point3D measurement = measurements.get(i);
+         points.add(new Point2D(measurement.getX(), measurement.getY()));
+      }
+
+      agent.addMeasurements(points);
    }
 
    public Agent getAgent()
