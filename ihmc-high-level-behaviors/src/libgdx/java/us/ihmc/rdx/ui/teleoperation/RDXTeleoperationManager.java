@@ -445,6 +445,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       {
          clearInteractablesAndLocomotionGraphics();
       }
+      ImGuiTools.previousWidgetTooltip("Keybind: Ctrl + L");
 
       pelvisHeightSlider.renderImGuiWidgets();
       chestPitchSlider.renderImGuiWidgets();
