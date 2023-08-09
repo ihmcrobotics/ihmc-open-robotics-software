@@ -6,6 +6,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.convexOptimization.linearProgram.LinearProgramSolver;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -80,6 +81,7 @@ public class MultiContactSupportRegionSolver
 
    private final ConvexPolygon2D supportRegion = new ConvexPolygon2D();
    private final RecyclingArrayList<FramePoint3D> supportRegionVertices = new RecyclingArrayList<>(30, FramePoint3D::new);
+   private final RecyclingArrayList<FramePoint3D> expandedSupportRegionVertices = new RecyclingArrayList<>(30, FramePoint3D::new);
 
    private final YoFramePoint3D averageContactPointPosition = new YoFramePoint3D("averageContactPointPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D directionToOptimize = new YoFrameVector3D("directionToOptimize", ReferenceFrame.getWorldFrame(), registry);
@@ -377,17 +379,20 @@ public class MultiContactSupportRegionSolver
             double x1 = supportRegionVertices.get(n).getX();
             double y1 = supportRegionVertices.get(n).getY();
 
-            double x2 = supportRegionVertices.get(0).getX();
-            double y2 = supportRegionVertices.get(0).getY();
-
-            if (n + 1 < supportRegionVertices.size())
+            if (expandedSupportRegionVertices.contains(new FramePoint3D(ReferenceFrame.getWorldFrame(), x1, y1, 0)))
             {
-               // by default, (x2, y2) is the first vertex
-               // since we don't store the vertices in a circular buffer,
-               // this handles the edge case of optimizing normal to the last edge
-               x2 = supportRegionVertices.get(n + 1).getX();
-               y2 = supportRegionVertices.get(n + 1).getY();
+               // skip if this vertex has already been expanded
+               n++;
+               continue;
             }
+
+            int nextIndex = n + 1;
+            if (nextIndex >= supportRegionVertices.size())
+               nextIndex = 0;
+
+            double x2 = supportRegionVertices.get(nextIndex).getX();
+            double y2 = supportRegionVertices.get(nextIndex).getY();
+
 
             // compute orthogonal direction to the edge
             // (y2-y1, x1-x2) is normal to (x2-x1,y2-y1)
@@ -402,17 +407,18 @@ public class MultiContactSupportRegionSolver
 
             if (linearProgramSolver.solve(costVectorC, Ain, bin, solution))
             {
+               // x_sol and y_sol are the coordinates of the new vertex
                double x_sol = solution.get(nonNegativeDecisionVariables - 4) - solution.get(nonNegativeDecisionVariables - 2);
                double y_sol = solution.get(nonNegativeDecisionVariables - 3) - solution.get(nonNegativeDecisionVariables - 1);
 
                Point2D solVertex = new Point2D(x_sol, y_sol);
 
-               //TODO: change this to only add point if it's outside the current polygon
+               //TODO: change this to only add the point if it's outside the current polygon
                if (!vertexList.contains(solVertex))
                {
                   vertexList.add(solVertex);
                   supportRegion.addVertex(x_sol, y_sol);
-                  supportRegionVertices.add().setIncludingFrame(ReferenceFrame.getWorldFrame(), x_sol, y_sol, 0.0);
+                  supportRegionVertices.insertAtIndex(nextIndex).setIncludingFrame(ReferenceFrame.getWorldFrame(), x_sol, y_sol, 0.0);
                   supportRegion.update();
                   updateGraphics();
                }
@@ -421,10 +427,11 @@ public class MultiContactSupportRegionSolver
 
                // check for convergence by computing area of triangle formed by (x_n, y_n), (x_n+1, y_n+1), (x_sol, y_sol)
                // this (signed) area is given by 0.5 * det([x_n - x_sol, y_n - y_sol; x_n+1 - x_sol, y_n+1 - y_sol])
+               // if the area of this triangle is less than 1e-3, then add it to the list of expanded indices
                double area = 0.5 * (((x1 - x_sol) * (y2 - y_sol)) - ((y1 - y_sol) * (x2 - x_sol)));
                if ((Math.abs(area) < 1e-3) && (n > 3))
                {
-                  return true;
+                  expandedSupportRegionVertices.add().setIncludingFrame(ReferenceFrame.getWorldFrame(), x1, y1, 0.0);
                }
 
                n++;
