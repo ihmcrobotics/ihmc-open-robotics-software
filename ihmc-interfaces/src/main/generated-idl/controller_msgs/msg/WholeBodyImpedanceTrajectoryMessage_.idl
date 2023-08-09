@@ -1,6 +1,7 @@
-#ifndef __controller_msgs__msg__WholeBodyJointspaceTrajectoryMessage__idl__
-#define __controller_msgs__msg__WholeBodyJointspaceTrajectoryMessage__idl__
+#ifndef __controller_msgs__msg__WholeBodyImpedanceTrajectoryMessage__idl__
+#define __controller_msgs__msg__WholeBodyImpedanceTrajectoryMessage__idl__
 
+#include "controller_msgs/msg/./MultiContactTimedContactSequenceMessage_.idl"
 #include "controller_msgs/msg/./OneDoFJointTrajectoryMessage_.idl"
 #include "ihmc_common_msgs/msg/./QueueableMessage_.idl"
 module controller_msgs
@@ -11,11 +12,11 @@ module controller_msgs
     {
 
       /**
-       * This message is part of the IHMC whole-body controller API.
-       * Allows to send joint-space trajectory to either part of the joints or for all the joints.
+       * This message is part of the whole-body impedance controller API.
+       * Allows to send joint-space trajectory along with a timed contact sequence which determines limb stiffness.
        */
-      @TypeCode(type="controller_msgs::msg::dds_::WholeBodyJointspaceTrajectoryMessage_")
-      struct WholeBodyJointspaceTrajectoryMessage
+      @TypeCode(type="controller_msgs::msg::dds_::WholeBodyImpedanceTrajectoryMessage_")
+      struct WholeBodyImpedanceTrajectoryMessage
       {
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -35,6 +36,10 @@ module controller_msgs
          * Properties for queueing trajectories.
          */
         ihmc_common_msgs::msg::dds::QueueableMessage queueing_properties;
+        /**
+         * Contact sequence message
+         */
+        controller_msgs::msg::dds::MultiContactTimedContactSequenceMessage contact_sequence_message;
       };
     };
   };

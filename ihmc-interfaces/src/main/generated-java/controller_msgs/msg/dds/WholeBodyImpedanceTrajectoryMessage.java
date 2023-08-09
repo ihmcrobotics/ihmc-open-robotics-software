@@ -7,10 +7,10 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * Allows to send joint-space trajectory to either part of the joints or for all the joints.
+       * This message is part of the whole-body impedance controller API.
+       * Allows to send joint-space trajectory along with a timed contact sequence which determines limb stiffness.
        */
-public class WholeBodyJointspaceTrajectoryMessage extends Packet<WholeBodyJointspaceTrajectoryMessage> implements Settable<WholeBodyJointspaceTrajectoryMessage>, EpsilonComparable<WholeBodyJointspaceTrajectoryMessage>
+public class WholeBodyImpedanceTrajectoryMessage extends Packet<WholeBodyImpedanceTrajectoryMessage> implements Settable<WholeBodyImpedanceTrajectoryMessage>, EpsilonComparable<WholeBodyImpedanceTrajectoryMessage>
 {
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -30,29 +30,35 @@ public class WholeBodyJointspaceTrajectoryMessage extends Packet<WholeBodyJoints
             * Properties for queueing trajectories.
             */
    public ihmc_common_msgs.msg.dds.QueueableMessage queueing_properties_;
+   /**
+            * Contact sequence message
+            */
+   public controller_msgs.msg.dds.MultiContactTimedContactSequenceMessage contact_sequence_message_;
 
-   public WholeBodyJointspaceTrajectoryMessage()
+   public WholeBodyImpedanceTrajectoryMessage()
    {
       joint_hash_codes_ = new us.ihmc.idl.IDLSequence.Integer (100, "type_2");
 
       joint_trajectory_messages_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.OneDoFJointTrajectoryMessage> (100, new controller_msgs.msg.dds.OneDoFJointTrajectoryMessagePubSubType());
       queueing_properties_ = new ihmc_common_msgs.msg.dds.QueueableMessage();
+      contact_sequence_message_ = new controller_msgs.msg.dds.MultiContactTimedContactSequenceMessage();
 
    }
 
-   public WholeBodyJointspaceTrajectoryMessage(WholeBodyJointspaceTrajectoryMessage other)
+   public WholeBodyImpedanceTrajectoryMessage(WholeBodyImpedanceTrajectoryMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(WholeBodyJointspaceTrajectoryMessage other)
+   public void set(WholeBodyImpedanceTrajectoryMessage other)
    {
       sequence_id_ = other.sequence_id_;
 
       joint_hash_codes_.set(other.joint_hash_codes_);
       joint_trajectory_messages_.set(other.joint_trajectory_messages_);
       ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.staticCopy(other.queueing_properties_, queueing_properties_);
+      controller_msgs.msg.dds.MultiContactTimedContactSequenceMessagePubSubType.staticCopy(other.contact_sequence_message_, contact_sequence_message_);
    }
 
    /**
@@ -100,19 +106,28 @@ public class WholeBodyJointspaceTrajectoryMessage extends Packet<WholeBodyJoints
    }
 
 
-   public static Supplier<WholeBodyJointspaceTrajectoryMessagePubSubType> getPubSubType()
+   /**
+            * Contact sequence message
+            */
+   public controller_msgs.msg.dds.MultiContactTimedContactSequenceMessage getContactSequenceMessage()
    {
-      return WholeBodyJointspaceTrajectoryMessagePubSubType::new;
+      return contact_sequence_message_;
+   }
+
+
+   public static Supplier<WholeBodyImpedanceTrajectoryMessagePubSubType> getPubSubType()
+   {
+      return WholeBodyImpedanceTrajectoryMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return WholeBodyJointspaceTrajectoryMessagePubSubType::new;
+      return WholeBodyImpedanceTrajectoryMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(WholeBodyJointspaceTrajectoryMessage other, double epsilon)
+   public boolean epsilonEquals(WholeBodyImpedanceTrajectoryMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -129,6 +144,7 @@ public class WholeBodyJointspaceTrajectoryMessage extends Packet<WholeBodyJoints
       }
 
       if (!this.queueing_properties_.epsilonEquals(other.queueing_properties_, epsilon)) return false;
+      if (!this.contact_sequence_message_.epsilonEquals(other.contact_sequence_message_, epsilon)) return false;
 
       return true;
    }
@@ -138,15 +154,16 @@ public class WholeBodyJointspaceTrajectoryMessage extends Packet<WholeBodyJoints
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof WholeBodyJointspaceTrajectoryMessage)) return false;
+      if(!(other instanceof WholeBodyImpedanceTrajectoryMessage)) return false;
 
-      WholeBodyJointspaceTrajectoryMessage otherMyClass = (WholeBodyJointspaceTrajectoryMessage) other;
+      WholeBodyImpedanceTrajectoryMessage otherMyClass = (WholeBodyImpedanceTrajectoryMessage) other;
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
       if (!this.joint_hash_codes_.equals(otherMyClass.joint_hash_codes_)) return false;
       if (!this.joint_trajectory_messages_.equals(otherMyClass.joint_trajectory_messages_)) return false;
       if (!this.queueing_properties_.equals(otherMyClass.queueing_properties_)) return false;
+      if (!this.contact_sequence_message_.equals(otherMyClass.contact_sequence_message_)) return false;
 
       return true;
    }
@@ -156,7 +173,7 @@ public class WholeBodyJointspaceTrajectoryMessage extends Packet<WholeBodyJoints
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("WholeBodyJointspaceTrajectoryMessage {");
+      builder.append("WholeBodyImpedanceTrajectoryMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("joint_hash_codes=");
@@ -164,7 +181,9 @@ public class WholeBodyJointspaceTrajectoryMessage extends Packet<WholeBodyJoints
       builder.append("joint_trajectory_messages=");
       builder.append(this.joint_trajectory_messages_);      builder.append(", ");
       builder.append("queueing_properties=");
-      builder.append(this.queueing_properties_);
+      builder.append(this.queueing_properties_);      builder.append(", ");
+      builder.append("contact_sequence_message=");
+      builder.append(this.contact_sequence_message_);
       builder.append("}");
       return builder.toString();
    }
