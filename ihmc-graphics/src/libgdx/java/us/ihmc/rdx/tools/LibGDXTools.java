@@ -188,16 +188,23 @@ public class LibGDXTools
 
    public static void toEuclid(HmdMatrix34 openVRRigidBodyTransform, RigidBodyTransform rigidBodyTransformToPack)
    {
+      toEuclidUnsafe(openVRRigidBodyTransform, rigidBodyTransformToPack);
+      if (!rigidBodyTransformToPack.getRotation().isIdentity())
+         rigidBodyTransformToPack.getRotation().normalize();
+   }
+
+   public static void toEuclidUnsafe(HmdMatrix34 openVRRigidBodyTransform, RigidBodyTransform rigidBodyTransformToPack)
+   {
       FloatBuffer openVRValueBuffer = openVRRigidBodyTransform.m();
-      rigidBodyTransformToPack.getRotation().setAndNormalize(openVRValueBuffer.get(0),
-                                                             openVRValueBuffer.get(1),
-                                                             openVRValueBuffer.get(2),
-                                                             openVRValueBuffer.get(4),
-                                                             openVRValueBuffer.get(5),
-                                                             openVRValueBuffer.get(6),
-                                                             openVRValueBuffer.get(8),
-                                                             openVRValueBuffer.get(9),
-                                                             openVRValueBuffer.get(10));
+      rigidBodyTransformToPack.getRotation().setUnsafe(openVRValueBuffer.get(0),
+                                                       openVRValueBuffer.get(1),
+                                                       openVRValueBuffer.get(2),
+                                                       openVRValueBuffer.get(4),
+                                                       openVRValueBuffer.get(5),
+                                                       openVRValueBuffer.get(6),
+                                                       openVRValueBuffer.get(8),
+                                                       openVRValueBuffer.get(9),
+                                                       openVRValueBuffer.get(10));
       rigidBodyTransformToPack.getTranslation().setX(openVRValueBuffer.get(3));
       rigidBodyTransformToPack.getTranslation().setY(openVRValueBuffer.get(7));
       rigidBodyTransformToPack.getTranslation().setZ(openVRValueBuffer.get(11));

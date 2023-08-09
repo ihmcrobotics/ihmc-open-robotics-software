@@ -168,6 +168,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                      registry,
                                                      stepAdjustmentParameters.getCoPDistanceFromFrontOfFoot());
       supportDistanceFromBack = new DoubleParameter(yoNamePrefix + "supportDistanceFromBack",
+
                                                     registry,
                                                     stepAdjustmentParameters.getCoPDistanceFromBackOfFoot());
       supportDistanceFromInside = new DoubleParameter(yoNamePrefix + "supportDistanceFromInside",
@@ -210,8 +211,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                                    registry,
                                                                    yoGraphicsListRegistry);
       oneStepSafetyHeuristics = new CaptureRegionSafetyHeuristics(lengthLimit, registry, null);
-      multiStepCaptureRegionCalculator = new MultiStepCaptureRegionCalculator(soleZUpFrames,
-                                                                              reachabilityConstraintHandler,
+      multiStepCaptureRegionCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraintHandler,
                                                                               allowCrossOverSteps,
                                                                               registry,
                                                                               yoGraphicsListRegistry);
@@ -320,7 +320,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    {
       if (swingSpeedUpEnabled.getBooleanValue() && swingSpeedUp > speedUpTime.getValue())
       {
-         this.speedUpTime.add(swingSpeedUp);
+         this.speedUpTime.set(swingSpeedUp);
       }
    }
 
@@ -335,7 +335,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    {
       isInSwing.set(true);
       this.initialTime.set(initialTime);
-      reachabilityConstraintHandler.initializeReachabilityConstraint(supportSide, upcomingFootstep);
+      reachabilityConstraintHandler.initializeReachabilityConstraint(supportSide);
       speedUpTime.set(0.0);
       footstepSolution.set(upcomingFootstep);
       previousFootstepSolution.set(footstepSolution.getPosition());
@@ -352,12 +352,12 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                        double percentageToShrinkPolygon)
    {
       this.percentageToShrinkPolygon.set(percentageToShrinkPolygon);
+      footstepWasAdjusted.set(false);
 
       if (!isInSwing.getBooleanValue())
          return;
 
       controlTicksIntoStep.increment();
-      footstepWasAdjusted.set(false);
 
       computeTimeInCurrentState(currentTime);
       computeTimeRemainingInState();
@@ -379,8 +379,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                                        currentICP,
                                                                        allowableAreaForCoP.getCentroid(),
                                                                        captureRegionCalculator.getCaptureRegion());
-      FrameConvexPolygon2DReadOnly singleStepRegion = oneStepSafetyHeuristics.getCaptureRegionWithSafetyMargin().getNumberOfVertices() < 3 ? captureRegionCalculator.getCaptureRegion() :
-            oneStepSafetyHeuristics.getCaptureRegionWithSafetyMargin();
+      FrameConvexPolygon2DReadOnly singleStepRegion = oneStepSafetyHeuristics.getCaptureRegionWithSafetyMargin();
       // Steps in queue accounts for the current step, so for it to hold value, it has to be at least 2.
       multiStepCaptureRegionCalculator.compute(stanceSide,
                                                singleStepRegion,

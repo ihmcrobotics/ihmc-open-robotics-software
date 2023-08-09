@@ -217,7 +217,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    {
       isInSwing.set(true);
       this.initialTime.set(initialTime);
-      reachabilityConstraintHandler.initializeReachabilityConstraint(supportSide, upcomingFootstep);
+      reachabilityConstraintHandler.initializeReachabilityConstraint(supportSide);
       speedUpTime.set(0.0);
       footstepSolution.set(upcomingFootstep);
    }

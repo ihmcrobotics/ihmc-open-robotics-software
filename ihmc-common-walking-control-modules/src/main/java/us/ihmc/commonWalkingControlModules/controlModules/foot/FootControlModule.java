@@ -256,11 +256,6 @@ public class FootControlModule implements SCS2YoGraphicHolder
       supportState.setWeights(loadedFootAngularWeight, loadedFootLinearWeight);
    }
 
-   public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, double swingTime)
-   {
-      setAdjustedFootstepAndTime(adjustedFootstep, null, null, swingTime);
-   }
-
    public void setAdjustedFootstepAndTime(Footstep adjustedFootstep,
                                           FrameVector3DReadOnly finalCoMVelocity,
                                           FrameVector3DReadOnly finalCoMAcceleration,

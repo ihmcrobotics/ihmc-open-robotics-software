@@ -16,6 +16,7 @@ import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.thread.Throttler;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition.getTopic;
 
@@ -41,6 +42,8 @@ public class ControllerStatusTracker
    private final ArrayList<Runnable> notWalkingStateAnymoreCallbacks = new ArrayList<>();
    private final Throttler notWalkingStateAnymoreCallbackThrottler = new Throttler();
 
+   private final List<Notification> abortedListeners = new ArrayList<>();
+
    public ControllerStatusTracker(LogToolsWriteOnly statusLogger, ROS2NodeInterface ros2Node, String robotName)
    {
       this.statusLogger = statusLogger;
@@ -55,6 +58,11 @@ public class ControllerStatusTracker
       new IHMCROS2Callback<>(ros2Node, getTopic(ControllerCrashNotificationPacket.class, robotName), this::acceptControllerCrashNotificationPacket);
       new IHMCROS2Callback<>(ros2Node, getTopic(CapturabilityBasedStatus.class, robotName), this::acceptCapturabilityBasedStatus);
       new IHMCROS2Callback<>(ros2Node, getTopic(WalkingStatusMessage.class, robotName), this::acceptWalkingStatusMessage);
+   }
+
+   public void registerAbortedListener(Notification abortedListener)
+   {
+      abortedListeners.add(abortedListener);
    }
 
    // TODO: Make a "snapshot" or "view" that would hold perspective/thread sensitive data?
@@ -122,23 +130,36 @@ public class ControllerStatusTracker
 
    private void acceptWalkingStatusMessage(WalkingStatusMessage message)
    {
+      // Declared locally since this represents the absolute state which other threads can access
+      boolean isWalking = false;
       WalkingStatus walkingStatus = WalkingStatus.fromByte(message.getWalkingStatus());
+
       if (walkingStatus == WalkingStatus.STARTED || walkingStatus == WalkingStatus.RESUMED)
       {
          isWalking = true;
       }
       else if (walkingStatus == WalkingStatus.ABORT_REQUESTED)
       {
-         isWalking = false;
-         footstepTracker.reset();
+         for (Notification abortedListener : abortedListeners)
+         {
+            abortedListener.set();
+         }
 
+         footstepTracker.reset();
          LogTools.info("Walking Aborted.");
+      }
+      else if (walkingStatus == WalkingStatus.PAUSED)
+      {
+         LogTools.info("Walking Paused.");
       }
       else
       {
-         isWalking = false;
+         // Walking completed
+         footstepTracker.reset();
          finishedWalkingNotification.set();
       }
+
+      this.isWalking = isWalking;
    }
 
    public boolean isWalking()

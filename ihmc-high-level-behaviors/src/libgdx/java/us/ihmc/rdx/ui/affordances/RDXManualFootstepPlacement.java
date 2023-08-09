@@ -17,6 +17,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -24,6 +25,7 @@ import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -105,6 +107,11 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       }
       ImGuiTools.previousWidgetTooltip("Keybind: T");
       ImGui.sameLine();
+      if (ImGui.button(labels.get("Square Up")))
+      {
+         squareUpFootstep();
+      }
+      ImGui.sameLine();
       if (ImGui.button(labels.get("Cancel")) || ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
       {
          exitPlacement();
@@ -118,6 +125,21 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       ImGuiTools.previousWidgetTooltip("Keybind: Ctrl + Z");
    }
 
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+      if (footstepBeingPlaced != null)
+      {
+         footstepBeingPlaced.calculateVRPick(vrContext);
+      }
+   }
+
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      if (footstepBeingPlaced != null)
+      {
+         footstepBeingPlaced.processVRInput(vrContext);
+      }
+   }
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
       renderTooltip = false;
@@ -267,6 +289,24 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       tempFramePose.set(rigidBodyTransform);
       tempFramePose.getOrientation().setToYawOrientation(latestFootstepYaw);
       footstepBeingPlaced.updatePose(tempFramePose);
+   }
+
+   public void squareUpFootstep()
+   {
+      footstepPlan.clear();
+      ReferenceFrame leftFootFrame = syncedRobot.getReferenceFrames().getFootFrame(RobotSide.LEFT);
+      FramePose3D rightFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                  syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
+      rightFootPose.changeFrame(leftFootFrame);
+      RobotSide furthestForwardFootstep = rightFootPose.getTranslationX() > 0 ? RobotSide.RIGHT : RobotSide.LEFT;
+      MovingReferenceFrame furthestForwardSoleFrame = syncedRobot.getReferenceFrames().getSoleFrame(furthestForwardFootstep);
+      footstepBeingPlaced = new RDXInteractableFootstep(baseUI, furthestForwardFootstep.getOppositeSide(), footstepPlan.getNumberOfFootsteps(), null);
+      tempFramePose.setToZero(furthestForwardSoleFrame);
+      tempFramePose.getTranslation().addY(furthestForwardFootstep.negateIfLeftSide(footstepPlannerParameters.getIdealFootstepWidth()));
+      tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      footstepBeingPlaced.updatePose(tempFramePose);
+      placeFootstep();
+      exitPlacement();
    }
 
    public boolean pollIsModeNewlyActivated()

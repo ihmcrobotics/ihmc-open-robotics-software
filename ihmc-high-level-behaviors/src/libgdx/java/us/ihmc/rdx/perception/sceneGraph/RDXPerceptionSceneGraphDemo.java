@@ -117,6 +117,7 @@ public class RDXPerceptionSceneGraphDemo
 
             detectableSceneNodesSubscription.update();
             ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, onRobotPredefinedSceneNodeLibrary);
+            onRobotPredefinedSceneNodeLibrary.update(sensorPoseGizmo.getGizmoFrame());
             detectableSceneObjectsPublisher.publish(onRobotPredefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2Helper, ROS2IOTopicQualifier.STATUS);
 
             perceptionSceneGraphUI.update();
