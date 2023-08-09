@@ -71,6 +71,7 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
       {
          case DEFAULT:
          case FINGERLESS:
+         case UPPER_BODY:
             armJoints = new ArmJointName[] {ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.SHOULDER_YAW, ArmJointName.ELBOW_PITCH,
                   ArmJointName.ELBOW_ROLL, ArmJointName.WRIST_ROLL, ArmJointName.FIRST_WRIST_PITCH};
             break;
@@ -387,6 +388,7 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
       {
          case DEFAULT:
          case FINGERLESS:
+         case UPPER_BODY:
             return physicalProperties.getHandControlFrameToWristTransform(robotSide);
          case ARM_MASS_SIM:
          case UPPER_BODY_ARM_MASS_SIM:

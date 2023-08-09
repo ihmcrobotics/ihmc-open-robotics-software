@@ -11,11 +11,13 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -35,6 +37,10 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ValkyrieUpperBodySimulation
@@ -42,12 +48,15 @@ public class ValkyrieUpperBodySimulation
    private static final int bufferSize = 16000;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.UPPER_BODY_ARM_MASS_SIM);
+   private final Random random = new Random(32890);
+   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.UPPER_BODY);
    private final Robot simulationRobot;
    private final SimControllerInput controllerInput;
 
    private final RigidBodyBasics rootBody;
    private final OneDoFJointBasics[] controlledOneDoFJoints;
+   private final HumanoidJointNameMap jointNameMap = robotModel.getJointMap();
+   private final Map<String, OneDoFJointBasics> jointMap = new HashMap<>();
 
    private final SimulationConstructionSet2 simulation;
    private final SimulationSessionControls sessionControls;
@@ -57,21 +66,25 @@ public class ValkyrieUpperBodySimulation
    private RealtimeROS2Node ros2Node;
    private RobotConfigurationDataPublisher robotConfigurationDataPublisher;
 
+   private final YoBoolean submitRandomConfig = new YoBoolean("submitRandomConfig", registry);
    private final YoBoolean submitChestCommand = new YoBoolean("submitChestCommand", registry);
    private final YoDouble chestPitch = new YoDouble("chestPitch", registry);
    private final YoDouble chestRoll = new YoDouble("chestRoll", registry);
    private final YoDouble chestYaw = new YoDouble("chestYaw", registry);
 
    private final YoBoolean submitNeckCommand = new YoBoolean("submitNeckCommand", registry);
-   private final YoDouble neckPitch = new YoDouble("neckPitch", registry);
-   private final YoDouble neckRoll = new YoDouble("neckRoll", registry);
+   private final YoDouble neckPitch1 = new YoDouble("neckPitch1", registry);
    private final YoDouble neckYaw = new YoDouble("neckYaw", registry);
+   private final YoDouble neckPitch2 = new YoDouble("neckPitch2", registry);
 
    private final SideDependentList<YoBoolean> submitArmCommand = new SideDependentList<>();
    private final SideDependentList<YoDouble> shoulderPitch = new SideDependentList<>();
    private final SideDependentList<YoDouble> shoulderRoll = new SideDependentList<>();
    private final SideDependentList<YoDouble> shoulderYaw = new SideDependentList<>();
    private final SideDependentList<YoDouble> elbowPitch = new SideDependentList<>();
+   private final SideDependentList<YoDouble> forearmYaw = new SideDependentList<>();
+   private final SideDependentList<YoDouble> wristRoll = new SideDependentList<>();
+   private final SideDependentList<YoDouble> wristPitch = new SideDependentList<>();
 
    private final int simulationTicksPerControlTicks;
    private final YoLong doControlCounter = new YoLong("doControlCounter", registry);
@@ -87,6 +100,11 @@ public class ValkyrieUpperBodySimulation
       rootBody = upperBodySystem.getLeft();
       controlledOneDoFJoints = upperBodySystem.getRight();
 
+      for (int i = 0; i < controlledOneDoFJoints.length; i++)
+      {
+         jointMap.put(controlledOneDoFJoints[i].getName(), controlledOneDoFJoints[i]);
+      }
+
       for (RobotSide robotSide : RobotSide.values)
       {
          submitArmCommand.put(robotSide, new YoBoolean("submit" + robotSide.getCamelCaseNameForMiddleOfExpression() + "ArmCommand", registry));
@@ -94,6 +112,9 @@ public class ValkyrieUpperBodySimulation
          shoulderRoll.put(robotSide, new YoDouble(robotSide.getCamelCaseNameForStartOfExpression() + "ShoulderRoll", registry));
          shoulderYaw.put(robotSide, new YoDouble(robotSide.getCamelCaseNameForStartOfExpression() + "ShoulderYaw", registry));
          elbowPitch.put(robotSide, new YoDouble(robotSide.getCamelCaseNameForStartOfExpression() + "ElbowPitch", registry));
+         forearmYaw.put(robotSide, new YoDouble(robotSide.getCamelCaseNameForStartOfExpression() + "ForearmYaw", registry));
+         wristRoll.put(robotSide, new YoDouble(robotSide.getCamelCaseNameForStartOfExpression() + "WristRoll", registry));
+         wristPitch.put(robotSide, new YoDouble(robotSide.getCamelCaseNameForStartOfExpression() + "WristPitch", registry));
 
          shoulderPitch.get(robotSide).set(0.1);
          shoulderRoll.get(robotSide).set(robotSide.negateIfRightSide(-1.0));
@@ -142,7 +163,7 @@ public class ValkyrieUpperBodySimulation
             if (submitNeckCommand.getValue())
             {
                submitNeckCommand.set(false);
-               NeckTrajectoryMessage neckTrajectory = HumanoidMessageTools.createNeckTrajectoryMessage(3.0, new double[]{neckYaw.getDoubleValue(), neckPitch.getDoubleValue(), neckRoll.getDoubleValue()});
+               NeckTrajectoryMessage neckTrajectory = HumanoidMessageTools.createNeckTrajectoryMessage(3.0, new double[]{neckPitch1.getDoubleValue(), neckYaw.getDoubleValue(), neckPitch2.getDoubleValue()});
                commandInputManager.submitMessage(neckTrajectory);
             }
 
@@ -155,9 +176,31 @@ public class ValkyrieUpperBodySimulation
                   double[] desiredJointPositions = {shoulderPitch.get(robotSide).getValue(),
                                                     shoulderRoll.get(robotSide).getValue(),
                                                     shoulderYaw.get(robotSide).getValue(),
-                                                    elbowPitch.get(robotSide).getValue()};
+                                                    elbowPitch.get(robotSide).getValue(),
+                                                    forearmYaw.get(robotSide).getValue(),
+                                                    wristRoll.get(robotSide).getValue(),
+                                                    wristPitch.get(robotSide).getValue()};
                   ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, 3.0, desiredJointPositions);
                   commandInputManager.submitMessage(armTrajectoryMessage);
+               }
+            }
+
+            if (submitRandomConfig.getValue())
+            {
+               submitRandomConfig.set(false);
+
+               double trajectoryTime = 3.0;
+
+               List<String> neckJointNames = jointNameMap.getNeckJointNamesAsStrings();
+               commandInputManager.submitMessage(HumanoidMessageTools.createNeckTrajectoryMessage(trajectoryTime, createRandomJointAngles(neckJointNames)));
+
+               List<String> spineJointNames = jointNameMap.getSpineJointNamesAsStrings();
+               commandInputManager.submitMessage(HumanoidMessageTools.createSpineTrajectoryMessage(trajectoryTime, createRandomJointAngles(spineJointNames)));
+
+               for (RobotSide robotSide : RobotSide.values)
+               {
+                  List<String> armJointNames = jointNameMap.getArmJointNamesAsStrings(robotSide);
+                  commandInputManager.submitMessage(HumanoidMessageTools.createArmTrajectoryMessage(robotSide, trajectoryTime, createRandomJointAngles(armJointNames)));
                }
             }
 
@@ -215,6 +258,28 @@ public class ValkyrieUpperBodySimulation
       simulation.setCameraPosition(0.5, -9.0, 0.7);
       simulation.setCameraFocusPosition(0.5, 0.0, 0.7);
       simulation.start(true, false, false);
+   }
+
+   private double[] createRandomJointAngles(List<String> jointNames)
+   {
+      double[] jointAngles = new double[jointNames.size()];
+      for (int i = 0; i < jointAngles.length; i++)
+      {
+         jointAngles[i] = getRandomJointAngle(jointNames.get(i));
+      }
+      return jointAngles;
+   }
+
+   private double getRandomJointAngle(String jointName)
+   {
+      OneDoFJointBasics joint = jointMap.get(jointName);
+      double jointLimitLower = joint.getJointLimitLower();
+      double jointLimitUpper = joint.getJointLimitUpper();
+      double reductionFactor = 0.3;
+
+      double jointLimitReducedLower = joint.getJointLimitLower() + reductionFactor * 0.5 * (jointLimitUpper - jointLimitLower);
+      double jointLimitReducedUpper = joint.getJointLimitUpper() - reductionFactor * 0.5 * (jointLimitUpper - jointLimitLower);
+      return EuclidCoreRandomTools.nextDouble(random, jointLimitReducedLower, jointLimitReducedUpper);
    }
 
    public DRCRobotModel getRobotModel()
