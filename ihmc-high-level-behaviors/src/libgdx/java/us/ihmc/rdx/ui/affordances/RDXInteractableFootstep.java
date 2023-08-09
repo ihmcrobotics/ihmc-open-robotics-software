@@ -257,7 +257,7 @@ public class RDXInteractableFootstep
       {
          vrContext.getController(side).runIfConnected(controller ->
                                                       {
-                                                         if (!controller.getTriggerDragData().isDragging())
+                                                         if (!controller.getTriggerDragData().isDraggingSomething())
                                                          {
                                                             vrPickResult.get(side).reset();
                                                             Line3DReadOnly pickRay = controller.getPickRay();
@@ -270,13 +270,12 @@ public class RDXInteractableFootstep
                                                                closestCollision.set(mouseCollidable.getClosestInteresection());
                                                                if (side == RobotSide.RIGHT)
                                                                {
-                                                                  controller.setBButtonText("Place Another");
+                                                                  controller.setBButtonText("Delete");
                                                                   controller.setAButtonText("Walk");
                                                                }
                                                                else if (side == RobotSide.LEFT)
                                                                {
-                                                                  controller.setBButtonText("Place Another");
-                                                                  controller.setAButtonText("Delete");
+                                                                  controller.setAButtonText("PlaceAnother");
                                                                }
                                                             }
                                                          }
@@ -302,7 +301,7 @@ public class RDXInteractableFootstep
                                                              && vrContext.getController(side).getSelectedPick() == vrPickResult.get(side))
                                                          {
                                                             triggerDragData.setObjectBeingDragged(this);
-                                                            triggerDragData.setZUpDragStart(selectionCollisionBox.getPose().getReferenceFrame());
+                                                            triggerDragData.setZUpDragStart(collisionBoxFrame.getReferenceFrame());
                                                          }
                                                          if (triggerDragData.isBeingDragged(this))
                                                          {
@@ -314,8 +313,8 @@ public class RDXInteractableFootstep
                                                                                                                             Axis3D.Z);
                                                                closestCollision.add(planarMotion);
                                                                addGizmoPose(planarMotion);
-                                                               triggerDragData.updateZUpDrag(selectionCollisionBox.getPose().getReferenceFrame());
                                                                double deltaYaw = triggerDragData.getZUpDragPose().getOrientation().getYaw();
+                                                               triggerDragData.updateZUpDrag(collisionBoxFrame.getReferenceFrame());
                                                                selectablePose3DGizmo.getPoseGizmo()
                                                                                     .getTransformToParent()
                                                                                     .getRotation()
