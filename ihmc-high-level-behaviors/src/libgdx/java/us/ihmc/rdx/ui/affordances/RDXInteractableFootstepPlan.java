@@ -98,10 +98,9 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
    public void calculateVRPick(RDXVRContext vrContext)
    {
-      for (RDXInteractableFootstep singleFootstep : footsteps)
+      for (RDXInteractableFootstep footstep : footsteps)
       {
-         singleFootstep.calculateVRPick(vrContext);
-         //TODO check if singleFootstep is hovered in vr
+         footstep.calculateVRPick(vrContext);
       }
       if (selectedFootstep != null)
       {
@@ -111,10 +110,9 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
    public void processVRInput(RDXVRContext vrContext)
    {
-      for (int i = 0; i < footsteps.size(); i++)
+      for (RDXInteractableFootstep footstep : footsteps)
       {
-         RDXInteractableFootstep singleFootstep = footsteps.get(i);
-         singleFootstep.processVRInput(vrContext);
+         footstep.processVRInput(vrContext);
       }
 
       if (selectedFootstep != null)
@@ -129,7 +127,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       {
          footstep.calculate3DViewPick(input);
 
-         if (footstep.isHovered())
+         if (footstep.isMouseHovering())
             selectedFootstep = footstep;
       }
       if (selectedFootstep != null)
@@ -148,7 +146,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
          RDXInteractableFootstep footstep = footsteps.get(i);
          footstep.process3DViewInput(input, false);
 
-         if (footstep.isHovered())
+         if (footstep.isMouseHovering())
          {
             stepChecker.setReasonFrom(i);
             stepChecker.setRenderTooltip(true);
