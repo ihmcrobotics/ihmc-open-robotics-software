@@ -70,9 +70,9 @@ public class RDXRobotLowLevelMessenger
          communicationHelper.publishToController(homeChest);
       }
 
-      ImGui.sameLine();
       if (teleoperationParameters.getPSIAdjustable())
       {
+         ImGui.sameLine();
          if (ImGui.combo("PSI", pumpPSI, psiValues, psiValues.length))
          {
             sendPSIRequest();
