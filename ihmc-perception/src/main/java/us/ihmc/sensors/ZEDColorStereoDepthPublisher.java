@@ -38,16 +38,16 @@ import java.util.function.Supplier;
 import static org.bytedeco.zed.global.zed.*;
 
 /**
- * Encodes and publishes color and depth images from a ZED 2 sensor.
+ * Encodes and publishes color and depth images from a ZED sensor.
  * The depth image is aligned to the left camera of the ZED.
  */
-public class ZED2ColorStereoDepthPublisher
+public class ZEDColorStereoDepthPublisher
 {
    private static final int CAMERA_FPS = 30;
    private static final float MILLIMETER_TO_METERS = 0.001f;
-   private static final double ZED_2I_CENTER_TO_CAMERA_DISTANCE = 0.06;
 
    private final int cameraID;
+   private ZEDModelData zedModelData;
    private final SL_RuntimeParameters zedRuntimeParameters = new SL_RuntimeParameters();
 
    private final int imageWidth; // Width of rectified image in pixels (color image width == depth image width)
@@ -81,10 +81,10 @@ public class ZED2ColorStereoDepthPublisher
    private final Throttler throttler = new Throttler();
    private volatile boolean running = true;
 
-   public ZED2ColorStereoDepthPublisher(int cameraID,
-                                        SideDependentList<ROS2Topic<ImageMessage>> colorTopics,
-                                        ROS2Topic<ImageMessage> depthTopic,
-                                        Supplier<ReferenceFrame> sensorFrameSupplier)
+   public ZEDColorStereoDepthPublisher(int cameraID,
+                                       SideDependentList<ROS2Topic<ImageMessage>> colorTopics,
+                                       ROS2Topic<ImageMessage> depthTopic,
+                                       Supplier<ReferenceFrame> sensorFrameSupplier)
    {
       this.cameraID = cameraID;
 
@@ -92,6 +92,14 @@ public class ZED2ColorStereoDepthPublisher
       sl_create_camera(cameraID);
 
       SL_InitParameters zedInitializationParameters = new SL_InitParameters();
+
+      // Open camera with default parameters to find model
+      // Can't get the model number without opening the camera first
+      checkError("sl_open_camera", sl_open_camera(cameraID, zedInitializationParameters, 0, "", "", 0, "", "", ""));
+      setZEDConfiguration(cameraID);
+      sl_close_camera(cameraID);
+
+      // Set initialization parameters based on camera model
       zedInitializationParameters.camera_fps(CAMERA_FPS);
       zedInitializationParameters.resolution(SL_RESOLUTION_HD720);
       zedInitializationParameters.input_type(SL_INPUT_TYPE_USB);
@@ -102,8 +110,8 @@ public class ZED2ColorStereoDepthPublisher
       zedInitializationParameters.svo_real_time_mode(true);
       zedInitializationParameters.depth_mode(SL_DEPTH_MODE_ULTRA);
       zedInitializationParameters.depth_stabilization(1);
-      zedInitializationParameters.depth_maximum_distance(40);
-      zedInitializationParameters.depth_minimum_distance(-1);
+      zedInitializationParameters.depth_maximum_distance(zedModelData.getMaximumDepthDistance());
+      zedInitializationParameters.depth_minimum_distance(zedModelData.getMinimumDepthDistance());
       zedInitializationParameters.coordinate_unit(SL_UNIT_METER);
       zedInitializationParameters.coordinate_system(SL_COORDINATE_SYSTEM_RIGHT_HANDED_Z_UP_X_FWD);
       zedInitializationParameters.sdk_gpu_id(-1); // Will find and use the best available GPU
@@ -113,6 +121,7 @@ public class ZED2ColorStereoDepthPublisher
       zedInitializationParameters.open_timeout_sec(5.0f);
       zedInitializationParameters.async_grab_camera_recovery(false);
 
+      // Reopen camera with specific parameters set
       checkError("sl_open_camera", sl_open_camera(cameraID, zedInitializationParameters, 0, "", "", 0, "", "", ""));
 
       zedRuntimeParameters.enable_depth(true);
@@ -144,7 +153,7 @@ public class ZED2ColorStereoDepthPublisher
 
       // Setup other things
       imageEncoder = new CUDAImageEncoder();
-      cameraPosesInDepthFrame.get(RobotSide.RIGHT).getPosition().subY(2.0 * ZED_2I_CENTER_TO_CAMERA_DISTANCE);
+      cameraPosesInDepthFrame.get(RobotSide.RIGHT).getPosition().subY(2.0 * zedModelData.getCenterToCameraDistance());
       throttler.setFrequency(CAMERA_FPS);
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, getClass().getName() + "-Shutdown"));
@@ -159,10 +168,10 @@ public class ZED2ColorStereoDepthPublisher
 
             // Frame supplier provides frame pose of center of camera. Add Y to get left camera's frame pose
             leftCameraFramePose.setToZero(sensorFrameSupplier.get());
-            leftCameraFramePose.getPosition().addY(ZED_2I_CENTER_TO_CAMERA_DISTANCE);
+            leftCameraFramePose.getPosition().addY(zedModelData.getCenterToCameraDistance());
             leftCameraFramePose.changeFrame(ReferenceFrame.getWorldFrame());
          }
-      }, "ZED2ImageGrabThread");
+      }, "ZEDImageGrabThread");
 
       colorImagePublishThread = new Thread(() ->
       {
@@ -171,7 +180,7 @@ public class ZED2ColorStereoDepthPublisher
             throttler.waitAndRun();
             retrieveAndPublishColorImage();
          }
-      }, "ZED2ColorImagePublishThread");
+      }, "ZEDColorImagePublishThread");
 
       depthImagePublishThread = new Thread(() ->
       {
@@ -180,7 +189,7 @@ public class ZED2ColorStereoDepthPublisher
             throttler.waitAndRun();
             retrieveAndPublishDepthImage();
          }
-      }, "ZED2DepthImagePublishThread");
+      }, "ZEDDepthImagePublishThread");
 
       LogTools.info("Starting {} camera", getCameraModel(cameraID));
       LogTools.info("Firmware version: {}", sl_get_camera_firmware(cameraID));
@@ -326,8 +335,26 @@ public class ZED2ColorStereoDepthPublisher
       }
    }
 
+   private void setZEDConfiguration(int cameraID)
+   {
+      switch (sl_get_camera_model(cameraID))
+      {
+         case 0 -> zedModelData = ZEDModelData.ZED;
+         case 1 -> zedModelData = ZEDModelData.ZED_MINI;
+         case 2 -> zedModelData = ZEDModelData.ZED_2;
+         case 3 -> zedModelData = ZEDModelData.ZED_2I;
+         case 4 -> zedModelData = ZEDModelData.ZED_X;
+         case 5 -> zedModelData = ZEDModelData.ZED_X_MINI;
+         default ->
+         {
+            zedModelData = ZEDModelData.ZED;
+            LogTools.error("Failed to associate model number with a ZED sensor model");
+         }
+      }
+   }
+
    public static void main(String[] args)
    {
-      new ZED2ColorStereoDepthPublisher(0, PerceptionAPI.ZED2_COLOR_IMAGES, PerceptionAPI.ZED2_DEPTH, ReferenceFrame::getWorldFrame);
+      new ZEDColorStereoDepthPublisher(0, PerceptionAPI.ZED2_COLOR_IMAGES, PerceptionAPI.ZED2_DEPTH, ReferenceFrame::getWorldFrame);
    }
 }
