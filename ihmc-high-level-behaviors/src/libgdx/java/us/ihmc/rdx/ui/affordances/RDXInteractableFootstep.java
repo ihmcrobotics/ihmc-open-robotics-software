@@ -276,9 +276,7 @@ public class RDXInteractableFootstep
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
-            FramePose3DReadOnly pickPointPose = controller.getPickPointPose();
-
-            if (pointCollidable.collide(pickPointPose.getPosition()))
+            if (pointCollidable.collide(controller.getPickPointPose().getPosition()))
             {
                vrPickResult.get(side).addPickCollision(0);
                controller.addPickResult(vrPickResult.get(side));
