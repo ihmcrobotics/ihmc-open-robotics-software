@@ -127,7 +127,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       {
          footstep.calculate3DViewPick(input);
 
-         if (footstep.isHovered())
+         if (footstep.isMouseHovering())
             selectedFootstep = footstep;
       }
       if (selectedFootstep != null)
@@ -146,7 +146,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
          RDXInteractableFootstep footstep = footsteps.get(i);
          footstep.process3DViewInput(input, false);
 
-         if (footstep.isHovered())
+         if (footstep.isMouseHovering())
          {
             stepChecker.setReasonFrom(i);
             stepChecker.setRenderTooltip(true);

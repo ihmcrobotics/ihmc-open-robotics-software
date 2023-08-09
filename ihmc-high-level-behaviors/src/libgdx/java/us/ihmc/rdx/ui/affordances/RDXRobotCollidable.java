@@ -7,13 +7,11 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
@@ -25,6 +23,7 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.interaction.MouseCollidable;
+import us.ihmc.robotics.interaction.PointCollidable;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -44,9 +43,10 @@ public class RDXRobotCollidable implements RenderableProvider
    private final MovingReferenceFrame syncedLinkFrame;
    private final ModifiableReferenceFrame collisionShapeFrame;
    private final MouseCollidable mouseCollidable;
+   private final PointCollidable pointCollidable;
    private final RDXModelInstance collisionModelInstance;
    private final RDXModelInstance collisionShapeCoordinateFrameGraphic;
-   private FrameShape3DBasics shape;
+   private final FrameShape3DBasics shape;
    private final FramePose3D vrPickPose = new FramePose3D();
    private final String rigidBodyName;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
@@ -89,6 +89,7 @@ public class RDXRobotCollidable implements RenderableProvider
       collisionShapeFrame = new ModifiableReferenceFrame("collisionShapeFrame" + rigidBodyName, linkFrame);
 
       mouseCollidable = new MouseCollidable(shape);
+      pointCollidable = new PointCollidable(shape);
       collisionModelInstance = new RDXModelInstance(RDXModelBuilder.buildModel(meshBuilder ->
       {
          if (shape instanceof FrameSphere3DReadOnly sphere)
@@ -175,24 +176,19 @@ public class RDXRobotCollidable implements RenderableProvider
          {
             vrPickResult.get(side).reset();
             vrPickPose.setToZero(controller.getPickPoseFrame());
-            // The shape has the offsets from link frame built it.
+            // The shape has the offsets from link frame built in.
             // Do the collisions in link frame.
             vrPickPose.changeFrame(linkFrame);
             shape.setReferenceFrame(linkFrame);
 
-            FramePoint3D closestPoint = new FramePoint3D(shape.getReferenceFrame());
-            Vector3D vector = new Vector3D();
-            boolean isInside = shape.evaluatePoint3DCollision(vrPickPose.getPosition(), closestPoint, vector);
-            double distance = closestPoint.distance(vrPickPose.getPosition());
-            double distanceToSurface = isInside ? -distance : distance;
-            closestPoint.changeFrame(ReferenceFrame.getWorldFrame());
-            LibGDXTools.toLibGDX(closestPoint, pickRayCollisionPointGraphic.transform);
+            boolean isInside = pointCollidable.collide(vrPickPose.getPosition());
+            LibGDXTools.toLibGDX(pointCollidable.getClosestPointOnSurface(), pickRayCollisionPointGraphic.transform);
 
             if (isInside)
             {
-               vrPickResult.get(side).addPickCollision(distanceToSurface);
+               vrPickResult.get(side).addPickCollision(pointCollidable.getSignedDistanceToSurface());
                pickRayCollisionPointGraphic.setColor(ColorDefinitions.Green());
-               controller.setPickCollisionPoint(closestPoint);
+               controller.setPickCollisionPoint(pointCollidable.getClosestPointOnSurface());
             }
             else
             {
