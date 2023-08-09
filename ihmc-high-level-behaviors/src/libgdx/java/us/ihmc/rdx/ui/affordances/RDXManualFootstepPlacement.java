@@ -25,6 +25,7 @@ import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -124,6 +125,21 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       ImGuiTools.previousWidgetTooltip("Keybind: Ctrl + Z");
    }
 
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+      if (footstepBeingPlaced != null)
+      {
+         footstepBeingPlaced.calculateVRPick(vrContext);
+      }
+   }
+
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      if (footstepBeingPlaced != null)
+      {
+         footstepBeingPlaced.processVRInput(vrContext);
+      }
+   }
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
       renderTooltip = false;
