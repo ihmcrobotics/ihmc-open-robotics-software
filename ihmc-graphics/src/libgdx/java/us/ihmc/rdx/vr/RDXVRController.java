@@ -88,7 +88,7 @@ public class RDXVRController extends RDXVRTrackedDevice
    private InputAnalogActionData joystickActionData;
    private final LongBuffer gripActionHandle = BufferUtils.newLongBuffer(1);
    private InputAnalogActionData gripActionData;
-   private RDXVRRadialMenuSelection joystickSelection;
+   private RDXVRRadialMenuSelection radialMenuSelection;
    private Point3D topJoystickOffset;
    private Point3D bottomJoystickOffset;
    private Point3D leftJoystickOffset;
@@ -608,16 +608,16 @@ public class RDXVRController extends RDXVRTrackedDevice
       rightJoystickLabel.setText(text);
    }
 
-   public void setJoystickSelection(RDXVRRadialMenuSelection joystickSelection)
+   public void setRadialMenuSelection(RDXVRRadialMenuSelection radialMenuSelection)
    {
-      this.joystickSelection = joystickSelection;
+      this.radialMenuSelection = radialMenuSelection;
    }
 
    public void controlOfRadialMenu(String topText, String bottomText, String rightText, String leftText)
    {
-      if (joystickSelection == null)
+      if (radialMenuSelection == null)
       {
-         joystickSelection = RDXVRRadialMenuSelection.NONE;
+         radialMenuSelection = RDXVRRadialMenuSelection.NONE;
       }
       if (joystickActionData.x() != 0.0 || joystickActionData.y() != 0.0)
       {
@@ -631,30 +631,30 @@ public class RDXVRController extends RDXVRTrackedDevice
          radialMenuSelectionGraphic = null;
       }
       if (joystickActionData.x() < 0 && Math.abs(joystickActionData.x()) > Math.abs(joystickActionData.y())
-          || joystickSelection == RDXVRRadialMenuSelection.LEFT_RING)
+          || radialMenuSelection == RDXVRRadialMenuSelection.LEFT_RING)
       {
-         joystickSelection = RDXVRRadialMenuSelection.LEFT_RING;
+         radialMenuSelection = RDXVRRadialMenuSelection.LEFT_RING;
       }
       if (joystickActionData.x() > 0 && Math.abs(joystickActionData.x()) > Math.abs(joystickActionData.y())
-          || joystickSelection == RDXVRRadialMenuSelection.RIGHT_RING)
+          || radialMenuSelection == RDXVRRadialMenuSelection.RIGHT_RING)
       {
-         joystickSelection = RDXVRRadialMenuSelection.RIGHT_RING;
+         radialMenuSelection = RDXVRRadialMenuSelection.RIGHT_RING;
       }
       if (joystickActionData.y() > 0 && Math.abs(joystickActionData.y()) > Math.abs(joystickActionData.x())
-          || joystickSelection == RDXVRRadialMenuSelection.TOP_RING)
+          || radialMenuSelection == RDXVRRadialMenuSelection.TOP_RING)
       {
-         joystickSelection = RDXVRRadialMenuSelection.TOP_RING;
+         radialMenuSelection = RDXVRRadialMenuSelection.TOP_RING;
       }
       if (joystickActionData.y() < 0 && Math.abs(joystickActionData.y()) > Math.abs(joystickActionData.x())
-          || joystickSelection == RDXVRRadialMenuSelection.BOTTOM_RING)
+          || radialMenuSelection == RDXVRRadialMenuSelection.BOTTOM_RING)
       {
-         joystickSelection = RDXVRRadialMenuSelection.BOTTOM_RING;
+         radialMenuSelection = RDXVRRadialMenuSelection.BOTTOM_RING;
       }
    }
 
-   public Runnable getChoosenRunnable(Runnable topChoice, Runnable bottomChoice, Runnable rightChoice, Runnable leftChoice)
+   public Runnable getRadialMenuRunnable(Runnable topChoice, Runnable bottomChoice, Runnable rightChoice, Runnable leftChoice)
    {
-      switch (joystickSelection)
+      switch (radialMenuSelection)
       {
          case TOP_RING:
             if (topChoice != null)
@@ -676,29 +676,29 @@ public class RDXVRController extends RDXVRTrackedDevice
       return null;
    }
 
-   public void setBoxPosition(boolean isHovering)
+   public void setRadialMenuBoxPosition(boolean isHovering)
    {
       radialMenuReferenceFrame = new ModifiableReferenceFrame(joystickReferenceFrame.getReferenceFrame());
-      if (getOffset() != null)
+      if (getRadialMenuBoxOffset() != null)
       {
-         boxOffset.put(side, getOffset());
-         pastRadialMenuSelection = joystickSelection;
+         boxOffset.put(side, getRadialMenuBoxOffset());
+         pastRadialMenuSelection = radialMenuSelection;
          if (radialMenuSelectionGraphic != null)
-            updateHoverBoxFramePose(side);
+            updateRadialMenuFramePose(side);
       }
-      else if (getOffset() == null && isHovering)
+      else if (getRadialMenuBoxOffset() == null && isHovering)
       {
          if (pastRadialMenuSelection != null && pastRadialMenuSelection != RDXVRRadialMenuSelection.NONE)
          {
-            joystickSelection = pastRadialMenuSelection;
-            boxOffset.put(side, getOffset());
+            radialMenuSelection = pastRadialMenuSelection;
+            boxOffset.put(side, getRadialMenuBoxOffset());
             if (radialMenuSelectionGraphic != null)
-               updateHoverBoxFramePose(side);
+               updateRadialMenuFramePose(side);
          }
       }
    }
 
-   private void updateHoverBoxFramePose(RobotSide side)
+   private void updateRadialMenuFramePose(RobotSide side)
    {
       radialMenuReferenceFrame.getReferenceFrame().getTransformToParent().getTranslation().set(boxOffset.get(side));
       radialMenuReferenceFrame.getReferenceFrame().update();
@@ -714,11 +714,11 @@ public class RDXVRController extends RDXVRTrackedDevice
       radialMenuSelectionGraphic.setPoseInWorldFrame(radialMenuFramePose);
    }
 
-   public Point3D getOffset()
+   public Point3D getRadialMenuBoxOffset()
    {
-      if (joystickSelection != null)
+      if (radialMenuSelection != null)
       {
-         switch (joystickSelection)
+         switch (radialMenuSelection)
          {
             case LEFT_RING:
                return leftJoystickOffset;

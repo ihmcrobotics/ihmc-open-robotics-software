@@ -149,15 +149,15 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
                controller.controlOfRadialMenu("Open Hand", "Close Hand", "Door Avoidance", "Home Position");
                if (joystickButton.bChanged() && joystickButton.bState())
                {
-                  if (controller.getChoosenRunnable(openCommands, closeCommands, doorAvoidenceExecutable,  homePositionExecutable) != null)
-                     controller.getChoosenRunnable(openCommands, closeCommands, doorAvoidenceExecutable,  homePositionExecutable).run();
+                  if (controller.getRadialMenuRunnable(openCommands, closeCommands, doorAvoidenceExecutable, homePositionExecutable) != null)
+                     controller.getRadialMenuRunnable(openCommands, closeCommands, doorAvoidenceExecutable, homePositionExecutable).run();
                }
             }
             else
             {
-               controller.setJoystickSelection(null);
+               controller.setRadialMenuSelection(null);
             }
-            controller.setBoxPosition(isVRHovering());
+            controller.setRadialMenuBoxPosition(isVRHovering());
          });
       }
    }
