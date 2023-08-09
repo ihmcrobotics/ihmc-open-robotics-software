@@ -365,7 +365,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       if (interactablesEnabled.get())
       {
          locomotionManager.calculateWalkPathControlRingVRPick(vrContext);
-         if (interactablesAvailable && showEnvironmentCollisionMeshes.get())
+         if (interactablesAvailable)
             selectionCollisionModel.calculateVRPick(vrContext);
       }
    }
@@ -378,7 +378,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
          for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
             robotPartInteractable.processVRInput(vrContext);
 
-         if (interactablesEnabled.get() && showEnvironmentCollisionMeshes.get())
+         if (interactablesEnabled.get())
             selectionCollisionModel.processVRInput(vrContext);
       }
    }
@@ -391,7 +391,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
          if (interactablesAvailable)
          {
-            if (input.isWindowHovered() && showEnvironmentCollisionMeshes.get())
+            if (input.isWindowHovered())
                selectionCollisionModel.calculate3DViewPick(input);
 
             for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
@@ -409,8 +409,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
          if (interactablesAvailable)
          {
-            if (showEnvironmentCollisionMeshes.get())
-               selectionCollisionModel.process3DViewInput(input);
+            selectionCollisionModel.process3DViewInput(input);
 
             interactablePelvis.process3DViewInput(input);
 
