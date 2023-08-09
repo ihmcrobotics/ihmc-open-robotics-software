@@ -6,19 +6,23 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.valkyrie.ValkyrieCalibrationParameters;
 import us.ihmc.wholeBodyController.diagnostics.TorqueOffsetPrinter;
 
 public class ValkyrieCalibrationControllerStateFactory implements HighLevelControllerStateFactory
 {
    private final TorqueOffsetPrinter torqueOffsetPrinter;
-   private ValkyrieCalibrationControllerState calibrationControllerState;
-   private ValkyrieCalibrationParameters calibrationParameters;
+   private final ValkyrieCalibrationParameters calibrationParameters;
+   private final HumanoidJointNameMap jointNameMap;
 
-   public ValkyrieCalibrationControllerStateFactory(TorqueOffsetPrinter torqueOffsetPrinter, ValkyrieCalibrationParameters calibrationParameters)
+   private ValkyrieCalibrationControllerState calibrationControllerState;
+
+   public ValkyrieCalibrationControllerStateFactory(TorqueOffsetPrinter torqueOffsetPrinter, ValkyrieCalibrationParameters calibrationParameters, HumanoidJointNameMap jointNameMap)
    {
       this.torqueOffsetPrinter = torqueOffsetPrinter;
       this.calibrationParameters = calibrationParameters;
+      this.jointNameMap = jointNameMap;
    }
 
    @Override
@@ -30,9 +34,9 @@ public class ValkyrieCalibrationControllerStateFactory implements HighLevelContr
       OneDoFJoint[] controlledJoints = MultiBodySystemTools.filterJoints(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getControlledJoints(),
                                                                          OneDoFJoint.class);
       calibrationControllerState = new ValkyrieCalibrationControllerState(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
-                                                                          controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getFullRobotModel(),
                                                                           controlledJoints,
                                                                           controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getYoTime(),
+                                                                          jointNameMap,
                                                                           controllerFactoryHelper.getHighLevelControllerParameters(),
                                                                           controllerFactoryHelper.getLowLevelControllerOutput(),
                                                                           controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getFootContactStates(),

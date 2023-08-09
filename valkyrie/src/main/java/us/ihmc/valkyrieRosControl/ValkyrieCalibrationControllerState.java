@@ -9,10 +9,13 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commons.MathTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
@@ -53,9 +56,9 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
    private final JointDesiredOutputListReadOnly highLevelControlOutput;
 
    public ValkyrieCalibrationControllerState(HighLevelHumanoidControllerToolbox highLevelControllerToolbox,
-                                             FullHumanoidRobotModel fullHumanoidRobotModel,
                                              OneDoFJointBasics[] controlledJoints,
                                              DoubleProvider yoTime,
+                                             HumanoidJointNameMap jointNameMap,
                                              HighLevelControllerParameters highLevelControllerParameters,
                                              JointDesiredOutputListReadOnly highLevelControlOutput,
                                              SideDependentList<YoPlaneContactState> footContactStates,
@@ -86,14 +89,13 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       if (!useLegs)
          parameters.setLegJointsToRun(null);
 
-      // TODO set leg joints to null for upper body
-
       jointTorqueOffsetEstimatorController = new JointTorqueOffsetEstimatorController(calibrationParameters,
                                                                                       highLevelControllerToolbox,
                                                                                       footContactStates,
                                                                                       bipedSupportPolygons,
                                                                                       torqueOffsetPrinter,
-                                                                                      fullHumanoidRobotModel,
+                                                                                      MultiBodySystemBasics.toMultiBodySystemBasics(controlledJoints),
+                                                                                      jointNameMap,
                                                                                       yoTime,
                                                                                       parameters);
       registry.addChild(jointTorqueOffsetEstimatorController.getYoRegistry());

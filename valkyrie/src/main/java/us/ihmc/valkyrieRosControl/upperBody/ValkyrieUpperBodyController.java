@@ -360,17 +360,17 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
       factory.addState(standTransitionState.getHighLevelControllerName(), standTransitionState);
 
       // Setup calibration state
-//      ValkyrieCalibrationControllerState calibrationControllerState = new ValkyrieCalibrationControllerState(null,
-//                                                                                                             null,
-//                                                                                                             controlledOneDoFJoints,
-//                                                                                                             yoTime,
-//                                                                                                             robotModel.getHighLevelControllerParameters(),
-//                                                                                                             jointDesiredOutputList,
-//                                                                                                             null,
-//                                                                                                             null,
-//                                                                                                             robotModel.getCalibrationParameters(),
-//                                                                                                             valkyrieTorqueOffsetPrinter);
-//      factory.addState(calibrationControllerState.getHighLevelControllerName(), calibrationControllerState);
+      ValkyrieCalibrationControllerState calibrationControllerState = new ValkyrieCalibrationControllerState(null,
+                                                                                                             controlledOneDoFJoints,
+                                                                                                             yoTime,
+                                                                                                             robotModel.getJointMap(),
+                                                                                                             robotModel.getHighLevelControllerParameters(),
+                                                                                                             jointDesiredOutputList,
+                                                                                                             null,
+                                                                                                             null,
+                                                                                                             robotModel.getCalibrationParameters(),
+                                                                                                             valkyrieTorqueOffsetPrinter);
+      factory.addState(calibrationControllerState.getHighLevelControllerName(), calibrationControllerState);
 
       // Setup transitions
       YoEnum<HighLevelControllerName> requestedHighLevelControllerState = new YoEnum<>("requestedHighLevelControllerState", registry, HighLevelControllerName.class, true);
@@ -379,11 +379,11 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
       factory.addDoneTransition(standPrepControllerState.getHighLevelControllerName(), standReadyState.getHighLevelControllerName());
 
       // Calibration Request
-//      factory.addRequestedTransition(standPrepControllerState.getHighLevelControllerName(),     calibrationControllerState.getHighLevelControllerName(), requestedHighLevelControllerState);
-//      factory.addRequestedTransition(standReadyState.getHighLevelControllerName(),              calibrationControllerState.getHighLevelControllerName(), requestedHighLevelControllerState);
+      factory.addRequestedTransition(standPrepControllerState.getHighLevelControllerName(),     calibrationControllerState.getHighLevelControllerName(), requestedHighLevelControllerState);
+      factory.addRequestedTransition(standReadyState.getHighLevelControllerName(),              calibrationControllerState.getHighLevelControllerName(), requestedHighLevelControllerState);
 
       // Calibration -> Stand prep
-//      factory.addDoneTransition(calibrationControllerState.getHighLevelControllerName(), standPrepControllerState.getHighLevelControllerName());
+      factory.addDoneTransition(calibrationControllerState.getHighLevelControllerName(), standPrepControllerState.getHighLevelControllerName());
 
       // Stand ready -> Stand transition
       factory.addRequestedTransition(standReadyState.getHighLevelControllerName(), standTransitionState.getHighLevelControllerName(), requestedHighLevelControllerState);
