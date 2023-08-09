@@ -8,6 +8,7 @@ public enum ValkyrieRobotVersion implements RobotVersion
    FINGERLESS,
    ARM_MASS_SIM,
    ARMLESS,
+   UPPER_BODY_ARM_MASS_SIM,
    UPPER_BODY;
 
    public static final String ROBOT_VERSION_ENVIRONMENT_VARIABLE_NAME = "IHMC_VALKYRIE_ROBOT_VERSION";
@@ -27,6 +28,8 @@ public enum ValkyrieRobotVersion implements RobotVersion
          return ARM_MASS_SIM;
       else if (valueFromEnvironment.contains(ARMLESS.name().toLowerCase()))
          return ARMLESS;
+      else if (valueFromEnvironment.contains(UPPER_BODY_ARM_MASS_SIM.name().toLowerCase()))
+         return UPPER_BODY_ARM_MASS_SIM;
       else if (valueFromEnvironment.contains(UPPER_BODY.name().toLowerCase()))
          return UPPER_BODY;
       else
@@ -45,6 +48,8 @@ public enum ValkyrieRobotVersion implements RobotVersion
             return "models/val_description/urdf/valkyrie_sim_arm_mass_sim.urdf";
          case ARMLESS:
             return "models/val_description/urdf/valkyrie_sim_no_arms.urdf";
+         case UPPER_BODY_ARM_MASS_SIM:
+            return "models/val_description/urdf/valkyrie_sim_upper_body_arm_mass_sim.urdf";
          case UPPER_BODY:
             return "models/val_description/urdf/valkyrie_sim_upper_body.urdf";
          default:
@@ -64,6 +69,8 @@ public enum ValkyrieRobotVersion implements RobotVersion
             return "models/val_description/urdf/valkyrie_sim_arm_mass_sim.urdf";
          case ARMLESS:
             return "models/val_description/urdf/valkyrie_sim_no_arms.urdf";
+         case UPPER_BODY_ARM_MASS_SIM:
+            return "models/val_description/urdf/valkyrie_sim_upper_body_arm_mass_sim.urdf";
          case UPPER_BODY:
             return "models/val_description/urdf/valkyrie_sim_upper_body.urdf";
          default:
@@ -78,6 +85,7 @@ public enum ValkyrieRobotVersion implements RobotVersion
          case DEFAULT:
          case FINGERLESS:
          case ARM_MASS_SIM:
+         case UPPER_BODY_ARM_MASS_SIM:
          case UPPER_BODY:
             return true;
          case ARMLESS:
@@ -96,6 +104,7 @@ public enum ValkyrieRobotVersion implements RobotVersion
          case ARM_MASS_SIM:
          case ARMLESS:
             return true;
+         case UPPER_BODY_ARM_MASS_SIM:
          case UPPER_BODY:
             return false;
          default:
@@ -108,8 +117,9 @@ public enum ValkyrieRobotVersion implements RobotVersion
       switch(this)
       {
          case DEFAULT:
-            return true;
          case UPPER_BODY:
+            return true;
+         case UPPER_BODY_ARM_MASS_SIM:
          case FINGERLESS:
          case ARM_MASS_SIM:
          case ARMLESS:
@@ -125,8 +135,9 @@ public enum ValkyrieRobotVersion implements RobotVersion
       {
          case DEFAULT:
          case FINGERLESS:
-            return true;
          case UPPER_BODY:
+            return true;
+         case UPPER_BODY_ARM_MASS_SIM:
          case ARM_MASS_SIM:
          case ARMLESS:
             return false;

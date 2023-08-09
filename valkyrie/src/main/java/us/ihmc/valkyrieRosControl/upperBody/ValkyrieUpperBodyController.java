@@ -39,12 +39,10 @@ import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.rosControl.EffortJointHandle;
@@ -57,9 +55,7 @@ import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPu
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.FloatingJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
-import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.tools.SettableTimestampProvider;
 import us.ihmc.tools.TimestampProvider;
@@ -68,8 +64,6 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 import us.ihmc.valkyrieRosControl.*;
-import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
-import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.providers.LongProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -134,7 +128,7 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-   private static final ValkyrieRobotVersion VERSION = ValkyrieRobotVersion.UPPER_BODY;
+   private static final ValkyrieRobotVersion VERSION = ValkyrieRosControlController.VERSION;
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, VERSION);
 
    private final RigidBodyBasics rootBody;
@@ -492,7 +486,7 @@ public class ValkyrieUpperBodyController extends IHMCWholeRobotControlJavaBridge
 
    public static void main(String[] args)
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRobotVersion.UPPER_BODY);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRobotVersion.UPPER_BODY_ARM_MASS_SIM);
 
       HighLevelControllerParameters highLevelControllerParameters = robotModel.getHighLevelControllerParameters();
       List<GroupParameter<JointDesiredBehaviorReadOnly>> desiredJointBehaviors = highLevelControllerParameters.getDesiredJointBehaviors(STAND_PREP_STATE);

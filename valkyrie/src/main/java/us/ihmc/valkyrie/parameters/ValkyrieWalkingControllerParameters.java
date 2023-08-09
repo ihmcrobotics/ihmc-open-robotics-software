@@ -458,13 +458,14 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       if (jointHomeConfiguration != null)
          return jointHomeConfiguration;
 
+      boolean isUpperBodyModel = robotVerion == ValkyrieRobotVersion.UPPER_BODY_ARM_MASS_SIM || robotVerion == ValkyrieRobotVersion.UPPER_BODY;
       jointHomeConfiguration = new TObjectDoubleHashMap<String>();
 
       jointHomeConfiguration.put(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), 0.0);
       jointHomeConfiguration.put(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), 0.0);
       jointHomeConfiguration.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), 0.0);
 
-      double neckPitchHome = robotVerion == ValkyrieRobotVersion.UPPER_BODY ? 0.2 : 0.75;
+      double neckPitchHome = isUpperBodyModel ? 0.2 : 0.75;
       jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH), neckPitchHome);
       jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_YAW), 0.0);
       jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_PITCH), -0.1);
@@ -481,7 +482,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         double shoulderPitchHome = robotVerion == ValkyrieRobotVersion.UPPER_BODY ? 0.1 : 0.4;
+         double shoulderPitchHome = isUpperBodyModel ? 0.1 : 0.4;
          jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH), shoulderPitchHome);
          jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfRightSide(-1.0));
          jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), 0.1);
