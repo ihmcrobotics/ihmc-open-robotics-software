@@ -1,5 +1,5 @@
-# This message is part of the IHMC whole-body controller API.
-# Allows to send joint-space trajectory to either part of the joints or for all the joints.
+# This message is part of the whole-body impedance controller API.
+# Allows to send joint-space trajectory along with a timed contact sequence which determines limb stiffness.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
@@ -14,5 +14,8 @@ controller_msgs/OneDoFJointTrajectoryMessage[] joint_trajectory_messages
 
 # Properties for queueing trajectories.
 ihmc_common_msgs/QueueableMessage queueing_properties
+
+# Contact sequence message
+controller_msgs/MultiContactTimedContactSequenceMessage contact_sequence_message
 
 
