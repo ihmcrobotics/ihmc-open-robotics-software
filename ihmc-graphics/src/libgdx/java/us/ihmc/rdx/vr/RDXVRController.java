@@ -172,7 +172,6 @@ public class RDXVRController extends RDXVRTrackedDevice
       joystickReferenceFrame.getReferenceFrame().update();
       radialMenuSpherePoseFrame = new ModifiableReferenceFrame(joystickReferenceFrame.getReferenceFrame());
 
-
       triggerDragData = new RDXVRDragData(() -> getClickTriggerActionData().bState(), pickPoseFrame.getReferenceFrame());
       gripDragData = new RDXVRDragData(this::getGripAsButtonDown, pickPoseFrame.getReferenceFrame());
 
@@ -230,9 +229,8 @@ public class RDXVRController extends RDXVRTrackedDevice
          if (radialMenuSelectionGraphic == null)
          {
             FramePoint3DBasics[] vertices = selectionCollisionBox.getVertices();
-            radialMenuSelectionGraphic = new RDXModelInstance(RDXModelBuilder.buildModel(boxMeshBuilder -> boxMeshBuilder.addMultiLineBox(vertices,
-                                                                                                                                          0.0005,
-                                                                                                                                          new Color(Color.WHITE))));
+            radialMenuSelectionGraphic = new RDXModelInstance(RDXModelBuilder.buildModel(boxMeshBuilder ->
+                                                                   boxMeshBuilder.addMultiLineBox(vertices, 0.0005, new Color(Color.WHITE))));
          }
          if (pickPoseSphere == null)
          {
@@ -240,8 +238,8 @@ public class RDXVRController extends RDXVRTrackedDevice
             pickRayCollisionPointGraphic = new RDXModelInstance(RDXModelBuilder.createSphere(0.0015f, new Color(Color.WHITE)));
             LibGDXTools.hideGraphic(pickRayCollisionPointGraphic);
 
-            // These were tuned by @dcalvert using JRebel and bringing them down to updatePickResult method hand tweaking so they looked good
-            // for the Valve Index controllers.
+            // These were tuned by @dcalvert and @bpratt using JRebel and bringing them down to updatePickResult method hand tweaking
+            // so they looked good for the Valve Index controllers.
             Point3D aButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.085, -0.01, -0.02) : new Point3D(-0.082, -0.01, -0.017);
             Point3D bButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.07, -0.013, -0.015) : new Point3D(-0.07, -0.007, -0.008);
             topJoystickOffset = new Point3D(0.1, 0.0, 0.0);
@@ -259,7 +257,6 @@ public class RDXVRController extends RDXVRTrackedDevice
             rightJoystickLabel = new RDXVRControllerButtonLabel(joystickReferenceFrame.getReferenceFrame(), side, rightJoystickOffset, new YawPitchRoll());
             leftJoystickLabel = new RDXVRControllerButtonLabel(joystickReferenceFrame.getReferenceFrame(), side, leftJoystickOffset, new YawPitchRoll());
             gripAmountLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, gripAmountOffset, gripAmountOrientation);
-
          }
 
          pickPoseFrame.getReferenceFrame().update();
@@ -274,7 +271,6 @@ public class RDXVRController extends RDXVRTrackedDevice
          joystickReferenceFrame.getReferenceFrame().update();
          joystickFramePose.setToZero(joystickReferenceFrame.getReferenceFrame());
          joystickFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-
 
          radialMenuSpherePoseFrame.getReferenceFrame().update();
          joystickSphereFramePose.setToZero(radialMenuSpherePoseFrame.getReferenceFrame());
@@ -346,8 +342,9 @@ public class RDXVRController extends RDXVRTrackedDevice
          }
       }
 
-      radialMenuSpherePoseFrame.getTransformToParent().getTranslation().setX(0.1 * joystickActionData.y());
-      radialMenuSpherePoseFrame.getTransformToParent().getTranslation().setY(-0.1 * joystickActionData.x());
+      double radialSelectorTranslationScalar = 0.1;
+      radialMenuSpherePoseFrame.getTransformToParent().getTranslation().setX(radialSelectorTranslationScalar * joystickActionData.y());
+      radialMenuSpherePoseFrame.getTransformToParent().getTranslation().setY(-radialSelectorTranslationScalar * joystickActionData.x());
    }
 
    public void renderImGuiTunerWidgets()
