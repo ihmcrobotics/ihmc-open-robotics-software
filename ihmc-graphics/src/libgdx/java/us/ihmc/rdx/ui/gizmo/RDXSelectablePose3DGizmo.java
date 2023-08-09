@@ -12,6 +12,8 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
  * Adds "selectedness" to a pose 3D gizmo. It's not included in the base class because
@@ -50,6 +52,54 @@ public class RDXSelectablePose3DGizmo
       panel3D.getScene().addRenderableProvider(this::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
    }
 
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+      if (selected.get())
+      {
+         poseGizmo.calculateVRViewPick(vrContext);
+      }
+   }
+
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      processVRInput(vrContext, selected.get());
+   }
+
+   public void processVRInput(RDXVRContext vrContext, boolean isPickSelected)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         vrContext.getController(side).runIfConnected(controller ->
+         {
+            // Process input
+            boolean triggerReleasedWithoutDrag = controller.getTriggerClickReleasedWithoutDrag();
+            boolean isClickedOn = isPickSelected && triggerReleasedWithoutDrag;
+            boolean somethingElseIsClickedOn = !isPickSelected && triggerReleasedWithoutDrag;
+            boolean deselectionKeyPressed = ImGui.isKeyReleased(ImGuiTools.getDeleteKey()) || ImGui.isKeyReleased(ImGuiTools.getEscapeKey());
+
+            // Determine selectedness
+            if (isClickedOn)
+            {
+               selected.set(true);
+            }
+            if (somethingElseIsClickedOn || deselectionKeyPressed)
+            {
+               selected.set(false);
+            }
+
+            // Act
+            if (selected.get())
+            {
+               poseGizmo.processVRViewInput(vrContext);
+            }
+            else
+            {
+               poseGizmo.update();
+            }
+         });
+      }
+
+   }
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
       if (input.isWindowHovered() && selected.get())
