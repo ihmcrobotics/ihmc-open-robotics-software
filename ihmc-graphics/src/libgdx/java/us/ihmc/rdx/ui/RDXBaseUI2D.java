@@ -81,8 +81,8 @@ public class RDXBaseUI2D
       {
          Gdx.graphics.setWindowedMode(imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getWidth(),
                                       imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getHeight());
-         ((Lwjgl3Graphics) Gdx.graphics).getWindow().setPosition(imGuiWindowAndDockSystem.getPrimaryWindowPosition().getX(),
-                                                                 imGuiWindowAndDockSystem.getPrimaryWindowPosition().getY());
+         ((Lwjgl3Graphics) Gdx.graphics).getWindow().setPosition(imGuiWindowAndDockSystem.getPrimaryWindowContentAreaPosition().getX(),
+                                                                 imGuiWindowAndDockSystem.getPrimaryWindowContentAreaPosition().getY());
          return true;
       });
       layoutManager.getSaveListeners().add(this::saveApplicationSettings);

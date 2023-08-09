@@ -278,8 +278,8 @@ public class ImGuiTools
     */
    public static ImFont setupFonts(ImGuiIO io, int fontSizeLevel)
    {
-      final ImFontConfig fontConfig = new ImFontConfig(); // Natively allocated object, should be explicitly destroyed
-      final ImFontConfig boldFontConfig = new ImFontConfig();
+      final ImFontConfig smallFontConfig = new ImFontConfig(); // Natively allocated object, should be explicitly destroyed
+      final ImFontConfig smallBoldFontConfig = new ImFontConfig();
       final ImFontConfig consoleFontConfig = new ImFontConfig();
       final ImFontConfig mediumFontConfig = new ImFontConfig();
       final ImFontConfig bigFontConfig = new ImFontConfig();
@@ -298,8 +298,8 @@ public class ImGuiTools
 //      fontConfig.setRasterizerFlags(flags);
 //      fontConfig.setRasterizerMultiply(2.0f);
 //      fontConfig.setPixelSnapH(true);
-      fontConfig.setFontBuilderFlags(fontsFlags);
-      boldFontConfig.setFontBuilderFlags(fontsFlags + ImGuiFreeTypeBuilderFlags.Bold);
+      smallFontConfig.setFontBuilderFlags(fontsFlags);
+      smallBoldFontConfig.setFontBuilderFlags(fontsFlags + ImGuiFreeTypeBuilderFlags.Bold);
       consoleFontConfig.setFontBuilderFlags(fontsFlags);
       mediumFontConfig.setFontBuilderFlags(fontsFlags);
       bigFontConfig.setFontBuilderFlags(fontsFlags);
@@ -316,11 +316,11 @@ public class ImGuiTools
       Path segoeui = Paths.get(fontDirectory, "segoeui.ttf");
       if (Files.exists(segoeui))
       {
-         fontConfig.setName("segoeui.ttf, 16px");
-         smallFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 16.0f, fontConfig);
-         smallBoldFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 16.0f, boldFontConfig);
+         smallFontConfig.setName("segoeui.ttf, 16px");
+         smallFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 16.0f, smallFontConfig);
+         smallBoldFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 16.0f, smallBoldFontConfig);
 
-         fontConfig.setName("segoeui.ttf, 20px");
+         mediumFontConfig.setName("segoeui.ttf, 20px");
          mediumFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 20.0f, mediumFontConfig);
 
          bigFontConfig.setName("segoeui.ttf, 38px");
@@ -331,11 +331,11 @@ public class ImGuiTools
       }
       else
       {
-         fontConfig.setName("DejaVuSans.ttf, 13px");
-         smallFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 13.0f, fontConfig);
-         smallBoldFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 13.0f, boldFontConfig);
+         smallFontConfig.setName("DejaVuSans.ttf, 13px");
+         smallFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 13.0f, smallFontConfig);
+         smallBoldFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 13.0f, smallBoldFontConfig);
 
-         fontConfig.setName("DejaVuSans.ttf, 17px");
+         mediumFontConfig.setName("DejaVuSans.ttf, 17px");
          mediumFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 17.0f, mediumFontConfig);
 
          bigFontConfig.setName("DejaVuSans.ttf, 32px");
@@ -343,6 +343,11 @@ public class ImGuiTools
 
          nodeFontConfig.setName("DejaVuSans.ttf, 26px 1/2");
          nodeFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 26.0f, nodeFontConfig);
+
+         // Accomodate for ImGui issue where the Windows fonts will render smaller than normal
+         // This is so saving layout does not change the result depending on the fonts you have installed.
+         // Can be removed when this is fixed: https://github.com/ocornut/imgui/issues/4780
+         ImGui.getStyle().setFramePadding(ImGui.getStyle().getFramePaddingX(), 4.5f);
       }
       Path lucidaConsole = Paths.get(fontDirectory, "lucon.ttf");
 
@@ -376,7 +381,7 @@ public class ImGuiTools
       fontAtlas = ImGui.getIO().getFonts();
       fontAtlas.build();
 
-      fontConfig.destroy(); // After all fonts were added we don't need this config more
+      smallFontConfig.destroy(); // After all fonts were added we don't need this config more
       consoleFontConfig.destroy();
       mediumFontConfig.destroy();
       bigFontConfig.destroy();

@@ -8,7 +8,6 @@ import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import imgui.ImGui;
-import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.type.ImBoolean;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -285,27 +284,18 @@ public class RDXLocomotionManager
       boolean continueAvailable = !pauseAvailable && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0;
       boolean walkAvailable = !continueAvailable && interactableFootstepPlan.getNumberOfFootsteps() > 0;
 
-      if (ImGui.collapsingHeader(labels.get("Footstep Planning Options"), collapsedHeader, ImGuiTreeNodeFlags.DefaultOpen))
-      {
-         ImGui.indent();
-         assumeFlatGroundCheckbox.renderImGuiWidget();
-         areFootstepsAdjustableCheckbox.renderImGuiWidget();
-         planSwingTrajectoriesCheckbox.renderImGuiWidget();
-         replanSwingTrajectoriesOnChangeCheckbox.renderImGuiWidget();
-         ImGui.unindent();
-      }
-
-      swingTimeSlider.renderImGuiWidget();
-      transferTimeSlider.renderImGuiWidget();
-
-
       if (ImGui.button(labels.get("Disable Leg Mode")))
       {
          legControlMode = RDXLegControlMode.DISABLED;
       }
+
       ImGui.sameLine();
       ImGui.text("Leg Mode: " + legControlMode.name());
 
+      swingTimeSlider.renderImGuiWidget();
+      transferTimeSlider.renderImGuiWidget();
+
+      ImGui.separator();
       ImGui.text("Walking Options:");
       ImGui.sameLine();
 
@@ -343,6 +333,12 @@ public class RDXLocomotionManager
 
       manualFootstepPlacement.renderImGuiWidgets();
 
+      if (ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton())
+         legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
+
+      ImGui.separator();
+      walkPathControlRing.renderImGuiWidgets();
+
       ImGui.text("First stance side for planner:");
       ImGui.sameLine();
 
@@ -361,10 +357,15 @@ public class RDXLocomotionManager
          startStanceSide = RDXFootstepPlanning.InitialStanceSide.RIGHT;
       }
 
-      if (ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton())
-         legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
-
-      walkPathControlRing.renderImGuiWidgets();
+      if (ImGui.collapsingHeader(labels.get("Footstep Planning Options"), collapsedHeader))
+      {
+         ImGui.indent();
+         assumeFlatGroundCheckbox.renderImGuiWidget();
+         areFootstepsAdjustableCheckbox.renderImGuiWidget();
+         planSwingTrajectoriesCheckbox.renderImGuiWidget();
+         replanSwingTrajectoriesOnChangeCheckbox.renderImGuiWidget();
+         ImGui.unindent();
+      }
 
       // Handles all shortcuts for when the spacebar key is pressed
       if (ImGui.isKeyReleased(ImGuiTools.getSpaceKey()))
