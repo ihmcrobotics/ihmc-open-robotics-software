@@ -137,7 +137,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    {
       if (footstepBeingPlaced != null)
       {
-         footstepBeingPlaced.processVRInput(vrContext);
+         footstepBeingPlaced.processVRInput(vrContext, true);
       }
    }
    public void calculate3DViewPick(ImGui3DViewInput input)

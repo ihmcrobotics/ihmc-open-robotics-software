@@ -112,12 +112,12 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    {
       for (RDXInteractableFootstep footstep : footsteps)
       {
-         footstep.processVRInput(vrContext);
+         footstep.processVRInput(vrContext, false);
       }
 
       if (selectedFootstep != null)
       {
-         selectedFootstep.processVRInput(vrContext);
+         selectedFootstep.processVRInput(vrContext, false);
       }
    }
 
