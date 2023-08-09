@@ -87,8 +87,8 @@ public class RDXRobotCollidable implements RenderableProvider
       RigidBodyTransform collisionToLinkFrameTransform = new RigidBodyTransform();
       collisionShapeFrame = new ModifiableReferenceFrame("collisionShapeFrame" + rigidBodyName, linkFrame);
 
-      mouseCollidable = new MouseCollidable(shape);
-      pointCollidable = new PointCollidable(shape);
+      mouseCollidable = new MouseCollidable(this.shape);
+      pointCollidable = new PointCollidable(this.shape);
       collisionModelInstance = new RDXModelInstance(RDXModelBuilder.buildModel(meshBuilder ->
       {
          if (shape instanceof FrameSphere3DReadOnly sphere)
