@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DiagnosticsWhenHangingHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
@@ -95,6 +96,11 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(jointArray);
       lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(jointArray, JointDesiredControlMode.EFFORT);
 
+      for (int i = 0; i < oneDoFJoints.size(); i++)
+      {
+         jointMap.put(oneDoFJoints.get(i).getName(), oneDoFJoints.get(i));
+      }
+
       createHelpers(true, parameters);
 
       for (int i = 0; i < this.oneDoFJoints.size(); i++)
@@ -113,7 +119,6 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
 
          PDController controller = new PDController(jointName + "Calibration", registry);
          pdControllers.put(joint, controller);
-         jointMap.put(jointName, joint);
       }
 
       setDefaultPDControllerGains();
