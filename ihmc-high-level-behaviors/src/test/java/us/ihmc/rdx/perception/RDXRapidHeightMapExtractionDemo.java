@@ -71,6 +71,9 @@ public class RDXRapidHeightMapExtractionDemo
    private OpenCLManager openCLManager;
    private PerceptionDataLoader perceptionDataLoader;
 
+   private int skipIndex = 0;
+   private boolean autoIncrement = false;
+
    private boolean initialized = false;
 
    public RDXRapidHeightMapExtractionDemo()
@@ -150,18 +153,31 @@ public class RDXRapidHeightMapExtractionDemo
          @Override
          public void render()
          {
-            if (userChangedIndex.poll())
+            if (userChangedIndex.poll() )
             {
-               loadAndDecompressThreadExecutor.clearQueueAndExecute(() -> perceptionDataLoader.loadCompressedDepth(sensorTopicName,
-                                                                                                                   frameIndex.get(),
-                                                                                                                   depthBytePointer,
-                                                                                                                   loadedDepthImage.getBytedecoOpenCVMat()));
-               PerceptionDebugTools.displayDepth("Depth", loadedDepthImage.getBytedecoOpenCVMat(), 1);
-               updateHeightMap();
+               loadAndExecute();
+            }
+
+            if (skipIndex % 30 == 0 && autoIncrement)
+            {
+               frameIndex.set(frameIndex.get() + 1);
+               loadAndExecute();
             }
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
+
+            skipIndex++;
+         }
+
+         public void loadAndExecute()
+         {
+            loadAndDecompressThreadExecutor.clearQueueAndExecute(() -> perceptionDataLoader.loadCompressedDepth(sensorTopicName,
+                                                                                                                frameIndex.get(),
+                                                                                                                depthBytePointer,
+                                                                                                                loadedDepthImage.getBytedecoOpenCVMat()));
+            PerceptionDebugTools.displayDepth("Depth", loadedDepthImage.getBytedecoOpenCVMat(), 1);
+            updateHeightMap();
          }
 
          private void renderNavigationPanel()
@@ -182,6 +198,16 @@ public class RDXRapidHeightMapExtractionDemo
             {
                frameIndex.set(frameIndex.get() + 1);
                changed = true;
+            }
+
+            if (ImGui.button("Auto Increment"))
+            {
+               autoIncrement = true;
+            }
+
+            if (ImGui.button("Pause"))
+            {
+               autoIncrement = false;
             }
 
             if (changed)

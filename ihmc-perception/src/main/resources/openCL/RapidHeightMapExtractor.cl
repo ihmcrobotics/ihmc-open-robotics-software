@@ -106,10 +106,10 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
 
   cellCenterInWorld.x += 1.5f;
 
-   int WINDOW_WIDTH = 80;
-   int WINDOW_HEIGHT = 150;
+   int WINDOW_WIDTH = 100;
+   int WINDOW_HEIGHT = 180;
 
-   float halfCellWidth = params[HEIGHT_MAP_RESOLUTION] / 2.0f;
+   float halfCellWidth = params[HEIGHT_MAP_RESOLUTION] / 4.0f;
    float minX = cellCenterInWorld.x - halfCellWidth;
    float maxX = cellCenterInWorld.x + halfCellWidth;
    float minY = cellCenterInWorld.y - halfCellWidth;
@@ -144,9 +144,9 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
 
   int count = 0;
 
-  for (int pitch_count_offset = -WINDOW_HEIGHT / 2; pitch_count_offset < WINDOW_HEIGHT / 2 + 1; pitch_count_offset++)
+  for (int pitch_count_offset = -WINDOW_HEIGHT / 2; pitch_count_offset < WINDOW_HEIGHT / 2 + 1; pitch_count_offset+=3)
   {
-    for (int yaw_count_offset = -WINDOW_WIDTH / 2; yaw_count_offset < WINDOW_WIDTH / 2 + 1; yaw_count_offset++)
+    for (int yaw_count_offset = -WINDOW_WIDTH / 2; yaw_count_offset < WINDOW_WIDTH / 2 + 1; yaw_count_offset+=3)
     {
       int yaw_count = projectedPoint.x + yaw_count_offset;
       int pitch_count = projectedPoint.y + pitch_count_offset;
