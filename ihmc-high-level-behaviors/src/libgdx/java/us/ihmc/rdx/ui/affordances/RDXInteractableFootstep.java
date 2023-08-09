@@ -328,36 +328,16 @@ public class RDXInteractableFootstep
                 || vrContext.getController(RobotSide.LEFT).getSelectedPick() == vrPickResult.get(RobotSide.LEFT))
             {
                if (getFootstepSide() == RobotSide.LEFT)
-                  footstepModelInstance.materials.get(0)
-                                                 .set(new ColorAttribute(ColorAttribute.Diffuse,
-                                                                         1.0f,
-                                                                         0.0f,
-                                                                         0.0f,
-                                                                         0.0f));
+                  footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 1.0f, 0.0f, 0.0f, 0.0f));
                else
-                  footstepModelInstance.materials.get(0)
-                                                 .set(new ColorAttribute(ColorAttribute.Diffuse,
-                                                                         0.0f,
-                                                                         1.0f,
-                                                                         0.0f,
-                                                                         0.0f));
+                  footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 1.0f, 0.0f, 0.0f));
             }
             else
             {
                if (plannedFootstepInternal.getRobotSide() == RobotSide.LEFT)
-                  footstepModelInstance.materials.get(0)
-                                                 .set(new ColorAttribute(ColorAttribute.Diffuse,
-                                                                         0.5f,
-                                                                         0.0f,
-                                                                         0.0f,
-                                                                         0.0f));
+                  footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.5f, 0.0f, 0.0f, 0.0f));
                else
-                  footstepModelInstance.materials.get(0)
-                                                 .set(new ColorAttribute(ColorAttribute.Diffuse,
-                                                                         0.0f,
-                                                                         0.5f,
-                                                                         0.0f,
-                                                                         0.0f));
+                  footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 0.0f, 0.5f, 0.0f, 0.0f));
             }
          });
       }
