@@ -1,13 +1,16 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import us.ihmc.commons.InterpolationTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
@@ -115,6 +118,16 @@ public class CaptureRegionSafetyHeuristics implements SCS2YoGraphicHolder
 
       saferCaptureRegion.update();
 
+      // If the capture region that has been modified (the "safer capture region") is bad (by containing no value), we can reset it to be a line, where the line
+      // runs through the current capture point from the center of the foot, and is the two intersection points with the original capture region, plus some
+      // extra distance from the foot. Likely, when we moved the vertices of the safer region towards this middle line, something got messed up in the
+      // calculation. This shouldn't ever happen, and there are likely no edge cases where it does, but we don't it to brick the robot if it does happen, so
+      // we have this little safety check.
+      if (saferCaptureRegion.getNumberOfVertices() < 1)
+      {
+         createTheCaptureLine(captureRegion, capturePoint, saferCaptureRegion);
+      }
+
       yoSafetyBiasedCaptureRegion.setMatchingFrame(saferCaptureRegion, false);
    }
 
@@ -124,6 +137,10 @@ public class CaptureRegionSafetyHeuristics implements SCS2YoGraphicHolder
       {
          if (computeVisibiltyOfVerticesFromStance(saferCaptureRegion))
             projectVerticesVisibleToStanceAwayFromTheFoot();
+      }
+      else if (saferCaptureRegion.getNumberOfVertices() == 3)
+      {
+         projectClosestVertexOfTheTriangle(saferCaptureRegion);
       }
       else if (saferCaptureRegion.getNumberOfVertices() == 2)
       {
@@ -159,6 +176,44 @@ public class CaptureRegionSafetyHeuristics implements SCS2YoGraphicHolder
       }
 
       return true;
+   }
+
+
+   private void projectClosestVertexOfTheTriangle(FrameConvexPolygon2DBasics oneStepCaptureRegion)
+   {
+      // if it's zero, don't bother projecting
+      if (extraDistanceToStepFromStanceFoot.getValue() <= 0.0)
+         return;
+
+      int closestVertexIndex = oneStepCaptureRegion.getClosestVertexIndex(stancePosition);
+      Point2DBasics closestVertex = oneStepCaptureRegion.getVertexUnsafe(closestVertexIndex);
+
+      vectorToVertex.setReferenceFrame(stancePosition.getReferenceFrame());
+      vectorToVertex.sub(closestVertex, stancePosition);
+
+      // if you're already near the reachability limit, don't do any projection, it's just likely to mess you up.
+      double distanceSquared = vectorToVertex.normSquared();
+      if (distanceSquared > MathTools.square(reachabilityLimit.getValue()) - 0.42 * extraDistanceToStepFromStanceFoot.getValue())
+         return;
+
+      // Compute the maximum distance that the vertex can be projected along the line before hitting the reachability limit.
+      double maxProjectionDistance = Math.max(findMaximumProjectionDistance(Math.sqrt(distanceSquared),
+                                                                            reachabilityLimit.getValue(),
+                                                                            vectorToVertex.angle(lineOfMinimalAction.getDirection())), 0.0);
+
+      // TODO get distance along this line to the line formed by the other two vertices. That is then also the max distance.
+
+
+      // project all the vertices visible to the foot away from the stance foot in the direction through the current ICP.
+      closestVertex.scaleAdd(Math.min(maxProjectionDistance, extraDistanceToStepFromStanceFoot.getValue()),
+                             lineOfMinimalAction.getDirection(),
+                             closestVertex);
+      saferCaptureRegion.notifyVerticesChanged();
+
+      saferCaptureRegion.update();
+      boolean notifyOfUpdate = false;
+
+      return;
    }
 
    /**
@@ -260,6 +315,28 @@ public class CaptureRegionSafetyHeuristics implements SCS2YoGraphicHolder
 
       saferCaptureRegion.getVertexUnsafe(indexToModify).add(tempVector);
       saferCaptureRegion.notifyVerticesChanged();
+   }
+
+   private final FramePoint2D firstPoint = new FramePoint2D();
+   private final FramePoint2D secondPoint = new FramePoint2D();
+
+   private void createTheCaptureLine(FrameConvexPolygon2DReadOnly oneStepCaptureRegion,
+                                     FramePoint2DReadOnly capturePoint,
+                                     FrameConvexPolygon2DBasics captureLineToPack)
+   {
+      int intersections = oneStepCaptureRegion.intersectionWith(lineOfMinimalAction, firstPoint, secondPoint);
+      captureLineToPack.clear();
+      if (intersections == 0)
+         captureLineToPack.addVertexMatchingFrame(capturePoint, false);
+      else if (intersections == 1)
+         captureLineToPack.addVertexMatchingFrame(firstPoint, false);
+      else
+      {
+         captureLineToPack.addVertexMatchingFrame(firstPoint, false);
+         captureLineToPack.addVertexMatchingFrame(secondPoint, false);
+      }
+
+      captureLineToPack.update();
    }
 
    private static boolean checkIfClockWiseOrdered(List<? extends Point2DReadOnly> points, ConvexPolygon2DReadOnly captureRegion)

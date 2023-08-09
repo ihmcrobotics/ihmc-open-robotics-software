@@ -39,7 +39,7 @@ public class ROS2DetectableSceneNodesPublisher
          DetectableSceneNodeMessage detectableSceneNodeMessage = detectableSceneNodesMessage.getDetectableSceneNodes().add();
          detectableSceneNodeMessage.setName(detectableSceneNode.getName());
          detectableSceneNodeMessage.setCurrentlyDetected(detectableSceneNode.getCurrentlyDetected());
-         detectableSceneNodeMessage.setIsPoseOverriddenByOperator(detectableSceneNode.getPoseOverriddenByOperator());
+         detectableSceneNodeMessage.setTrackDetectedPose(detectableSceneNode.getTrackDetectedPose());
 
          sceneNodePose.setToZero(detectableSceneNode.getNodeFrame());
          sceneNodePose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -54,6 +54,8 @@ public class ROS2DetectableSceneNodesPublisher
             arUcoMarkerPose.changeFrame(ReferenceFrame.getWorldFrame());
             arUcoMarkerPose.get(arUcoMarkerToWorldTransform);
             MessageTools.toMessage(arUcoMarkerToWorldTransform, detectableSceneNodeMessage.getArucoMarkerTransformToWorld());
+
+            detectableSceneNodeMessage.setBreakFrequency((float) arUcoDetectableNode.getBreakFrequency());
          }
       }
       ros2PublishSubscribeAPI.publish(PerceptionAPI.DETECTABLE_SCENE_NODES.getTopic(ioQualifier), detectableSceneNodesMessage);

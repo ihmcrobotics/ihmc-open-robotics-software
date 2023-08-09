@@ -141,6 +141,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    private final YoFramePoint2D yoDesiredCoP = new YoFramePoint2D("desiredCoP", worldFrame, registry);
    private final YoFramePoint2D yoAchievedCMP = new YoFramePoint2D("achievedCMP", worldFrame, registry);
    private final YoFramePoint3D yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
+   private final YoFrameVector3D yoCenterOfMassVelocity = new YoFrameVector3D("centerOfMassVelocity", worldFrame, registry);
    private final YoFramePoint2D yoCapturePoint = new YoFramePoint2D("capturePoint", worldFrame, registry);
 
    private final FilteredVelocityYoFrameVector2d capturePointVelocity;
@@ -235,6 +236,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       yoDesiredCoP.setToNaN();
       yoAchievedCMP.setToNaN();
       yoCenterOfMass.setToNaN();
+      yoCenterOfMassVelocity.setToNaN();
       yoCapturePoint.setToNaN();
 
       icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
@@ -265,6 +267,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       yoDesiredCoP.setToNaN();
       yoAchievedCMP.setToNaN();
       yoCenterOfMass.setToNaN();
+      yoCenterOfMassVelocity.setToNaN();
       yoCapturePoint.setToNaN();
    }
 
@@ -378,6 +381,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       yoDesiredCMP.set(desiredCMP);
       yoDesiredCoP.set(desiredCoP);
       yoCenterOfMass.setFromReferenceFrame(centerOfMassFrame);
+      yoCenterOfMassVelocity.set(capturePointCalculator.getCenterOfMassVelocity());
       yoCapturePoint.set(capturePoint);
 
       success = success && computeDesiredLinearMomentumRateOfChange();

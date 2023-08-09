@@ -36,6 +36,7 @@ import us.ihmc.euclid.referenceFrame.FrameLine3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameLine3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.tools.RDXModelBuilder;
@@ -83,7 +84,7 @@ public class RDX3DSituatedImGuiPanel
          = ReferenceFrameTools.constructFrameWithChangingTransformToParent("graphicsXRightYDownFrame" + INDEX.getAndIncrement(),
                                                                            centerXThroughZUpFrame,
                                                                            graphicsXRightYDownToCenterXThroughZUpTransform);
-   private final FrameLine3D pickRay = new FrameLine3D();
+   private FrameLine3DReadOnly pickRay = new FrameLine3D();
    private final FramePoint3D pickIntersection = new FramePoint3D();
    private final Plane3D plane = new Plane3D();
    private ModelInstance centerFrameCoordinateFrame;
@@ -243,9 +244,7 @@ public class RDX3DSituatedImGuiPanel
       pickResult.reset();
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
       {
-         pickRay.setToZero(controller.getXForwardZUpControllerFrame());
-         pickRay.getDirection().set(Axis3D.X);
-         pickRay.changeFrame(ReferenceFrame.getWorldFrame());
+         pickRay = controller.getPickRay();
 
          pickIntersection.setToZero(ReferenceFrame.getWorldFrame());
          plane.intersectionWith(pickRay, pickIntersection);
