@@ -15,7 +15,6 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -316,14 +315,9 @@ public class RDXArmManager
       return runnable;
    }
 
-   public Runnable executeOpenHandConfiguration(RobotSide side)
+   public RDXHandConfigurationManager getHandManager()
    {
-      return () -> handManager.publishHandCommand(side, HandConfiguration.OPEN);
-   }
-
-   public Runnable executeCloseHandConfiguration(RobotSide side)
-   {
-      return () -> handManager.publishHandCommand(side, HandConfiguration.CLOSE);
+      return handManager;
    }
 
    public RDXArmControlMode getArmControlMode()

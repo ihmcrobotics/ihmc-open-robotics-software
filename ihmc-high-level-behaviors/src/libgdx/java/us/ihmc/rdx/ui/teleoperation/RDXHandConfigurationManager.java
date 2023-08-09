@@ -218,5 +218,4 @@ public class RDXHandConfigurationManager
 
       shieldButton.setOnPressed(()-> armTrajectoryRunnable.accept(toolbarSelectedSide));
    }
-   
 }

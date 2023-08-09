@@ -37,10 +37,10 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
    private RDXSpatialVectorArrows sensorWristWrenchArrows;
    private final RDXSpatialVectorArrows estimatedHandWrenchArrows;
    private final String contextMenuName;
-   private Runnable openCommands;
-   private Runnable closeCommands;
-   private Runnable doorAvoidenceExecutable;
-   private Runnable homePositionExecutable;
+   private Runnable openHand;
+   private Runnable closeHand;
+   private Runnable gotoDoorAvoidanceArmAngles;
+   private Runnable gotoArmHome;
 
    public static boolean robotCollidableIsHand(RobotSide side, RDXRobotCollidable robotCollidable, FullHumanoidRobotModel fullRobotModel)
    {
@@ -145,12 +145,12 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
             RDXVRDragData gripDragData = controller.getGripDragData();
             if (isVRHovering() || gripDragData.getObjectBeingDragged() == this)
             {
-
                controller.controlOfRadialMenu("Open Hand", "Close Hand", "Door Avoidance", "Home Position");
                if (joystickButton.bChanged() && joystickButton.bState())
                {
-                  if (controller.getRadialMenuRunnable(openCommands, closeCommands, doorAvoidenceExecutable, homePositionExecutable) != null)
-                     controller.getRadialMenuRunnable(openCommands, closeCommands, doorAvoidenceExecutable, homePositionExecutable).run();
+                  Runnable radialMenuSelection = controller.getRadialMenuRunnable(openHand, closeHand, gotoDoorAvoidanceArmAngles, gotoArmHome);
+                  if (radialMenuSelection != null)
+                     radialMenuSelection.run();
                }
             }
             else
@@ -163,23 +163,23 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
       }
    }
 
-   public void setOpenCommands(Runnable openCommands)
+   public void setOpenHand(Runnable openHand)
    {
-      this.openCommands = openCommands;
+      this.openHand = openHand;
    }
 
-   public void setCloseCommands(Runnable closeCommands)
+   public void setCloseHand(Runnable closeHand)
    {
-      this.closeCommands = closeCommands;
+      this.closeHand = closeHand;
    }
 
-   public void setDoorAvoidenceExecutable(Runnable doorAvoidenceExecutable)
+   public void setGotoDoorAvoidanceArmAngles(Runnable gotoDoorAvoidanceArmAngles)
    {
-      this.doorAvoidenceExecutable = doorAvoidenceExecutable;
+      this.gotoDoorAvoidanceArmAngles = gotoDoorAvoidanceArmAngles;
    }
 
-   public void setHomePositionExecutable(Runnable homePositionExecutable)
+   public void setGotoArmHome(Runnable gotoArmHome)
    {
-      this.homePositionExecutable = homePositionExecutable;
+      this.gotoArmHome = gotoArmHome;
    }
 }

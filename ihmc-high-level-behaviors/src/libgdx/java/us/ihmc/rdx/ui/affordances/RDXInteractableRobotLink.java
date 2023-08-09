@@ -124,24 +124,26 @@ public class RDXInteractableRobotLink
 
             if (isHovering || gripDragData.getObjectBeingDragged() == this)
             {
-
-               controller.setBButtonText("Delete Interactable");
-               controller.setAButtonText("Execute");
                if (gripDragData.getDragJustStarted())
                {
                   modified = true;
                   gripDragData.setObjectBeingDragged(this);
                   gripDragData.setInteractableFrameOnDragStart(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
                }
-            }
 
-            if (aButton.bState() && aButton.bChanged() && modified)
-            {
-               onSpacePressed.run();
-            }
-            if (bButton.bChanged() && bButton.bState())
-            {
-               delete();
+               if (modified)
+               {
+                  controller.setBButtonText("Delete");
+                  controller.setAButtonText("Execute");
+                  if (aButton.bState() && aButton.bChanged())
+                  {
+                     onSpacePressed.run();
+                  }
+                  if (bButton.bState() && bButton.bChanged())
+                  {
+                     delete();
+                  }
+               }
             }
 
             if (gripDragData.isBeingDragged(this))
