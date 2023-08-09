@@ -106,7 +106,7 @@ public class RDXInteractableFootstep
 
       selectablePose3DGizmo = new RDXSelectablePose3DGizmo();
       selectablePose3DGizmo.create(baseUI.getPrimary3DPanel());
-      selectionCollisionBox = new FrameBox3D();
+      selectionCollisionBox = new FrameBox3D(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
       selectionCollisionBox.getSize().set(FOOTSTEP_GRAPHIC_LENGTH, FOOTSTEP_GRAPHIC_WIDTH, FOOTSTEP_GRAPHIC_HEIGHT);
       selectionCollisionBox.getPose().getTranslation().add(FOOTSTEP_GRAPHIC_SOLE_OFFSET_X, FOOTSTEP_GRAPHIC_SOLE_OFFSET_Y, FOOTSTEP_GRAPHIC_SOLE_OFFSET_Z);
       collisionBoxFrame = new ModifiableReferenceFrame("collisionBoxFrame", selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
@@ -249,12 +249,6 @@ public class RDXInteractableFootstep
          updatePlannedTrajectoryInternal(pair.getLeft(), pair.getRight());
       }
 
-      if (collisionBoxFrame.getReferenceFrame() != selectablePose3DGizmo.getPoseGizmo().getGizmoFrame())
-         collisionBoxFrame.changeParentFrame(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
-
-      //Updates selectionCollisionBox pose as it is used in mouse pointcollide
-      selectionCollisionBox.getPose().set(selectablePose3DGizmo.getPoseGizmo().getPose());
-
       updateHoverState();
    }
 
@@ -282,7 +276,9 @@ public class RDXInteractableFootstep
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
-            if (pointCollidable.collide(controller.getPickPointPose().getPosition()))
+            FramePose3DReadOnly pickPointPose = controller.getPickPointPose();
+
+            if (pointCollidable.collide(pickPointPose.getPosition()))
             {
                vrPickResult.get(side).addPickCollision(0);
                controller.addPickResult(vrPickResult.get(side));
