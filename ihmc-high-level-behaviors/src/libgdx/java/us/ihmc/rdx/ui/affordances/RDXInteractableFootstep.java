@@ -251,6 +251,7 @@ public class RDXInteractableFootstep
 
       //Updates selectionCollisionBox pose as it is used in mouse pointcollide
       selectionCollisionBox.getPose().set(selectablePose3DGizmo.getPoseGizmo().getPose());
+      selectionCollisionBox.getPose().getTranslation().add(FOOTSTEP_GRAPHIC_SOLE_OFFSET_X, FOOTSTEP_GRAPHIC_SOLE_OFFSET_Y, FOOTSTEP_GRAPHIC_SOLE_OFFSET_Z);
 
       updateHoverState();
    }
