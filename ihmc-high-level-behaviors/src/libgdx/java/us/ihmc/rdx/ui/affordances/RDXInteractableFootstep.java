@@ -305,7 +305,7 @@ public class RDXInteractableFootstep
             {
                gripDragData.getDragFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(), ReferenceFrame.getWorldFrame());
             }
-            isHoveredVR.put(side, vrPickResult.get(side)== controller.getSelectedPick());
+            isHoveredVR.put(side, vrPickResult.get(side) == controller.getSelectedPick());
          });
       }
    }

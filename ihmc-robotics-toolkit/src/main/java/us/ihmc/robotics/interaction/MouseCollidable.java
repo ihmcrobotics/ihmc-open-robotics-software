@@ -66,7 +66,7 @@ public class MouseCollidable
    }
 
    /**
-    * @param pickRayInWorld      The mouse's pick ray in world.
+    * @param pickRayInWorld The mouse's pick ray in world.
     * @param collisionShapeFrame The reference frame of the shape; this can change dynamically for some applications
     *                            which is why we don't pass it in in the constructor
     * @return The closest collision distance of NaN if not colliding
