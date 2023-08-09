@@ -47,7 +47,6 @@ public class RDXRobotCollidable implements RenderableProvider
    private final RDXModelInstance collisionModelInstance;
    private final RDXModelInstance collisionShapeCoordinateFrameGraphic;
    private final FrameShape3DBasics shape;
-   private final FramePose3D vrPickPose = new FramePose3D();
    private final String rigidBodyName;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
@@ -175,13 +174,11 @@ public class RDXRobotCollidable implements RenderableProvider
          vrContext.getController(side).runIfConnected(controller ->
          {
             vrPickResult.get(side).reset();
-            vrPickPose.setToZero(controller.getPickPoseFrame());
             // The shape has the offsets from link frame built in.
             // Do the collisions in link frame.
-            vrPickPose.changeFrame(linkFrame);
             shape.setReferenceFrame(linkFrame);
 
-            boolean isInside = pointCollidable.collide(vrPickPose.getPosition());
+            boolean isInside = pointCollidable.collide(controller.getPickPointPose().getPosition());
             LibGDXTools.toLibGDX(pointCollidable.getClosestPointOnSurface(), pickRayCollisionPointGraphic.transform);
 
             if (isInside)
