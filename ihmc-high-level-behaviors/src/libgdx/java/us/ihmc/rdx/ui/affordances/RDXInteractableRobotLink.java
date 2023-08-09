@@ -135,7 +135,7 @@ public class RDXInteractableRobotLink
                }
             }
 
-            if (aButton.bState() && aButton.bChanged())
+            if (aButton.bState() && aButton.bChanged() && modified)
             {
                onSpacePressed.run();
             }
