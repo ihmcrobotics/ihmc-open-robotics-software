@@ -256,36 +256,36 @@ public class RDXInteractableFootstep
       for (RobotSide side : RobotSide.values)
       {
          vrContext.getController(side).runIfConnected(controller ->
-                                                      {
-                                                         if (!controller.getTriggerDragData().isDraggingSomething())
-                                                         {
-                                                            vrPickResult.get(side).reset();
-                                                            Line3DReadOnly pickRay = controller.getPickRay();
-                                                            closestCollisionDistance = Double.POSITIVE_INFINITY;
+         {
+            if (!controller.getTriggerDragData().isDraggingSomething())
+            {
+               vrPickResult.get(side).reset();
+               Line3DReadOnly pickRay = controller.getPickRay();
+               closestCollisionDistance = Double.POSITIVE_INFINITY;
 
-                                                            double distance = mouseCollidable.collide(pickRay, collisionBoxFrame.getReferenceFrame());
-                                                            if (!Double.isNaN(distance) && distance < closestCollisionDistance)
-                                                            {
-                                                               closestCollisionDistance = distance;
-                                                               closestCollision.set(mouseCollidable.getClosestInteresection());
-                                                               if (side == RobotSide.RIGHT)
-                                                               {
-                                                                  controller.setBButtonText("Delete");
-                                                                  controller.setAButtonText("Walk");
-                                                               }
-                                                               else if (side == RobotSide.LEFT)
-                                                               {
-                                                                  controller.setAButtonText("PlaceAnother");
-                                                               }
-                                                            }
-                                                         }
-                                                         vrPickResult.get(side).addPickCollision(closestCollisionDistance);
+               double distance = mouseCollidable.collide(pickRay, collisionBoxFrame.getReferenceFrame());
+               if (!Double.isNaN(distance) && distance < closestCollisionDistance)
+               {
+                  closestCollisionDistance = distance;
+                  closestCollision.set(mouseCollidable.getClosestInteresection());
+                  if (side == RobotSide.RIGHT)
+                  {
+                     controller.setBButtonText("Delete");
+                     controller.setAButtonText("Walk");
+                  }
+                  else if (side == RobotSide.LEFT)
+                  {
+                     controller.setAButtonText("PlaceAnother");
+                  }
+               }
+            }
+            vrPickResult.get(side).addPickCollision(closestCollisionDistance);
 
-                                                         if (vrPickResult.get(side).getPickCollisionWasAddedSinceReset())
-                                                         {
-                                                            controller.addPickResult(vrPickResult.get(side));
-                                                         }
-                                                      });
+            if (vrPickResult.get(side).getPickCollisionWasAddedSinceReset())
+            {
+               controller.addPickResult(vrPickResult.get(side));
+            }
+         });
       }
    }
 
@@ -294,72 +294,72 @@ public class RDXInteractableFootstep
       for (RobotSide side : RobotSide.values)
       {
          vrContext.getController(side).runIfConnected(controller ->
-                                                      {
-                                                         RDXVRDragData triggerDragData = controller.getTriggerDragData();
+         {
+            RDXVRDragData triggerDragData = controller.getTriggerDragData();
 
-                                                         if (triggerDragData.getDragJustStarted()
-                                                             && vrContext.getController(side).getSelectedPick() == vrPickResult.get(side))
-                                                         {
-                                                            triggerDragData.setObjectBeingDragged(this);
-                                                            triggerDragData.setZUpDragStart(collisionBoxFrame.getReferenceFrame());
-                                                         }
-                                                         if (triggerDragData.isBeingDragged(this))
-                                                         {
-                                                            Line3DReadOnly pickRay = controller.getPickRay();
-                                                            if (vrContext.getController(side).getSelectedPick() == vrPickResult.get(side))
-                                                            {
-                                                               Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay,
-                                                                                                                            closestCollision,
-                                                                                                                            Axis3D.Z);
-                                                               closestCollision.add(planarMotion);
-                                                               addGizmoPose(planarMotion);
-                                                               double deltaYaw = triggerDragData.getZUpDragPose().getOrientation().getYaw();
-                                                               triggerDragData.updateZUpDrag(collisionBoxFrame.getReferenceFrame());
-                                                               selectablePose3DGizmo.getPoseGizmo()
-                                                                                    .getTransformToParent()
-                                                                                    .getRotation()
-                                                                                    .setYawPitchRoll(deltaYaw,
-                                                                                                     selectablePose3DGizmo.getPoseGizmo().getPose().getPitch(),
-                                                                                                     selectablePose3DGizmo.getPoseGizmo().getPose().getRoll());
-                                                            }
-                                                         }
+            if (triggerDragData.getDragJustStarted()
+                && vrContext.getController(side).getSelectedPick() == vrPickResult.get(side))
+            {
+               triggerDragData.setObjectBeingDragged(this);
+               triggerDragData.setZUpDragStart(collisionBoxFrame.getReferenceFrame());
+            }
+            if (triggerDragData.isBeingDragged(this))
+            {
+               Line3DReadOnly pickRay = controller.getPickRay();
+               if (vrContext.getController(side).getSelectedPick() == vrPickResult.get(side))
+               {
+                  Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay,
+                                                                               closestCollision,
+                                                                               Axis3D.Z);
+                  closestCollision.add(planarMotion);
+                  addGizmoPose(planarMotion);
+                  double deltaYaw = triggerDragData.getZUpDragPose().getOrientation().getYaw();
+                  triggerDragData.updateZUpDrag(collisionBoxFrame.getReferenceFrame());
+                  selectablePose3DGizmo.getPoseGizmo()
+                                       .getTransformToParent()
+                                       .getRotation()
+                                       .setYawPitchRoll(deltaYaw,
+                                                        selectablePose3DGizmo.getPoseGizmo().getPose().getPitch(),
+                                                        selectablePose3DGizmo.getPoseGizmo().getPose().getRoll());
+               }
+            }
 
-                                                         if (vrContext.getController(RobotSide.RIGHT).getSelectedPick() == vrPickResult.get(RobotSide.RIGHT)
-                                                             || vrContext.getController(RobotSide.LEFT).getSelectedPick() == vrPickResult.get(RobotSide.LEFT))
-                                                         {
-                                                            if (getFootstepSide() == RobotSide.LEFT)
-                                                               footstepModelInstance.materials.get(0)
-                                                                                              .set(new ColorAttribute(ColorAttribute.Diffuse,
-                                                                                                                      1.0f,
-                                                                                                                      0.0f,
-                                                                                                                      0.0f,
-                                                                                                                      0.0f));
-                                                            else
-                                                               footstepModelInstance.materials.get(0)
-                                                                                              .set(new ColorAttribute(ColorAttribute.Diffuse,
-                                                                                                                      0.0f,
-                                                                                                                      1.0f,
-                                                                                                                      0.0f,
-                                                                                                                      0.0f));
-                                                         }
-                                                         else
-                                                         {
-                                                            if (plannedFootstepInternal.getRobotSide() == RobotSide.LEFT)
-                                                               footstepModelInstance.materials.get(0)
-                                                                                              .set(new ColorAttribute(ColorAttribute.Diffuse,
-                                                                                                                      0.5f,
-                                                                                                                      0.0f,
-                                                                                                                      0.0f,
-                                                                                                                      0.0f));
-                                                            else
-                                                               footstepModelInstance.materials.get(0)
-                                                                                              .set(new ColorAttribute(ColorAttribute.Diffuse,
-                                                                                                                      0.0f,
-                                                                                                                      0.5f,
-                                                                                                                      0.0f,
-                                                                                                                      0.0f));
-                                                         }
-                                                      });
+            if (vrContext.getController(RobotSide.RIGHT).getSelectedPick() == vrPickResult.get(RobotSide.RIGHT)
+                || vrContext.getController(RobotSide.LEFT).getSelectedPick() == vrPickResult.get(RobotSide.LEFT))
+            {
+               if (getFootstepSide() == RobotSide.LEFT)
+                  footstepModelInstance.materials.get(0)
+                                                 .set(new ColorAttribute(ColorAttribute.Diffuse,
+                                                                         1.0f,
+                                                                         0.0f,
+                                                                         0.0f,
+                                                                         0.0f));
+               else
+                  footstepModelInstance.materials.get(0)
+                                                 .set(new ColorAttribute(ColorAttribute.Diffuse,
+                                                                         0.0f,
+                                                                         1.0f,
+                                                                         0.0f,
+                                                                         0.0f));
+            }
+            else
+            {
+               if (plannedFootstepInternal.getRobotSide() == RobotSide.LEFT)
+                  footstepModelInstance.materials.get(0)
+                                                 .set(new ColorAttribute(ColorAttribute.Diffuse,
+                                                                         0.5f,
+                                                                         0.0f,
+                                                                         0.0f,
+                                                                         0.0f));
+               else
+                  footstepModelInstance.materials.get(0)
+                                                 .set(new ColorAttribute(ColorAttribute.Diffuse,
+                                                                         0.0f,
+                                                                         0.5f,
+                                                                         0.0f,
+                                                                         0.0f));
+            }
+         });
       }
    }
    public void calculate3DViewPick(ImGui3DViewInput input)
