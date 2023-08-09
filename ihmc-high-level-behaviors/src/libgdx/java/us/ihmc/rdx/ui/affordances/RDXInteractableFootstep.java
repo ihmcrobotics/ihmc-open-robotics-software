@@ -38,6 +38,7 @@ import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.interaction.MouseCollidable;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.visualizers.RDXPolynomial;
+import us.ihmc.robotics.interaction.PointCollidable;
 import us.ihmc.robotics.math.trajectories.core.Polynomial;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
@@ -67,8 +68,9 @@ public class RDXInteractableFootstep
    private final FrameBox3D selectionCollisionBox;
    private final ModifiableReferenceFrame collisionBoxFrame;
    private final MouseCollidable mouseCollidable;
+   private final PointCollidable pointCollidable;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private boolean isHovered;
+   private boolean isMouseHovering;
    private boolean isClickedOn;
    private final FramePose3D textFramePose = new FramePose3D();
    private final Timer timerFlashingFootsteps = new Timer();
@@ -86,7 +88,7 @@ public class RDXInteractableFootstep
    private boolean wasPoseUpdated = false;
 
    private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
-   private SideDependentList<Boolean> isHoveredVR = new SideDependentList<>(false, false);
+   private final SideDependentList<Boolean> isVRHovering = new SideDependentList<>(false, false);
 
    public RDXInteractableFootstep(RDXBaseUI baseUI, RobotSide footstepSide, int index, SideDependentList<ConvexPolygon2D> defaultPolygons)
    {
@@ -110,6 +112,7 @@ public class RDXInteractableFootstep
       collisionBoxFrame = new ModifiableReferenceFrame("collisionBoxFrame", selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
       collisionBoxFrame.update(transformToParent -> transformToParent.set(selectionCollisionBox.getPose()));
       mouseCollidable = new MouseCollidable(selectionCollisionBox);
+      pointCollidable = new PointCollidable(selectionCollisionBox);
 
       updateFootstepIndexText(index);
    }
@@ -257,7 +260,7 @@ public class RDXInteractableFootstep
 
    public void updateHoverState()
    {
-      if (isHovered || isHoveredVR.get(RobotSide.RIGHT) || isHoveredVR.get(RobotSide.LEFT))
+      if (isMouseHovering || isVRHovering.get(RobotSide.RIGHT) || isVRHovering.get(RobotSide.LEFT))
       {
          if (getFootstepSide() == RobotSide.LEFT)
             footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, 1.0f, 0.0f, 0.0f, 0.0f));
@@ -279,7 +282,7 @@ public class RDXInteractableFootstep
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
-            if (mouseCollidable.pointCollide(controller.getPickPointPose().getPosition()))
+            if (pointCollidable.collide(controller.getPickPointPose().getPosition()))
             {
                vrPickResult.get(side).addPickCollision(0);
                controller.addPickResult(vrPickResult.get(side));
@@ -305,7 +308,7 @@ public class RDXInteractableFootstep
             {
                gripDragData.getDragFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(), ReferenceFrame.getWorldFrame());
             }
-            isHoveredVR.put(side, vrPickResult.get(side) == controller.getSelectedPick());
+            isVRHovering.put(side, vrPickResult.get(side) == controller.getSelectedPick());
          });
       }
    }
@@ -324,8 +327,8 @@ public class RDXInteractableFootstep
 
    public void process3DViewInput(ImGui3DViewInput input, boolean currentlyPlacingFootstep)
    {
-      isHovered = pickResult == input.getClosestPick();
-      isClickedOn = isHovered && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
+      isMouseHovering = pickResult == input.getClosestPick();
+      isClickedOn = isMouseHovering && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
 
       // FIXME:
       if (currentlyPlacingFootstep)
@@ -334,7 +337,7 @@ public class RDXInteractableFootstep
       }
       else
       {
-         selectablePose3DGizmo.process3DViewInput(input, isHovered);
+         selectablePose3DGizmo.process3DViewInput(input, isMouseHovering);
       }
 
       footstepModelInstance.transform.setToRotationRad(selectablePose3DGizmo.getPoseGizmo().getPose().getRotation().getX32(),
@@ -374,14 +377,14 @@ public class RDXInteractableFootstep
       {
          if (getFootstepSide() == RobotSide.LEFT)
          {
-            if (isHovered())
+            if (isMouseHovering())
                setColor(1.0f, 0.0f, 0.0f, 0.0f);
             else
                setColor(0.5f, 0.0f, 0.0f, 0.0f);
          }
          else
          {
-            if (isHovered())
+            if (isMouseHovering())
                setColor(0.0f, 1.0f, 0.0f, 0.0f);
             else
                setColor(0.0f, 0.5f, 0.0f, 0.0f);
@@ -437,9 +440,9 @@ public class RDXInteractableFootstep
       return footstepModelInstance;
    }
 
-   public boolean isHovered()
+   public boolean isMouseHovering()
    {
-      return isHovered;
+      return isMouseHovering;
    }
 
    public double getYaw()
@@ -532,7 +535,7 @@ public class RDXInteractableFootstep
       this.footstepModelInstance = manuallyPlacedFootstep.footstepModelInstance;
       this.plannedFootstepInternal.set(manuallyPlacedFootstep.plannedFootstepInternal);
       this.selectablePose3DGizmo = manuallyPlacedFootstep.selectablePose3DGizmo;
-      this.isHovered = manuallyPlacedFootstep.isHovered;
+      this.isMouseHovering = manuallyPlacedFootstep.isMouseHovering;
       this.isClickedOn = manuallyPlacedFootstep.isClickedOn;
       this.textFramePose.setIncludingFrame(manuallyPlacedFootstep.textFramePose);
       this.flashingFootStepsColorHigh = manuallyPlacedFootstep.flashingFootStepsColorHigh;
