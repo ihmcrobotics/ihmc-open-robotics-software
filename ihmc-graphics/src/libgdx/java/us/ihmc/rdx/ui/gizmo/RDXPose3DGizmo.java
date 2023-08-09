@@ -228,7 +228,7 @@ public class RDXPose3DGizmo implements RenderableProvider
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
-            if (!controller.getTriggerDragData().isDragging())
+            if (!controller.getTriggerDragData().isDraggingSomething())
             {
                Line3DReadOnly pickRay = controller.getPickRay();
                closestVRCollisionSelection.put(side, determineCurrentSelectionFromPickRay(pickRay));
