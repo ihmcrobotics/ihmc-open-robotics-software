@@ -6,7 +6,6 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.ImGui;
 import imgui.internal.ImGuiDockNode;
-import imgui.internal.ImGuiWindow;
 import imgui.type.ImBoolean;
 import us.ihmc.log.LogTools;
 
@@ -29,11 +28,6 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
    @Nullable
    private ImGuiDockspacePanel parentDockspacePanel = null;
    private boolean isOnMainViewport = false;
-   private int lastDockID = -1;
-   private ImGuiDockNode imGuiDockNode;
-   private int parentNodeID;
-   private String dockNodeString;
-   private String parentNodeIDString;
 
    public ImGuiPanel(String panelName)
    {
@@ -72,12 +66,20 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
       }
    }
 
-   /* package-private */ void renderPanelAndChildren(ImGuiDockspacePanel justClosedPanel, TIntObjectHashMap<ImGuiDockspacePanel> dockIDMap)
+   /* package-private */ void renderPanelAndChildren(TIntObjectHashMap<ImGuiDockspacePanel> dockIDMap)
    {
       while (!removalQueue.isEmpty())
          children.remove(removalQueue.poll());
       while (!additionQueue.isEmpty())
          children.add(additionQueue.poll());
+
+      // If the dockspace closes, we want to not render because otherwise the
+      // docked stuff will lose its place. Also, let's show the docked windows
+      // when if it shows up again.
+      if (parentDockspacePanel != null)
+      {
+         isShowing.set(parentDockspacePanel.getIsShowing());
+      }
 
       if (isShowing.get() && render != null)
       {
@@ -99,39 +101,8 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
          ImGui.begin(panelName, isShowing, windowFlags);
          handleSizeAfterBegin();
 
-         ImGuiWindow currentWindow = imgui.internal.ImGui.getCurrentWindow();
-//         ImGui.doc
-
          int windowDockID = ImGui.getWindowDockID();
-         imGuiDockNode = imgui.internal.ImGui.dockBuilderGetNode(windowDockID);
-         if (imGuiDockNode.ptr != 0)
-         {
-            dockNodeString = String.format("0x%08X", imGuiDockNode.getID());
-            ImGuiDockNode parentNode = imGuiDockNode.getParentNode();
-            if (parentNode.ptr != 0)
-            {
-               parentNodeID = parentNode.getID();
-               parentNodeIDString = String.format("0x%08X", parentNodeID);
-            }
-         }
-
          findParentDockspacePanel(windowDockID, dockIDMap);
-
-//         if (parentDockspacePanel != null)
-//         {
-//            isShowing.set(parentDockspacePanel.getIsShowing());
-//         }
-
-         if (lastDockID != windowDockID)
-         {
-            LogTools.debug("Dock ID changed. {}: {} -> {}", panelName, lastDockID, windowDockID);
-            if (justClosedPanel != null)
-            {
-               LogTools.info("Closing \"{}\" because containing dockspace \"{}\" closed", panelName, justClosedPanel.getName());
-               isShowing.set(false);
-            }
-         }
-         lastDockID = windowDockID;
 
          render.run();
          ImGui.end();
@@ -139,7 +110,7 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
 
       for (ImGuiPanel child : children)
       {
-         child.renderPanelAndChildren(justClosedPanel, dockIDMap);
+         child.renderPanelAndChildren(dockIDMap);
       }
    }
 
