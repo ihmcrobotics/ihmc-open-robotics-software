@@ -5,8 +5,6 @@ import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.SceneNode;
 
-import javax.annotation.Nullable;
-
 /**
  * This node stays in the same spot relative to where a parent scene node
  * at the time it is seen up close.
@@ -71,7 +69,6 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
       return currentDistance;
    }
 
-   @Nullable
    public SceneNode getParentNode()
    {
       return parentNode;
