@@ -86,6 +86,9 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
          handleSizeBeforeBegin();
 
          // Keep regular panels from being able to create new viewports
+         // Calling setNextWindowViewport essentially locks the next panel
+         // to that viewport and it can't leave other than being dragged all
+         // the way to a dockspace position on another dockspace window.
          if (isOnMainViewport)
          {
             ImGui.setNextWindowViewport(ImGui.getMainViewport().getID());
