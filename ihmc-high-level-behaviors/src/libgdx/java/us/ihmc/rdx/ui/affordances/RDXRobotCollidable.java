@@ -185,6 +185,7 @@ public class RDXRobotCollidable implements RenderableProvider
                {
                   vrPickResult.get(side).addPickCollision(collision);
                   controller.addPickResult(vrPickResult.get(side));
+                  controller.setPickRayColliding(collision);
                }
             }
 
