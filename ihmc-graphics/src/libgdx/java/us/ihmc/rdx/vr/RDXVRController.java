@@ -10,11 +10,9 @@ import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.openvr.*;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FrameLine3D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -28,6 +26,7 @@ import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.nio.LongBuffer;
 import java.util.ArrayList;
@@ -89,6 +88,11 @@ public class RDXVRController extends RDXVRTrackedDevice
    private InputAnalogActionData joystickActionData;
    private final LongBuffer gripActionHandle = BufferUtils.newLongBuffer(1);
    private InputAnalogActionData gripActionData;
+   private RDXVRRadialMenuSelection radialMenuSelection;
+   private Point3D topJoystickOffset;
+   private Point3D bottomJoystickOffset;
+   private Point3D leftJoystickOffset;
+   private Point3D rightJoystickOffset;
 
    private boolean gripAsButtonDown = false;
 
@@ -124,11 +128,26 @@ public class RDXVRController extends RDXVRTrackedDevice
    private RDXModelInstance pickPoseSphere;
    private RDXModelInstance pickRayGraphic;
    private RDXModelInstance pickRayCollisionPointGraphic;
+   private RDXModelInstance radialMenuSphere;
+   private ModifiableReferenceFrame radialMenuSpherePoseFrame;
+   private ModifiableReferenceFrame joystickReferenceFrame;
+   private final FramePose3D joystickFramePose = new FramePose3D();
+   private final FramePose3D joystickSphereFramePose = new FramePose3D();
    private  RDXVRControllerButtonLabel aButtonLabel;
    private  RDXVRControllerButtonLabel bButtonLabel;
+   private RDXVRControllerButtonLabel topJoystickLabel;
+   private RDXVRControllerButtonLabel bottomJoystickLabel;
+   private RDXVRControllerButtonLabel leftJoystickLabel;
+   private RDXVRControllerButtonLabel rightJoystickLabel;
    private  RDXVRControllerButtonLabel gripAmountLabel;
    private final RDXVRDragData triggerDragData;
    private final RDXVRDragData gripDragData;
+   private RDXModelInstance radialMenuSelectionGraphic;
+   private final FrameBox3D selectionCollisionBox = new FrameBox3D();
+   private final SideDependentList<Point3D> boxOffset = new SideDependentList<>();
+   private ModifiableReferenceFrame radialMenuReferenceFrame;
+   private final FramePose3D radialMenuFramePose = new FramePose3D();
+   private RDXVRRadialMenuSelection pastRadialMenuSelection;
 
    public RDXVRController(RobotSide side, ReferenceFrame vrPlayAreaYUpZBackFrame)
    {
@@ -146,8 +165,17 @@ public class RDXVRController extends RDXVRTrackedDevice
       pickPoseFrame.getReferenceFrame().update();
       pickPoseTransformTuner = new ImGuiRigidBodyTransformTuner(pickPoseFrame.getTransformToParent());
 
+      joystickReferenceFrame = new ModifiableReferenceFrame(xForwardZUpControllerFrame);
+      joystickReferenceFrame.getTransformToParent().getTranslation().setX(-0.04);
+      joystickReferenceFrame.getTransformToParent().getTranslation().setY(side.negateIfLeftSide(-0.015));
+      joystickReferenceFrame.getTransformToParent().getTranslation().setZ(-0.017);
+      joystickReferenceFrame.getReferenceFrame().update();
+      radialMenuSpherePoseFrame = new ModifiableReferenceFrame(joystickReferenceFrame.getReferenceFrame());
+
       triggerDragData = new RDXVRDragData(() -> getClickTriggerActionData().bState(), pickPoseFrame.getReferenceFrame());
       gripDragData = new RDXVRDragData(this::getGripAsButtonDown, pickPoseFrame.getReferenceFrame());
+
+      selectionCollisionBox.getSize().set(0.0125, 0.075, 0.0025);
    }
 
    public void initSystem()
@@ -194,22 +222,40 @@ public class RDXVRController extends RDXVRTrackedDevice
 
       if (isConnected())
       {
+         if (radialMenuSphere == null)
+         {
+            radialMenuSphere = new RDXModelInstance(RDXModelBuilder.createSphere(0.0025f, new Color(Color.WHITE)));
+         }
+         if (radialMenuSelectionGraphic == null)
+         {
+            FramePoint3DBasics[] vertices = selectionCollisionBox.getVertices();
+            radialMenuSelectionGraphic = new RDXModelInstance(RDXModelBuilder.buildModel(boxMeshBuilder ->
+                                                                   boxMeshBuilder.addMultiLineBox(vertices, 0.0005, new Color(Color.WHITE))));
+         }
          if (pickPoseSphere == null)
          {
             pickPoseSphere = new RDXModelInstance(RDXModelBuilder.createSphere(0.0025f, new Color(0x870707ff)));
             pickRayCollisionPointGraphic = new RDXModelInstance(RDXModelBuilder.createSphere(0.0015f, new Color(Color.WHITE)));
             LibGDXTools.hideGraphic(pickRayCollisionPointGraphic);
 
-            // These were tuned by @dcalvert using JRebel hand tweaking so they looked good
-            // for the Valve Index controllers.
+            // These were tuned by @dcalvert and @bpratt using JRebel and bringing them down to updatePickResult method hand tweaking
+            // so they looked good for the Valve Index controllers.
             Point3D aButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.085, -0.01, -0.02) : new Point3D(-0.082, -0.01, -0.017);
             Point3D bButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.07, -0.013, -0.015) : new Point3D(-0.07, -0.007, -0.008);
+            topJoystickOffset = new Point3D(0.1, 0.0, 0.0);
+            bottomJoystickOffset = new Point3D(-0.1, 0.0, -0.006);
+            rightJoystickOffset = new Point3D(0.0, -0.1, -0.002);
+            leftJoystickOffset = new Point3D(0.0, 0.1, -0.002);
             Point3D gripAmountOffset = side == RobotSide.LEFT ? new Point3D(-0.1, -0.0, -0.07) : new Point3D(-0.1, 0.0, -0.07);
             YawPitchRoll gripAmountOrientation = side == RobotSide.LEFT ?
                   new YawPitchRoll(Math.toRadians(90.0), Math.toRadians(-37.0), Math.toRadians(90.0))
                   : new YawPitchRoll(Math.toRadians(-90.0), Math.toRadians(37.0), Math.toRadians(90.0));
             aButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, aButtonOffset, new YawPitchRoll());
             bButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, bButtonOffset, new YawPitchRoll());
+            topJoystickLabel = new RDXVRControllerButtonLabel(joystickReferenceFrame.getReferenceFrame(), side, topJoystickOffset, new YawPitchRoll());
+            bottomJoystickLabel = new RDXVRControllerButtonLabel(joystickReferenceFrame.getReferenceFrame(), side, bottomJoystickOffset, new YawPitchRoll());
+            rightJoystickLabel = new RDXVRControllerButtonLabel(joystickReferenceFrame.getReferenceFrame(), side, rightJoystickOffset, new YawPitchRoll());
+            leftJoystickLabel = new RDXVRControllerButtonLabel(joystickReferenceFrame.getReferenceFrame(), side, leftJoystickOffset, new YawPitchRoll());
             gripAmountLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, gripAmountOffset, gripAmountOrientation);
          }
 
@@ -222,8 +268,21 @@ public class RDXVRController extends RDXVRTrackedDevice
          pickRay.getDirection().set(Axis3D.X);
          pickRay.changeFrame(ReferenceFrame.getWorldFrame());
 
+         joystickReferenceFrame.getReferenceFrame().update();
+         joystickFramePose.setToZero(joystickReferenceFrame.getReferenceFrame());
+         joystickFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+
+         radialMenuSpherePoseFrame.getReferenceFrame().update();
+         joystickSphereFramePose.setToZero(radialMenuSpherePoseFrame.getReferenceFrame());
+         joystickSphereFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+         radialMenuSphere.setPoseInWorldFrame(joystickSphereFramePose);
+
          aButtonLabel.setText("");
          bButtonLabel.setText("");
+         topJoystickLabel.setText("");
+         bottomJoystickLabel.setText("");
+         leftJoystickLabel.setText("");
+         rightJoystickLabel.setText("");
          gripAmountLabel.setText("%.1f".formatted(gripActionData.x()));
       }
 
@@ -282,6 +341,10 @@ public class RDXVRController extends RDXVRTrackedDevice
             setPickRayColliding(distance);
          }
       }
+
+      double radialSelectorTranslationScalar = 0.1;
+      radialMenuSpherePoseFrame.getTransformToParent().getTranslation().setX(radialSelectorTranslationScalar * joystickActionData.y());
+      radialMenuSpherePoseFrame.getTransformToParent().getTranslation().setY(-radialSelectorTranslationScalar * joystickActionData.x());
    }
 
    public void renderImGuiTunerWidgets()
@@ -295,16 +358,28 @@ public class RDXVRController extends RDXVRTrackedDevice
       {
          getModelInstance().getRenderables(renderables, pool);
          pickPoseSphere.getRenderables(renderables, pool);
+         radialMenuSphere.getRenderables(renderables, pool);
 
          if (pickRayGraphic != null)
             pickRayGraphic.getRenderables(renderables, pool);
          if (pickRayCollisionPointGraphic != null)
-         {
             pickRayCollisionPointGraphic.getRenderables(renderables, pool);
+         if (aButtonLabel != null)
             aButtonLabel.getRenderables(renderables, pool);
+         if (bButtonLabel != null)
             bButtonLabel.getRenderables(renderables, pool);
+         if (topJoystickLabel != null)
+            topJoystickLabel.getRenderables(renderables, pool);
+         if (bottomJoystickLabel != null)
+            bottomJoystickLabel.getRenderables(renderables, pool);
+         if (rightJoystickLabel != null)
+            rightJoystickLabel.getRenderables(renderables, pool);
+         if (leftJoystickLabel != null)
+            leftJoystickLabel.getRenderables(renderables, pool);
+         if (gripAmountLabel != null)
             gripAmountLabel.getRenderables(renderables, pool);
-         }
+         if (radialMenuSelectionGraphic != null && (boxOffset.get(RobotSide.LEFT) != null || boxOffset.get(RobotSide.RIGHT) != null))
+            radialMenuSelectionGraphic.getRenderables(renderables, pool);
       }
    }
 
@@ -508,5 +583,152 @@ public class RDXVRController extends RDXVRTrackedDevice
    public void setBButtonText(String text)
    {
       bButtonLabel.setText(text);
+   }
+
+   public void setTopJoystickText(String text)
+   {
+      topJoystickLabel.setText(text);
+   }
+
+   public void setBottomJoystickText(String text)
+   {
+      bottomJoystickLabel.setText(text);
+   }
+
+   public void setLeftJoystickText(String text)
+   {
+      leftJoystickLabel.setText(text);
+   }
+
+   public void setRightJoystickText(String text)
+   {
+      rightJoystickLabel.setText(text);
+   }
+
+   public void setRadialMenuSelection(RDXVRRadialMenuSelection radialMenuSelection)
+   {
+      this.radialMenuSelection = radialMenuSelection;
+   }
+
+   public void controlOfRadialMenu(String topText, String bottomText, String rightText, String leftText)
+   {
+      if (radialMenuSelection == null)
+      {
+         radialMenuSelection = RDXVRRadialMenuSelection.NONE;
+      }
+      if (joystickActionData.x() != 0.0 || joystickActionData.y() != 0.0)
+      {
+         setTopJoystickText(topText);
+         setBottomJoystickText(bottomText);
+         setRightJoystickText(rightText);
+         setLeftJoystickText(leftText);
+      }
+      else if (joystickActionData.x() == 0.0 || joystickActionData.y() == 0.0)
+      {
+         radialMenuSelectionGraphic = null;
+      }
+      if (joystickActionData.x() < 0 && Math.abs(joystickActionData.x()) > Math.abs(joystickActionData.y())
+          || radialMenuSelection == RDXVRRadialMenuSelection.LEFT_RING)
+      {
+         radialMenuSelection = RDXVRRadialMenuSelection.LEFT_RING;
+      }
+      if (joystickActionData.x() > 0 && Math.abs(joystickActionData.x()) > Math.abs(joystickActionData.y())
+          || radialMenuSelection == RDXVRRadialMenuSelection.RIGHT_RING)
+      {
+         radialMenuSelection = RDXVRRadialMenuSelection.RIGHT_RING;
+      }
+      if (joystickActionData.y() > 0 && Math.abs(joystickActionData.y()) > Math.abs(joystickActionData.x())
+          || radialMenuSelection == RDXVRRadialMenuSelection.TOP_RING)
+      {
+         radialMenuSelection = RDXVRRadialMenuSelection.TOP_RING;
+      }
+      if (joystickActionData.y() < 0 && Math.abs(joystickActionData.y()) > Math.abs(joystickActionData.x())
+          || radialMenuSelection == RDXVRRadialMenuSelection.BOTTOM_RING)
+      {
+         radialMenuSelection = RDXVRRadialMenuSelection.BOTTOM_RING;
+      }
+   }
+
+   public Runnable getRadialMenuRunnable(Runnable topChoice, Runnable bottomChoice, Runnable rightChoice, Runnable leftChoice)
+   {
+      switch (radialMenuSelection)
+      {
+         case TOP_RING:
+            if (topChoice != null)
+               return topChoice;
+            break;
+         case BOTTOM_RING:
+            if (bottomChoice != null)
+               return bottomChoice;
+            break;
+         case RIGHT_RING:
+            if (rightChoice != null)
+               return rightChoice;
+            break;
+         case LEFT_RING:
+            if (leftChoice != null)
+               return leftChoice;
+            break;
+      }
+      return null;
+   }
+
+   public void setRadialMenuBoxPosition(boolean isHovering)
+   {
+      radialMenuReferenceFrame = new ModifiableReferenceFrame(joystickReferenceFrame.getReferenceFrame());
+      if (getRadialMenuBoxOffset() != null)
+      {
+         boxOffset.put(side, getRadialMenuBoxOffset());
+         pastRadialMenuSelection = radialMenuSelection;
+         if (radialMenuSelectionGraphic != null)
+            updateRadialMenuFramePose(side);
+      }
+      else if (getRadialMenuBoxOffset() == null && isHovering)
+      {
+         if (pastRadialMenuSelection != null && pastRadialMenuSelection != RDXVRRadialMenuSelection.NONE)
+         {
+            radialMenuSelection = pastRadialMenuSelection;
+            boxOffset.put(side, getRadialMenuBoxOffset());
+            if (radialMenuSelectionGraphic != null)
+               updateRadialMenuFramePose(side);
+         }
+      }
+   }
+
+   private void updateRadialMenuFramePose(RobotSide side)
+   {
+      radialMenuReferenceFrame.getReferenceFrame().getTransformToParent().getTranslation().set(boxOffset.get(side));
+      radialMenuReferenceFrame.getReferenceFrame().update();
+      radialMenuFramePose.setToZero(radialMenuReferenceFrame.getReferenceFrame());
+      radialMenuFramePose.getTranslation().add(boxOffset.get(side));
+      radialMenuFramePose.getTranslation().subY(0.03);
+      if (side == RobotSide.RIGHT)
+      {
+         radialMenuFramePose.getTranslation().addX(0.01);
+      }
+      radialMenuFramePose.getRotation().setToYawOrientation(side.negateIfLeftSide(0.2));
+      radialMenuFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      radialMenuSelectionGraphic.setPoseInWorldFrame(radialMenuFramePose);
+   }
+
+   public Point3D getRadialMenuBoxOffset()
+   {
+      if (radialMenuSelection != null)
+      {
+         switch (radialMenuSelection)
+         {
+            case LEFT_RING:
+               return leftJoystickOffset;
+            case RIGHT_RING:
+               return rightJoystickOffset;
+            case TOP_RING:
+               return topJoystickOffset;
+            case BOTTOM_RING:
+               return bottomJoystickOffset;
+            default:
+               return null;
+         }
+      }
+      return null;
    }
 }
