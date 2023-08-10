@@ -20,7 +20,7 @@ public class ImGuiEnumPlot extends ImGuiFancyWidget
 
    public ImGuiEnumPlot()
    {
-      this(TYPICAL_BUFFER_SIZE, 0, TYPICAL_PLOT_HEIGHT);
+      this(TYPICAL_BUFFER_SIZE, AUTO_SIZE_WIDTH, TYPICAL_PLOT_HEIGHT);
    }
 
 
