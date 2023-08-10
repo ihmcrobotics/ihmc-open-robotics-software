@@ -1,7 +1,9 @@
 package us.ihmc.perception.sceneGraph;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameSupplier;
 import us.ihmc.tools.Timer;
 
 /**
@@ -27,7 +29,9 @@ public abstract class DetectableSceneNode extends SceneNode
     * We allow the operator to disable tracking the detected pose.
     */
    private boolean trackDetectedPose = true;
+   private ReferenceFrameSupplier parentFrameSupplier;
    private final RigidBodyTransform originalTransformToParent = new RigidBodyTransform();
+   private transient final FramePose3D originalPose = new FramePose3D();
 
    public DetectableSceneNode(String name)
    {
@@ -37,6 +41,16 @@ public abstract class DetectableSceneNode extends SceneNode
    public DetectableSceneNode(String name, ReferenceFrame parentFrame)
    {
       super(name, parentFrame);
+   }
+
+   public void setParentFrame(ReferenceFrameSupplier parentFrameSupplier)
+   {
+      this.parentFrameSupplier = parentFrameSupplier;
+   }
+
+   public ReferenceFrameSupplier getParentFrame()
+   {
+      return parentFrameSupplier;
    }
 
    public void setCurrentlyDetected(boolean currentlyDetected)
@@ -68,13 +82,36 @@ public abstract class DetectableSceneNode extends SceneNode
    public void setTrackDetectedPose(boolean trackDetectedPose)
    {
       this.trackDetectedPose = trackDetectedPose;
+
+      if (trackDetectedPose && parentFrameSupplier.get() != getNodeFrame().getParent())
+      {
+         changeParentFrameWithoutMoving(parentFrameSupplier.get());
+      }
+      else if (!trackDetectedPose && getNodeFrame().getParent() != ReferenceFrame.getWorldFrame())
+      {
+         changeParentFrameWithoutMoving(ReferenceFrame.getWorldFrame());
+      }
    }
 
    /**
     * This sets the transform to the parent node back to the original one.
     * This is robust to whether or not this node is currently tracking the detected pose.
     */
-   public abstract void clearOffset();
+   public void clearOffset()
+   {
+      if (parentFrameSupplier.get() != getNodeFrame().getParent())
+      {
+         originalPose.setToZero(parentFrameSupplier.get());
+         originalPose.set(getOriginalTransformToParent());
+         originalPose.changeFrame(getNodeFrame().getParent());
+         originalPose.get(getNodeToParentFrameTransform());
+      }
+      else
+      {
+         getNodeToParentFrameTransform().set(getOriginalTransformToParent());
+      }
+      getNodeFrame().update();
+   }
 
    public void markModifiedByOperator()
    {

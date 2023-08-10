@@ -1,7 +1,6 @@
 package us.ihmc.perception.sceneGraph.rigidBodies;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
@@ -40,46 +39,12 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
       super(name, visualModelFilePath, visualModelToNodeFrameTransform);
       this.parentNode = parentNode;
 
+      setParentFrame(parentNode::getNodeFrame);
       changeParentFrame(parentNode.getNodeFrame());
       getNodeToParentFrameTransform().set(transformToParentNode);
       getNodeFrame().update();
 
       this.distanceToDisableTracking = distanceToDisableTracking;
-   }
-
-   @Override
-   public void setTrackDetectedPose(boolean trackDetectedPose)
-   {
-      super.setTrackDetectedPose(trackDetectedPose);
-
-      if (parentNode != null)
-      {
-         if (trackDetectedPose && parentNode.getNodeFrame() != getNodeFrame().getParent())
-         {
-            changeParentFrameWithoutMoving(parentNode.getNodeFrame());
-         }
-         else if (!trackDetectedPose && getNodeFrame().getParent() != ReferenceFrame.getWorldFrame())
-         {
-            changeParentFrameWithoutMoving(ReferenceFrame.getWorldFrame());
-         }
-      }
-   }
-
-   @Override
-   public void clearOffset()
-   {
-      if (parentNode.getNodeFrame() != getNodeFrame().getParent())
-      {
-         originalPose.setToZero(parentNode.getNodeFrame());
-         originalPose.set(getOriginalTransformToParent());
-         originalPose.changeFrame(getNodeFrame().getParent());
-         originalPose.get(getNodeToParentFrameTransform());
-      }
-      else
-      {
-         getNodeToParentFrameTransform().set(getOriginalTransformToParent());
-      }
-      getNodeFrame().update();
    }
 
    @Override

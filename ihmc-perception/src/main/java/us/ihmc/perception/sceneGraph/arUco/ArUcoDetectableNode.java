@@ -3,10 +3,8 @@ package us.ihmc.perception.sceneGraph.arUco;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.arUco.ArUcoMarker;
 import us.ihmc.perception.filters.BreakFrequencyAlphaCalculator;
 import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
-import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredRigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 
@@ -43,37 +41,11 @@ public class ArUcoDetectableNode extends PredefinedRigidBodySceneNode
 
       markerFrame = new ModifiableReferenceFrame(name + "MarkerFrame", ReferenceFrame.getWorldFrame());
       changeParentFrame(markerFrame.getReferenceFrame());
+      setParentFrame(markerFrame::getReferenceFrame);
 
       this.markerID = markerID;
       this.markerSize = markerSize;
       getNodeToParentFrameTransform().setAndInvert(markerToNodeFrameTransform);
-      getNodeFrame().update();
-
-      setOriginalTransformToParent(getNodeToParentFrameTransform());
-   }
-
-   /**
-    * Loads info from StoredPropertySet with name as suffix
-    */
-   public ArUcoDetectableNode(String name, String visualModelFilePath, RigidBodyTransform visualModelToNodeFrameTransform)
-   {
-      super(name, visualModelFilePath, visualModelToNodeFrameTransform);
-
-      markerFrame = new ModifiableReferenceFrame(name + "MarkerFrame", ReferenceFrame.getWorldFrame());
-      changeParentFrame(markerFrame.getReferenceFrame());
-
-      ArUcoMarker arUcoMarker = new ArUcoMarker(name);
-      markerID = arUcoMarker.getMarkerID();
-      markerSize = arUcoMarker.getMarkerSize();
-      // We measure the marker like it's a child of the node
-      // but really it's the parent, so we'll invert it in here
-      getNodeToParentFrameTransform().getTranslation().set(arUcoMarker.getMarkerXTranslationToParent(),
-                                                           arUcoMarker.getMarkerYTranslationToParent(),
-                                                           arUcoMarker.getMarkerZTranslationToParent());
-      EuclidCoreMissingTools.setYawPitchRollDegrees(getNodeToParentFrameTransform().getRotation(),
-                                                    arUcoMarker.getMarkerYawRotationToParentDegrees(),
-                                                    arUcoMarker.getMarkerPitchRotationToParentDegrees(),
-                                                    arUcoMarker.getMarkerRollRotationToParentDegrees());
       getNodeFrame().update();
 
       setOriginalTransformToParent(getNodeToParentFrameTransform());
@@ -84,38 +56,6 @@ public class ArUcoDetectableNode extends PredefinedRigidBodySceneNode
       alphaFilteredTransformToParent.setAlpha(breakFrequencyAlphaCalculator.calculateAlpha(breakFrequency));
       alphaFilteredTransformToParent.update(getMarkerToWorldFrameTransform());
       getMarkerToWorldFrameTransform().set(alphaFilteredTransformToParent);
-   }
-
-   @Override
-   public void setTrackDetectedPose(boolean trackDetectedPose)
-   {
-      super.setTrackDetectedPose(trackDetectedPose);
-
-      if (trackDetectedPose && markerFrame.getReferenceFrame() != getNodeFrame().getParent())
-      {
-         changeParentFrameWithoutMoving(markerFrame.getReferenceFrame());
-      }
-      else if (!trackDetectedPose && getNodeFrame().getParent() != ReferenceFrame.getWorldFrame())
-      {
-         changeParentFrameWithoutMoving(ReferenceFrame.getWorldFrame());
-      }
-   }
-
-   @Override
-   public void clearOffset()
-   {
-      if (markerFrame.getReferenceFrame() != getNodeFrame().getParent())
-      {
-         originalPose.setToZero(markerFrame.getReferenceFrame());
-         originalPose.set(getOriginalTransformToParent());
-         originalPose.changeFrame(getNodeFrame().getParent());
-         originalPose.get(getNodeToParentFrameTransform());
-      }
-      else
-      {
-         getNodeToParentFrameTransform().set(getOriginalTransformToParent());
-      }
-      getNodeFrame().update();
    }
 
    public int getMarkerID()
