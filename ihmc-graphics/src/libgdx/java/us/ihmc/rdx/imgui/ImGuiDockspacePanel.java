@@ -45,8 +45,6 @@ public class ImGuiDockspacePanel extends ImGuiPanelSizeHandler
          dockspaceID = id;
          ImGui.dockSpace(id, 0, 0, dockNodeFlags);
 
-//         ImGui.dockBuilderGetNode()
-
          ImGui.end();
       }
 
