@@ -3,7 +3,7 @@ package us.ihmc.rdx.imgui;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.flag.ImGuiWindowFlags;
-import imgui.internal.ImGui;
+import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.log.LogTools;
 
@@ -71,13 +71,13 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
       if (isShowing.get() && render != null)
       {
          handleSizeBeforeBegin();
-         int windowFlags = ImGuiWindowFlags.None;
-         if (hasMenuBar)
-            windowFlags |= ImGuiWindowFlags.MenuBar;
 
          // Keep regular panels from being able to create new viewports
          ImGui.setNextWindowViewport(ImGui.getMainViewport().getID());
 
+         int windowFlags = ImGuiWindowFlags.None;
+         if (hasMenuBar)
+            windowFlags |= ImGuiWindowFlags.MenuBar;
          ImGui.begin(panelName, isShowing, windowFlags);
          handleSizeAfterBegin();
 
