@@ -126,7 +126,6 @@ public class RDX3DPanel extends ImGuiPanel
       {
          view3DPanelSizeHandler.handleSizeBeforeBegin();
          ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
-
          int flags = ImGuiWindowFlags.None;
          ImGui.begin(panelName, flags);
          view3DPanelSizeHandler.handleSizeAfterBegin();
