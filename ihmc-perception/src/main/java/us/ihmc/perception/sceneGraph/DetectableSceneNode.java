@@ -81,15 +81,19 @@ public abstract class DetectableSceneNode extends SceneNode
     */
    public void setTrackDetectedPose(boolean trackDetectedPose)
    {
+      boolean changed = this.trackDetectedPose != trackDetectedPose;
       this.trackDetectedPose = trackDetectedPose;
 
-      if (trackDetectedPose && parentFrameSupplier.get() != getNodeFrame().getParent())
+      if (changed && trackDetectedPose)
       {
-         changeParentFrameWithoutMoving(parentFrameSupplier.get());
-      }
-      else if (!trackDetectedPose && getNodeFrame().getParent() != ReferenceFrame.getWorldFrame())
-      {
-         changeParentFrameWithoutMoving(ReferenceFrame.getWorldFrame());
+         if (trackDetectedPose)
+         {
+            changeParentFrameWithoutMoving(parentFrameSupplier.get());
+         }
+         else
+         {
+            changeParentFrameWithoutMoving(ReferenceFrame.getWorldFrame());
+         }
       }
    }
 
