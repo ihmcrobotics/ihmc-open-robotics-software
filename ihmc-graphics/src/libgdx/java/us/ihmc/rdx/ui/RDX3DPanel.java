@@ -127,9 +127,6 @@ public class RDX3DPanel extends ImGuiPanel
          view3DPanelSizeHandler.handleSizeBeforeBegin();
          ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
 
-         // Keep from being able to create it's own viewport
-         imgui.internal.ImGui.setNextWindowViewport(ImGui.getMainViewport().getID());
-
          int flags = ImGuiWindowFlags.None;
          ImGui.begin(panelName, flags);
          view3DPanelSizeHandler.handleSizeAfterBegin();
