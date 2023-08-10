@@ -139,20 +139,13 @@ public class RDXImGuiWindowAndDockSystem
 
       dockspaceId = ImGui.dockSpaceOverViewport(ImGui.getMainViewport(), flags);
 
-      ImGuiDockspacePanel justClosedPanel = null;
       for (ImGuiDockspacePanel dockspacePanel : dockPanelSet)
       {
          dockspacePanel.renderPanel();
-         if (dockspacePanel.getWasJustClosed())
-         {
-            justClosedPanel = dockspacePanel;
-            LogTools.debug("Closed dockspace panel: {}", justClosedPanel.getName());
-         }
-
          dockIDMap.put(dockspacePanel.getDockspaceID(), dockspacePanel);
       }
 
-      panelManager.renderPanels(justClosedPanel, dockIDMap);
+      panelManager.renderPanels(dockIDMap);
    }
 
    public void renderMenuDockPanelItems()

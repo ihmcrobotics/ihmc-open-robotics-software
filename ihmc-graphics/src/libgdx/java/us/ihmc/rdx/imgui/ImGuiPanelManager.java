@@ -46,7 +46,7 @@ public class ImGuiPanelManager
       }
    }
 
-   public void renderPanels(ImGuiDockspacePanel justClosedPanel, TIntObjectHashMap<ImGuiDockspacePanel> dockIDMap)
+   public void renderPanels(TIntObjectHashMap<ImGuiDockspacePanel> dockIDMap)
    {
       while (!removalQueue.isEmpty())
          panels.remove(removalQueue.poll());
@@ -56,7 +56,7 @@ public class ImGuiPanelManager
 
       for (ImGuiPanel panel : panels)
       {
-         panel.renderPanelAndChildren(justClosedPanel, dockIDMap);
+         panel.renderPanelAndChildren(dockIDMap);
       }
    }
 
