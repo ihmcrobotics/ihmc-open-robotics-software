@@ -139,14 +139,15 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
       for (RobotSide side : RobotSide.values)
       {
          vrContext.getController(side).runIfConnected(controller ->
-                                                      {
-                                                         if (!controller.getTriggerDragData().isDraggingSomething())
-                                                         {
-                                                            super.calculateVRPick(vrContext, true);
-                                                         }
-                                                      });
+         {
+            if (!controller.getTriggerDragData().isDraggingSomething())
+            {
+               super.calculateVRPick(vrContext, true);
+            }
+         });
       }
    }
+
    public void processVRInput(RDXVRContext vrContext)
    {
       super.processVRInput(vrContext);
