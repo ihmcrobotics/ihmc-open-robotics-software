@@ -132,7 +132,7 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
       }
       else
       {
-         if (dockNode.getParentNode().ptr == 0)
+         if (dockNode.getParentNode().ptr == 0) // Preventing rare hard crash
             LogTools.error("Not sure why this would happen yet but pretty sure it did once.");
          else
             findParentDockspacePanel(dockNode.getParentNode().getID(), dockIDMap);
