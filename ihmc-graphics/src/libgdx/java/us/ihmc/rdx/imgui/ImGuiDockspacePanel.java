@@ -1,5 +1,6 @@
 package us.ihmc.rdx.imgui;
 
+import imgui.ImGuiViewport;
 import imgui.flag.ImGuiDockNodeFlags;
 import imgui.flag.ImGuiStyleVar;
 import imgui.internal.ImGui;
@@ -13,6 +14,7 @@ public class ImGuiDockspacePanel extends ImGuiPanelSizeHandler
    private int dockspaceID = -1;
    private boolean wasJustClosed = false;
    private boolean shownLastTick = false;
+   private ImGuiViewport windowViewport;
 
    public ImGuiDockspacePanel(String name)
    {
@@ -30,6 +32,8 @@ public class ImGuiDockspacePanel extends ImGuiPanelSizeHandler
          handleSizeAfterBegin();
          ImGui.popStyleVar();
 
+         windowViewport = ImGui.getWindowViewport();
+
          // Info here: https://github.com/ocornut/imgui/blob/docking/imgui_demo.cpp#L7408
          int dockNodeFlags = ImGuiDockNodeFlags.None;
          dockNodeFlags += ImGuiDockNodeFlags.PassthruCentralNode;
@@ -40,6 +44,8 @@ public class ImGuiDockspacePanel extends ImGuiPanelSizeHandler
          }
          dockspaceID = id;
          ImGui.dockSpace(id, 0, 0, dockNodeFlags);
+
+//         ImGui.dockBuilderGetNode()
 
          ImGui.end();
       }
@@ -66,5 +72,15 @@ public class ImGuiDockspacePanel extends ImGuiPanelSizeHandler
    public String getName()
    {
       return name;
+   }
+
+   public int getDockspaceID()
+   {
+      return dockspaceID;
+   }
+
+   public ImGuiViewport getWindowViewport()
+   {
+      return windowViewport;
    }
 }

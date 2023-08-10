@@ -2,11 +2,15 @@ package us.ihmc.rdx.imgui;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.ImGui;
+import imgui.internal.ImGuiDockNode;
+import imgui.internal.ImGuiWindow;
 import imgui.type.ImBoolean;
 import us.ihmc.log.LogTools;
 
+import javax.annotation.Nullable;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeSet;
@@ -22,7 +26,14 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
    private final ConcurrentLinkedQueue<ImGuiPanel> removalQueue = new ConcurrentLinkedQueue<>();
    private final ConcurrentLinkedQueue<ImGuiPanel> additionQueue = new ConcurrentLinkedQueue<>();
 
+   @Nullable
+   private ImGuiDockspacePanel parentDockspacePanel = null;
+   private boolean isOnMainViewport = false;
    private int lastDockID = -1;
+   private ImGuiDockNode imGuiDockNode;
+   private int parentNodeID;
+   private String dockNodeString;
+   private String parentNodeIDString;
 
    public ImGuiPanel(String panelName)
    {
@@ -61,7 +72,7 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
       }
    }
 
-   /* package-private */ void renderPanelAndChildren(ImGuiDockspacePanel justClosedPanel)
+   /* package-private */ void renderPanelAndChildren(ImGuiDockspacePanel justClosedPanel, TIntObjectHashMap<ImGuiDockspacePanel> dockIDMap)
    {
       while (!removalQueue.isEmpty())
          children.remove(removalQueue.poll());
@@ -73,7 +84,14 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
          handleSizeBeforeBegin();
 
          // Keep regular panels from being able to create new viewports
-         ImGui.setNextWindowViewport(ImGui.getMainViewport().getID());
+         if (isOnMainViewport)
+         {
+            ImGui.setNextWindowViewport(ImGui.getMainViewport().getID());
+         }
+         else if (parentDockspacePanel != null)
+         {
+            ImGui.setNextWindowViewport(parentDockspacePanel.getWindowViewport().getID());
+         }
 
          int windowFlags = ImGuiWindowFlags.None;
          if (hasMenuBar)
@@ -81,7 +99,29 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
          ImGui.begin(panelName, isShowing, windowFlags);
          handleSizeAfterBegin();
 
+         ImGuiWindow currentWindow = imgui.internal.ImGui.getCurrentWindow();
+//         ImGui.doc
+
          int windowDockID = ImGui.getWindowDockID();
+         imGuiDockNode = imgui.internal.ImGui.dockBuilderGetNode(windowDockID);
+         if (imGuiDockNode.ptr != 0)
+         {
+            dockNodeString = String.format("0x%08X", imGuiDockNode.getID());
+            ImGuiDockNode parentNode = imGuiDockNode.getParentNode();
+            if (parentNode.ptr != 0)
+            {
+               parentNodeID = parentNode.getID();
+               parentNodeIDString = String.format("0x%08X", parentNodeID);
+            }
+         }
+
+         findParentDockspacePanel(windowDockID, dockIDMap);
+
+//         if (parentDockspacePanel != null)
+//         {
+//            isShowing.set(parentDockspacePanel.getIsShowing());
+//         }
+
          if (lastDockID != windowDockID)
          {
             LogTools.debug("Dock ID changed. {}: {} -> {}", panelName, lastDockID, windowDockID);
@@ -99,7 +139,29 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
 
       for (ImGuiPanel child : children)
       {
-         child.renderPanelAndChildren(justClosedPanel);
+         child.renderPanelAndChildren(justClosedPanel, dockIDMap);
+      }
+   }
+
+   private void findParentDockspacePanel(int nodeID, TIntObjectHashMap<ImGuiDockspacePanel> dockIDMap)
+   {
+      ImGuiDockNode dockNode = imgui.internal.ImGui.dockBuilderGetNode(nodeID);
+      if (dockNode.ptr == 0) // Panel is not docked, floating, in the main viewport
+      {
+         parentDockspacePanel = null;
+         isOnMainViewport = true;
+      }
+      else if (dockNode.isDockSpace())
+      {
+         parentDockspacePanel = dockIDMap.get(dockNode.getID());
+         isOnMainViewport = parentDockspacePanel == null;
+      }
+      else
+      {
+         if (dockNode.getParentNode().ptr == 0)
+            LogTools.error("Not sure why this would happen yet but pretty sure it did once.");
+         else
+            findParentDockspacePanel(dockNode.getParentNode().getID(), dockIDMap);
       }
    }
 

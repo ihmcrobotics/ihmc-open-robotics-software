@@ -2,6 +2,7 @@ package us.ihmc.rdx.imgui;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -45,7 +46,7 @@ public class ImGuiPanelManager
       }
    }
 
-   public void renderPanels(ImGuiDockspacePanel justClosedPanel)
+   public void renderPanels(ImGuiDockspacePanel justClosedPanel, TIntObjectHashMap<ImGuiDockspacePanel> dockIDMap)
    {
       while (!removalQueue.isEmpty())
          panels.remove(removalQueue.poll());
@@ -55,7 +56,7 @@ public class ImGuiPanelManager
 
       for (ImGuiPanel panel : panels)
       {
-         panel.renderPanelAndChildren(justClosedPanel);
+         panel.renderPanelAndChildren(justClosedPanel, dockIDMap);
       }
    }
 
