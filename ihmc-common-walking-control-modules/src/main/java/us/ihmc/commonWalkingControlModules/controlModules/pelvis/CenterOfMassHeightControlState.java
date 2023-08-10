@@ -143,16 +143,26 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
          ankleToGround = Math.max(ankleToGround, Math.abs(ankleToSole.getTranslationZ()));
       }
 
-      FramePoint3D leftHipPitch = new FramePoint3D(controllerToolbox.getFullRobotModel().getLegJoint(RobotSide.LEFT, LegJointName.HIP_PITCH).getFrameAfterJoint());
-      FramePoint3D rightHipPitch = new FramePoint3D(controllerToolbox.getFullRobotModel().getLegJoint(RobotSide.RIGHT, LegJointName.HIP_PITCH).getFrameAfterJoint());
+      FramePoint3D leftHipPitch = new FramePoint3D(controllerToolbox.getFullRobotModel()
+                                                                    .getLegJoint(RobotSide.LEFT, LegJointName.HIP_PITCH)
+                                                                    .getFrameAfterJoint());
+      FramePoint3D rightHipPitch = new FramePoint3D(controllerToolbox.getFullRobotModel()
+                                                                     .getLegJoint(RobotSide.RIGHT, LegJointName.HIP_PITCH)
+                                                                     .getFrameAfterJoint());
       leftHipPitch.changeFrame(controllerToolbox.getPelvisZUpFrame());
       rightHipPitch.changeFrame(controllerToolbox.getPelvisZUpFrame());
 
       double hipWidth = leftHipPitch.getY() - rightHipPitch.getY();
 
-      //      double minimumHeightAboveGround = walkingControllerParameters.minimumHeightAboveAnkle();// + ankleToGround;
-      //      double nominalHeightAboveGround = walkingControllerParameters.nominalHeightAboveAnkle();// + ankleToGround;
-      //      double maximumHeightAboveGround = walkingControllerParameters.maximumHeightAboveAnkle();// + ankleToGround;
+      /*
+       * These commented lines are left here as a monument to our sins. For shoe, we must only use
+       * nominalHeightAboveGround = nominalHeightAboveAnkle + ankleToGround due to how they process their
+       * data. Do not uncomment these lines. Do not remove them. Whenever open source is merged into shoe,
+       * these lines should remain unchanged. Woe upon those who do not heed this warning.
+       */
+      //  double minimumHeightAboveGround = walkingControllerParameters.minimumHeightAboveAnkle();// + ankleToGround;
+      //  double nominalHeightAboveGround = walkingControllerParameters.nominalHeightAboveAnkle();// + ankleToGround;
+      //  double maximumHeightAboveGround = walkingControllerParameters.maximumHeightAboveAnkle();// + ankleToGround;
       double minimumHeightAboveGround = walkingControllerParameters.minimumHeightAboveAnkle() + ankleToGround;
       double nominalHeightAboveGround = walkingControllerParameters.nominalHeightAboveAnkle() + ankleToGround;
       double maximumHeightAboveGround = walkingControllerParameters.maximumHeightAboveAnkle() + ankleToGround;
@@ -269,8 +279,10 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private final FrameVector2D desiredComAcceleration = new FrameVector2D();
    private final YoCoMHeightTimeDerivativesData comHeightDataBeforeSmoothing = new YoCoMHeightTimeDerivativesData("beforeSmoothing", registry);
    private final YoCoMHeightTimeDerivativesData comHeightDataAfterSmoothing = new YoCoMHeightTimeDerivativesData("afterSmoothing", registry);
-   private final YoCoMHeightTimeDerivativesData comHeightDataAfterSingularityAvoidance = new YoCoMHeightTimeDerivativesData("afterSingularityAvoidance", registry);
-   private final YoCoMHeightTimeDerivativesData comHeightDataAfterUnreachableFootstep = new YoCoMHeightTimeDerivativesData("afterUnreachableFootstep", registry);
+   private final YoCoMHeightTimeDerivativesData comHeightDataAfterSingularityAvoidance = new YoCoMHeightTimeDerivativesData("afterSingularityAvoidance",
+                                                                                                                            registry);
+   private final YoCoMHeightTimeDerivativesData comHeightDataAfterUnreachableFootstep = new YoCoMHeightTimeDerivativesData("afterUnreachableFootstep",
+                                                                                                                           registry);
    private final YoCoMHeightTimeDerivativesData finalComHeightData = new YoCoMHeightTimeDerivativesData("finalComHeightData", registry);
 
    private final FramePoint3D desiredCenterOfMassHeightPoint = new FramePoint3D(worldFrame);
