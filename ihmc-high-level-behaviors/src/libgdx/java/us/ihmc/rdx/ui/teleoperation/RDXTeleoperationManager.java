@@ -17,6 +17,7 @@ import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -264,6 +265,10 @@ public class RDXTeleoperationManager extends ImGuiPanel
                // TODO this should probably not handle the space event!
                // This sends a command to the controller.
                interactableHands.get(side).setOnSpacePressed(armManager.getSubmitDesiredArmSetpointsCallback(side));
+               interactableHands.get(side).setOpenHand(() -> armManager.getHandManager().publishHandCommand(side, HandConfiguration.OPEN));
+               interactableHands.get(side).setCloseHand(() -> armManager.getHandManager().publishHandCommand(side, HandConfiguration.CLOSE));
+               interactableHands.get(side).setGotoDoorAvoidanceArmAngles(() -> armManager.executeDoorAvoidanceArmAngles(side));
+               interactableHands.get(side).setGotoArmHome(() -> armManager.executeArmHome(side));
             }
          }
 
@@ -368,7 +373,9 @@ public class RDXTeleoperationManager extends ImGuiPanel
       {
          locomotionManager.processWalkPathControlRingVRInput(vrContext);
          for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
+         {
             robotPartInteractable.processVRInput(vrContext);
+         }
 
          if (interactablesEnabled.get())
             contactCollisionModel.processVRInput(vrContext);
