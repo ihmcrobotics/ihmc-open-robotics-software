@@ -66,9 +66,7 @@ public class RDXPredefinedRigidBodySceneNode
                                                       },
                                                       imBoolean -> ImGui.checkbox(labels.get("Track Detected Pose"), imBoolean));
 
-      int bufferSize = 1000;
-      int heightPixels = 20;
-      currentlyDetectedPlot = new ImGuiEnumPlot(predefinedRigidBodySceneNode.getName(), bufferSize, heightPixels);
+      currentlyDetectedPlot = new ImGuiEnumPlot(predefinedRigidBodySceneNode.getName());
 
       if (sceneNode instanceof ArUcoDetectableNode arUcoDetectableNode)
       {
