@@ -74,6 +74,10 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
          int windowFlags = ImGuiWindowFlags.None;
          if (hasMenuBar)
             windowFlags |= ImGuiWindowFlags.MenuBar;
+
+         // Keep regular panels from being able to create new viewports
+         ImGui.setNextWindowViewport(ImGui.getMainViewport().getID());
+
          ImGui.begin(panelName, isShowing, windowFlags);
          handleSizeAfterBegin();
 
