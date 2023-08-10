@@ -1,6 +1,5 @@
 package us.ihmc.perception.sceneGraph.arUco;
 
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.filters.BreakFrequencyAlphaCalculator;
@@ -22,7 +21,6 @@ public class ArUcoDetectableNode extends PredefinedRigidBodySceneNode
    private final AlphaFilteredRigidBodyTransform alphaFilteredTransformToParent = new AlphaFilteredRigidBodyTransform();
    private final BreakFrequencyAlphaCalculator breakFrequencyAlphaCalculator = new BreakFrequencyAlphaCalculator();
    private double breakFrequency = 1.0;
-   private transient final FramePose3D originalPose = new FramePose3D();
 
    /**
     * Give the marker info directly from code.

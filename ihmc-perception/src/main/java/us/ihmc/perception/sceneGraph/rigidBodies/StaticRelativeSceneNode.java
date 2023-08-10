@@ -1,6 +1,5 @@
 package us.ihmc.perception.sceneGraph.rigidBodies;
 
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
@@ -27,7 +26,6 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
     */
    private double distanceToDisableTracking;
    private double currentDistance = Double.NaN;
-   private transient final FramePose3D originalPose = new FramePose3D();
 
    public StaticRelativeSceneNode(String name,
                                   DetectableSceneNode parentNode,
