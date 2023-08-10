@@ -168,6 +168,10 @@ public class RDXRobotCollidable implements RenderableProvider
       isHoveredByAnything = false;
    }
 
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+      calculateVRPick(vrContext, false);
+   }
    public void calculateVRPick(RDXVRContext vrContext, boolean isInteractable)
    {
       for (RobotSide side : RobotSide.values)
