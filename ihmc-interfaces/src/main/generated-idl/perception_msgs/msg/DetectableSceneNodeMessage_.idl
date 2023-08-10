@@ -35,9 +35,13 @@ module perception_msgs
          */
         controller_msgs::msg::dds::RigidBodyTransformMessage aruco_marker_transform_to_world;
         /**
-         * Keeps track of when the operator has overridden the pose of this node
+         * Nodes can be set to not track the detected pose
          */
-        boolean is_pose_overridden_by_operator;
+        boolean track_detected_pose;
+        /**
+         * Break frequency filter value for nodes that are alpha filtered
+         */
+        float break_frequency;
       };
     };
   };

@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.SensorFrameBuffer;
 import com.badlogic.gdx.graphics.glutils.SensorFrameBufferBuilder;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
@@ -35,6 +36,7 @@ import java.util.function.Consumer;
 
 public class RDX3DPanel extends ImGuiPanel
 {
+   public static final int OVERLAY_BACKGROUND_COLOR = new Color(1.0f, 1.0f, 1.0f, 0.5f).toIntBits();
    private final ImGuiPanelSizeHandler view3DPanelSizeHandler = new ImGuiPanelSizeHandler();
    private final String panelName;
    private final int antiAliasing;

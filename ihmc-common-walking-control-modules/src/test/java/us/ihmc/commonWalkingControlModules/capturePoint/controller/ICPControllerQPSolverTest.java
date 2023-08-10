@@ -410,8 +410,6 @@ public class ICPControllerQPSolverTest
       DMatrixRMaj transformedGains = new DMatrixRMaj(2, 2);
       helper.transformGainsFromDynamicsFrame(transformedGains, desiredICPVelocity, parallelGain, orthogonalGain);
 
-      FrameVector2D transformedMagnitudeLimits = new FrameVector2D();
-      helper.transformFromDynamicsFrame(transformedMagnitudeLimits, desiredICPVelocity, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
       DMatrixRMaj scaledCoPFeedbackWeight = new DMatrixRMaj(2, 2);
       helper.transformFromDynamicsFrame(scaledCoPFeedbackWeight, desiredICPVelocity, forwardWeight, lateralWeight);
@@ -428,7 +426,7 @@ public class ICPControllerQPSolverTest
       solver.setCopSafeDistanceToEdge(copSafeDistanceToEdge);
       solver.setDesiredFeedbackDirection(unconstrainedFeedbackDelta, feedbackDirectionWeight);
 
-      solver.setMaximumFeedbackMagnitude(transformedMagnitudeLimits);
+      solver.setMaximumFeedbackMagnitude(CommonOps_DDRM.identity(2), Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
       solver.setMaximumFeedbackRate(feedbackpartMaxRate, controlDt);
 
       solver.setFeedbackRateWeight(0.0, 5e-8 / (controlDt * controlDt));

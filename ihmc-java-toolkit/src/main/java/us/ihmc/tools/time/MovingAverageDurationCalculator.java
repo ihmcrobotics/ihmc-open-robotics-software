@@ -4,16 +4,30 @@ import us.ihmc.commons.time.Stopwatch;
 
 import java.util.ArrayDeque;
 
-public class DurationCalculator
+public class MovingAverageDurationCalculator
 {
-   private volatile double duration;
+   private volatile double duration = Double.NaN;
    private final ArrayDeque<Double> deltas = new ArrayDeque<>();
    private final Stopwatch stopwatch = new Stopwatch().start();
-   private int history = 3;
+   private final int windowSize;
+
+   /**
+    * Window size of one yields the latest calculation only.
+    * @param windowSize 1 or more.
+    */
+   public MovingAverageDurationCalculator(int windowSize)
+   {
+      this.windowSize = windowSize;
+   }
 
    public synchronized void pause()
    {
       stopwatch.suspend();
+   }
+
+   public void reset()
+   {
+      stopwatch.reset();
    }
 
    public synchronized void ping()
@@ -23,7 +37,7 @@ public class DurationCalculator
       double elapsed = stopwatch.lap();
       deltas.addLast(elapsed);
 
-      while (deltas.size() > history)
+      while (deltas.size() > windowSize)
       {
          deltas.removeFirst();
       }

@@ -352,12 +352,12 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                        double percentageToShrinkPolygon)
    {
       this.percentageToShrinkPolygon.set(percentageToShrinkPolygon);
+      footstepWasAdjusted.set(false);
 
       if (!isInSwing.getBooleanValue())
          return;
 
       controlTicksIntoStep.increment();
-      footstepWasAdjusted.set(false);
 
       computeTimeInCurrentState(currentTime);
       computeTimeRemainingInState();

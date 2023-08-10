@@ -3,7 +3,7 @@ package us.ihmc.perception.sceneGraph.multiBodies.door;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.sceneGraph.rigidBodies.StaticArUcoRelativeDetectableSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
@@ -39,7 +39,7 @@ public class DoorSceneNodeDefinitions
       markerPose.changeFrame(panelFrame);
       markerPose.get(PUSH_DOOR_MARKER_TO_PANEL_TRANSFORM);
    }
-   public static final RigidBodyTransform PUSH_DOOR_MARKER_TO_FRAME_TRANSFORM = new RigidBodyTransform();
+   public static final RigidBodyTransform PUSH_DOOR_FRAME_TO_PANEL_TRANSFORM = new RigidBodyTransform();
    static
    {
       RigidBodyTransform panelToFrameTransform = new RigidBodyTransform();
@@ -48,11 +48,10 @@ public class DoorSceneNodeDefinitions
 
       ReferenceFrame frameFrame = ReferenceFrameMissingTools.constructARootFrame();
       ReferenceFrame panelFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(frameFrame, panelToFrameTransform);
-      ReferenceFrame markerFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(panelFrame,
-                                                                                                            PUSH_DOOR_MARKER_TO_PANEL_TRANSFORM);
-      FramePose3D markerPose = new FramePose3D(markerFrame);
-      markerPose.changeFrame(frameFrame);
-      markerPose.get(PUSH_DOOR_MARKER_TO_FRAME_TRANSFORM);
+
+      FramePose3D framePose = new FramePose3D(frameFrame);
+      framePose.changeFrame(panelFrame);
+      framePose.get(PUSH_DOOR_FRAME_TO_PANEL_TRANSFORM);
    }
 
    // PULL DOOR
@@ -80,7 +79,7 @@ public class DoorSceneNodeDefinitions
       markerPose.changeFrame(panelFrame);
       markerPose.get(PULL_DOOR_MARKER_TO_PANEL_TRANSFORM);
    }
-   public static final RigidBodyTransform PULL_DOOR_MARKER_TO_FRAME_TRANSFORM = new RigidBodyTransform();
+   public static final RigidBodyTransform PULL_DOOR_FRAME_TO_PANEL_TRANSFORM = new RigidBodyTransform();
    static
    {
       RigidBodyTransform panelToFrameTransform = new RigidBodyTransform();
@@ -89,14 +88,13 @@ public class DoorSceneNodeDefinitions
 
       ReferenceFrame frameFrame = ReferenceFrameMissingTools.constructARootFrame();
       ReferenceFrame panelFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(frameFrame, panelToFrameTransform);
-      ReferenceFrame markerFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(panelFrame,
-                                                                                                            PULL_DOOR_MARKER_TO_PANEL_TRANSFORM);
-      FramePose3D markerPose = new FramePose3D(markerFrame);
-      markerPose.changeFrame(frameFrame);
-      markerPose.get(PULL_DOOR_MARKER_TO_FRAME_TRANSFORM);
+
+      FramePose3D framePose = new FramePose3D(frameFrame);
+      framePose.changeFrame(panelFrame);
+      framePose.get(PULL_DOOR_FRAME_TO_PANEL_TRANSFORM);
    }
 
-   public static final double DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN = 3.0;
+   public static final double DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN = 2.0;
 
    // TODO: These transforms need to be verified.
    public static final String DOOR_PANEL_VISUAL_MODEL_FILE_PATH = "environmentObjects/door/doorPanel/DoorPanel.g3dj";
@@ -138,26 +136,24 @@ public class DoorSceneNodeDefinitions
                                      PUSH_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
    }
 
-   public static StaticArUcoRelativeDetectableSceneNode createPullDoorFrame()
+   public static StaticRelativeSceneNode createPullDoorFrame(ArUcoDetectableNode pullDoorPanel)
    {
-      return new StaticArUcoRelativeDetectableSceneNode("PullDoorFrame",
-                                                        DoorModelParameters.PULL_DOOR_MARKER_ID,
-                                                        DoorModelParameters.DOOR_ARUCO_MARKER_WIDTH,
-                                                        PULL_DOOR_MARKER_TO_FRAME_TRANSFORM,
-                                                        DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
-                                                        PULL_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
-                                                        DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
+      return new StaticRelativeSceneNode("PullDoorFrame",
+                                         pullDoorPanel,
+                                         PULL_DOOR_FRAME_TO_PANEL_TRANSFORM,
+                                         DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
+                                         PULL_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                         DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
    }
 
-   public static StaticArUcoRelativeDetectableSceneNode createPushDoorFrame()
+   public static StaticRelativeSceneNode createPushDoorFrame(ArUcoDetectableNode pushDoorPanel)
    {
-      return new StaticArUcoRelativeDetectableSceneNode("PushDoorFrame",
-                                                        DoorModelParameters.PUSH_DOOR_MARKER_ID,
-                                                        DoorModelParameters.DOOR_ARUCO_MARKER_WIDTH,
-                                                        PUSH_DOOR_MARKER_TO_FRAME_TRANSFORM,
-                                                        DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
-                                                        PUSH_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
-                                                        DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
+      return new StaticRelativeSceneNode("PushDoorFrame",
+                                         pushDoorPanel,
+                                         PUSH_DOOR_FRAME_TO_PANEL_TRANSFORM,
+                                         DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
+                                         PUSH_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                         DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
    }
 
    public static ArUcoDetectableNode createPushDoorLeverHandle()
