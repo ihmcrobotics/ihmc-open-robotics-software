@@ -57,6 +57,8 @@ public class ImGuiStoredPropertySetDoubleWidget implements ImGuiStoredPropertySe
                                              Runnable onParametersUpdatedCallback)
    {
       this.key = key;
+      this.min = key.getLowerBound();
+      this.max = key.getUpperBound();
       this.format = format;
       this.onParametersUpdatedCallback = onParametersUpdatedCallback;
       label = labels.getHidden(key.getTitleCasedName());
@@ -65,16 +67,12 @@ public class ImGuiStoredPropertySetDoubleWidget implements ImGuiStoredPropertySe
       Consumer<ImDouble> widgetRenderer;
       if (key.hasLowerBound() && key.hasUpperBound())
       {
-         this.min = key.getLowerBound();
-         this.max = key.getUpperBound();
          widgetRenderer = this::renderSliderWithMinMaxAndFormatFancy;
       }
       else
       {
          this.step = step;
          this.stepFast = stepFast;
-         min = Double.NaN;
-         max = Double.NaN;
          widgetRenderer = this::renderInputWithStepAndStepFastFancy;
       }
 
@@ -102,6 +100,8 @@ public class ImGuiStoredPropertySetDoubleWidget implements ImGuiStoredPropertySe
                                              boolean enforceInputWidget)
    {
       this.key = key;
+      this.min = key.getLowerBound();
+      this.max = key.getUpperBound();
       this.format = format;
       this.unitString = unitString;
       this.onParametersUpdatedCallback = onParametersUpdatedCallback;
@@ -111,16 +111,12 @@ public class ImGuiStoredPropertySetDoubleWidget implements ImGuiStoredPropertySe
       Consumer<ImDouble> widgetRenderer;
       if (!enforceInputWidget && key.hasLowerBound() && key.hasUpperBound())
       {
-         this.min = key.getLowerBound();
-         this.max = key.getUpperBound();
          widgetRenderer = this::renderSliderWithMinMaxAndFormatFancy;
       }
       else
       {
          this.step = step;
          this.stepFast = stepFast;
-         min = Double.NaN;
-         max = Double.NaN;
          widgetRenderer = this::renderInputWithStepAndStepFastFancy;
       }
 
@@ -166,6 +162,7 @@ public class ImGuiStoredPropertySetDoubleWidget implements ImGuiStoredPropertySe
    {
       if (ImGuiTools.volatileInputDouble(label, imDouble, step, stepFast, format))
       {
+         clamp(imDouble);
          onParametersUpdatedCallback.run();
       }
    }
@@ -196,7 +193,8 @@ public class ImGuiStoredPropertySetDoubleWidget implements ImGuiStoredPropertySe
 
    private void clamp(ImDouble imDouble)
    {
-      imDouble.set(MathTools.clamp(imDouble.get(), min, max));
+      if (!Double.isNaN(min) && !Double.isNaN(max))
+         imDouble.set(MathTools.clamp(imDouble.get(), min, max));
    }
 
    private void fancyBefore()

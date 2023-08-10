@@ -100,7 +100,7 @@ public class ICPController implements ICPControllerInterface
    private final ICPControlGainsReadOnly feedbackGains;
    private final DMatrixRMaj transformedGains = new DMatrixRMaj(2, 2);
    private final DMatrixRMaj inverseTransformedGains = new DMatrixRMaj(2, 2);
-   private final FrameVector2D transformedMagnitudeLimits = new FrameVector2D();
+   private final DMatrixRMaj transformedMagnitudeJacobian = new DMatrixRMaj(2, 2);
 
    private final YoInteger numberOfIterations = new YoInteger(yoNamePrefix + "NumberOfIterations", registry);
    private final YoBoolean hasNotConvergedInPast = new YoBoolean(yoNamePrefix + "HasNotConvergedInPast", registry);
@@ -363,10 +363,7 @@ public class ICPController implements ICPControllerInterface
                                              desiredICPVelocity,
                                              feedbackGains.getKpParallelToMotion(),
                                              feedbackGains.getKpOrthogonalToMotion());
-      helper.transformFromDynamicsFrame(transformedMagnitudeLimits,
-                                        desiredICPVelocity,
-                                        feedbackGains.getFeedbackPartMaxValueParallelToMotion(),
-                                        feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
+      helper.getTransformToDynamicsFrame(transformedMagnitudeJacobian, desiredICPVelocity);
 
       // run a temporary computation here to get what the  unconstrained CMP would be with none of the scaling
       computeUnconstrainedFeedbackCMP(perfectCoP, perfectCMPOffset, unconstrainedFeedbackNoScaling, unconstrainedFeedbackCMPNoScaling);
@@ -386,7 +383,18 @@ public class ICPController implements ICPControllerInterface
       solver.setCopSafeDistanceToEdge(safeCoPDistanceToEdge.getValue());
       solver.setDesiredFeedbackDirection(unconstrainedFeedback, feedbackDirectionWeight.getValue());
 
-      solver.setMaximumFeedbackMagnitude(transformedMagnitudeLimits);
+      if (ICPControllerHelper.isStationary(desiredICPVelocity))
+      {
+         solver.setMaximumFeedbackMagnitude(transformedMagnitudeJacobian,
+                                            feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion(),
+                                            feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
+      }
+      else
+      {
+         solver.setMaximumFeedbackMagnitude(transformedMagnitudeJacobian,
+                                            feedbackGains.getFeedbackPartMaxValueParallelToMotion(),
+                                            feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
+      }
       solver.setMaximumFeedbackRate(feedbackGains.getFeedbackPartMaxRate(), controlDT);
 
       solver.setFeedbackRateWeight(copCMPFeedbackRateWeight.getValue() / controlDTSquare, feedbackRateWeight.getValue() / controlDTSquare);

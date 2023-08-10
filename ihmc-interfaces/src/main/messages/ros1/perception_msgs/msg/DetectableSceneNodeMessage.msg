@@ -15,7 +15,10 @@ controller_msgs/RigidBodyTransformMessage transform_to_world
 # poses back to ArUco relative ones.
 controller_msgs/RigidBodyTransformMessage aruco_marker_transform_to_world
 
-# Keeps track of when the operator has overridden the pose of this node
-bool is_pose_overridden_by_operator
+# Nodes can be set to not track the detected pose
+bool track_detected_pose
+
+# Break frequency filter value for nodes that are alpha filtered
+float32 break_frequency
 
 

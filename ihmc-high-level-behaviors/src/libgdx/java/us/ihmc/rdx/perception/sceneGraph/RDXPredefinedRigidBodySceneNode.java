@@ -9,10 +9,8 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
-import us.ihmc.rdx.imgui.ImBooleanWrapper;
-import us.ihmc.rdx.imgui.ImGuiEnumPlot;
-import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
+import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
@@ -39,49 +37,55 @@ public class RDXPredefinedRigidBodySceneNode
    private boolean showing = false;
    private final RDXModelInstance modelInstance;
    private final FramePose3D nodePose = new FramePose3D();
-   /** For resetting the pose after overriding. */
-   private final RigidBodyTransform originalTransformToParent = new RigidBodyTransform();
    private final RigidBodyTransform visualModelToWorldTransform = new RigidBodyTransform();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiEnumPlot currentlyDetectedPlot;
-   private final RDXSelectablePose3DGizmo overridePoseGizmo;
-   private final ImBooleanWrapper overridePoseWrapper;
+   private final RDXSelectablePose3DGizmo offsetPoseGizmo;
+   private final ImBooleanWrapper trackDetectedPoseWrapper;
+   private ImGuiSliderDoubleWrapper alphaFilterValueSlider;
 
    public RDXPredefinedRigidBodySceneNode(PredefinedRigidBodySceneNode predefinedRigidBodySceneNode, RDX3DPanel panel3D)
    {
       this.sceneNode = predefinedRigidBodySceneNode;
 
-      originalTransformToParent.set(predefinedRigidBodySceneNode.getNodeToParentFrameTransform());
-
-      modelInstance = new RDXModelInstance(RDXModelLoader.load(predefinedRigidBodySceneNode.getVisualModelFilePath()));
+      modelInstance = new RDXModelInstance(RDXModelLoader.load(sceneNode.getVisualModelFilePath()));
       modelInstance.setColor(GHOST_COLOR);
 
       referenceFrameGraphic = new RDXReferenceFrameGraphic(0.05, Color.BLUE);
-      overridePoseGizmo = new RDXSelectablePose3DGizmo(predefinedRigidBodySceneNode.getNodeFrame(),
-                                                       predefinedRigidBodySceneNode.getNodeToParentFrameTransform());
-      overridePoseGizmo.createAndSetupDefault(panel3D);
-      overridePoseWrapper = new ImBooleanWrapper(predefinedRigidBodySceneNode::getPoseOverriddenByOperator,
-                                                 poseOverriddenByOperator ->
-                                                 {
-                                                    predefinedRigidBodySceneNode.setPoseOverriddenByOperator(poseOverriddenByOperator);
-                                                    predefinedRigidBodySceneNode.markModifiedByOperator();
-                                                 },
-                                                 imBoolean -> ImGui.checkbox(labels.get("Override pose"), imBoolean));
+      offsetPoseGizmo = new RDXSelectablePose3DGizmo(sceneNode.getNodeFrame(),
+                                                     sceneNode.getNodeToParentFrameTransform());
+      offsetPoseGizmo.createAndSetupDefault(panel3D);
+      trackDetectedPoseWrapper = new ImBooleanWrapper(sceneNode::getTrackDetectedPose,
+                                                      trackDetectedPose ->
+                                                      {
+                                                         sceneNode.setTrackDetectedPose(trackDetectedPose);
+                                                         ensureGizmoFrameIsSceneNodeFrame();
+                                                         sceneNode.markModifiedByOperator();
+                                                      },
+                                                      imBoolean -> ImGui.checkbox(labels.get("Track Detected Pose"), imBoolean));
 
       int bufferSize = 1000;
       int heightPixels = 20;
       currentlyDetectedPlot = new ImGuiEnumPlot(predefinedRigidBodySceneNode.getName(), bufferSize, heightPixels);
+
+      if (sceneNode instanceof ArUcoDetectableNode arUcoDetectableNode)
+      {
+         alphaFilterValueSlider = new ImGuiSliderDoubleWrapper("Break frequency", "%.2f", 0.2, 5.0,
+                                                               arUcoDetectableNode::getBreakFrequency,
+                                                               arUcoDetectableNode::setBreakFrequency);
+      }
    }
 
    public void update()
    {
-      showing = sceneNode.getCurrentlyDetected() || sceneNode.getPoseOverriddenByOperator();
+      showing = sceneNode.getCurrentlyDetected() || !sceneNode.getTrackDetectedPose();
 
       referenceFrameGraphic.setToReferenceFrame(sceneNode.getNodeFrame());
-      if (!showing || !sceneNode.getPoseOverriddenByOperator())
-         overridePoseGizmo.getSelected().set(false);
+      ensureGizmoFrameIsSceneNodeFrame();
+      if (!showing)
+         offsetPoseGizmo.getSelected().set(false);
 
-      if (overridePoseGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
+      if (offsetPoseGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
       {
          sceneNode.markModifiedByOperator();
       }
@@ -99,22 +103,31 @@ public class RDXPredefinedRigidBodySceneNode
       currentlyDetectedPlot.setWidgetTextColor(currentlyDetected ? ImGuiTools.GREEN : ImGuiTools.RED);
       currentlyDetectedPlot.render(currentlyDetected ? 1 : 0, currentlyDetected ? "CURRENTLY DETECTED" : "NOT DETECTED");
 
-      overridePoseWrapper.renderImGuiWidget();
-      if (overridePoseWrapper.changed() && sceneNode.getPoseOverriddenByOperator()) // Convenience
-         overridePoseGizmo.getSelected().set(true);
+      trackDetectedPoseWrapper.renderImGuiWidget();
       ImGui.sameLine();
-      ImGui.beginDisabled(!showing || !sceneNode.getPoseOverriddenByOperator());
-      ImGui.checkbox(labels.get("Use gizmo"), overridePoseGizmo.getSelected());
+      ImGui.beginDisabled(!showing);
+      ImGui.checkbox(labels.get("Show Offset Gizmo"), offsetPoseGizmo.getSelected());
+      ImGui.endDisabled();
       ImGui.sameLine();
-      if (ImGui.button(labels.get("Reset pose")))
+      if (ImGui.button(labels.get("Clear Offset")))
       {
-         sceneNode.getNodeToParentFrameTransform().set(originalTransformToParent);
-         sceneNode.getNodeFrame().update();
+         sceneNode.clearOffset();
+         ensureGizmoFrameIsSceneNodeFrame();
          sceneNode.markModifiedByOperator();
       }
-      ImGui.endDisabled();
+      if (sceneNode instanceof ArUcoDetectableNode)
+      {
+         alphaFilterValueSlider.render();
+         sceneNode.markModifiedByOperator();
+      }
 
       ImGui.separator();
+   }
+
+   private void ensureGizmoFrameIsSceneNodeFrame()
+   {
+      if (offsetPoseGizmo.getPoseGizmo().getGizmoFrame() != sceneNode.getNodeFrame())
+         offsetPoseGizmo.getPoseGizmo().setGizmoFrame(sceneNode.getNodeFrame());
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
@@ -127,31 +140,5 @@ public class RDXPredefinedRigidBodySceneNode
          if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
             referenceFrameGraphic.getRenderables(renderables, pool);
       }
-   }
-
-   public void setShowing(boolean showing)
-   {
-      this.showing = showing;
-   }
-
-   public RigidBodyTransform getTransformToParent()
-   {
-      return sceneNode.getNodeToParentFrameTransform();
-   }
-
-   public void setTransformToParent(RigidBodyTransform transform)
-   {
-      sceneNode.getNodeToParentFrameTransform().set(transform);
-      sceneNode.getNodeFrame().update();
-   }
-
-   public ReferenceFrame getReferenceFrame()
-   {
-      return sceneNode.getNodeFrame();
-   }
-
-   public PredefinedRigidBodySceneNode getSceneNode()
-   {
-      return sceneNode;
    }
 }

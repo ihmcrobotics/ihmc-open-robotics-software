@@ -31,9 +31,13 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage aruco_marker_transform_to_world_;
    /**
-            * Keeps track of when the operator has overridden the pose of this node
+            * Nodes can be set to not track the detected pose
             */
-   public boolean is_pose_overridden_by_operator_;
+   public boolean track_detected_pose_;
+   /**
+            * Break frequency filter value for nodes that are alpha filtered
+            */
+   public float break_frequency_;
 
    public DetectableSceneNodeMessage()
    {
@@ -57,7 +61,9 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_world_, transform_to_world_);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.aruco_marker_transform_to_world_, aruco_marker_transform_to_world_);
-      is_pose_overridden_by_operator_ = other.is_pose_overridden_by_operator_;
+      track_detected_pose_ = other.track_detected_pose_;
+
+      break_frequency_ = other.break_frequency_;
 
    }
 
@@ -121,18 +127,33 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
    }
 
    /**
-            * Keeps track of when the operator has overridden the pose of this node
+            * Nodes can be set to not track the detected pose
             */
-   public void setIsPoseOverriddenByOperator(boolean is_pose_overridden_by_operator)
+   public void setTrackDetectedPose(boolean track_detected_pose)
    {
-      is_pose_overridden_by_operator_ = is_pose_overridden_by_operator;
+      track_detected_pose_ = track_detected_pose;
    }
    /**
-            * Keeps track of when the operator has overridden the pose of this node
+            * Nodes can be set to not track the detected pose
             */
-   public boolean getIsPoseOverriddenByOperator()
+   public boolean getTrackDetectedPose()
    {
-      return is_pose_overridden_by_operator_;
+      return track_detected_pose_;
+   }
+
+   /**
+            * Break frequency filter value for nodes that are alpha filtered
+            */
+   public void setBreakFrequency(float break_frequency)
+   {
+      break_frequency_ = break_frequency;
+   }
+   /**
+            * Break frequency filter value for nodes that are alpha filtered
+            */
+   public float getBreakFrequency()
+   {
+      return break_frequency_;
    }
 
 
@@ -159,7 +180,9 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
 
       if (!this.transform_to_world_.epsilonEquals(other.transform_to_world_, epsilon)) return false;
       if (!this.aruco_marker_transform_to_world_.epsilonEquals(other.aruco_marker_transform_to_world_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_pose_overridden_by_operator_, other.is_pose_overridden_by_operator_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.track_detected_pose_, other.track_detected_pose_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.break_frequency_, other.break_frequency_, epsilon)) return false;
 
 
       return true;
@@ -180,7 +203,9 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
 
       if (!this.transform_to_world_.equals(otherMyClass.transform_to_world_)) return false;
       if (!this.aruco_marker_transform_to_world_.equals(otherMyClass.aruco_marker_transform_to_world_)) return false;
-      if(this.is_pose_overridden_by_operator_ != otherMyClass.is_pose_overridden_by_operator_) return false;
+      if(this.track_detected_pose_ != otherMyClass.track_detected_pose_) return false;
+
+      if(this.break_frequency_ != otherMyClass.break_frequency_) return false;
 
 
       return true;
@@ -200,8 +225,10 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       builder.append(this.transform_to_world_);      builder.append(", ");
       builder.append("aruco_marker_transform_to_world=");
       builder.append(this.aruco_marker_transform_to_world_);      builder.append(", ");
-      builder.append("is_pose_overridden_by_operator=");
-      builder.append(this.is_pose_overridden_by_operator_);
+      builder.append("track_detected_pose=");
+      builder.append(this.track_detected_pose_);      builder.append(", ");
+      builder.append("break_frequency=");
+      builder.append(this.break_frequency_);
       builder.append("}");
       return builder.toString();
    }

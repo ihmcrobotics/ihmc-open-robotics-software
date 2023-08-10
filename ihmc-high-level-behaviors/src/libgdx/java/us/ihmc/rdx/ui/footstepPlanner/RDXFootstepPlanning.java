@@ -168,6 +168,7 @@ public class RDXFootstepPlanning
          }
       }
       footstepPlannerRequest.setAssumeFlatGround(assumeFlatGround);
+      footstepPlannerRequest.setSnapGoalSteps(!assumeFlatGround);
 
       footstepPlannerRequest.setPlanBodyPath(locomotionParameters.getPlanWithBodyPath());
 
@@ -265,5 +266,10 @@ public class RDXFootstepPlanning
    public void setInitialStanceSide(InitialStanceSide initialStanceSide)
    {
       this.initialStanceSide = initialStanceSide;
+   }
+
+   public boolean isPlanning()
+   {
+      return executor.isExecuting();
    }
 }

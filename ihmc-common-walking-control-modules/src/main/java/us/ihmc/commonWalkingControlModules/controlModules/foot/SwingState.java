@@ -319,6 +319,7 @@ public class SwingState extends AbstractFootControlState
       swingTimeSpeedUpFactor.set(1.0);
       currentTimeWithSwingSpeedUp.set(Double.NaN);
       replanTrajectory.set(false);
+//      footstepWasAdjusted.set(false);
 
       if (workspaceLimiterControlModule != null)
       {
@@ -583,11 +584,6 @@ public class SwingState extends AbstractFootControlState
       tempPoint.setToZero(originOfControlFrame);
       tempPoint.changeFrame(worldFrame);
       radialFrame.setPoseAndUpdate(tempPoint, anklePitchRotationToParentFrame);
-   }
-
-   public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, double swingTime)
-   {
-      setAdjustedFootstepAndTime(adjustedFootstep, null, null, swingTime);
    }
 
    public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, FrameVector3DReadOnly finalCoMVelocity, FrameVector3DReadOnly finalCoMAcceleration, double swingTime)
