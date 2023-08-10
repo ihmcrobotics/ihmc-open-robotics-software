@@ -134,6 +134,19 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
       return estimatedHandWrenchArrows;
    }
 
+   public void calculateVRPick(RDXVRContext vrContext, boolean isHand)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         vrContext.getController(side).runIfConnected(controller ->
+                                                      {
+                                                         if (!controller.getTriggerDragData().isDraggingSomething())
+                                                         {
+                                                            super.calculateVRPick(vrContext, true);
+                                                         }
+                                                      });
+      }
+   }
    public void processVRInput(RDXVRContext vrContext)
    {
       super.processVRInput(vrContext);
@@ -143,7 +156,7 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
          {
             InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
             RDXVRDragData gripDragData = controller.getGripDragData();
-            if (isVRHovering() || gripDragData.getObjectBeingDragged() == this)
+            if (isVRPointing() || gripDragData.getObjectBeingDragged() == this)
             {
                controller.controlOfRadialMenu("Open Hand", "Close Hand", "Door Avoidance", "Home Position");
                if (joystickButton.bChanged() && joystickButton.bState())
@@ -158,7 +171,7 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
                controller.setRadialMenuSelection(null);
             }
             //TODO make radial menu disappear when joystick is active and move away from hovering
-            controller.setRadialMenuBoxPosition(isVRHovering());
+            controller.setRadialMenuBoxPosition(isVRPointing());
          });
       }
    }

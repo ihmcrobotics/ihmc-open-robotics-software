@@ -7,6 +7,7 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.ImGui;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -46,6 +47,7 @@ public class RDXInteractableRobotLink
    private boolean isMouseHovering;
    private final Notification contextMenuNotification = new Notification();
    private boolean isVRHovering;
+   private boolean isVRPointing;
    private final Notification becomesModified = new Notification();
 
    /** For when the graphic, the link, and control frame are all the same. */
@@ -103,20 +105,32 @@ public class RDXInteractableRobotLink
       }
    }
 
+   public void calculateVRPick(RDXVRContext vrContext, boolean isHand)
+   {
+      for (RDXRobotCollidable robotCollidable : robotCollidables)
+      {
+         robotCollidable.calculateVRPick(vrContext, isHand);
+      }
+   }
+
    public void processVRInput(RDXVRContext vrContext)
    {
       isVRHovering = false;
+      isVRPointing = false;
 
       for (RobotSide side : RobotSide.values)
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
             boolean isHovering = false;
+            boolean isPointing = false;
             for (RDXRobotCollidable robotCollidable : robotCollidables)
             {
                isHovering |= robotCollidable.getVRHovering(side);
+               isPointing |= robotCollidable.getVRPointing(side);
             }
             isVRHovering |= isHovering;
+            isVRPointing |= isPointing;
 
             RDXVRDragData gripDragData = controller.getGripDragData();
             InputDigitalActionData aButton = controller.getAButtonActionData();
@@ -269,6 +283,11 @@ public class RDXInteractableRobotLink
    public boolean isVRHovering()
    {
       return isVRHovering;
+   }
+
+   public boolean isVRPointing()
+   {
+      return isVRPointing;
    }
 
    public Notification getBecomesModified()
