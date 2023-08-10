@@ -1,11 +1,8 @@
 package us.ihmc.perception.sceneGraph;
 
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.Timer;
-
-import javax.annotation.Nullable;
 
 /**
  * An object that is currently detected or not currently detected,
@@ -30,10 +27,7 @@ public abstract class DetectableSceneNode extends SceneNode
     * We allow the operator to disable tracking the detected pose.
     */
    private boolean trackDetectedPose = true;
-   @Nullable
-   private SceneNode parentNode;
    private final RigidBodyTransform originalTransformToParent = new RigidBodyTransform();
-   private transient final FramePose3D originalPose = new FramePose3D();
 
    public DetectableSceneNode(String name)
    {
@@ -74,39 +68,13 @@ public abstract class DetectableSceneNode extends SceneNode
    public void setTrackDetectedPose(boolean trackDetectedPose)
    {
       this.trackDetectedPose = trackDetectedPose;
-
-      if (parentNode != null)
-      {
-         if (trackDetectedPose && parentNode.getNodeFrame() != getNodeFrame().getParent())
-         {
-            changeParentFrameWithoutMoving(parentNode.getNodeFrame());
-         }
-         else if (!trackDetectedPose && getNodeFrame().getParent() != ReferenceFrame.getWorldFrame())
-         {
-            changeParentFrameWithoutMoving(ReferenceFrame.getWorldFrame());
-         }
-      }
    }
 
    /**
     * This sets the transform to the parent node back to the original one.
     * This is robust to whether or not this node is currently tracking the detected pose.
     */
-   public void clearOffset()
-   {
-      if (parentNode != null && parentNode.getNodeFrame() != getNodeFrame().getParent())
-      {
-         originalPose.setToZero(parentNode.getNodeFrame());
-         originalPose.set(originalTransformToParent);
-         originalPose.changeFrame(getNodeFrame().getParent());
-         originalPose.get(getNodeToParentFrameTransform());
-      }
-      else
-      {
-         getNodeToParentFrameTransform().set(originalTransformToParent);
-      }
-      getNodeFrame().update();
-   }
+   public abstract void clearOffset();
 
    public void markModifiedByOperator()
    {
@@ -118,14 +86,8 @@ public abstract class DetectableSceneNode extends SceneNode
       return !modifiedTimer.isRunning(OPERATOR_FREEZE_TIME);
    }
 
-   public void setParentNode(SceneNode sceneNode)
+   public RigidBodyTransform getOriginalTransformToParent()
    {
-      parentNode = sceneNode;
-   }
-
-   @Nullable
-   public SceneNode getParentNode()
-   {
-      return parentNode;
+      return originalTransformToParent;
    }
 }

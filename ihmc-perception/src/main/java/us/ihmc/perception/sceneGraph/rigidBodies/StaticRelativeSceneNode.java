@@ -1,8 +1,13 @@
 package us.ihmc.perception.sceneGraph.rigidBodies;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.SceneNode;
+
+import javax.annotation.Nullable;
 
 /**
  * This node stays in the same spot relative to where a parent scene node
@@ -23,6 +28,7 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
     */
    private double distanceToDisableTracking;
    private double currentDistance = Double.NaN;
+   private transient final FramePose3D originalPose = new FramePose3D();
 
    public StaticRelativeSceneNode(String name,
                                   DetectableSceneNode parentNode,
@@ -34,12 +40,46 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
       super(name, visualModelFilePath, visualModelToNodeFrameTransform);
       this.parentNode = parentNode;
 
-      setParentNode(parentNode);
       changeParentFrame(parentNode.getNodeFrame());
       getNodeToParentFrameTransform().set(transformToParentNode);
       getNodeFrame().update();
 
       this.distanceToDisableTracking = distanceToDisableTracking;
+   }
+
+   @Override
+   public void setTrackDetectedPose(boolean trackDetectedPose)
+   {
+      super.setTrackDetectedPose(trackDetectedPose);
+
+      if (parentNode != null)
+      {
+         if (trackDetectedPose && parentNode.getNodeFrame() != getNodeFrame().getParent())
+         {
+            changeParentFrameWithoutMoving(parentNode.getNodeFrame());
+         }
+         else if (!trackDetectedPose && getNodeFrame().getParent() != ReferenceFrame.getWorldFrame())
+         {
+            changeParentFrameWithoutMoving(ReferenceFrame.getWorldFrame());
+         }
+      }
+   }
+
+   @Override
+   public void clearOffset()
+   {
+      if (parentNode.getNodeFrame() != getNodeFrame().getParent())
+      {
+         originalPose.setToZero(parentNode.getNodeFrame());
+         originalPose.set(getOriginalTransformToParent());
+         originalPose.changeFrame(getNodeFrame().getParent());
+         originalPose.get(getNodeToParentFrameTransform());
+      }
+      else
+      {
+         getNodeToParentFrameTransform().set(getOriginalTransformToParent());
+      }
+      getNodeFrame().update();
    }
 
    @Override
@@ -66,5 +106,11 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
    public double getCurrentDistance()
    {
       return currentDistance;
+   }
+
+   @Nullable
+   public SceneNode getParentNode()
+   {
+      return parentNode;
    }
 }
