@@ -94,7 +94,7 @@ public class RDX3DSituatedImagePanel
    {
       this.vrModeManager = vrModeManager;
       context.addVRPickCalculator(this::calculateVRPick);
-      context.addVRInputProcessor(this::addVRInputProcessor);
+      context.addVRInputProcessor(this::processVRInput);
    }
 
    public void create(Texture texture, Frustum frustum, ReferenceFrame referenceFrame, boolean flipY)
@@ -220,78 +220,84 @@ public class RDX3DSituatedImagePanel
 
    public void calculateVRPick(RDXVRContext vrContext)
    {
-      for (RobotSide side : RobotSide.values)
+      if (isShowing)
       {
-         vrContext.getController(side).runIfConnected(controller ->
+         for (RobotSide side : RobotSide.values)
          {
-            vrPickResult.get(side).reset();
-
-            Point3D closestPointOnSurface = new Point3D();
-            Vector3D normalAtClosestPoint = new Vector3D();
-            boolean isHovering = selectionCollisionBox.evaluatePoint3DCollision(controller.getPickPointPose().getPosition(),
-                                                                                closestPointOnSurface,
-                                                                                normalAtClosestPoint);
-            double distance = closestPointOnSurface.distance(controller.getPickPointPose().getPosition());
-            double distanceToSurface = isHovering ? -distance : distance;
-
-            if (isHovering)
+            vrContext.getController(side).runIfConnected(controller ->
             {
-               vrPickResult.get(side).addPickCollision(distanceToSurface);
-               controller.addPickResult(vrPickResult.get(side));
-               controller.setPickCollisionPoint(closestPointOnSurface);
-            }
-         });
+               vrPickResult.get(side).reset();
+
+               Point3D closestPointOnSurface = new Point3D();
+               Vector3D normalAtClosestPoint = new Vector3D();
+               boolean isHovering = selectionCollisionBox.evaluatePoint3DCollision(controller.getPickPointPose().getPosition(),
+                                                                                   closestPointOnSurface,
+                                                                                   normalAtClosestPoint);
+               double distance = closestPointOnSurface.distance(controller.getPickPointPose().getPosition());
+               double distanceToSurface = isHovering ? -distance : distance;
+
+               if (isHovering)
+               {
+                  vrPickResult.get(side).addPickCollision(distanceToSurface);
+                  controller.addPickResult(vrPickResult.get(side));
+                  controller.setPickCollisionPoint(closestPointOnSurface);
+               }
+            });
+         }
       }
    }
 
-   public void addVRInputProcessor(RDXVRContext context)
+   public void processVRInput(RDXVRContext context)
    {
-      RDXVRPanelPlacementMode placementMode = vrModeManager.getVideoPanelPlacementMode();
-
-      context.getHeadset().runIfConnected(headset ->
+      if (isShowing)
       {
-         if (placementMode == FOLLOW_HEADSET || (placementMode == MANUAL_PLACEMENT  && vrModeManager.getShowFloatVideoPanelNotification().poll()))
+         RDXVRPanelPlacementMode placementMode = vrModeManager.getVideoPanelPlacementMode();
+
+         context.getHeadset().runIfConnected(headset ->
          {
-            floatingPanelFramePose.setToZero(headset.getXForwardZUpHeadsetFrame());
-            floatingPanelFramePose.getPosition()
-                                  .set(panelDistanceFromHeadset, FOLLOW_HEADSET_OFFSET_Y, FOLLOW_HEADSET_OFFSET_Z);
-            floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-            floatingPanelFramePose.get(floatingPanelFrame.getTransformToParent());
-            floatingPanelFrame.getReferenceFrame().update();
-            updatePoses();
-         }
-      });
-
-      for (RobotSide side : RobotSide.values)
-      {
-         context.getController(side).runIfConnected(controller ->
-         {
-            boolean isHovering = controller.getSelectedPick() == vrPickResult.get(side);
-            isVRHovering |= isHovering;
-
-            if (placementMode == MANUAL_PLACEMENT)
+            if (placementMode == FOLLOW_HEADSET
+            || (placementMode == MANUAL_PLACEMENT && vrModeManager.getShowFloatVideoPanelNotification().poll()))
             {
-               RDXVRDragData gripDragData = controller.getGripDragData();
-
-               if (isHovering && gripDragData.getDragJustStarted())
-               {
-                  gripDragData.setObjectBeingDragged(this);
-                  gripDragData.setInteractableFrameOnDragStart(floatingPanelFrame.getReferenceFrame());
-               }
-
-               if (gripDragData.isDragging() && gripDragData.getObjectBeingDragged() == this)
-               {
-                  gripDragData.getDragFrame().getTransformToDesiredFrame(floatingPanelFrame.getTransformToParent(),
-                                                                         floatingPanelFrame.getReferenceFrame().getParent());
-                  floatingPanelFrame.getReferenceFrame().update();
-                  updatePoses();
-               }
-            }
-            else if (controller.getGripActionData().x() > 0.9 && selectionCollisionBox.isPointInside(controller.getPickPointPose().getPosition()))
-            {
-               vrModeManager.setVideoPanelPlacementMode(MANUAL_PLACEMENT);
+               floatingPanelFramePose.setToZero(headset.getXForwardZUpHeadsetFrame());
+               floatingPanelFramePose.getPosition().set(panelDistanceFromHeadset, FOLLOW_HEADSET_OFFSET_Y, FOLLOW_HEADSET_OFFSET_Z);
+               floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+               floatingPanelFramePose.get(floatingPanelFrame.getTransformToParent());
+               floatingPanelFrame.getReferenceFrame().update();
+               updatePoses();
             }
          });
+
+         for (RobotSide side : RobotSide.values)
+         {
+            context.getController(side).runIfConnected(controller ->
+            {
+               boolean isHovering = controller.getSelectedPick() == vrPickResult.get(side);
+               isVRHovering |= isHovering;
+
+               if (placementMode == MANUAL_PLACEMENT)
+               {
+                  RDXVRDragData gripDragData = controller.getGripDragData();
+
+                  if (isHovering && gripDragData.getDragJustStarted())
+                  {
+                     gripDragData.setObjectBeingDragged(this);
+                     gripDragData.setInteractableFrameOnDragStart(floatingPanelFrame.getReferenceFrame());
+                  }
+
+                  if (gripDragData.isBeingDragged(this))
+                  {
+                     gripDragData.getDragFrame().getTransformToDesiredFrame(floatingPanelFrame.getTransformToParent(),
+                                                                            floatingPanelFrame.getReferenceFrame().getParent());
+                     floatingPanelFrame.getReferenceFrame().update();
+                     updatePoses();
+                  }
+               }
+               else if (controller.getGripActionData().x() > 0.9 && selectionCollisionBox.isPointInside(controller.getPickPointPose().getPosition()))
+               {
+                  vrModeManager.setVideoPanelPlacementMode(MANUAL_PLACEMENT);
+               }
+            });
+         }
       }
    }
 
