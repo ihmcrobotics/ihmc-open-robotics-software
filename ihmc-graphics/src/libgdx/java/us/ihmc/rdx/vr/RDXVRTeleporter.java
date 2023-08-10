@@ -57,11 +57,12 @@ public class RDXVRTeleporter
    {
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
      {
+        InputDigitalActionData bButton = controller.getBButtonActionData();
+
         // Only enable teleportation when nothing is pick selected
         if (controller.getSelectedPick() == null && !controller.anythingElseBeingDragged(this))
         {
            controller.setBButtonText("Teleport");
-           InputDigitalActionData bButton = controller.getBButtonActionData();
            InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
 
            if (bButton.bChanged() && bButton.bState()) // Pressed B button
@@ -84,7 +85,6 @@ public class RDXVRTeleporter
                  proposedTeleportPose.get(tempTransform);
                  tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
               });
-              preparingToTeleport = false;
            }
 
            // Pressed right joystick button
@@ -117,6 +117,11 @@ public class RDXVRTeleporter
            {
               lastTouchpadY = Double.NaN;
            }
+        }
+
+        if (!bButton.bState())
+        {
+           preparingToTeleport = false;
         }
      });
    }
