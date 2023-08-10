@@ -1,5 +1,6 @@
 package us.ihmc.perception.sceneGraph.arUco;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.arUco.ArUcoMarker;
@@ -23,6 +24,7 @@ public class ArUcoDetectableNode extends PredefinedRigidBodySceneNode
    private final AlphaFilteredRigidBodyTransform alphaFilteredTransformToParent = new AlphaFilteredRigidBodyTransform();
    private final BreakFrequencyAlphaCalculator breakFrequencyAlphaCalculator = new BreakFrequencyAlphaCalculator();
    private double breakFrequency = 1.0;
+   private transient final FramePose3D originalPose = new FramePose3D();
 
    /**
     * Give the marker info directly from code.
@@ -82,6 +84,38 @@ public class ArUcoDetectableNode extends PredefinedRigidBodySceneNode
       alphaFilteredTransformToParent.setAlpha(breakFrequencyAlphaCalculator.calculateAlpha(breakFrequency));
       alphaFilteredTransformToParent.update(getMarkerToWorldFrameTransform());
       getMarkerToWorldFrameTransform().set(alphaFilteredTransformToParent);
+   }
+
+   @Override
+   public void setTrackDetectedPose(boolean trackDetectedPose)
+   {
+      super.setTrackDetectedPose(trackDetectedPose);
+
+      if (trackDetectedPose && markerFrame.getReferenceFrame() != getNodeFrame().getParent())
+      {
+         changeParentFrameWithoutMoving(markerFrame.getReferenceFrame());
+      }
+      else if (!trackDetectedPose && getNodeFrame().getParent() != ReferenceFrame.getWorldFrame())
+      {
+         changeParentFrameWithoutMoving(ReferenceFrame.getWorldFrame());
+      }
+   }
+
+   @Override
+   public void clearOffset()
+   {
+      if (markerFrame.getReferenceFrame() != getNodeFrame().getParent())
+      {
+         originalPose.setToZero(markerFrame.getReferenceFrame());
+         originalPose.set(getOriginalTransformToParent());
+         originalPose.changeFrame(getNodeFrame().getParent());
+         originalPose.get(getNodeToParentFrameTransform());
+      }
+      else
+      {
+         getNodeToParentFrameTransform().set(getOriginalTransformToParent());
+      }
+      getNodeFrame().update();
    }
 
    public int getMarkerID()
