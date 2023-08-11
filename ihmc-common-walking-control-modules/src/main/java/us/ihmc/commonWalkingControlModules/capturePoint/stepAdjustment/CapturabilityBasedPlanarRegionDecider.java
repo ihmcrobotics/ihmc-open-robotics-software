@@ -166,6 +166,11 @@ public class CapturabilityBasedPlanarRegionDecider implements SCS2YoGraphicHolde
       return constraintRegionChanged.getBooleanValue();
    }
 
+   public List<StepConstraintRegion> getStepConstraintRegions()
+   {
+      return stepConstraintRegions;
+   }
+
    public StepConstraintRegion getConstraintRegion()
    {
       return planarRegionToConstrainTo;
