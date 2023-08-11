@@ -316,7 +316,7 @@ public class RDXInteractableFootstep
             }
             else
             {
-               selectablePose3DGizmo.processVRInput(vrContext, vrContext.getController(side).getSelectedPick() == vrPickResult.get(side));
+               selectablePose3DGizmo.processVRInput(vrContext, isVRHovering.get(side));
             }
             
          });

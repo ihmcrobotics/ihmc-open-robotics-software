@@ -13,6 +13,7 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.rdx.vr.RDXVRDragData;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
@@ -71,18 +72,18 @@ public class RDXSelectablePose3DGizmo
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
-            // Process input
-            boolean triggerReleasedWithoutDrag = controller.getTriggerClickReleasedWithoutDrag();
-            boolean isClickedOn = isPickSelected && triggerReleasedWithoutDrag;
-            boolean somethingElseIsClickedOn = !isPickSelected && triggerReleasedWithoutDrag;
-            boolean deselectionKeyPressed = ImGui.isKeyReleased(ImGuiTools.getDeleteKey()) || ImGui.isKeyReleased(ImGuiTools.getEscapeKey());
+            RDXVRDragData triggerDragData = controller.getTriggerDragData();
 
+            if (triggerDragData.getDragJustStarted() && isPickSelected)
+            {
+               triggerDragData.setObjectBeingDragged(this);
+            }
             // Determine selectedness
-            if (isClickedOn)
+            if (triggerDragData.isBeingDragged(this))
             {
                selected.set(true);
             }
-            if (somethingElseIsClickedOn || deselectionKeyPressed)
+            else if (!isPickSelected && controller.getTriggerClickReleasedWithoutDrag() && controller.anythingElseBeingDragged(this))
             {
                selected.set(false);
             }
