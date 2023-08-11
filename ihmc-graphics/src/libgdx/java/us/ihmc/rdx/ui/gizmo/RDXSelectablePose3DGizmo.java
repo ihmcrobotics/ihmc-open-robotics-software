@@ -83,7 +83,7 @@ public class RDXSelectablePose3DGizmo
             {
                selected.set(true);
             }
-            else if (!isPickSelected && controller.getTriggerClickReleasedWithoutDrag() && controller.anythingElseBeingDragged(this))
+            else if (!isPickSelected && controller.getTriggerClickReleasedWithoutDrag() && controller.anythingElseBeingDragged(this) || controller.getGripDragData().isDraggingSomething())
             {
                selected.set(false);
             }
