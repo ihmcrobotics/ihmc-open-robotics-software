@@ -16,19 +16,20 @@ import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
  */
 public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
 {
+   private final DetectableSceneNode parentNode;
    /**
     * We don't want to lock in the static pose until we are close enough
     * for it to matter and also to get higher accuracy.
     */
-   private final double maximumDistanceToLockIn;
-   private final DetectableSceneNode parentNode;
+   private double distanceToDisableTracking;
+   private double currentDistance = Double.NaN;
 
    public StaticRelativeSceneNode(String name,
                                   DetectableSceneNode parentNode,
                                   RigidBodyTransform transformToParentNode,
                                   String visualModelFilePath,
                                   RigidBodyTransform visualModelToNodeFrameTransform,
-                                  double maximumDistanceToLockIn)
+                                  double distanceToDisableTracking)
    {
       super(name, visualModelFilePath, visualModelToNodeFrameTransform);
       this.parentNode = parentNode;
@@ -38,17 +39,32 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
       getNodeToParentFrameTransform().set(transformToParentNode);
       getNodeFrame().update();
 
-      this.maximumDistanceToLockIn = maximumDistanceToLockIn;
-   }
-
-   public double getMaximumDistanceToLockIn()
-   {
-      return maximumDistanceToLockIn;
+      this.distanceToDisableTracking = distanceToDisableTracking;
    }
 
    @Override
    public boolean getCurrentlyDetected()
    {
       return !getTrackDetectedPose() || parentNode.getCurrentlyDetected();
+   }
+
+   public void setDistanceToDisableTracking(double distanceToDisableTracking)
+   {
+      this.distanceToDisableTracking = distanceToDisableTracking;
+   }
+
+   public double getDistanceToDisableTracking()
+   {
+      return distanceToDisableTracking;
+   }
+
+   public void setCurrentDistance(double currentDistance)
+   {
+      this.currentDistance = currentDistance;
+   }
+
+   public double getCurrentDistance()
+   {
+      return currentDistance;
    }
 }
