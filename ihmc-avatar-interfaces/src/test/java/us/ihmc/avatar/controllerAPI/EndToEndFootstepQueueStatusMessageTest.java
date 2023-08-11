@@ -1,17 +1,9 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
+import controller_msgs.msg.dds.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -19,16 +11,17 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -36,9 +29,18 @@ import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnviro
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotTestInterface
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+public abstract class EndToEndFootstepQueueStatusMessageTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final CommonAvatarEnvironmentInterface environment = new FlatGroundEnvironment();
@@ -57,21 +59,22 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
    }
 
    @Test
-   public void testQueuing() throws SimulationExceededMaximumTimeException
+   public void testTheFootstepQueueStatus() throws SimulationExceededMaximumTimeException
    {
       DRCRobotModel robotModel = getRobotModel();
       createSimulationTestHelper(environment, location);
       simulationTestHelper.start();
       ThreadTools.sleep(1000);
+
+      // do the initial simulation
       assertTrue(simulationTestHelper.simulateNow(0.25));
 
       CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getControllerReferenceFrames();
       referenceFrames.updateFrames();
       MovingReferenceFrame midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
 
-      double maxStepWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getMaxStepWidth();
-      double minStepWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getMinStepWidth();
-      double halfStepWidth = (maxStepWidth + minStepWidth) / 4.0;
+      double stepWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getInPlaceWidth();
+      double halfStepWidth = stepWidth / 2.0;
       double stepLength = robotModel.getWalkingControllerParameters().getSteppingParameters().getDefaultStepLength() * 0.5;
       double nominalSwingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
       double nominalTransferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
@@ -80,7 +83,6 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
       List<FootstepDataMessage> footstepList = new ArrayList<>();
       RobotSide stepSide = RobotSide.LEFT;
       int steps = 8;
-      int stepsPerMessage = 3;
       double totalTime = robotModel.getWalkingControllerParameters().getDefaultFinalTransferTime();
 
       for (int foostepIdx = 0; foostepIdx < steps; foostepIdx++)
@@ -92,7 +94,9 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
          frameLocation.changeFrame(ReferenceFrame.getWorldFrame());
          FrameQuaternion frameOrientation = new FrameQuaternion(midFeetFrame);
          frameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+         int id = RandomNumbers.nextInt(random, 1, 5000);
          FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(stepSide, frameLocation, frameOrientation);
+         footstep.setSequenceId(id);
 
          // between 0.75 and 1.25 times the nominal time:
          double swingTime = (1.0 + 0.5 * (random.nextDouble() + 0.5)) * nominalSwingTime;
@@ -105,78 +109,83 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
          stepSide = stepSide.getOppositeSide();
       }
 
-      List<FootstepDataListMessage> messages = new ArrayList<>();
-      int stepsPackedInMessage = 0;
-      while (stepsPackedInMessage < footstepList.size())
+      // set up the listener architecture.
+      AtomicBoolean isInSwing = new AtomicBoolean(false);
+      List<FootstepDataMessage> currentFootstepQueue = new ArrayList<>();
+      FootstepQueueStatusMessage currentFootstepQueueStatus = new FootstepQueueStatusMessage();
+      YoInteger numberOfStepsInController = ((YoInteger) simulationTestHelper.findVariable(WalkingMessageHandler.class.getSimpleName(), "currentNumberOfFootsteps"));
+
+      StatusMessageOutputManager statusMessageOutputManager = simulationTestHelper.getHighLevelHumanoidControllerFactory().getStatusOutputManager();
+
+      statusMessageOutputManager.attachStatusMessageListener(FootstepQueueStatusMessage.class, currentFootstepQueueStatus::set);
+      statusMessageOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, (m) ->
       {
-         FootstepDataListMessage message = new FootstepDataListMessage();
-         for (int footstepIdx = 0; footstepIdx < stepsPerMessage; footstepIdx++)
+         if (m.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
          {
-            if (stepsPackedInMessage == footstepList.size())
-            {
-               break;
-            }
-
-            message.getFootstepDataList().add().set(footstepList.get(stepsPackedInMessage));
-            stepsPackedInMessage++;
+            isInSwing.set(false);
+            currentFootstepQueue.remove(0);
          }
-         message.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
-         message.getQueueingProperties().setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
-         messages.add(message);
-      }
-      FootstepDataListMessage r = messages.get(0);
-      r.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
-      r.getQueueingProperties().setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
+         else
+         {
+            isInSwing.set(true);
+         }
+      });
 
-      YoVariable numberOfStepsInController = simulationTestHelper.findVariable(WalkingMessageHandler.class.getSimpleName(), "currentNumberOfFootsteps");
-      int expectedNumberOfSteps = 0;
+      double simDt = 0.05;
 
-      double timeBetweenSendingMessages = nominalTransferTime / messages.size();
-      double timeUntilDone = totalTime;
-      for (int messageIdx = 0; messageIdx < messages.size(); messageIdx++)
+      // run the sim for a little bit, and make sure the published queue is empty
+      for (int i = 0; i < 100; i++)
       {
-         simulationTestHelper.publishToController(messages.get(messageIdx));
-         expectedNumberOfSteps += messages.get(messageIdx).getFootstepDataList().size();
-         assertTrue(simulationTestHelper.simulateNow(timeBetweenSendingMessages));
-         assertEquals(expectedNumberOfSteps, (int) numberOfStepsInController.getValueAsLongBits());
-         timeUntilDone -= timeBetweenSendingMessages;
+         simulationTestHelper.simulateNow(simDt);
+         assertEquals(0, currentFootstepQueueStatus.getQueuedFootstepList().size());
+         assertEquals(0, numberOfStepsInController.getIntegerValue());
       }
 
-      assertTrue(simulationTestHelper.simulateNow(timeUntilDone + 0.25));
+      // publish some footsteps to the controller, and check that the queue is correct during execution.
+      FootstepDataListMessage footstepListMessage = HumanoidMessageTools.createFootstepDataListMessage(footstepList.toArray(new FootstepDataMessage[0]));
+      simulationTestHelper.publishToController(footstepListMessage);
+
+      currentFootstepQueue.addAll(footstepList);
+
+      simulationTestHelper.simulateNow(50);
+
+      double simTime = 0.0;
+      while (simTime <= totalTime)
+      {
+         simulationTestHelper.simulateNow(simDt);
+         ThreadTools.sleep(50);
+
+         // check that the Queue size is accurate
+         int controllerSideQueueSize = numberOfStepsInController.getIntegerValue() + (isInSwing.get() ? 1 : 0);
+         assertEquals(isInSwing.get(), currentFootstepQueueStatus.getIsFirstStepInSwing());
+         assertEquals(controllerSideQueueSize, currentFootstepQueue.size(), "The actual footstep queue is wrong.");
+         assertEquals(controllerSideQueueSize, currentFootstepQueueStatus.getQueuedFootstepList().size());
+
+         for (int i =- 0; i < currentFootstepQueue.size(); i++)
+         {
+            FootstepDataMessage expectedStep = currentFootstepQueue.get(i);
+            QueuedFootstepStatusMessage queuedStep = currentFootstepQueueStatus.getQueuedFootstepList().get(i);
+            assertFootstepsEqual(expectedStep, queuedStep, 1e-5);
+         }
+
+         simTime += simDt;
+      }
+
+      LogTools.info("Finished, now check to make sure it went forward and all the steps are executed.");
+
+      assertTrue(simulationTestHelper.simulateNow(0.25));
       assertEquals(0, (int) numberOfStepsInController.getValueAsLongBits());
    }
 
-   protected void testMessageIsHandled(FootstepDataListMessage messageInMidFeetZUp) throws SimulationExceededMaximumTimeException
+   private static  void assertFootstepsEqual(FootstepDataMessage expected, QueuedFootstepStatusMessage queuedStep, double epsilon)
    {
-      CommonAvatarEnvironmentInterface environment = new FlatGroundEnvironment();
-      DRCStartingLocation location = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
-      createSimulationTestHelper(environment, location);
-      simulationTestHelper.start();
-      assertTrue(simulationTestHelper.simulateNow(0.25));
-
-      MovingReferenceFrame messageFrame = simulationTestHelper.getControllerReferenceFrames().getMidFeetZUpFrame();
-      transformMessageToWorld(messageFrame, messageInMidFeetZUp);
-
-      simulationTestHelper.publishToController(messageInMidFeetZUp);
-      assertTrue(simulationTestHelper.simulateNow(0.25));
-
-      int steps = (int) simulationTestHelper.findVariable("currentNumberOfFootsteps").getValueAsDouble();
-      assertEquals(messageInMidFeetZUp.getFootstepDataList().size(), steps);
+      assertEquals(expected.getSequenceId(), queuedStep.getSequenceId());
+      EuclidCoreTestTools.assertEquals(expected.getLocation(), queuedStep.getLocation(), epsilon);
+      EuclidCoreTestTools.assertEquals(expected.getOrientation(), queuedStep.getOrientation(), epsilon);
+      assertEquals(expected.getSwingDuration(), queuedStep.getSwingDuration(), epsilon);
+      assertEquals(expected.getTransferDuration(), queuedStep.getTransferDuration(), epsilon);
    }
 
-   private static void transformMessageToWorld(ReferenceFrame messageFrame, FootstepDataListMessage message)
-   {
-      int steps = message.getFootstepDataList().size();
-      FramePose3D stepPose = new FramePose3D();
-      for (int i = 0; i < steps; i++)
-      {
-         FootstepDataMessage footstep = message.getFootstepDataList().get(i);
-         stepPose.setIncludingFrame(messageFrame, footstep.getLocation(), footstep.getOrientation());
-         stepPose.changeFrame(ReferenceFrame.getWorldFrame());
-         footstep.getLocation().set(stepPose.getPosition());
-         footstep.getOrientation().set(stepPose.getOrientation());
-      }
-   }
 
    @BeforeEach
    public void showMemoryUsageBeforeTest()

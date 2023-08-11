@@ -20,3 +20,11 @@ bool track_detected_pose
 
 # Break frequency filter value for nodes that are alpha filtered
 float32 break_frequency
+
+# Distance to robot to disable tracking.
+# Used for automatically disabling tracking for static relative objects.
+float32 distance_to_disable_tracking
+
+# Current distance to robot.
+# Used for automatically disabling tracking for static relative objects.
+float32 current_distance_to_robot
