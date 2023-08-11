@@ -55,6 +55,9 @@ public class PushRobotControllerSCS2 implements Controller
    private final double visualScale;
    private final AtomicReference<Runnable> scheduledPushAction = new AtomicReference<>(null);
 
+   //this is just a debug variables
+   private boolean hasForceBeenApplied = false;
+
    public PushRobotControllerSCS2(DoubleProvider time, Robot pushableRobot, FullHumanoidRobotModel fullRobotModel)
    {
       this(time, pushableRobot, fullRobotModel.getChest().getParentJoint().getName(), new Vector3D(0, 0, 0.3), 0.005);
@@ -166,6 +169,7 @@ public class PushRobotControllerSCS2 implements Controller
 
    public void applyForceDelayed(StateTransitionCondition pushCondition, double timeDelay, Vector3DReadOnly direction, double magnitude, double duration)
    {
+      hasForceBeenApplied = true;
       this.pushCondition = pushCondition;
       setPushDuration(duration);
       setPushForceDirection(direction);
