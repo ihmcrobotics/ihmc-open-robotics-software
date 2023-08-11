@@ -1,18 +1,22 @@
 package us.ihmc.behaviors.activeMapping;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanner;
+import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.tools.ActiveMappingTools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -95,9 +99,17 @@ public class ActiveMappingModule
          Pose2D robotPose2D = new Pose2D(robotLocation.getX(), robotLocation.getY(), leftSolePose.getYaw());
 
          //ActiveMappingTools.getStraightGoalFootPoses(leftSolePose, rightSolePose, leftGoalPose, rightGoalPose, 0.6f);
-         Pose2D goalPose2D = ActiveMappingTools.getNearestUnexploredNode(planarRegionMap.getMapRegions(), gridOrigin, robotPose2D, gridSize, gridResolution);
+         //Pose2D goalPose2D = ActiveMappingTools.getNearestUnexploredNode(planarRegionMap.getMapRegions(), gridOrigin, robotPose2D, gridSize, gridResolution);
 
-         Pose3D goalPose = new Pose3D(goalPose2D.getX(), goalPose2D.getY(), 0.0, 0.0, 0.0, goalPose2D.getYaw());
+         Mat gridColor = new Mat();
+         MonteCarloPlannerTools.plotWorldAndAgent(monteCarloPlanner, gridColor);
+         PerceptionDebugTools.display("Grid", gridColor, 50, 1400);
+         Point2D goalPosition = monteCarloPlanner.plan();
+         monteCarloPlanner.execute(goalPosition);
+
+         float yawRobotToGoal = (float) Math.atan2(goalPosition.getY() - robotLocation.getY(), goalPosition.getX() - robotLocation.getX());
+
+         Pose3D goalPose = new Pose3D(goalPosition.getX(), goalPosition.getY(), 0.0, 0.0, 0.0, yawRobotToGoal);
 
          leftGoalPose.set(goalPose);
          rightGoalPose.set(goalPose);
@@ -175,5 +187,10 @@ public class ActiveMappingModule
    public int getGridSize()
    {
       return gridSize;
+   }
+
+   public void submitRangeScan(ArrayList<Point3D> points)
+   {
+      monteCarloPlanner.addMeasurements(points);
    }
 }

@@ -3,7 +3,6 @@ package us.ihmc.behaviors.monteCarloPlanning;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.euclid.tuple4D.Vector4D32;
 
 import java.util.ArrayList;
@@ -12,7 +11,6 @@ public class World
 {
    private final Mat grid;
    private final Point2D goal;
-   private final ArrayList<Vector4D32> obstacles;
 
    private final int gridHeight;
    private final int gridWidth;
@@ -20,7 +18,6 @@ public class World
 
    public World(int goalMargin, int gridHeight, int gridWidth)
    {
-      this.obstacles = new ArrayList<>();
       this.gridHeight = gridHeight;
       this.gridWidth = gridWidth;
       this.goalMargin = goalMargin;
@@ -30,7 +27,6 @@ public class World
 
    public World(ArrayList<Vector4D32> obstacles, Point2D goal, int goalMargin, int gridHeight, int gridWidth)
    {
-      this.obstacles = obstacles;
       this.grid = new Mat(gridHeight, gridWidth, opencv_core.CV_8UC1);
       this.gridHeight = gridHeight;
       this.gridWidth = gridWidth;
@@ -56,11 +52,20 @@ public class World
                // check if inside the world boundaries
                if (x >= 0 && x <= gridWidth && y >= 0 && y <= gridHeight)
                {
-                  grid.ptr(x, y).putInt(50);
+                  // if currently the pixel is 0 then set it to 50
+                  if (grid.ptr(x, y).get() == 0)
+                  {
+                     grid.ptr(x, y).put((byte) 50);
+                  }
                }
             }
          }
       }
+   }
+
+   public void submitObstacles(ArrayList<Vector4D32> obstacles)
+   {
+      MonteCarloPlannerTools.fillObstacles(obstacles, grid);
    }
 
    public Mat getGrid()
@@ -86,10 +91,5 @@ public class World
    public int getGoalMargin()
    {
       return goalMargin;
-   }
-
-   public ArrayList<Vector4D32> getObstacles()
-   {
-      return obstacles;
    }
 }

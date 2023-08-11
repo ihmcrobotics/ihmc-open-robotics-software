@@ -3,6 +3,7 @@ package us.ihmc.behaviors.activeMapping;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
+import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
@@ -57,12 +58,21 @@ public class ActiveMappingRemoteProcess extends LocalizationAndMappingProcess
       publisherMap = new ROS2PublisherMap(ros2Node);
       publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
       ros2Helper.subscribeViaCallback(terrainRegionsTopic, this::onPlanarRegionsReceived);
-      ros2Helper.subscribeViaCallback(PerceptionAPI.OUSTER_DEPTH_IMAGE, this::onOusterDepthReceived);
+      //ros2Helper.subscribeViaCallback(PerceptionAPI.OUSTER_DEPTH_IMAGE, this::onOusterDepthReceived);
 
       ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(WalkingStatusMessage.class, robotModel.getSimpleRobotName()), this::walkingStatusReceived);
 
       executorService.scheduleAtFixedRate(this::updateActiveMappingPlan, 0, PLANNING_PERIOD_MS, TimeUnit.MILLISECONDS);
       executorService.scheduleAtFixedRate(this::generalUpdate, 0, UPDATE_PERIOD_MS, TimeUnit.MILLISECONDS);
+   }
+
+   public void onOusterDepthReceived(ImageMessage imageMessage)
+   {
+      // Convert Ouster depth image to pointcloud
+
+
+
+
    }
 
    private void walkingStatusReceived(WalkingStatusMessage walkingStatusMessage)
@@ -115,5 +125,10 @@ public class ActiveMappingRemoteProcess extends LocalizationAndMappingProcess
 
 //         configurationParameters.setActiveMapping(false);
       }
+   }
+
+   public ActiveMappingModule getActiveMappingModule()
+   {
+      return activeMappingModule;
    }
 }

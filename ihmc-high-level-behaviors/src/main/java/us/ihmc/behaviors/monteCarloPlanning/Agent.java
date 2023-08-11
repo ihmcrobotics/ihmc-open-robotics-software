@@ -32,10 +32,10 @@ public class Agent
       averagePosition.add(position.getX() * 0.05, position.getY() * 0.05);
    }
 
-   public void measure(ArrayList<Vector4D32> obstacles)
+   public void measure(World world)
    {
       points.clear();
-      points.addAll(rangeScanner.scan(position, obstacles));
+      points.addAll(rangeScanner.scan(position, world));
    }
 
    public void addMeasurements(ArrayList<Point2D> measurements)
