@@ -69,6 +69,42 @@ public class StepConstraintsListCommand implements Command<StepConstraintsListCo
       }
    }
 
+   public void getAsMessage(StepConstraintsListMessage message)
+   {
+      message.getVertexBuffer().clear();
+      message.getRegionOrigin().clear();
+      message.getRegionNormal().clear();
+      message.getRegionOrientation().clear();
+      message.getConcaveHullsSize().clear();
+      message.getNumberOfHolesInRegion().clear();
+      message.getHolePolygonsSize().clear();
+
+      for (int regionIndex = 0; regionIndex < stepsConstraints.size(); regionIndex++)
+      {
+         StepConstraintRegionCommand regionCommand = stepsConstraints.get(regionIndex);
+
+         message.getRegionOrigin().add().set(regionCommand.getRegionOrigin());
+         message.getRegionOrientation().add().set(regionCommand.getTransformToWorld().getRotation()); // TODO check this
+         message.getRegionNormal().add().set(regionCommand.getRegionNormal());
+
+         int concaveHullSize = regionCommand.getConcaveHullVertices().size();
+         message.getConcaveHullsSize().add(concaveHullSize);
+         for (int vertexIndex = 0; vertexIndex < concaveHullSize; vertexIndex++)
+            message.getVertexBuffer().add().set(regionCommand.getConcaveHullVertices().get(vertexIndex));
+
+         int numberOfHoles = regionCommand.getHolesInRegion().size();
+         message.getNumberOfHolesInRegion().add(numberOfHoles);
+         for (int holeIndex = 0; holeIndex < numberOfHoles; holeIndex++)
+         {
+            ConcavePolygon2D hole = regionCommand.getHolesInRegion().get(holeIndex);
+            int holeVertices = hole.getNumberOfVertices();
+            message.getHolePolygonsSize().add(holeVertices);
+            for (int holeVertexIndex = 0; holeVertexIndex < holeVertices; holeVertexIndex++)
+               message.getVertexBuffer().add().set(hole.getVertex(holeVertexIndex));
+         }
+      }
+   }
+
    @Override
    public void set(StepConstraintsListCommand command)
    {
