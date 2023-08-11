@@ -162,6 +162,10 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       this.gizmoFrame = gizmoFrame;
    }
 
+   /**
+    * Use of this method is assuming that this Gizmo is the owner of this frame
+    * and not based on a frame managed externally.
+    */
    public void setParentFrame(ReferenceFrame parentReferenceFrame)
    {
       gizmoFrame.remove();
