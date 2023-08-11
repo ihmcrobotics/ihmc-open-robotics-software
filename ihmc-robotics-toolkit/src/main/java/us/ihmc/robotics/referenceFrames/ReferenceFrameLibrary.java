@@ -16,14 +16,14 @@ import java.util.List;
  */
 public class ReferenceFrameLibrary
 {
-   private final HashSet<String> frameNames = new HashSet<>();
    /** Reference frames are have immutable parents, so we must use Suppliers. */
    private final ArrayList<ReferenceFrameSupplier> referenceFrameSuppliers = new ArrayList<>();
+   private final HashSet<String> frameNames = new HashSet<>();
    private String[] referenceFrameNames;
 
    public void addAll(List<ReferenceFrameSupplier> referenceFrameSuppliers)
    {
-      for (ReferenceFrameSupplier referenceFrame : this.referenceFrameSuppliers)
+      for (ReferenceFrameSupplier referenceFrame : referenceFrameSuppliers)
       {
          add(referenceFrame);
       }
