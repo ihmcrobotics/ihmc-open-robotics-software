@@ -127,36 +127,20 @@ public class HumanoidPerceptionModule
 
    public void updateStructural(ROS2Helper ros2Helper, ArrayList<Point3D> pointCloud, ReferenceFrame sensorFrame, float thresholdHeight)
    {
-//      executorService.submit(() ->
-        {
-           Instant acquisitionTime = Instant.now();
+      this.activeMappingRemoteProcess.getActiveMappingModule().submitRangeScan(pointCloud);
 
-           cameraPose.setToZero(sensorFrame);
-           cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
+      //Instant acquisitionTime = Instant.now();
+      //
+      //cameraPose.setToZero(sensorFrame);
+      //cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
+      //
+      ////           occupancyGrid.put(new Scalar(0));
+      //extractOccupancyGrid(pointCloud, occupancyGrid, sensorFrame.getTransformToWorldFrame(), thresholdHeight,
+      //                    perceptionConfigurationParameters.getOccupancyGridResolution());
+      //
+      //opencv_imgproc.cvtColor(occupancyGrid, gridColor, COLOR_GRAY2RGB);
+      //PerceptionDebugTools.display("Occupancy Grid", gridColor, 1, 800);
 
-//           occupancyGrid.put(new Scalar(0));
-           extractOccupancyGrid(pointCloud, occupancyGrid, sensorFrame.getTransformToWorldFrame(), thresholdHeight,
-                                perceptionConfigurationParameters.getOccupancyGridResolution());
-
-
-
-           opencv_imgproc.cvtColor(occupancyGrid, gridColor, COLOR_GRAY2RGB);
-           PerceptionDebugTools.display("Occupancy Grid", gridColor, 1, 800);
-
-//           OpenCVTools.compressImagePNG(occupancyGrid, compressedOccupancyGrid);
-//           CameraModel.PINHOLE.packMessageFormat(occupancyGridMessage);
-//           PerceptionMessageTools.publishCompressedDepthImage(compressedOccupancyGrid,
-//                                                              PerceptionAPI.OCCUPANCY_GRID_MESSAGE,
-//                                                              occupancyGridMessage,
-//                                                              ros2Helper,
-//                                                              cameraPose,
-//                                                              acquisitionTime,
-//                                                              0,
-//                                                              ousterDepthImage.getImageHeight(),
-//                                                              ousterDepthImage.getImageWidth(),
-//                                                              (float) 0.05f);
-        }
-//        );
    }
 
    public void initializePerspectiveRapidRegionsExtractor(CameraIntrinsics cameraIntrinsics)
@@ -235,7 +219,7 @@ public class HumanoidPerceptionModule
 
          if (point.getZ() > thresholdHeight && gridX >= 0 && gridX < occupancyGrid.cols() && gridY >= 0 && gridY < occupancyGrid.rows())
          {
-            occupancyGrid.ptr(gridY, gridX).putInt(100);
+            occupancyGrid.ptr(gridY, gridX).put((byte)100);
          }
       }
    }
