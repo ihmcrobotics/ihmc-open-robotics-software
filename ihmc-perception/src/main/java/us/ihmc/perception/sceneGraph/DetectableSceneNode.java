@@ -3,6 +3,8 @@ package us.ihmc.perception.sceneGraph;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameSupplier;
 import us.ihmc.tools.Timer;
 
@@ -81,16 +83,23 @@ public abstract class DetectableSceneNode extends SceneNode
     */
    public void setTrackDetectedPose(boolean trackDetectedPose)
    {
-      boolean changed = this.trackDetectedPose != trackDetectedPose;
       this.trackDetectedPose = trackDetectedPose;
 
-      if (changed && trackDetectedPose)
+      if (EuclidCoreMissingTools.hasBeenRemoved(getNodeFrame()))
       {
-         if (trackDetectedPose)
+         LogTools.error("Not sure why this would be removed at this point.");
+      }
+
+      if (trackDetectedPose)
+      {
+         if (parentFrameSupplier.get() != getNodeFrame().getParent())
          {
             changeParentFrameWithoutMoving(parentFrameSupplier.get());
          }
-         else
+      }
+      else
+      {
+         if (getNodeFrame().getParent() != ReferenceFrame.getWorldFrame())
          {
             changeParentFrameWithoutMoving(ReferenceFrame.getWorldFrame());
          }
