@@ -95,7 +95,7 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
          }
          else if (parentDockspacePanel != null)
          {
-            ImGui.setNextWindowViewport(parentDockspacePanel.getWindowViewport().getID());
+            ImGui.setNextWindowViewport(parentDockspacePanel.getWindowViewportID());
          }
 
          int windowFlags = ImGuiWindowFlags.None;
