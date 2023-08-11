@@ -28,13 +28,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegionsList;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LegTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -91,6 +85,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
    private final YoInteger currentNumberOfFootsteps = new YoInteger("currentNumberOfFootsteps", registry);
    private final YoBoolean isWalkingPaused = new YoBoolean("isWalkingPaused", registry);
    private final YoBoolean isWalkingResuming = new YoBoolean("isWalkingResuming", registry);
+   private final YoBoolean clearFootstepsAfterPause = new YoBoolean("clearFootstepsAfterPause", registry);
    private final YoDouble defaultTransferTime = new YoDouble("defaultTransferTime", registry);
    private final YoDouble finalTransferTime = new YoDouble("finalTransferTime", registry);
    private final YoDouble defaultSwingTime = new YoDouble("defaultSwingTime", registry);
@@ -330,6 +325,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
          isWalkingResuming.set(true);
 
       isWalkingPaused.set(command.isPauseRequested());
+      clearFootstepsAfterPause.set(command.getClearRemainingFootstepQueue());
    }
 
    public void handleFootTrajectoryCommand(List<FootTrajectoryCommand> commands)
@@ -666,6 +662,11 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       {
          walkingStatusMessage.setWalkingStatus(WalkingStatus.PAUSED.toByte());
          statusOutputManager.reportStatusMessage(walkingStatusMessage);
+         if (clearFootstepsAfterPause.getBooleanValue())
+         {
+            clearFootsteps();
+            clearFootstepsAfterPause.set(false);
+         }
          checkForPause();
          return;
       }

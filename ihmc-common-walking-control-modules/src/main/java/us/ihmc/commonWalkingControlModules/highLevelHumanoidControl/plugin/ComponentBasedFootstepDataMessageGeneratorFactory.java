@@ -152,11 +152,12 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
       continuousStepGenerator.configureWith(walkingControllerParameters);
       continuousStepGenerator.setStopWalkingMessenger(new StopWalkingMessenger()
       {
-         private final AbortWalkingMessage message = new AbortWalkingMessage();
+         private final PauseWalkingMessage message = HumanoidMessageTools.createPauseWalkingMessage(true);
 
          @Override
          public void submitStopWalkingRequest()
          {
+            message.setClearRemainingFootstepQueue(true);
             walkingCommandInputManager.submitMessage(message);
          }
       });
