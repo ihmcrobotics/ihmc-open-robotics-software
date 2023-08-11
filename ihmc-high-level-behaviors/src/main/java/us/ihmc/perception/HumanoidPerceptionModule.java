@@ -127,19 +127,20 @@ public class HumanoidPerceptionModule
 
    public void updateStructural(ROS2Helper ros2Helper, ArrayList<Point3D> pointCloud, ReferenceFrame sensorFrame, float thresholdHeight)
    {
-      this.activeMappingRemoteProcess.getActiveMappingModule().submitRangeScan(pointCloud);
+      //this.activeMappingRemoteProcess.getActiveMappingModule().submitRangeScan(pointCloud);
 
       //Instant acquisitionTime = Instant.now();
       //
-      //cameraPose.setToZero(sensorFrame);
-      //cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
+      cameraPose.setToZero(sensorFrame);
+      cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
       //
-      ////           occupancyGrid.put(new Scalar(0));
-      //extractOccupancyGrid(pointCloud, occupancyGrid, sensorFrame.getTransformToWorldFrame(), thresholdHeight,
-      //                    perceptionConfigurationParameters.getOccupancyGridResolution());
-      //
-      //opencv_imgproc.cvtColor(occupancyGrid, gridColor, COLOR_GRAY2RGB);
-      //PerceptionDebugTools.display("Occupancy Grid", gridColor, 1, 800);
+      //           occupancyGrid.put(new Scalar(0));
+
+      extractOccupancyGrid(pointCloud, occupancyGrid, sensorFrame.getTransformToWorldFrame(), thresholdHeight,
+                          perceptionConfigurationParameters.getOccupancyGridResolution());
+
+      opencv_imgproc.cvtColor(occupancyGrid, gridColor, COLOR_GRAY2RGB);
+      PerceptionDebugTools.display("Occupancy Grid", gridColor, 1, 800);
 
    }
 
