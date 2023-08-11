@@ -178,7 +178,7 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
             {
                controller.setRadialMenuSelection(null);
             }
-            //TODO make radial menu disappear when joystick is active and move away from hovering
+            
             controller.setRadialMenuBoxPosition(isVRPointing());
          });
       }
