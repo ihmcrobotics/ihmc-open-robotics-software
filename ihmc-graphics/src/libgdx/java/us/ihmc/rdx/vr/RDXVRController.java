@@ -681,7 +681,7 @@ public class RDXVRController extends RDXVRTrackedDevice
          boxOffset.put(side, getRadialMenuBoxOffset());
          pastRadialMenuSelection = radialMenuSelection;
          if (radialMenuSelectionGraphic != null)
-            updateRadialMenuFramePose(side);
+            updateRadialMenuFramePose(side, 1.0F);
       }
       else if (getRadialMenuBoxOffset() == null && isHovering)
       {
@@ -690,12 +690,12 @@ public class RDXVRController extends RDXVRTrackedDevice
             radialMenuSelection = pastRadialMenuSelection;
             boxOffset.put(side, getRadialMenuBoxOffset());
             if (radialMenuSelectionGraphic != null)
-               updateRadialMenuFramePose(side);
+               updateRadialMenuFramePose(side, 1.0F);
          }
       }
    }
 
-   private void updateRadialMenuFramePose(RobotSide side)
+   private void updateRadialMenuFramePose(RobotSide side, float opacity)
    {
       radialMenuReferenceFrame.getReferenceFrame().getTransformToParent().getTranslation().set(boxOffset.get(side));
       radialMenuReferenceFrame.getReferenceFrame().update();
@@ -708,9 +708,15 @@ public class RDXVRController extends RDXVRTrackedDevice
       }
       radialMenuFramePose.getRotation().setToYawOrientation(side.negateIfLeftSide(0.2));
       radialMenuFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      radialMenuSelectionGraphic.setOpacity(opacity);
       radialMenuSelectionGraphic.setPoseInWorldFrame(radialMenuFramePose);
    }
 
+   public void hideRadialMenuBox()
+   {
+      if (radialMenuSelectionGraphic != null && boxOffset.get(side) != null)
+         updateRadialMenuFramePose(side, 0.0F);
+   }
    public Point3D getRadialMenuBoxOffset()
    {
       if (radialMenuSelection != null)
