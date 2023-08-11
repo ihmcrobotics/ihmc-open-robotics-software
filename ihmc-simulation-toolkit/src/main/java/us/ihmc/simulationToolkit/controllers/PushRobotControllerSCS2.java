@@ -172,6 +172,7 @@ public class PushRobotControllerSCS2 implements Controller
       hasForceBeenApplied = true;
       this.pushCondition = pushCondition;
       setPushDuration(duration);
+      System.out.println(pushDuration);
       setPushForceDirection(direction);
       setPushForceMagnitude(magnitude);
       setPushDelay(timeDelay);
@@ -230,9 +231,10 @@ public class PushRobotControllerSCS2 implements Controller
             pushCondition = null;
          }
       }
-
+      
       if (yoTime.getValue() <= pushTimeSwitch.getValue() + pushDuration.getValue() && yoTime.getValue() >= pushTimeSwitch.getValue())
       {
+         System.out.println(pushDuration);
          isBeingPushed.set(true);
          forceVector.set(pushForce);
          pushNumber.decrement();
