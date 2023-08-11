@@ -61,6 +61,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegionsList;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
@@ -410,6 +411,16 @@ public class BalanceManager implements SCS2YoGraphicHolder
       parentRegistry.addChild(registry);
    }
 
+   public Footstep getFootstep(int stepNumber)
+   {
+      return footsteps.get(stepNumber);
+   }
+
+   public FootstepTiming getFootstepTiming(int stepNumber)
+   {
+      return footstepTimings.get(stepNumber);
+   }
+
    public void setUseMomentumRecoveryModeForBalance(boolean useMomentumRecoveryModeForBalance)
    {
       this.useMomentumRecoveryModeForBalance.set(useMomentumRecoveryModeForBalance);
@@ -426,6 +437,11 @@ public class BalanceManager implements SCS2YoGraphicHolder
    public void setCurrentStepConstraints(StepConstraintRegionsList stepConstraintRegionsList)
    {
       stepAdjustmentController.setStepConstraintRegions(stepConstraintRegionsList.getAsList());
+   }
+
+   public List<StepConstraintRegion> getCurrentStepConstraints()
+   {
+      return stepAdjustmentController.getStepConstraintRegions();
    }
 
    public boolean checkAndUpdateStepAdjustment(Footstep footstep)
@@ -864,6 +880,11 @@ public class BalanceManager implements SCS2YoGraphicHolder
    public double getTimeRemainingInCurrentState()
    {
       return contactStateManager.getTimeRemainingInCurrentSupportSequence();
+   }
+
+   public double getTimeIntoCurrentSupportSequence()
+   {
+      return contactStateManager.getTimeInSupportSequence();
    }
 
    public double getAdjustedTimeRemainingInCurrentSupportSequence()
