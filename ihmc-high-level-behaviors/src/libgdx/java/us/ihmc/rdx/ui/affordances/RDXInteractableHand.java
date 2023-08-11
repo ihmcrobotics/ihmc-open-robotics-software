@@ -37,6 +37,7 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
    private RDXSpatialVectorArrows sensorWristWrenchArrows;
    private final RDXSpatialVectorArrows estimatedHandWrenchArrows;
    private final String contextMenuName;
+   private final SideDependentList<Boolean> wasVRPointing = new SideDependentList<>(false, false);
    private Runnable openHand;
    private Runnable closeHand;
    private Runnable gotoDoorAvoidanceArmAngles;
@@ -159,6 +160,7 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
             RDXVRDragData gripDragData = controller.getGripDragData();
             if (isVRPointing() || gripDragData.getObjectBeingDragged() == this)
             {
+               wasVRPointing.put(side, true);;
                controller.controlOfRadialMenu("Open Hand", "Close Hand", "Door Avoidance", "Home Position");
                if (joystickButton.bChanged() && joystickButton.bState())
                {
@@ -166,6 +168,11 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
                   if (radialMenuRunnable != null)
                      radialMenuRunnable.run();
                }
+            }
+            else if (controller.getSelectedPick() == null && !controller.anythingElseBeingDragged(this) && wasVRPointing.get(side))
+            {
+               controller.hideRadialMenuBox();
+               wasVRPointing.put(side, false);
             }
             else
             {
