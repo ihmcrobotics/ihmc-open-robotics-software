@@ -48,6 +48,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
+import us.ihmc.humanoidRobotics.model.CentroidalMomentumProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -157,6 +158,7 @@ public class HumanoidKinematicsSimulation
       fullRobotModel = robotModel.createFullRobotModel();
       CenterOfMassStateProvider centerOfMassStateProvider = CenterOfMassStateProvider.createJacobianBasedStateCalculator(fullRobotModel.getElevator(),
                                                                                                                          worldFrame);
+      CentroidalMomentumProvider centroidalMomentumProvider = CentroidalMomentumProvider.createJacobianBasedStateCalculator(fullRobotModel.getElevator());
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel, centerOfMassStateProvider, null);
 
       // Create registries to match controller so the XML gets loaded properly.
@@ -303,6 +305,7 @@ public class HumanoidKinematicsSimulation
       walkingController.setControllerCoreOutput(controllerCore.getOutputForHighLevelController());
 
       linearMomentumRateControlModule = new LinearMomentumRateControlModule(centerOfMassStateProvider,
+                                                                            centroidalMomentumProvider,
                                                                             referenceFrames,
                                                                             controllerToolbox.getContactableFeet(),
                                                                             fullRobotModel.getElevator(),

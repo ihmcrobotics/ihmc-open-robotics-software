@@ -83,48 +83,6 @@ public class CapturePointCalculator
       return centerOfMassVelocity;
    }
 
-   /**
-    * Deprecated on 6/1/2020. Use
-    * {@link CapturePointTools#computeCapturePointPosition(FramePoint2DReadOnly, FrameVector2DReadOnly, double, FixedFramePoint2DBasics)}
-    * instead
-    */
-   @Deprecated
-   public static void computeCapturePoint(FramePoint2DBasics capturePointToPack,
-                                          FramePoint2DReadOnly centerOfMassInWorld,
-                                          FrameVector2DReadOnly centerOfMassVelocityInWorld,
-                                          double omega0)
-   {
-      CapturePointTools.computeCapturePointPosition(centerOfMassInWorld, centerOfMassVelocityInWorld, omega0, capturePointToPack);
-   }
-
-   /**
-    * Deprecated on 6/1/2020. Use
-    * {@link CapturePointTools#computeCapturePointVelocity(FrameVector2DReadOnly, FrameVector2DReadOnly, double, FixedFrameVector2DBasics)}
-    * instead
-    */
-   @Deprecated
-   public static void computeCapturePointVelocity(FrameVector2DBasics capturePointVelocityToPack,
-                                                  FrameVector2DReadOnly centerOfMassVelocityInWorld,
-                                                  FrameVector2DReadOnly centerOfMassAccelerationInWorld,
-                                                  double omega0)
-   {
-      CapturePointTools.computeCapturePointVelocity(centerOfMassVelocityInWorld, centerOfMassAccelerationInWorld, omega0, capturePointVelocityToPack);
-   }
-
-   /**
-    * Deprecated on 6/1/2020. Use
-    * {@link CapturePointTools#computeCapturePointVelocity(FrameVector3DReadOnly, FrameVector3DReadOnly, double, FixedFrameVector3DBasics)}
-    * instead
-    */
-   @Deprecated
-   public static void computeDCMVelocity(FrameVector3DBasics capturePointVelocityToPack,
-                                         FrameVector3DReadOnly centerOfMassVelocityInWorld,
-                                         FrameVector3DReadOnly centerOfMassAccelerationInWorld,
-                                         double omega0)
-   {
-      CapturePointTools.computeCapturePointVelocity(centerOfMassVelocityInWorld, centerOfMassAccelerationInWorld, omega0, capturePointVelocityToPack);
-   }
-
    public static double computeOmega0ConstantHeight(double g, double z)
    {
       return Math.sqrt(g / z);

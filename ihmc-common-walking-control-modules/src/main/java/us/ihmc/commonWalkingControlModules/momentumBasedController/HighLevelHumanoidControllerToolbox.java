@@ -38,6 +38,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
+import us.ihmc.humanoidRobotics.model.CentroidalMomentumProvider;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -75,7 +76,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProvider, SCS2YoGraphicHolder
+public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProvider, CentroidalMomentumProvider, SCS2YoGraphicHolder
 {
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -463,6 +464,18 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    public FrameVector3DReadOnly getCenterOfMassVelocity()
    {
       return centerOfMassStateProvider.getCenterOfMassVelocity();
+   }
+
+   @Override
+   public FrameVector3DReadOnly getCentroidalLinearMomentum()
+   {
+      return yoLinearMomentum;
+   }
+
+   @Override
+   public FrameVector3DReadOnly getCentroidalAngularMomentum()
+   {
+      return yoAngularMomentum;
    }
 
    private final FrameVector3D angularMomentum = new FrameVector3D();

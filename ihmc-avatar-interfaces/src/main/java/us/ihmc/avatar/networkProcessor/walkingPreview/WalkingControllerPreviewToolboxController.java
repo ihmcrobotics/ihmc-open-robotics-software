@@ -44,6 +44,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessa
 import us.ihmc.humanoidRobotics.communication.walkingPreviewToolboxAPI.WalkingControllerPreviewInputCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
+import us.ihmc.humanoidRobotics.model.CentroidalMomentumProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -80,6 +81,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
    private final OneDoFJointBasics[] allOneDoFJointsExcludingHands;
    private final FullHumanoidRobotModel fullRobotModel;
    private final CenterOfMassStateProvider centerOfMassStateProvider;
+   private final CentroidalMomentumProvider centroidalMomentumProvider;
    private final CommonHumanoidReferenceFrames referenceFrames;
    private final SideDependentList<SettableFootSwitch> footSwitches = new SideDependentList<>();
 
@@ -122,6 +124,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       this.toolboxInputManager = toolboxInputManager;
       fullRobotModel = robotModel.createFullRobotModel();
       centerOfMassStateProvider = CenterOfMassStateProvider.createJacobianBasedStateCalculator(fullRobotModel.getElevator(), ReferenceFrame.getWorldFrame());
+      centroidalMomentumProvider = CentroidalMomentumProvider.createJacobianBasedStateCalculator(fullRobotModel.getElevator());
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel, centerOfMassStateProvider, null);
       previewTime = new YoDouble("timeInPreview", registry);
 
@@ -179,6 +182,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       RigidBodyBasics elevator = fullRobotModel.getElevator();
       SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
       linearMomentumRateControlModule = new LinearMomentumRateControlModule(centerOfMassStateProvider,
+                                                                            centroidalMomentumProvider,
                                                                             referenceFrames,
                                                                             contactableFeet,
                                                                             elevator,

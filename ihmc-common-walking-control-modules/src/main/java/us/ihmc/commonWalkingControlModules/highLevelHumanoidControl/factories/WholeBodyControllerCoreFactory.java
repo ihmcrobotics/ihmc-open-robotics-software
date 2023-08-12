@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
+import us.ihmc.humanoidRobotics.model.CentroidalMomentumProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -166,6 +167,7 @@ public class WholeBodyControllerCoreFactory
          return null;
 
       CenterOfMassStateProvider centerOfMassStateProvider = controllerToolbox;
+      CentroidalMomentumProvider centroidalMomentumProvider = controllerToolbox;
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       double controlDT = controllerToolbox.getControlDT();
       double gravityZ = controllerToolbox.getGravityZ();
@@ -175,6 +177,7 @@ public class WholeBodyControllerCoreFactory
       SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
 
       linearMomentumRateControlModule = new LinearMomentumRateControlModule(centerOfMassStateProvider,
+                                                                            centroidalMomentumProvider,
                                                                             referenceFrames,
                                                                             contactableFeet,
                                                                             elevator,
