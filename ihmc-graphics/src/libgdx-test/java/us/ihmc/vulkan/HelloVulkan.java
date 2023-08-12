@@ -37,6 +37,7 @@ public class HelloVulkan
    private List<Long> swapChainImageViews;
    private int swapChainImageFormat;
    private VkExtent2D swapChainExtent;
+   private long renderPass;
    private long pipelineLayout;
 
    public void run()
@@ -75,6 +76,7 @@ public class HelloVulkan
       createLogicalDevice();
       createSwapChain();
       createImageViews();
+      createRenderPass();
       createGraphicsPipeline();
    }
 
@@ -89,6 +91,8 @@ public class HelloVulkan
    private void cleanup()
    {
       VK10.vkDestroyPipelineLayout(device, pipelineLayout, null);
+
+      VK10.vkDestroyRenderPass(device, renderPass, null);
 
       swapChainImageViews.forEach(imageView -> VK10.vkDestroyImageView(device, imageView, null));
       KHRSwapchain.vkDestroySwapchainKHR(device, swapChain, null);
@@ -351,6 +355,45 @@ public class HelloVulkan
 
             swapChainImageViews.add(pImageView.get(0));
          }
+      }
+   }
+
+   private void createRenderPass()
+   {
+      try (MemoryStack stack = MemoryStack.stackPush())
+      {
+         VkAttachmentDescription.Buffer colorAttachment = VkAttachmentDescription.calloc(1, stack);
+         colorAttachment.format(swapChainImageFormat);
+         colorAttachment.samples(VK10.VK_SAMPLE_COUNT_1_BIT);
+         colorAttachment.loadOp(VK10.VK_ATTACHMENT_LOAD_OP_CLEAR);
+         colorAttachment.storeOp(VK10.VK_ATTACHMENT_STORE_OP_STORE);
+         colorAttachment.stencilLoadOp(VK10.VK_ATTACHMENT_LOAD_OP_DONT_CARE);
+         colorAttachment.stencilStoreOp(VK10.VK_ATTACHMENT_STORE_OP_DONT_CARE);
+         colorAttachment.initialLayout(VK10.VK_IMAGE_LAYOUT_UNDEFINED);
+         colorAttachment.finalLayout(KHRSwapchain.VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+
+         VkAttachmentReference.Buffer colorAttachmentReference = VkAttachmentReference.calloc(1, stack);
+         colorAttachmentReference.attachment(0);
+         colorAttachmentReference.layout(VK10.VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+         VkSubpassDescription.Buffer subpass = VkSubpassDescription.calloc(1, stack);
+         subpass.pipelineBindPoint(VK10.VK_PIPELINE_BIND_POINT_GRAPHICS);
+         subpass.colorAttachmentCount(1);
+         subpass.pColorAttachments(colorAttachmentReference);
+
+         VkRenderPassCreateInfo renderPassInfo = VkRenderPassCreateInfo.calloc(stack);
+         renderPassInfo.sType(VK10.VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO);
+         renderPassInfo.pAttachments(colorAttachment);
+         renderPassInfo.pSubpasses(subpass);
+
+         LongBuffer pRenderPass = stack.mallocLong(1);
+
+         if (VK10.vkCreateRenderPass(device, renderPassInfo, null, pRenderPass) != VK10.VK_SUCCESS)
+         {
+            throw new RuntimeException("Failed to create render pass");
+         }
+
+         renderPass = pRenderPass.get(0);
       }
    }
 
