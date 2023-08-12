@@ -13,7 +13,9 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Taken from https://github.com/Naitsirc98/Vulkan-Tutorial-Java
@@ -21,8 +23,10 @@ import java.util.List;
 public class HelloVulkan
 {
    private static final int UINT32_MAX = 0xFFFFFFFF;
+   private static final long UINT64_MAX = 0xFFFFFFFFFFFFFFFFL;
    private static final int WIDTH = 800;
    private static final int HEIGHT = 600;
+   private static final int MAX_FRAMES_IN_FLIGHT = 2;
 
    private long window;
    private VkInstance vulkanInstance;
@@ -43,6 +47,10 @@ public class HelloVulkan
    private long graphicsPipeline;
    private long commandPool;
    private List<VkCommandBuffer> commandBuffers;
+   private List<HelloVulkanFrame> inFlightFrames;
+   private Map<Integer, HelloVulkanFrame> imagesInFlight;
+   private int currentFrame;
+
 
    public void run()
    {
@@ -85,6 +93,7 @@ public class HelloVulkan
       createFramebuffers();
       createCommandPool();
       createCommandBuffers();
+      createSyncObjects();
    }
 
    private void mainLoop()
@@ -92,11 +101,23 @@ public class HelloVulkan
       while (!GLFW.glfwWindowShouldClose(window))
       {
          GLFW.glfwPollEvents();
+         drawFrame();
       }
+
+      // Wait for the device to complete all operations before release resources
+      VK10.vkDeviceWaitIdle(device);
    }
 
    private void cleanup()
    {
+      inFlightFrames.forEach(frame ->
+      {
+         VK10.vkDestroySemaphore(device, frame.renderFinishedSemaphore(), null);
+         VK10.vkDestroySemaphore(device, frame.imageAvailableSemaphore(), null);
+         VK10.vkDestroyFence(device, frame.fence(), null);
+      });
+      imagesInFlight.clear();
+
       VK10.vkDestroyCommandPool(device, commandPool, null);
 
       swapChainFramebuffers.forEach(framebuffer -> VK10.vkDestroyFramebuffer(device, framebuffer, null));
@@ -391,10 +412,19 @@ public class HelloVulkan
          subpass.colorAttachmentCount(1);
          subpass.pColorAttachments(colorAttachmentReference);
 
+         VkSubpassDependency.Buffer dependency = VkSubpassDependency.calloc(1, stack);
+         dependency.srcSubpass(VK10.VK_SUBPASS_EXTERNAL);
+         dependency.dstSubpass(0);
+         dependency.srcStageMask(VK10.VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
+         dependency.srcAccessMask(0);
+         dependency.dstStageMask(VK10.VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
+         dependency.dstAccessMask(VK10.VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK10.VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
+
          VkRenderPassCreateInfo renderPassInfo = VkRenderPassCreateInfo.calloc(stack);
          renderPassInfo.sType(VK10.VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO);
          renderPassInfo.pAttachments(colorAttachment);
          renderPassInfo.pSubpasses(subpass);
+         renderPassInfo.pDependencies(dependency);
 
          LongBuffer pRenderPass = stack.mallocLong(1);
 
@@ -657,6 +687,93 @@ public class HelloVulkan
                throw new RuntimeException("Failed to record command buffer");
             }
          }
+      }
+   }
+
+   private void createSyncObjects()
+   {
+      inFlightFrames = new ArrayList<>(MAX_FRAMES_IN_FLIGHT);
+      imagesInFlight = new HashMap<>(swapChainImages.size());
+
+      try (MemoryStack stack = MemoryStack.stackPush())
+      {
+         VkSemaphoreCreateInfo semaphoreInfo = VkSemaphoreCreateInfo.calloc(stack);
+         semaphoreInfo.sType(VK10.VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO);
+
+         VkFenceCreateInfo fenceInfo = VkFenceCreateInfo.calloc(stack);
+         fenceInfo.sType(VK10.VK_STRUCTURE_TYPE_FENCE_CREATE_INFO);
+         fenceInfo.flags(VK10.VK_FENCE_CREATE_SIGNALED_BIT);
+
+         LongBuffer pImageAvailableSemaphore = stack.mallocLong(1);
+         LongBuffer pRenderFinishedSemaphore = stack.mallocLong(1);
+         LongBuffer pFence = stack.mallocLong(1);
+
+         for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+         {
+            if (VK10.vkCreateSemaphore(device, semaphoreInfo, null, pImageAvailableSemaphore) != VK10.VK_SUCCESS
+             || VK10.vkCreateSemaphore(device, semaphoreInfo, null, pRenderFinishedSemaphore) != VK10.VK_SUCCESS
+             || VK10.vkCreateFence(device, fenceInfo, null, pFence) != VK10.VK_SUCCESS)
+            {
+
+               throw new RuntimeException("Failed to create synchronization objects for the frame " + i);
+            }
+
+            inFlightFrames.add(new HelloVulkanFrame(pImageAvailableSemaphore.get(0), pRenderFinishedSemaphore.get(0), pFence.get(0)));
+         }
+      }
+   }
+
+   private void drawFrame()
+   {
+      try (MemoryStack stack = MemoryStack.stackPush())
+      {
+         HelloVulkanFrame thisFrame = inFlightFrames.get(currentFrame);
+
+         VK10.vkWaitForFences(device, thisFrame.pFence(), true, UINT64_MAX);
+
+         IntBuffer pImageIndex = stack.mallocInt(1);
+
+         KHRSwapchain.vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, thisFrame.imageAvailableSemaphore(), VK10.VK_NULL_HANDLE, pImageIndex);
+         final int imageIndex = pImageIndex.get(0);
+
+         if (imagesInFlight.containsKey(imageIndex))
+         {
+            VK10.vkWaitForFences(device, imagesInFlight.get(imageIndex).fence(), true, UINT64_MAX);
+         }
+
+         imagesInFlight.put(imageIndex, thisFrame);
+
+         VkSubmitInfo submitInfo = VkSubmitInfo.calloc(stack);
+         submitInfo.sType(VK10.VK_STRUCTURE_TYPE_SUBMIT_INFO);
+
+         submitInfo.waitSemaphoreCount(1);
+         submitInfo.pWaitSemaphores(thisFrame.pImageAvailableSemaphore());
+         submitInfo.pWaitDstStageMask(stack.ints(VK10.VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT));
+
+         submitInfo.pSignalSemaphores(thisFrame.pRenderFinishedSemaphore());
+
+         submitInfo.pCommandBuffers(stack.pointers(commandBuffers.get(imageIndex)));
+
+         VK10.vkResetFences(device, thisFrame.pFence());
+
+         if (VK10.vkQueueSubmit(graphicsQueue, submitInfo, thisFrame.fence()) != VK10.VK_SUCCESS)
+         {
+            throw new RuntimeException("Failed to submit draw command buffer");
+         }
+
+         VkPresentInfoKHR presentInfo = VkPresentInfoKHR.calloc(stack);
+         presentInfo.sType(KHRSwapchain.VK_STRUCTURE_TYPE_PRESENT_INFO_KHR);
+
+         presentInfo.pWaitSemaphores(thisFrame.pRenderFinishedSemaphore());
+
+         presentInfo.swapchainCount(1);
+         presentInfo.pSwapchains(stack.longs(swapChain));
+
+         presentInfo.pImageIndices(pImageIndex);
+
+         KHRSwapchain.vkQueuePresentKHR(presentQueue, presentInfo);
+
+         currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
       }
    }
 
