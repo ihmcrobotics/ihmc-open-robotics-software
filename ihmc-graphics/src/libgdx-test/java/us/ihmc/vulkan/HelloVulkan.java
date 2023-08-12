@@ -34,9 +34,10 @@ public class HelloVulkan
    private VkQueue presentQueue;
    private long swapChain;
    private List<Long> swapChainImages;
-   private List<Long> swapChainImageViews;
    private int swapChainImageFormat;
    private VkExtent2D swapChainExtent;
+   private List<Long> swapChainImageViews;
+   private List<Long> swapChainFramebuffers;
    private long renderPass;
    private long pipelineLayout;
    private long graphicsPipeline;
@@ -79,6 +80,7 @@ public class HelloVulkan
       createImageViews();
       createRenderPass();
       createGraphicsPipeline();
+      createFramebuffers();
    }
 
    private void mainLoop()
@@ -91,6 +93,7 @@ public class HelloVulkan
 
    private void cleanup()
    {
+      swapChainFramebuffers.forEach(framebuffer -> VK10.vkDestroyFramebuffer(device, framebuffer, null));
       VK10.vkDestroyPipeline(device, graphicsPipeline, null);
       VK10.vkDestroyPipelineLayout(device, pipelineLayout, null);
       VK10.vkDestroyRenderPass(device, renderPass, null);
@@ -533,6 +536,38 @@ public class HelloVulkan
 
          vertShaderSPIRV.free();
          fragShaderSPIRV.free();
+      }
+   }
+
+   private void createFramebuffers()
+   {
+      swapChainFramebuffers = new ArrayList<>(swapChainImageViews.size());
+
+      try (MemoryStack stack = MemoryStack.stackPush())
+      {
+         LongBuffer attachments = stack.mallocLong(1);
+         LongBuffer pFramebuffer = stack.mallocLong(1);
+
+         // Lets allocate the create info struct once and just update the pAttachments field each iteration
+         VkFramebufferCreateInfo framebufferInfo = VkFramebufferCreateInfo.calloc(stack);
+         framebufferInfo.sType(VK10.VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO);
+         framebufferInfo.renderPass(renderPass);
+         framebufferInfo.width(swapChainExtent.width());
+         framebufferInfo.height(swapChainExtent.height());
+         framebufferInfo.layers(1);
+
+         for (long imageView : swapChainImageViews)
+         {
+            attachments.put(0, imageView);
+            framebufferInfo.pAttachments(attachments);
+
+            if (VK10.vkCreateFramebuffer(device, framebufferInfo, null, pFramebuffer) != VK10.VK_SUCCESS)
+            {
+               throw new RuntimeException("Failed to create framebuffer");
+            }
+
+            swapChainFramebuffers.add(pFramebuffer.get(0));
+         }
       }
    }
 
