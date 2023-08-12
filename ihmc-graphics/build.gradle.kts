@@ -96,4 +96,8 @@ libgdxTestDependencies {
 
    api("org.lwjgl:lwjgl-vulkan:$lwjglVersion")
    api("org.lwjgl:lwjgl-shaderc:$lwjglVersion")
+   api("org.lwjgl:lwjgl-shaderc:$lwjglVersion:natives-linux")
+   api("org.lwjgl:lwjgl-shaderc:$lwjglVersion:natives-windows")
+   api("org.lwjgl:lwjgl-shaderc:$lwjglVersion:natives-windows-x86")
+   api("org.lwjgl:lwjgl-shaderc:$lwjglVersion:natives-macos")
 }
