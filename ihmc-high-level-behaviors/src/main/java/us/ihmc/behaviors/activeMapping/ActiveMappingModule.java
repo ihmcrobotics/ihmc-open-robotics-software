@@ -15,7 +15,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.mapping.PlanarRegionMap;
-import us.ihmc.perception.tools.ActiveMappingTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -102,7 +101,7 @@ public class ActiveMappingModule
          //Pose2D goalPose2D = ActiveMappingTools.getNearestUnexploredNode(planarRegionMap.getMapRegions(), gridOrigin, robotPose2D, gridSize, gridResolution);
 
          Mat gridColor = new Mat();
-         MonteCarloPlannerTools.plotWorldAndAgent(monteCarloPlanner, gridColor);
+         MonteCarloPlannerTools.plotWorld(monteCarloPlanner.getWorld(), gridColor);
          PerceptionDebugTools.display("Grid", gridColor, 50, 1400);
          Point2D goalPosition = monteCarloPlanner.plan();
          monteCarloPlanner.execute(goalPosition);
@@ -192,5 +191,10 @@ public class ActiveMappingModule
    public void submitRangeScan(ArrayList<Point3D> points)
    {
       monteCarloPlanner.addMeasurements(points);
+   }
+
+   public MonteCarloPlanner getPlanner()
+   {
+      return monteCarloPlanner;
    }
 }
