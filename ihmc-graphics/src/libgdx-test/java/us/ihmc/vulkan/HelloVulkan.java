@@ -689,47 +689,113 @@ public class HelloVulkan
    {
       try (MemoryStack stack = MemoryStack.stackPush())
       {
+         long bufferSize = VulkanVertex.SIZEOF * VERTICES.length;
+
+         LongBuffer pBuffer = stack.mallocLong(1);
+         LongBuffer pBufferMemory = stack.mallocLong(1);
+         createBuffer(bufferSize,
+                      VK10.VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                      VK10.VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK10.VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                      pBuffer,
+                      pBufferMemory);
+
+         long stagingBuffer = pBuffer.get(0);
+         long stagingBufferMemory = pBufferMemory.get(0);
+
+         PointerBuffer data = stack.mallocPointer(1);
+
+         VK10.vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, data);
+         {
+            memcpy(data.getByteBuffer(0, (int) bufferSize), VERTICES);
+         }
+         VK10.vkUnmapMemory(device, stagingBufferMemory);
+
+         createBuffer(bufferSize,
+                      VK10.VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK10.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                      VK10.VK_MEMORY_HEAP_DEVICE_LOCAL_BIT,
+                      pBuffer,
+                      pBufferMemory);
+
+         vertexBuffer = pBuffer.get(0);
+         vertexBufferMemory = pBufferMemory.get(0);
+
+         copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+
+         VK10.vkDestroyBuffer(device, stagingBuffer, null);
+         VK10.vkFreeMemory(device, stagingBufferMemory, null);
+      }
+   }
+
+   private void createBuffer(long size, int usage, int properties, LongBuffer pBuffer, LongBuffer pBufferMemory)
+   {
+      try (MemoryStack stack = MemoryStack.stackPush())
+      {
          VkBufferCreateInfo bufferInfo = VkBufferCreateInfo.calloc(stack);
          bufferInfo.sType(VK10.VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO);
-         bufferInfo.size(VulkanVertex.SIZEOF * VERTICES.length);
-         bufferInfo.usage(VK10.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+         bufferInfo.size(size);
+         bufferInfo.usage(usage);
          bufferInfo.sharingMode(VK10.VK_SHARING_MODE_EXCLUSIVE);
 
-         LongBuffer pVertexBuffer = stack.mallocLong(1);
-
-         if (VK10.vkCreateBuffer(device, bufferInfo, null, pVertexBuffer) != VK10.VK_SUCCESS)
+         if (VK10.vkCreateBuffer(device, bufferInfo, null, pBuffer) != VK10.VK_SUCCESS)
          {
             throw new RuntimeException("Failed to create vertex buffer");
          }
-         vertexBuffer = pVertexBuffer.get(0);
 
          VkMemoryRequirements memRequirements = VkMemoryRequirements.malloc(stack);
-         VK10.vkGetBufferMemoryRequirements(device, vertexBuffer, memRequirements);
+         VK10.vkGetBufferMemoryRequirements(device, pBuffer.get(0), memRequirements);
 
          VkMemoryAllocateInfo allocInfo = VkMemoryAllocateInfo.calloc(stack);
          allocInfo.sType(VK10.VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO);
          allocInfo.allocationSize(memRequirements.size());
-         allocInfo.memoryTypeIndex(findMemoryType(stack,
-                                                  memRequirements.memoryTypeBits(),
-                                                  VK10.VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK10.VK_MEMORY_PROPERTY_HOST_COHERENT_BIT));
+         allocInfo.memoryTypeIndex(findMemoryType(stack, memRequirements.memoryTypeBits(), properties));
 
-         LongBuffer pVertexBufferMemory = stack.mallocLong(1);
-
-         if (VK10.vkAllocateMemory(device, allocInfo, null, pVertexBufferMemory) != VK10.VK_SUCCESS)
+         if (VK10.vkAllocateMemory(device, allocInfo, null, pBufferMemory) != VK10.VK_SUCCESS)
          {
             throw new RuntimeException("Failed to allocate vertex buffer memory");
          }
-         vertexBufferMemory = pVertexBufferMemory.get(0);
 
-         VK10.vkBindBufferMemory(device, vertexBuffer, vertexBufferMemory, 0);
+         VK10.vkBindBufferMemory(device, pBuffer.get(0), pBufferMemory.get(0), 0);
+      }
+   }
 
-         PointerBuffer data = stack.mallocPointer(1);
+   private void copyBuffer(long srcBuffer, long dstBuffer, long size)
+   {
+      try (MemoryStack stack = MemoryStack.stackPush())
+      {
+         VkCommandBufferAllocateInfo allocInfo = VkCommandBufferAllocateInfo.calloc(stack);
+         allocInfo.sType(VK10.VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO);
+         allocInfo.level(VK10.VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+         allocInfo.commandPool(commandPool);
+         allocInfo.commandBufferCount(1);
 
-         VK10.vkMapMemory(device, vertexBufferMemory, 0, bufferInfo.size(), 0, data);
+         PointerBuffer pCommandBuffer = stack.mallocPointer(1);
+         VK10.vkAllocateCommandBuffers(device, allocInfo, pCommandBuffer);
+         VkCommandBuffer commandBuffer = new VkCommandBuffer(pCommandBuffer.get(0), device);
+
+         VkCommandBufferBeginInfo beginInfo = VkCommandBufferBeginInfo.calloc(stack);
+         beginInfo.sType(VK10.VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO);
+         beginInfo.flags(VK10.VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+
+         VK10.vkBeginCommandBuffer(commandBuffer, beginInfo);
          {
-            memcpy(data.getByteBuffer(0, (int) bufferInfo.size()), VERTICES);
+            VkBufferCopy.Buffer copyRegion = VkBufferCopy.calloc(1, stack);
+            copyRegion.size(size);
+            VK10.vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, copyRegion);
          }
-         VK10.vkUnmapMemory(device, vertexBufferMemory);
+         VK10.vkEndCommandBuffer(commandBuffer);
+
+         VkSubmitInfo submitInfo = VkSubmitInfo.calloc(stack);
+         submitInfo.sType(VK10.VK_STRUCTURE_TYPE_SUBMIT_INFO);
+         submitInfo.pCommandBuffers(pCommandBuffer);
+
+         if (VK10.vkQueueSubmit(graphicsQueue, submitInfo, VK10.VK_NULL_HANDLE) != VK10.VK_SUCCESS)
+         {
+            throw new RuntimeException("Failed to submit copy command buffer");
+         }
+
+         VK10.vkQueueWaitIdle(graphicsQueue);
+
+         VK10.vkFreeCommandBuffers(device, commandPool, pCommandBuffer);
       }
    }
 
