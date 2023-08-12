@@ -50,7 +50,7 @@ public class HelloVulkan
    private List<HelloVulkanFrame> inFlightFrames;
    private Map<Integer, HelloVulkanFrame> imagesInFlight;
    private int currentFrame;
-
+   boolean framebufferResize;
 
    public void run()
    {
@@ -68,7 +68,7 @@ public class HelloVulkan
       }
 
       GLFW.glfwWindowHint(GLFW.GLFW_CLIENT_API, GLFW.GLFW_NO_API);
-      GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_FALSE);
+      GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_TRUE);
 
       String title = HelloVulkan.class.getSimpleName();
       window = GLFW.glfwCreateWindow(WIDTH, HEIGHT, title, MemoryUtil.NULL, MemoryUtil.NULL);
@@ -77,6 +77,13 @@ public class HelloVulkan
       {
          throw new RuntimeException("Cannot create window");
       }
+
+      GLFW.glfwSetFramebufferSizeCallback(window, this::framebufferResizeCallback);
+   }
+
+   private void framebufferResizeCallback(long window, int width, int height)
+   {
+      framebufferResize = true;
    }
 
    private void initVulkan()
@@ -86,13 +93,8 @@ public class HelloVulkan
       createSurface();
       pickPhysicalDevice();
       createLogicalDevice();
-      createSwapChain();
-      createImageViews();
-      createRenderPass();
-      createGraphicsPipeline();
-      createFramebuffers();
       createCommandPool();
-      createCommandBuffers();
+      createSwapChainObjects();
       createSyncObjects();
    }
 
@@ -108,8 +110,27 @@ public class HelloVulkan
       VK10.vkDeviceWaitIdle(device);
    }
 
+   private void cleanupSwapChain()
+   {
+      swapChainFramebuffers.forEach(framebuffer -> VK10.vkDestroyFramebuffer(device, framebuffer, null));
+
+      try (MemoryStack stack = MemoryStack.stackPush())
+      {
+         VK10.vkFreeCommandBuffers(device, commandPool, VulkanTools.asPointerBuffer(stack, commandBuffers));
+      }
+
+      VK10.vkDestroyPipeline(device, graphicsPipeline, null);
+      VK10.vkDestroyPipelineLayout(device, pipelineLayout, null);
+      VK10.vkDestroyRenderPass(device, renderPass, null);
+
+      swapChainImageViews.forEach(imageView -> VK10.vkDestroyImageView(device, imageView, null));
+      KHRSwapchain.vkDestroySwapchainKHR(device, swapChain, null);
+   }
+
    private void cleanup()
    {
+      cleanupSwapChain();
+
       inFlightFrames.forEach(frame ->
       {
          VK10.vkDestroySemaphore(device, frame.renderFinishedSemaphore(), null);
@@ -119,14 +140,6 @@ public class HelloVulkan
       imagesInFlight.clear();
 
       VK10.vkDestroyCommandPool(device, commandPool, null);
-
-      swapChainFramebuffers.forEach(framebuffer -> VK10.vkDestroyFramebuffer(device, framebuffer, null));
-      VK10.vkDestroyPipeline(device, graphicsPipeline, null);
-      VK10.vkDestroyPipelineLayout(device, pipelineLayout, null);
-      VK10.vkDestroyRenderPass(device, renderPass, null);
-
-      swapChainImageViews.forEach(imageView -> VK10.vkDestroyImageView(device, imageView, null));
-      KHRSwapchain.vkDestroySwapchainKHR(device, swapChain, null);
 
       VK10.vkDestroyDevice(device, null);
 
@@ -139,6 +152,36 @@ public class HelloVulkan
 
       GLFW.glfwDestroyWindow(window);
       GLFW.glfwTerminate();
+   }
+
+   private void recreateSwapChain()
+   {
+      try (MemoryStack stack = MemoryStack.stackPush())
+      {
+         IntBuffer width = stack.ints(0);
+         IntBuffer height = stack.ints(0);
+
+         while (width.get(0) == 0 && height.get(0) == 0)
+         {
+            GLFW.glfwGetFramebufferSize(window, width, height);
+            GLFW.glfwWaitEvents();
+         }
+      }
+
+      VK10.vkDeviceWaitIdle(device);
+
+      cleanupSwapChain();
+      createSwapChainObjects();
+   }
+
+   private void createSwapChainObjects()
+   {
+      createSwapChain();
+      createImageViews();
+      createRenderPass();
+      createGraphicsPipeline();
+      createFramebuffers();
+      createCommandBuffers();
    }
 
    private void createInstance()
@@ -733,7 +776,18 @@ public class HelloVulkan
 
          IntBuffer pImageIndex = stack.mallocInt(1);
 
-         KHRSwapchain.vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, thisFrame.imageAvailableSemaphore(), VK10.VK_NULL_HANDLE, pImageIndex);
+         int vkResult = KHRSwapchain.vkAcquireNextImageKHR(device,
+                                                           swapChain,
+                                                           UINT64_MAX,
+                                                           thisFrame.imageAvailableSemaphore(),
+                                                           VK10.VK_NULL_HANDLE,
+                                                           pImageIndex);
+         if (vkResult == KHRSwapchain.VK_ERROR_OUT_OF_DATE_KHR)
+         {
+            recreateSwapChain();
+            return;
+         }
+
          final int imageIndex = pImageIndex.get(0);
 
          if (imagesInFlight.containsKey(imageIndex))
@@ -771,7 +825,17 @@ public class HelloVulkan
 
          presentInfo.pImageIndices(pImageIndex);
 
-         KHRSwapchain.vkQueuePresentKHR(presentQueue, presentInfo);
+         vkResult = KHRSwapchain.vkQueuePresentKHR(presentQueue, presentInfo);
+
+         if (vkResult == KHRSwapchain.VK_ERROR_OUT_OF_DATE_KHR || vkResult == KHRSwapchain.VK_SUBOPTIMAL_KHR || framebufferResize)
+         {
+            framebufferResize = false;
+            recreateSwapChain();
+         }
+         else if (vkResult != VK10.VK_SUCCESS)
+         {
+            throw new RuntimeException("Failed to present swap chain image");
+         }
 
          currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
       }
@@ -822,7 +886,10 @@ public class HelloVulkan
          return capabilities.currentExtent();
       }
 
-      VkExtent2D actualExtent = VkExtent2D.malloc(stack).set(WIDTH, HEIGHT);
+      IntBuffer width = stack.ints(0);
+      IntBuffer height = stack.ints(0);
+      GLFW.glfwGetFramebufferSize(window, width, height);
+      VkExtent2D actualExtent = VkExtent2D.malloc(stack).set(width.get(0), height.get(0));
       VkExtent2D minExtent = capabilities.minImageExtent();
       VkExtent2D maxExtent = capabilities.maxImageExtent();
       actualExtent.width(MathTools.clamp(minExtent.width(), maxExtent.width(), actualExtent.width()));

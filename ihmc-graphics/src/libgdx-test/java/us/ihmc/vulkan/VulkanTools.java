@@ -5,12 +5,14 @@ import org.lwjgl.glfw.GLFWVulkan;
 import org.lwjgl.system.Configuration;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
+import org.lwjgl.system.Pointer;
 import org.lwjgl.vulkan.*;
 
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -82,6 +84,13 @@ public class VulkanTools
    {
       PointerBuffer buffer = stack.mallocPointer(collection.size());
       collection.stream().map(stack::UTF8).forEach(buffer::put);
+      return buffer.rewind();
+   }
+
+   public static PointerBuffer asPointerBuffer(MemoryStack stack, List<? extends Pointer> list)
+   {
+      PointerBuffer buffer = stack.mallocPointer(list.size());
+      list.forEach(buffer::put);
       return buffer.rewind();
    }
 
