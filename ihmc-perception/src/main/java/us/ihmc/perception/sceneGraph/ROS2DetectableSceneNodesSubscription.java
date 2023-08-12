@@ -13,6 +13,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
+import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 
 import java.util.List;
 
@@ -86,6 +87,10 @@ public class ROS2DetectableSceneNodesSubscription
                   arUcoMarkerPose.get(arUcoDetectableNode.getMarkerToWorldFrameTransform());
                   arUcoDetectableNode.getMarkerFrame().update();
                }
+               if (detectableSceneNode instanceof StaticRelativeSceneNode staticRelativeNode)
+               {
+                  staticRelativeNode.setCurrentDistance(detectableSceneNodeMessage.getCurrentDistanceToRobot());
+               }
 
                // If the node was recently modified by the operator, the node does not accept
                // updates of the "track detected pose" setting. This is to allow the operator's changes to propagate
@@ -94,6 +99,14 @@ public class ROS2DetectableSceneNodesSubscription
                if (operatorHasntModifiedAnythingRecently)
                {
                   detectableSceneNode.setTrackDetectedPose(detectableSceneNodeMessage.getTrackDetectedPose());
+                  if (detectableSceneNode instanceof ArUcoDetectableNode arUcoDetectableNode)
+                  {
+                     arUcoDetectableNode.setBreakFrequency(detectableSceneNodeMessage.getBreakFrequency());
+                  }
+                  if (detectableSceneNode instanceof StaticRelativeSceneNode staticRelativeNode)
+                  {
+                     staticRelativeNode.setDistanceToDisableTracking(detectableSceneNodeMessage.getDistanceToDisableTracking());
+                  }
 
                   MessageTools.toEuclid(detectableSceneNodeMessage.getTransformToWorld(), nodeToWorldTransform);
                   nodePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), nodeToWorldTransform);

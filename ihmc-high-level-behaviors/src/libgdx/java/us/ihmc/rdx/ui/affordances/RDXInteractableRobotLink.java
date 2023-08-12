@@ -5,7 +5,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.ImGui;
-import org.lwjgl.openvr.InputAnalogActionData;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -47,6 +46,7 @@ public class RDXInteractableRobotLink
    private boolean isMouseHovering;
    private final Notification contextMenuNotification = new Notification();
    private boolean isVRHovering;
+   private final Notification becomesModified = new Notification();
 
    /** For when the graphic, the link, and control frame are all the same. */
    public void create(RDXRobotCollidable robotCollidable, ReferenceFrame syncedControlFrame, String graphicFileName, RDX3DPanel panel3D)
@@ -120,10 +120,10 @@ public class RDXInteractableRobotLink
 
             RDXVRDragData gripDragData = controller.getGripDragData();
             InputDigitalActionData aButton = controller.getAButtonActionData();
+            InputDigitalActionData bButton = controller.getBButtonActionData();
 
             if (isHovering || gripDragData.getObjectBeingDragged() == this)
             {
-               controller.setAButtonText("Execute");
                if (gripDragData.getDragJustStarted())
                {
                   modified = true;
@@ -131,13 +131,22 @@ public class RDXInteractableRobotLink
                   gripDragData.setInteractableFrameOnDragStart(selectablePose3DGizmo.getPoseGizmo().getGizmoFrame());
                }
 
-               if (aButton.bChanged() && aButton.bState() && modified)
+               if (modified)
                {
-                  onSpacePressed.run();
+                  controller.setBButtonText("Delete");
+                  controller.setAButtonText("Execute");
+                  if (aButton.bState() && aButton.bChanged())
+                  {
+                     onSpacePressed.run();
+                  }
+                  if (bButton.bState() && bButton.bChanged())
+                  {
+                     delete();
+                  }
                }
             }
 
-            if (gripDragData.isDragging() && gripDragData.getObjectBeingDragged() == this)
+            if (gripDragData.isBeingDragged(this))
             {
                gripDragData.getDragFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
                                                                       selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getParent());
@@ -189,9 +198,8 @@ public class RDXInteractableRobotLink
       return becomesModified;
    }
 
-   public boolean renderImGuiWidgets()
+   public void renderImGuiWidgets()
    {
-      boolean becomesModified = false;
       if (ImGui.radioButton(labels.get("Deleted"), isDeleted()))
       {
          delete();
@@ -202,7 +210,7 @@ public class RDXInteractableRobotLink
          selectablePose3DGizmo.getSelected().set(false);
          if (!modified)
          {
-            becomesModified = true;
+            becomesModified.set();
             modified = true;
          }
       }
@@ -212,11 +220,10 @@ public class RDXInteractableRobotLink
          selectablePose3DGizmo.getSelected().set(true);
          if (!modified)
          {
-            becomesModified = true;
+            becomesModified.set();
             modified = true;
          }
       }
-      return becomesModified;
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -229,6 +236,7 @@ public class RDXInteractableRobotLink
       {
          highlightModel.getRenderables(renderables, pool);
       }
+
       selectablePose3DGizmo.getVirtualRenderables(renderables, pool);
    }
 
@@ -256,6 +264,16 @@ public class RDXInteractableRobotLink
    public ReferenceFrame getControlReferenceFrame()
    {
       return selectablePose3DGizmo.getPoseGizmo().getGizmoFrame();
+   }
+
+   public boolean isVRHovering()
+   {
+      return isVRHovering;
+   }
+
+   public Notification getBecomesModified()
+   {
+      return becomesModified;
    }
 
    public void setOnSpacePressed(Runnable onSpacePressed)
