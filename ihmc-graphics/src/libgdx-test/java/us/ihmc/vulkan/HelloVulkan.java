@@ -7,6 +7,8 @@ import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.vulkan.*;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.graphicsDescription.color.MutableColor;
 import us.ihmc.log.LogTools;
 
 import java.nio.ByteBuffer;
@@ -28,6 +30,12 @@ public class HelloVulkan
    private static final int HEIGHT = 600;
    private static final int MAX_FRAMES_IN_FLIGHT = 2;
 
+   private static final VulkanVertex[] VERTICES = {
+         new VulkanVertex(new Vector2D(0.0, -0.5), new MutableColor(1.0f, 0.0f, 0.0f)),
+         new VulkanVertex(new Vector2D(0.5, 0.5), new MutableColor(0.0f, 1.0f, 0.0f)),
+         new VulkanVertex(new Vector2D(-0.5, 0.5), new MutableColor(0.0f, 0.0f, 1.0f))
+   };
+
    private long window;
    private VkInstance vulkanInstance;
    private long debugMessenger;
@@ -46,6 +54,8 @@ public class HelloVulkan
    private long pipelineLayout;
    private long graphicsPipeline;
    private long commandPool;
+   private long vertexBuffer;
+   private long vertexBufferMemory;
    private List<VkCommandBuffer> commandBuffers;
    private List<HelloVulkanFrame> inFlightFrames;
    private Map<Integer, HelloVulkanFrame> imagesInFlight;
@@ -94,6 +104,7 @@ public class HelloVulkan
       pickPhysicalDevice();
       createLogicalDevice();
       createCommandPool();
+      createVertexBuffer();
       createSwapChainObjects();
       createSyncObjects();
    }
@@ -130,6 +141,9 @@ public class HelloVulkan
    private void cleanup()
    {
       cleanupSwapChain();
+
+      VK10.vkDestroyBuffer(device, vertexBuffer, null);
+      VK10.vkFreeMemory(device, vertexBufferMemory, null);
 
       inFlightFrames.forEach(frame ->
       {
@@ -487,9 +501,9 @@ public class HelloVulkan
          // Let's compile the GLSL shaders into SPIR-V at runtime using the shaderc library
          // Check ShaderSPIRVUtils class to see how it can be done
          ShaderSPIRVUtils.SPIRV vertShaderSPIRV
-               = ShaderSPIRVUtils.compileShaderFile("shaders/09_shader_base.vert", ShaderSPIRVUtils.ShaderKind.VERTEX_SHADER);
+               = ShaderSPIRVUtils.compileShaderFile("shaders/17_shader_vertexbuffer.vert", ShaderSPIRVUtils.ShaderKind.VERTEX_SHADER);
          ShaderSPIRVUtils.SPIRV fragShaderSPIRV
-               = ShaderSPIRVUtils.compileShaderFile("shaders/09_shader_base.frag", ShaderSPIRVUtils.ShaderKind.FRAGMENT_SHADER);
+               = ShaderSPIRVUtils.compileShaderFile("shaders/17_shader_vertexbuffer.frag", ShaderSPIRVUtils.ShaderKind.FRAGMENT_SHADER);
          long vertShaderModule = createShaderModule(vertShaderSPIRV.bytecode());
          long fragShaderModule = createShaderModule(fragShaderSPIRV.bytecode());
 
@@ -512,6 +526,8 @@ public class HelloVulkan
 
          VkPipelineVertexInputStateCreateInfo vertexInputInfo = VkPipelineVertexInputStateCreateInfo.calloc(stack);
          vertexInputInfo.sType(VK10.VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO);
+         vertexInputInfo.pVertexBindingDescriptions(VulkanVertex.getBindingDescription(stack));
+         vertexInputInfo.pVertexAttributeDescriptions(VulkanVertex.getAttributeDescriptions(stack));
 
          // ===> ASSEMBLY STAGE <===
 
@@ -669,6 +685,83 @@ public class HelloVulkan
       }
    }
 
+   private void createVertexBuffer()
+   {
+      try (MemoryStack stack = MemoryStack.stackPush())
+      {
+         VkBufferCreateInfo bufferInfo = VkBufferCreateInfo.calloc(stack);
+         bufferInfo.sType(VK10.VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO);
+         bufferInfo.size(VulkanVertex.SIZEOF * VERTICES.length);
+         bufferInfo.usage(VK10.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+         bufferInfo.sharingMode(VK10.VK_SHARING_MODE_EXCLUSIVE);
+
+         LongBuffer pVertexBuffer = stack.mallocLong(1);
+
+         if (VK10.vkCreateBuffer(device, bufferInfo, null, pVertexBuffer) != VK10.VK_SUCCESS)
+         {
+            throw new RuntimeException("Failed to create vertex buffer");
+         }
+         vertexBuffer = pVertexBuffer.get(0);
+
+         VkMemoryRequirements memRequirements = VkMemoryRequirements.malloc(stack);
+         VK10.vkGetBufferMemoryRequirements(device, vertexBuffer, memRequirements);
+
+         VkMemoryAllocateInfo allocInfo = VkMemoryAllocateInfo.calloc(stack);
+         allocInfo.sType(VK10.VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO);
+         allocInfo.allocationSize(memRequirements.size());
+         allocInfo.memoryTypeIndex(findMemoryType(stack,
+                                                  memRequirements.memoryTypeBits(),
+                                                  VK10.VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK10.VK_MEMORY_PROPERTY_HOST_COHERENT_BIT));
+
+         LongBuffer pVertexBufferMemory = stack.mallocLong(1);
+
+         if (VK10.vkAllocateMemory(device, allocInfo, null, pVertexBufferMemory) != VK10.VK_SUCCESS)
+         {
+            throw new RuntimeException("Failed to allocate vertex buffer memory");
+         }
+         vertexBufferMemory = pVertexBufferMemory.get(0);
+
+         VK10.vkBindBufferMemory(device, vertexBuffer, vertexBufferMemory, 0);
+
+         PointerBuffer data = stack.mallocPointer(1);
+
+         VK10.vkMapMemory(device, vertexBufferMemory, 0, bufferInfo.size(), 0, data);
+         {
+            memcpy(data.getByteBuffer(0, (int) bufferInfo.size()), VERTICES);
+         }
+         VK10.vkUnmapMemory(device, vertexBufferMemory);
+      }
+   }
+
+   private void memcpy(ByteBuffer buffer, VulkanVertex[] vertices)
+   {
+      for (VulkanVertex vertex : vertices)
+      {
+         buffer.putFloat(vertex.getPosition().getX32());
+         buffer.putFloat(vertex.getPosition().getY32());
+
+         buffer.putFloat(vertex.getColor().getX());
+         buffer.putFloat(vertex.getColor().getY());
+         buffer.putFloat(vertex.getColor().getZ());
+      }
+   }
+
+   private int findMemoryType(MemoryStack stack, int typeFilter, int properties)
+   {
+      VkPhysicalDeviceMemoryProperties memProperties = VkPhysicalDeviceMemoryProperties.malloc(stack);
+      VK10.vkGetPhysicalDeviceMemoryProperties(physicalDevice, memProperties);
+
+      for (int i = 0; i < memProperties.memoryTypeCount(); i++)
+      {
+         if ((typeFilter & (1 << i)) != 0 && (memProperties.memoryTypes(i).propertyFlags() & properties) == properties)
+         {
+            return i;
+         }
+      }
+
+      throw new RuntimeException("Failed to find suitable memory type");
+   }
+
    private void createCommandBuffers()
    {
       final int commandBuffersCount = swapChainFramebuffers.size();
@@ -721,7 +814,12 @@ public class HelloVulkan
             VK10.vkCmdBeginRenderPass(commandBuffer, renderPassInfo, VK10.VK_SUBPASS_CONTENTS_INLINE);
             {
                VK10.vkCmdBindPipeline(commandBuffer, VK10.VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
-               VK10.vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+
+               LongBuffer vertexBuffers = stack.longs(vertexBuffer);
+               LongBuffer offsets = stack.longs(0);
+               VK10.vkCmdBindVertexBuffers(commandBuffer, 0, vertexBuffers, offsets);
+
+               VK10.vkCmdDraw(commandBuffer, VERTICES.length, 1, 0, 0);
             }
             VK10.vkCmdEndRenderPass(commandBuffer);
 
@@ -787,6 +885,10 @@ public class HelloVulkan
             recreateSwapChain();
             return;
          }
+         else if (vkResult != VK10.VK_SUCCESS)
+         {
+            throw new RuntimeException("Cannot get image");
+         }
 
          final int imageIndex = pImageIndex.get(0);
 
@@ -810,9 +912,10 @@ public class HelloVulkan
 
          VK10.vkResetFences(device, thisFrame.pFence());
 
-         if (VK10.vkQueueSubmit(graphicsQueue, submitInfo, thisFrame.fence()) != VK10.VK_SUCCESS)
+         if ((vkResult = VK10.vkQueueSubmit(graphicsQueue, submitInfo, thisFrame.fence())) != VK10.VK_SUCCESS)
          {
-            throw new RuntimeException("Failed to submit draw command buffer");
+            VK10.vkResetFences(device, thisFrame.pFence());
+            throw new RuntimeException("Failed to submit draw command buffer: " + vkResult);
          }
 
          VkPresentInfoKHR presentInfo = VkPresentInfoKHR.calloc(stack);
