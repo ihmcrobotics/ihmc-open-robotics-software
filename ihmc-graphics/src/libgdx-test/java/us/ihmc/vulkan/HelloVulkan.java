@@ -37,6 +37,7 @@ public class HelloVulkan
    private List<Long> swapChainImageViews;
    private int swapChainImageFormat;
    private VkExtent2D swapChainExtent;
+   private long pipelineLayout;
 
    public void run()
    {
@@ -87,6 +88,8 @@ public class HelloVulkan
 
    private void cleanup()
    {
+      VK10.vkDestroyPipelineLayout(device, pipelineLayout, null);
+
       swapChainImageViews.forEach(imageView -> VK10.vkDestroyImageView(device, imageView, null));
       KHRSwapchain.vkDestroySwapchainKHR(device, swapChain, null);
 
@@ -378,6 +381,88 @@ public class HelloVulkan
          fragShaderStageInfo.stage(VK10.VK_SHADER_STAGE_FRAGMENT_BIT);
          fragShaderStageInfo.module(fragShaderModule);
          fragShaderStageInfo.pName(entryPoint);
+
+         // ===> VERTEX STAGE <===
+
+         VkPipelineVertexInputStateCreateInfo vertexInputInfo = VkPipelineVertexInputStateCreateInfo.calloc(stack);
+         vertexInputInfo.sType(VK10.VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO);
+
+         // ===> ASSEMBLY STAGE <===
+
+         VkPipelineInputAssemblyStateCreateInfo inputAssembly = VkPipelineInputAssemblyStateCreateInfo.calloc(stack);
+         inputAssembly.sType(VK10.VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO);
+         inputAssembly.topology(VK10.VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+         inputAssembly.primitiveRestartEnable(false);
+
+         // ===> VIEWPORT & SCISSOR
+
+         VkViewport.Buffer viewport = VkViewport.calloc(1, stack);
+         viewport.x(0.0f);
+         viewport.y(0.0f);
+         viewport.width(swapChainExtent.width());
+         viewport.height(swapChainExtent.height());
+         viewport.minDepth(0.0f);
+         viewport.maxDepth(1.0f);
+
+         VkRect2D.Buffer scissor = VkRect2D.calloc(1, stack);
+         scissor.offset(VkOffset2D.calloc(stack).set(0, 0));
+         scissor.extent(swapChainExtent);
+
+         VkPipelineViewportStateCreateInfo viewportState = VkPipelineViewportStateCreateInfo.calloc(stack);
+         viewportState.sType(VK10.VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO);
+         viewportState.pViewports(viewport);
+         viewportState.pScissors(scissor);
+
+         // ===> RASTERIZATION STAGE <===
+
+         VkPipelineRasterizationStateCreateInfo rasterizer = VkPipelineRasterizationStateCreateInfo.calloc(stack);
+         rasterizer.sType(VK10.VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO);
+         rasterizer.depthClampEnable(false);
+         rasterizer.rasterizerDiscardEnable(false);
+         rasterizer.polygonMode(VK10.VK_POLYGON_MODE_FILL);
+         rasterizer.lineWidth(1.0f);
+         rasterizer.cullMode(VK10.VK_CULL_MODE_BACK_BIT);
+         rasterizer.frontFace(VK10.VK_FRONT_FACE_CLOCKWISE);
+         rasterizer.depthBiasEnable(false);
+
+         // ===> MULTISAMPLING <===
+
+         VkPipelineMultisampleStateCreateInfo multisampling = VkPipelineMultisampleStateCreateInfo.calloc(stack);
+         multisampling.sType(VK10.VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO);
+         multisampling.sampleShadingEnable(false);
+         multisampling.rasterizationSamples(VK10.VK_SAMPLE_COUNT_1_BIT);
+
+         // ===> COLOR BLENDING <===
+
+         VkPipelineColorBlendAttachmentState.Buffer colorBlendAttachment = VkPipelineColorBlendAttachmentState.calloc(1, stack);
+         colorBlendAttachment.colorWriteMask(VK10.VK_COLOR_COMPONENT_R_BIT
+                                           | VK10.VK_COLOR_COMPONENT_G_BIT
+                                           | VK10.VK_COLOR_COMPONENT_B_BIT
+                                           | VK10.VK_COLOR_COMPONENT_A_BIT);
+         colorBlendAttachment.blendEnable(false);
+
+         VkPipelineColorBlendStateCreateInfo colorBlending = VkPipelineColorBlendStateCreateInfo.calloc(stack);
+         colorBlending.sType(VK10.VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO);
+         colorBlending.logicOpEnable(false);
+         colorBlending.logicOp(VK10.VK_LOGIC_OP_COPY);
+         colorBlending.pAttachments(colorBlendAttachment);
+         colorBlending.blendConstants(stack.floats(0.0f, 0.0f, 0.0f, 0.0f));
+
+         // ===> PIPELINE LAYOUT CREATION <===
+
+         VkPipelineLayoutCreateInfo pipelineLayoutInfo = VkPipelineLayoutCreateInfo.calloc(stack);
+         pipelineLayoutInfo.sType(VK10.VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO);
+
+         LongBuffer pPipelineLayout = stack.longs(VK10.VK_NULL_HANDLE);
+
+         if (VK10.vkCreatePipelineLayout(device, pipelineLayoutInfo, null, pPipelineLayout) != VK10.VK_SUCCESS)
+         {
+            throw new RuntimeException("Failed to create pipeline layout");
+         }
+
+         pipelineLayout = pPipelineLayout.get(0);
+
+         // ===> RELEASE RESOURCES <===
 
          VK10.vkDestroyShaderModule(device, vertShaderModule, null);
          VK10.vkDestroyShaderModule(device, fragShaderModule, null);
