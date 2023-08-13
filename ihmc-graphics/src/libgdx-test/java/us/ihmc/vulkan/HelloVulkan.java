@@ -36,6 +36,11 @@ public class HelloVulkan
       new VulkanVertex(new Vector2D(-0.5, 0.5), new MutableColor(0.0f, 0.0f, 1.0f))
    };
 
+   private static final /*uint16_t*/ short[] INDICES =
+   {
+      0, 1, 2, 2, 3, 0
+   };
+
    private long window;
    private VkInstance vulkanInstance;
    private long debugMessenger;
@@ -58,6 +63,8 @@ public class HelloVulkan
    private long transferCommandPool;
    private long vertexBuffer;
    private long vertexBufferMemory;
+   private long indexBuffer;
+   private long indexBufferMemory;
    private List<VkCommandBuffer> commandBuffers;
    private VkCommandBuffer transferCommandBuffer;
    private List<HelloVulkanFrame> inFlightFrames;
@@ -108,6 +115,7 @@ public class HelloVulkan
       createLogicalDevice();
       createCommandPool();
       createVertexBuffer();
+      createIndexBuffer();
       createSwapChainObjects();
       createSyncObjects();
    }
@@ -144,6 +152,9 @@ public class HelloVulkan
    private void cleanup()
    {
       cleanupSwapChain();
+
+      VK10.vkDestroyBuffer(device, indexBuffer, null);
+      VK10.vkFreeMemory(device, indexBufferMemory, null);
 
       VK10.vkFreeCommandBuffers(device, transferCommandPool, MemoryStack.stackGet().pointers(transferCommandBuffer));
       VK10.vkDestroyCommandPool(device, transferCommandPool, null);
@@ -758,6 +769,47 @@ public class HelloVulkan
          vertexBufferMemory = pBufferMemory.get(0);
 
          copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+
+         VK10.vkDestroyBuffer(device, stagingBuffer, null);
+         VK10.vkFreeMemory(device, stagingBufferMemory, null);
+      }
+   }
+
+   private void createIndexBuffer()
+   {
+      try (MemoryStack stack = MemoryStack.stackPush())
+      {
+         long bufferSize = Short.BYTES * INDICES.length;
+
+         LongBuffer pBuffer = stack.mallocLong(1);
+         LongBuffer pBufferMemory = stack.mallocLong(1);
+         createBuffer(bufferSize,
+                      VK10.VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                      VK10.VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK10.VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                      pBuffer,
+                      pBufferMemory);
+
+         long stagingBuffer = pBuffer.get(0);
+         long stagingBufferMemory = pBufferMemory.get(0);
+
+         PointerBuffer data = stack.mallocPointer(1);
+
+         VK10.vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, data);
+         {
+            memcpy(data.getByteBuffer(0, (int) bufferSize), INDICES);
+         }
+         VK10.vkUnmapMemory(device, stagingBufferMemory);
+
+         createBuffer(bufferSize,
+                      VK10.VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK10.VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                      VK10.VK_MEMORY_HEAP_DEVICE_LOCAL_BIT,
+                      pBuffer,
+                      pBufferMemory);
+
+         indexBuffer = pBuffer.get(0);
+         indexBufferMemory = pBufferMemory.get(0);
+
+         copyBuffer(stagingBuffer, indexBuffer, bufferSize);
 
          VK10.vkDestroyBuffer(device, stagingBuffer, null);
          VK10.vkFreeMemory(device, stagingBufferMemory, null);
