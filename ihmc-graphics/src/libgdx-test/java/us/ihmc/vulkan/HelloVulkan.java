@@ -31,9 +31,9 @@ public class HelloVulkan
    private static final int MAX_FRAMES_IN_FLIGHT = 2;
 
    private static final VulkanVertex[] VERTICES = {
-      new VulkanVertex(new Vector2D(0.0, -0.5), new MutableColor(1.0f, 0.0f, 0.0f)),
-      new VulkanVertex(new Vector2D(0.5, 0.5), new MutableColor(0.0f, 1.0f, 0.0f)),
-      new VulkanVertex(new Vector2D(-0.5, 0.5), new MutableColor(0.0f, 0.0f, 1.0f))
+         new VulkanVertex(new Vector2D(0.0, -0.5), new MutableColor(1.0f, 0.0f, 0.0f)),
+         new VulkanVertex(new Vector2D(0.5, 0.5), new MutableColor(0.0f, 1.0f, 0.0f)),
+         new VulkanVertex(new Vector2D(-0.5, 0.5), new MutableColor(0.0f, 0.0f, 1.0f))
    };
 
    private static final /*uint16_t*/ short[] INDICES =
@@ -49,7 +49,6 @@ public class HelloVulkan
    private VkDevice device;
    private VkQueue graphicsQueue;
    private VkQueue presentQueue;
-   private VkQueue transferQueue;
    private long swapChain;
    private List<Long> swapChainImages;
    private int swapChainImageFormat;
@@ -60,13 +59,11 @@ public class HelloVulkan
    private long pipelineLayout;
    private long graphicsPipeline;
    private long commandPool;
-   private long transferCommandPool;
    private long vertexBuffer;
    private long vertexBufferMemory;
    private long indexBuffer;
    private long indexBufferMemory;
    private List<VkCommandBuffer> commandBuffers;
-   private VkCommandBuffer transferCommandBuffer;
    private List<HelloVulkanFrame> inFlightFrames;
    private Map<Integer, HelloVulkanFrame> imagesInFlight;
    private int currentFrame;
@@ -155,9 +152,6 @@ public class HelloVulkan
 
       VK10.vkDestroyBuffer(device, indexBuffer, null);
       VK10.vkFreeMemory(device, indexBufferMemory, null);
-
-      VK10.vkFreeCommandBuffers(device, transferCommandPool, MemoryStack.stackGet().pointers(transferCommandBuffer));
-      VK10.vkDestroyCommandPool(device, transferCommandPool, null);
 
       VK10.vkDestroyBuffer(device, vertexBuffer, null);
       VK10.vkFreeMemory(device, vertexBufferMemory, null);
@@ -365,8 +359,6 @@ public class HelloVulkan
          graphicsQueue = new VkQueue(pQueue.get(0), device);
          VK10.vkGetDeviceQueue(device, indices.getPresentFamily(), 0, pQueue);
          presentQueue = new VkQueue(pQueue.get(0), device);
-         VK10.vkGetDeviceQueue(device, indices.getTransferFamily(), 0, pQueue);
-         transferQueue = new VkQueue(pQueue.get(0), device);
       }
    }
 
@@ -701,36 +693,6 @@ public class HelloVulkan
             throw new RuntimeException("Failed to create command pool");
          }
          commandPool = pCommandPool.get(0);
-
-         // ===> Create the transfer command pool <===
-
-         poolInfo.queueFamilyIndex(queueFamilyIndices.getTransferFamily());
-         // Tell Vulkan that the buffers of this pool will be constantly rerecorded
-         poolInfo.flags(VK10.VK_COMMAND_POOL_CREATE_TRANSIENT_BIT);
-
-         if (VK10.vkCreateCommandPool(device, poolInfo, null, pCommandPool) != VK10.VK_SUCCESS)
-         {
-            throw new RuntimeException("Failed to create command pool");
-         }
-         transferCommandPool = pCommandPool.get(0);
-
-         allocateTransferCommandBuffer();
-      }
-   }
-
-   private void allocateTransferCommandBuffer()
-   {
-      try (MemoryStack stack = MemoryStack.stackPush())
-      {
-         VkCommandBufferAllocateInfo allocInfo = VkCommandBufferAllocateInfo.calloc(stack);
-         allocInfo.sType(VK10.VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO);
-         allocInfo.level(VK10.VK_COMMAND_BUFFER_LEVEL_PRIMARY);
-         allocInfo.commandPool(transferCommandPool);
-         allocInfo.commandBufferCount(1);
-
-         PointerBuffer pCommandBuffer = stack.mallocPointer(1);
-         VK10.vkAllocateCommandBuffers(device, allocInfo, pCommandBuffer);
-         transferCommandBuffer = new VkCommandBuffer(pCommandBuffer.get(0), device);
       }
    }
 
@@ -824,10 +786,7 @@ public class HelloVulkan
          bufferInfo.sType(VK10.VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO);
          bufferInfo.size(size);
          bufferInfo.usage(usage);
-         // Change the sharing mode to concurrent (it will be shared between graphics and transfer queues)
-         QueueFamilyIndices queueFamilies = findQueueFamilies(physicalDevice);
-         bufferInfo.pQueueFamilyIndices(stack.ints(queueFamilies.getGraphicsFamily(), queueFamilies.getTransferFamily()));
-         bufferInfo.sharingMode(VK10.VK_SHARING_MODE_CONCURRENT);
+         bufferInfo.sharingMode(VK10.VK_SHARING_MODE_EXCLUSIVE);
 
          if (VK10.vkCreateBuffer(device, bufferInfo, null, pBuffer) != VK10.VK_SUCCESS)
          {
@@ -855,29 +814,40 @@ public class HelloVulkan
    {
       try (MemoryStack stack = MemoryStack.stackPush())
       {
+         VkCommandBufferAllocateInfo allocInfo = VkCommandBufferAllocateInfo.calloc(stack);
+         allocInfo.sType(VK10.VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO);
+         allocInfo.level(VK10.VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+         allocInfo.commandPool(commandPool);
+         allocInfo.commandBufferCount(1);
+
+         PointerBuffer pCommandBuffer = stack.mallocPointer(1);
+         VK10.vkAllocateCommandBuffers(device, allocInfo, pCommandBuffer);
+         VkCommandBuffer commandBuffer = new VkCommandBuffer(pCommandBuffer.get(0), device);
+
          VkCommandBufferBeginInfo beginInfo = VkCommandBufferBeginInfo.calloc(stack);
          beginInfo.sType(VK10.VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO);
          beginInfo.flags(VK10.VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
-         // Transfer command buffer implicitly reset
-         VK10.vkBeginCommandBuffer(transferCommandBuffer, beginInfo);
+         VK10.vkBeginCommandBuffer(commandBuffer, beginInfo);
          {
             VkBufferCopy.Buffer copyRegion = VkBufferCopy.calloc(1, stack);
             copyRegion.size(size);
-            VK10.vkCmdCopyBuffer(transferCommandBuffer, srcBuffer, dstBuffer, copyRegion);
+            VK10.vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, copyRegion);
          }
-         VK10.vkEndCommandBuffer(transferCommandBuffer);
+         VK10.vkEndCommandBuffer(commandBuffer);
 
          VkSubmitInfo submitInfo = VkSubmitInfo.calloc(stack);
          submitInfo.sType(VK10.VK_STRUCTURE_TYPE_SUBMIT_INFO);
-         submitInfo.pCommandBuffers(stack.pointers(transferCommandBuffer));
+         submitInfo.pCommandBuffers(pCommandBuffer);
 
-         if (VK10.vkQueueSubmit(transferQueue, submitInfo, VK10.VK_NULL_HANDLE) != VK10.VK_SUCCESS)
+         if (VK10.vkQueueSubmit(graphicsQueue, submitInfo, VK10.VK_NULL_HANDLE) != VK10.VK_SUCCESS)
          {
             throw new RuntimeException("Failed to submit copy command buffer");
          }
 
-         VK10.vkQueueWaitIdle(transferQueue);
+         VK10.vkQueueWaitIdle(graphicsQueue);
+
+         VK10.vkFreeCommandBuffers(device, commandPool, pCommandBuffer);
       }
    }
 
@@ -1066,7 +1036,7 @@ public class HelloVulkan
             throw new RuntimeException("Failed to submit draw command buffer: " + vkResult);
          }
 
-         VkPresentInfoKHR presentInfo = VkPresentInfoKHR.callocStack(stack);
+         VkPresentInfoKHR presentInfo = VkPresentInfoKHR.calloc(stack);
          presentInfo.sType(KHRSwapchain.VK_STRUCTURE_TYPE_PRESENT_INFO_KHR);
 
          presentInfo.pWaitSemaphores(thisFrame.pRenderFinishedSemaphore());
@@ -1096,7 +1066,7 @@ public class HelloVulkan
    {
       try (MemoryStack stack = MemoryStack.stackPush())
       {
-         VkShaderModuleCreateInfo createInfo = VkShaderModuleCreateInfo.callocStack(stack);
+         VkShaderModuleCreateInfo createInfo = VkShaderModuleCreateInfo.calloc(stack);
          createInfo.sType(VK10.VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO);
          createInfo.pCode(spirvCode);
 
@@ -1184,16 +1154,6 @@ public class HelloVulkan
             if ((queueFamilies.get(i).queueFlags() & VK10.VK_QUEUE_GRAPHICS_BIT) != 0)
             {
                indices.setGraphicsFamily(i);
-            }
-            else if ((queueFamilies.get(i).queueFlags() & VK10.VK_QUEUE_TRANSFER_BIT) != 0)
-            {
-               indices.setTransferFamily(i);
-            }
-            // In case of having only 1 queueFamily, use the same index since VK_QUEUE_GRAPHICS_BIT also implicitly
-            // covers VK_QUEUE_TRANSFER_BIT
-            if (queueFamilies.capacity() == 1)
-            {
-               indices.setTransferFamily(i);
             }
 
             KHRSurface.vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, presentSupport);
