@@ -31,9 +31,10 @@ public class HelloVulkan
    private static final int MAX_FRAMES_IN_FLIGHT = 2;
 
    private static final VulkanVertex[] VERTICES = {
-         new VulkanVertex(new Vector2D(0.0, -0.5), new MutableColor(1.0f, 0.0f, 0.0f)),
-         new VulkanVertex(new Vector2D(0.5, 0.5), new MutableColor(0.0f, 1.0f, 0.0f)),
-         new VulkanVertex(new Vector2D(-0.5, 0.5), new MutableColor(0.0f, 0.0f, 1.0f))
+         new VulkanVertex(new Vector2D(-0.5, -0.5), new MutableColor(1.0f, 0.0f, 0.0f)),
+         new VulkanVertex(new Vector2D(0.5, -0.5), new MutableColor(0.0f, 1.0f, 0.0f)),
+         new VulkanVertex(new Vector2D(0.5, 0.5), new MutableColor(0.0f, 0.0f, 1.0f)),
+         new VulkanVertex(new Vector2D(-0.5, 0.5), new MutableColor(1.0f, 1.0f, 1.0f)),
    };
 
    private static final /*uint16_t*/ short[] INDICES =
