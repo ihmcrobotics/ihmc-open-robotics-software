@@ -864,6 +864,15 @@ public class HelloVulkan
       }
    }
 
+   private void memcpy(ByteBuffer buffer, short[] indices)
+   {
+      for (short index : indices)
+      {
+         buffer.putShort(index);
+      }
+      buffer.rewind();
+   }
+
    private int findMemoryType(MemoryStack stack, int typeFilter, int properties)
    {
       VkPhysicalDeviceMemoryProperties memProperties = VkPhysicalDeviceMemoryProperties.malloc(stack);
@@ -937,7 +946,9 @@ public class HelloVulkan
                LongBuffer offsets = stack.longs(0);
                VK10.vkCmdBindVertexBuffers(commandBuffer, 0, vertexBuffers, offsets);
 
-               VK10.vkCmdDraw(commandBuffer, VERTICES.length, 1, 0, 0);
+               VK10.vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK10.VK_INDEX_TYPE_UINT16);
+
+               VK10.vkCmdDrawIndexed(commandBuffer, INDICES.length, 1, 0, 0, 0);
             }
             VK10.vkCmdEndRenderPass(commandBuffer);
 
