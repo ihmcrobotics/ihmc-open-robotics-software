@@ -9,10 +9,9 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
-import us.ihmc.rdx.imgui.ImBooleanWrapper;
-import us.ihmc.rdx.imgui.ImGuiEnumPlot;
-import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
+import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
+import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
@@ -44,6 +43,8 @@ public class RDXPredefinedRigidBodySceneNode
    private final ImGuiEnumPlot currentlyDetectedPlot;
    private final RDXSelectablePose3DGizmo offsetPoseGizmo;
    private final ImBooleanWrapper trackDetectedPoseWrapper;
+   private ImGuiSliderDoubleWrapper alphaFilterValueSlider;
+   private ImGuiInputDoubleWrapper distanceToDisableTrackingInput;
 
    public RDXPredefinedRigidBodySceneNode(PredefinedRigidBodySceneNode predefinedRigidBodySceneNode, RDX3DPanel panel3D)
    {
@@ -65,9 +66,22 @@ public class RDXPredefinedRigidBodySceneNode
                                                       },
                                                       imBoolean -> ImGui.checkbox(labels.get("Track Detected Pose"), imBoolean));
 
-      int bufferSize = 1000;
-      int heightPixels = 20;
-      currentlyDetectedPlot = new ImGuiEnumPlot(predefinedRigidBodySceneNode.getName(), bufferSize, heightPixels);
+      currentlyDetectedPlot = new ImGuiEnumPlot(predefinedRigidBodySceneNode.getName());
+
+      if (sceneNode instanceof ArUcoDetectableNode arUcoDetectableNode)
+      {
+         alphaFilterValueSlider = new ImGuiSliderDoubleWrapper("Break frequency", "%.2f", 0.2, 5.0,
+                                                               arUcoDetectableNode::getBreakFrequency,
+                                                               arUcoDetectableNode::setBreakFrequency,
+                                                               sceneNode::markModifiedByOperator);
+      }
+      if (sceneNode instanceof StaticRelativeSceneNode staticRelativeNode)
+      {
+         distanceToDisableTrackingInput = new ImGuiInputDoubleWrapper("Distance to disable tracking", "%.2f", 0.1, 0.5,
+                                                                      staticRelativeNode::getDistanceToDisableTracking,
+                                                                      staticRelativeNode::setDistanceToDisableTracking,
+                                                                      sceneNode::markModifiedByOperator);
+      }
    }
 
    public void update()
@@ -108,6 +122,15 @@ public class RDXPredefinedRigidBodySceneNode
          sceneNode.clearOffset();
          ensureGizmoFrameIsSceneNodeFrame();
          sceneNode.markModifiedByOperator();
+      }
+      if (sceneNode instanceof ArUcoDetectableNode)
+      {
+         alphaFilterValueSlider.render();
+      }
+      if (sceneNode instanceof StaticRelativeSceneNode staticRelativeNode)
+      {
+         ImGui.text("Current distance: %.2f".formatted(staticRelativeNode.getCurrentDistance()));
+         distanceToDisableTrackingInput.render();
       }
 
       ImGui.separator();

@@ -104,7 +104,9 @@ public class PredefinedSceneNodeLibrary
             {
                arUcoMarkerPose.setToZero(parentArUcoNode.getMarkerFrame());
                arUcoMarkerPose.setFromReferenceFrame(sensorFrame);
-               if (arUcoMarkerPose.getPosition().norm() <= staticRelativeNode.getMaximumDistanceToLockIn())
+               double currentDistance = arUcoMarkerPose.getPosition().norm();
+               staticRelativeNode.setCurrentDistance(currentDistance);
+               if (currentDistance <= staticRelativeNode.getDistanceToDisableTracking())
                {
                   staticRelativeNode.setTrackDetectedPose(false);
                }

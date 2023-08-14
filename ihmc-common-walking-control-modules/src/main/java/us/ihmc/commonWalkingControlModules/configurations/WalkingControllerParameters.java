@@ -25,6 +25,7 @@ import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -395,6 +396,12 @@ public abstract class WalkingControllerParameters
    }
 
    public abstract FootSwitchFactory getFootSwitchFactory();
+
+   public SideDependentList<FootSwitchFactory> getFootSwitchFactories()
+   {
+      FootSwitchFactory footSwitchFactory = getFootSwitchFactory();
+      return new SideDependentList<>(footSwitchFactory, footSwitchFactory);
+   }
 
    /**
     * Returns a list of joints that will not be used by the controller.
