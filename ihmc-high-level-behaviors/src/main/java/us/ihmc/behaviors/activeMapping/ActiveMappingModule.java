@@ -1,9 +1,11 @@
 package us.ihmc.behaviors.activeMapping;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanner;
+import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -14,6 +16,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.tools.ActiveMappingTools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;

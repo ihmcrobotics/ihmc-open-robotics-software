@@ -21,7 +21,7 @@ public class World
       this.gridHeight = gridHeight;
       this.gridWidth = gridWidth;
       this.goalMargin = goalMargin;
-      this.goal = new Point2D();
+      this.goal = new Point2D(30, 150);
       this.grid = new Mat(gridHeight, gridWidth, opencv_core.CV_8UC1);
    }
 

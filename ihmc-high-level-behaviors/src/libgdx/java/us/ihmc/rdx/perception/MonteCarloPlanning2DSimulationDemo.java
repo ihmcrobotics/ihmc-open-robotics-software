@@ -15,11 +15,11 @@ class MonteCarloPlanning2DSimulationDemo
    {
       ArrayList<Vector4D32> obstacles = new ArrayList<>();
 
-      obstacles.add(new Vector4D32(10, 20, 5, 5));
-      obstacles.add(new Vector4D32(45, 61, 8, 8));
-      obstacles.add(new Vector4D32(70, 82, 10, 8));
-      obstacles.add(new Vector4D32(90, 43, 3, 3));
-      obstacles.add(new Vector4D32(20, 34, 6, 6));
+      obstacles.add(new Vector4D32(20, 40, 10, 10));
+      obstacles.add(new Vector4D32(90, 120, 16, 16));
+      obstacles.add(new Vector4D32(140, 164, 10, 8));
+      obstacles.add(new Vector4D32(180, 86, 6, 6));
+      obstacles.add(new Vector4D32(40, 68, 12, 12));
 
       //obstacles.add(new Vector4D32(30, 10, 1, 10));
       //obstacles.add(new Vector4D32(30, 28, 1, 2));
