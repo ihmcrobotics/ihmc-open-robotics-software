@@ -1,4 +1,4 @@
-package us.ihmc.atlas.ObstacleCourseTests;
+package us.ihmc.atlas.obstacleCourseTests;
 
 import java.io.IOException;
 

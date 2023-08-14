@@ -1,4 +1,4 @@
-package us.ihmc.atlas.ObstacleCourseTests;
+package us.ihmc.atlas.obstacleCourseTests;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -7,16 +7,17 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseSteppingStonesTest;
+import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseRampFootstepSnapperTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 
-// this test is flaky because toe off is not triggered properly - the toe off condition needs to be fixed
-public class AtlasObstacleCourseSteppingStonesTest extends DRCObstacleCourseSteppingStonesTest
+public class AtlasObstacleCourseRampFootstepSnapperTest extends DRCObstacleCourseRampFootstepSnapperTest
 {
+   private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+      return robotModel;
    }
 
    @Override
@@ -28,8 +29,8 @@ public class AtlasObstacleCourseSteppingStonesTest extends DRCObstacleCourseStep
    @Tag("humanoid-obstacle-slow")
    @Override
    @Test
-   public void testWalkingOverEasySteppingStones()
+   public void testWalkingUpRampUsingSnapFootsteps()
    {
-      super.testWalkingOverEasySteppingStones();
+      super.testWalkingUpRampUsingSnapFootsteps();
    }
 }
