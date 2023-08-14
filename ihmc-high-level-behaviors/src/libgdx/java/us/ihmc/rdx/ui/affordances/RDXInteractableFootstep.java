@@ -324,19 +324,6 @@ public class RDXInteractableFootstep
             boolean isHovering = vrPickResult.get(side) == controller.getSelectedPick();
             isVRHovering.put(side, isHovering);
 
-            if (isHovering)
-            {
-               if (side == RobotSide.RIGHT)
-               {
-                  controller.setBButtonText("Delete");
-                  controller.setAButtonText("Walk");
-               }
-               else if (side == RobotSide.LEFT)
-               {
-                  controller.setAButtonText("PlaceAnother");
-               }
-            }
-
             boolean isPickRayHovering = isHovering && vrPickResult.get(side).getDistanceToControllerPickPoint() > 0.0;
             if (isPickRayHovering)
             {
