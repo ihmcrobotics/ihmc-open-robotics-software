@@ -86,7 +86,7 @@ public class RDXArmManager
                                     0.000,
                                     side.negateIfLeftSide(0.0)});
       }
-      doorAvoidanceArms.put(RobotSide.LEFT, new double[] {-0.121, -0.124, -0.971, -1.713, -0.935, -0.873, 0.277});
+      doorAvoidanceArms.put(RobotSide.LEFT, new double[] {-0.121, -0.124, -0.971, -1.513, -0.935, -0.873, 0.245});
       doorAvoidanceArms.put(RobotSide.RIGHT, new double[] {-0.523, -0.328, 0.586, -2.192, 0.828, 1.009, -0.281});
 
       handWrenchCalculator = new HandWrenchCalculator(syncedRobot);
@@ -102,8 +102,6 @@ public class RDXArmManager
 
    public void create(RDXBaseUI baseUI)
    {
-      baseUI.getImGuiPanelManager().addPanel("Arms & Hands", this::renderImGuiWidgets);
-
       panelHandWrenchIndicator = new RDX3DPanelHandWrenchIndicator(baseUI.getPrimary3DPanel());
       RDX3DPanelToolbarButton wrenchToolbarButton = baseUI.getPrimary3DPanel().addToolbarButton();
       wrenchToolbarButton.loadAndSetIcon("icons/handWrench.png");
@@ -200,16 +198,7 @@ public class RDXArmManager
          ImGui.sameLine();
          if (ImGui.button(labels.get("Home " + side.getPascalCaseName())))
          {
-            GoHomeMessage armHomeMessage = new GoHomeMessage();
-            armHomeMessage.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
-
-            if (side == RobotSide.LEFT)
-               armHomeMessage.setRobotSide(GoHomeMessage.ROBOT_SIDE_LEFT);
-            else
-               armHomeMessage.setRobotSide(GoHomeMessage.ROBOT_SIDE_RIGHT);
-
-            armHomeMessage.setTrajectoryTime(teleoperationParameters.getTrajectoryTime());
-            communicationHelper.publishToController(armHomeMessage);
+            executeArmHome(side);
          }
       }
 
@@ -232,10 +221,7 @@ public class RDXArmManager
          ImGui.sameLine();
          if (ImGui.button(labels.get(side.getPascalCaseName())))
          {
-            ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
-                                                                                                        teleoperationParameters.getTrajectoryTime(),
-                                                                                                        doorAvoidanceArms.get(side));
-            communicationHelper.publishToController(armTrajectoryMessage);
+            executeDoorAvoidanceArmAngles(side);
          }
       }
 
@@ -258,6 +244,28 @@ public class RDXArmManager
       }
 
       ImGui.checkbox(labels.get("Hand wrench magnitudes on 3D View"), indicateWrenchOnScreen);
+   }
+
+   public void executeArmHome(RobotSide side)
+   {
+      GoHomeMessage armHomeMessage = new GoHomeMessage();
+      armHomeMessage.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
+
+      if (side == RobotSide.LEFT)
+         armHomeMessage.setRobotSide(GoHomeMessage.ROBOT_SIDE_LEFT);
+      else
+         armHomeMessage.setRobotSide(GoHomeMessage.ROBOT_SIDE_RIGHT);
+
+      armHomeMessage.setTrajectoryTime(teleoperationParameters.getTrajectoryTime());
+      communicationHelper.publishToController(armHomeMessage);
+   }
+
+   public void executeDoorAvoidanceArmAngles(RobotSide side)
+   {
+      ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
+                                                                                                  teleoperationParameters.getTrajectoryTime(),
+                                                                                                  doorAvoidanceArms.get(side));
+      communicationHelper.publishToController(armTrajectoryMessage);
    }
 
    public Runnable getSubmitDesiredArmSetpointsCallback(RobotSide robotSide)
@@ -305,6 +313,11 @@ public class RDXArmManager
          }
       };
       return runnable;
+   }
+
+   public RDXHandConfigurationManager getHandManager()
+   {
+      return handManager;
    }
 
    public RDXArmControlMode getArmControlMode()

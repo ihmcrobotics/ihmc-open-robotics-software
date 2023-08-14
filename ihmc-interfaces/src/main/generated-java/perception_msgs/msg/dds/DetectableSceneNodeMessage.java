@@ -34,6 +34,20 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
             * Nodes can be set to not track the detected pose
             */
    public boolean track_detected_pose_;
+   /**
+            * Break frequency filter value for nodes that are alpha filtered
+            */
+   public float break_frequency_;
+   /**
+            * Distance to robot to disable tracking.
+            * Used for automatically disabling tracking for static relative objects.
+            */
+   public float distance_to_disable_tracking_;
+   /**
+            * Current distance to robot.
+            * Used for automatically disabling tracking for static relative objects.
+            */
+   public float current_distance_to_robot_;
 
    public DetectableSceneNodeMessage()
    {
@@ -58,6 +72,12 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_world_, transform_to_world_);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.aruco_marker_transform_to_world_, aruco_marker_transform_to_world_);
       track_detected_pose_ = other.track_detected_pose_;
+
+      break_frequency_ = other.break_frequency_;
+
+      distance_to_disable_tracking_ = other.distance_to_disable_tracking_;
+
+      current_distance_to_robot_ = other.current_distance_to_robot_;
 
    }
 
@@ -135,6 +155,55 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       return track_detected_pose_;
    }
 
+   /**
+            * Break frequency filter value for nodes that are alpha filtered
+            */
+   public void setBreakFrequency(float break_frequency)
+   {
+      break_frequency_ = break_frequency;
+   }
+   /**
+            * Break frequency filter value for nodes that are alpha filtered
+            */
+   public float getBreakFrequency()
+   {
+      return break_frequency_;
+   }
+
+   /**
+            * Distance to robot to disable tracking.
+            * Used for automatically disabling tracking for static relative objects.
+            */
+   public void setDistanceToDisableTracking(float distance_to_disable_tracking)
+   {
+      distance_to_disable_tracking_ = distance_to_disable_tracking;
+   }
+   /**
+            * Distance to robot to disable tracking.
+            * Used for automatically disabling tracking for static relative objects.
+            */
+   public float getDistanceToDisableTracking()
+   {
+      return distance_to_disable_tracking_;
+   }
+
+   /**
+            * Current distance to robot.
+            * Used for automatically disabling tracking for static relative objects.
+            */
+   public void setCurrentDistanceToRobot(float current_distance_to_robot)
+   {
+      current_distance_to_robot_ = current_distance_to_robot;
+   }
+   /**
+            * Current distance to robot.
+            * Used for automatically disabling tracking for static relative objects.
+            */
+   public float getCurrentDistanceToRobot()
+   {
+      return current_distance_to_robot_;
+   }
+
 
    public static Supplier<DetectableSceneNodeMessagePubSubType> getPubSubType()
    {
@@ -161,6 +230,12 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       if (!this.aruco_marker_transform_to_world_.epsilonEquals(other.aruco_marker_transform_to_world_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.track_detected_pose_, other.track_detected_pose_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.break_frequency_, other.break_frequency_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_to_disable_tracking_, other.distance_to_disable_tracking_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_distance_to_robot_, other.current_distance_to_robot_, epsilon)) return false;
+
 
       return true;
    }
@@ -182,6 +257,12 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       if (!this.aruco_marker_transform_to_world_.equals(otherMyClass.aruco_marker_transform_to_world_)) return false;
       if(this.track_detected_pose_ != otherMyClass.track_detected_pose_) return false;
 
+      if(this.break_frequency_ != otherMyClass.break_frequency_) return false;
+
+      if(this.distance_to_disable_tracking_ != otherMyClass.distance_to_disable_tracking_) return false;
+
+      if(this.current_distance_to_robot_ != otherMyClass.current_distance_to_robot_) return false;
+
 
       return true;
    }
@@ -201,7 +282,13 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       builder.append("aruco_marker_transform_to_world=");
       builder.append(this.aruco_marker_transform_to_world_);      builder.append(", ");
       builder.append("track_detected_pose=");
-      builder.append(this.track_detected_pose_);
+      builder.append(this.track_detected_pose_);      builder.append(", ");
+      builder.append("break_frequency=");
+      builder.append(this.break_frequency_);      builder.append(", ");
+      builder.append("distance_to_disable_tracking=");
+      builder.append(this.distance_to_disable_tracking_);      builder.append(", ");
+      builder.append("current_distance_to_robot=");
+      builder.append(this.current_distance_to_robot_);
       builder.append("}");
       return builder.toString();
    }

@@ -180,7 +180,7 @@ public class RDXHandConfigurationManager
       }
    }
 
-   private void publishHandCommand(RobotSide side, HandConfiguration handDesiredConfiguration)
+   public void publishHandCommand(RobotSide side, HandConfiguration handDesiredConfiguration)
    {
       communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
                                   HumanoidMessageTools.createHandDesiredConfigurationMessage(side, handDesiredConfiguration));
@@ -218,5 +218,4 @@ public class RDXHandConfigurationManager
 
       shieldButton.setOnPressed(()-> armTrajectoryRunnable.accept(toolbarSelectedSide));
    }
-
 }

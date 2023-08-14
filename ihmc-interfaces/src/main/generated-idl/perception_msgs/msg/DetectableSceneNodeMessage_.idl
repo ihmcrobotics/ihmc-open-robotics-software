@@ -38,6 +38,20 @@ module perception_msgs
          * Nodes can be set to not track the detected pose
          */
         boolean track_detected_pose;
+        /**
+         * Break frequency filter value for nodes that are alpha filtered
+         */
+        float break_frequency;
+        /**
+         * Distance to robot to disable tracking.
+         * Used for automatically disabling tracking for static relative objects.
+         */
+        float distance_to_disable_tracking;
+        /**
+         * Current distance to robot.
+         * Used for automatically disabling tracking for static relative objects.
+         */
+        float current_distance_to_robot;
       };
     };
   };
