@@ -265,7 +265,7 @@ public class HumanoidPerceptionModule
 
          if (point.getZ() > thresholdHeight && gridX >= 0 && gridX < occupancyGrid.cols() && gridY >= 0 && gridY < occupancyGrid.rows())
          {
-            occupancyGrid.ptr(gridY, gridX).put((byte) 100);
+            occupancyGrid.ptr(gridX, gridY).put((byte) 100);
          }
       }
    }
