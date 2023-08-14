@@ -59,4 +59,14 @@ public class ActiveMappingTools
 
       return goalPose;
    }
+
+   public static int getIndexFromCoordinates(double coordinate, float resolution, int offset)
+   {
+      return (int) (coordinate * resolution + offset);
+   }
+
+   public static double getCoordinateFromIndex(int index, double resolution, int offset)
+   {
+      return (index - offset) / resolution;
+   }
 }

@@ -1,11 +1,9 @@
 package us.ihmc.behaviors.activeMapping;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanner;
-import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -15,7 +13,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.mapping.PlanarRegionMap;
-import us.ihmc.perception.tools.PerceptionDebugTools;
+import us.ihmc.perception.tools.ActiveMappingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -56,19 +54,8 @@ public class ActiveMappingModule
    private boolean planAvailable = false;
    private boolean active = true;
 
-   private int gridSize = 20;
-   private float gridResolution = 1.0f;
-
-   int goalMargin = 5;
-   int scale = 2;
-   int worldHeight = 100;
-   int worldWidth = 100;
-
-   int iterations = 10;
-   int simulationCount = 10;
-
-   private final Point2D agentPos = new Point2D(10, 10);
-   private final Point2D goal = new Point2D(10, worldHeight - 10);
+   private float gridResolution = 10.0f;
+   private int offset = 70;
 
    public ActiveMappingModule(DRCRobotModel robotModel, HumanoidReferenceFrames humanoidReferenceFrames)
    {
@@ -100,11 +87,12 @@ public class ActiveMappingModule
          //ActiveMappingTools.getStraightGoalFootPoses(leftSolePose, rightSolePose, leftGoalPose, rightGoalPose, 0.6f);
          //Pose2D goalPose2D = ActiveMappingTools.getNearestUnexploredNode(planarRegionMap.getMapRegions(), gridOrigin, robotPose2D, gridSize, gridResolution);
 
-         Mat gridColor = new Mat();
-         MonteCarloPlannerTools.plotWorld(monteCarloPlanner.getWorld(), gridColor);
-         PerceptionDebugTools.display("Grid", gridColor, 50, 1400);
-         Point2D goalPosition = monteCarloPlanner.plan();
+         Point2D goalPositionIndices = monteCarloPlanner.plan();
+         Point2D goalPosition = new Point2D(ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getX(), gridResolution, 0),
+                                            ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getY(), gridResolution, 0));
          monteCarloPlanner.execute(goalPosition);
+
+         LogTools.warn("Current Position: {}, Indices: {}, Goal: {}", robotLocation, goalPositionIndices, goalPosition);
 
          float yawRobotToGoal = (float) Math.atan2(goalPosition.getY() - robotLocation.getY(), goalPosition.getX() - robotLocation.getX());
 
@@ -118,7 +106,7 @@ public class ActiveMappingModule
          LogTools.info("Next Goal: {}", goalPose);
 
          request = new FootstepPlannerRequest();
-         request.setTimeout(0.3);
+         request.setTimeout(1.5);
          request.setStartFootPoses(leftSolePose, rightSolePose);
          request.setPlanarRegionsList(planarRegionMap.getMapRegions());
          request.setPlanBodyPath(false);
@@ -185,7 +173,7 @@ public class ActiveMappingModule
 
    public int getGridSize()
    {
-      return gridSize;
+      return monteCarloPlanner.getWorld().getGridHeight();
    }
 
    public void submitRangeScan(ArrayList<Point3D> points)
