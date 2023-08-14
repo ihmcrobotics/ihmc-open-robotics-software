@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolv
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -18,7 +19,6 @@ import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
@@ -261,7 +261,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 
       private final ReferenceFrame soleFrame;
       private final GeometricJacobian footJacobian;
-      private final GravityCoriolisExternalWrenchMatrixCalculator gravityTorqueCalculator;
+      private final InverseDynamicsCalculator gravityTorqueCalculator;
       private final DMatrixRMaj jacobianTranspose = new DMatrixRMaj(6, 1);
       private final OneDoFJointReadOnly[] legJoints;
       private final YoDouble[] legJointGravityTaus;
@@ -306,7 +306,8 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
             throw new RuntimeException("We can't yet use the Jacobian Based Wrench calculator, because the Jacobian isn't square. We need to implement this with a pseudo inverse.");
 
          footJacobian = new GeometricJacobian(pelvis, foot, soleFrame);
-         gravityTorqueCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(MultiBodySystemReadOnly.toMultiBodySystemInput(legJoints));
+         gravityTorqueCalculator = new InverseDynamicsCalculator(MultiBodySystemReadOnly.toMultiBodySystemInput(legJoints));
+         gravityTorqueCalculator.setConsiderJointAccelerations(false);
          gravityTorqueCalculator.setGravitionalAcceleration(-9.81); // TODO Extract me
 
          legJointGravityTaus = new YoDouble[6];
