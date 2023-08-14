@@ -140,22 +140,25 @@ public class HumanoidPerceptionModule
                            perceptionConfigurationParameters.getOccupancyGridResolution(),
                            70);
 
-      int gridX = ActiveMappingTools.getIndexFromCoordinates(sensorFrame.getTransformToWorldFrame().getTranslationX(),
-                                                             perceptionConfigurationParameters.getOccupancyGridResolution(),
-                                                             70);
-      int gridY = ActiveMappingTools.getIndexFromCoordinates(sensorFrame.getTransformToWorldFrame().getTranslationY(),
-                                                             perceptionConfigurationParameters.getOccupancyGridResolution(),
-                                                             70);
 
-      agent.getPosition().set(gridX, gridY);
+      if (activeMappingRemoteProcess == null)
+      {
+         int gridX = ActiveMappingTools.getIndexFromCoordinates(sensorFrame.getTransformToWorldFrame().getTranslationX(),
+                                                                perceptionConfigurationParameters.getOccupancyGridResolution(),
+                                                                70);
+         int gridY = ActiveMappingTools.getIndexFromCoordinates(sensorFrame.getTransformToWorldFrame().getTranslationY(),
+                                                                perceptionConfigurationParameters.getOccupancyGridResolution(),
+                                                                70);
 
-      agent.measure(world);
+         agent.getPosition().set(gridX, gridY);
+         agent.measure(world);
+      }
 
       MonteCarloPlannerTools.plotWorld(world, gridColor);
       MonteCarloPlannerTools.plotAgent(agent, gridColor);
       MonteCarloPlannerTools.plotRangeScan(agent.getScanPoints(), gridColor);
 
-      PerceptionDebugTools.display("Monte Carlo Planner World", gridColor, 1, 1200);
+      PerceptionDebugTools.display("Monte Carlo Planner World", gridColor, 1, 1400);
    }
 
    public void initializePerspectiveRapidRegionsExtractor(CameraIntrinsics cameraIntrinsics)
