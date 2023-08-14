@@ -74,9 +74,9 @@ public class RDXSelectablePathControlRingGizmo
          selected = true;
       }
       
-      if (selected)
+      if (!selected && selectable)
       {
-         pathControlRingGizmo.processVRInput(vrContext);
+         pathControlRingGizmo.update();
       }
       pathControlRingGizmo.setShowArrows(selected);
       pathControlRingGizmo.setHighlightingEnabled(modified);
