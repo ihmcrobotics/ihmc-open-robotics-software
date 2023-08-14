@@ -93,6 +93,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandWrenchTr
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadHybridJointspaceTaskspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelControllerStateCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointOfflineCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LegTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MultiContactBalanceStatusCommand;
@@ -157,6 +158,7 @@ public class ControllerAPIDefinition
       commands.add(MomentumTrajectoryCommand.class);
       commands.add(CenterOfMassTrajectoryCommand.class);
       commands.add(HandWrenchTrajectoryCommand.class);
+      commands.add(JointOfflineCommand.class);
 
       /** Commands supported by the fast-walking controller, not in this repo */
       commands.add(DirectionalControlInputCommand.class);

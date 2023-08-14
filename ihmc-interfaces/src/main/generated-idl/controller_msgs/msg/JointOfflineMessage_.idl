@@ -1,0 +1,31 @@
+#ifndef __controller_msgs__msg__JointOfflineMessage__idl__
+#define __controller_msgs__msg__JointOfflineMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This message notifies the controller of a joint going offline, which causes the controller to go into an emergency fall-prevention mode.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::JointOfflineMessage_")
+      struct JointOfflineMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Hash-code of the joint which is offline. The hash-code is computed from OneDoFJoint#hashcode().
+         */
+        long joint_offline_hash_code;
+      };
+    };
+  };
+};
+
+#endif

@@ -864,4 +864,12 @@ public abstract class WalkingControllerParameters
    {
       return 0.8;
    }
+
+   /**
+    * If true, will enable an emergency control mode for joints being offline. See JointOfflineManager and JointOfflineCommand.
+    */
+   public boolean enableJointOfflineControl()
+   {
+      return false;
+   }
 }

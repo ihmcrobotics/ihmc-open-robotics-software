@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManage
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.JointOfflineManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
@@ -30,6 +31,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.WalkingCommandConsumer;
@@ -100,6 +102,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final FeetManager feetManager;
    private final BalanceManager balanceManager;
    private final CenterOfMassHeightManager comHeightManager;
+   private final JointOfflineManager jointOfflineManager;
 
    private final TouchdownErrorCompensator touchdownErrorCompensator;
 
@@ -228,6 +231,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       balanceManager = managerFactory.getOrCreateBalanceManager();
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
+      jointOfflineManager = managerFactory.getOrCreateJointOfflineManager();
 
       this.commandInputManager = commandInputManager;
       this.statusOutputManager = statusOutputManager;
@@ -644,7 +648,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       commandConsumer.handleAutomaticManipulationAbortOnICPError(currentState);
       commandConsumer.consumeLoadBearingCommands();
       commandConsumer.consumePrepareForLocomotionCommands();
-
+      commandConsumer.consumeJointOfflineCommand();
+      
       updateFailureDetection();
 
       walkingStateTimer.startMeasurement();
@@ -901,6 +906,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
       controllerCoreCommand.addFeedbackControlCommand(comHeightManager.getFeedbackControlCommand());
+
+      if (jointOfflineManager != null && jointOfflineManager.isJointOffline())
+      {
+         controllerCoreCommand.addInverseDynamicsCommand(jointOfflineManager.getInverseDynamicsCommand());
+      }
 
       controllerCoreCommand.addInverseDynamicsCommand(controllerCoreOptimizationSettings.getCommand());
 

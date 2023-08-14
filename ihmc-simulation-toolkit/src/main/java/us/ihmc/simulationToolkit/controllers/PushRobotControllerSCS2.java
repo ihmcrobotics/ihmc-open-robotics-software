@@ -55,6 +55,9 @@ public class PushRobotControllerSCS2 implements Controller
    private final double visualScale;
    private final AtomicReference<Runnable> scheduledPushAction = new AtomicReference<>(null);
 
+   //this is just a debug variables
+   private boolean hasForceBeenApplied = false;
+
    public PushRobotControllerSCS2(DoubleProvider time, Robot pushableRobot, FullHumanoidRobotModel fullRobotModel)
    {
       this(time, pushableRobot, fullRobotModel.getChest().getParentJoint().getName(), new Vector3D(0, 0, 0.3), 0.005);
@@ -129,7 +132,9 @@ public class PushRobotControllerSCS2 implements Controller
 
    public void setPushForceDirection(Vector3DReadOnly direction)
    {
+      System.out.println("pushDirection "+pushDirection);
       pushDirection.set(direction);
+      System.out.println("pushDirection "+pushDirection);
    }
 
    public void setPushDelay(double delay)
@@ -166,11 +171,17 @@ public class PushRobotControllerSCS2 implements Controller
 
    public void applyForceDelayed(StateTransitionCondition pushCondition, double timeDelay, Vector3DReadOnly direction, double magnitude, double duration)
    {
+      hasForceBeenApplied = true;
       this.pushCondition = pushCondition;
-      setPushDuration(duration);
+//      setPushDuration(duration);
+//      System.out.println("pushDuration " + pushDuration);
       setPushForceDirection(direction);
+      setPushDuration(duration);
+//      System.out.println("pushDirection "+pushDirection);
       setPushForceMagnitude(magnitude);
+//      System.out.println("pushForceMagnitude "+pushForceMagnitude);
       setPushDelay(timeDelay);
+//      System.out.println("pushDelay "+pushDelay);
       applyForce();
    }
 
@@ -226,9 +237,17 @@ public class PushRobotControllerSCS2 implements Controller
             pushCondition = null;
          }
       }
-
+      
+//      System.out.println("pushDuration " + pushDuration);
+//      System.out.println("pushDirection "+pushDirection);
+//      System.out.println("pushForceMagnitude "+pushForceMagnitude);
+//      System.out.println("pushDelay "+pushDelay);
       if (yoTime.getValue() <= pushTimeSwitch.getValue() + pushDuration.getValue() && yoTime.getValue() >= pushTimeSwitch.getValue())
       {
+//         System.out.println("pushDuration " + pushDuration);
+//         System.out.println("pushDirection "+pushDirection);
+//         System.out.println("pushForceMagnitude "+pushForceMagnitude);
+//         System.out.println("pushDelay "+pushDelay);
          isBeingPushed.set(true);
          forceVector.set(pushForce);
          pushNumber.decrement();

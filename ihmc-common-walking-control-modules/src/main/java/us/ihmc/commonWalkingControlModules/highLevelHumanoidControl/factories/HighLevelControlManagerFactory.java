@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.JointOfflineManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
@@ -65,6 +66,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
    private CenterOfMassHeightManager centerOfMassHeightManager;
    private FeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
+   private JointOfflineManager jointOfflineManager;
 
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
 
@@ -355,6 +357,23 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       pelvisOrientationManager.setWeights(pelvisAngularWeight);
       pelvisOrientationManager.setPrepareForLocomotion(walkingControllerParameters.doPreparePelvisForLocomotion());
       return pelvisOrientationManager;
+   }
+
+   public JointOfflineManager getOrCreateJointOfflineManager()
+   {
+      if (jointOfflineManager != null)
+         return jointOfflineManager;
+
+      if (!hasHighLevelHumanoidControllerToolbox(JointOfflineManager.class))
+         return null;
+      if (!hasWalkingControllerParameters(JointOfflineManager.class))
+         return null;
+
+      if (!walkingControllerParameters.enableJointOfflineControl())
+         return null;
+
+      jointOfflineManager = new JointOfflineManager(controllerToolbox.getControlledOneDoFJoints(), controllerToolbox.getYoTime(), registry);
+      return jointOfflineManager;
    }
 
    private boolean hasHighLevelHumanoidControllerToolbox(Class<?> managerClass)

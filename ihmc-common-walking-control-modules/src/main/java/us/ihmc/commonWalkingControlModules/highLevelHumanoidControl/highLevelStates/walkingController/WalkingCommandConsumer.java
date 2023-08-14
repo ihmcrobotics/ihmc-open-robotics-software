@@ -7,6 +7,7 @@ import controller_msgs.msg.dds.ManipulationAbortedStatus;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.JointOfflineManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
@@ -36,6 +37,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajecto
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandWrenchTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadHybridJointspaceTaskspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointOfflineCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LegTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LoadBearingCommand;
@@ -51,13 +53,12 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3Trajector
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StepConstraintRegionCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StepConstraintsListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WrenchTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
 import us.ihmc.humanoidRobotics.communication.fastWalkingAPI.FastWalkingGaitParametersCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -90,6 +91,7 @@ public class WalkingCommandConsumer
    private final FeetManager feetManager;
    private final BalanceManager balanceManager;
    private final CenterOfMassHeightManager comHeightManager;
+   private final JointOfflineManager jointOfflineManager;
 
    private final RigidBodyControlManager chestManager;
    private final RigidBodyControlManager headManager;
@@ -161,6 +163,7 @@ public class WalkingCommandConsumer
       commandsToRegister.add(PrepareForLocomotionCommand.class);
       commandsToRegister.add(DirectionalControlInputCommand.class);
       commandsToRegister.add(FastWalkingGaitParametersCommand.class);
+      commandsToRegister.add(JointOfflineCommand.class);
 
       commandConsumerWithDelayBuffers = new CommandConsumerWithDelayBuffers(commandInputManager, commandsToRegister, yoTime);
 
@@ -206,6 +209,7 @@ public class WalkingCommandConsumer
       feetManager = managerFactory.getOrCreateFeetManager();
       balanceManager = managerFactory.getOrCreateBalanceManager();
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
+      jointOfflineManager = managerFactory.getOrCreateJointOfflineManager();
 
       isAutomaticManipulationAbortEnabled.set(walkingControllerParameters.allowAutomaticManipulationAbort());
       icpErrorThresholdToAbortManipulation.set(walkingControllerParameters.getICPErrorThresholdForManipulationAbort());
@@ -234,7 +238,7 @@ public class WalkingCommandConsumer
 
       commandConsumerWithDelayBuffers.update();
    }
-
+   
    public void consumeHeadCommands()
    {
       if (headManager == null)
@@ -548,6 +552,19 @@ public class WalkingCommandConsumer
       }
    }
 
+   
+   
+   public void consumeJointOfflineCommand()
+   {
+      if (jointOfflineManager == null)
+         return;
+      if (!commandConsumerWithDelayBuffers.isNewCommandAvailable(JointOfflineCommand.class))
+         return;
+      
+      JointOfflineCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(JointOfflineCommand.class);
+      jointOfflineManager.setJointOffline(command.getJointOfflineHashCode());
+   }
+   
    public void consumeStopAllTrajectoryCommands()
    {
       if (!commandConsumerWithDelayBuffers.isNewCommandAvailable(StopAllTrajectoryCommand.class))
