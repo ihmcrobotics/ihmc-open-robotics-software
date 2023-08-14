@@ -86,7 +86,7 @@ public class RDXLocomotionManager
    private final AbortWalkingMessage abortWalkingMessage = new AbortWalkingMessage();
    private final ControllerStatusTracker controllerStatusTracker;
    private final Notification abortedNotification = new Notification();
-   private boolean lastAssumeFlatGroundState;
+   private boolean lastAssumeFlatGroundState = false;
    private final Timer footstepPlanningCompleteTimer = new Timer();
    private final ImGuiTextOverlay statusOverlay = new ImGuiTextOverlay();
 
@@ -106,7 +106,6 @@ public class RDXLocomotionManager
 
       locomotionParameters = new RDXLocomotionParameters(robotModel.getSimpleRobotName());
       locomotionParameters.load();
-      lastAssumeFlatGroundState = locomotionParameters.getAssumeFlatGround();
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       bodyPathPlannerParameters = robotModel.getAStarBodyPathPlannerParameters();
       swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
@@ -274,6 +273,11 @@ public class RDXLocomotionManager
       if (isPlacingFootstep != isCurrentlyPlacingFootstep)
          baseUI.setModelSceneMouseCollisionEnabled(isCurrentlyPlacingFootstep);
       isPlacingFootstep = isCurrentlyPlacingFootstep;
+
+      if (locomotionParameters.getAssumeFlatGround() != lastAssumeFlatGroundState)
+      {
+         footstepPlannerParameters.setEnableExpansionMask(locomotionParameters.getAssumeFlatGround());
+      }
 
       lastAssumeFlatGroundState = locomotionParameters.getAssumeFlatGround();
    }
