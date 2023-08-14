@@ -4,19 +4,26 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
+
+import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
+import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
+import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -27,8 +34,9 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 {
    private final YoRegistry registry;
 
+   private final BooleanProvider useJacobianTranspose;
    private final JointTorqueBasedTouchdownDetector touchdownDetector;
-   private final JacobianBasedWrenchCalculator wrenchCalculator;
+   private final JacobianBasedBasedTouchdownDetector wrenchDetector;
 
    private final ReferenceFrame soleFrame;
 
@@ -39,10 +47,15 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
                                      ReferenceFrame soleFrame,
                                      DoubleProvider torqueContactThreshold,
                                      DoubleProvider torqueSecondContactThreshold,
+                                     DoubleProvider contactForceThreshold,
                                      YoInteger contactThresholdWindowSize,
+                                     BooleanProvider compensateGravity,
+                                     BooleanProvider useJacobianTranspose,
                                      YoRegistry parentRegistry)
    {
       this.soleFrame = soleFrame;
+      this.useJacobianTranspose = useJacobianTranspose;
+
       if (rootBody == null)
       {
          throw new RuntimeException("This class needs an implementation of the root body to function!");
@@ -74,7 +87,14 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
                                                                 contactThresholdWindowSize,
                                                                 registry);
 
-      wrenchCalculator = new JacobianBasedWrenchCalculator(foot, rootBody, soleFrame, registry);
+      wrenchDetector = new JacobianBasedBasedTouchdownDetector(foot,
+                                                               rootBody,
+                                                               soleFrame,
+                                                               TotalMassCalculator.computeSubTreeMass(MultiBodySystemTools.getRootBody(rootBody)),
+                                                               contactForceThreshold,
+                                                               contactThresholdWindowSize,
+                                                               compensateGravity,
+                                                               registry);
 
       parentRegistry.addChild(registry);
    }
@@ -90,13 +110,16 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
    {
       touchdownDetector.update();
 
-      wrenchCalculator.calculate();
+      wrenchDetector.calculate();
    }
 
    @Override
    public boolean hasFootHitGroundSensitive()
    {
-      return touchdownDetector.hasTouchedDownSensitive();
+      if (useJacobianTranspose.getValue())
+         return wrenchDetector.hasFootHitGroundSensitive();
+      else
+         return touchdownDetector.hasTouchedDownSensitive();
    }
 
    /**
@@ -105,25 +128,37 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
    @Override
    public boolean hasFootHitGroundFiltered()
    {
-      return touchdownDetector.hasTouchedDownFiltered();
+      if (useJacobianTranspose.getValue())
+         return wrenchDetector.hasFootHitGroundFiltered();
+      else
+         return touchdownDetector.hasTouchedDownFiltered();
    }
 
    @Override
    public double getFootLoadPercentage()
    {
-      return Double.NaN;
+      if (useJacobianTranspose.getValue())
+         return wrenchDetector.getFootLoadPercentage();
+      else
+         return Double.NaN;
    }
 
    @Override
    public FramePoint2DReadOnly getCenterOfPressure()
    {
-      return null;
+      if (useJacobianTranspose.getValue())
+         return wrenchDetector.getCenterOfPressure();
+      else
+         return null;
    }
 
    @Override
    public WrenchReadOnly getMeasuredWrench()
    {
-      return wrenchCalculator.getWrench();
+      if (useJacobianTranspose.getValue())
+         return wrenchDetector.getWrench();
+      else
+         return null;
    }
 
    @Override
@@ -218,38 +253,90 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          touchdownDetectedFiltered.set(false);
          touchdownDetectedSecondThreshold.set(false);
       }
-
-      public String getName()
-      {
-         return getClass().getSimpleName();
-      }
    }
 
-   private static class JacobianBasedWrenchCalculator
+   private static class JacobianBasedBasedTouchdownDetector
    {
+      private static final double MIN_FORCE_TO_COMPUTE_COP = 5.0;
+
+      private final ReferenceFrame soleFrame;
       private final GeometricJacobian footJacobian;
+      private final GravityCoriolisExternalWrenchMatrixCalculator gravityTorqueCalculator;
       private final DMatrixRMaj jacobianTranspose = new DMatrixRMaj(6, 1);
       private final OneDoFJointReadOnly[] legJoints;
-      private final boolean isInvertible;
+      private final YoDouble[] legJointGravityTaus;
 
-      private final YoFixedFrameWrench yoWrench;
+      private final YoFixedFrameWrench wrench;
+      private final YoFixedFrameWrench wrenchNoGravity;
       private final DMatrixRMaj wrenchVector = new DMatrixRMaj(6, 1);
       private final DMatrixRMaj torqueVector = new DMatrixRMaj(6, 1);
       private final LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.linear(6);
 
-      public JacobianBasedWrenchCalculator(RigidBodyBasics foot, RigidBodyBasics pelvis, ReferenceFrame soleFrame, YoRegistry registry)
+      private final BooleanProvider compensateGravity;
+
+      private final double robotTotalWeight;
+      private final DoubleProvider contactForceThreshold;
+      private final YoBoolean hasFootHitGround;
+      private final GlitchFilteredYoBoolean hasFootHitGroundFiltered;
+
+      private final YoDouble footForceMagnitude;
+      private final YoDouble alphaFootLoadFiltering;
+      private final AlphaFilteredYoVariable footLoadPercentage;
+
+      private final YoFramePoint2D centerOfPressure;
+      private final CenterOfPressureResolver copResolver = new CenterOfPressureResolver();
+
+      public JacobianBasedBasedTouchdownDetector(RigidBodyBasics foot,
+                                                 RigidBodyBasics pelvis,
+                                                 ReferenceFrame soleFrame,
+                                                 double robotTotalWeight,
+                                                 DoubleProvider contactForceThreshold,
+                                                 YoInteger contactThresholdWindowSize,
+                                                 BooleanProvider compensateGravity,
+                                                 YoRegistry registry)
       {
-         footJacobian = new GeometricJacobian(pelvis, foot, soleFrame);
+         this.soleFrame = soleFrame;
+         this.robotTotalWeight = robotTotalWeight;
+         this.contactForceThreshold = contactForceThreshold;
+         this.compensateGravity = compensateGravity;
 
          legJoints = MultiBodySystemTools.createOneDoFJointPath(pelvis, foot);
-         isInvertible = legJoints.length == 6;
 
-         if (!isInvertible)
-            throw new RuntimeException("We can't yet use the Jacobian Based Wrench calculator, becuase the Jacobian isn't square. We need to implement this with a pseudo inverse.");
+         if (legJoints.length != 6)
+            throw new RuntimeException("We can't yet use the Jacobian Based Wrench calculator, because the Jacobian isn't square. We need to implement this with a pseudo inverse.");
 
-         yoWrench = new YoFixedFrameWrench(foot.getBodyFixedFrame(),
-                                           new YoFrameVector3D(foot.getName() + "EstimatedFootTorque", soleFrame, registry),
-                                           new YoFrameVector3D(foot.getName() + "EstimatedFootForce", soleFrame, registry));
+         footJacobian = new GeometricJacobian(pelvis, foot, soleFrame);
+         gravityTorqueCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(MultiBodySystemReadOnly.toMultiBodySystemInput(legJoints));
+         gravityTorqueCalculator.setGravitionalAcceleration(-9.81); // TODO Extract me
+
+         legJointGravityTaus = new YoDouble[6];
+         for (int i = 0; i < legJointGravityTaus.length; i++)
+         {
+            legJointGravityTaus[i] = new YoDouble("tau_gravity_" + legJoints[i].getName(), registry);
+         }
+         String namePrefix = foot.getName();
+
+         wrench = new YoFixedFrameWrench(foot.getBodyFixedFrame(),
+                                         new YoFrameVector3D(namePrefix + "EstimatedFootTorque", soleFrame, registry),
+                                         new YoFrameVector3D(namePrefix + "EstimatedFootForce", soleFrame, registry));
+         wrenchNoGravity = new YoFixedFrameWrench(foot.getBodyFixedFrame(),
+                                                  new YoFrameVector3D(namePrefix + "EstimatedFootTorqueNoGravity", soleFrame, registry),
+                                                  new YoFrameVector3D(namePrefix + "EstimatedFootForceNoGravity", soleFrame, registry));
+
+         footForceMagnitude = new YoDouble(namePrefix + "FootForceMag", registry);
+
+         alphaFootLoadFiltering = new YoDouble(namePrefix + "AlphaFootLoadFiltering", registry);
+         alphaFootLoadFiltering.set(0.1);
+         footLoadPercentage = new AlphaFilteredYoVariable(namePrefix + "FootLoadPercentage", registry, alphaFootLoadFiltering);
+
+         hasFootHitGround = new YoBoolean(namePrefix + "FootHitGround", registry);
+         // Final variable to identify if the foot has hit the ground
+         hasFootHitGroundFiltered = new GlitchFilteredYoBoolean(namePrefix + "HasFootHitGroundFiltered",
+                                                                registry,
+                                                                hasFootHitGround,
+                                                                contactThresholdWindowSize);
+
+         centerOfPressure = new YoFramePoint2D(namePrefix + "CenterOfPressure", "", soleFrame, registry);
       }
 
       public void calculate()
@@ -265,12 +352,68 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          CommonOps_DDRM.scale(-1.0, torqueVector);
 
          solver.solve(torqueVector, wrenchVector);
-         yoWrench.set(wrenchVector);
+         wrench.set(wrenchVector);
+
+         gravityTorqueCalculator.compute();
+
+         for (int i = 0; i < legJoints.length; i++)
+         {
+            legJointGravityTaus[i].set(gravityTorqueCalculator.getComputedJointTau(legJoints[i]).get(0));
+            torqueVector.set(i, 0, legJoints[i].getTau() - legJointGravityTaus[i].getValue());
+         }
+
+         CommonOps_DDRM.scale(-1.0, torqueVector);
+
+         solver.solve(torqueVector, wrenchVector);
+         wrenchNoGravity.set(wrenchVector);
+
+         updateFootSwitch(compensateGravity.getValue() ? wrenchNoGravity : wrench);
+      }
+
+      private void updateFootSwitch(WrenchReadOnly wrench)
+      {
+         footForceMagnitude.set(wrench.getLinearPart().norm());
+
+         // Using the force in foot frame to ensure z is up when the foot is flat.
+         // Sometimes the sensor can be mounted such that z is down.
+         double forceZUp = wrench.getLinearPartZ();
+
+         double fZPlus = MathTools.clamp(forceZUp, 0.0, Double.POSITIVE_INFINITY);
+         footLoadPercentage.update(fZPlus / robotTotalWeight);
+
+         hasFootHitGround.set(forceZUp > contactForceThreshold.getValue());
+         hasFootHitGroundFiltered.update();
+
+         // Computing Center of Pressure
+         if (fZPlus < MIN_FORCE_TO_COMPUTE_COP)
+            centerOfPressure.setToNaN();
+         else
+            copResolver.resolveCenterOfPressureAndNormalTorque(centerOfPressure, wrench, soleFrame);
+      }
+
+      public boolean hasFootHitGroundSensitive()
+      {
+         return hasFootHitGround.getValue();
+      }
+
+      public boolean hasFootHitGroundFiltered()
+      {
+         return hasFootHitGroundFiltered.getValue();
       }
 
       public WrenchReadOnly getWrench()
       {
-         return yoWrench;
+         return compensateGravity.getValue() ? wrench : wrenchNoGravity;
+      }
+
+      public double getFootLoadPercentage()
+      {
+         return footLoadPercentage.getDoubleValue();
+      }
+
+      public FramePoint2DReadOnly getCenterOfPressure()
+      {
+         return centerOfPressure;
       }
    }
 }
