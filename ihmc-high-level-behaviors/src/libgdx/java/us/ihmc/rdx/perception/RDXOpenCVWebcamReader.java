@@ -7,7 +7,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 import org.bytedeco.opencv.opencv_videoio.VideoWriter;
 import us.ihmc.log.LogTools;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVGuidedSwapVideoPanel;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
@@ -20,7 +20,7 @@ import java.util.function.Consumer;
  */
 public class RDXOpenCVWebcamReader
 {
-   private final ImGuiPanel panel = new ImGuiPanel("Webcam Reader", this::renderImGuiWidgets);
+   private final RDXPanel panel = new RDXPanel("Webcam Reader", this::renderImGuiWidgets);
    private VideoCapture videoCapture;
    private int imageWidth = 1920;
    private int imageHeight = 1080;
@@ -153,7 +153,7 @@ public class RDXOpenCVWebcamReader
       return bgrImage;
    }
 
-   public ImGuiPanel getStatisticsPanel()
+   public RDXPanel getStatisticsPanel()
    {
       return panel;
    }

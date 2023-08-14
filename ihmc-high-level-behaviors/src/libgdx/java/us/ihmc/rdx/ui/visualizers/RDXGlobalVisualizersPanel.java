@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -12,7 +12,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import java.util.ArrayList;
 import java.util.Set;
 
-public class RDXGlobalVisualizersPanel extends ImGuiPanel implements RDXRenderableProvider
+public class RDXGlobalVisualizersPanel extends RDXPanel implements RDXRenderableProvider
 {
    private static final String WINDOW_NAME = "Global Visualizers";
 
@@ -29,7 +29,7 @@ public class RDXGlobalVisualizersPanel extends ImGuiPanel implements RDXRenderab
    public void addVisualizer(RDXVisualizer visualizer)
    {
       visualizers.add(visualizer);
-      ImGuiPanel panel = visualizer.getPanel();
+      RDXPanel panel = visualizer.getPanel();
       if (panel != null)
          addChild(panel);
       if (created)

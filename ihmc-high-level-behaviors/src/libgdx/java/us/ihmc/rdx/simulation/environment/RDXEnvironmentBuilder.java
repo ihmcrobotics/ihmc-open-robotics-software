@@ -20,7 +20,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -42,7 +42,7 @@ import us.ihmc.tools.io.WorkspaceResourceFile;
 
 import java.util.*;
 
-public class RDXEnvironmentBuilder extends ImGuiPanel
+public class RDXEnvironmentBuilder extends RDXPanel
 {
    private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(RDXEnvironmentBuilder.class, "Environment");
    private final WorkspaceResourceDirectory environmentFilesDirectory = new WorkspaceResourceDirectory(getClass(), "/environments");
@@ -62,7 +62,7 @@ public class RDXEnvironmentBuilder extends ImGuiPanel
    private RDXEnvironmentObject selectedObject;
    private RDXEnvironmentObject intersectedObject;
    private final RDXPose3DGizmo pose3DGizmo = new RDXPose3DGizmo();
-   private final ImGuiPanel poseGizmoTunerPanel = pose3DGizmo.createTunerPanel(getClass().getSimpleName());
+   private final RDXPanel poseGizmoTunerPanel = pose3DGizmo.createTunerPanel(getClass().getSimpleName());
    private final Point3D tempIntersection = new Point3D();
    private final RDXBulletPhysicsManager bulletPhysicsManager = new RDXBulletPhysicsManager();
    private final ImBoolean inputsEnabled = new ImBoolean(true);

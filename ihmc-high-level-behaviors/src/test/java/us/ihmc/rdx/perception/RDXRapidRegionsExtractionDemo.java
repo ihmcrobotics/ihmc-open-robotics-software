@@ -25,7 +25,7 @@ import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.tools.MocapTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRenderer;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.visualizers.RDXLineGraphic;
@@ -63,7 +63,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private final Pose3D cameraPose = new Pose3D();
 
    private BytedecoImage bytedecoDepthImage;
-   private ImGuiPanel navigationPanel;
+   private RDXPanel navigationPanel;
    private String sensorTopicName;
 
    private PerceptionDataLoader perceptionDataLoader;
@@ -96,7 +96,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             openCLManager = new OpenCLManager();
             openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
 
-            navigationPanel = new ImGuiPanel("Dataset Navigation Panel");
+            navigationPanel = new RDXPanel("Dataset Navigation Panel");
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
 
             createForPerspective(720, 1280, false); // Real D455

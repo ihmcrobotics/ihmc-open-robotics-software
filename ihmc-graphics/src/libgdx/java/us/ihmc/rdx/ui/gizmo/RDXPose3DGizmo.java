@@ -511,9 +511,9 @@ public class RDXPose3DGizmo implements RenderableProvider
       }
    }
 
-   public ImGuiPanel createTunerPanel(String name)
+   public RDXPanel createTunerPanel(String name)
    {
-      return new ImGuiPanel("Pose3D Gizmo Tuner (" + name + ")", this::renderImGuiTuner);
+      return new RDXPanel("Pose3D Gizmo Tuner (" + name + ")", this::renderImGuiTuner);
    }
 
    public void renderImGuiTuner()
