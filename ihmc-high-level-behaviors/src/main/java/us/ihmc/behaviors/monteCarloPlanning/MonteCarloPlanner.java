@@ -17,16 +17,15 @@ public class MonteCarloPlanner
    private Agent agent;
    private MonteCarloTreeNode root;
 
-   int worldHeight = 100;
-   int worldWidth = 100;
+   int worldHeight = 200;
+   int worldWidth = 200;
    int goalMargin = 5;
 
-   private final Point2D agentPos = new Point2D(10, 10);
-   private final Point2D goal = new Point2D(10, worldHeight - 10);
+   private final Point2D agentPos = new Point2D(0, 0);
 
    public MonteCarloPlanner()
    {
-      this.world = new World(new ArrayList<>(), goal, goalMargin, worldHeight, worldWidth);
+      this.world = new World(goalMargin, worldHeight, worldWidth);
       this.agent = new Agent(agentPos);
 
       root = new MonteCarloTreeNode(agent.getPosition(), null, uniqueNodeId++);

@@ -97,32 +97,24 @@ public class ActiveMappingRemoteProcess extends LocalizationAndMappingProcess
    {
       if (configurationParameters.getActiveMapping())
       {
-         LogTools.info("Active Mapping Enabled. Updating Plan. Walking Status: {}", walkingStatusMessage);
-
          if (walkingStatusMessage.get() != null)
          {
-            LogTools.info("Checking for Walking Status to be Complete");
-
             activeMappingModule.setWalkingStatus(WalkingStatus.fromByte(walkingStatusMessage.get().getWalkingStatus()));
 
             if (walkingStatusMessage.get().getWalkingStatus() == WalkingStatusMessage.COMPLETED && !activeMappingModule.isPlanAvailable())
             {
-               LogTools.info("Walking Status is Complete. Generating Plan");
                activeMappingModule.updatePlan(planarRegionMap);
             }
          }
 
          if (activeMappingModule.isPlanAvailable())
          {
-            LogTools.info("Plan Available. Publishing Plan");
-
             // Publishing Plan Result
             FootstepDataListMessage footstepDataList = activeMappingModule.getFootstepDataListMessage();
             publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
 
             activeMappingModule.setPlanAvailable(false);
          }
-
 //         configurationParameters.setActiveMapping(false);
       }
    }

@@ -1,11 +1,9 @@
 package us.ihmc.perception;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.activeMapping.ActiveMappingRemoteProcess;
@@ -30,6 +28,7 @@ import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
+import us.ihmc.perception.tools.ActiveMappingTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionFilterTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
@@ -49,9 +48,6 @@ public class HumanoidPerceptionModule
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
 
    private BytedecoImage realsenseDepthImage;
-   private BytedecoImage ousterDepthImage;
-   private BytePointer compressedOccupancyGrid;
-   private ImageMessage occupancyGridMessage;
    private Mat gridColor = new Mat();
 
    private World world;
@@ -144,8 +140,12 @@ public class HumanoidPerceptionModule
                            perceptionConfigurationParameters.getOccupancyGridResolution(),
                            70);
 
-      int gridX = (int) (sensorFrame.getTransformToWorldFrame().getTranslationX() * perceptionConfigurationParameters.getOccupancyGridResolution() + 70);
-      int gridY = (int) (sensorFrame.getTransformToWorldFrame().getTranslationY() * perceptionConfigurationParameters.getOccupancyGridResolution() + 70);
+      int gridX = ActiveMappingTools.getIndexFromCoordinates(sensorFrame.getTransformToWorldFrame().getTranslationX(),
+                                                             perceptionConfigurationParameters.getOccupancyGridResolution(),
+                                                             70);
+      int gridY = ActiveMappingTools.getIndexFromCoordinates(sensorFrame.getTransformToWorldFrame().getTranslationY(),
+                                                             perceptionConfigurationParameters.getOccupancyGridResolution(),
+                                                             70);
 
       agent.getPosition().set(gridX, gridY);
 
@@ -180,18 +180,17 @@ public class HumanoidPerceptionModule
    {
       if (activeMappingRemoteProcess != null)
       {
+         LogTools.warn("Initializing Occupancy Grid from Active Mapping Remote Process");
+
          this.world = activeMappingRemoteProcess.getActiveMappingModule().getPlanner().getWorld();
          this.agent = activeMappingRemoteProcess.getActiveMappingModule().getPlanner().getAgent();
       }
       else
       {
-         LogTools.info("Initializing Occupancy Grid");
+         LogTools.warn("Initializing Occupancy Grid from Scratch");
 
          this.world = new World(0, gridHeight, gridWidth);
          this.agent = new Agent(new Point2D());
-
-         this.ousterDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
-         compressedOccupancyGrid = new BytePointer(); // deallocate later
       }
    }
 
@@ -260,8 +259,8 @@ public class HumanoidPerceptionModule
          Point3D point = pointCloud.get(i);
          //sensorToWorldTransform.transform(point);
 
-         int gridX = (int) (point.getX() * occupancyGridResolution + offset);
-         int gridY = (int) (point.getY() * occupancyGridResolution + offset);
+         int gridX = ActiveMappingTools.getIndexFromCoordinates(point.getX(), occupancyGridResolution, offset);
+         int gridY = ActiveMappingTools.getIndexFromCoordinates(point.getY(), occupancyGridResolution, offset);
 
          if (point.getZ() > thresholdHeight && gridX >= 0 && gridX < occupancyGrid.cols() && gridY >= 0 && gridY < occupancyGrid.rows())
          {
