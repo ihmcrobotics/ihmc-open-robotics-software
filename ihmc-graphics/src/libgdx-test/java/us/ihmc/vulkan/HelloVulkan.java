@@ -7,7 +7,9 @@ import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.vulkan.*;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.color.MutableColor;
 import us.ihmc.log.LogTools;
 
@@ -57,6 +59,7 @@ public class HelloVulkan
    private List<Long> swapChainImageViews;
    private List<Long> swapChainFramebuffers;
    private long renderPass;
+   private long descriptorSetLayout;
    private long pipelineLayout;
    private long graphicsPipeline;
    private long commandPool;
@@ -64,6 +67,8 @@ public class HelloVulkan
    private long vertexBufferMemory;
    private long indexBuffer;
    private long indexBufferMemory;
+   private List<Long> uniformBuffers;
+   private List<Long> uniformBuffersMemory;
    private List<VkCommandBuffer> commandBuffers;
    private List<HelloVulkanFrame> inFlightFrames;
    private Map<Integer, HelloVulkanFrame> imagesInFlight;
@@ -86,7 +91,6 @@ public class HelloVulkan
       }
 
       GLFW.glfwWindowHint(GLFW.GLFW_CLIENT_API, GLFW.GLFW_NO_API);
-      GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_TRUE);
 
       String title = HelloVulkan.class.getSimpleName();
       window = GLFW.glfwCreateWindow(WIDTH, HEIGHT, title, MemoryUtil.NULL, MemoryUtil.NULL);
@@ -132,6 +136,9 @@ public class HelloVulkan
 
    private void cleanupSwapChain()
    {
+      uniformBuffers.forEach(ubo -> VK10.vkDestroyBuffer(device, ubo, null));
+      uniformBuffersMemory.forEach(uboMemory -> VK10.vkFreeMemory(device, uboMemory, null));
+
       swapChainFramebuffers.forEach(framebuffer -> VK10.vkDestroyFramebuffer(device, framebuffer, null));
 
       try (MemoryStack stack = MemoryStack.stackPush())
@@ -150,6 +157,8 @@ public class HelloVulkan
    private void cleanup()
    {
       cleanupSwapChain();
+
+      VK10.vkDestroyDescriptorSetLayout(device, descriptorSetLayout, null);
 
       VK10.vkDestroyBuffer(device, indexBuffer, null);
       VK10.vkFreeMemory(device, indexBufferMemory, null);
@@ -207,6 +216,7 @@ public class HelloVulkan
       createRenderPass();
       createGraphicsPipeline();
       createFramebuffers();
+      createUniformBuffers();
       createCommandBuffers();
    }
 
@@ -506,6 +516,31 @@ public class HelloVulkan
       }
    }
 
+   private void createDescriptorSetLayout()
+   {
+      try (MemoryStack stack = MemoryStack.stackPush())
+      {
+         VkDescriptorSetLayoutBinding.Buffer uboLayoutBinding = VkDescriptorSetLayoutBinding.calloc(1, stack);
+         uboLayoutBinding.binding(0);
+         uboLayoutBinding.descriptorCount(1);
+         uboLayoutBinding.descriptorType(VK10.VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+         uboLayoutBinding.pImmutableSamplers(null);
+         uboLayoutBinding.stageFlags(VK10.VK_SHADER_STAGE_VERTEX_BIT);
+
+         VkDescriptorSetLayoutCreateInfo layoutInfo = VkDescriptorSetLayoutCreateInfo.calloc(stack);
+         layoutInfo.sType(VK10.VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO);
+         layoutInfo.pBindings(uboLayoutBinding);
+
+         LongBuffer pDescriptorSetLayout = stack.mallocLong(1);
+
+         if (VK10.vkCreateDescriptorSetLayout(device, layoutInfo, null, pDescriptorSetLayout) != VK10.VK_SUCCESS)
+         {
+            throw new RuntimeException("Failed to create descriptor set layout");
+         }
+         descriptorSetLayout = pDescriptorSetLayout.get(0);
+      }
+   }
+
    private void createGraphicsPipeline()
    {
       try (MemoryStack stack = MemoryStack.stackPush())
@@ -513,9 +548,9 @@ public class HelloVulkan
          // Let's compile the GLSL shaders into SPIR-V at runtime using the shaderc library
          // Check ShaderSPIRVUtils class to see how it can be done
          ShaderSPIRVUtils.SPIRV vertShaderSPIRV
-               = ShaderSPIRVUtils.compileShaderFile("shaders/17_shader_vertexbuffer.vert", ShaderSPIRVUtils.ShaderKind.VERTEX_SHADER);
+               = ShaderSPIRVUtils.compileShaderFile("shaders/21_shader_ubo.vert", ShaderSPIRVUtils.ShaderKind.VERTEX_SHADER);
          ShaderSPIRVUtils.SPIRV fragShaderSPIRV
-               = ShaderSPIRVUtils.compileShaderFile("shaders/17_shader_vertexbuffer.frag", ShaderSPIRVUtils.ShaderKind.FRAGMENT_SHADER);
+               = ShaderSPIRVUtils.compileShaderFile("shaders/21_shader_ubo.frag", ShaderSPIRVUtils.ShaderKind.FRAGMENT_SHADER);
          long vertShaderModule = createShaderModule(vertShaderSPIRV.bytecode());
          long fragShaderModule = createShaderModule(fragShaderSPIRV.bytecode());
 
@@ -606,6 +641,7 @@ public class HelloVulkan
 
          VkPipelineLayoutCreateInfo pipelineLayoutInfo = VkPipelineLayoutCreateInfo.calloc(stack);
          pipelineLayoutInfo.sType(VK10.VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO);
+         pipelineLayoutInfo.pSetLayouts(stack.longs(descriptorSetLayout));
 
          LongBuffer pPipelineLayout = stack.longs(VK10.VK_NULL_HANDLE);
          if (VK10.vkCreatePipelineLayout(device, pipelineLayoutInfo, null, pPipelineLayout) != VK10.VK_SUCCESS)
@@ -779,6 +815,30 @@ public class HelloVulkan
       }
    }
 
+   private void createUniformBuffers()
+   {
+      try (MemoryStack stack = MemoryStack.stackPush())
+      {
+         uniformBuffers = new ArrayList<>(swapChainImages.size());
+         uniformBuffersMemory = new ArrayList<>(swapChainImages.size());
+
+         LongBuffer pBuffer = stack.mallocLong(1);
+         LongBuffer pBufferMemory = stack.mallocLong(1);
+
+         for (int i = 0; i < swapChainImages.size(); i++)
+         {
+            createBuffer(UniformBufferObject.SIZEOF,
+                         VK10.VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                         VK10.VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK10.VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                         pBuffer,
+                         pBufferMemory);
+
+            uniformBuffers.add(pBuffer.get(0));
+            uniformBuffersMemory.add(pBufferMemory.get(0));
+         }
+      }
+   }
+
    private void createBuffer(long size, int usage, int properties, LongBuffer pBuffer, LongBuffer pBufferMemory)
    {
       try (MemoryStack stack = MemoryStack.stackPush())
@@ -871,6 +931,19 @@ public class HelloVulkan
       {
          buffer.putShort(index);
       }
+      buffer.rewind();
+   }
+
+   private void memcpy(ByteBuffer buffer, UniformBufferObject ubo)
+   {
+      final int mat4Size = 16 * Float.BYTES;
+
+      EuclidGraphicsTools.packValuesIntoBuffer(buffer, ubo.getModel());
+      EuclidGraphicsTools.packValuesIntoBuffer(buffer, ubo.getView());
+      EuclidGraphicsTools.packValuesIntoBuffer(buffer, ubo.getProjection());
+//      ubo.getModel().get(0, buffer);
+//      ubo.getView().get(mat4Size, buffer);
+//      ubo.getProjection().get(mat4Size * 2, buffer);
       buffer.rewind();
    }
 
@@ -968,10 +1041,10 @@ public class HelloVulkan
 
       try (MemoryStack stack = MemoryStack.stackPush())
       {
-         VkSemaphoreCreateInfo semaphoreInfo = VkSemaphoreCreateInfo.calloc(stack);
+         VkSemaphoreCreateInfo semaphoreInfo = VkSemaphoreCreateInfo.callocStack(stack);
          semaphoreInfo.sType(VK10.VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO);
 
-         VkFenceCreateInfo fenceInfo = VkFenceCreateInfo.calloc(stack);
+         VkFenceCreateInfo fenceInfo = VkFenceCreateInfo.callocStack(stack);
          fenceInfo.sType(VK10.VK_STRUCTURE_TYPE_FENCE_CREATE_INFO);
          fenceInfo.flags(VK10.VK_FENCE_CREATE_SIGNALED_BIT);
 
@@ -991,6 +1064,35 @@ public class HelloVulkan
 
             inFlightFrames.add(new HelloVulkanFrame(pImageAvailableSemaphore.get(0), pRenderFinishedSemaphore.get(0), pFence.get(0)));
          }
+      }
+   }
+
+   private void updateUniformBuffer(int currentImage)
+   {
+      try (MemoryStack stack = MemoryStack.stackPush())
+      {
+         UniformBufferObject ubo = new UniformBufferObject();
+
+//         ubo.getModel().rotate((float) (GLFW.glfwGetTime() * Math.toRadians(90)), 0.0f, 0.0f, 1.0f);
+         ubo.getModel().getRotation().appendYawRotation(GLFW.glfwGetTime() * Math.toRadians(90));
+         Point3D eyePosition = new Point3D(2.0, 2.0, 2.0);
+         Point3D pointToLookAt = new Point3D(0.0, 0.0, 0.0);
+         EuclidGraphicsTools.lookAt(ubo.getView(), eyePosition, pointToLookAt, Axis3D.Z);
+//         ubo.getView().lookAt(2.0f, 2.0f, 2.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+         double fieldOfViewY = Math.toRadians(45.0);
+         double aspectRatio = swapChainExtent.width() / (double) swapChainExtent.height();
+         double zNear = 0.1;
+         double zFar = 10.0;
+         EuclidGraphicsTools.perspective(ubo.getProjection(), fieldOfViewY, aspectRatio, zNear, zFar);
+//         ubo.getProjection().perspective((float) fieldOfViewY, +(float) swapChainExtent.width() / (float) swapChainExtent.height(), 0.1f, 10.0f);
+         ubo.getProjection().a22 = ubo.getProjection().a22 * -1.0;
+
+         PointerBuffer data = stack.mallocPointer(1);
+         VK10.vkMapMemory(device, uniformBuffersMemory.get(currentImage), 0, UniformBufferObject.SIZEOF, 0, data);
+         {
+            memcpy(data.getByteBuffer(0, UniformBufferObject.SIZEOF), ubo);
+         }
+         VK10.vkUnmapMemory(device, uniformBuffersMemory.get(currentImage));
       }
    }
 
