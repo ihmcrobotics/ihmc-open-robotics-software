@@ -599,6 +599,11 @@ public class RDXPose3DGizmo implements RenderableProvider
       return gizmoFrame;
    }
 
+   public FrameBasedGizmoModification getFrameBasedGizmoModification()
+   {
+      return frameBasedGizmoModification;
+   }
+
    public static Mesh angularHighlightMesh(double majorRadius, double minorRadius)
    {
       return tetrahedronRingMesh(1.75 * minorRadius, 1.25 * minorRadius, 5);

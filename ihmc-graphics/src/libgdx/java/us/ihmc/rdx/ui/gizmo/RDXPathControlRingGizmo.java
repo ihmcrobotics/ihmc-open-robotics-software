@@ -270,24 +270,12 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       }
    }
 
-   private void calculateHovered(RDXVRContext vrContext)
+   public void processVRInput(RDXVRContext vrContext)
    {
       for (RobotSide side : RobotSide.values)
       {
          isGizmoHoveredVR.put(side, vrContext.getController(side).getSelectedPick() == vrPickResult.get(side));
-      }
-   }
 
-   public void processVRInput(RDXVRContext vrContext)
-   {
-      calculateHovered(vrContext);
-      processVRInputModification(vrContext);
-   }
-
-   private void processVRInputModification(RDXVRContext vrContext)
-   {
-      for (RobotSide side : RobotSide.values)
-      {
          vrContext.getController(side).runIfConnected(controller ->
          {
             RDXVRDragData triggerDragData = controller.getTriggerDragData();
