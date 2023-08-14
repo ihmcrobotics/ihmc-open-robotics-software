@@ -652,9 +652,9 @@ public class RDXPathControlRingGizmo implements RenderableProvider
                                        closestVRCollisionSelection.get(RobotSide.RIGHT) == NEGATIVE_Y_ARROW)? highlightedMaterial : normalMaterial);
    }
 
-   public ImGuiPanel createTunerPanel(String name)
+   public RDXPanel createTunerPanel(String name)
    {
-      return new ImGuiPanel("Footstep Ring Gizmo Tuner (" + name + ")", this::renderImGuiTuner);
+      return new RDXPanel("Footstep Ring Gizmo Tuner (" + name + ")", this::renderImGuiTuner);
    }
 
    public void renderImGuiTuner()

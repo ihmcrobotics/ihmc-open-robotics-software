@@ -17,8 +17,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.rdx.imgui.ImGuiPanel;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPathControlRingGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
@@ -28,7 +27,7 @@ import us.ihmc.robotics.robotSide.SegmentDependentList;
 
 import java.util.ArrayList;
 
-public class RDXFootstepPlannerPanel extends ImGuiPanel implements RenderableProvider
+public class RDXFootstepPlannerPanel extends RDXPanel implements RenderableProvider
 {
    private final RDXPathControlRingGizmo goalGizmo = new RDXPathControlRingGizmo();
    private final FootstepPlannerParametersBasics footstepPlannerParameters;

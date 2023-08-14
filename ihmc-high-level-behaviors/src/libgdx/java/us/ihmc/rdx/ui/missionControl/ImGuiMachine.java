@@ -7,20 +7,18 @@ import imgui.extension.implot.flag.ImPlotAxisFlags;
 import imgui.extension.implot.flag.ImPlotFlags;
 import imgui.flag.ImGuiCond;
 import mission_control_msgs.msg.dds.SystemResourceUsageMessage;
-import mission_control_msgs.msg.dds.SystemServiceLogRefreshMessage;
 import mission_control_msgs.msg.dds.SystemServiceStatusMessage;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.ui.yo.ImPlotDoublePlotLine;
 import us.ihmc.rdx.ui.yo.ImPlotPlot;
 import us.ihmc.ros2.ROS2Node;
 
-import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -46,7 +44,7 @@ public class ImGuiMachine
    private IHMCROS2Publisher<Empty> rebootPublisher;
    private SystemResourceUsageMessage lastResourceUsageMessage = new SystemResourceUsageMessage();
 
-   private final ImGuiPanel panel;
+   private final RDXPanel panel;
    private final Map<String, ImGuiMachineService> services = new HashMap<>();
    private final ImPlotPlot cpuPlot = new ImPlotPlot();
    private final ImPlotPlot ramPlot = new ImPlotPlot();
@@ -77,7 +75,7 @@ public class ImGuiMachine
       this.instanceId = instanceId;
       this.hostname = hostname;
 
-      panel = new ImGuiPanel(hostname + "##" + instanceId);
+      panel = new RDXPanel(hostname + "##" + instanceId);
 
       cpuPlot.setFlags(plotFlags);
       cpuPlot.setXFlags(plotAxisXFlags);
@@ -121,7 +119,7 @@ public class ImGuiMachine
       return lastResourceUsageMessage;
    }
 
-   public ImGuiPanel getPanel()
+   public RDXPanel getPanel()
    {
       return panel;
    }
