@@ -133,10 +133,12 @@ public class RDXImGuiBasedUIDemo
 
    private void renderWindow2()
    {
+      ImGui.text("I'm in Window 2!");
    }
 
    private void renderWindow3()
    {
+      ImGui.text("I'm in Window 3!");
    }
 
    public static void main(String[] args)

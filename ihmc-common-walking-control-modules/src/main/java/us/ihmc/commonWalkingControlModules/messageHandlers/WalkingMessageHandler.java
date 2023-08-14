@@ -84,6 +84,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
    private final YoInteger currentNumberOfFootsteps = new YoInteger("currentNumberOfFootsteps", registry);
    private final YoBoolean isWalkingPaused = new YoBoolean("isWalkingPaused", registry);
    private final YoBoolean isWalkingResuming = new YoBoolean("isWalkingResuming", registry);
+   private final YoBoolean clearFootstepsAfterPause = new YoBoolean("clearFootstepsAfterPause", registry);
    private final YoDouble defaultTransferTime = new YoDouble("defaultTransferTime", registry);
    private final YoDouble finalTransferTime = new YoDouble("finalTransferTime", registry);
    private final YoDouble defaultSwingTime = new YoDouble("defaultSwingTime", registry);
@@ -321,6 +322,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
          isWalkingResuming.set(true);
 
       isWalkingPaused.set(command.isPauseRequested());
+      clearFootstepsAfterPause.set(command.getClearRemainingFootstepQueue());
    }
 
    public void handleFootTrajectoryCommand(List<FootTrajectoryCommand> commands)
@@ -720,6 +722,11 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       {
          walkingStatusMessage.setWalkingStatus(WalkingStatus.PAUSED.toByte());
          statusOutputManager.reportStatusMessage(walkingStatusMessage);
+         if (clearFootstepsAfterPause.getBooleanValue())
+         {
+            clearFootsteps();
+            clearFootstepsAfterPause.set(false);
+         }
          checkForPause();
          return;
       }
