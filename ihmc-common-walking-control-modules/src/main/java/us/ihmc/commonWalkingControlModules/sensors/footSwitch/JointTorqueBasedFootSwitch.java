@@ -12,9 +12,11 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -64,9 +66,15 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
       }
 
       registry = new YoRegistry(jointToRead.getName() + getClass().getSimpleName());
-      touchdownDetector = new JointTorqueBasedTouchdownDetector(namePrefix, jointToRead, true, torqueContactThreshold, torqueSecondContactThreshold, contactThresholdWindowSize, registry);
+      touchdownDetector = new JointTorqueBasedTouchdownDetector(namePrefix,
+                                                                jointToRead,
+                                                                true,
+                                                                torqueContactThreshold,
+                                                                torqueSecondContactThreshold,
+                                                                contactThresholdWindowSize,
+                                                                registry);
 
-      wrenchCalculator = new JacobianBasedWrenchCalculator(foot, rootBody, soleFrame);
+      wrenchCalculator = new JacobianBasedWrenchCalculator(foot, rootBody, soleFrame, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -137,12 +145,16 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
       private final boolean dontDetectTouchdownIfAtJointLimit;
 
       /**
-       * @param joint joint used to detect touchdown
-       * @param dontDetectTouchdownIfAtJointLimit if true, this detector will not detect a touchdown if the joint is past a joint limit. this is to avoid
-       *                                          false-positive touchdown signals given by simulated torques at joint limits
+       * @param joint                             joint used to detect touchdown
+       * @param dontDetectTouchdownIfAtJointLimit if true, this detector will not detect a touchdown if
+       *                                          the joint is past a joint limit. this is to avoid
+       *                                          false-positive touchdown signals given by simulated
+       *                                          torques at joint limits
        * @param registry
        */
-      public JointTorqueBasedTouchdownDetector(String namePrefix, OneDoFJointReadOnly joint, boolean dontDetectTouchdownIfAtJointLimit,
+      public JointTorqueBasedTouchdownDetector(String namePrefix,
+                                               OneDoFJointReadOnly joint,
+                                               boolean dontDetectTouchdownIfAtJointLimit,
                                                DoubleProvider torqueThreshold,
                                                DoubleProvider torqueHigherThreshold,
                                                YoInteger contactThresholdWindowSize,
@@ -155,7 +167,10 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 
          jointTorque = new YoDouble(namePrefix + joint.getName() + "_torqueUsedForTouchdownDetection", registry);
          touchdownDetected = new YoBoolean(namePrefix + joint.getName() + "_torqueBasedTouchdownDetected", registry);
-         touchdownDetectedFiltered = new GlitchFilteredYoBoolean(namePrefix + joint.getName() + "_torqueBasedTouchdownDetectedFiltered", registry, touchdownDetected, contactThresholdWindowSize);
+         touchdownDetectedFiltered = new GlitchFilteredYoBoolean(namePrefix + joint.getName() + "_torqueBasedTouchdownDetectedFiltered",
+                                                                 registry,
+                                                                 touchdownDetected,
+                                                                 contactThresholdWindowSize);
          touchdownDetectedSecondThreshold = new YoBoolean(namePrefix + joint.getName() + "_torqueBasedTouchdownSecondThreshold", registry);
       }
 
@@ -179,7 +194,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 
       public void update()
       {
-       jointTorque.set(joint.getTau());
+         jointTorque.set(joint.getTau());
 
          if (dontDetectTouchdownIfAtJointLimit && isAtJointLimit())
          {
@@ -213,48 +228,49 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
    private static class JacobianBasedWrenchCalculator
    {
       private final GeometricJacobian footJacobian;
+      private final DMatrixRMaj jacobianTranspose = new DMatrixRMaj(6, 1);
       private final OneDoFJointReadOnly[] legJoints;
       private final boolean isInvertible;
 
+      private final YoFixedFrameWrench yoWrench;
       private final DMatrixRMaj wrenchVector = new DMatrixRMaj(6, 1);
       private final DMatrixRMaj torqueVector = new DMatrixRMaj(6, 1);
       private final LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.linear(6);
 
-      private final Wrench wrench = new Wrench();
-
-      public JacobianBasedWrenchCalculator(RigidBodyBasics foot, RigidBodyBasics pelvis, ReferenceFrame soleFrame)
+      public JacobianBasedWrenchCalculator(RigidBodyBasics foot, RigidBodyBasics pelvis, ReferenceFrame soleFrame, YoRegistry registry)
       {
          footJacobian = new GeometricJacobian(pelvis, foot, soleFrame);
-         wrench.setToZero(ReferenceFrame.getWorldFrame());
 
          legJoints = MultiBodySystemTools.createOneDoFJointPath(pelvis, foot);
          isInvertible = legJoints.length == 6;
 
          if (!isInvertible)
-            throw new RuntimeException(
-                  "We can't yet use the Jacobian Based Wrench calculator, becuase the Jacobian isn't square. We need to implement this with a pseudo inverse.");
+            throw new RuntimeException("We can't yet use the Jacobian Based Wrench calculator, becuase the Jacobian isn't square. We need to implement this with a pseudo inverse.");
+
+         yoWrench = new YoFixedFrameWrench(foot.getBodyFixedFrame(),
+                                           new YoFrameVector3D(foot.getName() + "EstimatedFootTorque", soleFrame, registry),
+                                           new YoFrameVector3D(foot.getName() + "EstimatedFootForce", soleFrame, registry));
       }
 
       public void calculate()
       {
          footJacobian.compute();
-         DMatrixRMaj jacobianMatrix = footJacobian.getJacobianMatrix();
+         jacobianTranspose.reshape(footJacobian.getNumberOfColumns(), 6);
+         CommonOps_DDRM.transpose(footJacobian.getJacobianMatrix(), jacobianTranspose);
 
          for (int i = 0; i < legJoints.length; i++)
             torqueVector.set(i, 0, legJoints[i].getTau());
 
-         solver.setA(jacobianMatrix);
+         solver.setA(jacobianTranspose);
          CommonOps_DDRM.scale(-1.0, torqueVector);
 
-         solver.solve(wrenchVector, torqueVector);
-
-         wrench.setToZero(footJacobian.getJacobianFrame());
-         wrench.set(wrenchVector);
+         solver.solve(torqueVector, wrenchVector);
+         yoWrench.set(wrenchVector);
       }
 
       public WrenchReadOnly getWrench()
       {
-         return wrench;
+         return yoWrench;
       }
    }
 }
