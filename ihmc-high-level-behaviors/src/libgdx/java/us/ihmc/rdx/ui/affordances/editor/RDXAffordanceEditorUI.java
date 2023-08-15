@@ -621,6 +621,7 @@ public class RDXAffordanceEditorUI
             }
          }
          LogTools.info("SAVED to file {}", csvFile.getName());
+         csvDataMatrix.clear();
       }
       catch (IOException e)
       {
