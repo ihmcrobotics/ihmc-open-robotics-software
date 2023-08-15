@@ -548,6 +548,11 @@ public class ProMPAssistant
       distanceCandidateTasks.clear();
    }
 
+   public void setCustomSpeed(double speed)
+   {
+      proMPManagers.get(currentTask).setTaskCustomSpeed(speed);
+   }
+
    public int getTestNumber()
    {
       return testNumber;

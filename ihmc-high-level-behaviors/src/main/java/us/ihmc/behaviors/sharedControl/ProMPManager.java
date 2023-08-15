@@ -294,6 +294,15 @@ public class ProMPManager
       }
    }
 
+   public void setTaskCustomSpeed(double speed)
+   {
+      // update the time modulation of the learned ProMPs with estimated value
+      for (Map.Entry<String, ProMP> partProMP : learnedProMPs.entrySet())
+      {
+         (partProMP.getValue()).update_time_modulation((double) (partProMP.getValue()).get_traj_length() / speed);
+      }
+   }
+
    /**
     * Update the speed of the ProMPs of the task based on observation of multiple body parts trajectories
     */

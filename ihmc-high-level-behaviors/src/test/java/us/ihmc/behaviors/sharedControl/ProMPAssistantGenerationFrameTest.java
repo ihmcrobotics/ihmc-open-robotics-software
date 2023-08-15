@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -64,6 +65,13 @@ public class ProMPAssistantGenerationFrameTest
       // replay that file
       TrajectoryRecordReplay trajectoryPlayer = new TrajectoryRecordReplay(testFilePath, bodyParts.size());
       // start parsing data immedediately, assuming user is moving from beginning of recorded test trajectory
+      trajectoryPlayer.readCSV();
+      int numberOfSamples = trajectoryPlayer.getData().size();
+      HashMap<String, Boolean> updatedSpeed = new HashMap<String, Boolean>();
+      for (String bodyPart : bodyParts)
+      {
+         updatedSpeed.put(bodyPart, false);
+      }
       proMPAssistant.setIsMovingThreshold(0.00001);
 
       TrajectoryRecordReplay trajectoryRecorder = new TrajectoryRecordReplay(etcDirectory, bodyParts.size());
@@ -92,6 +100,11 @@ public class ProMPAssistantGenerationFrameTest
                //do not change the frame, just observe it in order to generate a prediction later
                proMPAssistant.processFrameAndObjectInformation(framePose, bodyPart,  "Target"
                                                                                      + "", objectFrame, null);
+               if (proMPAssistant.startedProcessing() && !updatedSpeed.get(bodyPart))
+               {
+                  proMPAssistant.setCustomSpeed(numberOfSamples);
+                  updatedSpeed.replace(bodyPart, true);
+               }
             }
             //record frame and store it in csv file
             framePose.changeFrame(objectFrame);
