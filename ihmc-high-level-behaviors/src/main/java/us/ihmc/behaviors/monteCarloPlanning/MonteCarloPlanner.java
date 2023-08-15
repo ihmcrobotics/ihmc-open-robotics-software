@@ -21,10 +21,14 @@ public class MonteCarloPlanner
    int worldWidth = 200;
    int goalMargin = 5;
 
+   int stepLength = 8;
+
    private final Point2D agentPos = new Point2D(0, 0);
 
-   public MonteCarloPlanner()
+   public MonteCarloPlanner(int offset)
    {
+      agentPos.set(offset, offset);
+
       this.world = new World(goalMargin, worldHeight, worldWidth);
       this.agent = new Agent(agentPos);
 
@@ -121,7 +125,7 @@ public class MonteCarloPlanner
 
    public void updateWorld(Point2D newState)
    {
-      world.updateGrid(newState, agent.getRangeScanner().getMaxRange());
+      MonteCarloPlannerTools.updateGrid(world, newState, agent.getRangeScanner().getMaxRange());
    }
 
    public void updateAgent(Point2D newState)
@@ -134,7 +138,7 @@ public class MonteCarloPlanner
     */
    public MonteCarloTreeNode expand(MonteCarloTreeNode node)
    {
-      ArrayList<Vector2D> availableActions = getAvailableActions(node);
+      ArrayList<Vector2D> availableActions = getAvailableActions(node, stepLength);
 
       for (Vector2D action : availableActions)
       {
@@ -152,11 +156,16 @@ public class MonteCarloPlanner
    /**
     * Back propagates the given score to the root node.
     */
-   public ArrayList<Vector2D> getAvailableActions(MonteCarloTreeNode node)
+   public ArrayList<Vector2D> getAvailableActions(MonteCarloTreeNode node, int stepLength)
    {
       ArrayList<Vector2D> availableActions = new ArrayList<>();
 
-      for (Vector2D action : new Vector2D[] {new Vector2D(0, 1), new Vector2D(0, -1), new Vector2D(1, 0), new Vector2D(-1, 0)})
+      Vector2D[] actions = new Vector2D[] {new Vector2D(0, stepLength),
+                                           new Vector2D(0, -stepLength),
+                                           new Vector2D(stepLength, 0),
+                                           new Vector2D(-stepLength, 0)};
+
+      for (Vector2D action : actions)
       {
          if (checkActionObstacles(node.getAgentState().getPosition(), action, world))
          {
@@ -178,7 +187,7 @@ public class MonteCarloPlanner
 
       for (int i = 0; i < simulationIterations; i++)
       {
-         ArrayList<Vector2D> availableActions = getAvailableActions(node);
+         ArrayList<Vector2D> availableActions = getAvailableActions(node, stepLength);
          Vector2D randomAction = availableActions.get((int) (Math.random() * availableActions.size()));
          randomState = computeActionResult(randomState, randomAction);
          score -= 1;
@@ -208,7 +217,7 @@ public class MonteCarloPlanner
             {
                if (point.distance(randomState) < agent.getRangeScanner().getMaxRange())
                {
-                  score -= 20;
+                  score -= 40;
                }
                else
                {
@@ -287,6 +296,4 @@ public class MonteCarloPlanner
    {
       agent.measure(world);
    }
-
-
 }

@@ -34,35 +34,6 @@ public class World
       this.goalMargin = goalMargin;
    }
 
-   public void updateGrid(Point2D agent_state, int radius)
-   {
-      // set a circle of pixels around the agent to be 50
-      int agent_min_x = (int) (agent_state.getX() - radius);
-      int agent_max_x = (int) (agent_state.getX() + radius);
-      int agent_min_y = (int) (agent_state.getY() - radius);
-      int agent_max_y = (int) (agent_state.getY() + radius);
-
-      for (int x = agent_min_x; x < agent_max_x; x++)
-      {
-         for (int y = agent_min_y; y < agent_max_y; y++)
-         {
-            // if point is within 5 pixels circular radius
-            if (Math.sqrt(Math.pow(x - agent_state.getX(), 2) + Math.pow(y - agent_state.getY(), 2)) < radius)
-            {
-               // check if inside the world boundaries
-               if (x >= 0 && x <= gridWidth && y >= 0 && y <= gridHeight)
-               {
-                  // if currently the pixel is 0 then set it to 50
-                  if (grid.ptr(x, y).get() == 0)
-                  {
-                     grid.ptr(x, y).put((byte) 50);
-                  }
-               }
-            }
-         }
-      }
-   }
-
    public void submitObstacles(ArrayList<Vector4D32> obstacles)
    {
       MonteCarloPlannerTools.fillObstacles(obstacles, grid);

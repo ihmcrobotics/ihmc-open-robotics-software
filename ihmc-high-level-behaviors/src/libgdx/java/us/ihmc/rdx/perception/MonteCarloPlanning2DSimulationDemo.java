@@ -31,7 +31,7 @@ class MonteCarloPlanning2DSimulationDemo
       //obstacles.add(new Vector4D32(30, 80, 30, 1));
       //obstacles.add(new Vector4D32(75, 80, 5, 1));
 
-      MonteCarloPlanner planner = new MonteCarloPlanner();
+      MonteCarloPlanner planner = new MonteCarloPlanner(0);
       planner.getWorld().submitObstacles(obstacles);
 
       int screenSize = 1400;

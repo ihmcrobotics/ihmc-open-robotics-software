@@ -151,14 +151,16 @@ public class HumanoidPerceptionModule
                                                                 70);
 
          agent.getPosition().set(gridX, gridY);
+
          agent.measure(world);
+
+         MonteCarloPlannerTools.plotWorld(world, gridColor);
+         MonteCarloPlannerTools.plotAgent(agent, gridColor);
+         MonteCarloPlannerTools.plotRangeScan(agent.getScanPoints(), gridColor);
+
+         PerceptionDebugTools.display("Monte Carlo Planner World", gridColor, 1, 1400);
       }
 
-      MonteCarloPlannerTools.plotWorld(world, gridColor);
-      MonteCarloPlannerTools.plotAgent(agent, gridColor);
-      MonteCarloPlannerTools.plotRangeScan(agent.getScanPoints(), gridColor);
-
-      PerceptionDebugTools.display("Monte Carlo Planner World", gridColor, 1, 1400);
    }
 
    public void initializePerspectiveRapidRegionsExtractor(CameraIntrinsics cameraIntrinsics)
