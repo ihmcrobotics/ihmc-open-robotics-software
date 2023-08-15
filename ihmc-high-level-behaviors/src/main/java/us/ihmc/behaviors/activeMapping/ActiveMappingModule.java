@@ -28,6 +28,8 @@ public class ActiveMappingModule
       EXECUTE_AND_PAUSE, CONTINUOUS_MAPPING_STRAIGHT, CONTINUOUS_MAPPING_COVERAGE, CONTINUOUS_MAPPING_SEARCH
    }
 
+   private final Mat gridColor = new Mat();
+
    private DecisionLayer decisionLayer;
 
    public ActiveMappingMode activeMappingMode = ActiveMappingMode.CONTINUOUS_MAPPING_STRAIGHT;
@@ -65,7 +67,7 @@ public class ActiveMappingModule
       this.referenceFrames = humanoidReferenceFrames;
       this.robotModel = robotModel;
 
-      monteCarloPlanner = new MonteCarloPlanner();
+      monteCarloPlanner = new MonteCarloPlanner(offset);
 
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
 
@@ -90,10 +92,19 @@ public class ActiveMappingModule
          //ActiveMappingTools.getStraightGoalFootPoses(leftSolePose, rightSolePose, leftGoalPose, rightGoalPose, 0.6f);
          //Pose2D goalPose2D = ActiveMappingTools.getNearestUnexploredNode(planarRegionMap.getMapRegions(), gridOrigin, robotPose2D, gridSize, gridResolution);
 
+         monteCarloPlanner.getAgent().measure(monteCarloPlanner.getWorld());
+
+         MonteCarloPlannerTools.plotWorld(monteCarloPlanner.getWorld(), gridColor);
+         MonteCarloPlannerTools.plotAgent(monteCarloPlanner.getAgent(), gridColor);
+         MonteCarloPlannerTools.plotRangeScan(monteCarloPlanner.getAgent().getScanPoints(), gridColor);
+
+         PerceptionDebugTools.display("Monte Carlo Planner World", gridColor, 1, 1400);
+
          Point2D goalPositionIndices = monteCarloPlanner.plan();
-         Point2D goalPosition = new Point2D(ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getX(), gridResolution, 0),
-                                            ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getY(), gridResolution, 0));
-         monteCarloPlanner.execute(goalPosition);
+         Point2D goalPosition = new Point2D(ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getX(), gridResolution, offset),
+                                            ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getY(), gridResolution, offset));
+
+         monteCarloPlanner.execute(goalPositionIndices);
 
          LogTools.warn("Current Position: {}, Indices: {}, Goal: {}", robotLocation, goalPositionIndices, goalPosition);
 
@@ -136,7 +147,7 @@ public class ActiveMappingModule
 
    public FootstepDataListMessage getFootstepDataListMessage()
    {
-      return FootstepDataMessageConverter.createFootstepDataListFromPlan(plannerOutput.getFootstepPlan(), 1.3, 0.4);
+      return FootstepDataMessageConverter.createFootstepDataListFromPlan(plannerOutput.getFootstepPlan(), 0.6, 0.3);
    }
 
    public void setPlanAvailable(boolean planAvailable)

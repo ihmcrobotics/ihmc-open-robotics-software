@@ -143,4 +143,33 @@ public class MonteCarloPlannerTools
 
       return closest_point;
    }
+
+   public static void updateGrid(World world, Point2D agent_state, int radius)
+   {
+      // set a circle of pixels around the agent to be 50
+      int agent_min_x = (int) (agent_state.getX() - radius);
+      int agent_max_x = (int) (agent_state.getX() + radius);
+      int agent_min_y = (int) (agent_state.getY() - radius);
+      int agent_max_y = (int) (agent_state.getY() + radius);
+
+      for (int x = agent_min_x; x < agent_max_x; x++)
+      {
+         for (int y = agent_min_y; y < agent_max_y; y++)
+         {
+            // if point is within 5 pixels circular radius
+            if (Math.sqrt(Math.pow(x - agent_state.getX(), 2) + Math.pow(y - agent_state.getY(), 2)) < radius)
+            {
+               // check if inside the world boundaries
+               if (x >= 0 && x <= world.getGridWidth() && y >= 0 && y <= world.getGridHeight())
+               {
+                  // if currently the pixel is 0 then set it to 50
+                  if (world.getGrid().ptr(x, y).get() == 0)
+                  {
+                     world.getGrid().ptr(x, y).put((byte) 50);
+                  }
+               }
+            }
+         }
+      }
+   }
 }
