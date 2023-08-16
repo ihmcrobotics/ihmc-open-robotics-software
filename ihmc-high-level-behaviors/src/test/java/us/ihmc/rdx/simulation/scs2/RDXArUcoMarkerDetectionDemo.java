@@ -7,7 +7,7 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.opencv.OpenCVArUcoMarker;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetection;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.perception.RDXOpenCVArUcoMarkerDetectionUI;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
@@ -82,7 +82,7 @@ public class RDXArUcoMarkerDetectionDemo
             testImageArUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI(" Test");
             testImageArUcoMarkerDetectionUI.create(testImageArUcoMarkerDetection);
             testImageArUcoMarkerDetectionUI.setupForRenderingDetectedPosesIn3D(new ArrayList<>(), sensorPoseGizmo.getGizmoFrame());
-            ImGuiPanel testUIPanel = new ImGuiPanel("Test image detection", this::renderTestUIImGuiWidgets);
+            RDXPanel testUIPanel = new RDXPanel("Test image detection", this::renderTestUIImGuiWidgets);
             testUIPanel.addChild(testImageArUcoMarkerDetectionUI.getMarkerImagePanel());
             baseUI.getImGuiPanelManager().addPanel(testUIPanel);
          }
