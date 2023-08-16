@@ -1,81 +1,86 @@
-#define GRID_LENGTH_METERS 0
-#define GRID_WIDTH_METERS 1
-#define CELL_SIZE_XY_METERS 2
-#define INPUT_HEIGHT 3
-#define INPUT_WIDTH 4
-#define GRID_LENGTH 5
-#define GRID_WIDTH 6
+#define HEIGHT_MAP_RESOLUTION 0
+#define HEIGHT_MAP_CENTER_INDEX 1
+#define DEPTH_INPUT_HEIGHT 2
+#define DEPTH_INPUT_WIDTH 3
+#define HEIGHT_MAP_CENTER_X 4
+#define HEIGHT_MAP_CENTER_Y 5
+#define MODE 6
+#define DEPTH_CX 7
+#define DEPTH_CY 8
+#define DEPTH_FX 9
+#define DEPTH_FY 10
 
-float3 back_project_spherical(int2 pos, float depth, global float *params) {
-  float totalPitch = M_PI / 2;
-  float totalYaw = 2 * M_PI;
+#define VERTICAL_FOV M_PI_2_F
+#define HORIZONTAL_FOV (2.0f * M_PI_F)
 
-  int x = pos.x;
-  int y = pos.y;
+/**
+ * Converts a coordinate (yaw, pitch) in the lidar sensor to a point in the sensor frame
+ **/
+float3 back_project_spherical(int yaw_index, int pitch_index, float depth, global float *params)
+{
+   int yawCountsFromCenter = -yaw_index - (params[DEPTH_INPUT_WIDTH] / 2);
+   int pitchCountsFromCenter = -(pitch_index - (params[DEPTH_INPUT_HEIGHT] / 2));
 
-  int xFromCenter = -x - (params[INPUT_WIDTH] / 2);
-  int yFromCenter = -(y - (params[INPUT_HEIGHT] / 2));
+   float yaw = yawCountsFromCenter / (float)params[DEPTH_INPUT_WIDTH] * HORIZONTAL_FOV;
+   float pitch = pitchCountsFromCenter / (float)params[DEPTH_INPUT_HEIGHT] * VERTICAL_FOV;
 
-  float yaw = xFromCenter / (float)params[INPUT_WIDTH] * totalYaw;
-  float pitch = yFromCenter / (float)params[INPUT_HEIGHT] * totalPitch;
+   float r = depth * cos(pitch);
 
-  float r = depth * cos(pitch);
+   float px = r * cos(yaw);
+   float py = r * sin(yaw);
+   float pz = depth * sin(pitch);
 
-  float px = r * cos(yaw);
-  float py = r * sin(yaw);
-  float pz = depth * sin(pitch);
-
-  // printf("Projection: [%d,%d] (X:%.2lf,Y:%.2lf,Z:%.2lf,R:%.2lf,D:%.2lf)\n",
-  // x, y, px, py, pz, r, depth);
-
-  float3 X = (float3)(px, py, pz);
-  return X;
+   return (float3)(px, py, pz);
 }
 
-float3 compute_grid_cell_center(int rIndex, int cIndex, global float *params) {
-  float3 cellCenter = (float3)(0, 0, 0);
-  cellCenter.x =
-      ((params[GRID_LENGTH] / 2) - rIndex) * params[CELL_SIZE_XY_METERS];
-  cellCenter.y =
-      ((params[GRID_WIDTH] / 2) - cIndex) * params[CELL_SIZE_XY_METERS];
-  cellCenter.z = -2.0f;
-  return cellCenter;
+float3 back_project_perspective(int2 pos, float Z, global float* params)
+{
+   float X = (pos.x - params[DEPTH_CX]) / params[DEPTH_FX] * Z;
+   float Y = (pos.y - params[DEPTH_CY]) / params[DEPTH_FY] * Z;
+
+   float3 point = (float3) (Z, -X, -Y);
+   return point;
 }
 
-int2 spherical_projection(float3 cellCenter, global float *params) {
-  int2 proj = (int2)(0, 0);
+int2 perspective_projection(float3 point, global float* params)
+{
+   float x = point.x / point.z * params[DEPTH_FX] + params[DEPTH_CX];
+   float y = point.y / point.z * params[DEPTH_FY] + params[DEPTH_CY];
 
-  int count = 0;
-  float pitchUnit = M_PI / (2 * params[INPUT_HEIGHT]);
-  float yawUnit = 2 * M_PI / (params[INPUT_WIDTH]);
-
-  int pitchOffset = params[INPUT_HEIGHT] / 2;
-  int yawOffset = params[INPUT_WIDTH] / 2;
-
-  float x = cellCenter.x;
-  float y = cellCenter.y;
-  float z = cellCenter.z;
-
-  float radius = length(cellCenter.xy);
-
-  float pitch = atan2(z, radius);
-  int pitchCount = (pitchOffset) - (int)(pitch / pitchUnit);
-
-  float yaw = atan2(-y, x);
-  int yawCount = (yawOffset) + (int)(yaw / yawUnit);
-
-  proj.x = pitchCount;
-  proj.y = yawCount;
-
-  //    printf("Projection: [%.2f,%.2f] (Yc:%d,Pc:%d, Z:%.2lf,R:%.2lf)\n", yaw,
-  //    pitch, yawCount, pitchCount, z, radius);
-
-  return proj;
+   return (int2) (x, y);
 }
 
-float get_height_on_plane(float x, float y, global float *plane) {
-  float height = (plane[3] - (plane[0] * x + plane[1] * y)) / plane[2];
-  return height;
+/**
+ * Converts a point in the sensor frame into a coordinate in the lidar sensor.
+ * coordinates returned are (int2) (pitch, yaw)
+ **/
+int2 spherical_projection(float3 cellCenter, global float *params)
+{
+   float pitchUnit = VERTICAL_FOV / (params[DEPTH_INPUT_HEIGHT]);
+   float yawUnit = HORIZONTAL_FOV / (params[DEPTH_INPUT_WIDTH]);
+
+   int pitchOffset = params[DEPTH_INPUT_HEIGHT] / 2;
+   int yawOffset = params[DEPTH_INPUT_WIDTH] / 2;
+
+   float x = cellCenter.x;
+   float y = cellCenter.y;
+   float z = cellCenter.z;
+
+   float radius = length(cellCenter.xy);
+
+   float pitch = atan2(z, radius);
+   int pitchCount = (pitchOffset) - (int)(pitch / pitchUnit);
+
+   float yaw = atan2(-y, x);
+   int yawCount = (yawOffset) + (int)(yaw / yawUnit);
+
+   return (int2) (pitchCount, yawCount);
+}
+
+float get_height_on_plane(float x, float y, global float *plane)
+{
+   float height = (plane[3] - (plane[0] * x + plane[1] * y)) / plane[2];
+   return height;
 }
 
 void kernel heightMapUpdateKernel(read_only image2d_t in,
@@ -83,132 +88,124 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
                                   global float *params,
                                   global float *sensorToWorldTf,
                                   global float *worldToSensorTf,
-                                  global float *plane) {
-  int cIndex = get_global_id(0);
-  int rIndex = get_global_id(1);
+                                  global float *plane)
+{
+   int xIndex = get_global_id(0);
+   int yIndex = get_global_id(1);
 
-  // printf("Height Map Update Kernel\n");
+   float3 normal;
+   float3 centroid;
 
-  float3 normal;
-  float3 centroid;
+   float averageHeightZ = 0;
+   float3 cellCenterInWorld = (float3) (0.0f, 0.0f, 0.65f);
+   cellCenterInWorld.xy = indices_to_coordinate((int2) (xIndex, yIndex),
+                                               (float2) (0, 0), // params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]
+                                               params[HEIGHT_MAP_RESOLUTION],
+                                               params[HEIGHT_MAP_CENTER_INDEX]);
 
-  float averageHeightZ = 0;
-  float3 cellCenter = compute_grid_cell_center(rIndex, cIndex, params);
 
-  cellCenter = transformPoint3D32_2(
-      cellCenter,
+   cellCenterInWorld.x += 1.5f;
+
+   int WINDOW_WIDTH = 100;
+   int WINDOW_HEIGHT = 180;
+
+   float halfCellWidth = params[HEIGHT_MAP_RESOLUTION] / 4.0f;
+   float minX = cellCenterInWorld.x - halfCellWidth;
+   float maxX = cellCenterInWorld.x + halfCellWidth;
+   float minY = cellCenterInWorld.y - halfCellWidth;
+   float maxY = cellCenterInWorld.y + halfCellWidth;
+
+   float3 cellCenterInSensor = transformPoint3D32_2(
+      cellCenterInWorld,
       (float3)(worldToSensorTf[0], worldToSensorTf[1], worldToSensorTf[2]),
       (float3)(worldToSensorTf[4], worldToSensorTf[5], worldToSensorTf[6]),
       (float3)(worldToSensorTf[8], worldToSensorTf[9], worldToSensorTf[10]),
       (float3)(worldToSensorTf[3], worldToSensorTf[7], worldToSensorTf[11]));
 
-  int2 projectedPoint = spherical_projection(cellCenter, params);
+   int2 projectedPoint;
+   if (params[MODE] == 0) // Spherical Projection
+   {
+      projectedPoint = spherical_projection(cellCenterInSensor, params);
+   }
+   else if (params[MODE] == 1) // Perspective Projection
+   {
+      // convert cellCenterInSensor to z-forward, x-right, y-down
+      float3 cellCenterInSensorZfwd = (float3) (-cellCenterInSensor.y, -cellCenterInSensor.z, cellCenterInSensor.x);
 
-  int2 pos = (int2)(0, 0);
+      if (cellCenterInSensorZfwd.z < 0)
+        return;
 
-  //    printf("[%d/%d, %d/%d] -> Cell: (%.2f, %.2f, %.2f) -> Proj: (%d,%d)\n",
-  //    rIndex, (int) params[GRID_LENGTH],
-  //         cIndex, (int) params[GRID_WIDTH], cellCenter.x, cellCenter.y,
-  //         cellCenter.z, pos.x, pos.y);
+      projectedPoint = perspective_projection(cellCenterInSensorZfwd, params);
+   }
 
-  int WINDOW_WIDTH = 20;
+   //printf("xIndex: %d, yIndex: %d\tcellCenterWorld: (%f, %f, %f)\tcellCenter: (%f, %f, %f)\tprojectedPoint: (%d, %d)\n",
+   //       xIndex, yIndex, cellCenterInWorld.x, cellCenterInWorld.y, cellCenterInWorld.z,
+   //       cellCenterInSensor.x, cellCenterInSensor.y, cellCenterInSensor.z, projectedPoint.x, projectedPoint.y);
 
-  int count = 0;
+   int count = 0;
 
-  for (int i = 0; i < (int)params[INPUT_HEIGHT]; i++) {
-    for (int j = -WINDOW_WIDTH / 2; j < WINDOW_WIDTH / 2 + 1; j++) {
-      pos = (int2)(projectedPoint.y + j, i);
+   for (int pitch_count_offset = -WINDOW_HEIGHT / 2; pitch_count_offset < WINDOW_HEIGHT / 2 + 1; pitch_count_offset+=3)
+   {
+      for (int yaw_count_offset = -WINDOW_WIDTH / 2; yaw_count_offset < WINDOW_WIDTH / 2 + 1; yaw_count_offset+=3)
+      {
+         int yaw_count = projectedPoint.x + yaw_count_offset;
+         int pitch_count = projectedPoint.y + pitch_count_offset;
 
-      //            printf("[%d/%d, %d/%d] -> Cell: (%.2f, %.2f, %.2f) -> Proj:
-      //            (%d,%d)\n", rIndex, (int) params[GRID_LENGTH],
-      //                              cIndex, (int) params[GRID_WIDTH],
-      //                              cellCenter.x, cellCenter.y, cellCenter.z,
-      //                              projectedPoint.x, projectedPoint.y);
+         if ((yaw_count >= 0) && (yaw_count < (int)params[DEPTH_INPUT_WIDTH]) && (pitch_count >= 0) && (pitch_count < (int)params[DEPTH_INPUT_HEIGHT]))
+         {
+            float radius = ((float)read_imageui(in, (int2) (yaw_count, pitch_count)).x) / (float) 1000;
 
-      if ((pos.x >= 0) && (pos.x < (int)params[INPUT_WIDTH]) && (pos.y >= 0) &&
-          (pos.y < (int)params[INPUT_HEIGHT])) {
-        float radius = ((float)read_imageui(in, pos).x) / (float)1000;
+            float3 queryPointInSensor;
+            float3 queryPointInWorld;
+            if (params[MODE] == 0) // Spherical
+            {
+               queryPointInSensor = back_project_spherical(yaw_count,pitch_count,radius,params);
+            }
+            else if (params[MODE] == 1) // Perspective
+            {
+               queryPointInSensor = back_project_perspective((int2) (yaw_count, pitch_count), radius, params);
+            }
 
-        float3 point = back_project_spherical(pos, radius, params);
-        //                point = transform3(point,
-        //                        (float3)(sensorToWorldTf[0],
-        //                        sensorToWorldTf[1], sensorToWorldTf[2]),
-        //                        (float3)(sensorToWorldTf[4],
-        //                        sensorToWorldTf[5], sensorToWorldTf[6]),
-        //                        (float3)(sensorToWorldTf[8],
-        //                        sensorToWorldTf[9], sensorToWorldTf[10]),
-        //                        (float3)(sensorToWorldTf[3],
-        //                        sensorToWorldTf[7], sensorToWorldTf[11]));
+            queryPointInWorld = transformPoint3D32_2(
+            queryPointInSensor,
+            (float3)(sensorToWorldTf[0], sensorToWorldTf[1], sensorToWorldTf[2]),
+            (float3)(sensorToWorldTf[4], sensorToWorldTf[5], sensorToWorldTf[6]),
+            (float3)(sensorToWorldTf[8], sensorToWorldTf[9], sensorToWorldTf[10]),
+            (float3)(sensorToWorldTf[3], sensorToWorldTf[7], sensorToWorldTf[11]));
 
-        //               printf("[%d,%d] : [%d/%d, %d/%d] -> Cell: (%.2f, %.2f,
-        //               %.2f) -> Proj: (%d,%d) -> BackProj: (%.2lf,%.2lf,%.2lf)
-        //               -> GridCell: (%.2f,%.2f)\n", i, j, rIndex, (int)
-        //               params[GRID_LENGTH],
-        //                        cIndex, (int) params[GRID_WIDTH],
-        //                        cellCenter.x, cellCenter.y, cellCenter.z,
-        //                        projectedPoint.x, projectedPoint.y, point.x,
-        //                        point.y, point.z, (point.x / 0.1), point.y /
-        //                        0.1);
+            //printf("xIndex: %d, yIndex: %d\tcellCenter: (%f, %f, %f)\tprojectedPoint: (%d, %d)\t(yaw: %d, pitch: %d)\tdepth: %f\tqueryPoint: (%f,%f,%f)\tLimits: (x:[%f,%f], y:[%f,%f])\n",
+            //   xIndex, yIndex, cellCenterInWorld.x, cellCenterInWorld.y, cellCenterInWorld.z, projectedPoint.x, projectedPoint.y,
+            //   yaw_count, pitch_count, radius, queryPointInWorld.x, queryPointInWorld.y, queryPointInWorld.z, minX, maxX, minY, maxY);
 
-        float minX = cellCenter.x - params[CELL_SIZE_XY_METERS] / 2;
-        float maxX = cellCenter.x + params[CELL_SIZE_XY_METERS] / 2;
-        float minY = cellCenter.y - params[CELL_SIZE_XY_METERS] / 2;
-        float maxY = cellCenter.y + params[CELL_SIZE_XY_METERS] / 2;
 
-        //                printf("[%d,%d] : [%d/%d, %d/%d] -> Cell: (%.2f, %.2f,
-        //                %.2f) -> Proj: (%d,%d) -> BackProj:
-        //                (%.2lf,%.2lf,%.2lf) -> GridCell: (%.2f,%.2f) ->
-        //                Bounds(X): (%.2f, %.2f),  -> Bounds(Y): (%.2f,
-        //                %.2f)\n", i, j, rIndex, (int) params[GRID_LENGTH],
-        //                              cIndex, (int) params[GRID_WIDTH],
-        //                              cellCenter.x, cellCenter.y,
-        //                              cellCenter.z, projectedPoint.x,
-        //                              projectedPoint.y, point.x, point.y,
-        //                              point.z, (cIndex *
-        //                              params[CELL_SIZE_XY_METERS]), (rIndex *
-        //                              params[CELL_SIZE_XY_METERS]), minX,
-        //                              maxX, minY, maxY);
+            //printf("xIndex: %d, yIndex: %d \tWorld Point: (%f, %f, %f), Sensor Point (Z-fwd): (%f, %f, %f) -> Image Point: (%d, %d)\n", xIndex, yIndex,
+            //      cellCenterInWorld.x, cellCenterInWorld.y, cellCenterInWorld.z,
+            //      cellCenterInSensor.x, cellCenterInSensor.y, cellCenterInSensor.z,
+            //      projectedPoint.x, projectedPoint.y);
 
-        if (point.x > minX && point.x < maxX && point.y > minY &&
-            point.y < maxY) {
-          count++;
-          averageHeightZ += point.z;
-
-          //                     printf("[%d,%d] : [%d/%d, %d/%d] -> Cell:
-          //                     (%.2f, %.2f, %.2f) -> Proj: (%d,%d) ->
-          //                     BackProj: (%.2lf,%.2lf,%.2lf) -> GridCell:
-          //                     (%.2f,%.2f) -> Bounds(X): (%.2f, %.2f),  ->
-          //                     Bounds(Y): (%.2f, %.2f)\n", i, j, rIndex, (int)
-          //                     params[GRID_LENGTH],
-          //                              cIndex, (int) params[GRID_WIDTH],
-          //                              cellCenter.x, cellCenter.y,
-          //                              cellCenter.z, projectedPoint.x,
-          //                              projectedPoint.y, point.x, point.y,
-          //                              point.z, (cIndex *
-          //                              params[CELL_SIZE_XY_METERS]), (rIndex
-          //                              * params[CELL_SIZE_XY_METERS]), minX,
-          //                              maxX, minY, maxY);
-          //
-          //                    printf("_________________________________++++++++++++++++++++++++
-          //                    FOUND
-          //                    +++++++++++++++++++++++++++++++____________________________________\n");
-        }
+            if (queryPointInWorld.x > minX && queryPointInWorld.x < maxX && queryPointInWorld.y > minY && queryPointInWorld.y < maxY)
+            {
+               //printf("HIT......: (%f, %f, %f), minX: %f, maxX: %f, minY: %f, maxY: %f\n", queryPointInWorld.x, queryPointInWorld.y, queryPointInWorld.z, minX, maxX, minY, maxY);
+               count++;
+               averageHeightZ += queryPointInWorld.z;
+            }
+         }
       }
-    }
-  }
+   }
 
-  if (count > 0) {
-    averageHeightZ =
-        max(-20.0f,
-            min(1.5f, averageHeightZ / (float)(count)-get_height_on_plane(
-                                           cellCenter.x, cellCenter.y, plane)));
-    write_imageui(out, (int2)(cIndex, rIndex),
-                  (uint4)((int)((2.0f + averageHeightZ) * 10000.0f), 0, 0, 0));
-  } else {
-    write_imageui(out, (int2)(cIndex, rIndex), (uint4)(0, 0, 0, 0));
-  }
+   int cellsPerAxis = 2 * params[HEIGHT_MAP_CENTER_INDEX] + 1;
 
-  //    averageHeightZ = cellCenter.x * cellCenter.x + cellCenter.y *
-  //    cellCenter.y; write_imageui(out, (int2)(cIndex,rIndex), (uint4)((int)(
-  //    (2.0f + averageHeightZ) * 10000.0f), 0, 0, 0));
+   if (count > 0)
+   {
+      averageHeightZ = averageHeightZ / (float)(count);
+      averageHeightZ = clamp(averageHeightZ, -5.f, 5.0f);
+
+      write_imageui(out, (int2)(xIndex, yIndex), (uint4)((int)( (averageHeightZ - 0.65f) * 10000.0f), 0, 0, 0));
+
+      //printf("xIndex: %d, yIndex: %d, count: %d, averageHeightZ: %f\n", xIndex, yIndex, count, averageHeightZ);
+   }
+   else
+   {
+      write_imageui(out, (int2)(xIndex, yIndex), (uint4)(0, 0, 0, 0));
+   }
 }

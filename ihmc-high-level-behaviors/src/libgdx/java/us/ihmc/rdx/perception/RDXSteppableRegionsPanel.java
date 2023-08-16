@@ -14,7 +14,7 @@ import us.ihmc.perception.steppableRegions.SteppableRegionsAPI;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersReadOnly;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySetGroup;
 import us.ihmc.ros2.ROS2Node;
@@ -38,7 +38,7 @@ public class RDXSteppableRegionsPanel
    private final ImBoolean drawPatches = new ImBoolean(true);
    private final ImInt yawIndexToRender = new ImInt(0);
 
-   private ImGuiPanel imguiPanel;
+   private RDXPanel imguiPanel;
    private RDXMatImagePanel steppabilityPanel;
    private RDXMatImagePanel steppableRegionsPanel;
 
@@ -56,7 +56,7 @@ public class RDXSteppableRegionsPanel
 
    public void create()
    {
-      imguiPanel = new ImGuiPanel("Steppable Region Extraction", this::renderImGuiWidgetsPanel);
+      imguiPanel = new RDXPanel("Steppable Region Extraction", this::renderImGuiWidgetsPanel);
 
       cellsPerSide = 100;
       steppabilityPanel = new RDXMatImagePanel("Raw Steppability ", cellsPerSide, cellsPerSide, false);
@@ -215,7 +215,7 @@ public class RDXSteppableRegionsPanel
       openCLManager.destroy();
    }
 
-   public ImGuiPanel getBasePanel()
+   public RDXPanel getBasePanel()
    {
       return imguiPanel;
    }

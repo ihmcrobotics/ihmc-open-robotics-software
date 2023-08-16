@@ -6,7 +6,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.perception.RDXBytedecoImagePanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -47,7 +47,7 @@ public class RDXFFMPEGOpenH264LoggingDemo
 
             baseUI.create();
 
-            ImGuiPanel panel = new ImGuiPanel("Image", this::renderImGuiWidgets);
+            RDXPanel panel = new RDXPanel("Image", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
 
             ffmpegLoggerDemoHelper.create(WIDTH, HEIGHT, this::prepareSourceImage);

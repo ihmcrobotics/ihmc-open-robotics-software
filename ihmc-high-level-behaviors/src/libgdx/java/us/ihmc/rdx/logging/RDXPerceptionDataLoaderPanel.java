@@ -9,7 +9,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLogChannel;
 import us.ihmc.perception.tools.PerceptionDebugTools;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
@@ -21,7 +21,7 @@ import java.util.HashMap;
 
 import static org.bytedeco.opencv.global.opencv_highgui.destroyAllWindows;
 
-public class RDXPerceptionDataLoaderPanel extends ImGuiPanel
+public class RDXPerceptionDataLoaderPanel extends RDXPanel
 {
    private PerceptionDataLoader loader;
    private Mat cvImage;

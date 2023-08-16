@@ -54,7 +54,7 @@ import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.RDXPointCloudRenderer;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
@@ -86,7 +86,7 @@ import java.util.function.LongSupplier;
 
 import static us.ihmc.rdx.simulation.sensors.RDXLowLevelDepthSensorSimulator.FLOATS_PER_POINT;
 
-public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
+public class RDXHighLevelDepthSensorSimulator extends RDXPanel
 {
    private static final MutableInt INDEX = new MutableInt();
 

@@ -6,7 +6,7 @@ import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.log.LogTools;
 
-public class ImGuiDockspacePanel extends ImGuiPanelSizeHandler
+public class RDXDockspacePanel extends RDXPanelSizeHandler
 {
    private final String name;
    private final ImBoolean isShowing = new ImBoolean(true);
@@ -15,7 +15,7 @@ public class ImGuiDockspacePanel extends ImGuiPanelSizeHandler
    private boolean shownLastTick = false;
    private int windowViewportID;
 
-   public ImGuiDockspacePanel(String name)
+   public RDXDockspacePanel(String name)
    {
       this.name = name;
    }
