@@ -92,7 +92,9 @@ public class ControllerAPIDefinition
       commands.add(MultiContactBalanceStatusCommand.class);
       commands.add(MultiContactTimedContactSequenceCommand.class);
 
-
+      /** Commands supported by the Crocoddyl control state */
+      commands.add(CrocoddylSolverTrajectoryCommand.class);
+      
       /** Command supported by the joint-space controller {@link JointspacePositionControllerState} */
       commands.add(WholeBodyJointspaceTrajectoryCommand.class);
 
