@@ -15,7 +15,7 @@ public class TreadmillMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5ab03b5f3ab4503ac4b9b0bab09bf7816800f84eecff5ea0190c1a6cd2ed4ea7";
+   		return "fff7a32cb2401bdbdd16c89bb33776632445a5365b302506e9fe34716021ebdf";
    }
    
    @Override

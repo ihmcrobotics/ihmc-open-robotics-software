@@ -12,20 +12,33 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class TreadmillMessage extends Packet<TreadmillMessage> implements Settable<TreadmillMessage>, EpsilonComparable<TreadmillMessage>
 {
+   public static final byte START_BELT_TIMEOUT_ENABLED = (byte) 0;
+   public static final byte START_BELT_TIMEOUT_DISABLED = (byte) 1;
+   public static final byte STOP_BELT = (byte) 2;
+   public static final byte SET_SPEED = (byte) 3;
+   public static final byte SET_ELEVATION = (byte) 4;
+   public static final byte AUTO_STOP = (byte) 5;
+   public static final byte AUTO_MINIMUM = (byte) 6;
+   public static final byte ACK_FLAG_TOGGLE = (byte) 7;
+   public static final byte BELT_STATUS = (byte) 8;
+   public static final byte GET_CURRENT_SPEED = (byte) 9;
+   public static final byte GET_CURRENT_ELEVATION = (byte) 10;
+   public static final byte GET_COMMANDED_SPEED = (byte) 11;
+   public static final byte GET_COMMANDED_ELEVATION = (byte) 12;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
    /**
-            * bool to activate the treadmill
+            * bool to dictate activation of communication between the treadmill and the computer. If true, activate and if false, deactivate
             */
    public boolean activate_;
    /**
-            * byte to decide current action
+            * byte to decide current action based on the previously defined byte values
             */
    public byte action_;
    /**
-            * This is the data being sent to and from the treadmill
+            * This is the data being sent to and from the treadmill. Speed is in MPH and incline is in percent incline
             */
    public double speed_;
    public double incline_;
@@ -70,14 +83,14 @@ public class TreadmillMessage extends Packet<TreadmillMessage> implements Settab
    }
 
    /**
-            * bool to activate the treadmill
+            * bool to dictate activation of communication between the treadmill and the computer. If true, activate and if false, deactivate
             */
    public void setActivate(boolean activate)
    {
       activate_ = activate;
    }
    /**
-            * bool to activate the treadmill
+            * bool to dictate activation of communication between the treadmill and the computer. If true, activate and if false, deactivate
             */
    public boolean getActivate()
    {
@@ -85,14 +98,14 @@ public class TreadmillMessage extends Packet<TreadmillMessage> implements Settab
    }
 
    /**
-            * byte to decide current action
+            * byte to decide current action based on the previously defined byte values
             */
    public void setAction(byte action)
    {
       action_ = action;
    }
    /**
-            * byte to decide current action
+            * byte to decide current action based on the previously defined byte values
             */
    public byte getAction()
    {
@@ -100,14 +113,14 @@ public class TreadmillMessage extends Packet<TreadmillMessage> implements Settab
    }
 
    /**
-            * This is the data being sent to and from the treadmill
+            * This is the data being sent to and from the treadmill. Speed is in MPH and incline is in percent incline
             */
    public void setSpeed(double speed)
    {
       speed_ = speed;
    }
    /**
-            * This is the data being sent to and from the treadmill
+            * This is the data being sent to and from the treadmill. Speed is in MPH and incline is in percent incline
             */
    public double getSpeed()
    {
