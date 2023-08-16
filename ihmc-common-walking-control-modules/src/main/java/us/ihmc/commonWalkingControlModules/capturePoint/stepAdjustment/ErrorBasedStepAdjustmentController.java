@@ -331,6 +331,12 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    }
 
    @Override
+   public List<StepConstraintRegion> getStepConstraintRegions()
+   {
+      return environmentConstraintProvider.getStepConstraintRegions();
+   }
+
+   @Override
    public void initialize(double initialTime, RobotSide supportSide)
    {
       isInSwing.set(true);
