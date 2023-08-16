@@ -20,10 +20,10 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.rdx.imgui.ImGuiEnumPlot;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
 import us.ihmc.rdx.imgui.ImGuiMovingPlot;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
+import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXBallAndArrowPosePlacement;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIDefinition;
@@ -59,8 +59,8 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
    private long numberOfSupportRegionsReceived = 0;
    private final Timer supportRegionsReceivedTimer = new Timer();
    private final RDXBallAndArrowPosePlacement goalAffordance = new RDXBallAndArrowPosePlacement();
-   private final ImGuiStoredPropertySetTuner footstepPlannerParameterTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Stairs behavior)");
-   private final ImGuiStoredPropertySetTuner swingPlannerParameterTuner = new ImGuiStoredPropertySetTuner("Swing Planner Parameters (Stairs behavior)");
+   private final RDXStoredPropertySetTuner footstepPlannerParameterTuner = new RDXStoredPropertySetTuner("Footstep Planner Parameters (Stairs behavior)");
+   private final RDXStoredPropertySetTuner swingPlannerParameterTuner = new RDXStoredPropertySetTuner("Swing Planner Parameters (Stairs behavior)");
    private double timeLeftInPause = 0.0;
 
    public RDXTraverseStairsBehaviorUI(BehaviorHelper helper)
@@ -206,7 +206,7 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
    }
 
    @Override
-   public void addChildPanels(ImGuiPanel parentPanel)
+   public void addChildPanels(RDXPanel parentPanel)
    {
       parentPanel.addChild(footstepPlannerParameterTuner);
       parentPanel.addChild(swingPlannerParameterTuner);

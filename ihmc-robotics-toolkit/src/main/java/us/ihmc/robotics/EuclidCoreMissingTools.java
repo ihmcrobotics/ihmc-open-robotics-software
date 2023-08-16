@@ -16,6 +16,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.CommonMatrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameTuple3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
@@ -37,6 +38,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
+import java.lang.reflect.Field;
 import java.util.Random;
 
 public class EuclidCoreMissingTools
@@ -1426,5 +1428,35 @@ public class EuclidCoreMissingTools
       double scalarToShrinkMatrixWithinBounds = nextDouble(random, 0.0, minMaxValue / matrix3D.maxAbsElement());
       matrix3D.scale(scalarToShrinkMatrixWithinBounds);
       return matrix3D;
+   }
+
+   /**
+    * Remove when this issue is fixed:
+    * https://github.com/ihmcrobotics/euclid/issues/57
+    */
+   private static final Field referenceFrameHasBeenRemoved;
+   static
+   {
+      try
+      {
+         referenceFrameHasBeenRemoved = ReferenceFrame.class.getDeclaredField("hasBeenRemoved");
+         referenceFrameHasBeenRemoved.setAccessible(true);
+      }
+      catch (NoSuchFieldException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+
+   public static boolean hasBeenRemoved(ReferenceFrame referenceFrame)
+   {
+      try
+      {
+         return referenceFrameHasBeenRemoved.getBoolean(referenceFrame);
+      }
+      catch (IllegalAccessException e)
+      {
+         throw new RuntimeException(e);
+      }
    }
 }

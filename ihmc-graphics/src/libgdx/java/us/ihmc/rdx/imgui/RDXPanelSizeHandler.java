@@ -8,7 +8,7 @@ import imgui.internal.ImGui;
  * difficult to move them around and re-dock them. It also makes the panel's initial size
  * to be smallish.
  */
-public class ImGuiPanelSizeHandler
+public class RDXPanelSizeHandler
 {
    private int firstTimeWidth = 300;
    private int firstTimeHeight = 200;

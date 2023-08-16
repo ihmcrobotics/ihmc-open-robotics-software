@@ -55,7 +55,7 @@ class ContactPoint
       }
    }
 
-   public void initialize(MultiContactSupportRegionSolverInput input)
+   public void initialize(MultiContactFrictionBasedSupportRegionSolverInput input)
    {
       FramePoint3D contactPointPosition = input.getContactPointPositions().get(contactPointIndex);
       FrameVector3D surfaceNormal = input.getSurfaceNormals().get(contactPointIndex);
@@ -115,8 +115,6 @@ class ContactPoint
             return;
          }
       }
-
-      return;
    }
 
    public Tuple3DReadOnly getResolvedForce()

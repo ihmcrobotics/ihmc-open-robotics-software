@@ -9,7 +9,7 @@ import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.RDXInteractableRealsenseD435;
@@ -41,7 +41,7 @@ public class RDXRealsenseD435UI
          {
             baseUI.create();
 
-            ImGuiPanel panel = new ImGuiPanel("D435", this::renderImGuiWidgets);
+            RDXPanel panel = new RDXPanel("D435", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
 
             d435Interactable = new RDXInteractableRealsenseD435(baseUI.getPrimary3DPanel());

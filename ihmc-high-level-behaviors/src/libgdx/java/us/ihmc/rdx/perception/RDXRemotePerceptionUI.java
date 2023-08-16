@@ -11,14 +11,14 @@ import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.rapidRegions.RapidRegionsExtractorParameters;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySetGroup;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 
 public class RDXRemotePerceptionUI
 {
-   private final ImGuiPanel panel = new ImGuiPanel("Perception Panel", this::renderImGuiWidgets);
+   private final RDXPanel panel = new RDXPanel("Perception Panel", this::renderImGuiWidgets);
 
    private final PerceptionConfigurationParameters perceptionConfigurationParameters = new PerceptionConfigurationParameters();
 
@@ -81,7 +81,7 @@ public class RDXRemotePerceptionUI
       return perceptionConfigurationParameters;
    }
 
-   public ImGuiPanel getPanel()
+   public RDXPanel getPanel()
    {
       return panel;
    }

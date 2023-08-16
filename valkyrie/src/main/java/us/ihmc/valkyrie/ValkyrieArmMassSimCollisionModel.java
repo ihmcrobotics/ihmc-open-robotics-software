@@ -93,15 +93,6 @@ public class ValkyrieArmMassSimCollisionModel implements RobotCollisionModel
             collidables.add(new Collidable(shoulderYaw.getPredecessor(), collisionMask, collisionGroup, upperArmShape));
          }
 
-         { // Elbow
-            JointBasics elbow = RobotCollisionModel.findJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), multiBodySystem);
-            MovingReferenceFrame elbowFrame = elbow.getFrameAfterJoint();
-            FrameCapsule3D elbowShape = new FrameCapsule3D(elbowFrame, 0.08, 0.05);
-            elbowShape.getPosition().set(0.0, 0.0, 0.0);
-            elbowShape.getAxis().set(Axis3D.Z);
-            collidables.add(new Collidable(elbow.getPredecessor(), collisionMask, collisionGroup, elbowShape));
-         }
-
          { // Forearm link
             JointBasics elbow = RobotCollisionModel.findJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), multiBodySystem);
             MovingReferenceFrame elbowFrame = elbow.getFrameAfterJoint();
@@ -209,8 +200,8 @@ public class ValkyrieArmMassSimCollisionModel implements RobotCollisionModel
             JointBasics ankleRoll = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), multiBodySystem);
             MovingReferenceFrame ankleRollFrame = ankleRoll.getFrameAfterJoint();
 
-            boolean addFootBox = false;
-            boolean addFootPoints = true;
+            boolean addFootBox = true;
+            boolean addFootPoints = false;
 
             ArrayList<Point2D> footContactPointsInSoleFrame = contactPointParameters.getFootContactPoints().get(robotSide);
             RigidBodyTransform soleToAnkleFrameTransform = jointMap.getSoleToParentFrameTransform(robotSide);
