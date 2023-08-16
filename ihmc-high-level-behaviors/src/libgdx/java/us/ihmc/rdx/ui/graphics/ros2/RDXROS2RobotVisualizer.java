@@ -14,10 +14,8 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.SCS2DefinitionMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 
