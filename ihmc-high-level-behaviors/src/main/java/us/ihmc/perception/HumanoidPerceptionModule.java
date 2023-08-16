@@ -23,6 +23,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.headless.LocalizationAndMappingProcess;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
@@ -59,6 +60,7 @@ public class HumanoidPerceptionModule
    private LocalizationAndMappingProcess localizationAndMappingProcess;
    private ActiveMappingRemoteProcess activeMappingRemoteProcess;
    private RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor;
+   private RapidHeightMapExtractor rapidHeightMapExtractor;
    private CollidingScanRegionFilter collidingScanRegionFilter;
    private FullHumanoidRobotModel fullRobotModel;
    private PlanarRegionsList regionsInSensorFrame;
@@ -179,6 +181,23 @@ public class HumanoidPerceptionModule
                                                                          cameraIntrinsics.getCy());
 
       this.rapidPlanarRegionsExtractor.getDebugger().setEnabled(false);
+   }
+
+   public void initializePerspectiveRapidHeightMapExtractor(CameraIntrinsics cameraIntrinsics)
+   {
+      LogTools.info("Initializing Perspective Rapid Height Map: {}", cameraIntrinsics);
+
+      this.realsenseDepthImage = new BytedecoImage(cameraIntrinsics.getWidth(), cameraIntrinsics.getHeight(), opencv_core.CV_16UC1);
+      this.realsenseDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+      this.rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager,
+                                                                         cameraIntrinsics.getHeight(),
+                                                                         cameraIntrinsics.getWidth(),
+                                                                         cameraIntrinsics.getFx(),
+                                                                         cameraIntrinsics.getFy(),
+                                                                         cameraIntrinsics.getCx(),
+                                                                         cameraIntrinsics.getCy());
+
+      this.rapidHeightMapExtractor.getDebugger().setEnabled(false);
    }
 
    public void initializeOccupancyGrid(int depthHeight, int depthWidth, int gridHeight, int gridWidth)
