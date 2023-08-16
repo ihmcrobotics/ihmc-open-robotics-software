@@ -8,12 +8,23 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 
 import static us.ihmc.commonWalkingControlModules.staticEquilibrium.ContactPoint.basisVectorsPerContactPoint;
 
+/**
+ * Whole-body force distribution calculator.
+ * Solves the QP:
+ *
+ * min_{f} f^2                         (min force)
+ *    s.t.  mg + sum(f) = 0            (lin static equilibrium)
+ *    s.t.  sum (r x f + r x mg) = 0   (ang static equilibrium)
+ *          f is friction constrained
+ *          tau_min <= G - J^T f <= tau_max  (f is actuation constrained)
+ *
+ * Notation taken from EoM:
+ * M qdd + C qd + G = tau + J^T f
+ */
 public class MultiContactForceDistributionCalculator
 {
    /* Maintain static equilibrium */
@@ -33,13 +44,13 @@ public class MultiContactForceDistributionCalculator
    /**
     * Returns whether an optimal solution was found
     */
-   public boolean solve(MultiContactForceDistributionInput input)
+   public boolean solve(WholeBodyContactDescription input)
    {
       clear();
 
       double mg = 9.81 * input.getRobotMass();
 
-      int rhoSize = MultiContactForceDistributionInput.numberOfBasisVectors * input.getNumberOfContactPoints();
+      int rhoSize = WholeBodyContactDescription.numberOfBasisVectors * input.getNumberOfContactPoints();
       int decisionVariables = rhoSize;
 
       rho.reshape(rhoSize, 1);
@@ -73,7 +84,7 @@ public class MultiContactForceDistributionCalculator
          contactPointPosition.setToZero(input.getContactFrame(contactPointIndex));
          contactPointPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
-         for (int basisVectorIndex = 0; basisVectorIndex < MultiContactForceDistributionInput.numberOfBasisVectors; basisVectorIndex++)
+         for (int basisVectorIndex = 0; basisVectorIndex < WholeBodyContactDescription.numberOfBasisVectors; basisVectorIndex++)
          {
             FrameVector3D basisVector = input.getBasisVector(contactPointIndex, basisVectorIndex);
             int column = basisVectorsPerContactPoint * contactPointIndex + basisVectorIndex;
@@ -130,15 +141,15 @@ public class MultiContactForceDistributionCalculator
       rho.zero();
    }
 
-   public Vector3D getResolvedForce(int contactPointIndex, MultiContactForceDistributionInput input)
+   public Vector3D getResolvedForce(int contactPointIndex, WholeBodyContactDescription input)
    {
       Vector3D resolvedForce = new Vector3D();
-      for (int i = 0; i < MultiContactForceDistributionInput.numberOfBasisVectors; i++)
+      for (int i = 0; i < WholeBodyContactDescription.numberOfBasisVectors; i++)
       {
          FrameVector3D basisVector = input.getBasisVector(contactPointIndex, i);
          basisVector.changeFrame(ReferenceFrame.getWorldFrame());
 
-         double rho = this.rho.get(MultiContactForceDistributionInput.numberOfBasisVectors * contactPointIndex + i, 0);
+         double rho = this.rho.get(WholeBodyContactDescription.numberOfBasisVectors * contactPointIndex + i, 0);
 
          resolvedForce.addX(basisVector.getX() * rho);
          resolvedForce.addY(basisVector.getY() * rho);

@@ -21,7 +21,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -35,9 +34,19 @@ import java.util.List;
  * This is an implementation of "Testing Static Equilibrium for Legged Robots", Bretl et al, 2008
  * {@see http://lall.stanford.edu/papers/bretl_eqmcut_ieee_tro_projection_2008_08_01_01/pubdata/entry.pdf}
  *
- * It solves for the convex region of feasible CoM XY positions, modelling the robot as a point mass and imposing friction constraints.
+ * Solves the LP:
+ *
+ * max_{x,f} c dot x                   (max com displacement)
+ *    s.t.  mg + sum(f) = 0            (lin static equilibrium)
+ *    s.t.  sum (x x f + x x mg) = 0   (ang static equilibrium)
+ *          f is friction constrained
+ *          tau_min <= G - J^T f <= tau_max  (f is actuation constrained)
+ *
+ * x is com position, c is a direction to optimize
+ * Notation taken from EoM:
+ * M qdd + C qd + G = tau + J^T f
  */
-public class MultiContactSupportRegionSolver_WithJacobians
+public class MultiContactActuationBasedSupportRegionSolver
 {
    private static final double optimizedCoMGraphicScale = 0.03;
 
@@ -47,10 +56,6 @@ public class MultiContactSupportRegionSolver_WithJacobians
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-   private TickAndUpdatable tickAndUpdatable = null;
-
-   private final List<ContactPoint> contactPoints = new ArrayList<>();
-   private MultiContactForceDistributionInput input;
    private final LinearProgramSolver linearProgramSolver = new LinearProgramSolver();
 
    private int nominalDecisionVariables;
@@ -70,8 +75,6 @@ public class MultiContactSupportRegionSolver_WithJacobians
    private final DMatrixRMaj costVectorC = new DMatrixRMaj(0);
    private final DMatrixRMaj solution = new DMatrixRMaj(0);
 
-   private final Point3D actuationConstraintCentroid = new Point3D();
-
    private final ConvexPolygon2D supportRegion = new ConvexPolygon2D();
    private final RecyclingArrayList<FramePoint3D> supportRegionVertices = new RecyclingArrayList<>(30, FramePoint3D::new);
 
@@ -84,24 +87,19 @@ public class MultiContactSupportRegionSolver_WithJacobians
    private final ExecutionTimer executionTimer;
    private final List<Point2D> vertexList = new ArrayList<>();
 
-   public MultiContactSupportRegionSolver_WithJacobians()
+   public MultiContactActuationBasedSupportRegionSolver()
    {
       this(defaultNumberOfDirectionsToOptimize);
    }
 
-   public MultiContactSupportRegionSolver_WithJacobians(int numberOfDirectionsToOptimize)
+   public MultiContactActuationBasedSupportRegionSolver(int numberOfDirectionsToOptimize)
    {
       this(numberOfDirectionsToOptimize, null);
    }
 
-   public MultiContactSupportRegionSolver_WithJacobians(int numberOfDirectionsToOptimize, YoRegistry registry)
+   public MultiContactActuationBasedSupportRegionSolver(int numberOfDirectionsToOptimize, YoRegistry registry)
    {
       executionTimer = registry == null ? null : new ExecutionTimer("comSolver", registry);
-
-      for (int i = 0; i < MultiContactSupportRegionSolverInput.maxContactPoints; i++)
-      {
-         contactPoints.add(new ContactPoint(i, registry, graphicsListRegistry));
-      }
 
       setNumberOfDirectionsToOptimize(numberOfDirectionsToOptimize);
 
@@ -112,14 +110,13 @@ public class MultiContactSupportRegionSolver_WithJacobians
       graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), optimizedCoMGraphic);
    }
 
-   public void initialize(MultiContactForceDistributionInput input)
+   public void initialize(WholeBodyContactDescription input)
    {
       clear();
 
       double mg = 9.81 * input.getRobotMass();
-      this.input = input;
 
-      int rhoSize = MultiContactForceDistributionInput.numberOfBasisVectors * input.getNumberOfContactPoints();
+      int rhoSize = WholeBodyContactDescription.numberOfBasisVectors * input.getNumberOfContactPoints();
       nominalDecisionVariables = rhoSize + centerOfMassDimensions;
       nonNegativeDecisionVariables = nominalDecisionVariables + centerOfMassDimensions;
       int actuationConstraints = input.getNumberOfJoints();
@@ -131,21 +128,16 @@ public class MultiContactSupportRegionSolver_WithJacobians
       bin.reshape(2 * staticEquilibriumConstraints + 2 * actuationConstraints, 1);
       costVectorC.reshape(nonNegativeDecisionVariables, 1);
 
-      for (int i = 0; i < contactPoints.size(); i++)
-      {
-         contactPoints.get(i).clear();
-      }
-
       for (int contactPointIndex = 0; contactPointIndex < input.getNumberOfContactPoints(); contactPointIndex++)
       {
          FramePoint3D contactPointPosition = new FramePoint3D(input.getContactFrame(contactPointIndex));
          contactPointPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
-         for (int basisVectorIndex = 0; basisVectorIndex < MultiContactForceDistributionInput.numberOfBasisVectors; basisVectorIndex++)
+         for (int basisVectorIndex = 0; basisVectorIndex < WholeBodyContactDescription.numberOfBasisVectors; basisVectorIndex++)
          {
             FrameVector3D basisVector = input.getBasisVector(contactPointIndex, basisVectorIndex);
             basisVector.changeFrame(ReferenceFrame.getWorldFrame());
-            int column = MultiContactForceDistributionInput.numberOfBasisVectors * contactPointIndex + basisVectorIndex;
+            int column = WholeBodyContactDescription.numberOfBasisVectors * contactPointIndex + basisVectorIndex;
 
             Aeq.set(0, column, basisVector.getX());
             Aeq.set(1, column, basisVector.getY());
@@ -324,11 +316,6 @@ public class MultiContactSupportRegionSolver_WithJacobians
    public YoGraphicsListRegistry getGraphicsListRegistry()
    {
       return graphicsListRegistry;
-   }
-
-   public void setTickAndUpdatable(TickAndUpdatable tickAndUpdatable)
-   {
-      this.tickAndUpdatable = tickAndUpdatable;
    }
 
    public DMatrixRMaj getAeq()

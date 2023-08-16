@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
-import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.ejml.data.DMatrixRMaj;
@@ -11,7 +10,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -24,9 +22,8 @@ import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculato
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
-public class MultiContactForceDistributionInput
+public class WholeBodyContactDescription
 {
    public static final int maxContactPoints = 50;
    private static final double coefficientOfFriction = 0.7;
@@ -57,7 +54,7 @@ public class MultiContactForceDistributionInput
    private final PoseReferenceFrame worldAlignedContactFrame = new PoseReferenceFrame("worldAlignedContactFrame", ReferenceFrame.getWorldFrame());
    private final TObjectIntMap<OneDoFJointBasics> jointIndexMap = new TObjectIntHashMap<>();
 
-   public MultiContactForceDistributionInput(OneDoFJointBasics[] oneDoFJoints)
+   public WholeBodyContactDescription(OneDoFJointBasics[] oneDoFJoints)
    {
       this.oneDoFJoints = oneDoFJoints;
 
@@ -97,7 +94,7 @@ public class MultiContactForceDistributionInput
       graspMatrixJacobianTranspose.zero();
    }
 
-   public void copyAndIgnoreIndex(int indexToIgnore, MultiContactForceDistributionInput other)
+   public void copyAndIgnoreIndex(int indexToIgnore, WholeBodyContactDescription other)
    {
       clear();
 

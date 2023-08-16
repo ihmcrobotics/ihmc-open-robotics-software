@@ -23,8 +23,8 @@ import toolbox_msgs.msg.dds.*;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.staticEquilibrium.MultiContactSupportRegionSolver;
-import us.ihmc.commonWalkingControlModules.staticEquilibrium.MultiContactSupportRegionSolverInput;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.MultiContactFrictionBasedSupportRegionSolver;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.MultiContactFrictionBasedSupportRegionSolverInput;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -660,8 +660,8 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       //////////////////  Step 2: solve for multi-contact support region directly   //////////////////
       ////////////////////////////////////////////////////////////////////////////////////////////////
 
-      MultiContactSupportRegionSolver multiContactSupportRegionSolver = new MultiContactSupportRegionSolver();
-      MultiContactSupportRegionSolverInput input = new MultiContactSupportRegionSolverInput();
+      MultiContactFrictionBasedSupportRegionSolver multiContactSupportRegionSolver = new MultiContactFrictionBasedSupportRegionSolver();
+      MultiContactFrictionBasedSupportRegionSolverInput input = new MultiContactFrictionBasedSupportRegionSolverInput();
       for (int i = 0; i < multiContactBalanceStatus.getContactPointsInWorld().size(); i++)
       {
          input.addContactPoint(multiContactBalanceStatus.getContactPointsInWorld().get(i), multiContactBalanceStatus.getSurfaceNormalsInWorld().get(i));

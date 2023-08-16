@@ -53,7 +53,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -114,8 +113,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
    /** Multi-contact support region solver */
    private final YoBoolean enableMultiContactSupportRegionSolver = new YoBoolean("enableMultiContactSupportRegionSolver", registry);
-   private final MultiContactSupportRegionSolver_WithJacobians supportRegionSolver = new MultiContactSupportRegionSolver_WithJacobians(20, registry);
-   private final MultiContactForceDistributionInput supportRegionSolverInput;
+   private final MultiContactActuationBasedSupportRegionSolver supportRegionSolver = new MultiContactActuationBasedSupportRegionSolver(20, registry);
+   private final WholeBodyContactDescription supportRegionSolverInput;
    /**
     * Indicates whether the rigid-bodies currently in contact as reported per:
     * {@link CapturabilityBasedStatus} or {@link MultiContactBalanceStatus} should be held in place for
@@ -226,7 +225,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          endEffectorToPrimaryBaseMap.put(desiredFullRobotModel.getPelvis(), desiredFullRobotModel.getFoot(robotSide));
       }
 
-      supportRegionSolverInput = new MultiContactForceDistributionInput(getDesiredOneDoFJoints());
+      supportRegionSolverInput = new WholeBodyContactDescription(getDesiredOneDoFJoints());
       populateDefaultJointLimitReductionFactors();
    }
 
