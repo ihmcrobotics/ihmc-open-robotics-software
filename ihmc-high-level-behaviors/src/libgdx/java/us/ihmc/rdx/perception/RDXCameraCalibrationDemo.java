@@ -15,7 +15,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVGuidedSwapVideoPanel;
@@ -33,7 +33,7 @@ import java.util.function.Consumer;
 public class RDXCameraCalibrationDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private final ImGuiPanel diagnosticPanel = new ImGuiPanel("Diagnostics", this::renderImGuiWidgets);
+   private final RDXPanel diagnosticPanel = new RDXPanel("Diagnostics", this::renderImGuiWidgets);
    private VideoCapture videoCapture;
    private int imageHeight = 1080;
    private int imageWidth = 1920;

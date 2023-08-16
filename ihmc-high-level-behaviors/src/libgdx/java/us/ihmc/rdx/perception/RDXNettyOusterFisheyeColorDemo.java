@@ -5,7 +5,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -37,7 +37,7 @@ public class RDXNettyOusterFisheyeColorDemo
             baseUI.create();
 
             nettyOusterUI.create(baseUI);
-            ImGuiPanel panel = new ImGuiPanel("Ouster Coloring", this::renderImGuiWidgets);
+            RDXPanel panel = new RDXPanel("Ouster Coloring", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
 
             blackflyReader = new RDXBlackflyReader(BLACKFLY_SERIAL_NUMBER);

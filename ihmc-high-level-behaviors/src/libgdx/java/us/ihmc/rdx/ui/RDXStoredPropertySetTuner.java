@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeSet;
 
-public class ImGuiStoredPropertySetTuner extends ImGuiPanel
+public class RDXStoredPropertySetTuner extends RDXPanel
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private StoredPropertySetBasics storedPropertySet;
@@ -24,7 +24,7 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
    private final ArrayList<ImGuiStoredPropertySetWidget> imGuiWidgetRenderers = new ArrayList<>();
    private final HashMap<StoredPropertyKey<?>, ImGuiStoredPropertySetWidget> imGuiWidgetRendererMap = new HashMap<>();
 
-   public ImGuiStoredPropertySetTuner(String name)
+   public RDXStoredPropertySetTuner(String name)
    {
       super(name);
       setRenderMethod(this::renderImGuiWidgets);

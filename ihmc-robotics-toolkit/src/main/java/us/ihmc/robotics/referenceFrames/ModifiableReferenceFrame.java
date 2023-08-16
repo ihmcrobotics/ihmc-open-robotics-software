@@ -3,6 +3,8 @@ package us.ihmc.robotics.referenceFrames;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 
 import java.util.function.Consumer;
 
@@ -55,6 +57,12 @@ public class ModifiableReferenceFrame
     */
    public void changeParentFrame(ReferenceFrame parentFrame)
    {
+      // I'm getting a rare bug here, need to leave this printing for a while so I can see which frame is having the issue. - @dcalvert
+      if (EuclidCoreMissingTools.hasBeenRemoved(parentFrame))
+      {
+         LogTools.error("Parent frame has been removed! {}", parentFrame.getName());
+      }
+
       referenceFrame.remove();
       referenceFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(frameName, parentFrame, transformToParent);
    }

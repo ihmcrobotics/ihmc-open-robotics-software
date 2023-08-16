@@ -16,7 +16,7 @@ import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
+import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.affordances.RDXBallAndArrowPosePlacement;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIDefinition;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIInterface;
@@ -33,7 +33,7 @@ public class RDXBuildingExplorationBehaviorUI extends RDXBehaviorUIInterface
 
    private final BehaviorHelper helper;
    private BuildingExplorationBehaviorParameters parameters;
-   private final ImGuiStoredPropertySetTuner parameterTuner = new ImGuiStoredPropertySetTuner("Building Exploration Parameters");
+   private final RDXStoredPropertySetTuner parameterTuner = new RDXStoredPropertySetTuner("Building Exploration Parameters");
    private final RDXBallAndArrowPosePlacement goalAffordance = new RDXBallAndArrowPosePlacement();
    private final RDXLookAndStepBehaviorUI lookAndStepUI;
    private final RDXTraverseStairsBehaviorUI traverseStairsUI;

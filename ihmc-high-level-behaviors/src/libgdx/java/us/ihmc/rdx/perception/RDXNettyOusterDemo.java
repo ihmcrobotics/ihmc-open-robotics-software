@@ -1,7 +1,7 @@
 package us.ihmc.rdx.perception;
 
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
 public class RDXNettyOusterDemo
@@ -20,7 +20,7 @@ public class RDXNettyOusterDemo
 
             nettyOusterUI.create(baseUI);
 
-            ImGuiPanel panel = new ImGuiPanel("Ouster", nettyOusterUI::renderImGuiWidgets);
+            RDXPanel panel = new RDXPanel("Ouster", nettyOusterUI::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
          }
 

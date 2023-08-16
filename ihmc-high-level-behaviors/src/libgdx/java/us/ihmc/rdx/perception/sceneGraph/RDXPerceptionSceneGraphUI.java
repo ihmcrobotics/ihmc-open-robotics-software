@@ -8,7 +8,7 @@ import imgui.type.ImBoolean;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.sceneGraph.*;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
@@ -29,7 +29,7 @@ public class RDXPerceptionSceneGraphUI
    private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
    private final ROS2DetectableSceneNodesSubscription detectableSceneNodesSubscription;
    private final ROS2DetectableSceneNodesPublisher detectableSceneObjectsPublisher = new ROS2DetectableSceneNodesPublisher();
-   private final ImGuiPanel panel = new ImGuiPanel("Perception Scene Graph UI", this::renderImGuiWidgets);
+   private final RDXPanel panel = new RDXPanel("Perception Scene Graph UI", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final ArrayList<RDXPredefinedRigidBodySceneNode> predefinedRigidBodySceneNodes = new ArrayList<>();
@@ -91,7 +91,7 @@ public class RDXPerceptionSceneGraphUI
       }
    }
 
-   public ImGuiPanel getPanel()
+   public RDXPanel getPanel()
    {
       return panel;
    }

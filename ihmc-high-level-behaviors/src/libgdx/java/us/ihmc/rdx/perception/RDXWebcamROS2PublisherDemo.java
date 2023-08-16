@@ -12,7 +12,7 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotIntegerPlot;
@@ -32,7 +32,7 @@ import java.time.Instant;
 public class RDXWebcamROS2PublisherDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI("ROS 2 Webcam Publisher");
-   private final ImGuiPanel diagnosticPanel = new ImGuiPanel("Diagnostics", this::renderImGuiWidgets);
+   private final RDXPanel diagnosticPanel = new RDXPanel("Diagnostics", this::renderImGuiWidgets);
    private RDXOpenCVWebcamReader webcamReader;
    private BytePointer jpegImageBytePointer;
    private Mat yuv420Image;

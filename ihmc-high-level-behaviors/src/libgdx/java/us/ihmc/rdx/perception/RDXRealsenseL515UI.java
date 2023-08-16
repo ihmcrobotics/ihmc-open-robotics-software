@@ -23,7 +23,7 @@ import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRenderer;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -76,7 +76,7 @@ public class RDXRealsenseL515UI
          {
             baseUI.create();
 
-            ImGuiPanel panel = new ImGuiPanel("L515", this::renderImGuiWidgets);
+            RDXPanel panel = new RDXPanel("L515", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
 
             l515Interactable = new RDXInteractableRealsenseL515(baseUI.getPrimary3DPanel());

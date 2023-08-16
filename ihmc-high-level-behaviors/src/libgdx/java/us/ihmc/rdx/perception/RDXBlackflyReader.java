@@ -10,7 +10,7 @@ import org.bytedeco.spinnaker.global.Spinnaker_C;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.spinnaker.SpinnakerBlackflyManager;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanel;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
@@ -24,7 +24,7 @@ import java.util.function.Consumer;
  */
 public class RDXBlackflyReader
 {
-   private final ImGuiPanel panel = new ImGuiPanel("Blackfly Reader", this::renderImGuiWidgets);
+   private final RDXPanel panel = new RDXPanel("Blackfly Reader", this::renderImGuiWidgets);
    private final String serialNumber;
    private volatile int imageWidth = -1;
    private volatile int imageHeight = -1;
@@ -146,7 +146,7 @@ public class RDXBlackflyReader
       return imageWasRead;
    }
 
-   public ImGuiPanel getStatisticsPanel()
+   public RDXPanel getStatisticsPanel()
    {
       return panel;
    }
