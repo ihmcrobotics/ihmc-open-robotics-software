@@ -11,7 +11,6 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 
 public class ExternalControllerState extends HighLevelControllerState
 {
-   private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    private final CommandInputManager commandInputManager;
    private final ExternalControlCommandConsumer externalControlCommandConsumer;
@@ -30,13 +29,12 @@ public class ExternalControllerState extends HighLevelControllerState
                                                                         controlledJoints,
                                                                         registry);
       externalControlCommandConsumer = new ExternalControlCommandConsumer(commandInputManager, wholeBodyConfigurationManager, controllerToolbox.getYoTime());
-      lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
    }
 
    @Override
    public JointDesiredOutputListReadOnly getOutputForLowLevelController()
    {
-      return lowLevelOneDoFJointDesiredDataHolder;
+      return wholeBodyConfigurationManager.getControlOutput();
    }
 
    @Override

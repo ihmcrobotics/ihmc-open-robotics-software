@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -9,12 +10,17 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CrocoddylControlCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CrocoddylSolverTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CrocoddylStateCommand;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -24,7 +30,11 @@ public class WholeBodyConfigurationManager
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoDouble timeAtWholeBodyCommand = new YoDouble("timeAtWholeBodyCommand", registry);
 
+   private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
+
    private final OneDoFJointReadOnly[] controlledJoints;
+   private final FullRobotModel fullRobotModel;
+
    private final YoDouble[] currentFeedForwardTorque;
    private final YoDouble[] currentFeedBackTorque;
    private final YoDouble[] desiredTotalTorque;
@@ -35,10 +45,21 @@ public class WholeBodyConfigurationManager
    private final RecyclingArrayList<DMatrixRMaj> feedbackGainMatrix = new RecyclingArrayList<>(DMatrixRMaj::new);
 
    private final PoseReferenceFrame desiredPelvisFrame = new PoseReferenceFrame("DesiredPelvisFrame", ReferenceFrame.getWorldFrame());
+   private final PoseReferenceFrame tempDesiredPelvisFrame = new PoseReferenceFrame("tempDesiredPelvisFrame", ReferenceFrame.getWorldFrame());
    private final FramePose3D desiredPelvisPose = new FramePose3D(ReferenceFrame.getWorldFrame());
    private final FrameVector3D desiredAngularRate = new FrameVector3D(ReferenceFrame.getWorldFrame());
    private final FrameVector3D desiredLinearRate = new FrameVector3D(ReferenceFrame.getWorldFrame());
    private final Twist pelvisTwist;
+
+   private final FramePose3D currentPelvisPose = new FramePose3D();
+   private final YoFrameVector3D rootTranslationError = new YoFrameVector3D("rootTranslationError", desiredPelvisFrame, registry);
+   private final YoFrameVector3D rootOrientationError = new YoFrameVector3D("rootOrientationError", desiredPelvisFrame, registry);
+   private final YoFrameVector3D rootLinearRateError = new YoFrameVector3D("rootLinearRateError", desiredPelvisFrame, registry);
+   private final YoFrameVector3D rootAngularRateError = new YoFrameVector3D("rootAngularRateError", desiredPelvisFrame, registry);
+   private final YoDouble[] jointPositionError;
+   private final YoDouble[] jointRateError;
+
+   private final FrameVector3D tempVector = new FrameVector3D();
 
    private final DoubleProvider time;
 
@@ -54,13 +75,17 @@ public class WholeBodyConfigurationManager
    {
       this.time = time;
       this.controlledJoints = controlledJoints;
+      this.fullRobotModel = fullRobotModel;
 
-      pelvisTwist = new Twist(fullRobotModel.getRootBody().getBodyFixedFrame(), ReferenceFrame.getWorldFrame(), desiredPelvisFrame);
+      pelvisTwist = new Twist(fullRobotModel.getRootBody().getBodyFixedFrame(), ReferenceFrame.getWorldFrame(), tempDesiredPelvisFrame);
+      lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
 
       jointTrajectories = new MultipleWaypointsTrajectoryGenerator[controlledJoints.length];
       currentFeedBackTorque = new YoDouble[controlledJoints.length];
       currentFeedForwardTorque = new YoDouble[controlledJoints.length];
       desiredTotalTorque = new YoDouble[controlledJoints.length];
+      jointPositionError = new YoDouble[controlledJoints.length];
+      jointRateError = new YoDouble[controlledJoints.length];
       for (int i = 0; i < controlledJoints.length; i++)
       {
          OneDoFJointReadOnly joint = controlledJoints[i];
@@ -68,6 +93,9 @@ public class WholeBodyConfigurationManager
          currentFeedForwardTorque[i] = new YoDouble(joint.getName() + "FeedForwardTorque", registry);
          currentFeedBackTorque[i] = new YoDouble(joint.getName() + "FeedbackTorque", registry);
          desiredTotalTorque[i] = new YoDouble(joint.getName() + "DesiredTotalTorque", registry);
+
+         jointPositionError[i] = new YoDouble(joint.getName() + "PositionError", registry);
+         jointRateError[i] = new YoDouble(joint.getName() + "RateError", registry);
       }
       basePoseTrajectory = new MultipleWaypointsPoseTrajectoryGenerator("BaseTrajectory", 20, registry);
       parentRegistry.addChild(registry);
@@ -110,9 +138,44 @@ public class WholeBodyConfigurationManager
       }
    }
 
+   public JointDesiredOutputListReadOnly getControlOutput()
+   {
+      return lowLevelOneDoFJointDesiredDataHolder;
+   }
+
    private void populateStateErrorVector()
    {
-      throw new RuntimeException("This needs to be done badly before we can do anythign else.");
+      desiredPelvisFrame.setPoseAndUpdate(basePoseTrajectory.getPose());
+
+      MovingReferenceFrame rootFrame = fullRobotModel.getRootBody().getBodyFixedFrame();
+
+      currentPelvisPose.setToZero(rootFrame);
+      currentPelvisPose.changeFrame(desiredPelvisFrame);
+
+      rootTranslationError.set(currentPelvisPose.getTranslation());
+      currentPelvisPose.getRotation().getRotationVector(rootOrientationError);
+
+      tempVector.setReferenceFrame(ReferenceFrame.getWorldFrame());
+      tempVector.sub(basePoseTrajectory.getVelocity(), rootFrame.getTwistOfFrame().getLinearPart());
+      rootLinearRateError.setMatchingFrame(tempVector);
+
+      tempVector.sub(basePoseTrajectory.getAngularVelocity(), rootFrame.getTwistOfFrame().getAngularPart());
+      rootAngularRateError.setMatchingFrame(tempVector);
+
+      rootTranslationError.get(stateErrorVector);
+      rootOrientationError.get(3, stateErrorVector);
+      rootLinearRateError.get(6 + controlledJoints.length, stateErrorVector);
+      rootAngularRateError.get(9 + controlledJoints.length, stateErrorVector);
+
+      for (int i = 0; i < controlledJoints.length; i++)
+      {
+         OneDoFJointReadOnly joint = controlledJoints[i];
+         jointPositionError[i].set(jointTrajectories[i].getValue() - joint.getQ());
+         jointRateError[i].set(jointTrajectories[i].getVelocity() - joint.getQd());
+
+         stateErrorVector.set(i + 6, 0, jointPositionError[i].getDoubleValue());
+         stateErrorVector.set(i + 12 + controlledJoints.length, 0, jointRateError[i].getDoubleValue());
+      }
    }
 
    private void populateFeedForwardTorqueVector(int currentIndex)
@@ -141,8 +204,8 @@ public class WholeBodyConfigurationManager
          for (int jointIndex = 0; jointIndex < jointTrajectories.length; jointIndex++)
             jointTrajectories[jointIndex].appendWaypoint(currentTime, jointPositions.get(jointIndex, 0), jointVelocities.get(jointIndex, 0));
 
-         desiredPelvisFrame.setPoseAndUpdate(state.getBasePoseInWorld());
-         pelvisTwist.setToZero(desiredPelvisFrame);
+         tempDesiredPelvisFrame.setPoseAndUpdate(state.getBasePoseInWorld());
+         pelvisTwist.setToZero(tempDesiredPelvisFrame);
          pelvisTwist.getLinearPart().set(state.getBaseLinearRateInBaseFrame());
          pelvisTwist.getAngularPart().set(state.getBaseAngularRateInBaseFrame());
          pelvisTwist.changeFrame(ReferenceFrame.getWorldFrame());
