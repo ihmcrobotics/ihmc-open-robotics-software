@@ -21,7 +21,7 @@ public class MonteCarloPlanner
    int worldWidth = 200;
    int goalMargin = 5;
 
-   int stepLength = 8;
+   int stepLength = 5;
 
    private final Point2D agentPos = new Point2D(0, 0);
 
@@ -217,11 +217,11 @@ public class MonteCarloPlanner
             {
                if (point.distance(randomState) < agent.getRangeScanner().getMaxRange())
                {
-                  score -= 40;
+                  score -= 200;
                }
                else
                {
-                  score += 20;
+                  score += 50;
                }
 
                if (world.getGrid().ptr((int) point.getX(), (int) point.getY()).get() == 0)

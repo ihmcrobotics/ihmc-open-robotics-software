@@ -8,6 +8,7 @@ import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanner;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.*;
@@ -45,7 +46,6 @@ public class ActiveMappingModule
    private RobotSide initialStanceSide = RobotSide.LEFT;
 
    private Point2D gridOrigin = new Point2D(0.0, -1.0);
-   private Point2D robotLocation = new Point2D();
 
    private Pose3D leftGoalPose = new Pose3D();
    private Pose3D rightGoalPose = new Pose3D();
@@ -55,6 +55,15 @@ public class ActiveMappingModule
    private ArrayList<Point2D> frontierPoints = new ArrayList<>();
 
    private WalkingStatus walkingStatus = WalkingStatus.STARTED;
+
+   private final Point2D goalPosition = new Point2D();
+   private final Point2D goalPositionIndices = new Point2D();
+
+   private final Point2D agentPosition = new Point2D();
+   private final Point2D agentPositionIndices = new Point2D();
+
+   private final Point2D robotLocation = new Point2D();
+   private final Point2D robotLocationIndices = new Point2D();
 
    private boolean planAvailable = false;
    private boolean active = true;
@@ -76,6 +85,12 @@ public class ActiveMappingModule
 
    public void updatePlan(PlanarRegionMap planarRegionMap)
    {
+      MonteCarloPlannerTools.plotWorld(monteCarloPlanner.getWorld(), gridColor);
+      MonteCarloPlannerTools.plotAgent(monteCarloPlanner.getAgent(), gridColor);
+      MonteCarloPlannerTools.plotRangeScan(monteCarloPlanner.getAgent().getScanPoints(), gridColor);
+
+      PerceptionDebugTools.display("Monte Carlo Planner World", gridColor, 1, 1400);
+
       if (active)
       {
          LogTools.info("Footstep Planning Request");
@@ -87,26 +102,30 @@ public class ActiveMappingModule
 
          robotLocation.set((leftSolePose.getX() + rightSolePose.getX()) / 2.0f, (leftSolePose.getY() + rightSolePose.getY()) / 2.0f);
 
-         Pose2D robotPose2D = new Pose2D(robotLocation.getX(), robotLocation.getY(), leftSolePose.getYaw());
-
+         //Pose2D robotPose2D = new Pose2D(robotLocation.getX(), robotLocation.getY(), leftSolePose.getYaw());
          //ActiveMappingTools.getStraightGoalFootPoses(leftSolePose, rightSolePose, leftGoalPose, rightGoalPose, 0.6f);
          //Pose2D goalPose2D = ActiveMappingTools.getNearestUnexploredNode(planarRegionMap.getMapRegions(), gridOrigin, robotPose2D, gridSize, gridResolution);
 
          monteCarloPlanner.getAgent().measure(monteCarloPlanner.getWorld());
 
-         MonteCarloPlannerTools.plotWorld(monteCarloPlanner.getWorld(), gridColor);
-         MonteCarloPlannerTools.plotAgent(monteCarloPlanner.getAgent(), gridColor);
-         MonteCarloPlannerTools.plotRangeScan(monteCarloPlanner.getAgent().getScanPoints(), gridColor);
 
-         PerceptionDebugTools.display("Monte Carlo Planner World", gridColor, 1, 1400);
+         agentPositionIndices.set(monteCarloPlanner.getAgent().getPosition());
 
-         Point2D goalPositionIndices = monteCarloPlanner.plan();
-         Point2D goalPosition = new Point2D(ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getX(), gridResolution, offset),
-                                            ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getY(), gridResolution, offset));
+         robotLocationIndices.set(ActiveMappingTools.getIndexFromCoordinates(robotLocation.getX(), gridResolution, offset),
+                                  ActiveMappingTools.getIndexFromCoordinates(robotLocation.getY(), gridResolution, offset));
 
-         monteCarloPlanner.execute(goalPositionIndices);
+         double error = agentPositionIndices.distance(robotLocationIndices);
 
-         LogTools.warn("Current Position: {}, Indices: {}, Goal: {}", robotLocation, goalPositionIndices, goalPosition);
+         LogTools.warn("Error: {}, Robot Position: {}, Agent Position: {}", error, robotLocationIndices, agentPositionIndices);
+
+         if (error < 10.0f)
+         {
+            goalPositionIndices.set(monteCarloPlanner.plan());
+            goalPosition.set(ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getX(), gridResolution, offset),
+                             ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getY(), gridResolution, offset));
+
+            monteCarloPlanner.execute(goalPositionIndices);
+         }
 
          float yawRobotToGoal = (float) Math.atan2(goalPosition.getY() - robotLocation.getY(), goalPosition.getX() - robotLocation.getX());
 
