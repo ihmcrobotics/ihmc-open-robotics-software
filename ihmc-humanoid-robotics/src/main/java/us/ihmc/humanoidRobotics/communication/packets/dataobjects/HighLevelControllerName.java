@@ -28,6 +28,7 @@ public enum HighLevelControllerName
    DIAGNOSTICS,
    @RosEnumValueDocumentation(documentation = "Automated calibration routine depending on the robot. For Valkyrie: estimation of the joint torque offsets.")
    CALIBRATION,
+   EXTERNAL,
    CUSTOM1,
    @RosEnumValueDocumentation(documentation = "State for recovering from a fall.")
    FALLING_STATE,

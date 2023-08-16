@@ -94,7 +94,7 @@ public class ControllerAPIDefinition
 
       /** Commands supported by the Crocoddyl control state */
       commands.add(CrocoddylSolverTrajectoryCommand.class);
-      
+
       /** Command supported by the joint-space controller {@link JointspacePositionControllerState} */
       commands.add(WholeBodyJointspaceTrajectoryCommand.class);
 
