@@ -43,7 +43,7 @@ public class RapidHeightMapExtractor
    private BytedecoImage inputDepthImage;
    private BytedecoImage outputHeightMapImage;
 
-   private final CameraIntrinsics cameraIntrinsics = new CameraIntrinsics();
+   private CameraIntrinsics cameraIntrinsics;
 
    private boolean firstRun = true;
    private boolean patchSizeChanged = true;
@@ -235,9 +235,15 @@ public class RapidHeightMapExtractor
 
    public void setDepthIntrinsics(double fx, double fy, double cx, double cy)
    {
+      cameraIntrinsics = new CameraIntrinsics();
       cameraIntrinsics.setFx(fx);
       cameraIntrinsics.setFy(fy);
       cameraIntrinsics.setCx(cx);
       cameraIntrinsics.setCy(cy);
+   }
+
+   public void setDepthIntrinsics(CameraIntrinsics cameraIntrinsics)
+   {
+      this.cameraIntrinsics = cameraIntrinsics;
    }
 }
