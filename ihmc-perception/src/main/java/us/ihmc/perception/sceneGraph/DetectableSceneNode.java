@@ -87,7 +87,7 @@ public abstract class DetectableSceneNode extends SceneNode
 
       if (EuclidCoreMissingTools.hasBeenRemoved(getNodeFrame()))
       {
-         LogTools.error("Not sure why this would be removed at this point.");
+         LogTools.error("Frame has been removed: {}. Not sure why this would be removed at this point.", getNodeFrame().getName());
       }
 
       if (trackDetectedPose)
