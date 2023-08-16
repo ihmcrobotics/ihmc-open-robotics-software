@@ -25,15 +25,6 @@ public class World
       this.grid = new Mat(gridHeight, gridWidth, opencv_core.CV_8UC1);
    }
 
-   public World(ArrayList<Vector4D32> obstacles, Point2D goal, int goalMargin, int gridHeight, int gridWidth)
-   {
-      this.grid = new Mat(gridHeight, gridWidth, opencv_core.CV_8UC1);
-      this.gridHeight = gridHeight;
-      this.gridWidth = gridWidth;
-      this.goal = goal;
-      this.goalMargin = goalMargin;
-   }
-
    public void submitObstacles(ArrayList<Vector4D32> obstacles)
    {
       MonteCarloPlannerTools.fillObstacles(obstacles, grid);
