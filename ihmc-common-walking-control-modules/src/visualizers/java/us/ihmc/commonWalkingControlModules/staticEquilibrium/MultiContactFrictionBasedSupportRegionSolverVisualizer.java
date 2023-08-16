@@ -20,7 +20,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicBox3DDefinition;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
@@ -33,22 +32,22 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MultiContactSupportRegionSolverVisualizer
+public class MultiContactFrictionBasedSupportRegionSolverVisualizer
 {
    private static final boolean showSupportRegion = true;
    private static final double visualizationScale = 2e-4;
 
-   public MultiContactSupportRegionSolverVisualizer(MultiContactSupportRegionSolverInput input)
+   public MultiContactFrictionBasedSupportRegionSolverVisualizer(MultiContactFrictionBasedSupportRegionSolverInput input)
    {
       runWithSCS1(input);
 //      runWithSCS2(input);
    }
 
-   private void runWithSCS1(MultiContactSupportRegionSolverInput input)
+   private void runWithSCS1(MultiContactFrictionBasedSupportRegionSolverInput input)
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("dummy"));
 
-      MultiContactSupportRegionSolver solver = new MultiContactSupportRegionSolver();
+      MultiContactFrictionBasedSupportRegionSolver solver = new MultiContactFrictionBasedSupportRegionSolver();
       scs.getRootRegistry().addChild(solver.getRegistry());
       scs.addYoGraphicsListRegistry(solver.getGraphicsListRegistry());
 
@@ -106,11 +105,11 @@ public class MultiContactSupportRegionSolverVisualizer
       ThreadTools.sleepForever();
    }
 
-   private void runWithSCS2(MultiContactSupportRegionSolverInput input)
+   private void runWithSCS2(MultiContactFrictionBasedSupportRegionSolverInput input)
    {
       SimulationConstructionSet2 scs2 = new SimulationConstructionSet2();
 
-      MultiContactSupportRegionSolver solver = new MultiContactSupportRegionSolver();
+      MultiContactFrictionBasedSupportRegionSolver solver = new MultiContactFrictionBasedSupportRegionSolver();
       scs2.getRootRegistry().addChild(solver.getRegistry());
       //      scs2.addYoGraphicsListRegistry(solver.getGraphicsListRegistry());
 
@@ -186,32 +185,32 @@ public class MultiContactSupportRegionSolverVisualizer
 
    public static void main(String[] args) throws Exception
    {
-//      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createTriangleFlatGround();
-//      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createTriangleTiltedOutSlightly();
-//      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createTriangleTiltedOutALot();
-//      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createTriangleOneTiltedFullyOut();
-//      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createTriangleOneTiltedFullyIn();
-//      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createFlatSquare();
-//      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createBipedFeet();
-//      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createBipedFeet(1.0, -1.0, 0.6);
-//      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createBipedFeetWithSingleHandhold();
-//      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createBipedFeetWithTwoHandholds();
+//      MultiContactFrictionBasedSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createTriangleFlatGround();
+//      MultiContactFrictionBasedSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createTriangleTiltedOutSlightly();
+      MultiContactFrictionBasedSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createTriangleTiltedOutALot();
+//      MultiContactFrictionBasedSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createTriangleOneTiltedFullyOut();
+//      MultiContactFrictionBasedSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createTriangleOneTiltedFullyIn();
+//      MultiContactFrictionBasedSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createFlatSquare();
+//      MultiContactFrictionBasedSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createBipedFeet();
+//      MultiContactFrictionBasedSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createBipedFeet(1.0, -1.0, 0.6);
+//      MultiContactFrictionBasedSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createBipedFeetWithSingleHandhold();
+//      MultiContactFrictionBasedSupportRegionSolverInput input = MultiContactSupportRegionSolverInputExamples.createBipedFeetWithTwoHandholds();
 
-      JFileChooser fileChooser = new JFileChooser();
-      File logDirectory = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator);
+//      JFileChooser fileChooser = new JFileChooser();
+//      File logDirectory = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator);
+//
+//      fileChooser.setCurrentDirectory(logDirectory);
+//      int chooserState = fileChooser.showOpenDialog(null);
+//
+//      if (chooserState != JFileChooser.APPROVE_OPTION)
+//         return;
+//
+//      File file = fileChooser.getSelectedFile();
+//
+//      BufferedReader dataFileReader = new BufferedReader(new FileReader(file));
+//      MultiContactFrictionBasedSupportRegionSolverInput input = MultiContactFrictionBasedSupportRegionSolverInput.loadFromFile(new BufferedReader(dataFileReader));
 
-      fileChooser.setCurrentDirectory(logDirectory);
-      int chooserState = fileChooser.showOpenDialog(null);
-
-      if (chooserState != JFileChooser.APPROVE_OPTION)
-         return;
-
-      File file = fileChooser.getSelectedFile();
-
-      BufferedReader dataFileReader = new BufferedReader(new FileReader(file));
-      MultiContactSupportRegionSolverInput input = MultiContactSupportRegionSolverInput.loadFromFile(new BufferedReader(dataFileReader));
-
-      new MultiContactSupportRegionSolverVisualizer(input);
+      new MultiContactFrictionBasedSupportRegionSolverVisualizer(input);
    }
 
    private static MeshDataHolder newConvexPolytope3DMesh(ConvexPolytope3DReadOnly convexPolytope3D)
