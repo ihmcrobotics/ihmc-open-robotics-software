@@ -17,7 +17,6 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
@@ -40,9 +39,17 @@ import static us.ihmc.commonWalkingControlModules.staticEquilibrium.ContactPoint
  * This is an implementation of "Testing Static Equilibrium for Legged Robots", Bretl et al, 2008
  * {@see http://lall.stanford.edu/papers/bretl_eqmcut_ieee_tro_projection_2008_08_01_01/pubdata/entry.pdf}
  *
- * It solves for the convex region of feasible CoM XY positions, modelling the robot as a point mass and imposing friction constraints.
+ * Solves the LP:
+ *
+ * max_{x,f} c dot x                   (max com displacement position x along direction c)
+ *    s.t.  mg + sum(f) = 0            (lin static equilibrium)
+ *    s.t.  sum (x x f + x x mg) = 0   (ang static equilibrium)
+ *          f is friction constrained
+ *          f is optionally constrained to a force polytope
+ *
+ * x is com position, c is a direction to optimize
  */
-public class MultiContactSupportRegionSolver
+public class MultiContactFrictionBasedSupportRegionSolver
 {
    private static final double optimizedCoMGraphicScale = 0.03;
 
@@ -56,7 +63,7 @@ public class MultiContactSupportRegionSolver
    private TickAndUpdatable tickAndUpdatable = null;
 
    private final List<ContactPoint> contactPoints = new ArrayList<>();
-   private MultiContactSupportRegionSolverInput input;
+   private MultiContactFrictionBasedSupportRegionSolverInput input;
    private final LinearProgramSolver linearProgramSolver = new LinearProgramSolver();
    private final YoBoolean foundSolution = new YoBoolean("foundSolution", registry);
 
@@ -91,14 +98,14 @@ public class MultiContactSupportRegionSolver
    private final List<TIntArrayList> activeSetIndices = new ArrayList<>();
    private final List<TIntArrayList> orderedActiveSetIndices = new ArrayList<>();
 
-   public MultiContactSupportRegionSolver()
+   public MultiContactFrictionBasedSupportRegionSolver()
    {
       this(defaultNumberOfDirectionsToOptimize);
    }
 
-   public MultiContactSupportRegionSolver(int numberOfDirectionsToOptimize)
+   public MultiContactFrictionBasedSupportRegionSolver(int numberOfDirectionsToOptimize)
    {
-      for (int i = 0; i < MultiContactSupportRegionSolverInput.maxContactPoints; i++)
+      for (int i = 0; i < MultiContactFrictionBasedSupportRegionSolverInput.maxContactPoints; i++)
       {
          contactPoints.add(new ContactPoint(i, registry, graphicsListRegistry));
       }
@@ -112,7 +119,7 @@ public class MultiContactSupportRegionSolver
       graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), optimizedCoMGraphic);
    }
 
-   public void initialize(MultiContactSupportRegionSolverInput input)
+   public void initialize(MultiContactFrictionBasedSupportRegionSolverInput input)
    {
       clear();
 
