@@ -4,11 +4,8 @@ import java.util.Collection;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoRegistry;
-
-import javax.xml.namespace.QName;
 
 public interface FootSwitchFactory
 {
