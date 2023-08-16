@@ -187,17 +187,13 @@ public class HumanoidPerceptionModule
    {
       LogTools.info("Initializing Perspective Rapid Height Map: {}", cameraIntrinsics);
 
-      this.realsenseDepthImage = new BytedecoImage(cameraIntrinsics.getWidth(), cameraIntrinsics.getHeight(), opencv_core.CV_16UC1);
-      this.realsenseDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      this.rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager,
-                                                                         cameraIntrinsics.getHeight(),
-                                                                         cameraIntrinsics.getWidth(),
-                                                                         cameraIntrinsics.getFx(),
-                                                                         cameraIntrinsics.getFy(),
-                                                                         cameraIntrinsics.getCx(),
-                                                                         cameraIntrinsics.getCy());
+      realsenseDepthImage = new BytedecoImage(cameraIntrinsics.getWidth(), cameraIntrinsics.getHeight(), opencv_core.CV_16UC1);
+      realsenseDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+      rapidHeightMapExtractor = new RapidHeightMapExtractor();
 
-      this.rapidHeightMapExtractor.getDebugger().setEnabled(false);
+      rapidHeightMapExtractor.setDepthIntrinsics(cameraIntrinsics);
+      rapidHeightMapExtractor.setHeightMapResolution(3.0f, 0.02f);
+      rapidHeightMapExtractor.create(openCLManager, realsenseDepthImage, 1);
    }
 
    public void initializeOccupancyGrid(int depthHeight, int depthWidth, int gridHeight, int gridWidth)
