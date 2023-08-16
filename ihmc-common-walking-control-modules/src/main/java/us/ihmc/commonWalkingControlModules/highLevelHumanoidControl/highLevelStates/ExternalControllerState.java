@@ -25,7 +25,10 @@ public class ExternalControllerState extends HighLevelControllerState
 
       this.commandInputManager = commandInputManager;
 
-      wholeBodyConfigurationManager = new WholeBodyConfigurationManager(controllerToolbox.getYoTime(), registry);
+      wholeBodyConfigurationManager = new WholeBodyConfigurationManager(controllerToolbox.getYoTime(),
+                                                                        controllerToolbox.getFullRobotModel(),
+                                                                        controlledJoints,
+                                                                        registry);
       externalControlCommandConsumer = new ExternalControlCommandConsumer(commandInputManager, wholeBodyConfigurationManager, controllerToolbox.getYoTime());
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
    }

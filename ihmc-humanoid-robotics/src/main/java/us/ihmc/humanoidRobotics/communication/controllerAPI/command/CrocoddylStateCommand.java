@@ -126,4 +126,14 @@ public class CrocoddylStateCommand implements Command<CrocoddylStateCommand, Cro
    {
       return baseAngularRateInBaseFrame;
    }
+
+   public DMatrixRMaj getJointPositions()
+   {
+      return jointPositions;
+   }
+
+   public DMatrixRMaj getJointVelocities()
+   {
+      return jointVelocities;
+   }
 }
