@@ -24,7 +24,7 @@ import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXHeightMapRenderer;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.ros2.RDXHeightMapVisualizer;
@@ -41,7 +41,7 @@ public class RDXRapidHeightMapExtractionDemo
    private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230517_114430_PerceptionLog_900_ms.hdf5").toString();
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private ImGuiPanel navigationPanel;
+   private RDXPanel navigationPanel;
 
    private String sensorTopicName;
 
@@ -89,7 +89,7 @@ public class RDXRapidHeightMapExtractionDemo
 
             openCLManager = new OpenCLManager();
 
-            navigationPanel = new ImGuiPanel("Dataset Navigation Panel");
+            navigationPanel = new RDXPanel("Dataset Navigation Panel");
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
             heightMapVisualizer.setActive(false);
 
