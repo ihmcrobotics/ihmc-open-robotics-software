@@ -2,12 +2,9 @@ package us.ihmc.commonWalkingControlModules.messageHandlers;
 
 import java.util.List;
 
+import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.mutable.MutableDouble;
 
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.PlanOffsetStatus;
-import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
-import controller_msgs.msg.dds.WalkingStatusMessage;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
@@ -27,14 +24,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegionsList;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LegTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -84,6 +76,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
    private final SideDependentList<RecyclingArrayDeque<FootTrajectoryCommand>> upcomingFootTrajectoryCommandListForFlamingoStance = new SideDependentList<>();
    private final SideDependentList<RecyclingArrayDeque<LegTrajectoryCommand>> upcomingLegTrajectoryCommandListForFlamingoStance = new SideDependentList<>();
 
+   private final FootstepQueueStatusMessage footstepQueueStatusMessage = new FootstepQueueStatusMessage();
    private final StatusMessageOutputManager statusOutputManager;
    private final PlanOffsetStatus planOffsetStatus = new PlanOffsetStatus();
 
@@ -91,6 +84,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
    private final YoInteger currentNumberOfFootsteps = new YoInteger("currentNumberOfFootsteps", registry);
    private final YoBoolean isWalkingPaused = new YoBoolean("isWalkingPaused", registry);
    private final YoBoolean isWalkingResuming = new YoBoolean("isWalkingResuming", registry);
+   private final YoBoolean clearFootstepsAfterPause = new YoBoolean("clearFootstepsAfterPause", registry);
    private final YoDouble defaultTransferTime = new YoDouble("defaultTransferTime", registry);
    private final YoDouble finalTransferTime = new YoDouble("finalTransferTime", registry);
    private final YoDouble defaultSwingTime = new YoDouble("defaultSwingTime", registry);
@@ -226,9 +220,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
                      else
                      {
                         LogTools.warn("Queued footstep previous command id {} != controller's previous command id {}."
-                                      + " Send an override message instead. Command ignored.",
-                                      command.getPreviousCommandId(),
-                                      lastCommandID.getValue());
+                                      + " Send an override message instead. Command ignored.", command.getPreviousCommandId(), lastCommandID.getValue());
                      }
                      return;
                   }
@@ -330,6 +322,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
          isWalkingResuming.set(true);
 
       isWalkingPaused.set(command.isPauseRequested());
+      clearFootstepsAfterPause.set(command.getClearRemainingFootstepQueue());
    }
 
    public void handleFootTrajectoryCommand(List<FootTrajectoryCommand> commands)
@@ -376,6 +369,69 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
    public void getAngularMomentumTrajectory(double startTime, double endTime, int numberOfPoints, RecyclingArrayList<EuclideanTrajectoryPoint> trajectoryToPack)
    {
       momentumTrajectoryHandler.getAngularMomentumTrajectory(startTime, endTime, numberOfPoints, trajectoryToPack);
+   }
+
+   public FootstepQueueStatusMessage updateAndReturnFootstepQueueStatus(Footstep footstepBeingExecuted,
+                                                                        FootstepTiming footstepTimingBeingExecuted,
+                                                                        List<StepConstraintRegion> stepConstraintsBeingExecuted,
+                                                                        double timeInSupportSequence,
+                                                                        boolean isFirstSTepCurrentlyInSwing)
+   {
+      footstepQueueStatusMessage.setTimeInSupportSequence(timeInSupportSequence);
+      footstepQueueStatusMessage.setIsFirstStepInSwing(isFirstSTepCurrentlyInSwing);
+
+      footstepQueueStatusMessage.getQueuedFootstepList().clear();
+      // This foot is currently being taken. Add it to the front of the queue.
+      if (footstepBeingExecuted != null)
+      {
+         QueuedFootstepStatusMessage queuedFootstepStatusMessage = footstepQueueStatusMessage.getQueuedFootstepList().add();
+         queuedFootstepStatusMessage.setSequenceId(footstepBeingExecuted.getSequenceID());
+         packQueuedFootstepStatus(queuedFootstepStatusMessage, footstepBeingExecuted, footstepTimingBeingExecuted, stepConstraintsBeingExecuted);
+
+      }
+      // Add the other steps to the queue.
+      for (int i = 0; i < upcomingFootsteps.size(); i++)
+      {
+         QueuedFootstepStatusMessage queuedFootstepStatusMessage = footstepQueueStatusMessage.getQueuedFootstepList().add();
+         Footstep upcomingFootstep = upcomingFootsteps.get(i);
+         FootstepTiming upcomingTiming = upcomingFootstepTimings.get(i);
+         StepConstraintRegionsList stepConstraints = upcomingStepConstraints.get(i);
+
+         queuedFootstepStatusMessage.setSequenceId(upcomingFootstep.getSequenceID());
+         packQueuedFootstepStatus(queuedFootstepStatusMessage, upcomingFootstep, upcomingTiming, stepConstraints);
+      }
+
+      return footstepQueueStatusMessage;
+   }
+
+   private static void packQueuedFootstepStatus(QueuedFootstepStatusMessage messasgeToPack,
+                                                Footstep footstep,
+                                                FootstepTiming footstepTiming,
+                                                StepConstraintRegionsList stepConstraints)
+   {
+      packQueuedFootstepStatus(messasgeToPack, footstep, footstepTiming, stepConstraints.getAsList());
+   }
+
+   private static void packQueuedFootstepStatus(QueuedFootstepStatusMessage messasgeToPack,
+                                                Footstep footstep,
+                                                FootstepTiming footstepTiming,
+                                                List<StepConstraintRegion> stepConstraints)
+   {
+      messasgeToPack.setRobotSide(footstep.getRobotSide().toByte());
+      messasgeToPack.getLocation().set(footstep.getFootstepPose().getPosition());
+      messasgeToPack.getOrientation().set(footstep.getFootstepPose().getOrientation());
+      messasgeToPack.setSwingDuration(footstepTiming.getSwingTime());
+      messasgeToPack.setTransferDuration(footstepTiming.getTransferTime());
+
+      // TODO : don't include this stuff for now. It makes the message too large to get sent for some reason.
+//      messasgeToPack.getPredictedContactPoints2d().clear();
+//      if (footstep.getPredictedContactPoints() != null)
+//      {
+//         for (int i = 0; i < footstep.getPredictedContactPoints().size(); i++)
+//            messasgeToPack.getPredictedContactPoints2d().add().set(footstep.getPredictedContactPoints().get(i));
+//      }
+
+//      StepConstraintRegionsList.getAsMessage(stepConstraints, messasgeToPack.getStepConstraints());
    }
 
    public MomentumTrajectoryHandler getMomentumTrajectoryHandler()
@@ -552,7 +608,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
    {
       return !upcomingFootTrajectoryCommandListForFlamingoStance.get(swingSide).isEmpty();
    }
-   
+
    public boolean hasLegTrajectoryForFlamingoStance(RobotSide swingSide)
    {
       return !upcomingLegTrajectoryCommandListForFlamingoStance.get(swingSide).isEmpty();
@@ -569,7 +625,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       for (RobotSide robotSide : RobotSide.values)
          clearFlamingoCommands(robotSide);
    }
-   
+
    public void clearFootsteps()
    {
       upcomingFootsteps.clear();
@@ -666,6 +722,11 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       {
          walkingStatusMessage.setWalkingStatus(WalkingStatus.PAUSED.toByte());
          statusOutputManager.reportStatusMessage(walkingStatusMessage);
+         if (clearFootstepsAfterPause.getBooleanValue())
+         {
+            clearFootsteps();
+            clearFootstepsAfterPause.set(false);
+         }
          checkForPause();
          return;
       }
@@ -1055,8 +1116,9 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
                                                                                  location2.getY());
       if (distanceXY > maxDistance)
       {
-         LogTools.warn("Got a footstep with a trajectory that is far from the step origin and goal location. The XY distance from a straight line trajectory was "
-                       + distanceXY + ". If that is acceptable increase the MaxSwingDistance parameter.");
+         LogTools.warn(
+               "Got a footstep with a trajectory that is far from the step origin and goal location. The XY distance from a straight line trajectory was "
+               + distanceXY + ". If that is acceptable increase the MaxSwingDistance parameter.");
          return false;
       }
 
@@ -1064,8 +1126,9 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       double distanceZ = Math.min(Math.abs(location1.getZ() - positionToCheck.getZ()), Math.abs(location2.getZ() - positionToCheck.getZ()));
       if (distanceZ > maxDistance)
       {
-         LogTools.warn("Got a footstep with a trajectory that is far from the step origin and goal location. The Z distance from the closer location was "
-                       + distanceZ + ". If that is acceptable increase the MaxSwingDistance parameter.");
+         LogTools.warn(
+               "Got a footstep with a trajectory that is far from the step origin and goal location. The Z distance from the closer location was " + distanceZ
+               + ". If that is acceptable increase the MaxSwingDistance parameter.");
          return false;
       }
 
