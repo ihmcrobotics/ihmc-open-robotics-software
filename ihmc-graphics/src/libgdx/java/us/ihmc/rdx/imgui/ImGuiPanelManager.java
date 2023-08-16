@@ -9,44 +9,44 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ImGuiPanelManager
 {
-   private final TreeSet<ImGuiPanel> panels = new TreeSet<>(Comparator.comparing(ImGuiPanel::getPanelName));
-   private final ConcurrentLinkedQueue<ImGuiPanel> removalQueue = new ConcurrentLinkedQueue<>();
-   private final ConcurrentLinkedQueue<ImGuiPanel> addQueue = new ConcurrentLinkedQueue<>();
+   private final TreeSet<RDXPanel> panels = new TreeSet<>(Comparator.comparing(RDXPanel::getPanelName));
+   private final ConcurrentLinkedQueue<RDXPanel> removalQueue = new ConcurrentLinkedQueue<>();
+   private final ConcurrentLinkedQueue<RDXPanel> addQueue = new ConcurrentLinkedQueue<>();
 
-   public void addPanel(ImGuiPanel panel)
+   public void addPanel(RDXPanel panel)
    {
       panels.add(panel);
    }
 
    public void addPanel(String windowName, Runnable render)
    {
-      panels.add(new ImGuiPanel(windowName, render));
+      panels.add(new RDXPanel(windowName, render));
    }
 
    public void addSelfManagedPanel(String windowName)
    {
-      panels.add(new ImGuiPanel(windowName));
+      panels.add(new RDXPanel(windowName));
    }
 
-   public void queueRemovePanel(ImGuiPanel panel)
+   public void queueRemovePanel(RDXPanel panel)
    {
       removalQueue.add(panel);
    }
 
-   public void queueAddPanel(ImGuiPanel panel)
+   public void queueAddPanel(RDXPanel panel)
    {
       addQueue.add(panel);
    }
 
    public void renderPanelMenu()
    {
-      for (ImGuiPanel panel : panels)
+      for (RDXPanel panel : panels)
       {
          panel.renderMenuItem();
       }
    }
 
-   public void renderPanels(TIntObjectHashMap<ImGuiDockspacePanel> dockIDMap)
+   public void renderPanels(TIntObjectHashMap<RDXDockspacePanel> dockIDMap)
    {
       while (!removalQueue.isEmpty())
          panels.remove(removalQueue.poll());
@@ -54,7 +54,7 @@ public class ImGuiPanelManager
       while (!addQueue.isEmpty())
          panels.add(addQueue.poll());
 
-      for (ImGuiPanel panel : panels)
+      for (RDXPanel panel : panels)
       {
          panel.renderPanelAndChildren(dockIDMap);
       }
@@ -66,7 +66,7 @@ public class ImGuiPanelManager
       for (Iterator<Map.Entry<String, JsonNode>> it = windowsNode.fields(); it.hasNext(); )
       {
          Map.Entry<String, JsonNode> panelEntry = it.next();
-         for (ImGuiPanel panel : panels)
+         for (RDXPanel panel : panels)
          {
             panel.load(panelEntry);
          }
@@ -77,7 +77,7 @@ public class ImGuiPanelManager
    {
       ObjectNode anchorJSON = root.putObject("windows");
 
-      for (ImGuiPanel panel : panels)
+      for (RDXPanel panel : panels)
       {
          panel.save(anchorJSON);
       }

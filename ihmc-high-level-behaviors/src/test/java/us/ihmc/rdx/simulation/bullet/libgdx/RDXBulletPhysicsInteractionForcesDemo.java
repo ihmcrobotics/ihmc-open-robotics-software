@@ -18,7 +18,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.simulation.bullet.RDXBulletTools;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.environment.object.objects.RDXLabFloorObject;
@@ -260,7 +260,7 @@ public class RDXBulletPhysicsInteractionForcesDemo
                }
             });
 
-            ImGuiPanel experimentPanel = new ImGuiPanel("Demo", () ->
+            RDXPanel experimentPanel = new RDXPanel("Demo", () ->
             {
                if (ImGui.button("Replace Block"))
                {

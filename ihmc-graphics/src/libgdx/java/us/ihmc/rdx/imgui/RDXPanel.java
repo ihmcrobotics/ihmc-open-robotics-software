@@ -15,36 +15,36 @@ import java.util.Map;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class ImGuiPanel extends ImGuiPanelSizeHandler
+public class RDXPanel extends RDXPanelSizeHandler
 {
    private final String panelName;
    private Runnable render;
    private final ImBoolean isShowing;
    private final boolean hasMenuBar;
-   private final TreeSet<ImGuiPanel> children = new TreeSet<>(Comparator.comparing(ImGuiPanel::getPanelName));
-   private final ConcurrentLinkedQueue<ImGuiPanel> removalQueue = new ConcurrentLinkedQueue<>();
-   private final ConcurrentLinkedQueue<ImGuiPanel> additionQueue = new ConcurrentLinkedQueue<>();
+   private final TreeSet<RDXPanel> children = new TreeSet<>(Comparator.comparing(RDXPanel::getPanelName));
+   private final ConcurrentLinkedQueue<RDXPanel> removalQueue = new ConcurrentLinkedQueue<>();
+   private final ConcurrentLinkedQueue<RDXPanel> additionQueue = new ConcurrentLinkedQueue<>();
 
    @Nullable
-   private ImGuiDockspacePanel parentDockspacePanel = null;
+   private RDXDockspacePanel parentDockspacePanel = null;
    private boolean isOnMainViewport = false;
 
-   public ImGuiPanel(String panelName)
+   public RDXPanel(String panelName)
    {
       this(panelName, null, false);
    }
 
-   public ImGuiPanel(String panelName, Runnable render)
+   public RDXPanel(String panelName, Runnable render)
    {
       this(panelName, render, false);
    }
 
-   public ImGuiPanel(String panelName, Runnable render, boolean isShowing)
+   public RDXPanel(String panelName, Runnable render, boolean isShowing)
    {
       this(panelName, render, isShowing, false);
    }
 
-   public ImGuiPanel(String panelName, Runnable render, boolean isShowing, boolean hasMenuBar)
+   public RDXPanel(String panelName, Runnable render, boolean isShowing, boolean hasMenuBar)
    {
       this.panelName = panelName;
       this.render = render;
@@ -60,13 +60,13 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
    {
       ImGui.menuItem(indent + panelName, "", isShowing);
 
-      for (ImGuiPanel child : children)
+      for (RDXPanel child : children)
       {
          child.renderMenuItem(indent + "\t");
       }
    }
 
-   /* package-private */ void renderPanelAndChildren(TIntObjectHashMap<ImGuiDockspacePanel> dockIDMap)
+   /* package-private */ void renderPanelAndChildren(TIntObjectHashMap<RDXDockspacePanel> dockIDMap)
    {
       while (!removalQueue.isEmpty())
          children.remove(removalQueue.poll());
@@ -111,13 +111,13 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
          ImGui.end();
       }
 
-      for (ImGuiPanel child : children)
+      for (RDXPanel child : children)
       {
          child.renderPanelAndChildren(dockIDMap);
       }
    }
 
-   private void findParentDockspacePanel(int nodeID, TIntObjectHashMap<ImGuiDockspacePanel> dockIDMap)
+   private void findParentDockspacePanel(int nodeID, TIntObjectHashMap<RDXDockspacePanel> dockIDMap)
    {
       ImGuiDockNode dockNode = imgui.internal.ImGui.dockBuilderGetNode(nodeID);
       if (dockNode.ptr == 0) // Panel is not docked, floating, in the main viewport
@@ -139,17 +139,17 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
       }
    }
 
-   public void addChild(ImGuiPanel child)
+   public void addChild(RDXPanel child)
    {
       children.add(child);
    }
 
-   public void queueRemoveChild(ImGuiPanel panel)
+   public void queueRemoveChild(RDXPanel panel)
    {
       removalQueue.add(panel);
 
    }
-   public void queueAddChild(ImGuiPanel panel)
+   public void queueAddChild(RDXPanel panel)
    {
       additionQueue.add(panel);
    }
@@ -161,7 +161,7 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
          isShowing.set(panelEntry.getValue().asBoolean());
       }
 
-      for (ImGuiPanel child : children)
+      for (RDXPanel child : children)
       {
          child.load(panelEntry);
       }
@@ -171,7 +171,7 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
    {
       anchorJSON.put(panelName, isShowing.get());
 
-      for (ImGuiPanel child : children)
+      for (RDXPanel child : children)
       {
          child.save(anchorJSON);
       }
@@ -192,7 +192,7 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
       return panelName;
    }
 
-   public TreeSet<ImGuiPanel> getChildren()
+   public TreeSet<RDXPanel> getChildren()
    {
       return children;
    }

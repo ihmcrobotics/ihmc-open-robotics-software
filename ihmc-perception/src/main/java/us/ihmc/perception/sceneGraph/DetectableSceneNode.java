@@ -3,9 +3,10 @@ package us.ihmc.perception.sceneGraph;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
+import us.ihmc.robotics.EuclidCoreMissingTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameSupplier;
 import us.ihmc.tools.Timer;
-
-import javax.annotation.Nullable;
 
 /**
  * An object that is currently detected or not currently detected,
@@ -30,8 +31,7 @@ public abstract class DetectableSceneNode extends SceneNode
     * We allow the operator to disable tracking the detected pose.
     */
    private boolean trackDetectedPose = true;
-   @Nullable
-   private SceneNode parentNode;
+   private ReferenceFrameSupplier parentFrameSupplier;
    private final RigidBodyTransform originalTransformToParent = new RigidBodyTransform();
    private transient final FramePose3D originalPose = new FramePose3D();
 
@@ -43,6 +43,16 @@ public abstract class DetectableSceneNode extends SceneNode
    public DetectableSceneNode(String name, ReferenceFrame parentFrame)
    {
       super(name, parentFrame);
+   }
+
+   public void setParentFrame(ReferenceFrameSupplier parentFrameSupplier)
+   {
+      this.parentFrameSupplier = parentFrameSupplier;
+   }
+
+   public ReferenceFrameSupplier getParentFrame()
+   {
+      return parentFrameSupplier;
    }
 
    public void setCurrentlyDetected(boolean currentlyDetected)
@@ -75,13 +85,21 @@ public abstract class DetectableSceneNode extends SceneNode
    {
       this.trackDetectedPose = trackDetectedPose;
 
-      if (parentNode != null)
+      if (EuclidCoreMissingTools.hasBeenRemoved(getNodeFrame()))
       {
-         if (trackDetectedPose && parentNode.getNodeFrame() != getNodeFrame().getParent())
+         LogTools.error("Frame has been removed: {}. Not sure why this would be removed at this point.", getNodeFrame().getName());
+      }
+
+      if (trackDetectedPose)
+      {
+         if (parentFrameSupplier.get() != getNodeFrame().getParent())
          {
-            changeParentFrameWithoutMoving(parentNode.getNodeFrame());
+            changeParentFrameWithoutMoving(parentFrameSupplier.get());
          }
-         else if (!trackDetectedPose && getNodeFrame().getParent() != ReferenceFrame.getWorldFrame())
+      }
+      else
+      {
+         if (getNodeFrame().getParent() != ReferenceFrame.getWorldFrame())
          {
             changeParentFrameWithoutMoving(ReferenceFrame.getWorldFrame());
          }
@@ -94,16 +112,16 @@ public abstract class DetectableSceneNode extends SceneNode
     */
    public void clearOffset()
    {
-      if (parentNode != null && parentNode.getNodeFrame() != getNodeFrame().getParent())
+      if (parentFrameSupplier.get() != getNodeFrame().getParent())
       {
-         originalPose.setToZero(parentNode.getNodeFrame());
-         originalPose.set(originalTransformToParent);
+         originalPose.setToZero(parentFrameSupplier.get());
+         originalPose.set(getOriginalTransformToParent());
          originalPose.changeFrame(getNodeFrame().getParent());
          originalPose.get(getNodeToParentFrameTransform());
       }
       else
       {
-         getNodeToParentFrameTransform().set(originalTransformToParent);
+         getNodeToParentFrameTransform().set(getOriginalTransformToParent());
       }
       getNodeFrame().update();
    }
@@ -118,14 +136,8 @@ public abstract class DetectableSceneNode extends SceneNode
       return !modifiedTimer.isRunning(OPERATOR_FREEZE_TIME);
    }
 
-   public void setParentNode(SceneNode sceneNode)
+   public RigidBodyTransform getOriginalTransformToParent()
    {
-      parentNode = sceneNode;
-   }
-
-   @Nullable
-   public SceneNode getParentNode()
-   {
-      return parentNode;
+      return originalTransformToParent;
    }
 }

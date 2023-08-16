@@ -13,7 +13,7 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.tools.RDXModelBuilder;
@@ -43,7 +43,7 @@ public class RDXOpenCVArUcoMarkerDetectionUI
    private final HashMap<Integer, RDXOpenCVArUcoTrackedMarker> idToTrackedMarkerMap = new HashMap<>();
    private BytedecoImage imageForDrawing;
    private RDXMatImagePanel markerImagePanel;
-   private final ImGuiPanel mainPanel;
+   private final RDXPanel mainPanel;
    private Scalar idColor;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImInt adaptiveThresholdWindowSizeMin = new ImInt();
@@ -81,7 +81,7 @@ public class RDXOpenCVArUcoMarkerDetectionUI
    public RDXOpenCVArUcoMarkerDetectionUI(String namePostfix)
    {
       this.namePostfix = namePostfix;
-      mainPanel = new ImGuiPanel("ArUco Marker Detection" + namePostfix, this::renderImGuiWidgets);
+      mainPanel = new RDXPanel("ArUco Marker Detection" + namePostfix, this::renderImGuiWidgets);
    }
 
    public void create(OpenCVArUcoMarkerDetection arUcoMarkerDetection)
@@ -306,7 +306,7 @@ public class RDXOpenCVArUcoMarkerDetectionUI
       }
    }
 
-   public ImGuiPanel getMainPanel()
+   public RDXPanel getMainPanel()
    {
       return mainPanel;
    }

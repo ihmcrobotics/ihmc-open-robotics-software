@@ -6,7 +6,7 @@ import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXImGuiLayoutManager;
 import us.ihmc.rdx.ui.ImGuiConfigurationLocation;
@@ -24,14 +24,14 @@ public class SCS2YoImPlotManager
    private final ArrayList<ImPlotModifiableYoPlotPanel> plotPanels = new ArrayList<>();
    private RDXYoManager yoManager;
    private ImGuiYoVariableSearchPanel yoVariableSearchPanel;
-   private ImGuiPanel parentPanel;
+   private RDXPanel parentPanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString panelToCreateName = new ImString("", 100);
    private HybridResourceFile configurationFile;
    private boolean layoutReloadQueued = false;
    private int delayedLayoutReloadCounter = 0;
 
-   public void create(RDXImGuiLayoutManager layoutManager, ImGuiPanel parentPanel)
+   public void create(RDXImGuiLayoutManager layoutManager, RDXPanel parentPanel)
    {
       this.layoutManager = layoutManager;
       this.parentPanel = parentPanel;

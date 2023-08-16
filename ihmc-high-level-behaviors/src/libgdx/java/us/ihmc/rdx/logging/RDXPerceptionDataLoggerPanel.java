@@ -7,7 +7,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLogChannel;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.tools.IHMCCommonPaths;
@@ -22,7 +22,7 @@ import java.util.HashMap;
  * Set the `perception.log.directory` JVM property to override the initial log directory.
  * You can also set this in the UI, though.
  */
-public class RDXPerceptionDataLoggerPanel extends ImGuiPanel
+public class RDXPerceptionDataLoggerPanel extends RDXPanel
 {
    public static final String PERCEPTION_DIRECTORY_NAME = "perception";
    public static final String PERCEPTION_LOGS_DEFAULT_DIRECTORY

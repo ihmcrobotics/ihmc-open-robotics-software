@@ -13,10 +13,10 @@ import imgui.type.ImInt;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.PlanarRegionMappingHandler;
 import us.ihmc.perception.tools.PlaneRegistrationTools;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
+import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.visualizers.RDXLineGraphic;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarLandmarkList;
@@ -26,9 +26,9 @@ import java.util.ArrayList;
 public class RDXPlanarRegionMappingUI implements RenderableProvider
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private ImGuiStoredPropertySetTuner mappingParametersTuner;
+   private RDXStoredPropertySetTuner mappingParametersTuner;
    private PlanarRegionMappingHandler mappingManager;
-   private ImGuiPanel imGuiPanel;
+   private RDXPanel panel;
 
    private ImGuiPlot wholeAlgorithmDurationPlot;
    private ImGuiPlot quaternionAveragingDurationPlot;
@@ -51,10 +51,10 @@ public class RDXPlanarRegionMappingUI implements RenderableProvider
    public RDXPlanarRegionMappingUI(String name, PlanarRegionMappingHandler mappingManager)
    {
       this.mappingManager = mappingManager;
-      imGuiPanel = new ImGuiPanel(name, this::renderImGuiWidgets);
-      mappingParametersTuner = new ImGuiStoredPropertySetTuner(mappingManager.getParameters().getTitle());
+      panel = new RDXPanel(name, this::renderImGuiWidgets);
+      mappingParametersTuner = new RDXStoredPropertySetTuner(mappingManager.getParameters().getTitle());
       mappingParametersTuner.create(mappingManager.getParameters());
-      imGuiPanel.addChild(mappingParametersTuner);
+      panel.addChild(mappingParametersTuner);
 
       wholeAlgorithmDurationPlot = new ImGuiPlot(labels.get("Whole algorithm duration"), 1000, 300, 50);
       quaternionAveragingDurationPlot = new ImGuiPlot(labels.get("ICP duration"), 1000, 300, 50);
@@ -187,9 +187,9 @@ public class RDXPlanarRegionMappingUI implements RenderableProvider
       return captured;
    }
 
-   public ImGuiPanel getImGuiPanel()
+   public RDXPanel getImGuiPanel()
    {
-      return imGuiPanel;
+      return panel;
    }
 
    public boolean getPointCloudRenderEnabled()
