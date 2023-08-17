@@ -24,11 +24,11 @@ import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.tools.PerceptionDataTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
-import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
+import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.ros2.RDXHeightMapVisualizer;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -45,7 +45,7 @@ public class RDXHeightMapExtractionDemo
    private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230117_161540_GoodPerceptionLog.hdf5").toString();
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private ImGuiPanel navigationPanel;
+   private RDXPanel navigationPanel;
 
    private String sensorTopicName;
 
@@ -54,8 +54,8 @@ public class RDXHeightMapExtractionDemo
 
    private final HeightMapUpdater heightMapUpdater = new HeightMapUpdater();
    private final RDXHeightMapVisualizer heightMapVisualizer = new RDXHeightMapVisualizer();
-   private final ImGuiStoredPropertySetTuner heightMapParameters;
-   private final ImGuiStoredPropertySetTuner heightMapFitlerParameters;
+   private final RDXStoredPropertySetTuner heightMapParameters;
+   private final RDXStoredPropertySetTuner heightMapFitlerParameters;
 
    private final Notification userChangedIndex = new Notification();
 
@@ -87,8 +87,8 @@ public class RDXHeightMapExtractionDemo
       perceptionDataLoader = new PerceptionDataLoader();
       previousPose.setToNaN();
 
-      heightMapParameters = new ImGuiStoredPropertySetTuner("heightMapParameters");
-      heightMapFitlerParameters = new ImGuiStoredPropertySetTuner("Filter Parameters");
+      heightMapParameters = new RDXStoredPropertySetTuner("heightMapParameters");
+      heightMapFitlerParameters = new RDXStoredPropertySetTuner("Filter Parameters");
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -106,7 +106,7 @@ public class RDXHeightMapExtractionDemo
             heightMapParameters.create(heightMapUpdater.getHeightMapParameters());
             heightMapFitlerParameters.create(heightMapUpdater.getHeightMapFilterParameters());
 
-            navigationPanel = new ImGuiPanel("Dataset Navigation Panel");
+            navigationPanel = new RDXPanel("Dataset Navigation Panel");
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
             baseUI.getImGuiPanelManager().addPanel(heightMapParameters);
             baseUI.getImGuiPanelManager().addPanel(heightMapFitlerParameters);

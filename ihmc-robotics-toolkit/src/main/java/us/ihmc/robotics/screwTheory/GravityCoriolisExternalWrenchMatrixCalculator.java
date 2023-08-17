@@ -479,6 +479,10 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
        */
       private final SpatialAcceleration rigidBodyAcceleration;
       /**
+       * Intermediate variable for storing this joint acceleration.
+       */
+      private final SpatialAcceleration localJointAcceleration = new SpatialAcceleration();
+      /**
        * Intermediate variable for storing this joint twist.
        */
       private final Twist localJointTwist = new Twist();
@@ -561,6 +565,9 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
       {
          if (!isRoot())
          {
+            if (getJoint().isMotionSubspaceVariable())
+               getJoint().getMotionSubspace(S);
+
             rigidBodyAcceleration.setIncludingFrame(parent.rigidBodyAcceleration);
 
             TwistReadOnly bodyTwistToUse;
@@ -570,6 +577,16 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
                getJoint().getPredecessorTwist(localJointTwist);
                rigidBodyAcceleration.changeFrame(getBodyFixedFrame(), localJointTwist, parent.getBodyFixedFrame().getTwistOfFrame());
                bodyTwistToUse = getBodyTwist();
+
+               if (getJoint().isMotionSubspaceVariable())
+               {
+                  SpatialAccelerationReadOnly jointBiasAcceleration = getJoint().getJointBiasAcceleration();
+                  localJointAcceleration.setIncludingFrame(jointBiasAcceleration);
+                  localJointAcceleration.changeFrame(getBodyFixedFrame());
+                  localJointAcceleration.setBodyFrame(getBodyFixedFrame());
+                  localJointAcceleration.setBaseFrame(parent.getBodyFixedFrame());
+                  rigidBodyAcceleration.add(localJointAcceleration);
+               }
             }
             else
             {

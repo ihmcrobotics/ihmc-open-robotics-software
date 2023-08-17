@@ -39,8 +39,8 @@ public class RDXImGuiWindowAndDockSystem
    private ImFont imFont;
    private int dockspaceId;
    private final ImString newDockPanelName = new ImString("", 100);
-   private final TreeSet<ImGuiDockspacePanel> dockPanelSet = new TreeSet<>(Comparator.comparing(ImGuiDockspacePanel::getName));
-   private final TIntObjectHashMap<ImGuiDockspacePanel> dockIDMap = new TIntObjectHashMap<>();
+   private final TreeSet<RDXDockspacePanel> dockPanelSet = new TreeSet<>(Comparator.comparing(RDXDockspacePanel::getName));
+   private final TIntObjectHashMap<RDXDockspacePanel> dockIDMap = new TIntObjectHashMap<>();
    private final ImGuiPanelManager panelManager;
    private HybridResourceFile imGuiSettingsFile;
    private HybridResourceFile panelsFile;
@@ -139,7 +139,7 @@ public class RDXImGuiWindowAndDockSystem
 
       dockspaceId = ImGui.dockSpaceOverViewport(ImGui.getMainViewport(), flags);
 
-      for (ImGuiDockspacePanel dockspacePanel : dockPanelSet)
+      for (RDXDockspacePanel dockspacePanel : dockPanelSet)
       {
          dockspacePanel.renderPanel();
          dockIDMap.put(dockspacePanel.getDockspaceID(), dockspacePanel);
@@ -158,11 +158,11 @@ public class RDXImGuiWindowAndDockSystem
       ImGui.sameLine();
       if (ImGui.button("Create###createNewDockPanelButton") && !newDockPanelName.get().isEmpty())
       {
-         dockPanelSet.add(new ImGuiDockspacePanel(newDockPanelName.get()));
+         dockPanelSet.add(new RDXDockspacePanel(newDockPanelName.get()));
       }
 
-      ImGuiDockspacePanel dockspacePanelToRemove = null;
-      for (ImGuiDockspacePanel dockspacePanel : dockPanelSet)
+      RDXDockspacePanel dockspacePanelToRemove = null;
+      for (RDXDockspacePanel dockspacePanel : dockPanelSet)
       {
          dockspacePanel.renderMenuItem();
          ImGui.sameLine();
@@ -226,13 +226,13 @@ public class RDXImGuiWindowAndDockSystem
       JsonNode dockspacePanelsNode = jsonNode.get("dockspacePanels");
       if (dockspacePanelsNode != null)
       {
-         ImGuiDockspacePanel[] priorDockpanelSet = dockPanelSet.toArray(new ImGuiDockspacePanel[0]);
+         RDXDockspacePanel[] priorDockpanelSet = dockPanelSet.toArray(new RDXDockspacePanel[0]);
          dockPanelSet.clear();
          for (Iterator<Map.Entry<String, JsonNode>> it = dockspacePanelsNode.fields(); it.hasNext(); )
          {
             Map.Entry<String, JsonNode> dockspacePanelEntry = it.next();
-            ImGuiDockspacePanel dockspacePanel = null;
-            for (ImGuiDockspacePanel otherDockspacePanel : priorDockpanelSet)
+            RDXDockspacePanel dockspacePanel = null;
+            for (RDXDockspacePanel otherDockspacePanel : priorDockpanelSet)
             {
                if (otherDockspacePanel.getName().equals(dockspacePanelEntry.getKey()))
                {
@@ -241,7 +241,7 @@ public class RDXImGuiWindowAndDockSystem
             }
             if (dockspacePanel == null)
             {
-               dockspacePanel = new ImGuiDockspacePanel(dockspacePanelEntry.getKey());
+               dockspacePanel = new RDXDockspacePanel(dockspacePanelEntry.getKey());
             }
             dockPanelSet.add(dockspacePanel);
             dockspacePanel.getIsShowing().set(dockspacePanelEntry.getValue().asBoolean());
@@ -262,7 +262,7 @@ public class RDXImGuiWindowAndDockSystem
       Consumer<ObjectNode> rootConsumer = root ->
       {
          ObjectNode anchorJSON = root.putObject("dockspacePanels");
-         for (ImGuiDockspacePanel dockspacePanel : dockPanelSet)
+         for (RDXDockspacePanel dockspacePanel : dockPanelSet)
          {
             anchorJSON.put(dockspacePanel.getName(), dockspacePanel.getIsShowing().get());
          }

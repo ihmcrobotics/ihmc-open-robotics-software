@@ -27,7 +27,7 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
    public RDXMultiBodyGraphic(String title)
    {
       super(title);
-      setSceneLevels(RDXSceneLevel.GROUND_TRUTH, RDXSceneLevel.MODEL);
+      setSceneLevels(RDXSceneLevel.GROUND_TRUTH, RDXSceneLevel.VIRTUAL);
    }
 
    public void loadRobotModelAndGraphics(RobotDefinition robotDefinition, RigidBodyBasics originalRootBody)

@@ -23,7 +23,7 @@ import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.spinnaker.BlackflyModelProperties;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.logging.RDXHDF5ImageBrowser;
@@ -150,7 +150,7 @@ public class RDXBlackflyCalibrationSuite
             baseUI.getImGuiPanelManager().addPanel("Calibration", RDXBlackflyCalibrationSuite.this::renderImGuiWidgets);
 
             nettyOusterUI.create(baseUI);
-            ImGuiPanel panel = new ImGuiPanel("Ouster", nettyOusterUI::renderImGuiWidgets);
+            RDXPanel panel = new RDXPanel("Ouster", nettyOusterUI::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
 
             blackflyReader.create();

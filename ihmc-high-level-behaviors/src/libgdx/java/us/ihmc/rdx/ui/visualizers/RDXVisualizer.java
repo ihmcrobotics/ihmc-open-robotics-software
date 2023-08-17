@@ -5,7 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
@@ -91,7 +91,7 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
       return false;
    }
 
-   public ImGuiPanel getPanel()
+   public RDXPanel getPanel()
    {
       return null;
    }

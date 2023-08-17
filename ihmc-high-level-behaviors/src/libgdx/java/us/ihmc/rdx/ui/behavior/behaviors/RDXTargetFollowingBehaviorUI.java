@@ -12,7 +12,6 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.targetFollowing.TargetFollowingBehavior;
 import us.ihmc.behaviors.targetFollowing.TargetFollowingBehaviorParameters;
 import us.ihmc.behaviors.tools.BehaviorHelper;
-import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -22,7 +21,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
+import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.affordances.RDXBallAndArrowPosePlacement;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIDefinition;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIInterface;
@@ -33,8 +32,6 @@ import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.behaviors.targetFollowing.TargetFollowingBehaviorAPI.*;
-
 public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
 {
    public static final RDXBehaviorUIDefinition DEFINITION = new RDXBehaviorUIDefinition(TargetFollowingBehavior.DEFINITION,
@@ -43,7 +40,7 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean publishTestLoop = new ImBoolean(false);
    private final TargetFollowingBehaviorParameters targetFollowingParameters = new TargetFollowingBehaviorParameters();
-   private final ImGuiStoredPropertySetTuner targetFollowingParameterTuner = new ImGuiStoredPropertySetTuner("Target Following Parameters");
+   private final RDXStoredPropertySetTuner targetFollowingParameterTuner = new RDXStoredPropertySetTuner("Target Following Parameters");
    private final RDXBallAndArrowPosePlacement manualTargetAffordance = new RDXBallAndArrowPosePlacement();
    private final RosTopicPublisher<PoseStamped> manualTargetPublisher = null;
    private int pointNumber;

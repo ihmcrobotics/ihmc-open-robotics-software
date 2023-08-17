@@ -16,52 +16,53 @@ import java.util.List;
  */
 public class ReferenceFrameLibrary
 {
+   /** Reference frames are have immutable parents, so we must use Suppliers. */
+   private final ArrayList<ReferenceFrameSupplier> referenceFrameSuppliers = new ArrayList<>();
    private final HashSet<String> frameNames = new HashSet<>();
-   private final ArrayList<ReferenceFrame> referenceFrames = new ArrayList<>();
    private String[] referenceFrameNames;
 
-   public void addAll(List<ReferenceFrame> referenceFrames)
+   public void addAll(List<ReferenceFrameSupplier> referenceFrameSuppliers)
    {
-      for (ReferenceFrame referenceFrame : referenceFrames)
+      for (ReferenceFrameSupplier referenceFrame : referenceFrameSuppliers)
       {
          add(referenceFrame);
       }
    }
 
-   public void add(ReferenceFrame referenceFrame)
+   public void add(ReferenceFrameSupplier referenceFrame)
    {
-      if (!frameNames.contains(referenceFrame.getName()))
+      if (!frameNames.contains(referenceFrame.get().getName()))
       {
-         frameNames.add(referenceFrame.getName());
-         referenceFrames.add(referenceFrame);
+         frameNames.add(referenceFrame.get().getName());
+         referenceFrameSuppliers.add(referenceFrame);
       }
    }
 
    public void build()
    {
-      referenceFrameNames = new String[referenceFrames.size()];
-      for (int i = 0; i < referenceFrames.size(); i++)
+      referenceFrameNames = new String[referenceFrameSuppliers.size()];
+      for (int i = 0; i < referenceFrameSuppliers.size(); i++)
       {
-         String fullName = referenceFrames.get(i).getName();
+         String fullName = referenceFrameSuppliers.get(i).get().getName();
          referenceFrameNames[i] = fullName.substring(fullName.lastIndexOf(".") + 1);
       }
    }
 
-   public ReferenceFrame findFrameByName(String referenceFrameName)
+   public ReferenceFrameSupplier findFrameByName(String referenceFrameName)
    {
       int frameIndex = findFrameIndexByName(referenceFrameName);
       boolean frameFound = frameIndex >= 0;
       if (frameFound)
       {
-         return referenceFrames.get(frameIndex);
+         return referenceFrameSuppliers.get(frameIndex);
       }
       LogTools.warn("Using world frame.");
-      return ReferenceFrame.getWorldFrame();
+      return ReferenceFrame::getWorldFrame;
    }
 
    public int findFrameIndexByName(String referenceFrameName)
    {
-      for (int i = 0; i < referenceFrames.size(); i++)
+      for (int i = 0; i < referenceFrameNames.length; i++)
       {
          if (referenceFrameName.equals(referenceFrameNames[i]))
          {
@@ -72,9 +73,9 @@ public class ReferenceFrameLibrary
       return -1;
    }
 
-   public List<ReferenceFrame> getReferenceFrames()
+   public List<ReferenceFrameSupplier> getReferenceFrameSuppliers()
    {
-      return referenceFrames;
+      return referenceFrameSuppliers;
    }
 
    public String[] getReferenceFrameNames()
