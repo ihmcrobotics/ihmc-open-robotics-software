@@ -161,11 +161,11 @@ public class RigidBodyJointControlHelper
          }
       }
 
+      hasLowLevelGains.set(lowLevelGains != null);
       if (lowLevelGains == null)
          return;
 
-      hasLowLevelGains.set(true);
-      this.hasLowLevelGains.clear();
+      this.lowLevelGains.clear();
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
          OneDoFJointBasics joint = joints[jointIdx];
