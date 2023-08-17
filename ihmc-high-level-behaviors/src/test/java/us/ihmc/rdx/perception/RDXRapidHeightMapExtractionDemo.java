@@ -233,6 +233,7 @@ public class RDXRapidHeightMapExtractionDemo
          ThreadTools.startAsDaemon(() ->
            {
               LogTools.info("Update Height Map: " + frameIndex.get());
+
               Point3D position = sensorPositionBuffer.get(frameIndex.get());
               Quaternion orientation = sensorOrientationBuffer.get(frameIndex.get());
               cameraPose.set(position, orientation);
@@ -240,36 +241,25 @@ public class RDXRapidHeightMapExtractionDemo
 
               long begin = System.nanoTime();
 
-              RigidBodyTransform transform = new RigidBodyTransform(sensorOrientationBuffer.get(frameIndex.get()),
+              RigidBodyTransform sensorToWorld = new RigidBodyTransform(sensorOrientationBuffer.get(frameIndex.get()),
                                                                     sensorPositionBuffer.get(frameIndex.get()));
 
-              RigidBodyTransform sensorToGround = new RigidBodyTransform(transform);
-              sensorToGround.getTranslation().setX(0.0f);
-              sensorToGround.getTranslation().setY(0.0f);
-              sensorToGround.getRotation()
-                            .set(new Quaternion(0.0f, sensorToGround.getRotation().getPitch(), sensorToGround.getRotation().getRoll()));
-
-              //LogTools.info("Sensor to Ground: " + sensorToGround);
-
-              // Point3D euler = new Point3D();
-              // sensorOrientationBuffer.get(frameIndex.get()).getEuler(euler);
-              // RigidBodyTransform transform = new RigidBodyTransform(new Quaternion(0.0, pitchAngle.get(), 0.0), new Point3D(0.0,0.0,1.0));
-
-              // LogTools.info("Rotation: " + euler);
-
-              rapidHeightMapUpdater.update(sensorToGround, planeHeight.get());
+              rapidHeightMapUpdater.update(sensorToWorld, planeHeight.get());
               heightMapUpdateNotification.set();
 
               long end = System.nanoTime();
               LogTools.info("Update Height Map: {} ms", (end - begin) / 1e6);
+
            }, getClass().getSimpleName() + "RapidHeightMap");
       }
 
       if (heightMapUpdateNotification.poll())
       {
-         Point2D gridCenter =
-               rapidHeightMapUpdater.getLatestHeightMapData() != null ? rapidHeightMapUpdater.getLatestHeightMapData().getGridCenter() : new Point2D();
-         gridCenter.setToZero();
+         Point3D gridCenter = rapidHeightMapUpdater.getGridCenter();
+//         gridCenter.setToZero();
+
+         LogTools.warn("Grid Center: " + gridCenter);
+
          heightMapRenderer.update(rapidHeightMapUpdater.getOutputHeightMapImage().getPointerForAccessSpeed(),
                                   gridCenter,
                                   rapidHeightMapUpdater.getCenterIndex(),
