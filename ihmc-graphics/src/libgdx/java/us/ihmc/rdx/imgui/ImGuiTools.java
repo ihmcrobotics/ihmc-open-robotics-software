@@ -236,6 +236,22 @@ public class ImGuiTools
       ImGui.textColored(color.r, color.g, color.b, color.a, text);
    }
 
+   public static void conditionalBoldColoredText(String text, int intColor, boolean condition)
+   {
+      if (condition)
+      {
+         ImGui.pushFont(ImGuiTools.getSmallBoldFont());
+         ImGui.pushStyleColor(ImGuiCol.Text, intColor);
+      }
+      ImGui.sameLine();
+      ImGui.text(text);
+      if (condition)
+      {
+         ImGui.popStyleColor();
+         ImGui.popFont();
+      }
+   }
+
    public static void previousWidgetTooltip(String tooltipText)
    {
       if (ImGui.isItemHovered())
