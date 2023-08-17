@@ -8,14 +8,14 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
-import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
 import java.util.*;
 
-public class RDXInteractableObjectBuilder extends ImGuiPanel
+public class RDXInteractableObjectBuilder extends RDXPanel
 {
    private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(RDXInteractableObjectBuilder.class, "Object Panel");
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
