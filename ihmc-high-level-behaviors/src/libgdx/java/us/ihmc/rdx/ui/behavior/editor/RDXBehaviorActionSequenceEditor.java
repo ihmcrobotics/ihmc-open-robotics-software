@@ -35,6 +35,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.io.*;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -57,10 +58,11 @@ import java.util.LinkedList;
 public class RDXBehaviorActionSequenceEditor
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private RDXPanel panel;
+   private final RDXPanel panel = new RDXPanel("Behavior Sequence Editor", this::renderImGuiWidgets, false, true);
    private final ImBoolean automaticExecution = new ImBoolean(false);
    private String name;
-   private final WorkspaceResourceFile workspaceFile;
+   @Nullable
+   private WorkspaceResourceFile workspaceFile = null;
    private final LinkedList<RDXBehaviorAction> actionSequence = new LinkedList<>();
    private String pascalCasedName;
    private RDX3DPanel panel3D;
@@ -83,25 +85,28 @@ public class RDXBehaviorActionSequenceEditor
    private final ActionSequenceUpdateMessage actionSequenceUpdateMessage = new ActionSequenceUpdateMessage();
    private boolean outOfSync = true;
 
-   public RDXBehaviorActionSequenceEditor(WorkspaceResourceFile fileToLoadFrom)
+   public void clear()
    {
-      this.workspaceFile = fileToLoadFrom;
-      loadNameFromFile();
-      afterNameDetermination();
+      workspaceFile = null;
    }
 
-   public RDXBehaviorActionSequenceEditor(String name, WorkspaceResourceDirectory storageDirectory)
+   public void createNewSequence(String name, WorkspaceResourceDirectory storageDirectory)
    {
       this.name = name;
       afterNameDetermination();
       this.workspaceFile = new WorkspaceResourceFile(storageDirectory, pascalCasedName + ".json");
    }
 
+   public void changeFileToLoadFrom(WorkspaceResourceFile fileToLoadFrom)
+   {
+      this.workspaceFile = fileToLoadFrom;
+      loadNameFromFile();
+      afterNameDetermination();
+   }
+
    public void afterNameDetermination()
    {
-      panel = new RDXPanel(name + " Behavior Sequence Editor", this::renderImGuiWidgets, false, true);
       pascalCasedName = FormattingTools.titleToPascalCase(name);
-      panel.getIsShowing().set(true);
    }
 
    public void create(RDX3DPanel panel3D,
@@ -235,24 +240,31 @@ public class RDXBehaviorActionSequenceEditor
 
    public void renderImGuiWidgets()
    {
-      renderMenuBar();
+      if (isCleared())
+      {
+         ImGui.text("No behavior selected.");
+      }
+      else
+      {
+         renderMenuBar();
 
-      renderSequencePrimaryControlsArea();
+         renderSequencePrimaryControlsArea();
 
-      ImGui.separator();
+         ImGui.separator();
 
-      // This, paired with the endChild call after, allows this area to scroll separately
-      // from the rest, so the top controls are still available while editing later parts
-      // of the sequence.
-      ImGui.beginChild(labels.get("childRegion"));
+         // This, paired with the endChild call after, allows this area to scroll separately
+         // from the rest, so the top controls are still available while editing later parts
+         // of the sequence.
+         ImGui.beginChild(labels.get("childRegion"));
 
-      renderInteractableActionListArea();
+         renderInteractableActionListArea();
 
-      ImGui.separator();
+         ImGui.separator();
 
-      renderActionCreationArea();
+         renderActionCreationArea();
 
-      ImGui.endChild();
+         ImGui.endChild();
+      }
    }
 
    private void renderMenuBar()
@@ -672,5 +684,10 @@ public class RDXBehaviorActionSequenceEditor
    public WorkspaceResourceFile getWorkspaceFile()
    {
       return workspaceFile;
+   }
+
+   public boolean isCleared()
+   {
+      return workspaceFile == null;
    }
 }
