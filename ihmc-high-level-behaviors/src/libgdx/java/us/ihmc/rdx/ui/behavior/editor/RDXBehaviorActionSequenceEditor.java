@@ -21,7 +21,6 @@ import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -58,7 +57,6 @@ import java.util.LinkedList;
 public class RDXBehaviorActionSequenceEditor
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final RDXPanel panel = new RDXPanel("Behavior Sequence Editor", this::renderImGuiWidgets, false, true);
    private final ImBoolean automaticExecution = new ImBoolean(false);
    private String name;
    @Nullable
@@ -159,6 +157,7 @@ public class RDXBehaviorActionSequenceEditor
                action.update();
                actionSequence.add(action);
                action.getSelected().set(false);
+               action.getExpanded().set(false);
             }
             else
             {
@@ -238,6 +237,22 @@ public class RDXBehaviorActionSequenceEditor
       }
    }
 
+   public void renderFileMenu()
+   {
+      if (workspaceFile.isFileAccessAvailable() && ImGui.menuItem("Save to JSON"))
+      {
+         saveToFile();
+      }
+      if (ImGui.menuItem("Load from JSON"))
+      {
+         if (!loadActionsFromFile())
+         {
+            LogTools.warn("Invalid action!");
+            actionSequence.clear();
+         }
+      }
+   }
+
    public void renderImGuiWidgets()
    {
       if (isCleared())
@@ -246,8 +261,6 @@ public class RDXBehaviorActionSequenceEditor
       }
       else
       {
-         renderMenuBar();
-
          renderSequencePrimaryControlsArea();
 
          ImGui.separator();
@@ -265,32 +278,6 @@ public class RDXBehaviorActionSequenceEditor
 
          ImGui.endChild();
       }
-   }
-
-   private void renderMenuBar()
-   {
-      ImGui.beginMenuBar();
-      if (ImGui.beginMenu(labels.get("File")))
-      {
-         if (workspaceFile.isFileAccessAvailable() && ImGui.menuItem("Save to JSON"))
-         {
-            saveToFile();
-         }
-         if (ImGui.menuItem("Load from JSON"))
-         {
-            if (!loadActionsFromFile())
-            {
-               LogTools.warn("Invalid action!");
-               actionSequence.clear();
-            }
-         }
-         ImGui.endMenu();
-      }
-      //      if (ImGui.beginMenu(labels.get("View")))
-      //      {
-      //         ImGui.endMenu();
-      //      }
-      ImGui.endMenuBar();
    }
 
    private void renderSequencePrimaryControlsArea()
@@ -659,9 +646,8 @@ public class RDXBehaviorActionSequenceEditor
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (panel.getIsShowing().get())
-         for (RDXBehaviorAction action : actionSequence)
-            action.getRenderables(renderables, pool);
+      for (RDXBehaviorAction action : actionSequence)
+         action.getRenderables(renderables, pool);
    }
 
    public void destroy()
@@ -669,11 +655,6 @@ public class RDXBehaviorActionSequenceEditor
       automaticExecutionStatusSubscription.destroy();
       executionNextIndexStatusSubscription.destroy();
       sequenceStatusSubscription.destroy();
-   }
-
-   public RDXPanel getPanel()
-   {
-      return panel;
    }
 
    public String getName()
