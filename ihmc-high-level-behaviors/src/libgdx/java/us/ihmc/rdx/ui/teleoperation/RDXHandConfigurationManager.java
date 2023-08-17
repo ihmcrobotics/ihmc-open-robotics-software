@@ -8,6 +8,7 @@ import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.tools.RDXIconTexture;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
@@ -158,9 +159,15 @@ public class RDXHandConfigurationManager
          IHMCROS2Input<HandSakeStatusMessage> status = sakeStatuses.get(side);
          if (status.hasReceivedFirstMessage())
          {
-            ImGui.text("Calibrated: " + status.getLatest().getCalibrated());
+            ImGui.text("Calibrated:");
             ImGui.sameLine();
-            ImGui.text("Needs reset: " + status.getLatest().getNeedsReset());
+            boolean calibrated = status.getLatest().getCalibrated();
+            ImGuiTools.conditionalBoldColoredText(Boolean.toString(calibrated), ImGuiTools.RED, !calibrated);
+            ImGui.sameLine();
+            ImGui.text("Needs reset:");
+            ImGui.sameLine();
+            boolean needsReset = !status.getLatest().getNeedsReset();
+            ImGuiTools.conditionalBoldColoredText(Boolean.toString(needsReset), ImGuiTools.RED, needsReset);
             ImGui.sameLine();
             ImGui.text("Temperature: " + FormattingTools.getFormattedDecimal1D(status.getLatest().getTemperature()));
          }
