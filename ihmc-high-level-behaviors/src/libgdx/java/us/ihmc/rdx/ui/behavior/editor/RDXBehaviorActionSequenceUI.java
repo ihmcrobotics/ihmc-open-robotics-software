@@ -50,7 +50,7 @@ public class RDXBehaviorActionSequenceUI
    private ReferenceFrameLibrary referenceFrameLibrary;
    private final ImString newSequenceName = new ImString(256);
    private final ArrayList<RDXAvailableActionSequence> availableSequences = new ArrayList<>();
-   private RDXBehaviorActionSequenceEditor selectedEditor = null;
+   private final RDXBehaviorActionSequenceEditor selectedEditor = new RDXBehaviorActionSequenceEditor();
 
    public void create(WorkspaceResourceDirectory behaviorSequenceStorageDirectory,
                       RDX3DPanel panel3D,
@@ -72,6 +72,8 @@ public class RDXBehaviorActionSequenceUI
       referenceFrameLibrary.build();
 
       reindexSequences();
+
+      managerPanel.queueAddChild(selectedEditor.getPanel());
    }
 
    public void update()
@@ -86,7 +88,7 @@ public class RDXBehaviorActionSequenceUI
       if (reindexClicked)
          reindexSequences();
 
-      if (ImGui.radioButton(labels.get("None"), selectedEditor == null))
+      if (ImGui.radioButton(labels.get("None"), selectedEditor.isCleared()))
       {
          if (anEditorIsSelected())
             destroyCurrentEditor();
@@ -101,10 +103,9 @@ public class RDXBehaviorActionSequenceUI
             {
                destroyCurrentEditor();
 
-               selectedEditor = new RDXBehaviorActionSequenceEditor(availableSequenceFile.getSequenceFile());
+               selectedEditor.changeFileToLoadFrom(availableSequenceFile.getSequenceFile());
                selectedEditor.create(panel3D, robotModel, ros2Node, syncedRobot, selectionCollisionModel, referenceFrameLibrary);
                selectedEditor.loadActionsFromFile();
-               managerPanel.queueAddChild(selectedEditor.getPanel());
             }
          }
       }
@@ -115,10 +116,9 @@ public class RDXBehaviorActionSequenceUI
       {
          destroyCurrentEditor();
 
-         selectedEditor = new RDXBehaviorActionSequenceEditor(newSequenceName.get(), behaviorSequenceStorageDirectory);
+         selectedEditor.createNewSequence(newSequenceName.get(), behaviorSequenceStorageDirectory);
          selectedEditor.create(panel3D, robotModel, ros2Node, syncedRobot, selectionCollisionModel, referenceFrameLibrary);
          selectedEditor.saveToFile();
-         managerPanel.queueAddChild(selectedEditor.getPanel());
          availableSequences.add(new RDXAvailableActionSequence(selectedEditor.getWorkspaceFile()));
       }
    }
@@ -127,9 +127,7 @@ public class RDXBehaviorActionSequenceUI
    {
       if (anEditorIsSelected())
       {
-         managerPanel.queueRemoveChild(selectedEditor.getPanel());
-         selectedEditor.destroy();
-         selectedEditor = null;
+         selectedEditor.clear();
       }
    }
 
@@ -157,13 +155,13 @@ public class RDXBehaviorActionSequenceUI
 
    public void calculateVRPick(RDXVRContext vrContext)
    {
-      if (selectedEditor != null)
+      if (anEditorIsSelected())
          selectedEditor.calculateVRPick(vrContext);
    }
 
    public void processVRInput(RDXVRContext vrContext)
    {
-      if (selectedEditor != null)
+      if (anEditorIsSelected())
          selectedEditor.processVRInput(vrContext);
    }
 
@@ -185,9 +183,14 @@ public class RDXBehaviorActionSequenceUI
          selectedEditor.getRenderables(renderables, pool);
    }
 
+   public void destroy()
+   {
+      selectedEditor.destroy();
+   }
+
    private boolean anEditorIsSelected()
    {
-      return selectedEditor != null;
+      return !selectedEditor.isCleared();
    }
 
    public RDXPanel getManagerPanel()
