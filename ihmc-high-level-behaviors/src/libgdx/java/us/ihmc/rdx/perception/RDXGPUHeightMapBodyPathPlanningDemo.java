@@ -30,7 +30,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.simulation.sensors.RDXSimulatedSensorFactory;
-import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
+import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
@@ -117,7 +117,7 @@ public class RDXGPUHeightMapBodyPathPlanningDemo
             baseUI.getPrimaryScene().addRenderableProvider(heightMapPoseGizmo::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
 
             simpleGPUHeightMapParameters = new SimpleGPUHeightMapParameters();
-            ImGuiStoredPropertySetTuner heightMapParameterTuner = new ImGuiStoredPropertySetTuner("Height Map Parameters");
+            RDXStoredPropertySetTuner heightMapParameterTuner = new RDXStoredPropertySetTuner("Height Map Parameters");
             heightMapParameterTuner.create(simpleGPUHeightMapParameters, () ->
             {
             });
