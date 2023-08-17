@@ -90,7 +90,8 @@ public class HumanoidPerceptionModule
       });
    }
 
-   public void updateTerrain(ROS2Helper ros2Helper, Mat depthImage, ReferenceFrame cameraFrame, boolean rapidRegionsEnabled, boolean mappingEnabled)
+   public void updateTerrain(ROS2Helper ros2Helper, Mat depthImage, ReferenceFrame cameraFrame,
+                             boolean rapidRegionsEnabled, boolean mappingEnabled, boolean heightMapEnabled)
    {
       if (localizationAndMappingProcess != null)
          localizationAndMappingProcess.setEnableLiveMode(mappingEnabled);
@@ -99,32 +100,42 @@ public class HumanoidPerceptionModule
       {
          executorService.submit(() ->
                                 {
-                                   if (robotConfigurationData != null && robotConfigurationData.getJointNameHash() != 0)
-                                   {
-                                      robotConfigurationDataBuffer.update(robotConfigurationData);
-                                      long newestTimestamp = robotConfigurationDataBuffer.getNewestTimestamp();
-                                      long selectedTimestamp = robotConfigurationDataBuffer.updateFullRobotModel(waitIfNecessary,
-                                                                                                                 newestTimestamp,
-                                                                                                                 this.fullRobotModel,
-                                                                                                                 null);
-                                   }
+                                    updatePlanarRegions(ros2Helper, depthImage, cameraFrame);
+                                });
+      }
 
-                                   OpenCVTools.convertFloatToShort(depthImage, realsenseDepthImage.getBytedecoOpenCVMat(), 1000.0, 0.0);
-                                   extractFramePlanarRegionsList(rapidPlanarRegionsExtractor,
-                                                                 realsenseDepthImage,
-                                                                 sensorFrameRegions,
-                                                                 regionsInWorldFrame,
-                                                                 regionsInSensorFrame,
-                                                                 cameraFrame);
-                                   filterFramePlanarRegionsList();
-                                   PerceptionMessageTools.publishFramePlanarRegionsList(sensorFrameRegions,
-                                                                                        PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
-                                                                                        ros2Helper);
+      if (heightMapEnabled)
+      {
+         executorService.submit(() ->
+                                {
+                                   updateHeightMap(ros2Helper, depthImage, cameraFrame);
                                 });
       }
    }
 
-   public void updateStructural(ROS2Helper ros2Helper, ArrayList<Point3D> pointCloud, ReferenceFrame sensorFrame, float thresholdHeight)
+   private void updatePlanarRegions(ROS2Helper ros2Helper, Mat depthImage, ReferenceFrame cameraFrame)
+   {
+      OpenCVTools.convertFloatToShort(depthImage, realsenseDepthImage.getBytedecoOpenCVMat(), 1000.0, 0.0);
+      extractFramePlanarRegionsList(rapidPlanarRegionsExtractor,
+                                    realsenseDepthImage,
+                                    sensorFrameRegions,
+                                    regionsInWorldFrame,
+                                    regionsInSensorFrame,
+                                    cameraFrame);
+      filterFramePlanarRegionsList();
+      PerceptionMessageTools.publishFramePlanarRegionsList(sensorFrameRegions,
+                                                           PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
+                                                           ros2Helper);
+   }
+
+   private void updateHeightMap(ROS2Helper ros2Helper, Mat depthImage, ReferenceFrame cameraFrame)
+   {
+      RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
+
+      rapidHeightMapExtractor.update(sensorToWorld, 0);
+   }
+
+   public void updateStructural(ROS2Helper ros2Helper, ArrayList<Point3D> pointCloud, ReferenceFrame sensorFrame, float thresholdHeight, boolean display)
    {
       //this.activeMappingRemoteProcess.getActiveMappingModule().submitRangeScan(pointCloud);
 
@@ -156,11 +167,14 @@ public class HumanoidPerceptionModule
 
          agent.measure(world);
 
-         MonteCarloPlannerTools.plotWorld(world, gridColor);
-         MonteCarloPlannerTools.plotAgent(agent, gridColor);
-         MonteCarloPlannerTools.plotRangeScan(agent.getScanPoints(), gridColor);
+         if (display)
+         {
+            MonteCarloPlannerTools.plotWorld(world, gridColor);
+            MonteCarloPlannerTools.plotAgent(agent, gridColor);
+            MonteCarloPlannerTools.plotRangeScan(agent.getScanPoints(), gridColor);
 
-         PerceptionDebugTools.display("Monte Carlo Planner World", gridColor, 1, 1400);
+            PerceptionDebugTools.display("Monte Carlo Planner World", gridColor, 1, 1400);
+         }
       }
 
    }
@@ -347,6 +361,11 @@ public class HumanoidPerceptionModule
 
       if (activeMappingRemoteProcess != null)
          activeMappingRemoteProcess.destroy();
+   }
+
+   public RapidHeightMapExtractor getRapidHeightMapExtractor()
+   {
+      return rapidHeightMapExtractor;
    }
 
    public void setPerceptionConfigurationParameters(PerceptionConfigurationParameters perceptionConfigurationParameters)

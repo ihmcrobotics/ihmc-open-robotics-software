@@ -10,6 +10,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
@@ -36,6 +37,8 @@ public class RapidHeightMapExtractor
 
    private OpenCLFloatBuffer sensorToGroundTransformBuffer;
    private float[] sensorToGroundTransformArray = new float[16];
+
+   private final Point3D gridCenter = new Point3D();
 
    private OpenCLFloatBuffer groundPlaneBuffer;
    private _cl_program rapidHeightMapUpdaterProgram;
@@ -98,10 +101,16 @@ public class RapidHeightMapExtractor
    }
 
 
-   public void update(RigidBodyTransform sensorToGroundTransform, float planeHeight)
+   public void update(RigidBodyTransform sensorToWorldTransform, float planeHeight)
    {
       if (!processing)
       {
+         RigidBodyTransform sensorToGroundTransform = new RigidBodyTransform(sensorToWorldTransform);
+         sensorToGroundTransform.getTranslation().setX(0.0f);
+         sensorToGroundTransform.getTranslation().setY(0.0f);
+         sensorToGroundTransform.getRotation()
+                       .set(new Quaternion(0.0f, sensorToGroundTransform.getRotation().getPitch(), sensorToGroundTransform.getRotation().getRoll()));
+
          // Upload input depth image
          inputDepthImage.writeOpenCLImage(openCLManager);
 
@@ -109,7 +118,7 @@ public class RapidHeightMapExtractor
          RigidBodyTransform groundToSensorTransform = new RigidBodyTransform(sensorToGroundTransform);
          groundToSensorTransform.invert();
 
-         Point3D gridCenter = new Point3D(sensorToGroundTransform.getTranslation());
+         gridCenter.set(sensorToWorldTransform.getTranslation());
 
          populateParameterBuffer(gridCenter);
 
@@ -222,6 +231,11 @@ public class RapidHeightMapExtractor
    public HeightMapData getLatestHeightMapData()
    {
       return latestHeightMapData;
+   }
+
+   public Point3D getGridCenter()
+   {
+      return gridCenter;
    }
 
    public void setHeightMapResolution(float widthInMeters, float cellSizeXYInMeters)

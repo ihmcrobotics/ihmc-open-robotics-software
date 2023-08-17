@@ -11,6 +11,7 @@ import org.bytedeco.javacpp.BytePointer;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.shader.RDXShader;
 import us.ihmc.rdx.shader.RDXUniform;
@@ -76,10 +77,9 @@ public class RDXHeightMapRenderer implements RenderableProvider
       intermediateVertexBuffer = new float[totalCells * FLOATS_PER_CELL];
    }
 
-   public void update(BytePointer heightMapPointer, Point2DReadOnly center, int centerIndex, float cellSizeXYInMeters)
+   public void update(BytePointer heightMapPointer, Point3D center, int centerIndex, float cellSizeXYInMeters)
    {
       int cellsPerAxis = 2 * centerIndex + 1;
-      LogTools.info("Rendering Height Map: {} {} {}", cellsPerAxis, cellsPerAxis, cellSizeXYInMeters);
 
       float maxHeight = 2.0f;
       float minHeight = 0.0f;
@@ -92,7 +92,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
          {
             int heightIndex = xIndex * cellsPerAxis + yIndex;
             int vertexIndex = heightIndex * FLOATS_PER_CELL;
-            float cellHeight = (float) (heightMapPointer.getShort(heightIndex * 2L) / 10000.0f);
+            float cellHeight = (heightMapPointer.getShort(heightIndex * 2L) / 10000.0f);
             cellHeight = (float) MathTools.clamp(cellHeight, minHeight, maxHeight);
             if (cellHeight > maxHeight - 0.01f)
                cellHeight = 0.0f;

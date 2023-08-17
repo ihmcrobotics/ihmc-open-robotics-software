@@ -97,7 +97,7 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
    float3 centroid;
 
    float averageHeightZ = 0;
-   float3 cellCenterInWorld = (float3) (0.0f, 0.0f, 0.65f);
+   float3 cellCenterInWorld = (float3) (0.0f, 0.0f, 0.0f);
    cellCenterInWorld.xy = indices_to_coordinate((int2) (xIndex, yIndex),
                                                (float2) (0, 0), // params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]
                                                params[HEIGHT_MAP_RESOLUTION],
@@ -106,8 +106,8 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
 
    cellCenterInWorld.x += 1.5f;
 
-   int WINDOW_WIDTH = 100;
-   int WINDOW_HEIGHT = 180;
+   int WINDOW_WIDTH = 140;
+   int WINDOW_HEIGHT = 250;
 
    float halfCellWidth = params[HEIGHT_MAP_RESOLUTION] / 4.0f;
    float minX = cellCenterInWorld.x - halfCellWidth;
@@ -200,12 +200,12 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
       averageHeightZ = averageHeightZ / (float)(count);
       averageHeightZ = clamp(averageHeightZ, -5.f, 5.0f);
 
-      write_imageui(out, (int2)(xIndex, yIndex), (uint4)((int)( (averageHeightZ - 0.65f) * 10000.0f), 0, 0, 0));
+      write_imageui(out, (int2)(yIndex, xIndex), (uint4)((int)( (averageHeightZ) * 10000.0f), 0, 0, 0));
 
       //printf("xIndex: %d, yIndex: %d, count: %d, averageHeightZ: %f\n", xIndex, yIndex, count, averageHeightZ);
    }
    else
    {
-      write_imageui(out, (int2)(xIndex, yIndex), (uint4)(0, 0, 0, 0));
+      write_imageui(out, (int2)(yIndex, xIndex), (uint4)(0, 0, 0, 0));
    }
 }
