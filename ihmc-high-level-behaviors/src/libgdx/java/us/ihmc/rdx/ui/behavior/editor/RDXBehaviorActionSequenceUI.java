@@ -8,6 +8,7 @@ import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -51,6 +52,7 @@ public class RDXBehaviorActionSequenceUI
    private final ImString newSequenceName = new ImString(256);
    private final ArrayList<RDXAvailableActionSequence> availableSequences = new ArrayList<>();
    private final RDXBehaviorActionSequenceEditor editor = new RDXBehaviorActionSequenceEditor();
+   private final Notification fileMenuShouldClose = new Notification();
 
    public void create(WorkspaceResourceDirectory behaviorSequenceStorageDirectory,
                       RDX3DPanel panel3D,
@@ -100,12 +102,19 @@ public class RDXBehaviorActionSequenceUI
 
    private void renderFileMenu()
    {
-      if (ImGui.beginMenu(labels.get("File")))
+      if (ImGui.beginMenu(labels.get("File"), !fileMenuShouldClose.poll()))
       {
+         if (!editor.isCleared())
+         {
+            editor.renderFileMenu();
+            ImGui.separator();
+         }
+
          if (ImGui.radioButton(labels.get("None"), editor.isCleared()))
          {
             if (anEditorIsSelected())
                destroyCurrentEditor();
+            fileMenuShouldClose.set();
          }
          for (RDXAvailableActionSequence availableSequenceFile : availableSequences)
          {
@@ -121,6 +130,7 @@ public class RDXBehaviorActionSequenceUI
                   editor.create(panel3D, robotModel, ros2Node, syncedRobot, selectionCollisionModel, referenceFrameLibrary);
                   editor.loadActionsFromFile();
                }
+               fileMenuShouldClose.set();
             }
          }
 
@@ -139,12 +149,6 @@ public class RDXBehaviorActionSequenceUI
          boolean reindexClicked = ImGui.button(labels.get("Reindex sequence files"));
          if (reindexClicked)
             reindexSequences();
-
-         if (!editor.isCleared())
-         {
-            ImGui.separator();
-            editor.renderFileMenu();
-         }
 
          ImGui.endMenu();
       }
