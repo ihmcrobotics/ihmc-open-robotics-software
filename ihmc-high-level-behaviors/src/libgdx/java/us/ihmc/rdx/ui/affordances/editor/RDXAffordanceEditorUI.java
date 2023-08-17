@@ -40,6 +40,10 @@ import java.util.*;
 
 public class RDXAffordanceEditorUI
 {
+   private static final double DEFAULT_DURATION = 1.0;
+   private static final double LINEAR_VELOCITY = 0.1;
+   private static final double ANGULAR_VELOCITY = 1.0; // [rad/s] for the sake gripper this is ~= to 0.1 m/s for a point on the edge of the gripper
+
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private RobotSide side = RobotSide.RIGHT;
@@ -52,15 +56,13 @@ public class RDXAffordanceEditorUI
    private ReferenceFrame initialObjectFrame;
    private ModifiableReferenceFrame affordanceFrame = new ModifiableReferenceFrame("affordanceFrame", ReferenceFrame.getWorldFrame());
    private final float[] gripperClosure = new float[1];
-   private static final double DEFAULT_DURATION = 1.0;
-   private static final double LINEAR_VELOCITY = 0.1;
-   private static final double ANGULAR_VELOCITY = 1.0; // [rad/s] for the sake gripper this is ~= to 0.1 m/s for a point on the edge of the gripper
+
    // affordance poses
    private RDXAffordanceFrame graspFrame;
    private RDXAffordanceFrames preGraspFrames;
    private RDXAffordanceFrames postGraspFrames;
 
-   public boolean affordancePoseLocked = false;
+   private boolean affordancePoseLocked = false;
    private boolean handLocked = false;
    private PoseReferenceFrame handLockedFrame;
    private RDXActiveAffordanceMenu[] activeMenu;
@@ -72,7 +74,6 @@ public class RDXAffordanceEditorUI
    private final ArrayList<double[]> csvDataMatrix = new ArrayList<>();
 
    public RDXAffordanceEditorUI()
-
    {
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
