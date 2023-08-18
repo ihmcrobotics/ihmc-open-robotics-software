@@ -15,7 +15,7 @@ public class ArUcoMarkerPosesPubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ee470e3fee4200e5c59e189f3ff3091489bfa35e2e2f0c6d3b78ea12aec3af6a";
+   		return "3f715fd2a14a20adfc990af912b8918e395d4327fa70447abe4ccbcc7ff713de";
    }
    
    @Override

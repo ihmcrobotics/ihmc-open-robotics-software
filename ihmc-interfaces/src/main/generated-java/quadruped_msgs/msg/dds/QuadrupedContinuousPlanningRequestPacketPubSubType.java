@@ -15,7 +15,7 @@ public class QuadrupedContinuousPlanningRequestPacketPubSubType implements us.ih
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b7d17d3f90c0fe40b4ca666401c22eb96987be679c85747edbd62d9c962fc7c6";
+   		return "ca8264b1f7caf16dbc388b3765b87a242cb815714d1be2d8141fd988f68ea48b";
    }
    
    @Override

@@ -15,7 +15,7 @@ public class REASensorDataFilterParametersMessagePubSubType implements us.ihmc.p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1494ab71a41c6d56c7c166b2eabf1979f614fa46efb3702ef989ac218db71395";
+   		return "71e1ea6be90c363c53506399978b23e1a2ec80becddee848f0839165c11a055e";
    }
    
    @Override
