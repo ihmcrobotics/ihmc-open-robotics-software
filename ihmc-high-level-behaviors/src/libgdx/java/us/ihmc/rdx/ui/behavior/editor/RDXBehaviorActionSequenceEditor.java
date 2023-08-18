@@ -379,7 +379,7 @@ public class RDXBehaviorActionSequenceEditor
 
          ImGui.text(String.format("Status # %d:", receivedStatusMessageCount));
          ImGui.sameLine();
-         if (latestExecutionStatus.getActionIndex() == 500)
+         if (latestExecutionStatus.getActionIndex() < 0)
          {
             if (endOfSequence)
             {
