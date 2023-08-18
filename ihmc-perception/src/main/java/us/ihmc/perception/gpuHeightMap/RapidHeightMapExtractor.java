@@ -32,6 +32,8 @@ public class RapidHeightMapExtractor
    private OpenCLManager openCLManager;
    private OpenCLFloatParameters parametersBuffer;
 
+   private RigidBodyTransform currentSensorToWorldTransform = new RigidBodyTransform();
+
    private OpenCLFloatBuffer groundToSensorTransformBuffer;
    private float[] groundToSensorTransformArray = new float[16];
 
@@ -101,15 +103,19 @@ public class RapidHeightMapExtractor
    }
 
 
-   public void update(RigidBodyTransform sensorToWorldTransform, float planeHeight)
+   public void update(RigidBodyTransform sensorToWorldTransform, RigidBodyTransform sensorToGroundTransform, float planeHeight)
    {
+      currentSensorToWorldTransform.set(sensorToWorldTransform);
+
       if (!processing)
       {
-         RigidBodyTransform sensorToGroundTransform = new RigidBodyTransform(sensorToWorldTransform);
-         sensorToGroundTransform.getTranslation().setX(0.0f);
-         sensorToGroundTransform.getTranslation().setY(0.0f);
-         sensorToGroundTransform.getRotation()
-                       .set(new Quaternion(0.0f, sensorToGroundTransform.getRotation().getPitch(), sensorToGroundTransform.getRotation().getRoll()));
+//         RigidBodyTransform sensorToGroundTf = new RigidBodyTransform(sensorToWorldTransform);
+//         sensorToGroundTf.getTranslation().setX(0.0f);
+//         sensorToGroundTf.getTranslation().setY(0.0f);
+//         sensorToGroundTf.getRotation()
+//                       .set(new Quaternion(0.0f, sensorToGroundTf.getRotation().getPitch(), sensorToGroundTf.getRotation().getRoll()));
+
+         sensorToGroundTransform.getTranslation().setZ(sensorToWorldTransform.getTranslationZ());
 
          // Upload input depth image
          inputDepthImage.writeOpenCLImage(openCLManager);
@@ -259,5 +265,10 @@ public class RapidHeightMapExtractor
    public void setDepthIntrinsics(CameraIntrinsics cameraIntrinsics)
    {
       this.cameraIntrinsics = cameraIntrinsics;
+   }
+
+   public RigidBodyTransform getSensorToWorldTransform()
+   {
+      return currentSensorToWorldTransform;
    }
 }

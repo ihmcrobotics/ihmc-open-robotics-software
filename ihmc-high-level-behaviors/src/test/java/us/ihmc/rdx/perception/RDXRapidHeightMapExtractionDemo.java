@@ -244,7 +244,7 @@ public class RDXRapidHeightMapExtractionDemo
               RigidBodyTransform sensorToWorld = new RigidBodyTransform(sensorOrientationBuffer.get(frameIndex.get()),
                                                                     sensorPositionBuffer.get(frameIndex.get()));
 
-              rapidHeightMapUpdater.update(sensorToWorld, planeHeight.get());
+              rapidHeightMapUpdater.update(sensorToWorld, sensorToWorld, planeHeight.get());
               heightMapUpdateNotification.set();
 
               long end = System.nanoTime();
@@ -260,7 +260,10 @@ public class RDXRapidHeightMapExtractionDemo
 
          LogTools.warn("Grid Center: " + gridCenter);
 
-         heightMapRenderer.update(rapidHeightMapUpdater.getOutputHeightMapImage().getPointerForAccessSpeed(),
+         RigidBodyTransform temporaryTransform = new RigidBodyTransform();
+
+         heightMapRenderer.update(temporaryTransform,
+               rapidHeightMapUpdater.getOutputHeightMapImage().getPointerForAccessSpeed(),
                                   gridCenter,
                                   rapidHeightMapUpdater.getCenterIndex(),
                                   rapidHeightMapUpdater.getCellSizeXYInMeters());
