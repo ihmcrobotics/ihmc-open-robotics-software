@@ -8,7 +8,7 @@ import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -39,7 +39,7 @@ import java.util.Comparator;
  */
 public class RDXBehaviorActionSequenceUI
 {
-   private final ImGuiPanel managerPanel = new ImGuiPanel("Behavior Sequence Manager", this::renderImGuiWidgets);
+   private final RDXPanel managerPanel = new RDXPanel("Behavior Sequence Manager", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private WorkspaceResourceDirectory behaviorSequenceStorageDirectory;
    private RDX3DPanel panel3D;
@@ -190,7 +190,7 @@ public class RDXBehaviorActionSequenceUI
       return selectedEditor != null;
    }
 
-   public ImGuiPanel getManagerPanel()
+   public RDXPanel getManagerPanel()
    {
       return managerPanel;
    }

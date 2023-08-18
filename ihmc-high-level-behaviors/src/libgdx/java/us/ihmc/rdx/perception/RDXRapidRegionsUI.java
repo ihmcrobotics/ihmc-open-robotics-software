@@ -13,13 +13,13 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsCustomizer;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.rapidRegions.RapidPatchesDebugOutputGenerator;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
+import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -37,9 +37,9 @@ public class RDXRapidRegionsUI implements RenderableProvider
    private RapidPlanarRegionsCustomizer rapidPlanarRegionsCustomizer;
    private RapidPatchesDebugOutputGenerator rapidRegionsDebutOutputGenerator;
 
-   private ImGuiStoredPropertySetTuner gpuRegionParametersTuner;
-   private ImGuiStoredPropertySetTuner polygonizerParametersTuner;
-   private ImGuiStoredPropertySetTuner concaveHullParametersTuner;
+   private RDXStoredPropertySetTuner gpuRegionParametersTuner;
+   private RDXStoredPropertySetTuner polygonizerParametersTuner;
+   private RDXStoredPropertySetTuner concaveHullParametersTuner;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean enabled = new ImBoolean(true);
@@ -57,7 +57,7 @@ public class RDXRapidRegionsUI implements RenderableProvider
    private ImGuiPlot depthFirstSearchDurationPlot;
    private ImGuiPlot planarRegionCustomizationDurationPlot;
 
-   private ImGuiPanel imguiPanel;
+   private RDXPanel imguiPanel;
    private RDXBytedecoImagePanel blurredDepthPanel;
    private RDXBytedecoImagePanel filteredDepthPanel;
    private RDXBytedecoImagePanel nxImagePanel;
@@ -84,16 +84,16 @@ public class RDXRapidRegionsUI implements RenderableProvider
       imageWidth = rapidPlanarRegionsExtractor.getImageWidth();
       imageHeight = rapidPlanarRegionsExtractor.getImageHeight();
 
-      gpuRegionParametersTuner = new ImGuiStoredPropertySetTuner(rapidPlanarRegionsExtractor.getParameters().getTitle());
+      gpuRegionParametersTuner = new RDXStoredPropertySetTuner(rapidPlanarRegionsExtractor.getParameters().getTitle());
       gpuRegionParametersTuner.create(rapidPlanarRegionsExtractor.getParameters());
 
-      polygonizerParametersTuner = new ImGuiStoredPropertySetTuner(rapidPlanarRegionsCustomizer.getPolygonizerParameters().getTitle());
+      polygonizerParametersTuner = new RDXStoredPropertySetTuner(rapidPlanarRegionsCustomizer.getPolygonizerParameters().getTitle());
       polygonizerParametersTuner.create(rapidPlanarRegionsCustomizer.getPolygonizerParameters(), true);
 
-      concaveHullParametersTuner = new ImGuiStoredPropertySetTuner(rapidPlanarRegionsCustomizer.getConcaveHullFactoryParameters().getTitle());
+      concaveHullParametersTuner = new RDXStoredPropertySetTuner(rapidPlanarRegionsCustomizer.getConcaveHullFactoryParameters().getTitle());
       concaveHullParametersTuner.create(rapidPlanarRegionsCustomizer.getConcaveHullFactoryParameters(), true);
 
-      imguiPanel = new ImGuiPanel("GPU Planar Region Extraction", this::renderImGuiWidgets);
+      imguiPanel = new RDXPanel("GPU Planar Region Extraction", this::renderImGuiWidgets);
       blurredDepthPanel = new RDXBytedecoImagePanel("Blurred Depth", imageWidth, imageHeight, RDXImagePanel.FLIP_Y);
       filteredDepthPanel = new RDXBytedecoImagePanel("Filtered Depth", imageWidth, imageHeight, RDXImagePanel.FLIP_Y);
 
@@ -192,7 +192,7 @@ public class RDXRapidRegionsUI implements RenderableProvider
       planarRegionsGraphic.destroy();
    }
 
-   public ImGuiPanel getPanel()
+   public RDXPanel getPanel()
    {
       return imguiPanel;
    }

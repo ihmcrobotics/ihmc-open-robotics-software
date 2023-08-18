@@ -8,7 +8,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
@@ -48,7 +48,7 @@ public class RDXFFMPEGL515DepthLoggingDemo
          {
             baseUI.create();
 
-            ImGuiPanel panel = new ImGuiPanel("Diagnostics", this::renderImGuiWidgets);
+            RDXPanel panel = new RDXPanel("Diagnostics", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
 
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());

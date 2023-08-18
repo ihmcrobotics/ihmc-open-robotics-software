@@ -15,7 +15,7 @@ public class HandPoseJointAnglesStatusMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e763fe8e851b4798cf6c1a8916a7e54f1d2ea4f0007fb762f2013f0c992fe517";
+   		return "bdaf324d06e9b6968e7959ecf059bf1e3bb43762f62fd897bfd7151e9003be12";
    }
    
    @Override

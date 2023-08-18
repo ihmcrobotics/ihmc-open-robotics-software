@@ -1,7 +1,9 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import ihmc_common_msgs.msg.dds.TimeIntervalMessage;
+import us.ihmc.commons.MathTools;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.robotics.time.TimeIntervalBasics;
 
 public class TimeIntervalCommand implements Command<TimeIntervalCommand, TimeIntervalMessage>
@@ -76,5 +78,16 @@ public class TimeIntervalCommand implements Command<TimeIntervalCommand, TimeInt
    public long getSequenceId()
    {
       return sequenceId;
+   }
+
+   public void addTimeOffset(double timeOffset)
+   {
+      startTime += timeOffset;
+      endTime += timeOffset;
+   }
+
+   public boolean intervalContains(double time)
+   {
+      return MathTools.intervalContains(time, startTime, endTime);
    }
 }

@@ -11,7 +11,7 @@ import imgui.type.ImInt;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.log.LogTools;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXRenderableAdapter;
@@ -42,7 +42,7 @@ public class RDXSCS2Session
    private String sessionInfo = "";
    private final ImBoolean runAtRealtimeRate = new ImBoolean(true);
    private final ImDouble playbackRealtimeRate = new ImDouble(1.0);
-   private final ImGuiPanel controlPanel = new ImGuiPanel("SCS 2 Session", this::renderImGuiWidgets);
+   private final RDXPanel controlPanel = new RDXPanel("SCS 2 Session", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImInt bufferIndex = new ImInt();
    protected final ImInt dtHz = new ImInt(-1);
@@ -68,7 +68,7 @@ public class RDXSCS2Session
       create(baseUI, controlPanel);
    }
 
-   public void create(RDXBaseUI baseUI, ImGuiPanel plotManagerParentPanel)
+   public void create(RDXBaseUI baseUI, RDXPanel plotManagerParentPanel)
    {
       baseUI.getPrimaryScene().addRenderableAdapter(renderables);
       plotManager.create(baseUI.getLayoutManager(), plotManagerParentPanel);
@@ -399,7 +399,7 @@ public class RDXSCS2Session
       return session;
    }
 
-   public ImGuiPanel getControlPanel()
+   public RDXPanel getControlPanel()
    {
       return controlPanel;
    }

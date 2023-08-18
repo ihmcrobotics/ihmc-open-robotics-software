@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
@@ -64,6 +65,9 @@ public class CommandInputManager
 
    /** Converters used to perform custom conversion to commands for specific messages. **/
    private final List<CommandConversionInterface> commandConverters = new ArrayList<>();
+
+   /** Messages and Commands are ignored if enabled if false. */
+   private final AtomicBoolean isEnabled = new AtomicBoolean(true);
 
    /**
     * Protocols for unpacking certain types of messages. These messages do not have to be registered at
@@ -186,6 +190,9 @@ public class CommandInputManager
    @SuppressWarnings({"unchecked", "rawtypes"})
    private void submitMessageInternal(Settable message)
    {
+      if (!isEnabled.get())
+         return;
+
       if (message == null)
       {
          LogTools.warn("{}Received a null message, ignored.", printStatementPrefix);
@@ -292,6 +299,8 @@ public class CommandInputManager
    @SuppressWarnings("unchecked")
    public <C extends Command<C, ?>> void submitCommand(C command)
    {
+      if (!isEnabled.get())
+         return;
       if (!command.isCommandValid())
          return;
 
@@ -505,6 +514,16 @@ public class CommandInputManager
          }
       };
       return builder;
+   }
+
+   public void setEnabled(boolean isEnabled)
+   {
+      this.isEnabled.set(isEnabled);
+   }
+
+   public boolean isEnabled()
+   {
+      return isEnabled.get();
    }
 
    /**

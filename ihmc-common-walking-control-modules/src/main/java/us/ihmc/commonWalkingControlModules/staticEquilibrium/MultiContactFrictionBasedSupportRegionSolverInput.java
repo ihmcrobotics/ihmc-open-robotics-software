@@ -16,11 +16,11 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Input to the solver {@link MultiContactSupportRegionSolver}
+ * Input to the solver {@link MultiContactFrictionBasedSupportRegionSolver}
  *
  * {@see http://lall.stanford.edu/papers/bretl_eqmcut_ieee_tro_projection_2008_08_01_01/pubdata/entry.pdf}
  */
-public class MultiContactSupportRegionSolverInput
+public class MultiContactFrictionBasedSupportRegionSolverInput
 {
    public static final int maxContactPoints = 50;
    private static final double defaultCoefficientOfFriction = 0.7;
@@ -148,9 +148,9 @@ public class MultiContactSupportRegionSolverInput
       }
    }
 
-   public static MultiContactSupportRegionSolverInput loadFromFile(BufferedReader reader) throws IOException
+   public static MultiContactFrictionBasedSupportRegionSolverInput loadFromFile(BufferedReader reader) throws IOException
    {
-      MultiContactSupportRegionSolverInput input = new MultiContactSupportRegionSolverInput();
+      MultiContactFrictionBasedSupportRegionSolverInput input = new MultiContactFrictionBasedSupportRegionSolverInput();
       input.setCoefficientOfFriction(Double.parseDouble(reader.readLine().split(":")[1]));
       int numberOfPoints = Integer.parseInt(reader.readLine().split(":")[1]);
 

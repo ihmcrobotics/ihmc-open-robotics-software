@@ -15,7 +15,7 @@ public class SpineDesiredAccelerationsMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e9da1226b1a45611e6a2cfb09ce3688d7b8239354015f309278d8c638994f563";
+   		return "450763f5ebef929b85ddc1655c903ef6ece4b1abd4a1ebdf3f4039bf73021ebc";
    }
    
    @Override

@@ -15,7 +15,7 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
 import us.ihmc.rdx.imgui.ImGuiPanelManager;
-import us.ihmc.rdx.imgui.ImGuiPanelSizeHandler;
+import us.ihmc.rdx.imgui.RDXPanelSizeHandler;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.RDXInputMode;
 import us.ihmc.rdx.input.ImGui2DViewInput;
@@ -46,7 +46,7 @@ public class RDXBaseUI2D
    private final HybridResourceDirectory configurationBaseDirectory;
    private HybridResourceFile libGDXSettingsFile;
    private final Stopwatch runTime = new Stopwatch().start();
-   private final ImGuiPanelSizeHandler view2DPanelSizeHandler = new ImGuiPanelSizeHandler();
+   private final RDXPanelSizeHandler view2DPanelSizeHandler = new RDXPanelSizeHandler();
    private ImGui2DViewInput inputCalculator;
    private final ArrayList<Consumer<ImGui2DViewInput>> imgui2DViewInputProcessors = new ArrayList<>();
    private GLFrameBuffer frameBuffer;

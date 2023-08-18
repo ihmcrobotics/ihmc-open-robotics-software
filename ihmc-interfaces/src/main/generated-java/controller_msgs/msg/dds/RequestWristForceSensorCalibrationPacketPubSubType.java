@@ -15,7 +15,7 @@ public class RequestWristForceSensorCalibrationPacketPubSubType implements us.ih
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2feef8deed04c4a92b5dd05f59afe3ed17e69fc18c185b702bed2e359f1724ab";
+   		return "1c1fe63a0b97f3f9fe2d46358e08184197a53c54d7f989ecc4ad4ed60cd7adee";
    }
    
    @Override
