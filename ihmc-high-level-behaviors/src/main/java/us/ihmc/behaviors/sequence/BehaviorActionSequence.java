@@ -219,7 +219,6 @@ public class BehaviorActionSequence
          if (endOfSequence)
          {
             automaticExecution = false;
-            currentlyExecutingAction = null;
          }
          else if (currentlyExecutingAction == null || !currentlyExecutingAction.isExecuting())
          {
@@ -233,7 +232,7 @@ public class BehaviorActionSequence
          executeNextAction();
       }
 
-      if (!automaticExecution && currentlyExecutingAction != null && !currentlyExecutingAction.isExecuting())
+      if (currentlyExecutingAction != null && !currentlyExecutingAction.isExecuting())
       {
          currentlyExecutingAction = null;
       }
