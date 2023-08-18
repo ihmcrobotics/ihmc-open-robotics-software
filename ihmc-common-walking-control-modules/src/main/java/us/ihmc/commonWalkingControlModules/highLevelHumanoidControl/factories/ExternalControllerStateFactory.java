@@ -16,6 +16,7 @@ public class ExternalControllerStateFactory implements HighLevelControllerStateF
       if (externalControllerState == null)
       {
          externalControllerState = new ExternalControllerState(controllerFactoryHelper.getCommandInputManager(),
+                                                               controllerFactoryHelper.getStatusMessageOutputManager(),
                                                                controllerFactoryHelper.getHighLevelHumanoidControllerToolbox());
       }
 
