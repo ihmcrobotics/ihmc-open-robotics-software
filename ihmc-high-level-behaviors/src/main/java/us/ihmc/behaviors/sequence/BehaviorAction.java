@@ -5,16 +5,25 @@ package us.ihmc.behaviors.sequence;
  */
 public interface BehaviorAction extends BehaviorActionData
 {
+   /** Called every tick. */
    default void update(int actionIndex, int nextExecutionIndex)
    {
 
    }
 
+   /** Trigger the action to begin executing. Called once per execution. */
    default void executeAction()
    {
       
    }
 
+   /** Called every tick only when this action is executing. */
+   default void updateCurrentlyExecuting()
+   {
+
+   }
+
+   /** Should return a precalculated value from {@link #updateCurrentlyExecuting} */
    default boolean isExecuting()
    {
       return false;

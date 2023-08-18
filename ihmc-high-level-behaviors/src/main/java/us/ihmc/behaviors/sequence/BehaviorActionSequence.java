@@ -69,6 +69,7 @@ public class BehaviorActionSequence
 
    private final Throttler oneHertzThrottler = new Throttler();
    private final ActionSequenceUpdateMessage actionSequenceStatusMessage = new ActionSequenceUpdateMessage();
+   private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
 
    public BehaviorActionSequence(DRCRobotModel robotModel, ROS2ControllerHelper ros2, ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -200,6 +201,11 @@ public class BehaviorActionSequence
          actionSequence.get(i).update(i, excecutionNextIndex);
       }
 
+      if (currentlyExecutingAction != null)
+      {
+         currentlyExecutingAction.updateCurrentlyExecuting();
+      }
+
       sendStatus();
 
       if (automaticExecution)
@@ -231,7 +237,9 @@ public class BehaviorActionSequence
    private void executeNextAction()
    {
       currentlyExecutingAction = actionSequence.get(excecutionNextIndex);
+      currentlyExecutingAction.update(excecutionNextIndex, excecutionNextIndex + 1);
       currentlyExecutingAction.executeAction();
+      currentlyExecutingAction.updateCurrentlyExecuting();
       excecutionNextIndex++;
    }
 

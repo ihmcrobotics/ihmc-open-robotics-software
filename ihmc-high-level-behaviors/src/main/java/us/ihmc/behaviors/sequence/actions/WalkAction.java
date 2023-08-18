@@ -44,6 +44,7 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    private FootstepDataListMessage footstepDataListMessage;
    private final Timer executionTimer = new Timer();
    private final Throttler warningThrottler = new Throttler().setFrequency(2.0);
+   private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
 
    public WalkAction(ROS2ControllerHelper ros2ControllerHelper,
@@ -147,14 +148,14 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    }
 
    @Override
-   public boolean isExecuting()
+   public void updateCurrentlyExecuting()
    {
       double nominalExecutionDuration = PlannerTools.calculateNominalTotalPlanExecutionDuration(footstepPlanner.getOutput().getFootstepPlan(),
                                                                                                 getSwingDuration(),
                                                                                                 walkingControllerParameters.getDefaultInitialTransferTime(),
                                                                                                 getTransferDuration(),
                                                                                                 walkingControllerParameters.getDefaultFinalTransferTime());
-      boolean isExecuting = false;
+      isExecuting = false;
       for (RobotSide side : RobotSide.values)
       {
          syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
@@ -170,8 +171,13 @@ public class WalkAction extends WalkActionData implements BehaviorAction
 
       executionStatusMessage.setNominalExecutionDuration(nominalExecutionDuration);
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
-      ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, executionStatusMessage);
+//      executionStatusMessage.ge
+      ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);
+   }
 
+   @Override
+   public boolean isExecuting()
+   {
       return isExecuting;
    }
 }
