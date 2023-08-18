@@ -15,7 +15,7 @@ public class PelvisHeightActionMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4f193942f20d5d46e480f0cd3b5029c2cb59652ebd06014e4005229d8dcd189a";
+   		return "12b68f4a7e1abd6c90edff53691a8c5dfb6a959cba764c02e32a9085425c4fa0";
    }
    
    @Override
