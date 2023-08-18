@@ -47,11 +47,14 @@ public class HumanoidPerceptionModule
 {
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
 
-   private BytedecoImage realsenseDepthImage;
+   /* For displaying occupancy grid from the active mapping module. */
    private Mat gridColor = new Mat();
 
+   /* For storing world and agent states when active mapping module is disabled */
    private World world;
    private Agent agent;
+
+   private BytedecoImage realsenseDepthImage;
 
    private final FramePose3D cameraPose = new FramePose3D();
 
@@ -70,8 +73,6 @@ public class HumanoidPerceptionModule
    private RobotConfigurationData robotConfigurationData;
 
    private PerceptionConfigurationParameters perceptionConfigurationParameters;
-
-   boolean waitIfNecessary = false; // dangerous if true! need a timeout
 
    public HumanoidPerceptionModule(OpenCLManager openCLManager)
    {
@@ -97,16 +98,6 @@ public class HumanoidPerceptionModule
       {
          executorService.submit(() ->
                                 {
-                                   if (robotConfigurationData != null && robotConfigurationData.getJointNameHash() != 0)
-                                   {
-                                      robotConfigurationDataBuffer.update(robotConfigurationData);
-                                      long newestTimestamp = robotConfigurationDataBuffer.getNewestTimestamp();
-                                      long selectedTimestamp = robotConfigurationDataBuffer.updateFullRobotModel(waitIfNecessary,
-                                                                                                                 newestTimestamp,
-                                                                                                                 this.fullRobotModel,
-                                                                                                                 null);
-                                   }
-
                                    OpenCVTools.convertFloatToShort(depthImage, realsenseDepthImage.getBytedecoOpenCVMat(), 1000.0, 0.0);
                                    extractFramePlanarRegionsList(rapidPlanarRegionsExtractor,
                                                                  realsenseDepthImage,
@@ -124,14 +115,8 @@ public class HumanoidPerceptionModule
 
    public void updateStructural(ROS2Helper ros2Helper, ArrayList<Point3D> pointCloud, ReferenceFrame sensorFrame, float thresholdHeight, boolean display)
    {
-      //this.activeMappingRemoteProcess.getActiveMappingModule().submitRangeScan(pointCloud);
-
-      //Instant acquisitionTime = Instant.now();
-      //
       cameraPose.setToZero(sensorFrame);
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
-      //
-      //           occupancyGrid.put(new Scalar(0));
 
       extractOccupancyGrid(pointCloud,
                            world.getGrid(),
@@ -139,7 +124,6 @@ public class HumanoidPerceptionModule
                            thresholdHeight,
                            perceptionConfigurationParameters.getOccupancyGridResolution(),
                            70);
-
 
       if (activeMappingRemoteProcess == null)
       {
