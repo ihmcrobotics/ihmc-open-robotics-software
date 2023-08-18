@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Pool;
 import org.bytedeco.javacpp.BytePointer;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
@@ -77,35 +78,45 @@ public class RDXHeightMapRenderer implements RenderableProvider
       intermediateVertexBuffer = new float[totalCells * FLOATS_PER_CELL];
    }
 
-   public void update(BytePointer heightMapPointer, Point3D center, int centerIndex, float cellSizeXYInMeters)
+   public void update(RigidBodyTransform zUpFrameToWorld, BytePointer heightMapPointer, Point3D center, int centerIndex, float cellSizeXYInMeters)
    {
+      zUpFrameToWorld.getTranslation().setZ(0);
+
       int cellsPerAxis = 2 * centerIndex + 1;
 
       float maxHeight = 2.0f;
       float minHeight = 0.0f;
 
+      Point3D spritePoint = new Point3D();
+
       for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
       {
-         double xPosition = indexToCoordinate(xIndex, center.getX(), cellSizeXYInMeters, centerIndex) + 1.5f;
-
          for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
          {
+            spritePoint.setToZero();
+
+            double xPosition = indexToCoordinate(xIndex, 0.0f, cellSizeXYInMeters, centerIndex) + 1.5f;
+            double yPosition = indexToCoordinate(yIndex, 0.0f, cellSizeXYInMeters, centerIndex);
+
             int heightIndex = xIndex * cellsPerAxis + yIndex;
             int vertexIndex = heightIndex * FLOATS_PER_CELL;
-            float cellHeight = (heightMapPointer.getShort(heightIndex * 2L) / 10000.0f);
-            cellHeight = (float) MathTools.clamp(cellHeight, minHeight, maxHeight);
-            if (cellHeight > maxHeight - 0.01f)
-               cellHeight = 0.0f;
+            float zPosition = (heightMapPointer.getShort(heightIndex * 2L) / 10000.0f);
+            zPosition = (float) MathTools.clamp(zPosition, minHeight, maxHeight);
+            if (zPosition > maxHeight - 0.01f)
+               zPosition = 0.0f;
 
-            double yPosition = indexToCoordinate(yIndex, center.getY(), cellSizeXYInMeters, centerIndex);
+            spritePoint.set(xPosition, yPosition, zPosition);
+            spritePoint.applyTransform(zUpFrameToWorld);
+
+//            spritePoint.setZ(zPosition);
 
             // Position
-            intermediateVertexBuffer[vertexIndex] = (float) xPosition;
-            intermediateVertexBuffer[vertexIndex + 1] = (float) yPosition;
-            intermediateVertexBuffer[vertexIndex + 2] = cellHeight;
+            intermediateVertexBuffer[vertexIndex] = (float) spritePoint.getX();
+            intermediateVertexBuffer[vertexIndex + 1] = (float) spritePoint.getY();
+            intermediateVertexBuffer[vertexIndex + 2] = (float) spritePoint.getZ();
 
             // Color (0.0 to 1.0)
-            float heightRatio = (cellHeight / maxHeight);
+            float heightRatio = (zPosition / maxHeight);
             intermediateVertexBuffer[vertexIndex + 3] = Math.abs(1.0f - heightRatio);
             intermediateVertexBuffer[vertexIndex + 4] = Math.max(100.0f * heightRatio, 1.0f);
             intermediateVertexBuffer[vertexIndex + 5] = Math.abs(1.0f - heightRatio);

@@ -36,6 +36,7 @@ import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.screwTheory.MovingZUpFrame;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 
@@ -90,7 +91,7 @@ public class HumanoidPerceptionModule
       });
    }
 
-   public void updateTerrain(ROS2Helper ros2Helper, Mat depthImage, ReferenceFrame cameraFrame,
+   public void updateTerrain(ROS2Helper ros2Helper, Mat depthImage, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame,
                              boolean rapidRegionsEnabled, boolean mappingEnabled, boolean heightMapEnabled)
    {
       if (localizationAndMappingProcess != null)
@@ -108,7 +109,7 @@ public class HumanoidPerceptionModule
       {
          executorService.submit(() ->
                                 {
-                                   updateHeightMap(ros2Helper, depthImage, cameraFrame);
+                                   updateHeightMap(ros2Helper, depthImage, cameraFrame, cameraZUpFrame);
                                 });
       }
    }
@@ -128,11 +129,12 @@ public class HumanoidPerceptionModule
                                                            ros2Helper);
    }
 
-   private void updateHeightMap(ROS2Helper ros2Helper, Mat depthImage, ReferenceFrame cameraFrame)
+   private void updateHeightMap(ROS2Helper ros2Helper, Mat depthImage, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
    {
       RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
+      RigidBodyTransform sensorToGround = cameraFrame.getTransformToDesiredFrame(cameraZUpFrame);
 
-      rapidHeightMapExtractor.update(sensorToWorld, 0);
+      rapidHeightMapExtractor.update(sensorToWorld, sensorToGround, 0);
    }
 
    public void updateStructural(ROS2Helper ros2Helper, ArrayList<Point3D> pointCloud, ReferenceFrame sensorFrame, float thresholdHeight, boolean display)
@@ -176,7 +178,6 @@ public class HumanoidPerceptionModule
             PerceptionDebugTools.display("Monte Carlo Planner World", gridColor, 1, 1400);
          }
       }
-
    }
 
    public void initializePerspectiveRapidRegionsExtractor(CameraIntrinsics cameraIntrinsics)

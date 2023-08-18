@@ -2,6 +2,7 @@ package us.ihmc.rdx.perception;
 
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.HumanoidPerceptionModule;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.rdx.RDXHeightMapRenderer;
@@ -53,12 +54,13 @@ public class RDXHumanoidPerceptionUI
       rapidRegionsUI.renderImGuiWidgets();
    }
 
-   public void render()
+   public void render(RigidBodyTransform zUpFrameToWorld)
    {
-      heightMapRenderer.update(humanoidPerception.getRapidHeightMapExtractor().getOutputHeightMapImage().getPointerForAccessSpeed(),
-                               humanoidPerception.getRapidHeightMapExtractor().getGridCenter(),
-                               humanoidPerception.getRapidHeightMapExtractor().getCenterIndex(),
-                               humanoidPerception.getRapidHeightMapExtractor().getCellSizeXYInMeters());
+      heightMapRenderer.update(zUpFrameToWorld,
+            humanoidPerception.getRapidHeightMapExtractor().getOutputHeightMapImage().getPointerForAccessSpeed(),
+            humanoidPerception.getRapidHeightMapExtractor().getGridCenter(),
+            humanoidPerception.getRapidHeightMapExtractor().getCenterIndex(),
+            humanoidPerception.getRapidHeightMapExtractor().getCellSizeXYInMeters());
 
       PerceptionDebugTools.displayHeightMap("Output Height Map",
                                 humanoidPerception.getRapidHeightMapExtractor().getOutputHeightMapImage().getBytedecoOpenCVMat(),
