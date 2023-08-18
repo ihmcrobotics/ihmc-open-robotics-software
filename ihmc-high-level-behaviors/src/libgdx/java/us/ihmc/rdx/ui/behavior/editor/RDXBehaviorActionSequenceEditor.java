@@ -80,6 +80,7 @@ public class RDXBehaviorActionSequenceEditor
    private IHMCROS2Input<Int32> executionNextIndexStatusSubscription;
    private IHMCROS2Input<Bool> automaticExecutionStatusSubscription;
    private IHMCROS2Input<ActionSequenceUpdateMessage> sequenceStatusSubscription;
+   private IHMCROS2Input<ActionExecutionStatusMessage> executionStatusSubscription;
    private final Empty manuallyExecuteNextActionMessage = new Empty();
    private final Bool automaticExecutionCommandMessage = new Bool();
    private final ArrayList<BehaviorActionData> actionDataForMessage = new ArrayList<>();
@@ -128,6 +129,7 @@ public class RDXBehaviorActionSequenceEditor
       automaticExecutionStatusSubscription = ros2.subscribe(BehaviorActionSequence.AUTOMATIC_EXECUTION_STATUS_TOPIC);
       sequenceStatusSubscription = ros2.subscribe(BehaviorActionSequence.SEQUENCE_STATUS_TOPIC);
       sequenceStatusSubscription.addCallback(message -> ++receivedSequenceStatusMessageCount);
+      executionStatusSubscription = ros2.subscribe(BehaviorActionSequence.ACTION_EXECUTION_STATUS);
    }
 
    public void loadNameFromFile()
@@ -380,6 +382,16 @@ public class RDXBehaviorActionSequenceEditor
       {
          RDXBehaviorAction nextExecutionAction = actionSequence.get(executionNextIndexStatus);
          ImGui.text("%s (%s)".formatted(nextExecutionAction.getDescription(), nextExecutionAction.getActionTypeTitle()));
+      }
+
+      if (executionStatusSubscription.hasReceivedFirstMessage())
+      {
+         ActionExecutionStatusMessage latestExecutionStatus = executionStatusSubscription.getLatest();
+         double elapsedTime = latestExecutionStatus.getElapsedExecutionTime();
+         double nominalDuration = latestExecutionStatus.getNominalExecutionDuration();
+         double percentComplete = elapsedTime / nominalDuration;
+         double percentLeft = 1.0 - percentComplete;
+         ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), 20.0f, "%.2f / %.2f".formatted(elapsedTime, nominalDuration));
       }
    }
 

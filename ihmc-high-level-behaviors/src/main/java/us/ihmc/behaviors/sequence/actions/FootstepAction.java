@@ -1,8 +1,10 @@
 package us.ihmc.behaviors.sequence.actions;
 
+import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
+import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -20,6 +22,7 @@ public class FootstepAction extends FootstepActionData implements BehaviorAction
    private final double swingDuration = 1.2;
    private final double transferDuration = 0.8;
    private final Timer executionTimer = new Timer();
+   private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
 
    public FootstepAction(ROS2ControllerHelper ros2ControllerHelper, ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -51,6 +54,12 @@ public class FootstepAction extends FootstepActionData implements BehaviorAction
    @Override
    public boolean isExecuting()
    {
-      return executionTimer.isRunning(swingDuration + transferDuration);
+      double nominalExecutionDuration = swingDuration + transferDuration;
+
+      executionStatusMessage.setNominalExecutionDuration(nominalExecutionDuration);
+      executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
+      ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, executionStatusMessage);
+
+      return executionTimer.isRunning(nominalExecutionDuration);
    }
 }
