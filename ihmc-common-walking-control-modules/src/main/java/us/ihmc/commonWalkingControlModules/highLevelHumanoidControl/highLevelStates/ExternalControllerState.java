@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.external.ExternalControlCommandConsumer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.external.WholeBodyConfigurationManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 
 public class ExternalControllerState extends HighLevelControllerState
@@ -17,10 +17,9 @@ public class ExternalControllerState extends HighLevelControllerState
    private final WholeBodyConfigurationManager wholeBodyConfigurationManager;
 
    public ExternalControllerState(CommandInputManager commandInputManager,
-                                  OneDoFJointBasics[] controlledJoints,
                                   HighLevelHumanoidControllerToolbox controllerToolbox)
    {
-      super("externalController", HighLevelControllerName.EXTERNAL, controlledJoints);
+      super("externalController", HighLevelControllerName.EXTERNAL, MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class));
 
       this.commandInputManager = commandInputManager;
 
