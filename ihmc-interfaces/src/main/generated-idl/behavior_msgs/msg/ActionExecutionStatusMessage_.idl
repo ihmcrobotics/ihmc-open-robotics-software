@@ -17,7 +17,7 @@ module behavior_msgs
         /**
          * Executing action index
          */
-        unsigned short action_index;
+        long action_index;
         /**
          * Nominal execution duration
          */

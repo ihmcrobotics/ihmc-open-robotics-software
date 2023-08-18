@@ -207,7 +207,7 @@ public class BehaviorActionSequence
       }
       else
       {
-         nothingExecutingStatusMessage.setActionIndex(500);
+         nothingExecutingStatusMessage.setActionIndex(-1);
          ros2.publish(ACTION_EXECUTION_STATUS, nothingExecutingStatusMessage);
       }
 

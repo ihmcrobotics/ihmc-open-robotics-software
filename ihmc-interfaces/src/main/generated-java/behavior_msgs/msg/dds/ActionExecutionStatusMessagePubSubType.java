@@ -15,7 +15,7 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9c6c8102306f9748e404d5ae81ac07fd8fea008d5674527e73acf10d11d8d334";
+   		return "870b4ea7e5d6c1b5ce3eceb515fab8c00ab6aeab03aea7ab51083075f60a2496";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -71,7 +71,7 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -86,7 +86,7 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
 
    public static void write(behavior_msgs.msg.dds.ActionExecutionStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_3(data.getActionIndex());
+      cdr.write_type_2(data.getActionIndex());
 
       cdr.write_type_6(data.getNominalExecutionDuration());
 
@@ -96,7 +96,7 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
 
    public static void read(behavior_msgs.msg.dds.ActionExecutionStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setActionIndex(cdr.read_type_3());
+      data.setActionIndex(cdr.read_type_2());
       	
       data.setNominalExecutionDuration(cdr.read_type_6());
       	
@@ -108,7 +108,7 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final void serialize(behavior_msgs.msg.dds.ActionExecutionStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_3("action_index", data.getActionIndex());
+      ser.write_type_2("action_index", data.getActionIndex());
       ser.write_type_6("nominal_execution_duration", data.getNominalExecutionDuration());
       ser.write_type_6("elapsed_execution_time", data.getElapsedExecutionTime());
    }
@@ -116,7 +116,7 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.ActionExecutionStatusMessage data)
    {
-      data.setActionIndex(ser.read_type_3("action_index"));
+      data.setActionIndex(ser.read_type_2("action_index"));
       data.setNominalExecutionDuration(ser.read_type_6("nominal_execution_duration"));
       data.setElapsedExecutionTime(ser.read_type_6("elapsed_execution_time"));
    }
