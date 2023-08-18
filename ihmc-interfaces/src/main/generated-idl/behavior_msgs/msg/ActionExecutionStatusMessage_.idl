@@ -1,0 +1,30 @@
+#ifndef __behavior_msgs__msg__ActionExecutionStatusMessage__idl__
+#define __behavior_msgs__msg__ActionExecutionStatusMessage__idl__
+
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is meant to communicate the status of currently executing actions
+       */
+      @TypeCode(type="behavior_msgs::msg::dds_::ActionExecutionStatusMessage_")
+      struct ActionExecutionStatusMessage
+      {
+        /**
+         * Nominal execution duration
+         */
+        double nominal_execution_duration;
+        /**
+         * Time since execution started
+         */
+        double elapsed_execution_time;
+      };
+    };
+  };
+};
+
+#endif

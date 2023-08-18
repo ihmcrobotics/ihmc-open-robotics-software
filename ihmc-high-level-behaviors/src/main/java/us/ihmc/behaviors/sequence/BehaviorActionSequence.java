@@ -44,6 +44,8 @@ public class BehaviorActionSequence
    public static final ROS2Topic<Int32> EXECUTION_NEXT_INDEX_STATUS_TOPIC = STATUS_TOPIC.withType(Int32.class).withSuffix("execution_next_index");
    public static final ROS2Topic<HandPoseJointAnglesStatusMessage> HAND_POSE_JOINT_ANGLES_STATUS
          = STATUS_TOPIC.withType(HandPoseJointAnglesStatusMessage.class).withSuffix("hand_pose_joint_angles");
+   public static final ROS2Topic<ActionExecutionStatusMessage> ACTION_EXECUTION_STATUS
+         = STATUS_TOPIC.withType(ActionExecutionStatusMessage.class).withSuffix("execution_status");
 
    private final DRCRobotModel robotModel;
    private final ROS2ControllerHelper ros2;
@@ -153,7 +155,7 @@ public class BehaviorActionSequence
          }
          for (WaitDurationActionMessage message : latestUpdateMessage.getWaitDurationActions())
          {
-            WaitDurationAction action = new WaitDurationAction();
+            WaitDurationAction action = new WaitDurationAction(ros2);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
@@ -218,6 +220,11 @@ public class BehaviorActionSequence
       {
          LogTools.info("Manually executing action: {}", actionSequence.get(excecutionNextIndex).getClass().getSimpleName());
          executeNextAction();
+      }
+
+      if (!automaticExecution && currentlyExecutingAction != null && !currentlyExecutingAction.isExecuting())
+      {
+         currentlyExecutingAction = null;
       }
    }
 

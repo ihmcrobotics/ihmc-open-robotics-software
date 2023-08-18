@@ -1,9 +1,11 @@
 package us.ihmc.behaviors.sequence.actions;
 
+import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
+import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.FormattingTools;
@@ -42,6 +44,7 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    private FootstepDataListMessage footstepDataListMessage;
    private final Timer executionTimer = new Timer();
    private final Throttler warningThrottler = new Throttler().setFrequency(2.0);
+   private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
 
    public WalkAction(ROS2ControllerHelper ros2ControllerHelper,
                      ROS2SyncedRobotModel syncedRobot,
@@ -164,6 +167,11 @@ public class WalkAction extends WalkActionData implements BehaviorAction
                                                                 executionTimer,
                                                                 warningThrottler);
       }
+
+      executionStatusMessage.setNominalExecutionDuration(nominalExecutionDuration);
+      executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
+      ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, executionStatusMessage);
+
       return isExecuting;
    }
 }
