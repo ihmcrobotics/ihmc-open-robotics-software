@@ -6,7 +6,7 @@ import imgui.flag.ImGuiDataType;
 import imgui.type.ImLong;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.perception.RDXBytedecoImagePanel;
@@ -70,7 +70,7 @@ public class RDXFFMPEGPlaybackDemo
 
             baseUI.create();
 
-            ImGuiPanel panel = new ImGuiPanel("Image", this::renderImGuiWidgets);
+            RDXPanel panel = new RDXPanel("Image", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
 
             loadVideo(exampleVideo.getFilesystemFile().toString());

@@ -970,6 +970,26 @@ public class ValkyrieInitialSetupFactories
       return initialSetup;
    }
 
+   public static ValkyrieMutableInitialSetup newStand2(HumanoidJointNameMap jointMap)
+   {
+      ValkyrieMutableInitialSetup initialSetup = new ValkyrieMutableInitialSetup(jointMap);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         initialSetup.setJoint(robotSide, LegJointName.HIP_ROLL, 0.0);
+         initialSetup.setJoint(robotSide, LegJointName.HIP_PITCH, -0.6);
+         initialSetup.setJoint(robotSide, LegJointName.KNEE_PITCH, 1.3);
+         initialSetup.setJoint(robotSide, LegJointName.ANKLE_PITCH, -0.7);
+         initialSetup.setJoint(robotSide, LegJointName.ANKLE_ROLL, 0.0);
+
+         initialSetup.setJoint(robotSide, ArmJointName.SHOULDER_ROLL, robotSide.negateIfRightSide(-1.3));
+         initialSetup.setJoint(robotSide, ArmJointName.SHOULDER_PITCH, -0.1);
+         initialSetup.setJoint(robotSide, ArmJointName.ELBOW_PITCH, robotSide.negateIfRightSide(-0.1));
+         initialSetup.setJoint(robotSide, ArmJointName.ELBOW_ROLL, 1.3);
+      }
+
+      initialSetup.getRootJointPosition().setZ(0.995);
+      return initialSetup;
+   }
 
    public static ValkyrieMutableInitialSetup newLean(HumanoidJointNameMap jointMap)
    {

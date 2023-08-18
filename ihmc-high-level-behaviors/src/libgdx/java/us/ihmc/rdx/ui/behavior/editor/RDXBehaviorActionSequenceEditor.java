@@ -21,7 +21,7 @@ import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -57,7 +57,7 @@ import java.util.LinkedList;
 public class RDXBehaviorActionSequenceEditor
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private ImGuiPanel panel;
+   private RDXPanel panel;
    private final ImBoolean automaticExecution = new ImBoolean(false);
    private String name;
    private final WorkspaceResourceFile workspaceFile;
@@ -99,7 +99,7 @@ public class RDXBehaviorActionSequenceEditor
 
    public void afterNameDetermination()
    {
-      panel = new ImGuiPanel(name + " Behavior Sequence Editor", this::renderImGuiWidgets, false, true);
+      panel = new RDXPanel(name + " Behavior Sequence Editor", this::renderImGuiWidgets, false, true);
       pascalCasedName = FormattingTools.titleToPascalCase(name);
       panel.getIsShowing().set(true);
    }
@@ -659,7 +659,7 @@ public class RDXBehaviorActionSequenceEditor
       sequenceStatusSubscription.destroy();
    }
 
-   public ImGuiPanel getPanel()
+   public RDXPanel getPanel()
    {
       return panel;
    }

@@ -3,6 +3,7 @@ package us.ihmc.perception.sceneGraph.rigidBodies;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.SceneNode;
 
 /**
  * This node stays in the same spot relative to where a parent scene node
@@ -34,7 +35,7 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
       super(name, visualModelFilePath, visualModelToNodeFrameTransform);
       this.parentNode = parentNode;
 
-      setParentNode(parentNode);
+      setParentFrame(parentNode::getNodeFrame);
       changeParentFrame(parentNode.getNodeFrame());
       getNodeToParentFrameTransform().set(transformToParentNode);
       getNodeFrame().update();
@@ -66,5 +67,10 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
    public double getCurrentDistance()
    {
       return currentDistance;
+   }
+
+   public SceneNode getParentNode()
+   {
+      return parentNode;
    }
 }

@@ -15,7 +15,7 @@ public class QuadrupedTeleopDesiredVelocityPubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f1a26567cc9a522d98203263ad22dde2ee430d2aa9e226b7761711a53fa60bab";
+   		return "82816c03a2478435afa786557fdc5ef23443ce7da75c82d6af44d29aeff89670";
    }
    
    @Override

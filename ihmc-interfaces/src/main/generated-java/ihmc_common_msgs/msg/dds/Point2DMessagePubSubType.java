@@ -15,7 +15,7 @@ public class Point2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ih
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a173c7c33c85949c1a313140ef2f56e0f5bf3c5a733a8a1f517f2b1aeef5cbe8";
+   		return "84a58716726e3af372362df1cb04897644241284ab466ce1fcd4e2ade344083e";
    }
    
    @Override
