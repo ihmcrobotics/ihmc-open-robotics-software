@@ -15,10 +15,12 @@ import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.Kinemat
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -115,15 +117,6 @@ public class RDXVRKinematicsStreamingMode
          handControlFrameGraphics.put(side, new RDXReferenceFrameGraphic(length));
          RigidBodyTransform wristToHandControlTransform = robotModel.getUIParameters().getTransformWristToHand(side);
          ModifiableReferenceFrame handDesiredControlFrame = new ModifiableReferenceFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
-         //            handDesiredControlFrame.getTransformToParent().set(robotModel.getJointMap().getHandControlFrameToWristTransform(side));
-         // Atlas
-         //         {
-         //            handDesiredControlFrame.getTransformToParent().getTranslation().setX(-0.1);
-         //            handDesiredControlFrame.getTransformToParent()
-         //                                   .getRotation()
-         //                                   .setYawPitchRoll(side == RobotSide.RIGHT ? 0.0 : Math.toRadians(180.0), side.negateIfLeftSide(Math.toRadians(90.0)), 0.0);
-         //         }
-         // Nadia
          {
             if (side == RobotSide.LEFT)
             {
@@ -198,20 +191,6 @@ public class RDXVRKinematicsStreamingMode
          }
       });
 
-      for (RobotSide side : RobotSide.values)
-      {
-         vrContext.getController(side).runIfConnected(controller ->
-         {
-            float currentGripX = controller.getGripActionData().x();
-//            if (currentGripX)
-            {
-
-            }
-//            lastGripX
-         });
-      }
-
-
       if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
@@ -244,26 +223,69 @@ public class RDXVRKinematicsStreamingMode
             });
          }
 
-//         vrContext.getHeadset().runIfConnected(headset ->
-//         {
-//            KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
-//            message.setEndEffectorHashCode(ghostFullRobotModel.getHead().hashCode());
-//            tempFramePose.setToZero(headset.getXForwardZUpHeadsetFrame());
-//            tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-//            headsetFrameGraphic.setToReferenceFrame(headset.getXForwardZUpHeadsetFrame());
-//            message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
-//            message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
-//            message.getControlFramePositionInEndEffector().set(0.1, 0.0, 0.0);
-//            message.getControlFrameOrientationInEndEffector().setYawPitchRoll(Math.PI / 2.0, 0.0, Math.PI / 2.0);
-//            boolean xSelected = false;
-//            boolean ySelected = false;
-//            boolean zSelected = true;
-//            message.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(xSelected,
-//                                                                                               ySelected,
-//                                                                                               zSelected,
-//                                                                                               ReferenceFrame.getWorldFrame()));
-//            toolboxInputMessage.getInputs().add().set(message);
-//         });
+         Set<String> trackedSegments = vrContext.getBodySegmentsWithTrackers();
+         if (trackedSegments.contains("leftForeArm"))
+         {
+            String segment = "leftForeArm";
+            vrContext.getTracker(segment).runIfConnected(tracker ->
+            {
+               if (leftForeArmDesiredControlFrame == null)
+               {
+                  leftForeArmDesiredControlFrame = new ModifiableReferenceFrame(segment,
+                                                                                vrContext.getTracker(
+                                                                                      segment).getXForwardZUpTrackerFrame());
+                  leftForeArmDesiredControlFrame.getTransformToParent().getRotation().appendYawRotation(-Math.PI / 2.0);
+               }
+               leftForeArmDesiredControlFrame.changeParentFrame(vrContext.getTracker(segment).getXForwardZUpTrackerFrame());
+               leftForeArmDesiredControlFrame.getReferenceFrame().update();
+               leftForeArmControlFrameGraphic.setToReferenceFrame(leftForeArmDesiredControlFrame.getReferenceFrame());
+               KinematicsToolboxRigidBodyMessage message = createOrientationRigidBodyMessage(
+                     ghostFullRobotModel.getForearm(RobotSide.LEFT),
+                     leftForeArmDesiredControlFrame,
+                     0.1);
+               toolboxInputMessage.getInputs().add().set(message);
+            });
+         }
+
+         if (trackedSegments.contains("rightForeArm"))
+         {
+            String segment = "rightForeArm";
+            vrContext.getTracker(segment).runIfConnected(tracker ->
+            {
+               if (rightForeArmDesiredControlFrame == null)
+               {
+                  rightForeArmDesiredControlFrame = new ModifiableReferenceFrame(segment, vrContext.getTracker(segment).getXForwardZUpTrackerFrame());
+                  rightForeArmDesiredControlFrame.getTransformToParent().getRotation().appendYawRotation(Math.PI / 2.0);
+               }
+               rightForeArmDesiredControlFrame.changeParentFrame(vrContext.getTracker(segment).getXForwardZUpTrackerFrame());
+               rightForeArmDesiredControlFrame.getReferenceFrame().update();
+               rightForeArmControlFrameGraphic.setToReferenceFrame(rightForeArmDesiredControlFrame.getReferenceFrame());
+               KinematicsToolboxRigidBodyMessage message = createOrientationRigidBodyMessage(ghostFullRobotModel.getForearm(RobotSide.RIGHT),
+                                                                                             rightForeArmDesiredControlFrame,
+                                                                                             0.1);
+               toolboxInputMessage.getInputs().add().set(message);
+            });
+         }
+
+         if (trackedSegments.contains("chest"))
+         {
+            String segment = "chest";
+            vrContext.getTracker(segment).runIfConnected(tracker ->
+            {
+               // start with current pose of the chest
+               if (chestTrackerControlFrame == null)
+               {
+                  chestTrackerControlFrame = new ModifiableReferenceFrame(segment, vrContext.getTracker(segment).getXForwardZUpTrackerFrame());
+               }
+               // update tracker frame
+               chestTrackerControlFrame.changeParentFrame(vrContext.getTracker(segment).getXForwardZUpTrackerFrame());
+               chestTrackerControlFrame.getReferenceFrame().update();
+               chestControlFrameGraphic.setToReferenceFrame(chestTrackerControlFrame.getReferenceFrame());
+               KinematicsToolboxRigidBodyMessage message = createOrientationRigidBodyMessage(ghostFullRobotModel.getChest(), chestTrackerControlFrame,10);
+               toolboxInputMessage.getInputs().add().set(message);
+            });
+         }
+
          if (enabled.get())
             toolboxInputMessage.setStreamToController(streamToController.get());
          else
@@ -272,6 +294,54 @@ public class RDXVRKinematicsStreamingMode
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(robotModel.getSimpleRobotName()), toolboxInputMessage);
          outputFrequencyPlot.recordEvent();
       }
+   }
+
+   private KinematicsToolboxRigidBodyMessage createOrientationRigidBodyMessage(RigidBodyBasics endEffector, ModifiableReferenceFrame desiredControlFrame, double weight) {
+      return createPoseRigidBodyMessage(endEffector, desiredControlFrame, 0, weight);
+   }
+
+   private KinematicsToolboxRigidBodyMessage createPositionRigidBodyMessage(RigidBodyBasics endEffector, ModifiableReferenceFrame desiredControlFrame, double weight) {
+      return createPoseRigidBodyMessage(endEffector, desiredControlFrame, weight, 0);
+   }
+
+   private KinematicsToolboxRigidBodyMessage createPoseRigidBodyMessage(RigidBodyBasics endEffector, ModifiableReferenceFrame desiredControlFrame, double positionWeight, double orientationWeight) {
+      KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
+      message.setEndEffectorHashCode(endEffector.hashCode());
+      String frameName = desiredControlFrame.getFrameName();
+      tempFramePose.setToZero(desiredControlFrame.getReferenceFrame());
+      tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      if (!frameName.equals("chestInitial"))
+      {
+         kinematicsRecorder.framePoseToRecord(tempFramePose, frameName);
+         if (kinematicsRecorder.isReplaying())
+            kinematicsRecorder.framePoseToPack(tempFramePose); //get values of tempFramePose from replay
+      }
+      else
+      {
+         message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
+         message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
+      }
+      if (positionWeight == 0)
+      {
+         message.getLinearSelectionMatrix().setXSelected(false);
+         message.getLinearSelectionMatrix().setYSelected(false);
+         message.getLinearSelectionMatrix().setZSelected(false);
+      }
+      else
+      {
+         message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(positionWeight));
+      }
+      if (orientationWeight == 0)
+      {
+         message.getAngularSelectionMatrix().setXSelected(false);
+         message.getAngularSelectionMatrix().setYSelected(false);
+         message.getAngularSelectionMatrix().setZSelected(false);
+      }
+      else
+      {
+         message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(orientationWeight));
+      }
+      return message;
    }
 
    public void update(boolean ikStreamingModeEnabled)
