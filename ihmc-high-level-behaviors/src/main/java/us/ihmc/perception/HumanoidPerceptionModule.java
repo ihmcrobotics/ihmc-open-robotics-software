@@ -97,19 +97,19 @@ public class HumanoidPerceptionModule
       if (rapidRegionsEnabled)
       {
          executorService.submit(() ->
-                                {
-                                   OpenCVTools.convertFloatToShort(depthImage, realsenseDepthImage.getBytedecoOpenCVMat(), 1000.0, 0.0);
-                                   extractFramePlanarRegionsList(rapidPlanarRegionsExtractor,
-                                                                 realsenseDepthImage,
-                                                                 sensorFrameRegions,
-                                                                 regionsInWorldFrame,
-                                                                 regionsInSensorFrame,
-                                                                 cameraFrame);
-                                   filterFramePlanarRegionsList();
-                                   PerceptionMessageTools.publishFramePlanarRegionsList(sensorFrameRegions,
-                                                                                        PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
-                                                                                        ros2Helper);
-                                });
+           {
+              OpenCVTools.convertFloatToShort(depthImage, realsenseDepthImage.getBytedecoOpenCVMat(), 1000.0, 0.0);
+              extractFramePlanarRegionsList(rapidPlanarRegionsExtractor,
+                                            realsenseDepthImage,
+                                            sensorFrameRegions,
+                                            regionsInWorldFrame,
+                                            regionsInSensorFrame,
+                                            cameraFrame);
+              filterFramePlanarRegionsList();
+              PerceptionMessageTools.publishFramePlanarRegionsList(sensorFrameRegions,
+                                                                   PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
+                                                                   ros2Helper);
+           });
       }
    }
 
@@ -304,7 +304,6 @@ public class HumanoidPerceptionModule
       try
       {
          boolean result = executorService.awaitTermination(1, TimeUnit.SECONDS);
-         Thread.sleep(1000);
       }
       catch (InterruptedException e)
       {
