@@ -13,10 +13,17 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class HandWrenchAction extends HandWrenchActionData implements BehaviorAction
 {
    private final ROS2ControllerHelper ros2ControllerHelper;
+   private int actionIndex;
 
    public HandWrenchAction(ROS2ControllerHelper ros2ControllerHelper)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
+   }
+
+   @Override
+   public void update(int actionIndex, int nextExecutionIndex)
+   {
+      this.actionIndex = actionIndex;
    }
 
    @Override

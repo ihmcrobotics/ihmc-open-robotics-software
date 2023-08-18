@@ -12,6 +12,10 @@ import us.ihmc.pubsub.TopicDataType;
 public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMessage> implements Settable<ActionExecutionStatusMessage>, EpsilonComparable<ActionExecutionStatusMessage>
 {
    /**
+            * Executing action index
+            */
+   public int action_index_;
+   /**
             * Nominal execution duration
             */
    public double nominal_execution_duration_;
@@ -32,10 +36,27 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
 
    public void set(ActionExecutionStatusMessage other)
    {
+      action_index_ = other.action_index_;
+
       nominal_execution_duration_ = other.nominal_execution_duration_;
 
       elapsed_execution_time_ = other.elapsed_execution_time_;
 
+   }
+
+   /**
+            * Executing action index
+            */
+   public void setActionIndex(int action_index)
+   {
+      action_index_ = action_index;
+   }
+   /**
+            * Executing action index
+            */
+   public int getActionIndex()
+   {
+      return action_index_;
    }
 
    /**
@@ -86,6 +107,8 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
       if(other == null) return false;
       if(other == this) return true;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.action_index_, other.action_index_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.nominal_execution_duration_, other.nominal_execution_duration_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.elapsed_execution_time_, other.elapsed_execution_time_, epsilon)) return false;
@@ -103,6 +126,8 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
 
       ActionExecutionStatusMessage otherMyClass = (ActionExecutionStatusMessage) other;
 
+      if(this.action_index_ != otherMyClass.action_index_) return false;
+
       if(this.nominal_execution_duration_ != otherMyClass.nominal_execution_duration_) return false;
 
       if(this.elapsed_execution_time_ != otherMyClass.elapsed_execution_time_) return false;
@@ -117,6 +142,8 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
       StringBuilder builder = new StringBuilder();
 
       builder.append("ActionExecutionStatusMessage {");
+      builder.append("action_index=");
+      builder.append(this.action_index_);      builder.append(", ");
       builder.append("nominal_execution_duration=");
       builder.append(this.nominal_execution_duration_);      builder.append(", ");
       builder.append("elapsed_execution_time=");

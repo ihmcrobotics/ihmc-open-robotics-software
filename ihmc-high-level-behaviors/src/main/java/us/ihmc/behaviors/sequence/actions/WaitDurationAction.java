@@ -9,6 +9,7 @@ import us.ihmc.tools.Timer;
 public class WaitDurationAction extends WaitDurationActionData implements BehaviorAction
 {
    private final ROS2ControllerHelper ros2ControllerHelper;
+   private int actionIndex;
    private final Timer executionTimer = new Timer();
    private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
@@ -16,6 +17,12 @@ public class WaitDurationAction extends WaitDurationActionData implements Behavi
    public WaitDurationAction(ROS2ControllerHelper ros2ControllerHelper)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
+   }
+
+   @Override
+   public void update(int actionIndex, int nextExecutionIndex)
+   {
+      this.actionIndex = actionIndex;
    }
 
    @Override
@@ -29,6 +36,7 @@ public class WaitDurationAction extends WaitDurationActionData implements Behavi
    {
       isExecuting = executionTimer.isRunning(getWaitDuration());
 
+      executionStatusMessage.setActionIndex(actionIndex);
       executionStatusMessage.setNominalExecutionDuration(getWaitDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
       ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, executionStatusMessage);

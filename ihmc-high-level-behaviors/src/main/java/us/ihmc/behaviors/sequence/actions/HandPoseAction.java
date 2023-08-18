@@ -29,6 +29,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
+   private int actionIndex;
    private final FramePose3D desiredHandControlPose = new FramePose3D();
    private final FramePose3D syncedHandControlPose = new FramePose3D();
    private final HandPoseJointAnglesStatusMessage handPoseJointAnglesStatus = new HandPoseJointAnglesStatusMessage();
@@ -55,6 +56,8 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    @Override
    public void update(int actionIndex, int nextExecutionIndex)
    {
+      this.actionIndex = actionIndex;
+
       if (actionIndex == nextExecutionIndex)
       {
          ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
@@ -115,6 +118,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
                                                             executionTimer,
                                                             warningThrottler);
 
+      executionStatusMessage.setActionIndex(actionIndex);
       executionStatusMessage.setNominalExecutionDuration(getTrajectoryDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
       ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);

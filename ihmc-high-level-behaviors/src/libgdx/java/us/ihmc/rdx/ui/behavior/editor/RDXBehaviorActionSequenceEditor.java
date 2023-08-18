@@ -373,25 +373,38 @@ public class RDXBehaviorActionSequenceEditor
          ImGuiTools.previousWidgetTooltip("Try clicking \"Send to robot\"");
       }
 
-      ImGui.text(String.format("Status # %d: Current action:", receivedStatusMessageCount));
-      ImGui.sameLine();
-      endOfSequence = executionNextIndexStatus >= actionSequence.size();
-      if (endOfSequence)
-         ImGui.text("End of sequence.");
-      else
-      {
-         RDXBehaviorAction nextExecutionAction = actionSequence.get(executionNextIndexStatus);
-         ImGui.text("%s (%s)".formatted(nextExecutionAction.getDescription(), nextExecutionAction.getActionTypeTitle()));
-      }
-
       if (executionStatusSubscription.hasReceivedFirstMessage())
       {
          ActionExecutionStatusMessage latestExecutionStatus = executionStatusSubscription.getLatest();
+
+         ImGui.text(String.format("Status # %d:", receivedStatusMessageCount));
+         ImGui.sameLine();
+         if (latestExecutionStatus.getActionIndex() == 500)
+         {
+            if (endOfSequence)
+            {
+               ImGui.text("End of sequence.");
+            }
+            else
+            {
+               ImGui.text("Nothing executing.");
+            }
+         }
+         else
+         {
+            RDXBehaviorAction executingAction = actionSequence.get(latestExecutionStatus.getActionIndex());
+            ImGui.text("Executing: %s (%s)".formatted(executingAction.getDescription(), executingAction.getActionTypeTitle()));
+         }
+
          double elapsedTime = latestExecutionStatus.getElapsedExecutionTime();
          double nominalDuration = latestExecutionStatus.getNominalExecutionDuration();
          double percentComplete = elapsedTime / nominalDuration;
          double percentLeft = 1.0 - percentComplete;
          ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), 20.0f, "%.2f / %.2f".formatted(elapsedTime, nominalDuration));
+      }
+      else
+      {
+         ImGui.text("Waiting for execution status...");
       }
    }
 
