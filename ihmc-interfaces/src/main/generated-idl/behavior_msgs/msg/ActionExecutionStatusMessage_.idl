@@ -15,6 +15,10 @@ module behavior_msgs
       struct ActionExecutionStatusMessage
       {
         /**
+         * Executing action index
+         */
+        unsigned short action_index;
+        /**
          * Nominal execution duration
          */
         double nominal_execution_duration;

@@ -18,6 +18,7 @@ import java.util.UUID;
 public class FootstepAction extends FootstepActionData implements BehaviorAction
 {
    private final ROS2ControllerHelper ros2ControllerHelper;
+   private int actionIndex;
    private final FramePose3D pose = new FramePose3D();
    private final double swingDuration = 1.2;
    private final double transferDuration = 0.8;
@@ -34,6 +35,8 @@ public class FootstepAction extends FootstepActionData implements BehaviorAction
    @Override
    public void update(int actionIndex, int nextExecutionIndex)
    {
+      this.actionIndex = actionIndex;
+
       pose.setToZero(getReferenceFrame());
       pose.changeFrame(ReferenceFrame.getWorldFrame());
    }
@@ -58,6 +61,7 @@ public class FootstepAction extends FootstepActionData implements BehaviorAction
       double nominalExecutionDuration = swingDuration + transferDuration;
       isExecuting = executionTimer.isRunning(nominalExecutionDuration);
 
+      executionStatusMessage.setActionIndex(actionIndex);
       executionStatusMessage.setNominalExecutionDuration(nominalExecutionDuration);
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
       ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);

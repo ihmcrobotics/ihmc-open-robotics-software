@@ -17,6 +17,7 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
 {
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
+   private int actionIndex;
    private final Timer executionTimer = new Timer();
    private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
@@ -25,6 +26,12 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
+   }
+
+   @Override
+   public void update(int actionIndex, int nextExecutionIndex)
+   {
+      this.actionIndex = actionIndex;
    }
 
    @Override
@@ -53,6 +60,7 @@ public class ChestOrientationAction extends ChestOrientationActionData implement
    {
       isExecuting = executionTimer.isRunning(getTrajectoryDuration());
 
+      executionStatusMessage.setActionIndex(actionIndex);
       executionStatusMessage.setNominalExecutionDuration(getTrajectoryDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
       ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);

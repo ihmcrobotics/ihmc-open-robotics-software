@@ -14,6 +14,7 @@ import us.ihmc.tools.Timer;
 public class PelvisHeightAction extends PelvisHeightActionData implements BehaviorAction
 {
    private final ROS2ControllerHelper ros2ControllerHelper;
+   private int actionIndex;
    private final Timer executionTimer = new Timer();
    private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
@@ -21,6 +22,12 @@ public class PelvisHeightAction extends PelvisHeightActionData implements Behavi
    public PelvisHeightAction(ROS2ControllerHelper ros2ControllerHelper)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
+   }
+
+   @Override
+   public void update(int actionIndex, int nextExecutionIndex)
+   {
+      this.actionIndex = actionIndex;
    }
 
    @Override
@@ -46,6 +53,7 @@ public class PelvisHeightAction extends PelvisHeightActionData implements Behavi
    {
       isExecuting = executionTimer.isRunning(getTrajectoryDuration());
 
+      executionStatusMessage.setActionIndex(actionIndex);
       executionStatusMessage.setNominalExecutionDuration(getTrajectoryDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
       ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);

@@ -41,6 +41,7 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    private final FootstepPlanningModule footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
+   private int actionIndex;
    private FootstepDataListMessage footstepDataListMessage;
    private final Timer executionTimer = new Timer();
    private final Throttler warningThrottler = new Throttler().setFrequency(2.0);
@@ -65,6 +66,8 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    @Override
    public void update(int actionIndex, int nextExecutionIndex)
    {
+      this.actionIndex = actionIndex;
+
       for (RobotSide side : RobotSide.values)
       {
          goalFeetPoses.get(side).setIncludingFrame(getReferenceFrame(), getGoalFootstepToParentTransforms().get(side));
@@ -169,6 +172,7 @@ public class WalkAction extends WalkActionData implements BehaviorAction
                                                                 warningThrottler);
       }
 
+      executionStatusMessage.setActionIndex(actionIndex);
       executionStatusMessage.setNominalExecutionDuration(nominalExecutionDuration);
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
 //      executionStatusMessage.ge
