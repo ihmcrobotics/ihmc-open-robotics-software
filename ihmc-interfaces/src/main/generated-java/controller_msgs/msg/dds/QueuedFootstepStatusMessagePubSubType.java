@@ -15,7 +15,7 @@ public class QueuedFootstepStatusMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1a019ecab63ba5a0fad83ac9bd253d3bca048060f7ce7fe0b994626649418dda";
+   		return "ab75e46819eae18287b738b8b36fdc8cd483fb1f430092376294f39193468d7e";
    }
    
    @Override

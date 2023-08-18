@@ -15,7 +15,7 @@ public class QuadrupedFootLoadBearingMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5fa7c91760f4f14a43b7cb47cf16d7ef600d92831ec49301fbbba12664de044c";
+   		return "f8971562ce8ef7c3d4554c9b220dbf95c9c80cc70f97955df78198d2307e9a68";
    }
    
    @Override
