@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Pool;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImGui;
+import imgui.ImVec2;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -58,6 +59,8 @@ public class RDXBehaviorActionSequenceEditor
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean automaticExecution = new ImBoolean(false);
+   private final ImVec2 calcDescriptionTextSize = new ImVec2();
+   private float longestDescriptionLength;
    private String name;
    @Nullable
    private WorkspaceResourceFile workspaceFile = null;
@@ -383,10 +386,29 @@ public class RDXBehaviorActionSequenceEditor
    private void renderInteractableActionListArea()
    {
       reorderRequest.setLeft(-1);
+
+      longestDescriptionLength = 50.0f;
+      for (int i = 0; i < actionSequence.size(); i++)
+      {
+         ImGui.calcTextSize(calcDescriptionTextSize, actionSequence.get(i).getActionData().getDescription());
+         if (calcDescriptionTextSize.x > longestDescriptionLength)
+            longestDescriptionLength = calcDescriptionTextSize.x;
+      }
+
       for (int i = 0; i < actionSequence.size(); i++)
       {
          RDXBehaviorAction action = actionSequence.get(i);
 
+         if (ImGui.radioButton(labels.get("", "playbackNextIndex", i), executionNextIndexStatus == i))
+         {
+            commandNextActionIndex(i);
+         }
+         ImGuiTools.previousWidgetTooltip("Next for excecution");
+         action.getDescription().set(action.getActionData().getDescription());
+         ImGui.sameLine();
+         ImGui.text("->");
+
+         ImGui.sameLine();
          if (!action.getExpanded().get())
          {
             if (ImGui.button(labels.get("[+]", "expand", i)))
@@ -399,19 +421,9 @@ public class RDXBehaviorActionSequenceEditor
                action.getExpanded().set(false);
             ImGuiTools.previousWidgetTooltip("Collapse action settings");
          }
-         ImGui.sameLine();
 
          ImGui.sameLine();
-         ImGui.text("Index %d".formatted(i));
-         ImGui.sameLine();
-         if (ImGui.radioButton(labels.get("", "playbackNextIndex", i), executionNextIndexStatus == i))
-         {
-            commandNextActionIndex(i);
-         }
-         ImGuiTools.previousWidgetTooltip("Next for excecution");
-         action.getDescription().set(action.getActionData().getDescription());
-         ImGui.sameLine();
-         ImGui.pushItemWidth(9.0f + action.getActionData().getDescription().length() * 7.0f);
+         ImGui.pushItemWidth(longestDescriptionLength + 30.0f);
          ImGuiTools.inputText(labels.get("", "description", i), action.getDescription());
          action.getActionData().setDescription(action.getDescription().get());
          ImGui.popItemWidth();
@@ -447,7 +459,7 @@ public class RDXBehaviorActionSequenceEditor
             action.getSelected().renderImGuiWidget();
             ImGuiTools.previousWidgetTooltip("(Show gizmo)");
             ImGui.sameLine();
-            ImGui.text("Type: %s".formatted(action.getActionTypeTitle()));
+            ImGui.text("Type: %s Index: %d".formatted(action.getActionTypeTitle(), i));
          }
 
          action.renderImGuiWidgets();
@@ -459,7 +471,13 @@ public class RDXBehaviorActionSequenceEditor
       if (indexToMove > -1)
       {
          int destinationIndex = reorderRequest.getRight() == 0 ? indexToMove - 1 : indexToMove + 1;
+         boolean toMoveWasSelected = indexToMove == executionNextIndexStatus;
+         boolean destinationWasSelected = destinationIndex == executionNextIndexStatus;
          actionSequence.add(destinationIndex, actionSequence.remove(indexToMove));
+         if (toMoveWasSelected) // Retain next action for execution
+            commandNextActionIndex(destinationIndex);
+         if (destinationWasSelected)
+            commandNextActionIndex(indexToMove);
       }
    }
 
