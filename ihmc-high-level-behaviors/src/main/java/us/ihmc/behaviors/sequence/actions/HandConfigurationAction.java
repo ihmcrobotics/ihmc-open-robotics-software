@@ -17,6 +17,7 @@ public class HandConfigurationAction extends HandConfigurationActionData impleme
 
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final Timer executionTimer = new Timer();
+   private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
 
    public HandConfigurationAction(ROS2ControllerHelper ros2ControllerHelper)
@@ -36,12 +37,18 @@ public class HandConfigurationAction extends HandConfigurationActionData impleme
    }
 
    @Override
-   public boolean isExecuting()
+   public void updateCurrentlyExecuting()
    {
+      isExecuting = executionTimer.isRunning(WAIT_TIME);
+
       executionStatusMessage.setNominalExecutionDuration(WAIT_TIME);
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
-      ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, executionStatusMessage);
+      ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);
+   }
 
-      return executionTimer.isRunning(WAIT_TIME);
+   @Override
+   public boolean isExecuting()
+   {
+      return isExecuting;
    }
 }

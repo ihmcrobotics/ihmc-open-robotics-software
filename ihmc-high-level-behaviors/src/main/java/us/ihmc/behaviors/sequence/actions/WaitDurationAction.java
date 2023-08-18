@@ -9,7 +9,8 @@ import us.ihmc.tools.Timer;
 public class WaitDurationAction extends WaitDurationActionData implements BehaviorAction
 {
    private final ROS2ControllerHelper ros2ControllerHelper;
-   private final Timer timer = new Timer();
+   private final Timer executionTimer = new Timer();
+   private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
 
    public WaitDurationAction(ROS2ControllerHelper ros2ControllerHelper)
@@ -20,16 +21,22 @@ public class WaitDurationAction extends WaitDurationActionData implements Behavi
    @Override
    public void executeAction()
    {
-      timer.reset();
+      executionTimer.reset();
+   }
+
+   @Override
+   public void updateCurrentlyExecuting()
+   {
+      isExecuting = executionTimer.isRunning(getWaitDuration());
+
+      executionStatusMessage.setNominalExecutionDuration(getWaitDuration());
+      executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
+      ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, executionStatusMessage);
    }
 
    @Override
    public boolean isExecuting()
    {
-      executionStatusMessage.setNominalExecutionDuration(getWaitDuration());
-      executionStatusMessage.setElapsedExecutionTime(timer.getElapsedTime());
-      ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, executionStatusMessage);
-
-      return timer.isRunning(getWaitDuration());
+      return isExecuting;
    }
 }

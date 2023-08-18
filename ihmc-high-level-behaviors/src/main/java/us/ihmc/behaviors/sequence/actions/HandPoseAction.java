@@ -34,6 +34,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    private final HandPoseJointAnglesStatusMessage handPoseJointAnglesStatus = new HandPoseJointAnglesStatusMessage();
    private final Timer executionTimer = new Timer();
    private final Throttler warningThrottler = new Throttler().setFrequency(2.0);
+   private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
 
    public HandPoseAction(ROS2ControllerHelper ros2ControllerHelper,
@@ -99,25 +100,29 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    }
 
    @Override
-   public boolean isExecuting()
+   public void updateCurrentlyExecuting()
    {
       desiredHandControlPose.setFromReferenceFrame(getReferenceFrame());
       syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getSide()));
 
       // Left hand broke on Nadia and not in the robot model?
       double rotationTolerance = getSide() == RobotSide.LEFT ? BROKEN_WRIST_ROTATION_TOLERANCE : ROTATION_TOLERANCE;
-      boolean isExecuting = BehaviorActionSequenceTools.isExecuting(desiredHandControlPose,
-                                                                    syncedHandControlPose,
-                                                                    TRANSLATION_TOLERANCE,
-                                                                    rotationTolerance,
-                                                                    getTrajectoryDuration(),
-                                                                    executionTimer,
-                                                                    warningThrottler);
+      isExecuting = BehaviorActionSequenceTools.isExecuting(desiredHandControlPose,
+                                                            syncedHandControlPose,
+                                                            TRANSLATION_TOLERANCE,
+                                                            rotationTolerance,
+                                                            getTrajectoryDuration(),
+                                                            executionTimer,
+                                                            warningThrottler);
 
       executionStatusMessage.setNominalExecutionDuration(getTrajectoryDuration());
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
-      ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, executionStatusMessage);
+      ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);
+   }
 
+   @Override
+   public boolean isExecuting()
+   {
       return isExecuting;
    }
 }

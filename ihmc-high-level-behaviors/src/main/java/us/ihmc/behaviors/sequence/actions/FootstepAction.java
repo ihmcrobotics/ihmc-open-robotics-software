@@ -22,6 +22,7 @@ public class FootstepAction extends FootstepActionData implements BehaviorAction
    private final double swingDuration = 1.2;
    private final double transferDuration = 0.8;
    private final Timer executionTimer = new Timer();
+   private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
 
    public FootstepAction(ROS2ControllerHelper ros2ControllerHelper, ReferenceFrameLibrary referenceFrameLibrary)
@@ -52,14 +53,19 @@ public class FootstepAction extends FootstepActionData implements BehaviorAction
    }
 
    @Override
-   public boolean isExecuting()
+   public void updateCurrentlyExecuting()
    {
       double nominalExecutionDuration = swingDuration + transferDuration;
+      isExecuting = executionTimer.isRunning(nominalExecutionDuration);
 
       executionStatusMessage.setNominalExecutionDuration(nominalExecutionDuration);
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
-      ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, executionStatusMessage);
+      ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);
+   }
 
-      return executionTimer.isRunning(nominalExecutionDuration);
+   @Override
+   public boolean isExecuting()
+   {
+      return isExecuting;
    }
 }
