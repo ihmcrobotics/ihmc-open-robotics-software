@@ -7,6 +7,11 @@ import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 
+/**
+ * This class performs the Monte Carlo Tree Search for the Monte Carlo Planning agent. It uses the
+ * Monte Carlo Tree Node class to store the state at each node in the tree and uses the Agent and World
+ * classes to store the agent and world states for planning purposes.
+ */
 public class MonteCarloPlanner
 {
    private int searchIterations = 10;

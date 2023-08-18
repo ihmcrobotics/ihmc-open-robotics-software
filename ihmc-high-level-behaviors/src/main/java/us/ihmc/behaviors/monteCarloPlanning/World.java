@@ -7,6 +7,11 @@ import us.ihmc.euclid.tuple4D.Vector4D32;
 
 import java.util.ArrayList;
 
+/**
+ * This class stores the state of the environment for the Monte Carlo Planning agent. Particularly it handles the occupancy, and
+ * exploration or coverage achieved so far by the agent. An image-based representation is used to access the 2D occupancy and coverage information
+ * for fast access as well as visualization and debugging.
+ */
 public class World
 {
    private final Mat grid;
