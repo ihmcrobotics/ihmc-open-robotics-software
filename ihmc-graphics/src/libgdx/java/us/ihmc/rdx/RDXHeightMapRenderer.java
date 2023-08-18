@@ -86,7 +86,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
 
       for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
       {
-         double xPosition = indexToCoordinate(xIndex, center.getX(), cellSizeXYInMeters, centerIndex);
+         double xPosition = indexToCoordinate(xIndex, center.getX(), cellSizeXYInMeters, centerIndex) + 1.5f;
 
          for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
          {
