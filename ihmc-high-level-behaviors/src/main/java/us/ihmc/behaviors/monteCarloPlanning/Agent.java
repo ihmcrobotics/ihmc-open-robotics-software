@@ -6,6 +6,12 @@ import us.ihmc.euclid.tuple4D.Vector4D32;
 
 import java.util.ArrayList;
 
+/**
+ * This class represents the robot and stores the state of the agent in
+ * the Monte Carlo Planner including the current and past locations of the agent
+ * as well as for handling the virtual sensor data available on the agent for simulated
+ * rollouts in the Monte Carlo Tree Search.
+ */
 public class Agent
 {
    private RangeScanner rangeScanner = new RangeScanner();
