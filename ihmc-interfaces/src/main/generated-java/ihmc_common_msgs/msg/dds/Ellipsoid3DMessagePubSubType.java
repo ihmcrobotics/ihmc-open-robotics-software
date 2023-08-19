@@ -15,7 +15,7 @@ public class Ellipsoid3DMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4e010183cc223c7d26e01fa0fdff2ae71ceb4be23391c7e206ed7b022138ee16";
+   		return "01c9ae373d8d49babf49be0e47f69caa56b9a991731eb6d986a266a9bcc6b43d";
    }
    
    @Override

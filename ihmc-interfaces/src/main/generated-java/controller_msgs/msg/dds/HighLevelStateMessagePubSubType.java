@@ -15,7 +15,7 @@ public class HighLevelStateMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a98edcf96889c49b2e1f71e7d3c97bb6d46011758b2dd33ee58adc0112b6a5c1";
+   		return "f5bb4d69decdd0729f806755c04cb609cf1ba29a6dd324143d46ed2bfffa918d";
    }
    
    @Override
