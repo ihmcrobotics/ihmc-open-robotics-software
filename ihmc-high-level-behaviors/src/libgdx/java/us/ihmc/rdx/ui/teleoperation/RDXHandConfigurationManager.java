@@ -8,7 +8,6 @@ import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.tools.RDXIconTexture;
-import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -26,6 +25,7 @@ public class RDXHandConfigurationManager
    private final SideDependentList<RDXIconTexture> handIcons = new SideDependentList<>();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final SideDependentList<RDXSakeHandInformation> sakeHandInfo = new SideDependentList<>();
+   private final SideDependentList<RDXHandQuickAccessButtons> handQuickAccessButtons = new SideDependentList<>();
 
    public void create(RDXBaseUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobotModel)
    {
@@ -41,41 +41,31 @@ public class RDXHandConfigurationManager
       {
          handIcons.put(side, new RDXIconTexture("icons/" + side.getLowerCaseName() + "Hand.png"));
 
-         RDX3DPanelToolbarButton calibrateButton = baseUI.getPrimary3DPanel().addToolbarButton();
-         calibrateButton.loadAndSetIcon("icons/calibrate.png");
-         calibrateButton.setTooltipText("Calibrate %s hand".formatted(side.getLowerCaseName()));
-         calibrateButton.setOnPressed(() -> publishHandCommand(side, HandConfiguration.CALIBRATE));
-
-         RDX3DPanelToolbarButton openHandButton = baseUI.getPrimary3DPanel().addToolbarButton();
-         openHandButton.loadAndSetIcon("icons/openGripper.png");
-         openHandButton.setTooltipText("Open %s hand".formatted(side.getLowerCaseName()));
-         openHandButton.setOnPressed(() -> publishHandCommand(side, HandConfiguration.OPEN));
-
-         RDX3DPanelToolbarButton closeHandButton = baseUI.getPrimary3DPanel().addToolbarButton();
-         closeHandButton.loadAndSetIcon("icons/closeGripper.png");
-         closeHandButton.setTooltipText("Close %s hand".formatted(side.getLowerCaseName()));
-         closeHandButton.setOnPressed(() -> publishHandCommand(side, HandConfiguration.CLOSE));
+         Runnable openHand = () -> publishHandCommand(side, HandConfiguration.OPEN);
+         Runnable closeHand = () -> publishHandCommand(side, HandConfiguration.CLOSE);
+         Runnable calibrateHand = () -> publishHandCommand(side, HandConfiguration.CALIBRATE);
+         Runnable resetHand = () -> publishHandCommand(side, HandConfiguration.RESET);
+         handQuickAccessButtons.put(side, new RDXHandQuickAccessButtons(baseUI, side, openHand, closeHand, calibrateHand, resetHand));
       }
 
       if (syncedRobotModel.getRobotModel().getHandModels().toString().contains("SakeHand"))
          setupForSakeHands();
    }
 
-   public void publishArmHomeCommand(RobotSide side)
-   {
-      double trajectoryTime = 3.5;
-      GoHomeMessage homeArm = new GoHomeMessage();
-      homeArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
-      homeArm.setRobotSide(side.toByte());
-      homeArm.setTrajectoryTime(trajectoryTime);
-      communicationHelper.publishToController(homeArm);
-   }
-
-   public void setupForSakeHands()
+   private void setupForSakeHands()
    {
       for (RobotSide side : RobotSide.values)
       {
          sakeHandInfo.put(side, new RDXSakeHandInformation(side, communicationHelper));
+      }
+   }
+
+   public void update()
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         sakeHandInfo.get(side).update();
+         handQuickAccessButtons.get(side).update(sakeHandInfo.get(side));
       }
    }
 
