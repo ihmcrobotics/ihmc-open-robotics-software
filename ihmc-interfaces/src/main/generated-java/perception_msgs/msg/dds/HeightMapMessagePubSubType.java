@@ -15,7 +15,7 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e024b8ac4761e9faffd92f3ea3ee79e5b2d84a194c76de1cb6e7ed89e1fdafb4";
+   		return "82715cb667bd36b8affe1e4678b3f83f3aed381c6e656e111d05cd76fcc2c615";
    }
    
    @Override

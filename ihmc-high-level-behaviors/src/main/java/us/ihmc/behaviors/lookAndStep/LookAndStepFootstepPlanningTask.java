@@ -299,7 +299,6 @@ public class LookAndStepFootstepPlanningTask
          stanceSideWhenLastFootstepStarted = lastStartedRobotSide == null ? null : lastStartedRobotSide.getOppositeSide();
          behaviorState = behaviorStateReference.get();
          numberOfIncompleteFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps();
-         numberOfCompletedFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfCompletedFootsteps();
          swingPlannerType = SwingPlannerType.fromInt(lookAndStepParameters.getSwingPlannerType());
 
          planarRegionsManager.updateSnapshot();
@@ -334,7 +333,6 @@ public class LookAndStepFootstepPlanningTask
    protected RobotSide lastPlanInitialStanceSide;
    protected LookAndStepBehavior.State behaviorState;
    protected int numberOfIncompleteFootsteps;
-   protected int numberOfCompletedFootsteps;
    protected SwingPlannerType swingPlannerType;
    protected final List<FootstepStatusMessage> stepsStartedWhilePlanning = new ArrayList<>();
    protected final Stopwatch moreInclusivePlanningDurationStopwatch = new Stopwatch();
