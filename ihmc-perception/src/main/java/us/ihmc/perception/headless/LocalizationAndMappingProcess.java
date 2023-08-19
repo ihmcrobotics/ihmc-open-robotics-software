@@ -149,8 +149,6 @@ public class LocalizationAndMappingProcess
    {
       if (latestDepthMessage.get() == null)
          latestDepthMessage.set(depthMessage);
-
-      executorService.submit(this::updateOccupancyGrid);
    }
 
    public void onPlanarRegionsReceived(FramePlanarRegionsListMessage message)
@@ -159,11 +157,6 @@ public class LocalizationAndMappingProcess
          latestIncomingRegions.set(message);
 
       executorService.submit(this::updateMap);
-   }
-
-   public synchronized void updateOccupancyGrid()
-   {
-      //LogTools.debug("Ouster Depth Received!");
    }
 
    public synchronized void updateMap()

@@ -107,10 +107,7 @@ public class MonteCarloPlannerTools
 
    public static boolean isPointOccupied(Point2D point, Mat grid)
    {
-      if (grid.ptr((int) point.getX(), (int) point.getY()).get() == 100)
-         return true;
-      else
-         return false;
+      return grid.ptr((int) point.getX(), (int) point.getY()).get() == 100;
    }
 
    public static Point2D findClosestIntersection(Point2D start_point, Point2D end_point, Mat grid)
