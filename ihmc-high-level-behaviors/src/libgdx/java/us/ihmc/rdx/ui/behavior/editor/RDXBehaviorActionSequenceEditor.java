@@ -405,7 +405,7 @@ public class RDXBehaviorActionSequenceEditor
          {
             commandNextActionIndex(i);
          }
-         ImGuiTools.previousWidgetTooltip("Next for excecution");
+         ImGuiTools.previousWidgetTooltip("Next for execution. Index " + i);
          action.getDescription().set(action.getActionData().getDescription());
          ImGui.sameLine();
          ImGui.text("->");
@@ -461,7 +461,7 @@ public class RDXBehaviorActionSequenceEditor
             action.getSelected().renderImGuiWidget();
             ImGuiTools.previousWidgetTooltip("(Show gizmo)");
             ImGui.sameLine();
-            ImGui.text("Type: %s Index: %d".formatted(action.getActionTypeTitle(), i));
+            ImGui.text("Type: %s   Index: %d".formatted(action.getActionTypeTitle(), i));
          }
 
          action.renderImGuiWidgets();
