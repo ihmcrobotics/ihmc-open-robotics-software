@@ -18,7 +18,6 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.teleoperation.RDXDesiredRobot;
 import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
@@ -49,6 +48,8 @@ public class RDXArmManager
    private RDXArmControlMode armControlMode = RDXArmControlMode.JOINT_ANGLES;
    private final SideDependentList<double[]> armsWide = new SideDependentList<>();
    private final SideDependentList<double[]> doorAvoidanceArms = new SideDependentList<>();
+   /** Nadia's arm positions where it's holding a shield in front of the chest. */
+   private final SideDependentList<double[]> shieldHoldingArms = new SideDependentList<>();
    private final RDXHandConfigurationManager handManager;
 
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
@@ -88,6 +89,13 @@ public class RDXArmManager
       }
       doorAvoidanceArms.put(RobotSide.LEFT, new double[] {-0.121, -0.124, -0.971, -1.513, -0.935, -0.873, 0.245});
       doorAvoidanceArms.put(RobotSide.RIGHT, new double[] {-0.523, -0.328, 0.586, -2.192, 0.828, 1.009, -0.281});
+      shieldHoldingArms.put(RobotSide.LEFT, new double[] {-1.01951, 0.72311, -1.29244, -1.26355, -0.51712, -0.04580, -0.00659});
+      shieldHoldingArms.put(RobotSide.RIGHT, new double[7]);
+      boolean[] invert = new boolean[] {false, true, true, false, true, false, false};
+      for (int i = 0; i < shieldHoldingArms.get(RobotSide.LEFT).length; i++)
+      {
+         shieldHoldingArms.get(RobotSide.RIGHT)[i] = (invert[i] ? -1.0 : 1.0) * shieldHoldingArms.get(RobotSide.LEFT)[i];
+      }
 
       handWrenchCalculator = new HandWrenchCalculator(syncedRobot);
 
@@ -103,10 +111,6 @@ public class RDXArmManager
    public void create(RDXBaseUI baseUI)
    {
       panelHandWrenchIndicator = new RDX3DPanelHandWrenchIndicator(baseUI.getPrimary3DPanel());
-      RDX3DPanelToolbarButton wrenchToolbarButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      wrenchToolbarButton.loadAndSetIcon("icons/handWrench.png");
-      wrenchToolbarButton.setTooltipText("Show / hide estimated hand wrench");
-      wrenchToolbarButton.setOnPressed(() -> indicateWrenchOnScreen.set(!indicateWrenchOnScreen.get()));
       baseUI.getPrimary3DPanel().addImGuiOverlayAddition(() ->
       {
          if (indicateWrenchOnScreen.get())
@@ -214,14 +218,23 @@ public class RDXArmManager
             communicationHelper.publishToController(armTrajectoryMessage);
          }
       }
-
       ImGui.text("Door avoidance arms:");
       for (RobotSide side : RobotSide.values)
       {
          ImGui.sameLine();
-         if (ImGui.button(labels.get(side.getPascalCaseName())))
+         if (ImGui.button(labels.get(side.getPascalCaseName(), "Door avoidance")))
          {
             executeDoorAvoidanceArmAngles(side);
+         }
+      }
+      ImGui.sameLine();
+      ImGui.text("Shield holding arms:");
+      for (RobotSide side : RobotSide.values)
+      {
+         ImGui.sameLine();
+         if (ImGui.button(labels.get(side.getPascalCaseName(), "Shield holding")))
+         {
+            executeShieldHoldingArmAngles(side);
          }
       }
 
@@ -262,9 +275,19 @@ public class RDXArmManager
 
    public void executeDoorAvoidanceArmAngles(RobotSide side)
    {
+      executeArmAngles(side, doorAvoidanceArms, teleoperationParameters.getTrajectoryTime());
+   }
+
+   public void executeShieldHoldingArmAngles(RobotSide side)
+   {
+      executeArmAngles(side, shieldHoldingArms, 3.0);
+   }
+
+   public void executeArmAngles(RobotSide side, SideDependentList<double[]> jointAngles, double trajectoryTime)
+   {
       ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
-                                                                                                  teleoperationParameters.getTrajectoryTime(),
-                                                                                                  doorAvoidanceArms.get(side));
+                                                                                                  trajectoryTime,
+                                                                                                  jointAngles.get(side));
       communicationHelper.publishToController(armTrajectoryMessage);
    }
 
