@@ -15,7 +15,7 @@ public class HandTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "358d65ebb83e8f2e14dcc81cd269d2bfa4483abf32cb55617be5e05ed3601768";
+   		return "fbf7f1cee0f2224c948116d25730baa239af7aa9c8d518ca2984fc0dee2a20e1";
    }
    
    @Override

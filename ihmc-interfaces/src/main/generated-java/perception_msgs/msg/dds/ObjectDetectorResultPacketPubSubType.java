@@ -15,7 +15,7 @@ public class ObjectDetectorResultPacketPubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "343e32103c889f950def9397ad22a371b9959f71d40a16c682fad74ffec8c91d";
+   		return "d2a69bf3012907d2df4e409d54800f020bbcd34fd1af913048aafc6afd07ec6e";
    }
    
    @Override
