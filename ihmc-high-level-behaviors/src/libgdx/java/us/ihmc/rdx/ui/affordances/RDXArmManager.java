@@ -122,10 +122,10 @@ public class RDXArmManager
 
    public void update()
    {
-      boolean desiredHandPoseChanged = false;
-
+      handManager.update();
       handWrenchCalculator.compute();
 
+      boolean desiredHandPoseChanged = false;
       for (RobotSide side : interactableHands.sides())
       {
          armIKSolvers.get(side).update(interactableHands.get(side).getControlReferenceFrame());
