@@ -286,6 +286,8 @@ public class RDXLocomotionManager
       boolean continueAvailable = !pauseAvailable && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0;
       boolean walkAvailable = !continueAvailable && interactableFootstepPlan.getNumberOfFootsteps() > 0;
 
+      ImGui.text("Queued footsteps: " + controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps());
+
       if (ImGui.button(labels.get("Disable Leg Mode")))
       {
          legControlMode = RDXLegControlMode.DISABLED;

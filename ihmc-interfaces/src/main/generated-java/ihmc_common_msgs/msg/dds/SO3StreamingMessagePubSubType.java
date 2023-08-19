@@ -15,7 +15,7 @@ public class SO3StreamingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "95d981ba46fe0cfe0041e134464907d1688c48945a7213a9109fbe7b858c2b95";
+   		return "494d87e8934f86806e1df429ab55aa133bd2ca5d226d32270dfbb40c1684cd56";
    }
    
    @Override

@@ -15,7 +15,7 @@ public class AtlasElectricMotorEnablePacketPubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "438b1cca285137269f8ac3c715f1b1d3166041152ce907e779d08575190ce25b";
+   		return "484307c2f6f4576ee0dddc567e694b03030dd7a88b2c9aa5c65b6b9c0d095ad6";
    }
    
    @Override

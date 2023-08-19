@@ -15,7 +15,7 @@ public class MultiContactTimedContactSequenceMessagePubSubType implements us.ihm
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "03f1fb77edaeaf37ef88467eeb6c8219a5b477f8c184861315a31fd41efb31d1";
+   		return "356e04a1322d0b50a85e2802c74a9a67ec241dedf2acdf921717cb366c1abd09";
    }
    
    @Override

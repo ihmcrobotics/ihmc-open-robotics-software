@@ -15,7 +15,7 @@ public class OneDoFJointTrajectoryMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "55d3df90c8727f43d73fc229860f9d1522120d014d6a6aa1d644ec2d6727c499";
+   		return "906a241c529d5f4d4e0a47ba01e65d50152118ec79f67fca45823b510a60e2d8";
    }
    
    @Override

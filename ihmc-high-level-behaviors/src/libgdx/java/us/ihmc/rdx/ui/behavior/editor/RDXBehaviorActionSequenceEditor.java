@@ -60,6 +60,7 @@ public class RDXBehaviorActionSequenceEditor
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean automaticExecution = new ImBoolean(false);
    private final ImVec2 calcDescriptionTextSize = new ImVec2();
+   private final ImVec2 expandButtonSize = new ImVec2();
    private float longestDescriptionLength;
    private String name;
    @Nullable
@@ -295,8 +296,9 @@ public class RDXBehaviorActionSequenceEditor
          }
       }
       ImGuiTools.previousWidgetTooltip("Expand all action settings");
+      ImGui.getItemRectSize(expandButtonSize);
       ImGui.sameLine();
-      if (ImGui.button(labels.get("[-]")))
+      if (ImGui.button(labels.get("[-]"), expandButtonSize.x, expandButtonSize.y))
       {
          for (var action : actionSequence)
          {
@@ -428,7 +430,7 @@ public class RDXBehaviorActionSequenceEditor
          {
             commandNextActionIndex(i);
          }
-         ImGuiTools.previousWidgetTooltip("Next for excecution");
+         ImGuiTools.previousWidgetTooltip("Next for execution. Index " + i);
          action.getDescription().set(action.getActionData().getDescription());
          ImGui.sameLine();
          ImGui.text("->");
@@ -442,7 +444,7 @@ public class RDXBehaviorActionSequenceEditor
          }
          else
          {
-            if (ImGui.button(labels.get("[-]", "collapse", i)))
+            if (ImGui.button(labels.get("[-]", "collapse", i), expandButtonSize.x, expandButtonSize.y))
                action.getExpanded().set(false);
             ImGuiTools.previousWidgetTooltip("Collapse action settings");
          }
@@ -484,7 +486,7 @@ public class RDXBehaviorActionSequenceEditor
             action.getSelected().renderImGuiWidget();
             ImGuiTools.previousWidgetTooltip("(Show gizmo)");
             ImGui.sameLine();
-            ImGui.text("Type: %s Index: %d".formatted(action.getActionTypeTitle(), i));
+            ImGui.text("Type: %s   Index: %d".formatted(action.getActionTypeTitle(), i));
          }
 
          action.renderImGuiWidgets();
