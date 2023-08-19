@@ -42,12 +42,12 @@ public class RDXHandQuickAccessButtons
       this.resetHand = resetHand;
 
       calibrateIcon = openHandCalibrateButton.loadAndSetIcon("icons/calibrate.png");
-      openIcon = openHandCalibrateButton.loadAndSetIcon("icons/openGripper.png");
+      openIcon = openHandCalibrateButton.loadAndSetIcon("icons/openHand%s.png".formatted(side.getPascalCaseName()));
       openHandCalibrateButton.setTooltipText("Open %s hand".formatted(side.getLowerCaseName()));
       openHandCalibrateButton.setOnPressed(openHand);
 
       resetIcon = closeHandResetButton.loadAndSetIcon("icons/resetHand.png");
-      closeIcon = closeHandResetButton.loadAndSetIcon("icons/closeGripper.png");
+      closeIcon = closeHandResetButton.loadAndSetIcon("icons/closeHand%s.png".formatted(side.getPascalCaseName()));
       closeHandResetButton.setTooltipText("Close %s hand".formatted(side.getLowerCaseName()));
       closeHandResetButton.setOnPressed(closeHand);
    }
