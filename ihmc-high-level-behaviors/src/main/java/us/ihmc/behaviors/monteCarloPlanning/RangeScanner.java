@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.monteCarloPlanning;
 
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple4D.Vector4D32;
 
 import java.util.ArrayList;
 
