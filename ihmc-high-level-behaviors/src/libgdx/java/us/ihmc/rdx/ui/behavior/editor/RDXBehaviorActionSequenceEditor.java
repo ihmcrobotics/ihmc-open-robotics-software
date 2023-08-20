@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImGui;
 import imgui.ImVec2;
+import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -59,7 +60,7 @@ import java.util.LinkedList;
  */
 public class RDXBehaviorActionSequenceEditor
 {
-   public static final float PROGRESS_BAR_HEIGHT = 20.0f;
+   public static final float PROGRESS_BAR_HEIGHT = 18.0f;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean automaticExecution = new ImBoolean(false);
@@ -404,6 +405,7 @@ public class RDXBehaviorActionSequenceEditor
             ImGui.text("Executing: %s (%s)".formatted(executingAction.getDescription(), executingAction.getActionTypeTitle()));
          }
 
+
          widgetAligner.text("Expected time remaining:");
          double elapsedTime = latestExecutionStatus.getElapsedExecutionTime();
          double nominalDuration = latestExecutionStatus.getNominalExecutionDuration();
@@ -411,18 +413,36 @@ public class RDXBehaviorActionSequenceEditor
          double percentLeft = 1.0 - percentComplete;
          ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "%.2f / %.2f".formatted(elapsedTime, nominalDuration));
 
-         widgetAligner.text("Translation error (m):");
-         double currentTranslationToGoal = latestExecutionStatus.getTranslationCurrentDistanceToGoal();
-         double startTranslationToGoal = latestExecutionStatus.getTranslationStartDistanceToGoal();
-         percentLeft = currentTranslationToGoal / Math.max(startTranslationToGoal, 0.05);
-         ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "%.2f / %.2f".formatted(currentTranslationToGoal,
-                                                                                                                     startTranslationToGoal));
+         ImGui.spacing();
+         widgetAligner.text("Position error (m):");
+         double currentPositionError = latestExecutionStatus.getCurrentPositionDistanceToGoal();
+         double startPositionError = latestExecutionStatus.getStartPositionDistanceToGoal();
+         double positionTolerance = latestExecutionStatus.getPositionDistanceToGoalTolerance();
+         double barEndValue = Math.max(Math.min(startPositionError, currentPositionError), 2.0 * positionTolerance);
+         double toleranceMarkPercent = positionTolerance / barEndValue;
+         int barColor = currentPositionError < positionTolerance ? ImGuiTools.GREEN : ImGuiTools.RED;
+         percentLeft = currentPositionError / barEndValue;
+         ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT,
+                                      barColor,
+                                      percentLeft,
+                                      toleranceMarkPercent,
+                                      "%.2f / %.2f".formatted(currentPositionError, startPositionError));
+         ImGui.spacing();
          widgetAligner.text("Orientation error (%s):".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL));
-         double currentOrientationToGoal = latestExecutionStatus.getOrientationCurrentDistanceToGoal();
-         double startOrientationToGoal = latestExecutionStatus.getOrientationStartDistanceToGoal();
-         percentLeft = currentOrientationToGoal / Math.max(startOrientationToGoal, Math.toRadians(1.0));
-         ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "%.2f / %.2f".formatted(currentOrientationToGoal,
-                                                                                                                     startOrientationToGoal));
+         double currentOrientationError = latestExecutionStatus.getCurrentOrientationDistanceToGoal();
+         double startOrientationError = latestExecutionStatus.getStartOrientationDistanceToGoal();
+         double orientationTolerance = latestExecutionStatus.getOrientationDistanceToGoalTolerance();
+         barEndValue = Math.max(Math.min(startOrientationError, currentOrientationError), 2.0 * orientationTolerance);
+         toleranceMarkPercent = orientationTolerance / barEndValue;
+         barColor = currentOrientationError < orientationTolerance ? ImGuiTools.GREEN : ImGuiTools.RED;
+         percentLeft = currentOrientationError / barEndValue;
+         ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT,
+                                      barColor,
+                                      percentLeft,
+                                      toleranceMarkPercent,
+                                      "%.2f / %.2f".formatted(Math.toDegrees(currentOrientationError), Math.toDegrees(startOrientationError)));
+         ImGui.spacing();
+
          if (executingAction instanceof RDXWalkAction)
          {
             widgetAligner.text("Footstep completion:");

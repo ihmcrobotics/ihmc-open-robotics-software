@@ -15,16 +15,22 @@ uint16 total_number_of_footsteps
 # Incomplete footsteps; used for walking actions
 uint16 number_of_incomplete_footsteps
 
-# Translation current distance to goal
-float64 translation_current_distance_to_goal
+# Current position distance to goal
+float64 current_position_distance_to_goal
 
-# Translation start distance to goal
-float64 translation_start_distance_to_goal
+# Start position distance to goal
+float64 start_position_distance_to_goal
 
-# Orientation current distance to goal
-float64 orientation_current_distance_to_goal
+# Position distance to goal tolerance
+float64 position_distance_to_goal_tolerance
 
-# Orientation start distance to goal
-float64 orientation_start_distance_to_goal
+# Current orientation distance to goal
+float64 current_orientation_distance_to_goal
+
+# Start orientation distance to goal
+float64 start_orientation_distance_to_goal
+
+# Orientation distance to goal tolerance
+float64 orientation_distance_to_goal_tolerance
 
 

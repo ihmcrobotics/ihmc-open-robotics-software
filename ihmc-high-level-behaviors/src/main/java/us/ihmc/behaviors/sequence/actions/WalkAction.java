@@ -31,8 +31,8 @@ import java.util.UUID;
 
 public class WalkAction extends WalkActionData implements BehaviorAction
 {
-   public static final double TRANSLATION_TOLERANCE = 0.15;
-   public static final double ROTATION_TOLERANCE = Math.toRadians(10.0);
+   public static final double POSITION_TOLERANCE = 0.15;
+   public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -50,8 +50,7 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
    private double nominalExecutionDuration;
-   private final SideDependentList<BehaviorActionCompletionCalculator> completionCalculator
-         = new SideDependentList<>(() -> new BehaviorActionCompletionCalculator());
+   private final SideDependentList<BehaviorActionCompletionCalculator> completionCalculator = new SideDependentList<>(BehaviorActionCompletionCalculator::new);
 
    public WalkAction(ROS2ControllerHelper ros2ControllerHelper,
                      ROS2SyncedRobotModel syncedRobot,
@@ -177,9 +176,7 @@ public class WalkAction extends WalkActionData implements BehaviorAction
 
          isComplete &= completionCalculator.get(side)
                                            .isComplete(commandedGoalFeetTransformToWorld.get(side),
-                                                       syncedFeetPoses.get(side),
-                                                       TRANSLATION_TOLERANCE,
-                                                       ROTATION_TOLERANCE,
+                                                       syncedFeetPoses.get(side), POSITION_TOLERANCE, ORIENTATION_TOLERANCE,
                                                        nominalExecutionDuration,
                                                        executionTimer,
                                                        warningThrottler);
@@ -194,10 +191,12 @@ public class WalkAction extends WalkActionData implements BehaviorAction
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
       executionStatusMessage.setTotalNumberOfFootsteps(footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps());
       executionStatusMessage.setNumberOfIncompleteFootsteps(incompleteFootsteps);
-      executionStatusMessage.setOrientationCurrentDistanceToGoal(completionCalculator.get(RobotSide.LEFT).getRotationError()
+      executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.get(RobotSide.LEFT).getRotationError()
                                                                  + completionCalculator.get(RobotSide.RIGHT).getRotationError());
-      executionStatusMessage.setTranslationCurrentDistanceToGoal(completionCalculator.get(RobotSide.LEFT).getTranslationError()
+      executionStatusMessage.setCurrentPositionDistanceToGoal(completionCalculator.get(RobotSide.LEFT).getTranslationError()
                                                                  + completionCalculator.get(RobotSide.RIGHT).getTranslationError());
+      executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
+      executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
       ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);
    }
 

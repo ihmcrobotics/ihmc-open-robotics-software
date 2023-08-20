@@ -35,21 +35,29 @@ module behavior_msgs
          */
         unsigned short number_of_incomplete_footsteps;
         /**
-         * Translation current distance to goal
+         * Current position distance to goal
          */
-        double translation_current_distance_to_goal;
+        double current_position_distance_to_goal;
         /**
-         * Translation start distance to goal
+         * Start position distance to goal
          */
-        double translation_start_distance_to_goal;
+        double start_position_distance_to_goal;
         /**
-         * Orientation current distance to goal
+         * Position distance to goal tolerance
          */
-        double orientation_current_distance_to_goal;
+        double position_distance_to_goal_tolerance;
         /**
-         * Orientation start distance to goal
+         * Current orientation distance to goal
          */
-        double orientation_start_distance_to_goal;
+        double current_orientation_distance_to_goal;
+        /**
+         * Start orientation distance to goal
+         */
+        double start_orientation_distance_to_goal;
+        /**
+         * Orientation distance to goal tolerance
+         */
+        double orientation_distance_to_goal_tolerance;
       };
     };
   };

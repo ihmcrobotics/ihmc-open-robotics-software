@@ -15,7 +15,7 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "8cd233c86781f79a8a9e841d1e6a36c72bfc906d611745593b7b4867ce039a49";
+   		return "d80baa183c13b8b9e57846d5226744ad978e04af74c579327fa130addd300395";
    }
    
    @Override
@@ -70,6 +70,10 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -110,6 +114,12 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -126,13 +136,17 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
 
       cdr.write_type_3(data.getNumberOfIncompleteFootsteps());
 
-      cdr.write_type_6(data.getTranslationCurrentDistanceToGoal());
+      cdr.write_type_6(data.getCurrentPositionDistanceToGoal());
 
-      cdr.write_type_6(data.getTranslationStartDistanceToGoal());
+      cdr.write_type_6(data.getStartPositionDistanceToGoal());
 
-      cdr.write_type_6(data.getOrientationCurrentDistanceToGoal());
+      cdr.write_type_6(data.getPositionDistanceToGoalTolerance());
 
-      cdr.write_type_6(data.getOrientationStartDistanceToGoal());
+      cdr.write_type_6(data.getCurrentOrientationDistanceToGoal());
+
+      cdr.write_type_6(data.getStartOrientationDistanceToGoal());
+
+      cdr.write_type_6(data.getOrientationDistanceToGoalTolerance());
 
    }
 
@@ -148,13 +162,17 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
       	
       data.setNumberOfIncompleteFootsteps(cdr.read_type_3());
       	
-      data.setTranslationCurrentDistanceToGoal(cdr.read_type_6());
+      data.setCurrentPositionDistanceToGoal(cdr.read_type_6());
       	
-      data.setTranslationStartDistanceToGoal(cdr.read_type_6());
+      data.setStartPositionDistanceToGoal(cdr.read_type_6());
       	
-      data.setOrientationCurrentDistanceToGoal(cdr.read_type_6());
+      data.setPositionDistanceToGoalTolerance(cdr.read_type_6());
       	
-      data.setOrientationStartDistanceToGoal(cdr.read_type_6());
+      data.setCurrentOrientationDistanceToGoal(cdr.read_type_6());
+      	
+      data.setStartOrientationDistanceToGoal(cdr.read_type_6());
+      	
+      data.setOrientationDistanceToGoalTolerance(cdr.read_type_6());
       	
 
    }
@@ -167,10 +185,12 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
       ser.write_type_6("elapsed_execution_time", data.getElapsedExecutionTime());
       ser.write_type_3("total_number_of_footsteps", data.getTotalNumberOfFootsteps());
       ser.write_type_3("number_of_incomplete_footsteps", data.getNumberOfIncompleteFootsteps());
-      ser.write_type_6("translation_current_distance_to_goal", data.getTranslationCurrentDistanceToGoal());
-      ser.write_type_6("translation_start_distance_to_goal", data.getTranslationStartDistanceToGoal());
-      ser.write_type_6("orientation_current_distance_to_goal", data.getOrientationCurrentDistanceToGoal());
-      ser.write_type_6("orientation_start_distance_to_goal", data.getOrientationStartDistanceToGoal());
+      ser.write_type_6("current_position_distance_to_goal", data.getCurrentPositionDistanceToGoal());
+      ser.write_type_6("start_position_distance_to_goal", data.getStartPositionDistanceToGoal());
+      ser.write_type_6("position_distance_to_goal_tolerance", data.getPositionDistanceToGoalTolerance());
+      ser.write_type_6("current_orientation_distance_to_goal", data.getCurrentOrientationDistanceToGoal());
+      ser.write_type_6("start_orientation_distance_to_goal", data.getStartOrientationDistanceToGoal());
+      ser.write_type_6("orientation_distance_to_goal_tolerance", data.getOrientationDistanceToGoalTolerance());
    }
 
    @Override
@@ -181,10 +201,12 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
       data.setElapsedExecutionTime(ser.read_type_6("elapsed_execution_time"));
       data.setTotalNumberOfFootsteps(ser.read_type_3("total_number_of_footsteps"));
       data.setNumberOfIncompleteFootsteps(ser.read_type_3("number_of_incomplete_footsteps"));
-      data.setTranslationCurrentDistanceToGoal(ser.read_type_6("translation_current_distance_to_goal"));
-      data.setTranslationStartDistanceToGoal(ser.read_type_6("translation_start_distance_to_goal"));
-      data.setOrientationCurrentDistanceToGoal(ser.read_type_6("orientation_current_distance_to_goal"));
-      data.setOrientationStartDistanceToGoal(ser.read_type_6("orientation_start_distance_to_goal"));
+      data.setCurrentPositionDistanceToGoal(ser.read_type_6("current_position_distance_to_goal"));
+      data.setStartPositionDistanceToGoal(ser.read_type_6("start_position_distance_to_goal"));
+      data.setPositionDistanceToGoalTolerance(ser.read_type_6("position_distance_to_goal_tolerance"));
+      data.setCurrentOrientationDistanceToGoal(ser.read_type_6("current_orientation_distance_to_goal"));
+      data.setStartOrientationDistanceToGoal(ser.read_type_6("start_orientation_distance_to_goal"));
+      data.setOrientationDistanceToGoalTolerance(ser.read_type_6("orientation_distance_to_goal_tolerance"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ActionExecutionStatusMessage src, behavior_msgs.msg.dds.ActionExecutionStatusMessage dest)
