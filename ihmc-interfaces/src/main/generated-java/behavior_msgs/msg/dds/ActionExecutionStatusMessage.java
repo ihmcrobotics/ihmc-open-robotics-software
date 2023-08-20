@@ -32,21 +32,29 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
             */
    public int number_of_incomplete_footsteps_;
    /**
-            * Translation current distance to goal
+            * Current position distance to goal
             */
-   public double translation_current_distance_to_goal_;
+   public double current_position_distance_to_goal_;
    /**
-            * Translation start distance to goal
+            * Start position distance to goal
             */
-   public double translation_start_distance_to_goal_;
+   public double start_position_distance_to_goal_;
    /**
-            * Orientation current distance to goal
+            * Position distance to goal tolerance
             */
-   public double orientation_current_distance_to_goal_;
+   public double position_distance_to_goal_tolerance_;
    /**
-            * Orientation start distance to goal
+            * Current orientation distance to goal
             */
-   public double orientation_start_distance_to_goal_;
+   public double current_orientation_distance_to_goal_;
+   /**
+            * Start orientation distance to goal
+            */
+   public double start_orientation_distance_to_goal_;
+   /**
+            * Orientation distance to goal tolerance
+            */
+   public double orientation_distance_to_goal_tolerance_;
 
    public ActionExecutionStatusMessage()
    {
@@ -70,13 +78,17 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
 
       number_of_incomplete_footsteps_ = other.number_of_incomplete_footsteps_;
 
-      translation_current_distance_to_goal_ = other.translation_current_distance_to_goal_;
+      current_position_distance_to_goal_ = other.current_position_distance_to_goal_;
 
-      translation_start_distance_to_goal_ = other.translation_start_distance_to_goal_;
+      start_position_distance_to_goal_ = other.start_position_distance_to_goal_;
 
-      orientation_current_distance_to_goal_ = other.orientation_current_distance_to_goal_;
+      position_distance_to_goal_tolerance_ = other.position_distance_to_goal_tolerance_;
 
-      orientation_start_distance_to_goal_ = other.orientation_start_distance_to_goal_;
+      current_orientation_distance_to_goal_ = other.current_orientation_distance_to_goal_;
+
+      start_orientation_distance_to_goal_ = other.start_orientation_distance_to_goal_;
+
+      orientation_distance_to_goal_tolerance_ = other.orientation_distance_to_goal_tolerance_;
 
    }
 
@@ -156,63 +168,93 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
    }
 
    /**
-            * Translation current distance to goal
+            * Current position distance to goal
             */
-   public void setTranslationCurrentDistanceToGoal(double translation_current_distance_to_goal)
+   public void setCurrentPositionDistanceToGoal(double current_position_distance_to_goal)
    {
-      translation_current_distance_to_goal_ = translation_current_distance_to_goal;
+      current_position_distance_to_goal_ = current_position_distance_to_goal;
    }
    /**
-            * Translation current distance to goal
+            * Current position distance to goal
             */
-   public double getTranslationCurrentDistanceToGoal()
+   public double getCurrentPositionDistanceToGoal()
    {
-      return translation_current_distance_to_goal_;
-   }
-
-   /**
-            * Translation start distance to goal
-            */
-   public void setTranslationStartDistanceToGoal(double translation_start_distance_to_goal)
-   {
-      translation_start_distance_to_goal_ = translation_start_distance_to_goal;
-   }
-   /**
-            * Translation start distance to goal
-            */
-   public double getTranslationStartDistanceToGoal()
-   {
-      return translation_start_distance_to_goal_;
+      return current_position_distance_to_goal_;
    }
 
    /**
-            * Orientation current distance to goal
+            * Start position distance to goal
             */
-   public void setOrientationCurrentDistanceToGoal(double orientation_current_distance_to_goal)
+   public void setStartPositionDistanceToGoal(double start_position_distance_to_goal)
    {
-      orientation_current_distance_to_goal_ = orientation_current_distance_to_goal;
+      start_position_distance_to_goal_ = start_position_distance_to_goal;
    }
    /**
-            * Orientation current distance to goal
+            * Start position distance to goal
             */
-   public double getOrientationCurrentDistanceToGoal()
+   public double getStartPositionDistanceToGoal()
    {
-      return orientation_current_distance_to_goal_;
+      return start_position_distance_to_goal_;
    }
 
    /**
-            * Orientation start distance to goal
+            * Position distance to goal tolerance
             */
-   public void setOrientationStartDistanceToGoal(double orientation_start_distance_to_goal)
+   public void setPositionDistanceToGoalTolerance(double position_distance_to_goal_tolerance)
    {
-      orientation_start_distance_to_goal_ = orientation_start_distance_to_goal;
+      position_distance_to_goal_tolerance_ = position_distance_to_goal_tolerance;
    }
    /**
-            * Orientation start distance to goal
+            * Position distance to goal tolerance
             */
-   public double getOrientationStartDistanceToGoal()
+   public double getPositionDistanceToGoalTolerance()
    {
-      return orientation_start_distance_to_goal_;
+      return position_distance_to_goal_tolerance_;
+   }
+
+   /**
+            * Current orientation distance to goal
+            */
+   public void setCurrentOrientationDistanceToGoal(double current_orientation_distance_to_goal)
+   {
+      current_orientation_distance_to_goal_ = current_orientation_distance_to_goal;
+   }
+   /**
+            * Current orientation distance to goal
+            */
+   public double getCurrentOrientationDistanceToGoal()
+   {
+      return current_orientation_distance_to_goal_;
+   }
+
+   /**
+            * Start orientation distance to goal
+            */
+   public void setStartOrientationDistanceToGoal(double start_orientation_distance_to_goal)
+   {
+      start_orientation_distance_to_goal_ = start_orientation_distance_to_goal;
+   }
+   /**
+            * Start orientation distance to goal
+            */
+   public double getStartOrientationDistanceToGoal()
+   {
+      return start_orientation_distance_to_goal_;
+   }
+
+   /**
+            * Orientation distance to goal tolerance
+            */
+   public void setOrientationDistanceToGoalTolerance(double orientation_distance_to_goal_tolerance)
+   {
+      orientation_distance_to_goal_tolerance_ = orientation_distance_to_goal_tolerance;
+   }
+   /**
+            * Orientation distance to goal tolerance
+            */
+   public double getOrientationDistanceToGoalTolerance()
+   {
+      return orientation_distance_to_goal_tolerance_;
    }
 
 
@@ -243,13 +285,17 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_incomplete_footsteps_, other.number_of_incomplete_footsteps_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.translation_current_distance_to_goal_, other.translation_current_distance_to_goal_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_position_distance_to_goal_, other.current_position_distance_to_goal_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.translation_start_distance_to_goal_, other.translation_start_distance_to_goal_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.start_position_distance_to_goal_, other.start_position_distance_to_goal_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.orientation_current_distance_to_goal_, other.orientation_current_distance_to_goal_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.position_distance_to_goal_tolerance_, other.position_distance_to_goal_tolerance_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.orientation_start_distance_to_goal_, other.orientation_start_distance_to_goal_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_orientation_distance_to_goal_, other.current_orientation_distance_to_goal_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.start_orientation_distance_to_goal_, other.start_orientation_distance_to_goal_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.orientation_distance_to_goal_tolerance_, other.orientation_distance_to_goal_tolerance_, epsilon)) return false;
 
 
       return true;
@@ -274,13 +320,17 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
 
       if(this.number_of_incomplete_footsteps_ != otherMyClass.number_of_incomplete_footsteps_) return false;
 
-      if(this.translation_current_distance_to_goal_ != otherMyClass.translation_current_distance_to_goal_) return false;
+      if(this.current_position_distance_to_goal_ != otherMyClass.current_position_distance_to_goal_) return false;
 
-      if(this.translation_start_distance_to_goal_ != otherMyClass.translation_start_distance_to_goal_) return false;
+      if(this.start_position_distance_to_goal_ != otherMyClass.start_position_distance_to_goal_) return false;
 
-      if(this.orientation_current_distance_to_goal_ != otherMyClass.orientation_current_distance_to_goal_) return false;
+      if(this.position_distance_to_goal_tolerance_ != otherMyClass.position_distance_to_goal_tolerance_) return false;
 
-      if(this.orientation_start_distance_to_goal_ != otherMyClass.orientation_start_distance_to_goal_) return false;
+      if(this.current_orientation_distance_to_goal_ != otherMyClass.current_orientation_distance_to_goal_) return false;
+
+      if(this.start_orientation_distance_to_goal_ != otherMyClass.start_orientation_distance_to_goal_) return false;
+
+      if(this.orientation_distance_to_goal_tolerance_ != otherMyClass.orientation_distance_to_goal_tolerance_) return false;
 
 
       return true;
@@ -302,14 +352,18 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
       builder.append(this.total_number_of_footsteps_);      builder.append(", ");
       builder.append("number_of_incomplete_footsteps=");
       builder.append(this.number_of_incomplete_footsteps_);      builder.append(", ");
-      builder.append("translation_current_distance_to_goal=");
-      builder.append(this.translation_current_distance_to_goal_);      builder.append(", ");
-      builder.append("translation_start_distance_to_goal=");
-      builder.append(this.translation_start_distance_to_goal_);      builder.append(", ");
-      builder.append("orientation_current_distance_to_goal=");
-      builder.append(this.orientation_current_distance_to_goal_);      builder.append(", ");
-      builder.append("orientation_start_distance_to_goal=");
-      builder.append(this.orientation_start_distance_to_goal_);
+      builder.append("current_position_distance_to_goal=");
+      builder.append(this.current_position_distance_to_goal_);      builder.append(", ");
+      builder.append("start_position_distance_to_goal=");
+      builder.append(this.start_position_distance_to_goal_);      builder.append(", ");
+      builder.append("position_distance_to_goal_tolerance=");
+      builder.append(this.position_distance_to_goal_tolerance_);      builder.append(", ");
+      builder.append("current_orientation_distance_to_goal=");
+      builder.append(this.current_orientation_distance_to_goal_);      builder.append(", ");
+      builder.append("start_orientation_distance_to_goal=");
+      builder.append(this.start_orientation_distance_to_goal_);      builder.append(", ");
+      builder.append("orientation_distance_to_goal_tolerance=");
+      builder.append(this.orientation_distance_to_goal_tolerance_);
       builder.append("}");
       return builder.toString();
    }
