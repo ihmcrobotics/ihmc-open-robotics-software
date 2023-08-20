@@ -5,8 +5,8 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
+import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
-import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.FormattingTools;
@@ -50,6 +50,8 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
    private double nominalExecutionDuration;
+   private final SideDependentList<BehaviorActionCompletionCalculator> completionCalculator
+         = new SideDependentList<>(() -> new BehaviorActionCompletionCalculator());
 
    public WalkAction(ROS2ControllerHelper ros2ControllerHelper,
                      ROS2SyncedRobotModel syncedRobot,
@@ -168,25 +170,34 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    @Override
    public void updateCurrentlyExecuting()
    {
-      isExecuting = false;
+      boolean isComplete = true;
       for (RobotSide side : RobotSide.values)
       {
          syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
 
-         isExecuting |= BehaviorActionSequenceTools.isExecuting(commandedGoalFeetTransformToWorld.get(side),
-                                                                syncedFeetPoses.get(side),
-                                                                TRANSLATION_TOLERANCE,
-                                                                ROTATION_TOLERANCE,
-                                                                nominalExecutionDuration,
-                                                                executionTimer,
-                                                                warningThrottler);
+         isComplete &= completionCalculator.get(side)
+                                           .isComplete(commandedGoalFeetTransformToWorld.get(side),
+                                                       syncedFeetPoses.get(side),
+                                                       TRANSLATION_TOLERANCE,
+                                                       ROTATION_TOLERANCE,
+                                                       nominalExecutionDuration,
+                                                       executionTimer,
+                                                       warningThrottler);
       }
+      int incompleteFootsteps = footstepTracker.getNumberOfIncompleteFootsteps();
+      isComplete &= incompleteFootsteps == 0;
+
+      isExecuting = !isComplete;
 
       executionStatusMessage.setActionIndex(actionIndex);
       executionStatusMessage.setNominalExecutionDuration(nominalExecutionDuration);
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
       executionStatusMessage.setTotalNumberOfFootsteps(footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps());
-      executionStatusMessage.setNumberOfIncompleteFootsteps(footstepTracker.getNumberOfIncompleteFootsteps());
+      executionStatusMessage.setNumberOfIncompleteFootsteps(incompleteFootsteps);
+      executionStatusMessage.setOrientationCurrentDistanceToGoal(completionCalculator.get(RobotSide.LEFT).getRotationError()
+                                                                 + completionCalculator.get(RobotSide.RIGHT).getRotationError());
+      executionStatusMessage.setTranslationCurrentDistanceToGoal(completionCalculator.get(RobotSide.LEFT).getTranslationError()
+                                                                 + completionCalculator.get(RobotSide.RIGHT).getTranslationError());
       ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);
    }
 
