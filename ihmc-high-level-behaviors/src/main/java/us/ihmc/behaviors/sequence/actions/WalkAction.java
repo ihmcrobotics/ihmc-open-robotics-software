@@ -7,6 +7,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
+import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -44,9 +45,11 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    private int actionIndex;
    private FootstepDataListMessage footstepDataListMessage;
    private final Timer executionTimer = new Timer();
+   private final WalkingFootstepTracker footstepTracker;
    private final Throttler warningThrottler = new Throttler().setFrequency(2.0);
    private boolean isExecuting;
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
+   private double nominalExecutionDuration;
 
    public WalkAction(ROS2ControllerHelper ros2ControllerHelper,
                      ROS2SyncedRobotModel syncedRobot,
@@ -61,6 +64,7 @@ public class WalkAction extends WalkActionData implements BehaviorAction
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
       setReferenceFrameLibrary(referenceFrameLibrary);
+      footstepTracker = new WalkingFootstepTracker(ros2ControllerHelper.getROS2NodeInterface(), syncedRobot.getRobotModel().getSimpleRobotName());
    }
 
    @Override
@@ -137,6 +141,12 @@ public class WalkAction extends WalkActionData implements BehaviorAction
          footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
          footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       }
+
+      nominalExecutionDuration = PlannerTools.calculateNominalTotalPlanExecutionDuration(footstepPlanner.getOutput().getFootstepPlan(),
+                                                                                         getSwingDuration(),
+                                                                                         walkingControllerParameters.getDefaultInitialTransferTime(),
+                                                                                         getTransferDuration(),
+                                                                                         walkingControllerParameters.getDefaultFinalTransferTime());
    }
 
    @Override
@@ -153,11 +163,6 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    @Override
    public void updateCurrentlyExecuting()
    {
-      double nominalExecutionDuration = PlannerTools.calculateNominalTotalPlanExecutionDuration(footstepPlanner.getOutput().getFootstepPlan(),
-                                                                                                getSwingDuration(),
-                                                                                                walkingControllerParameters.getDefaultInitialTransferTime(),
-                                                                                                getTransferDuration(),
-                                                                                                walkingControllerParameters.getDefaultFinalTransferTime());
       isExecuting = false;
       for (RobotSide side : RobotSide.values)
       {
@@ -175,7 +180,8 @@ public class WalkAction extends WalkActionData implements BehaviorAction
       executionStatusMessage.setActionIndex(actionIndex);
       executionStatusMessage.setNominalExecutionDuration(nominalExecutionDuration);
       executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
-//      executionStatusMessage.ge
+      executionStatusMessage.setTotalNumberOfFootsteps(footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps());
+      executionStatusMessage.setNumberOfIncompleteFootsteps(footstepTracker.getNumberOfIncompleteFootsteps());
       ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);
    }
 

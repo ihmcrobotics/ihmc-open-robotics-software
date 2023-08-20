@@ -26,6 +26,30 @@ module behavior_msgs
          * Time since execution started
          */
         double elapsed_execution_time;
+        /**
+         * Total number of footsteps; used for walking actions
+         */
+        unsigned short total_number_of_footsteps;
+        /**
+         * Incomplete footsteps; used for walking actions
+         */
+        unsigned short number_of_incomplete_footsteps;
+        /**
+         * Translation current distance to goal
+         */
+        double translation_current_distance_to_goal;
+        /**
+         * Translation start distance to goal
+         */
+        double translation_start_distance_to_goal;
+        /**
+         * Orientation current distance to goal
+         */
+        double orientation_current_distance_to_goal;
+        /**
+         * Orientation start distance to goal
+         */
+        double orientation_start_distance_to_goal;
       };
     };
   };
