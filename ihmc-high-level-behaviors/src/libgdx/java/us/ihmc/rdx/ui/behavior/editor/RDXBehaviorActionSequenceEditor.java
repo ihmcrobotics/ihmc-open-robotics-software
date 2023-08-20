@@ -22,6 +22,7 @@ import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -29,6 +30,7 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.behavior.editor.actions.*;
 import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -89,6 +91,7 @@ public class RDXBehaviorActionSequenceEditor
    private final ArrayList<BehaviorActionData> actionDataForMessage = new ArrayList<>();
    private final ActionSequenceUpdateMessage actionSequenceUpdateMessage = new ActionSequenceUpdateMessage();
    private boolean outOfSync = true;
+   private final ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
 
    public void clear()
    {
@@ -383,6 +386,7 @@ public class RDXBehaviorActionSequenceEditor
 
          ImGui.text(String.format("Status # %d:", receivedStatusMessageCount));
          ImGui.sameLine();
+         RDXBehaviorAction executingAction = null;
          if (latestExecutionStatus.getActionIndex() < 0)
          {
             if (endOfSequence)
@@ -396,32 +400,37 @@ public class RDXBehaviorActionSequenceEditor
          }
          else
          {
-            RDXBehaviorAction executingAction = actionSequence.get(latestExecutionStatus.getActionIndex());
+            executingAction = actionSequence.get(latestExecutionStatus.getActionIndex());
             ImGui.text("Executing: %s (%s)".formatted(executingAction.getDescription(), executingAction.getActionTypeTitle()));
          }
 
+         widgetAligner.text("Expected time remaining:");
          double elapsedTime = latestExecutionStatus.getElapsedExecutionTime();
          double nominalDuration = latestExecutionStatus.getNominalExecutionDuration();
          double percentComplete = elapsedTime / nominalDuration;
          double percentLeft = 1.0 - percentComplete;
          ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "%.2f / %.2f".formatted(elapsedTime, nominalDuration));
 
-         int incompleteFootsteps = latestExecutionStatus.getNumberOfIncompleteFootsteps();
-         int totalFootsteps = latestExecutionStatus.getTotalNumberOfFootsteps();
-         percentLeft = incompleteFootsteps / (double) totalFootsteps;
-         ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "%d / %d".formatted(incompleteFootsteps, totalFootsteps));
-
+         widgetAligner.text("Translation error (m):");
          double currentTranslationToGoal = latestExecutionStatus.getTranslationCurrentDistanceToGoal();
          double startTranslationToGoal = latestExecutionStatus.getTranslationStartDistanceToGoal();
-         percentLeft = currentTranslationToGoal / startTranslationToGoal;
+         percentLeft = currentTranslationToGoal / Math.max(startTranslationToGoal, 0.05);
          ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "%.2f / %.2f".formatted(currentTranslationToGoal,
                                                                                                                      startTranslationToGoal));
-
+         widgetAligner.text("Orientation error (%s):".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL));
          double currentOrientationToGoal = latestExecutionStatus.getOrientationCurrentDistanceToGoal();
          double startOrientationToGoal = latestExecutionStatus.getOrientationStartDistanceToGoal();
-         percentLeft = currentOrientationToGoal / startOrientationToGoal;
+         percentLeft = currentOrientationToGoal / Math.max(startOrientationToGoal, Math.toRadians(1.0));
          ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "%.2f / %.2f".formatted(currentOrientationToGoal,
                                                                                                                      startOrientationToGoal));
+         if (executingAction instanceof RDXWalkAction)
+         {
+            widgetAligner.text("Footstep completion:");
+            int incompleteFootsteps = latestExecutionStatus.getNumberOfIncompleteFootsteps();
+            int totalFootsteps = latestExecutionStatus.getTotalNumberOfFootsteps();
+            percentLeft = incompleteFootsteps / (double) totalFootsteps;
+            ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "%d / %d".formatted(incompleteFootsteps, totalFootsteps));
+         }
       }
       else
       {
