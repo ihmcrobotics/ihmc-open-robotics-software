@@ -130,10 +130,15 @@ public class WalkAction extends WalkActionData implements BehaviorAction
       }
       else
       {
-         footstepPlan.getFootstep(0).setTransferDuration(getTransferDuration() / 2.0);
+         for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+         {
+            if (i == 0 || i == footstepPlan.getNumberOfSteps() - 1)
+               footstepPlan.getFootstep(i).setTransferDuration(getTransferDuration() / 2.0);
+            else
+               footstepPlan.getFootstep(i).setTransferDuration(getTransferDuration());
 
-         if (footstepPlan.getNumberOfSteps() > 1)
-            footstepPlan.getFootstep(footstepPlan.getNumberOfSteps() - 1).setTransferDuration(getTransferDuration() / 2.0);
+            footstepPlan.getFootstep(i).setSwingDuration(getSwingDuration());
+         }
 
          footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan,
                                                                                                getSwingDuration(),
