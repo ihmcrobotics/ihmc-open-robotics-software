@@ -57,6 +57,8 @@ import java.util.LinkedList;
  */
 public class RDXBehaviorActionSequenceEditor
 {
+   public static final float PROGRESS_BAR_HEIGHT = 20.0f;
+
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean automaticExecution = new ImBoolean(false);
    private final ImVec2 calcDescriptionTextSize = new ImVec2();
@@ -402,7 +404,24 @@ public class RDXBehaviorActionSequenceEditor
          double nominalDuration = latestExecutionStatus.getNominalExecutionDuration();
          double percentComplete = elapsedTime / nominalDuration;
          double percentLeft = 1.0 - percentComplete;
-         ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), 20.0f, "%.2f / %.2f".formatted(elapsedTime, nominalDuration));
+         ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "%.2f / %.2f".formatted(elapsedTime, nominalDuration));
+
+         int incompleteFootsteps = latestExecutionStatus.getNumberOfIncompleteFootsteps();
+         int totalFootsteps = latestExecutionStatus.getTotalNumberOfFootsteps();
+         percentLeft = incompleteFootsteps / (double) totalFootsteps;
+         ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "%d / %d".formatted(incompleteFootsteps, totalFootsteps));
+
+         double currentTranslationToGoal = latestExecutionStatus.getTranslationCurrentDistanceToGoal();
+         double startTranslationToGoal = latestExecutionStatus.getTranslationStartDistanceToGoal();
+         percentLeft = currentTranslationToGoal / startTranslationToGoal;
+         ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "%.2f / %.2f".formatted(currentTranslationToGoal,
+                                                                                                                     startTranslationToGoal));
+
+         double currentOrientationToGoal = latestExecutionStatus.getOrientationCurrentDistanceToGoal();
+         double startOrientationToGoal = latestExecutionStatus.getOrientationStartDistanceToGoal();
+         percentLeft = currentOrientationToGoal / startOrientationToGoal;
+         ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "%.2f / %.2f".formatted(currentOrientationToGoal,
+                                                                                                                     startOrientationToGoal));
       }
       else
       {

@@ -15,7 +15,7 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "870b4ea7e5d6c1b5ce3eceb515fab8c00ab6aeab03aea7ab51083075f60a2496";
+   		return "8cd233c86781f79a8a9e841d1e6a36c72bfc906d611745593b7b4867ce039a49";
    }
    
    @Override
@@ -58,6 +58,18 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -80,6 +92,24 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -92,6 +122,18 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
 
       cdr.write_type_6(data.getElapsedExecutionTime());
 
+      cdr.write_type_3(data.getTotalNumberOfFootsteps());
+
+      cdr.write_type_3(data.getNumberOfIncompleteFootsteps());
+
+      cdr.write_type_6(data.getTranslationCurrentDistanceToGoal());
+
+      cdr.write_type_6(data.getTranslationStartDistanceToGoal());
+
+      cdr.write_type_6(data.getOrientationCurrentDistanceToGoal());
+
+      cdr.write_type_6(data.getOrientationStartDistanceToGoal());
+
    }
 
    public static void read(behavior_msgs.msg.dds.ActionExecutionStatusMessage data, us.ihmc.idl.CDR cdr)
@@ -102,6 +144,18 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
       	
       data.setElapsedExecutionTime(cdr.read_type_6());
       	
+      data.setTotalNumberOfFootsteps(cdr.read_type_3());
+      	
+      data.setNumberOfIncompleteFootsteps(cdr.read_type_3());
+      	
+      data.setTranslationCurrentDistanceToGoal(cdr.read_type_6());
+      	
+      data.setTranslationStartDistanceToGoal(cdr.read_type_6());
+      	
+      data.setOrientationCurrentDistanceToGoal(cdr.read_type_6());
+      	
+      data.setOrientationStartDistanceToGoal(cdr.read_type_6());
+      	
 
    }
 
@@ -111,6 +165,12 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
       ser.write_type_2("action_index", data.getActionIndex());
       ser.write_type_6("nominal_execution_duration", data.getNominalExecutionDuration());
       ser.write_type_6("elapsed_execution_time", data.getElapsedExecutionTime());
+      ser.write_type_3("total_number_of_footsteps", data.getTotalNumberOfFootsteps());
+      ser.write_type_3("number_of_incomplete_footsteps", data.getNumberOfIncompleteFootsteps());
+      ser.write_type_6("translation_current_distance_to_goal", data.getTranslationCurrentDistanceToGoal());
+      ser.write_type_6("translation_start_distance_to_goal", data.getTranslationStartDistanceToGoal());
+      ser.write_type_6("orientation_current_distance_to_goal", data.getOrientationCurrentDistanceToGoal());
+      ser.write_type_6("orientation_start_distance_to_goal", data.getOrientationStartDistanceToGoal());
    }
 
    @Override
@@ -119,6 +179,12 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
       data.setActionIndex(ser.read_type_2("action_index"));
       data.setNominalExecutionDuration(ser.read_type_6("nominal_execution_duration"));
       data.setElapsedExecutionTime(ser.read_type_6("elapsed_execution_time"));
+      data.setTotalNumberOfFootsteps(ser.read_type_3("total_number_of_footsteps"));
+      data.setNumberOfIncompleteFootsteps(ser.read_type_3("number_of_incomplete_footsteps"));
+      data.setTranslationCurrentDistanceToGoal(ser.read_type_6("translation_current_distance_to_goal"));
+      data.setTranslationStartDistanceToGoal(ser.read_type_6("translation_start_distance_to_goal"));
+      data.setOrientationCurrentDistanceToGoal(ser.read_type_6("orientation_current_distance_to_goal"));
+      data.setOrientationStartDistanceToGoal(ser.read_type_6("orientation_start_distance_to_goal"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ActionExecutionStatusMessage src, behavior_msgs.msg.dds.ActionExecutionStatusMessage dest)
