@@ -245,6 +245,10 @@ public class ImGuiTools
       }
    }
 
+   /**
+    * Places a mark, a vertical black line, at some point on the progress bar to
+    * convey to the user where a threshold is.
+    */
    public static void markedProgressBar(float barHeight, int color, double percent, double markPercent, String text)
    {
       float markPosition = (float) (ImGui.getColumnWidth() * markPercent);
