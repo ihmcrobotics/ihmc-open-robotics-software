@@ -50,7 +50,7 @@ class MonteCarloPlanning2DSimulationDemo
          PerceptionDebugTools.display("Grid", gridColor, 1, screenSize);
 
          Point2D newState = planner.plan();
-         planner.execute(newState);
+         planner.updateState(newState);
 
          i += 1;
       }

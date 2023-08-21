@@ -59,7 +59,7 @@ public class MonteCarloPlanner
       float bestScore = 0;
       MonteCarloTreeNode bestNode = null;
 
-      if (root.getChildren().size() == 0)
+      if (root.getChildren().isEmpty())
          LogTools.warn("No Children Nodes Found");
 
       // Select the best node based on the Upper Confidence Bound
@@ -83,7 +83,7 @@ public class MonteCarloPlanner
       return bestNode.getAgentState().getPosition();
    }
 
-   public void execute(Point2D newState)
+   public void updateState(Point2D newState)
    {
       updateWorld(newState);
       updateAgent(newState);
@@ -107,9 +107,9 @@ public class MonteCarloPlanner
       if (node.getVisits() == 0)
       {
          MonteCarloTreeNode childNode = expand(node);
-         float score = simulate(childNode);
-         childNode.setValue(score);
-         backPropagate(node, score);
+         double score = simulate(childNode);
+         childNode.setValue((float) score);
+         backPropagate(node, (float) score);
       }
       else
       {
@@ -135,7 +135,7 @@ public class MonteCarloPlanner
 
    public void updateAgent(Point2D newState)
    {
-      agent.updateState(newState);
+      agent.changeStateTo(newState);
    }
 
    /**
@@ -153,9 +153,7 @@ public class MonteCarloPlanner
          node.getChildren().add(postNode);
       }
 
-      MonteCarloTreeNode newNode = node.getChildren().get((int) (Math.random() * node.getChildren().size()));
-
-      return newNode;
+      return node.getChildren().get((int) (Math.random() * node.getChildren().size()));
    }
 
    /**
@@ -184,9 +182,9 @@ public class MonteCarloPlanner
       return availableActions;
    }
 
-   public float simulate(MonteCarloTreeNode node)
+   public double simulate(MonteCarloTreeNode node)
    {
-      float score = 0;
+      double score = 0;
 
       Point2D randomState = node.getAgentState().getPosition();
 
@@ -207,14 +205,14 @@ public class MonteCarloPlanner
             score += 200000;
          }
 
-         if (world.getGrid().ptr((int) randomState.getX(), (int) randomState.getY()).get() == MonteCarloPlannerTools.OCCUPIED)
+         if (world.getGrid().ptr((int) randomState.getX(), (int) randomState.getY()).get() == MonteCarloPlannerConstants.OCCUPIED)
          {
             score -= 400;
          }
 
          ArrayList<Point2D> scanPoints = agent.getRangeScanner().scan(randomState, world);
 
-         score += Math.pow(agent.getAveragePosition().distance(randomState), 2);
+         score += agent.getAveragePosition().distanceSquared(randomState);
 
          for (Point2D point : scanPoints)
          {
@@ -229,7 +227,7 @@ public class MonteCarloPlanner
                   score += 50;
                }
 
-               if (world.getGrid().ptr((int) point.getX(), (int) point.getY()).get() == MonteCarloPlannerTools.OCCUPANCY_UNKNOWN)
+               if (world.getGrid().ptr((int) point.getX(), (int) point.getY()).get() == MonteCarloPlannerConstants.OCCUPANCY_UNKNOWN)
                {
                   score += 500;
                }
@@ -251,15 +249,16 @@ public class MonteCarloPlanner
       }
    }
 
-   public Point2D computeActionResult(Point2D state, Vector2D action)
+   private static Point2D computeActionResult(Point2D state, Vector2D action)
    {
-      return new Point2D(state.getX() + action.getX(), state.getY() + action.getY());
+      Point2D actionResult = new Point2D();
+      actionResult.add(state, action);
+      return actionResult;
    }
 
    public boolean checkActionObstacles(Point2D state, Vector2D action, MonteCarloPlanningWorld world)
    {
-      Point2D position = new Point2D(state.getX() + action.getX(), state.getY() + action.getY());
-
+      Point2D position = computeActionResult(state, action);
       return !MonteCarloPlannerTools.isPointOccupied(position, world.getGrid());
    }
 
@@ -278,7 +277,7 @@ public class MonteCarloPlanner
       {
          Point3D measurement = measurements.get(i);
 
-         if (measurement.getZ() > 0.5)
+         if (measurement.getZ() > MonteCarloPlannerConstants.OCCUPANCY_MIN_THRESHOLD_HEIGHT_IN_METERS)
          {
             points.add(new Point2D(measurement.getX(), measurement.getY()));
          }
