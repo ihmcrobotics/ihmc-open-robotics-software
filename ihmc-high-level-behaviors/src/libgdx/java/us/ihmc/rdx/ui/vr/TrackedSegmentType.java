@@ -5,6 +5,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public enum TrackedSegmentType
 {
+   LEFT_HAND("leftHand", RobotSide.LEFT, new YawPitchRoll(), Double.NaN, Double.NaN),
+   RIGHT_HAND("rightHand", RobotSide.RIGHT, new YawPitchRoll(), Double.NaN, Double.NaN),
    LEFT_FOREARM("leftForeArm", RobotSide.LEFT, new YawPitchRoll(-Math.PI / 2.0, 0.0, 0.0), 0, 0.1),
    RIGHT_FOREARM("rightForeArm", RobotSide.RIGHT, new YawPitchRoll(Math.PI / 2.0, 0.0, 0.0), 0, 0.1),
    CHEST("chest", null, new YawPitchRoll(), 0, 10);

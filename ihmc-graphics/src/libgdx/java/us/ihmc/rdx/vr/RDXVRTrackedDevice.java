@@ -72,23 +72,26 @@ public abstract class RDXVRTrackedDevice
                                                                                          VR.ETrackedDeviceProperty_Prop_RenderModelName_String,
                                                                                          errorCode);
                Model model = new Model();
-               if (renderModelName.contains("focus3")) // vive focus 3 controller render models are not supported in open vr
+               if (renderModelName.contains("controller"))
                {
-                  String modelFile = "vr/controllers/vive_focus3/";
-                  if (renderModelName.contains("left"))
-                     modelFile += "Focus3_controller_left.g3dj";
-                  else if (renderModelName.contains("right"))
-                     modelFile += "Focus3_controller_right.g3dj";
-                  model = RDXModelLoader.load(modelFile);
-               }
-               else if (renderModelName.contains("index"))
-               {
-                  String modelFile = "vr/controllers/index/";
-                  if (renderModelName.contains("left"))
-                     modelFile += "valve_controller_knu_1_0_left.g3dj";
-                  else if (renderModelName.contains("right"))
-                     modelFile += "valve_controller_knu_1_0_right.g3dj";
-                  model = RDXModelLoader.load(modelFile);
+                  if (renderModelName.contains("focus3")) // vive focus 3 controller render models are not supported in open vr
+                  {
+                     String modelFile = "vr/controllers/vive_focus3/";
+                     if (renderModelName.contains("left"))
+                        modelFile += "Focus3_controller_left.g3dj";
+                     else if (renderModelName.contains("right"))
+                        modelFile += "Focus3_controller_right.g3dj";
+                     model = RDXModelLoader.load(modelFile);
+                  }
+                  else if (renderModelName.contains("index"))
+                  {
+                     String modelFile = "vr/controllers/index/";
+                     if (renderModelName.contains("left"))
+                        modelFile += "valve_controller_knu_1_0_left.g3dj";
+                     else if (renderModelName.contains("right"))
+                        modelFile += "valve_controller_knu_1_0_right.g3dj";
+                     model = RDXModelLoader.load(modelFile);
+                  }
                }
                else
                   model = RDXVRModelLoader.loadRenderModel(renderModelName);
