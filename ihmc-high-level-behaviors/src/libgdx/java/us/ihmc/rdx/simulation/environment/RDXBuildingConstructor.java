@@ -101,7 +101,7 @@ public class RDXBuildingConstructor extends RDXPanel
 
    public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if(building != null)
+      if (building != null)
       {
          for (RDXSimpleObject model : building.getAllObjects())
          {
@@ -176,7 +176,7 @@ public class RDXBuildingConstructor extends RDXPanel
       double closestDistance = Double.POSITIVE_INFINITY;
       RDXSimpleObject closestObject = null;
 
-      if(building != null)
+      if (building != null)
       {
          for (RDXSimpleObject object : building.getAllObjects())
          {
@@ -199,9 +199,9 @@ public class RDXBuildingConstructor extends RDXPanel
       {
          Line3DReadOnly pickRay = viewInput.getPickRayInWorld();
          lastPickPoint = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(EuclidCoreTools.origin3D,
-                                                                                     Axis3D.Z,
-                                                                                     pickRay.getPoint(),
-                                                                                     pickRay.getDirection());
+                                                                                 Axis3D.Z,
+                                                                                 pickRay.getPoint(),
+                                                                                 pickRay.getDirection());
          switch (mode)
          {
             case CONSTRUCTING:
@@ -210,7 +210,7 @@ public class RDXBuildingConstructor extends RDXPanel
                Model objectModel = RDXModelBuilder.createCylinder(0.15f, 0.25f, Color.BROWN).model;
                Box3D collisionBox = new Box3D(0.25f, 0.25f, 0.15f);
                objectToPlace.setRealisticModel(objectModel);
-//               objectToPlace.setCollisionModel(objectModel);
+               //               objectToPlace.setCollisionModel(objectModel);
                objectToPlace.setCollisionGeometryObject(collisionBox);
                objectToPlace.setCollisionModelColor(highlightColor, 0.2f);
                virtualObjects.add(objectToPlace);
@@ -257,7 +257,7 @@ public class RDXBuildingConstructor extends RDXPanel
             mode = Mode.CONSTRUCTING;
          }
 
-         if(ImGui.button("Create Stairs"))
+         if (ImGui.button("Create Stairs"))
          {
             constructStairwell(3, 4, 10, 3.0f, 3.0f, 12.0f);
          }
@@ -315,17 +315,18 @@ public class RDXBuildingConstructor extends RDXPanel
 
    public void constructStairwell(int floors, int sides, int numberOfStepsPerSide, float length, float width, float height)
    {
-      if(building == null) return;
+      if (building == null)
+         return;
 
-      float[] xOffsets = {-width/2.0f, length/1.4f, width/2.0f, -length/1.4f};
-      float[] yOffsets = {width/1.4f, length/2.0f, -width/1.4f, -length/2.0f};
+      float[] xOffsets = {-width / 2.0f, length / 1.4f, width / 2.0f, -length / 1.4f};
+      float[] yOffsets = {width / 1.4f, length / 2.0f, -width / 1.4f, -length / 2.0f};
 
-      float[] xPlatformOffsets = {-width/2.0f, length/2.0f, width/2.0f, -length/2.0f};
-      float[] yPlatformOffsets = {width/2.0f, length/2.0f, -width/2.0f, -length/2.0f};
+      float[] xPlatformOffsets = {-width / 2.0f, length / 2.0f, width / 2.0f, -length / 2.0f};
+      float[] yPlatformOffsets = {width / 2.0f, length / 2.0f, -width / 2.0f, -length / 2.0f};
 
-      for(int i = 0; i<floors; i++)
+      for (int i = 0; i < floors; i++)
       {
-         for(int j = 0; j<sides; j++)
+         for (int j = 0; j < sides; j++)
          {
             RDXSimpleObject stairsObject = new RDXSimpleObject("Stairs_" + ((sides * i) + j));
             Model objectModel = RDXModelBuilder.createStairs(1.5f, 0.3f, 0.3f, 10, Color.GRAY).model;
@@ -334,9 +335,9 @@ public class RDXBuildingConstructor extends RDXPanel
 
             Box3D collisionBox = new Box3D(1.0f, 0.1f, building.getHeight());
             stairsObject.setCollisionGeometryObject(collisionBox);
-            stairsObject.getRealisticModelOffset().getRotation().appendYawRotation(-2.0f * Math.PI / (float)(sides) * j);
+            stairsObject.getRealisticModelOffset().getRotation().appendYawRotation(-2.0f * Math.PI / (float) (sides) * j);
 
-            stairsObject.getRealisticModelOffset().getTranslation().add(xOffsets[j], yOffsets[j], 3.0f * (float)(i*sides + j) - 0.3f);
+            stairsObject.getRealisticModelOffset().getTranslation().add(xOffsets[j], yOffsets[j], 3.0f * (float) (i * sides + j) - 0.3f);
             stairsObject.setPositionInWorld(new Point3D(0.0f, 0.0f, 0.0f));
 
             building.insertComponent(RDXBuildingObject.ComponentType.STAIRS, stairsObject);
@@ -348,9 +349,9 @@ public class RDXBuildingConstructor extends RDXPanel
 
             Box3D platformCollisionBox = new Box3D(1.0f, 0.1f, building.getHeight());
             platformObject.setCollisionGeometryObject(platformCollisionBox);
-            platformObject.getRealisticModelOffset().getRotation().appendYawRotation(-2.0f * Math.PI / (float)(sides) * j);
+            platformObject.getRealisticModelOffset().getRotation().appendYawRotation(-2.0f * Math.PI / (float) (sides) * j);
 
-            platformObject.getRealisticModelOffset().getTranslation().add(xOffsets[j], yOffsets[j], 3.0f * (float)(i*sides + j) - 0.45f);
+            platformObject.getRealisticModelOffset().getTranslation().add(xOffsets[j], yOffsets[j], 3.0f * (float) (i * sides + j) - 0.45f);
             platformObject.setPositionInWorld(new Point3D(0.0f, 0.0f, 0.0f));
 
             building.insertComponent(RDXBuildingObject.ComponentType.PLATFORMS, platformObject);
@@ -361,39 +362,37 @@ public class RDXBuildingConstructor extends RDXPanel
    public void saveAsJSON(String fileNameToSave)
    {
       JSONFileTools.saveToClasspath("ihmc-open-robotics-software",
-         "ihmc-high-level-behaviors/src/libgdx/resources",
-         "environments/" + fileNameToSave,
-         rootNode ->
-         {
-            ArrayNode objectsArrayNode = rootNode.putArray("objects");
-            for (Point3D corner : building.getCorners())
-            {
-               ObjectNode objectNode = objectsArrayNode.addObject();
-               objectNode.put("type", "Corner");
-               objectNode.put("x", corner.getX());
-               objectNode.put("y", corner.getY());
-               objectNode.put("z", corner.getZ());
-            }
-         });
+                                    "ihmc-high-level-behaviors/src/libgdx/resources",
+                                    "environments/" + fileNameToSave,
+                                    rootNode ->
+                                    {
+                                       ArrayNode objectsArrayNode = rootNode.putArray("objects");
+                                       for (Point3D corner : building.getCorners())
+                                       {
+                                          ObjectNode objectNode = objectsArrayNode.addObject();
+                                          objectNode.put("type", "Corner");
+                                          objectNode.put("x", corner.getX());
+                                          objectNode.put("y", corner.getY());
+                                          objectNode.put("z", corner.getZ());
+                                       }
+                                    });
    }
 
    public void loadFromJSON(String fileNameToLoad)
    {
       selectedFileName = fileNameToLoad;
       building = new RDXBuildingObject();
-      JSONFileTools.load(new WorkspaceResourceFile(environmentFilesDirectory, fileNameToLoad),
-       rootNode ->
-       {
-          JSONTools.forEachArrayElement(rootNode, "objects", objectNode ->
-          {
-             float x = objectNode.get("x").floatValue();
-             float y = objectNode.get("y").floatValue();
-             float z = objectNode.get("z").floatValue();
+      JSONFileTools.load(new WorkspaceResourceFile(environmentFilesDirectory, fileNameToLoad), rootNode ->
+      {
+         JSONTools.forEachArrayElement(rootNode, "objects", objectNode ->
+         {
+            float x = objectNode.get("x").floatValue();
+            float y = objectNode.get("y").floatValue();
+            float z = objectNode.get("z").floatValue();
 
-             building.addCorner(new Point3D(x, y, z));
-          });
-
-       });
+            building.addCorner(new Point3D(x, y, z));
+         });
+      });
 
       building.construct();
    }

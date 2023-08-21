@@ -82,6 +82,10 @@ public class MonteCarloPlannerTools
       opencv_imgproc.rectangle(gridColor, new Point(goalMinY, goalMinX), new Point(goalMaxY, goalMaxX), new Scalar(255, 255, 255, 255), -1, 0, 0);
    }
 
+   /**
+    * Fills the obstacles in the grid given a list of rectangular obstacles
+    * in the form (center_x, center_y, width, height) using OpenCV rectangular drawing function.
+    * */
    public static void fillObstacles(ArrayList<Vector4D32> obstacles, Mat gridColor)
    {
       for (Vector4D32 obstacle : obstacles)
