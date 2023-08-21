@@ -15,7 +15,7 @@ public class JointOfflineMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1474a9800c6f410e81f34f0e01aa8c6dd0cfdc21d8d07bef35b51fe5627f5f5c";
+   		return "f91c8585ccf1a2c31681af433dd0160b122718492c24cef4bc31766fd7b68b9f";
    }
    
    @Override

@@ -15,7 +15,7 @@ public class PauseWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "931d208e148640a99db34bcace890764c0562702c8a86c630bcf97f435ccd730";
+   		return "c651722f6228dcb4b5814a673a4fda447ad34f0b17d7faa3b318336b11d6e524";
    }
    
    @Override

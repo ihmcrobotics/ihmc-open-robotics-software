@@ -15,7 +15,7 @@ public class REAStateRequestMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0cf3916c8cb28ee45d130f16a74bcc6d761a339975616d4c7dbeb4ae8564c5f3";
+   		return "53711703981f43a001b1547a25a67d7d0a9598fd6e371bdbde0e7b9ce7dbd12f";
    }
    
    @Override

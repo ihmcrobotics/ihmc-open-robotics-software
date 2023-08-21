@@ -15,7 +15,7 @@ public class Cylinder3DMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "3457d704db8588e15aff3b0f25318552fa9aeb80e655d41cba2a901243365b09";
+   		return "c7498a4f717b1affd66e65cd5c7a644401b31a9163723b7ae8c5fd2458a97db8";
    }
    
    @Override
