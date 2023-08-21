@@ -18,8 +18,8 @@ public class MonteCarloPlanner
    private int simulationIterations = 10;
    private int uniqueNodeId = 0;
 
-   private World world;
-   private Agent agent;
+   private MonteCarloPlanningWorld world;
+   private MonteCarloPlanningAgent agent;
    private MonteCarloTreeNode root;
 
    int worldHeight = 200;
@@ -34,8 +34,8 @@ public class MonteCarloPlanner
    {
       agentPos.set(offset, offset);
 
-      this.world = new World(goalMargin, worldHeight, worldWidth);
-      this.agent = new Agent(agentPos);
+      this.world = new MonteCarloPlanningWorld(goalMargin, worldHeight, worldWidth);
+      this.agent = new MonteCarloPlanningAgent(agentPos);
 
       root = new MonteCarloTreeNode(agent.getPosition(), null, uniqueNodeId++);
    }
@@ -256,7 +256,7 @@ public class MonteCarloPlanner
       return new Point2D(state.getX() + action.getX(), state.getY() + action.getY());
    }
 
-   public boolean checkActionObstacles(Point2D state, Vector2D action, World world)
+   public boolean checkActionObstacles(Point2D state, Vector2D action, MonteCarloPlanningWorld world)
    {
       Point2D position = new Point2D(state.getX() + action.getX(), state.getY() + action.getY());
 
@@ -287,12 +287,12 @@ public class MonteCarloPlanner
       agent.addMeasurements(points);
    }
 
-   public Agent getAgent()
+   public MonteCarloPlanningAgent getAgent()
    {
       return agent;
    }
 
-   public World getWorld()
+   public MonteCarloPlanningWorld getWorld()
    {
       return world;
    }

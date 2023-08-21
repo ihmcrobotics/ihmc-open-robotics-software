@@ -42,7 +42,7 @@ public class MonteCarloPlannerTools
       }
    }
 
-   public static void plotWorld(World world, Mat gridColor)
+   public static void plotWorld(MonteCarloPlanningWorld world, Mat gridColor)
    {
       // Convert the floating point grid to 8-bit grayscale then convert it to RGB image
       opencv_imgproc.cvtColor(world.getGrid(), gridColor, COLOR_GRAY2RGB);
@@ -60,7 +60,7 @@ public class MonteCarloPlannerTools
       }
    }
 
-   public static void plotAgent(Agent agent, Mat gridColor)
+   public static void plotAgent(MonteCarloPlanningAgent agent, Mat gridColor)
    {
       // Set the agent's position as 50
       gridColor.ptr((int) (agent.getPreviousPosition().getX32()), (int) (agent.getPreviousPosition().getY32()))
@@ -141,7 +141,7 @@ public class MonteCarloPlannerTools
       return closest_point;
    }
 
-   public static void updateGrid(World world, Point2D agent_state, int radius)
+   public static void updateGrid(MonteCarloPlanningWorld world, Point2D agent_state, int radius)
    {
       // set a circle of pixels around the agent to be 50
       int agent_min_x = (int) (agent_state.getX() - radius);

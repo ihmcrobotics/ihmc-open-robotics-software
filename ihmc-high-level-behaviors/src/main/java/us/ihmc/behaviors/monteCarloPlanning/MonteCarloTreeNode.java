@@ -6,8 +6,8 @@ import java.util.ArrayList;
 
 public class MonteCarloTreeNode
 {
-   private final Agent agent;
-   private World world;
+   private final MonteCarloPlanningAgent agent;
+   private MonteCarloPlanningWorld world;
    private MonteCarloTreeNode parent;
    private ArrayList<MonteCarloTreeNode> children;
 
@@ -22,7 +22,7 @@ public class MonteCarloTreeNode
    {
       this.id = id;
       this.parent = parent;
-      this.agent = new Agent(state);
+      this.agent = new MonteCarloPlanningAgent(state);
       children = new ArrayList<>();
    }
 
@@ -47,12 +47,12 @@ public class MonteCarloTreeNode
       return children;
    }
 
-   public Agent getAgentState()
+   public MonteCarloPlanningAgent getAgentState()
    {
       return agent;
    }
 
-   public World getWorldState()
+   public MonteCarloPlanningWorld getWorldState()
    {
       return world;
    }
@@ -77,7 +77,7 @@ public class MonteCarloTreeNode
       this.visits = visits;
    }
 
-   public void setWorldState(World world)
+   public void setWorldState(MonteCarloPlanningWorld world)
    {
       this.world = world;
    }

@@ -12,7 +12,7 @@ import java.util.ArrayList;
  * exploration or coverage achieved so far by the agent. An image-based representation is used to access the 2D occupancy and coverage information
  * for fast access as well as visualization and debugging.
  */
-public class World
+public class MonteCarloPlanningWorld
 {
    private final Mat grid;
    private final Point2D goal;
@@ -21,7 +21,7 @@ public class World
    private final int gridWidth;
    private final int goalMargin;
 
-   public World(int goalMargin, int gridHeight, int gridWidth)
+   public MonteCarloPlanningWorld(int goalMargin, int gridHeight, int gridWidth)
    {
       this.gridHeight = gridHeight;
       this.gridWidth = gridWidth;

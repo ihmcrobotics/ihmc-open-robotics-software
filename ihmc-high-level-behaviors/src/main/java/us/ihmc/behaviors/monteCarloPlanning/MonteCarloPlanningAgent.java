@@ -1,8 +1,6 @@
 package us.ihmc.behaviors.monteCarloPlanning;
 
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple4D.Vector4D32;
 
 import java.util.ArrayList;
 
@@ -12,7 +10,7 @@ import java.util.ArrayList;
  * as well as for handling the virtual sensor data available on the agent for simulated
  * rollouts in the Monte Carlo Tree Search.
  */
-public class Agent
+public class MonteCarloPlanningAgent
 {
    private RangeScanner rangeScanner = new RangeScanner();
 
@@ -22,7 +20,7 @@ public class Agent
 
    private ArrayList<Point2D> points = new ArrayList<>();
 
-   public Agent(Point2D position)
+   public MonteCarloPlanningAgent(Point2D position)
    {
       this.position.set(position);
       this.previousPosition.set(position);
@@ -38,7 +36,7 @@ public class Agent
       averagePosition.add(position.getX() * 0.05, position.getY() * 0.05);
    }
 
-   public void measure(World world)
+   public void measure(MonteCarloPlanningWorld world)
    {
       points.clear();
       points.addAll(rangeScanner.scan(position, world));
