@@ -19,14 +19,11 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
-import us.ihmc.rdx.ui.processes.RestartableProcess;
 import us.ihmc.rdx.ui.processes.RestartableJavaProcess;
 import us.ihmc.rdx.ui.tools.KinematicsRecordReplay;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
@@ -38,7 +35,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -54,6 +50,7 @@ import java.util.Set;
 
 public class RDXVRKinematicsStreamingMode
 {
+   private static final double FRAME_AXIS_GRAPHICS_LENGTH = 0.2;
    private final DRCRobotModel robotModel;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final RestartableJavaProcess kinematicsStreamingToolboxProcess;
@@ -68,11 +65,8 @@ public class RDXVRKinematicsStreamingMode
    private final FramePose3D tempFramePose = new FramePose3D();
    private final ImGuiFrequencyPlot statusFrequencyPlot = new ImGuiFrequencyPlot();
    private final ImGuiFrequencyPlot outputFrequencyPlot = new ImGuiFrequencyPlot();
-   private final SideDependentList<OneDoFJointBasics> wristJoints = new SideDependentList<>();
-   private final SideDependentList<ImGuiPlot> wristJointAnglePlots = new SideDependentList<>();
    private PausablePeriodicThread wakeUpThread;
    private final ImBoolean wakeUpThreadRunning = new ImBoolean(false);
-   private RDXReferenceFrameGraphic headsetFrameGraphic;
    private final SideDependentList<ModifiableReferenceFrame> handDesiredControlFrames = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> controllerFrameGraphics = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> handControlFrameGraphics = new SideDependentList<>();
@@ -112,13 +106,10 @@ public class RDXVRKinematicsStreamingMode
       ghostRobotGraphic.setActive(true);
       ghostRobotGraphic.create();
 
-      double length = 0.2;
-      headsetFrameGraphic = new RDXReferenceFrameGraphic(length);
       for (RobotSide side : RobotSide.values)
       {
-         controllerFrameGraphics.put(side, new RDXReferenceFrameGraphic(length));
-         handControlFrameGraphics.put(side, new RDXReferenceFrameGraphic(length));
-         RigidBodyTransform wristToHandControlTransform = robotModel.getUIParameters().getTransformWristToHand(side);
+         controllerFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
+         handControlFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
          ModifiableReferenceFrame handDesiredControlFrame = new ModifiableReferenceFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
          {
             if (side == RobotSide.LEFT)
@@ -133,9 +124,6 @@ public class RDXVRKinematicsStreamingMode
          }
          handDesiredControlFrame.getReferenceFrame().update();
          handDesiredControlFrames.put(side, handDesiredControlFrame);
-         ArmJointName lastWristJoint = robotModel.getJointMap().getArmJointNames()[robotModel.getJointMap().getArmJointNames().length - 1];
-         wristJoints.put(side, ghostFullRobotModel.getArmJoint(side, lastWristJoint));
-         wristJointAnglePlots.put(side, new ImGuiPlot(labels.get(side + " Hand Joint Angle")));
       }
 
       status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(robotModel.getSimpleRobotName()));
@@ -200,7 +188,7 @@ public class RDXVRKinematicsStreamingMode
          for (RobotSide side : RobotSide.values)
          {
             vrContext.getController(side).runIfConnected(controller ->
-            {  //TODO edit this part to include other robot parts (e.g., feet, elbows, chest?)
+            {
                KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
                message.setEndEffectorHashCode(ghostFullRobotModel.getHand(side).hashCode());
                tempFramePose.setToZero(handDesiredControlFrames.get(side).getReferenceFrame());
@@ -246,6 +234,10 @@ public class RDXVRKinematicsStreamingMode
    private void handleTrackedSegment(RDXVRContext vrContext, KinematicsStreamingToolboxInputMessage toolboxInputMessage, TrackedSegmentType segmentType) {
       vrContext.getTracker(segmentType.segmentName).runIfConnected(tracker ->
       {
+         if(!trackedSegmentGraphics.containsKey(segmentType.segmentName))
+         {
+            trackedSegmentGraphics.put(segmentType.segmentName,new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
+         }
          if (!trackedSegmentDesiredFrame.containsKey(segmentType.segmentName))
          {
             trackedSegmentDesiredFrame.put(segmentType.segmentName, new ModifiableReferenceFrame(segmentType.segmentName, vrContext.getTracker(segmentType.segmentName).getXForwardZUpTrackerFrame()));
@@ -259,7 +251,7 @@ public class RDXVRKinematicsStreamingMode
                   case LEFT_FOREARM -> ghostFullRobotModel.getForearm(RobotSide.LEFT);
                   case RIGHT_FOREARM -> ghostFullRobotModel.getForearm(RobotSide.RIGHT);
                   case CHEST -> ghostFullRobotModel.getChest();
-                  default -> throw new IllegalStateException("Unexpected value: " + segmentType);
+                  default -> throw new IllegalStateException("Unexpected VR-tracked segment: " + segmentType);
                };
 
          KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
@@ -281,25 +273,31 @@ public class RDXVRKinematicsStreamingMode
 //         if (kinematicsRecorder.isReplaying())
 //            kinematicsRecorder.framePoseToPack(tempFramePose); //get values of tempFramePose from replay
 
-      if (positionWeight == 0)
+      if(!Double.isNaN(positionWeight))
       {
-         message.getLinearSelectionMatrix().setXSelected(false);
-         message.getLinearSelectionMatrix().setYSelected(false);
-         message.getLinearSelectionMatrix().setZSelected(false);
+         if (positionWeight == 0)
+         {
+            message.getLinearSelectionMatrix().setXSelected(false);
+            message.getLinearSelectionMatrix().setYSelected(false);
+            message.getLinearSelectionMatrix().setZSelected(false);
+         }
+         else
+         {
+            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(positionWeight));
+         }
       }
-      else
+      if(!Double.isNaN(orientationWeight))
       {
-         message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(positionWeight));
-      }
-      if (orientationWeight == 0)
-      {
-         message.getAngularSelectionMatrix().setXSelected(false);
-         message.getAngularSelectionMatrix().setYSelected(false);
-         message.getAngularSelectionMatrix().setZSelected(false);
-      }
-      else
-      {
-         message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(orientationWeight));
+         if (orientationWeight == 0)
+         {
+            message.getAngularSelectionMatrix().setXSelected(false);
+            message.getAngularSelectionMatrix().setYSelected(false);
+            message.getAngularSelectionMatrix().setZSelected(false);
+         }
+         else
+         {
+            message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(orientationWeight));
+         }
       }
       return message;
    }
@@ -419,10 +417,6 @@ public class RDXVRKinematicsStreamingMode
       ImGui.text("Status:");
       ImGui.sameLine();
       statusFrequencyPlot.renderImGuiWidgets();
-      for (RobotSide side : RobotSide.values)
-      {
-         wristJointAnglePlots.get(side).render(wristJoints.get(side).getQ());
-      }
 
       ImGui.checkbox(labels.get("Show reference frames"), showReferenceFrameGraphics);
    }
@@ -475,11 +469,10 @@ public class RDXVRKinematicsStreamingMode
       }
       if (showReferenceFrameGraphics.get())
       {
-//         headsetFrameGraphic.getRenderables(renderables, pool);
          for (RobotSide side : RobotSide.values)
          {
             controllerFrameGraphics.get(side).getRenderables(renderables, pool);
-            handControlFrameGraphics.get(side).getRenderables(renderables, pool);
+//            handControlFrameGraphics.get(side).getRenderables(renderables, pool);
          }
       }
    }
@@ -488,7 +481,6 @@ public class RDXVRKinematicsStreamingMode
    {
       ghostRobotGraphic.destroy();
       sharedControlAssistant.destroy();
-      headsetFrameGraphic.dispose();
       for (RobotSide side : RobotSide.values)
       {
          controllerFrameGraphics.get(side).dispose();
@@ -510,10 +502,5 @@ public class RDXVRKinematicsStreamingMode
       }
       rightIndex++;
       return handConfigurations[rightIndex % handConfigurations.length];
-   }
-
-   public RestartableProcess getKinematicsStreamingToolboxProcess()
-   {
-      return kinematicsStreamingToolboxProcess;
    }
 }
