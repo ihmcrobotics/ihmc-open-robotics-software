@@ -138,55 +138,55 @@ public class RDXVRKinematicsStreamingMode
       if (controllerModel == RDXVRControllerModel.UNKNOWN)
          controllerModel = vrContext.getControllerModel();
       vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
-                                                             {
-                                                                InputDigitalActionData aButton = controller.getAButtonActionData();
-                                                                if (aButton.bChanged() && !aButton.bState())
-                                                                {
-                                                                   streamToController.set(!streamToController.get());
-                                                                }
+      {
+          InputDigitalActionData aButton = controller.getAButtonActionData();
+          if (aButton.bChanged() && !aButton.bState())
+          {
+             streamToController.set(!streamToController.get());
+          }
 
-                                                                // NOTE: Implement hand open close for controller trigger button.
-                                                                InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
-                                                                if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
-                                                                {
-                                                                   HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.LEFT);
-                                                                   sendHandCommand(RobotSide.LEFT, handConfiguration);
-                                                                }
+          // NOTE: Implement hand open close for controller trigger button.
+          InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
+          if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
+          {
+             HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.LEFT);
+             sendHandCommand(RobotSide.LEFT, handConfiguration);
+          }
 
-                                                                // Check if left joystick is pressed in order to trigger recording or replay of motion
-                                                                InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
-                                                                kinematicsRecorder.processRecordReplayInput(joystickButton);
-                                                                if (kinematicsRecorder.isReplayingEnabled().get())
-                                                                   wakeUpToolbox();
+          // Check if left joystick is pressed in order to trigger recording or replay of motion
+          InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
+          kinematicsRecorder.processRecordReplayInput(joystickButton);
+          if (kinematicsRecorder.isReplayingEnabled().get())
+             wakeUpToolbox();
 
-                                                                // Check if left B button is pressed in order to trigger shared control assistance
-                                                                InputDigitalActionData bButton = controller.getBButtonActionData();
-                                                                sharedControlAssistant.processInput(bButton);
-                                                             });
+          // Check if left B button is pressed in order to trigger shared control assistance
+          InputDigitalActionData bButton = controller.getBButtonActionData();
+          sharedControlAssistant.processInput(bButton);
+      });
 
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
-                                                              {
-                                                                 InputDigitalActionData aButton = controller.getAButtonActionData();
-                                                                 if (aButton.bChanged() && !aButton.bState())
-                                                                 {
-                                                                    setEnabled(!enabled.get());
-                                                                 }
+      {
+         InputDigitalActionData aButton = controller.getAButtonActionData();
+         if (aButton.bChanged() && !aButton.bState())
+         {
+         setEnabled(!enabled.get());
+         }
 
-                                                                 // NOTE: Implement hand open close for controller trigger button.
-                                                                 InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
-                                                                 if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
-                                                                 {
-                                                                    HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.RIGHT);
-                                                                    sendHandCommand(RobotSide.RIGHT, handConfiguration);
-                                                                 }
+         // NOTE: Implement hand open close for controller trigger button.
+         InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
+         if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
+         {
+         HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.RIGHT);
+         sendHandCommand(RobotSide.RIGHT, handConfiguration);
+         }
 
-                                                                 // use right joystick values to control pelvis height of robot indirectly by teleporting operator up/down
-                                                                 // NOTE. intentionally not controlling pelvis height directly but teleporting the whole user to make them more comfortable
-                                                                 userHeightChangeRate = -controller.getJoystickActionData().y();
-                                                                 vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld -> teleportIHMCZUpToIHMCZUpWorld.getTranslation()
-                                                                                                                                                  .addZ(userHeightChangeRate
-                                                                                                                                                        * 0.01));
-                                                              });
+         // use right joystick values to control pelvis height of robot indirectly by teleporting operator up/down
+         // NOTE. intentionally not controlling pelvis height directly but teleporting the whole user to make them more comfortable
+         userHeightChangeRate = -controller.getJoystickActionData().y();
+         vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld -> teleportIHMCZUpToIHMCZUpWorld.getTranslation()
+                                                                                      .addZ(userHeightChangeRate
+                                                                                            * 0.01));
+      });
 
       if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
