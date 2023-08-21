@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commons.MathTools;
@@ -46,10 +47,10 @@ public class JointOfflineManager
 
    public void setJointOffline(int offlineJointHashCode)
    {
-      if (offlineJoint != null && offlineJoint.hashCode() != offlineJointHashCode)
-      {
-         throw new RuntimeException("Only one joint can be offline at a time.");
-      }
+      //      if (offlineJoint != null && offlineJoint.hashCode() != offlineJointHashCode)
+      //      {
+      //         throw new RuntimeException("Only one joint can be offline at a time.");
+      //      }
 
       OneDoFJointBasics joint = jointHashCodeMap.get(offlineJointHashCode);
       if (joint == null)
@@ -80,9 +81,12 @@ public class JointOfflineManager
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      double alphaUnload = EuclidCoreTools.clamp((yoTime.getValue() - timeJointWentOffline.getValue()) / UNLOAD_DURATION, 0.0, 1.0);
-      jointOfflineWeight.set(MathTools.square(alphaUnload) * JOINT_OFFLINE_WEIGHT);
-      jointTorqueCommand.setWeight(jointOfflineWeight.getDoubleValue());
+//      double alphaUnload = EuclidCoreTools.clamp((yoTime.getValue() - timeJointWentOffline.getValue()) / UNLOAD_DURATION, 0.0, 1.0);
+//      jointOfflineWeight.set(MathTools.square(alphaUnload) * JOINT_OFFLINE_WEIGHT);
+      
+//      jointOfflineWeight.set(JOINT_OFFLINE_WEIGHT);
+//      jointTorqueCommand.setWeight(jointOfflineWeight.getDoubleValue());
+      jointTorqueCommand.setConstraintType(ConstraintType.EQUALITY);
 
       return jointTorqueCommand;
    }
