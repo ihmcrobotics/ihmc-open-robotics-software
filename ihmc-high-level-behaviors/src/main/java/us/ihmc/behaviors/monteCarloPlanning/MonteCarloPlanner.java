@@ -75,7 +75,7 @@ public class MonteCarloPlanner
 
       root = bestNode;
 
-      LogTools.info("Total Nodes in Tree: " + MonteCarloPlannerTools.getTotalNodes(root));
+      LogTools.info("Total Nodes in Tree: " + MonteCarloPlannerTools.getTotalNodesInSubTree(root));
 
       if (bestNode == null)
          return agent.getPosition();
@@ -207,7 +207,7 @@ public class MonteCarloPlanner
             score += 200000;
          }
 
-         if (world.getGrid().ptr((int) randomState.getX(), (int) randomState.getY()).get() == 100)
+         if (world.getGrid().ptr((int) randomState.getX(), (int) randomState.getY()).get() == MonteCarloPlannerTools.OCCUPIED)
          {
             score -= 400;
          }
@@ -229,7 +229,7 @@ public class MonteCarloPlanner
                   score += 50;
                }
 
-               if (world.getGrid().ptr((int) point.getX(), (int) point.getY()).get() == 0)
+               if (world.getGrid().ptr((int) point.getX(), (int) point.getY()).get() == MonteCarloPlannerTools.OCCUPANCY_UNKNOWN)
                {
                   score += 500;
                }
