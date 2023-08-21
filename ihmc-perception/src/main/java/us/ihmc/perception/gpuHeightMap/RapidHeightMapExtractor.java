@@ -109,12 +109,6 @@ public class RapidHeightMapExtractor
 
       if (!processing)
       {
-//         RigidBodyTransform sensorToGroundTf = new RigidBodyTransform(sensorToWorldTransform);
-//         sensorToGroundTf.getTranslation().setX(0.0f);
-//         sensorToGroundTf.getTranslation().setY(0.0f);
-//         sensorToGroundTf.getRotation()
-//                       .set(new Quaternion(0.0f, sensorToGroundTf.getRotation().getPitch(), sensorToGroundTf.getRotation().getRoll()));
-
          sensorToGroundTransform.getTranslation().setZ(sensorToWorldTransform.getTranslationZ());
 
          // Upload input depth image

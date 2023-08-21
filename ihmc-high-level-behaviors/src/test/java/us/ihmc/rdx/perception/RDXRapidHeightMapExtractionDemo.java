@@ -38,7 +38,7 @@ import java.util.ArrayList;
 
 public class RDXRapidHeightMapExtractionDemo
 {
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230517_114430_PerceptionLog_900_ms.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("IROS_2023/20230228_200243_PerceptionLog.hdf5").toString();
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private RDXPanel navigationPanel;
@@ -67,6 +67,10 @@ public class RDXRapidHeightMapExtractionDemo
 
    private BytedecoImage loadedDepthImage;
    private final BytePointer depthBytePointer = new BytePointer(1000000);
+
+   private final RigidBodyTransform sensorToWorldTf = new RigidBodyTransform();
+   private final RigidBodyTransform sensorToGroundTf = new RigidBodyTransform();
+   private final RigidBodyTransform groundToWorldTf = new RigidBodyTransform();
 
    private OpenCLManager openCLManager;
    private PerceptionDataLoader perceptionDataLoader;
@@ -135,8 +139,8 @@ public class RDXRapidHeightMapExtractionDemo
 
             loadedDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
 
-            perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer);
-            perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, sensorOrientationBuffer);
+            perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer, 10);
+            perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, sensorOrientationBuffer, 10);
 
             perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.L515_DEPTH_NAME,
                                                      frameIndex.get(),
@@ -241,10 +245,15 @@ public class RDXRapidHeightMapExtractionDemo
 
               long begin = System.nanoTime();
 
-              RigidBodyTransform sensorToWorld = new RigidBodyTransform(sensorOrientationBuffer.get(frameIndex.get()),
-                                                                    sensorPositionBuffer.get(frameIndex.get()));
+              sensorToWorldTf.set(sensorOrientationBuffer.get(frameIndex.get()), sensorPositionBuffer.get(frameIndex.get()));
 
-              rapidHeightMapUpdater.update(sensorToWorld, sensorToWorld, planeHeight.get());
+              sensorToGroundTf.set(sensorToWorldTf);
+              sensorToGroundTf.getTranslation().setX(0.0f);
+              sensorToGroundTf.getTranslation().setY(0.0f);
+              sensorToGroundTf.getRotation()
+                            .set(new Quaternion(0.0f, sensorToGroundTf.getRotation().getPitch(), sensorToGroundTf.getRotation().getRoll()));
+
+              rapidHeightMapUpdater.update(sensorToWorldTf, sensorToGroundTf, planeHeight.get());
               heightMapUpdateNotification.set();
 
               long end = System.nanoTime();
@@ -260,9 +269,12 @@ public class RDXRapidHeightMapExtractionDemo
 
          LogTools.warn("Grid Center: " + gridCenter);
 
-         RigidBodyTransform temporaryTransform = new RigidBodyTransform();
+         groundToWorldTf.set(sensorToWorldTf);
+         groundToWorldTf.getRotation().setToPitchOrientation(0.0f);
+         groundToWorldTf.getRotation().setToRollOrientation(0.0f);
+         groundToWorldTf.getTranslation().setZ(0);
 
-         heightMapRenderer.update(temporaryTransform,
+         heightMapRenderer.update(groundToWorldTf,
                rapidHeightMapUpdater.getOutputHeightMapImage().getPointerForAccessSpeed(),
                                   gridCenter,
                                   rapidHeightMapUpdater.getCenterIndex(),
