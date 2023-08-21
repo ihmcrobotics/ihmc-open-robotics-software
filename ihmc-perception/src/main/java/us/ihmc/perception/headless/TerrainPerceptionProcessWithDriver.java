@@ -272,7 +272,8 @@ public class TerrainPerceptionProcessWithDriver
 
          if (parameters.getPublishDepth())
          {
-            executorService.submit(() -> {
+            executorService.submit(() ->
+            {
                OpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
                PerceptionMessageTools.setDepthIntrinsicsFromRealsense(realsense, depthImageMessage);
                CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
@@ -302,7 +303,8 @@ public class TerrainPerceptionProcessWithDriver
             // YUV I420 has 1.5 times the height of the image
             yuvColorImage = new Mat(realsense.getColorHeight() * 1.5, realsense.getColorWidth(), opencv_core.CV_8UC1); // deallocate later
 
-            executorService.submit(() -> {
+            executorService.submit(() ->
+            {
 
                OpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
 
@@ -361,9 +363,12 @@ public class TerrainPerceptionProcessWithDriver
       running = false;
 
       executorService.shutdownNow();
-      try {
+      try
+      {
          boolean result = executorService.awaitTermination(200, TimeUnit.MILLISECONDS);
-      } catch (InterruptedException e) {
+      }
+      catch (InterruptedException e)
+      {
          throw new RuntimeException(e);
       }
 

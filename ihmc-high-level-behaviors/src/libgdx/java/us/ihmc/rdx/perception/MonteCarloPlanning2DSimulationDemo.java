@@ -13,7 +13,7 @@ class MonteCarloPlanning2DSimulationDemo
 {
    public static void main(String[] args)
    {
-      ArrayList<Vector4D32> obstacles = new ArrayList<>();
+      ArrayList<Vector4D32> obstacles = new ArrayList<>(); // The obstacles here are represented as rectangles with (center_x, center_y, width, height)
 
       obstacles.add(new Vector4D32(20, 40, 10, 10));
       obstacles.add(new Vector4D32(90, 120, 16, 16));

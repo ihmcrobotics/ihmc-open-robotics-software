@@ -260,6 +260,7 @@ public class LocalizationAndMappingThread
       if (updateMapFuture != null)
          updateMapFuture.cancel(true);
       planarRegionMap.destroy();
+      executorService.shutdown();
    }
 
    public void setEnableLiveMode(boolean enableLiveMode)
