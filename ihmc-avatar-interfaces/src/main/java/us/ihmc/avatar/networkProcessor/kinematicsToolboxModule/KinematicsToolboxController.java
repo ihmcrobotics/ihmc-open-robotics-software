@@ -271,7 +271,7 @@ public class KinematicsToolboxController extends ToolboxController
     * The active support polygon shrunk by the distance {@code centerOfMassSafeMargin}. This represents
     * the convex horizontal region that the center of mass is constrained to.
     */
-   private final RecyclingArrayList<Point2D> shrunkSupportPolygonVertices = new RecyclingArrayList<>(Point2D.class);
+   protected final RecyclingArrayList<Point2D> shrunkSupportPolygonVertices = new RecyclingArrayList<>(Point2D.class);
    /** Helper used for shrink the support polygon. */
    private final ConvexPolygonScaler convexPolygonScaler = new ConvexPolygonScaler();
    private final FrameConvexPolygon2D newSupportPolygon = new FrameConvexPolygon2D();

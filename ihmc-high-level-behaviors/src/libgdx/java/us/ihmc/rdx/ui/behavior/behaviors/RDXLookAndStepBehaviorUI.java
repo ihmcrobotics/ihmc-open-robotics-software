@@ -340,7 +340,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    }
 
    @Override
-   public void addChildPanels(ImGuiPanel parentPanel)
+   public void addChildPanels(RDXPanel parentPanel)
    {
       parentPanel.addChild(lookAndStepRemotePropertySet.createPanel());
       parentPanel.addChild(footstepPlannerRemotePropertySet.createPanel());

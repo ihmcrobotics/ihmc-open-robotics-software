@@ -25,7 +25,7 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.log.LogTools;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
@@ -78,7 +78,7 @@ public class RDXFootstepPlannerLogViewer
       scene3D.addDefaultLighting();
       panel3D = new RDX3DPanel("Footstep Planner Log 3D View");
       baseUI.add3DPanel(panel3D, scene3D);
-      panel3D.addChild(new ImGuiPanel("Footstep Planner Log Viewer Controls", this::renderImGuiWidgets));
+      panel3D.addChild(new RDXPanel("Footstep Planner Log Viewer Controls", this::renderImGuiWidgets));
       scene3D.addRenderableProvider(this::getRenderables);
       panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
 

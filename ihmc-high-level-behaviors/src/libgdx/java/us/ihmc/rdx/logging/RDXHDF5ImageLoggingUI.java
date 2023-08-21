@@ -14,7 +14,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.tools.ImPlotIntegerPlot;
@@ -38,7 +38,7 @@ public class RDXHDF5ImageLoggingUI
    private final Object syncObject = new Object();
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImGuiPanel panel = new ImGuiPanel("Logging", this::renderImGuiWidgets);
+   private final RDXPanel panel = new RDXPanel("Logging", this::renderImGuiWidgets);
    private H5File h5File = null;
    private final ImString logDirectory = new ImString(IHMCCommonPaths.LOGS_DIRECTORY.toString());
    private String logFile;
@@ -187,7 +187,7 @@ public class RDXHDF5ImageLoggingUI
          closeHDF5File();
    }
 
-   public ImGuiPanel getPanel()
+   public RDXPanel getPanel()
    {
       return panel;
    }

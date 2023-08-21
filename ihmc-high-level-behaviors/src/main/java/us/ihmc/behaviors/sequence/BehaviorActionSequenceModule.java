@@ -31,7 +31,7 @@ public class BehaviorActionSequenceModule
                                                                                   ROS2IOTopicQualifier.STATUS);
 
       ReferenceFrameLibrary referenceFrameLibrary = new ReferenceFrameLibrary();
-      referenceFrameLibrary.addAll(predefinedSceneNodeLibrary.getReferenceFrames());
+      referenceFrameLibrary.addAll(predefinedSceneNodeLibrary.getReferenceFrameSuppliers());
 
       sequence = new BehaviorActionSequence(robotModel, ros2, referenceFrameLibrary);
 

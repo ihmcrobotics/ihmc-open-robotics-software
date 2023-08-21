@@ -15,7 +15,7 @@ public class MultiContactTrajectoryStatusPubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a899a31cf65f617255afa2e2c41758e1d3167c35d7952e6e34995f07af478e01";
+   		return "0045d9a5c4df70f58cc3aec4c3c1840d90348a912033edd01effe4fd7d018854";
    }
    
    @Override

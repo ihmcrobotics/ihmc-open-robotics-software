@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -44,6 +45,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoLong;
 
 /**
  * Use this class to generate a stream of footsteps which path can be controlled given desired
@@ -128,6 +130,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
 
    private final YoContinuousStepGeneratorParameters parameters = new YoContinuousStepGeneratorParameters(variableNameSuffix, registry);
    private final DoubleProvider stepTime = () -> parameters.getSwingDuration() + parameters.getTransferDuration();
+   private final YoLong currentFootstepDataListCommandID = new YoLong("currentFootstepDataListCommandID_" + variableNameSuffix, registry);
 
    private final YoInteger numberOfTicksBeforeSubmittingFootsteps = new YoInteger("numberOfTicksBeforeSubmittingFootsteps" + variableNameSuffix, registry);
 
@@ -174,6 +177,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
 
       parameters.clear();
       numberOfTicksBeforeSubmittingFootsteps.set(2);
+      currentFootstepDataListCommandID.set(new Random().nextLong(0, Long.MAX_VALUE / 2)); // To make this command ID unique 
 
       setSupportFootBasedFootstepAdjustment(true);
    }
@@ -333,11 +337,11 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          for (int adjustorIndex = 0; adjustorIndex < footstepAdjustments.size(); adjustorIndex++)
             footstepAdjustments.get(adjustorIndex).adjustFootstep(currentSupportFootPose, nextFootstepPose2D, swingSide, footstep);
 
-//         if (!isStepValid(nextFootstepPose3D, previousFootstepPose, swingSide))
-//         {
-//            alternateStepChooser.computeStep(footstepPose2D, nextFootstepPose2D, swingSide, nextFootstepPose3D);
-//            nextFootstepPose2D.set(nextFootstepPose3D);
-//         }
+         //         if (!isStepValid(nextFootstepPose3D, previousFootstepPose, swingSide))
+         //         {
+         //            alternateStepChooser.computeStep(footstepPose2D, nextFootstepPose2D, swingSide, nextFootstepPose3D);
+         //            nextFootstepPose2D.set(nextFootstepPose3D);
+         //         }
 
          footstep.setRobotSide(swingSide.toByte());
          if (swingHeightInputProvider == null)
@@ -420,6 +424,10 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       {
          if (counter >= numberOfTicksBeforeSubmittingFootsteps.getValue())
          {
+            currentFootstepDataListCommandID.increment();
+            footstepDataListMessage.setSequenceId(currentFootstepDataListCommandID.getValue());
+            footstepDataListMessage.getQueueingProperties().setSequenceId(currentFootstepDataListCommandID.getValue());
+            footstepDataListMessage.getQueueingProperties().setMessageId(currentFootstepDataListCommandID.getValue());
             footstepMessenger.submitFootsteps(footstepDataListMessage);
             counter = 0;
          }
@@ -766,7 +774,10 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          private final YawPitchRoll yawPitchRoll = new YawPitchRoll();
 
          @Override
-         public boolean adjustFootstep(FramePose3DReadOnly supportFootPose, FramePose2DReadOnly footstepPose, RobotSide footSide, FootstepDataMessage adjustedPose)
+         public boolean adjustFootstep(FramePose3DReadOnly supportFootPose,
+                                       FramePose2DReadOnly footstepPose,
+                                       RobotSide footSide,
+                                       FootstepDataMessage adjustedPose)
          {
             adjustedPose.getLocation().set(footstepPose.getPosition());
             adjustedPose.getLocation().setZ(supportFootPose.getZ());
@@ -797,8 +808,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    }
 
    /**
-    * Sets a provider that is to be used to update the desired swing height of each foot internally
-    * on each call to {@link #update(double)}
+    * Sets a provider that is to be used to update the desired swing height of each foot internally on
+    * each call to {@link #update(double)}
     *
     * @param swingHeightInputProvider the provider used to set the swing height
     */

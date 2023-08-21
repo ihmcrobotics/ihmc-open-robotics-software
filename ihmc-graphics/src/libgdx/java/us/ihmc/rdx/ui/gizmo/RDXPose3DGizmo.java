@@ -167,6 +167,10 @@ public class RDXPose3DGizmo implements RenderableProvider
       this.gizmoFrame = gizmoFrame;
    }
 
+   /**
+    * Use of this method is assuming that this Gizmo is the owner of this frame
+    * and not based on a frame managed externally.
+    */
    public void setParentFrame(ReferenceFrame parentReferenceFrame)
    {
       gizmoFrame.remove();
@@ -511,9 +515,9 @@ public class RDXPose3DGizmo implements RenderableProvider
       }
    }
 
-   public ImGuiPanel createTunerPanel(String name)
+   public RDXPanel createTunerPanel(String name)
    {
-      return new ImGuiPanel("Pose3D Gizmo Tuner (" + name + ")", this::renderImGuiTuner);
+      return new RDXPanel("Pose3D Gizmo Tuner (" + name + ")", this::renderImGuiTuner);
    }
 
    public void renderImGuiTuner()

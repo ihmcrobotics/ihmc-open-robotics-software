@@ -10,7 +10,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -27,7 +27,7 @@ public class RDXSCS2HumanoidSimulationManager
 {
    private RDXSCS2SimulationSession scs2SimulationSession;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImGuiPanel managerPanel = new ImGuiPanel("SCS 2 Simulation Session", this::renderImGuiWidgets);
+   private final RDXPanel managerPanel = new RDXPanel("SCS 2 Simulation Session", this::renderImGuiWidgets);
    private SCS2AvatarSimulation avatarSimulation;
    private RealtimeROS2Node realtimeROS2Node;
    private RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup;
