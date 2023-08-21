@@ -15,7 +15,7 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d80baa183c13b8b9e57846d5226744ad978e04af74c579327fa130addd300395";
+   		return "1d5f57c94dcf559ac4a6d266bbd3106a647070ddc6fe3be9ad58849df895c135";
    }
    
    @Override
@@ -61,6 +61,8 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -120,6 +122,9 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -148,6 +153,8 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
 
       cdr.write_type_6(data.getOrientationDistanceToGoalTolerance());
 
+      cdr.write_type_6(data.getHandWrenchMagnitudeLinear());
+
    }
 
    public static void read(behavior_msgs.msg.dds.ActionExecutionStatusMessage data, us.ihmc.idl.CDR cdr)
@@ -174,6 +181,8 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
       	
       data.setOrientationDistanceToGoalTolerance(cdr.read_type_6());
       	
+      data.setHandWrenchMagnitudeLinear(cdr.read_type_6());
+      	
 
    }
 
@@ -191,6 +200,7 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
       ser.write_type_6("current_orientation_distance_to_goal", data.getCurrentOrientationDistanceToGoal());
       ser.write_type_6("start_orientation_distance_to_goal", data.getStartOrientationDistanceToGoal());
       ser.write_type_6("orientation_distance_to_goal_tolerance", data.getOrientationDistanceToGoalTolerance());
+      ser.write_type_6("hand_wrench_magnitude_linear", data.getHandWrenchMagnitudeLinear());
    }
 
    @Override
@@ -207,6 +217,7 @@ public class ActionExecutionStatusMessagePubSubType implements us.ihmc.pubsub.To
       data.setCurrentOrientationDistanceToGoal(ser.read_type_6("current_orientation_distance_to_goal"));
       data.setStartOrientationDistanceToGoal(ser.read_type_6("start_orientation_distance_to_goal"));
       data.setOrientationDistanceToGoalTolerance(ser.read_type_6("orientation_distance_to_goal_tolerance"));
+      data.setHandWrenchMagnitudeLinear(ser.read_type_6("hand_wrench_magnitude_linear"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ActionExecutionStatusMessage src, behavior_msgs.msg.dds.ActionExecutionStatusMessage dest)

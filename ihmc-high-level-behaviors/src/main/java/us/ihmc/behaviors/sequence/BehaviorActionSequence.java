@@ -9,6 +9,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.actions.*;
+import us.ihmc.behaviors.tools.HandWrenchCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
@@ -51,6 +52,7 @@ public class BehaviorActionSequence
    private final ROS2ControllerHelper ros2;
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private final ROS2SyncedRobotModel syncedRobot;
+   private final HandWrenchCalculator handWrenchCalculator;
    private final FootstepPlanningModule footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
@@ -78,6 +80,7 @@ public class BehaviorActionSequence
       this.referenceFrameLibrary = referenceFrameLibrary;
 
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2.getROS2NodeInterface());
+      handWrenchCalculator = new HandWrenchCalculator(syncedRobot);
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       walkingControllerParameters = robotModel.getWalkingControllerParameters();
@@ -138,7 +141,7 @@ public class BehaviorActionSequence
          }
          for (HandPoseActionMessage message : latestUpdateMessage.getHandPoseActions())
          {
-            HandPoseAction action = new HandPoseAction(ros2, referenceFrameLibrary, robotModel, syncedRobot);
+            HandPoseAction action = new HandPoseAction(ros2, referenceFrameLibrary, robotModel, syncedRobot, handWrenchCalculator);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
@@ -185,6 +188,7 @@ public class BehaviorActionSequence
       }
 
       syncedRobot.update();
+      handWrenchCalculator.compute();
 
       if (automaticExecutionSubscription.getMessageNotification().poll())
       {

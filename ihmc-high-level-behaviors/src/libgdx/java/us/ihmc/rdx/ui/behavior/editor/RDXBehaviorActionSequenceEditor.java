@@ -451,6 +451,14 @@ public class RDXBehaviorActionSequenceEditor
             percentLeft = incompleteFootsteps / (double) totalFootsteps;
             ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "%d / %d".formatted(incompleteFootsteps, totalFootsteps));
          }
+         else if (executingAction instanceof RDXHandPoseAction)
+         {
+            widgetAligner.text("Hand wrench linear (N?):");
+            double limit = 20.0;
+            double force = latestExecutionStatus.getHandWrenchMagnitudeLinear();
+            barColor = force < limit ? ImGuiTools.GREEN : ImGuiTools.RED;
+            ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT, barColor, force / limit, 0.5, "%.2f".formatted(force));
+         }
       }
       else
       {

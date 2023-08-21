@@ -32,3 +32,6 @@ float64 start_orientation_distance_to_goal
 
 # Orientation distance to goal tolerance
 float64 orientation_distance_to_goal_tolerance
+
+# Linear hand wrench magnitude
+float64 hand_wrench_magnitude_linear
