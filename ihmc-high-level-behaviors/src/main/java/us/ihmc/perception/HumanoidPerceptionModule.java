@@ -6,7 +6,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.activeMapping.ActiveMappingRemoteProcess;
+import us.ihmc.behaviors.activeMapping.ActiveMappingRemoteThread;
 import us.ihmc.behaviors.monteCarloPlanning.Agent;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.behaviors.monteCarloPlanning.World;
@@ -23,7 +23,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
-import us.ihmc.perception.headless.LocalizationAndMappingProcess;
+import us.ihmc.perception.headless.LocalizationAndMappingThread;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
@@ -59,8 +59,8 @@ public class HumanoidPerceptionModule
    private final FramePose3D cameraPose = new FramePose3D();
 
    private OpenCLManager openCLManager;
-   private LocalizationAndMappingProcess localizationAndMappingProcess;
-   private ActiveMappingRemoteProcess activeMappingRemoteProcess;
+   private LocalizationAndMappingThread localizationAndMappingThread;
+   private ActiveMappingRemoteThread activeMappingRemoteThread;
    private RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor;
    private CollidingScanRegionFilter collidingScanRegionFilter;
    private FullHumanoidRobotModel fullRobotModel;
@@ -91,8 +91,8 @@ public class HumanoidPerceptionModule
 
    public void updateTerrain(ROS2Helper ros2Helper, Mat depthImage, ReferenceFrame cameraFrame, boolean rapidRegionsEnabled, boolean mappingEnabled)
    {
-      if (localizationAndMappingProcess != null)
-         localizationAndMappingProcess.setEnableLiveMode(mappingEnabled);
+      if (localizationAndMappingThread != null)
+         localizationAndMappingThread.setEnableLiveMode(mappingEnabled);
 
       if (rapidRegionsEnabled)
       {
@@ -125,7 +125,7 @@ public class HumanoidPerceptionModule
                            perceptionConfigurationParameters.getOccupancyGridResolution(),
                            70);
 
-      if (activeMappingRemoteProcess == null)
+      if (activeMappingRemoteThread == null)
       {
          int gridX = ActiveMappingTools.getIndexFromCoordinates(sensorFrame.getTransformToWorldFrame().getTranslationX(),
                                                                 perceptionConfigurationParameters.getOccupancyGridResolution(),
@@ -170,12 +170,12 @@ public class HumanoidPerceptionModule
 
    public void initializeOccupancyGrid(int depthHeight, int depthWidth, int gridHeight, int gridWidth)
    {
-      if (activeMappingRemoteProcess != null)
+      if (activeMappingRemoteThread != null)
       {
          LogTools.warn("Initializing Occupancy Grid from Active Mapping Remote Process");
 
-         this.world = activeMappingRemoteProcess.getActiveMappingModule().getPlanner().getWorld();
-         this.agent = activeMappingRemoteProcess.getActiveMappingModule().getPlanner().getAgent();
+         this.world = activeMappingRemoteThread.getActiveMappingModule().getPlanner().getWorld();
+         this.agent = activeMappingRemoteThread.getActiveMappingModule().getPlanner().getAgent();
       }
       else
       {
@@ -194,34 +194,34 @@ public class HumanoidPerceptionModule
       this.collidingScanRegionFilter = PerceptionFilterTools.createHumanoidShinCollisionFilter(fullRobotModel, collisionBoxProvider);
    }
 
-   public void initializeLocalizationAndMappingProcess(ROS2SyncedRobotModel syncedRobot, String robotName, ROS2Node ros2Node, boolean smoothing)
+   public void initializeLocalizationAndMappingThread(ROS2SyncedRobotModel syncedRobot, String robotName, ROS2Node ros2Node, boolean smoothing)
    {
       LogTools.info("Initializing Localization and Mapping Process (Smoothing: {})", smoothing);
-      localizationAndMappingProcess = new LocalizationAndMappingProcess(robotName,
-                                                                        PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
-                                                                        PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
-                                                                        ros2Node,
-                                                                        syncedRobot.getReferenceFrames(),
-                                                                        () ->
+      localizationAndMappingThread = new LocalizationAndMappingThread(robotName,
+                                                                      PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
+                                                                      PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
+                                                                      ros2Node,
+                                                                      syncedRobot.getReferenceFrames(),
+                                                                      () ->
                                                                         {
                                                                         },
-                                                                        smoothing);
+                                                                      smoothing);
    }
 
    public void initializeActiveMappingProcess(String robotName, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, ROS2Node ros2Node)
    {
       LogTools.info("Initializing Active Mapping Process");
-      activeMappingRemoteProcess = new ActiveMappingRemoteProcess(robotName,
-                                                                  robotModel,
-                                                                  syncedRobot,
-                                                                  PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
-                                                                  PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
-                                                                  ros2Node,
-                                                                  syncedRobot.getReferenceFrames(),
-                                                                  () ->
+      activeMappingRemoteThread = new ActiveMappingRemoteThread(robotName,
+                                                                robotModel,
+                                                                syncedRobot,
+                                                                PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
+                                                                PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
+                                                                ros2Node,
+                                                                syncedRobot.getReferenceFrames(),
+                                                                () ->
                                                                   {
                                                                   },
-                                                                  true);
+                                                                true);
    }
 
    public void extractFramePlanarRegionsList(RapidPlanarRegionsExtractor extractor,
@@ -313,11 +313,11 @@ public class HumanoidPerceptionModule
       if (rapidPlanarRegionsExtractor != null)
          rapidPlanarRegionsExtractor.destroy();
 
-      if (localizationAndMappingProcess != null)
-         localizationAndMappingProcess.destroy();
+      if (localizationAndMappingThread != null)
+         localizationAndMappingThread.destroy();
 
-      if (activeMappingRemoteProcess != null)
-         activeMappingRemoteProcess.destroy();
+      if (activeMappingRemoteThread != null)
+         activeMappingRemoteThread.destroy();
    }
 
    public void setPerceptionConfigurationParameters(PerceptionConfigurationParameters perceptionConfigurationParameters)
