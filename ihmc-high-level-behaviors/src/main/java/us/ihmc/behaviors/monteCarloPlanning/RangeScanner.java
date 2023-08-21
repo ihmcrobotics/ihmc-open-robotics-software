@@ -28,7 +28,7 @@ public class RangeScanner
       Point2D end_point = new Point2D(pos.getX32() + maxRange * (float) Math.cos(theta), pos.getY32() + maxRange * (float) Math.sin(theta));
 
       // Get the intersection point with the obstacles
-      Point2D scanPoint = MonteCarloPlannerTools.findClosestIntersection(pos, end_point, world.getGrid());
+      Point2D scanPoint = MonteCarloPlannerTools.findClosestOccupiedPoint(pos, end_point, world.getGrid());
 
       if (scanPoint.distance(pos) > maxRange)
       {

@@ -4,7 +4,6 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Scalar;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple4D.Vector4D32;
 
@@ -14,15 +13,19 @@ import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_GRAY2RGB;
 
 public class MonteCarloPlannerTools
 {
-   public static int getTotalNodes(MonteCarloTreeNode node)
+   static byte OCCUPANCY_UNKNOWN = 0;
+   static byte OCCUPANCY_FREE = 50;
+   static byte OCCUPIED = 100;
+
+   public static int getTotalNodesInSubTree(MonteCarloTreeNode rootNode)
    {
-      if (node == null)
+      if (rootNode == null)
          return 0;
 
       int total = 1;
-      for (MonteCarloTreeNode child : node.getChildren())
+      for (MonteCarloTreeNode child : rootNode.getChildren())
       {
-         total += getTotalNodes(child);
+         total += getTotalNodesInSubTree(child);
       }
 
       return total;
@@ -101,7 +104,7 @@ public class MonteCarloPlannerTools
          opencv_imgproc.rectangle(gridColor,
                                   new Point(obstacleMinY, obstacleMinX),
                                   new Point(obstacleMaxY, obstacleMaxX),
-                                  new Scalar(100),
+                                  new Scalar(OCCUPIED),
                                   -1,
                                   0,
                                   0);
@@ -111,20 +114,20 @@ public class MonteCarloPlannerTools
 
    public static boolean isPointOccupied(Point2D point, Mat grid)
    {
-      return grid.ptr((int) point.getX(), (int) point.getY()).get() == 100;
+      return grid.ptr((int) point.getX(), (int) point.getY()).get() == OCCUPIED;
    }
 
-   public static Point2D findClosestIntersection(Point2D start_point, Point2D end_point, Mat grid)
+   public static Point2D findClosestOccupiedPoint(Point2D startPoint, Point2D endPoint, Mat grid)
    {
-
       // set closest_point to max, max
-      Point2D closest_point = new Point2D(10000000, 10000000);
+      Point2D closest_point = new Point2D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
       int samples = 10;
       for (int i = 0; i<samples; i++)
       {
-         Point2D currentPoint = new Point2D(EuclidCoreTools.interpolate(start_point.getX(), end_point.getX(), i/(double)samples),
-                                            EuclidCoreTools.interpolate(start_point.getY(), end_point.getY(), i/(double)samples));
+         double alpha = i / (double) samples;
+         Point2D currentPoint = new Point2D();
+         currentPoint.interpolate(startPoint, endPoint, alpha);
 
          // check if a 3x3 square around the current point is occupied
          if (isPointOccupied(currentPoint, grid) ||
@@ -163,10 +166,9 @@ public class MonteCarloPlannerTools
                // check if inside the world boundaries
                if (x >= 0 && x <= world.getGridWidth() && y >= 0 && y <= world.getGridHeight())
                {
-                  // if currently the pixel is 0 then set it to 50
-                  if (world.getGrid().ptr(x, y).get() == 0)
+                  if (world.getGrid().ptr(x, y).get() == OCCUPANCY_UNKNOWN)
                   {
-                     world.getGrid().ptr(x, y).put((byte) 50);
+                     world.getGrid().ptr(x, y).put(OCCUPANCY_FREE);
                   }
                }
             }
