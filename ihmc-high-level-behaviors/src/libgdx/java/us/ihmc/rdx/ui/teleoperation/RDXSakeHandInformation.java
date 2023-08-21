@@ -18,8 +18,8 @@ public class RDXSakeHandInformation
    private final CommunicationHelper communicationHelper;
    private final IHMCROS2Input<HandSakeStatusMessage> statusInput;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImGuiFlashingText calibrateStatusText = new ImGuiFlashingText(ImGuiTools.RED);
-   private final ImGuiFlashingText needResetStatusText = new ImGuiFlashingText(ImGuiTools.RED);
+   private final ImGuiFlashingText presentTemperatureText = new ImGuiFlashingText(ImGuiTools.RED);
+   private final ImGuiFlashingText errorStatusText = new ImGuiFlashingText(ImGuiTools.RED);
 
    public RDXSakeHandInformation(RobotSide side, CommunicationHelper communicationHelper)
    {
@@ -28,5 +28,55 @@ public class RDXSakeHandInformation
       statusInput = communicationHelper.subscribe(ROS2Tools.getControllerOutputTopic(communicationHelper.getRobotName())
                                                            .withTypeName(HandSakeStatusMessage.class),
                                                   message -> message.getRobotSide() == side.toByte());
+   }
+
+   public void renderImGuiWidgets()
+   {
+      if (statusInput.hasReceivedFirstMessage())
+      {
+         // TODO: Add ratio to unit conversions enum or something
+         double temperature = 100 * statusInput.getLatest().getTemperature();
+         boolean error = statusInput.getLatest().getIsInErrorState();
+
+         if (temperature < 55.0)
+         {
+            renderGradiatedImGuiText("Temperature: " + FormattingTools.getFormattedDecimal1D(temperature) + " C  |", temperature, 45.0, 55.0);
+         }
+         else
+         {
+            presentTemperatureText.renderText("Temperature: " + FormattingTools.getFormattedDecimal1D(temperature) + " C  |", true);
+         }
+         ImGui.sameLine();
+
+         if (!error)
+         {
+            ImGui.textColored(ImGuiTools.GREEN, "Status: all good");
+         }
+         else
+         {
+            errorStatusText.renderText("Status: ERROR", true);
+         }
+      }
+      else
+      {
+         ImGui.text("No status received.");
+      }
+   }
+
+   private void renderGradiatedImGuiText(String text, double value, double... colorSwitchValues)
+   {
+      int redValue = 0;
+      int greenValue = 255;
+
+      for (double switchValue : colorSwitchValues)
+      {
+         if (value < switchValue)
+            break;
+
+         redValue = 255;
+         greenValue -= 255 / colorSwitchValues.length;
+      }
+
+      ImGui.textColored(redValue, greenValue, 0, 255, text);
    }
 }

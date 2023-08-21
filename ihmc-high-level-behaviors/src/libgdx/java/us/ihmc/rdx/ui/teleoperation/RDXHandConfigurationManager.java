@@ -2,11 +2,8 @@ package us.ihmc.rdx.ui.teleoperation;
 
 import controller_msgs.msg.dds.*;
 import imgui.ImGui;
-import imgui.type.ImInt;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
-import us.ihmc.commons.FormattingTools;
-import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.SakeHandCommandOption;
@@ -34,7 +31,7 @@ public class RDXHandConfigurationManager
    private final SideDependentList<RDXIconTexture> handIcons = new SideDependentList<>();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private RobotSide toolbarSelectedSide = RobotSide.LEFT;
-   private final SideDependentList<IHMCROS2Input<HandSakeStatusMessage>> sakeStatuses = new SideDependentList<>();
+   private final SideDependentList<RDXSakeHandInformation> sakeHandInfo = new SideDependentList<>();
    private final SideDependentList<RDXSakeHandPositionSlider> handPositionSliders = new SideDependentList<>();
    private final SideDependentList<RDXSakeHandTorqueSlider> handTorqueSliders = new SideDependentList<>();
 
@@ -107,9 +104,7 @@ public class RDXHandConfigurationManager
    {
       for (RobotSide side : RobotSide.values)
       {
-         sakeStatuses.put(side, communicationHelper.subscribe(ROS2Tools.getControllerOutputTopic(communicationHelper.getRobotName())
-                                                                       .withTypeName(HandSakeStatusMessage.class),
-                                                              message -> message.getRobotSide() == side.toByte()));
+         sakeHandInfo.put(side, new RDXSakeHandInformation(side, communicationHelper));
       }
    }
 
@@ -119,20 +114,6 @@ public class RDXHandConfigurationManager
       {
          ImGui.image(handIcons.get(side).getTexture().getTextureObjectHandle(), 22.0f, 22.0f);
          ImGui.sameLine();
-         if (sakeStatuses.get(side).hasReceivedFirstMessage())
-         {
-            // TODO: Add ratio to unit conversions enum or something
-            double temperature = 100 * sakeStatuses.get(side).getLatest().getTemperature();
-            boolean error = sakeStatuses.get(side).getLatest().getIsInErrorState();
-            double errorValue = error ? 1.0 : 0.0;
-            renderGradiatedImGuiText("Temperature: " + FormattingTools.getFormattedDecimal1D(temperature) + " C  |", temperature, 45.0, 55.0);
-            ImGui.sameLine();
-            renderGradiatedImGuiText("Status: " + (error ? "ERROR" : "all good"), errorValue, 1.0);
-         }
-         else
-         {
-            ImGui.text("No status received.");
-         }
          if (ImGui.button(labels.get("Close", side.getCamelCaseName())))
          {
             publishHandCommand(side, SakeHandCommandOption.CLOSE);
@@ -152,26 +133,14 @@ public class RDXHandConfigurationManager
          {
             publishHandCommand(side, SakeHandCommandOption.CALIBRATE);
          }
+
+         sakeHandInfo.get(side).renderImGuiWidgets();
+
          handPositionSliders.get(side).renderImGuiWidgets();
          handTorqueSliders.get(side).renderImGuiWidgets();
+
+         ImGui.separator();
       }
-   }
-
-   private void renderGradiatedImGuiText(String text, double value, double... colorSwitchValues)
-   {
-      int redValue = 0;
-      int greenValue = 192;
-
-      for (double switchValue : colorSwitchValues)
-      {
-         if (value < switchValue)
-            break;
-
-         redValue = 192;
-         greenValue -= 192 / colorSwitchValues.length;
-      }
-
-      ImGui.textColored(redValue, greenValue, 0, 255, text);
    }
 
    public void publishHandCommand(RobotSide side, SakeHandCommandOption handCommandOption)
