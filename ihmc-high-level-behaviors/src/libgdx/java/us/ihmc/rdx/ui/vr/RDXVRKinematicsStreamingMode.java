@@ -182,7 +182,7 @@ public class RDXVRKinematicsStreamingMode
 
          // use right joystick values to control pelvis height of robot indirectly by teleporting operator up/down
          // NOTE. intentionally not controlling pelvis height directly but teleporting the whole user to make them more comfortable
-         userHeightChangeRate = controller.getJoystickActionData().y();
+         userHeightChangeRate = - controller.getJoystickActionData().y();
          vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld -> teleportIHMCZUpToIHMCZUpWorld.getTranslation().addZ(userHeightChangeRate * 0.01));
       });
 
