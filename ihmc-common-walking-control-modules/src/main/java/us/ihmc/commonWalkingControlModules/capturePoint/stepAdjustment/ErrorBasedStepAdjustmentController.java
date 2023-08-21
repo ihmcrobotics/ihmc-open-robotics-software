@@ -159,7 +159,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
       allowStepAdjustment = new BooleanParameter(yoNamePrefix + "AllowStepAdjustment", registry, stepAdjustmentParameters.allowStepAdjustment());
 
-      resetFootstepProjectionEachTick = new BooleanParameter(yoNamePrefix + "ResetFootstepProjectionEachTick", registry, true);
+      resetFootstepProjectionEachTick = new BooleanParameter(yoNamePrefix + "ResetFootstepProjectionEachTick", registry, false);
       minimumTimeForStepAdjustment = new DoubleParameter(yoNamePrefix + "minimumTimeForStepAdjustment",
                                                          registry,
                                                          stepAdjustmentParameters.getMinimumTimeForStepAdjustment());
