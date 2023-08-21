@@ -4,6 +4,11 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.thread.Throttler;
 
+/**
+ * This class will probably change a lot as actions have
+ * more complex conditions and decision making logic. It'll
+ * morph into something else entirely, probably.
+ */
 public class BehaviorActionCompletionCalculator
 {
    private double translationError;
