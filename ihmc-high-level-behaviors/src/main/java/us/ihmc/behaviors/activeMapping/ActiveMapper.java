@@ -6,9 +6,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanner;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
-import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.*;
@@ -22,7 +20,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
 
-public class ActiveMappingModule
+public class ActiveMapper
 {
    public enum ActiveMappingMode
    {
@@ -71,7 +69,7 @@ public class ActiveMappingModule
    private float gridResolution = 10.0f;
    private int offset = 70;
 
-   public ActiveMappingModule(DRCRobotModel robotModel, HumanoidReferenceFrames humanoidReferenceFrames)
+   public ActiveMapper(DRCRobotModel robotModel, HumanoidReferenceFrames humanoidReferenceFrames)
    {
       this.referenceFrames = humanoidReferenceFrames;
       this.robotModel = robotModel;

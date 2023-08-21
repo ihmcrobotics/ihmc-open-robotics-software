@@ -29,7 +29,7 @@ public class ActiveMappingRemoteThread extends LocalizationAndMappingThread
    private final ROS2PublisherMap publisherMap;
    private final ROS2SyncedRobotModel syncedRobotModel;
 
-   private ActiveMappingModule activeMappingModule;
+   private ActiveMapper activeMappingModule;
 
    private final ROS2Topic controllerFootstepDataTopic;
 
@@ -52,7 +52,7 @@ public class ActiveMappingRemoteThread extends LocalizationAndMappingThread
       this.syncedRobotModel = syncedRobotModel;
       this.controllerFootstepDataTopic = ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
 
-      activeMappingModule = new ActiveMappingModule(robotModel, referenceFrames);
+      activeMappingModule = new ActiveMapper(robotModel, referenceFrames);
 
       publisherMap = new ROS2PublisherMap(ros2Node);
       publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
@@ -118,7 +118,7 @@ public class ActiveMappingRemoteThread extends LocalizationAndMappingThread
       }
    }
 
-   public ActiveMappingModule getActiveMappingModule()
+   public ActiveMapper getActiveMappingModule()
    {
       return activeMappingModule;
    }
