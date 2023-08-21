@@ -28,9 +28,6 @@ public class RDXHumanoidPerceptionUI
       this.humanoidPerception = humanoidPerception;
       this.remotePerceptionUI = new RDXRemotePerceptionUI(ros2Helper);
 
-      this.rapidRegionsUI = new RDXRapidRegionsUI();
-      this.rapidRegionsUI.create(humanoidPerception.getRapidRegionsExtractor());
-
       this.activeMappingUI = new RDXActiveMappingUI("Active Mapping", ros2Helper);
 
       this.humanoidPerception.setPerceptionConfigurationParameters(remotePerceptionUI.getPerceptionConfigurationParameters());
@@ -41,6 +38,12 @@ public class RDXHumanoidPerceptionUI
       this.heightMapRenderer = new RDXHeightMapRenderer();
       this.heightMapRenderer.create(
             humanoidPerception.getRapidHeightMapExtractor().getCellsPerAxis() * humanoidPerception.getRapidHeightMapExtractor().getCellsPerAxis());
+   }
+
+   public void initializeRapidRegionsUI()
+   {
+      this.rapidRegionsUI = new RDXRapidRegionsUI();
+      this.rapidRegionsUI.create(humanoidPerception.getRapidRegionsExtractor());
    }
 
    public void initializeHeightMapUI(ROS2Helper ros2Helper)
@@ -58,7 +61,6 @@ public class RDXHumanoidPerceptionUI
    {
       heightMapRenderer.update(zUpFrameToWorld,
             humanoidPerception.getRapidHeightMapExtractor().getOutputHeightMapImage().getPointerForAccessSpeed(),
-            humanoidPerception.getRapidHeightMapExtractor().getGridCenter(),
             humanoidPerception.getRapidHeightMapExtractor().getCenterIndex(),
             humanoidPerception.getRapidHeightMapExtractor().getCellSizeXYInMeters());
 

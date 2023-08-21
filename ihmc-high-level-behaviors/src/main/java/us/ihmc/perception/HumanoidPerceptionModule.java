@@ -80,6 +80,12 @@ public class HumanoidPerceptionModule
       this.openCLManager = openCLManager;
    }
 
+   public void initializeRealsenseDepthImage(int height, int width)
+   {
+      this.realsenseDepthImage = new BytedecoImage(width, height, opencv_core.CV_16UC1);
+      this.realsenseDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+   }
+
    public void subscribeToRobotData(String robotName, ROS2Node ros2Node)
    {
       this.robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
@@ -184,8 +190,7 @@ public class HumanoidPerceptionModule
       LogTools.info("Initializing Perspective Rapid Regions: {}", cameraIntrinsics);
 
       this.sensorFrameRegions = new FramePlanarRegionsList();
-      this.realsenseDepthImage = new BytedecoImage(cameraIntrinsics.getWidth(), cameraIntrinsics.getHeight(), opencv_core.CV_16UC1);
-      this.realsenseDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+
       this.rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager,
                                                                          cameraIntrinsics.getHeight(),
                                                                          cameraIntrinsics.getWidth(),
@@ -201,8 +206,6 @@ public class HumanoidPerceptionModule
    {
       LogTools.info("Initializing Perspective Rapid Height Map: {}", cameraIntrinsics);
 
-      realsenseDepthImage = new BytedecoImage(cameraIntrinsics.getWidth(), cameraIntrinsics.getHeight(), opencv_core.CV_16UC1);
-      realsenseDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
       rapidHeightMapExtractor = new RapidHeightMapExtractor();
 
       rapidHeightMapExtractor.setDepthIntrinsics(cameraIntrinsics);
