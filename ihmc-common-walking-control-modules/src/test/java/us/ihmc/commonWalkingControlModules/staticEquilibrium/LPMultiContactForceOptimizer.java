@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.staticEquilibrium.ContactPoint.basisVectorsPerContactPoint;
-import static us.ihmc.commonWalkingControlModules.staticEquilibrium.MultiContactSupportRegionSolver.mg;
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.MultiContactFrictionBasedSupportRegionSolver.mg;
 
 /**
  * This class solves for forces given a set of contact points, surface normals, and CoM xy position
@@ -43,13 +43,13 @@ public class LPMultiContactForceOptimizer
 
    public LPMultiContactForceOptimizer()
    {
-      for (int i = 0; i < MultiContactSupportRegionSolverInput.maxContactPoints; i++)
+      for (int i = 0; i < MultiContactFrictionBasedSupportRegionSolverInput.maxContactPoints; i++)
       {
          contactPoints.add(new ContactPoint(i, registry, graphicsListRegistry));
       }
    }
 
-   public boolean solve(MultiContactSupportRegionSolverInput input, Point2DReadOnly centerOfMassXY)
+   public boolean solve(MultiContactFrictionBasedSupportRegionSolverInput input, Point2DReadOnly centerOfMassXY)
    {
       numberOfDecisionVariables = basisVectorsPerContactPoint * input.getNumberOfContacts();
 

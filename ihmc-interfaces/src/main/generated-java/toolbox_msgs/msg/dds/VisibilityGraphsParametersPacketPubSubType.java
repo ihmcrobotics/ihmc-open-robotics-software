@@ -15,7 +15,7 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b5e2023355be0f63352233fcdb5ec9772f5016b3e641f7ffe4c92655b5947ad9";
+   		return "bb991351cefcc176e9ad7a0219b3cf98b1a8a54ba8620c9b07a4dc5fe0eb0fa9";
    }
    
    @Override

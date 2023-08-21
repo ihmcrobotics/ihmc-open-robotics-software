@@ -17,13 +17,15 @@ import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.SakeHandCommandOption;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetDoubleWidget;
-import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
+import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.*;
@@ -71,7 +73,7 @@ import java.util.Set;
  * <li>Possibly extract simple controller controls to a smaller panel class, like remote safety controls or something.</li>
  * </ul>
  */
-public class RDXTeleoperationManager extends ImGuiPanel
+public class RDXTeleoperationManager extends RDXPanel
 {
    RDXBaseUI baseUI;
 
@@ -83,7 +85,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final RDXTeleoperationParameters teleoperationParameters;
-   private final ImGuiStoredPropertySetTuner teleoperationParametersTuner = new ImGuiStoredPropertySetTuner("Teleoperation Parameters");
+   private final RDXStoredPropertySetTuner teleoperationParametersTuner = new RDXStoredPropertySetTuner("Teleoperation Parameters");
    private final RDXRobotLowLevelMessenger robotLowLevelMessenger;
 
    private final RDXPelvisHeightSlider pelvisHeightSlider;
@@ -264,6 +266,10 @@ public class RDXTeleoperationManager extends ImGuiPanel
                // TODO this should probably not handle the space event!
                // This sends a command to the controller.
                interactableHands.get(side).setOnSpacePressed(armManager.getSubmitDesiredArmSetpointsCallback(side));
+               interactableHands.get(side).setOpenHand(() -> armManager.getHandManager().publishHandCommand(side, SakeHandCommandOption.OPEN));
+               interactableHands.get(side).setCloseHand(() -> armManager.getHandManager().publishHandCommand(side, SakeHandCommandOption.CLOSE));
+               interactableHands.get(side).setGotoDoorAvoidanceArmAngles(() -> armManager.executeDoorAvoidanceArmAngles(side));
+               interactableHands.get(side).setGotoArmHome(() -> armManager.executeArmHome(side));
             }
          }
 
@@ -368,7 +374,9 @@ public class RDXTeleoperationManager extends ImGuiPanel
       {
          locomotionManager.processWalkPathControlRingVRInput(vrContext);
          for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
+         {
             robotPartInteractable.processVRInput(vrContext);
+         }
 
          if (interactablesEnabled.get())
             contactCollisionModel.processVRInput(vrContext);

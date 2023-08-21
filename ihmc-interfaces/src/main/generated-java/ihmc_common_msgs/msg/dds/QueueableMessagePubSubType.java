@@ -15,7 +15,7 @@ public class QueueableMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9f8ac23def4f4fab3c27a9b0a6edd807c1e6e2f60cc53fec7e2da9311d24d5d6";
+   		return "532884e5aaa2436daa1cc485344f57765ae426d736760fd218be445b0b85978c";
    }
    
    @Override

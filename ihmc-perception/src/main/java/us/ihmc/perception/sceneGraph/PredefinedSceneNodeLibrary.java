@@ -7,6 +7,7 @@ import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameSupplier;
 
 import java.util.*;
 
@@ -38,7 +39,7 @@ public class PredefinedSceneNodeLibrary
    private final List<ArUcoDetectableNode> arUcoDetectableNodes = new ArrayList<>();
    private final List<StaticRelativeSceneNode> staticArUcoRelativeDetectableNodes = new ArrayList<>();
    private final TIntDoubleHashMap arUcoMarkerIDsToSizes = new TIntDoubleHashMap();
-   private final List<ReferenceFrame> referenceFrames = new ArrayList<>();
+   private final List<ReferenceFrameSupplier> referenceFrameSuppliers = new ArrayList<>();
    private final FramePose3D arUcoMarkerPose = new FramePose3D();
 
    public static PredefinedSceneNodeLibrary defaultObjects()
@@ -89,7 +90,7 @@ public class PredefinedSceneNodeLibrary
    public void registerDetectableSceneNode(DetectableSceneNode detectableSceneNode)
    {
       detectableSceneNodes.add(detectableSceneNode);
-      referenceFrames.add(detectableSceneNode.getNodeFrame());
+      referenceFrameSuppliers.add(detectableSceneNode::getNodeFrame);
    }
 
    public void update(ReferenceFrame sensorFrame)
@@ -104,7 +105,9 @@ public class PredefinedSceneNodeLibrary
             {
                arUcoMarkerPose.setToZero(parentArUcoNode.getMarkerFrame());
                arUcoMarkerPose.setFromReferenceFrame(sensorFrame);
-               if (arUcoMarkerPose.getPosition().norm() <= staticRelativeNode.getMaximumDistanceToLockIn())
+               double currentDistance = arUcoMarkerPose.getPosition().norm();
+               staticRelativeNode.setCurrentDistance(currentDistance);
+               if (currentDistance <= staticRelativeNode.getDistanceToDisableTracking())
                {
                   staticRelativeNode.setTrackDetectedPose(false);
                }
@@ -128,8 +131,8 @@ public class PredefinedSceneNodeLibrary
       return arUcoMarkerIDsToSizes;
    }
 
-   public List<ReferenceFrame> getReferenceFrames()
+   public List<ReferenceFrameSupplier> getReferenceFrameSuppliers()
    {
-      return referenceFrames;
+      return referenceFrameSuppliers;
    }
 }

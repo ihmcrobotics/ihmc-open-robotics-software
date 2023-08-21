@@ -21,7 +21,6 @@ import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -35,6 +34,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.io.*;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -57,10 +57,10 @@ import java.util.LinkedList;
 public class RDXBehaviorActionSequenceEditor
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private ImGuiPanel panel;
    private final ImBoolean automaticExecution = new ImBoolean(false);
    private String name;
-   private final WorkspaceResourceFile workspaceFile;
+   @Nullable
+   private WorkspaceResourceFile workspaceFile = null;
    private final LinkedList<RDXBehaviorAction> actionSequence = new LinkedList<>();
    private String pascalCasedName;
    private RDX3DPanel panel3D;
@@ -83,25 +83,28 @@ public class RDXBehaviorActionSequenceEditor
    private final ActionSequenceUpdateMessage actionSequenceUpdateMessage = new ActionSequenceUpdateMessage();
    private boolean outOfSync = true;
 
-   public RDXBehaviorActionSequenceEditor(WorkspaceResourceFile fileToLoadFrom)
+   public void clear()
    {
-      this.workspaceFile = fileToLoadFrom;
-      loadNameFromFile();
-      afterNameDetermination();
+      workspaceFile = null;
    }
 
-   public RDXBehaviorActionSequenceEditor(String name, WorkspaceResourceDirectory storageDirectory)
+   public void createNewSequence(String name, WorkspaceResourceDirectory storageDirectory)
    {
       this.name = name;
       afterNameDetermination();
       this.workspaceFile = new WorkspaceResourceFile(storageDirectory, pascalCasedName + ".json");
    }
 
+   public void changeFileToLoadFrom(WorkspaceResourceFile fileToLoadFrom)
+   {
+      this.workspaceFile = fileToLoadFrom;
+      loadNameFromFile();
+      afterNameDetermination();
+   }
+
    public void afterNameDetermination()
    {
-      panel = new ImGuiPanel(name + " Behavior Sequence Editor", this::renderImGuiWidgets, false, true);
       pascalCasedName = FormattingTools.titleToPascalCase(name);
-      panel.getIsShowing().set(true);
    }
 
    public void create(RDX3DPanel panel3D,
@@ -154,6 +157,7 @@ public class RDXBehaviorActionSequenceEditor
                action.update();
                actionSequence.add(action);
                action.getSelected().set(false);
+               action.getExpanded().set(false);
             }
             else
             {
@@ -233,52 +237,47 @@ public class RDXBehaviorActionSequenceEditor
       }
    }
 
-   public void renderImGuiWidgets()
+   public void renderFileMenu()
    {
-      renderMenuBar();
-
-      renderSequencePrimaryControlsArea();
-
-      ImGui.separator();
-
-      // This, paired with the endChild call after, allows this area to scroll separately
-      // from the rest, so the top controls are still available while editing later parts
-      // of the sequence.
-      ImGui.beginChild(labels.get("childRegion"));
-
-      renderInteractableActionListArea();
-
-      ImGui.separator();
-
-      renderActionCreationArea();
-
-      ImGui.endChild();
+      if (workspaceFile.isFileAccessAvailable() && ImGui.menuItem("Save to JSON"))
+      {
+         saveToFile();
+      }
+      if (ImGui.menuItem("Load from JSON"))
+      {
+         if (!loadActionsFromFile())
+         {
+            LogTools.warn("Invalid action!");
+            actionSequence.clear();
+         }
+      }
    }
 
-   private void renderMenuBar()
+   public void renderImGuiWidgets()
    {
-      ImGui.beginMenuBar();
-      if (ImGui.beginMenu(labels.get("File")))
+      if (isCleared())
       {
-         if (workspaceFile.isFileAccessAvailable() && ImGui.menuItem("Save to JSON"))
-         {
-            saveToFile();
-         }
-         if (ImGui.menuItem("Load from JSON"))
-         {
-            if (!loadActionsFromFile())
-            {
-               LogTools.warn("Invalid action!");
-               actionSequence.clear();
-            }
-         }
-         ImGui.endMenu();
+         ImGui.text("No behavior selected.");
       }
-      //      if (ImGui.beginMenu(labels.get("View")))
-      //      {
-      //         ImGui.endMenu();
-      //      }
-      ImGui.endMenuBar();
+      else
+      {
+         renderSequencePrimaryControlsArea();
+
+         ImGui.separator();
+
+         // This, paired with the endChild call after, allows this area to scroll separately
+         // from the rest, so the top controls are still available while editing later parts
+         // of the sequence.
+         ImGui.beginChild(labels.get("childRegion"));
+
+         renderInteractableActionListArea();
+
+         ImGui.separator();
+
+         renderActionCreationArea();
+
+         ImGui.endChild();
+      }
    }
 
    private void renderSequencePrimaryControlsArea()
@@ -647,9 +646,8 @@ public class RDXBehaviorActionSequenceEditor
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (panel.getIsShowing().get())
-         for (RDXBehaviorAction action : actionSequence)
-            action.getRenderables(renderables, pool);
+      for (RDXBehaviorAction action : actionSequence)
+         action.getRenderables(renderables, pool);
    }
 
    public void destroy()
@@ -657,11 +655,6 @@ public class RDXBehaviorActionSequenceEditor
       automaticExecutionStatusSubscription.destroy();
       executionNextIndexStatusSubscription.destroy();
       sequenceStatusSubscription.destroy();
-   }
-
-   public ImGuiPanel getPanel()
-   {
-      return panel;
    }
 
    public String getName()
@@ -672,5 +665,10 @@ public class RDXBehaviorActionSequenceEditor
    public WorkspaceResourceFile getWorkspaceFile()
    {
       return workspaceFile;
+   }
+
+   public boolean isCleared()
+   {
+      return workspaceFile == null;
    }
 }

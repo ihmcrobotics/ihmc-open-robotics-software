@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.affordances;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
@@ -11,6 +12,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXSpatialVectorArrows;
+import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.rdx.vr.RDXVRDragData;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -34,6 +37,10 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
    private RDXSpatialVectorArrows sensorWristWrenchArrows;
    private final RDXSpatialVectorArrows estimatedHandWrenchArrows;
    private final String contextMenuName;
+   private Runnable openHand;
+   private Runnable closeHand;
+   private Runnable gotoDoorAvoidanceArmAngles;
+   private Runnable gotoArmHome;
 
    public static boolean robotCollidableIsHand(RobotSide side, RDXRobotCollidable robotCollidable, FullHumanoidRobotModel fullRobotModel)
    {
@@ -125,5 +132,54 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
    public RDXSpatialVectorArrows getEstimatedHandWrenchArrows()
    {
       return estimatedHandWrenchArrows;
+   }
+
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      super.processVRInput(vrContext);
+      for (RobotSide side : RobotSide.values)
+      {
+         vrContext.getController(side).runIfConnected(controller ->
+         {
+            InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
+            RDXVRDragData gripDragData = controller.getGripDragData();
+            if (isVRHovering() || gripDragData.getObjectBeingDragged() == this)
+            {
+               controller.controlOfRadialMenu("Open Hand", "Close Hand", "Door Avoidance", "Home Position");
+               if (joystickButton.bChanged() && joystickButton.bState())
+               {
+                  Runnable radialMenuSelection = controller.getRadialMenuRunnable(openHand, closeHand, gotoDoorAvoidanceArmAngles, gotoArmHome);
+                  if (radialMenuSelection != null)
+                     radialMenuSelection.run();
+               }
+            }
+            else
+            {
+               controller.setRadialMenuSelection(null);
+            }
+            //TODO make radial menu disappear when joystick is active and move away from hovering
+            controller.setRadialMenuBoxPosition(isVRHovering());
+         });
+      }
+   }
+
+   public void setOpenHand(Runnable openHand)
+   {
+      this.openHand = openHand;
+   }
+
+   public void setCloseHand(Runnable closeHand)
+   {
+      this.closeHand = closeHand;
+   }
+
+   public void setGotoDoorAvoidanceArmAngles(Runnable gotoDoorAvoidanceArmAngles)
+   {
+      this.gotoDoorAvoidanceArmAngles = gotoDoorAvoidanceArmAngles;
+   }
+
+   public void setGotoArmHome(Runnable gotoArmHome)
+   {
+      this.gotoArmHome = gotoArmHome;
    }
 }

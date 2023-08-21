@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.behaviors.tools.behaviorTree.*;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -62,12 +62,12 @@ public abstract class RDXBehaviorUIInterface extends BehaviorTreeNode implements
       return children;
    }
 
-   public void addChildPanels(ImGuiPanel parentPanel)
+   public void addChildPanels(RDXPanel parentPanel)
    {
 
    }
 
-   public final void addChildPanelsIncludingChildren(ImGuiPanel parentPanel)
+   public final void addChildPanelsIncludingChildren(RDXPanel parentPanel)
    {
       addChildPanels(parentPanel);
 

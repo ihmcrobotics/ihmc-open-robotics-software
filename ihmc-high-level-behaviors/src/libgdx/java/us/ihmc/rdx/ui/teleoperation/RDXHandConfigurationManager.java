@@ -174,7 +174,7 @@ public class RDXHandConfigurationManager
       ImGui.textColored(redValue, greenValue, 0, 255, text);
    }
 
-   private void publishHandCommand(RobotSide side, SakeHandCommandOption handCommandOption)
+   public void publishHandCommand(RobotSide side, SakeHandCommandOption handCommandOption)
    {
       communicationHelper.publish(ROS2Tools::getHandSakeCommandTopic,
                                   HumanoidMessageTools.createHandSakeDesiredCommandMessage(side, handCommandOption, 0.0, 0.0));
@@ -212,5 +212,4 @@ public class RDXHandConfigurationManager
 
       shieldButton.setOnPressed(() -> armTrajectoryRunnable.accept(toolbarSelectedSide));
    }
-
 }

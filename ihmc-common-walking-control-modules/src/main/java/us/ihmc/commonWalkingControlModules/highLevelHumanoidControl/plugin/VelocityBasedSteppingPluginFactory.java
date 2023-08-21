@@ -154,9 +154,11 @@ public class VelocityBasedSteppingPluginFactory implements HumanoidSteppingPlugi
          @Override
          public void submitStopWalkingRequest()
          {
+            message.setClearRemainingFootstepQueue(true);
             walkingCommandInputManager.submitMessage(message);
          }
       });
+
       fastWalkingJoystickPlugin.setStartWalkingMessenger(new StartWalkingMessenger()
       {
          private final PauseWalkingMessage message = HumanoidMessageTools.createPauseWalkingMessage(false);

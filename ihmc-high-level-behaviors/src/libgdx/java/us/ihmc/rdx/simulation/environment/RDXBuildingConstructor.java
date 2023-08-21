@@ -17,7 +17,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -30,7 +30,7 @@ import us.ihmc.robotics.interaction.StepCheckIsPointInsideAlgorithm;
 
 import java.util.ArrayList;
 
-public class RDXBuildingConstructor extends ImGuiPanel
+public class RDXBuildingConstructor extends RDXPanel
 {
    private enum Mode
    {
@@ -43,7 +43,7 @@ public class RDXBuildingConstructor extends ImGuiPanel
    private RDXSimpleObject intersectedObject;
    private final ImFloat ambientLightAmount = new ImFloat(0.4f);
    private final RDXPose3DGizmo pose3DGizmo = new RDXPose3DGizmo();
-   private final ImGuiPanel poseGizmoTunerPanel = pose3DGizmo.createTunerPanel(getClass().getSimpleName());
+   private final RDXPanel poseGizmoTunerPanel = pose3DGizmo.createTunerPanel(getClass().getSimpleName());
 
    private final StepCheckIsPointInsideAlgorithm stepCheckIsPointInsideAlgorithm = new StepCheckIsPointInsideAlgorithm();
    private final RDX3DPanel panel3D;

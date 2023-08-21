@@ -15,7 +15,7 @@ public class PointCloudWorldPacketPubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1f2903c788c575f75371a029c502c50fbef8254ccd9a5916f36b86116afc1027";
+   		return "a850b95e1a21eb88741f024cd8f24d7b073d17d7552df0b7331a2215067bcbda";
    }
    
    @Override

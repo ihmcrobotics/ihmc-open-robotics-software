@@ -15,7 +15,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "60b207f4baffd449d532f182ce297d1f4c164ea9789d870b8253ca3b6e68b0f6";
+   		return "0ee2c191291ab8f338147dc1153067ec32bd853da7d89f1dff891a6da049dc3f";
    }
    
    @Override
@@ -63,6 +63,10 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -91,6 +95,12 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -109,6 +119,10 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
 
       cdr.write_type_5(data.getBreakFrequency());
 
+      cdr.write_type_5(data.getDistanceToDisableTracking());
+
+      cdr.write_type_5(data.getCurrentDistanceToRobot());
+
    }
 
    public static void read(perception_msgs.msg.dds.DetectableSceneNodeMessage data, us.ihmc.idl.CDR cdr)
@@ -121,6 +135,10 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
       data.setTrackDetectedPose(cdr.read_type_7());
       	
       data.setBreakFrequency(cdr.read_type_5());
+      	
+      data.setDistanceToDisableTracking(cdr.read_type_5());
+      	
+      data.setCurrentDistanceToRobot(cdr.read_type_5());
       	
 
    }
@@ -136,6 +154,8 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
 
       ser.write_type_7("track_detected_pose", data.getTrackDetectedPose());
       ser.write_type_5("break_frequency", data.getBreakFrequency());
+      ser.write_type_5("distance_to_disable_tracking", data.getDistanceToDisableTracking());
+      ser.write_type_5("current_distance_to_robot", data.getCurrentDistanceToRobot());
    }
 
    @Override
@@ -149,6 +169,8 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
 
       data.setTrackDetectedPose(ser.read_type_7("track_detected_pose"));
       data.setBreakFrequency(ser.read_type_5("break_frequency"));
+      data.setDistanceToDisableTracking(ser.read_type_5("distance_to_disable_tracking"));
+      data.setCurrentDistanceToRobot(ser.read_type_5("current_distance_to_robot"));
    }
 
    public static void staticCopy(perception_msgs.msg.dds.DetectableSceneNodeMessage src, perception_msgs.msg.dds.DetectableSceneNodeMessage dest)
