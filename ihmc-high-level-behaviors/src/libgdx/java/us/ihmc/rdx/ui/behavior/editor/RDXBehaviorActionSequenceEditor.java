@@ -405,7 +405,6 @@ public class RDXBehaviorActionSequenceEditor
             ImGui.text("Executing: %s (%s)".formatted(executingAction.getDescription(), executingAction.getActionTypeTitle()));
          }
 
-
          widgetAligner.text("Expected time remaining:");
          double elapsedTime = latestExecutionStatus.getElapsedExecutionTime();
          double nominalDuration = latestExecutionStatus.getNominalExecutionDuration();
