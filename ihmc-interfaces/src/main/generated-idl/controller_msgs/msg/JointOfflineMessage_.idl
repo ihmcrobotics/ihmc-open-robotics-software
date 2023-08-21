@@ -1,6 +1,7 @@
 #ifndef __controller_msgs__msg__JointOfflineMessage__idl__
 #define __controller_msgs__msg__JointOfflineMessage__idl__
 
+#include "geometry_msgs/msg/./Point_.idl"
 module controller_msgs
 {
   module msg
@@ -20,9 +21,22 @@ module controller_msgs
          */
         unsigned long sequence_id;
         /**
-         * Hash-code of the joint which is offline. The hash-code is computed from OneDoFJoint#hashcode().
+         * Hash-code of the joints which are offline. Joints that are currently offline and not included in this list are re-enabled.
+         * The hash-code is computed from OneDoFJoint#hashcode().
          */
-        long joint_offline_hash_code;
+        sequence<long, 6> joint_offline_hash_codes;
+        /**
+         * Nominal left foot contact points (in sole frame) given the set of offline joints
+         */
+        sequence<geometry_msgs::msg::dds::Point, 4> nominal_left_foot_contact_points_2d;
+        /**
+         * Nominal right foot contact points (in sole frame) given the set of offline joints
+         */
+        sequence<geometry_msgs::msg::dds::Point, 4> nominal_right_foot_contact_points_2d;
+        /**
+         * The time to delay this command on the controller side before being executed.
+         */
+        double execution_delay_time;
       };
     };
   };
