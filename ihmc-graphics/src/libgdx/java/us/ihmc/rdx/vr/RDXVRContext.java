@@ -150,7 +150,8 @@ public class RDXVRContext
             VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker, trackerIndices, -1);
       for (int i = 0; i < numberOfTrackers; i++) {
          int deviceIndex = trackerIndices.get(i);
-         if (!trackers.containsKey(getTrackedBodySegment(getSerialNumber(deviceIndex)))) {
+         if (!trackers.containsKey(getTrackedBodySegment(getSerialNumber(deviceIndex))))
+         {
             trackers.put(getTrackedBodySegment(getSerialNumber(deviceIndex)), new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex));
          }
       }

@@ -138,53 +138,55 @@ public class RDXVRKinematicsStreamingMode
       if (controllerModel == RDXVRControllerModel.UNKNOWN)
          controllerModel = vrContext.getControllerModel();
       vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
-      {
-         InputDigitalActionData aButton = controller.getAButtonActionData();
-         if (aButton.bChanged() && !aButton.bState())
-         {
-            streamToController.set(!streamToController.get());
-         }
+                                                             {
+                                                                InputDigitalActionData aButton = controller.getAButtonActionData();
+                                                                if (aButton.bChanged() && !aButton.bState())
+                                                                {
+                                                                   streamToController.set(!streamToController.get());
+                                                                }
 
-         // NOTE: Implement hand open close for controller trigger button.
-         InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
-         if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
-         {
-            HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.LEFT);
-            sendHandCommand(RobotSide.LEFT, handConfiguration);
-         }
+                                                                // NOTE: Implement hand open close for controller trigger button.
+                                                                InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
+                                                                if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
+                                                                {
+                                                                   HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.LEFT);
+                                                                   sendHandCommand(RobotSide.LEFT, handConfiguration);
+                                                                }
 
-         // Check if left joystick is pressed in order to trigger recording or replay of motion
-         InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
-         kinematicsRecorder.processRecordReplayInput(joystickButton);
-         if(kinematicsRecorder.isReplayingEnabled().get())
-            wakeUpToolbox();
+                                                                // Check if left joystick is pressed in order to trigger recording or replay of motion
+                                                                InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
+                                                                kinematicsRecorder.processRecordReplayInput(joystickButton);
+                                                                if (kinematicsRecorder.isReplayingEnabled().get())
+                                                                   wakeUpToolbox();
 
-         // Check if left B button is pressed in order to trigger shared control assistance
-         InputDigitalActionData bButton = controller.getBButtonActionData();
-         sharedControlAssistant.processInput(bButton);
-      });
+                                                                // Check if left B button is pressed in order to trigger shared control assistance
+                                                                InputDigitalActionData bButton = controller.getBButtonActionData();
+                                                                sharedControlAssistant.processInput(bButton);
+                                                             });
 
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
-      {
-         InputDigitalActionData aButton = controller.getAButtonActionData();
-         if (aButton.bChanged() && !aButton.bState())
-         {
-            setEnabled(!enabled.get());
-         }
+                                                              {
+                                                                 InputDigitalActionData aButton = controller.getAButtonActionData();
+                                                                 if (aButton.bChanged() && !aButton.bState())
+                                                                 {
+                                                                    setEnabled(!enabled.get());
+                                                                 }
 
-         // NOTE: Implement hand open close for controller trigger button.
-         InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
-         if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
-         {
-            HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.RIGHT);
-            sendHandCommand(RobotSide.RIGHT, handConfiguration);
-         }
+                                                                 // NOTE: Implement hand open close for controller trigger button.
+                                                                 InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
+                                                                 if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
+                                                                 {
+                                                                    HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.RIGHT);
+                                                                    sendHandCommand(RobotSide.RIGHT, handConfiguration);
+                                                                 }
 
-         // use right joystick values to control pelvis height of robot indirectly by teleporting operator up/down
-         // NOTE. intentionally not controlling pelvis height directly but teleporting the whole user to make them more comfortable
-         userHeightChangeRate = - controller.getJoystickActionData().y();
-         vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld -> teleportIHMCZUpToIHMCZUpWorld.getTranslation().addZ(userHeightChangeRate * 0.01));
-      });
+                                                                 // use right joystick values to control pelvis height of robot indirectly by teleporting operator up/down
+                                                                 // NOTE. intentionally not controlling pelvis height directly but teleporting the whole user to make them more comfortable
+                                                                 userHeightChangeRate = -controller.getJoystickActionData().y();
+                                                                 vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld -> teleportIHMCZUpToIHMCZUpWorld.getTranslation()
+                                                                                                                                                  .addZ(userHeightChangeRate
+                                                                                                                                                        * 0.01));
+                                                              });
 
       if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
@@ -203,58 +205,85 @@ public class RDXVRKinematicsStreamingMode
       }
    }
 
-   private void handleTrackedSegment(RDXVRContext vrContext, KinematicsStreamingToolboxInputMessage toolboxInputMessage, TrackedSegmentType segmentType, Set<String> additionalTrackedSegments) {
+   private void handleTrackedSegment(RDXVRContext vrContext,
+                                     KinematicsStreamingToolboxInputMessage toolboxInputMessage,
+                                     TrackedSegmentType segmentType,
+                                     Set<String> additionalTrackedSegments)
+   {
       if (additionalTrackedSegments.contains(segmentType.segmentName))
       {
          vrContext.getTracker(segmentType.segmentName).runIfConnected(tracker ->
          {
-             if(!trackerFrameGraphics.containsKey(segmentType.segmentName))
+             if (!trackerFrameGraphics.containsKey(segmentType.segmentName))
              {
-                trackerFrameGraphics.put(segmentType.segmentName, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
+                trackerFrameGraphics.put(segmentType.segmentName,
+                                         new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
              }
              if (!trackedSegmentDesiredFrame.containsKey(segmentType.segmentName))
              {
-                trackedSegmentDesiredFrame.put(segmentType.segmentName, new ModifiableReferenceFrame(segmentType.segmentName, vrContext.getTracker(segmentType.segmentName).getXForwardZUpTrackerFrame()));
-                trackedSegmentDesiredFrame.get(segmentType.segmentName).getTransformToParent().getRotation().append(segmentType.trackerToRigidBodyRotation);
+                trackedSegmentDesiredFrame.put(segmentType.segmentName,
+                                               new ModifiableReferenceFrame(segmentType.segmentName,
+                                                                            vrContext.getTracker(
+                                                                                           segmentType.segmentName)
+                                                                                     .getXForwardZUpTrackerFrame()));
+                trackedSegmentDesiredFrame.get(segmentType.segmentName)
+                                          .getTransformToParent()
+                                          .getRotation()
+                                          .append(segmentType.trackerToRigidBodyRotation);
              }
-             trackedSegmentDesiredFrame.get(segmentType.segmentName).changeParentFrame(vrContext.getTracker(segmentType.segmentName).getXForwardZUpTrackerFrame());
+             trackedSegmentDesiredFrame.get(segmentType.segmentName)
+                                       .changeParentFrame(vrContext.getTracker(segmentType.segmentName)
+                                                                   .getXForwardZUpTrackerFrame());
              trackedSegmentDesiredFrame.get(segmentType.segmentName).getReferenceFrame().update();
-             trackerFrameGraphics.get(segmentType.segmentName).setToReferenceFrame(trackedSegmentDesiredFrame.get(segmentType.segmentName).getReferenceFrame());
+             trackerFrameGraphics.get(segmentType.segmentName)
+                                 .setToReferenceFrame(trackedSegmentDesiredFrame.get(segmentType.segmentName)
+                                                                                .getReferenceFrame());
              RigidBodyBasics controlledSegment = switch (segmentType)
-                   {
-                      case LEFT_FOREARM -> ghostFullRobotModel.getForearm(RobotSide.LEFT);
-                      case RIGHT_FOREARM -> ghostFullRobotModel.getForearm(RobotSide.RIGHT);
-                      case CHEST -> ghostFullRobotModel.getChest();
-                      default -> throw new IllegalStateException("Unexpected VR-tracked segment: " + segmentType);
-                   };
-             KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
-                                                                                trackedSegmentDesiredFrame.get(segmentType.segmentName),
-                                                                                segmentType.segmentName,
-                                                                                segmentType.positionWeight,
-                                                                                segmentType.orientationWeight);
-             toolboxInputMessage.getInputs().add().set(message);
+             {
+                case LEFT_FOREARM -> ghostFullRobotModel.getForearm(RobotSide.LEFT);
+                case RIGHT_FOREARM -> ghostFullRobotModel.getForearm(RobotSide.RIGHT);
+                case CHEST -> ghostFullRobotModel.getChest();
+                default -> throw new IllegalStateException(
+                      "Unexpected VR-tracked segment: " + segmentType);
+          };
+          KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
+                                                                             trackedSegmentDesiredFrame.get(
+                                                                                   segmentType.segmentName),
+                                                                             segmentType.segmentName,
+                                                                             segmentType.positionWeight,
+                                                                             segmentType.orientationWeight);
+          toolboxInputMessage.getInputs().add().set(message);
          });
       }
-      else if(segmentType.segmentName.contains("Hand"))
+      else if (segmentType.segmentName.contains("Hand"))
       {
          vrContext.getController(segmentType.robotSide).runIfConnected(controller ->
          {
-            controllerFrameGraphics.get(segmentType.robotSide).setToReferenceFrame(controller.getXForwardZUpControllerFrame());
-            KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(ghostFullRobotModel.getHand(segmentType.robotSide),
-                                                                               handDesiredControlFrames.get(segmentType.robotSide),
-                                                                               segmentType.segmentName,
-                                                                               segmentType.positionWeight,
-                                                                               segmentType.orientationWeight);
-            // TODO. this transform should go in TrackedSegmentType. and also the one in the create() method. Actually check if they cancel out
-            message.getControlFrameOrientationInEndEffector().setYawPitchRoll(0.0,
-                                                                              segmentType.robotSide.negateIfLeftSide(Math.PI / 2.0),
-                                                                              segmentType.robotSide.negateIfLeftSide(Math.PI / 2.0));
-            toolboxInputMessage.getInputs().add().set(message);
+           controllerFrameGraphics.get(segmentType.robotSide)
+                                  .setToReferenceFrame(controller.getXForwardZUpControllerFrame());
+           KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(ghostFullRobotModel.getHand(
+                                                                                    segmentType.robotSide),
+                                                                              handDesiredControlFrames.get(
+                                                                                    segmentType.robotSide),
+                                                                              segmentType.segmentName,
+                                                                              segmentType.positionWeight,
+                                                                              segmentType.orientationWeight);
+           // TODO. this transform should go in TrackedSegmentType. and also the one in the create() method. Actually check if they cancel out
+           message.getControlFrameOrientationInEndEffector()
+                  .setYawPitchRoll(0.0,
+                                   segmentType.robotSide.negateIfLeftSide(Math.PI / 2.0),
+                                   segmentType.robotSide.negateIfLeftSide(Math.PI / 2.0));
+           toolboxInputMessage.getInputs().add().set(message);
          });
       }
    }
 
-   private KinematicsToolboxRigidBodyMessage createRigidBodyMessage(RigidBodyBasics segment, ModifiableReferenceFrame desiredControlFrame, String frameName, double positionWeight, double orientationWeight) {
+   private KinematicsToolboxRigidBodyMessage createRigidBodyMessage(RigidBodyBasics segment,
+                                                                    ModifiableReferenceFrame desiredControlFrame,
+                                                                    String frameName,
+                                                                    double positionWeight,
+                                                                    double orientationWeight)
+   {
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
       message.setEndEffectorHashCode(segment.hashCode());
       tempFramePose.setToZero(desiredControlFrame.getReferenceFrame());
@@ -276,7 +305,7 @@ public class RDXVRKinematicsStreamingMode
 
       message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
       message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
-      if(!Double.isNaN(positionWeight))
+      if (!Double.isNaN(positionWeight))
       {
          if (positionWeight == 0)
          {
@@ -289,7 +318,7 @@ public class RDXVRKinematicsStreamingMode
             message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(positionWeight));
          }
       }
-      if(!Double.isNaN(orientationWeight))
+      if (!Double.isNaN(orientationWeight))
       {
          if (orientationWeight == 0)
          {
@@ -320,7 +349,7 @@ public class RDXVRKinematicsStreamingMode
          if (latestStatus.getJointNameHash() == -1)
          {
             if (latestStatus.getCurrentToolboxState() == KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD
-             && messageThrottler.run(1.0))
+                && messageThrottler.run(1.0))
                LogTools.warn("Status update: Toolbox failed initialization, missing RobotConfigurationData.");
             else if (latestStatus.getCurrentToolboxState() == KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL)
                LogTools.info("Status update: Toolbox initialized successfully.");
@@ -360,24 +389,24 @@ public class RDXVRKinematicsStreamingMode
          }
       }
       ghostRobotGraphic.update();
-      if(sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive()) // if graphic active update also graphic
+      if (sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive()) // if graphic active update also graphic
          sharedControlAssistant.getGhostPreviewGraphic().update();
    }
 
    public void renderImGuiWidgets()
    {
       if (controllerModel == RDXVRControllerModel.FOCUS3)
-         ImGui.text("X BUTTON");
+         ImGui.text("X Button");
       else
-         ImGui.text("LEFT A BUTTON");
+         ImGui.text("Left A Button");
       ImGui.sameLine();
       ImGui.checkbox(labels.get("Control/Stop Robot"), streamToController);
 
       // add widget for using shared control assistance in VR
       if (controllerModel == RDXVRControllerModel.FOCUS3)
-         ImGui.text("Y BUTTON");
+         ImGui.text("Y Button");
       else
-         ImGui.text("LEFT B BUTTON");
+         ImGui.text("Left B Button");
       ImGui.sameLine();
       sharedControlAssistant.renderWidgets(labels);
 
@@ -457,7 +486,7 @@ public class RDXVRKinematicsStreamingMode
    {
       if (status.hasReceivedFirstMessage())
       {
-         ghostRobotGraphic.getRenderables(renderables, pool,sceneLevels);
+         ghostRobotGraphic.getRenderables(renderables, pool, sceneLevels);
          if (sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive())
          {
             sharedControlAssistant.getGhostPreviewGraphic().getRenderables(renderables, pool, sceneLevels);
