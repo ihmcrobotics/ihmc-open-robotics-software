@@ -80,13 +80,7 @@ public class JointOfflineManager
    {
       RecyclingArrayList<Point2D> nominalContactPoints = this.nominalContactPoints.get(nextFootstep.getRobotSide());
       if (!nominalContactPoints.isEmpty())
-      {
-         nextFootstep.getPredictedContactPoints().clear();
-         for (int i = 0; i < nominalContactPoints.size(); i++)
-         {
-            nextFootstep.getPredictedContactPoints().add(nominalContactPoints.get(i));
-         }
-      }
+         nextFootstep.setPredictedContactPoints(nominalContactPoints);
    }
 
    public boolean isJointOffline()
