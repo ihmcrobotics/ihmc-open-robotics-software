@@ -160,7 +160,7 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
             RDXVRDragData gripDragData = controller.getGripDragData();
             if (isVRPointing() || gripDragData.getObjectBeingDragged() == this)
             {
-               wasVRPointing.put(side, true);;
+               wasVRPointing.put(side, true);
                controller.controlOfRadialMenu("Open Hand", "Close Hand", "Door Avoidance", "Home Position");
                if (joystickButton.bChanged() && joystickButton.bState())
                {
