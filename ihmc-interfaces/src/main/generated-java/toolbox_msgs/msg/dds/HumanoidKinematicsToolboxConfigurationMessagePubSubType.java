@@ -15,7 +15,7 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "88a74c1269b866d192d810dcfa1f0c3e3fcf9c38e92b6161f909c4011f957a10";
+   		return "512c136f0cf0055d0bdd81435509cb1b8c4f12139314e1899c6868499bcb9269";
    }
    
    @Override

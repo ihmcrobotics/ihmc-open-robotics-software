@@ -15,7 +15,7 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "88af3a0277dc8829504d743f086a89c0271eb03bcc153a1cd6ed84afb8062031";
+   		return "3c31f62d364faeb1464397a1d26b16d46df07b8650817cf84c4968f10c981769";
    }
    
    @Override

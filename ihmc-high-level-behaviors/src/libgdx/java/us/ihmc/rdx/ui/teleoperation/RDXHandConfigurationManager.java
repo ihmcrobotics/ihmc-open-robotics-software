@@ -5,8 +5,6 @@ import imgui.ImGui;
 import imgui.type.ImInt;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
-import us.ihmc.commons.FormattingTools;
-import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.tools.RDXIconTexture;
@@ -34,7 +32,7 @@ public class RDXHandConfigurationManager
    private final SideDependentList<RDXIconTexture> handIcons = new SideDependentList<>();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private RobotSide toolbarSelectedSide = RobotSide.LEFT;
-   private final SideDependentList<IHMCROS2Input<HandSakeStatusMessage>> sakeStatuses = new SideDependentList<>();
+   private final SideDependentList<RDXSakeHandInformation> sakeHandInfo = new SideDependentList<>();
 
    public void create(RDXBaseUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobotModel)
    {
@@ -111,9 +109,7 @@ public class RDXHandConfigurationManager
    {
       for (RobotSide side : RobotSide.values)
       {
-         sakeStatuses.put(side, communicationHelper.subscribe(ROS2Tools.getControllerOutputTopic(communicationHelper.getRobotName())
-                                                                       .withTypeName(HandSakeStatusMessage.class),
-                                                              message -> message.getRobotSide() == side.toByte()));
+         sakeHandInfo.put(side, new RDXSakeHandInformation(side, communicationHelper));
       }
    }
 
@@ -149,34 +145,11 @@ public class RDXHandConfigurationManager
             communicationHelper.publish(ROS2Tools::getHandConfigurationTopic, message);
          }
       }
-      if (!sakeStatuses.isEmpty())
+      if (!sakeHandInfo.isEmpty())
          ImGui.text("Sake EZGrippers:");
-      for (RobotSide side : sakeStatuses.sides())
+      for (RobotSide side : sakeHandInfo.sides())
       {
-         ImGui.text(side.getPascalCaseName() + ":");
-         ImGui.sameLine();
-         IHMCROS2Input<HandSakeStatusMessage> status = sakeStatuses.get(side);
-         if (status.hasReceivedFirstMessage())
-         {
-            ImGui.text("Calibrated: " + status.getLatest().getCalibrated());
-            ImGui.sameLine();
-            ImGui.text("Needs reset: " + status.getLatest().getNeedsReset());
-            ImGui.sameLine();
-            ImGui.text("Temperature: " + FormattingTools.getFormattedDecimal1D(status.getLatest().getTemperature()));
-         }
-         else
-         {
-            ImGui.text("No status received.");
-         }
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Reset", side.getCamelCaseName())))
-         {
-            HandSakeDesiredCommandMessage sakeCommand = new HandSakeDesiredCommandMessage();
-            sakeCommand.setRobotSide(side.toByte());
-            sakeCommand.setDesiredHandConfiguration(HandSakeDesiredCommandMessage.HAND_CONFIGURATION_RESET);
-            communicationHelper.publish(ROS2Tools.getControllerInputTopic(communicationHelper.getRobotName()).withTypeName(HandSakeDesiredCommandMessage.class),
-                                        sakeCommand);
-         }
+         sakeHandInfo.get(side).renderImGuiWidgets();
       }
    }
 

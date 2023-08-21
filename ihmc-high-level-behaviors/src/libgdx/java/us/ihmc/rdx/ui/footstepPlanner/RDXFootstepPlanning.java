@@ -133,6 +133,8 @@ public class RDXFootstepPlanning
 
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
 
+      footstepPlannerRequest.setTimeout(12.0);
+
       footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), goalPose);
 
       if (locomotionParameters.getPlanSwingTrajectories())
