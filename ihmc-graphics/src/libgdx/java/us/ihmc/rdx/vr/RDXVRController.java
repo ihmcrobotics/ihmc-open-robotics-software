@@ -715,6 +715,7 @@ public class RDXVRController extends RDXVRTrackedDevice
    {
       radialMenuSelectionGraphic = null;
    }
+
    public Point3D getRadialMenuBoxOffset()
    {
       if (radialMenuSelection != null)
