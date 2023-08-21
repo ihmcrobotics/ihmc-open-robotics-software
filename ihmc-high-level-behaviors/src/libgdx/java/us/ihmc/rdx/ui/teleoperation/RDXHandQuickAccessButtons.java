@@ -17,6 +17,10 @@ public class RDXHandQuickAccessButtons
    private final RDXIconTexture calibrateIcon;
    private final RDXIconTexture closeIcon;
    private final RDXIconTexture resetIcon;
+   private final String openHandText;
+   private final String calibrateHandText;
+   private final String closeHandText;
+   private final String resetHandText;
 
    public RDXHandQuickAccessButtons(RDXBaseUI baseUI,
                                     RobotSide side,
@@ -43,12 +47,16 @@ public class RDXHandQuickAccessButtons
 
       calibrateIcon = openHandCalibrateButton.loadAndSetIcon("icons/calibrate.png");
       openIcon = openHandCalibrateButton.loadAndSetIcon("icons/openHand%s.png".formatted(side.getPascalCaseName()));
-      openHandCalibrateButton.setTooltipText("Open %s hand".formatted(side.getLowerCaseName()));
+      openHandText = "Open %s hand".formatted(side.getLowerCaseName());
+      calibrateHandText = "Calibrate %s hand".formatted(side.getLowerCaseName());
+      openHandCalibrateButton.setTooltipText(openHandText);
       openHandCalibrateButton.setOnPressed(openHand);
 
       resetIcon = closeHandResetButton.loadAndSetIcon("icons/resetHand.png");
       closeIcon = closeHandResetButton.loadAndSetIcon("icons/closeHand%s.png".formatted(side.getPascalCaseName()));
-      closeHandResetButton.setTooltipText("Close %s hand".formatted(side.getLowerCaseName()));
+      closeHandText = "Close %s hand".formatted(side.getLowerCaseName());
+      resetHandText = "Reset %s hand".formatted(side.getLowerCaseName());
+      closeHandResetButton.setTooltipText(closeHandText);
       closeHandResetButton.setOnPressed(closeHand);
    }
 
@@ -56,7 +64,9 @@ public class RDXHandQuickAccessButtons
    {
       openHandCalibrateButton.setIconTexture(sakeHandInfo.getCalibrated() ? openIcon : calibrateIcon);
       openHandCalibrateButton.setOnPressed(sakeHandInfo.getCalibrated() ? openHand : calibrateHand);
+      openHandCalibrateButton.setTooltipText(sakeHandInfo.getCalibrated() ? openHandText : calibrateHandText);
       closeHandResetButton.setIconTexture(sakeHandInfo.getNeedsReset() ? resetIcon : closeIcon);
       closeHandResetButton.setOnPressed(sakeHandInfo.getNeedsReset() ? resetHand : closeHand);
+      closeHandResetButton.setTooltipText(sakeHandInfo.getNeedsReset() ? resetHandText : closeHandText);
    }
 }
