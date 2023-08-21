@@ -59,6 +59,7 @@ public class FullRobotModelTestTools
 
       private final SideDependentList<HashMap<LimbName, RigidBodyBasics>> endEffectors = new SideDependentList<>();
       private final SideDependentList<RigidBodyBasics> hands = new SideDependentList<>();
+      private final SideDependentList<RigidBodyBasics> forearms = new SideDependentList<>();
       private final SideDependentList<RigidBodyBasics> feet = new SideDependentList<>();
 
       private final SideDependentList<MovingReferenceFrame> soleFrames = new SideDependentList<>();
@@ -214,6 +215,7 @@ public class FullRobotModelTestTools
          armJoints.get(robotSide).put(ArmJointName.WRIST_ROLL, wristRoll);
 
          hands.put(robotSide, hand);
+         forearms.put(robotSide, lowerArm);
          endEffectors.get(robotSide).put(LimbName.ARM, hand);
 
          oneDoFJoints.put(shoulderYaw.getName(), shoulderYaw);
@@ -397,6 +399,12 @@ public class FullRobotModelTestTools
       public RigidBodyBasics getHand(RobotSide robotSide)
       {
          return hands.get(robotSide);
+      }
+
+      @Override
+      public RigidBodyBasics getForearm(RobotSide robotSide)
+      {
+         return forearms.get(robotSide);
       }
 
       @Override
