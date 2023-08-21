@@ -15,7 +15,7 @@ public class SteppableRegionDebugImageMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "fc6436bb9a36e20c62aa35671072748d29173b8d49f0031df729be7f4cb489d0";
+   		return "e2c689eda1f81ec5ef16a6902b568e5cfa2439c8bb5c5698e9bc27a81e3f442c";
    }
    
    @Override

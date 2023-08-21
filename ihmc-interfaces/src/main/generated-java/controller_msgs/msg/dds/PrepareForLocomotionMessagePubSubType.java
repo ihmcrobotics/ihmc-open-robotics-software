@@ -15,7 +15,7 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5e95c2de3ab382c3289dd3e993e64ffcafd8cf6f9f40ba2f2617617105d6206e";
+   		return "b72181e318ebba9e1f22e1ebe710a8468da4f23e5539ec11f3778b340afcaa5c";
    }
    
    @Override

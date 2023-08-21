@@ -86,7 +86,7 @@ public class RDXLocomotionManager
    private final AbortWalkingMessage abortWalkingMessage = new AbortWalkingMessage();
    private final ControllerStatusTracker controllerStatusTracker;
    private final Notification abortedNotification = new Notification();
-   private boolean lastAssumeFlatGroundState;
+   private boolean lastAssumeFlatGroundState = false;
    private final Timer footstepPlanningCompleteTimer = new Timer();
    private final ImGuiTextOverlay statusOverlay = new ImGuiTextOverlay();
 
@@ -106,7 +106,6 @@ public class RDXLocomotionManager
 
       locomotionParameters = new RDXLocomotionParameters(robotModel.getSimpleRobotName());
       locomotionParameters.load();
-      lastAssumeFlatGroundState = locomotionParameters.getAssumeFlatGround();
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       bodyPathPlannerParameters = robotModel.getAStarBodyPathPlannerParameters();
       swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
@@ -275,6 +274,11 @@ public class RDXLocomotionManager
          baseUI.setModelSceneMouseCollisionEnabled(isCurrentlyPlacingFootstep);
       isPlacingFootstep = isCurrentlyPlacingFootstep;
 
+      if (locomotionParameters.getAssumeFlatGround() != lastAssumeFlatGroundState)
+      {
+         footstepPlannerParameters.setEnableExpansionMask(locomotionParameters.getAssumeFlatGround());
+      }
+
       lastAssumeFlatGroundState = locomotionParameters.getAssumeFlatGround();
    }
 
@@ -285,6 +289,8 @@ public class RDXLocomotionManager
       boolean pauseAvailable = controllerStatusTracker.isWalking();
       boolean continueAvailable = !pauseAvailable && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0;
       boolean walkAvailable = !continueAvailable && interactableFootstepPlan.getNumberOfFootsteps() > 0;
+
+      ImGui.text("Queued footsteps: " + controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps());
 
       if (ImGui.button(labels.get("Disable Leg Mode")))
       {

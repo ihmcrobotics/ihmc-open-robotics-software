@@ -15,7 +15,7 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "36ea066353f46e48c69eac8580b17f42ddf409229f98d83fd162cebec2da8948";
+   		return "7e25b16a5c14d22596c1b99b8eaf797ec178d5be9809dadd8544ef9cecd078be";
    }
    
    @Override

@@ -15,7 +15,7 @@ public class ChestTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "21a5d2a0362dbd990973023aa73a344bbb099e2c4c039b898f5cde9671f2da3b";
+   		return "db4649d00d1b5ed84428b24465afc5fe97d1cdd5d99990b06301789fd04d588f";
    }
    
    @Override
