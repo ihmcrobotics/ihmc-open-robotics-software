@@ -439,19 +439,18 @@ public class RDXTeleoperationManager extends RDXPanel
 
       robotLowLevelMessenger.renderImGuiWidgets();
 
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Delete all Interactables")) || ImGui.getIO().getKeyCtrl() && ImGui.isKeyReleased('L'))
-      {
-         clearInteractablesAndLocomotionGraphics();
-      }
-      ImGuiTools.previousWidgetTooltip("Keybind: Ctrl + L");
-
       pelvisHeightSlider.renderImGuiWidgets();
       chestPitchSlider.renderImGuiWidgets();
       chestYawSlider.renderImGuiWidgets();
 
       trajectoryTimeSlider.renderImGuiWidget();
 
+      if (ImGui.button(labels.get("Delete all Interactables")) || ImGui.getIO().getKeyCtrl() && ImGui.isKeyReleased('L'))
+      {
+         clearInteractablesAndLocomotionGraphics();
+      }
+      ImGuiTools.previousWidgetTooltip("Keybind: Ctrl + L");
+      ImGui.sameLine();
       if (interactablesAvailable)
       {
          ImGui.checkbox("Interactables Enabled", interactablesEnabled);
