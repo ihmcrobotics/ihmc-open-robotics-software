@@ -12,6 +12,7 @@ import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
+import us.ihmc.rdx.ui.interactable.RDXSakeHandPositionSlider;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -33,6 +34,7 @@ public class RDXHandConfigurationManager
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private RobotSide toolbarSelectedSide = RobotSide.LEFT;
    private final SideDependentList<RDXSakeHandInformation> sakeHandInfo = new SideDependentList<>();
+   private final SideDependentList<RDXSakeHandPositionSlider> handPositionSliders = new SideDependentList<>();
 
    public void create(RDXBaseUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobotModel)
    {
@@ -85,6 +87,11 @@ public class RDXHandConfigurationManager
       armHomeButton.loadAndSetIcon("icons/home.png");
       armHomeButton.setTooltipText("left/right arm home pose");
       armHomeButton.setOnPressed(() -> publishArmHomeCommand(toolbarSelectedSide));
+
+      for (RobotSide handSide : RobotSide.values)
+      {
+         handPositionSliders.put(handSide, new RDXSakeHandPositionSlider(syncedRobotModel, communicationHelper, handSide));
+      }
 
       if (ADD_SHIELD_BUTTON)
       {
@@ -144,6 +151,8 @@ public class RDXHandConfigurationManager
                   = HumanoidMessageTools.createHandDesiredConfigurationMessage(side, HandConfiguration.values[handConfigurationIndices.get(side).get()]);
             communicationHelper.publish(ROS2Tools::getHandConfigurationTopic, message);
          }
+
+         handPositionSliders.get(side).renderImGuiWidgets();
       }
       if (!sakeHandInfo.isEmpty())
          ImGui.text("Sake EZGrippers:");

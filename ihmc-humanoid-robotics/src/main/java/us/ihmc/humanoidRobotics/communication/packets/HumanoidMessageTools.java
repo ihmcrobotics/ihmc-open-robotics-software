@@ -16,58 +16,7 @@ import atlas_msgs.msg.dds.AtlasWristSensorCalibrationRequestPacket;
 import atlas_msgs.msg.dds.BDIBehaviorCommandPacket;
 import atlas_msgs.msg.dds.BDIBehaviorStatusPacket;
 import boofcv.struct.calib.CameraPinholeBrown;
-import controller_msgs.msg.dds.ArmDesiredAccelerationsMessage;
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.AutomaticManipulationAbortMessage;
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.ChestHybridJointspaceTaskspaceTrajectoryMessage;
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.ClearDelayQueueMessage;
-import controller_msgs.msg.dds.DesiredAccelerationsMessage;
-import controller_msgs.msg.dds.FootLoadBearingMessage;
-import controller_msgs.msg.dds.FootTrajectoryMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.GoHomeMessage;
-import controller_msgs.msg.dds.HandCollisionDetectedPacket;
-import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
-import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
-import controller_msgs.msg.dds.HandJointAnglePacket;
-import controller_msgs.msg.dds.HandLoadBearingMessage;
-import controller_msgs.msg.dds.HandPowerCyclePacket;
-import controller_msgs.msg.dds.HandTrajectoryMessage;
-import controller_msgs.msg.dds.HeadHybridJointspaceTaskspaceTrajectoryMessage;
-import controller_msgs.msg.dds.HeadTrajectoryMessage;
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
-import controller_msgs.msg.dds.HighLevelStateMessage;
-import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
-import controller_msgs.msg.dds.LegCompliancePacket;
-import controller_msgs.msg.dds.LegTrajectoryMessage;
-import controller_msgs.msg.dds.LocalizationPacket;
-import controller_msgs.msg.dds.LocalizationPointMapPacket;
-import controller_msgs.msg.dds.LocalizationStatusPacket;
-import controller_msgs.msg.dds.ManualHandControlPacket;
-import controller_msgs.msg.dds.NeckDesiredAccelerationsMessage;
-import controller_msgs.msg.dds.NeckTrajectoryMessage;
-import controller_msgs.msg.dds.ObjectWeightPacket;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.PauseWalkingMessage;
-import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisPoseErrorPacket;
-import controller_msgs.msg.dds.PelvisTrajectoryMessage;
-import controller_msgs.msg.dds.PlanOffsetStatus;
-import controller_msgs.msg.dds.PrepareForLocomotionMessage;
-import controller_msgs.msg.dds.SnapFootstepPacket;
-import controller_msgs.msg.dds.SpineDesiredAccelerationsMessage;
-import controller_msgs.msg.dds.SpineTrajectoryMessage;
-import controller_msgs.msg.dds.StateEstimatorModePacket;
-import controller_msgs.msg.dds.WalkOverTerrainGoalPacket;
-import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
-import controller_msgs.msg.dds.WholeBodyStreamingMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
-import controller_msgs.msg.dds.WrenchTrajectoryPointMessage;
+import controller_msgs.msg.dds.*;
 import gnu.trove.list.array.TDoubleArrayList;
 import ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage;
 import ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessage;
@@ -1407,6 +1356,19 @@ public class HumanoidMessageTools
       HandDesiredConfigurationMessage message = new HandDesiredConfigurationMessage();
       message.setRobotSide(robotSide.toByte());
       message.setDesiredHandConfiguration(handDesiredConfiguration.toByte());
+      return message;
+   }
+
+   public static HandSakeDesiredCommandMessage createHandSakeDesiredCommandMessage(RobotSide robotSide,
+                                                                                   byte sakeHandConfiguration,
+                                                                                   double goalPosition,
+                                                                                   double goalTorque)
+   {
+      HandSakeDesiredCommandMessage message = new HandSakeDesiredCommandMessage();
+      message.setRobotSide(robotSide.toByte());
+      message.setDesiredHandConfiguration(sakeHandConfiguration);
+      message.setPostionRatio(goalPosition);
+      message.setTorqueRatio(goalTorque);
       return message;
    }
 
