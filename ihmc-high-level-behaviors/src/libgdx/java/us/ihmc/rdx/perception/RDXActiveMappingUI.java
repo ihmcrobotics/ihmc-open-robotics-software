@@ -13,7 +13,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.tools.RDXModelBuilder;
@@ -33,7 +33,7 @@ public class RDXActiveMappingUI implements RenderableProvider
    private PerceptionConfigurationParameters perceptionConfigurationParameters;
    private ImGuiRemoteROS2StoredPropertySetGroup remotePropertySets;
    private ActiveMappingModule activeMappingModule;
-   private ImGuiPanel imGuiPanel;
+   private RDXPanel panel;
 
    private ArrayList<ModelInstance> gridCylinders = new ArrayList<>();
 
@@ -42,7 +42,7 @@ public class RDXActiveMappingUI implements RenderableProvider
    public RDXActiveMappingUI(String name, ActiveMappingModule mappingManager)
    {
       this.activeMappingModule = mappingManager;
-      imGuiPanel = new ImGuiPanel(name, this::renderImGuiWidgets);
+      panel = new RDXPanel(name, this::renderImGuiWidgets);
 
       for (int i = 0; i < activeMappingModule.getGridSize(); i++)
       {
@@ -59,7 +59,7 @@ public class RDXActiveMappingUI implements RenderableProvider
 
    public RDXActiveMappingUI(String name, ROS2Helper ros2Helper)
    {
-      imGuiPanel = new ImGuiPanel(name, this::renderImGuiWidgets);
+      panel = new RDXPanel(name, this::renderImGuiWidgets);
       perceptionConfigurationParameters = new PerceptionConfigurationParameters();
       remotePropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper);
       remotePropertySets.registerRemotePropertySet(perceptionConfigurationParameters, PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS);
@@ -108,9 +108,9 @@ public class RDXActiveMappingUI implements RenderableProvider
       }
    }
 
-   public ImGuiPanel getImGuiPanel()
+   public RDXPanel getImGuiPanel()
    {
-      return imGuiPanel;
+      return panel;
    }
 
    @Override
@@ -127,9 +127,9 @@ public class RDXActiveMappingUI implements RenderableProvider
       }
    }
 
-   public ImGuiPanel getPanel()
+   public RDXPanel getPanel()
    {
-      return imGuiPanel;
+      return panel;
    }
 
    public void destroy()

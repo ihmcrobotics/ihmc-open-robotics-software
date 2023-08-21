@@ -58,7 +58,7 @@ public class RDXBehaviorUIManager
    private RDXBehaviorUIInterface highestLevelUI;
    private final BehaviorHelper helper;
    private final RDXImNodesBehaviorTreeUI imNodeBehaviorTreeUI;
-   private final ImGuiPanel treeViewPanel;
+   private final RDXPanel treeViewPanel;
    private final ImBoolean imEnabled = new ImBoolean(false);
    private final YoBooleanClientHelper yoEnabled;
    private final RDXBehaviorUIRegistry behaviorRegistry;
@@ -88,8 +88,8 @@ public class RDXBehaviorUIManager
          behaviorTreeStatus.set(BehaviorMessageTools.unpackBehaviorTreeMessage(behaviorTreeMessage));
       });
 
-      treeViewPanel = new ImGuiPanel(ImGuiTools.uniqueLabel(getClass(), "Behavior Tree Panel"), this::renderBehaviorTreeImGuiWidgets, false, true);
-      treeViewPanel.addChild(new ImGuiPanel("Behaviors Status Log", logWidget::renderImGuiWidgets));
+      treeViewPanel = new RDXPanel(ImGuiTools.uniqueLabel(getClass(), "Behavior Tree Panel"), this::renderBehaviorTreeImGuiWidgets, false, true);
+      treeViewPanel.addChild(new RDXPanel("Behaviors Status Log", logWidget::renderImGuiWidgets));
 
       rootBehaviorUI = new RDXRootBehaviorUI(this::renderRootUIImGuiWidgets);
       imNodeBehaviorTreeUI = new RDXImNodesBehaviorTreeUI();
@@ -227,7 +227,7 @@ public class RDXBehaviorUIManager
       highestLevelUI.destroy();
    }
 
-   public ImGuiPanel getPanel()
+   public RDXPanel getPanel()
    {
       return treeViewPanel;
    }

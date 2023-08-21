@@ -15,7 +15,7 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "14e6d662422f2ef63f35585e1695f1e5f22815ce0ec8ccecea4fc34dd91ec6e6";
+   		return "1cf66818d79ba2698e9270cc6ca538bcf7223057dcd605d4acdafe57eaa75a24";
    }
    
    @Override
