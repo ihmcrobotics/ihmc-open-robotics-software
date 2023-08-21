@@ -12,7 +12,7 @@ import java.util.ArrayList;
  */
 public class MonteCarloPlanningAgent
 {
-   private RangeScanner rangeScanner = new RangeScanner();
+   private final RangeScanner rangeScanner = new RangeScanner();
 
    private final Point2D position = new Point2D();
    private final Point2D previousPosition = new Point2D();
@@ -27,13 +27,12 @@ public class MonteCarloPlanningAgent
       this.averagePosition.set(position);
    }
 
-   public void updateState(Point2D newState)
+   public void changeStateTo(Point2D newState)
    {
       previousPosition.set(position);
       position.set(newState);
 
-      averagePosition.scale(0.95);
-      averagePosition.add(position.getX() * 0.05, position.getY() * 0.05);
+      averagePosition.interpolate(position, 0.05);
    }
 
    public void measure(MonteCarloPlanningWorld world)

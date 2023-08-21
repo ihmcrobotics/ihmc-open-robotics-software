@@ -122,7 +122,7 @@ public class ActiveMapper
             goalPosition.set(ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getX(), gridResolution, offset),
                              ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getY(), gridResolution, offset));
 
-            monteCarloPlanner.execute(goalPositionIndices);
+            monteCarloPlanner.updateState(goalPositionIndices);
          }
 
          float yawRobotToGoal = (float) Math.atan2(goalPosition.getY() - robotLocation.getY(), goalPosition.getX() - robotLocation.getX());

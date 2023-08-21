@@ -13,10 +13,6 @@ import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_GRAY2RGB;
 
 public class MonteCarloPlannerTools
 {
-   static byte OCCUPANCY_UNKNOWN = 0;
-   static byte OCCUPANCY_FREE = 50;
-   static byte OCCUPIED = 100;
-
    public static int getTotalNodesInSubTree(MonteCarloTreeNode rootNode)
    {
       if (rootNode == null)
@@ -104,7 +100,7 @@ public class MonteCarloPlannerTools
          opencv_imgproc.rectangle(gridColor,
                                   new Point(obstacleMinY, obstacleMinX),
                                   new Point(obstacleMaxY, obstacleMaxX),
-                                  new Scalar(OCCUPIED),
+                                  new Scalar(MonteCarloPlannerConstants.OCCUPIED),
                                   -1,
                                   0,
                                   0);
@@ -114,7 +110,7 @@ public class MonteCarloPlannerTools
 
    public static boolean isPointOccupied(Point2D point, Mat grid)
    {
-      return grid.ptr((int) point.getX(), (int) point.getY()).get() == OCCUPIED;
+      return grid.ptr((int) point.getX(), (int) point.getY()).get() == MonteCarloPlannerConstants.OCCUPIED;
    }
 
    public static Point2D findClosestOccupiedPoint(Point2D startPoint, Point2D endPoint, Mat grid)
@@ -151,14 +147,14 @@ public class MonteCarloPlannerTools
    public static void updateGrid(MonteCarloPlanningWorld world, Point2D agent_state, int radius)
    {
       // set a circle of pixels around the agent to be 50
-      int agent_min_x = (int) (agent_state.getX() - radius);
-      int agent_max_x = (int) (agent_state.getX() + radius);
-      int agent_min_y = (int) (agent_state.getY() - radius);
-      int agent_max_y = (int) (agent_state.getY() + radius);
+      int agentMinX = (int) (agent_state.getX() - radius);
+      int agentMaxX = (int) (agent_state.getX() + radius);
+      int agentMinY = (int) (agent_state.getY() - radius);
+      int agentMaxY = (int) (agent_state.getY() + radius);
 
-      for (int x = agent_min_x; x < agent_max_x; x++)
+      for (int x = agentMinX; x < agentMaxX; x++)
       {
-         for (int y = agent_min_y; y < agent_max_y; y++)
+         for (int y = agentMinY; y < agentMaxY; y++)
          {
             // if point is within 5 pixels circular radius
             if (Math.sqrt(Math.pow(x - agent_state.getX(), 2) + Math.pow(y - agent_state.getY(), 2)) < radius)
@@ -166,9 +162,9 @@ public class MonteCarloPlannerTools
                // check if inside the world boundaries
                if (x >= 0 && x <= world.getGridWidth() && y >= 0 && y <= world.getGridHeight())
                {
-                  if (world.getGrid().ptr(x, y).get() == OCCUPANCY_UNKNOWN)
+                  if (world.getGrid().ptr(x, y).get() == MonteCarloPlannerConstants.OCCUPANCY_UNKNOWN)
                   {
-                     world.getGrid().ptr(x, y).put(OCCUPANCY_FREE);
+                     world.getGrid().ptr(x, y).put(MonteCarloPlannerConstants.OCCUPANCY_FREE);
                   }
                }
             }
