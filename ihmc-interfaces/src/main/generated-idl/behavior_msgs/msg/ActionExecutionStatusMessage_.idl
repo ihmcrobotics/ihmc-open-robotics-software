@@ -58,6 +58,10 @@ module behavior_msgs
          * Orientation distance to goal tolerance
          */
         double orientation_distance_to_goal_tolerance;
+        /**
+         * Linear hand wrench magnitude
+         */
+        double hand_wrench_magnitude_linear;
       };
     };
   };

@@ -55,6 +55,10 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
             * Orientation distance to goal tolerance
             */
    public double orientation_distance_to_goal_tolerance_;
+   /**
+            * Linear hand wrench magnitude
+            */
+   public double hand_wrench_magnitude_linear_;
 
    public ActionExecutionStatusMessage()
    {
@@ -89,6 +93,8 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
       start_orientation_distance_to_goal_ = other.start_orientation_distance_to_goal_;
 
       orientation_distance_to_goal_tolerance_ = other.orientation_distance_to_goal_tolerance_;
+
+      hand_wrench_magnitude_linear_ = other.hand_wrench_magnitude_linear_;
 
    }
 
@@ -257,6 +263,21 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
       return orientation_distance_to_goal_tolerance_;
    }
 
+   /**
+            * Linear hand wrench magnitude
+            */
+   public void setHandWrenchMagnitudeLinear(double hand_wrench_magnitude_linear)
+   {
+      hand_wrench_magnitude_linear_ = hand_wrench_magnitude_linear;
+   }
+   /**
+            * Linear hand wrench magnitude
+            */
+   public double getHandWrenchMagnitudeLinear()
+   {
+      return hand_wrench_magnitude_linear_;
+   }
+
 
    public static Supplier<ActionExecutionStatusMessagePubSubType> getPubSubType()
    {
@@ -297,6 +318,8 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.orientation_distance_to_goal_tolerance_, other.orientation_distance_to_goal_tolerance_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.hand_wrench_magnitude_linear_, other.hand_wrench_magnitude_linear_, epsilon)) return false;
+
 
       return true;
    }
@@ -332,6 +355,8 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
 
       if(this.orientation_distance_to_goal_tolerance_ != otherMyClass.orientation_distance_to_goal_tolerance_) return false;
 
+      if(this.hand_wrench_magnitude_linear_ != otherMyClass.hand_wrench_magnitude_linear_) return false;
+
 
       return true;
    }
@@ -363,7 +388,9 @@ public class ActionExecutionStatusMessage extends Packet<ActionExecutionStatusMe
       builder.append("start_orientation_distance_to_goal=");
       builder.append(this.start_orientation_distance_to_goal_);      builder.append(", ");
       builder.append("orientation_distance_to_goal_tolerance=");
-      builder.append(this.orientation_distance_to_goal_tolerance_);
+      builder.append(this.orientation_distance_to_goal_tolerance_);      builder.append(", ");
+      builder.append("hand_wrench_magnitude_linear=");
+      builder.append(this.hand_wrench_magnitude_linear_);
       builder.append("}");
       return builder.toString();
    }
