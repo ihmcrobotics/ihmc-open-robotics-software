@@ -7,9 +7,9 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.activeMapping.ActiveMappingRemoteThread;
-import us.ihmc.behaviors.monteCarloPlanning.Agent;
+import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanningAgent;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
-import us.ihmc.behaviors.monteCarloPlanning.World;
+import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanningWorld;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -51,8 +51,8 @@ public class HumanoidPerceptionModule
    private Mat gridColor = new Mat();
 
    /* For storing world and agent states when active mapping module is disabled */
-   private World world;
-   private Agent agent;
+   private MonteCarloPlanningWorld world;
+   private MonteCarloPlanningAgent agent;
 
    private BytedecoImage realsenseDepthImage;
 
@@ -181,8 +181,8 @@ public class HumanoidPerceptionModule
       {
          LogTools.warn("Initializing Occupancy Grid from Scratch");
 
-         this.world = new World(0, gridHeight, gridWidth);
-         this.agent = new Agent(new Point2D());
+         this.world = new MonteCarloPlanningWorld(0, gridHeight, gridWidth);
+         this.agent = new MonteCarloPlanningAgent(new Point2D());
       }
    }
 

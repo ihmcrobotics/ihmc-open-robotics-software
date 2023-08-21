@@ -9,7 +9,7 @@ public class RangeScanner
    private final int numPoints = 24;
    private final int maxRange = 20;
 
-   public ArrayList<Point2D> scan(Point2D pos, World world)
+   public ArrayList<Point2D> scan(Point2D pos, MonteCarloPlanningWorld world)
    {
       ArrayList<Point2D> points = new ArrayList<>();
       for (int i = 0; i < numPoints; i++)
@@ -22,7 +22,7 @@ public class RangeScanner
       return points;
    }
 
-   public Point2D getScanPoint(Point2D pos, float theta, World world)
+   public Point2D getScanPoint(Point2D pos, float theta, MonteCarloPlanningWorld world)
    {
       // Get the end point of the ray
       Point2D end_point = new Point2D(pos.getX32() + maxRange * (float) Math.cos(theta), pos.getY32() + maxRange * (float) Math.sin(theta));
