@@ -78,7 +78,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
       intermediateVertexBuffer = new float[totalCells * FLOATS_PER_CELL];
    }
 
-   public void update(RigidBodyTransform zUpFrameToWorld, BytePointer heightMapPointer, Point3D center, int centerIndex, float cellSizeXYInMeters)
+   public void update(RigidBodyTransform zUpFrameToWorld, BytePointer heightMapPointer,int centerIndex, float cellSizeXYInMeters)
    {
       zUpFrameToWorld.getTranslation().setZ(0);
 
