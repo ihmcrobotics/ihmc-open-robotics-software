@@ -138,10 +138,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       boolean footstepIsBeingAdjusted = false;
       if (!feetManager.getCurrentConstraintType(swingSide).isLoadBearing())
          footstepIsBeingAdjusted = balanceManager.checkAndUpdateStepAdjustment(nextFootstep);
-
-      if (jointOfflineManager != null)
-         jointOfflineManager.setUpcomingFootContactPoints(nextFootstep);
-
+      
       if (footstepIsBeingAdjusted)
       {
          walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
@@ -160,6 +157,8 @@ public class WalkingSingleSupportState extends SingleSupportState
 
          updateHeightManager();
       }
+
+      // TODO look at setting upcoming contact state here based on joint going offline
 
       if (requestSwingSpeedUp || footstepIsBeingAdjusted)
       {
