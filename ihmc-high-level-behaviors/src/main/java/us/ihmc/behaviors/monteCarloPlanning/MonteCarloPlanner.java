@@ -82,7 +82,7 @@ public class MonteCarloPlanner
       if (bestNode == null)
          return agent.getPosition();
 
-      return bestNode.getAgentState().getPosition();
+      return bestNode.getPosition();
    }
 
    public void updateState(Point2DReadOnly newState)
@@ -149,7 +149,7 @@ public class MonteCarloPlanner
 
       for (Vector2DReadOnly action : availableActions)
       {
-         Point2D newState = computeActionResult(node.getAgentState().getPosition(), action);
+         Point2D newState = computeActionResult(node.getPosition(), action);
          MonteCarloTreeNode postNode = new MonteCarloTreeNode(newState, node, uniqueNodeId++);
 
          node.getChildren().add(postNode);
@@ -172,9 +172,9 @@ public class MonteCarloPlanner
 
       for (Vector2D action : actions)
       {
-         if (checkActionObstacles(node.getAgentState().getPosition(), action, world))
+         if (checkActionObstacles(node.getPosition(), action, world))
          {
-            if (checkActionBoundaries(node.getAgentState().getPosition(), action, world.getGridWidth()))
+            if (checkActionBoundaries(node.getPosition(), action, world.getGridWidth()))
             {
                availableActions.add(action);
             }
@@ -188,7 +188,7 @@ public class MonteCarloPlanner
    {
       double score = 0;
 
-      Point2DReadOnly randomState = node.getAgentState().getPosition();
+      Point2DReadOnly randomState = node.getPosition();
 
       for (int i = 0; i < simulationIterations; i++)
       {
@@ -199,17 +199,17 @@ public class MonteCarloPlanner
 
          if (randomState.getX() < 0 || randomState.getX() >= world.getGridWidth() || randomState.getY() < 0 || randomState.getY() >= world.getGridHeight())
          {
-            score -= 1000;
+            score -= MonteCarloPlannerConstants.PENALTY_COLLISION_BOUNDARY;
          }
 
          if (randomState.distance(world.getGoal()) < world.getGoalMargin())
          {
-            score += 200000;
+            score += MonteCarloPlannerConstants.REWARD_GOAL;
          }
 
          if (world.getGrid().ptr((int) randomState.getX(), (int) randomState.getY()).get() == MonteCarloPlannerConstants.OCCUPIED)
          {
-            score -= 400;
+            score -= MonteCarloPlannerConstants.PENALTY_COLLISION_OBSTACLE;
          }
 
          ArrayList<Point2DReadOnly> scanPoints = agent.getRangeScanner().scan(randomState, world);
@@ -222,16 +222,16 @@ public class MonteCarloPlanner
             {
                if (point.distance(randomState) < agent.getRangeScanner().getMaxRange())
                {
-                  score -= 200;
+                  score -= MonteCarloPlannerConstants.PENALTY_PROXIMITY_OBSTACLE;
                }
                else
                {
-                  score += 50;
+                  score += MonteCarloPlannerConstants.REWARD_SAFE_DISTANCE;
                }
 
                if (world.getGrid().ptr((int) point.getX(), (int) point.getY()).get() == MonteCarloPlannerConstants.OCCUPANCY_UNKNOWN)
                {
-                  score += 500;
+                  score += MonteCarloPlannerConstants.REWARD_COVERAGE;
                }
             }
          }
