@@ -372,7 +372,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       if (!walkingControllerParameters.enableJointOfflineControl())
          return null;
 
-      jointOfflineManager = new JointOfflineManager(controllerToolbox.getControlledOneDoFJoints(), registry);
+      jointOfflineManager = new JointOfflineManager(controllerToolbox, registry);
       return jointOfflineManager;
    }
 

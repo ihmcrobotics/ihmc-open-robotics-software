@@ -81,7 +81,7 @@ public class JointOfflineCommand extends QueueableCommand<JointOfflineCommand, J
 
       nominalContactPoints.get(RobotSide.RIGHT).clear();
       for (int i = 0; i < message.getNominalRightFootContactPoints2d().size(); i++)
-         nominalContactPoints.get(RobotSide.LEFT).add().set(message.getNominalRightFootContactPoints2d().get(i));
+         nominalContactPoints.get(RobotSide.RIGHT).add().set(message.getNominalRightFootContactPoints2d().get(i));
 
       this.executionDelayTime = message.getExecutionDelayTime();
    }
