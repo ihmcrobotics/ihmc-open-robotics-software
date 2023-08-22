@@ -4,10 +4,11 @@ public class MonteCarloPlannerConstants
 {
    static int REWARD_GOAL = 20000000;
    static int REWARD_COVERAGE = 500;
-   static int REWARD_SAFE_DISTANCE = 50;
+   static int REWARD_SAFE_DISTANCE = 100;
+   static int REWARD_DISTANCE_FROM_AVERAGE_POSITION = 4;
 
    static int PENALTY_COLLISION_OBSTACLE = 500;
-   static int PENALTY_COLLISION_BOUNDARY = 2000;
+   static int PENALTY_COLLISION_BOUNDARY = 4000;
    static int PENALTY_PROXIMITY_OBSTACLE = 300;
 
    static byte OCCUPANCY_UNKNOWN = 0;

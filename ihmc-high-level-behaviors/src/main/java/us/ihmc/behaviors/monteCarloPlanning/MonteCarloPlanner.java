@@ -77,7 +77,7 @@ public class MonteCarloPlanner
 
       root = bestNode;
 
-      LogTools.info("Total Nodes in Tree: " + MonteCarloPlannerTools.getTotalNodesInSubTree(root));
+      //LogTools.info("Total Nodes in Tree: " + MonteCarloPlannerTools.getTotalNodesInSubTree(root));
 
       if (bestNode == null)
          return agent.getPosition();
@@ -145,7 +145,7 @@ public class MonteCarloPlanner
     */
    public MonteCarloTreeNode expand(MonteCarloTreeNode node)
    {
-      ArrayList<Vector2DReadOnly> availableActions = getAvailableActions(node, stepLength);
+      ArrayList<Vector2DReadOnly> availableActions = getAvailableActions(node.getPosition(), stepLength);
 
       for (Vector2DReadOnly action : availableActions)
       {
@@ -161,7 +161,7 @@ public class MonteCarloPlanner
    /**
     * Back propagates the given score to the root node.
     */
-   public ArrayList<Vector2DReadOnly> getAvailableActions(MonteCarloTreeNode node, int stepLength)
+   public ArrayList<Vector2DReadOnly> getAvailableActions(Point2DReadOnly position, int stepLength)
    {
       ArrayList<Vector2DReadOnly> availableActions = new ArrayList<>();
 
@@ -172,14 +172,16 @@ public class MonteCarloPlanner
 
       for (Vector2D action : actions)
       {
-         if (checkActionObstacles(node.getPosition(), action, world))
+         if (checkActionObstacles(position, action, world))
          {
-            if (checkActionBoundaries(node.getPosition(), action, world.getGridWidth()))
+            if (checkActionBoundaries(position, action, world.getGridWidth()))
             {
                availableActions.add(action);
             }
          }
       }
+
+      LogTools.warn("Available Actions: {}", availableActions.size());
 
       return availableActions;
    }
@@ -192,7 +194,9 @@ public class MonteCarloPlanner
 
       for (int i = 0; i < simulationIterations; i++)
       {
-         ArrayList<Vector2DReadOnly> availableActions = getAvailableActions(node, stepLength);
+         //LogTools.warn("Simulation: {}", i);
+
+         ArrayList<Vector2DReadOnly> availableActions = getAvailableActions(randomState, stepLength);
          Vector2DReadOnly randomAction = availableActions.get((int) (Math.random() * availableActions.size()));
          randomState = computeActionResult(randomState, randomAction);
          score -= 1;
@@ -202,7 +206,7 @@ public class MonteCarloPlanner
             score -= MonteCarloPlannerConstants.PENALTY_COLLISION_BOUNDARY;
          }
 
-         if (randomState.distance(world.getGoal()) < world.getGoalMargin())
+         if (randomState.distanceSquared(world.getGoal()) < world.getGoalMarginSquared())
          {
             score += MonteCarloPlannerConstants.REWARD_GOAL;
          }
@@ -214,7 +218,7 @@ public class MonteCarloPlanner
 
          ArrayList<Point2DReadOnly> scanPoints = agent.getRangeScanner().scan(randomState, world);
 
-         score += agent.getAveragePosition().distanceSquared(randomState);
+         score += agent.getAveragePosition().distanceSquared(randomState) * MonteCarloPlannerConstants.REWARD_DISTANCE_FROM_AVERAGE_POSITION;
 
          for (Point2DReadOnly point : scanPoints)
          {
@@ -266,8 +270,8 @@ public class MonteCarloPlanner
 
    public boolean checkActionBoundaries(Point2DReadOnly state, Vector2DReadOnly action, int gridWidth)
    {
-      Point2D position = new Point2D(state.getX() + action.getX(), state.getY() + action.getY());
-
+      Point2D position = new Point2D();
+      position.add(state, action);
       return position.getX() >= 0 && position.getX() < gridWidth && position.getY() >= 0 && position.getY() < gridWidth;
    }
 
