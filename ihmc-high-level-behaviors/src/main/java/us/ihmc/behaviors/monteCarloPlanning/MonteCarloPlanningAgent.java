@@ -13,12 +13,26 @@ import java.util.ArrayList;
  */
 public class MonteCarloPlanningAgent
 {
-   private final RangeScanner rangeScanner = new RangeScanner(24, 20);
-
+   /**
+    * The current position of the agent.
+    */
    private final Point2D position = new Point2D();
+   /**
+    * The previous position of the agent.
+    */
    private final Point2D previousPosition = new Point2D();
+   /**
+    * The average position of the agent. Used for rewarding the planner for moving away from the previously taken path.
+    */
    private final Point2D averagePosition = new Point2D();
-
+   /**
+    * The virtual range sensor on the agent. Used for internal simulation rollouts in the Monte Carlo Tree Search.
+    */
+   private final RangeScanner rangeScanner = new RangeScanner(24, 20);
+   /**
+    * Stores the virtual range sensor scans for the agent. These hold simulated range values based on the
+    * simulated agent position and the world occupancy state.
+    */
    private final ArrayList<Point2DReadOnly> points = new ArrayList<>();
 
    public MonteCarloPlanningAgent(Point2DReadOnly position)
@@ -80,5 +94,4 @@ public class MonteCarloPlanningAgent
    {
       return points;
    }
-
 }
