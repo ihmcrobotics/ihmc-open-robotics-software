@@ -242,8 +242,8 @@ public class MonteCarloPlanner
 
    public void backPropagate(MonteCarloTreeNode node, float score)
    {
-      node.setValue(node.getValue() + score);
-      node.setVisits(node.getVisits() + 1);
+      node.addValue(score);
+      node.incrementVisits();
 
       if (node.getParent() != null)
       {
