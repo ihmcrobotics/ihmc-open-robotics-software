@@ -18,23 +18,23 @@ public class RangeScanner
       this.maxRangeSquared = maxRange * maxRange;
    }
 
-   public ArrayList<Point2DReadOnly> scan(Point2DReadOnly pos, MonteCarloPlanningWorld world)
+   public ArrayList<Point2DReadOnly> scan(Point2DReadOnly origin, MonteCarloPlanningWorld world)
    {
       ArrayList<Point2DReadOnly> points = new ArrayList<>();
       for (int i = 0; i < numPoints; i++)
       {
-         float theta = i * 2 * (float) Math.PI / numPoints;
-         Point2DReadOnly point = getScanPoint(pos, theta, world);
+         double theta = i * 2 * Math.PI / numPoints;
+         Point2DReadOnly point = getScanPoint(origin, theta, world);
          points.add(point);
       }
 
       return points;
    }
 
-   public Point2DReadOnly getScanPoint(Point2DReadOnly pos, float theta, MonteCarloPlanningWorld world)
+   public Point2DReadOnly getScanPoint(Point2DReadOnly pos, double theta, MonteCarloPlanningWorld world)
    {
       // Get the end point of the ray
-      Point2DReadOnly endPoint = new Point2D(pos.getX32() + maxRange * (float) Math.cos(theta), pos.getY32() + maxRange * (float) Math.sin(theta));
+      Point2DReadOnly endPoint = new Point2D(pos.getX() + maxRange * Math.cos(theta), pos.getY() + maxRange * Math.sin(theta));
 
       // Get the intersection point with the obstacles
       Point2DReadOnly scanPoint = MonteCarloPlannerTools.findClosestOccupiedPoint(pos, endPoint, world.getGrid(), maxRange);

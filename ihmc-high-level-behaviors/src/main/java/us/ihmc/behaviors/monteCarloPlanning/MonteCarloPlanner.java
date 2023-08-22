@@ -4,10 +4,11 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class performs the Monte Carlo Tree Search for the Monte Carlo Planning agent. It uses the
@@ -275,13 +276,13 @@ public class MonteCarloPlanner
       return MonteCarloPlannerTools.isWithinGridBoundaries(position, gridWidth);
    }
 
-   public void addMeasurements(ArrayList<Point3D> measurements)
+   public void submitMeasurements(List<Point3DReadOnly> measurements)
    {
-      ArrayList<Point2D> points = new ArrayList<>();
+      ArrayList<Point2DReadOnly> points = new ArrayList<>();
 
       for (int i = 0; i<measurements.size(); i+=5)
       {
-         Point3D measurement = measurements.get(i);
+         Point3DReadOnly measurement = measurements.get(i);
 
          if (measurement.getZ() > MonteCarloPlannerConstants.OCCUPANCY_MIN_THRESHOLD_HEIGHT_IN_METERS)
          {
@@ -289,7 +290,7 @@ public class MonteCarloPlanner
          }
       }
 
-      agent.addMeasurements(points);
+      agent.setMeasurements(points);
    }
 
    public MonteCarloPlanningAgent getAgent()

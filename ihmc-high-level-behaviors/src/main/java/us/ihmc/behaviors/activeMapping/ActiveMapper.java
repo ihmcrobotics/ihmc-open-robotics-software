@@ -8,7 +8,7 @@ import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanner;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -19,6 +19,7 @@ import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ActiveMapper
 {
@@ -207,9 +208,9 @@ public class ActiveMapper
       return monteCarloPlanner.getWorld().getGridHeight();
    }
 
-   public void submitRangeScan(ArrayList<Point3D> points)
+   public void submitRangeScan(List<Point3DReadOnly> points)
    {
-      monteCarloPlanner.addMeasurements(points);
+      monteCarloPlanner.submitMeasurements(points);
    }
 
    public MonteCarloPlanner getPlanner()
