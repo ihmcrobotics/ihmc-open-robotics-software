@@ -50,7 +50,7 @@ public class MonteCarloPlanningAgent
       points.addAll(rangeScanner.scan(position, world));
    }
 
-   public void addMeasurements(ArrayList<Point2D> measurements)
+   public void setMeasurements(ArrayList<Point2DReadOnly> measurements)
    {
       points.clear();
       points.addAll(measurements);
