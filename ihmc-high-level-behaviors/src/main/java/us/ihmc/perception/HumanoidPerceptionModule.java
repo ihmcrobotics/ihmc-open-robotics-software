@@ -134,8 +134,7 @@ public class HumanoidPerceptionModule
                                                                 perceptionConfigurationParameters.getOccupancyGridResolution(),
                                                                 70);
 
-         agent.getPosition().set(gridX, gridY);
-
+         agent.changeStateTo(gridX, gridY);
          agent.measure(world);
 
          if (display)

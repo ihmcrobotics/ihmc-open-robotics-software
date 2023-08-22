@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.monteCarloPlanning;
 
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
 import java.util.ArrayList;
 
@@ -9,31 +10,26 @@ public class RangeScanner
    private final int numPoints = 24;
    private final int maxRange = 20;
 
-   public ArrayList<Point2D> scan(Point2D pos, MonteCarloPlanningWorld world)
+   public ArrayList<Point2DReadOnly> scan(Point2DReadOnly pos, MonteCarloPlanningWorld world)
    {
-      ArrayList<Point2D> points = new ArrayList<>();
+      ArrayList<Point2DReadOnly> points = new ArrayList<>();
       for (int i = 0; i < numPoints; i++)
       {
          float theta = i * 2 * (float) Math.PI / numPoints;
-         Point2D point = getScanPoint(pos, theta, world);
+         Point2DReadOnly point = getScanPoint(pos, theta, world);
          points.add(point);
       }
 
       return points;
    }
 
-   public Point2D getScanPoint(Point2D pos, float theta, MonteCarloPlanningWorld world)
+   public Point2DReadOnly getScanPoint(Point2DReadOnly pos, float theta, MonteCarloPlanningWorld world)
    {
       // Get the end point of the ray
-      Point2D end_point = new Point2D(pos.getX32() + maxRange * (float) Math.cos(theta), pos.getY32() + maxRange * (float) Math.sin(theta));
+      Point2DReadOnly endPoint = new Point2D(pos.getX32() + maxRange * (float) Math.cos(theta), pos.getY32() + maxRange * (float) Math.sin(theta));
 
       // Get the intersection point with the obstacles
-      Point2D scanPoint = MonteCarloPlannerTools.findClosestOccupiedPoint(pos, end_point, world.getGrid());
-
-      if (scanPoint.distance(pos) > maxRange)
-      {
-         scanPoint = end_point;
-      }
+      Point2DReadOnly scanPoint = MonteCarloPlannerTools.findClosestOccupiedPoint(pos, endPoint, world.getGrid(), maxRange);
 
       return scanPoint;
    }

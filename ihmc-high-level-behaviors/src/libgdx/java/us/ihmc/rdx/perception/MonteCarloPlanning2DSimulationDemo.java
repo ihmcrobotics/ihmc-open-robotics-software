@@ -4,6 +4,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanner;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D32;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 
@@ -49,7 +50,7 @@ class MonteCarloPlanning2DSimulationDemo
 
          PerceptionDebugTools.display("Grid", gridColor, 1, screenSize);
 
-         Point2D newState = planner.plan();
+         Point2DReadOnly newState = planner.plan();
          planner.updateState(newState);
 
          i += 1;
