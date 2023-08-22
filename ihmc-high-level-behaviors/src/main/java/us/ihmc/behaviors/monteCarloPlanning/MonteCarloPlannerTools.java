@@ -8,8 +8,10 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D32;
+import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_GRAY2RGB;
@@ -32,11 +34,12 @@ public class MonteCarloPlannerTools
 
    public static void printTree(MonteCarloTreeNode node, int level)
    {
-      System.out.printf("ID: %d\tLevel: %d\tNode: %s\tChildren: %d%n",
-                        node.getId(),
-                        level,
-                        node.getPosition().toString(),
-                        node.getChildren().size());
+      // TODO: Make this write to a string and then print the combined string with LogTools.info()
+      LogTools.info(String.format("ID: %d\tLevel: %d\tNode: %s\tChildren: %d%n",
+               node.getId(),
+               level,
+               node.getPosition().toString(),
+               node.getChildren().size()));
 
       for (MonteCarloTreeNode child : node.getChildren())
       {
@@ -124,8 +127,7 @@ public class MonteCarloPlannerTools
       int samples = 10;
       Point2D currentPoint = new Point2D();
 
-      List<Point2D> neighbors = new ArrayList<>();
-      for (int i = 0; i<8; i++) neighbors.add(new Point2D());
+      Point2D[] neighbors = new Point2D[8];
 
       for (int i = 0; i<samples; i++)
       {
@@ -136,7 +138,7 @@ public class MonteCarloPlannerTools
          updateNeighborsList(neighbors, currentPoint);
 
          // check if a 3x3 square around the current point is occupied
-         if (isPointOccupied(currentPoint, grid) || neighbors.stream().anyMatch(neighbor -> isPointOccupied(neighbor, grid)))
+         if ( isPointOccupied(currentPoint, grid) || Arrays.stream(neighbors).anyMatch(neighbor -> isPointOccupied(neighbor, grid)))
          {
             // If the current point is occupied, return the closest point
             closestPoint.set(currentPoint);
@@ -152,16 +154,16 @@ public class MonteCarloPlannerTools
       return closestPoint;
    }
 
-   public static void updateNeighborsList(List<Point2D> neighborsToUpdate, Point2DReadOnly origin)
+   public static void updateNeighborsList(Point2D[] neighborsToUpdate, Point2DReadOnly origin)
    {
-      neighborsToUpdate.get(0).set(origin.getX() + 1, origin.getY());
-      neighborsToUpdate.get(1).set(origin.getX() - 1, origin.getY());
-      neighborsToUpdate.get(2).set(origin.getX(), origin.getY() + 1);
-      neighborsToUpdate.get(3).set(origin.getX(), origin.getY() - 1);
-      neighborsToUpdate.get(4).set(origin.getX() + 1, origin.getY() + 1);
-      neighborsToUpdate.get(5).set(origin.getX() - 1, origin.getY() - 1);
-      neighborsToUpdate.get(6).set(origin.getX() + 1, origin.getY() - 1);
-      neighborsToUpdate.get(7).set(origin.getX() - 1, origin.getY() + 1);
+      neighborsToUpdate[0].set(origin.getX() + 1, origin.getY());
+      neighborsToUpdate[1].set(origin.getX() - 1, origin.getY());
+      neighborsToUpdate[2].set(origin.getX(), origin.getY() + 1);
+      neighborsToUpdate[3].set(origin.getX(), origin.getY() - 1);
+      neighborsToUpdate[4].set(origin.getX() + 1, origin.getY() + 1);
+      neighborsToUpdate[5].set(origin.getX() - 1, origin.getY() - 1);
+      neighborsToUpdate[6].set(origin.getX() + 1, origin.getY() - 1);
+      neighborsToUpdate[7].set(origin.getX() - 1, origin.getY() + 1);
    }
 
    public static void updateGrid(MonteCarloPlanningWorld world, Point2DReadOnly agentState, int radius)

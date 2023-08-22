@@ -6,9 +6,9 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.activeMapping.ActiveMappingRemoteThread;
-import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanningAgent;
+import us.ihmc.behaviors.activeMapping.ActiveMappingRemoteTask;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
+import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanningAgent;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanningWorld;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
@@ -23,7 +23,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
-import us.ihmc.perception.headless.LocalizationAndMappingThread;
+import us.ihmc.perception.headless.LocalizationAndMappingTask;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
@@ -38,7 +38,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -59,8 +59,8 @@ public class HumanoidPerceptionModule
    private final FramePose3D cameraPose = new FramePose3D();
 
    private OpenCLManager openCLManager;
-   private LocalizationAndMappingThread localizationAndMappingThread;
-   private ActiveMappingRemoteThread activeMappingRemoteThread;
+   private LocalizationAndMappingTask localizationAndMappingTask;
+   private ActiveMappingRemoteTask activeMappingRemoteThread;
    private RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor;
    private CollidingScanRegionFilter collidingScanRegionFilter;
    private FullHumanoidRobotModel fullRobotModel;
@@ -91,8 +91,8 @@ public class HumanoidPerceptionModule
 
    public void updateTerrain(ROS2Helper ros2Helper, Mat depthImage, ReferenceFrame cameraFrame, boolean rapidRegionsEnabled, boolean mappingEnabled)
    {
-      if (localizationAndMappingThread != null)
-         localizationAndMappingThread.setEnableLiveMode(mappingEnabled);
+      if (localizationAndMappingTask != null)
+         localizationAndMappingTask.setEnableLiveMode(mappingEnabled);
 
       if (rapidRegionsEnabled)
       {
@@ -113,7 +113,7 @@ public class HumanoidPerceptionModule
       }
    }
 
-   public void updateStructural(ROS2Helper ros2Helper, ArrayList<Point3D> pointCloud, ReferenceFrame sensorFrame, float thresholdHeight, boolean display)
+   public void updateStructural(ROS2Helper ros2Helper, List<Point3D> pointCloud, ReferenceFrame sensorFrame, float thresholdHeight, boolean display)
    {
       cameraPose.setToZero(sensorFrame);
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -124,6 +124,8 @@ public class HumanoidPerceptionModule
                            thresholdHeight,
                            perceptionConfigurationParameters.getOccupancyGridResolution(),
                            70);
+
+      // TODO: Publish the occupancy grid as ImageMessage using the ROS2Helper.
 
       if (activeMappingRemoteThread == null)
       {
@@ -196,31 +198,31 @@ public class HumanoidPerceptionModule
    public void initializeLocalizationAndMappingThread(ROS2SyncedRobotModel syncedRobot, String robotName, ROS2Node ros2Node, boolean smoothing)
    {
       LogTools.info("Initializing Localization and Mapping Process (Smoothing: {})", smoothing);
-      localizationAndMappingThread = new LocalizationAndMappingThread(robotName,
-                                                                      PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
-                                                                      PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
-                                                                      ros2Node,
-                                                                      syncedRobot.getReferenceFrames(),
-                                                                      () ->
+      localizationAndMappingTask = new LocalizationAndMappingTask(robotName,
+                                                                  PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
+                                                                  PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
+                                                                  ros2Node,
+                                                                  syncedRobot.getReferenceFrames(),
+                                                                  () ->
                                                                         {
                                                                         },
-                                                                      smoothing);
+                                                                  smoothing);
    }
 
    public void initializeActiveMappingProcess(String robotName, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, ROS2Node ros2Node)
    {
       LogTools.info("Initializing Active Mapping Process");
-      activeMappingRemoteThread = new ActiveMappingRemoteThread(robotName,
-                                                                robotModel,
-                                                                syncedRobot,
-                                                                PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
-                                                                PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
-                                                                ros2Node,
-                                                                syncedRobot.getReferenceFrames(),
-                                                                () ->
+      activeMappingRemoteThread = new ActiveMappingRemoteTask(robotName,
+                                                              robotModel,
+                                                              syncedRobot,
+                                                              PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
+                                                              PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
+                                                              ros2Node,
+                                                              syncedRobot.getReferenceFrames(),
+                                                              () ->
                                                                   {
                                                                   },
-                                                                true);
+                                                              true);
    }
 
    public void extractFramePlanarRegionsList(RapidPlanarRegionsExtractor extractor,
@@ -238,7 +240,7 @@ public class HumanoidPerceptionModule
       worldRegions.applyTransform(cameraFrame.getTransformToWorldFrame());
    }
 
-   public void extractOccupancyGrid(ArrayList<Point3D> pointCloud,
+   public void extractOccupancyGrid(List<Point3D> pointCloud,
                                     Mat occupancyGrid,
                                     RigidBodyTransform sensorToWorldTransform,
                                     float thresholdHeight,
@@ -312,8 +314,8 @@ public class HumanoidPerceptionModule
       if (rapidPlanarRegionsExtractor != null)
          rapidPlanarRegionsExtractor.destroy();
 
-      if (localizationAndMappingThread != null)
-         localizationAndMappingThread.destroy();
+      if (localizationAndMappingTask != null)
+         localizationAndMappingTask.destroy();
 
       if (activeMappingRemoteThread != null)
          activeMappingRemoteThread.destroy();

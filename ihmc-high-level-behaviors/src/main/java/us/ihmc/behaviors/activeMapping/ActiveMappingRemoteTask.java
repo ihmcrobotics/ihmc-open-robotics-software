@@ -12,14 +12,14 @@ import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.headless.LocalizationAndMappingThread;
+import us.ihmc.perception.headless.LocalizationAndMappingTask;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ActiveMappingRemoteThread extends LocalizationAndMappingThread
+public class ActiveMappingRemoteTask extends LocalizationAndMappingTask
 {
    private final static long UPDATE_PERIOD_MS = 500;
    private final static long PLANNING_PERIOD_MS = 500;
@@ -35,15 +35,15 @@ public class ActiveMappingRemoteThread extends LocalizationAndMappingThread
 
    private FootstepPlannerRequest request;
 
-   public ActiveMappingRemoteThread(String simpleRobotName,
-                                    DRCRobotModel robotModel,
-                                    ROS2SyncedRobotModel syncedRobotModel,
-                                    ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic,
-                                    ROS2Topic<FramePlanarRegionsListMessage> structuralRegionsTopic,
-                                    ROS2Node ros2Node,
-                                    HumanoidReferenceFrames referenceFrames,
-                                    Runnable referenceFramesUpdater,
-                                    boolean smoothing)
+   public ActiveMappingRemoteTask(String simpleRobotName,
+                                  DRCRobotModel robotModel,
+                                  ROS2SyncedRobotModel syncedRobotModel,
+                                  ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic,
+                                  ROS2Topic<FramePlanarRegionsListMessage> structuralRegionsTopic,
+                                  ROS2Node ros2Node,
+                                  HumanoidReferenceFrames referenceFrames,
+                                  Runnable referenceFramesUpdater,
+                                  boolean smoothing)
    {
       super(simpleRobotName, terrainRegionsTopic, structuralRegionsTopic, ros2Node, referenceFrames, referenceFramesUpdater, smoothing);
 

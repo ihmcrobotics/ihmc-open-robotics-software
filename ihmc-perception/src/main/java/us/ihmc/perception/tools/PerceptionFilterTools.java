@@ -62,13 +62,12 @@ public class PerceptionFilterTools
       collisionFilter.update();
       PlanarRegionsList planarRegionsList = framePlanarRegionsList.getPlanarRegionsList();
 
-      List<PlanarRegion> filteredPlanarRegions = planarRegionsList.getPlanarRegionsAsList().parallelStream()
-                                                                  .filter(region ->
-                                                                  {
-                                                                     PlanarRegion regionInWorld = region.copy();
-                                                                     regionInWorld.applyTransform(framePlanarRegionsList.getSensorToWorldFrameTransform());
-                                                                     return collisionFilter.test(0, regionInWorld);
-                                                                  }).toList();
+      List<PlanarRegion> filteredPlanarRegions = planarRegionsList.getPlanarRegionsAsList().parallelStream().filter(region ->
+      {
+         PlanarRegion regionInWorld = region.copy();
+         regionInWorld.applyTransform(framePlanarRegionsList.getSensorToWorldFrameTransform());
+         return collisionFilter.test(0, regionInWorld);
+      }).toList();
 
       framePlanarRegionsList.getPlanarRegionsList().clear();
       framePlanarRegionsList.getPlanarRegionsList().addPlanarRegions(filteredPlanarRegions);
