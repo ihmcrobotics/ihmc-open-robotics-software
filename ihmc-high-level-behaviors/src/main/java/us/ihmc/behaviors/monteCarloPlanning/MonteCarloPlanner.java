@@ -1,6 +1,5 @@
 package us.ihmc.behaviors.monteCarloPlanning;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -202,7 +201,7 @@ public class MonteCarloPlanner
          randomState = computeActionResult(randomState, randomAction);
          score -= 1;
 
-         if (randomState.getX() < 0 || randomState.getX() >= world.getGridWidth() || randomState.getY() < 0 || randomState.getY() >= world.getGridHeight())
+         if (!MonteCarloPlannerTools.isWithinGridBoundaries(randomState, world.getGridWidth()))
          {
             score -= MonteCarloPlannerConstants.PENALTY_COLLISION_BOUNDARY;
          }
@@ -223,7 +222,7 @@ public class MonteCarloPlanner
 
          for (Point2DReadOnly point : scanPoints)
          {
-            if (point.getX() >= 0 && point.getX() < world.getGridWidth() && point.getY() >= 0 && point.getY() < world.getGridHeight())
+            if (MonteCarloPlannerTools.isWithinGridBoundaries(point, world.getGridWidth()))
             {
                if (point.distanceSquared(randomState) < agent.getRangeScanner().getMaxRangeSquared())
                {
@@ -273,7 +272,7 @@ public class MonteCarloPlanner
    {
       Point2D position = new Point2D();
       position.add(state, action);
-      return MathTools.intervalContains(position.getX(), 0, gridWidth) && MathTools.intervalContains(position.getY(), 0, gridWidth);
+      return MonteCarloPlannerTools.isWithinGridBoundaries(position, gridWidth);
    }
 
    public void addMeasurements(ArrayList<Point3D> measurements)
