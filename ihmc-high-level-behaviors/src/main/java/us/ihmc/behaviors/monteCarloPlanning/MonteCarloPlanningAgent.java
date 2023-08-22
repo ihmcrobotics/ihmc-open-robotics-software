@@ -33,7 +33,7 @@ public class MonteCarloPlanningAgent
     * Stores the virtual range sensor scans for the agent. These hold simulated range values based on the
     * simulated agent position and the world occupancy state.
     */
-   private final ArrayList<Point2DReadOnly> points = new ArrayList<>();
+   private final ArrayList<Point2DReadOnly> scanPoints = new ArrayList<>();
 
    public MonteCarloPlanningAgent(Point2DReadOnly position)
    {
@@ -60,14 +60,14 @@ public class MonteCarloPlanningAgent
 
    public void measure(MonteCarloPlanningWorld world)
    {
-      points.clear();
-      points.addAll(rangeScanner.scan(position, world));
+      scanPoints.clear();
+      scanPoints.addAll(rangeScanner.scan(position, world));
    }
 
    public void setMeasurements(ArrayList<Point2DReadOnly> measurements)
    {
-      points.clear();
-      points.addAll(measurements);
+      scanPoints.clear();
+      scanPoints.addAll(measurements);
    }
 
    public Point2DReadOnly getPosition()
@@ -92,6 +92,6 @@ public class MonteCarloPlanningAgent
 
    public ArrayList<Point2DReadOnly> getScanPoints()
    {
-      return points;
+      return scanPoints;
    }
 }
