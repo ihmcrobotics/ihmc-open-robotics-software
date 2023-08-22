@@ -194,4 +194,9 @@ public class MonteCarloPlannerTools
          }
       }
    }
+
+   public static boolean isWithinGridBoundaries(Point2DReadOnly position, int gridWidth)
+   {
+      return MathTools.intervalContains(position.getX(), 0, gridWidth) && MathTools.intervalContains(position.getY(), 0, gridWidth);
+   }
 }
