@@ -13,7 +13,7 @@ import java.util.ArrayList;
  */
 public class MonteCarloPlanningAgent
 {
-   private final RangeScanner rangeScanner = new RangeScanner();
+   private final RangeScanner rangeScanner = new RangeScanner(24, 20);
 
    private final Point2D position = new Point2D();
    private final Point2D previousPosition = new Point2D();

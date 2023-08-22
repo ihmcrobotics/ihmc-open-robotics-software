@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.monteCarloPlanning;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -181,7 +182,7 @@ public class MonteCarloPlanner
          }
       }
 
-      LogTools.warn("Available Actions: {}", availableActions.size());
+      //LogTools.warn("Available Actions: {}", availableActions.size());
 
       return availableActions;
    }
@@ -224,7 +225,7 @@ public class MonteCarloPlanner
          {
             if (point.getX() >= 0 && point.getX() < world.getGridWidth() && point.getY() >= 0 && point.getY() < world.getGridHeight())
             {
-               if (point.distance(randomState) < agent.getRangeScanner().getMaxRange())
+               if (point.distanceSquared(randomState) < agent.getRangeScanner().getMaxRangeSquared())
                {
                   score -= MonteCarloPlannerConstants.PENALTY_PROXIMITY_OBSTACLE;
                }
@@ -272,7 +273,7 @@ public class MonteCarloPlanner
    {
       Point2D position = new Point2D();
       position.add(state, action);
-      return position.getX() >= 0 && position.getX() < gridWidth && position.getY() >= 0 && position.getY() < gridWidth;
+      return MathTools.intervalContains(position.getX(), 0, gridWidth) && MathTools.intervalContains(position.getY(), 0, gridWidth);
    }
 
    public void addMeasurements(ArrayList<Point3D> measurements)

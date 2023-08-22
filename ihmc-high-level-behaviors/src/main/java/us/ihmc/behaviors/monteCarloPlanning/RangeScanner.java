@@ -7,8 +7,16 @@ import java.util.ArrayList;
 
 public class RangeScanner
 {
-   private final int numPoints = 24;
-   private final int maxRange = 20;
+   private int numPoints;
+   private int maxRange;
+   private int maxRangeSquared;
+
+   public RangeScanner(int numPoints, int maxRange)
+   {
+      this.numPoints = numPoints;
+      this.maxRange = maxRange;
+      this.maxRangeSquared = maxRange * maxRange;
+   }
 
    public ArrayList<Point2DReadOnly> scan(Point2DReadOnly pos, MonteCarloPlanningWorld world)
    {
@@ -42,5 +50,10 @@ public class RangeScanner
    public int getMaxRange()
    {
       return maxRange;
+   }
+
+   public int getMaxRangeSquared()
+   {
+      return maxRangeSquared;
    }
 }
