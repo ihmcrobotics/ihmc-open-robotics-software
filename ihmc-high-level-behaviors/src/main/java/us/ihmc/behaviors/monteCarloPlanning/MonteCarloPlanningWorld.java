@@ -20,6 +20,7 @@ public class MonteCarloPlanningWorld
    private final int gridHeight;
    private final int gridWidth;
    private final int goalMargin;
+   private final int goalMarginSquared;
 
    public MonteCarloPlanningWorld(int goalMargin, int gridHeight, int gridWidth)
    {
@@ -28,6 +29,7 @@ public class MonteCarloPlanningWorld
       this.goalMargin = goalMargin;
       this.goal = new Point2D(30, 150);
       this.grid = new Mat(gridHeight, gridWidth, opencv_core.CV_8UC1);
+      this.goalMarginSquared = goalMargin * goalMargin;
    }
 
    public void submitObstacles(ArrayList<Vector4D32> obstacles)
@@ -58,5 +60,10 @@ public class MonteCarloPlanningWorld
    public int getGoalMargin()
    {
       return goalMargin;
+   }
+
+   public int getGoalMarginSquared()
+   {
+      return goalMarginSquared;
    }
 }
