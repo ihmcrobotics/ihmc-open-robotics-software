@@ -211,8 +211,8 @@ public class BehaviorActionSequence
       }
       else
       {
-//         nothingExecutingStatusMessage.setActionIndex(-1);
-//         ros2.publish(ACTION_EXECUTION_STATUS, nothingExecutingStatusMessage);
+         nothingExecutingStatusMessage.setActionIndex(-1);
+         ros2.publish(ACTION_EXECUTION_STATUS, nothingExecutingStatusMessage);
       }
 
       sendStatus();
