@@ -31,13 +31,13 @@ public class RangeScanner
       return points;
    }
 
-   public Point2DReadOnly getScanPoint(Point2DReadOnly pos, double theta, MonteCarloPlanningWorld world)
+   public Point2DReadOnly getScanPoint(Point2DReadOnly position, double theta, MonteCarloPlanningWorld world)
    {
       // Get the end point of the ray
-      Point2DReadOnly endPoint = new Point2D(pos.getX() + maxRange * Math.cos(theta), pos.getY() + maxRange * Math.sin(theta));
+      Point2DReadOnly endPoint = new Point2D(position.getX() + maxRange * Math.cos(theta), position.getY() + maxRange * Math.sin(theta));
 
       // Get the intersection point with the obstacles
-      Point2DReadOnly scanPoint = MonteCarloPlannerTools.findClosestOccupiedPoint(pos, endPoint, world.getGrid(), maxRange);
+      Point2DReadOnly scanPoint = MonteCarloPlannerTools.findClosestOccupiedPoint(position, endPoint, world.getGrid(), maxRange);
 
       return scanPoint;
    }
