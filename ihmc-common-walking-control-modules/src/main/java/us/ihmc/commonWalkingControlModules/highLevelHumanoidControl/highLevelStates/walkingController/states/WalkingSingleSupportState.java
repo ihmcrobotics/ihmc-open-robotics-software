@@ -110,7 +110,14 @@ public class WalkingSingleSupportState extends SingleSupportState
    @Override
    public void doAction(double timeInState)
    {
-      if (resubmitStepsInSwingEveryTick.getBooleanValue())
+      boolean updatedNextFootstepContactPoints = false;
+
+      if (jointOfflineManager != null)
+      {
+         updatedNextFootstepContactPoints = jointOfflineManager.setUpcomingFootContactPoints(nextFootstep);
+      }
+
+      if (resubmitStepsInSwingEveryTick.getBooleanValue() || updatedNextFootstepContactPoints)
       {
          balanceManager.clearICPPlan();
          balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
@@ -138,7 +145,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       boolean footstepIsBeingAdjusted = false;
       if (!feetManager.getCurrentConstraintType(swingSide).isLoadBearing())
          footstepIsBeingAdjusted = balanceManager.checkAndUpdateStepAdjustment(nextFootstep);
-      
+
       if (footstepIsBeingAdjusted)
       {
          walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);

@@ -127,6 +127,17 @@ public class JointOfflineManager
       }
    }
 
+   public boolean setUpcomingFootContactPoints(Footstep nextFootstep)
+   {
+      if (hasNewContactState.get(nextFootstep.getRobotSide()).isFalse())
+         return false;
+      hasNewContactState.get(nextFootstep.getRobotSide()).setFalse();
+      RecyclingArrayList<Point2D> nominalContactPoints = this.nominalContactPoints.get(nextFootstep.getRobotSide());
+      if (!nominalContactPoints.isEmpty())
+         nextFootstep.setPredictedContactPoints(nominalContactPoints);
+      return true;
+   }
+
    public boolean isJointOffline()
    {
       return jointTorqueCommand.getNumberOfJoints() > 0;
