@@ -4,11 +4,11 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MonteCarloTreeNode
 {
-   private final MonteCarloPlanningAgent agent;
-   private MonteCarloPlanningWorld world;
+   private Point2D position;
    private MonteCarloTreeNode parent;
    private ArrayList<MonteCarloTreeNode> children;
 
@@ -21,9 +21,9 @@ public class MonteCarloTreeNode
 
    public MonteCarloTreeNode(Point2DReadOnly state, MonteCarloTreeNode parent, int id)
    {
+      this.position = new Point2D(state);
       this.id = id;
       this.parent = parent;
-      this.agent = new MonteCarloPlanningAgent(state);
       children = new ArrayList<>();
    }
 
@@ -43,19 +43,9 @@ public class MonteCarloTreeNode
       return upperConfidenceBound;
    }
 
-   public ArrayList<MonteCarloTreeNode> getChildren()
+   public List<MonteCarloTreeNode> getChildren()
    {
       return children;
-   }
-
-   public MonteCarloPlanningAgent getAgentState()
-   {
-      return agent;
-   }
-
-   public MonteCarloPlanningWorld getWorldState()
-   {
-      return world;
    }
 
    public int getVisits()
@@ -78,11 +68,6 @@ public class MonteCarloTreeNode
       this.visits = visits;
    }
 
-   public void setWorldState(MonteCarloPlanningWorld world)
-   {
-      this.world = world;
-   }
-
    public MonteCarloTreeNode getParent()
    {
       return parent;
@@ -91,6 +76,11 @@ public class MonteCarloTreeNode
    public int getId()
    {
       return id;
+   }
+
+   public Point2D getPosition()
+   {
+      return position;
    }
 
 }

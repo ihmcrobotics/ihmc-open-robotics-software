@@ -4,6 +4,7 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D32;
@@ -34,7 +35,7 @@ public class MonteCarloPlannerTools
       System.out.printf("ID: %d\tLevel: %d\tNode: %s\tChildren: %d%n",
                         node.getId(),
                         level,
-                        node.getAgentState().getPosition().toString(),
+                        node.getPosition().toString(),
                         node.getChildren().size());
 
       for (MonteCarloTreeNode child : node.getChildren())
@@ -171,12 +172,15 @@ public class MonteCarloPlannerTools
       int agentMinY = (int) (agentState.getY() - radius);
       int agentMaxY = (int) (agentState.getY() + radius);
 
+      int radiusSquared = radius * radius;
+
       for (int x = agentMinX; x < agentMaxX; x++)
       {
          for (int y = agentMinY; y < agentMaxY; y++)
          {
             // if point is within 5 pixels circular radius
-            if (Math.sqrt(Math.pow(x - agentState.getX(), 2) + Math.pow(y - agentState.getY(), 2)) < radius)
+            if ((MathTools.square(x - agentState.getX()) + MathTools.square(y - agentState.getY()) < radiusSquared))
+            //if (Math.sqrt(Math.pow(x - agentState.getX(), 2) + Math.pow(y - agentState.getY(), 2)) < radius)
             {
                // check if inside the world boundaries
                if (x >= 0 && x <= world.getGridWidth() && y >= 0 && y <= world.getGridHeight())
