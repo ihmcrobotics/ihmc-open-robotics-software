@@ -5,9 +5,11 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D32;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_GRAY2RGB;
 
@@ -47,10 +49,10 @@ public class MonteCarloPlannerTools
       opencv_imgproc.cvtColor(world.getGrid(), gridColor, COLOR_GRAY2RGB);
    }
 
-   public static void plotRangeScan(ArrayList<Point2D> scanPoints, Mat gridColor)
+   public static void plotRangeScan(ArrayList<Point2DReadOnly> scanPoints, Mat gridColor)
    {
       // Plot lidar scan points as filled red cells
-      for (Point2D point : scanPoints)
+      for (Point2DReadOnly point : scanPoints)
       {
          if (point.getX32() < gridColor.rows() && point.getY32() < gridColor.cols() && point.getX32() >= 0 && point.getY32() >= 0)
          {
@@ -70,7 +72,7 @@ public class MonteCarloPlannerTools
                .put(new byte[] {100, 100, (byte) 255});
    }
 
-   public static void plotGoal(Point2D goal, int goalMargin, Mat gridColor)
+   public static void plotGoal(Point2DReadOnly goal, int goalMargin, Mat gridColor)
    {
       // Display a yellow square on goal of total width goal_margin
       int goalMinX = (int) (goal.getX32() - goalMargin);
@@ -108,56 +110,73 @@ public class MonteCarloPlannerTools
    }
 
 
-   public static boolean isPointOccupied(Point2D point, Mat grid)
+   public static boolean isPointOccupied(Point2DReadOnly point, Mat grid)
    {
       return grid.ptr((int) point.getX(), (int) point.getY()).get() == MonteCarloPlannerConstants.OCCUPIED;
    }
 
-   public static Point2D findClosestOccupiedPoint(Point2D startPoint, Point2D endPoint, Mat grid)
+   public static Point2DReadOnly findClosestOccupiedPoint(Point2DReadOnly startPoint, Point2DReadOnly endPoint, Mat grid, float maxRange)
    {
       // set closest_point to max, max
       Point2D closest_point = new Point2D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
       int samples = 10;
+      Point2D currentPoint = new Point2D();
+
+      List<Point2D> neighbors = new ArrayList<>();
+      for (int i = 0; i<8; i++) neighbors.add(new Point2D());
+
       for (int i = 0; i<samples; i++)
       {
          double alpha = i / (double) samples;
-         Point2D currentPoint = new Point2D();
+         currentPoint.setToZero();
          currentPoint.interpolate(startPoint, endPoint, alpha);
 
+         updateNeighborsList(neighbors, currentPoint);
+
          // check if a 3x3 square around the current point is occupied
-         if (isPointOccupied(currentPoint, grid) ||
-             isPointOccupied(new Point2D(currentPoint.getX() + 1, currentPoint.getY()), grid) ||
-             isPointOccupied(new Point2D(currentPoint.getX() - 1, currentPoint.getY()), grid) ||
-             isPointOccupied(new Point2D(currentPoint.getX(), currentPoint.getY() + 1), grid) ||
-             isPointOccupied(new Point2D(currentPoint.getX(), currentPoint.getY() - 1), grid) ||
-             isPointOccupied(new Point2D(currentPoint.getX() + 1, currentPoint.getY() + 1), grid) ||
-             isPointOccupied(new Point2D(currentPoint.getX() - 1, currentPoint.getY() - 1), grid) ||
-             isPointOccupied(new Point2D(currentPoint.getX() + 1, currentPoint.getY() - 1), grid) ||
-             isPointOccupied(new Point2D(currentPoint.getX() - 1, currentPoint.getY() + 1), grid))
+         if (isPointOccupied(currentPoint, grid) || neighbors.stream().anyMatch(neighbor -> isPointOccupied(neighbor, grid)))
          {
             // If the current point is occupied, return the closest point
-            return currentPoint;
+            closest_point.set(currentPoint);
+            break;
          }
+      }
+
+      if (closest_point.distance(startPoint) > maxRange)
+      {
+         closest_point.set(endPoint);
       }
 
       return closest_point;
    }
 
-   public static void updateGrid(MonteCarloPlanningWorld world, Point2D agent_state, int radius)
+   public static void updateNeighborsList(List<Point2D> neighborsToUpdate, Point2DReadOnly origin)
+   {
+      neighborsToUpdate.get(0).set(origin.getX() + 1, origin.getY());
+      neighborsToUpdate.get(1).set(origin.getX() - 1, origin.getY());
+      neighborsToUpdate.get(2).set(origin.getX(), origin.getY() + 1);
+      neighborsToUpdate.get(3).set(origin.getX(), origin.getY() - 1);
+      neighborsToUpdate.get(4).set(origin.getX() + 1, origin.getY() + 1);
+      neighborsToUpdate.get(5).set(origin.getX() - 1, origin.getY() - 1);
+      neighborsToUpdate.get(6).set(origin.getX() + 1, origin.getY() - 1);
+      neighborsToUpdate.get(7).set(origin.getX() - 1, origin.getY() + 1);
+   }
+
+   public static void updateGrid(MonteCarloPlanningWorld world, Point2DReadOnly agentState, int radius)
    {
       // set a circle of pixels around the agent to be 50
-      int agentMinX = (int) (agent_state.getX() - radius);
-      int agentMaxX = (int) (agent_state.getX() + radius);
-      int agentMinY = (int) (agent_state.getY() - radius);
-      int agentMaxY = (int) (agent_state.getY() + radius);
+      int agentMinX = (int) (agentState.getX() - radius);
+      int agentMaxX = (int) (agentState.getX() + radius);
+      int agentMinY = (int) (agentState.getY() - radius);
+      int agentMaxY = (int) (agentState.getY() + radius);
 
       for (int x = agentMinX; x < agentMaxX; x++)
       {
          for (int y = agentMinY; y < agentMaxY; y++)
          {
             // if point is within 5 pixels circular radius
-            if (Math.sqrt(Math.pow(x - agent_state.getX(), 2) + Math.pow(y - agent_state.getY(), 2)) < radius)
+            if (Math.sqrt(Math.pow(x - agentState.getX(), 2) + Math.pow(y - agentState.getY(), 2)) < radius)
             {
                // check if inside the world boundaries
                if (x >= 0 && x <= world.getGridWidth() && y >= 0 && y <= world.getGridHeight())

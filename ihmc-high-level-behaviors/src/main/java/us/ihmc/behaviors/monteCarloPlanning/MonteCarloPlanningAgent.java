@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.monteCarloPlanning;
 
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
 import java.util.ArrayList;
 
@@ -18,19 +19,27 @@ public class MonteCarloPlanningAgent
    private final Point2D previousPosition = new Point2D();
    private final Point2D averagePosition = new Point2D();
 
-   private ArrayList<Point2D> points = new ArrayList<>();
+   private final ArrayList<Point2DReadOnly> points = new ArrayList<>();
 
-   public MonteCarloPlanningAgent(Point2D position)
+   public MonteCarloPlanningAgent(Point2DReadOnly position)
    {
       this.position.set(position);
       this.previousPosition.set(position);
       this.averagePosition.set(position);
    }
 
-   public void changeStateTo(Point2D newState)
+   public void changeStateTo(Point2DReadOnly newState)
    {
       previousPosition.set(position);
       position.set(newState);
+
+      averagePosition.interpolate(position, 0.05);
+   }
+
+   public void changeStateTo(double xPosition, double yPosition)
+   {
+      previousPosition.set(xPosition, yPosition);
+      position.set(xPosition, yPosition);
 
       averagePosition.interpolate(position, 0.05);
    }
@@ -47,7 +56,7 @@ public class MonteCarloPlanningAgent
       points.addAll(measurements);
    }
 
-   public Point2D getPosition()
+   public Point2DReadOnly getPosition()
    {
       return position;
    }
@@ -57,17 +66,17 @@ public class MonteCarloPlanningAgent
       return rangeScanner;
    }
 
-   public Point2D getAveragePosition()
+   public Point2DReadOnly getAveragePosition()
    {
       return averagePosition;
    }
 
-   public Point2D getPreviousPosition()
+   public Point2DReadOnly getPreviousPosition()
    {
       return previousPosition;
    }
 
-   public ArrayList<Point2D> getScanPoints()
+   public ArrayList<Point2DReadOnly> getScanPoints()
    {
       return points;
    }

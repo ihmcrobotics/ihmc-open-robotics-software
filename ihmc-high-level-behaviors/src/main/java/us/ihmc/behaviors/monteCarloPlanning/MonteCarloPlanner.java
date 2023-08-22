@@ -2,6 +2,8 @@ package us.ihmc.behaviors.monteCarloPlanning;
 
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 
@@ -45,7 +47,7 @@ public class MonteCarloPlanner
     * and the agent. Updates the Monte Carlo Tree multiple times before selecting the best node
     * based on the Upper Confidence Bound.
     */
-   public Point2D plan()
+   public Point2DReadOnly plan()
    {
       if (root == null)
          return agent.getPosition();
@@ -83,7 +85,7 @@ public class MonteCarloPlanner
       return bestNode.getAgentState().getPosition();
    }
 
-   public void updateState(Point2D newState)
+   public void updateState(Point2DReadOnly newState)
    {
       updateWorld(newState);
       updateAgent(newState);
@@ -128,12 +130,12 @@ public class MonteCarloPlanner
       }
    }
 
-   public void updateWorld(Point2D newState)
+   public void updateWorld(Point2DReadOnly newState)
    {
       MonteCarloPlannerTools.updateGrid(world, newState, agent.getRangeScanner().getMaxRange());
    }
 
-   public void updateAgent(Point2D newState)
+   public void updateAgent(Point2DReadOnly newState)
    {
       agent.changeStateTo(newState);
    }
@@ -143,9 +145,9 @@ public class MonteCarloPlanner
     */
    public MonteCarloTreeNode expand(MonteCarloTreeNode node)
    {
-      ArrayList<Vector2D> availableActions = getAvailableActions(node, stepLength);
+      ArrayList<Vector2DReadOnly> availableActions = getAvailableActions(node, stepLength);
 
-      for (Vector2D action : availableActions)
+      for (Vector2DReadOnly action : availableActions)
       {
          Point2D newState = computeActionResult(node.getAgentState().getPosition(), action);
          MonteCarloTreeNode postNode = new MonteCarloTreeNode(newState, node, uniqueNodeId++);
@@ -159,9 +161,9 @@ public class MonteCarloPlanner
    /**
     * Back propagates the given score to the root node.
     */
-   public ArrayList<Vector2D> getAvailableActions(MonteCarloTreeNode node, int stepLength)
+   public ArrayList<Vector2DReadOnly> getAvailableActions(MonteCarloTreeNode node, int stepLength)
    {
-      ArrayList<Vector2D> availableActions = new ArrayList<>();
+      ArrayList<Vector2DReadOnly> availableActions = new ArrayList<>();
 
       Vector2D[] actions = new Vector2D[] {new Vector2D(0, stepLength),
                                            new Vector2D(0, -stepLength),
@@ -186,12 +188,12 @@ public class MonteCarloPlanner
    {
       double score = 0;
 
-      Point2D randomState = node.getAgentState().getPosition();
+      Point2DReadOnly randomState = node.getAgentState().getPosition();
 
       for (int i = 0; i < simulationIterations; i++)
       {
-         ArrayList<Vector2D> availableActions = getAvailableActions(node, stepLength);
-         Vector2D randomAction = availableActions.get((int) (Math.random() * availableActions.size()));
+         ArrayList<Vector2DReadOnly> availableActions = getAvailableActions(node, stepLength);
+         Vector2DReadOnly randomAction = availableActions.get((int) (Math.random() * availableActions.size()));
          randomState = computeActionResult(randomState, randomAction);
          score -= 1;
 
@@ -210,11 +212,11 @@ public class MonteCarloPlanner
             score -= 400;
          }
 
-         ArrayList<Point2D> scanPoints = agent.getRangeScanner().scan(randomState, world);
+         ArrayList<Point2DReadOnly> scanPoints = agent.getRangeScanner().scan(randomState, world);
 
          score += agent.getAveragePosition().distanceSquared(randomState);
 
-         for (Point2D point : scanPoints)
+         for (Point2DReadOnly point : scanPoints)
          {
             if (point.getX() >= 0 && point.getX() < world.getGridWidth() && point.getY() >= 0 && point.getY() < world.getGridHeight())
             {
@@ -249,20 +251,20 @@ public class MonteCarloPlanner
       }
    }
 
-   private static Point2D computeActionResult(Point2D state, Vector2D action)
+   private static Point2D computeActionResult(Point2DReadOnly state, Vector2DReadOnly action)
    {
       Point2D actionResult = new Point2D();
       actionResult.add(state, action);
       return actionResult;
    }
 
-   public boolean checkActionObstacles(Point2D state, Vector2D action, MonteCarloPlanningWorld world)
+   public boolean checkActionObstacles(Point2DReadOnly state, Vector2DReadOnly action, MonteCarloPlanningWorld world)
    {
       Point2D position = computeActionResult(state, action);
       return !MonteCarloPlannerTools.isPointOccupied(position, world.getGrid());
    }
 
-   public boolean checkActionBoundaries(Point2D state, Vector2D action, int gridWidth)
+   public boolean checkActionBoundaries(Point2DReadOnly state, Vector2DReadOnly action, int gridWidth)
    {
       Point2D position = new Point2D(state.getX() + action.getX(), state.getY() + action.getY());
 

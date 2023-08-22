@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.monteCarloPlanning;
 
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
 import java.util.ArrayList;
 
@@ -18,7 +19,7 @@ public class MonteCarloTreeNode
 
    float exploration_weight = 2.0f;
 
-   public MonteCarloTreeNode(Point2D state, MonteCarloTreeNode parent, int id)
+   public MonteCarloTreeNode(Point2DReadOnly state, MonteCarloTreeNode parent, int id)
    {
       this.id = id;
       this.parent = parent;
