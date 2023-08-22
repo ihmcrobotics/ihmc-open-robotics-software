@@ -17,8 +17,6 @@ public class MonteCarloTreeNode
    private int visits = 0;
    private float value = 0;
 
-   float exploration_weight = 2.0f;
-
    public MonteCarloTreeNode(Point2DReadOnly state, MonteCarloTreeNode parent, int id)
    {
       this.position = new Point2D(state);
@@ -35,7 +33,7 @@ public class MonteCarloTreeNode
          return;
       }
 
-      upperConfidenceBound = (value / visits) + (exploration_weight * (float) Math.sqrt(Math.log(parent.visits) / visits));
+      upperConfidenceBound = (value / visits) + (MonteCarloPlannerConstants.EXPLORATION_WEIGHT * (float) Math.sqrt(Math.log(parent.visits) / visits));
    }
 
    public float getUpperConfidenceBound()

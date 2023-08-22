@@ -16,4 +16,6 @@ public class MonteCarloPlannerConstants
    static byte OCCUPIED = 100;
 
    static float OCCUPANCY_MIN_THRESHOLD_HEIGHT_IN_METERS = 0.5f;
+
+   static final float EXPLORATION_WEIGHT = 2.0f;
 }

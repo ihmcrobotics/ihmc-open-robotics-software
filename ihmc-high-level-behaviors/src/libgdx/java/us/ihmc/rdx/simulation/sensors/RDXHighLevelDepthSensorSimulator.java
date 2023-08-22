@@ -54,9 +54,9 @@ import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.RDXPointCloudRenderer;
-import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -81,6 +81,7 @@ import java.nio.ByteOrder;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.function.LongSupplier;
 
@@ -173,7 +174,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final float[] color = new float[] {1.0f, 1.0f, 1.0f, 1.0f};
    private final ImInt segmentationDivisor = new ImInt(8);
-   private final ArrayList<Point3D> pointCloud = new ArrayList<>();
+   private final List<Point3D> pointCloud = new ArrayList<>();
    private int segmentIndex = 0;
    private OpenCLManager openCLManager;
    private _cl_program openCLProgram;
@@ -753,7 +754,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
       }
    }
 
-   public ArrayList<Point3D> getPointCloud()
+   public List<Point3D> getPointCloud()
    {
       pointCloud.clear();
       for (int i = 0; i < depthSensorSimulator.getNumberOfPoints()
