@@ -130,16 +130,10 @@ public class TerrainPerceptionProcessWithDriver
          LogTools.info("Creating terrain process with no collision provider.");
 
       this.robotConfigurationData = new RobotConfigurationData();
-
-      this.robotConfigurationData = new RobotConfigurationData();
-
       this.outputPeriod = UnitConversions.hertzToSeconds(31.0f);
-
       openCLManager = new OpenCLManager();
-
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_videopub");
       realtimeROS2Node.spin();
-
       realSenseHardwareManager = new RealSenseHardwareManager();
 
       LogTools.info("Creating Bytedeco Realsense Using: {}", serialNumber);

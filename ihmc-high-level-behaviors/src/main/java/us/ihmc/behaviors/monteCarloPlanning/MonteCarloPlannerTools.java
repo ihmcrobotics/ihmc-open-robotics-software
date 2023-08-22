@@ -118,8 +118,8 @@ public class MonteCarloPlannerTools
 
    public static Point2DReadOnly findClosestOccupiedPoint(Point2DReadOnly startPoint, Point2DReadOnly endPoint, Mat grid, float maxRange)
    {
-      // set closest_point to max, max
-      Point2D closest_point = new Point2D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+      // set closestPoint to max, max
+      Point2D closestPoint = new Point2D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
       int samples = 10;
       Point2D currentPoint = new Point2D();
@@ -139,17 +139,17 @@ public class MonteCarloPlannerTools
          if (isPointOccupied(currentPoint, grid) || neighbors.stream().anyMatch(neighbor -> isPointOccupied(neighbor, grid)))
          {
             // If the current point is occupied, return the closest point
-            closest_point.set(currentPoint);
+            closestPoint.set(currentPoint);
             break;
          }
       }
 
-      if (closest_point.distance(startPoint) > maxRange)
+      if (closestPoint.distance(startPoint) > maxRange)
       {
-         closest_point.set(endPoint);
+         closestPoint.set(endPoint);
       }
 
-      return closest_point;
+      return closestPoint;
    }
 
    public static void updateNeighborsList(List<Point2D> neighborsToUpdate, Point2DReadOnly origin)
