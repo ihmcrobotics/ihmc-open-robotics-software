@@ -68,6 +68,16 @@ public class MonteCarloTreeNode
       this.visits = visits;
    }
 
+   public void incrementVisits()
+   {
+      visits++;
+   }
+
+   public void addValue(float value)
+   {
+      this.value += value;
+   }
+
    public MonteCarloTreeNode getParent()
    {
       return parent;
