@@ -51,9 +51,9 @@ public class RDX3DPanelToolbar
 
             float sizeX = iconSize;
             float sizeY = iconSize;
-            float uv0X = button.getUVX0();
+            float uv0X = 0.0f;
             float uv0Y = 0.0f;
-            float uv1X = button.getUVX1();
+            float uv1X = 1.0f;
             float uv1Y = 1.0f;
             // We are making this background fully transparent currently
             float backgroundColorR = 1.0f;
