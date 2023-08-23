@@ -1,40 +1,43 @@
 package us.ihmc.behaviors.monteCarloPlanning;
 
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple4D.Vector4D32;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
 import java.util.ArrayList;
 
 public class RangeScanner
 {
-   private final int numPoints = 24;
-   private final int maxRange = 20;
+   private int numPoints;
+   private int maxRange;
+   private int maxRangeSquared;
 
-   public ArrayList<Point2D> scan(Point2D pos, World world)
+   public RangeScanner(int numPoints, int maxRange)
    {
-      ArrayList<Point2D> points = new ArrayList<>();
+      this.numPoints = numPoints;
+      this.maxRange = maxRange;
+      this.maxRangeSquared = maxRange * maxRange;
+   }
+
+   public ArrayList<Point2DReadOnly> scan(Point2DReadOnly origin, MonteCarloPlanningWorld world)
+   {
+      ArrayList<Point2DReadOnly> points = new ArrayList<>();
       for (int i = 0; i < numPoints; i++)
       {
-         float theta = i * 2 * (float) Math.PI / numPoints;
-         Point2D point = getScanPoint(pos, theta, world);
+         double theta = i * 2 * Math.PI / numPoints;
+         Point2DReadOnly point = getScanPoint(origin, theta, world);
          points.add(point);
       }
 
       return points;
    }
 
-   public Point2D getScanPoint(Point2D pos, float theta, World world)
+   public Point2DReadOnly getScanPoint(Point2DReadOnly position, double theta, MonteCarloPlanningWorld world)
    {
       // Get the end point of the ray
-      Point2D end_point = new Point2D(pos.getX32() + maxRange * (float) Math.cos(theta), pos.getY32() + maxRange * (float) Math.sin(theta));
+      Point2DReadOnly endPoint = new Point2D(position.getX() + maxRange * Math.cos(theta), position.getY() + maxRange * Math.sin(theta));
 
       // Get the intersection point with the obstacles
-      Point2D scanPoint = MonteCarloPlannerTools.findClosestIntersection(pos, end_point, world.getGrid());
-
-      if (scanPoint.distance(pos) > maxRange)
-      {
-         scanPoint = end_point;
-      }
+      Point2DReadOnly scanPoint = MonteCarloPlannerTools.findClosestOccupiedPoint(position, endPoint, world.getGrid(), maxRange);
 
       return scanPoint;
    }
@@ -47,5 +50,10 @@ public class RangeScanner
    public int getMaxRange()
    {
       return maxRange;
+   }
+
+   public int getMaxRangeSquared()
+   {
+      return maxRangeSquared;
    }
 }

@@ -22,9 +22,6 @@ import us.ihmc.tools.Timer;
  */
 public class RDX3DPanelToolbarButton
 {
-   private static final float ONE_THIRD = 1.0f / 3.0f;
-   private static final float TWO_THIRDS = 2.0f / 3.0f;
-
    private Runnable onPressed;
    private RDXIconTexture iconTexture;
    private String tooltipText = null;
@@ -57,24 +54,6 @@ public class RDX3DPanelToolbarButton
    {
       if (onPressed != null)
          onPressed.run();
-   }
-
-   public float getUVX0()
-   {
-      if (isHovered)
-         return ONE_THIRD;
-      if (isDown)
-         return TWO_THIRDS;
-      return 0.0f;
-   }
-
-   public float getUVX1()
-   {
-      if (isHovered)
-         return TWO_THIRDS;
-      if (isDown)
-         return 1.0f;
-      return ONE_THIRD;
    }
 
    public RDXIconTexture getIconTexture()

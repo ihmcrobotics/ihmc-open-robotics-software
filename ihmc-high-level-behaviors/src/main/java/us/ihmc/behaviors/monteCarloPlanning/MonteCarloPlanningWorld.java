@@ -7,7 +7,12 @@ import us.ihmc.euclid.tuple4D.Vector4D32;
 
 import java.util.ArrayList;
 
-public class World
+/**
+ * This class stores the state of the environment for the Monte Carlo Planning agent. Particularly it handles the occupancy, and
+ * exploration or coverage achieved so far by the agent. An image-based representation is used to access the 2D occupancy and coverage information
+ * for fast access as well as visualization and debugging.
+ */
+public class MonteCarloPlanningWorld
 {
    private final Mat grid;
    private final Point2D goal;
@@ -15,23 +20,16 @@ public class World
    private final int gridHeight;
    private final int gridWidth;
    private final int goalMargin;
+   private final int goalMarginSquared;
 
-   public World(int goalMargin, int gridHeight, int gridWidth)
+   public MonteCarloPlanningWorld(int goalMargin, int gridHeight, int gridWidth)
    {
       this.gridHeight = gridHeight;
       this.gridWidth = gridWidth;
       this.goalMargin = goalMargin;
       this.goal = new Point2D(30, 150);
       this.grid = new Mat(gridHeight, gridWidth, opencv_core.CV_8UC1);
-   }
-
-   public World(ArrayList<Vector4D32> obstacles, Point2D goal, int goalMargin, int gridHeight, int gridWidth)
-   {
-      this.grid = new Mat(gridHeight, gridWidth, opencv_core.CV_8UC1);
-      this.gridHeight = gridHeight;
-      this.gridWidth = gridWidth;
-      this.goal = goal;
-      this.goalMargin = goalMargin;
+      this.goalMarginSquared = goalMargin * goalMargin;
    }
 
    public void submitObstacles(ArrayList<Vector4D32> obstacles)
@@ -62,5 +60,10 @@ public class World
    public int getGoalMargin()
    {
       return goalMargin;
+   }
+
+   public int getGoalMarginSquared()
+   {
+      return goalMarginSquared;
    }
 }

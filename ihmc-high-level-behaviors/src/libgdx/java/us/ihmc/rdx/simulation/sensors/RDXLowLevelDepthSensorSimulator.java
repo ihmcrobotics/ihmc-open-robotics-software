@@ -57,6 +57,7 @@ public class RDXLowLevelDepthSensorSimulator
    private final int imageHeight;
    private final int numberOfPoints;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final CameraIntrinsics cameraIntrinsics = new CameraIntrinsics();
    private final ImFloat fieldOfViewY = new ImFloat();
    private final ImFloat focalLengthPixels = new ImFloat();
    private final ImFloat nearPlaneDistance = new ImFloat();
@@ -68,8 +69,6 @@ public class RDXLowLevelDepthSensorSimulator
    private final float noiseAmplitudeAtMinRange;
    private final float noiseAmplitudeAtMaxRange;
    private final float simulateL515Noise;
-
-   private final CameraIntrinsics cameraIntrinsics = new CameraIntrinsics();
 
    /** Simulated camera that observes the current GDX Scene **/
    private PerspectiveCamera camera;

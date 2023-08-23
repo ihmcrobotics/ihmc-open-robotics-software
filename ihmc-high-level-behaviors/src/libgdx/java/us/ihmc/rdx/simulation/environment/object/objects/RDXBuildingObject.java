@@ -23,12 +23,9 @@ public class RDXBuildingObject
    }
 
    private final ArrayList<Point3D> corners = new ArrayList<>();
-
    private final ArrayList<RDXSimpleObject> allObjects = new ArrayList<>();
-   private final HashMap<ComponentType, ArrayList<RDXSimpleObject>> components = new HashMap<>();
-
    private final RigidBodyTransform translationTransform = new RigidBodyTransform();
-
+   private final HashMap<ComponentType, ArrayList<RDXSimpleObject>> components = new HashMap<>();
    private final ColorAttribute highlightColor = ColorAttribute.createDiffuse(0.3f, 0.8f, 0.4f, 1.0f);
 
    private float height = 2.5f;
@@ -78,23 +75,19 @@ public class RDXBuildingObject
    {
       for (int i = 0; i < corners.size(); i++)
       {
-         Point3D corner = corners.get( (i + 1) % corners.size());
+         Point3D corner = corners.get((i + 1) % corners.size());
          Point3D previousCorner = corners.get(i % corners.size());
-         double yaw = EuclidGeometryTools.angleFromFirstToSecondVector2D(corner.getX() - previousCorner.getX(),
-                                                                         corner.getY() - previousCorner.getY(),
-                                                                         1,
-                                                                         0);
-         float length = (float)EuclidGeometryTools.distanceBetweenPoint3Ds(corner.getX(),
-                                                                           corner.getY(),
-                                                                           corner.getZ(),
-                                                                           previousCorner.getX(),
-                                                                           previousCorner.getY(),
-                                                                           previousCorner.getZ());
+         double yaw = EuclidGeometryTools.angleFromFirstToSecondVector2D(corner.getX() - previousCorner.getX(), corner.getY() - previousCorner.getY(), 1, 0);
+         float length = (float) EuclidGeometryTools.distanceBetweenPoint3Ds(corner.getX(),
+                                                                            corner.getY(),
+                                                                            corner.getZ(),
+                                                                            previousCorner.getX(),
+                                                                            previousCorner.getY(),
+                                                                            previousCorner.getZ());
          Point3D midPoint = new Point3D(0.0, 0.0, 0.0);
          midPoint.add(corner);
          midPoint.add(previousCorner);
          midPoint.scale(0.5);
-
 
          RDXSimpleObject objectToPlace = new RDXSimpleObject("BuildingWall_" + i);
          Model objectModel = RDXModelBuilder.createBox(length, 0.1f, height, Color.LIGHT_GRAY).model;

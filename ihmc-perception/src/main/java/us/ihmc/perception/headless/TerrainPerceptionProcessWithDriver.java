@@ -130,16 +130,10 @@ public class TerrainPerceptionProcessWithDriver
          LogTools.info("Creating terrain process with no collision provider.");
 
       this.robotConfigurationData = new RobotConfigurationData();
-
-      this.robotConfigurationData = new RobotConfigurationData();
-
       this.outputPeriod = UnitConversions.hertzToSeconds(31.0f);
-
       openCLManager = new OpenCLManager();
-
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_videopub");
       realtimeROS2Node.spin();
-
       realSenseHardwareManager = new RealSenseHardwareManager();
 
       LogTools.info("Creating Bytedeco Realsense Using: {}", serialNumber);
@@ -272,7 +266,8 @@ public class TerrainPerceptionProcessWithDriver
 
          if (parameters.getPublishDepth())
          {
-            executorService.submit(() -> {
+            executorService.submit(() ->
+            {
                OpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
                PerceptionMessageTools.setDepthIntrinsicsFromRealsense(realsense, depthImageMessage);
                CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
@@ -302,7 +297,8 @@ public class TerrainPerceptionProcessWithDriver
             // YUV I420 has 1.5 times the height of the image
             yuvColorImage = new Mat(realsense.getColorHeight() * 1.5, realsense.getColorWidth(), opencv_core.CV_8UC1); // deallocate later
 
-            executorService.submit(() -> {
+            executorService.submit(() ->
+            {
 
                OpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
 
@@ -361,9 +357,12 @@ public class TerrainPerceptionProcessWithDriver
       running = false;
 
       executorService.shutdownNow();
-      try {
+      try
+      {
          boolean result = executorService.awaitTermination(200, TimeUnit.MILLISECONDS);
-      } catch (InterruptedException e) {
+      }
+      catch (InterruptedException e)
+      {
          throw new RuntimeException(e);
       }
 

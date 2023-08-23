@@ -1,9 +1,11 @@
 package us.ihmc.rdx.perception;
 
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanner;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D32;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 
@@ -13,7 +15,7 @@ class MonteCarloPlanning2DSimulationDemo
 {
    public static void main(String[] args)
    {
-      ArrayList<Vector4D32> obstacles = new ArrayList<>();
+      ArrayList<Vector4D32> obstacles = new ArrayList<>(); // The obstacles here are represented as rectangles with (center_x, center_y, width, height)
 
       obstacles.add(new Vector4D32(20, 40, 10, 10));
       obstacles.add(new Vector4D32(90, 120, 16, 16));
@@ -37,11 +39,14 @@ class MonteCarloPlanning2DSimulationDemo
       int screenSize = 1400;
       boolean running = true;
       int i = 0;
+      Mat gridColor = new Mat();
+      Scalar zero = new Scalar(0, 0, 0, 0);
+
       while (running)
       {
          planner.scanWorld();
 
-         Mat gridColor = new Mat();
+         gridColor.put(zero);
          MonteCarloPlannerTools.plotWorld(planner.getWorld(), gridColor);
          MonteCarloPlannerTools.plotAgent(planner.getAgent(), gridColor);
          MonteCarloPlannerTools.plotRangeScan(planner.getAgent().getScanPoints(), gridColor);
@@ -49,8 +54,8 @@ class MonteCarloPlanning2DSimulationDemo
 
          PerceptionDebugTools.display("Grid", gridColor, 1, screenSize);
 
-         Point2D newState = planner.plan();
-         planner.execute(newState);
+         Point2DReadOnly newState = planner.plan();
+         planner.updateState(newState);
 
          i += 1;
       }

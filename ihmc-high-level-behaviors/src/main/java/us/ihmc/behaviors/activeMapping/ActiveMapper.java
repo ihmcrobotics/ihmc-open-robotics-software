@@ -6,11 +6,9 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanner;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
-import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -21,8 +19,9 @@ import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class ActiveMappingModule
+public class ActiveMapper
 {
    public enum ActiveMappingMode
    {
@@ -71,7 +70,7 @@ public class ActiveMappingModule
    private float gridResolution = 10.0f;
    private int offset = 70;
 
-   public ActiveMappingModule(DRCRobotModel robotModel, HumanoidReferenceFrames humanoidReferenceFrames)
+   public ActiveMapper(DRCRobotModel robotModel, HumanoidReferenceFrames humanoidReferenceFrames)
    {
       this.referenceFrames = humanoidReferenceFrames;
       this.robotModel = robotModel;
@@ -124,7 +123,7 @@ public class ActiveMappingModule
             goalPosition.set(ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getX(), gridResolution, offset),
                              ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getY(), gridResolution, offset));
 
-            monteCarloPlanner.execute(goalPositionIndices);
+            monteCarloPlanner.updateState(goalPositionIndices);
          }
 
          float yawRobotToGoal = (float) Math.atan2(goalPosition.getY() - robotLocation.getY(), goalPosition.getX() - robotLocation.getX());
@@ -209,9 +208,9 @@ public class ActiveMappingModule
       return monteCarloPlanner.getWorld().getGridHeight();
    }
 
-   public void submitRangeScan(ArrayList<Point3D> points)
+   public void submitRangeScan(List<Point3DReadOnly> points)
    {
-      monteCarloPlanner.addMeasurements(points);
+      monteCarloPlanner.submitMeasurements(points);
    }
 
    public MonteCarloPlanner getPlanner()

@@ -15,7 +15,7 @@ public class QuixStandUpStateMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "dbd40fd029df0775e92a4eb8d14dad4d3418c5bc6536a059ed2eac82d98b08a1";
+   		return "fe90825b15f5cb8bee52f59d825fc4168c49c5e42ec38cf6b547106eb14ef9e8";
    }
    
    @Override
