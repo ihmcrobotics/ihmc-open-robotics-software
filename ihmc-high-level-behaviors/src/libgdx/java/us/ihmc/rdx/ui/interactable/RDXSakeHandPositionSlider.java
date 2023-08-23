@@ -35,10 +35,10 @@ public class RDXSakeHandPositionSlider
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ROS2SyncedRobotModel syncedRobot;
    private final CommunicationHelper communicationHelper;
+   private final RobotSide handSide;
    private final String sliderName;
    private final float[] sliderValue = new float[1];
    private double valueFromRobot = Double.NaN;
-   private final RobotSide handSide;
    private final Throttler updateThrottler = new Throttler();
    private final Throttler sendThrottler = new Throttler();
 
