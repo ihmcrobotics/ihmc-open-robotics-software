@@ -383,7 +383,11 @@ public class RDXVRController extends RDXVRTrackedDevice
       }
    }
 
-   /** Updates the pick ray graphic. */
+   /**
+    * Updates the pick ray graphic. Only call this if you're not sumbitting a pick result.
+    * Submitting pick results is better if possible, because they will get sorted and this
+    * automatically called.
+    */
    public void setPickRayColliding(double distance)
    {
       Point3D offset = new Point3D(distance / 2.0, 0.0, 0.0);
