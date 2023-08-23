@@ -34,7 +34,7 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
 
    public OneDoFJointTrajectoryMessage()
    {
-      trajectory_points_ = new us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage> (50, new ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessagePubSubType());
+      trajectory_points_ = new us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage> (500, new ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessagePubSubType());
 
    }
 

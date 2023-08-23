@@ -15,7 +15,7 @@ public class ValkyrieHandFingerTrajectoryMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "27f2868a7ecbaeae24b343c80df6296edb2deed67fea53eed4311aa73ce7ee1a";
+   		return "a069248ef2d4f51842c23637acc262065a99a54c9251be1803d0b4e799f96005";
    }
    
    @Override
