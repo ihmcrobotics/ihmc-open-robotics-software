@@ -15,7 +15,7 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d0b6e3c1dd04ba3301c06a44f25cfe57bdce7660cbadeaaf8a6155f4a584de23";
+   		return "c577e6cf1f01bbba20c18381e50e31f9e2c92f93387c747f7ac7c443c3e2a381";
    }
    
    @Override

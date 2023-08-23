@@ -17,12 +17,30 @@ public class JointOfflineMessage extends Packet<JointOfflineMessage> implements 
             */
    public long sequence_id_;
    /**
-            * Hash-code of the joint which is offline. The hash-code is computed from OneDoFJoint#hashcode().
+            * Hash-code of the joints which are offline. Joints that are currently offline and not included in this list are re-enabled.
+            * The hash-code is computed from OneDoFJoint#hashcode().
             */
-   public int joint_offline_hash_code_;
+   public us.ihmc.idl.IDLSequence.Integer  joint_offline_hash_codes_;
+   /**
+            * Nominal left foot contact points (in sole frame) given the set of offline joints
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  nominal_left_foot_contact_points_2d_;
+   /**
+            * Nominal right foot contact points (in sole frame) given the set of offline joints
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  nominal_right_foot_contact_points_2d_;
+   /**
+            * The time to delay this command on the controller side before being executed.
+            */
+   public double execution_delay_time_;
 
    public JointOfflineMessage()
    {
+      joint_offline_hash_codes_ = new us.ihmc.idl.IDLSequence.Integer (6, "type_2");
+
+      nominal_left_foot_contact_points_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (4, new geometry_msgs.msg.dds.PointPubSubType());
+      nominal_right_foot_contact_points_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (4, new geometry_msgs.msg.dds.PointPubSubType());
+
    }
 
    public JointOfflineMessage(JointOfflineMessage other)
@@ -35,7 +53,10 @@ public class JointOfflineMessage extends Packet<JointOfflineMessage> implements 
    {
       sequence_id_ = other.sequence_id_;
 
-      joint_offline_hash_code_ = other.joint_offline_hash_code_;
+      joint_offline_hash_codes_.set(other.joint_offline_hash_codes_);
+      nominal_left_foot_contact_points_2d_.set(other.nominal_left_foot_contact_points_2d_);
+      nominal_right_foot_contact_points_2d_.set(other.nominal_right_foot_contact_points_2d_);
+      execution_delay_time_ = other.execution_delay_time_;
 
    }
 
@@ -54,19 +75,47 @@ public class JointOfflineMessage extends Packet<JointOfflineMessage> implements 
       return sequence_id_;
    }
 
+
    /**
-            * Hash-code of the joint which is offline. The hash-code is computed from OneDoFJoint#hashcode().
+            * Hash-code of the joints which are offline. Joints that are currently offline and not included in this list are re-enabled.
+            * The hash-code is computed from OneDoFJoint#hashcode().
             */
-   public void setJointOfflineHashCode(int joint_offline_hash_code)
+   public us.ihmc.idl.IDLSequence.Integer  getJointOfflineHashCodes()
    {
-      joint_offline_hash_code_ = joint_offline_hash_code;
+      return joint_offline_hash_codes_;
+   }
+
+
+   /**
+            * Nominal left foot contact points (in sole frame) given the set of offline joints
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getNominalLeftFootContactPoints2d()
+   {
+      return nominal_left_foot_contact_points_2d_;
+   }
+
+
+   /**
+            * Nominal right foot contact points (in sole frame) given the set of offline joints
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getNominalRightFootContactPoints2d()
+   {
+      return nominal_right_foot_contact_points_2d_;
+   }
+
+   /**
+            * The time to delay this command on the controller side before being executed.
+            */
+   public void setExecutionDelayTime(double execution_delay_time)
+   {
+      execution_delay_time_ = execution_delay_time;
    }
    /**
-            * Hash-code of the joint which is offline. The hash-code is computed from OneDoFJoint#hashcode().
+            * The time to delay this command on the controller side before being executed.
             */
-   public int getJointOfflineHashCode()
+   public double getExecutionDelayTime()
    {
-      return joint_offline_hash_code_;
+      return execution_delay_time_;
    }
 
 
@@ -89,7 +138,23 @@ public class JointOfflineMessage extends Packet<JointOfflineMessage> implements 
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.joint_offline_hash_code_, other.joint_offline_hash_code_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.joint_offline_hash_codes_, other.joint_offline_hash_codes_, epsilon)) return false;
+
+      if (this.nominal_left_foot_contact_points_2d_.size() != other.nominal_left_foot_contact_points_2d_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.nominal_left_foot_contact_points_2d_.size(); i++)
+         {  if (!this.nominal_left_foot_contact_points_2d_.get(i).epsilonEquals(other.nominal_left_foot_contact_points_2d_.get(i), epsilon)) return false; }
+      }
+
+      if (this.nominal_right_foot_contact_points_2d_.size() != other.nominal_right_foot_contact_points_2d_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.nominal_right_foot_contact_points_2d_.size(); i++)
+         {  if (!this.nominal_right_foot_contact_points_2d_.get(i).epsilonEquals(other.nominal_right_foot_contact_points_2d_.get(i), epsilon)) return false; }
+      }
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_delay_time_, other.execution_delay_time_, epsilon)) return false;
 
 
       return true;
@@ -106,7 +171,10 @@ public class JointOfflineMessage extends Packet<JointOfflineMessage> implements 
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if(this.joint_offline_hash_code_ != otherMyClass.joint_offline_hash_code_) return false;
+      if (!this.joint_offline_hash_codes_.equals(otherMyClass.joint_offline_hash_codes_)) return false;
+      if (!this.nominal_left_foot_contact_points_2d_.equals(otherMyClass.nominal_left_foot_contact_points_2d_)) return false;
+      if (!this.nominal_right_foot_contact_points_2d_.equals(otherMyClass.nominal_right_foot_contact_points_2d_)) return false;
+      if(this.execution_delay_time_ != otherMyClass.execution_delay_time_) return false;
 
 
       return true;
@@ -120,8 +188,14 @@ public class JointOfflineMessage extends Packet<JointOfflineMessage> implements 
       builder.append("JointOfflineMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("joint_offline_hash_code=");
-      builder.append(this.joint_offline_hash_code_);
+      builder.append("joint_offline_hash_codes=");
+      builder.append(this.joint_offline_hash_codes_);      builder.append(", ");
+      builder.append("nominal_left_foot_contact_points_2d=");
+      builder.append(this.nominal_left_foot_contact_points_2d_);      builder.append(", ");
+      builder.append("nominal_right_foot_contact_points_2d=");
+      builder.append(this.nominal_right_foot_contact_points_2d_);      builder.append(", ");
+      builder.append("execution_delay_time=");
+      builder.append(this.execution_delay_time_);
       builder.append("}");
       return builder.toString();
    }

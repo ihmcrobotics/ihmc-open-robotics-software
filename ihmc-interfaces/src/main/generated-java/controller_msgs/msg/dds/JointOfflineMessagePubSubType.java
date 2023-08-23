@@ -15,7 +15,7 @@ public class JointOfflineMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1474a9800c6f410e81f34f0e01aa8c6dd0cfdc21d8d07bef35b51fe5627f5f5c";
+   		return "a10a308c8168ad8a82499c21f64535e2e3dc3702eee3c1e26e7f05fb1bc8254c";
    }
    
    @Override
@@ -54,7 +54,15 @@ public class JointOfflineMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (6 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 4; ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 4; ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       return current_alignment - initial_alignment;
@@ -73,6 +81,20 @@ public class JointOfflineMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getJointOfflineHashCodes().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getNominalLeftFootContactPoints2d().size(); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getNominalLeftFootContactPoints2d().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getNominalRightFootContactPoints2d().size(); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getNominalRightFootContactPoints2d().get(i0), current_alignment);}
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
 
@@ -83,7 +105,19 @@ public class JointOfflineMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       cdr.write_type_4(data.getSequenceId());
 
-      cdr.write_type_2(data.getJointOfflineHashCode());
+      if(data.getJointOfflineHashCodes().size() <= 6)
+      cdr.write_type_e(data.getJointOfflineHashCodes());else
+          throw new RuntimeException("joint_offline_hash_codes field exceeds the maximum length");
+
+      if(data.getNominalLeftFootContactPoints2d().size() <= 4)
+      cdr.write_type_e(data.getNominalLeftFootContactPoints2d());else
+          throw new RuntimeException("nominal_left_foot_contact_points_2d field exceeds the maximum length");
+
+      if(data.getNominalRightFootContactPoints2d().size() <= 4)
+      cdr.write_type_e(data.getNominalRightFootContactPoints2d());else
+          throw new RuntimeException("nominal_right_foot_contact_points_2d field exceeds the maximum length");
+
+      cdr.write_type_6(data.getExecutionDelayTime());
 
    }
 
@@ -91,7 +125,10 @@ public class JointOfflineMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       data.setSequenceId(cdr.read_type_4());
       	
-      data.setJointOfflineHashCode(cdr.read_type_2());
+      cdr.read_type_e(data.getJointOfflineHashCodes());	
+      cdr.read_type_e(data.getNominalLeftFootContactPoints2d());	
+      cdr.read_type_e(data.getNominalRightFootContactPoints2d());	
+      data.setExecutionDelayTime(cdr.read_type_6());
       	
 
    }
@@ -100,14 +137,20 @@ public class JointOfflineMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    public final void serialize(controller_msgs.msg.dds.JointOfflineMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
-      ser.write_type_2("joint_offline_hash_code", data.getJointOfflineHashCode());
+      ser.write_type_e("joint_offline_hash_codes", data.getJointOfflineHashCodes());
+      ser.write_type_e("nominal_left_foot_contact_points_2d", data.getNominalLeftFootContactPoints2d());
+      ser.write_type_e("nominal_right_foot_contact_points_2d", data.getNominalRightFootContactPoints2d());
+      ser.write_type_6("execution_delay_time", data.getExecutionDelayTime());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.JointOfflineMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
-      data.setJointOfflineHashCode(ser.read_type_2("joint_offline_hash_code"));
+      ser.read_type_e("joint_offline_hash_codes", data.getJointOfflineHashCodes());
+      ser.read_type_e("nominal_left_foot_contact_points_2d", data.getNominalLeftFootContactPoints2d());
+      ser.read_type_e("nominal_right_foot_contact_points_2d", data.getNominalRightFootContactPoints2d());
+      data.setExecutionDelayTime(ser.read_type_6("execution_delay_time"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.JointOfflineMessage src, controller_msgs.msg.dds.JointOfflineMessage dest)

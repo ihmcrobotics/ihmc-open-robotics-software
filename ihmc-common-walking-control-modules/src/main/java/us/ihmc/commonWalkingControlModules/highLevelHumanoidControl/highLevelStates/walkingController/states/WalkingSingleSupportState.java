@@ -4,6 +4,7 @@ import org.apache.commons.math3.util.Precision;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.JointOfflineManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
@@ -54,6 +55,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final CenterOfMassHeightManager comHeightManager;
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
+   private final JointOfflineManager jointOfflineManager;
 
    private final YoBoolean finishSingleSupportWhenICPPlannerIsDone = new YoBoolean("finishSingleSupportWhenICPPlannerIsDone", registry);
    private final YoBoolean resubmitStepsInSwingEveryTick = new YoBoolean("resubmitStepsInSwingEveryTick", registry);
@@ -86,6 +88,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
+      jointOfflineManager = managerFactory.getOrCreateJointOfflineManager();
 
       finishSingleSupportWhenICPPlannerIsDone.set(walkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone());
       minimizeAngularMomentumRateZDuringSwing = new BooleanParameter("minimizeAngularMomentumRateZDuringSwing",
@@ -107,7 +110,14 @@ public class WalkingSingleSupportState extends SingleSupportState
    @Override
    public void doAction(double timeInState)
    {
-      if (resubmitStepsInSwingEveryTick.getBooleanValue())
+      boolean updatedNextFootstepContactPoints = false;
+
+      if (jointOfflineManager != null)
+      {
+         updatedNextFootstepContactPoints = jointOfflineManager.setUpcomingFootContactPoints(nextFootstep);
+      }
+
+      if (resubmitStepsInSwingEveryTick.getBooleanValue() || updatedNextFootstepContactPoints)
       {
          balanceManager.clearICPPlan();
          balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
@@ -154,6 +164,8 @@ public class WalkingSingleSupportState extends SingleSupportState
 
          updateHeightManager();
       }
+
+      // TODO look at setting upcoming contact state here based on joint going offline
 
       if (requestSwingSpeedUp || footstepIsBeingAdjusted)
       {
