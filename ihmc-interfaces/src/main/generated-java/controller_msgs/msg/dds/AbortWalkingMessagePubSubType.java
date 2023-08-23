@@ -15,7 +15,7 @@ public class AbortWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "654c39e4787ae4359dec5d73cae22411af530f915fb9364587e5506606957253";
+   		return "18d99d5bd41df9a50cc4b2256566ca889ec9817354efef545005b7b558bf4c2d";
    }
    
    @Override

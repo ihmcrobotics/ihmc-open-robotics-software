@@ -8,7 +8,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import us.ihmc.behaviors.activeMapping.ActiveMappingModule;
+import us.ihmc.behaviors.activeMapping.ActiveMapper;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
@@ -33,7 +33,7 @@ public class RDXActiveMappingUI implements RenderableProvider
 
    private PerceptionConfigurationParameters perceptionConfigurationParameters;
    private ImGuiRemoteROS2StoredPropertySetGroup remotePropertySets;
-   private ActiveMappingModule activeMappingModule;
+   private ActiveMapper activeMapper;
    private RDXPanel panel;
 
    private ArrayList<ModelInstance> gridCylinders = new ArrayList<>();
@@ -42,19 +42,19 @@ public class RDXActiveMappingUI implements RenderableProvider
 
    private PlanarRegionMap planarRegionMap;
 
-   public RDXActiveMappingUI(String name, PlanarRegionMap planarRegionMap, ActiveMappingModule mappingManager)
+   public RDXActiveMappingUI(String name, PlanarRegionMap planarRegionMap, ActiveMapper mappingManager)
    {
       this.planarRegionMap = planarRegionMap;
-      this.activeMappingModule = mappingManager;
+      this.activeMapper = mappingManager;
       panel = new RDXPanel(name, this::renderImGuiWidgets);
 
-      for (int i = 0; i < activeMappingModule.getGridSize(); i++)
+      for (int i = 0; i < activeMapper.getGridSize(); i++)
       {
-         for (int j = 0; j < activeMappingModule.getGridSize(); j++)
+         for (int j = 0; j < activeMapper.getGridSize(); j++)
          {
             ModelInstance cylinderModel = RDXModelBuilder.createCylinder(0.02f, 0.03f, Color.BLUE);
-            cylinderModel.transform.setToTranslation(activeMappingModule.getGridOrigin().getX32() + i * activeMappingModule.getGridResolution(),
-                                                     activeMappingModule.getGridOrigin().getY32() + j * activeMappingModule.getGridResolution(),
+            cylinderModel.transform.setToTranslation(activeMapper.getGridOrigin().getX32() + i * activeMapper.getGridResolution(),
+                                                     activeMapper.getGridOrigin().getY32() + j * activeMapper.getGridResolution(),
                                                      0.0f);
             gridCylinders.add(cylinderModel);
          }
@@ -91,8 +91,8 @@ public class RDXActiveMappingUI implements RenderableProvider
          if (ImGui.button("Calculate Footstep Plan") || ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
          {
             LogTools.info("Triggered footstep plan calculation");
-            activeMappingModule.updatePlan(planarRegionMap);
-            activeMappingModule.setPlanAvailable(true);
+            activeMapper.updatePlan(planarRegionMap);
+            activeMapper.setPlanAvailable(true);
          }
       }
    }

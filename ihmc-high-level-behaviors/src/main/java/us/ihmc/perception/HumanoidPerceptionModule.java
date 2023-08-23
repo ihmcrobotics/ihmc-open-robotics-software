@@ -6,10 +6,10 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.activeMapping.ActiveMappingRemoteProcess;
-import us.ihmc.behaviors.monteCarloPlanning.Agent;
+import us.ihmc.behaviors.activeMapping.ActiveMappingRemoteTask;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
-import us.ihmc.behaviors.monteCarloPlanning.World;
+import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanningAgent;
+import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanningWorld;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -24,7 +24,7 @@ import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
-import us.ihmc.perception.headless.LocalizationAndMappingProcess;
+import us.ihmc.perception.headless.LocalizationAndMappingTask;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
@@ -39,7 +39,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -48,17 +48,20 @@ public class HumanoidPerceptionModule
 {
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
 
-   private BytedecoImage realsenseDepthImage;
+   /* For displaying occupancy grid from the active mapping module. */
    private Mat gridColor = new Mat();
 
-   private World world;
-   private Agent agent;
+   /* For storing world and agent states when active mapping module is disabled */
+   private MonteCarloPlanningWorld world;
+   private MonteCarloPlanningAgent agent;
+
+   private BytedecoImage realsenseDepthImage;
 
    private final FramePose3D cameraPose = new FramePose3D();
 
    private OpenCLManager openCLManager;
-   private LocalizationAndMappingProcess localizationAndMappingProcess;
-   private ActiveMappingRemoteProcess activeMappingRemoteProcess;
+   private LocalizationAndMappingTask localizationAndMappingTask;
+   private ActiveMappingRemoteTask activeMappingRemoteThread;
    private RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor;
    private RapidHeightMapExtractor rapidHeightMapExtractor;
    private CollidingScanRegionFilter collidingScanRegionFilter;
@@ -72,8 +75,6 @@ public class HumanoidPerceptionModule
    private RobotConfigurationData robotConfigurationData;
 
    private PerceptionConfigurationParameters perceptionConfigurationParameters;
-
-   boolean waitIfNecessary = false; // dangerous if true! need a timeout
 
    public HumanoidPerceptionModule(OpenCLManager openCLManager)
    {
@@ -99,23 +100,23 @@ public class HumanoidPerceptionModule
    public void updateTerrain(ROS2Helper ros2Helper, Mat depthImage, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame,
                              boolean rapidRegionsEnabled, boolean mappingEnabled, boolean heightMapEnabled)
    {
-      if (localizationAndMappingProcess != null)
-         localizationAndMappingProcess.setEnableLiveMode(mappingEnabled);
+      if (localizationAndMappingTask != null)
+         localizationAndMappingTask.setEnableLiveMode(mappingEnabled);
 
       if (rapidRegionsEnabled)
       {
          executorService.submit(() ->
-                                {
-                                    updatePlanarRegions(ros2Helper, depthImage, cameraFrame);
-                                });
+           {
+               updatePlanarRegions(ros2Helper, depthImage, cameraFrame);
+           });
       }
 
       if (heightMapEnabled)
       {
          executorService.submit(() ->
-                                {
-                                   updateRapidHeightMap(ros2Helper, depthImage, cameraFrame, cameraZUpFrame);
-                                });
+           {
+              updateRapidHeightMap(ros2Helper, depthImage, cameraFrame, cameraZUpFrame);
+           });
       }
    }
 
@@ -142,16 +143,10 @@ public class HumanoidPerceptionModule
       rapidHeightMapExtractor.update(sensorToWorld, sensorToGround, 0);
    }
 
-   public void updateStructural(ROS2Helper ros2Helper, ArrayList<Point3D> pointCloud, ReferenceFrame sensorFrame, float thresholdHeight, boolean display)
+   public void updateStructural(ROS2Helper ros2Helper, List<Point3D> pointCloud, ReferenceFrame sensorFrame, float thresholdHeight, boolean display)
    {
-      //this.activeMappingRemoteProcess.getActiveMappingModule().submitRangeScan(pointCloud);
-
-      //Instant acquisitionTime = Instant.now();
-      //
       cameraPose.setToZero(sensorFrame);
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
-      //
-      //           occupancyGrid.put(new Scalar(0));
 
       extractOccupancyGrid(pointCloud,
                            world.getGrid(),
@@ -160,8 +155,9 @@ public class HumanoidPerceptionModule
                            perceptionConfigurationParameters.getOccupancyGridResolution(),
                            70);
 
+      // TODO: Publish the occupancy grid as ImageMessage using the ROS2Helper.
 
-      if (activeMappingRemoteProcess == null)
+      if (activeMappingRemoteThread == null)
       {
          int gridX = ActiveMappingTools.getIndexFromCoordinates(sensorFrame.getTransformToWorldFrame().getTranslationX(),
                                                                 perceptionConfigurationParameters.getOccupancyGridResolution(),
@@ -170,8 +166,7 @@ public class HumanoidPerceptionModule
                                                                 perceptionConfigurationParameters.getOccupancyGridResolution(),
                                                                 70);
 
-         agent.getPosition().set(gridX, gridY);
-
+         agent.changeStateTo(gridX, gridY);
          agent.measure(world);
 
          if (display)
@@ -215,19 +210,19 @@ public class HumanoidPerceptionModule
 
    public void initializeOccupancyGrid(int depthHeight, int depthWidth, int gridHeight, int gridWidth)
    {
-      if (activeMappingRemoteProcess != null)
+      if (activeMappingRemoteThread != null)
       {
          LogTools.warn("Initializing Occupancy Grid from Active Mapping Remote Process");
 
-         this.world = activeMappingRemoteProcess.getActiveMappingModule().getPlanner().getWorld();
-         this.agent = activeMappingRemoteProcess.getActiveMappingModule().getPlanner().getAgent();
+         this.world = activeMappingRemoteThread.getActiveMappingModule().getPlanner().getWorld();
+         this.agent = activeMappingRemoteThread.getActiveMappingModule().getPlanner().getAgent();
       }
       else
       {
          LogTools.warn("Initializing Occupancy Grid from Scratch");
 
-         this.world = new World(0, gridHeight, gridWidth);
-         this.agent = new Agent(new Point2D());
+         this.world = new MonteCarloPlanningWorld(0, gridHeight, gridWidth);
+         this.agent = new MonteCarloPlanningAgent(new Point2D());
       }
    }
 
@@ -239,34 +234,34 @@ public class HumanoidPerceptionModule
       this.collidingScanRegionFilter = PerceptionFilterTools.createHumanoidShinCollisionFilter(fullRobotModel, collisionBoxProvider);
    }
 
-   public void initializeLocalizationAndMappingProcess(ROS2SyncedRobotModel syncedRobot, String robotName, ROS2Node ros2Node, boolean smoothing)
+   public void initializeLocalizationAndMappingThread(ROS2SyncedRobotModel syncedRobot, String robotName, ROS2Node ros2Node, boolean smoothing)
    {
       LogTools.info("Initializing Localization and Mapping Process (Smoothing: {})", smoothing);
-      localizationAndMappingProcess = new LocalizationAndMappingProcess(robotName,
-                                                                        PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
-                                                                        PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
-                                                                        ros2Node,
-                                                                        syncedRobot.getReferenceFrames(),
-                                                                        () ->
-                                                                        {
-                                                                        },
-                                                                        smoothing);
-   }
-
-   public void initializeActiveMappingProcess(String robotName, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, ROS2Node ros2Node)
-   {
-      LogTools.info("Initializing Active Mapping Process");
-      activeMappingRemoteProcess = new ActiveMappingRemoteProcess(robotName,
-                                                                  robotModel,
-                                                                  syncedRobot,
+      localizationAndMappingTask = new LocalizationAndMappingTask(robotName,
                                                                   PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
                                                                   PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
                                                                   ros2Node,
                                                                   syncedRobot.getReferenceFrames(),
                                                                   () ->
+                                                                        {
+                                                                        },
+                                                                  smoothing);
+   }
+
+   public void initializeActiveMappingProcess(String robotName, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, ROS2Node ros2Node)
+   {
+      LogTools.info("Initializing Active Mapping Process");
+      activeMappingRemoteThread = new ActiveMappingRemoteTask(robotName,
+                                                              robotModel,
+                                                              syncedRobot,
+                                                              PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
+                                                              PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
+                                                              ros2Node,
+                                                              syncedRobot.getReferenceFrames(),
+                                                              () ->
                                                                   {
                                                                   },
-                                                                  true);
+                                                              true);
    }
 
    public void extractFramePlanarRegionsList(RapidPlanarRegionsExtractor extractor,
@@ -284,7 +279,7 @@ public class HumanoidPerceptionModule
       worldRegions.applyTransform(cameraFrame.getTransformToWorldFrame());
    }
 
-   public void extractOccupancyGrid(ArrayList<Point3D> pointCloud,
+   public void extractOccupancyGrid(List<Point3D> pointCloud,
                                     Mat occupancyGrid,
                                     RigidBodyTransform sensorToWorldTransform,
                                     float thresholdHeight,
@@ -349,7 +344,6 @@ public class HumanoidPerceptionModule
       try
       {
          boolean result = executorService.awaitTermination(1, TimeUnit.SECONDS);
-         Thread.sleep(1000);
       }
       catch (InterruptedException e)
       {
@@ -359,11 +353,11 @@ public class HumanoidPerceptionModule
       if (rapidPlanarRegionsExtractor != null)
          rapidPlanarRegionsExtractor.destroy();
 
-      if (localizationAndMappingProcess != null)
-         localizationAndMappingProcess.destroy();
+      if (localizationAndMappingTask != null)
+         localizationAndMappingTask.destroy();
 
-      if (activeMappingRemoteProcess != null)
-         activeMappingRemoteProcess.destroy();
+      if (activeMappingRemoteThread != null)
+         activeMappingRemoteThread.destroy();
    }
 
    public RapidHeightMapExtractor getRapidHeightMapExtractor()

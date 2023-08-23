@@ -10,7 +10,7 @@
     "lowerBound" : 1,
     "upperBound" : 10
   },
-  "Occupancy Grid Resolution" : {
+  "Occupancy grid resolution" : {
     "value" : 10,
     "lowerBound" : 1,
     "upperBound" : 100

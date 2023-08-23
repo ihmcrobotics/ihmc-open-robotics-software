@@ -183,7 +183,7 @@ public class PlanarRegionMapTest
       PerceptionDebugTools.printPlanarRegionsListVertices("List Two", planarRegionsListTwo, true);
       PerceptionDebugTools.printPlanarRegionsListVertices("List Three", planarRegionsListThree, true);
 
-      PlanarRegionMap planarRegionMap = new PlanarRegionMap();
+      PlanarRegionMap planarRegionMap = new PlanarRegionMap(true);
 
       planarRegionMap.setInitialSensorPose(sensorToWorldOne);
       planarRegionMap.registerRegions(planarRegionsListOne, sensorToWorldOne, null);

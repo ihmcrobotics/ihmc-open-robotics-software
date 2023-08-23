@@ -47,7 +47,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * 4. Perform factor graph optimization
  * 5. Publish optimized results for both map and localization estimates
  */
-public class LocalizationAndMappingProcess
+public class LocalizationAndMappingTask
 {
    private final static long SCHEDULED_UPDATE_PERIOD_MS = 100;
 
@@ -89,13 +89,13 @@ public class LocalizationAndMappingProcess
 
    private final Notification shouldUpdateMap = new Notification();
 
-   public LocalizationAndMappingProcess(String simpleRobotName,
-                                        ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic,
-                                        ROS2Topic<FramePlanarRegionsListMessage> structuralRegionsTopic,
-                                        ROS2Node ros2Node,
-                                        HumanoidReferenceFrames referenceFrames,
-                                        Runnable referenceFramesUpdater,
-                                        boolean smoothing)
+   public LocalizationAndMappingTask(String simpleRobotName,
+                                     ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic,
+                                     ROS2Topic<FramePlanarRegionsListMessage> structuralRegionsTopic,
+                                     ROS2Node ros2Node,
+                                     HumanoidReferenceFrames referenceFrames,
+                                     Runnable referenceFramesUpdater,
+                                     boolean smoothing)
    {
       this.referenceFramesUpdater = referenceFramesUpdater;
       this.terrainRegionsTopic = terrainRegionsTopic;
@@ -149,8 +149,6 @@ public class LocalizationAndMappingProcess
    {
       if (latestDepthMessage.get() == null)
          latestDepthMessage.set(depthMessage);
-
-      executorService.submit(this::updateOccupancyGrid);
    }
 
    public void onPlanarRegionsReceived(FramePlanarRegionsListMessage message)
@@ -159,11 +157,6 @@ public class LocalizationAndMappingProcess
          latestIncomingRegions.set(message);
 
       executorService.submit(this::updateMap);
-   }
-
-   public synchronized void updateOccupancyGrid()
-   {
-      //LogTools.debug("Ouster Depth Received!");
    }
 
    public synchronized void updateMap()
@@ -267,6 +260,7 @@ public class LocalizationAndMappingProcess
       if (updateMapFuture != null)
          updateMapFuture.cancel(true);
       planarRegionMap.destroy();
+      executorService.shutdown();
    }
 
    public void setEnableLiveMode(boolean enableLiveMode)

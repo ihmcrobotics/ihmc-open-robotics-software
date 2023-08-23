@@ -396,6 +396,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       centerOfPressureCommandCalculator.computeCenterOfPressureCommand(desiredCoP,
                                                                        contactStateCommands,
                                                                        bipedSupportPolygons.getFootPolygonsInSoleFrame());
+      centerOfPressureCommand.set(centerOfPressureCommandCalculator.getCenterOfPressureCommand());
 
       return success;
    }
@@ -455,6 +456,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
             break;
          default:
             throw new IllegalArgumentException("This command type has not been set up for height control.");
+
       }
    }
 

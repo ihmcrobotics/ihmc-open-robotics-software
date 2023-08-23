@@ -1,8 +1,6 @@
 package us.ihmc.behaviors.tools.walkingController;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -26,11 +24,18 @@ public class WalkingFootstepTracker
    private final ArrayList<FootstepDataMessage> footsteps = new ArrayList<>();
    private volatile int completedIndex = 0;
    private volatile int totalStepsCompleted = 0;
+   private volatile int totalIncompleteFootsteps = 0;
 
    public WalkingFootstepTracker(ROS2NodeInterface ros2Node, String robotName)
    {
       new IHMCROS2Callback<>(ros2Node, getTopic(FootstepDataListMessage.class, robotName), this::interceptFootstepDataListMessage);
       new IHMCROS2Callback<>(ros2Node, getTopic(FootstepStatusMessage.class, robotName), this::acceptFootstepStatusMessage);
+      new IHMCROS2Callback<>(ros2Node, getTopic(FootstepQueueStatusMessage.class, robotName), this::acceptFootstepQueueStatusMessage);
+   }
+
+   private void acceptFootstepQueueStatusMessage(FootstepQueueStatusMessage footstepQueueStatusMessage)
+   {
+      totalIncompleteFootsteps = footstepQueueStatusMessage.getQueuedFootstepList().size();
    }
 
    private void acceptFootstepStatusMessage(FootstepStatusMessage footstepStatusMessage)
@@ -102,17 +107,7 @@ public class WalkingFootstepTracker
 
    public int getNumberOfIncompleteFootsteps()
    {
-      int numberOfIncompleteFootsteps;
-      synchronized (this)
-      {
-         numberOfIncompleteFootsteps = footsteps.size() - completedIndex;
-      }
-      return numberOfIncompleteFootsteps;
-   }
-
-   public int getNumberOfCompletedFootsteps()
-   {
-      return completedIndex;
+      return totalIncompleteFootsteps;
    }
 
    public void reset()

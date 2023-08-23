@@ -1,13 +1,14 @@
 package us.ihmc.behaviors.monteCarloPlanning;
 
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MonteCarloTreeNode
 {
-   private final Agent agent;
-   private World world;
+   private Point2D position;
    private MonteCarloTreeNode parent;
    private ArrayList<MonteCarloTreeNode> children;
 
@@ -16,13 +17,11 @@ public class MonteCarloTreeNode
    private int visits = 0;
    private float value = 0;
 
-   float exploration_weight = 2.0f;
-
-   public MonteCarloTreeNode(Point2D state, MonteCarloTreeNode parent, int id)
+   public MonteCarloTreeNode(Point2DReadOnly state, MonteCarloTreeNode parent, int id)
    {
+      this.position = new Point2D(state);
       this.id = id;
       this.parent = parent;
-      this.agent = new Agent(state);
       children = new ArrayList<>();
    }
 
@@ -34,7 +33,7 @@ public class MonteCarloTreeNode
          return;
       }
 
-      upperConfidenceBound = (value / visits) + (exploration_weight * (float) Math.sqrt(Math.log(parent.visits) / visits));
+      upperConfidenceBound = (value / visits) + (MonteCarloPlannerConstants.EXPLORATION_WEIGHT * (float) Math.sqrt(Math.log(parent.visits) / visits));
    }
 
    public float getUpperConfidenceBound()
@@ -42,19 +41,9 @@ public class MonteCarloTreeNode
       return upperConfidenceBound;
    }
 
-   public ArrayList<MonteCarloTreeNode> getChildren()
+   public List<MonteCarloTreeNode> getChildren()
    {
       return children;
-   }
-
-   public Agent getAgentState()
-   {
-      return agent;
-   }
-
-   public World getWorldState()
-   {
-      return world;
    }
 
    public int getVisits()
@@ -77,9 +66,14 @@ public class MonteCarloTreeNode
       this.visits = visits;
    }
 
-   public void setWorldState(World world)
+   public void incrementVisits()
    {
-      this.world = world;
+      visits++;
+   }
+
+   public void addValue(float value)
+   {
+      this.value += value;
    }
 
    public MonteCarloTreeNode getParent()
@@ -90,6 +84,11 @@ public class MonteCarloTreeNode
    public int getId()
    {
       return id;
+   }
+
+   public Point2D getPosition()
+   {
+      return position;
    }
 
 }
