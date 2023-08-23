@@ -118,7 +118,7 @@ public class RDXAffordanceEditorUI
                                                      handTransformsToWorld,
                                                      handPoses,
                                                      objectBuilder.getSelectedObject().getTransformToWorld(),
-                                                     activeSide[0],
+                                                     activeSide,
                                                      activeMenu,
                                                      new ArrayList<>(Arrays.asList(new Color(0xFFE4B5FF),
                                                                                    new Color(0xFF8C00FF),
@@ -138,7 +138,7 @@ public class RDXAffordanceEditorUI
                                                       handTransformsToWorld,
                                                       handPoses,
                                                       objectBuilder.getSelectedObject().getTransformToWorld(),
-                                                      activeSide[0],
+                                                      activeSide,
                                                       activeMenu,
                                                       new ArrayList<>(Arrays.asList(new Color(0xD8BFD8FF),
                                                                                     new Color(0xBA55D3FF),
@@ -213,8 +213,8 @@ public class RDXAffordanceEditorUI
       }
 
       graspFrame.update();
-//      preGraspFrames.update();
-//      postGraspFrames.update();
+      preGraspFrames.update();
+      postGraspFrames.update();
 
       if (handPoses.containsKey(activeSide[0]))
          gripperClosure[0] = interactableHands.get(activeSide[0]).getGripperClosure();
@@ -222,7 +222,7 @@ public class RDXAffordanceEditorUI
 
    public void renderImGuiWidgets()
    {
-      ImGui.text("HAND MENU");
+      ImGui.text("HANDS MENU");
       ColorDefinition handColor = handColors.get(RobotSide.LEFT);
       ImGui.pushStyleColor(ImGuiCol.CheckMark , (float) handColor.getRed(), (float) handColor.getGreen(), (float) handColor.getBlue(),
                            (float) handColor.getAlpha());
@@ -354,7 +354,7 @@ public class RDXAffordanceEditorUI
                      activeMenu[0] = RDXActiveAffordanceMenu.GRASP;
                      graspFrame.selectFrame();
                   }
-                  else
+                  else if (preGraspFrames.getNumberOfFrames() > 0)
                   {
                      activeMenu[0] = RDXActiveAffordanceMenu.PRE_GRASP;
                      preGraspFrames.setSelectedIndexToSize();
@@ -390,7 +390,7 @@ public class RDXAffordanceEditorUI
                      activeMenu[0] = RDXActiveAffordanceMenu.GRASP;
                      graspFrame.selectFrame();
                   }
-                  else
+                  else if (postGraspFrames.getNumberOfFrames() > 0)
                   {
                      activeMenu[0] = RDXActiveAffordanceMenu.POST_GRASP;
                      postGraspFrames.resetSelectedIndex();
@@ -450,7 +450,7 @@ public class RDXAffordanceEditorUI
       for (RobotSide side : handPoses.keySet())
       {
          handTransformsToWorld.get(side).setToZero();
-         handTransformsToWorld.get(side).getTranslation().set(-0.5, activeSide[0].negateIfRightSide(0.2), 0);
+         handTransformsToWorld.get(side).getTranslation().set(-0.5, side.negateIfRightSide(0.2), 0);
          handTransformsToWorld.get(side).getRotation().setYawPitchRoll(0.0, Math.toRadians(-90.0), 0.0);
          interactableHands.get(side).closeGripper();
       }

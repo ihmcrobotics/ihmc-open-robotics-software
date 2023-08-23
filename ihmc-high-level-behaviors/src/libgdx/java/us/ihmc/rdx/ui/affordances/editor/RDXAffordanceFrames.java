@@ -18,26 +18,27 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class RDXAffordanceFrames
 {
-   private final SideDependentList<ArrayList<FramePose3D>> poses = new SideDependentList<>();
-   private final SideDependentList<ArrayList<PoseReferenceFrame>> poseFrames = new SideDependentList<>();
-   private final SideDependentList<ArrayList<RDXReferenceFrameGraphic>> frameGraphics = new SideDependentList<>();
-   private final ArrayList<Integer> poseIndices = new ArrayList<>();
+   private final SideDependentList<List<FramePose3D>> poses = new SideDependentList<>();
+   private final SideDependentList<List<PoseReferenceFrame>> poseFrames = new SideDependentList<>();
+   private final SideDependentList<List<RDXReferenceFrameGraphic>> frameGraphics = new SideDependentList<>();
+   private final List<Integer> poseIndices = new ArrayList<>();
    private int index = 0;
-   private final ArrayList<Color> colors;
+   private final List<Color> colors;
    private SideDependentList<Integer> colorIndex = new SideDependentList<Integer>();
    public final SideDependentList<RDXInteractableSakeGripper> interactableHands;
    private final SideDependentList<FramePose3D> handPoses;
-   private final SideDependentList<ArrayList<HandConfiguration>> handConfigurations = new SideDependentList<>();
+   private final SideDependentList<List<HandConfiguration>> handConfigurations = new SideDependentList<>();
    private HandConfiguration selectedFrameConfiguration;
    private int selectedIndex = -1;
    private final SideDependentList<RigidBodyTransform> handTransformsToWorld;
    private final RigidBodyTransform objectTransformToWorld;
-   private final ArrayList<RigidBodyTransform> objectTransforms = new ArrayList<>();
+   private final List<RigidBodyTransform> objectTransforms = new ArrayList<>();
    boolean changedColor = false;
-   private RobotSide activeSide;
+   private RobotSide[] activeSide;
    private RDXActiveAffordanceMenu[] activeMenu;
    private final RDXActiveAffordanceMenu menu;
 
@@ -45,7 +46,7 @@ public class RDXAffordanceFrames
                               SideDependentList<RigidBodyTransform> handTransformsToWorld,
                               SideDependentList<FramePose3D> handPoses,
                               RigidBodyTransform objectTransformToWorld,
-                              RobotSide activeSide,
+                              RobotSide[] activeSide,
                               RDXActiveAffordanceMenu[] activeMenu,
                               ArrayList<Color> colors)
    {
@@ -72,11 +73,12 @@ public class RDXAffordanceFrames
    {
       for (RobotSide side : handPoses.keySet())
       {
-         for (int i = 0; i < poses.size(); ++i)
+         for (int i = 0; i < poses.get(side).size(); ++i)
          {
             poses.get(side).set(i, new FramePose3D(poseFrames.get(side).get(i)));
             poses.get(side).get(i).changeFrame(ReferenceFrame.getWorldFrame());
-            frameGraphics.get(side).get(i).updateFromFramePose(poses.get(side).get(i));
+            if (frameGraphics.get(side).get(i) != null)
+               frameGraphics.get(side).get(i).updateFromFramePose(poses.get(side).get(i));
          }
       }
    }
@@ -86,20 +88,22 @@ public class RDXAffordanceFrames
       if (ImGui.button(labels.get("ADD") + "##" + lableId))
       {
          activeMenu[0] = this.menu;
-         addFrame(handPoses.get(activeSide));
+         addFrame(handPoses.get(activeSide[0]));
          // add a spot for the object transform associated with this frame
          objectTransforms.add(new RigidBodyTransform(objectTransformToWorld));
-         // add an empty spot for the hand configuration
-         handConfigurations.get(activeSide).add(null);
          // select the frame you've just added
          selectedIndex = poseIndices.size() - 1;
       }
       ImGui.sameLine();
       if (ImGui.button(labels.get("SET") + "##" + lableId) && activeMenu[0].equals(this.menu))
       {
-         poseFrames.get(activeSide).get(selectedIndex).setPoseAndUpdate(handPoses.get(activeSide));
-         poses.get(activeSide).set(selectedIndex, handPoses.get(activeSide));
+         poseFrames.get(activeSide[0]).get(selectedIndex).setPoseAndUpdate(handPoses.get(activeSide[0]));
+         poses.get(activeSide[0]).set(selectedIndex, handPoses.get(activeSide[0]));
          objectTransforms.set(selectedIndex, new RigidBodyTransform(objectTransformToWorld));
+         if (frameGraphics.get(activeSide[0]).get(selectedIndex) == null)
+         {
+            frameGraphics.get(activeSide[0]).set(selectedIndex, new RDXReferenceFrameGraphic(0.1, colors.get(colorIndex.get(activeSide[0]) % colors.size())));
+         }
       }
       ImGui.sameLine();
       if (ImGui.button(labels.get("CLEAR ALL") + "##" + lableId))
@@ -107,79 +111,71 @@ public class RDXAffordanceFrames
          reset();
          activeMenu[0] = RDXActiveAffordanceMenu.NONE;
       }
-      if (poseIndices.size() > 0)
+      for (RobotSide side : RobotSide.values)
       {
-         for (int i = 0; i < poseIndices.size(); ++i)
+         if (poseIndices.size() > 0)
          {
-            if (i % 5 != 0)
+            for (int i = 0; i < poseIndices.size(); ++i)
+            {
+               if (side == RobotSide.RIGHT && i == 0)
+               {
+                  ImGui.text("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -");
+               }
+
+               if (i % 5 != 0)
+                  ImGui.sameLine();
+               // display selected frame in green
+               if (selectedIndex == i && activeMenu[0].equals(this.menu) && activeSide[0] == side)
+               {
+                  ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 1.0f, 0.0f, 1.0f);
+                  changedColor = true;
+               }
+               if (ImGui.button(labels.get((side  == RobotSide.RIGHT ? "R" : "L") + poseIndices.get(i).toString()) + "##" + lableId))
+               {
+                  activeMenu[0] = this.menu;
+                  activeSide[0] = side;
+                  selectFrame(i);
+               }
+               if (changedColor)
+               {
+                  ImGui.popStyleColor();
+                  changedColor = false;
+               }
                ImGui.sameLine();
-            // display selected frame in green
-            if (selectedIndex == i && activeMenu[0].equals(this.menu))
-            {
-               ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 1.0f, 0.0f, 1.0f);
-               changedColor = true;
-            }
-            if (ImGui.button(labels.get("R" + poseIndices.get(i).toString()) + "##" + lableId))
-            {
-               activeMenu[0] = this.menu;
-               activeSide = RobotSide.RIGHT;
-               selectFrame(i);
-            }
-
-            ImGui.sameLine();
-            // Add a dummy spacing for a specific distance (change the 'x' value as needed)
-            float distanceBeforeSeparator = 20.0f; // Set the desired distance
-            ImGui.dummy(distanceBeforeSeparator, 1);
-            // Draw the vertical separator
-            ImGui.separator();
-            ImGui.sameLine();
-            // Add a dummy spacing for a specific distance after the separator if needed (change the 'x' value as needed)
-            float distanceAfterSeparator = 20.0f; // Set the desired distance
-            ImGui.dummy(distanceAfterSeparator, 1);
-
-            if (ImGui.button(labels.get("L" + poseIndices.get(i).toString()) + "##" + lableId))
-            {
-               activeMenu[0] = this.menu;
-               activeSide = RobotSide.LEFT;
-               selectFrame(i);
-            }
-            if (changedColor)
-            {
+               // handle the delete button click event here...
+               ImGui.pushStyleColor(ImGuiCol.Button, 1.0f, 1.0f, 1.0f, 1.0f);
+               if (ImGui.button(labels.get("X") + "##" + lableId + (side  == RobotSide.RIGHT ? "R" : "L") + i, 15, 15))
+               {
+                  for (RobotSide eachSide : RobotSide.values)
+                  {
+                     poseFrames.get(eachSide).remove(i);
+                     poses.get(eachSide).remove(i);
+                     frameGraphics.get(eachSide).remove(i);
+                     handConfigurations.get(eachSide).remove(i);
+                  }
+                  poseIndices.remove(i);
+                  objectTransforms.remove(i);
+                  selectedFrameConfiguration = null;
+                  selectedIndex = -1;
+                  activeMenu[0] = RDXActiveAffordanceMenu.NONE;
+               }
                ImGui.popStyleColor();
-               changedColor = false;
             }
-            ImGui.sameLine();
-            // handle the delete button click event here...
-            ImGui.pushStyleColor(ImGuiCol.Button, 1.0f, 1.0f, 1.0f, 1.0f);
-            if (ImGui.button(labels.get("X") + "##" + lableId + i, 15, 15))
-            {
-               poseFrames.get(activeSide).remove(i);
-               poses.get(activeSide).remove(i);
-               frameGraphics.get(activeSide).remove(i);
-               handConfigurations.get(activeSide).remove(i);
-               poseIndices.remove(i);
-               objectTransforms.remove(i);
-               selectedFrameConfiguration = null;
-               selectedIndex = -1;
-               activeMenu[0] = RDXActiveAffordanceMenu.NONE;
-            }
-            ImGui.popStyleColor();
+         }
+         else
+         {
+            colorIndex.replace(activeSide[0], 0);
+            index = 0;
          }
       }
-      else
-      {
-         colorIndex.replace(activeSide, 0);
-         index = 0;
-      }
-
       ImGui.text("Hand Configuration: " + (selectedFrameConfiguration == null ? "" : selectedFrameConfiguration.toString()));
       ImGui.sameLine();
       if (ImGui.button(labels.get("SET") + "##hand" + lableId) && activeMenu[0].equals(this.menu))
       {
          if (selectedIndex >= 0)
          {
-            handConfigurations.get(activeSide).set(selectedIndex, interactableHands.get(activeSide).getConfiguration());
-            selectedFrameConfiguration = handConfigurations.get(activeSide).get(selectedIndex);
+            handConfigurations.get(activeSide[0]).set(selectedIndex, interactableHands.get(activeSide[0]).getConfiguration());
+            selectedFrameConfiguration = handConfigurations.get(activeSide[0]).get(selectedIndex);
          }
       }
    }
@@ -188,33 +184,58 @@ public class RDXAffordanceFrames
    {
       index++;
       poseReference.changeFrame(ReferenceFrame.getWorldFrame());
-      PoseReferenceFrame frame = new PoseReferenceFrame(activeSide.getLowerCaseName() + index + "Frame", poseReference.getReferenceFrame());
+      PoseReferenceFrame frame = new PoseReferenceFrame(activeSide[0].getLowerCaseName() + index + "Frame", poseReference.getReferenceFrame());
       frame.setPoseAndUpdate(poseReference);
 
       poseIndices.add(index);
-      poses.get(activeSide).add(poseReference);
+      poses.get(activeSide[0]).add(poseReference);
+      poseFrames.get(activeSide[0]).add(frame);
+      frameGraphics.get(activeSide[0]).add(new RDXReferenceFrameGraphic(0.1, colors.get(colorIndex.get(activeSide[0]) % colors.size())));
+      colorIndex.replace(activeSide[0], colorIndex.get(activeSide[0]) + 1);
 
-      poseFrames.get(activeSide).add(frame);
-      frameGraphics.get(activeSide).add(new RDXReferenceFrameGraphic(0.1, colors.get(colorIndex.get(activeSide) % colors.size())));
-      colorIndex.replace(activeSide, colorIndex.get(activeSide) + 1);
+      //add an empty graphics frame for the other hand, with same pose from previous frame associated with that side
+      RobotSide nonActiveSide = activeSide[0] == RobotSide.RIGHT ? RobotSide.LEFT : RobotSide.RIGHT;
+      FramePose3D otherSidePoseReference;
+      if (poses.get(nonActiveSide).size() > 1) // if there is a previous frame
+         otherSidePoseReference = new FramePose3D(poses.get(nonActiveSide).get(poses.get(nonActiveSide).size() - 1));
+      else // use current pose
+         otherSidePoseReference = new FramePose3D(handPoses.get(nonActiveSide));
+      otherSidePoseReference.changeFrame(ReferenceFrame.getWorldFrame());
+      frame = new PoseReferenceFrame(nonActiveSide.getLowerCaseName() + index + "Frame", otherSidePoseReference.getReferenceFrame());
+      frame.setPoseAndUpdate(otherSidePoseReference);
+
+      poses.get(nonActiveSide).add(otherSidePoseReference);
+      poseFrames.get(nonActiveSide).add(frame);
+      frameGraphics.get(nonActiveSide).add(null);
 
       // no hand configuration is set right when you add a new frame
       selectedFrameConfiguration = null;
+      // add an empty spot for the hand configurations
+      handConfigurations.get(activeSide[0]).add(null);
+      handConfigurations.get(nonActiveSide).add(null);
    }
 
    public void selectFrame(int index)
    {
-      // move hand to selected frame
-      handTransformsToWorld.get(activeSide).set(poses.get(activeSide).get(index));
-      selectedIndex = index;
-      // if hand configuration has been assigned to this frame
-      if (handConfigurations.get(activeSide).get(index) != null)
+      for (RobotSide side : RobotSide.values)
       {
-         interactableHands.get(activeSide).setGripperToConfiguration(handConfigurations.get(activeSide).get(index)); // update hand configuration when teleporting
-         selectedFrameConfiguration = handConfigurations.get(activeSide).get(index);
+         // move hand to selected frame
+         handTransformsToWorld.get(side).set(poses.get(side).get(index));
+         // if hand configuration has been assigned to this frame
+         if (handConfigurations.get(side).get(index) != null)
+         {
+            interactableHands.get(side).setGripperToConfiguration(handConfigurations.get(side).get(index)); // update hand configuration when teleporting
+            selectedFrameConfiguration = handConfigurations.get(side).get(index);
+         }
+         else
+            selectedFrameConfiguration = null;
+
+         if (side == activeSide[0])
+            interactableHands.get(side).setSelected(true);
+         else
+            interactableHands.get(side).setSelected(false);
       }
-      else
-         selectedFrameConfiguration = null;
+      selectedIndex = index;
       // update pose of the object
       objectTransformToWorld.set(objectTransforms.get(selectedIndex));
    }
@@ -251,7 +272,8 @@ public class RDXAffordanceFrames
       for (RobotSide side : RobotSide.values)
          for (RDXReferenceFrameGraphic frameGraphic : frameGraphics.get(side))
          {
-            frameGraphic.getRenderables(renderables, pool);
+            if (frameGraphic != null)
+               frameGraphic.getRenderables(renderables, pool);
          }
    }
 
@@ -260,17 +282,17 @@ public class RDXAffordanceFrames
       return poseFrames.get(RobotSide.RIGHT).size();
    }
 
-   public ArrayList<FramePose3D> getPoses(RobotSide side)
+   public List<FramePose3D> getPoses(RobotSide side)
    {
       return poses.get(side);
    }
 
-   public ArrayList<HandConfiguration> getHandConfigurations(RobotSide side)
+   public List<HandConfiguration> getHandConfigurations(RobotSide side)
    {
       return handConfigurations.get(side);
    }
 
-   public ArrayList<RigidBodyTransform> getObjectTransforms()
+   public List<RigidBodyTransform> getObjectTransforms()
    {
       return objectTransforms;
    }
