@@ -187,9 +187,19 @@ public class RDXInteractableFrameModel
       return selectablePose3DGizmo.getPoseGizmo();
    }
 
+   public RDXModelInstance getModelInstance()
+   {
+      return modelInstance;
+   }
+
    public boolean isSelected()
    {
       return selectablePose3DGizmo.isSelected();
+   }
+
+   public void setSelected(boolean selected)
+   {
+      selectablePose3DGizmo.setSelected(selected);
    }
 
    public void setShowing(boolean showing)
