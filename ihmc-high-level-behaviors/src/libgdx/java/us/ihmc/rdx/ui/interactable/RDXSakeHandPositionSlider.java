@@ -1,17 +1,27 @@
 package us.ihmc.rdx.ui.interactable;
 
+import controller_msgs.msg.dds.HandSakeDesiredCommandMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import imgui.internal.ImGui;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
 
+/**
+ * This slider allows the user to control the Sake hand's finger positions,
+ * and reflects the position of the fingers on the robot.
+ *
+ * When the slider is moved by the user, a GOTO command is sent to the Sake hand
+ * causing the hand to move to the target position.
+ *
+ * The slider's position value is an approximate angle between the two fingertips,
+ * 0 degrees when the fingers are touching and 210 degrees when the fingers are fully open.
+ */
 public class RDXSakeHandPositionSlider
 {
    private static final double UPDATE_PERIOD = UnitConversions.hertzToSeconds(10.0);
@@ -59,11 +69,14 @@ public class RDXSakeHandPositionSlider
          if (sendThrottler.run(SEND_PERIOD) && syncedRobot.getDataReceptionTimerSnapshot().isRunning(ROBOT_DATA_EXPIRATION_DURATION))
          {
             double positionRatio = sliderValue[0] / MAX_ANGLE_LIMIT;
-            communicationHelper.publish(ROS2Tools::getHandSakeCommandTopic,
-                                        HumanoidMessageTools.createHandSakeDesiredCommandMessage(handSide,
-                                                                                                 (byte) 5, // TODO: Get access to SakeHandCommand.HandConfiguration
-                                                                                                 positionRatio,
-                                                                                                 0.3));
+
+            HandSakeDesiredCommandMessage message = new HandSakeDesiredCommandMessage();
+            message.setRobotSide(handSide.toByte());
+            message.setDesiredHandConfiguration((byte) 5); // GOTO command
+            message.setPostionRatio(positionRatio);
+            message.setTorqueRatio(0.3);
+
+            communicationHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);
          }
       }
       else

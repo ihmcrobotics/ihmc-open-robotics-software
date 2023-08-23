@@ -11,6 +11,7 @@ import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.HandWrenchCalculator;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -62,8 +63,7 @@ public class RDXArmManager
    private final ImBoolean indicateWrenchOnScreen = new ImBoolean(false);
    private RDX3DPanelHandWrenchIndicator panelHandWrenchIndicator;
 
-   private boolean queuePopupToOpen = false;
-   private RobotSide sideToMove;
+   private final TypedNotification<RobotSide> showWarningNotification = new TypedNotification<>();
 
    public RDXArmManager(CommunicationHelper communicationHelper,
                         DRCRobotModel robotModel,
@@ -266,10 +266,8 @@ public class RDXArmManager
 
    private void renderTooltipAndContextMenu()
    {
-      if (queuePopupToOpen)
+      if (showWarningNotification.peekHasValue())
       {
-         queuePopupToOpen = false;
-
          ImGui.openPopup(labels.get("Warning"));
       }
 
@@ -285,12 +283,14 @@ public class RDXArmManager
          ImGui.separator();
          if (ImGui.button("Continue"))
          {
-            executeArmAngles(sideToMove, doorAvoidanceArms, teleoperationParameters.getTrajectoryTime());
+            executeArmAngles(showWarningNotification.blockingPoll(), doorAvoidanceArms, teleoperationParameters.getTrajectoryTime());
             ImGui.closeCurrentPopup();
          }
          ImGui.sameLine();
          if (ImGui.button("Cancel"))
          {
+            // unset notification
+            showWarningNotification.set(null);
             ImGui.closeCurrentPopup();
          }
          ImGui.endPopup();
@@ -313,11 +313,12 @@ public class RDXArmManager
 
    public void executeDoorAvoidanceArmAngles(RobotSide side)
    {
-      sideToMove = side;
-
+      // Warning pops up if fingers are more than 15 degrees from "zero" (zero = when fingertips are parallel)
+      // i.e. when the fingers are more than 30 degrees apart from each other
+      // This is an arbitrary value
       if (syncedRobot.getLatestHandJointAnglePacket(side).getJointAngles().get(0) > Math.toRadians(15.0))
       {
-         queuePopupToOpen = true;
+         showWarningNotification.set(side);
       }
       else
       {
