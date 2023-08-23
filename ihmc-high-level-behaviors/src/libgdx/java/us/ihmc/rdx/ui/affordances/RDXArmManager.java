@@ -266,7 +266,7 @@ public class RDXArmManager
 
    private void renderTooltipAndContextMenu()
    {
-      if (showWarningNotification.peekHasValue())
+      if (showWarningNotification.peekHasValue() && showWarningNotification.poll())
       {
          ImGui.openPopup(labels.get("Warning"));
       }
@@ -283,14 +283,12 @@ public class RDXArmManager
          ImGui.separator();
          if (ImGui.button("Continue"))
          {
-            executeArmAngles(showWarningNotification.blockingPoll(), doorAvoidanceArms, teleoperationParameters.getTrajectoryTime());
+            executeArmAngles(showWarningNotification.read(), doorAvoidanceArms, teleoperationParameters.getTrajectoryTime());
             ImGui.closeCurrentPopup();
          }
          ImGui.sameLine();
          if (ImGui.button("Cancel"))
          {
-            // unset notification
-            showWarningNotification.set(null);
             ImGui.closeCurrentPopup();
          }
          ImGui.endPopup();
