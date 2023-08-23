@@ -128,6 +128,8 @@ public class MonteCarloPlannerTools
       Point2D currentPoint = new Point2D();
 
       Point2D[] neighbors = new Point2D[8];
+      for (int i = 0; i<neighbors.length; i++)
+         neighbors[i] = new Point2D();
 
       for (int i = 0; i<samples; i++)
       {
