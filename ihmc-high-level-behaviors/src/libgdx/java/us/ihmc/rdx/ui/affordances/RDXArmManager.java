@@ -37,6 +37,19 @@ import us.ihmc.tools.thread.MissingThreadTools;
  */
 public class RDXArmManager
 {
+   /* Sake hand's fingers do not extend much outward from the hand at 15 degrees apart, i.e. they are nearly parallel
+      kinda look like this:
+      15 degrees apart  |  0 degrees apart
+
+        /\    /\                 /||\
+       | |    | | <- fingers -> / /\ \
+       | |    | |              / /  \ \
+       |  ----  |             |  ----  |
+       |        | <-  palm -> |        |
+       |________|             |________|
+    */
+   private final static double SAKE_HAND_SAFEE_FINGER_ANGLE = 15.0;
+
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final CommunicationHelper communicationHelper;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -119,8 +132,6 @@ public class RDXArmManager
          if (indicateWrenchOnScreen.get())
             panelHandWrenchIndicator.renderImGuiOverlay();
       });
-
-      baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltipAndContextMenu);
 
       handManager.create(baseUI, communicationHelper, syncedRobot);
    }
@@ -262,10 +273,8 @@ public class RDXArmManager
       }
 
       ImGui.checkbox(labels.get("Hand wrench magnitudes on 3D View"), indicateWrenchOnScreen);
-   }
 
-   private void renderTooltipAndContextMenu()
-   {
+      // Pop up warning if notification is set
       if (showWarningNotification.peekHasValue() && showWarningNotification.poll())
       {
          ImGui.openPopup(labels.get("Warning"));
@@ -314,7 +323,7 @@ public class RDXArmManager
       // Warning pops up if fingers are more than 15 degrees from "zero" (zero = when fingertips are parallel)
       // i.e. when the fingers are more than 30 degrees apart from each other
       // This is an arbitrary value
-      if (syncedRobot.getLatestHandJointAnglePacket(side).getJointAngles().get(0) > Math.toRadians(15.0))
+      if (syncedRobot.getLatestHandJointAnglePacket(side).getJointAngles().get(0) > Math.toRadians(SAKE_HAND_SAFEE_FINGER_ANGLE))
       {
          showWarningNotification.set(side);
       }
