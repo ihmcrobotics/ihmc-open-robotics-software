@@ -196,8 +196,9 @@ public class RDXAffordanceFrames
       //add an empty graphics frame for the other hand, with same pose from previous frame associated with that side
       RobotSide nonActiveSide = activeSide[0] == RobotSide.RIGHT ? RobotSide.LEFT : RobotSide.RIGHT;
       FramePose3D otherSidePoseReference;
-      if (poses.get(nonActiveSide).size() > 1) // if there is a previous frame
-         otherSidePoseReference = new FramePose3D(poses.get(nonActiveSide).get(poses.get(nonActiveSide).size() - 1));
+      int nonActiveSideSize = poses.get(nonActiveSide).size();
+      if (nonActiveSideSize > 1) // if there is a previous frame
+         otherSidePoseReference = new FramePose3D(poses.get(nonActiveSide).get(nonActiveSideSize - 1));
       else // use current pose
          otherSidePoseReference = new FramePose3D(handPoses.get(nonActiveSide));
       otherSidePoseReference.changeFrame(ReferenceFrame.getWorldFrame());
