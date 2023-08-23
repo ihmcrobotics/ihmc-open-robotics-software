@@ -48,7 +48,7 @@ public class RDXSakeHandPositionSlider
    {
       if (updateThrottler.run(UPDATE_PERIOD) && syncedRobot.getLatestHandJointAnglePacket(handSide) != null)
       {
-         valueFromRobot =  syncedRobot.getLatestHandJointAnglePacket(handSide).getJointAngles().get(0);
+         valueFromRobot = syncedRobot.getLatestHandJointAnglePacket(handSide).getJointAngles().get(0);
       }
    }
 

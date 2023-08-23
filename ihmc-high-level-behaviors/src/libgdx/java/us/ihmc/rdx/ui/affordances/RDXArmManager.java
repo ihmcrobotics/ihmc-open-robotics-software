@@ -62,6 +62,9 @@ public class RDXArmManager
    private final ImBoolean indicateWrenchOnScreen = new ImBoolean(false);
    private RDX3DPanelHandWrenchIndicator panelHandWrenchIndicator;
 
+   private boolean queuePopupToOpen = false;
+   private RobotSide sideToMove;
+
    public RDXArmManager(CommunicationHelper communicationHelper,
                         DRCRobotModel robotModel,
                         ROS2SyncedRobotModel syncedRobot,
@@ -116,6 +119,8 @@ public class RDXArmManager
          if (indicateWrenchOnScreen.get())
             panelHandWrenchIndicator.renderImGuiOverlay();
       });
+
+      baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltipAndContextMenu);
 
       handManager.create(baseUI, communicationHelper, syncedRobot);
    }
@@ -259,6 +264,39 @@ public class RDXArmManager
       ImGui.checkbox(labels.get("Hand wrench magnitudes on 3D View"), indicateWrenchOnScreen);
    }
 
+   private void renderTooltipAndContextMenu()
+   {
+      if (queuePopupToOpen)
+      {
+         queuePopupToOpen = false;
+
+         ImGui.openPopup(labels.get("Warning"));
+      }
+
+      if (ImGui.beginPopupModal(labels.get("Warning")))
+      {
+         ImGui.text("""
+                          The hand is currently open.
+                                                    
+                          Continuing to door avoidance
+                          may cause the hand to collide
+                          with the body of the robot.""");
+
+         ImGui.separator();
+         if (ImGui.button("Continue"))
+         {
+            executeArmAngles(sideToMove, doorAvoidanceArms, teleoperationParameters.getTrajectoryTime());
+            ImGui.closeCurrentPopup();
+         }
+         ImGui.sameLine();
+         if (ImGui.button("Cancel"))
+         {
+            ImGui.closeCurrentPopup();
+         }
+         ImGui.endPopup();
+      }
+   }
+
    public void executeArmHome(RobotSide side)
    {
       GoHomeMessage armHomeMessage = new GoHomeMessage();
@@ -275,7 +313,16 @@ public class RDXArmManager
 
    public void executeDoorAvoidanceArmAngles(RobotSide side)
    {
-      executeArmAngles(side, doorAvoidanceArms, teleoperationParameters.getTrajectoryTime());
+      sideToMove = side;
+
+      if (syncedRobot.getLatestHandJointAnglePacket(side).getJointAngles().get(0) > Math.toRadians(15.0))
+      {
+         queuePopupToOpen = true;
+      }
+      else
+      {
+         executeArmAngles(side, doorAvoidanceArms, teleoperationParameters.getTrajectoryTime());
+      }
    }
 
    public void executeShieldHoldingArmAngles(RobotSide side)
