@@ -9,6 +9,7 @@ public class RDXVRPickResult
 {
    private double distanceToControllerPickPoint = Double.POSITIVE_INFINITY;
    private Object objectBeingPicked = null;
+   private String pickedObjectName = "";
 
    public void reset()
    {
@@ -49,5 +50,15 @@ public class RDXVRPickResult
    public Object getObjectBeingPicked()
    {
       return objectBeingPicked;
+   }
+
+   public void setPickedObjectName(String pickedObjectName)
+   {
+      this.pickedObjectName = pickedObjectName;
+   }
+
+   public String getPickedObjectName()
+   {
+      return pickedObjectName;
    }
 }

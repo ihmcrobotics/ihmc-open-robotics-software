@@ -339,11 +339,21 @@ public class RDXVRController extends RDXVRTrackedDevice
 
       if (selectedPick != null)
       {
-         selectedPickLabel.setText(selectedPick.getObjectBeingPicked() == null ? "null" : selectedPick.getObjectBeingPicked().getClass().getSimpleName());
+         String labelText;
+         String pickedObjectName = selectedPick.getPickedObjectName();
+         if (!pickedObjectName.isEmpty())
+            labelText = pickedObjectName;
+         else
+            labelText = selectedPick.getObjectBeingPicked() == null ? "null" : selectedPick.getObjectBeingPicked().getClass().getSimpleName();
+         selectedPickLabel.setText(labelText);
          double distance = selectedPick.getDistanceToControllerPickPoint();
          if (distance > 0.0)
          {
             setPickRayColliding(distance);
+         }
+         else
+         {
+            setPickPointColliding(distance);
          }
       }
 
@@ -403,15 +413,19 @@ public class RDXVRController extends RDXVRTrackedDevice
       pickRayGraphic = new RDXModelInstance(pickRayBox);
       pickRayGraphic.setPoseInWorldFrame(getPickPointPose());
 
+      setPickPointColliding(distance);
+   }
+
+   /**
+    * Updates the pick point graphic. Only call this if you're not sumbitting a pick result.
+    * Submitting pick results is better if possible, because they will get sorted and this
+    * automatically called.
+    */
+   public void setPickPointColliding(double distance)
+   {
       pickCollisionPoint.setToZero(pickPoseFrame.getReferenceFrame());
       pickCollisionPoint.setX(distance);
       pickCollisionPoint.changeFrame(ReferenceFrame.getWorldFrame());
-      LibGDXTools.toLibGDX(pickCollisionPoint, pickRayCollisionPointGraphic.transform);
-   }
-
-   public void setPickCollisionPoint(Point3DReadOnly closestPointInWorld)
-   {
-      pickCollisionPoint.setIncludingFrame(ReferenceFrame.getWorldFrame(), closestPointInWorld);
       LibGDXTools.toLibGDX(pickCollisionPoint, pickRayCollisionPointGraphic.transform);
    }
 
