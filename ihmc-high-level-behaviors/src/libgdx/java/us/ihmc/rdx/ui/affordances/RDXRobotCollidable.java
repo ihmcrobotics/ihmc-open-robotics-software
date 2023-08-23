@@ -43,38 +43,44 @@ public class RDXRobotCollidable implements RenderableProvider
    private final MovingReferenceFrame syncedLinkFrame;
    private final ModifiableReferenceFrame collisionShapeFrame;
    private final MouseCollidable mouseCollidable;
+   private final MouseCollidable vrPickRayCollidable;
    private final PointCollidable pointCollidable;
    private final RDXModelInstance collisionModelInstance;
    private final RDXModelInstance collisionShapeCoordinateFrameGraphic;
    private final FrameShape3DBasics shape;
    private final String rigidBodyName;
+   private final int collidableIndex;
+   private final String name;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
    private boolean isHoveredByAnything = false;
    private boolean isMouseHovering = false;
    private final SideDependentList<Boolean> isVRHovering = new SideDependentList<>(false, false);
    private final SideDependentList<Boolean> isVRPointing = new SideDependentList<>(false, false);
-   private RDXModelInstance pickRayCollisionPointGraphic;
+   private final RDXModelInstance pickRayCollisionPointGraphic;
 
-   public RDXRobotCollidable(us.ihmc.scs2.simulation.collision.Collidable collidable, Color color)
+   public RDXRobotCollidable(us.ihmc.scs2.simulation.collision.Collidable collidable, int collidableIndex, Color color)
    {
       this(collidable.getShape(),
            collidable.getRigidBody().getParentJoint().getFrameAfterJoint(),
            collidable.getRigidBody().getName(),
+           collidableIndex,
            color);
    }
 
-   public RDXRobotCollidable(Collidable collidable, Color color)
+   public RDXRobotCollidable(Collidable collidable, int collidableIndex, Color color)
    {
       this(collidable.getShape(),
            collidable.getRigidBody().getParentJoint().getFrameAfterJoint(),
            collidable.getRigidBody().getName(),
+           collidableIndex,
            color);
    }
 
    public RDXRobotCollidable(FrameShape3DReadOnly shape,
                              MovingReferenceFrame syncedLinkFrame,
                              String rigidBodyName,
+                             int collidableIndex,
                              Color color)
    {
       // Copy because we will be changing the frame
@@ -82,6 +88,8 @@ public class RDXRobotCollidable implements RenderableProvider
       this.shape = (FrameShape3DBasics) shape.copy();
       this.syncedLinkFrame = syncedLinkFrame;
       this.rigidBodyName = rigidBodyName;
+      this.collidableIndex = collidableIndex;
+      name = "%s %d - %s".formatted(rigidBodyName, collidableIndex, shape.getClass().getSimpleName());
 
       linkFrame = syncedLinkFrame;
 
@@ -89,7 +97,14 @@ public class RDXRobotCollidable implements RenderableProvider
       collisionShapeFrame = new ModifiableReferenceFrame("collisionShapeFrame" + rigidBodyName, linkFrame);
 
       mouseCollidable = new MouseCollidable(this.shape);
+      vrPickRayCollidable = new MouseCollidable(this.shape);
       pointCollidable = new PointCollidable(this.shape);
+      for (RobotSide side : RobotSide.values)
+      {
+         vrPickResult.get(side).setObjectBeingPicked(this);
+         vrPickResult.get(side).setPickedObjectName(name);
+      }
+
       collisionModelInstance = new RDXModelInstance(RDXModelBuilder.buildModel(meshBuilder ->
       {
          if (shape instanceof FrameSphere3DReadOnly sphere)
@@ -172,6 +187,7 @@ public class RDXRobotCollidable implements RenderableProvider
    {
       calculateVRPick(vrContext, false);
    }
+
    public void calculateVRPick(RDXVRContext vrContext, boolean isInteractable)
    {
       for (RobotSide side : RobotSide.values)
@@ -181,30 +197,31 @@ public class RDXRobotCollidable implements RenderableProvider
             // The shape has the offsets from link frame built in.
             // Do the collisions in link frame.
             shape.setReferenceFrame(linkFrame);
-            if (!controller.getTriggerDragData().isDraggingSomething() && isInteractable)
-            {
-               Line3DReadOnly pickRay = controller.getPickRay();
-               double collision = mouseCollidable.collide(pickRay, collisionShapeFrame.getReferenceFrame());
-               if (!Double.isNaN(collision))
-               {
-                  vrPickResult.get(side).addPickCollision(collision);
-                  controller.addPickResult(vrPickResult.get(side));
-               }
-            }
 
             boolean isInside = pointCollidable.collide(controller.getPickPointPose().getPosition());
             LibGDXTools.toLibGDX(pointCollidable.getClosestPointOnSurface(), pickRayCollisionPointGraphic.transform);
 
             if (isInside)
             {
-               vrPickResult.get(side).addPickCollision(0);
+               vrPickResult.get(side).setDistanceToControllerPickPoint(pointCollidable.getSignedDistanceToSurface());
                pickRayCollisionPointGraphic.setColor(ColorDefinitions.Green());
-               controller.setPickCollisionPoint(pointCollidable.getClosestPointOnSurface());
                controller.addPickResult(vrPickResult.get(side));
             }
             else
             {
                pickRayCollisionPointGraphic.setColor(ColorDefinitions.White());
+
+               // Do the pick ray 2nd so we can only do one
+               if (!controller.getTriggerDragData().isDraggingSomething() && isInteractable)
+               {
+                  Line3DReadOnly pickRay = controller.getPickRay();
+                  double collision = vrPickRayCollidable.collide(pickRay, collisionShapeFrame.getReferenceFrame());
+                  if (!Double.isNaN(collision))
+                  {
+                     vrPickResult.get(side).setDistanceToControllerPickPoint(collision);
+                     controller.addPickResult(vrPickResult.get(side));
+                  }
+               }
             }
          });
       }
@@ -216,7 +233,7 @@ public class RDXRobotCollidable implements RenderableProvider
       {
          boolean isPointing = vrContext.getController(side).getSelectedPick() == vrPickResult.get(side);
          boolean isHovering =
-               vrContext.getController(side).getSelectedPick() == vrPickResult.get(side) && vrPickResult.get(side).getDistanceToControllerPickPoint() == 0;
+               vrContext.getController(side).getSelectedPick() == vrPickResult.get(side) && vrPickResult.get(side).getDistanceToControllerPickPoint() <= 0.0;
          isVRPointing.set(side, isPointing);
          isVRHovering.set(side, isHovering);
          isHoveredByAnything |= isHovering;

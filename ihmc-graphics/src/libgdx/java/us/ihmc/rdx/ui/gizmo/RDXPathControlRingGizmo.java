@@ -155,6 +155,12 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       RDXBaseUI.getInstance().getKeyBindings().register("Drag control ring", "Left mouse");
       RDXBaseUI.getInstance().getKeyBindings().register("Drag control ring (yaw)", "Right mouse");
       RDXBaseUI.getInstance().getKeyBindings().register("Move control ring slowly", "Shift");
+
+      for (RobotSide side : RobotSide.values)
+      {
+         vrPickResult.get(side).setObjectBeingPicked(this);
+         vrPickResult.get(side).setPickedObjectName("Path Control Ring Gizmo");
+      }
    }
 
    public void setGizmoFrame(ReferenceFrame gizmoFrame)

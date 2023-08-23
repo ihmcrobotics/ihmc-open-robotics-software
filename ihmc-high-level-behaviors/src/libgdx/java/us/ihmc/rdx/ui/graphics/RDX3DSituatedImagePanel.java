@@ -240,7 +240,6 @@ public class RDX3DSituatedImagePanel
                {
                   vrPickResult.get(side).addPickCollision(distanceToSurface);
                   controller.addPickResult(vrPickResult.get(side));
-                  controller.setPickCollisionPoint(closestPointOnSurface);
                }
             });
          }

@@ -40,6 +40,7 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
@@ -80,12 +81,18 @@ public class RDX3DSituatedImGuiPanel
                                                                            graphicsXRightYDownToCenterXThroughZUpTransform);
    private final Plane3D plane = new Plane3D();
    private final FramePoint3D pickIntersection = new FramePoint3D();
-   private final RDXVRPickResult pickResult = new RDXVRPickResult();
+   private final SideDependentList<RDXVRPickResult> pickResult = new SideDependentList<>(RDXVRPickResult::new);
 
    public RDX3DSituatedImGuiPanel(String name, Runnable renderImGuiWidgets)
    {
       this.name = name;
       this.renderImGuiWidgets = renderImGuiWidgets;
+
+      for (RobotSide side : RobotSide.values)
+      {
+         pickResult.get(side).setObjectBeingPicked(this);
+         pickResult.get(side).setPickedObjectName(name + " ImGui Panel");
+      }
    }
 
    public void create(ImGuiImplGl3 imGuiGl3, double panelWidthInMeters, double panelHeightInMeters, int pixelsPerCentimeter)
@@ -245,9 +252,8 @@ public class RDX3DSituatedImGuiPanel
                mousePosX = scaledX;
                mousePosY = scaledY;
 
-               pickResult.setDistanceToControllerPickPoint(distance);
-               pickResult.setObjectBeingPicked(this);
-               controller.addPickResult(pickResult);
+               pickResult.get(RobotSide.RIGHT).setDistanceToControllerPickPoint(distance);
+               controller.addPickResult(pickResult.get(RobotSide.RIGHT));
             }
          }
       });
@@ -257,7 +263,7 @@ public class RDX3DSituatedImGuiPanel
    {
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
       {
-         if (controller.getSelectedPick() == pickResult)
+         if (controller.getSelectedPick() == pickResult.get(RobotSide.RIGHT))
          {
             leftMouseDown = controller.getClickTriggerActionData().bState();
          }
