@@ -280,11 +280,15 @@ public class RDXTeleoperationManager extends RDXPanel
          interactablesEnabled.set(true);
       }
 
-      // STAND PREP
       RDX3DPanelToolbarButton standPrepButton = baseUI.getPrimary3DPanel().addToolbarButton();
       standPrepButton.loadAndSetIcon("icons/standPrep.png");
       standPrepButton.setOnPressed(robotLowLevelMessenger::sendStandRequest);
       standPrepButton.setTooltipText("Stand prep");
+
+      RDX3DPanelToolbarButton deleteAllInteractablesButton = baseUI.getPrimary3DPanel().addToolbarButton();
+      deleteAllInteractablesButton.loadAndSetIcon("icons/deleteAll.png");
+      deleteAllInteractablesButton.setOnPressed(this::clearInteractablesAndLocomotionGraphics);
+      deleteAllInteractablesButton.setTooltipText("Delete All Interactables (Keybind: Ctrl + L)");
 
       baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
    }

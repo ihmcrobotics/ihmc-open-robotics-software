@@ -35,7 +35,7 @@ public class RDXPlanarRegionMappingUI implements RenderableProvider
    private ImGuiPlot factorGraphDurationPlot;
    private ImGuiPlot regionMergingDurationPlot;
 
-   private final ImBoolean liveModeEnabled = new ImBoolean();
+   private final ImBoolean liveModeEnabled = new ImBoolean(true);
    private final ImBoolean renderEnabled = new ImBoolean(true);
    private final ImBoolean renderBoundingBoxEnabled = new ImBoolean(false);
    private boolean captured = false;
