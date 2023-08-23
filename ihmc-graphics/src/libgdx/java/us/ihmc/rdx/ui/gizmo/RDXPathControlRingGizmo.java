@@ -315,7 +315,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
                   Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
                   frameBasedGizmoModification.translateInWorld(planarMotion);
                   closestCollision.add(planarMotion);
-                  controller.setPickRayColliding(pickRay.getPoint().distance(closestCollision));
                   triggerDragData.updateZUpDrag(gizmoFrame);
                   double deltaYaw = triggerDragData.getZUpDragPose().getOrientation().getYaw() - gizmoFrame.getTransformToRoot().getRotation().getYaw();
                   frameBasedGizmoModification.yawInWorld(deltaYaw);
