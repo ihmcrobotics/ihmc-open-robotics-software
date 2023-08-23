@@ -5,18 +5,26 @@ import us.ihmc.euclid.Axis3D;
 /**
  * Enum for Leg Joint Names. The user should not assume any ordering, or assume anything about the
  * total number of Enums here. They are meant to support multiple robots with common control
- * modules. So joints can be added even if they exist on one robot but not on others. Therefore, the
- * user should not use LegJointName.values() or LegJointName.foo.ordinal(). Unfortunately, we cannot
- * override those methods and make them throw exceptions. For now to make sure the user doesn't
- * misuse LegJointName in that way, we throw in a bunch of FUTURE_EXPANSION_TEST elements, which
- * should cause some exceptions when things are misused. If they are all iterated over but fewer are
- * expected, then that might throw an out of bounds exception somewhere. However, they can still be
- * misused in many ways so we need to occasionally search for LegJointName.values(),
- * LegJointName.foo.ordinal() and make sure they are not used. But checking for
- * variableName.ordinal() is harder, since we do use this a lot in places where the ordinals are
- * pretty much guaranteed not to change, like RobotSide. TODO: Search for and remove bad uses of
- * LegJointNames throughout the code. Also, a simple test is to run a sim, then reorder these, then
- * run again and see if anything changes.
+ * modules. So joints can be added even if they exist on one robot but not on others.
+ * <p>
+ * Therefore, the user should not use LegJointName.values() or LegJointName.foo.ordinal().
+ * Unfortunately, we cannot override those methods and make them throw exceptions.
+ * </p>
+ * <p>
+ * For now to make sure the user doesn't misuse LegJointName in that way, we throw in a bunch of
+ * FUTURE_EXPANSION_TEST elements, which should cause some exceptions when things are misused. If
+ * they are all iterated over but fewer are expected, then that might throw an out of bounds
+ * exception somewhere. However, they can still be misused in many ways so we need to occasionally
+ * search for LegJointName.values(), LegJointName.foo.ordinal() and make sure they are not used. But
+ * checking for variableName.ordinal() is harder, since we do use this a lot in places where the
+ * ordinals are pretty much guaranteed not to change, like RobotSide.
+ * <p>
+ * TODO: Search for and remove bad uses of LegJointNames throughout the code.
+ * </p>
+ * <p>
+ * Also, a simple test is to run a sim, then reorder these, then run again and see if anything
+ * changes.
+ * </p>
  */
 public enum LegJointName
 {
