@@ -129,17 +129,18 @@ public class RDXVRController extends RDXVRTrackedDevice
    private RDXModelInstance pickRayGraphic;
    private RDXModelInstance pickRayCollisionPointGraphic;
    private RDXModelInstance radialMenuSphere;
-   private ModifiableReferenceFrame radialMenuSpherePoseFrame;
-   private ModifiableReferenceFrame joystickReferenceFrame;
+   private final ModifiableReferenceFrame radialMenuSpherePoseFrame;
+   private final ModifiableReferenceFrame joystickReferenceFrame;
    private final FramePose3D joystickFramePose = new FramePose3D();
    private final FramePose3D joystickSphereFramePose = new FramePose3D();
-   private  RDXVRControllerButtonLabel aButtonLabel;
-   private  RDXVRControllerButtonLabel bButtonLabel;
+   private RDXVRControllerButtonLabel aButtonLabel;
+   private RDXVRControllerButtonLabel bButtonLabel;
+   private RDXVRControllerButtonLabel selectedPickLabel;
    private RDXVRControllerButtonLabel topJoystickLabel;
    private RDXVRControllerButtonLabel bottomJoystickLabel;
    private RDXVRControllerButtonLabel leftJoystickLabel;
    private RDXVRControllerButtonLabel rightJoystickLabel;
-   private  RDXVRControllerButtonLabel gripAmountLabel;
+   private RDXVRControllerButtonLabel gripAmountLabel;
    private final RDXVRDragData triggerDragData;
    private final RDXVRDragData gripDragData;
    private RDXModelInstance radialMenuSelectionGraphic;
@@ -238,10 +239,11 @@ public class RDXVRController extends RDXVRTrackedDevice
             pickRayCollisionPointGraphic = new RDXModelInstance(RDXModelBuilder.createSphere(0.0015f, new Color(Color.WHITE)));
             LibGDXTools.hideGraphic(pickRayCollisionPointGraphic);
 
-            // These were tuned by @dcalvert and @bpratt using JRebel and bringing them down to updatePickResult method hand tweaking
+            // These were tuned by @dcalvert and @bpratt using JRebel and bringing them out of this if statement and hand tweaking
             // so they looked good for the Valve Index controllers.
             Point3D aButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.085, -0.01, -0.02) : new Point3D(-0.082, -0.01, -0.017);
             Point3D bButtonOffset = side == RobotSide.LEFT ? new Point3D(-0.07, -0.013, -0.015) : new Point3D(-0.07, -0.007, -0.008);
+            Point3D selectedPickLabelOffset = side == RobotSide.LEFT ? new Point3D(-0.03, 0.07, -0.004) : new Point3D(-0.04, 0.04, -0.004);
             topJoystickOffset = new Point3D(0.1, 0.0, 0.0);
             bottomJoystickOffset = new Point3D(-0.1, 0.0, -0.006);
             rightJoystickOffset = new Point3D(0.0, -0.1, -0.002);
@@ -252,6 +254,7 @@ public class RDXVRController extends RDXVRTrackedDevice
                   : new YawPitchRoll(Math.toRadians(-90.0), Math.toRadians(37.0), Math.toRadians(90.0));
             aButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, aButtonOffset, new YawPitchRoll());
             bButtonLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, bButtonOffset, new YawPitchRoll());
+            selectedPickLabel = new RDXVRControllerButtonLabel(pickPoseFrame.getReferenceFrame(), side, selectedPickLabelOffset, new YawPitchRoll());
             topJoystickLabel = new RDXVRControllerButtonLabel(joystickReferenceFrame.getReferenceFrame(), side, topJoystickOffset, new YawPitchRoll());
             bottomJoystickLabel = new RDXVRControllerButtonLabel(joystickReferenceFrame.getReferenceFrame(), side, bottomJoystickOffset, new YawPitchRoll());
             rightJoystickLabel = new RDXVRControllerButtonLabel(joystickReferenceFrame.getReferenceFrame(), side, rightJoystickOffset, new YawPitchRoll());
@@ -279,6 +282,7 @@ public class RDXVRController extends RDXVRTrackedDevice
 
          aButtonLabel.setText("");
          bButtonLabel.setText("");
+         selectedPickLabel.setText("");
          topJoystickLabel.setText("");
          bottomJoystickLabel.setText("");
          leftJoystickLabel.setText("");
@@ -335,6 +339,7 @@ public class RDXVRController extends RDXVRTrackedDevice
 
       if (selectedPick != null)
       {
+         selectedPickLabel.setText(selectedPick.getObjectBeingPicked() == null ? "null" : selectedPick.getObjectBeingPicked().getClass().getSimpleName());
          double distance = selectedPick.getDistanceToControllerPickPoint();
          if (distance > 0.0)
          {
@@ -368,6 +373,8 @@ public class RDXVRController extends RDXVRTrackedDevice
             aButtonLabel.getRenderables(renderables, pool);
          if (bButtonLabel != null)
             bButtonLabel.getRenderables(renderables, pool);
+         if (selectedPickLabel != null)
+            selectedPickLabel.getRenderables(renderables, pool);
          if (topJoystickLabel != null)
             topJoystickLabel.getRenderables(renderables, pool);
          if (bottomJoystickLabel != null)
