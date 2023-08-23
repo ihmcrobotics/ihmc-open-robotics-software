@@ -138,8 +138,7 @@ public class ICPController implements ICPControllerInterface
                         YoRegistry parentRegistry,
                         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(walkingControllerParameters,
-           walkingControllerParameters.getICPControllerParameters(),
+      this(walkingControllerParameters.getICPControllerParameters(),
            icpControlPolygons,
            contactableFeet,
            controlDT,
@@ -147,52 +146,49 @@ public class ICPController implements ICPControllerInterface
            yoGraphicsListRegistry);
    }
 
-   public ICPController(WalkingControllerParameters walkingControllerParameters,
-                        ICPControllerParameters icpOptimizationParameters,
+   public ICPController(ICPControllerParameters icpControllerParameters,
                         ICPControlPolygons icpControlPolygons,
                         SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                         double controlDT,
                         YoRegistry parentRegistry,
                         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.parameters = icpOptimizationParameters;
+      this.parameters = icpControllerParameters;
       this.controlDT = controlDT;
       this.controlDTSquare = controlDT * controlDT;
 
-      useCMPFeedback = new BooleanParameter(yoNamePrefix + "UseCMPFeedback", registry, icpOptimizationParameters.useCMPFeedback());
-      useAngularMomentum = new BooleanParameter(yoNamePrefix + "UseAngularMomentum", registry, icpOptimizationParameters.useAngularMomentum());
+      useCMPFeedback = new BooleanParameter(yoNamePrefix + "UseCMPFeedback", registry, icpControllerParameters.useCMPFeedback());
+      useAngularMomentum = new BooleanParameter(yoNamePrefix + "UseAngularMomentum", registry, icpControllerParameters.useAngularMomentum());
 
       scaleFeedbackWeightWithGain = new BooleanParameter(yoNamePrefix + "ScaleFeedbackWeightWithGain",
                                                          registry,
-                                                         icpOptimizationParameters.scaleFeedbackWeightWithGain());
+                                                         icpControllerParameters.scaleFeedbackWeightWithGain());
 
-      copFeedbackForwardWeight = new DoubleParameter(yoNamePrefix + "CoPFeedbackForwardWeight", registry, icpOptimizationParameters.getFeedbackForwardWeight());
-      copFeedbackLateralWeight = new DoubleParameter(yoNamePrefix + "CoPFeedbackLateralWeight", registry, icpOptimizationParameters.getFeedbackLateralWeight());
+      copFeedbackForwardWeight = new DoubleParameter(yoNamePrefix + "CoPFeedbackForwardWeight", registry, icpControllerParameters.getFeedbackForwardWeight());
+      copFeedbackLateralWeight = new DoubleParameter(yoNamePrefix + "CoPFeedbackLateralWeight", registry, icpControllerParameters.getFeedbackLateralWeight());
 
       copCMPFeedbackRateWeight = new DoubleParameter(yoNamePrefix + "CoPCMPFeedbackRateWeight",
                                                      registry,
-                                                     icpOptimizationParameters.getCoPCMPFeedbackRateWeight());
-      feedbackRateWeight = new DoubleParameter(yoNamePrefix + "FeedbackRateWeight", registry, icpOptimizationParameters.getFeedbackRateWeight());
+                                                     icpControllerParameters.getCoPCMPFeedbackRateWeight());
+      feedbackRateWeight = new DoubleParameter(yoNamePrefix + "FeedbackRateWeight", registry, icpControllerParameters.getFeedbackRateWeight());
 
-      feedbackGains = new ParameterizedICPControlGains("", icpOptimizationParameters.getICPFeedbackGains(), registry);
+      feedbackGains = new ParameterizedICPControlGains("", icpControllerParameters.getICPFeedbackGains(), registry);
 
-      dynamicsObjectiveWeight = new DoubleParameter(yoNamePrefix + "DynamicsObjectiveWeight", registry, icpOptimizationParameters.getDynamicsObjectiveWeight());
+      dynamicsObjectiveWeight = new DoubleParameter(yoNamePrefix + "DynamicsObjectiveWeight", registry, icpControllerParameters.getDynamicsObjectiveWeight());
 
-      cmpFeedbackWeight = new DoubleParameter(yoNamePrefix + "CMPFeedbackWeight", registry, icpOptimizationParameters.getAngularMomentumMinimizationWeight());
+      cmpFeedbackWeight = new DoubleParameter(yoNamePrefix + "CMPFeedbackWeight", registry, icpControllerParameters.getAngularMomentumMinimizationWeight());
 
-      feedbackDirectionWeight = new DoubleParameter(yoNamePrefix + "FeedbackDirectionWeight", registry, icpOptimizationParameters.getFeedbackDirectionWeight());
+      feedbackDirectionWeight = new DoubleParameter(yoNamePrefix + "FeedbackDirectionWeight", registry, icpControllerParameters.getFeedbackDirectionWeight());
 
       BooleanProvider useICPControlPolygons = new BooleanParameter(yoNamePrefix + "UseICPControlPolygons",
                                                                    registry,
-                                                                   icpOptimizationParameters.getUseICPControlPolygons());
+                                                                   icpControllerParameters.getUseICPControlPolygons());
       boolean hasICPControlPolygons = icpControlPolygons != null;
 
-      safeCoPDistanceToEdge = new DoubleParameter(yoNamePrefix + "SafeCoPDistanceToEdge", registry, icpOptimizationParameters.getSafeCoPDistanceToEdge());
-      double defaultMaxAllowedDistanceCMPSupport = walkingControllerParameters != null ? walkingControllerParameters.getMaxAllowedDistanceCMPSupport()
-                                                                                       : Double.NaN;
-      maxAllowedDistanceCMPSupport = new DoubleParameter(yoNamePrefix + "MaxAllowedDistanceCMPSupport", registry, defaultMaxAllowedDistanceCMPSupport);
+      safeCoPDistanceToEdge = new DoubleParameter(yoNamePrefix + "SafeCoPDistanceToEdge", registry, icpControllerParameters.getSafeCoPDistanceToEdge());
+      maxAllowedDistanceCMPSupport = new DoubleParameter(yoNamePrefix + "MaxAllowedDistanceCMPSupport", registry, icpControllerParameters.getMaxAllowedDistanceCMPSupport());
 
-      integrator = new AngularMomentumIntegrator(yoNamePrefix, icpOptimizationParameters, feedbackGains, controlDT, registry);
+      integrator = new AngularMomentumIntegrator(yoNamePrefix, icpControllerParameters, feedbackGains, controlDT, registry);
 
       int totalVertices = 0;
       for (RobotSide robotSide : RobotSide.values)

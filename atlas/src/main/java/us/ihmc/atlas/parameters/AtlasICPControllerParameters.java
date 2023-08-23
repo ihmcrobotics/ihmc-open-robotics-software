@@ -22,6 +22,13 @@ public class AtlasICPControllerParameters extends ICPControllerParameters
 
    /** {@inheritDoc} */
    @Override
+   public double getMaxAllowedDistanceCMPSupport()
+   {
+      return 0.04;
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public double getFeedbackLateralWeight()
    {
       return runningOnRealRobot ? 1.5 : 1.5;

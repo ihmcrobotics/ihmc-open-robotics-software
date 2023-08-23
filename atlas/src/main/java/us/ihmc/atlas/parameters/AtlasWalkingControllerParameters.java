@@ -467,12 +467,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return Double.POSITIVE_INFINITY; //0.075;
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public double getMaxAllowedDistanceCMPSupport()
-   {
-      return 0.04 * jointMap.getModelScale();
-   }
 
    /** {@inheritDoc} */
    @Override

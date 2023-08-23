@@ -564,20 +564,6 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * During normal execution the control algorithm computes a desired CMP. It is then projected in the
-    * support polygon to avoid angular momentum of the upper body. When the robot is falling and
-    * recovery is impossible otherwise, the support used for CMP projection can be increased and the
-    * robot uses upper body momentum. This value defines the amount the support polygon for CMP
-    * projection is increased in that case.
-    *
-    * @return maxAllowedDistanceCMPSupport
-    */
-   public double getMaxAllowedDistanceCMPSupport()
-   {
-      return Double.NaN;
-   }
-
-   /**
     * When true, some of the tracking performance will be degraded to reduce the generated angular
     * momentum rate around the vertical axis during swing only. Useful when the robot has heavy legs
     * and tends to slips during swing.

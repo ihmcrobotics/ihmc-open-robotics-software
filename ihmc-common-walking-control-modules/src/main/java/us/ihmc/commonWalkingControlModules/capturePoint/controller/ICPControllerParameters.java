@@ -143,6 +143,21 @@ public abstract class ICPControllerParameters
       return 0.06;
    }
 
+
+   /**
+    * During normal execution the control algorithm computes a desired CMP. It is then projected in the
+    * support polygon to avoid angular momentum of the upper body. When the robot is falling and
+    * recovery is impossible otherwise, the support used for CMP projection can be increased and the
+    * robot uses upper body momentum. This value defines the amount the support polygon for CMP
+    * projection is increased in that case.
+    *
+    * @return maxAllowedDistanceCMPSupport
+    */
+   public double getMaxAllowedDistanceCMPSupport()
+   {
+      return Double.NaN;
+   }
+
    public void createFeedForwardAlphaCalculator(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
    }

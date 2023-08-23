@@ -102,11 +102,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       return (target == RobotTarget.REAL_ROBOT ? 3.0 : 3.3) / Math.sqrt(jointMap.getModelScale()); // 3.3 seems more appropriate.
    }
 
-   @Override
-   public double getMaxAllowedDistanceCMPSupport()
-   {
-      return target == RobotTarget.REAL_ROBOT ? 0.0 : 0.04;
-   }
 
    @Override
    public boolean allowDisturbanceRecoveryBySpeedingUpSwing()

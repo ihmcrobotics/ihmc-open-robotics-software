@@ -90,4 +90,10 @@ public class ValkyrieICPControllerParameters extends ICPControllerParameters
    {
       return 0.001;
    }
+
+   @Override
+   public double getMaxAllowedDistanceCMPSupport()
+   {
+      return target == RobotTarget.REAL_ROBOT ? 0.0 : 0.04;
+   }
 }
