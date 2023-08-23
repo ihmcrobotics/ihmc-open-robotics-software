@@ -63,13 +63,11 @@ public class PerceptionFilterTools
       PlanarRegionsList planarRegionsList = framePlanarRegionsList.getPlanarRegionsList();
 
       List<PlanarRegion> filteredPlanarRegions = planarRegionsList.getPlanarRegionsAsList().parallelStream().filter(region ->
-                                                                                                                    {
-                                                                                                                       PlanarRegion regionInWorld = region.copy();
-                                                                                                                       regionInWorld.applyTransform(
-                                                                                                                             framePlanarRegionsList.getSensorToWorldFrameTransform());
-                                                                                                                       return collisionFilter.test(0,
-                                                                                                                                                   regionInWorld);
-                                                                                                                    }).toList();
+      {
+         PlanarRegion regionInWorld = region.copy();
+         regionInWorld.applyTransform(framePlanarRegionsList.getSensorToWorldFrameTransform());
+         return collisionFilter.test(0, regionInWorld);
+      }).toList();
 
       framePlanarRegionsList.getPlanarRegionsList().clear();
       framePlanarRegionsList.getPlanarRegionsList().addPlanarRegions(filteredPlanarRegions);
@@ -115,16 +113,12 @@ public class PerceptionFilterTools
       double minDot = Math.cos(Math.PI / 2.0 - angleFromNormal);
 
       List<PlanarRegion> filteredList = framePlanarRegionsList.getPlanarRegionsList().getPlanarRegionsAsList().parallelStream().filter(region ->
-                                                                                                                                       {
-                                                                                                                                          Vector3D vectorToRegion = new Vector3D(
-                                                                                                                                                region.getPoint());
-                                                                                                                                          vectorToRegion.normalize();
+      {
+         Vector3D vectorToRegion = new Vector3D(region.getPoint());
+         vectorToRegion.normalize();
 
-                                                                                                                                          return Math.abs(
-                                                                                                                                                vectorToRegion.dot(
-                                                                                                                                                      region.getNormal()))
-                                                                                                                                                 > minDot;
-                                                                                                                                       }).toList();
+         return Math.abs(vectorToRegion.dot(region.getNormal())) > minDot;
+      }).toList();
 
       framePlanarRegionsList.getPlanarRegionsList().clear();
       framePlanarRegionsList.getPlanarRegionsList().addPlanarRegions(filteredList);

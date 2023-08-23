@@ -18,6 +18,11 @@ public interface PerceptionConfigurationParametersBasics extends PerceptionConfi
       set(PerceptionConfigurationParameters.ousterThrottlerFrequency, ousterThrottlerFrequency);
    }
 
+   default void setOccupancyGridResolution(int occupancyGridResolution)
+   {
+      set(PerceptionConfigurationParameters.occupancyGridResolution, occupancyGridResolution);
+   }
+
    default void setRapidRegionsEnabled(boolean rapidRegionsEnabled)
    {
       set(PerceptionConfigurationParameters.rapidRegionsEnabled, rapidRegionsEnabled);
@@ -71,6 +76,11 @@ public interface PerceptionConfigurationParametersBasics extends PerceptionConfi
    default void setConcaveHullFilters(boolean concaveHullFilters)
    {
       set(PerceptionConfigurationParameters.concaveHullFilters, concaveHullFilters);
+   }
+
+   default void setShadowFilter(boolean shadowFilter)
+   {
+      set(PerceptionConfigurationParameters.shadowFilter, shadowFilter);
    }
 
    default void setActiveMapping(boolean activeMapping)
