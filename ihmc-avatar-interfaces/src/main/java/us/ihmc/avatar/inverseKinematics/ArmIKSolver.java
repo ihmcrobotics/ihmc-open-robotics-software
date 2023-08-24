@@ -27,6 +27,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
@@ -50,7 +51,7 @@ public class ArmIKSolver
    /** The gains of the solver depend on this dt, it shouldn't change based on the actual thread scheduled period. */
    public static final double CONTROL_DT = 0.001;
    public static final double GRAVITY = 9.81;
-   private static final int INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE = 10;
+   private static final int INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE = 50;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final ReferenceFrame armWorldFrame = ReferenceFrame.getWorldFrame();
@@ -137,8 +138,8 @@ public class ArmIKSolver
       weightMatrix.setLinearWeights(weight, weight, weight);
       weightMatrix.setAngularWeights(weight, weight, weight);
 
-      selectionMatrix.setLinearAxisSelection(true, true, true);
-      selectionMatrix.setAngularAxisSelection(true, true, true);
+      // selects everything
+      selectionMatrix.resetSelection();
 
       privilegedConfigurationCommand.setDefaultWeight(0.025);
       privilegedConfigurationCommand.setDefaultConfigurationGain(50.0);
@@ -208,19 +209,34 @@ public class ArmIKSolver
          // Feed the solution output back into the working joints to be the start state of the next compute.
          ControllerCoreOutput controllerCoreOutput = controllerCore.getControllerCoreOutput();
          JointDesiredOutputListReadOnly output = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();
+         boolean jointIsMoving = false;
          for (int j = 0; j < workingOneDoFJoints.length; j++)
          {
             if (output.hasDataForJoint(workingOneDoFJoints[j]))
             {
                JointDesiredOutputReadOnly jointDesiredOutput = output.getJointDesiredOutput(workingOneDoFJoints[j]);
-               workingOneDoFJoints[j].setQ(jointDesiredOutput.getDesiredPosition());
-               workingOneDoFJoints[j].setQd(jointDesiredOutput.getDesiredVelocity());
+               double desiredVelocity = jointDesiredOutput.getDesiredVelocity();
+               // we are wanting to move, so things haven't converged
+               if (Math.abs(desiredVelocity) > 1e-3)
+                  jointIsMoving = true;
+               // we need to integrate the velocity to get the desired poistion
+               double integratedPosition = workingOneDoFJoints[j].getQ() + CONTROL_DT * desiredVelocity;
+               // if the desired position is vastly different than the one integrated internally, don't use that.
+               if (AngleTools.computeAngleDifferenceMinusPiToPi(integratedPosition, jointDesiredOutput.getDesiredPosition()) > Math.toRadians(45.0))
+                  integratedPosition = jointDesiredOutput.getDesiredPosition();
+               workingOneDoFJoints[j].setQ(integratedPosition);
+               workingOneDoFJoints[j].setQd(desiredVelocity);
                if (jointDesiredOutput.hasDesiredTorque())
                {
                   workingOneDoFJoints[j].setTau(jointDesiredOutput.getDesiredTorque());
                }
             }
          }
+
+         // none of the joints are moving, so terminate the search early.
+         if (!jointIsMoving)
+            break;
+
          workChest.updateFramesRecursively();
       }
 
