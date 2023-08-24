@@ -8,12 +8,13 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import us.ihmc.behaviors.activeMapping.ActiveMappingModule;
+import us.ihmc.behaviors.activeMapping.ActiveMapper;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
+import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.tools.RDXModelBuilder;
@@ -32,25 +33,28 @@ public class RDXActiveMappingUI implements RenderableProvider
 
    private PerceptionConfigurationParameters perceptionConfigurationParameters;
    private ImGuiRemoteROS2StoredPropertySetGroup remotePropertySets;
-   private ActiveMappingModule activeMappingModule;
-   private ImGuiPanel imGuiPanel;
+   private ActiveMapper activeMapper;
+   private RDXPanel panel;
 
    private ArrayList<ModelInstance> gridCylinders = new ArrayList<>();
 
    private final ImBoolean renderEnabled = new ImBoolean(true);
 
-   public RDXActiveMappingUI(String name, ActiveMappingModule mappingManager)
-   {
-      this.activeMappingModule = mappingManager;
-      imGuiPanel = new ImGuiPanel(name, this::renderImGuiWidgets);
+   private PlanarRegionMap planarRegionMap;
 
-      for (int i = 0; i < activeMappingModule.getGridSize(); i++)
+   public RDXActiveMappingUI(String name, PlanarRegionMap planarRegionMap, ActiveMapper mappingManager)
+   {
+      this.planarRegionMap = planarRegionMap;
+      this.activeMapper = mappingManager;
+      panel = new RDXPanel(name, this::renderImGuiWidgets);
+
+      for (int i = 0; i < activeMapper.getGridSize(); i++)
       {
-         for (int j = 0; j < activeMappingModule.getGridSize(); j++)
+         for (int j = 0; j < activeMapper.getGridSize(); j++)
          {
             ModelInstance cylinderModel = RDXModelBuilder.createCylinder(0.02f, 0.03f, Color.BLUE);
-            cylinderModel.transform.setToTranslation(activeMappingModule.getGridOrigin().getX32() + i * activeMappingModule.getGridResolution(),
-                                                     activeMappingModule.getGridOrigin().getY32() + j * activeMappingModule.getGridResolution(),
+            cylinderModel.transform.setToTranslation(activeMapper.getGridOrigin().getX32() + i * activeMapper.getGridResolution(),
+                                                     activeMapper.getGridOrigin().getY32() + j * activeMapper.getGridResolution(),
                                                      0.0f);
             gridCylinders.add(cylinderModel);
          }
@@ -59,7 +63,7 @@ public class RDXActiveMappingUI implements RenderableProvider
 
    public RDXActiveMappingUI(String name, ROS2Helper ros2Helper)
    {
-      imGuiPanel = new ImGuiPanel(name, this::renderImGuiWidgets);
+      panel = new RDXPanel(name, this::renderImGuiWidgets);
       perceptionConfigurationParameters = new PerceptionConfigurationParameters();
       remotePropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper);
       remotePropertySets.registerRemotePropertySet(perceptionConfigurationParameters, PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS);
@@ -87,8 +91,8 @@ public class RDXActiveMappingUI implements RenderableProvider
          if (ImGui.button("Calculate Footstep Plan") || ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
          {
             LogTools.info("Triggered footstep plan calculation");
-            activeMappingModule.updateFootstepPlan();
-            activeMappingModule.setPlanAvailable(true);
+            activeMapper.updatePlan(planarRegionMap);
+            activeMapper.setPlanAvailable(true);
          }
       }
    }
@@ -101,16 +105,16 @@ public class RDXActiveMappingUI implements RenderableProvider
          {
             if (renderEnabled.get())
             {
-               mapPlanarRegionsGraphic.generateMeshes(activeMappingModule.getPlanarRegionMap().getMapRegions());
+               mapPlanarRegionsGraphic.generateMeshes(planarRegionMap.getMapRegions());
                mapPlanarRegionsGraphic.update();
             }
          }
       }
    }
 
-   public ImGuiPanel getImGuiPanel()
+   public RDXPanel getImGuiPanel()
    {
-      return imGuiPanel;
+      return panel;
    }
 
    @Override
@@ -127,9 +131,9 @@ public class RDXActiveMappingUI implements RenderableProvider
       }
    }
 
-   public ImGuiPanel getPanel()
+   public RDXPanel getPanel()
    {
-      return imGuiPanel;
+      return panel;
    }
 
    public void destroy()

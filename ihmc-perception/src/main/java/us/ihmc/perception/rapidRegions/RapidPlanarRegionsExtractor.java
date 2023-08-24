@@ -138,6 +138,7 @@ public class RapidPlanarRegionsExtractor
    {
       this(openCLManager, program, imageHeight, imageWidth, fx, fy, cx, cy, "");
    }
+
    /**
     * Creates buffers and kernels for the OpenCL program.
     *
@@ -173,12 +174,11 @@ public class RapidPlanarRegionsExtractor
 
    public RapidPlanarRegionsExtractor(OpenCLManager openCLManager, _cl_program program, int imageHeight, int imageWidth)
    {
+      this.sensorModel = SensorModel.SPHERICAL;
       this.openCLManager = openCLManager;
       this.planarRegionExtractionProgram = program;
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
-
-      sensorModel = SensorModel.SPHERICAL;
 
       this.parameters = new RapidRegionsExtractorParameters("Spherical");
 

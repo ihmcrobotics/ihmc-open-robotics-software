@@ -12,13 +12,12 @@ import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
-import imgui.type.ImBoolean;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.rdx.RDXFocusBasedCamera;
-import us.ihmc.rdx.imgui.ImGuiPanel;
-import us.ihmc.rdx.imgui.ImGuiPanelSizeHandler;
+import us.ihmc.rdx.imgui.RDXPanel;
+import us.ihmc.rdx.imgui.RDXPanelSizeHandler;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.RDXInputMode;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -34,10 +33,10 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class RDX3DPanel extends ImGuiPanel
+public class RDX3DPanel extends RDXPanel
 {
    public static final int OVERLAY_BACKGROUND_COLOR = new Color(1.0f, 1.0f, 1.0f, 0.5f).toIntBits();
-   private final ImGuiPanelSizeHandler view3DPanelSizeHandler = new ImGuiPanelSizeHandler();
+   private final RDXPanelSizeHandler view3DPanelSizeHandler = new RDXPanelSizeHandler();
    private final String panelName;
    private final int antiAliasing;
    private RDX3DScene scene;

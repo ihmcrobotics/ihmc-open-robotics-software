@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Pool;
 import org.bytedeco.javacpp.BytePointer;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.shader.RDXShader;
 import us.ihmc.rdx.shader.RDXUniform;
@@ -75,43 +76,53 @@ public class RDXHeightMapRenderer implements RenderableProvider
       intermediateVertexBuffer = new float[totalCells * FLOATS_PER_CELL];
    }
 
-   public void update(BytePointer heightMapPointer, int gridLength, int gridWidth, float cellSizeXYInMeters)
+   public void update(BytePointer heightMapPointer, Point2DReadOnly center, int centerIndex, float cellSizeXYInMeters)
    {
-      LogTools.info("Rendering Height Map: {} {} {}", gridLength, gridWidth, cellSizeXYInMeters);
+      int cellsPerAxis = 2 * centerIndex + 1;
+      LogTools.info("Rendering Height Map: {} {} {}", cellsPerAxis, cellsPerAxis, cellSizeXYInMeters);
 
-      float maxHeight = 0.7f;
+      float maxHeight = 2.0f;
       float minHeight = 0.0f;
 
-      for (int i = 0; i < gridLength; i++)
+      for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
       {
-         for (int j = 0; j < gridWidth; j++)
+         double xPosition = indexToCoordinate(xIndex, center.getX(), cellSizeXYInMeters, centerIndex);
+
+         for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
          {
-            int heightIndex = i * gridWidth + j;
+            int heightIndex = xIndex * cellsPerAxis + yIndex;
             int vertexIndex = heightIndex * FLOATS_PER_CELL;
-            float cellHeight = (float) (heightMapPointer.getShort(heightIndex * 2L)) / 10000.0f;
+            float cellHeight = (float) (heightMapPointer.getShort(heightIndex * 2L) / 10000.0f);
             cellHeight = (float) MathTools.clamp(cellHeight, minHeight, maxHeight);
             if (cellHeight > maxHeight - 0.01f)
                cellHeight = 0.0f;
 
+            double yPosition = indexToCoordinate(yIndex, center.getY(), cellSizeXYInMeters, centerIndex);
+
             // Position
-            intermediateVertexBuffer[vertexIndex] = ((float) gridLength / 2 - i) * cellSizeXYInMeters;
-            intermediateVertexBuffer[vertexIndex + 1] = ((float) gridWidth / 2 - j) * cellSizeXYInMeters;
+            intermediateVertexBuffer[vertexIndex] = (float) xPosition;
+            intermediateVertexBuffer[vertexIndex + 1] = (float) yPosition;
             intermediateVertexBuffer[vertexIndex + 2] = cellHeight;
 
             // Color (0.0 to 1.0)
             float heightRatio = (cellHeight / maxHeight);
             intermediateVertexBuffer[vertexIndex + 3] = Math.abs(1.0f - heightRatio);
-            intermediateVertexBuffer[vertexIndex + 4] = Math.abs(1.0f - heightRatio * 0.123f);
+            intermediateVertexBuffer[vertexIndex + 4] = Math.max(100.0f * heightRatio, 1.0f);
             intermediateVertexBuffer[vertexIndex + 5] = Math.abs(1.0f - heightRatio);
-            intermediateVertexBuffer[vertexIndex + 6] = Math.abs(0.3f + 0.5f * heightRatio);
+            intermediateVertexBuffer[vertexIndex + 6] = Math.abs(0.3f + 10.0f * heightRatio);
 
             // Size
-            intermediateVertexBuffer[vertexIndex + 7] = 0.03f;
+            intermediateVertexBuffer[vertexIndex + 7] = 0.02f;
          }
       }
 
       renderable.meshPart.size = totalCells;
       renderable.meshPart.mesh.setVertices(intermediateVertexBuffer, 0, totalCells * FLOATS_PER_CELL);
+   }
+
+   public static double indexToCoordinate(int index, double gridCenter, double resolution, int centerIndex)
+   {
+      return (index - centerIndex) * resolution + gridCenter;
    }
 
    public FloatBuffer getVertexBuffer()

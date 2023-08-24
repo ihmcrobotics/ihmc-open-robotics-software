@@ -11,7 +11,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
  * TODO:
  *   - Add collision information
  */
-public class PredefinedRigidBodySceneNode extends DetectableSceneNode
+public abstract class PredefinedRigidBodySceneNode extends DetectableSceneNode
 {
    private final String visualModelFilePath;
    private final RigidBodyTransform visualModelToNodeFrameTransform;

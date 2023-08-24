@@ -15,6 +15,7 @@ import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,10 +32,12 @@ public class MeshBasedContactDetector
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private double contactThreshold = 0.02;
+   private final YoBoolean isContactDetected = new YoBoolean("isContactDetected", registry);
    private final BoundingBox3D shapeBoundingBoxInWorld = new BoundingBox3D();
-   private List<FrameShape3DBasics> environmentShapes = null;
+   private List<? extends FrameShape3DBasics> environmentShapes = null;
 
    private final List<RigidBodyBasics> contactableRigidBodies = new ArrayList<>();
+   private final Map<RigidBodyBasics, YoBoolean> contactDetectedMap = new HashMap<>();
    private final Map<RigidBodyBasics, List<Collidable>> collidableMap;
    private final Map<RigidBodyBasics, List<YoDetectedContactPoint>> contactPointMap = new HashMap<>();
 
@@ -43,9 +46,9 @@ public class MeshBasedContactDetector
    private final RigidBodyTransform robotToEnvironmentTransform = new RigidBodyTransform();
    private final RigidBodyTransform environmentToRobotTransform = new RigidBodyTransform();
 
-   private final FramePoint3D tempContactPointA = new FramePoint3D();
-   private final FramePoint3D tempContactPointB = new FramePoint3D();
-   private final FrameVector3D tempSurfaceNormal = new FrameVector3D();
+   private final FramePoint3D contactPointOnRobotSurface = new FramePoint3D();
+   private final FramePoint3D contactPointOnEnvironmentSurface = new FramePoint3D();
+   private final FrameVector3D robotSurfaceNormal = new FrameVector3D();
 
    public MeshBasedContactDetector(List<Collidable> robotCollidables)
    {
@@ -65,15 +68,20 @@ public class MeshBasedContactDetector
          }
 
          this.contactPointMap.put(rigidBody, contactPoints);
+         this.contactDetectedMap.put(rigidBody, new YoBoolean("contactDetected" + rigidBody.getName(), registry));
       }
    }
 
    public void update()
    {
       /* Reset all contact points */
+      isContactDetected.set(false);
+
       for (int i = 0; i < contactableRigidBodies.size(); i++)
       {
          RigidBodyBasics rigidBody = contactableRigidBodies.get(i);
+
+         contactDetectedMap.get(rigidBody).set(false);
          List<YoDetectedContactPoint> visualization = contactPointMap.get(rigidBody);
          for (int j = 0; j < visualization.size(); j++)
          {
@@ -97,6 +105,7 @@ public class MeshBasedContactDetector
          for (int j = 0; j < collidables.size(); j++)
          {
             Collidable robotCollidable = collidables.get(j);
+            RigidBodyBasics rigidBody = robotCollidable.getRigidBody();
 
             robotCollidable.getShape().getReferenceFrame().update();
             robotCollidable.getShape().getBoundingBox(ReferenceFrame.getWorldFrame(), shapeBoundingBoxInWorld);
@@ -113,6 +122,8 @@ public class MeshBasedContactDetector
                if (doCollisionCheck(robotCollidable.getShape(), environmentShape, contactPoints.get(contactPointsDetected)))
                { // full collision check
                   contactPointsDetected++;
+                  isContactDetected.set(true);
+                  contactDetectedMap.get(rigidBody).set(true);
                   break;
                }
             }
@@ -135,21 +146,27 @@ public class MeshBasedContactDetector
       environmentShape.applyTransform(environmentToRobotTransform);
       environmentShape.setReferenceFrame(robotShapeFrame);
 
-      collisionDetector.evaluateCollision(environmentShape, robotShape, collisionResult);
+      FrameShape3DReadOnly shapeA = environmentShape;
+      FrameShape3DReadOnly shapeB = robotShape;
+      collisionDetector.evaluateCollision(shapeA, shapeB, collisionResult);
 
       boolean contactDetected = collisionResult.getSignedDistance() < contactThreshold;
       if (contactDetected)
       {
-         tempContactPointA.setIncludingFrame(robotShapeFrame, collisionResult.getPointOnB());
-         environmentShape.evaluatePoint3DCollision(tempContactPointA, tempContactPointB, tempSurfaceNormal);
+         contactPointOnEnvironmentSurface.setIncludingFrame(robotShapeFrame, collisionResult.getPointOnA());
+         contactPointOnRobotSurface.setIncludingFrame(robotShapeFrame, collisionResult.getPointOnB());
+         robotSurfaceNormal.setIncludingFrame(robotShapeFrame, collisionResult.getNormalOnB());
 
-         tempContactPointA.setReferenceFrame(robotShapeFrame);
-         tempSurfaceNormal.setReferenceFrame(robotShapeFrame);
-         tempContactPointA.changeFrame(ReferenceFrame.getWorldFrame());
-         tempSurfaceNormal.changeFrame(ReferenceFrame.getWorldFrame());
+         contactPointOnRobotSurface.changeFrame(ReferenceFrame.getWorldFrame());
+         contactPointOnEnvironmentSurface.changeFrame(ReferenceFrame.getWorldFrame());
+         robotSurfaceNormal.changeFrame(ReferenceFrame.getWorldFrame());
 
-         contactPointToSet.getContactPointPosition().set(tempContactPointA);
-         contactPointToSet.getContactPointNormal().set(tempSurfaceNormal);
+         contactPointToSet.getContactPointPosition().set(contactPointOnRobotSurface);
+         contactPointToSet.getContactPointNormal().set(robotSurfaceNormal);
+         contactPointToSet.getEnvironmentProjectionPoint().set(contactPointOnEnvironmentSurface);
+         contactPointToSet.setRobotEnvironmentSignedDistance(collisionResult.getSignedDistance());
+         contactPointToSet.setRobotShape(robotShape);
+         contactPointToSet.setEnvironmentShape(environmentShape);
       }
 
       environmentShape.applyTransform(robotToEnvironmentTransform);
@@ -174,6 +191,16 @@ public class MeshBasedContactDetector
       return group;
    }
 
+   public boolean isContactDetected()
+   {
+      return isContactDetected.getValue();
+   }
+
+   public boolean isContactDetected(RigidBodyBasics rigidBody)
+   {
+      return contactDetectedMap.get(rigidBody).getValue();
+   }
+
    public List<RigidBodyBasics> getContactableRigidBodies()
    {
       return contactableRigidBodies;
@@ -184,7 +211,7 @@ public class MeshBasedContactDetector
       return contactPointMap;
    }
 
-   public void setEnvironmentShapes(List<FrameShape3DBasics> environmentShapes)
+   public void setEnvironmentShapes(List<? extends FrameShape3DBasics> environmentShapes)
    {
       this.environmentShapes = environmentShapes;
    }

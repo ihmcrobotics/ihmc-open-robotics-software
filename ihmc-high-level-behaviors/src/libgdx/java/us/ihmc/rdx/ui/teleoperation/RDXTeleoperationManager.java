@@ -18,13 +18,13 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetDoubleWidget;
-import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
+import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.*;
@@ -72,7 +72,7 @@ import java.util.Set;
  * <li>Possibly extract simple controller controls to a smaller panel class, like remote safety controls or something.</li>
  * </ul>
  */
-public class RDXTeleoperationManager extends ImGuiPanel
+public class RDXTeleoperationManager extends RDXPanel
 {
    RDXBaseUI baseUI;
 
@@ -84,7 +84,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final RDXTeleoperationParameters teleoperationParameters;
-   private final ImGuiStoredPropertySetTuner teleoperationParametersTuner = new ImGuiStoredPropertySetTuner("Teleoperation Parameters");
+   private final RDXStoredPropertySetTuner teleoperationParametersTuner = new RDXStoredPropertySetTuner("Teleoperation Parameters");
    private final RDXRobotLowLevelMessenger robotLowLevelMessenger;
 
    private final RDXPelvisHeightSlider pelvisHeightSlider;
@@ -280,11 +280,15 @@ public class RDXTeleoperationManager extends ImGuiPanel
          interactablesEnabled.set(true);
       }
 
-      // STAND PREP
       RDX3DPanelToolbarButton standPrepButton = baseUI.getPrimary3DPanel().addToolbarButton();
       standPrepButton.loadAndSetIcon("icons/standPrep.png");
       standPrepButton.setOnPressed(robotLowLevelMessenger::sendStandRequest);
       standPrepButton.setTooltipText("Stand prep");
+
+      RDX3DPanelToolbarButton deleteAllInteractablesButton = baseUI.getPrimary3DPanel().addToolbarButton();
+      deleteAllInteractablesButton.loadAndSetIcon("icons/deleteAll.png");
+      deleteAllInteractablesButton.setOnPressed(this::clearInteractablesAndLocomotionGraphics);
+      deleteAllInteractablesButton.setTooltipText("Delete All Interactables (Keybind: Ctrl + L)");
 
       baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
    }
@@ -439,19 +443,18 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       robotLowLevelMessenger.renderImGuiWidgets();
 
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Delete all Interactables")) || ImGui.getIO().getKeyCtrl() && ImGui.isKeyReleased('L'))
-      {
-         clearInteractablesAndLocomotionGraphics();
-      }
-      ImGuiTools.previousWidgetTooltip("Keybind: Ctrl + L");
-
       pelvisHeightSlider.renderImGuiWidgets();
       chestPitchSlider.renderImGuiWidgets();
       chestYawSlider.renderImGuiWidgets();
 
       trajectoryTimeSlider.renderImGuiWidget();
 
+      if (ImGui.button(labels.get("Delete all Interactables")) || ImGui.getIO().getKeyCtrl() && ImGui.isKeyReleased('L'))
+      {
+         clearInteractablesAndLocomotionGraphics();
+      }
+      ImGuiTools.previousWidgetTooltip("Keybind: Ctrl + L");
+      ImGui.sameLine();
       if (interactablesAvailable)
       {
          ImGui.checkbox("Interactables Enabled", interactablesEnabled);

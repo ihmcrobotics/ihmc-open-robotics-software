@@ -15,7 +15,7 @@ public class WaypointBasedTrajectoryMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5e35bf5bdcefd118c7804803b7ff756b0ea5146cf20ad2b51ad3aa9978a5a9fa";
+   		return "eb99ad6e49d2edb9d2644f6eabde984f7ffe482272c4a119bd23134393cc7bf4";
    }
    
    @Override
