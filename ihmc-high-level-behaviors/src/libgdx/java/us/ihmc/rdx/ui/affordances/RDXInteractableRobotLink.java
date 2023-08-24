@@ -10,6 +10,7 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -57,8 +58,8 @@ public class RDXInteractableRobotLink
    /** Used for the hands especially, which have 3 frames each. */
    public void create(RDXRobotCollidable robotCollidable,
                       ReferenceFrame syncedControlFrame,
-                      RigidBodyTransform graphicToControlFrameTransform,
-                      RigidBodyTransform linkToControlFrameTransform,
+                      RigidBodyTransformReadOnly graphicToControlFrameTransform,
+                      RigidBodyTransformReadOnly linkToControlFrameTransform,
                       String modelFileName,
                       RDX3DPanel panel3D)
    {

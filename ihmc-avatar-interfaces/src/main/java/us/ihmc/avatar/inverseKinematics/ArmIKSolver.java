@@ -93,10 +93,9 @@ public class ArmIKSolver
 
       // Set the control frame pose to our palm centered control frame.
       // The spatial feedback command wants this relative to the fixed CoM of the hand link.
-      RigidBodyTransform handControlToBodyFixedCoMFrameTransform = new RigidBodyTransform();
-      HandTransformTools.getHandControlToBodyFixedCoMFrameTransform(syncedRobot, side, handControlToBodyFixedCoMFrameTransform);
-      controlFramePose.setToZero(workHand.getBodyFixedFrame());
-      controlFramePose.set(handControlToBodyFixedCoMFrameTransform);
+      FramePose3D tempPose = new FramePose3D(syncedRobot.getHandControlFrame(side));
+      tempPose.changeFrame(syncedRobot.getHand(side).getBodyFixedFrame());
+      controlFramePose.setIncludingFrame(workHand.getBodyFixedFrame(), tempPose);
 
       workingOneDoFJoints = MultiBodySystemMissingTools.getSubtreeJointArray(OneDoFJointBasics.class, workChest);
 
