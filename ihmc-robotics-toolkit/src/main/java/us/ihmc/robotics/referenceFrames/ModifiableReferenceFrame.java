@@ -63,7 +63,10 @@ public class ModifiableReferenceFrame
          LogTools.error("Parent frame has been removed! {}", parentFrame.getName());
       }
 
-      referenceFrame.remove();
+      // We can't remove these because we need the getTransformToDesiredFrame to work later
+      // for the "changeParentFrameWithoutMoving" functionality. Maybe the GC automatically
+      // makes this a non-issue though.
+      // referenceFrame.remove();
       referenceFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(frameName, parentFrame, transformToParent);
    }
 
@@ -78,7 +81,11 @@ public class ModifiableReferenceFrame
    {
       RigidBodyTransform newTransformToParent = new RigidBodyTransform();
       referenceFrame.getTransformToDesiredFrame(newTransformToParent, parentFrame);
-      referenceFrame.remove();
+
+      // We can't remove these because we need the getTransformToDesiredFrame to work later
+      // for the "changeParentFrameWithoutMoving" functionality. Maybe the GC automatically
+      // makes this a non-issue though.
+      // referenceFrame.remove();
       transformToParent.set(newTransformToParent);
       referenceFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(frameName, parentFrame, transformToParent);
    }
