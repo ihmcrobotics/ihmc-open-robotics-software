@@ -868,6 +868,7 @@ public class PlanarRegionMap
             // Region has not been matched enough
             boolean regionIsBad =
                   (currentTimeIndex - region.getTickOfLastMeasurement() > 3) && (region.getNumberOfTimesMatched() < 2) && (region.getRegionId() > 1);
+
             if (!regionIsBad)
             {
                processedMap.addPlanarRegion(region);

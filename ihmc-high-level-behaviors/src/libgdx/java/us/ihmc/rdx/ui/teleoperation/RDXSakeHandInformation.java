@@ -20,6 +20,8 @@ public class RDXSakeHandInformation
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiFlashingText calibrateStatusText = new ImGuiFlashingText(ImGuiTools.RED);
    private final ImGuiFlashingText needResetStatusText = new ImGuiFlashingText(ImGuiTools.RED);
+   private boolean calibrated = true;
+   private boolean needsReset = false;
 
    public RDXSakeHandInformation(RobotSide side, CommunicationHelper communicationHelper)
    {
@@ -30,6 +32,12 @@ public class RDXSakeHandInformation
                                                   message -> message.getRobotSide() == side.toByte());
    }
 
+   public void update()
+   {
+      calibrated = statusInput.getLatest().getCalibrated();
+      needsReset = statusInput.getLatest().getNeedsReset();
+   }
+
    public void renderImGuiWidgets()
    {
       ImGui.text(side.getPascalCaseName() + ":");
@@ -38,12 +46,10 @@ public class RDXSakeHandInformation
       {
          ImGui.text("Calibrated:");
          ImGui.sameLine();
-         boolean calibrated = statusInput.getLatest().getCalibrated();
          calibrateStatusText.renderText(Boolean.toString(calibrated), !calibrated);
          ImGui.sameLine();
          ImGui.text("Needs reset:");
          ImGui.sameLine();
-         boolean needsReset = statusInput.getLatest().getNeedsReset();
          needResetStatusText.renderText(Boolean.toString(needsReset), needsReset);
          ImGui.sameLine();
          ImGui.text("Temperature: " + FormattingTools.getFormattedDecimal1D(statusInput.getLatest().getTemperature()));
@@ -61,5 +67,15 @@ public class RDXSakeHandInformation
          communicationHelper.publish(ROS2Tools.getControllerInputTopic(communicationHelper.getRobotName()).withTypeName(HandSakeDesiredCommandMessage.class),
                                      sakeCommand);
       }
+   }
+
+   public boolean getCalibrated()
+   {
+      return calibrated;
+   }
+
+   public boolean getNeedsReset()
+   {
+      return needsReset;
    }
 }
