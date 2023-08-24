@@ -13,7 +13,6 @@ import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXSpatialVectorArrows;
 import us.ihmc.rdx.vr.RDXVRContext;
-import us.ihmc.rdx.vr.RDXVRDragData;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -37,7 +36,6 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
    private RDXSpatialVectorArrows sensorWristWrenchArrows;
    private final RDXSpatialVectorArrows estimatedHandWrenchArrows;
    private final String contextMenuName;
-   private final SideDependentList<Boolean> wasVRPointing = new SideDependentList<>(false, false);
    private Runnable openHand;
    private Runnable closeHand;
    private Runnable gotoDoorAvoidanceArmAngles;
@@ -135,33 +133,19 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
       return estimatedHandWrenchArrows;
    }
 
-   public void calculateVRPick(RDXVRContext vrContext, boolean isHand)
-   {
-      for (RobotSide side : RobotSide.values)
-      {
-         vrContext.getController(side).runIfConnected(controller ->
-         {
-            if (!controller.getTriggerDragData().isDraggingSomething())
-            {
-               super.calculateVRPick(vrContext, true);
-            }
-         });
-      }
-   }
-
    public void processVRInput(RDXVRContext vrContext)
    {
       super.processVRInput(vrContext);
+
       for (RobotSide side : RobotSide.values)
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
-            InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
-            RDXVRDragData gripDragData = controller.getGripDragData();
-            if (isVRPointing() || gripDragData.getObjectBeingDragged() == this)
+            if (isVRPointing(side) || isVRHovering(side) || controller.getGripDragData().isBeingDragged(this))
             {
-               wasVRPointing.put(side, true);
                controller.controlOfRadialMenu("Open Hand", "Close Hand", "Door Avoidance", "Home Position");
+
+               InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
                if (joystickButton.bChanged() && joystickButton.bState())
                {
                   Runnable radialMenuRunnable = controller.getRadialMenuRunnable(openHand, closeHand, gotoDoorAvoidanceArmAngles, gotoArmHome);
@@ -169,17 +153,16 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
                      radialMenuRunnable.run();
                }
             }
-            else if (controller.getSelectedPick() == null && !controller.anythingElseBeingDragged(this) && wasVRPointing.get(side))
+            else if (controller.getSelectedPick() == null && !controller.anythingElseBeingDragged(this))
             {
                controller.hideRadialMenuBox();
-               wasVRPointing.put(side, false);
             }
             else
             {
                controller.setRadialMenuSelection(null);
             }
             
-            controller.setRadialMenuBoxPosition(isVRPointing());
+            controller.setRadialMenuBoxPosition(isVRPointing(side));
          });
       }
    }

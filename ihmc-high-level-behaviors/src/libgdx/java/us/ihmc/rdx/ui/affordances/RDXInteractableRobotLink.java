@@ -7,7 +7,6 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.ImGui;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -21,6 +20,7 @@ import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRDragData;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 
@@ -46,8 +46,8 @@ public class RDXInteractableRobotLink
    private Runnable onSpacePressed;
    private boolean isMouseHovering;
    private final Notification contextMenuNotification = new Notification();
-   private boolean isVRHovering;
-   private boolean isVRPointing;
+   private final SideDependentList<Boolean> isVRHovering = new SideDependentList<>(false, false);
+   private final SideDependentList<Boolean> isVRPointing = new SideDependentList<>(false, false);
    private final Notification becomesModified = new Notification();
 
    /** For when the graphic, the link, and control frame are all the same. */
@@ -95,7 +95,11 @@ public class RDXInteractableRobotLink
 
       highlightModel.setPose(graphicFrame);
 
-      if (modified && !selectablePose3DGizmo.isSelected() && (isMouseHovering || isVRHovering))
+      if (modified && !selectablePose3DGizmo.isSelected() && (isMouseHovering
+                                                           || isVRHovering.get(RobotSide.LEFT)
+                                                           || isVRHovering.get(RobotSide.RIGHT)
+                                                           || isVRPointing.get(RobotSide.LEFT)
+                                                           || isVRPointing.get(RobotSide.RIGHT)))
       {
          highlightModel.setTransparency(0.7);
       }
@@ -103,40 +107,45 @@ public class RDXInteractableRobotLink
       {
          highlightModel.setTransparency(0.5);
       }
+
+      for (RobotSide side : RobotSide.values)
+      {
+         isVRHovering.put(side, false);
+         isVRPointing.put(side, false);
+      }
+      isMouseHovering = false;
    }
 
-   public void calculateVRPick(RDXVRContext vrContext, boolean isHand)
+   public void calculateVRPick(RDXVRContext vrContext)
    {
       for (RDXRobotCollidable robotCollidable : robotCollidables)
       {
-         robotCollidable.calculateVRPick(vrContext, isHand);
+         robotCollidable.calculateVRPick(vrContext);
       }
    }
 
    public void processVRInput(RDXVRContext vrContext)
    {
-      isVRHovering = false;
-      isVRPointing = false;
-
       for (RobotSide side : RobotSide.values)
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
-            boolean isHovering = false;
-            boolean isPointing = false;
             for (RDXRobotCollidable robotCollidable : robotCollidables)
             {
-               isHovering |= robotCollidable.getVRHovering(side);
-               isPointing |= robotCollidable.getVRPointing(side);
+               if (robotCollidable.getVRHovering(side))
+                  isVRHovering.put(side, true);
+               if (robotCollidable.getVRPointing(side))
+                  isVRPointing.put(side, true);
             }
-            isVRHovering |= isHovering;
-            isVRPointing |= isPointing;
 
             RDXVRDragData gripDragData = controller.getGripDragData();
             InputDigitalActionData aButton = controller.getAButtonActionData();
             InputDigitalActionData bButton = controller.getBButtonActionData();
 
-            if (isHovering || gripDragData.getObjectBeingDragged() == this)
+            // We want the delete and execute buttons to work when dragging, but
+            // sometimes it's not hovering while dragging due to lag, so we also
+            // enter this block if it's just being dragged.
+            if (isVRHovering.get(side) || gripDragData.isBeingDragged(this))
             {
                if (gripDragData.getDragJustStarted())
                {
@@ -176,7 +185,6 @@ public class RDXInteractableRobotLink
 
    public boolean process3DViewInput(ImGui3DViewInput input)
    {
-      isMouseHovering = false;
       for (RDXRobotCollidable robotCollidable : robotCollidables)
       {
          isMouseHovering |= robotCollidable.getMouseHovering();
@@ -280,14 +288,14 @@ public class RDXInteractableRobotLink
       return selectablePose3DGizmo.getPoseGizmo().getGizmoFrame();
    }
 
-   public boolean isVRHovering()
+   public boolean isVRPointing(RobotSide side)
    {
-      return isVRHovering;
+      return isVRPointing.get(side);
    }
 
-   public boolean isVRPointing()
+   public boolean isVRHovering(RobotSide side)
    {
-      return isVRPointing;
+      return isVRHovering.get(side);
    }
 
    public Notification getBecomesModified()

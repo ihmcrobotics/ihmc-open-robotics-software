@@ -58,6 +58,10 @@ public class RDXRobotCollidable implements RenderableProvider
    private final SideDependentList<Boolean> isVRHovering = new SideDependentList<>(false, false);
    private final SideDependentList<Boolean> isVRPointing = new SideDependentList<>(false, false);
    private final RDXModelInstance pickRayCollisionPointGraphic;
+   private boolean ranVRCalculateInput = false;
+   private boolean ranVRProcessInput = false;
+   private boolean ranMouseCalculateInput = false;
+   private boolean ranMouseProcessInput = false;
 
    public RDXRobotCollidable(us.ihmc.scs2.simulation.collision.Collidable collidable, int collidableIndex, Color color)
    {
@@ -181,83 +185,110 @@ public class RDXRobotCollidable implements RenderableProvider
       collisionShapeCoordinateFrameGraphic.setTransformToReferenceFrame(collisionShapeFrame.getReferenceFrame());
 
       isHoveredByAnything = false;
+      for (RobotSide side : RobotSide.values)
+      {
+         isVRPointing.set(side, false);
+         isVRHovering.set(side, false);
+      }
+      // The robot collidables are shared by things, so we only want to do
+      // these at most once per frame each.
+      ranVRCalculateInput = false;
+      ranVRProcessInput = false;
+      ranMouseCalculateInput = false;
+      ranMouseProcessInput = false;
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
    {
-      calculateVRPick(vrContext, false);
-   }
-
-   public void calculateVRPick(RDXVRContext vrContext, boolean isInteractable)
-   {
-      for (RobotSide side : RobotSide.values)
+      if (!ranVRCalculateInput)
       {
-         vrContext.getController(side).runIfConnected(controller ->
+         ranVRCalculateInput = true;
+
+         for (RobotSide side : RobotSide.values)
          {
-            // The shape has the offsets from link frame built in.
-            // Do the collisions in link frame.
-            shape.setReferenceFrame(linkFrame);
-
-            boolean isInside = pointCollidable.collide(controller.getPickPointPose().getPosition());
-            LibGDXTools.toLibGDX(pointCollidable.getClosestPointOnSurface(), pickRayCollisionPointGraphic.transform);
-
-            if (isInside)
+            vrContext.getController(side).runIfConnected(controller ->
             {
-               vrPickResult.get(side).setDistanceToControllerPickPoint(pointCollidable.getSignedDistanceToSurface());
-               pickRayCollisionPointGraphic.setColor(ColorDefinitions.Green());
-               controller.addPickResult(vrPickResult.get(side));
-            }
-            else
-            {
-               pickRayCollisionPointGraphic.setColor(ColorDefinitions.White());
-
-               // Do the pick ray 2nd so we can only do one
-               if (!controller.getTriggerDragData().isDraggingSomething() && isInteractable)
+               if (!controller.anythingElseBeingDragged(this))
                {
-                  Line3DReadOnly pickRay = controller.getPickRay();
-                  double collision = vrPickRayCollidable.collide(pickRay, collisionShapeFrame.getReferenceFrame());
-                  if (!Double.isNaN(collision))
+                  // The shape has the offsets from link frame built in.
+                  // Do the collisions in link frame.
+                  shape.setReferenceFrame(linkFrame);
+
+                  boolean isInside = pointCollidable.collide(controller.getPickPointPose().getPosition());
+                  LibGDXTools.toLibGDX(pointCollidable.getClosestPointOnSurface(), pickRayCollisionPointGraphic.transform);
+
+                  if (isInside)
                   {
-                     vrPickResult.get(side).setDistanceToControllerPickPoint(collision);
+                     vrPickResult.get(side).setDistanceToControllerPickPoint(pointCollidable.getSignedDistanceToSurface());
+                     pickRayCollisionPointGraphic.setColor(ColorDefinitions.Green());
                      controller.addPickResult(vrPickResult.get(side));
                   }
+                  else
+                  {
+                     pickRayCollisionPointGraphic.setColor(ColorDefinitions.White());
+
+                     // Do the pick ray 2nd so we can only do one
+                     Line3DReadOnly pickRay = controller.getPickRay();
+                     double collision = vrPickRayCollidable.collide(pickRay, collisionShapeFrame.getReferenceFrame());
+                     if (!Double.isNaN(collision))
+                     {
+                        vrPickResult.get(side).setDistanceToControllerPickPoint(collision);
+                        controller.addPickResult(vrPickResult.get(side));
+                     }
+                  }
                }
-            }
-         });
+            });
+         }
       }
    }
 
    public void processVRInput(RDXVRContext vrContext)
    {
-      for (RobotSide side : RobotSide.values)
+      if (!ranVRProcessInput)
       {
-         boolean isPointing = vrContext.getController(side).getSelectedPick() == vrPickResult.get(side);
-         boolean isHovering =
-               vrContext.getController(side).getSelectedPick() == vrPickResult.get(side) && vrPickResult.get(side).getDistanceToControllerPickPoint() <= 0.0;
-         isVRPointing.set(side, isPointing);
-         isVRHovering.set(side, isHovering);
-         isHoveredByAnything |= isHovering;
+         ranVRProcessInput = true;
+
+         for (RobotSide side : RobotSide.values)
+         {
+            boolean pickSelected = vrContext.getController(side).getSelectedPick() == vrPickResult.get(side);
+            boolean isHovering = pickSelected && vrPickResult.get(side).getDistanceToControllerPickPoint() <= 0.0;
+            boolean isPointing = pickSelected && !isHovering;
+            isVRPointing.set(side, isPointing);
+            isVRHovering.set(side, isHovering);
+            isHoveredByAnything |= isHovering;
+            isHoveredByAnything |= isPointing;
+         }
       }
    }
 
    public void calculatePick(ImGui3DViewInput input)
    {
-      Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
-      pickResult.reset();
-      double collision = mouseCollidable.collide(pickRayInWorld, collisionShapeFrame.getReferenceFrame());
-      if (!Double.isNaN(collision))
-         pickResult.addPickCollision(collision);
-
-      if (pickResult.getPickCollisionWasAddedSinceReset())
+      if (!ranMouseCalculateInput)
       {
-         input.addPickResult(pickResult);
+         ranMouseCalculateInput = true;
+
+         Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
+         pickResult.reset();
+         double collision = mouseCollidable.collide(pickRayInWorld, collisionShapeFrame.getReferenceFrame());
+         if (!Double.isNaN(collision))
+            pickResult.addPickCollision(collision);
+
+         if (pickResult.getPickCollisionWasAddedSinceReset())
+         {
+            input.addPickResult(pickResult);
+         }
       }
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      isMouseHovering = input.getClosestPick() == pickResult;
-      isHoveredByAnything |= isMouseHovering;
+      if (!ranMouseProcessInput)
+      {
+         ranMouseProcessInput = true;
+
+         isMouseHovering = input.getClosestPick() == pickResult;
+         isHoveredByAnything |= isMouseHovering;
+      }
    }
 
    @Override
