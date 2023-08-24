@@ -18,8 +18,8 @@ mainDependencies {
    api("us.ihmc:euclid-frame-shape:0.20.0")
    api("us.ihmc:euclid-shape:0.20.0")
    api("us.ihmc:simulation-construction-set:0.24.1")
-   api("us.ihmc:scs2-definition:17-0.16.1")
-   api("us.ihmc:scs2-simulation-construction-set:17-0.16.1")
+   api("us.ihmc:scs2-definition:17-0.16.2")
+   api("us.ihmc:scs2-simulation-construction-set:17-0.16.2")
    api("us.ihmc:ihmc-parameter-optimization:source")
    api("us.ihmc:ihmc-java-toolkit:source")
 }
