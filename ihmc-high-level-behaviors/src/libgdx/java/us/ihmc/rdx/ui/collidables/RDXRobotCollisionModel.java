@@ -54,7 +54,7 @@ public class RDXRobotCollisionModel
    {
       for (RDXRobotCollidable robotCollidable : robotCollidables)
       {
-         robotCollidable.calculateVRPick(vrContext, false);
+         robotCollidable.calculateVRPick(vrContext);
       }
    }
 
