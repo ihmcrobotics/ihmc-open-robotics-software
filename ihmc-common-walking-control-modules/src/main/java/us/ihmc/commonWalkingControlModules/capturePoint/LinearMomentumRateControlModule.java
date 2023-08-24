@@ -458,6 +458,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
             break;
          default:
             throw new IllegalArgumentException("This command type has not been set up for height control.");
+
       }
    }
 

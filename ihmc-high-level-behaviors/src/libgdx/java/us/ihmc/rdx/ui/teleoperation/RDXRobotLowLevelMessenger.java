@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui.teleoperation;
 
 import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import imgui.ImGui;
 import imgui.type.ImInt;
 import us.ihmc.behaviors.tools.CommunicationHelper;
@@ -71,6 +72,12 @@ public class RDXRobotLowLevelMessenger
       }
 
       ImGui.sameLine();
+      if (ImGui.button(labels.get("Stop All Trajectories")))
+      {
+         StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
+         communicationHelper.publishToController(stopAllTrajectoryMessage);
+      }
+
       if (teleoperationParameters.getPSIAdjustable())
       {
          if (ImGui.combo("PSI", pumpPSI, psiValues, psiValues.length))

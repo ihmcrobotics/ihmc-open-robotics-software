@@ -15,7 +15,7 @@ public class ExternalForceEstimationOutputStatusPubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e8d0b3c9f6d75b5f2be8441710ad547ebabe4440a8965c9eb7bfc9b20bbd6ae8";
+   		return "c05eae605ee817ca64f0db75cc8d333008986e173e72625e478e8ccbf40d17f0";
    }
    
    @Override

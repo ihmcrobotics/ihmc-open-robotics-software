@@ -40,7 +40,7 @@ public class FootstepActionData implements BehaviorActionData
    public void loadFromFile(JsonNode jsonNode)
    {
       side = RobotSide.getSideFromString(jsonNode.get("side").asText());
-      modifiableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()));
+      modifiableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()).get());
       modifiableReferenceFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
    }
 
@@ -55,7 +55,7 @@ public class FootstepActionData implements BehaviorActionData
    public void fromMessage(FootstepActionMessage message)
    {
       side = RobotSide.fromByte(message.getRobotSide());
-      modifiableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(message.getParentFrame().getString(0)));
+      modifiableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(message.getParentFrame().getString(0)).get());
       modifiableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
    }
 

@@ -20,6 +20,11 @@ public interface PerceptionConfigurationParametersReadOnly extends StoredPropert
       return get(ousterThrottlerFrequency);
    }
 
+   default int getOccupancyGridResolution()
+   {
+      return get(occupancyGridResolution);
+   }
+
    default boolean getRapidRegionsEnabled()
    {
       return get(rapidRegionsEnabled);
@@ -73,6 +78,11 @@ public interface PerceptionConfigurationParametersReadOnly extends StoredPropert
    default boolean getConcaveHullFilters()
    {
       return get(concaveHullFilters);
+   }
+
+   default boolean getShadowFilter()
+   {
+      return get(shadowFilter);
    }
 
    default boolean getActiveMapping()

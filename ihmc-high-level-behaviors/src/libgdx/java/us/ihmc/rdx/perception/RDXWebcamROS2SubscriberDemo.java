@@ -13,7 +13,7 @@ import us.ihmc.idl.IDLSequence;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.tools.ImPlotDoublePlot;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
@@ -31,7 +31,7 @@ import us.ihmc.tools.thread.Throttler;
 public class RDXWebcamROS2SubscriberDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI("ROS 2 Webcam Subscriber");
-   private final ImGuiPanel diagnosticPanel = new ImGuiPanel("Diagnostics", this::renderImGuiWidgets);
+   private final RDXPanel diagnosticPanel = new RDXPanel("Diagnostics", this::renderImGuiWidgets);
    //   private ImGuiVideoPanel videoPanel;
    private RDXBytedecoImagePanel cvImagePanel;
    private final ImPlotFrequencyPlot receiveFrequencyPlot = new ImPlotFrequencyPlot("Receive frequency");

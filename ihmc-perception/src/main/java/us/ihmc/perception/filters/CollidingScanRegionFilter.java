@@ -39,4 +39,9 @@ public class CollidingScanRegionFilter implements ScanRegionFilter
 
       return !collisionBoxNode.contains(region);
    }
+
+   public CollisionShapeTester getCollisionBoxNode()
+   {
+      return collisionBoxNode;
+   }
 }

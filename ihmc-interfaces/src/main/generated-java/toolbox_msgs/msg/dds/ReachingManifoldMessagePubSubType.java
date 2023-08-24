@@ -15,7 +15,7 @@ public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f2780a689fc11f03c9ffb162b522146098b2ed299a295ba5c5751e3a26bdb20b";
+   		return "4969da9998fca7057eb8cbc32f4e3b189fd36b0c44068ea4b65681ac4bf82e55";
    }
    
    @Override

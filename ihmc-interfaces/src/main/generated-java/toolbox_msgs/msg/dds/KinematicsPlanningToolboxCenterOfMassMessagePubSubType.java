@@ -15,7 +15,7 @@ public class KinematicsPlanningToolboxCenterOfMassMessagePubSubType implements u
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c3d03686d115bf73ca68b4ef059ae0e4a2594ef743b8a0683cd106d5012e7937";
+   		return "4e42c7f13073df21194ed2bfd951a4b26d174f7415cd5878aca35696c783170b";
    }
    
    @Override

@@ -15,7 +15,7 @@ public class BigVideoPacketPubSubType implements us.ihmc.pubsub.TopicDataType<pe
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9ee6fb51407d243cebde6d9dc18c4cf0c29032d1a97dbc211ac3bdac8695609a";
+   		return "2e35cabc2007a999a9e3abf536e1af29a0b2697cfa9c4814e14336db85aeb998";
    }
    
    @Override
