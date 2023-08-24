@@ -76,7 +76,7 @@ public class RDXBehaviorActionSequenceEditor
    private ROS2SyncedRobotModel syncedRobot;
    private RobotCollisionModel selectionCollisionModel;
    private ReferenceFrameLibrary referenceFrameLibrary;
-   private ROS2ControllerHelper ros2;
+   private ROS2ControllerHelper ros2ControllerHelper;
    private final MutablePair<Integer, Integer> reorderRequest = MutablePair.of(-1, 0);
    private volatile long receivedSequenceStatusMessageCount = 0;
    private long receivedStatusMessageCount = 0;
@@ -131,13 +131,13 @@ public class RDXBehaviorActionSequenceEditor
       this.syncedRobot = syncedRobot;
       this.selectionCollisionModel = selectionCollisionModel;
       this.referenceFrameLibrary = referenceFrameLibrary;
-      ros2 = new ROS2ControllerHelper(ros2Node, robotModel);
+      ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
 
-      executionNextIndexStatusSubscription = ros2.subscribe(BehaviorActionSequence.EXECUTION_NEXT_INDEX_STATUS_TOPIC);
-      automaticExecutionStatusSubscription = ros2.subscribe(BehaviorActionSequence.AUTOMATIC_EXECUTION_STATUS_TOPIC);
-      sequenceStatusSubscription = ros2.subscribe(BehaviorActionSequence.SEQUENCE_STATUS_TOPIC);
+      executionNextIndexStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.EXECUTION_NEXT_INDEX_STATUS_TOPIC);
+      automaticExecutionStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.AUTOMATIC_EXECUTION_STATUS_TOPIC);
+      sequenceStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.SEQUENCE_STATUS_TOPIC);
       sequenceStatusSubscription.addCallback(message -> ++receivedSequenceStatusMessageCount);
-      executionStatusSubscription = ros2.subscribe(BehaviorActionSequence.ACTION_EXECUTION_STATUS);
+      executionStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.ACTION_EXECUTION_STATUS);
       executionStatusSubscription.getLatest().setActionIndex(-1); // To indicate to the user that nothing was yet received.
    }
 
@@ -163,7 +163,7 @@ public class RDXBehaviorActionSequenceEditor
                                                                                 selectionCollisionModel,
                                                                                 panel3D,
                                                                                 referenceFrameLibrary,
-                                                                                ros2);
+                                                                                ros2ControllerHelper);
             if (action != null)
             {
                action.getActionData().loadFromFile(actionNode);
@@ -191,7 +191,7 @@ public class RDXBehaviorActionSequenceEditor
    private void commandNextActionIndex(int nextActionIndex)
    {
       currentActionIndexCommandMessage.setData(nextActionIndex);
-      ros2.publish(BehaviorActionSequence.EXECUTION_NEXT_INDEX_COMMAND_TOPIC, currentActionIndexCommandMessage);
+      ros2ControllerHelper.publish(BehaviorActionSequence.EXECUTION_NEXT_INDEX_COMMAND_TOPIC, currentActionIndexCommandMessage);
    }
 
    public void saveToFile()
@@ -346,7 +346,7 @@ public class RDXBehaviorActionSequenceEditor
          {
             // Automatically attempt to get back in sync
             RDXActionSequenceTools.packActionSequenceUpdateMessage(actionSequence, actionDataForMessage, actionSequenceUpdateMessage);
-            ros2.publish(BehaviorActionSequence.SEQUENCE_COMMAND_TOPIC, actionSequenceUpdateMessage);
+            ros2ControllerHelper.publish(BehaviorActionSequence.SEQUENCE_COMMAND_TOPIC, actionSequenceUpdateMessage);
          }
       }
 
@@ -361,7 +361,7 @@ public class RDXBehaviorActionSequenceEditor
          if (ImGui.checkbox(labels.get("Autonomously"), automaticExecution))
          {
             automaticExecutionCommandMessage.setData(automaticExecution.get());
-            ros2.publish(BehaviorActionSequence.AUTOMATIC_EXECUTION_COMMAND_TOPIC, automaticExecutionCommandMessage);
+            ros2ControllerHelper.publish(BehaviorActionSequence.AUTOMATIC_EXECUTION_COMMAND_TOPIC, automaticExecutionCommandMessage);
          }
          ImGuiTools.previousWidgetTooltip("Enables autonomous execution. Will immediately start executing when checked.");
          if (!automaticExecution.get())
@@ -369,7 +369,7 @@ public class RDXBehaviorActionSequenceEditor
             ImGui.sameLine();
             if (ImGui.button(labels.get("Manually")))
             {
-               ros2.publish(BehaviorActionSequence.MANUALLY_EXECUTE_NEXT_ACTION_TOPIC, manuallyExecuteNextActionMessage);
+               ros2ControllerHelper.publish(BehaviorActionSequence.MANUALLY_EXECUTE_NEXT_ACTION_TOPIC, manuallyExecuteNextActionMessage);
             }
             ImGuiTools.previousWidgetTooltip("Executes the next action.");
          }
@@ -592,8 +592,7 @@ public class RDXBehaviorActionSequenceEditor
                                                                      robotModel,
                                                                      syncedRobot.getFullRobotModel(),
                                                                      selectionCollisionModel,
-                                                                     referenceFrameLibrary,
-                                                                     ros2);
+                                                                     referenceFrameLibrary, ros2ControllerHelper);
             // Set the new action to where the last one was for faster authoring
             handPoseAction.setSide(side);
             RDXHandPoseAction nextPreviousHandPoseAction = findNextPreviousHandPoseAction(side);
