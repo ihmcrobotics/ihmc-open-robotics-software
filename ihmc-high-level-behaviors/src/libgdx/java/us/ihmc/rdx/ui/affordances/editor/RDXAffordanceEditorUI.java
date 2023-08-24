@@ -71,7 +71,7 @@ public class RDXAffordanceEditorUI
    private RDXAffordanceFrames preGraspFrames;
    private RDXAffordanceFrames postGraspFrames;
 
-   private boolean affordancePoseLocked = false;
+   private SideDependentList<Boolean> affordancePoseLocked = new SideDependentList<>();
    private SideDependentList<Boolean> handsLocked = new SideDependentList<>();
    private final SideDependentList<PoseReferenceFrame> handLockedFrames = new SideDependentList<>();
    private RDXActiveAffordanceMenu[] activeMenu;
@@ -108,6 +108,7 @@ public class RDXAffordanceEditorUI
                handPoses.put(side, new FramePose3D(ReferenceFrame.getWorldFrame(), handTransformsToWorld.get(side)));
 
                handsLocked.put(side, false);
+               affordancePoseLocked.put(side, false);
             }
 
             activeSide = new RobotSide[1];
@@ -178,27 +179,30 @@ public class RDXAffordanceEditorUI
       {
          FramePose3D objectPose = new FramePose3D(ReferenceFrame.getWorldFrame(), objectBuilder.getSelectedObject().getTransformToWorld());
          // when editing post grasp poses, we want to move the object frame and the hand together
-         if (activeMenu[0] == RDXActiveAffordanceMenu.POST_GRASP && handsLocked.get(activeSide[0]))
+         for (RobotSide side : RobotSide.values)
          {
-            // used to update the hand pose according to object pose in post-grasping once fixed contact with object
-            if (!affordancePoseLocked)
+            if (activeMenu[0] == RDXActiveAffordanceMenu.POST_GRASP && handsLocked.get(side))
             {
+               // used to update the hand pose according to object pose in post-grasping once fixed contact with object
+               if (!affordancePoseLocked.get(side))
+               {
+                  objectFrame.setPoseAndUpdate(objectPose);
+                  handLockedFrames.put(side, new PoseReferenceFrame(side.getLowerCaseName() + "HandFrame", objectFrame));
+                  handPoses.get(side).changeFrame(objectFrame);
+                  handLockedFrames.get(side).setPoseAndUpdate(handPoses.get(side));
+                  handPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+                  affordancePoseLocked.replace(side, true);
+               }
                objectFrame.setPoseAndUpdate(objectPose);
-               handLockedFrames.put(activeSide[0], new PoseReferenceFrame("handFrame", objectFrame));
-               handPoses.get(activeSide[0]).changeFrame(objectFrame);
-               handLockedFrames.get(activeSide[0]).setPoseAndUpdate(handPoses.get(activeSide[0]));
-               handPoses.get(activeSide[0]).changeFrame(ReferenceFrame.getWorldFrame());
-               affordancePoseLocked = true;
+               FramePose3D pose = new FramePose3D(handLockedFrames.get(side));
+               pose.changeFrame(ReferenceFrame.getWorldFrame());
+               handTransformsToWorld.get(side).set(pose.getOrientation(), pose.getTranslation());
             }
-            objectFrame.setPoseAndUpdate(objectPose);
-            FramePose3D pose = new FramePose3D(handLockedFrames.get(activeSide[0]));
-            pose.changeFrame(ReferenceFrame.getWorldFrame());
-            handTransformsToWorld.get(activeSide[0]).set(pose.getOrientation(), pose.getTranslation());
-         }
-         else
-         {
-            handsLocked.replace(activeSide[0], false);
-            affordancePoseLocked = false;
+            else
+            {
+               handsLocked.replace(side, false);
+               affordancePoseLocked.replace(side, false);
+            }
          }
       }
       for (RobotSide side : handPoses.keySet())
@@ -270,6 +274,9 @@ public class RDXAffordanceEditorUI
             }
          }
       }
+      if (ImGui.button(labels.get("MIRROR ")))
+
+
       if (handPoses.containsKey(activeSide[0]))
       {
          ImGui.text("Hand configuration: ");
@@ -308,18 +315,38 @@ public class RDXAffordanceEditorUI
       ImGui.text("Post-grasp Frames: ");
       ImGui.sameLine();
       postGraspFrames.renderImGuiWidgets(labels, "postgrasp");
-      boolean changedColor = false;
+      boolean changedColorLockOneHand = false;
       if (handPoses.containsKey(activeSide[0]))
       {
          if (handsLocked.get(activeSide[0]))
          {
             ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 0.0f, 1.0f, 0.5f);
-            changedColor = true;
+            changedColorLockOneHand = true;
          }
-         if (ImGui.button(labels.get("LOCK HAND TO OBJECT")) && activeMenu[0] == RDXActiveAffordanceMenu.POST_GRASP)
-            handsLocked.replace(activeSide[0], !handsLocked.get(activeSide[0]));
-         if (changedColor)
+         if (!(handsLocked.get(RobotSide.LEFT) && handsLocked.get(RobotSide.RIGHT)))
+         {
+            if (ImGui.button(labels.get("LOCK HAND TO OBJECT")) && activeMenu[0] == RDXActiveAffordanceMenu.POST_GRASP)
+               handsLocked.replace(activeSide[0], !handsLocked.get(activeSide[0]));
+         }
+         if (changedColorLockOneHand)
             ImGui.popStyleColor();
+
+         boolean changedColorLockBothHands = false;
+         if ((handsLocked.get(RobotSide.LEFT) && handsLocked.get(RobotSide.RIGHT)))
+         {
+            ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 0.0f, 1.0f, 0.5f);
+            changedColorLockBothHands = true;
+         }
+         if (!((handsLocked.get(RobotSide.LEFT) && !handsLocked.get(RobotSide.RIGHT)) || (!handsLocked.get(RobotSide.LEFT) && handsLocked.get(RobotSide.RIGHT))))
+         { // not in alternate state, this means single hand lock is not activate
+            if (ImGui.button(labels.get("LOCK BOTH HANDS TO OBJECT")) && activeMenu[0] == RDXActiveAffordanceMenu.POST_GRASP)
+            {
+               for (RobotSide side : RobotSide.values)
+                  handsLocked.replace(side, !handsLocked.get(side));
+            }
+            if (changedColorLockBothHands)
+               ImGui.popStyleColor();
+         }
       }
       ImGui.separator();
 
