@@ -10,7 +10,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
@@ -22,10 +22,16 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 public class RapidHeightMapExtractor
 {
    private float gridWidthInMeters = 8.0f;
-   private float cellSizeXYInMeters = 0.02f;
+   private float localCellSizeInMeters = 0.02f;
+
+   private float globalWidth = 10.0f;
+   private float globalCellSizeInMeters = 0.02f;
 
    private int centerIndex;
-   private int cellsPerAxis;
+   private int localCellsPerAxis;
+
+   private int globalCenterIndex;
+   private int globalCellsPerAxis;
 
    private int mode = 0; // 0 -> Ouster, 1 -> Realsense
 
@@ -33,6 +39,9 @@ public class RapidHeightMapExtractor
    private OpenCLFloatParameters parametersBuffer;
 
    private RigidBodyTransform currentSensorToWorldTransform = new RigidBodyTransform();
+
+   private OpenCLFloatBuffer groundToWorldTransformBuffer;
+   private float[] groundToWorldTransformArray = new float[16];
 
    private OpenCLFloatBuffer groundToSensorTransformBuffer;
    private float[] groundToSensorTransformArray = new float[16];
@@ -45,8 +54,10 @@ public class RapidHeightMapExtractor
    private OpenCLFloatBuffer groundPlaneBuffer;
    private _cl_program rapidHeightMapUpdaterProgram;
    private _cl_kernel heightMapUpdateKernel;
+   private _cl_kernel heightMapRegistrationKernel;
    private BytedecoImage inputDepthImage;
-   private BytedecoImage outputHeightMapImage;
+   private BytedecoImage localHeightMapImage;
+   private BytedecoImage globalHeightMapImage;
 
    private CameraIntrinsics cameraIntrinsics;
 
@@ -64,8 +75,11 @@ public class RapidHeightMapExtractor
       this.openCLManager = openCLManager;
       rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapExtractor", "HeightMapUtils.cl");
 
-      centerIndex = HeightMapTools.computeCenterIndex(gridWidthInMeters, cellSizeXYInMeters);
-      cellsPerAxis = 2 * centerIndex + 1;
+      centerIndex = HeightMapTools.computeCenterIndex(gridWidthInMeters, localCellSizeInMeters);
+      localCellsPerAxis = 2 * centerIndex + 1;
+
+      globalCenterIndex = HeightMapTools.computeCenterIndex(globalWidth, globalCellSizeInMeters);
+      globalCellsPerAxis = 2 * globalCenterIndex + 1;
 
       parametersBuffer = new OpenCLFloatParameters();
 
@@ -75,40 +89,29 @@ public class RapidHeightMapExtractor
       sensorToGroundTransformBuffer = new OpenCLFloatBuffer(16);
       sensorToGroundTransformBuffer.createOpenCLBufferObject(openCLManager);
 
+      groundToWorldTransformBuffer = new OpenCLFloatBuffer(16);
+      groundToWorldTransformBuffer.createOpenCLBufferObject(openCLManager);
+
       groundPlaneBuffer = new OpenCLFloatBuffer(4);
       groundPlaneBuffer.createOpenCLBufferObject(openCLManager);
 
-      outputHeightMapImage = new BytedecoImage(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
-      outputHeightMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+      localHeightMapImage = new BytedecoImage(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_16UC1);
+      localHeightMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+
+      globalHeightMapImage = new BytedecoImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_16UC1);
+      globalHeightMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
 
       heightMapUpdateKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapUpdateKernel");
+      heightMapRegistrationKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapRegistrationKernel");
    }
 
-   private void populateParameterBuffer(Tuple3DReadOnly gridCenter)
+   public void update(RigidBodyTransform sensorToWorldTransform, RigidBodyTransform sensorToGroundTransform, RigidBodyTransform groundToWorldTransform)
    {
-      //// Fill parameters buffer
-      parametersBuffer.setParameter(cellSizeXYInMeters);
-      parametersBuffer.setParameter(centerIndex);
-      parametersBuffer.setParameter((float) inputDepthImage.getImageHeight());
-      parametersBuffer.setParameter((float) inputDepthImage.getImageWidth());
-      parametersBuffer.setParameter((float) gridCenter.getX());
-      parametersBuffer.setParameter((float) gridCenter.getY());
-      parametersBuffer.setParameter((float) mode);
-      parametersBuffer.setParameter((float) cameraIntrinsics.getCx());
-      parametersBuffer.setParameter((float) cameraIntrinsics.getCy());
-      parametersBuffer.setParameter((float) cameraIntrinsics.getFx());
-      parametersBuffer.setParameter((float) cameraIntrinsics.getFy());
-
-      parametersBuffer.writeOpenCLBufferObject(openCLManager);
-   }
-
-
-   public void update(RigidBodyTransform sensorToWorldTransform, RigidBodyTransform sensorToGroundTransform, float planeHeight)
-   {
-      currentSensorToWorldTransform.set(sensorToWorldTransform);
 
       if (!processing)
       {
+         currentSensorToWorldTransform.set(sensorToWorldTransform);
+
          sensorToGroundTransform.getTranslation().setZ(sensorToWorldTransform.getTranslationZ());
 
          // Upload input depth image
@@ -132,49 +135,78 @@ public class RapidHeightMapExtractor
          sensorToGroundTransformBuffer.getBytedecoFloatBufferPointer().asBuffer().put(sensorToGroundTransformArray);
          sensorToGroundTransformBuffer.writeOpenCLBufferObject(openCLManager);
 
+         // Fill ground-to-world transform buffer
+         groundToWorldTransform.get(groundToWorldTransformArray);
+         groundToWorldTransformBuffer.getBytedecoFloatBufferPointer().asBuffer().put(groundToWorldTransformArray);
+         groundToWorldTransformBuffer.writeOpenCLBufferObject(openCLManager);
+
          // Generate a +Z vector in world frame
          Vector3D groundNormalSensorFrame = new Vector3D(0.0, 0.0, 1.0);
          groundToSensorTransform.transform(groundNormalSensorFrame);
 
          //LogTools.info("Ground normal in sensor frame: " + groundNormalSensorFrame);
 
-         groundPlaneBuffer.getBytedecoFloatBufferPointer().asBuffer().put(new float[] {groundNormalSensorFrame.getX32(), groundNormalSensorFrame.getY32(),
-                                                                                       groundNormalSensorFrame.getZ32(),
-                                                                                       (float) (planeHeight - sensorToGroundTransform.getTranslationZ())});
-         groundPlaneBuffer.writeOpenCLBufferObject(openCLManager);
-
          // Set kernel arguments for the height map kernel
          openCLManager.setKernelArgument(heightMapUpdateKernel, 0, inputDepthImage.getOpenCLImageObject());
-         openCLManager.setKernelArgument(heightMapUpdateKernel, 1, outputHeightMapImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(heightMapUpdateKernel, 1, localHeightMapImage.getOpenCLImageObject());
          openCLManager.setKernelArgument(heightMapUpdateKernel, 2, parametersBuffer.getOpenCLBufferObject());
          openCLManager.setKernelArgument(heightMapUpdateKernel, 3, sensorToGroundTransformBuffer.getOpenCLBufferObject());
          openCLManager.setKernelArgument(heightMapUpdateKernel, 4, groundToSensorTransformBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(heightMapUpdateKernel, 5, groundPlaneBuffer.getOpenCLBufferObject());
+
+         // Set kernel arguments for the height map registration kernel
+         openCLManager.setKernelArgument(heightMapRegistrationKernel, 0, localHeightMapImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(heightMapRegistrationKernel, 1, globalHeightMapImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(heightMapRegistrationKernel, 2, parametersBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(heightMapRegistrationKernel, 3, groundToWorldTransformBuffer.getOpenCLBufferObject());
 
          // Execute kernel with length and width parameters
-         openCLManager.execute2D(heightMapUpdateKernel, cellsPerAxis, cellsPerAxis);
+         openCLManager.execute2D(heightMapUpdateKernel, localCellsPerAxis, localCellsPerAxis);
+
+         // Execute kernel with length and width parameters
+         openCLManager.execute2D(heightMapRegistrationKernel, globalCellsPerAxis, globalCellsPerAxis);
 
          // Read height map image into CPU memory
-         outputHeightMapImage.readOpenCLImage(openCLManager);
+         localHeightMapImage.readOpenCLImage(openCLManager);
+         globalHeightMapImage.readOpenCLImage(openCLManager);
 
          latestHeightMapData = convertToHeightMapData(gridCenter);
       }
    }
 
+   private void populateParameterBuffer(Tuple3DReadOnly gridCenter)
+   {
+      //// Fill parameters buffer
+      parametersBuffer.setParameter(localCellSizeInMeters);
+      parametersBuffer.setParameter(centerIndex);
+      parametersBuffer.setParameter((float) inputDepthImage.getImageHeight());
+      parametersBuffer.setParameter((float) inputDepthImage.getImageWidth());
+      parametersBuffer.setParameter((float) gridCenter.getX());
+      parametersBuffer.setParameter((float) gridCenter.getY());
+      parametersBuffer.setParameter((float) mode);
+      parametersBuffer.setParameter((float) cameraIntrinsics.getCx());
+      parametersBuffer.setParameter((float) cameraIntrinsics.getCy());
+      parametersBuffer.setParameter((float) cameraIntrinsics.getFx());
+      parametersBuffer.setParameter((float) cameraIntrinsics.getFy());
+      parametersBuffer.setParameter(globalCellSizeInMeters);
+      parametersBuffer.setParameter((float) globalCenterIndex);
+
+      parametersBuffer.writeOpenCLBufferObject(openCLManager);
+   }
+
    private HeightMapData convertToHeightMapData(Tuple3DReadOnly center)
    {
-      HeightMapData heightMapData = new HeightMapData(cellSizeXYInMeters, gridWidthInMeters, center.getX(), center.getY());
-      BytePointer heightMapPointer = outputHeightMapImage.getBytedecoByteBufferPointer();
+      HeightMapData heightMapData = new HeightMapData(localCellSizeInMeters, gridWidthInMeters, center.getX(), center.getY());
+      BytePointer heightMapPointer = localHeightMapImage.getBytedecoByteBufferPointer();
 
       float maxHeight = 0.7f;
       float minHeight = 0.0f;
 
 
-      for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
+      for (int xIndex = 0; xIndex < localCellsPerAxis; xIndex++)
       {
-         for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
+         for (int yIndex = 0; yIndex < localCellsPerAxis; yIndex++)
          {
-            int heightIndex = xIndex * cellsPerAxis + yIndex;
+            int heightIndex = xIndex * localCellsPerAxis + yIndex;
             float cellHeight = (float) (heightMapPointer.getShort(heightIndex * 2L)) / 10000.0f;
             cellHeight = (float) MathTools.clamp(cellHeight, minHeight, maxHeight);
             if (cellHeight > maxHeight - 0.01f)
@@ -208,19 +240,34 @@ public class RapidHeightMapExtractor
       this.modified = modified;
    }
 
-   public float getCellSizeXYInMeters()
+   public float getLocalCellSizeInMeters()
    {
-      return cellSizeXYInMeters;
+      return localCellSizeInMeters;
    }
 
-   public BytedecoImage getOutputHeightMapImage()
+   public float getGlobalCellSizeInMeters()
    {
-      return outputHeightMapImage;
+      return globalCellSizeInMeters;
    }
 
-   public int getCellsPerAxis()
+   public BytedecoImage getLocalHeightMapImage()
    {
-      return cellsPerAxis;
+      return localHeightMapImage;
+   }
+
+   public BytedecoImage getGlobalHeightMapImage()
+   {
+      return globalHeightMapImage;
+   }
+
+   public int getLocalCellsPerAxis()
+   {
+      return localCellsPerAxis;
+   }
+
+   public int getGlobalCellsPerAxis()
+   {
+      return globalCellsPerAxis;
    }
 
    public int getCenterIndex()
@@ -241,10 +288,10 @@ public class RapidHeightMapExtractor
    public void setHeightMapResolution(float widthInMeters, float cellSizeXYInMeters)
    {
       this.gridWidthInMeters = widthInMeters;
-      this.cellSizeXYInMeters = cellSizeXYInMeters;
+      this.localCellSizeInMeters = cellSizeXYInMeters;
 
       centerIndex = HeightMapTools.computeCenterIndex(gridWidthInMeters, cellSizeXYInMeters);
-      cellsPerAxis = 2 * centerIndex + 1;
+      localCellsPerAxis = 2 * centerIndex + 1;
    }
 
    public void setDepthIntrinsics(double fx, double fy, double cx, double cy)

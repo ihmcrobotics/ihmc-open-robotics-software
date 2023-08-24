@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
@@ -48,6 +49,12 @@ public class RDXRapidHeightMapExtractionDemo
 
    private final ArrayList<Point3D> sensorPositionBuffer = new ArrayList<>();
    private final ArrayList<Quaternion> sensorOrientationBuffer = new ArrayList<>();
+
+   private Mat currentHeightMap;
+   private Mat previousHeightMap;
+
+   private ArrayList<Point2D> previousPoints = new ArrayList<>();
+   private ArrayList<Point2D> currentPoints = new ArrayList<>();
 
    private HumanoidPerceptionModule humanoidPerception;
    private RDXHumanoidPerceptionUI humanoidPerceptionUI;
@@ -147,6 +154,9 @@ public class RDXRapidHeightMapExtractionDemo
                                                      frameIndex.get(),
                                                      depthBytePointer,
                                                      humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat());
+
+            currentHeightMap = new Mat(humanoidPerception.getRapidHeightMapExtractor().getLocalCellsPerAxis(),
+                                       humanoidPerception.getRapidHeightMapExtractor().getLocalCellsPerAxis(), opencv_core.CV_8UC1);
          }
 
          @Override
@@ -251,7 +261,7 @@ public class RDXRapidHeightMapExtractionDemo
                                                                           sensorToGroundTf.getRotation().getPitch(),
                                                                           sensorToGroundTf.getRotation().getRoll()));
 
-                                      humanoidPerception.getRapidHeightMapExtractor().update(sensorToWorldTf, sensorToGroundTf, planeHeight.get());
+                                      humanoidPerception.getRapidHeightMapExtractor().update(sensorToWorldTf, sensorToGroundTf, groundToWorldTf);
                                       heightMapUpdateNotification.set();
 
                                       long end = System.nanoTime();
@@ -265,13 +275,11 @@ public class RDXRapidHeightMapExtractionDemo
          groundToWorldTf.getRotation().setYawPitchRoll(sensorToWorldTf.getRotation().getYaw(), 0, 0);
          groundToWorldTf.getTranslation().setZ(0);
 
-         LogTools.warn("Yaw: " + groundToWorldTf.getRotation().getYaw());
-
          humanoidPerceptionUI.getHeightMapRenderer()
                              .update(groundToWorldTf,
-                                     humanoidPerception.getRapidHeightMapExtractor().getOutputHeightMapImage().getPointerForAccessSpeed(),
+                                     humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getPointerForAccessSpeed(),
                                      humanoidPerception.getRapidHeightMapExtractor().getCenterIndex(),
-                                     humanoidPerception.getRapidHeightMapExtractor().getCellSizeXYInMeters());
+                                     humanoidPerception.getRapidHeightMapExtractor().getLocalCellSizeInMeters());
 
          heightMapVisualizer.acceptHeightMapMessage(HeightMapMessageTools.toMessage(humanoidPerception.getRapidHeightMapExtractor().getLatestHeightMapData()));
          heightMapVisualizer.update();
@@ -279,10 +287,15 @@ public class RDXRapidHeightMapExtractionDemo
          humanoidPerception.getRapidHeightMapExtractor().setModified(false);
          humanoidPerception.getRapidHeightMapExtractor().setProcessing(false);
 
-         PerceptionDebugTools.displayHeightMap("Output Height Map",
-                                               humanoidPerception.getRapidHeightMapExtractor().getOutputHeightMapImage().getBytedecoOpenCVMat(),
+         PerceptionDebugTools.displayHeightMap("Local Height Map",
+                                               humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getBytedecoOpenCVMat(),
                                                1,
-                                               1 / (0.3f + 0.20f * humanoidPerception.getRapidHeightMapExtractor().getCellSizeXYInMeters()));
+                                               1 / (0.3f + 0.20f * humanoidPerception.getRapidHeightMapExtractor().getLocalCellSizeInMeters()));
+
+         PerceptionDebugTools.displayHeightMap("Global Height Map",
+                                               humanoidPerception.getRapidHeightMapExtractor().getGlobalHeightMapImage().getBytedecoOpenCVMat(),
+                                               1,
+                                               1 / (0.3f + 0.20f * humanoidPerception.getRapidHeightMapExtractor().getGlobalCellSizeInMeters()));
       }
    }
 

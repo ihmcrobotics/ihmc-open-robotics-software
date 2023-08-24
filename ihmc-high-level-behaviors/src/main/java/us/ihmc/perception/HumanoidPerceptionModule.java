@@ -139,8 +139,9 @@ public class HumanoidPerceptionModule
    {
       RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
       RigidBodyTransform sensorToGround = cameraFrame.getTransformToDesiredFrame(cameraZUpFrame);
+      RigidBodyTransform groundToWorld = cameraZUpFrame.getTransformToWorldFrame();
 
-      rapidHeightMapExtractor.update(sensorToWorld, sensorToGround, 0);
+      rapidHeightMapExtractor.update(sensorToWorld, sensorToGround, groundToWorld);
    }
 
    public void updateStructural(ROS2Helper ros2Helper, List<Point3D> pointCloud, ReferenceFrame sensorFrame, float thresholdHeight, boolean display)
