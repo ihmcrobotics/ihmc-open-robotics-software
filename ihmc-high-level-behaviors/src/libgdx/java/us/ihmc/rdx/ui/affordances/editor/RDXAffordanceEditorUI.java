@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 
+import imgui.type.ImBoolean;
 import org.bytedeco.javacv.Frame;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -38,532 +39,475 @@ import us.ihmc.tools.io.*;
 
 import java.util.*;
 
-public class RDXAffordanceEditorUI
-{
-   private static final double DEFAULT_DURATION = 1.0;
-   private static final double LINEAR_VELOCITY = 0.1;
-   private static final double ANGULAR_VELOCITY = 1.0; // [rad/s] for the sake gripper this is ~= to 0.1 m/s for a point on the edge of the gripper
-   private static final SideDependentList<ColorDefinition> HAND_COLORS;
-   static {
-      HAND_COLORS = new SideDependentList<>();
-      HAND_COLORS.put(RobotSide.LEFT, ColorDefinitions.SandyBrown());
-      HAND_COLORS.put(RobotSide.RIGHT, ColorDefinitions.SlateBlue());
-   }
+public class RDXAffordanceEditorUI {
+    private static final double DEFAULT_DURATION = 1.0;
+    private static final double LINEAR_VELOCITY = 0.1;
+    private static final double ANGULAR_VELOCITY = 1.0; // [rad/s] for the sake gripper this is ~= to 0.1 m/s for a point on the edge of the gripper
+    private static final SideDependentList<ColorDefinition> HAND_COLORS;
 
-   private final RDXBaseUI baseUI = new RDXBaseUI();
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private RobotSide[] activeSide;
+    static {
+        HAND_COLORS = new SideDependentList<>();
+        HAND_COLORS.put(RobotSide.LEFT, ColorDefinitions.SandyBrown());
+        HAND_COLORS.put(RobotSide.RIGHT, ColorDefinitions.SlateBlue());
+    }
 
-   private final SideDependentList<RDXInteractableSakeGripper> interactableHands = new SideDependentList<>();
-   private final SideDependentList<RigidBodyTransform> handTransformsToWorld = new SideDependentList<>();
-   private final SideDependentList<FramePose3D> handPoses = new SideDependentList<>();
-   private RDXInteractableObjectBuilder objectBuilder;
-   private final PoseReferenceFrame objectFrame = new PoseReferenceFrame("objectFrame", ReferenceFrame.getWorldFrame());
-   private ReferenceFrame initialObjectFrame;
-   private ModifiableReferenceFrame affordanceFrame = new ModifiableReferenceFrame("affordanceFrame", ReferenceFrame.getWorldFrame());
-   private final float[] gripperClosure = new float[1];
+    private final RDXBaseUI baseUI = new RDXBaseUI();
+    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+    private RobotSide[] activeSide;
 
-   // affordance poses
-   private RDXAffordanceFrame graspFrame;
-   private RDXAffordanceFrames preGraspFrames;
-   private RDXAffordanceFrames postGraspFrames;
+    private final SideDependentList<RDXInteractableSakeGripper> interactableHands = new SideDependentList<>();
+    private final SideDependentList<RigidBodyTransform> handTransformsToWorld = new SideDependentList<>();
+    private final SideDependentList<FramePose3D> handPoses = new SideDependentList<>();
+    private RDXInteractableObjectBuilder objectBuilder;
+    private final PoseReferenceFrame objectFrame = new PoseReferenceFrame("objectFrame", ReferenceFrame.getWorldFrame());
+    private ReferenceFrame initialObjectFrame;
+    private ModifiableReferenceFrame affordanceFrame = new ModifiableReferenceFrame("affordanceFrame", ReferenceFrame.getWorldFrame());
+    private final float[] gripperClosure = new float[1];
 
-   // mirroring
-   private boolean mirrorActive = false;
-   private final Map<String, Boolean> activeTranslationAxisMirror = new HashMap<>();
-   private final Map<String, Boolean> activeRotationAxisMirror = new HashMap<>();
-   private FramePose3DReadOnly lastActiveHandPose;
-   
+    // affordance poses
+    private RDXAffordanceFrame graspFrame;
+    private RDXAffordanceFrames preGraspFrames;
+    private RDXAffordanceFrames postGraspFrames;
 
-   // locking to object
-   private SideDependentList<Boolean> affordancePoseLocked = new SideDependentList<>();
-   private SideDependentList<Boolean> handsLocked = new SideDependentList<>();
-   private final SideDependentList<PoseReferenceFrame> handLockedFrames = new SideDependentList<>();
+    // mirroring
+    private final ImBoolean mirrorActive = new ImBoolean(false);
+    private final Map<String, Boolean> activeTranslationAxisMirror = new TreeMap<>();
+    private final Map<String, Boolean> activeRotationAxisMirror = new TreeMap<>();
+    private FramePose3DReadOnly lastActiveHandPose;
 
-   private RDXActiveAffordanceMenu[] activeMenu;
-   private boolean playing = false;
 
-   private final ImGuiInputText textInput = new ImGuiInputText("Enter file name to save/load");
-   private String fileName = "";
-   private final WorkspaceResourceDirectory configurationsDirectory = new WorkspaceResourceDirectory(getClass(), "/affordances");
-   private final ArrayList<double[]> csvDataMatrix = new ArrayList<>();
+    // locking to object
+    private SideDependentList<Boolean> affordancePoseLocked = new SideDependentList<>();
+    private SideDependentList<Boolean> handsLocked = new SideDependentList<>();
+    private final SideDependentList<PoseReferenceFrame> handLockedFrames = new SideDependentList<>();
 
-   public RDXAffordanceEditorUI()
-   {
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
-      {
-         @Override
-         public void create()
-         {
-            baseUI.create();
-            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
-            objectBuilder = new RDXInteractableObjectBuilder(baseUI, PredefinedSceneNodeLibrary.defaultObjects());
-            baseUI.getImGuiPanelManager().addPanel(objectBuilder.getWindowName(), objectBuilder::renderImGuiWidgets);
+    private RDXActiveAffordanceMenu[] activeMenu;
+    private boolean playing = false;
 
-            for (RobotSide side : RobotSide.values)
-            {
-               handTransformsToWorld.put(side, new RigidBodyTransform());
-               handTransformsToWorld.get(side).getRotation().setYawPitchRoll(0.0, Math.toRadians(-90.0), 0.0);
-               handTransformsToWorld.get(side).getTranslation().set(-0.5, side.negateIfRightSide(0.2), 0);
-               interactableHands.put(side, new RDXInteractableSakeGripper(baseUI.getPrimary3DPanel(),
-                                                                 handTransformsToWorld.get(side),
-                                                                 new ColorDefinition(HAND_COLORS.get(side).getRed(),
-                                                                                     HAND_COLORS.get(side).getGreen(),
-                                                                                     HAND_COLORS.get(side).getBlue(),
-                                                                                     0.8)));
-               handPoses.put(side, new FramePose3D(ReferenceFrame.getWorldFrame(), handTransformsToWorld.get(side)));
+    private final ImGuiInputText textInput = new ImGuiInputText("Enter file name to save/load");
+    private String fileName = "";
+    private final WorkspaceResourceDirectory configurationsDirectory = new WorkspaceResourceDirectory(getClass(), "/affordances");
+    private final ArrayList<double[]> csvDataMatrix = new ArrayList<>();
 
-               handsLocked.put(side, false);
-               affordancePoseLocked.put(side, false);
+    public RDXAffordanceEditorUI() {
+        baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter() {
+            @Override
+            public void create() {
+                baseUI.create();
+                baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
+                objectBuilder = new RDXInteractableObjectBuilder(baseUI, PredefinedSceneNodeLibrary.defaultObjects());
+                baseUI.getImGuiPanelManager().addPanel(objectBuilder.getWindowName(), objectBuilder::renderImGuiWidgets);
+
+                for (RobotSide side : RobotSide.values) {
+                    handTransformsToWorld.put(side, new RigidBodyTransform());
+                    handTransformsToWorld.get(side).getRotation().setYawPitchRoll(0.0, Math.toRadians(-90.0), 0.0);
+                    handTransformsToWorld.get(side).getTranslation().set(-0.5, side.negateIfRightSide(0.2), 0);
+                    interactableHands.put(side, new RDXInteractableSakeGripper(baseUI.getPrimary3DPanel(),
+                            handTransformsToWorld.get(side),
+                            new ColorDefinition(HAND_COLORS.get(side).getRed(),
+                                    HAND_COLORS.get(side).getGreen(),
+                                    HAND_COLORS.get(side).getBlue(),
+                                    0.8)));
+                    handPoses.put(side, new FramePose3D(ReferenceFrame.getWorldFrame(), handTransformsToWorld.get(side)));
+
+                    handsLocked.put(side, false);
+                    affordancePoseLocked.put(side, false);
+                }
+
+                activeSide = new RobotSide[1];
+                activeSide[0] = RobotSide.RIGHT;
+                activeMenu = new RDXActiveAffordanceMenu[1];
+                activeMenu[0] = RDXActiveAffordanceMenu.PRE_GRASP;
+                preGraspFrames = new RDXAffordanceFrames(interactableHands,
+                        handTransformsToWorld,
+                        handPoses,
+                        objectBuilder.getSelectedObject().getTransformToWorld(),
+                        activeSide,
+                        activeMenu,
+                        new ArrayList<>(Arrays.asList(new Color(0xFFE4B5FF),
+                                new Color(0xFF8C00FF),
+                                new Color(0xFFDAB9FF),
+                                new Color(0xFF6600FF),
+                                new Color(0xFFA07AFF))));
+                activeMenu[0] = RDXActiveAffordanceMenu.GRASP;
+                graspFrame = new RDXAffordanceFrame(interactableHands,
+                        handTransformsToWorld,
+                        handPoses,
+                        objectBuilder.getSelectedObject().getTransformToWorld(),
+                        activeSide,
+                        activeMenu,
+                        Color.BLACK);
+                activeMenu[0] = RDXActiveAffordanceMenu.POST_GRASP;
+                postGraspFrames = new RDXAffordanceFrames(interactableHands,
+                        handTransformsToWorld,
+                        handPoses,
+                        objectBuilder.getSelectedObject().getTransformToWorld(),
+                        activeSide,
+                        activeMenu,
+                        new ArrayList<>(Arrays.asList(new Color(0xD8BFD8FF),
+                                new Color(0xBA55D3FF),
+                                new Color(0x9932CCFF),
+                                new Color(0x8A2BE2FF),
+                                new Color(0x4B0082FF))));
+                activeMenu[0] = RDXActiveAffordanceMenu.NONE;
+                for (RobotSide side : RobotSide.values) {
+                    baseUI.getPrimaryScene().addRenderableProvider(interactableHands.get(side));
+                    baseUI.getImGuiPanelManager().addPanel(interactableHands.get(side).getPose3DGizmo().createTunerPanel(side.getCamelCaseName() + " Hand"));
+                }
+                baseUI.getPrimaryScene().addRenderableProvider(objectBuilder.getSelectedObject());
+                baseUI.getPrimaryScene().addRenderableProvider(RDXAffordanceEditorUI.this::getRenderables);
+                baseUI.getImGuiPanelManager().addPanel("Affordance Panel", RDXAffordanceEditorUI.this::renderImGuiWidgets);
+
+                activeTranslationAxisMirror.put("X", false);
+                activeTranslationAxisMirror.put("Y", false);
+                activeTranslationAxisMirror.put("Z", false);
+                activeTranslationAxisMirror.put("-X", false);
+                activeTranslationAxisMirror.put("-Y", false);
+                activeTranslationAxisMirror.put("-Z", false);
+
+                activeRotationAxisMirror.put("Yaw", false);
+                activeRotationAxisMirror.put("Pitch", false);
+                activeRotationAxisMirror.put("Roll", false);
+                activeRotationAxisMirror.put("-Yaw", false);
+                activeRotationAxisMirror.put("-Pitch", false);
+                activeRotationAxisMirror.put("-Roll", false);
             }
 
-            activeSide = new RobotSide[1];
+            @Override
+            public void render() {
+                update();
+                baseUI.renderBeforeOnScreenUI();
+                baseUI.renderEnd();
+            }
+
+            @Override
+            public void dispose() {
+                baseUI.dispose();
+            }
+        });
+    }
+
+    public void update() {
+        if (objectBuilder.isAnyObjectSelected()) {
+            FramePose3D objectPose = new FramePose3D(ReferenceFrame.getWorldFrame(), objectBuilder.getSelectedObject().getTransformToWorld());
+            // when editing post grasp poses, we want to move the object frame and the hand together
+            for (RobotSide side : handPoses.keySet()) {
+                if (activeMenu[0] == RDXActiveAffordanceMenu.POST_GRASP && handsLocked.get(side)) {
+                    // used to update the hand pose according to object pose in post-grasping once fixed contact with object
+                    if (!affordancePoseLocked.get(side)) {
+                        objectFrame.setPoseAndUpdate(objectPose);
+                        handLockedFrames.put(side, new PoseReferenceFrame(side.getLowerCaseName() + "HandFrame", objectFrame));
+                        handPoses.get(side).changeFrame(objectFrame);
+                        handLockedFrames.get(side).setPoseAndUpdate(handPoses.get(side));
+                        handPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+                        affordancePoseLocked.replace(side, true);
+                    }
+                    objectFrame.setPoseAndUpdate(objectPose);
+                    FramePose3D pose = new FramePose3D(handLockedFrames.get(side));
+                    pose.changeFrame(ReferenceFrame.getWorldFrame());
+                    handTransformsToWorld.get(side).set(pose.getOrientation(), pose.getTranslation());
+                } else {
+                    handsLocked.replace(side, false);
+                    affordancePoseLocked.replace(side, false);
+                }
+            }
+        }
+
+        for (RobotSide side : handPoses.keySet()) {
+            // update hand poses according to where the hand is
+            handPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+            handPoses.get(side).set(handTransformsToWorld.get(side));
+
+            // selected hand determines active side
+            if (interactableHands.get(side).isSelected()) {
+                activeSide[0] = side;
+            }
+        }
+
+        // mirroring
+        if (mirrorActive.get()) {
+            RobotSide nonActiveSide = (activeSide[0] == RobotSide.RIGHT ? RobotSide.LEFT : RobotSide.RIGHT);
+            FramePose3D activeHandPose = new FramePose3D(handPoses.get(activeSide[0]));
+            activeHandPose.changeFrame(interactableHands.get(activeSide[0]).getReferenceFrameHand()); // TODO fix this reference frame and use it later
+            FramePose3D nonActiveHandPose = new FramePose3D(handPoses.get(nonActiveSide));
+            nonActiveHandPose.changeFrame(interactableHands.get(nonActiveSide).getReferenceFrameHand());
+
+            FixedFramePoint3DBasics activeSideTranslation = activeHandPose.getTranslation();
+            Point3DBasics nonActiveSideTranslation = new FramePoint3D();
+            for (var axis : activeTranslationAxisMirror.entrySet()) {
+                if (axis.getValue()) {
+                    switch (axis.getKey()) {
+                        case "X" ->
+                                nonActiveSideTranslation.setX(activeSideTranslation.getX() - lastActiveHandPose.getTranslation().getX());
+                        case "Y" ->
+                                nonActiveSideTranslation.setY(activeSideTranslation.getY() - lastActiveHandPose.getTranslation().getY());
+                        case "Z" ->
+                                nonActiveSideTranslation.setZ(activeSideTranslation.getZ() - lastActiveHandPose.getTranslation().getZ());
+                        case "-X" ->
+                                nonActiveSideTranslation.setX(-activeSideTranslation.getX() + lastActiveHandPose.getTranslation().getX());
+                        case "-Y" ->
+                                nonActiveSideTranslation.setY(-activeSideTranslation.getY() + -lastActiveHandPose.getTranslation().getY());
+                        case "-Z" ->
+                                nonActiveSideTranslation.setZ(-activeSideTranslation.getZ() + -lastActiveHandPose.getTranslation().getZ());
+                    }
+                }
+            }
+            FixedFrameQuaternionBasics activeSideOrientation = activeHandPose.getOrientation();
+            YawPitchRoll nonActiveSideYawPitchRoll = new YawPitchRoll();
+            for (var axis : activeRotationAxisMirror.entrySet()) {
+                if (axis.getValue()) {
+                    switch (axis.getKey()) {
+                        case "Yaw" ->
+                                nonActiveSideYawPitchRoll.setYaw(activeSideOrientation.getYaw() - lastActiveHandPose.getOrientation().getYaw());
+                        case "Pitch" ->
+                                nonActiveSideYawPitchRoll.setPitch(activeSideOrientation.getPitch() - lastActiveHandPose.getOrientation().getPitch());
+                        case "Roll" ->
+                                nonActiveSideYawPitchRoll.setRoll(activeSideOrientation.getRoll() - lastActiveHandPose.getOrientation().getRoll());
+                        case "-Yaw" ->
+                                nonActiveSideYawPitchRoll.setYaw(-activeSideOrientation.getYaw() + lastActiveHandPose.getOrientation().getYaw());
+                        case "-Pitch" ->
+                                nonActiveSideYawPitchRoll.setPitch(-activeSideOrientation.getPitch() + lastActiveHandPose.getOrientation().getPitch());
+                        case "-Roll" ->
+                                nonActiveSideYawPitchRoll.setRoll(-activeSideOrientation.getRoll() + lastActiveHandPose.getOrientation().getRoll());
+                    }
+                }
+            }
+            RigidBodyTransform nonActiveSideTransform = new RigidBodyTransform(nonActiveSideYawPitchRoll, nonActiveSideTranslation);
+            nonActiveHandPose.applyTransform(nonActiveSideTransform);
+            nonActiveHandPose.changeFrame(ReferenceFrame.getWorldFrame());
+            handTransformsToWorld.get(nonActiveSide).set(nonActiveHandPose);
+            lastActiveHandPose = new FramePose3D(activeHandPose);
+        }
+
+        graspFrame.update();
+        preGraspFrames.update();
+        postGraspFrames.update();
+
+        if (handPoses.containsKey(activeSide[0]))
+            gripperClosure[0] = interactableHands.get(activeSide[0]).getGripperClosure();
+    }
+
+    public void renderImGuiWidgets() {
+        ImGui.text("HANDS MENU");
+        ColorDefinition handColor = HAND_COLORS.get(RobotSide.LEFT);
+        ImGui.pushStyleColor(ImGuiCol.CheckMark, (float) handColor.getRed(), (float) handColor.getGreen(), (float) handColor.getBlue(),
+                (float) handColor.getAlpha());
+        if (ImGui.radioButton(labels.get("LEFT"), activeSide[0] == RobotSide.LEFT)) {
+            activeSide[0] = RobotSide.LEFT;
+            interactableHands.get(RobotSide.LEFT).setSelected(true);
+            if (handPoses.containsKey(RobotSide.RIGHT))
+                interactableHands.get(RobotSide.RIGHT).setSelected(false);
+        }
+        ImGui.popStyleColor();
+        ImGui.sameLine();
+        handColor = HAND_COLORS.get(RobotSide.RIGHT);
+        ImGui.pushStyleColor(ImGuiCol.CheckMark, (float) handColor.getRed(), (float) handColor.getGreen(), (float) handColor.getBlue(),
+                (float) handColor.getAlpha());
+        if (ImGui.radioButton(labels.get("RIGHT"), activeSide[0] == RobotSide.RIGHT)) {
             activeSide[0] = RobotSide.RIGHT;
-            activeMenu = new RDXActiveAffordanceMenu[1];
-            activeMenu[0] = RDXActiveAffordanceMenu.PRE_GRASP;
-            preGraspFrames = new RDXAffordanceFrames(interactableHands,
-                                                     handTransformsToWorld,
-                                                     handPoses,
-                                                     objectBuilder.getSelectedObject().getTransformToWorld(),
-                                                     activeSide,
-                                                     activeMenu,
-                                                     new ArrayList<>(Arrays.asList(new Color(0xFFE4B5FF),
-                                                                                   new Color(0xFF8C00FF),
-                                                                                   new Color(0xFFDAB9FF),
-                                                                                   new Color(0xFF6600FF),
-                                                                                   new Color(0xFFA07AFF))));
-            activeMenu[0] = RDXActiveAffordanceMenu.GRASP;
-            graspFrame = new RDXAffordanceFrame(interactableHands,
-                                                handTransformsToWorld,
-                                                handPoses,
-                                                objectBuilder.getSelectedObject().getTransformToWorld(),
-                                                activeSide,
-                                                activeMenu,
-                                                Color.BLACK);
-            activeMenu[0] = RDXActiveAffordanceMenu.POST_GRASP;
-            postGraspFrames = new RDXAffordanceFrames(interactableHands,
-                                                      handTransformsToWorld,
-                                                      handPoses,
-                                                      objectBuilder.getSelectedObject().getTransformToWorld(),
-                                                      activeSide,
-                                                      activeMenu,
-                                                      new ArrayList<>(Arrays.asList(new Color(0xD8BFD8FF),
-                                                                                    new Color(0xBA55D3FF),
-                                                                                    new Color(0x9932CCFF),
-                                                                                    new Color(0x8A2BE2FF),
-                                                                                    new Color(0x4B0082FF))));
-            activeMenu[0] = RDXActiveAffordanceMenu.NONE;
-            for (RobotSide side : RobotSide.values)
-            {
-               baseUI.getPrimaryScene().addRenderableProvider(interactableHands.get(side));
-               baseUI.getImGuiPanelManager().addPanel(interactableHands.get(side).getPose3DGizmo().createTunerPanel(side.getCamelCaseName() + " Hand"));
+            interactableHands.get(RobotSide.RIGHT).setSelected(true);
+            if (handPoses.containsKey(RobotSide.LEFT))
+                interactableHands.get(RobotSide.LEFT).setSelected(false);
+        }
+        ImGui.popStyleColor();
+        ImGui.sameLine();
+        for (RobotSide side : RobotSide.values) {
+            if (activeSide[0] == side && !handPoses.containsKey(side)) {
+                if (ImGui.button(labels.get("ADD") + "##side")) {
+                    interactableHands.get(side).setShowing(true);
+                    handTransformsToWorld.get(side).getRotation().setYawPitchRoll(0.0, Math.toRadians(-90.0), 0.0);
+                    handTransformsToWorld.get(side).getTranslation().set(-0.5, side.negateIfRightSide(0.2), 0);
+                    handPoses.put(side, new FramePose3D(ReferenceFrame.getWorldFrame(), handTransformsToWorld.get(side)));
+                }
+            } else if (activeSide[0] == side && handPoses.containsKey(side)) {
+                if (ImGui.button(labels.get("REMOVE") + "##side")) {
+                    interactableHands.get(side).setShowing(false);
+                    handPoses.remove(side);
+                }
             }
-            baseUI.getPrimaryScene().addRenderableProvider(objectBuilder.getSelectedObject());
-            baseUI.getPrimaryScene().addRenderableProvider(RDXAffordanceEditorUI.this::getRenderables);
-            baseUI.getImGuiPanelManager().addPanel("Affordance Panel", RDXAffordanceEditorUI.this::renderImGuiWidgets);
+        }
 
-            activeTranslationAxisMirror.put("X", false);
-            activeTranslationAxisMirror.put("Y", false);
-            activeTranslationAxisMirror.put("Z", false);
-            activeTranslationAxisMirror.put("-X", false);
-            activeTranslationAxisMirror.put("-Y", false);
-            activeTranslationAxisMirror.put("-Z", false);
+        if (handPoses.containsKey(activeSide[0])) {
+            ImGui.text("Hand configuration: ");
+            if (ImGui.button(labels.get("OPEN")))
+                interactableHands.get(activeSide[0]).openGripper();
+            ImGui.sameLine();
+            if (ImGui.button(labels.get("HALF_CLOSE")))
+                interactableHands.get(activeSide[0]).setGripperToHalfClose();
+            ImGui.sameLine();
+            if (ImGui.button(labels.get("CLOSE")))
+                interactableHands.get(activeSide[0]).closeGripper();
+            ImGui.sameLine();
+            if (ImGui.button(labels.get("CRUSH")))
+                interactableHands.get(activeSide[0]).crushGripper();
+            if (ImGui.sliderFloat("SET CLOSURE",
+                    gripperClosure,
+                    interactableHands.get(activeSide[0]).getMinGripperClosure(),
+                    interactableHands.get(activeSide[0]).getMaxGripperClosure()))
+                interactableHands.get(activeSide[0]).setGripperClosure(gripperClosure[0]);
+            ImGui.separator();
+        }
 
-            activeRotationAxisMirror.put("Y", false);
-            activeRotationAxisMirror.put("P", false);
-            activeRotationAxisMirror.put("R", false);
-            activeRotationAxisMirror.put("-Y", false);
-            activeRotationAxisMirror.put("-P", false);
-            activeRotationAxisMirror.put("-R", false);
-         }
-
-         @Override
-         public void render()
-         {
-            update();
-            baseUI.renderBeforeOnScreenUI();
-            baseUI.renderEnd();
-         }
-
-         @Override
-         public void dispose()
-         {
-            baseUI.dispose();
-         }
-      });
-   }
-
-   public void update()
-   {
-      if (objectBuilder.isAnyObjectSelected())
-      {
-         FramePose3D objectPose = new FramePose3D(ReferenceFrame.getWorldFrame(), objectBuilder.getSelectedObject().getTransformToWorld());
-         // when editing post grasp poses, we want to move the object frame and the hand together
-         for (RobotSide side : handPoses.keySet())
-         {
-            if (activeMenu[0] == RDXActiveAffordanceMenu.POST_GRASP && handsLocked.get(side))
-            {
-               // used to update the hand pose according to object pose in post-grasping once fixed contact with object
-               if (!affordancePoseLocked.get(side))
-               {
-                  objectFrame.setPoseAndUpdate(objectPose);
-                  handLockedFrames.put(side, new PoseReferenceFrame(side.getLowerCaseName() + "HandFrame", objectFrame));
-                  handPoses.get(side).changeFrame(objectFrame);
-                  handLockedFrames.get(side).setPoseAndUpdate(handPoses.get(side));
-                  handPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
-                  affordancePoseLocked.replace(side, true);
-               }
-               objectFrame.setPoseAndUpdate(objectPose);
-               FramePose3D pose = new FramePose3D(handLockedFrames.get(side));
-               pose.changeFrame(ReferenceFrame.getWorldFrame());
-               handTransformsToWorld.get(side).set(pose.getOrientation(), pose.getTranslation());
+        ImGui.checkbox("Mirror Other Hand", mirrorActive);
+        ImGui.text("Translation: ");
+        Map<String, Boolean> changedColorTranslationAxisButton = new HashMap<>();
+        for (var axisMirror : activeTranslationAxisMirror.entrySet()) {
+            changedColorTranslationAxisButton.put(axisMirror.getKey(), false);
+            ImGui.sameLine();
+            if (axisMirror.getValue()) {
+                ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 0.0f, 1.0f, 0.5f);
+                changedColorTranslationAxisButton.replace(axisMirror.getKey(), true);
             }
-            else
-            {
-               handsLocked.replace(side, false);
-               affordancePoseLocked.replace(side, false);
+            if (ImGui.button(labels.get(axisMirror.getKey()) + "##" + "Translation")) {
+                axisMirror.setValue(!axisMirror.getValue());
             }
-         }
-      }
-
-      for (RobotSide side : handPoses.keySet())
-      {
-         // update hand poses according to where the hand is
-         handPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
-         handPoses.get(side).set(handTransformsToWorld.get(side));
-
-         // selected hand determines active side
-         if(interactableHands.get(side).isSelected())
-         {
-            activeSide[0] = side;
-         }
-      }
-
-      // mirroring
-      if (mirrorActive)
-      {
-         RobotSide nonActiveSide = (activeSide[0] == RobotSide.RIGHT ? RobotSide.LEFT : RobotSide.RIGHT);
-         FramePose3D activeHandPose = new FramePose3D(handPoses.get(activeSide[0]));
-
-         FixedFramePoint3DBasics activeSideTranslation = activeHandPose.getTranslation();
-         Point3DBasics nonActiveSideTranslation = new FramePoint3D();
-         for (var axis : activeTranslationAxisMirror.entrySet())
-         {
-            if (axis.getValue())
-            {
-               switch (axis.getKey())
-               {
-                  case "X" -> nonActiveSideTranslation.setX(activeSideTranslation.getX() - lastActiveHandPose.getTranslation().getX());
-                  case "Y" -> nonActiveSideTranslation.setY(activeSideTranslation.getY() - lastActiveHandPose.getTranslation().getY());
-                  case "Z" -> nonActiveSideTranslation.setZ(activeSideTranslation.getZ() - lastActiveHandPose.getTranslation().getZ());
-                  case "-X" -> nonActiveSideTranslation.setX(-activeSideTranslation.getX() + lastActiveHandPose.getTranslation().getX());
-                  case "-Y" -> nonActiveSideTranslation.setY(-activeSideTranslation.getY() + - lastActiveHandPose.getTranslation().getY());
-                  case "-Z" -> nonActiveSideTranslation.setZ(-activeSideTranslation.getZ() + - lastActiveHandPose.getTranslation().getZ());
-               }
-               nonActiveSideTranslation.applyTransform((Transform) nonActiveSideTranslation);
+            if (changedColorTranslationAxisButton.get(axisMirror.getKey()))
+                ImGui.popStyleColor();
+        }
+        ImGui.text("Rotation:     ");
+        Map<String, Boolean> changedColorRotationAxisButton = new HashMap<>();
+        for (var axisMirror : activeRotationAxisMirror.entrySet()) {
+            changedColorRotationAxisButton.put(axisMirror.getKey(), false);
+            ImGui.sameLine();
+            if (axisMirror.getValue()) {
+                ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 0.0f, 1.0f, 0.5f);
+                changedColorRotationAxisButton.replace(axisMirror.getKey(), true);
             }
-         }
-         lastActiveHandPose = new FramePose3D(activeHandPose);
-
-         YawPitchRoll activeSideYawPitchRoll = new YawPitchRoll();
-         pose.getRotation().get(activeSideYawPitchRoll);
-         YawPitchRoll nonActiveSideYawPitchRoll = new YawPitchRoll();
-         for (var axis : activeRotationAxisMirror.entrySet())
-         {
-            if (axis.getValue())
-            {
-               //               switch (axis.getKey())
-               //               {
-               //                  case "Y" -> nonActiveSideYawPitchRoll.appendYawRotation();
-               //                  case "P" -> nonActiveSideYawPitchRoll.appendPitchRotation();
-               //                  case "R" -> nonActiveSideYawPitchRoll.appendRollRotation();
-               //                  case "-Y" -> nonActiveSideYawPitchRoll.appendYawRotation(-);
-               //                  case "-P" -> nonActiveSideYawPitchRoll.appendPitchRotation(-);
-               //                  case "-R" -> nonActiveSideYawPitchRoll.appendRollRotation(-);
-               //               }
+            if (ImGui.button(labels.get(axisMirror.getKey()) + "##" + "Rotation")) {
+                axisMirror.setValue(!axisMirror.getValue());
             }
-         }
-         handTransformsToWorld.get(nonActiveSide).set(nonActiveSideYawPitchRoll, nonActiveSideTranslation);
-      }
+            if (changedColorRotationAxisButton.get(axisMirror.getKey()))
+                ImGui.popStyleColor();
+        }
+        ImGui.separator();
 
-      graspFrame.update();
-      preGraspFrames.update();
-      postGraspFrames.update();
+        ImGui.text("PRE-GRASP MENU");
+        ImGui.text("Pre-grasp Frames: ");
+        ImGui.sameLine();
+        preGraspFrames.renderImGuiWidgets(labels, "pregrasp");
+        ImGui.separator();
 
-      if (handPoses.containsKey(activeSide[0]))
-         gripperClosure[0] = interactableHands.get(activeSide[0]).getGripperClosure();
-   }
+        ImGui.text("GRASP MENU");
+        ImGui.text("Grasp Frame: ");
+        ImGui.sameLine();
+        graspFrame.renderImGuiWidgets(labels, "grasp");
+        ImGui.separator();
 
-   public void renderImGuiWidgets()
-   {
-      ImGui.text("HANDS MENU");
-      ColorDefinition handColor = HAND_COLORS.get(RobotSide.LEFT);
-      ImGui.pushStyleColor(ImGuiCol.CheckMark , (float) handColor.getRed(), (float) handColor.getGreen(), (float) handColor.getBlue(),
-                           (float) handColor.getAlpha());
-      if (ImGui.radioButton(labels.get("LEFT"), activeSide[0] == RobotSide.LEFT))
-      {
-         activeSide[0] = RobotSide.LEFT;
-         interactableHands.get(RobotSide.LEFT).setSelected(true);
-         if (handPoses.containsKey(RobotSide.RIGHT))
-            interactableHands.get(RobotSide.RIGHT).setSelected(false);
-      }
-      ImGui.popStyleColor();
-      ImGui.sameLine();
-      handColor = HAND_COLORS.get(RobotSide.RIGHT);
-      ImGui.pushStyleColor(ImGuiCol.CheckMark , (float) handColor.getRed(), (float) handColor.getGreen(), (float) handColor.getBlue(),
-                           (float) handColor.getAlpha());
-      if (ImGui.radioButton(labels.get("RIGHT"), activeSide[0] == RobotSide.RIGHT))
-      {
-         activeSide[0] = RobotSide.RIGHT;
-         interactableHands.get(RobotSide.RIGHT).setSelected(true);
-         if (handPoses.containsKey(RobotSide.LEFT))
-            interactableHands.get(RobotSide.LEFT).setSelected(false);
-      }
-      ImGui.popStyleColor();
-      ImGui.sameLine();
-      for (RobotSide side : RobotSide.values)
-      {
-         if (activeSide[0] == side && !handPoses.containsKey(side))
-         {
-            if (ImGui.button(labels.get("ADD") + "##side"))
-            {
-               interactableHands.get(side).setShowing(true);
-               handTransformsToWorld.get(side).getRotation().setYawPitchRoll(0.0, Math.toRadians(-90.0), 0.0);
-               handTransformsToWorld.get(side).getTranslation().set(-0.5, side.negateIfRightSide(0.2), 0);
-               handPoses.put(side, new FramePose3D(ReferenceFrame.getWorldFrame(), handTransformsToWorld.get(side)));
+        ImGui.text("POST-GRASP MENU");
+        ImGui.text("Post-grasp Frames: ");
+        ImGui.sameLine();
+        postGraspFrames.renderImGuiWidgets(labels, "postgrasp");
+        boolean changedColorLockOneHand = false;
+        if (handPoses.containsKey(activeSide[0])) {
+            if (handsLocked.get(activeSide[0])) {
+                ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 0.0f, 1.0f, 0.5f);
+                changedColorLockOneHand = true;
             }
-         }
-         else if (activeSide[0] == side && handPoses.containsKey(side))
-         {
-            if (ImGui.button(labels.get("REMOVE") + "##side"))
-            {
-               interactableHands.get(side).setShowing(false);
-               handPoses.remove(side);
+            if (!(handsLocked.get(RobotSide.LEFT) && handsLocked.get(RobotSide.RIGHT))) {
+                if (ImGui.button(labels.get("LOCK HAND TO OBJECT")) && activeMenu[0] == RDXActiveAffordanceMenu.POST_GRASP)
+                    handsLocked.replace(activeSide[0], !handsLocked.get(activeSide[0]));
             }
-         }
-      }
+            if (changedColorLockOneHand)
+                ImGui.popStyleColor();
 
-      if (handPoses.containsKey(activeSide[0]))
-      {
-         ImGui.text("Hand configuration: ");
-         if (ImGui.button(labels.get("OPEN")))
-            interactableHands.get(activeSide[0]).openGripper();
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("HALF_CLOSE")))
-            interactableHands.get(activeSide[0]).setGripperToHalfClose();
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("CLOSE")))
-            interactableHands.get(activeSide[0]).closeGripper();
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("CRUSH")))
-            interactableHands.get(activeSide[0]).crushGripper();
-         if (ImGui.sliderFloat("SET CLOSURE",
-                               gripperClosure,
-                               interactableHands.get(activeSide[0]).getMinGripperClosure(),
-                               interactableHands.get(activeSide[0]).getMaxGripperClosure()))
-            interactableHands.get(activeSide[0]).setGripperClosure(gripperClosure[0]);
-         ImGui.separator();
-      }
+            boolean changedColorLockBothHands = false;
+            if ((handsLocked.get(RobotSide.LEFT) && handsLocked.get(RobotSide.RIGHT))) {
+                ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 0.0f, 1.0f, 0.5f);
+                changedColorLockBothHands = true;
+            }
+            if (!((handsLocked.get(RobotSide.LEFT) && !handsLocked.get(RobotSide.RIGHT)) || (!handsLocked.get(RobotSide.LEFT) && handsLocked.get(RobotSide.RIGHT)))) { // not in alternate state, this means single hand lock is not activate
+                if (ImGui.button(labels.get("LOCK BOTH HANDS TO OBJECT")) && activeMenu[0] == RDXActiveAffordanceMenu.POST_GRASP) {
+                    for (RobotSide side : RobotSide.values)
+                        handsLocked.replace(side, !handsLocked.get(side));
+                }
+                if (changedColorLockBothHands)
+                    ImGui.popStyleColor();
+            }
+        }
+        ImGui.separator();
 
-      ImGui.checkbox("Mirror Other Hand", mirrorActive);
-      ImGui.text("Translation: ");
-      Map<String, Boolean> changedColorTranslationAxisButton = new HashMap<>();
-      for (var axisMirror : activeTranslationAxisMirror.entrySet())
-      {
-         changedColorTranslationAxisButton.put(axisMirror.getKey(), false);
-         ImGui.sameLine();
-         if (axisMirror.getValue())
-         {
-            ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 0.0f, 1.0f, 0.5f);
-            changedColorTranslationAxisButton.replace(axisMirror.getKey(), true);
-         }
-         if (ImGui.button(labels.get(axisMirror.getKey()) + "##" + "Translation"))
-         {
-            axisMirror.setValue(!axisMirror.getValue());
-         }
-         if (changedColorTranslationAxisButton.get(axisMirror.getKey()))
-            ImGui.popStyleColor();
-      }
-      ImGui.text("Rotation:     ");
-      Map<String, Boolean> changedColorRotationAxisButton = new HashMap<>();
-      for (var axisMirror : activeRotationAxisMirror.entrySet())
-      {
-         changedColorRotationAxisButton.put(axisMirror.getKey(), false);
-         ImGui.sameLine();
-         if (axisMirror.getValue())
-         {
-            ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 0.0f, 1.0f, 0.5f);
-            changedColorRotationAxisButton.replace(axisMirror.getKey(), true);
-         }
-         if (ImGui.button(labels.get(axisMirror.getKey()) + "##" + "Rotation"))
-         {
-            axisMirror.setValue(!axisMirror.getValue());
-         }
-         if (changedColorRotationAxisButton.get(axisMirror.getKey()))
-            ImGui.popStyleColor();
-      }
-      ImGui.separator();
+        ImGui.text("PREVIOUS/NEXT FRAME: ");
+        ImGui.sameLine();
+        if (ImGui.button(labels.get("<"), 20, 25)) {
+            switch (activeMenu[0]) {
+                case PRE_GRASP -> {
+                    if (!preGraspFrames.isFirst())
+                        preGraspFrames.selectPrevious();
+                }
+                case GRASP -> {
+                    if (preGraspFrames.getNumberOfFrames() > 0) {
+                        activeMenu[0] = RDXActiveAffordanceMenu.PRE_GRASP;
+                        preGraspFrames.setSelectedIndexToSize();
+                        preGraspFrames.selectPrevious();
+                    }
+                }
+                case POST_GRASP -> {
+                    if (!postGraspFrames.isFirst())
+                        postGraspFrames.selectPrevious();
+                    else {
+                        if (graspFrame.isSet(activeSide[0])) {
+                            activeMenu[0] = RDXActiveAffordanceMenu.GRASP;
+                            graspFrame.selectFrame();
+                        } else if (preGraspFrames.getNumberOfFrames() > 0) {
+                            activeMenu[0] = RDXActiveAffordanceMenu.PRE_GRASP;
+                            preGraspFrames.setSelectedIndexToSize();
+                            preGraspFrames.selectPrevious();
+                        }
+                    }
+                }
+            }
+        }
+        ImGui.sameLine();
+        if (ImGui.button(labels.get(">"), 20, 25) || playing) {
+            if (playing) {
+                try {
+                    Thread.sleep(112); // about 9Hz
+                } catch (InterruptedException e) {
+                }
+            }
+            switch (activeMenu[0]) {
+                case PRE_GRASP -> {
+                    if (!preGraspFrames.isLast())
+                        preGraspFrames.selectNext();
+                    else {
+                        if (graspFrame.isSet(activeSide[0])) {
+                            activeMenu[0] = RDXActiveAffordanceMenu.GRASP;
+                            graspFrame.selectFrame();
+                        } else if (postGraspFrames.getNumberOfFrames() > 0) {
+                            activeMenu[0] = RDXActiveAffordanceMenu.POST_GRASP;
+                            postGraspFrames.resetSelectedIndex();
+                            postGraspFrames.selectNext();
+                        }
+                    }
+                }
+                case GRASP -> {
+                    if (postGraspFrames.getNumberOfFrames() > 0) {
+                        activeMenu[0] = RDXActiveAffordanceMenu.POST_GRASP;
+                        postGraspFrames.resetSelectedIndex();
+                        postGraspFrames.selectNext();
+                    }
+                }
+                case POST_GRASP -> {
+                    if (!postGraspFrames.isLast())
+                        postGraspFrames.selectNext();
+                    else
+                        playing = false;
+                }
+            }
+        }
+        ImGui.sameLine();
+        if (ImGui.button(labels.get("PLAY"))) {
+            playing = true;
+        }
+        ImGui.separator();
 
-      ImGui.text("PRE-GRASP MENU");
-      ImGui.text("Pre-grasp Frames: ");
-      ImGui.sameLine();
-      preGraspFrames.renderImGuiWidgets(labels, "pregrasp");
-      ImGui.separator();
-
-      ImGui.text("GRASP MENU");
-      ImGui.text("Grasp Frame: ");
-      ImGui.sameLine();
-      graspFrame.renderImGuiWidgets(labels, "grasp");
-      ImGui.separator();
-
-      ImGui.text("POST-GRASP MENU");
-      ImGui.text("Post-grasp Frames: ");
-      ImGui.sameLine();
-      postGraspFrames.renderImGuiWidgets(labels, "postgrasp");
-      boolean changedColorLockOneHand = false;
-      if (handPoses.containsKey(activeSide[0]))
-      {
-         if (handsLocked.get(activeSide[0]))
-         {
-            ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 0.0f, 1.0f, 0.5f);
-            changedColorLockOneHand = true;
-         }
-         if (!(handsLocked.get(RobotSide.LEFT) && handsLocked.get(RobotSide.RIGHT)))
-         {
-            if (ImGui.button(labels.get("LOCK HAND TO OBJECT")) && activeMenu[0] == RDXActiveAffordanceMenu.POST_GRASP)
-               handsLocked.replace(activeSide[0], !handsLocked.get(activeSide[0]));
-         }
-         if (changedColorLockOneHand)
-            ImGui.popStyleColor();
-
-         boolean changedColorLockBothHands = false;
-         if ((handsLocked.get(RobotSide.LEFT) && handsLocked.get(RobotSide.RIGHT)))
-         {
-            ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 0.0f, 1.0f, 0.5f);
-            changedColorLockBothHands = true;
-         }
-         if (!((handsLocked.get(RobotSide.LEFT) && !handsLocked.get(RobotSide.RIGHT)) || (!handsLocked.get(RobotSide.LEFT) && handsLocked.get(RobotSide.RIGHT))))
-         { // not in alternate state, this means single hand lock is not activate
-            if (ImGui.button(labels.get("LOCK BOTH HANDS TO OBJECT")) && activeMenu[0] == RDXActiveAffordanceMenu.POST_GRASP)
-            {
-               for (RobotSide side : RobotSide.values)
-                  handsLocked.replace(side, !handsLocked.get(side));
-            }
-            if (changedColorLockBothHands)
-               ImGui.popStyleColor();
-         }
-      }
-      ImGui.separator();
-
-      ImGui.text("PREVIOUS/NEXT FRAME: ");
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("<"), 20, 25))
-      {
-         switch (activeMenu[0])
-         {
-            case PRE_GRASP ->
-            {
-               if (!preGraspFrames.isFirst())
-                  preGraspFrames.selectPrevious();
-            }
-            case GRASP ->
-            {
-               if (preGraspFrames.getNumberOfFrames() > 0)
-               {
-                  activeMenu[0] = RDXActiveAffordanceMenu.PRE_GRASP;
-                  preGraspFrames.setSelectedIndexToSize();
-                  preGraspFrames.selectPrevious();
-               }
-            }
-            case POST_GRASP ->
-            {
-               if (!postGraspFrames.isFirst())
-                  postGraspFrames.selectPrevious();
-               else
-               {
-                  if (graspFrame.isSet(activeSide[0]))
-                  {
-                     activeMenu[0] = RDXActiveAffordanceMenu.GRASP;
-                     graspFrame.selectFrame();
-                  }
-                  else if (preGraspFrames.getNumberOfFrames() > 0)
-                  {
-                     activeMenu[0] = RDXActiveAffordanceMenu.PRE_GRASP;
-                     preGraspFrames.setSelectedIndexToSize();
-                     preGraspFrames.selectPrevious();
-                  }
-               }
-            }
-         }
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get(">"), 20, 25) || playing)
-      {
-         if (playing)
-         {
-            try
-            {
-               Thread.sleep(112); // about 9Hz
-            }
-            catch (InterruptedException e)
-            {
-            }
-         }
-         switch (activeMenu[0])
-         {
-            case PRE_GRASP ->
-            {
-               if (!preGraspFrames.isLast())
-                  preGraspFrames.selectNext();
-               else
-               {
-                  if (graspFrame.isSet(activeSide[0]))
-                  {
-                     activeMenu[0] = RDXActiveAffordanceMenu.GRASP;
-                     graspFrame.selectFrame();
-                  }
-                  else if (postGraspFrames.getNumberOfFrames() > 0)
-                  {
-                     activeMenu[0] = RDXActiveAffordanceMenu.POST_GRASP;
-                     postGraspFrames.resetSelectedIndex();
-                     postGraspFrames.selectNext();
-                  }
-               }
-            }
-            case GRASP ->
-            {
-               if (postGraspFrames.getNumberOfFrames() > 0)
-               {
-                  activeMenu[0] = RDXActiveAffordanceMenu.POST_GRASP;
-                  postGraspFrames.resetSelectedIndex();
-                  postGraspFrames.selectNext();
-               }
-            }
-            case POST_GRASP ->
-            {
-               if (!postGraspFrames.isLast())
-                  postGraspFrames.selectNext();
-               else
-                  playing = false;
-            }
-         }
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("PLAY")))
-      {
-         playing = true;
-      }
-      ImGui.separator();
-
-      if (ImGui.button("RESET"))
-      {
-         objectBuilder.getSelectedObject().resetToInitialPose();
-         reset();
-      }
-      if (textInput.render())
-      {
-         fileName = textInput.getString();
-      }
+        if (ImGui.button("RESET")) {
+            objectBuilder.getSelectedObject().resetToInitialPose();
+            reset();
+        }
+        if (textInput.render()) {
+            fileName = textInput.getString();
+        }
 //      if (ImGui.button("SAVE"))
 //      {
 //         saveToFile(fileName);
@@ -575,74 +519,61 @@ public class RDXAffordanceEditorUI
 //         reset();
 //         loadFromFile(fileName);
 //      }
-   }
+    }
 
-   private void reset()
-   {
-      for (RobotSide side : handPoses.keySet())
-      {
-         handTransformsToWorld.get(side).setToZero();
-         handTransformsToWorld.get(side).getTranslation().set(-0.5, side.negateIfRightSide(0.2), 0);
-         handTransformsToWorld.get(side).getRotation().setYawPitchRoll(0.0, Math.toRadians(-90.0), 0.0);
-         interactableHands.get(side).closeGripper();
-      }
+    private void reset() {
+        for (RobotSide side : handPoses.keySet()) {
+            handTransformsToWorld.get(side).setToZero();
+            handTransformsToWorld.get(side).getTranslation().set(-0.5, side.negateIfRightSide(0.2), 0);
+            handTransformsToWorld.get(side).getRotation().setYawPitchRoll(0.0, Math.toRadians(-90.0), 0.0);
+            interactableHands.get(side).closeGripper();
+        }
 
-      graspFrame.reset();
-      preGraspFrames.reset();
-      postGraspFrames.reset();
-      activeMenu[0] = RDXActiveAffordanceMenu.NONE;
-   }
+        graspFrame.reset();
+        preGraspFrames.reset();
+        postGraspFrames.reset();
+        activeMenu[0] = RDXActiveAffordanceMenu.NONE;
+    }
 
-   private ArrayList<Double> computeTrajectoryDurations(ArrayList<FramePose3D> preGraspPoses, FramePose3D graspPose, ArrayList<FramePose3D> postGraspPoses)
-   {
-      ArrayList<Double> trajectoryDurations = new ArrayList<>();
-      int sizePreGrasp = preGraspPoses.size();
-      // compute trajectory duration as the necessary duration required to reach two consecutive frames at the desired velocity
-      for (int i = 0; i < sizePreGrasp; i++)
-      {
-         if (i != 0)
-         {
-            double positionDistance = preGraspPoses.get(i).getPositionDistance(preGraspPoses.get(i - 1));
-            double angularDistance = preGraspPoses.get(i).getOrientationDistance(preGraspPoses.get(i - 1));
+    private ArrayList<Double> computeTrajectoryDurations(ArrayList<FramePose3D> preGraspPoses, FramePose3D graspPose, ArrayList<FramePose3D> postGraspPoses) {
+        ArrayList<Double> trajectoryDurations = new ArrayList<>();
+        int sizePreGrasp = preGraspPoses.size();
+        // compute trajectory duration as the necessary duration required to reach two consecutive frames at the desired velocity
+        for (int i = 0; i < sizePreGrasp; i++) {
+            if (i != 0) {
+                double positionDistance = preGraspPoses.get(i).getPositionDistance(preGraspPoses.get(i - 1));
+                double angularDistance = preGraspPoses.get(i).getOrientationDistance(preGraspPoses.get(i - 1));
+                // take max duration required to achieve the desired linear velocity or angular velocity
+                trajectoryDurations.add(Math.max(positionDistance / LINEAR_VELOCITY, angularDistance / ANGULAR_VELOCITY));
+            } else
+                trajectoryDurations.add(DEFAULT_DURATION);
+        }
+
+        if (sizePreGrasp > 0) {
+            double positionDistance = graspPose.getPositionDistance(preGraspPoses.get(sizePreGrasp - 1));
+            double angularDistance = graspPose.getOrientationDistance(preGraspPoses.get(sizePreGrasp - 1));
             // take max duration required to achieve the desired linear velocity or angular velocity
             trajectoryDurations.add(Math.max(positionDistance / LINEAR_VELOCITY, angularDistance / ANGULAR_VELOCITY));
-         }
-         else
+        } else
             trajectoryDurations.add(DEFAULT_DURATION);
-      }
 
-      if (sizePreGrasp > 0)
-      {
-         double positionDistance = graspPose.getPositionDistance(preGraspPoses.get(sizePreGrasp - 1));
-         double angularDistance = graspPose.getOrientationDistance(preGraspPoses.get(sizePreGrasp - 1));
-         // take max duration required to achieve the desired linear velocity or angular velocity
-         trajectoryDurations.add(Math.max(positionDistance / LINEAR_VELOCITY, angularDistance / ANGULAR_VELOCITY));
-      }
-      else
-         trajectoryDurations.add(DEFAULT_DURATION);
+        for (int i = 0; i < postGraspPoses.size(); i++) {
+            if (i != 0) {
+                double positionDistance = postGraspPoses.get(i).getPositionDistance(postGraspPoses.get(i - 1));
+                double angularDistance = postGraspPoses.get(i).getOrientationDistance(postGraspPoses.get(i - 1));
+                // take max duration required to achieve the desired linear velocity or angular velocity
+                trajectoryDurations.add(Math.max(positionDistance / LINEAR_VELOCITY, angularDistance / ANGULAR_VELOCITY));
+            } else if (!graspFrame.isSet(activeSide[0])) {
+                double positionDistance = postGraspPoses.get(i).getPositionDistance(graspPose);
+                double angularDistance = postGraspPoses.get(i).getOrientationDistance(graspPose);
+                // take max duration required to achieve the desired linear velocity or angular velocity
+                trajectoryDurations.add(Math.max(positionDistance / LINEAR_VELOCITY, angularDistance / ANGULAR_VELOCITY));
+            } else
+                trajectoryDurations.add(DEFAULT_DURATION);
+        }
 
-      for (int i = 0; i < postGraspPoses.size(); i++)
-      {
-         if (i != 0)
-         {
-            double positionDistance = postGraspPoses.get(i).getPositionDistance(postGraspPoses.get(i - 1));
-            double angularDistance = postGraspPoses.get(i).getOrientationDistance(postGraspPoses.get(i - 1));
-            // take max duration required to achieve the desired linear velocity or angular velocity
-            trajectoryDurations.add(Math.max(positionDistance / LINEAR_VELOCITY, angularDistance / ANGULAR_VELOCITY));
-         }
-         else if (!graspFrame.isSet(activeSide[0]))
-         {
-            double positionDistance = postGraspPoses.get(i).getPositionDistance(graspPose);
-            double angularDistance = postGraspPoses.get(i).getOrientationDistance(graspPose);
-            // take max duration required to achieve the desired linear velocity or angular velocity
-            trajectoryDurations.add(Math.max(positionDistance / LINEAR_VELOCITY, angularDistance / ANGULAR_VELOCITY));
-         }
-         else
-            trajectoryDurations.add(DEFAULT_DURATION);
-      }
-
-      return trajectoryDurations;
-   }
+        return trajectoryDurations;
+    }
 
 //   public void saveToFile(String fileName)
 //   {
@@ -917,15 +848,13 @@ public class RDXAffordanceEditorUI
 //      }
 //   }
 
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
-      graspFrame.getRenderables(renderables, pool);
-      preGraspFrames.getRenderables(renderables, pool);
-      postGraspFrames.getRenderables(renderables, pool);
-   }
+    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool) {
+        graspFrame.getRenderables(renderables, pool);
+        preGraspFrames.getRenderables(renderables, pool);
+        postGraspFrames.getRenderables(renderables, pool);
+    }
 
-   public static void main(String[] args)
-   {
-      new RDXAffordanceEditorUI();
-   }
+    public static void main(String[] args) {
+        new RDXAffordanceEditorUI();
+    }
 }
