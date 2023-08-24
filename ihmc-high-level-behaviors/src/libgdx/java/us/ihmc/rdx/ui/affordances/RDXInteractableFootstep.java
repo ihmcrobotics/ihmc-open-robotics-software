@@ -129,9 +129,6 @@ public class RDXInteractableFootstep
    {
       String text = plannedFootstepInternal.getRobotSide().getSideNameFirstLetter() + index;
 
-      for (RobotSide side : RobotSide.values)
-         vrPickResult.get(side).setPickedObjectName("Footstep " + text);
-
       if (!textRenderablesMap.containsKey(text))
       {
          float textHeight = 0.08f;
@@ -291,6 +288,7 @@ public class RDXInteractableFootstep
             if (pointCollidable.collide(controller.getPickPointPose().getPosition()))
             {
                vrPickResult.get(side).setDistanceToControllerPickPoint(pointCollidable.getSignedDistanceToSurface());
+               vrPickResult.get(side).setPickedObjectName("Footstep " + footstepIndexText.getCurrentText());
                controller.addPickResult(vrPickResult.get(side));
             }
          });
