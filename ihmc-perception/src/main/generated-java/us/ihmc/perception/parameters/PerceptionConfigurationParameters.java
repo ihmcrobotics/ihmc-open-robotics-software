@@ -20,6 +20,7 @@ public class PerceptionConfigurationParameters extends StoredPropertySet impleme
 
    public static final IntegerStoredPropertyKey l515ThrottlerFrequency = keys.addIntegerKey("L515 throttler frequency");
    public static final IntegerStoredPropertyKey ousterThrottlerFrequency = keys.addIntegerKey("Ouster throttler frequency");
+   public static final IntegerStoredPropertyKey occupancyGridResolution = keys.addIntegerKey("Occupancy grid resolution");
    public static final BooleanStoredPropertyKey rapidRegionsEnabled = keys.addBooleanKey("Rapid regions enabled");
    public static final BooleanStoredPropertyKey loggingEnabled = keys.addBooleanKey("Logging enabled");
    public static final BooleanStoredPropertyKey publishColor = keys.addBooleanKey("Publish color");
@@ -31,6 +32,7 @@ public class PerceptionConfigurationParameters extends StoredPropertySet impleme
    public static final BooleanStoredPropertyKey supportSquareEnabled = keys.addBooleanKey("Support square enabled");
    public static final BooleanStoredPropertyKey boundingBoxFilter = keys.addBooleanKey("Bounding box filter");
    public static final BooleanStoredPropertyKey concaveHullFilters = keys.addBooleanKey("Concave hull filters");
+   public static final BooleanStoredPropertyKey shadowFilter = keys.addBooleanKey("Shadow filter");
    public static final BooleanStoredPropertyKey activeMapping = keys.addBooleanKey("Active mapping");
 
    /**
