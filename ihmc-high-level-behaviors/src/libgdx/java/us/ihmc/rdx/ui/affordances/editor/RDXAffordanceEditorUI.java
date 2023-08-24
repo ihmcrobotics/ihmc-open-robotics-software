@@ -5,17 +5,21 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 
+import org.bytedeco.javacv.Frame;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.log.LogTools;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiInputText;
@@ -26,19 +30,12 @@ import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObjectBuilder;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.tools.io.*;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 public class RDXAffordanceEditorUI
@@ -46,11 +43,11 @@ public class RDXAffordanceEditorUI
    private static final double DEFAULT_DURATION = 1.0;
    private static final double LINEAR_VELOCITY = 0.1;
    private static final double ANGULAR_VELOCITY = 1.0; // [rad/s] for the sake gripper this is ~= to 0.1 m/s for a point on the edge of the gripper
-   private static final SideDependentList<ColorDefinition> handColors;
+   private static final SideDependentList<ColorDefinition> HAND_COLORS;
    static {
-      handColors = new SideDependentList<>();
-      handColors.put(RobotSide.LEFT, ColorDefinitions.SandyBrown());
-      handColors.put(RobotSide.RIGHT, ColorDefinitions.SlateBlue());
+      HAND_COLORS = new SideDependentList<>();
+      HAND_COLORS.put(RobotSide.LEFT, ColorDefinitions.SandyBrown());
+      HAND_COLORS.put(RobotSide.RIGHT, ColorDefinitions.SlateBlue());
    }
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
@@ -71,9 +68,18 @@ public class RDXAffordanceEditorUI
    private RDXAffordanceFrames preGraspFrames;
    private RDXAffordanceFrames postGraspFrames;
 
+   // mirroring
+   private boolean mirrorActive = false;
+   private final Map<String, Boolean> activeTranslationAxisMirror = new HashMap<>();
+   private final Map<String, Boolean> activeRotationAxisMirror = new HashMap<>();
+   private FramePose3DReadOnly lastActiveHandPose;
+   
+
+   // locking to object
    private SideDependentList<Boolean> affordancePoseLocked = new SideDependentList<>();
    private SideDependentList<Boolean> handsLocked = new SideDependentList<>();
    private final SideDependentList<PoseReferenceFrame> handLockedFrames = new SideDependentList<>();
+
    private RDXActiveAffordanceMenu[] activeMenu;
    private boolean playing = false;
 
@@ -101,9 +107,9 @@ public class RDXAffordanceEditorUI
                handTransformsToWorld.get(side).getTranslation().set(-0.5, side.negateIfRightSide(0.2), 0);
                interactableHands.put(side, new RDXInteractableSakeGripper(baseUI.getPrimary3DPanel(),
                                                                  handTransformsToWorld.get(side),
-                                                                 new ColorDefinition(handColors.get(side).getRed(),
-                                                                                     handColors.get(side).getGreen(),
-                                                                                     handColors.get(side).getBlue(),
+                                                                 new ColorDefinition(HAND_COLORS.get(side).getRed(),
+                                                                                     HAND_COLORS.get(side).getGreen(),
+                                                                                     HAND_COLORS.get(side).getBlue(),
                                                                                      0.8)));
                handPoses.put(side, new FramePose3D(ReferenceFrame.getWorldFrame(), handTransformsToWorld.get(side)));
 
@@ -155,6 +161,20 @@ public class RDXAffordanceEditorUI
             baseUI.getPrimaryScene().addRenderableProvider(objectBuilder.getSelectedObject());
             baseUI.getPrimaryScene().addRenderableProvider(RDXAffordanceEditorUI.this::getRenderables);
             baseUI.getImGuiPanelManager().addPanel("Affordance Panel", RDXAffordanceEditorUI.this::renderImGuiWidgets);
+
+            activeTranslationAxisMirror.put("X", false);
+            activeTranslationAxisMirror.put("Y", false);
+            activeTranslationAxisMirror.put("Z", false);
+            activeTranslationAxisMirror.put("-X", false);
+            activeTranslationAxisMirror.put("-Y", false);
+            activeTranslationAxisMirror.put("-Z", false);
+
+            activeRotationAxisMirror.put("Y", false);
+            activeRotationAxisMirror.put("P", false);
+            activeRotationAxisMirror.put("R", false);
+            activeRotationAxisMirror.put("-Y", false);
+            activeRotationAxisMirror.put("-P", false);
+            activeRotationAxisMirror.put("-R", false);
          }
 
          @Override
@@ -179,7 +199,7 @@ public class RDXAffordanceEditorUI
       {
          FramePose3D objectPose = new FramePose3D(ReferenceFrame.getWorldFrame(), objectBuilder.getSelectedObject().getTransformToWorld());
          // when editing post grasp poses, we want to move the object frame and the hand together
-         for (RobotSide side : RobotSide.values)
+         for (RobotSide side : handPoses.keySet())
          {
             if (activeMenu[0] == RDXActiveAffordanceMenu.POST_GRASP && handsLocked.get(side))
             {
@@ -205,15 +225,65 @@ public class RDXAffordanceEditorUI
             }
          }
       }
+
       for (RobotSide side : handPoses.keySet())
       {
+         // update hand poses according to where the hand is
          handPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
          handPoses.get(side).set(handTransformsToWorld.get(side));
 
+         // selected hand determines active side
          if(interactableHands.get(side).isSelected())
          {
             activeSide[0] = side;
          }
+      }
+
+      // mirroring
+      if (mirrorActive)
+      {
+         RobotSide nonActiveSide = (activeSide[0] == RobotSide.RIGHT ? RobotSide.LEFT : RobotSide.RIGHT);
+         FramePose3D activeHandPose = new FramePose3D(handPoses.get(activeSide[0]));
+
+         FixedFramePoint3DBasics activeSideTranslation = activeHandPose.getTranslation();
+         Point3DBasics nonActiveSideTranslation = new FramePoint3D();
+         for (var axis : activeTranslationAxisMirror.entrySet())
+         {
+            if (axis.getValue())
+            {
+               switch (axis.getKey())
+               {
+                  case "X" -> nonActiveSideTranslation.setX(activeSideTranslation.getX() - lastActiveHandPose.getTranslation().getX());
+                  case "Y" -> nonActiveSideTranslation.setY(activeSideTranslation.getY() - lastActiveHandPose.getTranslation().getY());
+                  case "Z" -> nonActiveSideTranslation.setZ(activeSideTranslation.getZ() - lastActiveHandPose.getTranslation().getZ());
+                  case "-X" -> nonActiveSideTranslation.setX(-activeSideTranslation.getX() + lastActiveHandPose.getTranslation().getX());
+                  case "-Y" -> nonActiveSideTranslation.setY(-activeSideTranslation.getY() + - lastActiveHandPose.getTranslation().getY());
+                  case "-Z" -> nonActiveSideTranslation.setZ(-activeSideTranslation.getZ() + - lastActiveHandPose.getTranslation().getZ());
+               }
+               nonActiveSideTranslation.applyTransform((Transform) nonActiveSideTranslation);
+            }
+         }
+         lastActiveHandPose = new FramePose3D(activeHandPose);
+
+         YawPitchRoll activeSideYawPitchRoll = new YawPitchRoll();
+         pose.getRotation().get(activeSideYawPitchRoll);
+         YawPitchRoll nonActiveSideYawPitchRoll = new YawPitchRoll();
+         for (var axis : activeRotationAxisMirror.entrySet())
+         {
+            if (axis.getValue())
+            {
+               //               switch (axis.getKey())
+               //               {
+               //                  case "Y" -> nonActiveSideYawPitchRoll.appendYawRotation();
+               //                  case "P" -> nonActiveSideYawPitchRoll.appendPitchRotation();
+               //                  case "R" -> nonActiveSideYawPitchRoll.appendRollRotation();
+               //                  case "-Y" -> nonActiveSideYawPitchRoll.appendYawRotation(-);
+               //                  case "-P" -> nonActiveSideYawPitchRoll.appendPitchRotation(-);
+               //                  case "-R" -> nonActiveSideYawPitchRoll.appendRollRotation(-);
+               //               }
+            }
+         }
+         handTransformsToWorld.get(nonActiveSide).set(nonActiveSideYawPitchRoll, nonActiveSideTranslation);
       }
 
       graspFrame.update();
@@ -227,7 +297,7 @@ public class RDXAffordanceEditorUI
    public void renderImGuiWidgets()
    {
       ImGui.text("HANDS MENU");
-      ColorDefinition handColor = handColors.get(RobotSide.LEFT);
+      ColorDefinition handColor = HAND_COLORS.get(RobotSide.LEFT);
       ImGui.pushStyleColor(ImGuiCol.CheckMark , (float) handColor.getRed(), (float) handColor.getGreen(), (float) handColor.getBlue(),
                            (float) handColor.getAlpha());
       if (ImGui.radioButton(labels.get("LEFT"), activeSide[0] == RobotSide.LEFT))
@@ -239,7 +309,7 @@ public class RDXAffordanceEditorUI
       }
       ImGui.popStyleColor();
       ImGui.sameLine();
-      handColor = handColors.get(RobotSide.RIGHT);
+      handColor = HAND_COLORS.get(RobotSide.RIGHT);
       ImGui.pushStyleColor(ImGuiCol.CheckMark , (float) handColor.getRed(), (float) handColor.getGreen(), (float) handColor.getBlue(),
                            (float) handColor.getAlpha());
       if (ImGui.radioButton(labels.get("RIGHT"), activeSide[0] == RobotSide.RIGHT))
@@ -261,7 +331,6 @@ public class RDXAffordanceEditorUI
                handTransformsToWorld.get(side).getRotation().setYawPitchRoll(0.0, Math.toRadians(-90.0), 0.0);
                handTransformsToWorld.get(side).getTranslation().set(-0.5, side.negateIfRightSide(0.2), 0);
                handPoses.put(side, new FramePose3D(ReferenceFrame.getWorldFrame(), handTransformsToWorld.get(side)));
-               handsLocked.put(side, false);
             }
          }
          else if (activeSide[0] == side && handPoses.containsKey(side))
@@ -270,12 +339,9 @@ public class RDXAffordanceEditorUI
             {
                interactableHands.get(side).setShowing(false);
                handPoses.remove(side);
-               handsLocked.remove(side);
             }
          }
       }
-      if (ImGui.button(labels.get("MIRROR ")))
-
 
       if (handPoses.containsKey(activeSide[0]))
       {
@@ -298,6 +364,45 @@ public class RDXAffordanceEditorUI
             interactableHands.get(activeSide[0]).setGripperClosure(gripperClosure[0]);
          ImGui.separator();
       }
+
+      ImGui.checkbox("Mirror Other Hand", mirrorActive);
+      ImGui.text("Translation: ");
+      Map<String, Boolean> changedColorTranslationAxisButton = new HashMap<>();
+      for (var axisMirror : activeTranslationAxisMirror.entrySet())
+      {
+         changedColorTranslationAxisButton.put(axisMirror.getKey(), false);
+         ImGui.sameLine();
+         if (axisMirror.getValue())
+         {
+            ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 0.0f, 1.0f, 0.5f);
+            changedColorTranslationAxisButton.replace(axisMirror.getKey(), true);
+         }
+         if (ImGui.button(labels.get(axisMirror.getKey()) + "##" + "Translation"))
+         {
+            axisMirror.setValue(!axisMirror.getValue());
+         }
+         if (changedColorTranslationAxisButton.get(axisMirror.getKey()))
+            ImGui.popStyleColor();
+      }
+      ImGui.text("Rotation:     ");
+      Map<String, Boolean> changedColorRotationAxisButton = new HashMap<>();
+      for (var axisMirror : activeRotationAxisMirror.entrySet())
+      {
+         changedColorRotationAxisButton.put(axisMirror.getKey(), false);
+         ImGui.sameLine();
+         if (axisMirror.getValue())
+         {
+            ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 0.0f, 1.0f, 0.5f);
+            changedColorRotationAxisButton.replace(axisMirror.getKey(), true);
+         }
+         if (ImGui.button(labels.get(axisMirror.getKey()) + "##" + "Rotation"))
+         {
+            axisMirror.setValue(!axisMirror.getValue());
+         }
+         if (changedColorRotationAxisButton.get(axisMirror.getKey()))
+            ImGui.popStyleColor();
+      }
+      ImGui.separator();
 
       ImGui.text("PRE-GRASP MENU");
       ImGui.text("Pre-grasp Frames: ");

@@ -73,7 +73,7 @@ public class RDXAffordanceFrame
 
    public void renderImGuiWidgets(ImGuiUniqueLabelMap labels, String labelId)
    {
-      if (ImGui.button(labels.get("SET") + "##" + labelId))
+      if (ImGui.button(labels.get("SET") + "##" + labelId) && handPoses.containsKey(activeSide[0]))
       {
          isPoseSet.replace(activeSide[0], true);
          setFrame(handPoses.get(activeSide[0]));

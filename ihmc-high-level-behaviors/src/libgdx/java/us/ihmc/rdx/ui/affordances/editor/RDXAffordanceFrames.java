@@ -85,7 +85,7 @@ public class RDXAffordanceFrames
 
    public void renderImGuiWidgets(ImGuiUniqueLabelMap labels, String lableId)
    {
-      if (ImGui.button(labels.get("ADD") + "##" + lableId))
+      if (ImGui.button(labels.get("ADD") + "##" + lableId) && handPoses.containsKey(activeSide[0]))
       {
          activeMenu[0] = this.menu;
          addFrame(handPoses.get(activeSide[0]));
