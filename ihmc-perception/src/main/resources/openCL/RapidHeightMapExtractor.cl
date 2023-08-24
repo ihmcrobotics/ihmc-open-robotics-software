@@ -1,5 +1,5 @@
-#define HEIGHT_MAP_RESOLUTION 0
-#define HEIGHT_MAP_CENTER_INDEX 1
+#define LOCAL_CELL_SIZE 0
+#define LOCAL_CENTER_INDEX 1
 #define DEPTH_INPUT_HEIGHT 2
 #define DEPTH_INPUT_WIDTH 3
 #define HEIGHT_MAP_CENTER_X 4
@@ -9,6 +9,8 @@
 #define DEPTH_CY 8
 #define DEPTH_FX 9
 #define DEPTH_FY 10
+#define GLOBAL_CELL_SIZE 11
+#define GLOBAL_CENTER_INDEX 12
 
 #define VERTICAL_FOV M_PI_2_F
 #define HORIZONTAL_FOV (2.0f * M_PI_F)
@@ -83,12 +85,11 @@ float get_height_on_plane(float x, float y, global float *plane)
    return height;
 }
 
-void kernel heightMapUpdateKernel(read_only image2d_t in,
-                                  write_only image2d_t out,
+void kernel heightMapUpdateKernel(read_write image2d_t in,
+                                  read_write image2d_t out,
                                   global float *params,
                                   global float *sensorToWorldTf,
-                                  global float *worldToSensorTf,
-                                  global float *plane)
+                                  global float *worldToSensorTf)
 {
    int xIndex = get_global_id(0);
    int yIndex = get_global_id(1);
@@ -100,8 +101,8 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
    float3 cellCenterInWorld = (float3) (0.0f, 0.0f, 0.0f);
    cellCenterInWorld.xy = indices_to_coordinate((int2) (xIndex, yIndex),
                                                (float2) (0, 0), // params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]
-                                               params[HEIGHT_MAP_RESOLUTION],
-                                               params[HEIGHT_MAP_CENTER_INDEX]);
+                                               params[LOCAL_CELL_SIZE],
+                                               params[LOCAL_CENTER_INDEX]);
 
 
    cellCenterInWorld.x += 1.5f;
@@ -109,7 +110,7 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
    int WINDOW_WIDTH = 140;
    int WINDOW_HEIGHT = 250;
 
-   float halfCellWidth = params[HEIGHT_MAP_RESOLUTION] / 4.0f;
+   float halfCellWidth = params[LOCAL_CELL_SIZE] / 4.0f;
    float minX = cellCenterInWorld.x - halfCellWidth;
    float maxX = cellCenterInWorld.x + halfCellWidth;
    float minY = cellCenterInWorld.y - halfCellWidth;
@@ -193,7 +194,7 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
       }
    }
 
-   int cellsPerAxis = 2 * params[HEIGHT_MAP_CENTER_INDEX] + 1;
+   int cellsPerAxis = 2 * params[LOCAL_CENTER_INDEX] + 1;
 
    if (count > 0)
    {
@@ -208,4 +209,47 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
    {
       write_imageui(out, (int2)(yIndex, xIndex), (uint4)(0, 0, 0, 0));
    }
+}
+
+void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
+                                        read_write image2d_t globalMap,
+                                        global float *params,
+                                        global float *groundToWorldTf)
+{
+   int xIndex = get_global_id(0);
+   int yIndex = get_global_id(1);
+
+   // Create a 3D point in world frame
+   float3 cellCenterInWorld = (float3)(0, 0, 0);
+   cellCenterInWorld.xy = indices_to_coordinate((int2) (xIndex, yIndex),
+                                               (float2) (0, 0), // params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]
+                                               params[GLOBAL_CELL_SIZE],
+                                               params[GLOBAL_CENTER_INDEX]);
+
+   // Transform the point to the ground frame
+   float3 cellCenterInGround = transformPoint3D32_2(
+      cellCenterInWorld,
+      (float3)(groundToWorldTf[0], groundToWorldTf[1], groundToWorldTf[2]),
+      (float3)(groundToWorldTf[4], groundToWorldTf[5], groundToWorldTf[6]),
+      (float3)(groundToWorldTf[8], groundToWorldTf[9], groundToWorldTf[10]),
+      (float3)(groundToWorldTf[3], groundToWorldTf[7], groundToWorldTf[11]));
+
+   // Compute the local cell index in the local map
+   int2 localCellIndex = coordinate_to_indices(
+      (float2)(cellCenterInGround.x, cellCenterInGround.y),
+      (float2)(0, 0), // params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]
+      params[LOCAL_CELL_SIZE],
+      params[LOCAL_CENTER_INDEX]);
+
+   int localCellsPerAxis = 2 * params[LOCAL_CENTER_INDEX] + 1;
+
+   // Extract the height from the local map at the local cell index (if within bounds)
+   float height = 0.0f;
+   if (localCellIndex.x >= 0 && localCellIndex.x < localCellsPerAxis && localCellIndex.y >= 0 && localCellIndex.y < localCellsPerAxis)
+   {
+      height = (float)read_imageui(localMap, (int2)(localCellIndex.x, localCellIndex.y)).x / 10000.0f;
+   }
+
+   // Put the height value in the global map at the global cell index
+   write_imageui(globalMap, (int2)(xIndex, yIndex), (uint4)((int)(height * 10000.0f), 0, 0, 0));
 }

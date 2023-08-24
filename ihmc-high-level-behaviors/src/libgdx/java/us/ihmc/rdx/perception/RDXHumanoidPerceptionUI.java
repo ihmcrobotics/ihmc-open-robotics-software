@@ -37,7 +37,7 @@ public class RDXHumanoidPerceptionUI
    {
       this.heightMapRenderer = new RDXHeightMapRenderer();
       this.heightMapRenderer.create(
-            humanoidPerception.getRapidHeightMapExtractor().getCellsPerAxis() * humanoidPerception.getRapidHeightMapExtractor().getCellsPerAxis());
+            humanoidPerception.getRapidHeightMapExtractor().getLocalCellsPerAxis() * humanoidPerception.getRapidHeightMapExtractor().getLocalCellsPerAxis());
    }
 
    public void initializeRapidRegionsUI()
@@ -60,13 +60,13 @@ public class RDXHumanoidPerceptionUI
    public void render(RigidBodyTransform zUpFrameToWorld)
    {
       heightMapRenderer.update(zUpFrameToWorld,
-            humanoidPerception.getRapidHeightMapExtractor().getOutputHeightMapImage().getPointerForAccessSpeed(),
+            humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getPointerForAccessSpeed(),
             humanoidPerception.getRapidHeightMapExtractor().getCenterIndex(),
-            humanoidPerception.getRapidHeightMapExtractor().getCellSizeXYInMeters());
+            humanoidPerception.getRapidHeightMapExtractor().getLocalCellSizeInMeters());
 
       PerceptionDebugTools.displayHeightMap("Output Height Map",
-                                humanoidPerception.getRapidHeightMapExtractor().getOutputHeightMapImage().getBytedecoOpenCVMat(),
-                                1, 1 / (0.3f + 0.20f * humanoidPerception.getRapidHeightMapExtractor().getCellSizeXYInMeters()));
+                                humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getBytedecoOpenCVMat(),
+                                1, 1 / (0.3f + 0.20f * humanoidPerception.getRapidHeightMapExtractor().getLocalCellSizeInMeters()));
       rapidRegionsUI.render();
    }
 
@@ -119,8 +119,25 @@ public class RDXHumanoidPerceptionUI
 
    public void destroy()
    {
-      rapidRegionsUI.destroy();
-      rapidRegionsVisualizer.destroy();
-      rapidRegionsMapVisualizer.destroy();
+      if (remotePerceptionUI != null)
+         remotePerceptionUI.destroy();
+
+      if (rapidRegionsUI != null)
+         rapidRegionsUI.destroy();
+
+      if (activeMappingUI != null)
+         activeMappingUI.destroy();
+
+      if (heightMapRenderer != null)
+         heightMapRenderer.dispose();
+
+      if (heightMapUI != null)
+         heightMapUI.destroy();
+
+      if (rapidRegionsVisualizer != null)
+         rapidRegionsVisualizer.destroy();
+
+      if (rapidRegionsMapVisualizer != null)
+         rapidRegionsMapVisualizer.destroy();
    }
 }
