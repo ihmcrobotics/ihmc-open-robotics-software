@@ -66,12 +66,12 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
       RDX3DPanelToolbarButton leftFootButton = baseUI.getPrimary3DPanel().addToolbarButton();
       leftFootButton.loadAndSetIcon("icons/leftFoot.png");
-      leftFootButton.setTooltipText("Place left footstep");
+      leftFootButton.setTooltipText("Place left footstep (Keybind: R)");
       leftFootButton.setOnPressed(() -> createNewFootstep(RobotSide.LEFT));
 
       RDX3DPanelToolbarButton rightFootButton = baseUI.getPrimary3DPanel().addToolbarButton();
       rightFootButton.loadAndSetIcon("icons/rightFoot.png");
-      rightFootButton.setTooltipText("Place right footstep");
+      rightFootButton.setTooltipText("Place right footstep (Keybind: T)");
       rightFootButton.setOnPressed(() -> createNewFootstep(RobotSide.RIGHT));
 
       RDXBaseUI.getInstance().getKeyBindings().register("Place left footstep", "R");
