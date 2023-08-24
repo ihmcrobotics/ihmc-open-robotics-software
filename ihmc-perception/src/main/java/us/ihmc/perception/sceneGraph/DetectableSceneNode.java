@@ -9,6 +9,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameSupplier;
 import us.ihmc.tools.Timer;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An object that is currently detected or not currently detected,
@@ -34,7 +35,7 @@ public abstract class DetectableSceneNode extends SceneNode
     */
    private boolean trackDetectedPose = true;
    private ReferenceFrameSupplier parentFrameSupplier;
-   private final ArrayList<DetectableSceneNode> children = new ArrayList<>();
+   private final List<DetectableSceneNode> children = new ArrayList<>();
    private final RigidBodyTransform originalTransformToParent = new RigidBodyTransform();
    private transient final FramePose3D originalPose = new FramePose3D();
 
@@ -148,7 +149,7 @@ public abstract class DetectableSceneNode extends SceneNode
       return originalTransformToParent;
    }
 
-   public ArrayList<DetectableSceneNode> getChildren()
+   public List<DetectableSceneNode> getChildren()
    {
       return children;
    }
