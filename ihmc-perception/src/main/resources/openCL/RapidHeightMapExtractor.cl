@@ -214,7 +214,7 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
 void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
                                         read_write image2d_t globalMap,
                                         global float *params,
-                                        global float *groundToWorldTf)
+                                        global float *worldToGroundTf)
 {
    int xIndex = get_global_id(0);
    int yIndex = get_global_id(1);
@@ -229,10 +229,14 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
    // Transform the point to the ground frame
    float3 cellCenterInGround = transformPoint3D32_2(
       cellCenterInWorld,
-      (float3)(groundToWorldTf[0], groundToWorldTf[1], groundToWorldTf[2]),
-      (float3)(groundToWorldTf[4], groundToWorldTf[5], groundToWorldTf[6]),
-      (float3)(groundToWorldTf[8], groundToWorldTf[9], groundToWorldTf[10]),
-      (float3)(groundToWorldTf[3], groundToWorldTf[7], groundToWorldTf[11]));
+      (float3)(worldToGroundTf[0], worldToGroundTf[1], worldToGroundTf[2]),
+      (float3)(worldToGroundTf[4], worldToGroundTf[5], worldToGroundTf[6]),
+      (float3)(worldToGroundTf[8], worldToGroundTf[9], worldToGroundTf[10]),
+      (float3)(worldToGroundTf[3], worldToGroundTf[7], worldToGroundTf[11]));
+
+   bool isColliding = length(cellCenterInGround.xy) < 0.4f;
+
+   cellCenterInGround.x -= 1.5f;
 
    // Compute the local cell index in the local map
    int2 localCellIndex = coordinate_to_indices(
@@ -245,11 +249,26 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
 
    // Extract the height from the local map at the local cell index (if within bounds)
    float height = 0.0f;
+   float previousHeight = (float) read_imageui(globalMap, (int2)(yIndex, xIndex)).x / 10000.0f;
+
    if (localCellIndex.x >= 0 && localCellIndex.x < localCellsPerAxis && localCellIndex.y >= 0 && localCellIndex.y < localCellsPerAxis)
    {
-      height = (float)read_imageui(localMap, (int2)(localCellIndex.x, localCellIndex.y)).x / 10000.0f;
+      height = (float)read_imageui(localMap, (int2)(localCellIndex.y, localCellIndex.x)).x / 10000.0f;
+   }
+
+   float alpha = 0.90f;
+   float finalHeight = 0.0f;
+
+   if (height > 0.05f && height < 0.7f && !isColliding)
+   {
+//      finalHeight = height;
+       finalHeight = previousHeight * alpha + height * (1.0f - alpha);
+   }
+   else
+   {
+      finalHeight = previousHeight;
    }
 
    // Put the height value in the global map at the global cell index
-   write_imageui(globalMap, (int2)(xIndex, yIndex), (uint4)((int)(height * 10000.0f), 0, 0, 0));
+   write_imageui(globalMap, (int2)(yIndex, xIndex), (uint4)((int)(finalHeight * 10000.0f), 0, 0, 0));
 }

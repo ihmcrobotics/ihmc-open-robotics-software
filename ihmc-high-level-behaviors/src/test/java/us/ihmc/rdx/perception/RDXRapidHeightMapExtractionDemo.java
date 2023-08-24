@@ -277,9 +277,9 @@ public class RDXRapidHeightMapExtractionDemo
 
          humanoidPerceptionUI.getHeightMapRenderer()
                              .update(groundToWorldTf,
-                                     humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getPointerForAccessSpeed(),
-                                     humanoidPerception.getRapidHeightMapExtractor().getCenterIndex(),
-                                     humanoidPerception.getRapidHeightMapExtractor().getLocalCellSizeInMeters());
+                                     humanoidPerception.getRapidHeightMapExtractor().getGlobalHeightMapImage().getPointerForAccessSpeed(),
+                                     humanoidPerception.getRapidHeightMapExtractor().getGlobalCenterIndex(),
+                                     humanoidPerception.getRapidHeightMapExtractor().getGlobalCellSizeInMeters());
 
          heightMapVisualizer.acceptHeightMapMessage(HeightMapMessageTools.toMessage(humanoidPerception.getRapidHeightMapExtractor().getLatestHeightMapData()));
          heightMapVisualizer.update();
