@@ -128,7 +128,6 @@ public class RDXInteractableFootstep
    public void updateFootstepIndexText(int index)
    {
       String text = plannedFootstepInternal.getRobotSide().getSideNameFirstLetter() + index;
-
       if (!textRenderablesMap.containsKey(text))
       {
          float textHeight = 0.08f;
