@@ -40,7 +40,7 @@ public class RapidHeightMapExtractor
 
    private RigidBodyTransform currentSensorToWorldTransform = new RigidBodyTransform();
 
-   private OpenCLFloatBuffer groundToWorldTransformBuffer;
+   private OpenCLFloatBuffer worldToGroundTransformBuffer;
    private float[] groundToWorldTransformArray = new float[16];
 
    private OpenCLFloatBuffer groundToSensorTransformBuffer;
@@ -89,8 +89,8 @@ public class RapidHeightMapExtractor
       sensorToGroundTransformBuffer = new OpenCLFloatBuffer(16);
       sensorToGroundTransformBuffer.createOpenCLBufferObject(openCLManager);
 
-      groundToWorldTransformBuffer = new OpenCLFloatBuffer(16);
-      groundToWorldTransformBuffer.createOpenCLBufferObject(openCLManager);
+      worldToGroundTransformBuffer = new OpenCLFloatBuffer(16);
+      worldToGroundTransformBuffer.createOpenCLBufferObject(openCLManager);
 
       groundPlaneBuffer = new OpenCLFloatBuffer(4);
       groundPlaneBuffer.createOpenCLBufferObject(openCLManager);
@@ -107,11 +107,9 @@ public class RapidHeightMapExtractor
 
    public void update(RigidBodyTransform sensorToWorldTransform, RigidBodyTransform sensorToGroundTransform, RigidBodyTransform groundToWorldTransform)
    {
-
       if (!processing)
       {
          currentSensorToWorldTransform.set(sensorToWorldTransform);
-
          sensorToGroundTransform.getTranslation().setZ(sensorToWorldTransform.getTranslationZ());
 
          // Upload input depth image
@@ -120,6 +118,9 @@ public class RapidHeightMapExtractor
          // Fill ground plane buffer
          RigidBodyTransform groundToSensorTransform = new RigidBodyTransform(sensorToGroundTransform);
          groundToSensorTransform.invert();
+
+         RigidBodyTransform worldToGroundTransform = new RigidBodyTransform(groundToWorldTransform);
+         worldToGroundTransform.invert();
 
          gridCenter.set(sensorToWorldTransform.getTranslation());
 
@@ -136,15 +137,9 @@ public class RapidHeightMapExtractor
          sensorToGroundTransformBuffer.writeOpenCLBufferObject(openCLManager);
 
          // Fill ground-to-world transform buffer
-         groundToWorldTransform.get(groundToWorldTransformArray);
-         groundToWorldTransformBuffer.getBytedecoFloatBufferPointer().asBuffer().put(groundToWorldTransformArray);
-         groundToWorldTransformBuffer.writeOpenCLBufferObject(openCLManager);
-
-         // Generate a +Z vector in world frame
-         Vector3D groundNormalSensorFrame = new Vector3D(0.0, 0.0, 1.0);
-         groundToSensorTransform.transform(groundNormalSensorFrame);
-
-         //LogTools.info("Ground normal in sensor frame: " + groundNormalSensorFrame);
+         worldToGroundTransform.get(groundToWorldTransformArray);
+         worldToGroundTransformBuffer.getBytedecoFloatBufferPointer().asBuffer().put(groundToWorldTransformArray);
+         worldToGroundTransformBuffer.writeOpenCLBufferObject(openCLManager);
 
          // Set kernel arguments for the height map kernel
          openCLManager.setKernelArgument(heightMapUpdateKernel, 0, inputDepthImage.getOpenCLImageObject());
@@ -157,7 +152,7 @@ public class RapidHeightMapExtractor
          openCLManager.setKernelArgument(heightMapRegistrationKernel, 0, localHeightMapImage.getOpenCLImageObject());
          openCLManager.setKernelArgument(heightMapRegistrationKernel, 1, globalHeightMapImage.getOpenCLImageObject());
          openCLManager.setKernelArgument(heightMapRegistrationKernel, 2, parametersBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(heightMapRegistrationKernel, 3, groundToWorldTransformBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(heightMapRegistrationKernel, 3, worldToGroundTransformBuffer.getOpenCLBufferObject());
 
          // Execute kernel with length and width parameters
          openCLManager.execute2D(heightMapUpdateKernel, localCellsPerAxis, localCellsPerAxis);
@@ -273,6 +268,11 @@ public class RapidHeightMapExtractor
    public int getCenterIndex()
    {
       return centerIndex;
+   }
+
+   public int getGlobalCenterIndex()
+   {
+      return globalCenterIndex;
    }
 
    public HeightMapData getLatestHeightMapData()
