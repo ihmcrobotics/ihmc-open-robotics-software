@@ -84,7 +84,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    }
 
    @Override
-   public void executeAction()
+   public void triggerActionExecution()
    {
       ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
 

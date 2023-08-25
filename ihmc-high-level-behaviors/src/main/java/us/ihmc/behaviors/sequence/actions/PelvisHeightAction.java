@@ -31,7 +31,7 @@ public class PelvisHeightAction extends PelvisHeightActionData implements Behavi
    }
 
    @Override
-   public void executeAction()
+   public void triggerActionExecution()
    {
       PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage();
       message.getEuclideanTrajectory()

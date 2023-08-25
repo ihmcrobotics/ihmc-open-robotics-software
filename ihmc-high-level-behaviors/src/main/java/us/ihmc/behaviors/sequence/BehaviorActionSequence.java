@@ -246,7 +246,7 @@ public class BehaviorActionSequence
    {
       currentlyExecutingAction = actionSequence.get(excecutionNextIndex);
       currentlyExecutingAction.update(excecutionNextIndex, excecutionNextIndex + 1);
-      currentlyExecutingAction.executeAction();
+      currentlyExecutingAction.triggerActionExecution();
       currentlyExecutingAction.updateCurrentlyExecuting();
       excecutionNextIndex++;
    }

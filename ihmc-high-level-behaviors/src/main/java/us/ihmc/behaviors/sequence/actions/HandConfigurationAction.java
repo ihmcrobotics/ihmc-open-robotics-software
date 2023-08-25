@@ -33,7 +33,7 @@ public class HandConfigurationAction extends HandConfigurationActionData impleme
    }
 
    @Override
-   public void executeAction()
+   public void triggerActionExecution()
    {
       HandDesiredConfigurationMessage message
             = HumanoidMessageTools.createHandDesiredConfigurationMessage(getSide(),

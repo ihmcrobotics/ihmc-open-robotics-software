@@ -26,7 +26,7 @@ public class WaitDurationAction extends WaitDurationActionData implements Behavi
    }
 
    @Override
-   public void executeAction()
+   public void triggerActionExecution()
    {
       executionTimer.reset();
    }

@@ -28,7 +28,7 @@ public class ArmJointAnglesAction extends ArmJointAnglesActionData implements Be
    }
 
    @Override
-   public void executeAction()
+   public void triggerActionExecution()
    {
       double[] jointAngleArray = new double[NUMBER_OF_JOINTS];
       for (int i = 0; i < NUMBER_OF_JOINTS; i++)

@@ -12,7 +12,7 @@ public interface BehaviorAction extends BehaviorActionData
    }
 
    /** Trigger the action to begin executing. Called once per execution. */
-   default void executeAction()
+   default void triggerActionExecution()
    {
       
    }
