@@ -697,7 +697,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          controllerToolbox.getFootContactState(robotSide).pollContactHasChangedNotification();
       }
 
-
       updateAndPublishFootstepQueueStatus();
       statusOutputManager.reportStatusMessage(balanceManager.updateAndReturnCapturabilityBasedStatus());
 
@@ -751,6 +750,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
                                                                                                        balanceManager.getTimeIntoCurrentSupportSequence(),
                                                                                                        isFirstStepInSwing));
    }
+
    public void updateFailureDetection()
    {
       capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
@@ -810,9 +810,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       comHeightManager.compute(balanceManager.getDesiredICPVelocity(), desiredCoMVelocityAsFrameVector, isInDoubleSupport, omega0, feetManager);
       FeedbackControlCommand<?> heightControlCommand = comHeightManager.getHeightControlCommand();
 
-      // the comHeightManager can control the pelvis with a feedback controller and
-      // doesn't always need the z component of the momentum command. It would be
-      // better to remove the coupling between these two modules
+      /*
+       * The comHeightManager can control the pelvis with a feedback controller and doesn't always need
+       * the z component of the momentum command. It would be better to remove the coupling between these
+       * two modules.
+       */
       boolean controlHeightWithMomentum = comHeightManager.getControlHeightWithMomentum() && enableHeightFeedbackControl.getValue();
       boolean keepCMPInsideSupportPolygon = !bodyManagerIsLoadBearing;
       if (currentState.isDoubleSupportState())
