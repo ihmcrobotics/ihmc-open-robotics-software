@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.HandSakeStatusMessage;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.flag.ImGuiCol;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.IHMCROS2Input;
@@ -21,34 +22,41 @@ public class RDXSakeHandTorqueSlider
    private static final double SEND_PERIOD = UnitConversions.hertzToSeconds(5.0);
    private static final float MAX_TORQUE = 1f;
    private static final float MIN_TORQUE = 0f;
+   private static final double MAX_ANGLE_LIMIT = 105.0;
    private static final double EPSILON = 1E-6;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ROS2SyncedRobotModel syncedRobot;
    private final IHMCROS2Input<HandSakeStatusMessage> handStatusMessage;
    private final CommunicationHelper communicationHelper;
    private final String sliderName;
    private final float[] sliderValue = new float[1];
-   private double valueFromRobot = Double.NaN;
+   private double loadValueFromRobot = Double.NaN;
+   private double handPositionFromRobot = Double.NaN;
    private final RobotSide handSide;
    private final Throttler updateThrottler = new Throttler();
    private final Throttler sendThrottler = new Throttler();
 
-   public RDXSakeHandTorqueSlider(CommunicationHelper communicationhelper, RobotSide handSide)
+   public RDXSakeHandTorqueSlider(ROS2SyncedRobotModel syncedRobot, CommunicationHelper communicationhelper, RobotSide handSide)
    {
+      this.syncedRobot = syncedRobot;
       this.communicationHelper = communicationhelper;
       this.handSide = handSide;
       sliderName = handSide.getPascalCaseName() + " torque";
+
+      syncedRobot.addRobotConfigurationDataReceivedCallback(this::receiveSakeHandData);
 
       handStatusMessage = communicationHelper.subscribe(ROS2Tools.getControllerOutputTopic(communicationHelper.getRobotName())
                                                                  .withTypeName(HandSakeStatusMessage.class),
                                                         message -> message.getRobotSide() == handSide.toByte());
    }
 
-   private void receiveHandTorqueData()
+   private void receiveSakeHandData()
    {
-      if (updateThrottler.run(UPDATE_PERIOD) && handStatusMessage.hasReceivedFirstMessage())
+      if (updateThrottler.run(UPDATE_PERIOD) && handStatusMessage.hasReceivedFirstMessage() && syncedRobot.getLatestHandJointAnglePacket(handSide) != null)
       {
-         valueFromRobot = handStatusMessage.getLatest().getTorqueRatio();
+         loadValueFromRobot = handStatusMessage.getLatest().getTorqueRatio();
+         handPositionFromRobot = syncedRobot.getLatestHandJointAnglePacket(handSide).getJointAngles().get(0);
       }
    }
 
@@ -60,16 +68,18 @@ public class RDXSakeHandTorqueSlider
          {
             HandSakeDesiredCommandMessage message = new HandSakeDesiredCommandMessage();
 
+            double currentHandPositionRatio = (Math.toDegrees(handPositionFromRobot) + 3.0) / MAX_ANGLE_LIMIT;
+
             message.setRobotSide(handSide.toByte());
             message.setDesiredHandConfiguration((byte) 5); // GOTO
-            message.setPostionRatio(0);
+            message.setPostionRatio(currentHandPositionRatio);
             message.setTorqueRatio(sliderValue[0]);
 
             communicationHelper.publish(ROS2Tools::getHandSakeCommandTopic, message);
          }
       }
 
-      receiveHandTorqueData();
+      receiveSakeHandData();
    }
 
    private final ImVec2 textSize = new ImVec2();
@@ -77,7 +87,7 @@ public class RDXSakeHandTorqueSlider
    private boolean renderImGuiSliderAndReturnChanged()
    {
       float previousValue = sliderValue[0];
-      float presentTorqueBar = (float) ((ImGui.getItemRectSizeX() - textSize.x - 12.0f) * valueFromRobot);
+      float presentTorqueBar = (float) ((ImGui.getItemRectSizeX() - textSize.x - 12.0f) * loadValueFromRobot);
       float windowPositionX = ImGui.getWindowPosX();
       float windowPositionY = ImGui.getWindowPosY();
       ImGui.getWindowDrawList().addRectFilled(windowPositionX + ImGui.getCursorPosX() + presentTorqueBar + 2.0f,
