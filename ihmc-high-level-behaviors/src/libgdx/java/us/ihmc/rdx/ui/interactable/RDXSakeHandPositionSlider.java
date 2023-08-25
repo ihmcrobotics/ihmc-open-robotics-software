@@ -42,9 +42,7 @@ public class RDXSakeHandPositionSlider
    private final Throttler updateThrottler = new Throttler();
    private final Throttler sendThrottler = new Throttler();
 
-   public RDXSakeHandPositionSlider(ROS2SyncedRobotModel syncedRobot,
-                                    CommunicationHelper communicationHelper,
-                                    RobotSide handSide)
+   public RDXSakeHandPositionSlider(ROS2SyncedRobotModel syncedRobot, CommunicationHelper communicationHelper, RobotSide handSide)
    {
       this.syncedRobot = syncedRobot;
       this.communicationHelper = communicationHelper;
