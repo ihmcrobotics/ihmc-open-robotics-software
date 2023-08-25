@@ -246,8 +246,8 @@ public class RapidPatchesDebugOutputGenerator
       //      constructCentroidSurfelCloud(patchFeatureGrid.getCxImage(), patchFeatureGrid.getCyImage(), patchFeatureGrid.getCzImage(), patchFeatureGrid.getNxImage(),
 //                                   patchFeatureGrid.getNyImage(), patchFeatureGrid.getNzImage());
 
-      PerceptionDebugTools.displayDepth("Depth", inputDepthImage, 1);
-      showDebugImage(1);
+      //PerceptionDebugTools.displayDepth("Depth", inputDepthImage, 1);
+      //showDebugImage(1);
    }
 
    public void displayInputDepth(Mat depth, int delay)

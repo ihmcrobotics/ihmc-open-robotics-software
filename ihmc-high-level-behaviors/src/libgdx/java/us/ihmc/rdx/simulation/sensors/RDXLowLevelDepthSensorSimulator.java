@@ -57,6 +57,7 @@ public class RDXLowLevelDepthSensorSimulator
    private final int imageHeight;
    private final int numberOfPoints;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final CameraIntrinsics cameraIntrinsics = new CameraIntrinsics();
    private final ImFloat fieldOfViewY = new ImFloat();
    private final ImFloat focalLengthPixels = new ImFloat();
    private final ImFloat nearPlaneDistance = new ImFloat();
@@ -437,5 +438,16 @@ public class RDXLowLevelDepthSensorSimulator
    public Texture getFrameBufferColorTexture()
    {
       return frameBuffer.getColorTexture();
+   }
+
+   public CameraIntrinsics getCameraIntrinsics()
+   {
+      cameraIntrinsics.setFx(focalLengthPixels.get());
+      cameraIntrinsics.setFy(focalLengthPixels.get());
+      cameraIntrinsics.setCx(principalOffsetXPixels.get());
+      cameraIntrinsics.setCy(principalOffsetYPixels.get());
+      cameraIntrinsics.setHeight(imageHeight);
+      cameraIntrinsics.setWidth(imageWidth);
+      return cameraIntrinsics;
    }
 }
