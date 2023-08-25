@@ -166,7 +166,7 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    }
 
    @Override
-   public void executeAction()
+   public void triggerActionExecution()
    {
       plan();
       if (footstepDataListMessage != null)

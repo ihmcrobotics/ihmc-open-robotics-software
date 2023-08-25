@@ -42,7 +42,7 @@ public class FootstepAction extends FootstepActionData implements BehaviorAction
    }
 
    @Override
-   public void executeAction()
+   public void triggerActionExecution()
    {
       FootstepPlan footstepPlan = new FootstepPlan();
       footstepPlan.addFootstep(getSide(), pose);

@@ -27,7 +27,7 @@ public class HandWrenchAction extends HandWrenchActionData implements BehaviorAc
    }
 
    @Override
-   public void executeAction()
+   public void triggerActionExecution()
    {
       HandWrenchTrajectoryMessage handWrenchTrajectoryMessage = new HandWrenchTrajectoryMessage();
       handWrenchTrajectoryMessage.setRobotSide(getSide().toByte());
