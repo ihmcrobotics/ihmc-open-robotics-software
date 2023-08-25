@@ -38,12 +38,11 @@ public class NaturalPostureManager
       naturalPostureTimer = new ExecutionTimer("naturalPostureTimer", registry);
 
       OneDoFJointBasics[] allOneDoFjoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class);
-
       String[] jointNamesRestrictiveLimits = naturalPostureParameters.getJointsWithRestrictiveLimits();
-      OneDoFJointBasics[] jointsWithRestrictiveLimit = MultiBodySystemTools.filterJoints(ScrewTools.findJointsWithNames(allOneDoFjoints,
+      OneDoFJointBasics[] jointsWithRestrictiveLimits = MultiBodySystemTools.filterJoints(ScrewTools.findJointsWithNames(allOneDoFjoints,
                                                                                                                         jointNamesRestrictiveLimits),
                                                                                          OneDoFJointBasics.class);
-      for (OneDoFJointBasics joint : jointsWithRestrictiveLimit)
+      for (OneDoFJointBasics joint : jointsWithRestrictiveLimits)
       {
          JointLimitParameters limitParameters = naturalPostureParameters.getJointLimitParametersForJointsWithRestrictiveLimits(joint.getName());
          if (limitParameters == null)

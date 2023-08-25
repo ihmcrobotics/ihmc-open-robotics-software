@@ -436,15 +436,10 @@ public class MotionQPInputCalculator
       // b = S * b
       qpInputToPack.taskObjective.mult(nativeTempSelectionMatrix, nativeTempTaskObjective);
 
-      //<<<<<<< HEAD
-      ////      tempTaskJacobian.reshape(taskSize, jacobianCalculator.getNumberOfDegreesOfFreedom());
-      //      CommonOps_DDRM.mult(selectionMatrix, jacobian, qpInputToPack.taskJacobian);
-
-      //=======
       // J = S * J
       qpInputToPack.taskJacobian.reshape(taskSize, jacobianCalculator.getNumberOfDegreesOfFreedom());
       qpInputToPack.taskJacobian.mult(nativeTempSelectionMatrix, nativeTempJacobian);
-      //>>>>>>> refs/heads/develop
+
       if (commandToConvert.isNullspaceProjected())
       {
          mergeAllTaskJacobians();
@@ -452,14 +447,6 @@ public class MotionQPInputCalculator
                                                       nativeAllTaskJacobian,
                                                       qpInputToPack.taskJacobian,
                                                       nullspaceProjectionAlpha.getValue());
-         //<<<<<<< HEAD
-         //         
-         //         projectedTaskJacobian.get(qpInputToPack.taskJacobian);
-
-         // Testing
-         //         recordTaskJacobian(qpInputToPack.taskJacobian);
-         //=======
-         //>>>>>>> refs/heads/develop
       }
       else
       {

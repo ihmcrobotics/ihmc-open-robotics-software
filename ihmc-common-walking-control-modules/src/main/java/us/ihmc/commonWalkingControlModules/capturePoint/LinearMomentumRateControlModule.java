@@ -147,8 +147,6 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    private final BooleanProvider useCenterOfPressureCommandOnly = new BooleanParameter("useCenterOfPressureCommandOnly", registry, false);
    private final DoubleProvider capturePointVelocityBreakFrequency = new DoubleParameter("capturePointVelocityBreakFrequency", registry, 26.5);
 
-   // private final DoubleParameter centerOfPressureWeight = new DoubleParameter("CenterOfPressureObjectiveWeight", registry, 0.2);
-
    private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
 
    private boolean initializeOnStateChange;
@@ -243,9 +241,10 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
 
       icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
       icpControlPolygons = new ICPControlPolygons(icpControlPlane, registry, yoGraphicsListRegistry);
-      bipedSupportPolygons = new BipedSupportPolygons(referenceFrames, registry, null); // TODO: This is not being
-      // visualized since it is a
-      // duplicate for now.
+      /*
+       * TODO: The following is not being visualized since it is a duplicate for now.
+       */
+      bipedSupportPolygons = new BipedSupportPolygons(referenceFrames, registry, null);
 
       ICPControllerParameters icpControllerParameters = walkingControllerParameters.getICPControllerParameters();
 
