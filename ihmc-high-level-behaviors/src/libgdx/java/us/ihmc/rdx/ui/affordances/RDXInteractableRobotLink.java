@@ -126,6 +126,11 @@ public class RDXInteractableRobotLink
 
    public void processVRInput(RDXVRContext vrContext)
    {
+      for (RDXRobotCollidable robotCollidable : robotCollidables)
+      {
+         robotCollidable.processVRInput(vrContext);
+      }
+
       for (RobotSide side : RobotSide.values)
       {
          vrContext.getController(side).runIfConnected(controller ->

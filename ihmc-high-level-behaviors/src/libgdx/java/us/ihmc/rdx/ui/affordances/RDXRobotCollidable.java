@@ -253,8 +253,8 @@ public class RDXRobotCollidable implements RenderableProvider
             boolean pickSelected = vrContext.getController(side).getSelectedPick() == vrPickResult.get(side);
             boolean isHovering = pickSelected && vrPickResult.get(side).getDistanceToControllerPickPoint() <= 0.0;
             boolean isPointing = pickSelected && !isHovering;
-            isVRPointing.set(side, isPointing);
             isVRHovering.set(side, isHovering);
+            isVRPointing.set(side, isPointing);
             isHoveredByAnything |= isHovering;
             isHoveredByAnything |= isPointing;
          }
