@@ -1,12 +1,16 @@
 package us.ihmc.rdx.imgui;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import imgui.flag.ImGuiFocusedFlags;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.ImGui;
 import imgui.internal.ImGuiDockNode;
 import imgui.type.ImBoolean;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.log.LogTools;
 
 import javax.annotation.Nullable;
@@ -20,6 +24,8 @@ public class RDXPanel extends RDXPanelSizeHandler
    private final String panelName;
    private Runnable render;
    private final ImBoolean isShowing;
+   private boolean isDockedAndVisible = false;
+   private final Notification loadedAndDockSelected = new Notification();
    private final boolean hasMenuBar;
    private final TreeSet<RDXPanel> children = new TreeSet<>(Comparator.comparing(RDXPanel::getPanelName));
    private final ConcurrentLinkedQueue<RDXPanel> removalQueue = new ConcurrentLinkedQueue<>();
@@ -28,6 +34,10 @@ public class RDXPanel extends RDXPanelSizeHandler
    @Nullable
    private RDXDockspacePanel parentDockspacePanel = null;
    private boolean isOnMainViewport = false;
+   private int state;
+   private int selectedTabId;
+   private int dockNodeID;
+   private boolean isRootNode;
 
    public RDXPanel(String panelName)
    {
@@ -105,11 +115,38 @@ public class RDXPanel extends RDXPanelSizeHandler
          handleSizeAfterBegin();
 
          int windowDockID = ImGui.getWindowDockID();
+         ImGuiDockNode dockNode = imgui.internal.ImGui.dockBuilderGetNode(windowDockID);
+         boolean isDocked = dockNode.ptr != 0;
+         isDockedAndVisible = false;
+
+         state = dockNode.getState();
+         selectedTabId = dockNode.getSelectedTabId();
+         dockNodeID = dockNode.getID();
+         isRootNode = dockNode.isRootNode();
+//         dockNode.
+
+
+
+         LogTools.info("%s: dock id: 0x%08X tab: 0x%08X focused: %b".formatted(panelName, dockNodeID, selectedTabId, ImGui.isWindowFocused(ImGuiFocusedFlags.ChildWindows)));
+
+         if (isDocked && dockNode.getIsFocused())
+            isDockedAndVisible = true;
+
          findParentDockspacePanel(windowDockID, dockIDMap);
 
          render.run();
          ImGui.end();
+
+         // Restore selected docked panels.
+         // Unfortunately there's an ImGui issue where the docked windows show
+         // the alphabetically last window on start instead of the one the user
+         // had open when the configuration was saved.
+         if (loadedAndDockSelected.poll())
+         {
+            ImGui.setWindowFocus(panelName);
+         }
       }
+
 
       for (RDXPanel child : children)
       {
@@ -158,7 +195,16 @@ public class RDXPanel extends RDXPanelSizeHandler
    {
       if (panelName.equals(panelEntry.getKey()))
       {
-         isShowing.set(panelEntry.getValue().asBoolean());
+         if (panelEntry.getValue() instanceof BooleanNode booleanNode) // Backwards compatibility
+         {
+            isShowing.set(panelEntry.getValue().asBoolean());
+         }
+         else if (panelEntry.getValue() instanceof ArrayNode arrayNode)
+         {
+            isShowing.set(arrayNode.get(0).asBoolean());
+            if (isShowing.get() && arrayNode.get(1).asBoolean())
+               loadedAndDockSelected.set();
+         }
       }
 
       for (RDXPanel child : children)
@@ -169,7 +215,9 @@ public class RDXPanel extends RDXPanelSizeHandler
 
    /* package-private */ void save(ObjectNode anchorJSON)
    {
-      anchorJSON.put(panelName, isShowing.get());
+      ArrayNode arrayNode = anchorJSON.putArray(panelName);
+      arrayNode.add(isShowing.get());
+      arrayNode.add(isShowing.get() && isDockedAndVisible);
 
       for (RDXPanel child : children)
       {
