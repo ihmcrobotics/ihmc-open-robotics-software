@@ -8,9 +8,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
@@ -21,10 +19,10 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 public class RapidHeightMapExtractor
 {
-   private float gridWidthInMeters = 8.0f;
+   private float localWidthInMeters = 8.0f;
    private float localCellSizeInMeters = 0.02f;
 
-   private float globalWidth = 10.0f;
+   private float globalWidthInMeters = 10.0f;
    private float globalCellSizeInMeters = 0.02f;
 
    private int centerIndex;
@@ -32,6 +30,17 @@ public class RapidHeightMapExtractor
 
    private int globalCenterIndex;
    private int globalCellsPerAxis;
+   private float heightScalingFactor = 10000.0f;
+
+   private int searchWindowHeight = 250;
+   private int searchWindowWidth = 140;
+
+   private float minHeightRegistration = 0.05f;
+   private float maxHeightRegistration = 0.7f;
+
+   private float robotCollisionCylinderRadius = 0.4f;
+   private float gridOffsetX = localWidthInMeters / 2.0f;
+   private float heightFilterAlpha = 0.65f;
 
    private int mode = 0; // 0 -> Ouster, 1 -> Realsense
 
@@ -75,10 +84,10 @@ public class RapidHeightMapExtractor
       this.openCLManager = openCLManager;
       rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapExtractor", "HeightMapUtils.cl");
 
-      centerIndex = HeightMapTools.computeCenterIndex(gridWidthInMeters, localCellSizeInMeters);
+      centerIndex = HeightMapTools.computeCenterIndex(localWidthInMeters, localCellSizeInMeters);
       localCellsPerAxis = 2 * centerIndex + 1;
 
-      globalCenterIndex = HeightMapTools.computeCenterIndex(globalWidth, globalCellSizeInMeters);
+      globalCenterIndex = HeightMapTools.computeCenterIndex(globalWidthInMeters, globalCellSizeInMeters);
       globalCellsPerAxis = 2 * globalCenterIndex + 1;
 
       parametersBuffer = new OpenCLFloatParameters();
@@ -184,13 +193,23 @@ public class RapidHeightMapExtractor
       parametersBuffer.setParameter((float) cameraIntrinsics.getFy());
       parametersBuffer.setParameter(globalCellSizeInMeters);
       parametersBuffer.setParameter((float) globalCenterIndex);
+      parametersBuffer.setParameter(robotCollisionCylinderRadius);
+      parametersBuffer.setParameter(gridOffsetX);
+      parametersBuffer.setParameter(heightFilterAlpha);
+      parametersBuffer.setParameter(localCellsPerAxis);
+      parametersBuffer.setParameter(globalCellsPerAxis);
+      parametersBuffer.setParameter(heightScalingFactor);
+      parametersBuffer.setParameter(minHeightRegistration);
+      parametersBuffer.setParameter(maxHeightRegistration);
+      parametersBuffer.setParameter(searchWindowHeight);
+      parametersBuffer.setParameter(searchWindowWidth);
 
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
    }
 
    private HeightMapData convertToHeightMapData(Tuple3DReadOnly center)
    {
-      HeightMapData heightMapData = new HeightMapData(localCellSizeInMeters, gridWidthInMeters, center.getX(), center.getY());
+      HeightMapData heightMapData = new HeightMapData(localCellSizeInMeters, localWidthInMeters, center.getX(), center.getY());
       BytePointer heightMapPointer = localHeightMapImage.getBytedecoByteBufferPointer();
 
       float maxHeight = 0.7f;
@@ -287,10 +306,11 @@ public class RapidHeightMapExtractor
 
    public void setHeightMapResolution(float widthInMeters, float cellSizeXYInMeters)
    {
-      this.gridWidthInMeters = widthInMeters;
+      this.localWidthInMeters = widthInMeters;
       this.localCellSizeInMeters = cellSizeXYInMeters;
+      this.gridOffsetX = localWidthInMeters / 2.0f;
 
-      centerIndex = HeightMapTools.computeCenterIndex(gridWidthInMeters, cellSizeXYInMeters);
+      centerIndex = HeightMapTools.computeCenterIndex(localWidthInMeters, cellSizeXYInMeters);
       localCellsPerAxis = 2 * centerIndex + 1;
    }
 

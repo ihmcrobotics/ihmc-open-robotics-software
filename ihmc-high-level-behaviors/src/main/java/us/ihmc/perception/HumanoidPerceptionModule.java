@@ -106,17 +106,17 @@ public class HumanoidPerceptionModule
       if (rapidRegionsEnabled)
       {
          executorService.submit(() ->
-           {
-               updatePlanarRegions(ros2Helper, depthImage, cameraFrame);
-           });
+         {
+            updatePlanarRegions(ros2Helper, depthImage, cameraFrame);
+         });
       }
 
       if (heightMapEnabled)
       {
          executorService.submit(() ->
-           {
-              updateRapidHeightMap(ros2Helper, depthImage, cameraFrame, cameraZUpFrame);
-           });
+         {
+            updateRapidHeightMap(ros2Helper, depthImage, cameraFrame, cameraZUpFrame);
+         });
       }
    }
 
