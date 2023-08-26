@@ -252,7 +252,7 @@ public class RDX3DSituatedImGuiPanel
                mousePosX = scaledX;
                mousePosY = scaledY;
 
-               pickResult.get(RobotSide.RIGHT).setDistanceToControllerPickPoint(distance);
+               pickResult.get(RobotSide.RIGHT).setPointingAtCollision(distance);
                controller.addPickResult(pickResult.get(RobotSide.RIGHT));
             }
          }

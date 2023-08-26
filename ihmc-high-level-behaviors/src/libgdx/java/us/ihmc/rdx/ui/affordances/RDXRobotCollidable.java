@@ -7,7 +7,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -219,7 +218,7 @@ public class RDXRobotCollidable implements RenderableProvider
 
                   if (isInside)
                   {
-                     vrPickResult.get(side).setDistanceToControllerPickPoint(pointCollidable.getSignedDistanceToSurface());
+                     vrPickResult.get(side).setHoveringCollsion(controller.getPickPointPose().getPosition(), pointCollidable.getClosestPointOnSurface());
                      pickRayCollisionPointGraphic.setColor(ColorDefinitions.Green());
                      controller.addPickResult(vrPickResult.get(side));
                   }
@@ -232,7 +231,7 @@ public class RDXRobotCollidable implements RenderableProvider
                      double collision = vrPickRayCollidable.collide(pickRay, collisionShapeFrame.getReferenceFrame());
                      if (!Double.isNaN(collision))
                      {
-                        vrPickResult.get(side).setDistanceToControllerPickPoint(collision);
+                        vrPickResult.get(side).setPointingAtCollision(collision);
                         controller.addPickResult(vrPickResult.get(side));
                      }
                   }
@@ -251,7 +250,7 @@ public class RDXRobotCollidable implements RenderableProvider
          for (RobotSide side : RobotSide.values)
          {
             boolean pickSelected = vrContext.getController(side).getSelectedPick() == vrPickResult.get(side);
-            boolean isHovering = pickSelected && vrPickResult.get(side).getDistanceToControllerPickPoint() <= 0.0;
+            boolean isHovering = pickSelected && vrPickResult.get(side).isHoveringNotPointingAt();
             boolean isPointing = pickSelected && !isHovering;
             isVRHovering.set(side, isHovering);
             isVRPointing.set(side, isPointing);

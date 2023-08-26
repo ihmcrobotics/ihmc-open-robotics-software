@@ -346,14 +346,13 @@ public class RDXVRController extends RDXVRTrackedDevice
          else
             labelText = selectedPick.getObjectBeingPicked() == null ? "null" : selectedPick.getObjectBeingPicked().getClass().getSimpleName();
          selectedPickLabel.setText(labelText);
-         double distance = selectedPick.getDistanceToControllerPickPoint();
-         if (distance > 0.0)
+         if (selectedPick.isHoveringNotPointingAt())
          {
-            setPickRayColliding(distance);
+            setPickPointColliding(selectedPick.getClosestPointOnSurface());
          }
          else
          {
-            setPickPointColliding(distance);
+            setPickRayColliding(selectedPick.getDistanceToControllerPickPoint());
          }
       }
 
@@ -413,7 +412,10 @@ public class RDXVRController extends RDXVRTrackedDevice
       pickRayGraphic = new RDXModelInstance(pickRayBox);
       pickRayGraphic.setPoseInWorldFrame(getPickPointPose());
 
-      setPickPointColliding(distance);
+      pickCollisionPoint.setToZero(pickPoseFrame.getReferenceFrame());
+      pickCollisionPoint.setX(distance);
+      pickCollisionPoint.changeFrame(ReferenceFrame.getWorldFrame());
+      LibGDXTools.toLibGDX(pickCollisionPoint, pickRayCollisionPointGraphic.transform);
    }
 
    /**
@@ -421,12 +423,9 @@ public class RDXVRController extends RDXVRTrackedDevice
     * Submitting pick results is better if possible, because they will get sorted and this
     * automatically called.
     */
-   public void setPickPointColliding(double distance)
+   public void setPickPointColliding(Point3DReadOnly closestPointOnSurface)
    {
-      pickCollisionPoint.setToZero(pickPoseFrame.getReferenceFrame());
-      pickCollisionPoint.setX(distance);
-      pickCollisionPoint.changeFrame(ReferenceFrame.getWorldFrame());
-      LibGDXTools.toLibGDX(pickCollisionPoint, pickRayCollisionPointGraphic.transform);
+      LibGDXTools.toLibGDX(closestPointOnSurface, pickRayCollisionPointGraphic.transform);
    }
 
    public RDXModelInstance getPickPoseSphere()

@@ -273,7 +273,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
             }
             if (closestVRCollisionSelection.get(side) != null)
             {
-               vrPickResult.get(side).setDistanceToControllerPickPoint(closestCollisionDistance);
+               vrPickResult.get(side).setPointingAtCollision(closestCollisionDistance);
                controller.addPickResult(vrPickResult.get(side));
             }
          });
