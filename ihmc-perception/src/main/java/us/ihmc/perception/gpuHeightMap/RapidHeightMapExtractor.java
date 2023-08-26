@@ -234,6 +234,25 @@ public class RapidHeightMapExtractor
       return heightMapData;
    }
 
+   public void setHeightMapResolution(float widthInMeters, float cellSizeXYInMeters)
+   {
+      this.localWidthInMeters = widthInMeters;
+      this.localCellSizeInMeters = cellSizeXYInMeters;
+      this.gridOffsetX = localWidthInMeters / 2.0f;
+
+      centerIndex = HeightMapTools.computeCenterIndex(localWidthInMeters, cellSizeXYInMeters);
+      localCellsPerAxis = 2 * centerIndex + 1;
+   }
+
+   public void setDepthIntrinsics(double fx, double fy, double cx, double cy)
+   {
+      cameraIntrinsics = new CameraIntrinsics();
+      cameraIntrinsics.setFx(fx);
+      cameraIntrinsics.setFy(fy);
+      cameraIntrinsics.setCx(cx);
+      cameraIntrinsics.setCy(cy);
+   }
+
    public boolean isProcessing()
    {
       return processing;
@@ -302,25 +321,6 @@ public class RapidHeightMapExtractor
    public Point3D getGridCenter()
    {
       return gridCenter;
-   }
-
-   public void setHeightMapResolution(float widthInMeters, float cellSizeXYInMeters)
-   {
-      this.localWidthInMeters = widthInMeters;
-      this.localCellSizeInMeters = cellSizeXYInMeters;
-      this.gridOffsetX = localWidthInMeters / 2.0f;
-
-      centerIndex = HeightMapTools.computeCenterIndex(localWidthInMeters, cellSizeXYInMeters);
-      localCellsPerAxis = 2 * centerIndex + 1;
-   }
-
-   public void setDepthIntrinsics(double fx, double fy, double cx, double cy)
-   {
-      cameraIntrinsics = new CameraIntrinsics();
-      cameraIntrinsics.setFx(fx);
-      cameraIntrinsics.setFy(fy);
-      cameraIntrinsics.setCx(cx);
-      cameraIntrinsics.setCy(cy);
    }
 
    public void setDepthIntrinsics(CameraIntrinsics cameraIntrinsics)
