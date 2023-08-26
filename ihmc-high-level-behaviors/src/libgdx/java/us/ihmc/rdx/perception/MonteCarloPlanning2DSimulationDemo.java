@@ -4,12 +4,14 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanner;
 import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
-import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.behaviors.monteCarloPlanning.MonteCarloTreeNode;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D32;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.util.ArrayList;
+import java.util.List;
 
 class MonteCarloPlanning2DSimulationDemo
 {
@@ -42,6 +44,10 @@ class MonteCarloPlanning2DSimulationDemo
       Mat gridColor = new Mat();
       Scalar zero = new Scalar(0, 0, 0, 0);
 
+      List<MonteCarloTreeNode> optimalPath = new ArrayList<>();
+
+      planner.setParameters(50, 10, 4);
+
       while (running)
       {
          planner.scanWorld();
@@ -51,6 +57,16 @@ class MonteCarloPlanning2DSimulationDemo
          MonteCarloPlannerTools.plotAgent(planner.getAgent(), gridColor);
          MonteCarloPlannerTools.plotRangeScan(planner.getAgent().getScanPoints(), gridColor);
          MonteCarloPlannerTools.plotGoal(planner.getWorld().getGoal(), planner.getWorld().getGoalMargin(), gridColor);
+
+         optimalPath.clear();
+         planner.getOptimalPathFromRoot(optimalPath);
+         MonteCarloPlannerTools.plotPath(optimalPath, gridColor);
+
+         int totalNodes = planner.getNumberOfNodesInTree();
+         
+         //LogTools.info("Optimal Path Length: {}/({})", optimalPath.size(), totalNodes);
+
+         planner.printLayerCounts();
 
          PerceptionDebugTools.display("Grid", gridColor, 1, screenSize);
 

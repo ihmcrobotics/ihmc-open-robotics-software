@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -17,8 +18,8 @@ import java.util.List;
  */
 public class MonteCarloPlanner
 {
-   private int searchIterations = 10;
-   private int simulationIterations = 10;
+   private int searchIterations = 15;
+   private int simulationIterations = 100;
    private int uniqueNodeId = 0;
 
    private MonteCarloPlanningWorld world;
@@ -77,8 +78,6 @@ public class MonteCarloPlanner
       }
 
       root = bestNode;
-
-      //LogTools.info("Total Nodes in Tree: " + MonteCarloPlannerTools.getTotalNodesInSubTree(root));
 
       if (bestNode == null)
          return agent.getPosition();
@@ -291,6 +290,38 @@ public class MonteCarloPlanner
       }
 
       agent.setMeasurements(points);
+   }
+
+   public void setParameters(int simulationIterations, int searchIterations, int stepLength)
+   {
+      this.simulationIterations = simulationIterations;
+      this.searchIterations = searchIterations;
+      this.stepLength = stepLength;
+   }
+
+   public void getOptimalPathFromRoot(List<MonteCarloTreeNode> path)
+   {
+      MonteCarloPlannerTools.getOptimalPath(root, path);
+   }
+
+   public int getNumberOfNodesInTree()
+   {
+      return MonteCarloPlannerTools.getTotalNodesInSubTree(root);
+   }
+
+   public void printLayerCounts()
+   {
+      HashMap<Integer, Integer> layerCounts = new HashMap<>();
+      MonteCarloPlannerTools.getLayerCounts(root, layerCounts);
+
+      StringBuilder output = new StringBuilder("{");
+      for (Integer key : layerCounts.keySet())
+      {
+         output.append("(").append(key - root.getLevel()).append(":").append(layerCounts.get(key)).append(")");
+         output.append(", ");
+      }
+
+      LogTools.info("Layer Counts: {}", output.toString());
    }
 
    public MonteCarloPlanningAgent getAgent()
