@@ -11,6 +11,16 @@
 #define DEPTH_FY 10
 #define GLOBAL_CELL_SIZE 11
 #define GLOBAL_CENTER_INDEX 12
+#define ROBOT_COLLISION_RADIUS 13
+#define GRID_OFFSET_X 14
+#define HEIGHT_FILTER_ALPHA 15
+#define LOCAL_CELLS_PER_AXIS 16
+#define GLOBAL_CELLS_PER_AXIS 17
+#define HEIGHT_SCALING_FACTOR 18
+#define MIN_HEIGHT_REGISTRATION 19
+#define MAX_HEIGHT_REGISTRATION 20
+#define SEARCH_WINDOW_HEIGHT 21
+#define SEARCH_WINDOW_WIDTH 22
 
 #define VERTICAL_FOV M_PI_2_F
 #define HORIZONTAL_FOV (2.0f * M_PI_F)
@@ -105,10 +115,7 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
                                                params[LOCAL_CENTER_INDEX]);
 
 
-   cellCenterInWorld.x += 1.5f;
-
-   int WINDOW_WIDTH = 140;
-   int WINDOW_HEIGHT = 250;
+   cellCenterInWorld.x += params[GRID_OFFSET_X];
 
    float halfCellWidth = params[LOCAL_CELL_SIZE] / 4.0f;
    float minX = cellCenterInWorld.x - halfCellWidth;
@@ -145,9 +152,9 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
 
    int count = 0;
 
-   for (int pitch_count_offset = -WINDOW_HEIGHT / 2; pitch_count_offset < WINDOW_HEIGHT / 2 + 1; pitch_count_offset+=3)
+   for (int pitch_count_offset = - (int) (params[SEARCH_WINDOW_HEIGHT] / 2); pitch_count_offset <  (int) (params[SEARCH_WINDOW_HEIGHT] / 2 + 1); pitch_count_offset+=3)
    {
-      for (int yaw_count_offset = -WINDOW_WIDTH / 2; yaw_count_offset < WINDOW_WIDTH / 2 + 1; yaw_count_offset+=3)
+      for (int yaw_count_offset = - (int) (params[SEARCH_WINDOW_WIDTH] / 2); yaw_count_offset <  (int) (params[SEARCH_WINDOW_WIDTH] / 2 + 1); yaw_count_offset+=3)
       {
          int yaw_count = projectedPoint.x + yaw_count_offset;
          int pitch_count = projectedPoint.y + pitch_count_offset;
@@ -194,14 +201,14 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
       }
    }
 
-   int cellsPerAxis = 2 * params[LOCAL_CENTER_INDEX] + 1;
+   int cellsPerAxis = (int)params[LOCAL_CELLS_PER_AXIS];
 
    if (count > 0)
    {
       averageHeightZ = averageHeightZ / (float)(count);
       averageHeightZ = clamp(averageHeightZ, -5.f, 5.0f);
 
-      write_imageui(out, (int2)(yIndex, xIndex), (uint4)((int)( (averageHeightZ) * 10000.0f), 0, 0, 0));
+      write_imageui(out, (int2)(yIndex, xIndex), (uint4)((int)( (averageHeightZ) * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
 
       //printf("xIndex: %d, yIndex: %d, count: %d, averageHeightZ: %f\n", xIndex, yIndex, count, averageHeightZ);
    }
@@ -234,9 +241,10 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
       (float3)(worldToGroundTf[8], worldToGroundTf[9], worldToGroundTf[10]),
       (float3)(worldToGroundTf[3], worldToGroundTf[7], worldToGroundTf[11]));
 
-   bool isColliding = length(cellCenterInGround.xy) < 0.4f;
+   // Check if the point is within the robot's collision radius
+   bool isColliding = length(cellCenterInGround.xy) < params[ROBOT_COLLISION_RADIUS];
 
-   cellCenterInGround.x -= 1.5f;
+   cellCenterInGround.x -= params[GRID_OFFSET_X];
 
    // Compute the local cell index in the local map
    int2 localCellIndex = coordinate_to_indices(
@@ -245,24 +253,23 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
       params[LOCAL_CELL_SIZE],
       params[LOCAL_CENTER_INDEX]);
 
-   int localCellsPerAxis = 2 * params[LOCAL_CENTER_INDEX] + 1;
+   int localCellsPerAxis = (int) params[LOCAL_CELLS_PER_AXIS];
 
    // Extract the height from the local map at the local cell index (if within bounds)
    float height = 0.0f;
-   float previousHeight = (float) read_imageui(globalMap, (int2)(yIndex, xIndex)).x / 10000.0f;
+   float previousHeight = (float) read_imageui(globalMap, (int2)(yIndex, xIndex)).x / params[HEIGHT_SCALING_FACTOR];
 
    if (localCellIndex.x >= 0 && localCellIndex.x < localCellsPerAxis && localCellIndex.y >= 0 && localCellIndex.y < localCellsPerAxis)
    {
-      height = (float)read_imageui(localMap, (int2)(localCellIndex.y, localCellIndex.x)).x / 10000.0f;
+      height = (float)read_imageui(localMap, (int2)(localCellIndex.y, localCellIndex.x)).x / params[HEIGHT_SCALING_FACTOR];
    }
 
-   float alpha = 0.90f;
    float finalHeight = 0.0f;
 
-   if (height > 0.05f && height < 0.7f && !isColliding)
+   // Filter the height value if it is within the registration height range and not colliding with the robot
+   if (height > params[MIN_HEIGHT_REGISTRATION] && height < params[MAX_HEIGHT_REGISTRATION] && !isColliding)
    {
-//      finalHeight = height;
-       finalHeight = previousHeight * alpha + height * (1.0f - alpha);
+       finalHeight = previousHeight * params[HEIGHT_FILTER_ALPHA] + height * (1.0f - params[HEIGHT_FILTER_ALPHA]);
    }
    else
    {
@@ -270,5 +277,5 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
    }
 
    // Put the height value in the global map at the global cell index
-   write_imageui(globalMap, (int2)(yIndex, xIndex), (uint4)((int)(finalHeight * 10000.0f), 0, 0, 0));
+   write_imageui(globalMap, (int2)(yIndex, xIndex), (uint4)((int)(finalHeight * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
 }

@@ -1,11 +1,8 @@
 package us.ihmc.rdx.perception;
 
 import imgui.ImGui;
-import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.CommunicationMode;
@@ -14,7 +11,6 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
@@ -41,53 +37,33 @@ import java.util.ArrayList;
 public class RDXRapidHeightMapExtractionDemo
 {
    private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("IROS_2023/20230228_200243_PerceptionLog.hdf5").toString();
-
-   private final RDXBaseUI baseUI = new RDXBaseUI();
-   private RDXPanel navigationPanel;
-
-   private String sensorTopicName;
-
-   private final ArrayList<Point3D> sensorPositionBuffer = new ArrayList<>();
-   private final ArrayList<Quaternion> sensorOrientationBuffer = new ArrayList<>();
-
-   private Mat currentHeightMap;
-   private Mat previousHeightMap;
-
-   private ArrayList<Point2D> previousPoints = new ArrayList<>();
-   private ArrayList<Point2D> currentPoints = new ArrayList<>();
-
-   private HumanoidPerceptionModule humanoidPerception;
-   private RDXHumanoidPerceptionUI humanoidPerceptionUI;
-   private final RDXHeightMapVisualizer heightMapVisualizer = new RDXHeightMapVisualizer();
-
-   private final Notification userChangedIndex = new Notification();
    private final ResettableExceptionHandlingExecutorService loadAndDecompressThreadExecutor = MissingThreadTools.newSingleThreadExecutor("LoadAndDecompress",
                                                                                                                                          true,
                                                                                                                                          1);
-
-   private final ImInt frameIndex = new ImInt(0);
-   private final ImFloat planeHeight = new ImFloat(1.5f); // 2.133f
-
-   private final Pose3D cameraPose = new Pose3D();
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
-
+   private final RDXHeightMapVisualizer heightMapVisualizer = new RDXHeightMapVisualizer();
+   private final ArrayList<Quaternion> sensorOrientationBuffer = new ArrayList<>();
+   private final ArrayList<Point3D> sensorPositionBuffer = new ArrayList<>();
    private final Notification heightMapUpdateNotification = new Notification();
-
+   private final RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform();
+   private final RigidBodyTransform sensorToGroundTransform = new RigidBodyTransform();
+   private final RigidBodyTransform groundToWorldTransform = new RigidBodyTransform();
    private final BytePointer depthBytePointer = new BytePointer(1000000);
+   private final Notification userChangedIndex = new Notification();
+   private final ImInt frameIndex = new ImInt(0);
+   private final RDXBaseUI baseUI = new RDXBaseUI();
+   private final Pose3D cameraPose = new Pose3D();
 
-   private final RigidBodyTransform sensorToWorldTf = new RigidBodyTransform();
-   private final RigidBodyTransform sensorToGroundTf = new RigidBodyTransform();
-   private final RigidBodyTransform groundToWorldTf = new RigidBodyTransform();
-
-   private CameraIntrinsics cameraIntrinsics;
-
-   private OpenCLManager openCLManager;
+   private RDXHumanoidPerceptionUI humanoidPerceptionUI;
+   private HumanoidPerceptionModule humanoidPerception;
    private PerceptionDataLoader perceptionDataLoader;
+   private CameraIntrinsics cameraIntrinsics;
+   private OpenCLManager openCLManager;
+   private RDXPanel navigationPanel;
+   private String sensorTopicName;
 
    private int skipIndex = 0;
    private boolean autoIncrement = false;
-
-   private boolean initialized = false;
 
    public RDXRapidHeightMapExtractionDemo()
    {
@@ -154,9 +130,6 @@ public class RDXRapidHeightMapExtractionDemo
                                                      frameIndex.get(),
                                                      depthBytePointer,
                                                      humanoidPerception.getRealsenseDepthImage().getBytedecoOpenCVMat());
-
-            currentHeightMap = new Mat(humanoidPerception.getRapidHeightMapExtractor().getLocalCellsPerAxis(),
-                                       humanoidPerception.getRapidHeightMapExtractor().getLocalCellsPerAxis(), opencv_core.CV_8UC1);
          }
 
          @Override
@@ -193,8 +166,6 @@ public class RDXRapidHeightMapExtractionDemo
          private void renderNavigationPanel()
          {
             boolean changed = ImGui.sliderInt("Frame Index", frameIndex.getData(), 0, perceptionDataLoader.getHDF5Manager().getCount(sensorTopicName) - 1);
-
-            changed |= ImGui.sliderFloat("Plane Height", planeHeight.getData(), -3.0f, 3.0f);
 
             if (ImGui.button("Load Previous"))
             {
@@ -241,42 +212,42 @@ public class RDXRapidHeightMapExtractionDemo
       if (!humanoidPerception.getRapidHeightMapExtractor().isProcessing())
       {
          ThreadTools.startAsDaemon(() ->
-                                   {
-                                      LogTools.info("Update Height Map: " + frameIndex.get());
+         {
+            Point3D position = sensorPositionBuffer.get(frameIndex.get());
+            Quaternion orientation = sensorOrientationBuffer.get(frameIndex.get());
+            cameraPose.set(position, orientation);
+            cameraFrame.setPoseAndUpdate(cameraPose);
 
-                                      Point3D position = sensorPositionBuffer.get(frameIndex.get());
-                                      Quaternion orientation = sensorOrientationBuffer.get(frameIndex.get());
-                                      cameraPose.set(position, orientation);
-                                      cameraFrame.setPoseAndUpdate(cameraPose);
+            long begin = System.nanoTime();
 
-                                      long begin = System.nanoTime();
+            sensorToWorldTransform.set(sensorOrientationBuffer.get(frameIndex.get()), sensorPositionBuffer.get(frameIndex.get()));
 
-                                      sensorToWorldTf.set(sensorOrientationBuffer.get(frameIndex.get()), sensorPositionBuffer.get(frameIndex.get()));
+            sensorToGroundTransform.set(sensorToWorldTransform);
+            sensorToGroundTransform.getTranslation().setX(0.0f);
+            sensorToGroundTransform.getTranslation().setY(0.0f);
+            sensorToGroundTransform.getRotation()
+                                  .set(new Quaternion(0.0f,
+                                                      sensorToGroundTransform.getRotation().getPitch(),
+                                                      sensorToGroundTransform.getRotation().getRoll()));
 
-                                      sensorToGroundTf.set(sensorToWorldTf);
-                                      sensorToGroundTf.getTranslation().setX(0.0f);
-                                      sensorToGroundTf.getTranslation().setY(0.0f);
-                                      sensorToGroundTf.getRotation()
-                                                      .set(new Quaternion(0.0f,
-                                                                          sensorToGroundTf.getRotation().getPitch(),
-                                                                          sensorToGroundTf.getRotation().getRoll()));
+            humanoidPerception.getRapidHeightMapExtractor().update(sensorToWorldTransform, sensorToGroundTransform,
+                                                                  groundToWorldTransform);
+            heightMapUpdateNotification.set();
 
-                                      humanoidPerception.getRapidHeightMapExtractor().update(sensorToWorldTf, sensorToGroundTf, groundToWorldTf);
-                                      heightMapUpdateNotification.set();
+            long end = System.nanoTime();
+            LogTools.info("Update Height Map ({}): {} ms", frameIndex.get(), (end - begin) / 1e6);
 
-                                      long end = System.nanoTime();
-                                      LogTools.info("Update Height Map: {} ms", (end - begin) / 1e6);
-                                   }, getClass().getSimpleName() + "RapidHeightMap");
+         }, getClass().getSimpleName() + "RapidHeightMap");
       }
 
       if (heightMapUpdateNotification.poll())
       {
-         groundToWorldTf.set(sensorToWorldTf);
-         groundToWorldTf.getRotation().setYawPitchRoll(sensorToWorldTf.getRotation().getYaw(), 0, 0);
-         groundToWorldTf.getTranslation().setZ(0);
+         groundToWorldTransform.set(sensorToWorldTransform);
+         groundToWorldTransform.getRotation().setYawPitchRoll(sensorToWorldTransform.getRotation().getYaw(), 0, 0);
+         groundToWorldTransform.getTranslation().setZ(0);
 
          humanoidPerceptionUI.getHeightMapRenderer()
-                             .update(groundToWorldTf,
+                             .update(groundToWorldTransform,
                                      humanoidPerception.getRapidHeightMapExtractor().getGlobalHeightMapImage().getPointerForAccessSpeed(),
                                      humanoidPerception.getRapidHeightMapExtractor().getGlobalCenterIndex(),
                                      humanoidPerception.getRapidHeightMapExtractor().getGlobalCellSizeInMeters());
@@ -296,57 +267,6 @@ public class RDXRapidHeightMapExtractionDemo
                                                humanoidPerception.getRapidHeightMapExtractor().getGlobalHeightMapImage().getBytedecoOpenCVMat(),
                                                1,
                                                1 / (0.3f + 0.20f * humanoidPerception.getRapidHeightMapExtractor().getGlobalCellSizeInMeters()));
-      }
-   }
-
-   public Point2D sphericalProject(Point3D cellCenter, int INPUT_HEIGHT, int INPUT_WIDTH)
-   {
-      Point2D proj = new Point2D();
-
-      int count = 0;
-      double pitchUnit = Math.PI / (2 * INPUT_HEIGHT);
-      double yawUnit = 2 * Math.PI / (INPUT_WIDTH);
-
-      int pitchOffset = INPUT_HEIGHT / 2;
-      int yawOffset = INPUT_WIDTH / 2;
-
-      double x = cellCenter.getX();
-      double y = cellCenter.getY();
-      double z = cellCenter.getZ();
-
-      double radius = Math.sqrt(x * x + y * y);
-
-      double pitch = Math.atan2(z, radius);
-      int pitchCount = (pitchOffset) - (int) (pitch / pitchUnit);
-
-      double yaw = Math.atan2(-y, x);
-      int yawCount = (yawOffset) + (int) (yaw / yawUnit);
-
-      proj.setX(pitchCount);
-      proj.setY(yawCount);
-
-      LogTools.info(String.format("Projection: [%.2f,%.2f] (Yc:%d,Pc:%d, Z:%.2f,R:%.2f)\n", yaw, pitch, yawCount, pitchCount, z, radius));
-
-      return proj;
-   }
-
-   public void testProjection(Mat depth)
-   {
-      double radius = 4.0f;
-      double height = 2.0f;
-      double yawUnit = 2 * Math.PI / depth.cols();
-      double pitchUnit = Math.PI / (2 * depth.rows());
-
-      for (int i = 0; i < depth.cols(); i++)
-      {
-         Point3D point = new Point3D(radius * Math.cos(i * yawUnit), radius * Math.sin(i * yawUnit), -height);
-
-         Point2D projection = sphericalProject(point, depth.rows(), depth.cols());
-
-         LogTools.info("[" + i + "] Point : " + String.format("%.2f, %.2f, %.2f", point.getX(), point.getY(), point.getZ()) + " Projection : " + String.format(
-               "%d, %d",
-               (int) projection.getX(),
-               (int) projection.getY()));
       }
    }
 
