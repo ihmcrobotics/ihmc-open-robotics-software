@@ -70,7 +70,7 @@ public class RDX3DSituatedImagePanel
    private final ModifiableReferenceFrame floatingPanelFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
    private final FramePose3D floatingPanelFramePose = new FramePose3D();
    private double panelDistanceFromHeadset = 0.5;
-   private boolean isShowing;
+   private boolean isShowing = false;
    private final FrameBox3D selectionCollisionBox = new FrameBox3D();
    private final PointCollidable pointCollidable = new PointCollidable(selectionCollisionBox);
    private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
@@ -83,7 +83,6 @@ public class RDX3DSituatedImagePanel
    public RDX3DSituatedImagePanel()
    {
       vrModeManager = null;
-      isShowing = true;
    }
 
    /**
@@ -97,7 +96,7 @@ public class RDX3DSituatedImagePanel
       context.addVRInputProcessor(this::processVRInput);
    }
 
-   public void create(Texture texture, Frustum frustum, ReferenceFrame referenceFrame, boolean flipY)
+   public void create(Texture texture, Frustum frustum, ReferenceFrame centerOfPanelFrame, boolean flipY)
    {
       // Counter clockwise order
       // Draw so thumb faces away and index right
@@ -106,19 +105,19 @@ public class RDX3DSituatedImagePanel
       bottomLeftPosition.set(planePoints[4]);
       bottomRightPosition.set(planePoints[5]);
       topRightPosition.set(planePoints[6]);
-      create(texture, referenceFrame, flipY);
+      create(texture, centerOfPanelFrame, flipY);
    }
 
-   public void create(Texture texture, Vector3[] points, ReferenceFrame referenceFrame, boolean flipY)
+   public void create(Texture texture, Vector3[] points, ReferenceFrame centerOfPanelFrame, boolean flipY)
    {
       topLeftPosition.set(points[0]);
       bottomLeftPosition.set(points[1]);
       bottomRightPosition.set(points[2]);
       topRightPosition.set(points[3]);
-      create(texture, referenceFrame, flipY);
+      create(texture, centerOfPanelFrame, flipY);
    }
 
-   public void create(Texture texture, double panelWidth, double panelHeight, ReferenceFrame referenceFrame, boolean flipY)
+   public void create(Texture texture, double panelWidth, double panelHeight, ReferenceFrame centerOfPanelFrame, boolean flipY)
    {
       float halfPanelHeight = (float) panelHeight / 2.0f;
       float halfPanelWidth = (float) panelWidth / 2.0f;
@@ -126,10 +125,10 @@ public class RDX3DSituatedImagePanel
       bottomLeftPosition.set(-halfPanelHeight, halfPanelWidth, 0.0f);
       bottomRightPosition.set(-halfPanelHeight, -halfPanelWidth, 0.0f);
       topRightPosition.set(halfPanelHeight, -halfPanelWidth, 0.0f);
-      create(texture, referenceFrame, flipY);
+      create(texture, centerOfPanelFrame, flipY);
    }
 
-   private void create(Texture texture, ReferenceFrame referenceFrame, boolean flipY)
+   private void create(Texture texture, ReferenceFrame centerOfPanelFrame, boolean flipY)
    {
       this.texture = texture;
       ModelBuilder modelBuilder = new ModelBuilder();
@@ -144,30 +143,33 @@ public class RDX3DSituatedImagePanel
       bottomLeftUV.set(0.0f, flipY ? 0.0f : 1.0f);
       bottomRightUV.set(1.0f, flipY ? 0.0f : 1.0f);
       topRightUV.set(1.0f, flipY ? 1.0f : 0.0f);
-      tempFramePoint.setToZero(ReferenceFrame.getWorldFrame());
-      LibGDXTools.toEuclid(topLeftPosition, tempFramePoint);
-      tempFramePoint.changeFrame(referenceFrame);
-      LibGDXTools.toLibGDX(tempFramePoint, topLeftPosition);
+
+      // Transform the corners into world frame
+      transformFromLocalToWorld(topLeftPosition, centerOfPanelFrame);
+      transformFromLocalToWorld(bottomLeftPosition, centerOfPanelFrame);
+      transformFromLocalToWorld(bottomRightPosition, centerOfPanelFrame);
+      transformFromLocalToWorld(topRightPosition, centerOfPanelFrame);
+
+      // Add vertices for the front of the panel
       meshBuilder.vertex(topLeftPosition, topLeftNormal, Color.WHITE, topLeftUV);
-      tempFramePoint.setToZero(ReferenceFrame.getWorldFrame());
-      LibGDXTools.toEuclid(bottomLeftPosition, tempFramePoint);
-      tempFramePoint.changeFrame(referenceFrame);
-      LibGDXTools.toLibGDX(tempFramePoint, bottomLeftPosition);
       meshBuilder.vertex(bottomLeftPosition, bottomLeftNormal, Color.WHITE, bottomLeftUV);
-      tempFramePoint.setToZero(ReferenceFrame.getWorldFrame());
-      LibGDXTools.toEuclid(bottomRightPosition, tempFramePoint);
-      tempFramePoint.changeFrame(referenceFrame);
-      LibGDXTools.toLibGDX(tempFramePoint, bottomRightPosition);
       meshBuilder.vertex(bottomRightPosition, bottomRightNormal, Color.WHITE, bottomRightUV);
-      tempFramePoint.setToZero(ReferenceFrame.getWorldFrame());
-      LibGDXTools.toEuclid(topRightPosition, tempFramePoint);
-      tempFramePoint.changeFrame(referenceFrame);
-      LibGDXTools.toLibGDX(tempFramePoint, topRightPosition);
       meshBuilder.vertex(topRightPosition, topRightNormal, Color.WHITE, topRightUV);
+
+      // Add a mirrored image on the back so it's always visible.
+      meshBuilder.vertex(topLeftPosition, topLeftNormal, Color.WHITE, topRightUV);
+      meshBuilder.vertex(bottomLeftPosition, bottomLeftNormal, Color.WHITE, bottomRightUV);
+      meshBuilder.vertex(bottomRightPosition, bottomRightNormal, Color.WHITE, bottomLeftUV);
+      meshBuilder.vertex(topRightPosition, topRightNormal, Color.WHITE, topLeftUV);
+
+      // Front
       meshBuilder.triangle((short) 3, (short) 0, (short) 1);
       meshBuilder.triangle((short) 1, (short) 2, (short) 3);
-      Mesh mesh = meshBuilder.end();
+      // Back
+      meshBuilder.triangle((short) 5, (short) 4, (short) 7);
+      meshBuilder.triangle((short) 7, (short) 6, (short) 5);
 
+      Mesh mesh = meshBuilder.end();
       MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
       Material material = new Material();
 
@@ -186,13 +188,30 @@ public class RDX3DSituatedImagePanel
       FramePoint3DBasics[] vertices = selectionCollisionBox.getVertices();
       hoverBoxMesh = new ModelInstance(RDXModelBuilder.buildModel(boxMeshBuilder ->
                                                boxMeshBuilder.addMultiLineBox(vertices, 0.0005, new Color(Color.WHITE))));
+
+      for (RobotSide side : RobotSide.values)
+      {
+         vrPickResult.get(side).setObjectBeingPicked(this);
+         vrPickResult.get(side).setPickedObjectName("3D Situated Image Panel");
+      }
+   }
+
+   private void transformFromLocalToWorld(Vector3 positionToTransform, ReferenceFrame localFrame)
+   {
+      tempFramePoint.setToZero(ReferenceFrame.getWorldFrame());
+      LibGDXTools.toEuclid(positionToTransform, tempFramePoint);
+      tempFramePoint.changeFrame(localFrame);
+      LibGDXTools.toLibGDX(tempFramePoint, positionToTransform);
    }
 
    public void update(Texture imageTexture)
    {
       if (vrModeManager != null)
       {
-         isShowing = vrModeManager.getShowFloatingVideoPanel().get();
+         // Prevent ever having an invisible panel out there, which is very confusing
+         // to the VR user when the controllers are colliding with and invisible box.
+         boolean somethingToShow = imageTexture != null || texture != null;
+         isShowing = somethingToShow && vrModeManager.getShowFloatingVideoPanel().get();
       }
 
       // Update the texture if necessary
