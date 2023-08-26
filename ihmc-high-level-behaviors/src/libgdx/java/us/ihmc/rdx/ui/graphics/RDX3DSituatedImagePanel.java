@@ -23,8 +23,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
@@ -33,6 +31,7 @@ import us.ihmc.rdx.ui.vr.RDXVRModeManager;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRDragData;
 import us.ihmc.rdx.vr.RDXVRPickResult;
+import us.ihmc.robotics.interaction.PointCollidable;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -73,6 +72,7 @@ public class RDX3DSituatedImagePanel
    private double panelDistanceFromHeadset = 0.5;
    private boolean isShowing;
    private final FrameBox3D selectionCollisionBox = new FrameBox3D();
+   private final PointCollidable pointCollidable = new PointCollidable(selectionCollisionBox);
    private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
    /** If either VR controller is hovering the panel. */
    private boolean isVRHovering = false;
@@ -226,19 +226,10 @@ public class RDX3DSituatedImagePanel
          {
             vrContext.getController(side).runIfConnected(controller ->
             {
-               vrPickResult.get(side).reset();
-
-               Point3D closestPointOnSurface = new Point3D();
-               Vector3D normalAtClosestPoint = new Vector3D();
-               boolean isHovering = selectionCollisionBox.evaluatePoint3DCollision(controller.getPickPointPose().getPosition(),
-                                                                                   closestPointOnSurface,
-                                                                                   normalAtClosestPoint);
-               double distance = closestPointOnSurface.distance(controller.getPickPointPose().getPosition());
-               double distanceToSurface = isHovering ? -distance : distance;
-
-               if (isHovering)
+               boolean isInside = pointCollidable.collide(controller.getPickPointPose().getPosition());
+               if (isInside)
                {
-                  vrPickResult.get(side).addPickCollision(distanceToSurface);
+                  vrPickResult.get(side).setHoveringCollsion(controller.getPickPointPose().getPosition(), pointCollidable.getClosestPointOnSurface());
                   controller.addPickResult(vrPickResult.get(side));
                }
             });
