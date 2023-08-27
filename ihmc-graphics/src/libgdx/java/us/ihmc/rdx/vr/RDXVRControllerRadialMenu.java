@@ -103,12 +103,13 @@ public class RDXVRControllerRadialMenu
       radialMenuSelection = RDXVRRadialMenuSelection.NONE;
    }
 
-   public void run(String topText, String bottomText, String rightText, String leftText,
+   public void run(RDXVRController controller,
+                   String topText, String bottomText, String rightText, String leftText,
                    Runnable topRunnable, Runnable bottomRunnable, Runnable rightRunnable, Runnable leftRunnable)
    {
       showSphere = true;
 
-      if (joystickActionData.x() != 0.0 || joystickActionData.y() != 0.0)
+      if (!controller.getJoystickIsCentered())
       {
          showSelectionBox = true;
 
@@ -155,7 +156,7 @@ public class RDXVRControllerRadialMenu
          radialMenuFramePose.changeFrame(ReferenceFrame.getWorldFrame());
          radialMenuSelectionGraphic.setPoseInWorldFrame(radialMenuFramePose);
 
-         if (joystickPressActionData.bChanged() && joystickPressActionData.bState())
+         if (joystickPressActionData.bChanged() && !joystickPressActionData.bState())
          {
             switch (radialMenuSelection)
             {

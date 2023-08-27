@@ -54,6 +54,7 @@ public class RDXVRController extends RDXVRTrackedDevice
     * The Vive Focus 3 apparenly just goes from 0.0 to 1.0 so is not a factor.
     */
    public static final double GRIP_AS_BUTTON_THRESHOLD = 0.7;
+   public static final double JOYSTICK_ZERO_THRESHOLD = 0.3;
 
    private final RobotSide side;
 
@@ -84,6 +85,7 @@ public class RDXVRController extends RDXVRTrackedDevice
    private InputAnalogActionData touchpadActionData;
    private final LongBuffer joystickActionHandle = BufferUtils.newLongBuffer(1);
    private InputAnalogActionData joystickActionData;
+   private boolean joystickIsCentered = false;
    private final RDXVRControllerRadialMenu radialMenu;
    private final LongBuffer gripActionHandle = BufferUtils.newLongBuffer(1);
    private InputAnalogActionData gripActionData;
@@ -249,6 +251,7 @@ public class RDXVRController extends RDXVRTrackedDevice
       VRInput.VRInput_GetAnalogActionData(gripActionHandle.get(0), gripActionData, VR.k_ulInvalidInputValueHandle);
 
       gripAsButtonDown = gripActionData.x() > GRIP_AS_BUTTON_THRESHOLD;
+      joystickIsCentered = Math.abs(joystickActionData.x()) < JOYSTICK_ZERO_THRESHOLD && Math.abs(joystickActionData.y()) < JOYSTICK_ZERO_THRESHOLD;
 
       triggerDragData.update();
       gripDragData.update();
@@ -431,6 +434,11 @@ public class RDXVRController extends RDXVRTrackedDevice
    public InputAnalogActionData getJoystickActionData()
    {
       return joystickActionData;
+   }
+
+   public boolean getJoystickIsCentered()
+   {
+      return joystickIsCentered;
    }
 
    public InputAnalogActionData getGripActionData()
