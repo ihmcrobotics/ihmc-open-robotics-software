@@ -71,10 +71,7 @@ public class PlanarRegionMap
    private final RigidBodyTransform estimatedTransformToPrevious = new RigidBodyTransform();
    private final PlanarLandmarkList mapLandmarks = new PlanarLandmarkList();
 
-   private final Stopwatch wholeAlgorithmDurationStopwatch = new Stopwatch();
-   private final Stopwatch quaternionAveragingStopwatch = new Stopwatch();
-   private final Stopwatch factorGraphStopwatch = new Stopwatch();
-   private final Stopwatch regionMergingStopwatch = new Stopwatch();
+   private PlanarRegionMapStatistics mapStatistics;
 
    private MergingMode merger;
    private MatchingMode matcher;
@@ -668,8 +665,6 @@ public class PlanarRegionMap
       if (merger != MergingMode.SMOOTHING)
          return null;
 
-      wholeAlgorithmDurationStopwatch.resetLap();
-
       PlanarRegionsList regions = new PlanarRegionsList();
 
       // Remove all regions that are too small
@@ -721,8 +716,6 @@ public class PlanarRegionMap
       }
       else
       {
-         quaternionAveragingStopwatch.resetLap();
-
          transformToPrevious.setIdentity();
 
          LogTools.debug("Computing ICP transform [{} <- {}]", keyframes.get(keyframes.size() - 1).getTimeIndex(), currentTimeIndex);
@@ -789,10 +782,8 @@ public class PlanarRegionMap
 
          LogTools.debug("Transform to previous: {}", transformToPrevious);
 
-         quaternionAveragingStopwatch.lap();
          //quaternionAveragingStopwatch.suspend();
 
-         factorGraphStopwatch.resetLap();
          applyFactorGraphBasedSmoothing(finalMap,
                                         graphRegions,
                                         transformToWorld,
@@ -815,11 +806,6 @@ public class PlanarRegionMap
                                                           posteriorRegionsInWorld.addPlanarRegion(region);
                                                        });
 
-         factorGraphStopwatch.lap();
-         //factorGraphStopwatch.suspend();
-
-         regionMergingStopwatch.resetLap();
-
          finalMap = crossReduceRegionsIteratively(finalMap, graphRegions);
          processUniqueRegions(finalMap);
 
@@ -834,17 +820,9 @@ public class PlanarRegionMap
 
          keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, transformToWorld, estimatedTransformToWorld));
 
-         regionMergingStopwatch.lap();
-         //regionMergingStopwatch.suspend();
-
-         wholeAlgorithmDurationStopwatch.lap();
-         //wholeAlgorithmDurationStopwatch.suspend();
-
          return transformToWorld;
       }
 
-      wholeAlgorithmDurationStopwatch.lap();
-      //wholeAlgorithmDurationStopwatch.suspend();
       return null;
    }
 
@@ -945,46 +923,6 @@ public class PlanarRegionMap
    public void setInitialSensorPose(RigidBodyTransform transformToWorld)
    {
       initialTransformToWorld.set(transformToWorld);
-   }
-
-   public void printStatistics(boolean average)
-   {
-      if (average)
-      {
-         LogTools.info(String.format("Whole Algorithm: %.3f, Quaternion Averaging: %.3f, Factor Graph: %.3f, Region Merging: %.3f",
-                                     wholeAlgorithmDurationStopwatch.averageLap(),
-                                     quaternionAveragingStopwatch.averageLap(),
-                                     factorGraphStopwatch.averageLap(),
-                                     regionMergingStopwatch.averageLap()));
-      }
-      else
-      {
-         LogTools.info(String.format("Whole Algorithm: %.3f, Quaternion Averaging: %.3f, Factor Graph: %.3f, Region Merging: %.3f",
-                                     wholeAlgorithmDurationStopwatch.totalElapsed(),
-                                     quaternionAveragingStopwatch.totalElapsed(),
-                                     factorGraphStopwatch.totalElapsed(),
-                                     regionMergingStopwatch.totalElapsed()));
-      }
-   }
-
-   public Stopwatch getWholeAlgorithmDurationStopwatch()
-   {
-      return wholeAlgorithmDurationStopwatch;
-   }
-
-   public Stopwatch getQuaternionAveragingStopwatch()
-   {
-      return quaternionAveragingStopwatch;
-   }
-
-   public Stopwatch getFactorGraphStopwatch()
-   {
-      return factorGraphStopwatch;
-   }
-
-   public Stopwatch getRegionMergingStopwatch()
-   {
-      return regionMergingStopwatch;
    }
 
    public int getNumberOfKeyframes()

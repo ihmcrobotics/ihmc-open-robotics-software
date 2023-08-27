@@ -25,6 +25,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.mapping.PlanarRegionMap;
+import us.ihmc.perception.mapping.PlanarRegionMapStatistics;
 import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
 import us.ihmc.perception.odometry.RapidPatchesBasedICP;
 import us.ihmc.perception.opencl.OpenCLManager;
@@ -119,6 +120,7 @@ public class PlanarRegionMappingHandler
    private final RapidPatchesBasedICP rapidPatchesBasedICP = new RapidPatchesBasedICP();
 
    private PerceptionDataLoader perceptionDataLoader;
+   private PlanarRegionMapStatistics planarRegionMapStatistics;
 
    public PlanarRegionMappingHandler()
    {
@@ -168,11 +170,13 @@ public class PlanarRegionMappingHandler
 
       //createOuster(128, 1024, smoothing);
       createTerrain(720, 1280, false);
+
+      planarRegionMapStatistics = new PlanarRegionMapStatistics(planarRegionMap, rapidRegionsExtractor);
    }
 
    private void createTerrain(int depthHeight, int depthWidth, boolean simulation)
    {
-      planarRegionMap = new PlanarRegionMap(true, "Fast");
+      planarRegionMap = new PlanarRegionMap(true);
       sensorLogChannelName = PerceptionLoggerConstants.L515_DEPTH_NAME;
 
       String version = simulation ? "Simulation" : "";
@@ -182,8 +186,8 @@ public class PlanarRegionMappingHandler
       depth16UC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
 
       perceptionDataLoader.loadCompressedDepth(sensorLogChannelName, perceptionLogIndex, depthPointer, depth16UC1Image.getBytedecoOpenCVMat());
-      perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer);
-      perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, sensorOrientationBuffer);
+      perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
+      perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, sensorOrientationBuffer, PerceptionLoggerConstants.LEGACY_BLOCK_SIZE);
 
       totalDepthCount = perceptionDataLoader.getHDF5Manager().getCount(sensorLogChannelName);
    }
@@ -276,6 +280,10 @@ public class PlanarRegionMappingHandler
          LogTools.debug("Transform: {}", framePlanarRegionsList.getSensorToWorldFrameTransform());
 
          updateMapWithNewRegions(framePlanarRegionsList);
+         planarRegionMapStatistics.computeStatistics();
+
+         LogTools.info("Statistics: {}", planarRegionMapStatistics);
+
          planarRegionListIndex++;
       }
 
@@ -289,7 +297,7 @@ public class PlanarRegionMappingHandler
          {
             try
             {
-               Thread.sleep(10);
+               Thread.sleep(100);
             }
             catch (InterruptedException e)
             {
@@ -309,6 +317,9 @@ public class PlanarRegionMappingHandler
          {
             planarRegionMap.setModified(true);
             updateMapWithNewRegions(framePlanarRegionsList);
+
+            planarRegionMapStatistics.computeStatistics();
+            LogTools.info("Statistics: {}", planarRegionMapStatistics);
          }
 
          perceptionLogIndex += 1;
