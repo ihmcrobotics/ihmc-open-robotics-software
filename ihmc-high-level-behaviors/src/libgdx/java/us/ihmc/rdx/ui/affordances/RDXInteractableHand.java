@@ -142,7 +142,8 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
          {
             if (isVRPointing(side) || isVRHovering(side) || controller.getGripDragData().isBeingDragged(this))
             {
-               controller.getRadialMenu().run("Open Hand", "Close Hand", "Door Avoidance", "Home Position",
+               controller.getRadialMenu().run(controller,
+                                              "Open Hand", "Close Hand", "Door Avoidance", "Home Position",
                                               openHand, closeHand, gotoDoorAvoidanceArmAngles, gotoArmHome);
             }
          });
