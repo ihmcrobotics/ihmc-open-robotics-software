@@ -82,6 +82,9 @@ public class WalkAction extends WalkActionData implements BehaviorAction
       }
    }
 
+   /**
+    * TODO: Footstep planning should happen on a thread so it doesn't hang up updates.
+    */
    public void plan()
    {
       FramePose3D leftFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
