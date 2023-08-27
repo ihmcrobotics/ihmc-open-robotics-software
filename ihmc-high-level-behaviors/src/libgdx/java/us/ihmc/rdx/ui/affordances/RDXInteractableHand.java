@@ -3,7 +3,6 @@ package us.ihmc.rdx.ui.affordances;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
@@ -143,26 +142,9 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
          {
             if (isVRPointing(side) || isVRHovering(side) || controller.getGripDragData().isBeingDragged(this))
             {
-               controller.controlOfRadialMenu("Open Hand", "Close Hand", "Door Avoidance", "Home Position");
-
-               InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
-               if (joystickButton.bChanged() && joystickButton.bState())
-               {
-                  Runnable radialMenuRunnable = controller.getRadialMenuRunnable(openHand, closeHand, gotoDoorAvoidanceArmAngles, gotoArmHome);
-                  if (radialMenuRunnable != null)
-                     radialMenuRunnable.run();
-               }
+               controller.getRadialMenu().run("Open Hand", "Close Hand", "Door Avoidance", "Home Position",
+                                              openHand, closeHand, gotoDoorAvoidanceArmAngles, gotoArmHome);
             }
-            else if (controller.getSelectedPick() == null && !controller.anythingElseBeingDragged(this))
-            {
-               controller.hideRadialMenuBox();
-            }
-            else
-            {
-               controller.setRadialMenuSelection(null);
-            }
-            
-            controller.setRadialMenuBoxPosition(isVRPointing(side));
          });
       }
    }
