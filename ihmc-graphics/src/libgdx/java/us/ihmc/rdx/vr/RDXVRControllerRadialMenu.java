@@ -16,6 +16,13 @@ import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+/**
+ * A radial menu showing 4 options. A white sphere shows above the joystick
+ * when the menu is available. Move the joystick in a direction to see the options.
+ * Click and release the joystick button while holding it in the direction of
+ * the desired option to execute the option. A white mesh box highlights the
+ * selected option.
+ */
 public class RDXVRControllerRadialMenu
 {
    private final RobotSide side;
