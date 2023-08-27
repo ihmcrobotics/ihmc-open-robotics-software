@@ -1459,4 +1459,34 @@ public class EuclidCoreMissingTools
          throw new RuntimeException(e);
       }
    }
+
+   /**
+    * Remove when this issue is fixed:
+    * https://github.com/ihmcrobotics/euclid/issues/57
+    */
+   private static final Field referenceFrameName;
+   static
+   {
+      try
+      {
+         referenceFrameName = ReferenceFrame.class.getDeclaredField("frameName");
+         referenceFrameName.setAccessible(true);
+      }
+      catch (NoSuchFieldException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+
+   public static String frameName(ReferenceFrame referenceFrame)
+   {
+      try
+      {
+         return referenceFrameName.get(referenceFrame).toString();
+      }
+      catch (IllegalAccessException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
 }
