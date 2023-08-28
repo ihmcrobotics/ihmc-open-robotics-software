@@ -63,6 +63,8 @@ public interface HumanoidJointNameMap extends LeggedJointNameMap<RobotSide>
 
    String getHandName(RobotSide robotSide);
 
+   String getForearmName(RobotSide robotSide);
+
    String getFootName(RobotSide robotSide);
 
    default List<String> getNeckJointNamesAsStrings()
