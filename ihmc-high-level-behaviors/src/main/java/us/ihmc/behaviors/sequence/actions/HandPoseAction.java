@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
+import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import behavior_msgs.msg.dds.HandPoseJointAnglesStatusMessage;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -7,8 +8,9 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
+import us.ihmc.behaviors.sequence.BehaviorActionCompletionCalculator;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
-import us.ihmc.behaviors.sequence.BehaviorActionSequenceTools;
+import us.ihmc.behaviors.tools.HandWrenchCalculator;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
@@ -21,26 +23,34 @@ import us.ihmc.tools.thread.Throttler;
 
 public class HandPoseAction extends HandPoseActionData implements BehaviorAction
 {
-   public static final double TRANSLATION_TOLERANCE = 0.15;
-   public static final double ROTATION_TOLERANCE = Math.toRadians(10.0);
-   public static final double BROKEN_WRIST_ROTATION_TOLERANCE = Math.toRadians(90.0);
+   public static final double POSITION_TOLERANCE = 0.15;
+   public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
+   private int actionIndex;
    private final FramePose3D desiredHandControlPose = new FramePose3D();
    private final FramePose3D syncedHandControlPose = new FramePose3D();
+   private final HandWrenchCalculator handWrenchCalculator;
    private final HandPoseJointAnglesStatusMessage handPoseJointAnglesStatus = new HandPoseJointAnglesStatusMessage();
    private final Timer executionTimer = new Timer();
    private final Throttler warningThrottler = new Throttler().setFrequency(2.0);
+   private boolean isExecuting;
+   private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
+   private double startPositionDistanceToGoal;
+   private double startOrientationDistanceToGoal;
+   private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
 
    public HandPoseAction(ROS2ControllerHelper ros2ControllerHelper,
                          ReferenceFrameLibrary referenceFrameLibrary,
                          DRCRobotModel robotModel,
-                         ROS2SyncedRobotModel syncedRobot)
+                         ROS2SyncedRobotModel syncedRobot,
+                         HandWrenchCalculator handWrenchCalculator)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
+      this.handWrenchCalculator = handWrenchCalculator;
       setReferenceFrameLibrary(referenceFrameLibrary);
 
       for (RobotSide side : RobotSide.values)
@@ -52,6 +62,8 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    @Override
    public void update(int actionIndex, int nextExecutionIndex)
    {
+      this.actionIndex = actionIndex;
+
       if (actionIndex == nextExecutionIndex)
       {
          ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
@@ -72,7 +84,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    }
 
    @Override
-   public void executeAction()
+   public void triggerActionExecution()
    {
       ArmIKSolver armIKSolver = armIKSolvers.get(getSide());
 
@@ -94,22 +106,42 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
       ros2ControllerHelper.publishToController(armTrajectoryMessage);
 
       executionTimer.reset();
+
+      desiredHandControlPose.setFromReferenceFrame(getReferenceFrame());
+      syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getSide()));
+      startPositionDistanceToGoal = syncedHandControlPose.getTranslation().differenceNorm(desiredHandControlPose.getTranslation());
+      startOrientationDistanceToGoal = syncedHandControlPose.getRotation().distance(desiredHandControlPose.getRotation(), true);
    }
 
    @Override
-   public boolean isExecuting()
+   public void updateCurrentlyExecuting()
    {
       desiredHandControlPose.setFromReferenceFrame(getReferenceFrame());
       syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getSide()));
 
       // Left hand broke on Nadia and not in the robot model?
-      double rotationTolerance = getSide() == RobotSide.LEFT ? BROKEN_WRIST_ROTATION_TOLERANCE : ROTATION_TOLERANCE;
-      return BehaviorActionSequenceTools.isExecuting(desiredHandControlPose,
-                                                     syncedHandControlPose,
-                                                     TRANSLATION_TOLERANCE,
-                                                     rotationTolerance,
+      isExecuting = !completionCalculator.isComplete(desiredHandControlPose,
+                                                     syncedHandControlPose, POSITION_TOLERANCE, ORIENTATION_TOLERANCE,
                                                      getTrajectoryDuration(),
                                                      executionTimer,
                                                      warningThrottler);
+
+      executionStatusMessage.setActionIndex(actionIndex);
+      executionStatusMessage.setNominalExecutionDuration(getTrajectoryDuration());
+      executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
+      executionStatusMessage.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
+      executionStatusMessage.setStartPositionDistanceToGoal(startPositionDistanceToGoal);
+      executionStatusMessage.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
+      executionStatusMessage.setCurrentPositionDistanceToGoal(completionCalculator.getTranslationError());
+      executionStatusMessage.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
+      executionStatusMessage.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
+      executionStatusMessage.setHandWrenchMagnitudeLinear(handWrenchCalculator.getLinearWrenchMagnitude(getSide(), true));
+      ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);
+   }
+
+   @Override
+   public boolean isExecuting()
+   {
+      return isExecuting;
    }
 }
