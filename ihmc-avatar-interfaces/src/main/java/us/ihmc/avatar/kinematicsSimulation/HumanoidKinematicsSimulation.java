@@ -160,7 +160,7 @@ public class HumanoidKinematicsSimulation
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel, centerOfMassStateProvider, null);
 
       // Create registries to match controller so the XML gets loaded properly.
-      yoTime = new YoDouble("timeInPreview", registry);
+      yoTime = new YoDouble("time", registry);
       YoRegistry drcControllerThreadRegistry = new YoRegistry("DRCControllerThread");
       YoRegistry drcMomentumBasedControllerRegistry = new YoRegistry("DRCMomentumBasedController");
       YoRegistry humanoidHighLevelControllerManagerRegistry = new YoRegistry("HumanoidHighLevelControllerManager");

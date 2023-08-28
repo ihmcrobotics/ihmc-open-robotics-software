@@ -1,11 +1,14 @@
 package us.ihmc.avatar.scs2;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
@@ -27,6 +30,7 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
    private final ControllerOutput controllerOutput;
    private final boolean writeBeforeEstimatorTick;
    private final List<JointController> jointControllers = new ArrayList<>();
+   private final Map<String, JointController> jointControllerMap = new HashMap<>();
 
    private final YoDouble unstableVelocityThreshold = new YoDouble("unstableVelocityThreshold", registry);
    private final YoInteger unstableVelocityNumberThreshold = new YoInteger("unstableVelocityNumberThreshold", registry);
@@ -78,7 +82,9 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
             {
                OneDoFJointStateBasics simJointInput = controllerOutput.getOneDoFJointOutput(controllerJoint);
                OneDoFJointReadOnly simJointOutput = (OneDoFJointReadOnly) controllerInput.getInput().findJoint(controllerJoint.getName());
-               jointControllers.add(new OneDoFJointController(simJointOutput, simJointInput, jointDesiredOutput, registry));
+               OneDoFJointController jointController = new OneDoFJointController(simJointOutput, simJointInput, jointDesiredOutput, registry);
+               jointControllers.add(jointController);
+               jointControllerMap.put(controllerFourBarJoint.getName(), jointController);
             }
             else
             {
@@ -92,14 +98,22 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
                simOutputs[1] = (OneDoFJointReadOnly) controllerInput.getInput().findJoint(controllerFourBarJoint.getJointB().getName());
                simOutputs[2] = (OneDoFJointReadOnly) controllerInput.getInput().findJoint(controllerFourBarJoint.getJointC().getName());
                simOutputs[3] = (OneDoFJointReadOnly) controllerInput.getInput().findJoint(controllerFourBarJoint.getJointD().getName());
-               jointControllers.add(new CrossFourBarJointController(controllerFourBarJoint, simOutputs, simInputs, jointDesiredOutput, registry));
+               CrossFourBarJointController jointController = new CrossFourBarJointController(controllerFourBarJoint,
+                                                                                             simOutputs,
+                                                                                             simInputs,
+                                                                                             jointDesiredOutput,
+                                                                                             registry);
+               jointControllers.add(jointController);
+               jointControllerMap.put(controllerFourBarJoint.getName(), jointController);
             }
          }
          else
          {
             OneDoFJointStateBasics simJointInput = controllerOutput.getOneDoFJointOutput(controllerJoint);
             OneDoFJointReadOnly simJointOutput = (OneDoFJointReadOnly) controllerInput.getInput().findJoint(controllerJoint.getName());
-            jointControllers.add(new OneDoFJointController(simJointOutput, simJointInput, jointDesiredOutput, registry));
+            OneDoFJointController jointController = new OneDoFJointController(simJointOutput, simJointInput, jointDesiredOutput, registry);
+            jointControllers.add(jointController);
+            jointControllerMap.put(simJointOutput.getName(), jointController);
          }
       }
    }
@@ -140,8 +154,47 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
       return registry;
    }
 
+   public void setOneDoFJointConfigurationCorruptor(String jointName, OneDoFJointCommandCorruptor corruptor)
+   {
+      JointController outputWriter = jointControllerMap.get(jointName);
+      if (outputWriter == null)
+      {
+         LogTools.error("Couldn't find joint output writer for joint {}." + jointName);
+         return;
+      }
+      outputWriter.setJointConfigurationCorruptor(corruptor);
+   }
+
+   public void setOneDoFJointVelocityCorruptor(String jointName, OneDoFJointCommandCorruptor corruptor)
+   {
+      JointController outputWriter = jointControllerMap.get(jointName);
+      if (outputWriter == null)
+      {
+         LogTools.error("Couldn't find joint output writer for joint {}." + jointName);
+         return;
+      }
+      outputWriter.setJointVelocityCorruptor(corruptor);
+   }
+
+   public void setOneDoFJointEffortCorruptor(String jointName, OneDoFJointCommandCorruptor corruptor)
+   {
+      JointController outputWriter = jointControllerMap.get(jointName);
+      if (outputWriter == null)
+      {
+         LogTools.error("Couldn't find joint output writer for joint {}." + jointName);
+         return;
+      }
+      outputWriter.setJointEffortCorruptor(corruptor);
+   }
+
    private interface JointController
    {
+      void setJointConfigurationCorruptor(OneDoFJointCommandCorruptor jointConfigurationCorruptor);
+
+      void setJointVelocityCorruptor(OneDoFJointCommandCorruptor jointVelocityCorruptor);
+
+      void setJointEffortCorruptor(OneDoFJointCommandCorruptor jointEffortCorruptor);
+
       void doControl();
    }
 
@@ -158,6 +211,10 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
       private final YoInteger unstableVelocityCounter;
       private final YoDouble previousVelocity;
       private final YoDouble unstableVelocityStartTime;
+
+      private OneDoFJointCommandCorruptor jointConfigurationCorruptor = null;
+      private OneDoFJointCommandCorruptor jointVelocityCorruptor = null;
+      private OneDoFJointCommandCorruptor jointEffortCorruptor = null;
 
       public OneDoFJointController(OneDoFJointReadOnly simOutput,
                                    OneDoFJointStateBasics simInput,
@@ -183,25 +240,64 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
       }
 
       @Override
+      public void setJointConfigurationCorruptor(OneDoFJointCommandCorruptor jointConfigurationCorruptor)
+      {
+         this.jointConfigurationCorruptor = jointConfigurationCorruptor;
+      }
+
+      @Override
+      public void setJointVelocityCorruptor(OneDoFJointCommandCorruptor jointVelocityCorruptor)
+      {
+         this.jointVelocityCorruptor = jointVelocityCorruptor;
+      }
+
+      @Override
+      public void setJointEffortCorruptor(OneDoFJointCommandCorruptor jointEffortCorruptor)
+      {
+         this.jointEffortCorruptor = jointEffortCorruptor;
+      }
+
+      @Override
       public void doControl()
       {
          double positionError;
          double velocityError;
 
          if (jointDesiredOutput.hasDesiredTorque())
-            yoControllerTau.set(jointDesiredOutput.getDesiredTorque());
+         {
+            double tau_d = jointDesiredOutput.getDesiredTorque();
+            if (jointEffortCorruptor != null)
+               tau_d = jointEffortCorruptor.corruptCommand(tau_d, simOutput);
+            yoControllerTau.set(tau_d);
+         }
          else
+         {
             yoControllerTau.set(0.0);
+         }
 
          if (jointDesiredOutput.hasDesiredPosition())
-            positionError = jointDesiredOutput.getDesiredPosition() - simOutput.getQ();
+         {
+            double q_d = jointDesiredOutput.getDesiredPosition();
+            if (jointConfigurationCorruptor != null)
+               q_d = jointConfigurationCorruptor.corruptCommand(q_d, simOutput);
+            positionError = q_d - simOutput.getQ();
+         }
          else
+         {
             positionError = 0.0;
+         }
 
          if (jointDesiredOutput.hasDesiredVelocity())
-            velocityError = jointDesiredOutput.getDesiredVelocity() - simOutput.getQd();
+         {
+            double qd_d = jointDesiredOutput.getDesiredVelocity();
+            if (jointVelocityCorruptor != null)
+               qd_d = jointVelocityCorruptor.corruptCommand(qd_d, simOutput);
+            velocityError = qd_d - simOutput.getQd();
+         }
          else
+         {
             velocityError = 0.0;
+         }
 
          if (jointDesiredOutput.hasPositionFeedbackMaxError())
             positionError = MathTools.clamp(positionError, jointDesiredOutput.getPositionFeedbackMaxError());
@@ -261,6 +357,10 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
       private final YoDouble previousVelocity;
       private final YoDouble unstableVelocityStartTime;
 
+      private OneDoFJointCommandCorruptor jointConfigurationCorruptor = null;
+      private OneDoFJointCommandCorruptor jointVelocityCorruptor = null;
+      private OneDoFJointCommandCorruptor jointEffortCorruptor = null;
+
       public CrossFourBarJointController(CrossFourBarJointBasics controllerFourBarJoint,
                                          OneDoFJointReadOnly[] simOutputs,
                                          OneDoFJointStateBasics[] simInputs,
@@ -270,7 +370,7 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
          this.simOutputs = simOutputs;
          this.simInputs = simInputs;
          this.jointDesiredOutput = jointDesiredOutput;
-         localFourBarJoint = CrossFourBarJoint.cloneCrossFourBarJoint(controllerFourBarJoint, ReferenceFrameTools.constructARootFrame("dummy"), "dummy");
+         localFourBarJoint = CrossFourBarJoint.cloneCrossFourBarJoint(controllerFourBarJoint, ReferenceFrameTools.constructARootFrame("dummy"), "");
 
          if (controllerFourBarJoint.getJointA().isLoopClosure() || controllerFourBarJoint.getJointD().isLoopClosure())
             torqueSourceIndices = new int[] {1, 2};
@@ -292,6 +392,24 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
       }
 
       @Override
+      public void setJointConfigurationCorruptor(OneDoFJointCommandCorruptor jointConfigurationCorruptor)
+      {
+         this.jointConfigurationCorruptor = jointConfigurationCorruptor;
+      }
+
+      @Override
+      public void setJointVelocityCorruptor(OneDoFJointCommandCorruptor jointVelocityCorruptor)
+      {
+         this.jointVelocityCorruptor = jointVelocityCorruptor;
+      }
+
+      @Override
+      public void setJointEffortCorruptor(OneDoFJointCommandCorruptor jointEffortCorruptor)
+      {
+         this.jointEffortCorruptor = jointEffortCorruptor;
+      }
+
+      @Override
       public void doControl()
       {
          double positionError;
@@ -300,19 +418,40 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
          updateFourBarJoint();
 
          if (jointDesiredOutput.hasDesiredTorque())
-            yoControllerTau.set(jointDesiredOutput.getDesiredTorque());
+         {
+            double tau_d = jointDesiredOutput.getDesiredTorque();
+            if (jointEffortCorruptor != null)
+               tau_d = jointEffortCorruptor.corruptCommand(tau_d, localFourBarJoint);
+            yoControllerTau.set(tau_d);
+         }
          else
+         {
             yoControllerTau.set(0.0);
+         }
 
          if (jointDesiredOutput.hasDesiredPosition())
-            positionError = jointDesiredOutput.getDesiredPosition() - localFourBarJoint.getQ();
+         {
+            double q_d = jointDesiredOutput.getDesiredPosition();
+            if (jointConfigurationCorruptor != null)
+               q_d = jointConfigurationCorruptor.corruptCommand(q_d, localFourBarJoint);
+            positionError = q_d - localFourBarJoint.getQ();
+         }
          else
+         {
             positionError = 0.0;
+         }
 
          if (jointDesiredOutput.hasDesiredVelocity())
-            velocityError = jointDesiredOutput.getDesiredVelocity() - localFourBarJoint.getQd();
+         {
+            double qd_d = jointDesiredOutput.getDesiredVelocity();
+            if (jointVelocityCorruptor != null)
+               qd_d = jointVelocityCorruptor.corruptCommand(qd_d, localFourBarJoint);
+            velocityError = qd_d - localFourBarJoint.getQd();
+         }
          else
+         {
             velocityError = 0.0;
+         }
 
          if (jointDesiredOutput.hasPositionFeedbackMaxError())
             positionError = MathTools.clamp(positionError, jointDesiredOutput.getPositionFeedbackMaxError());
@@ -379,5 +518,17 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
          else
             unstableVelocityCounter.set(Math.max(unstableVelocityCounter.getValue() - 1, 0));
       }
+   }
+
+   public static interface OneDoFJointCommandCorruptor
+   {
+      /**
+       * Corrupt the command of the given joint before feeding it to the simulated robot.
+       *
+       * @param originalCommandValue the command that would be used if no corruption was to be applied.
+       * @param joint                the joint to which the command is to be corrupted.
+       * @return the corrupted command value. Return {@code originalCommandValue} for no corruption.
+       */
+      double corruptCommand(double originalCommandValue, OneDoFJointReadOnly joint);
    }
 }

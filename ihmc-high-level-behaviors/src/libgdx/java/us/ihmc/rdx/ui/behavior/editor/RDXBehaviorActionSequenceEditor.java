@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Pool;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImGui;
+import imgui.ImVec2;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -21,6 +22,7 @@ import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -28,6 +30,7 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.behavior.editor.actions.*;
 import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -56,8 +59,13 @@ import java.util.LinkedList;
  */
 public class RDXBehaviorActionSequenceEditor
 {
+   public static final float PROGRESS_BAR_HEIGHT = 18.0f;
+
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean automaticExecution = new ImBoolean(false);
+   private final ImVec2 calcDescriptionTextSize = new ImVec2();
+   private final ImVec2 expandButtonSize = new ImVec2();
+   private float longestDescriptionLength;
    private String name;
    @Nullable
    private WorkspaceResourceFile workspaceFile = null;
@@ -68,7 +76,7 @@ public class RDXBehaviorActionSequenceEditor
    private ROS2SyncedRobotModel syncedRobot;
    private RobotCollisionModel selectionCollisionModel;
    private ReferenceFrameLibrary referenceFrameLibrary;
-   private ROS2ControllerHelper ros2;
+   private ROS2ControllerHelper ros2ControllerHelper;
    private final MutablePair<Integer, Integer> reorderRequest = MutablePair.of(-1, 0);
    private volatile long receivedSequenceStatusMessageCount = 0;
    private long receivedStatusMessageCount = 0;
@@ -77,11 +85,15 @@ public class RDXBehaviorActionSequenceEditor
    private IHMCROS2Input<Int32> executionNextIndexStatusSubscription;
    private IHMCROS2Input<Bool> automaticExecutionStatusSubscription;
    private IHMCROS2Input<ActionSequenceUpdateMessage> sequenceStatusSubscription;
+   private IHMCROS2Input<ActionExecutionStatusMessage> executionStatusSubscription;
+   private final ActionExecutionStatusMessage executionStatusMessageToDisplay = new ActionExecutionStatusMessage();
+   private RDXBehaviorAction currentlyExecutingAction;
    private final Empty manuallyExecuteNextActionMessage = new Empty();
    private final Bool automaticExecutionCommandMessage = new Bool();
    private final ArrayList<BehaviorActionData> actionDataForMessage = new ArrayList<>();
    private final ActionSequenceUpdateMessage actionSequenceUpdateMessage = new ActionSequenceUpdateMessage();
    private boolean outOfSync = true;
+   private final ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
 
    public void clear()
    {
@@ -119,12 +131,14 @@ public class RDXBehaviorActionSequenceEditor
       this.syncedRobot = syncedRobot;
       this.selectionCollisionModel = selectionCollisionModel;
       this.referenceFrameLibrary = referenceFrameLibrary;
-      ros2 = new ROS2ControllerHelper(ros2Node, robotModel);
+      ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
 
-      executionNextIndexStatusSubscription = ros2.subscribe(BehaviorActionSequence.EXECUTION_NEXT_INDEX_STATUS_TOPIC);
-      automaticExecutionStatusSubscription = ros2.subscribe(BehaviorActionSequence.AUTOMATIC_EXECUTION_STATUS_TOPIC);
-      sequenceStatusSubscription = ros2.subscribe(BehaviorActionSequence.SEQUENCE_STATUS_TOPIC);
+      executionNextIndexStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.EXECUTION_NEXT_INDEX_STATUS_TOPIC);
+      automaticExecutionStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.AUTOMATIC_EXECUTION_STATUS_TOPIC);
+      sequenceStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.SEQUENCE_STATUS_TOPIC);
       sequenceStatusSubscription.addCallback(message -> ++receivedSequenceStatusMessageCount);
+      executionStatusSubscription = ros2ControllerHelper.subscribe(BehaviorActionSequence.ACTION_EXECUTION_STATUS);
+      executionStatusSubscription.getLatest().setActionIndex(-1); // To indicate to the user that nothing was yet received.
    }
 
    public void loadNameFromFile()
@@ -149,7 +163,7 @@ public class RDXBehaviorActionSequenceEditor
                                                                                 selectionCollisionModel,
                                                                                 panel3D,
                                                                                 referenceFrameLibrary,
-                                                                                ros2);
+                                                                                ros2ControllerHelper);
             if (action != null)
             {
                action.getActionData().loadFromFile(actionNode);
@@ -177,7 +191,7 @@ public class RDXBehaviorActionSequenceEditor
    private void commandNextActionIndex(int nextActionIndex)
    {
       currentActionIndexCommandMessage.setData(nextActionIndex);
-      ros2.publish(BehaviorActionSequence.EXECUTION_NEXT_INDEX_COMMAND_TOPIC, currentActionIndexCommandMessage);
+      ros2ControllerHelper.publish(BehaviorActionSequence.EXECUTION_NEXT_INDEX_COMMAND_TOPIC, currentActionIndexCommandMessage);
    }
 
    public void saveToFile()
@@ -290,8 +304,9 @@ public class RDXBehaviorActionSequenceEditor
          }
       }
       ImGuiTools.previousWidgetTooltip("Expand all action settings");
+      ImGui.getItemRectSize(expandButtonSize);
       ImGui.sameLine();
-      if (ImGui.button(labels.get("[-]")))
+      if (ImGui.button(labels.get("[-]"), expandButtonSize.x, expandButtonSize.y))
       {
          for (var action : actionSequence)
          {
@@ -331,7 +346,7 @@ public class RDXBehaviorActionSequenceEditor
          {
             // Automatically attempt to get back in sync
             RDXActionSequenceTools.packActionSequenceUpdateMessage(actionSequence, actionDataForMessage, actionSequenceUpdateMessage);
-            ros2.publish(BehaviorActionSequence.SEQUENCE_COMMAND_TOPIC, actionSequenceUpdateMessage);
+            ros2ControllerHelper.publish(BehaviorActionSequence.SEQUENCE_COMMAND_TOPIC, actionSequenceUpdateMessage);
          }
       }
 
@@ -346,7 +361,7 @@ public class RDXBehaviorActionSequenceEditor
          if (ImGui.checkbox(labels.get("Autonomously"), automaticExecution))
          {
             automaticExecutionCommandMessage.setData(automaticExecution.get());
-            ros2.publish(BehaviorActionSequence.AUTOMATIC_EXECUTION_COMMAND_TOPIC, automaticExecutionCommandMessage);
+            ros2ControllerHelper.publish(BehaviorActionSequence.AUTOMATIC_EXECUTION_COMMAND_TOPIC, automaticExecutionCommandMessage);
          }
          ImGuiTools.previousWidgetTooltip("Enables autonomous execution. Will immediately start executing when checked.");
          if (!automaticExecution.get())
@@ -354,39 +369,133 @@ public class RDXBehaviorActionSequenceEditor
             ImGui.sameLine();
             if (ImGui.button(labels.get("Manually")))
             {
-               ros2.publish(BehaviorActionSequence.MANUALLY_EXECUTE_NEXT_ACTION_TOPIC, manuallyExecuteNextActionMessage);
+               ros2ControllerHelper.publish(BehaviorActionSequence.MANUALLY_EXECUTE_NEXT_ACTION_TOPIC, manuallyExecuteNextActionMessage);
             }
             ImGuiTools.previousWidgetTooltip("Executes the next action.");
          }
       }
 
-      ImGui.text("# " + receivedSequenceStatusMessageCount);
+      ImGui.text(String.format("Sequence update # %d, Status # %d:", receivedSequenceStatusMessageCount, receivedStatusMessageCount));
       if (outOfSync)
       {
          ImGui.sameLine();
-         ImGui.text(String.format("Out of sync! # Actions: Local: %d Remote: %d", actionSequence.size(), remoteSequenceSize));
-         ImGuiTools.previousWidgetTooltip("Try clicking \"Send to robot\"");
+         ImGui.textColored(ImGuiTools.RED, String.format("Out of sync! # Actions: Local: %d Remote: %d", actionSequence.size(), remoteSequenceSize));
       }
-
-      ImGui.text(String.format("Status # %d: Current action:", receivedStatusMessageCount));
-      ImGui.sameLine();
-      endOfSequence = executionNextIndexStatus >= actionSequence.size();
-      if (endOfSequence)
-         ImGui.text("End of sequence.");
       else
       {
-         RDXBehaviorAction nextExecutionAction = actionSequence.get(executionNextIndexStatus);
-         ImGui.text("%s (%s)".formatted(nextExecutionAction.getDescription(), nextExecutionAction.getActionTypeTitle()));
+         ImGui.sameLine();
+         ImGui.textColored(ImGuiTools.DARK_GREEN, "Synchronized.");
+      }
+
+      {  // These brackets here to take `latestExecutionStatus` out of scope below.
+         // We use executionStatusMessageToDisplay in order to display the previously
+         // executed action's results, otherwise it gets cleared.
+         ActionExecutionStatusMessage latestExecutionStatus = executionStatusSubscription.getLatest();
+         if (latestExecutionStatus.getActionIndex() < 0)
+         {
+            if (endOfSequence)
+            {
+               ImGui.text("End of sequence.");
+            }
+            else
+            {
+               ImGui.text("Nothing executing.");
+            }
+         }
+         else
+         {
+            executionStatusMessageToDisplay.set(latestExecutionStatus);
+            currentlyExecutingAction = actionSequence.get(executionStatusMessageToDisplay.getActionIndex());
+            ImGui.text("Executing: %s (%s)".formatted(currentlyExecutingAction.getDescription(), currentlyExecutingAction.getActionTypeTitle()));
+         }
+      }
+
+      widgetAligner.text("Expected time remaining:");
+      double elapsedTime = executionStatusMessageToDisplay.getElapsedExecutionTime();
+      double nominalDuration = executionStatusMessageToDisplay.getNominalExecutionDuration();
+      double percentComplete = elapsedTime / nominalDuration;
+      double percentLeft = 1.0 - percentComplete;
+      ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "%.2f / %.2f".formatted(elapsedTime, nominalDuration));
+
+      ImGui.spacing();
+      widgetAligner.text("Position error (m):");
+      double currentPositionError = executionStatusMessageToDisplay.getCurrentPositionDistanceToGoal();
+      double startPositionError = executionStatusMessageToDisplay.getStartPositionDistanceToGoal();
+      double positionTolerance = executionStatusMessageToDisplay.getPositionDistanceToGoalTolerance();
+      double barEndValue = Math.max(Math.min(startPositionError, currentPositionError), 2.0 * positionTolerance);
+      double toleranceMarkPercent = positionTolerance / barEndValue;
+      int barColor = currentPositionError < positionTolerance ? ImGuiTools.GREEN : ImGuiTools.RED;
+      percentLeft = currentPositionError / barEndValue;
+      ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT,
+                                   barColor,
+                                   percentLeft,
+                                   toleranceMarkPercent,
+                                   "%.2f / %.2f".formatted(currentPositionError, startPositionError));
+      ImGui.spacing();
+      widgetAligner.text("Orientation error (%s):".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL));
+      double currentOrientationError = executionStatusMessageToDisplay.getCurrentOrientationDistanceToGoal();
+      double startOrientationError = executionStatusMessageToDisplay.getStartOrientationDistanceToGoal();
+      double orientationTolerance = executionStatusMessageToDisplay.getOrientationDistanceToGoalTolerance();
+      barEndValue = Math.max(Math.min(startOrientationError, currentOrientationError), 2.0 * orientationTolerance);
+      toleranceMarkPercent = orientationTolerance / barEndValue;
+      barColor = currentOrientationError < orientationTolerance ? ImGuiTools.GREEN : ImGuiTools.RED;
+      percentLeft = currentOrientationError / barEndValue;
+      ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT,
+                                   barColor,
+                                   percentLeft,
+                                   toleranceMarkPercent,
+                                   "%.2f / %.2f".formatted(Math.toDegrees(currentOrientationError), Math.toDegrees(startOrientationError)));
+      ImGui.spacing();
+
+      if (currentlyExecutingAction instanceof RDXWalkAction)
+      {
+         widgetAligner.text("Footstep completion:");
+         int incompleteFootsteps = executionStatusMessageToDisplay.getNumberOfIncompleteFootsteps();
+         int totalFootsteps = executionStatusMessageToDisplay.getTotalNumberOfFootsteps();
+         percentLeft = incompleteFootsteps / (double) totalFootsteps;
+         ImGui.progressBar((float) percentLeft, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "%d / %d".formatted(incompleteFootsteps, totalFootsteps));
+      }
+      else if (currentlyExecutingAction instanceof RDXHandPoseAction)
+      {
+         widgetAligner.text("Hand wrench linear (N?):");
+         double limit = 20.0;
+         double force = executionStatusMessageToDisplay.getHandWrenchMagnitudeLinear();
+         barColor = force < limit ? ImGuiTools.GREEN : ImGuiTools.RED;
+         ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT, barColor, force / limit, 0.5, "%.2f".formatted(force));
+      }
+      else // Just to take up the space to avoid varying height.
+      {
+         widgetAligner.text("");
+         ImGui.progressBar(0.0f, ImGui.getColumnWidth(), PROGRESS_BAR_HEIGHT, "");
       }
    }
 
    private void renderInteractableActionListArea()
    {
       reorderRequest.setLeft(-1);
+
+      longestDescriptionLength = 50.0f;
+      for (int i = 0; i < actionSequence.size(); i++)
+      {
+         ImGui.calcTextSize(calcDescriptionTextSize, actionSequence.get(i).getActionData().getDescription());
+         if (calcDescriptionTextSize.x > longestDescriptionLength)
+            longestDescriptionLength = calcDescriptionTextSize.x;
+      }
+
       for (int i = 0; i < actionSequence.size(); i++)
       {
          RDXBehaviorAction action = actionSequence.get(i);
 
+         if (ImGui.radioButton(labels.get("", "playbackNextIndex", i), executionNextIndexStatus == i))
+         {
+            commandNextActionIndex(i);
+         }
+         ImGuiTools.previousWidgetTooltip("Next for execution. Index " + i);
+         action.getDescription().set(action.getActionData().getDescription());
+         ImGui.sameLine();
+         ImGui.text("->");
+
+         ImGui.sameLine();
          if (!action.getExpanded().get())
          {
             if (ImGui.button(labels.get("[+]", "expand", i)))
@@ -395,23 +504,13 @@ public class RDXBehaviorActionSequenceEditor
          }
          else
          {
-            if (ImGui.button(labels.get("[-]", "collapse", i)))
+            if (ImGui.button(labels.get("[-]", "collapse", i), expandButtonSize.x, expandButtonSize.y))
                action.getExpanded().set(false);
             ImGuiTools.previousWidgetTooltip("Collapse action settings");
          }
-         ImGui.sameLine();
 
          ImGui.sameLine();
-         ImGui.text("Index %d".formatted(i));
-         ImGui.sameLine();
-         if (ImGui.radioButton(labels.get("", "playbackNextIndex", i), executionNextIndexStatus == i))
-         {
-            commandNextActionIndex(i);
-         }
-         ImGuiTools.previousWidgetTooltip("Next for excecution");
-         action.getDescription().set(action.getActionData().getDescription());
-         ImGui.sameLine();
-         ImGui.pushItemWidth(9.0f + action.getActionData().getDescription().length() * 7.0f);
+         ImGui.pushItemWidth(longestDescriptionLength + 30.0f);
          ImGuiTools.inputText(labels.get("", "description", i), action.getDescription());
          action.getActionData().setDescription(action.getDescription().get());
          ImGui.popItemWidth();
@@ -447,7 +546,7 @@ public class RDXBehaviorActionSequenceEditor
             action.getSelected().renderImGuiWidget();
             ImGuiTools.previousWidgetTooltip("(Show gizmo)");
             ImGui.sameLine();
-            ImGui.text("Type: %s".formatted(action.getActionTypeTitle()));
+            ImGui.text("Type: %s   Index: %d".formatted(action.getActionTypeTitle(), i));
          }
 
          action.renderImGuiWidgets();
@@ -459,7 +558,13 @@ public class RDXBehaviorActionSequenceEditor
       if (indexToMove > -1)
       {
          int destinationIndex = reorderRequest.getRight() == 0 ? indexToMove - 1 : indexToMove + 1;
+         boolean toMoveWasSelected = indexToMove == executionNextIndexStatus;
+         boolean destinationWasSelected = destinationIndex == executionNextIndexStatus;
          actionSequence.add(destinationIndex, actionSequence.remove(indexToMove));
+         if (toMoveWasSelected) // Retain next action for execution
+            commandNextActionIndex(destinationIndex);
+         if (destinationWasSelected)
+            commandNextActionIndex(indexToMove);
       }
    }
 
@@ -487,8 +592,7 @@ public class RDXBehaviorActionSequenceEditor
                                                                      robotModel,
                                                                      syncedRobot.getFullRobotModel(),
                                                                      selectionCollisionModel,
-                                                                     referenceFrameLibrary,
-                                                                     ros2);
+                                                                     referenceFrameLibrary, ros2ControllerHelper);
             // Set the new action to where the last one was for faster authoring
             handPoseAction.setSide(side);
             RDXHandPoseAction nextPreviousHandPoseAction = findNextPreviousHandPoseAction(side);

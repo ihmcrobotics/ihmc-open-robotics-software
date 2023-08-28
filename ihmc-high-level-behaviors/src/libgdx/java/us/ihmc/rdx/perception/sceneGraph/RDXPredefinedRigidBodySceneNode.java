@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -43,6 +44,7 @@ public class RDXPredefinedRigidBodySceneNode
    private final ImGuiEnumPlot currentlyDetectedPlot;
    private final RDXSelectablePose3DGizmo offsetPoseGizmo;
    private final ImBooleanWrapper trackDetectedPoseWrapper;
+   private final TypedNotification<Boolean> trackDetectedPoseChanged = new TypedNotification<>();
    private ImGuiSliderDoubleWrapper alphaFilterValueSlider;
    private ImGuiInputDoubleWrapper distanceToDisableTrackingInput;
 
@@ -58,12 +60,7 @@ public class RDXPredefinedRigidBodySceneNode
                                                      sceneNode.getNodeToParentFrameTransform());
       offsetPoseGizmo.createAndSetupDefault(panel3D);
       trackDetectedPoseWrapper = new ImBooleanWrapper(sceneNode::getTrackDetectedPose,
-                                                      trackDetectedPose ->
-                                                      {
-                                                         sceneNode.setTrackDetectedPose(trackDetectedPose);
-                                                         ensureGizmoFrameIsSceneNodeFrame();
-                                                         sceneNode.markModifiedByOperator();
-                                                      },
+                                                      trackDetectedPoseChanged::set,
                                                       imBoolean -> ImGui.checkbox(labels.get("Track Detected Pose"), imBoolean));
 
       currentlyDetectedPlot = new ImGuiEnumPlot(predefinedRigidBodySceneNode.getName());
@@ -86,6 +83,14 @@ public class RDXPredefinedRigidBodySceneNode
 
    public void update()
    {
+      if (trackDetectedPoseChanged.poll())
+      {
+         boolean trackDetectedPose = trackDetectedPoseChanged.read();
+         sceneNode.setTrackDetectedPose(trackDetectedPose);
+         ensureGizmoFrameIsSceneNodeFrame();
+         sceneNode.markModifiedByOperator();
+      }
+
       showing = sceneNode.getCurrentlyDetected() || !sceneNode.getTrackDetectedPose();
 
       referenceFrameGraphic.setToReferenceFrame(sceneNode.getNodeFrame());
