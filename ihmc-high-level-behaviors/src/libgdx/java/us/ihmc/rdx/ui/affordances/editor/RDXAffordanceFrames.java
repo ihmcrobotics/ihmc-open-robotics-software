@@ -28,10 +28,11 @@ public class RDXAffordanceFrames
    private final List<Integer> poseIndices = new ArrayList<>();
    private int index = 0;
    private final List<Color> colors;
-   private final SideDependentList<Integer> colorIndex = new SideDependentList<Integer>();
+   private int colorIndex = 0;
    private final SideDependentList<RDXInteractableSakeGripper> interactableHands;
    private final SideDependentList<FramePose3D> handPoses;
    private final SideDependentList<List<HandConfiguration>> handConfigurations = new SideDependentList<>();
+   private final SideDependentList<List<Boolean>> arePosesSet = new SideDependentList<>();
    private HandConfiguration selectedFrameConfiguration;
    private int selectedIndex = -1;
    private final SideDependentList<RigidBodyTransform> handTransformsToWorld;
@@ -64,8 +65,8 @@ public class RDXAffordanceFrames
          handConfigurations.put(side,  new ArrayList<>());
          poses.put(side,  new ArrayList<>());
          poseFrames.put(side,  new ArrayList<>());
+         arePosesSet.put(side, new ArrayList<>());
          frameGraphics.put(side,  new ArrayList<>());
-         colorIndex.put(side, 0);
       }
    }
 
@@ -100,10 +101,12 @@ public class RDXAffordanceFrames
          poseFrames.get(activeSide[0]).get(selectedIndex).setPoseAndUpdate(handPoses.get(activeSide[0]));
          poses.get(activeSide[0]).set(selectedIndex, handPoses.get(activeSide[0]));
          objectTransforms.set(selectedIndex, new RigidBodyTransform(objectTransformToWorld));
-         if (frameGraphics.get(activeSide[0]).get(selectedIndex) == null)
+         if (frameGraphics.get(activeSide[0]).get(selectedIndex) == null || !arePosesSet.get(activeSide[0]).get(selectedIndex))
          {
-            frameGraphics.get(activeSide[0]).set(selectedIndex, new RDXReferenceFrameGraphic(0.1, colors.get(colorIndex.get(activeSide[0]) % colors.size())));
+            frameGraphics.get(activeSide[0]).set(selectedIndex, new RDXReferenceFrameGraphic(0.1, colors.get(colorIndex % colors.size())));
+            colorIndex++;
          }
+         arePosesSet.get(activeSide[0]).set(selectedIndex, true);
       }
       ImGui.sameLine();
       if (ImGui.button(labels.get("CLEAR ALL") + "##" + lableId))
@@ -150,6 +153,7 @@ public class RDXAffordanceFrames
                   {
                      poseFrames.get(eachSide).remove(i);
                      poses.get(eachSide).remove(i);
+                     arePosesSet.get(eachSide).remove(i);
                      frameGraphics.get(eachSide).remove(i);
                      handConfigurations.get(eachSide).remove(i);
                   }
@@ -164,7 +168,7 @@ public class RDXAffordanceFrames
          }
          else
          {
-            colorIndex.replace(activeSide[0], 0);
+            colorIndex = 0;
             index = 0;
          }
       }
@@ -190,24 +194,37 @@ public class RDXAffordanceFrames
       poseIndices.add(index);
       poses.get(activeSide[0]).add(poseReference);
       poseFrames.get(activeSide[0]).add(frame);
-      frameGraphics.get(activeSide[0]).add(new RDXReferenceFrameGraphic(0.1, colors.get(colorIndex.get(activeSide[0]) % colors.size())));
-      colorIndex.replace(activeSide[0], colorIndex.get(activeSide[0]) + 1);
+      arePosesSet.get(activeSide[0]).add(true);
+      frameGraphics.get(activeSide[0]).add(new RDXReferenceFrameGraphic(0.1, colors.get(colorIndex % colors.size())));
+      colorIndex++;
 
-      //add an empty graphics frame for the other hand, with same pose from previous frame associated with that side
+      //add frame for the other hand, with same pose from previous frame associated with that side
       RobotSide nonActiveSide = activeSide[0] == RobotSide.RIGHT ? RobotSide.LEFT : RobotSide.RIGHT;
-      FramePose3D otherSidePoseReference;
-      int nonActiveSideSize = poses.get(nonActiveSide).size();
-      if (nonActiveSideSize > 1) // if there is a previous frame
-         otherSidePoseReference = new FramePose3D(poses.get(nonActiveSide).get(nonActiveSideSize - 1));
-      else // use current pose
-         otherSidePoseReference = new FramePose3D(handPoses.get(nonActiveSide));
+      FramePose3D otherSidePoseReference = new FramePose3D(handPoses.get(nonActiveSide));
       otherSidePoseReference.changeFrame(ReferenceFrame.getWorldFrame());
       frame = new PoseReferenceFrame(nonActiveSide.getLowerCaseName() + index + "Frame", otherSidePoseReference.getReferenceFrame());
       frame.setPoseAndUpdate(otherSidePoseReference);
 
       poses.get(nonActiveSide).add(otherSidePoseReference);
       poseFrames.get(nonActiveSide).add(frame);
-      frameGraphics.get(nonActiveSide).add(null);
+      arePosesSet.get(nonActiveSide).add(false);
+      // add empty graphics if initial pose is not set
+      boolean hasFrameBeenSetOnce = false;
+      for (boolean isInitialPoseSet : arePosesSet.get(nonActiveSide))
+      {
+         if (isInitialPoseSet)
+         {
+            hasFrameBeenSetOnce = true;
+            break;
+         }
+      }
+      if (!hasFrameBeenSetOnce)
+         frameGraphics.get(nonActiveSide).add(null);
+      else
+      {
+         frameGraphics.get(nonActiveSide).add(new RDXReferenceFrameGraphic(0.1, Color.RED));
+      }
+
 
       // no hand configuration is set right when you add a new frame
       selectedFrameConfiguration = null;
@@ -258,14 +275,15 @@ public class RDXAffordanceFrames
          poseFrames.get(side).clear();
          poses.get(side).clear();
          frameGraphics.get(side).clear();
-         colorIndex.replace(side, 0);
          handConfigurations.get(side).clear();
+         arePosesSet.get(side).clear();
       }
       poseIndices.clear();
       objectTransforms.clear();
       selectedFrameConfiguration = null;
       selectedIndex = -1;
       index = 0;
+      colorIndex = 0;
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -286,6 +304,11 @@ public class RDXAffordanceFrames
    public List<FramePose3D> getPoses(RobotSide side)
    {
       return poses.get(side);
+   }
+
+   public List<Boolean> getArePosesSet(RobotSide side)
+   {
+      return arePosesSet.get(side);
    }
 
    public List<HandConfiguration> getHandConfigurations(RobotSide side)

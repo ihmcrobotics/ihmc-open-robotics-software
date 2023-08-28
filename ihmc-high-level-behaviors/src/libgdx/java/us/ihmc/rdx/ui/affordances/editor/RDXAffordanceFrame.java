@@ -80,7 +80,7 @@ public class RDXAffordanceFrame
          activeMenu[0] = this.menu;
       }
       ImGui.sameLine();
-      if (ImGui.button(labels.get("CLEAR") + "##" + labelId))
+      if (ImGui.button(labels.get("CLEAR ALL") + "##" + labelId))
       {
          reset();
          activeMenu[0] = RDXActiveAffordanceMenu.NONE;
@@ -111,6 +111,16 @@ public class RDXAffordanceFrame
                ImGui.popStyleColor();
                changedColor = false;
             }
+            ImGui.sameLine();
+            // handle the delete button click event here...
+            ImGui.pushStyleColor(ImGuiCol.Button, 1.0f, 1.0f, 1.0f, 1.0f);
+            if (ImGui.button(labels.get("X") + "##" + (side  == RobotSide.RIGHT ? "R" : "L") + labelId, 15, 15))
+            {
+               isPoseSet.replace(side, false);
+               handConfigurations.replace(side, null);
+               activeMenu[0] = RDXActiveAffordanceMenu.NONE;
+            }
+            ImGui.popStyleColor();
          }
       }
 
