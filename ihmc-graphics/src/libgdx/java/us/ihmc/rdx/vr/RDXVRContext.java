@@ -36,6 +36,16 @@ import us.ihmc.tools.io.*;
  */
 public class RDXVRContext
 {
+   // TODO. remove body segments names and serial number once integrated openxr. Use tracker role instead
+   private static final Map<String, String> TRACKER_SERIAL_MAP = new HashMap<String, String>()
+   {
+      {
+         put("LHR-6680BD50", "chest");
+         put("LHR-743512BE", "leftForeArm");
+         put("LHR-41A915A6", "rightForeArm");
+      }
+   }; // must use serial number, tracker role is not supported in org.lwjgl.openvr.VR
+
    // couple of scratch buffers
    private final IntBuffer errorPointer = BufferUtils.newIntBuffer(1);
    private final IntBuffer widthPointer = BufferUtils.newIntBuffer(1);
@@ -87,16 +97,8 @@ public class RDXVRContext
    private final RDXVRHeadset headset = new RDXVRHeadset(vrPlayAreaYUpZBackFrame);
    private final SideDependentList<RDXVRController> controllers = new SideDependentList<>(new RDXVRController(RobotSide.LEFT, vrPlayAreaYUpZBackFrame),
                                                                                           new RDXVRController(RobotSide.RIGHT, vrPlayAreaYUpZBackFrame));
-   private final HashMap<Integer, RDXVRBaseStation> baseStations = new HashMap<>();
-   private final HashMap<String, RDXVRTracker> trackers = new HashMap<>();
-   private static final HashMap<String, String> TRACKER_SERIAL_MAP = new HashMap<String, String>()
-   {
-      {
-         put("LHR-6680BD50", "chest");
-         put("LHR-743512BE", "leftForeArm");
-         put("LHR-41A915A6", "rightForeArm");
-      }
-   }; // must use serial number, tracker role is not supported in org.lwjgl.openvr.VR
+   private final Map<Integer, RDXVRBaseStation> baseStations = new HashMap<>();
+   private final Map<String, RDXVRTracker> trackers = new HashMap<>();
 
    public void initSystem()
    {

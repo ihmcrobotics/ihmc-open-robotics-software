@@ -46,6 +46,7 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.Throttler;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class RDXVRKinematicsStreamingMode
@@ -69,8 +70,8 @@ public class RDXVRKinematicsStreamingMode
    private final ImBoolean wakeUpThreadRunning = new ImBoolean(false);
    private final SideDependentList<ModifiableReferenceFrame> handDesiredControlFrames = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> controllerFrameGraphics = new SideDependentList<>();
-   private final HashMap<String, ModifiableReferenceFrame> trackedSegmentDesiredFrame = new HashMap<>();
-   private final HashMap<String, RDXReferenceFrameGraphic> trackerFrameGraphics = new HashMap<>();
+   private final Map<String, ModifiableReferenceFrame> trackedSegmentDesiredFrame = new HashMap<>();
+   private final Map<String, RDXReferenceFrameGraphic> trackerFrameGraphics = new HashMap<>();
    private double userHeightChangeRate = 0.0;
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
    private final ImBoolean streamToController = new ImBoolean(false);
@@ -210,33 +211,33 @@ public class RDXVRKinematicsStreamingMode
                                      TrackedSegmentType segmentType,
                                      Set<String> additionalTrackedSegments)
    {
-      if (additionalTrackedSegments.contains(segmentType.segmentName))
+      if (additionalTrackedSegments.contains(segmentType.getSegmentName()))
       {
-         vrContext.getTracker(segmentType.segmentName).runIfConnected(tracker ->
+         vrContext.getTracker(segmentType.getSegmentName()).runIfConnected(tracker ->
          {
-             if (!trackerFrameGraphics.containsKey(segmentType.segmentName))
+             if (!trackerFrameGraphics.containsKey(segmentType.getSegmentName()))
              {
-                trackerFrameGraphics.put(segmentType.segmentName,
+                trackerFrameGraphics.put(segmentType.getSegmentName(),
                                          new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
              }
-             if (!trackedSegmentDesiredFrame.containsKey(segmentType.segmentName))
+             if (!trackedSegmentDesiredFrame.containsKey(segmentType.getSegmentName()))
              {
-                trackedSegmentDesiredFrame.put(segmentType.segmentName,
-                                               new ModifiableReferenceFrame(segmentType.segmentName,
+                trackedSegmentDesiredFrame.put(segmentType.getSegmentName(),
+                                               new ModifiableReferenceFrame(segmentType.getSegmentName(),
                                                                             vrContext.getTracker(
-                                                                                           segmentType.segmentName)
+                                                                                           segmentType.getSegmentName())
                                                                                      .getXForwardZUpTrackerFrame()));
-                trackedSegmentDesiredFrame.get(segmentType.segmentName)
+                trackedSegmentDesiredFrame.get(segmentType.getSegmentName())
                                           .getTransformToParent()
                                           .getRotation()
-                                          .append(segmentType.trackerToRigidBodyRotation);
+                                          .append(segmentType.getTrackerToRigidBodyRotation());
              }
-             trackedSegmentDesiredFrame.get(segmentType.segmentName)
-                                       .changeParentFrame(vrContext.getTracker(segmentType.segmentName)
+             trackedSegmentDesiredFrame.get(segmentType.getSegmentName())
+                                       .changeParentFrame(vrContext.getTracker(segmentType.getSegmentName())
                                                                    .getXForwardZUpTrackerFrame());
-             trackedSegmentDesiredFrame.get(segmentType.segmentName).getReferenceFrame().update();
-             trackerFrameGraphics.get(segmentType.segmentName)
-                                 .setToReferenceFrame(trackedSegmentDesiredFrame.get(segmentType.segmentName)
+             trackedSegmentDesiredFrame.get(segmentType.getSegmentName()).getReferenceFrame().update();
+             trackerFrameGraphics.get(segmentType.getSegmentName())
+                                 .setToReferenceFrame(trackedSegmentDesiredFrame.get(segmentType.getSegmentName())
                                                                                 .getReferenceFrame());
              RigidBodyBasics controlledSegment = switch (segmentType)
              {
@@ -248,31 +249,31 @@ public class RDXVRKinematicsStreamingMode
           };
           KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
                                                                              trackedSegmentDesiredFrame.get(
-                                                                                   segmentType.segmentName),
-                                                                             segmentType.segmentName,
-                                                                             segmentType.positionWeight,
-                                                                             segmentType.orientationWeight);
+                                                                                   segmentType.getSegmentName()),
+                                                                             segmentType.getSegmentName(),
+                                                                             segmentType.getPositionWeight(),
+                                                                             segmentType.getOrientationWeight());
           toolboxInputMessage.getInputs().add().set(message);
          });
       }
-      else if (segmentType.segmentName.contains("Hand"))
+      else if (segmentType.getSegmentName().contains("Hand"))
       {
-         vrContext.getController(segmentType.robotSide).runIfConnected(controller ->
+         vrContext.getController(segmentType.getSegmentSide()).runIfConnected(controller ->
          {
-           controllerFrameGraphics.get(segmentType.robotSide)
+           controllerFrameGraphics.get(segmentType.getSegmentSide())
                                   .setToReferenceFrame(controller.getXForwardZUpControllerFrame());
            KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(ghostFullRobotModel.getHand(
-                                                                                    segmentType.robotSide),
+                                                                                    segmentType.getSegmentSide()),
                                                                               handDesiredControlFrames.get(
-                                                                                    segmentType.robotSide),
-                                                                              segmentType.segmentName,
-                                                                              segmentType.positionWeight,
-                                                                              segmentType.orientationWeight);
+                                                                                    segmentType.getSegmentSide()),
+                                                                              segmentType.getSegmentName(),
+                                                                              segmentType.getPositionWeight(),
+                                                                              segmentType.getOrientationWeight());
            // TODO. this transform should go in TrackedSegmentType. and also the one in the create() method. Actually check if they cancel out
            message.getControlFrameOrientationInEndEffector()
                   .setYawPitchRoll(0.0,
-                                   segmentType.robotSide.negateIfLeftSide(Math.PI / 2.0),
-                                   segmentType.robotSide.negateIfLeftSide(Math.PI / 2.0));
+                                   segmentType.getSegmentSide().negateIfLeftSide(Math.PI / 2.0),
+                                   segmentType.getSegmentSide().negateIfLeftSide(Math.PI / 2.0));
            toolboxInputMessage.getInputs().add().set(message);
          });
       }

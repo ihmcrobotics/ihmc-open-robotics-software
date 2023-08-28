@@ -11,11 +11,11 @@ public enum TrackedSegmentType
    RIGHT_FOREARM("rightForeArm", RobotSide.RIGHT, new YawPitchRoll(Math.PI / 2.0, 0.0, 0.0), 0, 0.1),
    CHEST("chest", null, new YawPitchRoll(), 0, 10);
 
-   String segmentName;
-   RobotSide robotSide;
-   YawPitchRoll trackerToRigidBodyRotation;
-   double positionWeight;
-   double orientationWeight;
+   private String segmentName;
+   private RobotSide robotSide;
+   private YawPitchRoll trackerToRigidBodyRotation;
+   private double positionWeight;
+   private double orientationWeight;
 
    TrackedSegmentType(String segmentName, RobotSide robotSide, YawPitchRoll trackerToRigidBodyRotation, double positionWeight, double orientationWeight)
    {
@@ -24,5 +24,30 @@ public enum TrackedSegmentType
       this.trackerToRigidBodyRotation = trackerToRigidBodyRotation;
       this.positionWeight = positionWeight;
       this.orientationWeight = orientationWeight;
+   }
+
+   public String getSegmentName()
+   {
+      return segmentName;
+   }
+
+   public RobotSide getSegmentSide()
+   {
+      return robotSide;
+   }
+
+   public YawPitchRoll getTrackerToRigidBodyRotation()
+   {
+      return trackerToRigidBodyRotation;
+   }
+
+   public double getPositionWeight()
+   {
+      return positionWeight;
+   }
+
+   public double getOrientationWeight()
+   {
+      return orientationWeight;
    }
 }
