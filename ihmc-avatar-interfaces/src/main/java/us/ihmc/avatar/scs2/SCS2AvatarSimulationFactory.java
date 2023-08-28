@@ -196,6 +196,7 @@ public class SCS2AvatarSimulationFactory
       avatarSimulation.setControllerThread(controllerThread);
       avatarSimulation.setEstimatorThread(estimatorThread);
       avatarSimulation.setStepGeneratorThread(stepGeneratorThread);
+      avatarSimulation.setOutputWriter(simulationOutputWriter);
       avatarSimulation.setRobotController(robotController);
       avatarSimulation.setRobot(robot);
       avatarSimulation.setSimulatedRobotTimeProvider(simulatedRobotTimeProvider);
