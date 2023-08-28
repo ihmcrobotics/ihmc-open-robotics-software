@@ -301,19 +301,19 @@ public class RDXAffordanceFrames
       return poseFrames.get(RobotSide.RIGHT).size();
    }
 
-   public List<FramePose3D> getPoses(RobotSide side)
+   public SideDependentList<List<FramePose3D>> getPoses()
    {
-      return poses.get(side);
+      return poses;
    }
 
-   public List<Boolean> getArePosesSet(RobotSide side)
+   public SideDependentList<List<Boolean>> getArePosesSet()
    {
-      return arePosesSet.get(side);
+      return arePosesSet;
    }
 
-   public List<HandConfiguration> getHandConfigurations(RobotSide side)
+   public SideDependentList<List<HandConfiguration>> getHandConfigurations()
    {
-      return handConfigurations.get(side);
+      return handConfigurations;
    }
 
    public List<RigidBodyTransform> getObjectTransforms()

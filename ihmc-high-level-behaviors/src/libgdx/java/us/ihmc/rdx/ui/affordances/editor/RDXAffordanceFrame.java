@@ -192,9 +192,9 @@ public class RDXAffordanceFrame
             frameGraphics.get(side).getRenderables(renderables, pool);
    }
 
-   public FramePose3D getPose(RobotSide side)
+   public SideDependentList<FramePose3D> getPoses()
    {
-      return poses.get(side);
+      return poses;
    }
 
    public HandConfiguration getHandConfiguration(RobotSide side)
