@@ -10,6 +10,7 @@ import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningMo
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.behaviors.tools.HandWrenchCalculator;
+import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
@@ -52,6 +53,7 @@ public class BehaviorActionSequence
    private final ROS2ControllerHelper ros2;
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private final ROS2SyncedRobotModel syncedRobot;
+   private final WalkingFootstepTracker footstepTracker;
    private final HandWrenchCalculator handWrenchCalculator;
    private final FootstepPlanningModule footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
@@ -80,6 +82,7 @@ public class BehaviorActionSequence
       this.referenceFrameLibrary = referenceFrameLibrary;
 
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2.getROS2NodeInterface());
+      footstepTracker = new WalkingFootstepTracker(ros2.getROS2NodeInterface(), robotModel.getSimpleRobotName());
       handWrenchCalculator = new HandWrenchCalculator(syncedRobot);
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
@@ -167,6 +170,7 @@ public class BehaviorActionSequence
          {
             WalkAction action = new WalkAction(ros2,
                                                syncedRobot,
+                                               footstepTracker,
                                                footstepPlanner,
                                                footstepPlannerParameters,
                                                walkingControllerParameters,
@@ -263,5 +267,16 @@ public class BehaviorActionSequence
          BehaviorActionSequenceTools.packActionSequenceUpdateMessage(actionSequence, actionSequenceStatusMessage);
          ros2.publish(BehaviorActionSequence.SEQUENCE_STATUS_TOPIC, actionSequenceStatusMessage);
       }
+   }
+
+   public void destroy()
+   {
+      syncedRobot.destroy();
+      footstepPlanner.closeAndDispose();
+      footstepTracker.destroy();
+      updateSubscription.destroy();
+      manuallyExecuteSubscription.destroy();
+      automaticExecutionSubscription.destroy();
+      executionNextIndexSubscription.destroy();
    }
 }

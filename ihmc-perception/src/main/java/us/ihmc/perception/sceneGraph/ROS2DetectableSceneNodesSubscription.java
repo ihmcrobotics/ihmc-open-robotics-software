@@ -125,6 +125,11 @@ public class ROS2DetectableSceneNodesSubscription
       return newMessageAvailable;
    }
 
+   public void destroy()
+   {
+      detectableSceneNodesSubscription.destroy();
+   }
+
    public long getNumberOfMessagesReceived()
    {
       return numberOfMessagesReceived;
