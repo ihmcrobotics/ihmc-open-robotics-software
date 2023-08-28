@@ -40,7 +40,6 @@ public class RDXAffordanceEditorUI
    private static final double LINEAR_VELOCITY = 0.1;
    private static final double ANGULAR_VELOCITY = 1.0; // [rad/s] for the sake gripper this is ~= to 0.1 m/s for a point on the edge of the gripper
    private static final SideDependentList<ColorDefinition> HAND_COLORS;
-
    static
    {
       HAND_COLORS = new SideDependentList<>();
@@ -56,7 +55,6 @@ public class RDXAffordanceEditorUI
    private final SideDependentList<RigidBodyTransform> handTransformsToWorld = new SideDependentList<>();
    private final SideDependentList<FramePose3D> handPoses = new SideDependentList<>();
    private RDXInteractableObjectBuilder objectBuilder;
-   private final PoseReferenceFrame objectFrame = new PoseReferenceFrame("objectFrame", ReferenceFrame.getWorldFrame());
    private ReferenceFrame initialObjectFrame;
    private ModifiableReferenceFrame affordanceFrame = new ModifiableReferenceFrame("affordanceFrame", ReferenceFrame.getWorldFrame());
    private final float[] gripperClosure = new float[1];
@@ -68,11 +66,6 @@ public class RDXAffordanceEditorUI
 
    private RDXAffordanceMirror mirror;
    private RDXAffordanceLocker locker;
-
-   // locking to object
-   private SideDependentList<Boolean> affordancePoseLocked = new SideDependentList<>();
-   private SideDependentList<Boolean> handsLocked = new SideDependentList<>();
-   private final SideDependentList<PoseReferenceFrame> handLockedFrames = new SideDependentList<>();
 
    private RDXActiveAffordanceMenu[] activeMenu;
    private boolean playing = false;

@@ -10,7 +10,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
