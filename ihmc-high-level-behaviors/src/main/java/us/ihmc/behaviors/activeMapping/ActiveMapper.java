@@ -1,28 +1,34 @@
 package us.ihmc.behaviors.activeMapping;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
-import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlanner;
+import us.ihmc.behaviors.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.tools.ActiveMappingTools;
-import us.ihmc.robotics.geometry.FramePlanarRegionsList;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class ActiveMappingModule
+public class ActiveMapper
 {
    public enum ActiveMappingMode
    {
       EXECUTE_AND_PAUSE, CONTINUOUS_MAPPING_STRAIGHT, CONTINUOUS_MAPPING_COVERAGE, CONTINUOUS_MAPPING_SEARCH
    }
+
+   private final Mat gridColor = new Mat();
 
    private DecisionLayer decisionLayer;
 
@@ -31,7 +37,7 @@ public class ActiveMappingModule
    private final FootstepPlanningModule footstepPlanner;
    private final DRCRobotModel robotModel;
    private final HumanoidReferenceFrames referenceFrames;
-   private PlanarRegionMap planarRegionMap;
+   private MonteCarloPlanner monteCarloPlanner;
 
    private FootstepPlannerRequest request;
    private FootstepPlannerOutput plannerOutput;
@@ -39,7 +45,6 @@ public class ActiveMappingModule
    private RobotSide initialStanceSide = RobotSide.LEFT;
 
    private Point2D gridOrigin = new Point2D(0.0, -1.0);
-   private Point2D robotLocation = new Point2D();
 
    private Pose3D leftGoalPose = new Pose3D();
    private Pose3D rightGoalPose = new Pose3D();
@@ -50,35 +55,45 @@ public class ActiveMappingModule
 
    private WalkingStatus walkingStatus = WalkingStatus.STARTED;
 
+   private final Point2D goalPosition = new Point2D();
+   private final Point2D goalPositionIndices = new Point2D();
+
+   private final Point2D agentPosition = new Point2D();
+   private final Point2D agentPositionIndices = new Point2D();
+
+   private final Point2D robotLocation = new Point2D();
+   private final Point2D robotLocationIndices = new Point2D();
+
    private boolean planAvailable = false;
-   private boolean active = false;
+   private boolean active = true;
 
-   private int gridSize = 20;
-   private float gridResolution = 0.3f;
+   private float gridResolution = 10.0f;
+   private int offset = 70;
 
-   public ActiveMappingModule(DRCRobotModel robotModel, HumanoidReferenceFrames humanoidReferenceFrames)
+   public ActiveMapper(DRCRobotModel robotModel, HumanoidReferenceFrames humanoidReferenceFrames)
    {
       this.referenceFrames = humanoidReferenceFrames;
-      this.planarRegionMap = new PlanarRegionMap(true);
       this.robotModel = robotModel;
+
+      monteCarloPlanner = new MonteCarloPlanner(offset);
 
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
 
       active = true;
    }
 
-   public void updateMap(FramePlanarRegionsList regions)
+   public void updatePlan(PlanarRegionMap planarRegionMap)
    {
-      if (active)
-      {
-         planarRegionMap.registerRegions(regions.getPlanarRegionsList(), regions.getSensorToWorldFrameTransform(), null);
-      }
-   }
+      MonteCarloPlannerTools.plotWorld(monteCarloPlanner.getWorld(), gridColor);
+      MonteCarloPlannerTools.plotAgent(monteCarloPlanner.getAgent(), gridColor);
+      MonteCarloPlannerTools.plotRangeScan(monteCarloPlanner.getAgent().getScanPoints(), gridColor);
 
-   public void updateFootstepPlan()
-   {
+      PerceptionDebugTools.display("Monte Carlo Planner World", gridColor, 1, 1400);
+
       if (active)
       {
+         LogTools.info("Footstep Planning Request");
+
          leftSolePose.set(referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
          rightSolePose.set(referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
          leftGoalPose.setToZero();
@@ -86,12 +101,34 @@ public class ActiveMappingModule
 
          robotLocation.set((leftSolePose.getX() + rightSolePose.getX()) / 2.0f, (leftSolePose.getY() + rightSolePose.getY()) / 2.0f);
 
-         Pose2D robotPose2D = new Pose2D(robotLocation.getX(), robotLocation.getY(), leftSolePose.getYaw());
-
+         //Pose2D robotPose2D = new Pose2D(robotLocation.getX(), robotLocation.getY(), leftSolePose.getYaw());
          //ActiveMappingTools.getStraightGoalFootPoses(leftSolePose, rightSolePose, leftGoalPose, rightGoalPose, 0.6f);
-         Pose2D goalPose2D = ActiveMappingTools.getNearestUnexploredNode(planarRegionMap.getMapRegions(), gridOrigin, robotPose2D, gridSize, gridResolution);
+         //Pose2D goalPose2D = ActiveMappingTools.getNearestUnexploredNode(planarRegionMap.getMapRegions(), gridOrigin, robotPose2D, gridSize, gridResolution);
 
-         Pose3D goalPose = new Pose3D(goalPose2D.getX(), goalPose2D.getY(), 0.0, 0.0, 0.0, goalPose2D.getYaw());
+         monteCarloPlanner.getAgent().measure(monteCarloPlanner.getWorld());
+
+
+         agentPositionIndices.set(monteCarloPlanner.getAgent().getPosition());
+
+         robotLocationIndices.set(ActiveMappingTools.getIndexFromCoordinates(robotLocation.getX(), gridResolution, offset),
+                                  ActiveMappingTools.getIndexFromCoordinates(robotLocation.getY(), gridResolution, offset));
+
+         double error = agentPositionIndices.distance(robotLocationIndices);
+
+         LogTools.warn("Error: {}, Robot Position: {}, Agent Position: {}", error, robotLocationIndices, agentPositionIndices);
+
+         if (error < 10.0f)
+         {
+            goalPositionIndices.set(monteCarloPlanner.plan());
+            goalPosition.set(ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getX(), gridResolution, offset),
+                             ActiveMappingTools.getCoordinateFromIndex((int) goalPositionIndices.getY(), gridResolution, offset));
+
+            monteCarloPlanner.updateState(goalPositionIndices);
+         }
+
+         float yawRobotToGoal = (float) Math.atan2(goalPosition.getY() - robotLocation.getY(), goalPosition.getX() - robotLocation.getX());
+
+         Pose3D goalPose = new Pose3D(goalPosition.getX(), goalPosition.getY(), 0.0, 0.0, 0.0, yawRobotToGoal);
 
          leftGoalPose.set(goalPose);
          rightGoalPose.set(goalPose);
@@ -101,7 +138,7 @@ public class ActiveMappingModule
          LogTools.info("Next Goal: {}", goalPose);
 
          request = new FootstepPlannerRequest();
-         request.setTimeout(0.3);
+         request.setTimeout(1.5);
          request.setStartFootPoses(leftSolePose, rightSolePose);
          request.setPlanarRegionsList(planarRegionMap.getMapRegions());
          request.setPlanBodyPath(false);
@@ -126,20 +163,9 @@ public class ActiveMappingModule
       }
    }
 
-   public PlanarRegionMap getPlanarRegionMap()
-   {
-      return planarRegionMap;
-   }
-
    public FootstepDataListMessage getFootstepDataListMessage()
    {
-      return FootstepDataMessageConverter.createFootstepDataListFromPlan(plannerOutput.getFootstepPlan(), 1.3, 0.4);
-   }
-
-   public void reset()
-   {
-      planarRegionMap.destroy();
-      planarRegionMap = new PlanarRegionMap(true);
+      return FootstepDataMessageConverter.createFootstepDataListFromPlan(plannerOutput.getFootstepPlan(), 0.6, 0.3);
    }
 
    public void setPlanAvailable(boolean planAvailable)
@@ -179,6 +205,16 @@ public class ActiveMappingModule
 
    public int getGridSize()
    {
-      return gridSize;
+      return monteCarloPlanner.getWorld().getGridHeight();
+   }
+
+   public void submitRangeScan(List<Point3DReadOnly> points)
+   {
+      monteCarloPlanner.submitMeasurements(points);
+   }
+
+   public MonteCarloPlanner getPlanner()
+   {
+      return monteCarloPlanner;
    }
 }

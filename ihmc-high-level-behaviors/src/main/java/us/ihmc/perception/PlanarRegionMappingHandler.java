@@ -120,16 +120,16 @@ public class PlanarRegionMappingHandler
 
    private PerceptionDataLoader perceptionDataLoader;
 
-   public PlanarRegionMappingHandler(boolean smoothing)
+   public PlanarRegionMappingHandler()
    {
       source = DataSource.SUBMIT_API;
-      planarRegionMap = new PlanarRegionMap(smoothing);
+      planarRegionMap = new PlanarRegionMap(true);
    }
 
-   public PlanarRegionMappingHandler(String simpleRobotName, ROS2Node ros2Node, boolean smoothing)
+   public PlanarRegionMappingHandler(String simpleRobotName, ROS2Node ros2Node)
    {
       source = DataSource.ROS2_CALLBACK;
-      planarRegionMap = new PlanarRegionMap(smoothing);
+      planarRegionMap = new PlanarRegionMap(true);
 
       if (ros2Node != null)
       {
@@ -167,18 +167,17 @@ public class PlanarRegionMappingHandler
 //      perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
 
       //createOuster(128, 1024, smoothing);
-      createTerrain(720, 1280, smoothing, false);
+      createTerrain(720, 1280, false);
    }
 
-   private void createTerrain(int depthHeight, int depthWidth, boolean smoothing, boolean simulation)
+   private void createTerrain(int depthHeight, int depthWidth, boolean simulation)
    {
-      planarRegionMap = new PlanarRegionMap(smoothing, "Fast");
+      planarRegionMap = new PlanarRegionMap(true, "Fast");
       sensorLogChannelName = PerceptionLoggerConstants.L515_DEPTH_NAME;
 
       String version = simulation ? "Simulation" : "";
 
       rapidRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager, openCLProgram, depthHeight, depthWidth, 654.29, 654.29, 651.14, 361.89, version);
-      setupPlanarRegionsExtractor();
       rapidPatchesBasedICP.create(openCLManager, openCLProgram, depthHeight, depthWidth);
       depth16UC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
 
@@ -189,12 +188,11 @@ public class PlanarRegionMappingHandler
       totalDepthCount = perceptionDataLoader.getHDF5Manager().getCount(sensorLogChannelName);
    }
 
-   private void createOuster(int depthHeight, int depthWidth, boolean smoothing)
+   private void createOuster(int depthHeight, int depthWidth)
    {
-      planarRegionMap = new PlanarRegionMap(smoothing, "Spherical");
+      planarRegionMap = new PlanarRegionMap(true, "Spherical");
       sensorLogChannelName = PerceptionLoggerConstants.OUSTER_DEPTH_NAME;
       rapidRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager, openCLProgram, depthHeight, depthWidth);
-      setupPlanarRegionsExtractor();
       rapidPatchesBasedICP.create(openCLManager, openCLProgram, depthHeight, depthWidth);
       depth16UC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
 
@@ -205,15 +203,10 @@ public class PlanarRegionMappingHandler
       totalDepthCount = perceptionDataLoader.getHDF5Manager().getCount(sensorLogChannelName);
    }
 
-   private void setupPlanarRegionsExtractor()
-   {
-      rapidRegionsExtractor.getDebugger().setEnabled(true);
-   }
-
-   public PlanarRegionMappingHandler(File planarRegionLogDirectory, boolean smoothing)
+   public PlanarRegionMappingHandler(File planarRegionLogDirectory)
    {
       source = DataSource.PLANAR_REGIONS_LOG;
-      planarRegionMap = new PlanarRegionMap(smoothing);
+      planarRegionMap = new PlanarRegionMap(true);
 
       for (File file : planarRegionLogDirectory.listFiles())
       {
@@ -273,16 +266,6 @@ public class PlanarRegionMappingHandler
          PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regionsToPublish);
          controllerRegionsPublisher.publish(planarRegionsListMessage);
       }
-   }
-
-   public void autoIncrementButtonCallback()
-   {
-      updateMapFuture = executorService.scheduleAtFixedRate(this::nextButtonCallback, 0, 120, TimeUnit.MILLISECONDS);
-   }
-
-   public void pauseButtonCallback()
-   {
-      updateMapFuture.cancel(true);
    }
 
    public void nextButtonCallback()
@@ -355,11 +338,6 @@ public class PlanarRegionMappingHandler
                                                            });
    }
 
-   public PlanarRegionsList pollMapRegions()
-   {
-      return latestPlanarRegionsForRendering.getAndSet(null);
-   }
-
    public RigidBodyTransform pollKeyframePose()
    {
       LogTools.debug("Polling Keyframe Pose: {}", latestKeyframePoseForRendering.get());
@@ -371,11 +349,6 @@ public class PlanarRegionMappingHandler
       boolean modified = planarRegionMap.isModified();
       planarRegionMap.setModified(false);
       return modified;
-   }
-
-   public boolean hasPlanarRegionsToRender()
-   {
-      return latestPlanarRegionsForRendering.get() != null;
    }
 
    public void updateMapWithNewRegions(FramePlanarRegionsList regions)
@@ -393,21 +366,6 @@ public class PlanarRegionMappingHandler
       latestPlanarRegionsForPublishing.set(planarRegionMap.getMapRegions().copy());
 
       LogTools.debug("Total Regions in Map: {}", planarRegionMap.getMapRegions().getNumberOfPlanarRegions());
-   }
-
-   public boolean isCaptured()
-   {
-      return enableCapture;
-   }
-
-   public void setCaptured(boolean enableCapture)
-   {
-      this.enableCapture = enableCapture;
-   }
-
-   public boolean isEnabled()
-   {
-      return enableLiveMode;
    }
 
    public void resetMap()
@@ -459,6 +417,41 @@ public class PlanarRegionMappingHandler
          currentRegions.getPlanarRegionsList().applyTransform(currentToPreviousTransform);
 
       PerceptionDebugTools.printTransform("ComputeICP", currentToPreviousTransform, true);
+   }
+
+   public void autoIncrementButtonCallback()
+   {
+      updateMapFuture = executorService.scheduleAtFixedRate(this::nextButtonCallback, 0, 120, TimeUnit.MILLISECONDS);
+   }
+
+   public void pauseButtonCallback()
+   {
+      updateMapFuture.cancel(true);
+   }
+
+   public PlanarRegionsList pollMapRegions()
+   {
+      return latestPlanarRegionsForRendering.getAndSet(null);
+   }
+
+   public boolean hasPlanarRegionsToRender()
+   {
+      return latestPlanarRegionsForRendering.get() != null;
+   }
+
+   public boolean isCaptured()
+   {
+      return enableCapture;
+   }
+
+   public void setCaptured(boolean enableCapture)
+   {
+      this.enableCapture = enableCapture;
+   }
+
+   public boolean isEnabled()
+   {
+      return enableLiveMode;
    }
 
    public void hardResetTheMap()

@@ -1,8 +1,10 @@
 package us.ihmc.behaviors.sequence.actions;
 
+import behavior_msgs.msg.dds.ActionExecutionStatusMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
+import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -16,10 +18,13 @@ import java.util.UUID;
 public class FootstepAction extends FootstepActionData implements BehaviorAction
 {
    private final ROS2ControllerHelper ros2ControllerHelper;
+   private int actionIndex;
    private final FramePose3D pose = new FramePose3D();
    private final double swingDuration = 1.2;
    private final double transferDuration = 0.8;
    private final Timer executionTimer = new Timer();
+   private boolean isExecuting;
+   private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
 
    public FootstepAction(ROS2ControllerHelper ros2ControllerHelper, ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -30,12 +35,14 @@ public class FootstepAction extends FootstepActionData implements BehaviorAction
    @Override
    public void update(int actionIndex, int nextExecutionIndex)
    {
+      this.actionIndex = actionIndex;
+
       pose.setToZero(getReferenceFrame());
       pose.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
    @Override
-   public void executeAction()
+   public void triggerActionExecution()
    {
       FootstepPlan footstepPlan = new FootstepPlan();
       footstepPlan.addFootstep(getSide(), pose);
@@ -49,8 +56,20 @@ public class FootstepAction extends FootstepActionData implements BehaviorAction
    }
 
    @Override
+   public void updateCurrentlyExecuting()
+   {
+      double nominalExecutionDuration = swingDuration + transferDuration;
+      isExecuting = executionTimer.isRunning(nominalExecutionDuration);
+
+      executionStatusMessage.setActionIndex(actionIndex);
+      executionStatusMessage.setNominalExecutionDuration(nominalExecutionDuration);
+      executionStatusMessage.setElapsedExecutionTime(executionTimer.getElapsedTime());
+      ros2ControllerHelper.publish(BehaviorActionSequence.ACTION_EXECUTION_STATUS, this.executionStatusMessage);
+   }
+
+   @Override
    public boolean isExecuting()
    {
-      return executionTimer.isRunning(swingDuration + transferDuration);
+      return isExecuting;
    }
 }
