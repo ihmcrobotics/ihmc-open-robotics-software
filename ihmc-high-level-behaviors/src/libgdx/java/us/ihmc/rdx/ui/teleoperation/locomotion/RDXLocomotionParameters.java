@@ -1,10 +1,7 @@
 package us.ihmc.rdx.ui.teleoperation.locomotion;
 
 import org.apache.commons.lang3.StringUtils;
-import us.ihmc.tools.property.BooleanStoredPropertyKey;
-import us.ihmc.tools.property.DoubleStoredPropertyKey;
-import us.ihmc.tools.property.StoredPropertyKeyList;
-import us.ihmc.tools.property.StoredPropertySet;
+import us.ihmc.tools.property.*;
 
 public class RDXLocomotionParameters extends StoredPropertySet
 {
@@ -25,6 +22,7 @@ public class RDXLocomotionParameters extends StoredPropertySet
    public static final BooleanStoredPropertyKey planSwingTrajectories = keys.addBooleanKey("Plan swing trajectories");
    public static final BooleanStoredPropertyKey replanSwingTrajectoriesOnChange = keys.addBooleanKey("Replan swing trajectories on change");
    public static final BooleanStoredPropertyKey assumeFlatGround = keys.addBooleanKey("Assume flat ground");
+   public static final IntegerStoredPropertyKey initialStanceSide = keys.addIntegerKey("Initial stance side");
 
    public RDXLocomotionParameters(String robotName)
    {
@@ -104,5 +102,10 @@ public class RDXLocomotionParameters extends StoredPropertySet
    public boolean getAssumeFlatGround()
    {
       return get(assumeFlatGround);
+   }
+
+   public int getInitialStanceSide()
+   {
+      return get(initialStanceSide);
    }
 }
