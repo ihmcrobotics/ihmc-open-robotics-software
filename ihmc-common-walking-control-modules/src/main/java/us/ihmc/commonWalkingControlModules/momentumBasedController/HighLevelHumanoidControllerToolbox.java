@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.commonWalkingControlModules.inertialParameterEstimation.InertialParameterEstimator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.commonWalkingControlModules.referenceFrames.WalkingTrajectoryPath;
@@ -161,6 +162,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    private WalkingMessageHandler walkingMessageHandler;
    private WalkingTrajectoryPath walkingTrajectoryPath;
+
+   private InertialParameterEstimator inertialParameterEstimator;
 
    private final YoBoolean controllerFailed = new YoBoolean("controllerFailed", registry);
 
@@ -358,6 +361,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       failureDetectionControlModule = new WalkingFailureDetectionControlModule(getContactableFeet(), registry);
 
       attachControllerFailureListener(fallingDirection -> controllerFailed.set(true));
+
+      inertialParameterEstimator = new InertialParameterEstimator(fullRobotModel, registry);
    }
 
    public static JointBasics[] computeJointsToOptimizeFor(FullHumanoidRobotModel fullRobotModel, JointBasics... jointsToRemove)
@@ -412,6 +417,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
       for (int i = 0; i < updatables.size(); i++)
          updatables.get(i).update(yoTime.getDoubleValue());
+
+      inertialParameterEstimator.update();
    }
 
    private final FramePoint2D tempFootCop2d = new FramePoint2D();
