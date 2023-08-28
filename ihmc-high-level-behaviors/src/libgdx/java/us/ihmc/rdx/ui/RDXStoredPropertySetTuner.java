@@ -178,6 +178,11 @@ public class RDXStoredPropertySetTuner extends RDXPanel
       return new ImGuiStoredPropertySetBooleanWidget(storedPropertySet, key, onParametersUpdatedCallback);
    }
 
+   public ImGuiStoredPropertySetEnumWidget createEnumRadioButtons(IntegerStoredPropertyKey key, Enum<?>[] enumValues)
+   {
+      return new ImGuiStoredPropertySetEnumWidget(storedPropertySet, key, enumValues, onParametersUpdatedCallback);
+   }
+
    private void onParametersUpdatedCallbackAndMore()
    {
       anyParameterChanged = true;
