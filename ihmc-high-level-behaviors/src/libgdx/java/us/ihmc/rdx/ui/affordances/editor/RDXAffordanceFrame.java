@@ -24,16 +24,15 @@ public class RDXAffordanceFrame
    private final SideDependentList<PoseReferenceFrame> poseFrames = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> frameGraphics = new SideDependentList<>();
    private SideDependentList<HandConfiguration> handConfigurations = new SideDependentList<>();
-   public final SideDependentList<RDXInteractableSakeGripper> interactableHands;
+   private final SideDependentList<RDXInteractableSakeGripper> interactableHands;
    private final SideDependentList<FramePose3D> handPoses;
    private final SideDependentList<RigidBodyTransform> handTransformsToWorld;
    private final RigidBodyTransform objectTransformToWorld;
    private final RigidBodyTransform objectTransformOfFrame = new RigidBodyTransform();
-   private RobotSide[] activeSide;
-   private RDXActiveAffordanceMenu[] activeMenu;
+   private final RobotSide[] activeSide;
+   private final RDXActiveAffordanceMenu[] activeMenu;
    private RDXActiveAffordanceMenu menu;
-
-   public boolean changedColor = false;
+   private boolean changedColor = false;
 
    public RDXAffordanceFrame(SideDependentList<RDXInteractableSakeGripper> interactableHands,
                              SideDependentList<RigidBodyTransform> handTransformsToWorld,
