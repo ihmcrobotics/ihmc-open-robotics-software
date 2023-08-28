@@ -109,10 +109,13 @@ public class RDXImGuiWindowAndDockSystem
       ImGuiTools.initializeColorStyle();
       imFont = ImGuiTools.setupFonts(io, fontSizeLevel);
 
+      // Add a 1px frame border to UI elements
+      ImGuiStyle style = ImGui.getStyle();
+      style.setFrameBorderSize(1.0f);
+
       // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
       if (io.hasConfigFlags(ImGuiConfigFlags.ViewportsEnable))
       {
-         final ImGuiStyle style = imgui.ImGui.getStyle();
          style.setWindowRounding(0.0f);
          style.setColor(ImGuiCol.WindowBg, imgui.ImGui.getColorU32(ImGuiCol.WindowBg, 1));
       }
