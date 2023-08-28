@@ -35,6 +35,7 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
       super(name, visualModelFilePath, visualModelToNodeFrameTransform);
       this.parentNode = parentNode;
 
+      parentNode.getChildren().add(this);
       setParentFrame(parentNode::getNodeFrame);
       changeParentFrame(parentNode.getNodeFrame());
       getNodeToParentFrameTransform().set(transformToParentNode);
