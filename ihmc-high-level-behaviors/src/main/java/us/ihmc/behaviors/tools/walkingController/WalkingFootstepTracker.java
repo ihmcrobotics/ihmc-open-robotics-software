@@ -22,15 +22,24 @@ import static us.ihmc.tools.string.StringTools.format;
 public class WalkingFootstepTracker
 {
    private final ArrayList<FootstepDataMessage> footsteps = new ArrayList<>();
+   private final IHMCROS2Callback<FootstepDataListMessage> footstepDataListSubscriber;
+   private final IHMCROS2Callback<FootstepStatusMessage> footstepStatusSubscriber;
+   private final IHMCROS2Callback<FootstepQueueStatusMessage> footstepQueueStatusSubscriber;
    private volatile int completedIndex = 0;
    private volatile int totalStepsCompleted = 0;
    private volatile int totalIncompleteFootsteps = 0;
 
    public WalkingFootstepTracker(ROS2NodeInterface ros2Node, String robotName)
    {
-      new IHMCROS2Callback<>(ros2Node, getTopic(FootstepDataListMessage.class, robotName), this::interceptFootstepDataListMessage);
-      new IHMCROS2Callback<>(ros2Node, getTopic(FootstepStatusMessage.class, robotName), this::acceptFootstepStatusMessage);
-      new IHMCROS2Callback<>(ros2Node, getTopic(FootstepQueueStatusMessage.class, robotName), this::acceptFootstepQueueStatusMessage);
+      footstepDataListSubscriber = new IHMCROS2Callback<>(ros2Node,
+                                                          getTopic(FootstepDataListMessage.class, robotName),
+                                                          this::interceptFootstepDataListMessage);
+      footstepStatusSubscriber = new IHMCROS2Callback<>(ros2Node,
+                                                        getTopic(FootstepStatusMessage.class, robotName),
+                                                        this::acceptFootstepStatusMessage);
+      footstepQueueStatusSubscriber = new IHMCROS2Callback<>(ros2Node,
+                                                             getTopic(FootstepQueueStatusMessage.class, robotName),
+                                                             this::acceptFootstepQueueStatusMessage);
    }
 
    private void acceptFootstepQueueStatusMessage(FootstepQueueStatusMessage footstepQueueStatusMessage)
@@ -117,5 +126,12 @@ public class WalkingFootstepTracker
          footsteps.clear();
          completedIndex = 0;
       }
+   }
+
+   public void destroy()
+   {
+      footstepDataListSubscriber.destroy();
+      footstepStatusSubscriber.destroy();
+      footstepQueueStatusSubscriber.destroy();
    }
 }
