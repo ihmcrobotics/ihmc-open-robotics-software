@@ -128,9 +128,9 @@ public class RDXFootstepPlanning
 
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
 
-      footstepPlannerRequest.setTimeout(12.0);
+      footstepPlannerRequest.setTimeout(locomotionParameters.getFootstepPlannerTimeout());
 
-      footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), goalPose);
+      footstepPlannerRequest.setGoalFootPoses(locomotionParameters.getIdealGoalFootstepWidth(), goalPose);
 
       if (locomotionParameters.getPlanSwingTrajectories())
          footstepPlannerRequest.setSwingPlannerType(SwingPlannerType.MULTI_WAYPOINT_POSITION);
@@ -165,7 +165,8 @@ public class RDXFootstepPlanning
          }
       }
       footstepPlannerRequest.setAssumeFlatGround(assumeFlatGround);
-      footstepPlannerRequest.setSnapGoalSteps(!assumeFlatGround);
+      boolean snapGoalSteps = !assumeFlatGround;
+      footstepPlannerRequest.setSnapGoalSteps(snapGoalSteps);
 
       footstepPlannerRequest.setPlanBodyPath(locomotionParameters.getPlanWithBodyPath());
 
