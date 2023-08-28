@@ -54,9 +54,11 @@ public class ImGuiTools
    private static int rightArrowKey;
    private static ImFontAtlas fontAtlas;
 
+   public static int BLACK = Color.BLACK.toIntBits();
    public static int WHITE = Color.WHITE.toIntBits();
    public static int RED = Color.RED.toIntBits();
    public static int GREEN = Color.GREEN.toIntBits();
+   public static int DARK_GREEN = new Color(0.0f, 0.7f, 0.0f, 1.0f).toIntBits();
 
    public static long createContext()
    {
@@ -242,6 +244,26 @@ public class ImGuiTools
       {
          ImGui.setTooltip(tooltipText);
       }
+   }
+
+   /**
+    * Places a mark, a vertical black line, at some point on the progress bar to
+    * convey to the user where a threshold is.
+    */
+   public static void markedProgressBar(float barHeight, int color, double percent, double markPercent, String text)
+   {
+      float markPosition = (float) (ImGui.getColumnWidth() * markPercent);
+      float windowPositionX = ImGui.getWindowPosX();
+      float windowPositionY = ImGui.getWindowPosY();
+      float verticalExtents = 3.0f;
+      ImGui.getWindowDrawList().addRectFilled(windowPositionX + ImGui.getCursorPosX() + markPosition,
+                                              windowPositionY + ImGui.getCursorPosY() - verticalExtents,
+                                              windowPositionX + ImGui.getCursorPosX() + markPosition + 2.0f,
+                                              windowPositionY + ImGui.getCursorPosY() + barHeight + verticalExtents,
+                                              ImGuiTools.BLACK, 1.0f);
+      ImGui.pushStyleColor(ImGuiCol.PlotHistogram, color);
+      ImGui.progressBar((float) percent, ImGui.getColumnWidth(), barHeight, text);
+      ImGui.popStyleColor();
    }
 
    /** @deprecated Use ImGuiUniqueLabelMap instead. */
