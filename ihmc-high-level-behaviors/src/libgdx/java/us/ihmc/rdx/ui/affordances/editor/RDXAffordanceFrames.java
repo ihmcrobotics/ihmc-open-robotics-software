@@ -28,8 +28,8 @@ public class RDXAffordanceFrames
    private final List<Integer> poseIndices = new ArrayList<>();
    private int index = 0;
    private final List<Color> colors;
-   private SideDependentList<Integer> colorIndex = new SideDependentList<Integer>();
-   public final SideDependentList<RDXInteractableSakeGripper> interactableHands;
+   private final SideDependentList<Integer> colorIndex = new SideDependentList<Integer>();
+   private final SideDependentList<RDXInteractableSakeGripper> interactableHands;
    private final SideDependentList<FramePose3D> handPoses;
    private final SideDependentList<List<HandConfiguration>> handConfigurations = new SideDependentList<>();
    private HandConfiguration selectedFrameConfiguration;
@@ -37,9 +37,9 @@ public class RDXAffordanceFrames
    private final SideDependentList<RigidBodyTransform> handTransformsToWorld;
    private final RigidBodyTransform objectTransformToWorld;
    private final List<RigidBodyTransform> objectTransforms = new ArrayList<>();
-   boolean changedColor = false;
-   private RobotSide[] activeSide;
-   private RDXActiveAffordanceMenu[] activeMenu;
+   private boolean changedColor = false;
+   private final RobotSide[] activeSide;
+   private final RDXActiveAffordanceMenu[] activeMenu;
    private final RDXActiveAffordanceMenu menu;
 
    public RDXAffordanceFrames(SideDependentList<RDXInteractableSakeGripper> interactableHands,

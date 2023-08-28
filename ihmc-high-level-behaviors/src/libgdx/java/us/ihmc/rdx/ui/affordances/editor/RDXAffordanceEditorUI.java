@@ -5,17 +5,16 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 
-import imgui.type.ImBoolean;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiInputText;
@@ -67,17 +66,8 @@ public class RDXAffordanceEditorUI
    private RDXAffordanceFrames preGraspFrames;
    private RDXAffordanceFrames postGraspFrames;
 
-   // mirroring
-   private final ImBoolean mirrorActive = new ImBoolean(false);
-   private final Map<String, Boolean> activeTransformAxisMirror = new LinkedHashMap<>();
-   private boolean negatedAxis = false;
-   private final RigidBodyTransform frameActiveSideTransform =  new RigidBodyTransform();
-   private final ReferenceFrame frameActiveSide = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
-                                                                                                                         frameActiveSideTransform);
-   private final RigidBodyTransform frameNonActiveSideTransform =  new RigidBodyTransform();
-   private final ReferenceFrame frameNonActiveSide = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
-                                                                                                                            frameNonActiveSideTransform);
-   private FramePose3DReadOnly lastActiveHandPose = new FramePose3D(frameActiveSide);
+   private RDXAffordanceMirror mirror;
+   private RDXAffordanceLocker locker;
 
    // locking to object
    private SideDependentList<Boolean> affordancePoseLocked = new SideDependentList<>();
@@ -117,9 +107,6 @@ public class RDXAffordanceEditorUI
                                                                                         HAND_COLORS.get(side).getBlue(),
                                                                                         0.8)));
                handPoses.put(side, new FramePose3D(ReferenceFrame.getWorldFrame(), handTransformsToWorld.get(side)));
-
-               handsLocked.put(side, false);
-               affordancePoseLocked.put(side, false);
             }
 
             activeSide = new RobotSide[1];
@@ -167,12 +154,8 @@ public class RDXAffordanceEditorUI
             baseUI.getPrimaryScene().addRenderableProvider(RDXAffordanceEditorUI.this::getRenderables);
             baseUI.getImGuiPanelManager().addPanel("Affordance Panel", RDXAffordanceEditorUI.this::renderImGuiWidgets);
 
-            activeTransformAxisMirror.put("X", false);
-            activeTransformAxisMirror.put("Y", false);
-            activeTransformAxisMirror.put("Z", false);
-            activeTransformAxisMirror.put("Yaw", false);
-            activeTransformAxisMirror.put("Pitch", false);
-            activeTransformAxisMirror.put("Roll", false);
+            mirror = new RDXAffordanceMirror(interactableHands, handTransformsToWorld, handPoses, activeSide);
+            locker = new RDXAffordanceLocker(handTransformsToWorld, handPoses, activeSide, activeMenu);
          }
 
          @Override
@@ -197,31 +180,7 @@ public class RDXAffordanceEditorUI
       {
          FramePose3D objectPose = new FramePose3D(ReferenceFrame.getWorldFrame(), objectBuilder.getSelectedObject().getTransformToWorld());
          // when editing post grasp poses, we want to move the object frame and the hand together
-         for (RobotSide side : handPoses.keySet())
-         {
-            if (activeMenu[0] == RDXActiveAffordanceMenu.POST_GRASP && handsLocked.get(side))
-            {
-               // used to update the hand pose according to object pose in post-grasping once fixed contact with object
-               if (!affordancePoseLocked.get(side))
-               {
-                  objectFrame.setPoseAndUpdate(objectPose);
-                  handLockedFrames.put(side, new PoseReferenceFrame(side.getLowerCaseName() + "HandFrame", objectFrame));
-                  handPoses.get(side).changeFrame(objectFrame);
-                  handLockedFrames.get(side).setPoseAndUpdate(handPoses.get(side));
-                  handPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
-                  affordancePoseLocked.replace(side, true);
-               }
-               objectFrame.setPoseAndUpdate(objectPose);
-               FramePose3D pose = new FramePose3D(handLockedFrames.get(side));
-               pose.changeFrame(ReferenceFrame.getWorldFrame());
-               handTransformsToWorld.get(side).set(pose.getOrientation(), pose.getTranslation());
-            }
-            else
-            {
-               handsLocked.replace(side, false);
-               affordancePoseLocked.replace(side, false);
-            }
-         }
+         locker.update(objectPose);
       }
 
       for (RobotSide side : handPoses.keySet())
@@ -232,90 +191,17 @@ public class RDXAffordanceEditorUI
 
          // selected hand determines active side
          if (interactableHands.get(side).isSelected())
-         {
             activeSide[0] = side;
-         }
       }
+      // update hand configuration
+      if (handPoses.containsKey(activeSide[0]))
+         gripperClosure[0] = interactableHands.get(activeSide[0]).getGripperClosure();
 
-      // mirroring
-      if (mirrorActive.get())
-      {
-         RobotSide nonActiveSide = (activeSide[0] == RobotSide.RIGHT ? RobotSide.LEFT : RobotSide.RIGHT);
-         FramePose3D activeHandPose = new FramePose3D(handPoses.get(activeSide[0]));
-         activeHandPose.changeFrame(frameActiveSide);
-
-         FramePose3D nonActiveHandPose = new FramePose3D(handPoses.get(nonActiveSide));
-         nonActiveHandPose.changeFrame(frameNonActiveSide);
-
-         Point3DBasics activeSideTranslationIncrement = new FramePoint3D();
-         YawPitchRoll activeSideYawPitchRollIncrement = new YawPitchRoll();
-         for (var axis : activeTransformAxisMirror.entrySet())
-         {
-            if (axis.getValue())
-            {
-               switch (axis.getKey())
-               {
-                  case "X" ->
-                  {
-                     if (negatedAxis)
-                        activeSideTranslationIncrement.setX(-activeHandPose.getTranslation().getX() + lastActiveHandPose.getTranslation().getX());
-                     else
-                        activeSideTranslationIncrement.setX(activeHandPose.getTranslation().getX() - lastActiveHandPose.getTranslation().getX());
-                  }
-                  case "Y" ->
-                  {
-                     if (negatedAxis)
-                        activeSideTranslationIncrement.setY(-activeHandPose.getTranslation().getY() + lastActiveHandPose.getTranslation().getY());
-                     else
-                        activeSideTranslationIncrement.setY(activeHandPose.getTranslation().getY() - lastActiveHandPose.getTranslation().getY());
-                  }
-                  case "Z" ->
-                  {
-                     if (negatedAxis)
-                        activeSideTranslationIncrement.setZ(-activeHandPose.getTranslation().getZ() + lastActiveHandPose.getTranslation().getZ());
-                     else
-                        activeSideTranslationIncrement.setZ(activeHandPose.getTranslation().getZ() - lastActiveHandPose.getTranslation().getZ());
-                  }
-                  case "Yaw" ->
-                  {
-                     if (negatedAxis)
-                        activeSideYawPitchRollIncrement.setYaw(-activeHandPose.getYaw() + lastActiveHandPose.getYaw());
-                     else
-                        activeSideYawPitchRollIncrement.setYaw(activeHandPose.getYaw() - lastActiveHandPose.getYaw());
-                  }
-                  case "Pitch" ->
-                  {
-                     if (negatedAxis)
-                        activeSideYawPitchRollIncrement.setPitch(-activeHandPose.getPitch() + lastActiveHandPose.getPitch());
-                     else
-                        activeSideYawPitchRollIncrement.setPitch(activeHandPose.getPitch() - lastActiveHandPose.getPitch());
-                  }
-                  case "Roll" ->
-                  {
-                     if (negatedAxis)
-                        activeSideYawPitchRollIncrement.setRoll(-activeHandPose.getRoll() + lastActiveHandPose.getRoll());
-                     else
-                        activeSideYawPitchRollIncrement.setRoll(activeHandPose.getRoll() - lastActiveHandPose.getRoll());
-                  }
-               }
-            }
-         }
-         RigidBodyTransform nonActiveSideTransform = new RigidBodyTransform(activeSideYawPitchRollIncrement, activeSideTranslationIncrement);
-         if (!nonActiveSideTransform.geometricallyEquals(new RigidBodyTransform(), 0.001))
-         {
-            nonActiveHandPose.applyTransform(nonActiveSideTransform);
-            nonActiveHandPose.changeFrame(ReferenceFrame.getWorldFrame());
-            handTransformsToWorld.get(nonActiveSide).set(nonActiveHandPose);
-            lastActiveHandPose = new FramePose3D(frameActiveSide, activeHandPose);
-         }
-      }
+      mirror.update();
 
       graspFrame.update();
       preGraspFrames.update();
       postGraspFrames.update();
-
-      if (handPoses.containsKey(activeSide[0]))
-         gripperClosure[0] = interactableHands.get(activeSide[0]).getGripperClosure();
    }
 
    public void renderImGuiWidgets()
@@ -395,45 +281,7 @@ public class RDXAffordanceEditorUI
          ImGui.separator();
       }
 
-      if (handPoses.containsKey(RobotSide.RIGHT) && handPoses.containsKey(RobotSide.LEFT))
-      {
-         if (ImGui.checkbox("Mirror Other Hand", mirrorActive))
-            resetMirror();
-         if (ImGui.button("Set Reference Frame Axis"))
-         {
-            setReferenceFrameMirror();
-         }
-         ImGui.text("Transform: ");
-         Map<String, Boolean> changedColorTranslationAxisButton = new HashMap<>();
-         for (var axisMirror : activeTransformAxisMirror.entrySet())
-         {
-            changedColorTranslationAxisButton.put(axisMirror.getKey(), false);
-            ImGui.sameLine();
-            if (axisMirror.getValue())
-            {
-               ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 0.0f, 1.0f, 0.5f);
-               changedColorTranslationAxisButton.replace(axisMirror.getKey(), true);
-            }
-            if (ImGui.button(labels.get(axisMirror.getKey()) + "##" + "Transform"))
-            {
-               axisMirror.setValue(!axisMirror.getValue());
-               setReferenceFrameMirror();
-            }
-            if (changedColorTranslationAxisButton.get(axisMirror.getKey()))
-               ImGui.popStyleColor();
-         }
-         if (ImGui.button(labels.get("Switch Direction")))
-         {
-            negatedAxis = !negatedAxis;
-         }
-
-         ImGui.separator();
-      }
-      else
-      {
-         mirrorActive.set(false);
-         resetMirror();
-      }
+      mirror.renderImGuiWidgets(labels);
 
       ImGui.text("PRE-GRASP MENU");
       ImGui.text("Pre-grasp Frames: ");
@@ -451,40 +299,7 @@ public class RDXAffordanceEditorUI
       ImGui.text("Post-grasp Frames: ");
       ImGui.sameLine();
       postGraspFrames.renderImGuiWidgets(labels, "postgrasp");
-      boolean changedColorLockOneHand = false;
-      if (handPoses.containsKey(activeSide[0]))
-      {
-         if (handsLocked.get(activeSide[0]))
-         {
-            ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 0.0f, 1.0f, 0.5f);
-            changedColorLockOneHand = true;
-         }
-         if (!(handsLocked.get(RobotSide.LEFT) && handsLocked.get(RobotSide.RIGHT)))
-         {
-            if (ImGui.button(labels.get("LOCK HAND TO OBJECT")) && activeMenu[0] == RDXActiveAffordanceMenu.POST_GRASP)
-               handsLocked.replace(activeSide[0], !handsLocked.get(activeSide[0]));
-         }
-         if (changedColorLockOneHand)
-            ImGui.popStyleColor();
-
-         boolean changedColorLockBothHands = false;
-         if ((handsLocked.get(RobotSide.LEFT) && handsLocked.get(RobotSide.RIGHT)))
-         {
-            ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 0.0f, 1.0f, 0.5f);
-            changedColorLockBothHands = true;
-         }
-         if (!((handsLocked.get(RobotSide.LEFT) && !handsLocked.get(RobotSide.RIGHT)) || (!handsLocked.get(RobotSide.LEFT)
-                                                                                          && handsLocked.get(RobotSide.RIGHT))))
-         { // not in alternate state, this means single hand lock is not activate
-            if (ImGui.button(labels.get("LOCK BOTH HANDS TO OBJECT")) && activeMenu[0] == RDXActiveAffordanceMenu.POST_GRASP)
-            {
-               for (RobotSide side : RobotSide.values)
-                  handsLocked.replace(side, !handsLocked.get(side));
-            }
-            if (changedColorLockBothHands)
-               ImGui.popStyleColor();
-         }
-      }
+      locker.renderImGuiWidgets(labels);
       ImGui.separator();
 
       ImGui.text("PREVIOUS/NEXT FRAME: ");
@@ -618,8 +433,7 @@ public class RDXAffordanceEditorUI
          handTransformsToWorld.get(side).getRotation().setYawPitchRoll(0.0, Math.toRadians(-90.0), 0.0);
          interactableHands.get(side).closeGripper();
       }
-      mirrorActive.set(false);
-      resetMirror();
+      mirror.reset();
 
       graspFrame.reset();
       preGraspFrames.reset();
@@ -627,26 +441,6 @@ public class RDXAffordanceEditorUI
       activeMenu[0] = RDXActiveAffordanceMenu.NONE;
    }
 
-   private void resetMirror()
-   {
-      if (!mirrorActive.get())
-      {
-         lastActiveHandPose = new FramePose3D(frameActiveSide, new RigidBodyTransform());
-         for (var axisMirror : activeTransformAxisMirror.entrySet())
-            axisMirror.setValue(false);
-      }
-   }
-
-   private void setReferenceFrameMirror()
-   {
-      RobotSide nonActiveSide = (activeSide[0] == RobotSide.RIGHT ? RobotSide.LEFT : RobotSide.RIGHT);
-      frameActiveSideTransform.set((interactableHands.get(activeSide[0]).getReferenceFrameHand().getTransformToWorldFrame()));
-      frameActiveSide.update();
-      frameNonActiveSideTransform.set((interactableHands.get(nonActiveSide).getReferenceFrameHand().getTransformToWorldFrame()));
-      frameNonActiveSide.update();
-
-      lastActiveHandPose = new FramePose3D(frameActiveSide, new RigidBodyTransform());
-   }
 
    private ArrayList<Double> computeTrajectoryDurations(ArrayList<FramePose3D> preGraspPoses, FramePose3D graspPose, ArrayList<FramePose3D> postGraspPoses)
    {
@@ -699,165 +493,165 @@ public class RDXAffordanceEditorUI
       return trajectoryDurations;
    }
 
-   //   public void saveToFile(String fileName)
-   //   {
-   //      // change affordance reference from world to initial object frame
-   //      RigidBodyTransform initialObjectTransform = new RigidBodyTransform(objectBuilder.getSelectedObject().getInitialTransformToWorld());
-   //      initialObjectFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(), initialObjectTransform);
-   //      affordanceFrame.changeParentFrame(initialObjectFrame);
-   //
-   //      WorkspaceResourceFile file = new WorkspaceResourceFile(configurationsDirectory, fileName + ".json");
-   //      if (file.isFileAccessAvailable())
-   //      {
-   //         LogTools.info("Saving to file ...");
-   //         JSONFileTools.save(file, jsonNode ->
-   //         {
-   //            jsonNode.put("name", fileName);
-   //            ArrayNode actionsArrayNode = jsonNode.putArray("actions");
-   //            var preGraspPoses = preGraspFrames.getPoses();
-   //            var graspPose = graspFrame.getPose();
-   //            var postGraspPoses = postGraspFrames.getPoses();
-   //            ArrayList<Double> trajectoryDurations = computeTrajectoryDurations(preGraspPoses, graspPose, postGraspPoses);
-   //            var preGraspHandConfigurations = preGraspFrames.getHandConfigurations();
-   //            var postGraspHandConfigurations = postGraspFrames.getHandConfigurations();
-   //            for (int i = 0; i < preGraspPoses.size(); i++)
-   //            {
-   //               ObjectNode actionNode = actionsArrayNode.addObject();
-   //               actionNode.put("type", "RDXHandPoseAction");
-   //               actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
-   //               actionNode.put("side", side.getLowerCaseName());
-   //               actionNode.put("trajectoryDuration", trajectoryDurations.get(i));
-   //               preGraspPoses.get(i).changeFrame(affordanceFrame.getReferenceFrame());
-   //               RigidBodyTransform transformToParent = new RigidBodyTransform(preGraspPoses.get(i));
-   //               JSONTools.toJSON(actionNode, transformToParent);
-   //
-   //               double[] dataTrajectories = new double[16];
-   //               transformToParent.get(dataTrajectories);
-   //               csvDataMatrix.add(dataTrajectories);
-   //
-   //               if (preGraspHandConfigurations.get(i) != null)
-   //               {
-   //                  dataTrajectories = new double[16];
-   //                  for (int data = 0; data < dataTrajectories.length; data++)
-   //                     dataTrajectories[data] = 0.0;
-   //                  dataTrajectories[0] = HandConfiguration.valueOf(preGraspHandConfigurations.get(i).toString()).ordinal();
-   //                  csvDataMatrix.add(dataTrajectories);
-   //
-   //                  ObjectNode extraActionNode = actionsArrayNode.addObject();
-   //                  extraActionNode.put("type", "RDXHandConfigurationAction");
-   //                  extraActionNode.put("side", side.getLowerCaseName());
-   //                  extraActionNode.put("grip", preGraspHandConfigurations.get(i).toString());
-   //               }
-   //            }
-   //            if (graspFrame.isSet())
-   //            {
-   //               ObjectNode actionNode = actionsArrayNode.addObject();
-   //               actionNode.put("type", "RDXHandPoseAction");
-   //               actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
-   //               actionNode.put("side", side.getLowerCaseName());
-   //               actionNode.put("trajectoryDuration", trajectoryDurations.get(preGraspPoses.size()));
-   //               graspPose.changeFrame(affordanceFrame.getReferenceFrame());
-   //               RigidBodyTransform transformToParent = new RigidBodyTransform(graspPose);
-   //               JSONTools.toJSON(actionNode, transformToParent);
-   //
-   //               double[] dataTrajectories = new double[16];
-   //               transformToParent.get(dataTrajectories);
-   //               csvDataMatrix.add(dataTrajectories);
-   //
-   //               if (graspFrame.getHandConfiguration() != null)
-   //               {
-   //                  ObjectNode extraActionNode = actionsArrayNode.addObject();
-   //                  extraActionNode.put("type", "RDXHandConfigurationAction");
-   //                  extraActionNode.put("side", side.getLowerCaseName());
-   //                  extraActionNode.put("grip", graspFrame.getHandConfiguration().toString());
-   //
-   //                  dataTrajectories = new double[16];
-   //                  for (int data = 0; data < dataTrajectories.length; data++)
-   //                     dataTrajectories[data] = 0.0;
-   //                  dataTrajectories[0] = HandConfiguration.valueOf(graspFrame.getHandConfiguration().toString()).ordinal();
-   //                  csvDataMatrix.add(dataTrajectories);
-   //               }
-   //            }
-   //            for (int i = 0; i < postGraspPoses.size(); i++)
-   //            {
-   //               ObjectNode actionNode = actionsArrayNode.addObject();
-   //               actionNode.put("type", "RDXHandPoseAction");
-   //               actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
-   //               actionNode.put("side", side.getLowerCaseName());
-   //               actionNode.put("trajectoryDuration", trajectoryDurations.get(preGraspPoses.size() + 1 + i));
-   //               postGraspPoses.get(i).changeFrame(affordanceFrame.getReferenceFrame());
-   //               RigidBodyTransform transformToParent = new RigidBodyTransform(postGraspPoses.get(i));
-   //               JSONTools.toJSON(actionNode, transformToParent);
-   //
-   //               double[] dataTrajectories = new double[16];
-   //               transformToParent.get(dataTrajectories);
-   //               csvDataMatrix.add(dataTrajectories);
-   //
-   //               if (postGraspHandConfigurations.get(i) != null)
-   //               {
-   //                  dataTrajectories = new double[16];
-   //                  for (int data = 0; data < dataTrajectories.length; data++)
-   //                     dataTrajectories[data] = 0.0;
-   //                  dataTrajectories[0] = HandConfiguration.valueOf(postGraspHandConfigurations.get(i).toString()).ordinal();
-   //                  csvDataMatrix.add(dataTrajectories);
-   //
-   //                  ObjectNode extraActionNode = actionsArrayNode.addObject();
-   //                  extraActionNode.put("type", "RDXHandConfigurationAction");
-   //                  extraActionNode.put("side", side.getLowerCaseName());
-   //                  extraActionNode.put("grip", postGraspHandConfigurations.get(i).toString());
-   //               }
-   //            }
-   //         });
-   //         LogTools.info("SAVED to file {}", file.getFileName());
-   //      }
-   //      else
-   //      {
-   //         LogTools.warn("Could not save to {}", file.getFileName());
-   //      }
-   //
-   //      WorkspaceResourceFile extraFile = new WorkspaceResourceFile(configurationsDirectory, fileName + "Extra.json");
-   //      if (extraFile.isFileAccessAvailable())
-   //      {
-   //         JSONFileTools.save(extraFile, jsonNode ->
-   //         {
-   //            jsonNode.put("name", fileName);
-   //            jsonNode.put("object", objectBuilder.getSelectedObjectName());
-   //            JSONTools.toJSON(jsonNode, new RigidBodyTransform(objectBuilder.getSelectedObject().getInitialPose()));
-   //            ArrayNode framesArrayNode = jsonNode.putArray("frames");
-   //            var preGraspObjectTransforms = preGraspFrames.getObjectTransforms();
-   //            var preGraspHandConfigurations = preGraspFrames.getHandConfigurations();
-   //            jsonNode.put("numberPreGraspFrames", preGraspObjectTransforms.size());
-   //            for (int i = 0; i < preGraspObjectTransforms.size(); i++)
-   //            {
-   //               ObjectNode frameArray = framesArrayNode.addObject();
-   //               JSONTools.toJSON(frameArray, preGraspObjectTransforms.get(i));
-   //               frameArray.put("grip", preGraspHandConfigurations.get(i) == null ? "" : preGraspHandConfigurations.get(i).toString());
-   //            }
-   //            if (graspFrame.isSet())
-   //            {
-   //               ObjectNode frameArray = framesArrayNode.addObject();
-   //               JSONTools.toJSON(frameArray, graspFrame.getObjectTransform());
-   //               frameArray.put("grip", graspFrame.getHandConfiguration() == null ? "" : graspFrame.getHandConfiguration().toString());
-   //            }
-   //            var postGraspObjectTransforms = postGraspFrames.getObjectTransforms();
-   //            var postGraspHandConfigurations = postGraspFrames.getHandConfigurations();
-   //            jsonNode.put("numberPostGraspFrames", postGraspObjectTransforms.size());
-   //            for (int i = 0; i < postGraspObjectTransforms.size(); i++)
-   //            {
-   //               ObjectNode frameArray = framesArrayNode.addObject();
-   //               JSONTools.toJSON(frameArray, postGraspObjectTransforms.get(i));
-   //               frameArray.put("grip", postGraspHandConfigurations.get(i) == null ? "" : postGraspHandConfigurations.get(i).toString());
-   //            }
-   //         });
-   //         LogTools.info("SAVED to file {}", extraFile.getFileName());
-   //      }
-   //      else
-   //      {
-   //         LogTools.warn("Could not save extra info to {}", extraFile.getFileName());
-   //      }
-   //
-   //      generateCSVFiles(fileName);
-   //   }
+//   public void saveToFile(String fileName)
+//   {
+//      // change affordance reference from world to initial object frame
+//      RigidBodyTransform initialObjectTransform = new RigidBodyTransform(objectBuilder.getSelectedObject().getInitialTransformToWorld());
+//      initialObjectFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(), initialObjectTransform);
+//      affordanceFrame.changeParentFrame(initialObjectFrame);
+//
+//      WorkspaceResourceFile file = new WorkspaceResourceFile(configurationsDirectory, fileName + ".json");
+//      if (file.isFileAccessAvailable())
+//      {
+//         LogTools.info("Saving to file ...");
+//         JSONFileTools.save(file, jsonNode ->
+//         {
+//            jsonNode.put("name", fileName);
+//            ArrayNode actionsArrayNode = jsonNode.putArray("actions");
+//            var preGraspPoses = preGraspFrames.getPoses();
+//            var graspPose = graspFrame.getPose();
+//            var postGraspPoses = postGraspFrames.getPoses();
+//            ArrayList<Double> trajectoryDurations = computeTrajectoryDurations(preGraspPoses, graspPose, postGraspPoses);
+//            var preGraspHandConfigurations = preGraspFrames.getHandConfigurations();
+//            var postGraspHandConfigurations = postGraspFrames.getHandConfigurations();
+//            for (int i = 0; i < preGraspPoses.size(); i++)
+//            {
+//               ObjectNode actionNode = actionsArrayNode.addObject();
+//               actionNode.put("type", "RDXHandPoseAction");
+//               actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
+//               actionNode.put("side", side.getLowerCaseName());
+//               actionNode.put("trajectoryDuration", trajectoryDurations.get(i));
+//               preGraspPoses.get(i).changeFrame(affordanceFrame.getReferenceFrame());
+//               RigidBodyTransform transformToParent = new RigidBodyTransform(preGraspPoses.get(i));
+//               JSONTools.toJSON(actionNode, transformToParent);
+//
+//               double[] dataTrajectories = new double[16];
+//               transformToParent.get(dataTrajectories);
+//               csvDataMatrix.add(dataTrajectories);
+//
+//               if (preGraspHandConfigurations.get(i) != null)
+//               {
+//                  dataTrajectories = new double[16];
+//                  for (int data = 0; data < dataTrajectories.length; data++)
+//                     dataTrajectories[data] = 0.0;
+//                  dataTrajectories[0] = HandConfiguration.valueOf(preGraspHandConfigurations.get(i).toString()).ordinal();
+//                  csvDataMatrix.add(dataTrajectories);
+//
+//                  ObjectNode extraActionNode = actionsArrayNode.addObject();
+//                  extraActionNode.put("type", "RDXHandConfigurationAction");
+//                  extraActionNode.put("side", side.getLowerCaseName());
+//                  extraActionNode.put("grip", preGraspHandConfigurations.get(i).toString());
+//               }
+//            }
+//            if (graspFrame.isSet())
+//            {
+//               ObjectNode actionNode = actionsArrayNode.addObject();
+//               actionNode.put("type", "RDXHandPoseAction");
+//               actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
+//               actionNode.put("side", side.getLowerCaseName());
+//               actionNode.put("trajectoryDuration", trajectoryDurations.get(preGraspPoses.size()));
+//               graspPose.changeFrame(affordanceFrame.getReferenceFrame());
+//               RigidBodyTransform transformToParent = new RigidBodyTransform(graspPose);
+//               JSONTools.toJSON(actionNode, transformToParent);
+//
+//               double[] dataTrajectories = new double[16];
+//               transformToParent.get(dataTrajectories);
+//               csvDataMatrix.add(dataTrajectories);
+//
+//               if (graspFrame.getHandConfiguration() != null)
+//               {
+//                  ObjectNode extraActionNode = actionsArrayNode.addObject();
+//                  extraActionNode.put("type", "RDXHandConfigurationAction");
+//                  extraActionNode.put("side", side.getLowerCaseName());
+//                  extraActionNode.put("grip", graspFrame.getHandConfiguration().toString());
+//
+//                  dataTrajectories = new double[16];
+//                  for (int data = 0; data < dataTrajectories.length; data++)
+//                     dataTrajectories[data] = 0.0;
+//                  dataTrajectories[0] = HandConfiguration.valueOf(graspFrame.getHandConfiguration().toString()).ordinal();
+//                  csvDataMatrix.add(dataTrajectories);
+//               }
+//            }
+//            for (int i = 0; i < postGraspPoses.size(); i++)
+//            {
+//               ObjectNode actionNode = actionsArrayNode.addObject();
+//               actionNode.put("type", "RDXHandPoseAction");
+//               actionNode.put("parentFrame", objectBuilder.getSelectedObjectName());
+//               actionNode.put("side", side.getLowerCaseName());
+//               actionNode.put("trajectoryDuration", trajectoryDurations.get(preGraspPoses.size() + 1 + i));
+//               postGraspPoses.get(i).changeFrame(affordanceFrame.getReferenceFrame());
+//               RigidBodyTransform transformToParent = new RigidBodyTransform(postGraspPoses.get(i));
+//               JSONTools.toJSON(actionNode, transformToParent);
+//
+//               double[] dataTrajectories = new double[16];
+//               transformToParent.get(dataTrajectories);
+//               csvDataMatrix.add(dataTrajectories);
+//
+//               if (postGraspHandConfigurations.get(i) != null)
+//               {
+//                  dataTrajectories = new double[16];
+//                  for (int data = 0; data < dataTrajectories.length; data++)
+//                     dataTrajectories[data] = 0.0;
+//                  dataTrajectories[0] = HandConfiguration.valueOf(postGraspHandConfigurations.get(i).toString()).ordinal();
+//                  csvDataMatrix.add(dataTrajectories);
+//
+//                  ObjectNode extraActionNode = actionsArrayNode.addObject();
+//                  extraActionNode.put("type", "RDXHandConfigurationAction");
+//                  extraActionNode.put("side", side.getLowerCaseName());
+//                  extraActionNode.put("grip", postGraspHandConfigurations.get(i).toString());
+//               }
+//            }
+//         });
+//         LogTools.info("SAVED to file {}", file.getFileName());
+//      }
+//      else
+//      {
+//         LogTools.warn("Could not save to {}", file.getFileName());
+//      }
+//
+//      WorkspaceResourceFile extraFile = new WorkspaceResourceFile(configurationsDirectory, fileName + "Extra.json");
+//      if (extraFile.isFileAccessAvailable())
+//      {
+//         JSONFileTools.save(extraFile, jsonNode ->
+//         {
+//            jsonNode.put("name", fileName);
+//            jsonNode.put("object", objectBuilder.getSelectedObjectName());
+//            JSONTools.toJSON(jsonNode, new RigidBodyTransform(objectBuilder.getSelectedObject().getInitialPose()));
+//            ArrayNode framesArrayNode = jsonNode.putArray("frames");
+//            var preGraspObjectTransforms = preGraspFrames.getObjectTransforms();
+//            var preGraspHandConfigurations = preGraspFrames.getHandConfigurations();
+//            jsonNode.put("numberPreGraspFrames", preGraspObjectTransforms.size());
+//            for (int i = 0; i < preGraspObjectTransforms.size(); i++)
+//            {
+//               ObjectNode frameArray = framesArrayNode.addObject();
+//               JSONTools.toJSON(frameArray, preGraspObjectTransforms.get(i));
+//               frameArray.put("grip", preGraspHandConfigurations.get(i) == null ? "" : preGraspHandConfigurations.get(i).toString());
+//            }
+//            if (graspFrame.isSet())
+//            {
+//               ObjectNode frameArray = framesArrayNode.addObject();
+//               JSONTools.toJSON(frameArray, graspFrame.getObjectTransform());
+//               frameArray.put("grip", graspFrame.getHandConfiguration() == null ? "" : graspFrame.getHandConfiguration().toString());
+//            }
+//            var postGraspObjectTransforms = postGraspFrames.getObjectTransforms();
+//            var postGraspHandConfigurations = postGraspFrames.getHandConfigurations();
+//            jsonNode.put("numberPostGraspFrames", postGraspObjectTransforms.size());
+//            for (int i = 0; i < postGraspObjectTransforms.size(); i++)
+//            {
+//               ObjectNode frameArray = framesArrayNode.addObject();
+//               JSONTools.toJSON(frameArray, postGraspObjectTransforms.get(i));
+//               frameArray.put("grip", postGraspHandConfigurations.get(i) == null ? "" : postGraspHandConfigurations.get(i).toString());
+//            }
+//         });
+//         LogTools.info("SAVED to file {}", extraFile.getFileName());
+//      }
+//      else
+//      {
+//         LogTools.warn("Could not save extra info to {}", extraFile.getFileName());
+//      }
+//
+////         generateCSVFiles(fileName);
+//   }
    //
    //   public void generateCSVFiles(String fileName)
    //   {
