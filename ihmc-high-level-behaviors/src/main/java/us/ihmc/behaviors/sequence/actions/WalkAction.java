@@ -51,8 +51,6 @@ public class WalkAction extends WalkActionData implements BehaviorAction
    private final ActionExecutionStatusMessage executionStatusMessage = new ActionExecutionStatusMessage();
    private double nominalExecutionDuration;
    private final SideDependentList<BehaviorActionCompletionCalculator> completionCalculator = new SideDependentList<>(BehaviorActionCompletionCalculator::new);
-   private double startPositionError;
-   private double startOrientationError;
 
    public WalkAction(ROS2ControllerHelper ros2ControllerHelper,
                      ROS2SyncedRobotModel syncedRobot,
@@ -159,13 +157,9 @@ public class WalkAction extends WalkActionData implements BehaviorAction
                                                                                          walkingControllerParameters.getDefaultInitialTransferTime(),
                                                                                          getTransferDuration(),
                                                                                          walkingControllerParameters.getDefaultFinalTransferTime());
-      startPositionError = 0.0;
-      startOrientationError = 0.0;
       for (RobotSide side : RobotSide.values)
       {
          syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
-         startPositionError += syncedFeetPoses.get(side).getTranslation().differenceNorm(commandedGoalFeetTransformToWorld.get(side).getTranslation());
-         startOrientationError += syncedFeetPoses.get(side).getOrientation().distance(commandedGoalFeetTransformToWorld.get(side).getOrientation());
       }
    }
 
