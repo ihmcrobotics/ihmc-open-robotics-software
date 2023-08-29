@@ -206,4 +206,9 @@ public class RDXAffordanceMirror
 
       lastActivePose = new FramePose3D(frameActiveSide, new RigidBodyTransform());
    }
+
+   public boolean isActive()
+   {
+      return mirrorActive.get();
+   }
 }

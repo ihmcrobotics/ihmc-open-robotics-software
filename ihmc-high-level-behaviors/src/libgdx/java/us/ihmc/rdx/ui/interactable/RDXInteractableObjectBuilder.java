@@ -105,7 +105,7 @@ public class RDXInteractableObjectBuilder extends RDXPanel
 
    public void loadObject(String objectName)
    {
-      selectedObject.load(nameModelMap.get(objectName));
+      selectedObject.load(nameModelMap.get(objectName), visualModelTransformMap.get(objectName));
       selectedObjectName = objectName;
    }
 
