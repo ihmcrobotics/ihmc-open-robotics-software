@@ -463,11 +463,12 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       pointA2D.set(pointA);
       pointB2D.set(pointB);
       stance2D.set(stance);
-      EuclidGeometryTools.orthogonalProjectionOnLine2D(stance2D, pointA2D, pointB2D, tempPoint);
-      boolean smallAngleChange = !EuclidGeometryTools.isPoint2DOnLineSegment2D(tempPoint, pointA2D, pointB2D);
+      Point2D stanceProjection2D = tempPoint;
+      EuclidGeometryTools.orthogonalProjectionOnLine2D(stance2D, pointA2D, pointB2D, stanceProjection2D);
+      boolean smallAngleChange = !EuclidGeometryTools.isPoint2DOnLineSegment2D(stanceProjection2D, pointA2D, pointB2D);
 
       xyDistanceToStance.setToZero(trajectoryFrame);
-      xyDistanceToStance.sub(tempPoint, stance2D);
+      xyDistanceToStance.sub(stanceProjection2D, stance2D);
       xyDistanceToStance.changeFrame(stanceZUpFrame);
 
       // If the nominal trajectory intersects the negative Y axis of the sole frame for a swing with the left side the step is a cross over step.
@@ -475,6 +476,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       pointBInStance.setIncludingFrame(trajectoryFrame, pointB2D);
       pointAInStance.changeFrame(stanceZUpFrame);
       pointBInStance.changeFrame(stanceZUpFrame);
+      Point2D swingIntersectionWithStanceY2D = tempPoint;
       boolean trajectoryIntersectsY = EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(0.0,
                                                                                                     0.0,
                                                                                                     0.0,
@@ -483,9 +485,10 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
                                                                                                     pointAInStance.getY(),
                                                                                                     pointBInStance.getX(),
                                                                                                     pointBInStance.getY(),
-                                                                                                    tempPoint);
+                                                                                                    swingIntersectionWithStanceY2D);
 
-      boolean crossOver = trajectoryIntersectsY && swingSide.negateIfRightSide(tempPoint.getY()) < 0.0;
+      double intersectionYTowardsSwingSide = swingSide.negateIfRightSide(swingIntersectionWithStanceY2D.getY());
+      boolean crossOver = trajectoryIntersectsY && intersectionYTowardsSwingSide < 0.0;
       crossOverStep.set(crossOver);
 
       // Prevent adjusting on side steps or steps that do not change the angle between the feet much.
