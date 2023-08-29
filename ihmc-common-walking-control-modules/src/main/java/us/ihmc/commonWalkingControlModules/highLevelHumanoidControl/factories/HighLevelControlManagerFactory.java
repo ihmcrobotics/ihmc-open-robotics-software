@@ -12,8 +12,8 @@ import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation
 import us.ihmc.commonWalkingControlModules.configurations.HumanoidRobotNaturalPosture;
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.naturalPosture.NaturalPostureManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.controlModules.naturalPosture.NaturalPostureManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
@@ -374,6 +374,10 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
                                                                                                             registry,
                                                                                                             controllerToolbox.getYoGraphicsListRegistry());
 
+//      /* create humanoid robot natural posture*/
+//      boolean useURDFJointNumbering = false;
+//      HumanoidRobotNaturalPosture naturalPostureMeasurement = NadiaNaturalPosture(controllerToolbox.getFullRobotModel(), useURDFJointNumbering, registry, controllerToolbox.getYoGraphicsListRegistry());
+      
       naturalPostureManager = new NaturalPostureManager(naturalPostureMeasurement,
                                                         walkingControllerParameters.getNaturalPostureParameters(),
                                                         controllerToolbox,

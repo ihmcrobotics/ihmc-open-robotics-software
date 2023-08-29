@@ -124,11 +124,6 @@ public class PelvisOrientationManager implements SCS2YoGraphicHolder
    {
       return stateMachine.getCurrentState().getFeedbackControlCommand();
    }
-   
-   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
-   {
-      return null;
-   }
 
    public void goToHomeFromCurrentDesired(double trajectoryTime)
    {
