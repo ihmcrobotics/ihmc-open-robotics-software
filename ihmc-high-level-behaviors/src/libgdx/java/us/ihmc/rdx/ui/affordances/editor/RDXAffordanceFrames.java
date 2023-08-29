@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
@@ -84,7 +85,7 @@ public class RDXAffordanceFrames
       }
    }
 
-   public void renderImGuiWidgets(ImGuiUniqueLabelMap labels, String lableId)
+   public void renderImGuiWidgets(ImGuiUniqueLabelMap labels, String lableId, boolean editingBothHands)
    {
       if (ImGui.button(labels.get("ADD") + "##" + lableId) && handPoses.containsKey(activeSide[0]))
       {
@@ -98,15 +99,33 @@ public class RDXAffordanceFrames
       ImGui.sameLine();
       if (ImGui.button(labels.get("SET") + "##" + lableId) && activeMenu[0].equals(this.menu))
       {
-         poseFrames.get(activeSide[0]).get(selectedIndex).setPoseAndUpdate(handPoses.get(activeSide[0]));
-         poses.get(activeSide[0]).set(selectedIndex, handPoses.get(activeSide[0]));
-         objectTransforms.set(selectedIndex, new RigidBodyTransform(objectTransformToWorld));
-         if (frameGraphics.get(activeSide[0]).get(selectedIndex) == null || !arePosesSet.get(activeSide[0]).get(selectedIndex))
+         if (editingBothHands)
          {
-            frameGraphics.get(activeSide[0]).set(selectedIndex, new RDXReferenceFrameGraphic(0.1, colors.get(colorIndex % colors.size())));
-            colorIndex++;
+            for (RobotSide side : handPoses.keySet())
+            {
+               poseFrames.get(side).get(selectedIndex).setPoseAndUpdate(handPoses.get(side));
+               poses.get(side).set(selectedIndex, handPoses.get(side));
+               objectTransforms.set(selectedIndex, new RigidBodyTransform(objectTransformToWorld));
+               if (frameGraphics.get(side).get(selectedIndex) == null || !arePosesSet.get(side).get(selectedIndex))
+               {
+                  frameGraphics.get(side).set(selectedIndex, new RDXReferenceFrameGraphic(0.1, colors.get(colorIndex % colors.size())));
+                  colorIndex++;
+               }
+               arePosesSet.get(side).set(selectedIndex, true);
+            }
          }
-         arePosesSet.get(activeSide[0]).set(selectedIndex, true);
+         else
+         {
+            poseFrames.get(activeSide[0]).get(selectedIndex).setPoseAndUpdate(handPoses.get(activeSide[0]));
+            poses.get(activeSide[0]).set(selectedIndex, handPoses.get(activeSide[0]));
+            objectTransforms.set(selectedIndex, new RigidBodyTransform(objectTransformToWorld));
+            if (frameGraphics.get(activeSide[0]).get(selectedIndex) == null || !arePosesSet.get(activeSide[0]).get(selectedIndex))
+            {
+               frameGraphics.get(activeSide[0]).set(selectedIndex, new RDXReferenceFrameGraphic(0.1, colors.get(colorIndex % colors.size())));
+               colorIndex++;
+            }
+            arePosesSet.get(activeSide[0]).set(selectedIndex, true);
+         }
       }
       ImGui.sameLine();
       if (ImGui.button(labels.get("CLEAR ALL") + "##" + lableId))
@@ -236,6 +255,39 @@ public class RDXAffordanceFrames
       }
    }
 
+   public void loadFrame(FramePose3D poseReference, RobotSide side, int index)
+   {
+      poseReference.changeFrame(ReferenceFrame.getWorldFrame());
+      PoseReferenceFrame frame = new PoseReferenceFrame(side.getLowerCaseName() + index + "Frame", poseReference.getReferenceFrame());
+      frame.setPoseAndUpdate(poseReference);
+
+      poses.get(side).add(poseReference);
+      poseFrames.get(side).add(frame);
+      boolean hasFrameBeenSetOnce = false;
+      for (boolean isInitialPoseSet : arePosesSet.get(side))
+      {
+         if (isInitialPoseSet)
+         {
+            hasFrameBeenSetOnce = true;
+            break;
+         }
+      }
+      if (!hasFrameBeenSetOnce)
+         frameGraphics.get(side).add(null);
+      else if (!arePosesSet.get(side).get(index-1))
+      {
+         frameGraphics.get(side).add(new RDXReferenceFrameGraphic(0.1, Color.RED));
+      }
+      else
+         frameGraphics.get(side).add(new RDXReferenceFrameGraphic(0.1, colors.get(colorIndex % colors.size())));
+      colorIndex++;
+
+      // no hand configuration is set right when you add a new frame
+      selectedFrameConfiguration = null;
+      // add an empty spot for the hand configurations
+      handConfigurations.get(side).add(null);
+   }
+
    public void selectFrame(int index)
    {
       for (RobotSide side : handPoses.keySet())
@@ -322,6 +374,11 @@ public class RDXAffordanceFrames
    public List<RigidBodyTransform> getObjectTransforms()
    {
       return objectTransforms;
+   }
+
+   public void addIndexPose(int index)
+   {
+      poseIndices.add(index);
    }
 
    public void selectNext()

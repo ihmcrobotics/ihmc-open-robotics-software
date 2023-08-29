@@ -21,6 +21,7 @@ public class RDXAffordanceLocker
    private SideDependentList<Boolean> affordancePoseLocked = new SideDependentList<>();
    private SideDependentList<Boolean> handsLocked = new SideDependentList<>();
    private final SideDependentList<PoseReferenceFrame> handLockedFrames = new SideDependentList<>();
+   private boolean bothHandsLocked = false;
 
    private final PoseReferenceFrame objectFrame = new PoseReferenceFrame("objectFrame", ReferenceFrame.getWorldFrame());
 
@@ -68,6 +69,11 @@ public class RDXAffordanceLocker
             affordancePoseLocked.replace(side, false);
          }
       }
+
+      if (handsLocked.get(RobotSide.RIGHT) && handsLocked.get(RobotSide.LEFT))
+         bothHandsLocked = true;
+      else
+         bothHandsLocked = false;
    }
 
    public void renderImGuiWidgets(ImGuiUniqueLabelMap labels)
@@ -106,5 +112,10 @@ public class RDXAffordanceLocker
                ImGui.popStyleColor();
          }
       }
+   }
+
+   public boolean areBothHandsLocked()
+   {
+      return bothHandsLocked;
    }
 }

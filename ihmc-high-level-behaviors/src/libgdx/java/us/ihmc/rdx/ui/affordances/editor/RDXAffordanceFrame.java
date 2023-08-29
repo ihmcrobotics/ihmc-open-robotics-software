@@ -17,6 +17,8 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.awt.*;
+
 public class RDXAffordanceFrame
 {
    private SideDependentList<FramePose3D> poses = new SideDependentList<>();
@@ -70,12 +72,22 @@ public class RDXAffordanceFrame
       }
    }
 
-   public void renderImGuiWidgets(ImGuiUniqueLabelMap labels, String labelId)
+   public void renderImGuiWidgets(ImGuiUniqueLabelMap labels, String labelId, boolean editingBothHands)
    {
       if (ImGui.button(labels.get("SET") + "##" + labelId) && handPoses.containsKey(activeSide[0]))
       {
-         isPoseSet.replace(activeSide[0], true);
-         setFrame(handPoses.get(activeSide[0]));
+         if (editingBothHands)
+         {
+            for (RobotSide side : RobotSide.values)
+            {
+               isPoseSet.replace(side, true);
+               setFrame(handPoses.get(side), side);
+            }
+         }
+         else {
+            isPoseSet.replace(activeSide[0], true);
+            setFrame(handPoses.get(activeSide[0]));
+         }
          objectTransformOfFrame.set(objectTransformToWorld);
          activeMenu[0] = this.menu;
       }
@@ -149,25 +161,30 @@ public class RDXAffordanceFrame
 
    public void setFrame(FramePose3D poseReference)
    {
-      poses.replace(activeSide[0], new FramePose3D(poseReference.getReferenceFrame(), poseReference));
-      poses.get(activeSide[0]).changeFrame(ReferenceFrame.getWorldFrame());
-      poseFrames.get(activeSide[0]).setPoseAndUpdate(poses.get(activeSide[0]));
-      isPoseSet.replace(activeSide[0], true);
-      frameGraphics.get(activeSide[0]).updateFromFramePose(poses.get(activeSide[0]));
+      setFrame(poseReference, activeSide[0]);
+   }
+
+   public void setFrame(FramePose3D poseReference, RobotSide side)
+   {
+      poses.replace(side, new FramePose3D(poseReference.getReferenceFrame(), poseReference));
+      poses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+      poseFrames.get(side).setPoseAndUpdate(poses.get(side));
+      isPoseSet.replace(side, true);
+      frameGraphics.get(side).updateFromFramePose(poses.get(side));
    }
 
    public void selectFrame()
    {
-      if (isPoseSet.get(activeSide[0]))
-      {
-         handTransformsToWorld.get(activeSide[0]).set(poses.get(activeSide[0]));  // move hand to grasp point
-         objectTransformToWorld.set(objectTransformOfFrame);
-      }
-      if (handConfigurations.get(activeSide[0]) != null)
-         interactableHands.get(activeSide[0]).setGripperToConfiguration(handConfigurations.get(activeSide[0]));
-
       for (RobotSide side : handPoses.keySet())
       {
+         if (isPoseSet.get(side))
+         {
+            handTransformsToWorld.get(side).set(poses.get(side));  // move hand to grasp point
+            objectTransformToWorld.set(objectTransformOfFrame);
+         }
+         if (handConfigurations.get(side) != null)
+            interactableHands.get(side).setGripperToConfiguration(handConfigurations.get(side));
+
          if (side == activeSide[0])
             interactableHands.get(side).setSelected(true);
          else
@@ -175,9 +192,9 @@ public class RDXAffordanceFrame
       }
    }
 
-   public void setHandConfiguration(HandConfiguration configuration)
+   public void setHandConfiguration(HandConfiguration configuration, RobotSide side)
    {
-      handConfigurations.replace(activeSide[0], configuration);
+      handConfigurations.replace(side, configuration);
    }
 
    public void setObjectTransform(RigidBodyTransform transform)

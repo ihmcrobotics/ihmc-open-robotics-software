@@ -1,0 +1,98 @@
+{
+  "name" : "",
+  "object" : "Box",
+  "x" : 0.0,
+  "y" : -0.173,
+  "z" : 0.0,
+  "rollInDegrees" : 0.0,
+  "pitchInDegrees" : 0.0,
+  "yawInDegrees" : 0.0,
+  "frames" : [ {
+    "x" : 0.0,
+    "y" : -0.173,
+    "z" : 0.0,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 0.0,
+    "grip" : [ {
+      "side" : "left",
+      "config" : ""
+    }, {
+      "side" : "right",
+      "config" : ""
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : -0.173,
+    "z" : 0.0,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 0.0,
+    "grip" : [ {
+      "side" : "left",
+      "config" : ""
+    }, {
+      "side" : "right",
+      "config" : ""
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : -0.173,
+    "z" : 0.0,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 0.0,
+    "grip" : [ {
+      "side" : "left",
+      "config" : ""
+    }, {
+      "side" : "right",
+      "config" : ""
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : -0.173,
+    "z" : 0.0,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 0.0,
+    "grip" : [ {
+      "side" : "left",
+      "config" : ""
+    }, {
+      "side" : "right",
+      "config" : ""
+    } ]
+  }, {
+    "x" : 0.0,
+    "y" : -0.173,
+    "z" : 0.321,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 0.0,
+    "grip" : [ {
+      "side" : "left",
+      "config" : ""
+    }, {
+      "side" : "right",
+      "config" : ""
+    } ]
+  }, {
+    "x" : -0.095,
+    "y" : -0.173,
+    "z" : 0.689,
+    "rollInDegrees" : 0.0,
+    "pitchInDegrees" : 0.0,
+    "yawInDegrees" : 0.0,
+    "grip" : [ {
+      "side" : "left",
+      "config" : ""
+    }, {
+      "side" : "right",
+      "config" : ""
+    } ]
+  } ],
+  "activeSides" : 2,
+  "numberPreGraspFrames" : 2,
+  "numberPostGraspFrames" : 3
+}

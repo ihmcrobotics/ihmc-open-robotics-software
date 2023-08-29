@@ -53,7 +53,7 @@ public class RDXAffordanceEditorUI
 
    private RDXAffordanceMirror mirror;
    private RDXAffordanceLocker locker;
-   private AffordanceExporter exporter;
+   private RDXAffordanceExporter exporter;
 
    private RDXActiveAffordanceMenu[] activeMenu;
    private boolean playing = false;
@@ -135,7 +135,7 @@ public class RDXAffordanceEditorUI
 
             mirror = new RDXAffordanceMirror(interactableHands, handTransformsToWorld, handPoses, activeSide);
             locker = new RDXAffordanceLocker(handTransformsToWorld, handPoses, activeSide, activeMenu);
-            exporter = new AffordanceExporter(handPoses.keySet(), preGraspFrames, graspFrame, postGraspFrames, objectBuilder);
+            exporter = new RDXAffordanceExporter(handPoses.keySet(), preGraspFrames, graspFrame, postGraspFrames, objectBuilder);
          }
 
          @Override
@@ -171,7 +171,13 @@ public class RDXAffordanceEditorUI
 
          // selected hand determines active side
          if (interactableHands.get(side).isSelected())
-            activeSide[0] = side;
+         {
+            if (activeSide[0] != side)
+            {
+               mirror.reset();
+               activeSide[0] = side;
+            }
+         }
       }
       // update hand configuration
       if (handPoses.containsKey(activeSide[0]))
@@ -266,19 +272,19 @@ public class RDXAffordanceEditorUI
       ImGui.text("PRE-GRASP MENU");
       ImGui.text("Pre-grasp Frames: ");
       ImGui.sameLine();
-      preGraspFrames.renderImGuiWidgets(labels, "pregrasp");
+      preGraspFrames.renderImGuiWidgets(labels, "pregrasp", mirror.isActive());
       ImGui.separator();
 
       ImGui.text("GRASP MENU");
       ImGui.text("Grasp Frame: ");
       ImGui.sameLine();
-      graspFrame.renderImGuiWidgets(labels, "grasp");
+      graspFrame.renderImGuiWidgets(labels, "grasp", mirror.isActive());
       ImGui.separator();
 
       ImGui.text("POST-GRASP MENU");
       ImGui.text("Post-grasp Frames: ");
       ImGui.sameLine();
-      postGraspFrames.renderImGuiWidgets(labels, "postgrasp");
+      postGraspFrames.renderImGuiWidgets(labels, "postgrasp", mirror.isActive() && locker.areBothHandsLocked());
       locker.renderImGuiWidgets(labels);
       ImGui.separator();
 
@@ -377,9 +383,7 @@ public class RDXAffordanceEditorUI
       }
       ImGui.sameLine();
       if (ImGui.button(labels.get("PLAY")))
-      {
          playing = true;
-      }
       ImGui.separator();
 
       if (ImGui.button("RESET"))
@@ -388,13 +392,9 @@ public class RDXAffordanceEditorUI
          reset();
       }
       if (textInput.render())
-      {
          fileName = textInput.getString();
-      }
       if (ImGui.button("SAVE"))
-      {
          exporter.saveToFile(fileName);
-      }
       ImGui.sameLine();
       if (ImGui.button(labels.get("LOAD")))
       {
