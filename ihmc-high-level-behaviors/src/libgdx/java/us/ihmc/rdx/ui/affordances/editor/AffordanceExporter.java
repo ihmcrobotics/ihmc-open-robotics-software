@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui.affordances.editor;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -20,10 +21,12 @@ import us.ihmc.tools.io.WorkspaceResourceFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class AffordanceExporter
 {
@@ -36,18 +39,20 @@ public class AffordanceExporter
    private final RDXAffordanceFrame graspFrame;
    private final RDXAffordanceFrames preGraspFrames;
    private final RDXAffordanceFrames postGraspFrames;
+   private final Set<RobotSide> activeSides;
    private final RDXInteractableObjectBuilder objectBuilder;
    private final WorkspaceResourceDirectory configurationsDirectory = new WorkspaceResourceDirectory(getClass(), "/affordances");
    private final SideDependentList<List<double[]>> csvDataMatrices = new SideDependentList<>();
 
-   public AffordanceExporter(RDXAffordanceFrames preGraspFrames, RDXAffordanceFrame graspFrame, RDXAffordanceFrames postGraspFrames, RDXInteractableObjectBuilder objectBuilder)
+   public AffordanceExporter(Set<RobotSide> activeSides, RDXAffordanceFrames preGraspFrames, RDXAffordanceFrame graspFrame, RDXAffordanceFrames postGraspFrames, RDXInteractableObjectBuilder objectBuilder)
    {
       this.preGraspFrames = preGraspFrames;
       this.graspFrame = graspFrame;
       this.postGraspFrames = postGraspFrames;
       this.objectBuilder = objectBuilder;
+      this.activeSides = activeSides;
 
-      for (RobotSide side : RobotSide.values)
+      for (RobotSide side : activeSides)
          csvDataMatrices.put(side, new ArrayList<>());
    }
 
@@ -73,7 +78,7 @@ public class AffordanceExporter
             var postGraspPoses = postGraspFrames.getPoses();
 
             SideDependentList<List<Double>> trajectoryDurations = new SideDependentList<>();
-            for (RobotSide side : RobotSide.values)
+            for (RobotSide side : activeSides)
                trajectoryDurations.put(side, computeTrajectoryDurations(preGraspPoses.get(side), graspPoses.get(side), postGraspPoses.get(side)));
 
             var arePreGraspPosesSet = preGraspFrames.getArePosesSet();
@@ -82,9 +87,10 @@ public class AffordanceExporter
             var preGraspHandConfigurations = preGraspFrames.getHandConfigurations();
             var postGraspHandConfigurations = postGraspFrames.getHandConfigurations();
 
-            for (int i = 0; i < preGraspPoses.get(RobotSide.RIGHT).size(); i++)
+            int numberOfPreGraspFrames = activeSides.contains(RobotSide.RIGHT) ? preGraspPoses.get(RobotSide.RIGHT).size() : preGraspPoses.get(RobotSide.LEFT).size();
+            for (int i = 0; i < numberOfPreGraspFrames; i++)
             {
-               for (RobotSide side : RobotSide.values)
+               for (RobotSide side : activeSides)
                {
                   if (arePreGraspPosesSet.get(side).get(i))
                   {
@@ -117,7 +123,7 @@ public class AffordanceExporter
                   }
                }
             }
-            for (RobotSide side : RobotSide.values)
+            for (RobotSide side : activeSides)
             {
                if (graspFrame.isSet(side))
                {
@@ -148,10 +154,15 @@ public class AffordanceExporter
                      csvDataMatrices.get(side).add(dataTrajectories);
                   }
                }
+               else
+               {
+                  LogTools.error("A Grasp Frame is not defined for each considered hand!");
+               }
             }
-            for (int i = 0; i < postGraspPoses.get(RobotSide.RIGHT).size(); i++)
+            int numberOfPostGraspFrames = activeSides.contains(RobotSide.RIGHT) ? postGraspPoses.get(RobotSide.RIGHT).size() : postGraspPoses.get(RobotSide.LEFT).size();
+            for (int i = 0; i < numberOfPostGraspFrames; i++)
             {
-               for (RobotSide side : RobotSide.values)
+               for (RobotSide side : activeSides)
                {
                   if (arePostGraspPosesSet.get(side).get(i))
                   {
@@ -192,55 +203,75 @@ public class AffordanceExporter
          LogTools.warn("Could not save to {}", file.getFileName());
       }
 
-//      saveExtraInfoToFile(fileName);
-
-      for (RobotSide side : RobotSide.values)
+      saveExtraInfoToFile(fileName);
+      for (RobotSide side : activeSides)
          generateCSVFiles(fileName + side.getPascalCaseName(), csvDataMatrices.get(side));
    }
 
-//   private void saveExtraInfoToFile(String fileName)
-//   {
-//      WorkspaceResourceFile extraFile = new WorkspaceResourceFile(configurationsDirectory, fileName + "Extra.json");
-//      if (extraFile.isFileAccessAvailable())
-//      {
-//         JSONFileTools.save(extraFile, jsonNode ->
-//         {
-//            jsonNode.put("name", fileName);
-//            jsonNode.put("object", objectBuilder.getSelectedObjectName());
-//            JSONTools.toJSON(jsonNode, new RigidBodyTransform(objectBuilder.getSelectedObject().getInitialPose()));
-//            ArrayNode framesArrayNode = jsonNode.putArray("frames");
-//            var preGraspObjectTransforms = preGraspFrames.getObjectTransforms();
-//            var preGraspHandConfigurations = preGraspFrames.getHandConfigurations();
-//            jsonNode.put("numberPreGraspFrames", preGraspObjectTransforms.size());
-//            for (int i = 0; i < preGraspObjectTransforms.size(); i++)
-//            {
-//               ObjectNode frameArray = framesArrayNode.addObject();
-//               JSONTools.toJSON(frameArray, preGraspObjectTransforms.get(i));
-//               frameArray.put("grip", preGraspHandConfigurations.get(i) == null ? "" : preGraspHandConfigurations.get(i).toString());
-//            }
-//            if (graspFrame.isSet())
-//            {
-//               ObjectNode frameArray = framesArrayNode.addObject();
-//               JSONTools.toJSON(frameArray, graspFrame.getObjectTransform());
-//               frameArray.put("grip", graspFrame.getHandConfiguration() == null ? "" : graspFrame.getHandConfiguration().toString());
-//            }
-//            var postGraspObjectTransforms = postGraspFrames.getObjectTransforms();
-//            var postGraspHandConfigurations = postGraspFrames.getHandConfigurations();
-//            jsonNode.put("numberPostGraspFrames", postGraspObjectTransforms.size());
-//            for (int i = 0; i < postGraspObjectTransforms.size(); i++)
-//            {
-//               ObjectNode frameArray = framesArrayNode.addObject();
-//               JSONTools.toJSON(frameArray, postGraspObjectTransforms.get(i));
-//               frameArray.put("grip", postGraspHandConfigurations.get(i) == null ? "" : postGraspHandConfigurations.get(i).toString());
-//            }
-//         });
-//         LogTools.info("SAVED to file {}", extraFile.getFileName());
-//      }
-//      else
-//      {
-//         LogTools.warn("Could not save extra info to {}", extraFile.getFileName());
-//      }
-//   }
+   private void saveExtraInfoToFile(String fileName)
+   {
+      WorkspaceResourceFile extraFile = new WorkspaceResourceFile(configurationsDirectory, fileName + "Extra.json");
+      if (extraFile.isFileAccessAvailable())
+      {
+         JSONFileTools.save(extraFile, jsonNode ->
+         {
+            jsonNode.put("name", fileName);
+            jsonNode.put("object", objectBuilder.getSelectedObjectName());
+            JSONTools.toJSON(jsonNode, new RigidBodyTransform(objectBuilder.getSelectedObject().getInitialPose()));
+            ArrayNode framesArrayNode = jsonNode.putArray("frames");
+            var preGraspObjectTransforms = preGraspFrames.getObjectTransforms();
+            var preGraspHandConfigurations = preGraspFrames.getHandConfigurations();
+            jsonNode.put("numberPreGraspFrames", preGraspObjectTransforms.size());
+            for (int i = 0; i < preGraspObjectTransforms.size(); i++)
+            {
+               ObjectNode frameArray = framesArrayNode.addObject();
+               JSONTools.toJSON(frameArray, preGraspObjectTransforms.get(i));
+
+               ArrayNode gripArrayNode = frameArray.putArray("grip");
+               for (RobotSide side : activeSides)
+               {
+                  ObjectNode gripArray = gripArrayNode.addObject();
+                  gripArray.put("side", side.getLowerCaseName());
+                  gripArray.put("config", preGraspHandConfigurations.get(side).get(i) == null ? "" : preGraspHandConfigurations.get(side).get(i).toString());
+               }
+            }
+
+            if (graspFrame.isSet(RobotSide.LEFT) || graspFrame.isSet(RobotSide.RIGHT))
+            {
+               ObjectNode frameArray = framesArrayNode.addObject();
+               JSONTools.toJSON(frameArray, graspFrame.getObjectTransform());
+               ArrayNode gripArrayNode = frameArray.putArray("grip");
+               for (RobotSide side : activeSides)
+               {
+                  ObjectNode gripArray = gripArrayNode.addObject();
+                  gripArray.put("side", side.getLowerCaseName());
+                  gripArray.put("config", graspFrame.getHandConfiguration(side) == null ? "" : graspFrame.getHandConfiguration(side).toString());
+               }
+            }
+
+            var postGraspObjectTransforms = postGraspFrames.getObjectTransforms();
+            var postGraspHandConfigurations = postGraspFrames.getHandConfigurations();
+            jsonNode.put("numberPostGraspFrames", postGraspObjectTransforms.size());
+            for (int i = 0; i < postGraspObjectTransforms.size(); i++)
+            {
+               ObjectNode frameArray = framesArrayNode.addObject();
+               JSONTools.toJSON(frameArray, postGraspObjectTransforms.get(i));
+               ArrayNode gripArrayNode = frameArray.putArray("grip");
+               for (RobotSide side : activeSides)
+               {
+                  ObjectNode gripArray = gripArrayNode.addObject();
+                  gripArray.put("side", side.getLowerCaseName());
+                  gripArray.put("config", postGraspHandConfigurations.get(side).get(i) == null ? "" : postGraspHandConfigurations.get(side).get(i).toString());
+               }
+            }
+         });
+         LogTools.info("SAVED to file {}", extraFile.getFileName());
+      }
+      else
+      {
+         LogTools.warn("Could not save extra info to {}", extraFile.getFileName());
+      }
+   }
 
    private List<Double> computeTrajectoryDurations(List<FramePose3D> preGraspPoses, FramePose3D graspPose, List<FramePose3D> postGraspPoses)
    {
@@ -322,87 +353,87 @@ public class AffordanceExporter
       }
    }
 
-   //   public void loadFromFile(String fileName)
-   //   {
-   //      Path filePath = Paths.get(configurationsDirectory.getFilesystemDirectory().toString(), fileName + "Extra.json");
-   //      final int[] preGraspFramesSize = new int[1];
-   //      final int[] postGraspFramesSize = new int[1];
-   //      if (Files.exists(filePath))
-   //      {
-   //         JSONFileTools.load(filePath, jsonNode ->
-   //         {
-   //            String objectName = jsonNode.get("object").asText();
-   //            if (!objectName.isEmpty())
-   //            {
-   //               objectBuilder.loadObject(jsonNode.get("object").asText());
-   //               RigidBodyTransform initialTransform = new RigidBodyTransform();
-   //               JSONTools.toEuclid(jsonNode, initialTransform);
-   //               objectBuilder.getSelectedObject().setPose(initialTransform);
-   //            }
-   //            preGraspFramesSize[0] = jsonNode.get("numberPreGraspFrames").asInt();
-   //            postGraspFramesSize[0] = jsonNode.get("numberPostGraspFrames").asInt();
-   //            JsonNode framesArrayNode = jsonNode.get("frames");
-   //            for (int i = 0; i < preGraspFramesSize[0]; i++)
-   //            {
-   //               RigidBodyTransform preGraspObjectTransform = new RigidBodyTransform();
-   //               JSONTools.toEuclid(framesArrayNode.get(i), preGraspObjectTransform);
-   //               preGraspFrames.addObjectTransform(preGraspObjectTransform);
-   //               String configuration = framesArrayNode.get(i).get("grip").asText();
-   //               preGraspFrames.addHandConfiguration(configuration.isEmpty() ? null : HandConfiguration.valueOf(configuration));
-   //            }
-   //            RigidBodyTransform graspObjectTransform = new RigidBodyTransform();
-   //            JSONTools.toEuclid(framesArrayNode.get(preGraspFramesSize[0]), graspObjectTransform);
-   //            graspFrame.setObjectTransform(graspObjectTransform);
-   //            String configuration = framesArrayNode.get(preGraspFramesSize[0]).get("grip").asText();
-   //            graspFrame.setHandConfiguration(configuration.isEmpty() ? null : HandConfiguration.valueOf(configuration));
-   //            for (int i = 0; i < postGraspFramesSize[0]; i++)
-   //            {
-   //               RigidBodyTransform postGraspObjectTransform = new RigidBodyTransform();
-   //               JSONTools.toEuclid(framesArrayNode.get(i + preGraspFramesSize[0] + 1), postGraspObjectTransform);
-   //               postGraspFrames.addObjectTransform(postGraspObjectTransform);
-   //               configuration = framesArrayNode.get(i + preGraspFramesSize[0] + 1).get("grip").asText();
-   //               postGraspFrames.addHandConfiguration(configuration.isEmpty() ? null : HandConfiguration.valueOf(configuration));
-   //            }
-   //         });
-   //         LogTools.info("LOADED file {}", filePath);
-   //      }
-   //      else
-   //      {
-   //         LogTools.warn("Could not load file {}", filePath);
-   //      }
-   //
-   //      // change affordance reference from whatever it is now to loaded initial object pose
-   //      RigidBodyTransform initialObjectTransform = new RigidBodyTransform(objectBuilder.getSelectedObject().getInitialTransformToWorld());
-   //      initialObjectFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(), initialObjectTransform);
-   //      affordanceFrame.changeParentFrame(initialObjectFrame);
-   //
-   //      filePath = Paths.get(configurationsDirectory.getFilesystemDirectory().toString(), fileName + ".json");
-   //      if (Files.exists(filePath))
-   //      {
-   //         JSONFileTools.load(filePath, jsonNode ->
-   //         {
-   //            JSONTools.forEachArrayElement(jsonNode, "actions", actionNode ->
-   //            {
-   //               String actionType = actionNode.get("type").asText();
-   //               if (actionType.equals("RDXHandPoseAction"))
-   //               {
-   //                  //                  side = RobotSide.getSideFromString(jsonNode.get("side").asText());
-   //                  RigidBodyTransform frameTransform = new RigidBodyTransform();
-   //                  JSONTools.toEuclid(actionNode, frameTransform);
-   //                  if (preGraspFrames.getNumberOfFrames() < preGraspFramesSize[0])
-   //                     preGraspFrames.addFrame(new FramePose3D(affordanceFrame.getReferenceFrame(), frameTransform));
-   //                  else if (!graspFrame.isSet())
-   //                     graspFrame.setFrame(new FramePose3D(affordanceFrame.getReferenceFrame(), frameTransform));
-   //                  else
-   //                     postGraspFrames.addFrame(new FramePose3D(affordanceFrame.getReferenceFrame(), frameTransform));
-   //               }
-   //            });
-   //         });
-   //         LogTools.info("LOADED file {}", filePath);
-   //      }
-   //      else
-   //      {
-   //         LogTools.warn("Could not load file {}", filePath);
-   //      }
-   //   }
+      public void loadFromFile(String fileName)
+      {
+         Path filePath = Paths.get(configurationsDirectory.getFilesystemDirectory().toString(), fileName + "Extra.json");
+         final int[] preGraspFramesSize = new int[1];
+         final int[] postGraspFramesSize = new int[1];
+         if (Files.exists(filePath))
+         {
+            JSONFileTools.load(filePath, jsonNode ->
+            {
+               String objectName = jsonNode.get("object").asText();
+               if (!objectName.isEmpty())
+               {
+                  objectBuilder.loadObject(jsonNode.get("object").asText());
+                  RigidBodyTransform initialTransform = new RigidBodyTransform();
+                  JSONTools.toEuclid(jsonNode, initialTransform);
+                  objectBuilder.getSelectedObject().setPose(initialTransform);
+               }
+               preGraspFramesSize[0] = jsonNode.get("numberPreGraspFrames").asInt();
+               postGraspFramesSize[0] = jsonNode.get("numberPostGraspFrames").asInt();
+               JsonNode framesArrayNode = jsonNode.get("frames");
+               for (int i = 0; i < preGraspFramesSize[0]; i++)
+               {
+                  RigidBodyTransform preGraspObjectTransform = new RigidBodyTransform();
+                  JSONTools.toEuclid(framesArrayNode.get(i), preGraspObjectTransform);
+                  preGraspFrames.addObjectTransform(preGraspObjectTransform);
+                  String configuration = framesArrayNode.get(i).get("grip").asText();
+                  preGraspFrames.addHandConfiguration(configuration.isEmpty() ? null : HandConfiguration.valueOf(configuration));
+               }
+               RigidBodyTransform graspObjectTransform = new RigidBodyTransform();
+               JSONTools.toEuclid(framesArrayNode.get(preGraspFramesSize[0]), graspObjectTransform);
+               graspFrame.setObjectTransform(graspObjectTransform);
+               String configuration = framesArrayNode.get(preGraspFramesSize[0]).get("grip").asText();
+               graspFrame.setHandConfiguration(configuration.isEmpty() ? null : HandConfiguration.valueOf(configuration));
+               for (int i = 0; i < postGraspFramesSize[0]; i++)
+               {
+                  RigidBodyTransform postGraspObjectTransform = new RigidBodyTransform();
+                  JSONTools.toEuclid(framesArrayNode.get(i + preGraspFramesSize[0] + 1), postGraspObjectTransform);
+                  postGraspFrames.addObjectTransform(postGraspObjectTransform);
+                  configuration = framesArrayNode.get(i + preGraspFramesSize[0] + 1).get("grip").asText();
+                  postGraspFrames.addHandConfiguration(configuration.isEmpty() ? null : HandConfiguration.valueOf(configuration));
+               }
+            });
+            LogTools.info("LOADED file {}", filePath);
+         }
+         else
+         {
+            LogTools.warn("Could not load file {}", filePath);
+         }
+
+         // change affordance reference from whatever it is now to loaded initial object pose
+         RigidBodyTransform initialObjectTransform = new RigidBodyTransform(objectBuilder.getSelectedObject().getInitialTransformToWorld());
+         initialObjectFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(), initialObjectTransform);
+         affordanceFrame.changeParentFrame(initialObjectFrame);
+
+         filePath = Paths.get(configurationsDirectory.getFilesystemDirectory().toString(), fileName + ".json");
+         if (Files.exists(filePath))
+         {
+            JSONFileTools.load(filePath, jsonNode ->
+            {
+               JSONTools.forEachArrayElement(jsonNode, "actions", actionNode ->
+               {
+                  String actionType = actionNode.get("type").asText();
+                  if (actionType.equals("RDXHandPoseAction"))
+                  {
+                     //                  side = RobotSide.getSideFromString(jsonNode.get("side").asText());
+                     RigidBodyTransform frameTransform = new RigidBodyTransform();
+                     JSONTools.toEuclid(actionNode, frameTransform);
+                     if (preGraspFrames.getNumberOfFrames() < preGraspFramesSize[0])
+                        preGraspFrames.addFrame(new FramePose3D(affordanceFrame.getReferenceFrame(), frameTransform));
+                     else if (!graspFrame.isSet())
+                        graspFrame.setFrame(new FramePose3D(affordanceFrame.getReferenceFrame(), frameTransform));
+                     else
+                        postGraspFrames.addFrame(new FramePose3D(affordanceFrame.getReferenceFrame(), frameTransform));
+                  }
+               });
+            });
+            LogTools.info("LOADED file {}", filePath);
+         }
+         else
+         {
+            LogTools.warn("Could not load file {}", filePath);
+         }
+      }
 }
