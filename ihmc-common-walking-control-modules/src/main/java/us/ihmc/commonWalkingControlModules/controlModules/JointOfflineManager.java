@@ -34,6 +34,8 @@ public class JointOfflineManager
    private final SideDependentList<MutableBoolean> hasNewContactState = new SideDependentList<>(side -> new MutableBoolean(false));
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final FramePoint3D tempPoint = new FramePoint3D();
+   
+   private final double dampingCoefficient = 5.0;
 
    public JointOfflineManager(HighLevelHumanoidControllerToolbox controllerToolbox, YoRegistry registry)
    {
@@ -73,6 +75,7 @@ public class JointOfflineManager
          }
 
          double desiredJointTorque = 0.0;
+         desiredJointTorque = -joint.getQd()*dampingCoefficient;
          jointTorqueCommand.addJoint(joint, desiredJointTorque);
          offlineStatus.get(joint).set(true);
       }
