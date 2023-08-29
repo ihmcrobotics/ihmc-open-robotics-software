@@ -135,7 +135,7 @@ public class RDXAffordanceEditorUI
 
             mirror = new RDXAffordanceMirror(interactableHands, handTransformsToWorld, handPoses, activeSide);
             locker = new RDXAffordanceLocker(handTransformsToWorld, handPoses, activeSide, activeMenu);
-            exporter = new AffordanceExporter(preGraspFrames, graspFrame, postGraspFrames, objectBuilder);
+            exporter = new AffordanceExporter(handPoses.keySet(), preGraspFrames, graspFrame, postGraspFrames, objectBuilder);
          }
 
          @Override
@@ -391,17 +391,17 @@ public class RDXAffordanceEditorUI
       {
          fileName = textInput.getString();
       }
-            if (ImGui.button("SAVE"))
-            {
-               exporter.saveToFile(fileName);
-            }
-      //      ImGui.sameLine();
-      //      if (ImGui.button(labels.get("LOAD")))
-      //      {
-      //         objectBuilder.reset();
-      //         reset();
-      //         exporter.loadFromFile(fileName);
-      //      }
+      if (ImGui.button("SAVE"))
+      {
+         exporter.saveToFile(fileName);
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("LOAD")))
+      {
+         objectBuilder.reset();
+         reset();
+         exporter.loadFromFile(fileName);
+      }
    }
 
    private void reset()

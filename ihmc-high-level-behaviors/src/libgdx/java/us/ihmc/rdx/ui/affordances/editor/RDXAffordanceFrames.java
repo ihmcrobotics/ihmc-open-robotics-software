@@ -114,7 +114,7 @@ public class RDXAffordanceFrames
          reset();
          activeMenu[0] = RDXActiveAffordanceMenu.NONE;
       }
-      for (RobotSide side : RobotSide.values)
+      for (RobotSide side : handPoses.keySet())
       {
          if (poseIndices.size() > 0)
          {
@@ -149,7 +149,7 @@ public class RDXAffordanceFrames
                ImGui.pushStyleColor(ImGuiCol.Button, 1.0f, 1.0f, 1.0f, 1.0f);
                if (ImGui.button(labels.get("X") + "##" + lableId + (side  == RobotSide.RIGHT ? "R" : "L") + i, 15, 15))
                {
-                  for (RobotSide eachSide : RobotSide.values)
+                  for (RobotSide eachSide : handPoses.keySet())
                   {
                      poseFrames.get(eachSide).remove(i);
                      poses.get(eachSide).remove(i);
@@ -198,44 +198,47 @@ public class RDXAffordanceFrames
       frameGraphics.get(activeSide[0]).add(new RDXReferenceFrameGraphic(0.1, colors.get(colorIndex % colors.size())));
       colorIndex++;
 
-      //add frame for the other hand, with same pose from previous frame associated with that side
-      RobotSide nonActiveSide = activeSide[0] == RobotSide.RIGHT ? RobotSide.LEFT : RobotSide.RIGHT;
-      FramePose3D otherSidePoseReference = new FramePose3D(handPoses.get(nonActiveSide));
-      otherSidePoseReference.changeFrame(ReferenceFrame.getWorldFrame());
-      frame = new PoseReferenceFrame(nonActiveSide.getLowerCaseName() + index + "Frame", otherSidePoseReference.getReferenceFrame());
-      frame.setPoseAndUpdate(otherSidePoseReference);
-
-      poses.get(nonActiveSide).add(otherSidePoseReference);
-      poseFrames.get(nonActiveSide).add(frame);
-      arePosesSet.get(nonActiveSide).add(false);
-      // add empty graphics if initial pose is not set
-      boolean hasFrameBeenSetOnce = false;
-      for (boolean isInitialPoseSet : arePosesSet.get(nonActiveSide))
-      {
-         if (isInitialPoseSet)
-         {
-            hasFrameBeenSetOnce = true;
-            break;
-         }
-      }
-      if (!hasFrameBeenSetOnce)
-         frameGraphics.get(nonActiveSide).add(null);
-      else
-      {
-         frameGraphics.get(nonActiveSide).add(new RDXReferenceFrameGraphic(0.1, Color.RED));
-      }
-
-
       // no hand configuration is set right when you add a new frame
       selectedFrameConfiguration = null;
       // add an empty spot for the hand configurations
       handConfigurations.get(activeSide[0]).add(null);
-      handConfigurations.get(nonActiveSide).add(null);
+
+      //add frame for the other hand, with same pose from previous frame associated with that side
+      RobotSide nonActiveSide = activeSide[0] == RobotSide.RIGHT ? RobotSide.LEFT : RobotSide.RIGHT;
+      if (handPoses.containsKey(nonActiveSide))
+      {
+         FramePose3D otherSidePoseReference = new FramePose3D(handPoses.get(nonActiveSide));
+         otherSidePoseReference.changeFrame(ReferenceFrame.getWorldFrame());
+         frame = new PoseReferenceFrame(nonActiveSide.getLowerCaseName() + index + "Frame", otherSidePoseReference.getReferenceFrame());
+         frame.setPoseAndUpdate(otherSidePoseReference);
+
+         poses.get(nonActiveSide).add(otherSidePoseReference);
+         poseFrames.get(nonActiveSide).add(frame);
+         arePosesSet.get(nonActiveSide).add(false);
+         // add empty graphics if initial pose is not set
+         boolean hasFrameBeenSetOnce = false;
+         for (boolean isInitialPoseSet : arePosesSet.get(nonActiveSide))
+         {
+            if (isInitialPoseSet)
+            {
+               hasFrameBeenSetOnce = true;
+               break;
+            }
+         }
+         if (!hasFrameBeenSetOnce)
+            frameGraphics.get(nonActiveSide).add(null);
+         else
+         {
+            frameGraphics.get(nonActiveSide).add(new RDXReferenceFrameGraphic(0.1, Color.RED));
+         }
+         // add an empty spot for the hand configurations
+         handConfigurations.get(nonActiveSide).add(null);
+      }
    }
 
    public void selectFrame(int index)
    {
-      for (RobotSide side : RobotSide.values)
+      for (RobotSide side : handPoses.keySet())
       {
          // move hand to selected frame
          handTransformsToWorld.get(side).set(poses.get(side).get(index));
@@ -288,7 +291,7 @@ public class RDXAffordanceFrames
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (RobotSide side : RobotSide.values)
+      for (RobotSide side : handPoses.keySet())
          for (RDXReferenceFrameGraphic frameGraphic : frameGraphics.get(side))
          {
             if (frameGraphic != null)

@@ -86,7 +86,7 @@ public class RDXAffordanceFrame
          activeMenu[0] = RDXActiveAffordanceMenu.NONE;
       }
 
-      for (RobotSide side : RobotSide.values)
+      for (RobotSide side : handPoses.keySet())
       {
          if (isPoseSet.get(side))
          {
@@ -166,7 +166,7 @@ public class RDXAffordanceFrame
       if (handConfigurations.get(activeSide[0]) != null)
          interactableHands.get(activeSide[0]).setGripperToConfiguration(handConfigurations.get(activeSide[0]));
 
-      for (RobotSide side : RobotSide.values)
+      for (RobotSide side : handPoses.keySet())
       {
          if (side == activeSide[0])
             interactableHands.get(side).setSelected(true);
