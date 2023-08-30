@@ -348,6 +348,7 @@ public class RDXLocomotionManager
       ImGui.separator();
       walkPathControlRing.renderImGuiWidgets();
 
+      initialStanceSideRadioButtons.renderImGuiWidget();
       if (ImGui.collapsingHeader(labels.get("Footstep Planning Options"), collapsedHeader))
       {
          ImGui.indent();
@@ -355,7 +356,6 @@ public class RDXLocomotionManager
          areFootstepsAdjustableCheckbox.renderImGuiWidget();
          planSwingTrajectoriesCheckbox.renderImGuiWidget();
          replanSwingTrajectoriesOnChangeCheckbox.renderImGuiWidget();
-         initialStanceSideRadioButtons.renderImGuiWidget();
          ImGui.unindent();
       }
 
