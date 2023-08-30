@@ -22,8 +22,7 @@ public class BehaviorActionCompletionCalculator
                              double translationTolerance,
                              double rotationTolerance,
                              double actionNominalDuration,
-                             Timer executionTimer,
-                             Throttler warningThrottler)
+                             Timer executionTimer)
    {
       boolean timeIsUp = !executionTimer.isRunning(actionNominalDuration);
 

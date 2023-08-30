@@ -5,7 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.sequence.actions.FootstepActionData;
+import us.ihmc.behaviors.sequence.actions.FootstepPlanActionData;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
@@ -20,16 +20,16 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class RDXFootstepAction extends RDXBehaviorAction
+public class RDXFootstepPlanAction extends RDXBehaviorAction
 {
-   private final FootstepActionData actionData = new FootstepActionData();
+   private final FootstepPlanActionData actionData = new FootstepPlanActionData();
    private final RDXPose3DGizmo solePoseGizmo = new RDXPose3DGizmo(actionData.getReferenceFrame(), actionData.getTransformToParent());
    private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
    private final SideDependentList<RigidBodyTransform> ankleToSoleFrameTransforms = new SideDependentList<>();
    private final ModifiableReferenceFrame graphicFrame = new ModifiableReferenceFrame(actionData.getReferenceFrame());
    private final SideDependentList<RDXInteractableHighlightModel> highlightModels = new SideDependentList<>();
 
-   public RDXFootstepAction(RDX3DPanel panel3D, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, ReferenceFrameLibrary referenceFrameLibrary)
+   public RDXFootstepPlanAction(RDX3DPanel panel3D, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, ReferenceFrameLibrary referenceFrameLibrary)
    {
       actionData.setReferenceFrameLibrary(referenceFrameLibrary);
 
@@ -53,11 +53,6 @@ public class RDXFootstepAction extends RDXBehaviorAction
    public void updateAfterLoading()
    {
       referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getParentReferenceFrame().getName());
-   }
-
-   public void setSide(RobotSide side)
-   {
-      actionData.setSide(side);
    }
 
    public void setIncludingFrame(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
@@ -135,7 +130,7 @@ public class RDXFootstepAction extends RDXBehaviorAction
    }
 
    @Override
-   public FootstepActionData getActionData()
+   public FootstepPlanActionData getActionData()
    {
       return actionData;
    }

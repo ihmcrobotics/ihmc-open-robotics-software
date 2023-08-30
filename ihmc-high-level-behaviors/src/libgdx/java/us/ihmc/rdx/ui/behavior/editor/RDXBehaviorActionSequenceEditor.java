@@ -641,28 +641,16 @@ public class RDXBehaviorActionSequenceEditor
       {
          newAction = new RDXArmJointAnglesAction();
       }
-      ImGui.text("Add Footstep:");
+      ImGui.text("Add Footstep Plan:");
       ImGui.sameLine();
       for (var side : RobotSide.values)
       {
          if (ImGui.button(labels.get(side.getPascalCaseName(), 1)))
          {
-            RDXFootstepAction footstepAction = new RDXFootstepAction(panel3D, robotModel, syncedRobot, referenceFrameLibrary);
-            // Set the new action to where the last one was for faster authoring
-            footstepAction.setSide(side);
-            RDXFootstepAction nextPreviousFootstepAction = findNextPreviousFootstepAction();
-            if (nextPreviousFootstepAction != null)
-            {
-               footstepAction.setIncludingFrame(nextPreviousFootstepAction.getReferenceFrame().getParent(),
-                                                nextPreviousFootstepAction.getReferenceFrame().getTransformToParent());
-            }
-            else // set to current robot's foot pose
-            {
-               footstepAction.setToReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
-            }
+            RDXFootstepPlanAction footstepPlanAction = new RDXFootstepPlanAction(panel3D, robotModel, syncedRobot, referenceFrameLibrary);
             if (nextPreviousParentFrame != null)
-               footstepAction.getActionData().changeParentFrameWithoutMoving(nextPreviousParentFrame);
-            newAction = footstepAction;
+               footstepPlanAction.getActionData().changeParentFrame(nextPreviousParentFrame);
+            newAction = footstepPlanAction;
          }
          if (side.ordinal() < 1)
             ImGui.sameLine();
@@ -687,9 +675,9 @@ public class RDXBehaviorActionSequenceEditor
    {
       for (int i = Math.min(executionNextIndexStatus, actionSequence.size() - 1); i >= 0; i--)
       {
-         if (actionSequence.get(i) instanceof RDXFootstepAction footstepAction)
+         if (actionSequence.get(i) instanceof RDXFootstepPlanAction footstepPlanAction)
          {
-            return footstepAction.getActionData().getParentReferenceFrame();
+            return footstepPlanAction.getActionData().getParentReferenceFrame();
          }
          else if (actionSequence.get(i) instanceof RDXHandPoseAction handPoseAction)
          {
@@ -701,19 +689,6 @@ public class RDXBehaviorActionSequenceEditor
          }
       }
       return null;
-   }
-
-   private RDXFootstepAction findNextPreviousFootstepAction()
-   {
-      RDXFootstepAction previousAction = null;
-      for (int i = 0; i < executionNextIndexStatus + 1 && i < actionSequence.size(); i++)
-      {
-         if (actionSequence.get(i) instanceof RDXFootstepAction footstepAction)
-         {
-            previousAction = footstepAction;
-         }
-      }
-      return previousAction;
    }
 
    private RDXHandPoseAction findNextPreviousHandPoseAction(RobotSide side)
