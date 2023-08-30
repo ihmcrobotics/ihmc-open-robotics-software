@@ -379,6 +379,8 @@ public class RDXAffordanceFrames
    public void addIndexPose(int index)
    {
       poseIndices.add(index);
+      selectedIndex = index;
+      this.index = index;
    }
 
    public void selectNext()
