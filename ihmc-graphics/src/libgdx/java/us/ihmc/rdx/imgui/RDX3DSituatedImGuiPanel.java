@@ -89,10 +89,7 @@ public class RDX3DSituatedImGuiPanel
       this.renderImGuiWidgets = renderImGuiWidgets;
 
       for (RobotSide side : RobotSide.values)
-      {
-         pickResult.get(side).setObjectBeingPicked(this);
-         pickResult.get(side).setPickedObjectName(name + " ImGui Panel");
-      }
+         pickResult.get(side).setPickedObjectID(this, name + " ImGui Panel");
    }
 
    public void create(ImGuiImplGl3 imGuiGl3, double panelWidthInMeters, double panelHeightInMeters, int pixelsPerCentimeter)

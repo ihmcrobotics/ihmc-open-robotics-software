@@ -36,20 +36,12 @@ public class RDXVRPickResult
       return distanceToControllerPickPoint;
    }
 
-   /**
-    * Optional. Used to filter access between various parts of the application.
-    */
-   public void setObjectBeingPicked(Object objectBeingPicked)
-   {
-      this.objectBeingPicked = objectBeingPicked;
-   }
-
    public Object getObjectBeingPicked()
    {
       return objectBeingPicked;
    }
 
-   public void setPickedObjectName(String pickedObjectName)
+   public void setPickedObjectID(Object objectBeingPicked, String pickedObjectName)
    {
       this.pickedObjectName = pickedObjectName;
    }
