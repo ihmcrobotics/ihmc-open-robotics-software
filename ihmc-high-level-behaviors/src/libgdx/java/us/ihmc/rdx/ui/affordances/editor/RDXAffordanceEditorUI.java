@@ -1,30 +1,27 @@
 package us.ihmc.rdx.ui.affordances.editor;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
-
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiInputText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObjectBuilder;
+import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class RDXAffordanceEditorUI
 {
@@ -36,7 +33,7 @@ public class RDXAffordanceEditorUI
       HAND_COLORS.put(RobotSide.RIGHT, ColorDefinitions.SlateBlue());
    }
 
-   private final RDXBaseUI baseUI = new RDXBaseUI();
+   private final RDXBaseUI baseUI;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private RobotSide[] activeSide;
 
@@ -61,97 +58,75 @@ public class RDXAffordanceEditorUI
    private final ImGuiInputText textInput = new ImGuiInputText("Enter file name to save/load");
    private String fileName = "";
 
-   public RDXAffordanceEditorUI()
+   public RDXAffordanceEditorUI(RDXBaseUI baseUI)
    {
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      this.baseUI = baseUI;
+      objectBuilder = new RDXInteractableObjectBuilder(baseUI, PredefinedSceneNodeLibrary.defaultObjects());
+      baseUI.getImGuiPanelManager().addPanel(objectBuilder.getWindowName(), objectBuilder::renderImGuiWidgets);
+
+      for (RobotSide side : RobotSide.values)
       {
-         @Override
-         public void create()
-         {
-            baseUI.create();
-            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
-            objectBuilder = new RDXInteractableObjectBuilder(baseUI, PredefinedSceneNodeLibrary.defaultObjects());
-            baseUI.getImGuiPanelManager().addPanel(objectBuilder.getWindowName(), objectBuilder::renderImGuiWidgets);
+         handTransformsToWorld.put(side, new RigidBodyTransform());
+         handTransformsToWorld.get(side).getRotation().setYawPitchRoll(0.0, Math.toRadians(-90.0), 0.0);
+         handTransformsToWorld.get(side).getTranslation().set(-0.5, side.negateIfRightSide(0.2), 0);
+         interactableHands.put(side,
+                               new RDXInteractableSakeGripper(baseUI.getPrimary3DPanel(),
+                                                              handTransformsToWorld.get(side),
+                                                              new ColorDefinition(HAND_COLORS.get(side).getRed(),
+                                                                                  HAND_COLORS.get(side).getGreen(),
+                                                                                  HAND_COLORS.get(side).getBlue(),
+                                                                                  0.8)));
+         handPoses.put(side, new FramePose3D(ReferenceFrame.getWorldFrame(), handTransformsToWorld.get(side)));
+      }
 
-            for (RobotSide side : RobotSide.values)
-            {
-               handTransformsToWorld.put(side, new RigidBodyTransform());
-               handTransformsToWorld.get(side).getRotation().setYawPitchRoll(0.0, Math.toRadians(-90.0), 0.0);
-               handTransformsToWorld.get(side).getTranslation().set(-0.5, side.negateIfRightSide(0.2), 0);
-               interactableHands.put(side,
-                                     new RDXInteractableSakeGripper(baseUI.getPrimary3DPanel(),
-                                                                    handTransformsToWorld.get(side),
-                                                                    new ColorDefinition(HAND_COLORS.get(side).getRed(),
-                                                                                        HAND_COLORS.get(side).getGreen(),
-                                                                                        HAND_COLORS.get(side).getBlue(),
-                                                                                        0.8)));
-               handPoses.put(side, new FramePose3D(ReferenceFrame.getWorldFrame(), handTransformsToWorld.get(side)));
-            }
-
-            activeSide = new RobotSide[1];
-            activeSide[0] = RobotSide.RIGHT;
-            activeMenu = new RDXActiveAffordanceMenu[1];
-            activeMenu[0] = RDXActiveAffordanceMenu.PRE_GRASP;
-            preGraspFrames = new RDXAffordanceFrames(interactableHands,
-                                                     handTransformsToWorld,
-                                                     handPoses,
-                                                     objectBuilder.getSelectedObject().getTransformToWorld(),
-                                                     activeSide,
-                                                     activeMenu,
-                                                     new ArrayList<>(Arrays.asList(new Color(0xFFE4B5FF),
-                                                                                   new Color(0xFF8C00FF),
-                                                                                   new Color(0xFFDAB9FF),
-                                                                                   new Color(0xFF6600FF),
-                                                                                   new Color(0xFFA07AFF))));
-            activeMenu[0] = RDXActiveAffordanceMenu.GRASP;
-            graspFrame = new RDXAffordanceFrame(interactableHands,
+      activeSide = new RobotSide[1];
+      activeSide[0] = RobotSide.RIGHT;
+      activeMenu = new RDXActiveAffordanceMenu[1];
+      activeMenu[0] = RDXActiveAffordanceMenu.PRE_GRASP;
+      preGraspFrames = new RDXAffordanceFrames(interactableHands,
+                                               handTransformsToWorld,
+                                               handPoses,
+                                               objectBuilder.getSelectedObject().getTransformToWorld(),
+                                               activeSide,
+                                               activeMenu,
+                                               new ArrayList<>(Arrays.asList(new Color(0xFFE4B5FF),
+                                                                             new Color(0xFF8C00FF),
+                                                                             new Color(0xFFDAB9FF),
+                                                                             new Color(0xFF6600FF),
+                                                                             new Color(0xFFA07AFF))));
+      activeMenu[0] = RDXActiveAffordanceMenu.GRASP;
+      graspFrame = new RDXAffordanceFrame(interactableHands,
+                                          handTransformsToWorld,
+                                          handPoses,
+                                          objectBuilder.getSelectedObject().getTransformToWorld(),
+                                          activeSide,
+                                          activeMenu,
+                                          Color.BLACK);
+      activeMenu[0] = RDXActiveAffordanceMenu.POST_GRASP;
+      postGraspFrames = new RDXAffordanceFrames(interactableHands,
                                                 handTransformsToWorld,
                                                 handPoses,
                                                 objectBuilder.getSelectedObject().getTransformToWorld(),
                                                 activeSide,
                                                 activeMenu,
-                                                Color.BLACK);
-            activeMenu[0] = RDXActiveAffordanceMenu.POST_GRASP;
-            postGraspFrames = new RDXAffordanceFrames(interactableHands,
-                                                      handTransformsToWorld,
-                                                      handPoses,
-                                                      objectBuilder.getSelectedObject().getTransformToWorld(),
-                                                      activeSide,
-                                                      activeMenu,
-                                                      new ArrayList<>(Arrays.asList(new Color(0xD8BFD8FF),
-                                                                                    new Color(0xBA55D3FF),
-                                                                                    new Color(0x9932CCFF),
-                                                                                    new Color(0x8A2BE2FF),
-                                                                                    new Color(0x4B0082FF))));
-            activeMenu[0] = RDXActiveAffordanceMenu.NONE;
-            for (RobotSide side : RobotSide.values)
-            {
-               baseUI.getPrimaryScene().addRenderableProvider(interactableHands.get(side));
-               baseUI.getImGuiPanelManager().addPanel(interactableHands.get(side).getPose3DGizmo().createTunerPanel(side.getCamelCaseName() + " Hand"));
-            }
-            baseUI.getPrimaryScene().addRenderableProvider(objectBuilder.getSelectedObject());
-            baseUI.getPrimaryScene().addRenderableProvider(RDXAffordanceEditorUI.this::getRenderables);
-            baseUI.getImGuiPanelManager().addPanel("Affordance Panel", RDXAffordanceEditorUI.this::renderImGuiWidgets);
+                                                new ArrayList<>(Arrays.asList(new Color(0xD8BFD8FF),
+                                                                              new Color(0xBA55D3FF),
+                                                                              new Color(0x9932CCFF),
+                                                                              new Color(0x8A2BE2FF),
+                                                                              new Color(0x4B0082FF))));
+      activeMenu[0] = RDXActiveAffordanceMenu.NONE;
+      for (RobotSide side : RobotSide.values)
+      {
+         baseUI.getPrimaryScene().addRenderableProvider(interactableHands.get(side));
+         baseUI.getImGuiPanelManager().addPanel(interactableHands.get(side).getPose3DGizmo().createTunerPanel(side.getCamelCaseName() + " Hand"));
+      }
+      baseUI.getPrimaryScene().addRenderableProvider(objectBuilder.getSelectedObject());
+      baseUI.getPrimaryScene().addRenderableProvider(RDXAffordanceEditorUI.this::getRenderables);
+      baseUI.getImGuiPanelManager().addPanel("Affordance Panel", RDXAffordanceEditorUI.this::renderImGuiWidgets);
 
-            mirror = new RDXAffordanceMirror(interactableHands, handTransformsToWorld, handPoses, activeSide);
-            locker = new RDXAffordanceLocker(handTransformsToWorld, handPoses, activeSide, activeMenu);
-            exporter = new RDXAffordanceExporter(handPoses.keySet(), preGraspFrames, graspFrame, postGraspFrames, objectBuilder);
-         }
-
-         @Override
-         public void render()
-         {
-            update();
-            baseUI.renderBeforeOnScreenUI();
-            baseUI.renderEnd();
-         }
-
-         @Override
-         public void dispose()
-         {
-            baseUI.dispose();
-         }
-      });
+      mirror = new RDXAffordanceMirror(interactableHands, handTransformsToWorld, handPoses, activeSide);
+      locker = new RDXAffordanceLocker(handTransformsToWorld, handPoses, activeSide, activeMenu);
+      exporter = new RDXAffordanceExporter(handPoses.keySet(), preGraspFrames, graspFrame, postGraspFrames, objectBuilder);
    }
 
    public void update()
@@ -426,10 +401,5 @@ public class RDXAffordanceEditorUI
       graspFrame.getRenderables(renderables, pool);
       preGraspFrames.getRenderables(renderables, pool);
       postGraspFrames.getRenderables(renderables, pool);
-   }
-
-   public static void main(String[] args)
-   {
-      new RDXAffordanceEditorUI();
    }
 }
