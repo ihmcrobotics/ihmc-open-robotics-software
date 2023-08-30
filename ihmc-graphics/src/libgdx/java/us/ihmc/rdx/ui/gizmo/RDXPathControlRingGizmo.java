@@ -155,6 +155,9 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       RDXBaseUI.getInstance().getKeyBindings().register("Drag control ring", "Left mouse");
       RDXBaseUI.getInstance().getKeyBindings().register("Drag control ring (yaw)", "Right mouse");
       RDXBaseUI.getInstance().getKeyBindings().register("Move control ring slowly", "Shift");
+
+      for (RobotSide side : RobotSide.values)
+         vrPickResult.get(side).setPickedObjectID(this, "Path Control Ring Gizmo");
    }
 
    public void setGizmoFrame(ReferenceFrame gizmoFrame)
@@ -267,7 +270,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
             }
             if (closestVRCollisionSelection.get(side) != null)
             {
-               vrPickResult.get(side).setDistanceToControllerPickPoint(closestCollisionDistance);
+               vrPickResult.get(side).setPointingAtCollision(closestCollisionDistance);
                controller.addPickResult(vrPickResult.get(side));
             }
          });
@@ -315,7 +318,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
                   Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
                   frameBasedGizmoModification.translateInWorld(planarMotion);
                   closestCollision.add(planarMotion);
-                  controller.setPickRayColliding(pickRay.getPoint().distance(closestCollision));
                   triggerDragData.updateZUpDrag(gizmoFrame);
                   double deltaYaw = triggerDragData.getZUpDragPose().getOrientation().getYaw() - gizmoFrame.getTransformToRoot().getRotation().getYaw();
                   frameBasedGizmoModification.yawInWorld(deltaYaw);

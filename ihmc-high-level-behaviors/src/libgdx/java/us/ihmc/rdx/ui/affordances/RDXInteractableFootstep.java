@@ -283,7 +283,8 @@ public class RDXInteractableFootstep
          {
             if (pointCollidable.collide(controller.getPickPointPose().getPosition()))
             {
-               vrPickResult.get(side).addPickCollision(0);
+               vrPickResult.get(side).setHoveringCollsion(controller.getPickPointPose().getPosition(), pointCollidable.getClosestPointOnSurface());
+               vrPickResult.get(side).setPickedObjectID(this, "Footstep " + footstepIndexText.getCurrentText());
                controller.addPickResult(vrPickResult.get(side));
             }
          });
