@@ -47,6 +47,7 @@ public class RDX3DSituatedText implements RenderableProvider
    private final ModelBuilder modelBuilder = new ModelBuilder();
    private final HashMap<String, ModelInstance> textModelInstances = new HashMap<>();
    private ModelInstance modelInstance;
+   private String currentText;
    private final Font awtFont;
    private final Color awtColor;
    private final float textHeightMeters;
@@ -77,6 +78,7 @@ public class RDX3DSituatedText implements RenderableProvider
 
    public void setText(String text)
    {
+      this.currentText = text;
       modelInstance = textModelInstances.get(text);
 
       if (modelInstance == null)
@@ -162,5 +164,10 @@ public class RDX3DSituatedText implements RenderableProvider
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       modelInstance.getRenderables(renderables, pool);
+   }
+
+   public String getCurrentText()
+   {
+      return currentText;
    }
 }
