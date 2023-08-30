@@ -190,10 +190,7 @@ public class RDX3DSituatedImagePanel
                                                boxMeshBuilder.addMultiLineBox(vertices, 0.0005, new Color(Color.WHITE))));
 
       for (RobotSide side : RobotSide.values)
-      {
-         vrPickResult.get(side).setObjectBeingPicked(this);
-         vrPickResult.get(side).setPickedObjectName("3D Situated Image Panel");
-      }
+         vrPickResult.get(side).setPickedObjectID(this, "3D Situated Image Panel");
    }
 
    private void transformFromLocalToWorld(Vector3 positionToTransform, ReferenceFrame localFrame)

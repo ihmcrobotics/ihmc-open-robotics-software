@@ -115,9 +115,6 @@ public class RDXInteractableFootstep
       pointCollidable = new PointCollidable(selectionCollisionBox);
 
       updateFootstepIndexText(index);
-
-      for (RobotSide side : RobotSide.values)
-         vrPickResult.get(side).setObjectBeingPicked(this);
    }
 
    /**
@@ -287,7 +284,7 @@ public class RDXInteractableFootstep
             if (pointCollidable.collide(controller.getPickPointPose().getPosition()))
             {
                vrPickResult.get(side).setHoveringCollsion(controller.getPickPointPose().getPosition(), pointCollidable.getClosestPointOnSurface());
-               vrPickResult.get(side).setPickedObjectName("Footstep " + footstepIndexText.getCurrentText());
+               vrPickResult.get(side).setPickedObjectID(this, "Footstep " + footstepIndexText.getCurrentText());
                controller.addPickResult(vrPickResult.get(side));
             }
          });

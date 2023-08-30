@@ -103,10 +103,7 @@ public class RDXRobotCollidable implements RenderableProvider
       vrPickRayCollidable = new MouseCollidable(this.shape);
       pointCollidable = new PointCollidable(this.shape);
       for (RobotSide side : RobotSide.values)
-      {
-         vrPickResult.get(side).setObjectBeingPicked(this);
-         vrPickResult.get(side).setPickedObjectName(name);
-      }
+         vrPickResult.get(side).setPickedObjectID(this, name);
 
       collisionModelInstance = new RDXModelInstance(RDXModelBuilder.buildModel(meshBuilder ->
       {
