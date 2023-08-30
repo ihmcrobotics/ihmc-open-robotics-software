@@ -178,6 +178,7 @@ public class RDXStoredPropertySetTuner extends RDXPanel
       return new ImGuiStoredPropertySetBooleanWidget(storedPropertySet, key, onParametersUpdatedCallback);
    }
 
+   /** Interperets an Integer stored property as representing an enum ordinal and makes radio buttons for it. */
    public ImGuiStoredPropertySetEnumWidget createEnumRadioButtons(IntegerStoredPropertyKey key, Enum<?>[] enumValues)
    {
       return new ImGuiStoredPropertySetEnumWidget(storedPropertySet, key, enumValues, onParametersUpdatedCallback);
