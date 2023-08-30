@@ -22,6 +22,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
  * Click and release the joystick button while holding it in the direction of
  * the desired option to execute the option. A white mesh box highlights the
  * selected option.
+ *
+ * TODO: It's a little awkward to press the joystick button while holding it in
+ *   a direction, so we could look into using the trigger to do that or
+ *   something.
  */
 public class RDXVRControllerRadialMenu
 {
