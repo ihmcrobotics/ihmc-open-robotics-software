@@ -74,6 +74,55 @@ def print_file_sizes(path, filenames):
     print('------------------------------------------------------------------------------------------------------')
     print()
 
+def rename_file(path, h5, h5_filename):
+    # ensures the only modded files are the old 20230207 file names
+    if(h5_filename[0].isdigit() and h5_filename[1].isdigit() and h5_filename[2].isdigit() and "plog" not in h5_filename):
+        print("Old file name: " + h5_filename)
+        unique_set = set({}) # unique set of all base groups in the HD5F file
+        groups = collect_groups(h5)
+
+        # collect the unique base groups
+        for group in groups:
+            stringSplit = group.split("/") 
+            unique_set.add(stringSplit[0]) 
+
+        # replace file name using unique groups
+        newFileName = h5_filename.replace("PerceptionLog", "plog") 
+        stringSplit = newFileName.split("_") 
+        newFileName = stringSplit[0] + "_" + stringSplit[1] + "_"
+        newFileName += ''.join( s.capitalize()+"_" for s in unique_set) # replace time stamp with sensor usage info
+        for i in range(2, len(stringSplit)):
+            newFileName += stringSplit[i]
+            if(i < len(stringSplit)-1):
+                newFileName += "_"
+        
+        # rename the file if user likes the change
+        print("New file name: " + newFileName)
+        answer = input("Confirm the name change?: [y/n] ")
+        if(answer.lower() == 'y' or 'yes'):
+            oldFile = path + h5_filename
+            newFileName = path + newFileName
+            os.rename(src=oldFile, dst=newFileName) # rename file
+            return True
+        else:
+            print("Name unchanged.")
+            return False
+    else:
+        return False
+
+# rename all files in .ihmc/logs/perception that use the old date_time_Perceptionlog.hd5f format
+def rename_all_files(path, filenames):
+    unTouchedFiles = []
+
+    for filename in filenames:
+        if filename.endswith('.hdf5'):
+            h5= h5py.File(path + filename, 'r')
+            if(not rename_file(path, h5, filename)):
+                unTouchedFiles.append(filename)
+
+    print("Files that were not changed:")
+    print(unTouchedFiles)
+
 def collect_channels(data):
     channels = []
 
