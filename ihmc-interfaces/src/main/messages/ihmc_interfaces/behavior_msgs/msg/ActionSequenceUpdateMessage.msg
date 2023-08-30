@@ -5,7 +5,7 @@ behavior_msgs/ArmJointAnglesActionMessage[<=200] arm_joint_angles_actions
 
 behavior_msgs/ChestOrientationActionMessage[<=200] chest_orientation_actions
 
-behavior_msgs/FootstepActionMessage[<=200] footstep_actions
+behavior_msgs/FootstepPlanActionMessage[<=200] footstep_plan_actions
 
 behavior_msgs/HandConfigurationActionMessage[<=200] hand_configuration_actions
 

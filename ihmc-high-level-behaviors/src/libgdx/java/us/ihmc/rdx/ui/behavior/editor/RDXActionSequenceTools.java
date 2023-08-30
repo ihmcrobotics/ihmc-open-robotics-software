@@ -37,7 +37,7 @@ public class RDXActionSequenceTools
          }
          case "RDXFootstepAction" ->
          {
-            return new RDXFootstepAction(panel3D, robotModel, syncedRobot, referenceFrameLibrary);
+            return new RDXFootstepPlanAction(panel3D, robotModel, syncedRobot, referenceFrameLibrary);
          }
          case "RDXHandConfigurationAction" ->
          {
