@@ -17,7 +17,7 @@ import java.util.*;
 
 public class RDXInteractableObjectBuilder extends RDXPanel
 {
-   private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(RDXInteractableObjectBuilder.class, "Object Panel");
+   private final static String WINDOW_NAME = "Object Panel";
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final PredefinedSceneNodeLibrary predefinedSceneNodeLibrary;
    private RDXInteractableObject selectedObject;
