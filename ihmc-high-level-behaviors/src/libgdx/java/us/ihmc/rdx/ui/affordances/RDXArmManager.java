@@ -11,6 +11,7 @@ import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.HandWrenchCalculator;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -36,6 +37,19 @@ import us.ihmc.tools.thread.MissingThreadTools;
  */
 public class RDXArmManager
 {
+   /* Sake hand's fingers do not extend much outward from the hand at 15 degrees apart, i.e. they are nearly parallel
+      kinda look like this:
+      15 degrees apart  |  0 degrees apart
+
+        /\    /\                 /||\
+       | |    | | <- fingers -> / /\ \
+       | |    | |              / /  \ \
+       |  ----  |             |  ----  |
+       |        | <-  palm -> |        |
+       |________|             |________|
+    */
+   private final static double SAKE_HAND_SAFEE_FINGER_ANGLE = 15.0;
+
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final CommunicationHelper communicationHelper;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -61,6 +75,8 @@ public class RDXArmManager
    private final HandWrenchCalculator handWrenchCalculator;
    private final ImBoolean indicateWrenchOnScreen = new ImBoolean(false);
    private RDX3DPanelHandWrenchIndicator panelHandWrenchIndicator;
+
+   private final TypedNotification<RobotSide> showWarningNotification = new TypedNotification<>();
 
    public RDXArmManager(CommunicationHelper communicationHelper,
                         DRCRobotModel robotModel,
@@ -256,6 +272,35 @@ public class RDXArmManager
       }
 
       ImGui.checkbox(labels.get("Hand wrench magnitudes on 3D View"), indicateWrenchOnScreen);
+
+      // Pop up warning if notification is set
+      if (showWarningNotification.peekHasValue() && showWarningNotification.poll())
+      {
+         ImGui.openPopup(labels.get("Warning"));
+      }
+
+      if (ImGui.beginPopupModal(labels.get("Warning")))
+      {
+         ImGui.text("""
+                          The hand is currently open.
+                                                    
+                          Continuing to door avoidance
+                          may cause the hand to collide
+                          with the body of the robot.""");
+
+         ImGui.separator();
+         if (ImGui.button("Continue"))
+         {
+            executeArmAngles(showWarningNotification.read(), doorAvoidanceArms, teleoperationParameters.getTrajectoryTime());
+            ImGui.closeCurrentPopup();
+         }
+         ImGui.sameLine();
+         if (ImGui.button("Cancel"))
+         {
+            ImGui.closeCurrentPopup();
+         }
+         ImGui.endPopup();
+      }
    }
 
    public void executeArmHome(RobotSide side)
@@ -274,7 +319,17 @@ public class RDXArmManager
 
    public void executeDoorAvoidanceArmAngles(RobotSide side)
    {
-      executeArmAngles(side, doorAvoidanceArms, teleoperationParameters.getTrajectoryTime());
+      // Warning pops up if fingers are more than 15 degrees from "zero" (zero = when fingertips are parallel)
+      // i.e. when the fingers are more than 30 degrees apart from each other
+      // This is an arbitrary value
+      if (syncedRobot.getLatestHandJointAnglePacket(side).getJointAngles().get(0) > Math.toRadians(SAKE_HAND_SAFEE_FINGER_ANGLE))
+      {
+         showWarningNotification.set(side);
+      }
+      else
+      {
+         executeArmAngles(side, doorAvoidanceArms, teleoperationParameters.getTrajectoryTime());
+      }
    }
 
    public void executeShieldHoldingArmAngles(RobotSide side)

@@ -39,6 +39,7 @@ public class FootstepActionData implements BehaviorActionData
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
+      description = jsonNode.get("description").textValue();
       side = RobotSide.getSideFromString(jsonNode.get("side").asText());
       modifiableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()).get());
       modifiableReferenceFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));

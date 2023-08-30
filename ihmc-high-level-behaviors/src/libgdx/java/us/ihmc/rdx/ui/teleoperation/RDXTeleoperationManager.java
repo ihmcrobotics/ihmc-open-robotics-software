@@ -367,8 +367,12 @@ public class RDXTeleoperationManager extends RDXPanel
       if (interactablesEnabled.get())
       {
          locomotionManager.calculateWalkPathControlRingVRPick(vrContext);
-         if (interactablesAvailable)
+
+         if (interactablesAvailable && showContactCollisionMeshes.get())
             contactCollisionModel.calculateVRPick(vrContext);
+
+         for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
+            robotPartInteractable.calculateVRPick(vrContext);
       }
    }
 
@@ -377,13 +381,12 @@ public class RDXTeleoperationManager extends RDXPanel
       if (interactablesAvailable)
       {
          locomotionManager.processWalkPathControlRingVRInput(vrContext);
-         for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
-         {
-            robotPartInteractable.processVRInput(vrContext);
-         }
 
-         if (interactablesEnabled.get())
+         if (interactablesEnabled.get() && showContactCollisionMeshes.get())
             contactCollisionModel.processVRInput(vrContext);
+
+         for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
+            robotPartInteractable.processVRInput(vrContext);
       }
    }
 
@@ -395,7 +398,7 @@ public class RDXTeleoperationManager extends RDXPanel
 
          if (interactablesAvailable)
          {
-            if (input.isWindowHovered())
+            if (input.isWindowHovered() && showContactCollisionMeshes.get())
                contactCollisionModel.calculate3DViewPick(input);
 
             for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
@@ -413,7 +416,8 @@ public class RDXTeleoperationManager extends RDXPanel
 
          if (interactablesAvailable)
          {
-            contactCollisionModel.process3DViewInput(input);
+            if (showContactCollisionMeshes.get())
+               contactCollisionModel.process3DViewInput(input);
 
             interactablePelvis.process3DViewInput(input);
 

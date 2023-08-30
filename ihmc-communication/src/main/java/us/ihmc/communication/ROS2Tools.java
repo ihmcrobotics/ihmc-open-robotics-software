@@ -4,6 +4,7 @@ import com.eprosima.xmlschemas.fastrtps_profiles.ReliabilityQosKindType;
 import controller_msgs.msg.dds.HandSakeDesiredCommandMessage;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.HandJointAnglePacket;
+import controller_msgs.msg.dds.HandSakeDesiredCommandMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
