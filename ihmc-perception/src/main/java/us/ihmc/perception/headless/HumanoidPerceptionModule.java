@@ -1,8 +1,10 @@
 package us.ihmc.perception.headless;
 
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -22,6 +24,7 @@ import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.tools.ActiveMappingTools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionFilterTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -29,6 +32,7 @@ import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -51,6 +55,9 @@ public class HumanoidPerceptionModule
    private CollisionBoxProvider collisionBoxProvider;
    private FramePlanarRegionsList sensorFrameRegions;
 
+   private final ImageMessage depthImageMessage = new ImageMessage();
+   private final BytePointer compressedDepthPointer = new BytePointer();
+
    private PerceptionConfigurationParameters perceptionConfigurationParameters;
 
    public HumanoidPerceptionModule(OpenCLManager openCLManager)
@@ -64,17 +71,29 @@ public class HumanoidPerceptionModule
       this.realsenseDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
    }
 
-   public void updateTerrain(ROS2Helper ros2Helper, Mat depthImage, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame,
-                             boolean rapidRegionsEnabled, boolean mappingEnabled, boolean heightMapEnabled)
+   public void updateTerrain(ROS2Helper ros2Helper, Mat incomingDepth, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame,
+                             boolean rapidRegionsEnabled, boolean mappingEnabled, boolean heightMapEnabled, boolean metricDepth)
    {
       if (localizationAndMappingTask != null)
          localizationAndMappingTask.setEnableLiveMode(mappingEnabled);
+
+      if (rapidRegionsEnabled || heightMapEnabled)
+      {
+         if (metricDepth)
+         {
+            OpenCVTools.convertFloatToShort(incomingDepth, realsenseDepthImage.getBytedecoOpenCVMat(), 1000.0, 0.0);
+         }
+         else
+         {
+            incomingDepth.convertTo(realsenseDepthImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1, 1, 0);
+         }
+      }
 
       if (rapidRegionsEnabled)
       {
          executorService.submit(() ->
          {
-            updatePlanarRegions(ros2Helper, depthImage, cameraFrame);
+            updatePlanarRegions(ros2Helper, cameraFrame);
          });
       }
 
@@ -82,14 +101,13 @@ public class HumanoidPerceptionModule
       {
          executorService.submit(() ->
          {
-            updateRapidHeightMap(ros2Helper, depthImage, cameraFrame, cameraZUpFrame);
+            updateRapidHeightMap(ros2Helper, cameraFrame, cameraZUpFrame);
          });
       }
    }
 
-   private void updatePlanarRegions(ROS2Helper ros2Helper, Mat depthImage, ReferenceFrame cameraFrame)
+   private void updatePlanarRegions(ROS2Helper ros2Helper, ReferenceFrame cameraFrame)
    {
-      OpenCVTools.convertFloatToShort(depthImage, realsenseDepthImage.getBytedecoOpenCVMat(), 1000.0, 0.0);
       extractFramePlanarRegionsList(rapidPlanarRegionsExtractor,
                                     realsenseDepthImage,
                                     sensorFrameRegions,
@@ -102,13 +120,26 @@ public class HumanoidPerceptionModule
                                                            ros2Helper);
    }
 
-   private void updateRapidHeightMap(ROS2Helper ros2Helper, Mat depthImage, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
+   private void updateRapidHeightMap(ROS2Helper ros2Helper, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
    {
       RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
       RigidBodyTransform sensorToGround = cameraFrame.getTransformToDesiredFrame(cameraZUpFrame);
       RigidBodyTransform groundToWorld = cameraZUpFrame.getTransformToWorldFrame();
 
       rapidHeightMapExtractor.update(sensorToWorld, sensorToGround, groundToWorld);
+
+      Instant acquisitionTime = Instant.now();
+
+      OpenCVTools.compressImagePNG(rapidHeightMapExtractor.getGlobalHeightMapImage().getBytedecoOpenCVMat(), compressedDepthPointer);
+      PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer,
+                                                         PerceptionAPI.HEIGHT_MAP_GLOBAL,
+                                                         depthImageMessage,
+                                                         ros2Helper,
+                                                         cameraPose,
+                                                         acquisitionTime, rapidHeightMapExtractor.getSequenceNumber(),
+                                                         rapidHeightMapExtractor.getGlobalHeightMapImage().getImageHeight(),
+                                                         rapidHeightMapExtractor.getGlobalHeightMapImage().getImageWidth(),
+                                                         10000.0f);
    }
 
    public void updateStructural(ROS2Helper ros2Helper, List<Point3D> pointCloud, ReferenceFrame sensorFrame, Mat occupancy, float thresholdHeight, boolean display)

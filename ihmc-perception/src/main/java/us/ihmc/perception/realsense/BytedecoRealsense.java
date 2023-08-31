@@ -499,6 +499,8 @@ public class BytedecoRealsense
          depthCameraIntrinsics.setFy(getDepthFocalLengthPixelsY());
          depthCameraIntrinsics.setCx(getDepthPrincipalOffsetXPixels());
          depthCameraIntrinsics.setCy(getDepthPrincipalOffsetYPixels());
+         depthCameraIntrinsics.setHeight(depthHeight);
+         depthCameraIntrinsics.setWidth(depthWidth);
       }
       return depthCameraIntrinsics;
    }
@@ -512,6 +514,8 @@ public class BytedecoRealsense
          colorCameraIntrinsics.setFy(getColorFocalLengthPixelsY());
          colorCameraIntrinsics.setCx(getColorPrincipalOffsetXPixels());
          colorCameraIntrinsics.setCy(getColorPrincipalOffsetYPixels());
+         colorCameraIntrinsics.setHeight(colorHeight);
+         colorCameraIntrinsics.setWidth(colorWidth);
       }
       return colorCameraIntrinsics;
    }
