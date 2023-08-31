@@ -11,7 +11,13 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class RDXAffordanceLocker
+/**
+ * The "Lock Hand To Object" and "Lock Both Hands To Object" functionality allows you to lock the hands to the object and translate and rotate the object with
+ * the hands attached to it.
+ * It works only for post grasp frames. This means you need to first click on a frame button in the Post Grasp Menu or add one frame if there are none.
+ * While moving the object and attached hands, you can then "Set" or "Add" frames whenever you wish.
+ */
+public class RDXAffordanceTemplateLocker
 {
    private final SideDependentList<FramePose3D> handPoses;
    private final SideDependentList<RigidBodyTransform> handTransformsToWorld;
@@ -25,10 +31,10 @@ public class RDXAffordanceLocker
 
    private final PoseReferenceFrame objectFrame = new PoseReferenceFrame("objectFrame", ReferenceFrame.getWorldFrame());
 
-   public RDXAffordanceLocker(SideDependentList<RigidBodyTransform> handTransformsToWorld,
-                              SideDependentList<FramePose3D> handPoses,
-                              RobotSide[] activeSide,
-                              RDXActiveAffordanceMenu[] activeMenu)
+   public RDXAffordanceTemplateLocker(SideDependentList<RigidBodyTransform> handTransformsToWorld,
+                                      SideDependentList<FramePose3D> handPoses,
+                                      RobotSide[] activeSide,
+                                      RDXActiveAffordanceMenu[] activeMenu)
    {
       this.handPoses = handPoses;
       this.handTransformsToWorld = handTransformsToWorld;
@@ -88,7 +94,7 @@ public class RDXAffordanceLocker
          }
          if (!(handsLocked.get(RobotSide.LEFT) && handsLocked.get(RobotSide.RIGHT)))
          {
-            if (ImGui.button(labels.get("LOCK HAND TO OBJECT")) && activeMenu[0] == RDXActiveAffordanceMenu.POST_GRASP)
+            if (ImGui.button(labels.get("Lock Hand To Object")) && activeMenu[0] == RDXActiveAffordanceMenu.POST_GRASP)
                handsLocked.replace(activeSide[0], !handsLocked.get(activeSide[0]));
          }
          if (changedColorLockOneHand)
@@ -103,7 +109,7 @@ public class RDXAffordanceLocker
          if (!((handsLocked.get(RobotSide.LEFT) && !handsLocked.get(RobotSide.RIGHT)) || (!handsLocked.get(RobotSide.LEFT)
                                                                                           && handsLocked.get(RobotSide.RIGHT))))
          { // not in alternate state, this means single hand lock is not activate
-            if (ImGui.button(labels.get("LOCK BOTH HANDS TO OBJECT")) && activeMenu[0] == RDXActiveAffordanceMenu.POST_GRASP)
+            if (ImGui.button(labels.get("Lock Both Hands To Object")) && activeMenu[0] == RDXActiveAffordanceMenu.POST_GRASP)
             {
                for (RobotSide side : RobotSide.values)
                   handsLocked.replace(side, !handsLocked.get(side));

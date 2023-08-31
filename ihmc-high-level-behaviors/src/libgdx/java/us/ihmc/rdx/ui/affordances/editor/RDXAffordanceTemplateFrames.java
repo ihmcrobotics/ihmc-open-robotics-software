@@ -10,7 +10,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
@@ -21,7 +20,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RDXAffordanceFrames
+public class RDXAffordanceTemplateFrames
 {
    private final SideDependentList<List<FramePose3D>> poses = new SideDependentList<>();
    private final SideDependentList<List<PoseReferenceFrame>> poseFrames = new SideDependentList<>();
@@ -44,13 +43,13 @@ public class RDXAffordanceFrames
    private final RDXActiveAffordanceMenu[] activeMenu;
    private final RDXActiveAffordanceMenu menu;
 
-   public RDXAffordanceFrames(SideDependentList<RDXInteractableSakeGripper> interactableHands,
-                              SideDependentList<RigidBodyTransform> handTransformsToWorld,
-                              SideDependentList<FramePose3D> handPoses,
-                              RigidBodyTransform objectTransformToWorld,
-                              RobotSide[] activeSide,
-                              RDXActiveAffordanceMenu[] activeMenu,
-                              ArrayList<Color> colors)
+   public RDXAffordanceTemplateFrames(SideDependentList<RDXInteractableSakeGripper> interactableHands,
+                                      SideDependentList<RigidBodyTransform> handTransformsToWorld,
+                                      SideDependentList<FramePose3D> handPoses,
+                                      RigidBodyTransform objectTransformToWorld,
+                                      RobotSide[] activeSide,
+                                      RDXActiveAffordanceMenu[] activeMenu,
+                                      ArrayList<Color> colors)
    {
       this.interactableHands = interactableHands;
       this.handPoses = handPoses;
@@ -85,9 +84,9 @@ public class RDXAffordanceFrames
       }
    }
 
-   public void renderImGuiWidgets(ImGuiUniqueLabelMap labels, String lableId, boolean editingBothHands)
+   public void renderImGuiWidgets(ImGuiUniqueLabelMap labels, String labelId, boolean editingBothHands)
    {
-      if (ImGui.button(labels.get("ADD") + "##" + lableId) && handPoses.containsKey(activeSide[0]))
+      if (ImGui.button(labels.get("Add") + "##" + labelId) && handPoses.containsKey(activeSide[0]))
       {
          activeMenu[0] = this.menu;
          addFrame(handPoses.get(activeSide[0]));
@@ -97,7 +96,7 @@ public class RDXAffordanceFrames
          selectedIndex = poseIndices.size() - 1;
       }
       ImGui.sameLine();
-      if (ImGui.button(labels.get("SET") + "##" + lableId) && activeMenu[0].equals(this.menu))
+      if (ImGui.button(labels.get("Set") + "##" + labelId) && activeMenu[0].equals(this.menu))
       {
          if (editingBothHands)
          {
@@ -128,7 +127,7 @@ public class RDXAffordanceFrames
          }
       }
       ImGui.sameLine();
-      if (ImGui.button(labels.get("CLEAR ALL") + "##" + lableId))
+      if (ImGui.button(labels.get("Clear All") + "##" + labelId))
       {
          reset();
          activeMenu[0] = RDXActiveAffordanceMenu.NONE;
@@ -152,7 +151,7 @@ public class RDXAffordanceFrames
                   ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 1.0f, 0.0f, 1.0f);
                   changedColor = true;
                }
-               if (ImGui.button(labels.get((side  == RobotSide.RIGHT ? "R" : "L") + poseIndices.get(i).toString()) + "##" + lableId))
+               if (ImGui.button(labels.get((side  == RobotSide.RIGHT ? "R" : "L") + poseIndices.get(i).toString()) + "##" + labelId))
                {
                   activeMenu[0] = this.menu;
                   activeSide[0] = side;
@@ -166,7 +165,7 @@ public class RDXAffordanceFrames
                ImGui.sameLine();
                // handle the delete button click event here...
                ImGui.pushStyleColor(ImGuiCol.Button, 1.0f, 1.0f, 1.0f, 1.0f);
-               if (ImGui.button(labels.get("X") + "##" + lableId + (side  == RobotSide.RIGHT ? "R" : "L") + i, 15, 15))
+               if (ImGui.button(labels.get("X") + "##" + labelId + (side  == RobotSide.RIGHT ? "R" : "L") + i, 15, 15))
                {
                   for (RobotSide eachSide : handPoses.keySet())
                   {
@@ -185,6 +184,7 @@ public class RDXAffordanceFrames
                ImGui.popStyleColor();
             }
          }
+
          else
          {
             colorIndex = 0;
@@ -193,7 +193,7 @@ public class RDXAffordanceFrames
       }
       ImGui.text("Hand Configuration: " + (selectedFrameConfiguration == null ? "" : selectedFrameConfiguration.toString()));
       ImGui.sameLine();
-      if (ImGui.button(labels.get("SET") + "##hand" + lableId) && activeMenu[0].equals(this.menu))
+      if (ImGui.button(labels.get("Set") + "##hand" + labelId) && activeMenu[0].equals(this.menu))
       {
          if (selectedIndex >= 0)
          {

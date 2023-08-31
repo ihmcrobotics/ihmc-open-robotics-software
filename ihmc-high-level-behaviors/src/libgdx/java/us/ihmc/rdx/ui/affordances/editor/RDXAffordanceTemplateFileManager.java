@@ -30,7 +30,7 @@ import java.util.Set;
 
 import static us.ihmc.robotics.robotSide.RobotSide.getSideFromString;
 
-public class RDXAffordanceExporter
+public class RDXAffordanceTemplateFileManager
 {
    private static final double DEFAULT_DURATION = 1.0;
    private static final double LINEAR_VELOCITY = 0.1;
@@ -38,15 +38,15 @@ public class RDXAffordanceExporter
 
    private ReferenceFrame initialObjectFrame;
    private ModifiableReferenceFrame affordanceFrame = new ModifiableReferenceFrame("affordanceFrame", ReferenceFrame.getWorldFrame());
-   private final RDXAffordanceFrame graspFrame;
-   private final RDXAffordanceFrames preGraspFrames;
-   private final RDXAffordanceFrames postGraspFrames;
+   private final RDXAffordanceTemplateFrame graspFrame;
+   private final RDXAffordanceTemplateFrames preGraspFrames;
+   private final RDXAffordanceTemplateFrames postGraspFrames;
    private final Set<RobotSide> activeSides;
    private final RDXInteractableObjectBuilder objectBuilder;
    private final WorkspaceResourceDirectory configurationsDirectory = new WorkspaceResourceDirectory(getClass(), "/affordances");
    private final SideDependentList<List<double[]>> csvDataMatrices = new SideDependentList<>();
 
-   public RDXAffordanceExporter(Set<RobotSide> activeSides, RDXAffordanceFrames preGraspFrames, RDXAffordanceFrame graspFrame, RDXAffordanceFrames postGraspFrames, RDXInteractableObjectBuilder objectBuilder)
+   public RDXAffordanceTemplateFileManager(Set<RobotSide> activeSides, RDXAffordanceTemplateFrames preGraspFrames, RDXAffordanceTemplateFrame graspFrame, RDXAffordanceTemplateFrames postGraspFrames, RDXInteractableObjectBuilder objectBuilder)
    {
       this.preGraspFrames = preGraspFrames;
       this.graspFrame = graspFrame;
