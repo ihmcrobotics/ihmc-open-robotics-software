@@ -94,9 +94,9 @@ public class ArmIKSolver
 
       // Set the control frame pose to our palm centered control frame.
       // The spatial feedback command wants this relative to the fixed CoM of the hand link.
-      FramePose3D tempPose = new FramePose3D(syncedRobot.getHandControlFrame(side));
-      tempPose.changeFrame(syncedRobot.getHand(side).getBodyFixedFrame());
-      controlFramePose.setIncludingFrame(workHand.getBodyFixedFrame(), tempPose);
+      FramePose3D syncedControlFramePose = new FramePose3D(syncedRobot.getHandControlFrame(side));
+      syncedControlFramePose.changeFrame(syncedRobot.getHand(side).getBodyFixedFrame());
+      controlFramePose.setIncludingFrame(workHand.getBodyFixedFrame(), syncedControlFramePose);
 
       workingOneDoFJoints = MultiBodySystemMissingTools.getSubtreeJointArray(OneDoFJointBasics.class, workChest);
 
@@ -221,7 +221,7 @@ public class ArmIKSolver
                   jointIsMoving = true;
                // we need to integrate the velocity to get the desired poistion
                double integratedPosition = workingOneDoFJoints[j].getQ() + CONTROL_DT * desiredVelocity;
-               // if the desired position is vastly different than the one integrated internally, don't use that.
+               // if the desired position is vastly different than the one integrated internally, don't it, and fall back to the output of the IK.
                if (AngleTools.computeAngleDifferenceMinusPiToPi(integratedPosition, jointDesiredOutput.getDesiredPosition()) > Math.toRadians(45.0))
                   integratedPosition = jointDesiredOutput.getDesiredPosition();
                workingOneDoFJoints[j].setQ(integratedPosition);
