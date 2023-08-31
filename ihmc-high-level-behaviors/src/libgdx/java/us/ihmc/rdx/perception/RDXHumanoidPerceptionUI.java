@@ -3,7 +3,7 @@ package us.ihmc.rdx.perception;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.HumanoidPerceptionModule;
+import us.ihmc.perception.headless.HumanoidPerceptionModule;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.rdx.RDXHeightMapRenderer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXHeightMapVisualizer;
@@ -46,28 +46,24 @@ public class RDXHumanoidPerceptionUI
       this.rapidRegionsUI.create(humanoidPerception.getRapidRegionsExtractor());
    }
 
-   public void initializeHeightMapUI(ROS2Helper ros2Helper)
-   {
-      heightMapUI = new RDXRemoteHeightMapPanel(ros2Helper);
-   }
-
-
-   public void renderImGuiWidgets()
-   {
-      rapidRegionsUI.renderImGuiWidgets();
-   }
-
    public void render(RigidBodyTransform zUpFrameToWorld)
    {
-      heightMapRenderer.update(zUpFrameToWorld,
-            humanoidPerception.getRapidHeightMapExtractor().getGlobalHeightMapImage().getPointerForAccessSpeed(),
-            humanoidPerception.getRapidHeightMapExtractor().getGlobalCenterIndex(),
-            humanoidPerception.getRapidHeightMapExtractor().getGlobalCellSizeInMeters());
+      if (heightMapRenderer != null)
+      {
+         heightMapRenderer.update(zUpFrameToWorld,
+                                  humanoidPerception.getRapidHeightMapExtractor().getGlobalHeightMapImage().getPointerForAccessSpeed(),
+                                  humanoidPerception.getRapidHeightMapExtractor().getGlobalCenterIndex(),
+                                  humanoidPerception.getRapidHeightMapExtractor().getGlobalCellSizeInMeters());
 
-      PerceptionDebugTools.displayHeightMap("Output Height Map",
-                                humanoidPerception.getRapidHeightMapExtractor().getGlobalHeightMapImage().getBytedecoOpenCVMat(),
-                                1, 1 / (0.3f + 0.20f * humanoidPerception.getRapidHeightMapExtractor().getLocalCellSizeInMeters()));
-      rapidRegionsUI.render();
+         PerceptionDebugTools.displayHeightMap("Output Height Map",
+                                               humanoidPerception.getRapidHeightMapExtractor().getGlobalHeightMapImage().getBytedecoOpenCVMat(),
+                                               1, 1 / (0.3f + 0.20f * humanoidPerception.getRapidHeightMapExtractor().getLocalCellSizeInMeters()));
+      }
+
+      if (rapidRegionsUI != null)
+      {
+         rapidRegionsUI.render();
+      }
    }
 
    public void initializeMapRegionsVisualizer(ROS2Node ros2Node, RDXGlobalVisualizersPanel globalVisualizersUI, boolean render)
@@ -90,6 +86,40 @@ public class RDXHumanoidPerceptionUI
       heightMapVisualizer.setupForNetworking(ros2Helper);
       heightMapVisualizer.setActive(render);
       globalVisualizersUI.addVisualizer(heightMapVisualizer);
+   }
+
+   public void destroy()
+   {
+      if (remotePerceptionUI != null)
+         remotePerceptionUI.destroy();
+
+      if (rapidRegionsUI != null)
+         rapidRegionsUI.destroy();
+
+      if (activeMappingUI != null)
+         activeMappingUI.destroy();
+
+      if (heightMapRenderer != null)
+         heightMapRenderer.dispose();
+
+      if (heightMapUI != null)
+         heightMapUI.destroy();
+
+      if (rapidRegionsVisualizer != null)
+         rapidRegionsVisualizer.destroy();
+
+      if (rapidRegionsMapVisualizer != null)
+         rapidRegionsMapVisualizer.destroy();
+   }
+
+   public void initializeHeightMapUI(ROS2Helper ros2Helper)
+   {
+      heightMapUI = new RDXRemoteHeightMapPanel(ros2Helper);
+   }
+
+   public void renderImGuiWidgets()
+   {
+      rapidRegionsUI.renderImGuiWidgets();
    }
 
    public RDXRapidRegionsUI getRapidRegionsUI()
@@ -115,29 +145,5 @@ public class RDXHumanoidPerceptionUI
    public float getThresholdHeight()
    {
       return remotePerceptionUI.getThresholdHeight();
-   }
-
-   public void destroy()
-   {
-      if (remotePerceptionUI != null)
-         remotePerceptionUI.destroy();
-
-      if (rapidRegionsUI != null)
-         rapidRegionsUI.destroy();
-
-      if (activeMappingUI != null)
-         activeMappingUI.destroy();
-
-      if (heightMapRenderer != null)
-         heightMapRenderer.dispose();
-
-      if (heightMapUI != null)
-         heightMapUI.destroy();
-
-      if (rapidRegionsVisualizer != null)
-         rapidRegionsVisualizer.destroy();
-
-      if (rapidRegionsMapVisualizer != null)
-         rapidRegionsMapVisualizer.destroy();
    }
 }
