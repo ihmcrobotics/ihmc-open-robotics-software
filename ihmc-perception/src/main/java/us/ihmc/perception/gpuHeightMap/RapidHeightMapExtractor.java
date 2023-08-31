@@ -19,6 +19,8 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 public class RapidHeightMapExtractor
 {
+   public int sequenceNumber = 0;
+
    private float localWidthInMeters = 8.0f;
    private float localCellSizeInMeters = 0.02f;
 
@@ -174,6 +176,8 @@ public class RapidHeightMapExtractor
          globalHeightMapImage.readOpenCLImage(openCLManager);
 
          latestHeightMapData = convertToHeightMapData(gridCenter);
+
+         sequenceNumber++;
       }
    }
 
@@ -321,6 +325,11 @@ public class RapidHeightMapExtractor
    public Point3D getGridCenter()
    {
       return gridCenter;
+   }
+
+   public int getSequenceNumber()
+   {
+      return sequenceNumber;
    }
 
    public void setDepthIntrinsics(CameraIntrinsics cameraIntrinsics)

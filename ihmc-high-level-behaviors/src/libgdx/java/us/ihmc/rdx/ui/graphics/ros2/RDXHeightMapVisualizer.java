@@ -6,10 +6,13 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.perception.tools.PerceptionMessageTools;
+import us.ihmc.rdx.RDXHeightMapRenderer;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
@@ -21,6 +24,7 @@ import java.util.Set;
 
 public class RDXHeightMapVisualizer extends RDXVisualizer
 {
+   private final RDXHeightMapRenderer heightMapRenderer = new RDXHeightMapRenderer();
    private final RDXGridMapGraphic gridMapGraphic = new RDXGridMapGraphic();
    private final ResettableExceptionHandlingExecutorService executorService;
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
@@ -63,6 +67,20 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
             gridMapGraphic.setRenderGroundPlane(renderGroundPlane.get());
             gridMapGraphic.setRenderGroundCells(renderGroundCells.get());
             gridMapGraphic.generateMeshesAsync(heightMapMessage);
+         });
+      }
+   }
+
+   public void acceptImageMessage(ImageMessage imageMessage)
+   {
+      frequencyPlot.recordEvent();
+      if (isActive())
+      {
+         executorService.clearQueueAndExecute(() ->
+         {
+            // TODO: Decompress and render
+            // Decompress the height map image
+            // Update the height map renderer with the new image
          });
       }
    }

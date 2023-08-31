@@ -185,6 +185,8 @@ public class PerceptionAPI
    public static final ROS2Topic<HeightMapStateRequestMessage> HEIGHT_MAP_STATE_REQUEST = HEIGHT_MAP_MODULE.withOutput().withTypeName(HeightMapStateRequestMessage.class);
 
    public static final ROS2Topic<ImageMessage> OCCUPANCY_GRID_MESSAGE = PERCEPTION_MODULE.withOutput().withTypeName(ImageMessage.class).withSuffix("occupancy_grid");
+   public static final ROS2Topic<ImageMessage> HEIGHT_MAP_GLOBAL = PERCEPTION_MODULE.withOutput().withTypeName(ImageMessage.class).withSuffix("height_map_global");
+   public static final ROS2Topic<ImageMessage> HEIGHT_MAP_LOCAL = PERCEPTION_MODULE.withOutput().withTypeName(ImageMessage.class).withSuffix("height_map_local");
 
    public static final ROS2Topic<Empty> PUBLISH_LIDAR_SCAN = PERCEPTION_MODULE.withSuffix("publish_lidar_scan").withType(Empty.class);
    public static final ROS2Topic<Empty> PUBLISH_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("publish_height_map").withType(Empty.class);
