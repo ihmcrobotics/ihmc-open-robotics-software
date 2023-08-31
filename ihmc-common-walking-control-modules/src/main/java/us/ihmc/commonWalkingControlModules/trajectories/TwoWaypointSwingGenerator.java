@@ -443,7 +443,8 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    private final Point2D pointB2D = new Point2D();
    private final FramePoint2D pointAInStance = new FramePoint2D();
    private final FramePoint2D pointBInStance = new FramePoint2D();
-   private final Point2D tempPoint = new Point2D();
+   private final Point2D stanceProjection2D = new Point2D();
+   private final Point2D swingIntersectionWithStanceY2D = new Point2D();
 
    /**
     * Given the start and end point of the swing as well as the position of the stance foot this method
@@ -463,7 +464,6 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       pointA2D.set(pointA);
       pointB2D.set(pointB);
       stance2D.set(stance);
-      Point2D stanceProjection2D = tempPoint;
       EuclidGeometryTools.orthogonalProjectionOnLine2D(stance2D, pointA2D, pointB2D, stanceProjection2D);
       boolean smallAngleChange = !EuclidGeometryTools.isPoint2DOnLineSegment2D(stanceProjection2D, pointA2D, pointB2D);
 
@@ -476,7 +476,6 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       pointBInStance.setIncludingFrame(trajectoryFrame, pointB2D);
       pointAInStance.changeFrame(stanceZUpFrame);
       pointBInStance.changeFrame(stanceZUpFrame);
-      Point2D swingIntersectionWithStanceY2D = tempPoint;
       boolean trajectoryIntersectsY = EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(0.0,
                                                                                                     0.0,
                                                                                                     0.0,
