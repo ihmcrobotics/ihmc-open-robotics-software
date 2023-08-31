@@ -88,7 +88,7 @@ public class RDXVRTeleporter
            }
 
            // Pressed right joystick button
-           if (robotMidFeetZUpReferenceFrame != null && joystickButton.bChanged() && !joystickButton.bState())
+           if (robotMidFeetZUpReferenceFrame != null && controller.getJoystickIsCentered() && joystickButton.bChanged() && !joystickButton.bState())
            {
               snapToMidFeetZUp(vrContext);
            }

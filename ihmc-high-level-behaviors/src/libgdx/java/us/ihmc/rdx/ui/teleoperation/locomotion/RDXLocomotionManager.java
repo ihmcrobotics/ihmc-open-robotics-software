@@ -170,7 +170,7 @@ public class RDXLocomotionManager
       planSwingTrajectoriesCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.planSwingTrajectories);
       replanSwingTrajectoriesOnChangeCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.replanSwingTrajectoriesOnChange);
       swingTimeSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.swingTime, 0.3, 1.5);
-      transferTimeSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.transferTime, 0.3, 1.5);
+      transferTimeSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.transferTime, 0.1, 1.5);
       initialStanceSideRadioButtons = locomotionParametersTuner.createEnumRadioButtons(RDXLocomotionParameters.initialStanceSide, InitialStanceSide.values());
 
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW, syncedRobot);
