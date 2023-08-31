@@ -56,7 +56,7 @@ import java.util.concurrent.TimeUnit;
  * 5. Publishes depth images on the depth topic
  * 6. Publishes planar regions on the planar regions topic
  *
- * Benchtop L515: F1120592, Tripod: F1121365, Local: F0245563, Nadia: F112114, D435: 108522071219, D435: 213522252883, 215122254074
+ * Benchtop L515: F1120592, Tripod: F1121365, Local: F0245563, Nadia: F112114, D435: 108522071219, D435: 213522252883, 215122254074, 752112070330
  */
 public class TerrainPerceptionProcessWithDriver
 {
@@ -191,7 +191,6 @@ public class TerrainPerceptionProcessWithDriver
          throttler.waitAndRun(outputPeriod); // do the waiting after we send to remove unnecessary latency
       }
 
-      // Make sure the Realsense
       ThreadTools.sleep(100);
 
       if (realsense != null)
@@ -206,7 +205,6 @@ public class TerrainPerceptionProcessWithDriver
     */
    private void update()
    {
-      parameters.setRapidRegionsEnabled(true);
       if (realsense.readFrameData())
       {
          realsense.updateDataBytePointers();
@@ -321,26 +319,14 @@ public class TerrainPerceptionProcessWithDriver
 
          if (parameters.getRapidRegionsEnabled())
          {
-            LogTools.info("Extracting Planar Regions");
             humanoidPerception.updateTerrain(ros2Helper, depth16UC1Image, cameraFrame,
                                              cameraZUpFrame, true, false, false, false);
          }
 
          if (parameters.getHeightMapEnabled())
          {
-            LogTools.info("Extracting Height Maps");
             humanoidPerception.updateTerrain(ros2Helper, depth16UC1Image, cameraFrame,
                                              cameraZUpFrame, false, false, true, false);
-
-            PerceptionDebugTools.displayHeightMap("Local Height Map",
-                                                  humanoidPerception.getRapidHeightMapExtractor().getLocalHeightMapImage().getBytedecoOpenCVMat(),
-                                                  1,
-                                                  1 / (0.3f + 0.20f * humanoidPerception.getRapidHeightMapExtractor().getLocalCellSizeInMeters()));
-
-            PerceptionDebugTools.displayHeightMap("Global Height Map",
-                                                  humanoidPerception.getRapidHeightMapExtractor().getGlobalHeightMapImage().getBytedecoOpenCVMat(),
-                                                  1,
-                                                  1 / (0.3f + 0.20f * humanoidPerception.getRapidHeightMapExtractor().getGlobalCellSizeInMeters()));
          }
 
          if (parameters.getPublishDepth() || parameters.getRapidRegionsEnabled())
