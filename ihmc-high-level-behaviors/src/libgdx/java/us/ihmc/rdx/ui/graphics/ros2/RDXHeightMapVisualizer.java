@@ -8,10 +8,9 @@ import imgui.type.ImBoolean;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.perception.tools.PerceptionMessageTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.RDXHeightMapRenderer;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
@@ -44,9 +43,15 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
       executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), daemon, queueSize);
    }
 
-   public void setupForNetworking(ROS2PublishSubscribeAPI ros2)
+   public void setupForHeightMapMessage(ROS2PublishSubscribeAPI ros2)
    {
       ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_OUTPUT, this::acceptHeightMapMessage);
+      activeHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.PUBLISH_HEIGHT_MAP);
+   }
+
+   public void setupForImageMessage(ROS2PublishSubscribeAPI ros2)
+   {
+      ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_GLOBAL, this::acceptImageMessage);
       activeHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.PUBLISH_HEIGHT_MAP);
    }
 
@@ -78,6 +83,8 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
       {
          executorService.clearQueueAndExecute(() ->
          {
+            LogTools.info("Received image message with size: " + imageMessage.getData().size());
+
             // TODO: Decompress and render
             // Decompress the height map image
             // Update the height map renderer with the new image
