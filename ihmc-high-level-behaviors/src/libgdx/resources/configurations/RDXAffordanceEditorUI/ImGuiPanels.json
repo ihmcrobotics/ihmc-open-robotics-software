@@ -1,0 +1,12 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : true,
+    "Affordance Panel" : true,
+    "Object Panel###java.lang.Class:Object Panel" : true,
+    "Pose3D Gizmo Tuner (hand)" : true,
+    "Pose3D Gizmo Tuner (object)" : true,
+    "VR Settings" : false,
+    "VR Thread Debugger" : false
+  }
+}

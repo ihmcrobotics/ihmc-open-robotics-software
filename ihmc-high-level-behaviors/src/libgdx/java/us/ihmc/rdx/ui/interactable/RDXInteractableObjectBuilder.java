@@ -8,7 +8,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -71,21 +70,21 @@ public class RDXInteractableObjectBuilder extends RDXPanel
          }
          ImGui.separator();
       }
-      if (isAnyObjectSelected() && (ImGui.button(labels.get("SET INITIAL POSE") + "##object")))
+      if (isAnyObjectSelected() && (ImGui.button(labels.get("Set Initial Pose") + "##object")))
       {
          selectedObject.setInitialPose();
       }
       ImGui.sameLine();
-      if (isAnyObjectSelected() && imgui.ImGui.button(labels.get("RESET TO INITIAL POSE") + "##object"))
+      if (isAnyObjectSelected() && imgui.ImGui.button(labels.get("Reset To Initial Pose") + "##object"))
       {
          selectedObject.resetToInitialPose();
       }
       ImGui.sameLine();
-      if (isAnyObjectSelected() && (ImGui.button(labels.get("DELETE") + "##object")))
+      if (isAnyObjectSelected() && (ImGui.button(labels.get("Delete") + "##object")))
       {
          reset();
       }
-      if (isAnyObjectSelected() && (ImGui.button(labels.get("HIDE/SHOW GIZMO") + "##object")))
+      if (isAnyObjectSelected() && (ImGui.button(labels.get("Hide/Show Gizmo") + "##object")))
       {
          selectedObject.switchGizmoVisualization();
       }
@@ -95,6 +94,11 @@ public class RDXInteractableObjectBuilder extends RDXPanel
    {
       selectedObject.clear();
       selectedObjectName = "";
+      selectedObject.resetPose();
+   }
+
+   public void resetPose()
+   {
       selectedObject.resetPose();
    }
 

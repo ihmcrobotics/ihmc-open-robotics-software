@@ -5,12 +5,12 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
-public class RDXAffordanceEditorDemo
+public class RDXAffordanceTemplateEditorDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private RDXAffordanceEditorUI editor;
+   private RDXAffordanceTemplateEditorUI editor;
 
-   public RDXAffordanceEditorDemo()
+   public RDXAffordanceTemplateEditorDemo()
    {
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -19,7 +19,7 @@ public class RDXAffordanceEditorDemo
          {
             baseUI.create();
             baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
-            editor = new RDXAffordanceEditorUI(baseUI);
+            editor = new RDXAffordanceTemplateEditorUI(baseUI);
          }
 
          @Override
@@ -40,6 +40,6 @@ public class RDXAffordanceEditorDemo
 
    public static void main(String[] args)
    {
-      new RDXAffordanceEditorDemo();
+      new RDXAffordanceTemplateEditorDemo();
    }
 }

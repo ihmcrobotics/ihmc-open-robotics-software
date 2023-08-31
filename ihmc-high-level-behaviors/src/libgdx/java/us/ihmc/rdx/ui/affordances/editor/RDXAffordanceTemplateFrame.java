@@ -17,9 +17,7 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-import java.awt.*;
-
-public class RDXAffordanceFrame
+public class RDXAffordanceTemplateFrame
 {
    private SideDependentList<FramePose3D> poses = new SideDependentList<>();
    private SideDependentList<Boolean> isPoseSet = new SideDependentList<>();
@@ -36,13 +34,13 @@ public class RDXAffordanceFrame
    private RDXActiveAffordanceMenu menu;
    private boolean changedColor = false;
 
-   public RDXAffordanceFrame(SideDependentList<RDXInteractableSakeGripper> interactableHands,
-                             SideDependentList<RigidBodyTransform> handTransformsToWorld,
-                             SideDependentList<FramePose3D> handPoses,
-                             RigidBodyTransform objectTransformToWorld,
-                             RobotSide[] activeSide,
-                             RDXActiveAffordanceMenu[] activeMenu,
-                             Color color)
+   public RDXAffordanceTemplateFrame(SideDependentList<RDXInteractableSakeGripper> interactableHands,
+                                     SideDependentList<RigidBodyTransform> handTransformsToWorld,
+                                     SideDependentList<FramePose3D> handPoses,
+                                     RigidBodyTransform objectTransformToWorld,
+                                     RobotSide[] activeSide,
+                                     RDXActiveAffordanceMenu[] activeMenu,
+                                     Color color)
    {
       this.interactableHands = interactableHands;
       this.handPoses = handPoses;
@@ -74,7 +72,7 @@ public class RDXAffordanceFrame
 
    public void renderImGuiWidgets(ImGuiUniqueLabelMap labels, String labelId, boolean editingBothHands)
    {
-      if (ImGui.button(labels.get("SET") + "##" + labelId) && handPoses.containsKey(activeSide[0]))
+      if (ImGui.button(labels.get("Set") + "##" + labelId) && handPoses.containsKey(activeSide[0]))
       {
          if (editingBothHands)
          {
@@ -92,7 +90,7 @@ public class RDXAffordanceFrame
          activeMenu[0] = this.menu;
       }
       ImGui.sameLine();
-      if (ImGui.button(labels.get("CLEAR ALL") + "##" + labelId))
+      if (ImGui.button(labels.get("Clear All") + "##" + labelId))
       {
          reset();
          activeMenu[0] = RDXActiveAffordanceMenu.NONE;
@@ -138,7 +136,7 @@ public class RDXAffordanceFrame
 
       ImGui.text("Hand Configuration: " + (handConfigurations.get(activeSide[0]) == null ? "" : handConfigurations.get(activeSide[0]).toString()));
       ImGui.sameLine();
-      if (ImGui.button(labels.get("SET") + "##hand" + labelId) && activeMenu[0].equals(this.menu))
+      if (ImGui.button(labels.get("Set") + "##hand" + labelId) && activeMenu[0].equals(this.menu))
       {
          handConfigurations.replace(activeSide[0], interactableHands.get(activeSide[0]).getConfiguration());
       }

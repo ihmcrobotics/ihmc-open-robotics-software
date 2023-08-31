@@ -20,7 +20,16 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class RDXAffordanceMirror
+/**
+ * In order to use the mirror function and move both hands at the same time:
+ * 1. you can first teleport to the frames you want to start at (by clicking on the frame button with index inside), or Reset;
+ * 2. then activate the checkbox "Mirror Other Hand";
+ * 3. select the button of the axis that you are going to move, by moving the gizmo of the selected hand interactable;
+ * 4. move the hand;
+ * 5. you can switch direction button if you want them to move in the opposite way;
+ * 6. click "Set" or "Add" when you're done
+ */
+public class RDXAffordanceTemplateMirror
 {
    private final SideDependentList<RDXInteractableSakeGripper> interactableHands;
    private final SideDependentList<FramePose3D> handPoses;
@@ -37,10 +46,10 @@ public class RDXAffordanceMirror
                                                                                                                             frameNonActiveSideTransform);
    private FramePose3DReadOnly lastActivePose = new FramePose3D(frameActiveSide);
 
-   public RDXAffordanceMirror(SideDependentList<RDXInteractableSakeGripper> interactableHands,
-                              SideDependentList<RigidBodyTransform> handTransformsToWorld,
-                              SideDependentList<FramePose3D> handPoses,
-                              RobotSide[] activeSide)
+   public RDXAffordanceTemplateMirror(SideDependentList<RDXInteractableSakeGripper> interactableHands,
+                                      SideDependentList<RigidBodyTransform> handTransformsToWorld,
+                                      SideDependentList<FramePose3D> handPoses,
+                                      RobotSide[] activeSide)
    {
       this.interactableHands = interactableHands;
       this.handPoses = handPoses;
