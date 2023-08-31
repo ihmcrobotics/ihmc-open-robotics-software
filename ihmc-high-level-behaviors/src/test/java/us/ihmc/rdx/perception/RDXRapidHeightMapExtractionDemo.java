@@ -14,7 +14,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.HumanoidPerceptionModule;
+import us.ihmc.perception.headless.HumanoidPerceptionModule;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;

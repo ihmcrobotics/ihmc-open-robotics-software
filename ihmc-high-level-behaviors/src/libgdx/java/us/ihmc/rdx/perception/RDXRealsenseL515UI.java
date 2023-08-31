@@ -17,6 +17,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.MutableBytePointer;
+import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.realsense.BytedecoRealsense;
@@ -151,7 +152,7 @@ public class RDXRealsenseL515UI
                                        opencv_imgproc.COLOR_RGB2RGBA);
                colorImagePanel.draw();
 
-               CameraPinholeBrown depthCameraIntrinsics = l515.getDepthCameraIntrinsics();
+               CameraIntrinsics depthCameraIntrinsics = l515.getDepthCameraIntrinsics();
 
                double cmosSensorDiagonal = 0.004233; // format 1/6"
                double cmosWidthLocal = cmosWidth.get();
