@@ -111,9 +111,6 @@ public class RDXLocomotionManager
       bodyPathPlannerParameters = robotModel.getAStarBodyPathPlannerParameters();
       swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
 
-      locomotionParameters.addAnyPropertyChangedListener(locomotionParametersChanged);
-      footstepPlannerParameters.addAnyPropertyChangedListener(footstepPlanningParametersChanged);
-
       teleoperationPanel.addChild(locomotionParametersTuner);
       teleoperationPanel.addChild(footstepPlanningParametersTuner);
       teleoperationPanel.addChild(bodyPathPlanningParametersTuner);
@@ -159,6 +156,8 @@ public class RDXLocomotionManager
       this.baseUI = baseUI;
 
       controllerStatusTracker.registerAbortedListener(abortedNotification);
+      locomotionParameters.addAnyPropertyChangedListener(locomotionParametersChanged);
+      footstepPlannerParameters.addAnyPropertyChangedListener(footstepPlanningParametersChanged);
 
       locomotionParametersTuner.create(locomotionParameters);
       footstepPlanningParametersTuner.create(footstepPlannerParameters, false);
