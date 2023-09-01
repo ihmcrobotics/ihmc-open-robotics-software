@@ -75,6 +75,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
       shader.init(renderable);
       renderable.shader = shader.getBaseShader();
 
+      LogTools.info("Vertex Buffer Size: {}", totalCells * FLOATS_PER_CELL);
       intermediateVertexBuffer = new float[totalCells * FLOATS_PER_CELL];
    }
 

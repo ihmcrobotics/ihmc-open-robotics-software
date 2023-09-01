@@ -16,6 +16,7 @@ import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.tools.NativeMemoryTools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.rdx.RDXHeightMapRenderer;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
@@ -70,6 +71,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    public void create()
    {
       super.create();
+      heightMapRenderer.create(501 * 501);
    }
 
    public void acceptHeightMapMessage(HeightMapMessage heightMapMessage)
@@ -100,7 +102,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
             {
                heightMapImage = new Mat(imageMessage.getImageHeight(), imageMessage.getImageWidth(), opencv_core.CV_16UC1);
                compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
-               incomingCompressedImageBuffer = NativeMemoryTools.allocate(numberOfBytes);
+               incomingCompressedImageBuffer = NativeMemoryTools.allocate(numberOfBytes * 2);
                incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
             }
 
@@ -121,7 +123,9 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
             RigidBodyTransform transform = new RigidBodyTransform(imageMessage.getOrientation(), imageMessage.getPosition());
 
             // Update the height map renderer with the new image
-            heightMapRenderer.update(transform, heightMapImage.getPointer(), heightMapImage.rows() / 2 + 1, 0.02f);
+            heightMapRenderer.update(transform, heightMapImage.ptr(0), heightMapImage.rows() / 2, 0.02f);
+
+            PerceptionDebugTools.displayDepth("Received Global Height Map", heightMapImage, 1);
          });
       }
    }
@@ -177,6 +181,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
       if (isActive() && sceneLevelCheck(sceneLevels))
       {
          gridMapGraphic.getRenderables(renderables, pool);
+         heightMapRenderer.getRenderables(renderables, pool);
       }
    }
 
