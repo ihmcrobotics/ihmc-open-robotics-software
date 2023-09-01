@@ -136,8 +136,6 @@ public class WalkingFailureDetectionControlModule
 
       isRobotFalling.set(fallWasReported.getAndSet(false) || (!isCapturePointCloseToFootPolygon && !isCapturePointCloseToDesiredCapturePoint));
 
-//      isRobotFalling.set(false);
-      
       if (isRobotFalling.getBooleanValue())
       {
          tempFallingDirection.set(capturePoint2d);
@@ -186,8 +184,8 @@ public class WalkingFailureDetectionControlModule
    {
       return icpDistanceFromFootPolygonThreshold.getValue();
    }
-   
-   public void setICPDistanceFromFootPolygonThreshold(double threshold) 
+
+   public void setICPDistanceFromFootPolygonThreshold(double threshold)
    {
       icpDistanceFromFootPolygonThreshold.set(threshold);
    }
