@@ -96,8 +96,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                  HumanoidRobotContextDataFactory contextDataFactory,
                                  DRCOutputProcessor outputProcessor,
                                  RealtimeROS2Node realtimeROS2Node,
-                                 double gravity,
-                                 double estimatorDT)
+                                 double gravity)
    {
       controllerFullRobotModel = robotModel.createFullRobotModel();
       if (robotInitialSetup != null)

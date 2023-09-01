@@ -41,6 +41,10 @@ public class YoPositionJointHandleHolder
    {
       this.q.set(handle.getPosition());
       this.qd.set(handle.getVelocity());
+   }
+
+   public void updateControllerOutput()
+   {
       if (desiredJointData.hasDesiredPosition())
          this.controllerPositionDesired.set(desiredJointData.getDesiredPosition());
       // Otherwise, don't change the desired position
