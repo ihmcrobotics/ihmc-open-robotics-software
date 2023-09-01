@@ -25,6 +25,14 @@ public class FootstepPlanActionMessage extends Packet<FootstepPlanActionMessage>
             * The footsteps, with a maximum of 50
             */
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepActionMessage>  footsteps_;
+   /**
+            * Swing duration
+            */
+   public double swing_duration_;
+   /**
+            * Transfer duration
+            */
+   public double transfer_duration_;
 
    public FootstepPlanActionMessage()
    {
@@ -47,6 +55,10 @@ public class FootstepPlanActionMessage extends Packet<FootstepPlanActionMessage>
       parent_frame_.set(other.parent_frame_);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_parent_, transform_to_parent_);
       footsteps_.set(other.footsteps_);
+      swing_duration_ = other.swing_duration_;
+
+      transfer_duration_ = other.transfer_duration_;
+
    }
 
 
@@ -86,6 +98,36 @@ public class FootstepPlanActionMessage extends Packet<FootstepPlanActionMessage>
       return footsteps_;
    }
 
+   /**
+            * Swing duration
+            */
+   public void setSwingDuration(double swing_duration)
+   {
+      swing_duration_ = swing_duration;
+   }
+   /**
+            * Swing duration
+            */
+   public double getSwingDuration()
+   {
+      return swing_duration_;
+   }
+
+   /**
+            * Transfer duration
+            */
+   public void setTransferDuration(double transfer_duration)
+   {
+      transfer_duration_ = transfer_duration;
+   }
+   /**
+            * Transfer duration
+            */
+   public double getTransferDuration()
+   {
+      return transfer_duration_;
+   }
+
 
    public static Supplier<FootstepPlanActionMessagePubSubType> getPubSubType()
    {
@@ -115,6 +157,10 @@ public class FootstepPlanActionMessage extends Packet<FootstepPlanActionMessage>
          {  if (!this.footsteps_.get(i).epsilonEquals(other.footsteps_.get(i), epsilon)) return false; }
       }
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.swing_duration_, other.swing_duration_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.transfer_duration_, other.transfer_duration_, epsilon)) return false;
+
 
       return true;
    }
@@ -132,6 +178,10 @@ public class FootstepPlanActionMessage extends Packet<FootstepPlanActionMessage>
       if (!this.parent_frame_.equals(otherMyClass.parent_frame_)) return false;
       if (!this.transform_to_parent_.equals(otherMyClass.transform_to_parent_)) return false;
       if (!this.footsteps_.equals(otherMyClass.footsteps_)) return false;
+      if(this.swing_duration_ != otherMyClass.swing_duration_) return false;
+
+      if(this.transfer_duration_ != otherMyClass.transfer_duration_) return false;
+
 
       return true;
    }
@@ -149,7 +199,11 @@ public class FootstepPlanActionMessage extends Packet<FootstepPlanActionMessage>
       builder.append("transform_to_parent=");
       builder.append(this.transform_to_parent_);      builder.append(", ");
       builder.append("footsteps=");
-      builder.append(this.footsteps_);
+      builder.append(this.footsteps_);      builder.append(", ");
+      builder.append("swing_duration=");
+      builder.append(this.swing_duration_);      builder.append(", ");
+      builder.append("transfer_duration=");
+      builder.append(this.transfer_duration_);
       builder.append("}");
       return builder.toString();
    }

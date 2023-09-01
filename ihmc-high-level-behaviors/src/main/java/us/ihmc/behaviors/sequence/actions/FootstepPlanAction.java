@@ -33,8 +33,6 @@ public class FootstepPlanAction extends FootstepPlanActionData implements Behavi
    private final WalkingControllerParameters walkingControllerParameters;
    private int actionIndex;
    private final FramePose3D solePose = new FramePose3D();
-   private final double swingDuration = 1.2;
-   private final double transferDuration = 0.8;
    private final FootstepPlan footstepPlanToExecute = new FootstepPlan();
    private final Timer executionTimer = new Timer();
    private boolean isExecuting;
@@ -76,17 +74,17 @@ public class FootstepPlanAction extends FootstepPlanActionData implements Behavi
       }
 
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlanToExecute,
-                                                                                                                    swingDuration,
-                                                                                                                    transferDuration);
+                                                                                                                    getSwingDuration(),
+                                                                                                                    getTransferDuration());
       footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
       footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       ros2ControllerHelper.publishToController(footstepDataListMessage);
       executionTimer.reset();
 
       nominalExecutionDuration = PlannerTools.calculateNominalTotalPlanExecutionDuration(footstepPlanToExecute,
-                                                                                         swingDuration,
+                                                                                         getSwingDuration(),
                                                                                          walkingControllerParameters.getDefaultInitialTransferTime(),
-                                                                                         transferDuration,
+                                                                                         getTransferDuration(),
                                                                                          walkingControllerParameters.getDefaultFinalTransferTime());
 
       for (RobotSide side : RobotSide.values)
