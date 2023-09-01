@@ -43,6 +43,7 @@ public class RDXBehaviorActionSequenceUI
    private final RDXPanel panel = new RDXPanel("Behavior Sequence Editor", this::renderImGuiWidgets, false, true);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private WorkspaceResourceDirectory behaviorSequenceStorageDirectory;
+   private RDXBaseUI baseUI;
    private RDX3DPanel panel3D;
    private DRCRobotModel robotModel;
    private ROS2Node ros2Node;
@@ -55,6 +56,7 @@ public class RDXBehaviorActionSequenceUI
    private final Notification fileMenuShouldClose = new Notification();
 
    public void create(WorkspaceResourceDirectory behaviorSequenceStorageDirectory,
+                      RDXBaseUI baseUI,
                       RDX3DPanel panel3D,
                       DRCRobotModel robotModel,
                       ROS2Node ros2Node,
@@ -63,6 +65,7 @@ public class RDXBehaviorActionSequenceUI
                       ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.behaviorSequenceStorageDirectory = behaviorSequenceStorageDirectory;
+      this.baseUI = baseUI;
       this.panel3D = panel3D;
       this.robotModel = robotModel;
       this.ros2Node = ros2Node;
@@ -127,7 +130,7 @@ public class RDXBehaviorActionSequenceUI
                   destroyCurrentEditor();
 
                   editor.changeFileToLoadFrom(availableSequenceFile.getSequenceFile());
-                  editor.create(panel3D, robotModel, ros2Node, syncedRobot, selectionCollisionModel, referenceFrameLibrary);
+                  editor.create(baseUI, panel3D, robotModel, ros2Node, syncedRobot, selectionCollisionModel, referenceFrameLibrary);
                   editor.loadActionsFromFile();
                }
                fileMenuShouldClose.set();
@@ -141,7 +144,7 @@ public class RDXBehaviorActionSequenceUI
             destroyCurrentEditor();
 
             editor.createNewSequence(newSequenceName.get(), behaviorSequenceStorageDirectory);
-            editor.create(panel3D, robotModel, ros2Node, syncedRobot, selectionCollisionModel, referenceFrameLibrary);
+            editor.create(baseUI, panel3D, robotModel, ros2Node, syncedRobot, selectionCollisionModel, referenceFrameLibrary);
             editor.saveToFile();
             availableSequences.add(new RDXAvailableActionSequence(editor.getWorkspaceFile()));
          }

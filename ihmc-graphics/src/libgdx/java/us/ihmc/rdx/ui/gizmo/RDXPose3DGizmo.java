@@ -171,10 +171,18 @@ public class RDXPose3DGizmo implements RenderableProvider
     * Use of this method is assuming that this Gizmo is the owner of this frame
     * and not based on a frame managed externally.
     */
-   public void setParentFrame(ReferenceFrame parentReferenceFrame)
+   public void setParentFrame(ReferenceFrame newParentFrame)
    {
       gizmoFrame.remove();
-      gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
+      gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(newParentFrame, transformToParent);
+   }
+
+   public void changeParentFrameWithoutMoving(ReferenceFrame newParentFrame)
+   {
+      RigidBodyTransform newTransformToParent = new RigidBodyTransform();
+      gizmoFrame.getTransformToDesiredFrame(newTransformToParent, newParentFrame);
+      transformToParent.set(newTransformToParent);
+      gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(newParentFrame, transformToParent);
    }
 
    public void createAndSetupDefault(RDX3DPanel panel3D)

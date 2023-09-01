@@ -34,9 +34,8 @@ public class FootstepPlanActionData implements BehaviorActionData
    {
       jsonNode.put("description", description);
       jsonNode.put("parentFrame", modifiableReferenceFrame.getReferenceFrame().getParent().getName());
-      JSONTools.toJSON(jsonNode, modifiableReferenceFrame.getTransformToParent());
 
-      ArrayNode foostepsArrayNode = jsonNode.putArray("foosteps");
+      ArrayNode foostepsArrayNode = jsonNode.putArray("footsteps");
       for (FootstepActionData footstep : footsteps)
       {
          ObjectNode footstepNode = foostepsArrayNode.addObject();
@@ -49,7 +48,6 @@ public class FootstepPlanActionData implements BehaviorActionData
    {
       description = jsonNode.get("description").textValue();
       modifiableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()).get());
-      modifiableReferenceFrame.update(transformToParent -> JSONTools.toEuclid(jsonNode, transformToParent));
 
       footsteps.clear();
       JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> footsteps.add().loadFromFile(footstepNode));
