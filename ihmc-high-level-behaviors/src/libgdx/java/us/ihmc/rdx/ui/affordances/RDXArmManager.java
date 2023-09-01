@@ -103,7 +103,6 @@ public class RDXArmManager
                                     side.negateIfRightSide(-0.6),
                                     0.000,
                                     side.negateIfLeftSide(0.0)});
-
          armsUpForWalking.put(side,
                               new double[] {0.6,
                                     side.negateIfRightSide(0.0),
