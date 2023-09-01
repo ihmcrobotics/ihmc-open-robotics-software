@@ -61,7 +61,7 @@ public class RDXArmManager
    private final ArmJointName[] armJointNames;
    private RDXArmControlMode armControlMode = RDXArmControlMode.JOINT_ANGLES;
    private final SideDependentList<double[]> armsWide = new SideDependentList<>();
-   private final SideDependentList<double[]> armsTRex = new SideDependentList<>();
+   private final SideDependentList<double[]> armsUpForWalking = new SideDependentList<>();
    private final SideDependentList<double[]> doorAvoidanceArms = new SideDependentList<>();
    /** Nadia's arm positions where it's holding a shield in front of the chest. */
    private final SideDependentList<double[]> shieldHoldingArms = new SideDependentList<>();
@@ -103,18 +103,15 @@ public class RDXArmManager
                                     side.negateIfRightSide(-0.6),
                                     0.000,
                                     side.negateIfLeftSide(0.0)});
-      }
 
-      for (RobotSide side : RobotSide.values)
-      {
-         armsTRex.put(side,
-                 new double[] {0.6,
-                         side.negateIfRightSide(0.0),
-                         side.negateIfRightSide(-0.5),
-                         -1.6,
-                         side.negateIfRightSide(0.0),
-                         0.000,
-                         side.negateIfLeftSide(0.0)});
+         armsUpForWalking.put(side,
+                              new double[] {0.6,
+                                    side.negateIfRightSide(0.0),
+                                    side.negateIfRightSide(-0.5),
+                                    -1.6,
+                                    side.negateIfRightSide(0.0),
+                                    0.000,
+                                    side.negateIfLeftSide(0.0)});
       }
 
       doorAvoidanceArms.put(RobotSide.LEFT, new double[] {-0.121, -0.124, -0.971, -1.513, -0.935, -0.873, 0.245});
@@ -255,8 +252,8 @@ public class RDXArmManager
          if (ImGui.button(labels.get("Walking " + side.getPascalCaseName())))
          {
             ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
-                    teleoperationParameters.getTrajectoryTime(),
-                    armsTRex.get(side));
+                                                                                                        teleoperationParameters.getTrajectoryTime(),
+                                                                                                        armsUpForWalking.get(side));
             communicationHelper.publishToController(armTrajectoryMessage);
          }
       }
