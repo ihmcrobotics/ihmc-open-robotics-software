@@ -28,6 +28,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.editor.actions.*;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.EuclidCoreMissingTools;
@@ -71,6 +72,7 @@ public class RDXBehaviorActionSequenceEditor
    private WorkspaceResourceFile workspaceFile = null;
    private final LinkedList<RDXBehaviorAction> actionSequence = new LinkedList<>();
    private String pascalCasedName;
+   private RDXBaseUI baseUI;
    private RDX3DPanel panel3D;
    private DRCRobotModel robotModel;
    private ROS2SyncedRobotModel syncedRobot;
@@ -119,13 +121,15 @@ public class RDXBehaviorActionSequenceEditor
       pascalCasedName = FormattingTools.titleToPascalCase(name);
    }
 
-   public void create(RDX3DPanel panel3D,
+   public void create(RDXBaseUI baseUI,
+                      RDX3DPanel panel3D,
                       DRCRobotModel robotModel,
                       ROS2Node ros2Node,
                       ROS2SyncedRobotModel syncedRobot,
                       RobotCollisionModel selectionCollisionModel,
                       ReferenceFrameLibrary referenceFrameLibrary)
    {
+      this.baseUI = baseUI;
       this.panel3D = panel3D;
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
@@ -161,6 +165,7 @@ public class RDXBehaviorActionSequenceEditor
                                                                                 robotModel,
                                                                                 syncedRobot,
                                                                                 selectionCollisionModel,
+                                                                                baseUI,
                                                                                 panel3D,
                                                                                 referenceFrameLibrary,
                                                                                 ros2ControllerHelper);
@@ -641,19 +646,12 @@ public class RDXBehaviorActionSequenceEditor
       {
          newAction = new RDXArmJointAnglesAction();
       }
-      ImGui.text("Add Footstep Plan:");
-      ImGui.sameLine();
-      for (var side : RobotSide.values)
+      if (ImGui.button(labels.get("Add Footstep Plan")))
       {
-         if (ImGui.button(labels.get(side.getPascalCaseName(), 1)))
-         {
-            RDXFootstepPlanAction footstepPlanAction = new RDXFootstepPlanAction(panel3D, robotModel, syncedRobot, referenceFrameLibrary);
-            if (nextPreviousParentFrame != null)
-               footstepPlanAction.getActionData().changeParentFrame(nextPreviousParentFrame);
-            newAction = footstepPlanAction;
-         }
-         if (side.ordinal() < 1)
-            ImGui.sameLine();
+         RDXFootstepPlanAction footstepPlanAction = new RDXFootstepPlanAction(baseUI, robotModel, syncedRobot, referenceFrameLibrary);
+         if (nextPreviousParentFrame != null)
+            footstepPlanAction.getActionData().changeParentFrame(nextPreviousParentFrame);
+         newAction = footstepPlanAction;
       }
       if (ImGui.button(labels.get("Add Wait")))
       {
