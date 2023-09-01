@@ -24,7 +24,7 @@ public class ForceSensorData implements ForceSensorDataReadOnly, Settable<ForceS
    private ReferenceFrame measurementFrame;
    private RigidBodyBasics measurementLink;
 
-   private final WrenchReadOnly wrench = MecanoMissingTools.newLinkedWrenchReadOnly(this::getMeasurementFrame, this::getMeasurementFrame, wrenchMatrix);
+   private transient final WrenchReadOnly wrench = MecanoMissingTools.newLinkedWrenchReadOnly(this::getMeasurementFrame, this::getMeasurementFrame, wrenchMatrix);
 
    public ForceSensorData()
    {
