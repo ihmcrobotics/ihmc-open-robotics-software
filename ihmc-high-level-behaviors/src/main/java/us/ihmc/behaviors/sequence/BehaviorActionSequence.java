@@ -26,7 +26,7 @@ import java.util.LinkedList;
 
 /**
  * Manages running a sequence of actions on the robot with shared autonomy.
- * Since this class always currently gets it's instructions from the operator, it never loads
+ * Since this class always currently gets its instructions from the operator, it never loads
  * a sequence from file, and the sequence is always completely updated by the operator, even
  * when switching sequences entirely.
  */
