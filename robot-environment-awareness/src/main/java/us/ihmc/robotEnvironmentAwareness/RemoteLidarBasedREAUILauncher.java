@@ -2,12 +2,13 @@ package us.ihmc.robotEnvironmentAwareness;
 
 import java.util.Map;
 
-import javafx.application.Application;
+import javafx.application.Application.Parameters;
 import javafx.stage.Stage;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.ui.LIDARBasedEnvironmentAwarenessUI;
 
-public class RemoteLidarBasedREAUILauncher extends Application
+public class RemoteLidarBasedREAUILauncher extends ApplicationNoModule
 {
    public RemoteLidarBasedREAUILauncher()
    {

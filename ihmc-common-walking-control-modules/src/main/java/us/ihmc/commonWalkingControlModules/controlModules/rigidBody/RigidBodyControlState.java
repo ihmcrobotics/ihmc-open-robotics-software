@@ -16,13 +16,15 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
-public abstract class RigidBodyControlState implements State
+public abstract class RigidBodyControlState implements State, SCS2YoGraphicHolder
 {
    protected final YoRegistry registry;
    protected final String warningPrefix;
@@ -143,6 +145,11 @@ public abstract class RigidBodyControlState implements State
    }
 
    public InverseDynamicsCommand<?> getTransitionOutOfStateCommand()
+   {
+      return null;
+   }
+
+   public JointDesiredOutputListReadOnly getJointDesiredData()
    {
       return null;
    }

@@ -1,12 +1,10 @@
 package us.ihmc.robotEnvironmentAwareness.perceptionSuite;
 
 import javafx.stage.Stage;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.messager.Messager;
+import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
-import us.ihmc.robotEnvironmentAwareness.ui.LIDARBasedEnvironmentAwarenessUI;
 import us.ihmc.robotEnvironmentAwareness.ui.PlanarSegmentationUI;
-import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.PlanarSegmentationModule;
 
 public class SegmentationPerceptionSuiteElement implements PerceptionSuiteElement<PlanarSegmentationModule, PlanarSegmentationUI>

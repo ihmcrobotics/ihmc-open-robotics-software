@@ -108,7 +108,7 @@ public class ToeSlippingDetector
 
    public void update()
    {
-      footSwitch.computeAndPackFootWrench(footWrench);
+      footSwitch.getMeasuredWrench(footWrench);
       toeForceFiltered.update(footWrench.getLinearPart().length());
 
       foot.getBodyFixedFrame().getTwistOfFrame(footTwist);

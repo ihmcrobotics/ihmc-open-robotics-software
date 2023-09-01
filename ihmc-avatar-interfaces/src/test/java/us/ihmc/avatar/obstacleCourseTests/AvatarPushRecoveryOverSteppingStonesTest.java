@@ -10,11 +10,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.PlanarRegionMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.stepAdjustment.StepConstraintCalculator;
 import us.ihmc.avatar.stepAdjustment.SteppableRegionsCalculator;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
@@ -83,7 +81,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   private void setupTest()
+   private void setupTestEnvironment()
    {
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.EASY_STEPPING_STONES;
 
@@ -96,7 +94,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
 
       FullHumanoidRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
       double z = getForcePointOffsetZInChestFrame();
-      pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationSession().getTime(),
+      pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationConstructionSet().getTime(),
                                                         simulationTestHelper.getRobot(),
                                                         fullRobotModel.getChest().getParentJoint().getName(),
                                                         new Vector3D(0, 0, z));
@@ -120,20 +118,17 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       simulationTestHelper.addYoGraphicDefinition(pushRobotController.getForceVizDefinition());
 
       swingTime = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime();
-      double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
       totalMass = fullRobotModel.getTotalMass();
 
       assertTrue(simulationTestHelper.simulateNow(0.25));
-
    }
 
-   @Test
-   public void testWalkingOverSteppingStonesForwardPush()
+   private FootstepDataListMessage startTest()
    {
-      setupTest();
+      simulationTestHelper.setKeepSCSUp(true);
       double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
 
-      SteppableRegionsCalculator steppableRegionsCalculator = new SteppableRegionsCalculator(10.0, new YoRegistry("test"));
+      SteppableRegionsCalculator steppableRegionsCalculator = new SteppableRegionsCalculator(100.0, new YoRegistry("test"));
       steppableRegionsCalculator.setPlanarRegions(createPlanarRegionsList());
 
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingOverEasySteppingStones(swingTime, transferTime);
@@ -141,17 +136,15 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       footstepDataList.getDefaultStepConstraints().set(StepConstraintMessageConverter.convertToStepConstraintsListMessage(steppableRegionsCalculator.computeSteppableRegions()));
       simulationTestHelper.publishToController(footstepDataList);
 
+      return footstepDataList;
+   }
 
-      StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
-      double delay = 0.5 * swingTime;
-      Vector3D firstForceDirection = new Vector3D(-1.0, 0.0, 0.0);
-      double percentWeight = 0.35;
-      double magnitude = percentWeight * totalMass * 9.81;
-      double duration = 0.1;
-      pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
+   private void simulateAndAssertComplete(int numberOfSteps)
+   {
+      double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
 
       double stepDuration = swingTime + transferTime;
-      boolean success = simulationTestHelper.simulateNow(footstepDataList.getFootstepDataList().size() * stepDuration + 1.5);
+      boolean success = simulationTestHelper.simulateNow(numberOfSteps * stepDuration + 1.5);
 
       simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
@@ -164,6 +157,42 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       assertTrue(success);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+
+   @Test
+   public void testWalkingOverSteppingStonesBackwardPush()
+   {
+      setupTestEnvironment();
+      FootstepDataListMessage footstepDataList =  startTest();
+
+
+      StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+      double delay = 0.5 * swingTime;
+      Vector3D firstForceDirection = new Vector3D(1.0, 0.0, 0.0);
+      double percentWeight = 0.35;
+      double magnitude = percentWeight * totalMass * 9.81;
+      double duration = 0.1;
+      pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
+
+      simulateAndAssertComplete(footstepDataList.getFootstepDataList().size());
+   }
+
+   @Test
+   public void testWalkingOverSteppingStonesForwardPush()
+   {
+      setupTestEnvironment();
+      FootstepDataListMessage footstepDataList = startTest();
+
+      StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+      double delay = 0.5 * swingTime;
+      Vector3D firstForceDirection = new Vector3D(-1.0, 0.0, 0.0);
+      double percentWeight = 0.35;
+      double magnitude = percentWeight * totalMass * 9.81;
+      double duration = 0.1;
+      pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
+
+      simulateAndAssertComplete(footstepDataList.getFootstepDataList().size());
    }
 
    protected double getForcePointOffsetZInChestFrame()
@@ -227,10 +256,8 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       platform.setRegionId(idStart + locations.size() - 2);
 
       planarRegions.add(platform);
-      planarRegions.add(platform);
 
       return planarRegions;
-
    }
 
    private PlanarRegionsListMessage createPlanarRegionsListMessage()

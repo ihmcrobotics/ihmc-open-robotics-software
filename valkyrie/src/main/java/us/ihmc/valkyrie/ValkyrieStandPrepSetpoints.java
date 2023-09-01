@@ -50,7 +50,7 @@ public class ValkyrieStandPrepSetpoints implements WholeBodySetpointParameters
       }
    }
 
-   private void setSetpoint(String jointName, double value)
+   public void setSetpoint(String jointName, double value)
    {
       setPoints.put(jointName, value);
    }

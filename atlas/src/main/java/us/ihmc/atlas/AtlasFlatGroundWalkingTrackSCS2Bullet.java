@@ -40,7 +40,8 @@ public class AtlasFlatGroundWalkingTrackSCS2Bullet
 
    public AtlasFlatGroundWalkingTrackSCS2Bullet()
    {
-      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS);
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ);
+      robotModel.setUseHandMutatorCollisions(true);
       robotModel.setUseSDFCollisions(true);
       FlatGroundEnvironment environment = new FlatGroundEnvironment();
 
@@ -72,8 +73,8 @@ public class AtlasFlatGroundWalkingTrackSCS2Bullet
 
       avatarSimulation.start();
 
-      avatarSimulation.getSessionVisualizerControls().setCameraFocusPosition(0.3, 0.0, 1.0);
-      avatarSimulation.getSessionVisualizerControls().setCameraPosition(7.0, 4.0, 3.0);
+      avatarSimulation.getSimulationConstructionSet().setCameraFocusPosition(0.3, 0.0, 1.0);
+      avatarSimulation.getSimulationConstructionSet().setCameraPosition(7.0, 4.0, 3.0);
    }
 
 
@@ -85,7 +86,6 @@ public class AtlasFlatGroundWalkingTrackSCS2Bullet
       CoPTrajectoryParameters copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
       HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
-      SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
@@ -104,7 +104,6 @@ public class AtlasFlatGroundWalkingTrackSCS2Bullet
 
       HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory,
                                                                                                     feetForceSensorNames,
-                                                                                                    feetContactSensorNames,
                                                                                                     wristForceSensorNames,
                                                                                                     highLevelControllerParameters,
                                                                                                     walkingControllerParameters,

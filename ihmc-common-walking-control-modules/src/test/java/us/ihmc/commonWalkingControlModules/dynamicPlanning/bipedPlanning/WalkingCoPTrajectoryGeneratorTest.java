@@ -106,7 +106,7 @@ public class WalkingCoPTrajectoryGeneratorTest
       List<SettableContactStateProvider> contactStateProviders = copTrajectory.getContactStateProviders();
       for (int i = 0; i < contactStateProviders.size() - 1; i++)
       {
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(contactStateProviders.get(i).getECMPEndPosition(), contactStateProviders.get(i + 1).getECMPStartPosition(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(contactStateProviders.get(i).getECMPEndPosition(), contactStateProviders.get(i + 1).getECMPStartPosition(), epsilon);
          assertEquals(contactStateProviders.get(i).getTimeInterval().getEndTime(), contactStateProviders.get(i + 1).getTimeInterval().getStartTime(), epsilon);
       }
 
@@ -183,7 +183,7 @@ public class WalkingCoPTrajectoryGeneratorTest
       List<SettableContactStateProvider> contactStateProviders = copTrajectory.getContactStateProviders();
       for (int i = 0; i < contactStateProviders.size() - 1; i++)
       {
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(contactStateProviders.get(i).getECMPEndPosition(), contactStateProviders.get(i + 1).getECMPStartPosition(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(contactStateProviders.get(i).getECMPEndPosition(), contactStateProviders.get(i + 1).getECMPStartPosition(), epsilon);
          assertEquals(contactStateProviders.get(i).getTimeInterval().getEndTime(), contactStateProviders.get(i + 1).getTimeInterval().getStartTime(), epsilon);
       }
 
@@ -217,9 +217,9 @@ public class WalkingCoPTrajectoryGeneratorTest
       FramePoint3D expectedMidpoint = new FramePoint3D();
       expectedMidpoint.interpolate(leftFoot, rightFoot, splitFractionCalculatorParameters.getTransferFinalWeightDistributionAtFullDepth());
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(expectedMidpoint, contactStateProviders.get(5).getECMPEndPosition(), 1e-5);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(expectedMidpoint, contactStateProviders.get(6).getECMPStartPosition(), 1e-5);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(expectedMidpoint, contactStateProviders.get(6).getECMPEndPosition(), 1e-5);
+      EuclidFrameTestTools.assertGeometricallyEquals(expectedMidpoint, contactStateProviders.get(5).getECMPEndPosition(), 1e-5);
+      EuclidFrameTestTools.assertGeometricallyEquals(expectedMidpoint, contactStateProviders.get(6).getECMPStartPosition(), 1e-5);
+      EuclidFrameTestTools.assertGeometricallyEquals(expectedMidpoint, contactStateProviders.get(6).getECMPEndPosition(), 1e-5);
 
       if (visualize)
          CoPTrajectoryVisualizer.visualize(copTrajectory);
@@ -276,7 +276,7 @@ public class WalkingCoPTrajectoryGeneratorTest
       List<SettableContactStateProvider> contactStateProviders = copTrajectory.getContactStateProviders();
       for (int i = 0; i < contactStateProviders.size() - 1; i++)
       {
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(contactStateProviders.get(i).getECMPEndPosition(), contactStateProviders.get(i + 1).getECMPStartPosition(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(contactStateProviders.get(i).getECMPEndPosition(), contactStateProviders.get(i + 1).getECMPStartPosition(), epsilon);
          assertEquals(contactStateProviders.get(i).getTimeInterval().getEndTime(), contactStateProviders.get(i + 1).getTimeInterval().getStartTime(), epsilon);
       }
 
@@ -310,9 +310,9 @@ public class WalkingCoPTrajectoryGeneratorTest
       FramePoint3D expectedMidpoint = new FramePoint3D();
       expectedMidpoint.interpolate(rightFoot, leftFoot, splitFractionCalculatorParameters.getTransferFinalWeightDistributionAtFullDepth());
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(expectedMidpoint, contactStateProviders.get(5).getECMPEndPosition(), 1e-5);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(expectedMidpoint, contactStateProviders.get(6).getECMPStartPosition(), 1e-5);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(expectedMidpoint, contactStateProviders.get(6).getECMPEndPosition(), 1e-5);
+      EuclidFrameTestTools.assertGeometricallyEquals(expectedMidpoint, contactStateProviders.get(5).getECMPEndPosition(), 1e-5);
+      EuclidFrameTestTools.assertGeometricallyEquals(expectedMidpoint, contactStateProviders.get(6).getECMPStartPosition(), 1e-5);
+      EuclidFrameTestTools.assertGeometricallyEquals(expectedMidpoint, contactStateProviders.get(6).getECMPEndPosition(), 1e-5);
 
       if (visualize)
          CoPTrajectoryVisualizer.visualize(copTrajectory);

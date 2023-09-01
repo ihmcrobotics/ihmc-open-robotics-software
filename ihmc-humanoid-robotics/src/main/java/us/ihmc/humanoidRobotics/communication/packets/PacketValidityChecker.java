@@ -3,6 +3,10 @@ package us.ihmc.humanoidRobotics.communication.packets;
 import java.util.List;
 
 import controller_msgs.msg.dds.*;
+import exoskeleton_msgs.msg.dds.ExoStepDataListMessage;
+import exoskeleton_msgs.msg.dds.ExoStepDataMessage;
+import ihmc_common_msgs.msg.dds.*;
+import quadruped_msgs.msg.dds.*;
 import us.ihmc.communication.packets.ObjectValidityChecker;
 import us.ihmc.communication.packets.ObjectValidityChecker.ObjectErrorType;
 import us.ihmc.communication.packets.Packet;
@@ -483,58 +487,6 @@ public abstract class PacketValidityChecker
          String messageClassName = message.getClass().getSimpleName();
          errorMessage = messageClassName + "'s robotQuadrant field " + errorType.getMessage();
          return errorMessage;
-      }
-
-      return null;
-   }
-
-   /**
-    * Checks the validity of a {@link FootstepDataMessage}.
-    *
-    * @param message
-    * @return null if the packet is valid, or the error message.
-    */
-   public static String validateAdjustFootstepMessage(AdjustFootstepMessage message)
-   {
-      ObjectErrorType packetFieldErrorType;
-
-      packetFieldErrorType = ObjectValidityChecker.validateEnum(RobotSide.fromByte(message.getRobotSide()));
-      if (packetFieldErrorType != null)
-      {
-         String messageClassName = message.getClass().getSimpleName();
-         String errorMessage = messageClassName + "'s robotSide field" + packetFieldErrorType.getMessage();
-         return errorMessage;
-      }
-
-      packetFieldErrorType = ObjectValidityChecker.validateTuple3d(message.getLocation());
-      if (packetFieldErrorType != null)
-      {
-         String messageClassName = message.getClass().getSimpleName();
-         String errorMessage = messageClassName + "'s location field " + packetFieldErrorType.getMessage();
-         return errorMessage;
-      }
-
-      packetFieldErrorType = ObjectValidityChecker.validateQuat4d(message.getOrientation());
-      if (packetFieldErrorType != null)
-      {
-         String messageClassName = message.getClass().getSimpleName();
-         String errorMessage = messageClassName + "'s orientation field " + packetFieldErrorType.getMessage();
-         return errorMessage;
-      }
-
-      if (message.getPredictedContactPoints2d() != null)
-      {
-         for (int arrayListIndex = 0; arrayListIndex < message.getPredictedContactPoints2d().size(); arrayListIndex++)
-         {
-            packetFieldErrorType = ObjectValidityChecker.validateTuple3d(message.getPredictedContactPoints2d().get(arrayListIndex));
-
-            if (packetFieldErrorType != null)
-            {
-               String messageClassName = message.getClass().getSimpleName();
-               String errorMessage = messageClassName + "'s predictedContactPoints field " + packetFieldErrorType.getMessage();
-               return errorMessage;
-            }
-         }
       }
 
       return null;

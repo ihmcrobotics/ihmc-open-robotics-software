@@ -8,7 +8,7 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.PlanarRegionMessage;
+import perception_msgs.msg.dds.PlanarRegionMessage;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;

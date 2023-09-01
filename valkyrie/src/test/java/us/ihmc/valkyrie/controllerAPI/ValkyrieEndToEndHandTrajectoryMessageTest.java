@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.HandWrenchTrajectoryMessage;
-import controller_msgs.msg.dds.SE3TrajectoryMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
 import controller_msgs.msg.dds.WrenchTrajectoryMessage;
 import us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -149,15 +149,15 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       {
          FrameEuclideanTrajectoryPoint trajectoryPoint = trajectoryPoints.getTrajectoryPoint(i);
          double time = trajectoryPoint.getTime() + firstTrajectoryTime;
-         Point3DReadOnly position = trajectoryPoint.getPositionCopy();
-         Vector3DReadOnly linearVelocity = trajectoryPoint.getLinearVelocityCopy();
+         Point3DReadOnly position = trajectoryPoint.getPosition();
+         Vector3DReadOnly linearVelocity = trajectoryPoint.getLinearVelocity();
          se3TrajectoryMessage.getTaskspaceTrajectoryPoints().add()
                              .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(time, position, new Quaternion(), linearVelocity, new Vector3D()));
       }
       se3TrajectoryMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(new SelectionMatrix3D(null, false, false, false)));
 
       WrenchTrajectoryMessage wrenchTrajectoryMessage = new WrenchTrajectoryMessage();
-      wrenchTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(ReferenceFrame.getWorldFrame().hashCode());
+      wrenchTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(ReferenceFrame.getWorldFrame().getFrameNameHashCode());
       wrenchTrajectoryMessage.getWrenchTrajectoryPoints().add().set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(1.8, null, null));
       wrenchTrajectoryMessage.getWrenchTrajectoryPoints().add()
                              .set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(1.9, null, new Vector3D(150.0, 0.0, 75.0)));

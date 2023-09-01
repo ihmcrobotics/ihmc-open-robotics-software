@@ -6,6 +6,7 @@ public class ConstraintOptimizerParameters implements ConstraintOptimizerParamet
    private double maxY = 0.5;
    private double deltaInside = 0.0;
    private boolean constrainMaxAdjustment = true;
+   private boolean shouldPerformOptimization = true;
 
    private boolean parametersChanged = false;
 
@@ -43,6 +44,11 @@ public class ConstraintOptimizerParameters implements ConstraintOptimizerParamet
       this.constrainMaxAdjustment = constraintMaxAdjustment;
    }
 
+   public void setShouldPerformOptimization(boolean shouldPerformOptimization)
+   {
+      this.shouldPerformOptimization = shouldPerformOptimization;
+   }
+
    public double getDesiredDistanceInside()
    {
       return deltaInside;
@@ -61,5 +67,10 @@ public class ConstraintOptimizerParameters implements ConstraintOptimizerParamet
    public boolean getConstrainMaxAdjustment()
    {
       return constrainMaxAdjustment;
+   }
+
+   public boolean shouldPerformOptimization()
+   {
+      return shouldPerformOptimization;
    }
 }

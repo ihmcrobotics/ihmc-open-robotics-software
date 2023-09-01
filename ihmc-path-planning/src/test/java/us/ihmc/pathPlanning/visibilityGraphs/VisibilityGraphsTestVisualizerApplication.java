@@ -3,20 +3,20 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javafx.application.Application;
 import javafx.stage.Stage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.log.LogTools;
+import us.ihmc.messager.javafx.JavaFXMessager;
+import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapSolution;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.pathPlanning.visibilityGraphs.visualizer.VisibilityGraphsTestVisualizer;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-public class VisibilityGraphsTestVisualizerApplication extends Application
+public class VisibilityGraphsTestVisualizerApplication extends ApplicationNoModule
 {
    // Default UI parameters which should be changeable on the fly
    private static final boolean showBodyPath = true;

@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.dispatcher;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.BehaviorControlModePacket;
+import toolbox_msgs.msg.dds.BehaviorControlModePacket;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.log.LogTools;

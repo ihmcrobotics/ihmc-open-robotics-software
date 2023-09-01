@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class JointspaceTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.JointspaceTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::JointspaceTrajectoryMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "71a12532eed9275797cf8388153ea2fc402c96a463721a4c31a6d7ea1968bf6c";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
@@ -45,7 +57,7 @@ public class JointspaceTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.OneDoFJointTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -68,7 +80,7 @@ public class JointspaceTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
       {
           current_alignment += controller_msgs.msg.dds.OneDoFJointTrajectoryMessagePubSubType.getCdrSerializedSize(data.getJointTrajectoryMessages().get(i0), current_alignment);}
 
-      current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getCdrSerializedSize(data.getQueueingProperties(), current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.getCdrSerializedSize(data.getQueueingProperties(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -82,7 +94,7 @@ public class JointspaceTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
       cdr.write_type_e(data.getJointTrajectoryMessages());else
           throw new RuntimeException("joint_trajectory_messages field exceeds the maximum length");
 
-      controller_msgs.msg.dds.QueueableMessagePubSubType.write(data.getQueueingProperties(), cdr);
+      ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.write(data.getQueueingProperties(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.JointspaceTrajectoryMessage data, us.ihmc.idl.CDR cdr)
@@ -90,7 +102,7 @@ public class JointspaceTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
       data.setSequenceId(cdr.read_type_4());
       	
       cdr.read_type_e(data.getJointTrajectoryMessages());	
-      controller_msgs.msg.dds.QueueableMessagePubSubType.read(data.getQueueingProperties(), cdr);	
+      ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.read(data.getQueueingProperties(), cdr);	
 
    }
 
@@ -99,7 +111,7 @@ public class JointspaceTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_e("joint_trajectory_messages", data.getJointTrajectoryMessages());
-      ser.write_type_a("queueing_properties", new controller_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
+      ser.write_type_a("queueing_properties", new ihmc_common_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
 
    }
 
@@ -108,7 +120,7 @@ public class JointspaceTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       ser.read_type_e("joint_trajectory_messages", data.getJointTrajectoryMessages());
-      ser.read_type_a("queueing_properties", new controller_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
+      ser.read_type_a("queueing_properties", new ihmc_common_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
 
    }
 

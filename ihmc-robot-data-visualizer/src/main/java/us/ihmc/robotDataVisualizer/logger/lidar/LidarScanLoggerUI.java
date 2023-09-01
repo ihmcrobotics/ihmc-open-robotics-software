@@ -11,8 +11,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.javafx.ApplicationNoModule;
 
-public class LidarScanLoggerUI extends Application
+public class LidarScanLoggerUI extends ApplicationNoModule
 {
    @FXML
    private BorderPane mainPane;

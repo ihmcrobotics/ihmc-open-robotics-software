@@ -4,11 +4,10 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import map_sense.RawGPUPlanarRegionList;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.tuple.Pair;
-import org.jfree.util.Log;
 import org.ros.message.Time;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.CollidingScanPointFilter;
-import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.CollidingScanRegionFilter;
+import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCROS2Callback;
@@ -18,14 +17,11 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
-import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.depthData.CollisionShapeTester;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotEnvironmentAwareness.updaters.GPUPlanarRegionUpdater;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -86,7 +82,7 @@ public class DelayFixedPlanarRegionsSubscription
                                             ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
                                             rosClockCalculator::receivedRobotConfigurationData);
 
-      ROS2Tools.createCallbackSubscription2(ros2Node, ROS2Tools.MAPSENSE_REGIONS_DELAY_OFFSET, message -> delayOffset.setValue(message.getData()));
+      ROS2Tools.createCallbackSubscription2(ros2Node, PerceptionAPI.MAPSENSE_REGIONS_DELAY_OFFSET, message -> delayOffset.setValue(message.getData()));
 
       boolean daemon = true;
       int queueSize = 1;

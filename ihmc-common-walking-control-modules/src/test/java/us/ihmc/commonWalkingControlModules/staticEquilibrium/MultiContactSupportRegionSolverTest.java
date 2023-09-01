@@ -12,21 +12,21 @@ import java.util.List;
 
 public class MultiContactSupportRegionSolverTest
 {
-   private static final boolean VISUALIZE = false; //  Boolean.parseBoolean(System.getProperty("visualize", "true"));
+   private static final boolean VISUALIZE = true; //  Boolean.parseBoolean(System.getProperty("visualize", "true"));
    private static final double marginToTest = 1e-3;
 
    @Test
    public void testStaticEquilibriumSolver()
    {
-      List<MultiContactSupportRegionSolverInput> inputsToTest = Arrays.asList(MultiContactSupportRegionSolverInputExamples.createTriangleFlatGround(),
-                                                                              MultiContactSupportRegionSolverInputExamples.createTriangleTiltedOutSlightly(),
-                                                                              MultiContactSupportRegionSolverInputExamples.createTriangleTiltedOutALot(),
-                                                                              MultiContactSupportRegionSolverInputExamples.createTriangleOneTiltedFullyOut(),
-                                                                              MultiContactSupportRegionSolverInputExamples.createTriangleOneTiltedFullyIn(),
-                                                                              MultiContactSupportRegionSolverInputExamples.createFlatSquare(),
-                                                                              MultiContactSupportRegionSolverInputExamples.createBipedFeet(),
-                                                                              MultiContactSupportRegionSolverInputExamples.createBipedFeetWithSingleHandhold(),
-                                                                              MultiContactSupportRegionSolverInputExamples.createBipedFeetWithSingleHandhold());
+      List<MultiContactFrictionBasedSupportRegionSolverInput> inputsToTest = Arrays.asList(MultiContactSupportRegionSolverInputExamples.createTriangleFlatGround(),
+                                                                                           MultiContactSupportRegionSolverInputExamples.createTriangleTiltedOutSlightly(),
+                                                                                           MultiContactSupportRegionSolverInputExamples.createTriangleTiltedOutALot(),
+                                                                                           MultiContactSupportRegionSolverInputExamples.createTriangleOneTiltedFullyOut(),
+                                                                                           MultiContactSupportRegionSolverInputExamples.createTriangleOneTiltedFullyIn(),
+                                                                                           MultiContactSupportRegionSolverInputExamples.createFlatSquare(),
+                                                                                           MultiContactSupportRegionSolverInputExamples.createBipedFeet(),
+                                                                                           MultiContactSupportRegionSolverInputExamples.createBipedFeetWithSingleHandhold(),
+                                                                                           MultiContactSupportRegionSolverInputExamples.createBipedFeetWithSingleHandhold());
 
       for (int i = 0; i < inputsToTest.size(); i++)
       {
@@ -34,14 +34,14 @@ public class MultiContactSupportRegionSolverTest
       }
    }
 
-   private void runTest(MultiContactSupportRegionSolverInput input)
+   private void runTest(MultiContactFrictionBasedSupportRegionSolverInput input)
    {
-      MultiContactSupportRegionSolver solver = new MultiContactSupportRegionSolver();
+      MultiContactFrictionBasedSupportRegionSolver solver = new MultiContactFrictionBasedSupportRegionSolver();
       solver.initialize(input);
       solver.solve();
 
       ConvexPolygon2DReadOnly supportPolygon = solver.getSupportRegion();
-      MultiContactForceOptimizer forceOptimizer = new MultiContactForceOptimizer();
+      LPMultiContactForceOptimizer forceOptimizer = new LPMultiContactForceOptimizer();
 
       ConvexPolygonScaler scaler = new ConvexPolygonScaler();
       ConvexPolygon2D innerPolygon = new ConvexPolygon2D();
@@ -64,15 +64,15 @@ public class MultiContactSupportRegionSolverTest
 
    private static void runTimingTest()
    {
-      MultiContactSupportRegionSolver solver = new MultiContactSupportRegionSolver();
+      MultiContactFrictionBasedSupportRegionSolver solver = new MultiContactFrictionBasedSupportRegionSolver();
 
-      MultiContactSupportRegionSolverInput input0 = MultiContactSupportRegionSolverInputExamples.createTriangleTiltedOutSlightly();
-      MultiContactSupportRegionSolverInput input1 = MultiContactSupportRegionSolverInputExamples.createTriangleOneTiltedFullyIn();
-      MultiContactSupportRegionSolverInput input2 = MultiContactSupportRegionSolverInputExamples.createBipedFeet();
-      MultiContactSupportRegionSolverInput input3 = MultiContactSupportRegionSolverInputExamples.createBipedFeetWithSingleHandhold();
-      MultiContactSupportRegionSolverInput input4 = MultiContactSupportRegionSolverInputExamples.createBipedFeetWithTwoHandholds();
+      MultiContactFrictionBasedSupportRegionSolverInput input0 = MultiContactSupportRegionSolverInputExamples.createTriangleTiltedOutSlightly();
+      MultiContactFrictionBasedSupportRegionSolverInput input1 = MultiContactSupportRegionSolverInputExamples.createTriangleOneTiltedFullyIn();
+      MultiContactFrictionBasedSupportRegionSolverInput input2 = MultiContactSupportRegionSolverInputExamples.createBipedFeet();
+      MultiContactFrictionBasedSupportRegionSolverInput input3 = MultiContactSupportRegionSolverInputExamples.createBipedFeetWithSingleHandhold();
+      MultiContactFrictionBasedSupportRegionSolverInput input4 = MultiContactSupportRegionSolverInputExamples.createBipedFeetWithTwoHandholds();
 
-      MultiContactSupportRegionSolverInput[] inputs = new MultiContactSupportRegionSolverInput[]{input0, input1, input2, input3, input4};
+      MultiContactFrictionBasedSupportRegionSolverInput[] inputs = new MultiContactFrictionBasedSupportRegionSolverInput[]{input0, input1, input2, input3, input4};
 
       // warm up
       int warmups = 20;
@@ -84,7 +84,7 @@ public class MultiContactSupportRegionSolverTest
 
       // do timing test
       int iterations = 20;
-      long start = System.currentTimeMillis();
+      long startNano = System.nanoTime();
 
       for (int i = 0; i < iterations; i++)
       {
@@ -95,10 +95,10 @@ public class MultiContactSupportRegionSolverTest
          }
       }
 
-      long stop = System.currentTimeMillis();
+      long stopNano = System.nanoTime();
 
-      long diff = stop - start;
-      System.out.println("Average solve time: " + (diff / (iterations * inputs.length)) + "ms") ;
+      double diffUs = (stopNano - startNano) * 1e-3;
+      System.out.println("Average solve time: " + (diffUs / (iterations * inputs.length)) + " micro-sec") ;
    }
 
    public static void main(String[] args)

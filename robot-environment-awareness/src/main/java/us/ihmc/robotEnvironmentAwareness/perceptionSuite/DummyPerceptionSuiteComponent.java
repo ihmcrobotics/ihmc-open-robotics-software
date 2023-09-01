@@ -18,8 +18,8 @@ public class DummyPerceptionSuiteComponent
       this.name = name;
       this.messager = messager;
 
-      messager.registerTopicListener(runModuleTopic, this::run);
-      messager.registerTopicListener(showUITopic, this::run);
+      messager.addTopicListener(runModuleTopic, this::run);
+      messager.addTopicListener(showUITopic, this::run);
    }
 
 

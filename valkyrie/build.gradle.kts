@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.6"
-   id("us.ihmc.ihmc-cd") version "1.23"
+   id("us.ihmc.ihmc-ci") version "8.3"
+   id("us.ihmc.ihmc-cd") version "1.26"
    id("us.ihmc.scs") version "0.4"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
@@ -20,21 +20,15 @@ mainDependencies {
    api("org.ejml:ejml-simple:0.39")
    api("org.ejml:ejml-ddense:0.39")
    api("us.ihmc:jinput:2.0.6-ihmc2")
+   api("org.glassfish.jaxb:jaxb-runtime:2.3.2")
 
-   api("us.ihmc:euclid:0.17.2")
-   api("us.ihmc:euclid-geometry:0.17.2")
-   api("us.ihmc:euclid-frame:0.17.2")
-   api("us.ihmc:euclid-shape:0.17.2")
-   api("us.ihmc:euclid-frame-shape:0.17.2")
-   api("us.ihmc:mecano:0.11.0")
-   api("us.ihmc:mecano-yovariables:0.11.0")
-   api("us.ihmc:ihmc-yovariables:0.9.12")
-   api("us.ihmc:ihmc-realtime:1.5.0")
-   api("us.ihmc:ihmc-ros-control:0.6.0")
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.8")
-   api("us.ihmc:simulation-construction-set:0.21.16")
-   api("us.ihmc:ihmc-graphics-description:0.19.4")
-   api("us.ihmc:ihmc-robot-description:0.21.3")
+   api("us.ihmc:euclid:0.20.0")
+   api("us.ihmc:euclid-geometry:0.20.0")
+   api("us.ihmc:euclid-frame:0.20.0")
+   api("us.ihmc:euclid-shape:0.20.0")
+   api("us.ihmc:euclid-frame-shape:0.20.0")
+   api("us.ihmc:ihmc-realtime:1.6.0")
+   api("us.ihmc:ihmc-ros-control:0.7.1")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-system-identification:source")
@@ -57,13 +51,11 @@ mainDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:euclid:0.17.2")
-   api("us.ihmc:euclid-geometry:0.17.2")
-   api("us.ihmc:euclid-frame:0.17.2")
-   api("us.ihmc:euclid-shape:0.17.2")
-   api("us.ihmc:euclid-frame-shape:0.17.2")
-   api("us.ihmc:mecano:0.11.0")
-   api("us.ihmc:mecano-yovariables:0.11.0")
+   api("us.ihmc:euclid:0.20.0")
+   api("us.ihmc:euclid-geometry:0.20.0")
+   api("us.ihmc:euclid-frame:0.20.0")
+   api("us.ihmc:euclid-shape:0.20.0")
+   api("us.ihmc:euclid-frame-shape:0.20.0")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-avatar-interfaces-test:source")
 }
@@ -154,8 +146,6 @@ tasks.create("deploy") {
          put(file("launchScripts").toString(), directory)
          exec("chmod +x $directory/runNetworkProcessor.sh")
          exec("ls -halp $directory")
-         // For some reason, this jar needs to be removed to get the JAXB to work.
-         exec("rm ~/valkyrie/lib/jaxb-runtime-2.3.2.jar")
       }
 
       deployNetworkProcessor()

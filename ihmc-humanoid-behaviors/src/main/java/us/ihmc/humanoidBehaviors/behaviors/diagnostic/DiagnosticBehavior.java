@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.diagnostic;
 import java.util.ArrayList;
 import java.util.Random;
 
+import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import org.apache.commons.lang3.StringUtils;
 import org.ejml.data.DMatrixRMaj;
 
@@ -455,7 +456,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          armZeroJointAngleConfigurationOffsets.put(robotSide, armZeroJointAngleConfigurationOffset);
 
          upperArmJoints.put(robotSide, MultiBodySystemTools.filterJoints(MultiBodySystemTools.createJointPath(chest, upperArmBody), OneDoFJointBasics.class));
-         upperArmJointsClone.put(robotSide, MultiBodySystemTools.filterJoints(MultiBodySystemFactories.cloneKinematicChain(upperArmJoints.get(robotSide)),
+         upperArmJointsClone.put(robotSide, MultiBodySystemTools.filterJoints(MultiBodySystemFactories.cloneKinematicChain(upperArmJoints.get(robotSide), robotSide.getLowerCaseName() + "_clone"),
                                                                               OneDoFJointBasics.class));
          GeometricJacobian upperArmJacobian = new GeometricJacobian(upperArmJointsClone.get(robotSide),
                                                                     upperArmJointsClone.get(robotSide)[upperArmJointsClone.get(robotSide).length

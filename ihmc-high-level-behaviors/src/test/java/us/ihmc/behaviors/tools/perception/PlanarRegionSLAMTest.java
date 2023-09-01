@@ -4,14 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javafx.application.Platform;
@@ -22,15 +21,24 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullGraphicalMergerListener;
+import us.ihmc.perception.slamWrapper.SlamWrapperNativeLibrary;
+import us.ihmc.perception.tools.PlaneRegistrationTools;
+import us.ihmc.perception.mapping.PlanarRegionMap;
+import us.ihmc.perception.slamWrapper.SlamWrapper;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMergerListener;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMergerTest;
@@ -38,13 +46,16 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMResult;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.*;
 import us.ihmc.tools.lists.PairList;
 
 class PlanarRegionSLAMTest
 {
+   static
+   {
+      SlamWrapperNativeLibrary.load();
+   }
+
    private static final boolean VISUALIZE = Boolean.parseBoolean(System.getProperty("visualize"));
 
    @Test
@@ -1074,4 +1085,105 @@ class PlanarRegionSLAMTest
       MutationTestFacilitator.facilitateMutationTestForClasses(new Class[] {PlanarRegionSLAM.class, ConcaveHullMerger.class},
                                                                new Class[] {PlanarRegionSLAMTest.class, ConcaveHullMergerTest.class});
    }
+
+   @Disabled
+   @Test
+   public void testPlanarRegionFactorGraphSLAM()
+   {
+      SlamWrapper.FactorGraphExternal slam = new SlamWrapper.FactorGraphExternal();
+
+      RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform(new Quaternion(0.03, 0.0, 0.0), new Vector3D(0.05, 0.05, -0.05));
+      RigidBodyTransform worldToSensorTransform = new RigidBodyTransform();
+      worldToSensorTransform.setAndInvert(sensorToWorldTransform);
+
+      PlanarRegionsList listOne = createSomeRightAngledWalls(-3, false, new RigidBodyTransform(), true, true, true);
+      PlanarRegionsList listTwo = createSomeRightAngledWalls(-6, false, worldToSensorTransform, true, true, true);
+
+      FramePlanarRegionsList frameRegionsListOne = new FramePlanarRegionsList(listOne, new RigidBodyTransform());
+      FramePlanarRegionsList frameRegionsListTwo = new FramePlanarRegionsList(listTwo, sensorToWorldTransform);
+
+      PlanarRegionMap map = new PlanarRegionMap(true);
+
+      map.submitRegionsUsingIterativeReduction(frameRegionsListOne);
+      map.submitRegionsUsingIterativeReduction(frameRegionsListTwo);
+
+      RigidBodyTransform optimalTransform = map.getOptimalSensorToWorldTransform();
+
+      Point3D eulerAngles = new Point3D();
+      optimalTransform.getRotation().getEuler(eulerAngles);
+
+      Point3D initialAngles = new Point3D();
+      sensorToWorldTransform.getRotation().getEuler(initialAngles);
+
+      LogTools.info("Optimal Rotation: \n" + eulerAngles + "\tOptimal Translation" + optimalTransform.getTranslation());
+
+      assertEquals(0.0, EuclidGeometryTools.distanceBetweenPoint3Ds(eulerAngles.getX(), eulerAngles.getY(), eulerAngles.getZ(), initialAngles.getX(),
+                                                                    initialAngles.getY(), initialAngles.getZ()), 1e-2);
+
+      assertEquals(0.0,
+                   EuclidGeometryTools.distanceBetweenPoint3Ds(sensorToWorldTransform.getTranslationX(),
+                                                               sensorToWorldTransform.getTranslationY(),
+                                                               sensorToWorldTransform.getTranslationZ(),
+                                                               optimalTransform.getTranslationX(),
+                                                               optimalTransform.getTranslationY(),
+                                                               optimalTransform.getTranslationZ()), 0.1);
+
+      Vector4D planeOne = map.getOptimalLandmarkById(1);
+      Vector4D planeTwo = map.getOptimalLandmarkById(2);
+      Vector4D planeThree = map.getOptimalLandmarkById(3);
+
+      PerceptionDebugTools.printPlane(listOne.getPlanarRegion(0), true);
+      LogTools.info("Plane One: " + planeOne);
+
+      PerceptionDebugTools.printPlane(listOne.getPlanarRegion(1), true);
+      LogTools.info("Plane Two: " + planeTwo);
+
+      PerceptionDebugTools.printPlane(listOne.getPlanarRegion(2), true);
+      LogTools.info("Plane Three: " + planeThree);
+
+   }
+
+   @Test
+   public void testPointToPlaneICP()
+   {
+      RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform(new Quaternion(0.2, -0.5, 0.1), new Vector3D(0.1, 0.05, -0.1));
+      RigidBodyTransform worldToSensorTransform = new RigidBodyTransform();
+      worldToSensorTransform.setAndInvert(sensorToWorldTransform);
+
+      PlanarRegionsList listOne = createSomeRightAngledWalls(-3, false, new RigidBodyTransform(), true, true, true);
+      PlanarRegionsList listTwo = createSomeRightAngledWalls(-6, false, worldToSensorTransform, true, true, true);
+
+      TIntIntMap matches = new TIntIntHashMap();
+
+      PlaneRegistrationTools.findBestPlanarRegionMatches(new PlanarLandmarkList(listOne), new PlanarLandmarkList(listTwo), matches, 0.4f, 0.6f, 0.4f, 0.5f);
+
+      int[] keys = matches.keys();
+      for(Integer key : keys)
+      {
+         LogTools.info("Match: " + key + " " + matches.get(key));
+      }
+
+      RigidBodyTransform transform;
+      RigidBodyTransform totalTransform = new RigidBodyTransform();
+
+      LogTools.info("{}",listTwo.getPlanarRegion(1).getDebugString());
+
+      int numIterations = 5;
+
+      for(int i = 0; i<numIterations; i++)
+      {
+         transform = PlaneRegistrationTools.computeTransformFromRegions(listOne, listTwo, matches);
+         transform.invert();
+         listTwo.applyTransform(transform);
+         totalTransform.multiply(transform);
+      }
+
+      Point3D eulerAngles = new Point3D();
+      totalTransform.getRotation().getEuler(eulerAngles);
+      LogTools.info("Rotation: {} {} {}", eulerAngles.getX(), eulerAngles.getY(), eulerAngles.getZ());
+      LogTools.info("Translation: {} {} {}", totalTransform.getTranslationX(), totalTransform.getTranslationY(), totalTransform.getTranslationZ());
+
+      LogTools.info("{}",listTwo.getPlanarRegion(0).getDebugString());
+   }
+
 }

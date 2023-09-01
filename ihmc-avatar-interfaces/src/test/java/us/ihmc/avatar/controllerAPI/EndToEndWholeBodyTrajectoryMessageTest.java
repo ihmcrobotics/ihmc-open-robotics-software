@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Test;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
-import controller_msgs.msg.dds.MessageCollectionNotification;
+import ihmc_common_msgs.msg.dds.MessageCollectionNotification;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
-import controller_msgs.msg.dds.SO3TrajectoryMessage;
+import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
@@ -40,6 +40,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -108,7 +109,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
          RigidBodyBasics chest = fullRobotModel.getChest();
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          OneDoFJointBasics[] arm = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
-         OneDoFJointBasics[] armClone = MultiBodySystemFactories.cloneOneDoFJointKinematicChain(chest, hand);
+         OneDoFJointBasics[] armClone = MultiBodySystemTools.filterJoints(MultiBodySystemFactories.cloneKinematicChain(arm, robotSide.getLowerCaseName() + "ArmCopy"), OneDoFJointBasics.class);
          for (int i = 0; i < armClone.length; i++)
          {
             OneDoFJointBasics joint = armClone[i];
@@ -137,7 +138,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
                                                                                             worldFrame));
       }
 
-      HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      CommonHumanoidReferenceFrames humanoidReferenceFrames = simulationTestHelper.getControllerReferenceFrames();
+      humanoidReferenceFrames.updateFrames();
       RigidBodyBasics pelvis = fullRobotModel.getPelvis();
       ReferenceFrame pelvisZUpFrame = humanoidReferenceFrames.getPelvisZUpFrame();
       FramePose3D desiredPelvisPose = new FramePose3D(pelvis.getBodyFixedFrame());
@@ -261,7 +263,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
                                                                                                 worldFrame));
       }
 
-      HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      CommonHumanoidReferenceFrames humanoidReferenceFrames = simulationTestHelper.getControllerReferenceFrames();
+      humanoidReferenceFrames.updateFrames();
       RigidBodyBasics pelvis = fullRobotModel.getPelvis();
       ReferenceFrame pelvisZUpFrame = humanoidReferenceFrames.getPelvisZUpFrame();
       FramePose3D desiredPelvisPose = new FramePose3D(pelvis.getBodyFixedFrame());
@@ -386,7 +389,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
          messageCollectionMessenger.addMessage(handTrajectoryMessage);
       }
 
-      HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      CommonHumanoidReferenceFrames humanoidReferenceFrames = simulationTestHelper.getControllerReferenceFrames();
+      humanoidReferenceFrames.updateFrames();
       RigidBodyBasics pelvis = fullRobotModel.getPelvis();
       ReferenceFrame pelvisZUpFrame = humanoidReferenceFrames.getPelvisZUpFrame();
       FramePose3D desiredPelvisPose = new FramePose3D(pelvis.getBodyFixedFrame());
@@ -450,8 +454,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
       ThreadTools.sleep(1000);
 
-      FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getControllerReferenceFrames();
+      referenceFrames.updateFrames();
       ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
 
       WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();

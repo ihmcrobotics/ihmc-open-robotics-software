@@ -1,0 +1,6 @@
+{
+  "title" : "Target following behavior parameters",
+  "Minimum distance to keep from target" : 1.5,
+  "Look and step goal update period" : 0.5,
+  "Test loop radius" : 3.0
+}

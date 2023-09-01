@@ -16,7 +16,6 @@ public class HumanoidNetworkProcessorParameters
    private boolean useKinematicsPlanningToolboxModule, visualizeKinematicsPlanningToolboxModule;
    private boolean useKinematicsStreamingToolboxModule, visualizeKinematicsStreamingToolboxModule;
    private boolean useFootstepPlanningToolboxModule, visualizeFootstepPlanningToolboxModule;
-   private boolean useMocapModule;
    private boolean useDirectionalControlModule;
    private boolean useBehaviorModule, visualizeBehaviorModule;
    private boolean useAutomaticDiagnostic;
@@ -114,11 +113,6 @@ public class HumanoidNetworkProcessorParameters
    {
       this.useFootstepPlanningToolboxModule = enable;
       this.visualizeFootstepPlanningToolboxModule = visualize;
-   }
-
-   public void setUseMocapModule(boolean enable)
-   {
-      this.useMocapModule = enable;
    }
    
    public void setUseDirectionalControlModule(boolean enable)
@@ -263,11 +257,6 @@ public class HumanoidNetworkProcessorParameters
       return visualizeFootstepPlanningToolboxModule;
    }
 
-   public boolean isUseMocapModule()
-   {
-      return useMocapModule;
-   }
-   
    public boolean isUseDirectionalControlModule()
    {
 	   return useDirectionalControlModule;

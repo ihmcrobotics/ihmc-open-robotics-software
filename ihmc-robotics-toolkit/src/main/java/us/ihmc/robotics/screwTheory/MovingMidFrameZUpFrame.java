@@ -2,6 +2,8 @@ package us.ihmc.robotics.screwTheory;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -29,6 +31,21 @@ public class MovingMidFrameZUpFrame extends MovingReferenceFrame
       if (frameOne == frameTwo)
          throw new IllegalArgumentException("The frames have to be different.");
       frameOne.verifySameRoots(frameTwo);
+
+      this.frameOne = frameOne;
+      this.frameTwo = frameTwo;
+   }
+
+   public MovingMidFrameZUpFrame(String name, MovingReferenceFrame frameOne, MovingReferenceFrame frameTwo, ReferenceFrame stationaryFrame)
+   {
+      super(name, stationaryFrame, true);
+
+      if (frameOne == frameTwo)
+         throw new IllegalArgumentException("The frames have to be different.");
+      if (!stationaryFrame.isAStationaryFrame())
+         throw new RuntimeException(getClass().getSimpleName() + " can only have a root frame that is stationary.");
+      frameOne.verifyIsAncestor(stationaryFrame);
+      frameTwo.verifyIsAncestor(stationaryFrame);
 
       this.frameOne = frameOne;
       this.frameTwo = frameTwo;

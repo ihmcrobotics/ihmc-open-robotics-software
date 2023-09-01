@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
@@ -146,7 +146,6 @@ public class KSTTools
       ikCommandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel, ikController.getDesiredReferenceFrames()));
 
       ikController.setPreserveUserCommandHistory(false);
-      ikController.minimizeAngularMomentum(true);
 
       streamingMessageFactory = new KSTStreamingMessageFactory(fullRobotModelFactory);
       trajectoryMessageFactory = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
@@ -217,7 +216,7 @@ public class KSTTools
          }
 
          Pose3DBasics rootJointPose = currentRootJoint.getJointPose();
-         rootJointPose.set(robotConfigurationDataInternal.getRootTranslation(), robotConfigurationDataInternal.getRootOrientation());
+         rootJointPose.set(robotConfigurationDataInternal.getRootPosition(), robotConfigurationDataInternal.getRootOrientation());
          currentFullRobotModel.updateFrames();
       }
    }
@@ -545,7 +544,7 @@ public class KSTTools
       }
 
       Pose3DBasics rootJointPose = fullRobotModelToUpdate.getRootJoint().getJointPose();
-      rootJointPose.set(robotConfigurationData.getRootTranslation(), robotConfigurationData.getRootOrientation());
+      rootJointPose.set(robotConfigurationData.getRootPosition(), robotConfigurationData.getRootOrientation());
    }
 
    public static void copyRobotState(FullHumanoidRobotModel source, FullHumanoidRobotModel destination, JointStateType stateSelection)

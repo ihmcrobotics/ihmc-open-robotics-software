@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class HighLevelStateMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.HighLevelStateMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::HighLevelStateMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "f5bb4d69decdd0729f806755c04cb609cf1ba29a6dd324143d46ed2bfffa918d";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

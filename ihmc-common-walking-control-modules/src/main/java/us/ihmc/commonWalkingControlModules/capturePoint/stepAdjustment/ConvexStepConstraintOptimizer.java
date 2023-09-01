@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
+import us.ihmc.commons.MathTools;
 import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -28,10 +29,10 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class ConvexStepConstraintOptimizer
 {
    private static final boolean DEBUG = false;
-   private static final boolean warmStart = true;
+   private boolean warmStart = true;
 
    /**
-    * Weight associated with moving into the polygon.
+    * Weight associated with moving into the polygon. This is typically an inequality constraint, but is implemented as a cost
     */
    private static final double polygonWeight = 1.0e6;
    /**
@@ -81,12 +82,16 @@ public class ConvexStepConstraintOptimizer
       iterations = new YoInteger("StepConstrationOptimizerIterations", registry);
    }
 
-
    public void reset()
    {
       iterations.set(0);
       invariantConstraintRegionValuesComputed = false;
       invariantOptimizationValuesComputed = false;
+   }
+
+   public void setWarmStart(boolean warmStart)
+   {
+      this.warmStart = warmStart;
    }
 
    public RigidBodyTransformReadOnly findConstraintTransform(ConvexPolygon2DReadOnly polygonToWiggle,
@@ -101,6 +106,13 @@ public class ConvexStepConstraintOptimizer
                                                              ConstraintOptimizerParametersReadOnly parameters,
                                                              int[] startingVerticesToIgnore)
    {
+      iterations.set(-1);
+      if (!parameters.shouldPerformOptimization())
+      {
+         transformToReturn.setToZero();
+         return transformToReturn;
+      }
+
       int numberOfPoints = polygonToWiggle.getNumberOfVertices();
 
       boolean parametersChanged = parameters.pollParametersChanged();
@@ -133,7 +145,7 @@ public class ConvexStepConstraintOptimizer
          MatrixTools.multAddBlock(-1.0, A, p, j, constraintsPerPoint * i, 0);
       }
 
-      // Check to see if the optimization actually needs to run. Most of the time, probably not, but if so, there's no need to run the optimizer
+      // Check to see if the optimization actually needs to run. Most of the time, probably not, and if so, there's no need to run the optimizer
       solution.reshape(numberOfPoints, 1);
       CommonOps_DDRM.scale(-1.0, j, solution);
       boolean areConstraintsAlreadyValid = true;
@@ -151,7 +163,6 @@ public class ConvexStepConstraintOptimizer
          transformToReturn.setToZero();
          return transformToReturn;
       }
-
 
       if (!invariantOptimizationValuesComputed)
       {
@@ -190,10 +201,21 @@ public class ConvexStepConstraintOptimizer
          return null;
       }
 
+      // enforce the constraints manually
+      if (parameters.getConstrainMaxAdjustment())
+      {
+         solution.set(0, 0, MathTools.clamp(solution.get(0), parameters.getMaxX()));
+         solution.set(1, 0, MathTools.clamp(solution.get(1), parameters.getMaxY()));
+      }
       // assemble the transform
       transformToReturn.getTranslation().set(solution.get(0), solution.get(1), 0.0);
 
       return transformToReturn;
+   }
+
+   public int getIterationsInOptimization()
+   {
+      return iterations.getIntegerValue();
    }
 
    private void computeInvariantConstraintValues(ConvexPolygon2DReadOnly planeToWiggleInto,

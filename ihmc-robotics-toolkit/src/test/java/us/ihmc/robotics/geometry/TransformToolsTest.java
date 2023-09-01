@@ -38,7 +38,7 @@ public class TransformToolsTest
 
       transform2.setRotationRollAndZeroTranslation(Math.PI / 4);
 
-      EuclidCoreTestTools.assertRigidBodyTransformEquals(transform, transform2, 1e-7);
+      EuclidCoreTestTools.assertEquals(transform, transform2, 1e-7);
 
       transform = new RigidBodyTransform();
 
@@ -48,7 +48,7 @@ public class TransformToolsTest
 
       transform2.setRotationPitchAndZeroTranslation(3 * Math.PI / 4);
 
-      EuclidCoreTestTools.assertRigidBodyTransformEquals(transform, transform2, 1e-7);
+      EuclidCoreTestTools.assertEquals(transform, transform2, 1e-7);
 
       transform = new RigidBodyTransform();
 
@@ -58,7 +58,7 @@ public class TransformToolsTest
 
       transform2.setRotationYawAndZeroTranslation(-Math.PI / 2);
 
-      EuclidCoreTestTools.assertRigidBodyTransformEquals(transform, transform2, 1e-7);
+      EuclidCoreTestTools.assertEquals(transform, transform2, 1e-7);
    }
 
    @Test

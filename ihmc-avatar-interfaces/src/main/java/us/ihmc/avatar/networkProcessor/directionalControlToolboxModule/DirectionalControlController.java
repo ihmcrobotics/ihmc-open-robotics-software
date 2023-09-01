@@ -11,16 +11,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.DirectionalControlConfigurationMessage;
-import controller_msgs.msg.dds.DirectionalControlInputMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.PauseWalkingMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
+import controller_msgs.msg.dds.*;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import us.ihmc.avatar.joystickBasedJavaFXController.JoystickStepParametersProperty.JoystickStepParameters;
@@ -29,7 +21,6 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootPoseProvider;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -38,6 +29,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -226,7 +218,7 @@ public class DirectionalControlController extends ToolboxController
       continuousStepGenerator.setDesiredVelocityProvider(() -> new Vector2D(forwardVelocityProperty.get(), lateralVelocityProperty.get()));
       continuousStepGenerator.configureWith(walkingControllerParameters);
 
-      continuousStepGenerator.setFootstepAdjustment(this::adjustFootstep);
+      continuousStepGenerator.addFootstepAdjustment(this::adjustFootstep);
       continuousStepGenerator.setFootstepMessenger(this::prepareFootsteps);
       continuousStepGenerator.setFootPoseProvider(robotSide -> new FramePose3D(getSoleFrame(robotSide)));
       continuousStepGenerator.addFootstepValidityIndicator(this::isStepSnappable);
@@ -449,7 +441,7 @@ public class DirectionalControlController extends ToolboxController
     * @param footSide     -- left or right
     * @return 3D pose for the input step
     */
-   private FramePose3DReadOnly adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide)
+   private boolean adjustFootstep(FramePose3DReadOnly stancePose, FramePose2DReadOnly footstepPose, RobotSide footSide, FootstepDataMessage adjustedFootstep)
    {
       FramePose3D adjustedBasedOnStanceFoot = new FramePose3D();
       adjustedBasedOnStanceFoot.getPosition().set(footstepPose.getPosition());
@@ -467,7 +459,11 @@ public class DirectionalControlController extends ToolboxController
          {
             snapAndWiggleSingleStep.snapAndWiggle(wiggledPose, footPolygonToWiggle, forwardVelocityProperty.get() > 0.0);
             if (wiggledPose.containsNaN())
-               return adjustedBasedOnStanceFoot;
+            {
+               adjustedFootstep.getLocation().set(adjustedBasedOnStanceFoot.getPosition());
+               adjustedFootstep.getOrientation().set(adjustedBasedOnStanceFoot.getOrientation());
+               return true;
+            }
          }
          catch (SnappingFailedException e)
          {
@@ -476,11 +472,15 @@ public class DirectionalControlController extends ToolboxController
              * Let's just keep the adjusted footstep based on the pose of the current stance foot.
              */
          }
-         return wiggledPose;
+         adjustedFootstep.getLocation().set(wiggledPose.getPosition());
+         adjustedFootstep.getOrientation().set(wiggledPose.getOrientation());
+         return true;
       }
       else
       {
-         return adjustedBasedOnStanceFoot;
+         adjustedFootstep.getLocation().set(adjustedBasedOnStanceFoot.getPosition());
+         adjustedFootstep.getOrientation().set(adjustedBasedOnStanceFoot.getOrientation());
+         return true;
       }
    }
 

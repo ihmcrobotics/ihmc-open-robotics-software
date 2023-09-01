@@ -8,9 +8,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
-import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.WholeBodyStreamingMessagePublisher;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.WholeBodyTrajectoryMessagePublisher;
@@ -38,6 +38,7 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePose3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -89,10 +90,13 @@ public class KSTStreamingState implements State
    private final RigidBodyBasics chest;
    private final SideDependentList<RigidBodyBasics> hands = new SideDependentList<>();
    private final SideDependentList<OneDoFJointBasics[]> armJoints = new SideDependentList<>();
+   private final YoDouble lockPoseFilterBreakFrequency = new YoDouble("lockPoseFilterBreakFrequncy", registry);
    private final YoBoolean lockPelvis = new YoBoolean("lockPelvis", registry);
    private final YoBoolean lockChest = new YoBoolean("lockChest", registry);
    private final YoFramePose3D lockPelvisPose = new YoFramePose3D("lockPelvisPose", worldFrame, registry);
+   private final AlphaFilteredYoFramePose3D lockPelvisPoseFiltered;
    private final YoFramePose3D lockChestPose = new YoFramePose3D("lockChestPose", worldFrame, registry);
+   private final AlphaFilteredYoFramePose3D lockChestPoseFiltered;
 
    private final YoDouble defaultArmMessageWeight = new YoDouble("defaultArmMessageWeight", registry);
    private final YoDouble defaultNeckMessageWeight = new YoDouble("defaultNeckMessageWeight", registry);
@@ -164,8 +168,8 @@ public class KSTStreamingState implements State
 
    public KSTStreamingState(KSTTools tools)
    {
-      useStreamingPublisher.set(true);
       KinematicsStreamingToolboxParameters parameters = tools.getParameters();
+      useStreamingPublisher.set(parameters.getUseStreamingPublisher());
       this.tools = tools;
       toolboxControllerPeriod = tools.getToolboxControllerPeriod();
       ikController = tools.getIKController();
@@ -173,6 +177,9 @@ public class KSTStreamingState implements State
       ikSolverJointGains = ikController.getDefaultJointGains();
       ikController.getCenterOfMassSafeMargin().set(parameters.getCenterOfMassSafeMargin());
       ikController.setPublishingSolutionPeriod(parameters.getPublishingSolutionPeriod());
+      ikController.getMomentumWeight().set(parameters.getCenterOfMassHoldWeight());
+      ikController.minimizeMomentum(parameters.isMinimizeAngularMomentum(), parameters.isMinimizeLinearMomentum());
+      ikController.setMomentumWeight(parameters.getAngularMomentumWeight(), parameters.getLinearMomentumWeight());
       desiredFullRobotModel = tools.getDesiredFullRobotModel();
       ikCommandInputManager = tools.getIKCommandInputManager();
 
@@ -185,7 +192,8 @@ public class KSTStreamingState implements State
          neckJoints = new OneDoFJointBasics[0];
       else
          neckJoints = MultiBodySystemTools.createOneDoFJointPath(chest, head);
-      defaultNeckJointMessages = Stream.of(neckJoints).map(joint -> KinematicsToolboxMessageFactory.newOneDoFJointMessage(joint, 10.0, 0.0))
+      defaultNeckJointMessages = Stream.of(neckJoints)
+                                       .map(joint -> KinematicsToolboxMessageFactory.newOneDoFJointMessage(joint, 10.0, 0.0))
                                        .collect(Collectors.toList());
       defaultPelvisMessage.setEndEffectorHashCode(pelvis.hashCode());
       defaultPelvisMessage.getDesiredOrientationInWorld().setToZero();
@@ -198,7 +206,8 @@ public class KSTStreamingState implements State
          hands.put(robotSide, hand);
          armJoints.put(robotSide, joints);
          defaultArmJointMessages.put(robotSide,
-                                     Stream.of(joints).map(joint -> KinematicsToolboxMessageFactory.newOneDoFJointMessage(joint, 10.0, 0.0))
+                                     Stream.of(joints)
+                                           .map(joint -> KinematicsToolboxMessageFactory.newOneDoFJointMessage(joint, 10.0, 0.0))
                                            .collect(Collectors.toList()));
       }
 
@@ -228,7 +237,7 @@ public class KSTStreamingState implements State
       //                                             .collect(Collectors.toList()));
       //      }
 
-      publishingPeriod.set(5.0 * tools.getWalkingControllerPeriod());
+      publishingPeriod.set(parameters.getPublishingPeriod());
 
       defaultLinearRateLimit.set(parameters.getDefaultLinearRateLimit());
       defaultAngularRateLimit.set(parameters.getDefaultAngularRateLimit());
@@ -243,6 +252,14 @@ public class KSTStreamingState implements State
       blendedRobotState = new YoKinematicsToolboxOutputStatus("Blended", rootJoint, oneDoFJoints, registry);
       filteredRobotState = new YoKinematicsToolboxOutputStatus("Filtered", rootJoint, oneDoFJoints, registry);
       outputRobotState = new YoKinematicsToolboxOutputStatus("FD", rootJoint, oneDoFJoints, registry);
+
+      { // Filter for locking
+         DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(lockPoseFilterBreakFrequency.getValue(),
+                                                                                                      toolboxControllerPeriod);
+         lockPoseFilterBreakFrequency.set(0.25);
+         lockPelvisPoseFiltered = new AlphaFilteredYoFramePose3D("lockPelvisPoseFiltered", "", lockPelvisPose, alpha, registry);
+         lockChestPoseFiltered = new AlphaFilteredYoFramePose3D("lockChestPoseFiltered", "", lockChestPose, alpha, registry);
+      }
 
       YoDouble inputFrequencyAlpha = new YoDouble("inputFrequencyFilter", registry);
       inputFrequencyAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(2.0, toolboxControllerPeriod));
@@ -271,10 +288,16 @@ public class KSTStreamingState implements State
          rawInputOrientation = new YoFrameQuaternion(namePrefix + "RawOrientation", worldFrame, registry);
          rawExtrapolatedInputPosition = new YoFramePoint3D(namePrefix + "RawExtrapolatedPosition", worldFrame, registry);
          rawExtrapolatedInputOrientation = new YoFrameQuaternion(namePrefix + "RawExtrapolatedOrientation", worldFrame, registry);
-         filteredExtrapolatedInputPosition = new AlphaFilteredYoFramePoint(namePrefix
-               + "FilteredExtrapolatedPosition", "", registry, inputsAlphaProvider, rawExtrapolatedInputPosition);
-         filteredExtrapolatedInputOrientation = new AlphaFilteredYoFrameQuaternion(namePrefix
-               + "FilteredExtrapolatedOrientation", "", rawExtrapolatedInputOrientation, inputsAlphaProvider, registry);
+         filteredExtrapolatedInputPosition = new AlphaFilteredYoFramePoint(namePrefix + "FilteredExtrapolatedPosition",
+                                                                           "",
+                                                                           registry,
+                                                                           inputsAlphaProvider,
+                                                                           rawExtrapolatedInputPosition);
+         filteredExtrapolatedInputOrientation = new AlphaFilteredYoFrameQuaternion(namePrefix + "FilteredExtrapolatedOrientation",
+                                                                                   "",
+                                                                                   rawExtrapolatedInputOrientation,
+                                                                                   inputsAlphaProvider,
+                                                                                   registry);
          YoFixedFrameSpatialVector rawInputSpatialVelocity = new YoFixedFrameSpatialVector(namePrefix + "RawVelocity", worldFrame, registry);
          YoFixedFrameSpatialVector decayingInputSpatialVelocity = new YoFixedFrameSpatialVector(namePrefix + "DecayingVelocity", worldFrame, registry);
          rawInputPositionMap.put(rigidBody, rawInputPosition);
@@ -364,8 +387,9 @@ public class KSTStreamingState implements State
       if (lockPelvis.getValue())
       {
          lockPelvisPose.setFromReferenceFrame(controllerFullRobotModel.getPelvis().getBodyFixedFrame());
-         defaultPelvisMessage.getDesiredPositionInWorld().set(lockPelvisPose.getPosition());
-         defaultPelvisMessage.getDesiredOrientationInWorld().set(lockPelvisPose.getOrientation());
+         lockPelvisPoseFiltered.update();
+         defaultPelvisMessage.getDesiredPositionInWorld().set(lockPelvisPoseFiltered.getPosition());
+         defaultPelvisMessage.getDesiredOrientationInWorld().set(lockPelvisPoseFiltered.getOrientation());
          defaultPelvisMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
          defaultPelvisMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
          MessageTools.packWeightMatrix3DMessage(defaultPelvisMessageLockWeight.getValue(), defaultPelvisMessage.getLinearWeightMatrix());
@@ -373,6 +397,7 @@ public class KSTStreamingState implements State
       }
       else
       {
+         lockPelvisPoseFiltered.reset();
          lockPelvisPose.setFromReferenceFrame(pelvis.getBodyFixedFrame());
          defaultPelvisMessage.getDesiredPositionInWorld().set(lockPelvisPose.getPosition());
          defaultPelvisMessage.getDesiredOrientationInWorld().setToYawOrientation(lockPelvisPose.getYaw());
@@ -387,8 +412,9 @@ public class KSTStreamingState implements State
       if (lockChest.getValue())
       {
          lockChestPose.setFromReferenceFrame(controllerFullRobotModel.getChest().getBodyFixedFrame());
-         defaultChestMessage.getDesiredPositionInWorld().set(lockChestPose.getPosition());
-         defaultChestMessage.getDesiredOrientationInWorld().set(lockChestPose.getOrientation());
+         lockChestPoseFiltered.update();
+         defaultChestMessage.getDesiredPositionInWorld().set(lockChestPoseFiltered.getPosition());
+         defaultChestMessage.getDesiredOrientationInWorld().set(lockChestPoseFiltered.getOrientation());
          defaultChestMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
          defaultChestMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
          MessageTools.packWeightMatrix3DMessage(defaultChestMessageLockWeight.getValue(), defaultChestMessage.getLinearWeightMatrix());
@@ -396,6 +422,7 @@ public class KSTStreamingState implements State
       }
       else
       {
+         lockChestPoseFiltered.reset();
          lockChestPose.setFromReferenceFrame(chest.getBodyFixedFrame());
          defaultChestMessage.getDesiredPositionInWorld().setToZero();
          defaultChestMessage.getDesiredOrientationInWorld().setToYawOrientation(lockChestPose.getYaw());
@@ -501,15 +528,25 @@ public class KSTStreamingState implements State
       if (lockPelvis.getValue() && !tools.getConfigurationCommand().isPelvisTaskspaceEnabled())
       {
          lockPelvisPose.setFromReferenceFrame(controllerFullRobotModel.getPelvis().getBodyFixedFrame());
-         defaultPelvisMessage.getDesiredPositionInWorld().set(lockPelvisPose.getPosition());
-         defaultPelvisMessage.getDesiredOrientationInWorld().set(lockPelvisPose.getOrientation());
+         lockPelvisPoseFiltered.update();
+         defaultPelvisMessage.getDesiredPositionInWorld().set(lockPelvisPoseFiltered.getPosition());
+         defaultPelvisMessage.getDesiredOrientationInWorld().set(lockPelvisPoseFiltered.getOrientation());
+      }
+      else
+      {
+         lockPelvisPoseFiltered.reset();
       }
 
       if (lockChest.getValue() && !tools.getConfigurationCommand().isChestTaskspaceEnabled())
       {
          lockChestPose.setFromReferenceFrame(controllerFullRobotModel.getChest().getBodyFixedFrame());
-         defaultChestMessage.getDesiredPositionInWorld().set(lockChestPose.getPosition());
-         defaultChestMessage.getDesiredOrientationInWorld().set(lockChestPose.getOrientation());
+         lockChestPoseFiltered.update();
+         defaultChestMessage.getDesiredPositionInWorld().set(lockChestPoseFiltered.getPosition());
+         defaultChestMessage.getDesiredOrientationInWorld().set(lockChestPoseFiltered.getOrientation());
+      }
+      else
+      {
+         lockChestPoseFiltered.reset();
       }
 
       estimateInputsVelocity();

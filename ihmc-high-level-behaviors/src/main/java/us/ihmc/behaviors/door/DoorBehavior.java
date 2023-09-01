@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.door;
 
-import controller_msgs.msg.dds.DetectedFiducialPacket;
-import org.apache.commons.lang3.tuple.MutablePair;
+import perception_msgs.msg.dds.DetectedFiducialPacket;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
@@ -26,11 +25,13 @@ import us.ihmc.tools.Timer;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.behaviors.door.DoorBehaviorAPI.*;
-
+/**
+ * A behavior tree layer on top of the door behavior that John wrote for Atlas.
+ * @deprecated Not supported right now. Being kept for reference or revival.
+ */
 public class DoorBehavior extends ResettingNode implements BehaviorInterface
 {
-   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Door", DoorBehavior::new, DoorBehaviorAPI.create());
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Door", DoorBehavior::new);
    private BehaviorHelper helper;
    private ROS2SyncedRobotModel syncedRobot;
    private AtomicReference<Boolean> reviewEnabled;
@@ -59,12 +60,13 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
    {
       this.helper = helper;
       helper.subscribeToBehaviorStatusViaCallback(status::set);
-      reviewEnabled = helper.subscribeViaReference(ReviewEnabled, true);
+      // FIXME: subscribe review enabled
+      reviewEnabled = null;
       helper.subscribeToDoorLocationViaCallback(doorLocationPacket ->
       {
          doorDetectedTimer.reset();
          doorPose.set(doorLocationPacket.getDoorTransformToWorld());
-         helper.publish(DetectedDoorPose, MutablePair.of(DoorType.fromByte(doorLocationPacket.getDetectedDoorType()), new Pose3D(doorPose)));
+         // publish detected door
       });
       helper.subscribeViaCallback(ROS2Tools::getBehaviorStatusTopic, status ->
       {
@@ -93,7 +95,7 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
    {
       FramePose3DReadOnly robotPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame);
       distanceToDoor = doorPose.getPosition().distance(robotPose.getPosition());
-      helper.publish(DistanceToDoor, distanceToDoor);
+      // FIXME: publish distance to door
       helper.publishToolboxState(FiducialDetectorToolboxModule::getInputTopic, ToolboxState.WAKE_UP);
       helper.publishToolboxState(ObjectDetectorToolboxModule::getInputTopic, ToolboxState.WAKE_UP);
 

@@ -19,9 +19,9 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.PrepareForLocomotionMessage;
-import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
@@ -42,7 +42,6 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -77,6 +76,7 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
 import us.ihmc.robotics.math.trajectories.generators.EuclideanTrajectoryPointCalculator;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
@@ -85,6 +85,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -141,7 +142,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
-      HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      CommonHumanoidReferenceFrames humanoidReferenceFrames = simulationTestHelper.getControllerReferenceFrames();
       humanoidReferenceFrames.updateFrames();
 
       for (RobotSide robotSide : RobotSide.values)
@@ -151,7 +152,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
 
          OneDoFJointBasics[] armOriginal = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
-         OneDoFJointBasics[] armClone = MultiBodySystemFactories.cloneOneDoFJointKinematicChain(chest, hand);
+         OneDoFJointBasics[] armClone = MultiBodySystemTools.filterJoints(MultiBodySystemFactories.cloneKinematicChain(armOriginal, robotSide.getLowerCaseName()), OneDoFJointBasics.class);
+
          for (int jointIndex = 0; jointIndex < armOriginal.length; jointIndex++)
          {
             OneDoFJointBasics original = armOriginal[jointIndex];
@@ -249,7 +251,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
-      HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      CommonHumanoidReferenceFrames humanoidReferenceFrames = simulationTestHelper.getControllerReferenceFrames();
       humanoidReferenceFrames.updateFrames();
 
       for (RobotSide robotSide : RobotSide.values)
@@ -494,12 +496,12 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          for (int i = 0; i < trajectoryPoints.getNumberOfTrajectoryPoints(); i++)
          {
-            Point3D desiredPosition = new Point3D();
-            Vector3D desiredLinearVelocity = new Vector3D();
+            FrameEuclideanTrajectoryPoint trajectoryPoint = trajectoryPoints.getTrajectoryPoint(i);
+            Point3D desiredPosition = new Point3D(trajectoryPoint.getPosition());
+            Vector3D desiredLinearVelocity = new Vector3D(trajectoryPoint.getLinearVelocity());
             Quaternion desiredOrientation = new Quaternion(tempOrientation);
             Vector3D desiredAngularVelocity = new Vector3D();
 
-            trajectoryPoints.getTrajectoryPoint(i).get(desiredPosition, desiredLinearVelocity);
             double time = trajectoryPoints.getTrajectoryPoint(i).getTime();
 
             VisualDefinitionFactory visualDefinitionFactory = new VisualDefinitionFactory();
@@ -571,7 +573,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
             SE3TrajectoryPoint controllerTrajectoryPoint = EndToEndTestTools.findSE3TrajectoryPoint(handName, trajectoryPointIndex, simulationTestHelper);
             SE3TrajectoryPoint expectedTrajectoryPoint = new SE3TrajectoryPoint();
-            framePoint.get(expectedTrajectoryPoint);
+            expectedTrajectoryPoint.set(framePoint);
 
             assertEquals(expectedTrajectoryPoint.getTime(), controllerTrajectoryPoint.getTime(), EPSILON_FOR_DESIREDS);
             assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
@@ -591,7 +593,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          SE3TrajectoryPoint controllerTrajectoryPoint = EndToEndTestTools.findFeedbackControllerCurrentDesiredSE3TrajectoryPoint(handName,
                                                                                                                                  simulationTestHelper);
          SE3TrajectoryPoint expectedTrajectoryPoint = new SE3TrajectoryPoint();
-         framePoint.get(expectedTrajectoryPoint);
+         expectedTrajectoryPoint.set(framePoint);
 
          controllerTrajectoryPoint.setTime(expectedTrajectoryPoint.getTime());
          assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
@@ -786,8 +788,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             Vector3D desiredLinearVelocity = new Vector3D();
             Quaternion desiredOrientation = new Quaternion(tempOrientation);
             Vector3D desiredAngularVelocity = new Vector3D();
+            FrameEuclideanTrajectoryPoint r = trajectoryPoints.getTrajectoryPoint(calculatorIndex);
 
-            trajectoryPoints.getTrajectoryPoint(calculatorIndex).get(desiredPosition, desiredLinearVelocity);
+            desiredPosition.set(r.getPosition());
+            desiredLinearVelocity.set(r.getLinearVelocity());
             double time = trajectoryPoints.getTrajectoryPoint(calculatorIndex).getTime();
 
             VisualDefinitionFactory visualDefinitionFactory = new VisualDefinitionFactory();
@@ -838,7 +842,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
             SE3TrajectoryPoint controllerTrajectoryPoint = EndToEndTestTools.findSE3TrajectoryPoint(handName, trajectoryPointIndex, simulationTestHelper);
             SE3TrajectoryPoint expectedTrajectoryPoint = new SE3TrajectoryPoint();
-            framePoint.get(expectedTrajectoryPoint);
+            expectedTrajectoryPoint.set(framePoint);
             assertEquals(expectedTrajectoryPoint.getTime(), controllerTrajectoryPoint.getTime(), EPSILON_FOR_DESIREDS);
             assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
 
@@ -869,8 +873,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       String varnamePosition = handName + "ErrorPosition";
       Vector3D positionError = EndToEndTestTools.findVector3D(namespacePosition, varnamePosition, simulationTestHelper);
 
-      assertTrue(rotationError.length() < Math.toRadians(15.0));
-      assertTrue(positionError.length() < 0.05);
+      assertTrue(rotationError.norm() < Math.toRadians(15.0));
+      assertTrue(positionError.norm() < 0.05);
 
       // check internal desired matches last trajectory point:
       String namespacePositionDesired = FeedbackControllerToolbox.class.getSimpleName();
@@ -882,8 +886,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       Quaternion desiredOrientation = EndToEndTestTools.findQuaternion(namespaceOrientationDesired, varnameOrientationDesired, simulationTestHelper);
 
       lastPoint.changeFrame(worldFrame);
-      EuclidCoreTestTools.assertTuple3DEquals(lastPoint.getPositionCopy(), desiredPosition, 0.001);
-      EuclidCoreTestTools.assertQuaternionEquals(lastPoint.getOrientationCopy(), desiredOrientation, 0.001);
+      EuclidCoreTestTools.assertEquals(lastPoint.getPosition(), desiredPosition, 0.001);
+      EuclidCoreTestTools.assertEquals(lastPoint.getOrientation(), desiredOrientation, 0.001);
 
       assertEquals(2 * handTrajectoryMessages.size(), statusMessages.size());
       double startTime = 0.0;
@@ -1014,8 +1018,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                Vector3D desiredLinearVelocity = new Vector3D();
                Quaternion desiredOrientation = new Quaternion(tempOrientation);
                Vector3D desiredAngularVelocity = new Vector3D();
+               FrameEuclideanTrajectoryPoint r = trajectoryPoints.getTrajectoryPoint(calculatorIndex);
 
-               trajectoryPoints.getTrajectoryPoint(calculatorIndex).get(desiredPosition, desiredLinearVelocity);
+               desiredPosition.set(r.getPosition());
+               desiredLinearVelocity.set(r.getLinearVelocity());
                double time = trajectoryPoints.getTrajectoryPoint(calculatorIndex).getTime();
 
                VisualDefinitionFactory visualDefinitionFactory = new VisualDefinitionFactory();
@@ -1133,8 +1139,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                Vector3D desiredLinearVelocity = new Vector3D();
                Quaternion desiredOrientation = new Quaternion(tempOrientation);
                Vector3D desiredAngularVelocity = new Vector3D();
+               FrameEuclideanTrajectoryPoint r = trajectoryPoints.getTrajectoryPoint(calculatorIndex);
 
-               trajectoryPoints.getTrajectoryPoint(calculatorIndex).get(desiredPosition, desiredLinearVelocity);
+               desiredPosition.set(r.getPosition());
+               desiredLinearVelocity.set(r.getLinearVelocity());
                double time = trajectoryPoints.getTrajectoryPoint(calculatorIndex).getTime();
 
                VisualDefinitionFactory visualDefinitionFactory = new VisualDefinitionFactory();
@@ -1206,8 +1214,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          SE3TrajectoryPoint controllerTrajectoryPoint = EndToEndTestTools.findFeedbackControllerCurrentDesiredSE3TrajectoryPoint(handName,
                                                                                                                                  simulationTestHelper);
          SE3TrajectoryPoint expectedTrajectoryPoint = new SE3TrajectoryPoint();
-         expectedTrajectoryPoint.setPosition(desiredPose.getPosition());
-         expectedTrajectoryPoint.setOrientation(desiredPose.getOrientation());
+         expectedTrajectoryPoint.getPosition().set(desiredPose.getPosition());
+         expectedTrajectoryPoint.getOrientation().set(desiredPose.getOrientation());
 
          assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
       }
@@ -1380,7 +1388,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          FramePose3D currentHandPose = new FramePose3D(rightHandControlFrame);
          currentHandPose.changeFrame(ReferenceFrame.getWorldFrame());
          EuclidCoreTestTools.assertPoint3DGeometricallyEquals(poseToHold.getPosition(), currentHandPose.getPosition(), 1.0e-2);
-         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(poseToHold.getOrientation(), currentHandPose.getOrientation(), Math.toRadians(10.0));
+         EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(poseToHold.getOrientation(), currentHandPose.getOrientation(), Math.toRadians(10.0));
       }
    }
 
@@ -1525,17 +1533,17 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                                                                      currentDesiredTrajectoryPoint.getAngularVelocity(),
                                                                      currentDesiredTrajectoryPoint.getLinearVelocity());
 
-         EuclidGeometryTestTools.assertPose3DEquals(desiredPoses.get(robotSide), controllerDesiredPose, desiredEpsilon);
+         EuclidCoreTestTools.assertEquals(desiredPoses.get(robotSide), controllerDesiredPose, desiredEpsilon);
          MecanoTestTools.assertSpatialVectorEquals(desiredVelocities.get(robotSide), controllerDesiredVelocity, desiredEpsilon);
 
          FramePose3D currentPose = new FramePose3D(hand.getBodyFixedFrame());
          currentPose.changeFrame(worldFrame);
-         EuclidGeometryTestTools.assertPose3DGeometricallyEquals("Poor tracking for side: " + robotSide + " position: "
+         EuclidCoreTestTools.assertGeometricallyEquals("Poor tracking for side: " + robotSide + " position: "
                + currentPose.getPosition().distance(controllerDesiredPose.getPosition()) + ", orientation: "
                + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientation().distance(controllerDesiredPose.getOrientation()))),
-                                                                 controllerDesiredPose,
-                                                                 currentPose,
-                                                                 0.1);
+                                                       controllerDesiredPose,
+                                                       currentPose,
+                                                       0.1);
       }
 
       success = simulationTestHelper.simulateNow(0.5 * trajectoryTime.getValue() + 1.5);
@@ -1553,21 +1561,21 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                                                                      currentDesiredTrajectoryPoint.getAngularVelocity(),
                                                                      currentDesiredTrajectoryPoint.getLinearVelocity());
 
-         EuclidGeometryTestTools.assertPose3DEquals(desiredPoses.get(robotSide), controllerDesiredPose, desiredEpsilon);
+         EuclidCoreTestTools.assertEquals(desiredPoses.get(robotSide), controllerDesiredPose, desiredEpsilon);
          MecanoTestTools.assertSpatialVectorEquals(desiredVelocities.get(robotSide), controllerDesiredVelocity, desiredEpsilon);
 
          FramePose3D currentPose = new FramePose3D(hand.getBodyFixedFrame());
          currentPose.changeFrame(worldFrame);
-         EuclidCoreTestTools.assertTuple3DEquals("Poor position tracking for side: " + robotSide + " error: "
+         EuclidCoreTestTools.assertEquals("Poor position tracking for side: " + robotSide + " error: "
                + currentPose.getPosition().distance(controllerDesiredPose.getPosition()),
-                                                 controllerDesiredPose.getPosition(),
-                                                 currentPose.getPosition(),
-                                                 3.0e-2);
-         EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Poor orientation tracking for side: " + robotSide + " error: "
+                                          controllerDesiredPose.getPosition(),
+                                          currentPose.getPosition(),
+                                          3.0e-2);
+         EuclidCoreTestTools.assertOrientation3DGeometricallyEquals("Poor orientation tracking for side: " + robotSide + " error: "
                + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientation().distance(controllerDesiredPose.getOrientation()))),
-                                                                 controllerDesiredPose.getOrientation(),
-                                                                 currentPose.getOrientation(),
-                                                                 0.3);
+                                                                    controllerDesiredPose.getOrientation(),
+                                                                    currentPose.getOrientation(),
+                                                                    0.3);
       }
    }
 
@@ -1598,10 +1606,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(bodyName, 2, scs);
 
       Point3DReadOnly controllerDesiredPosition = EndToEndTestTools.findFeedbackControllerDesiredPosition(bodyName, scs);
-      EuclidCoreTestTools.assertTuple3DEquals(desiredPosition, controllerDesiredPosition, EPSILON_FOR_DESIREDS);
+      EuclidCoreTestTools.assertEquals(desiredPosition, controllerDesiredPosition, EPSILON_FOR_DESIREDS);
 
       QuaternionReadOnly controllerDesiredOrientation = EndToEndTestTools.findFeedbackControllerDesiredOrientation(bodyName, scs);
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(desiredOrientation, controllerDesiredOrientation, EPSILON_FOR_DESIREDS);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(desiredOrientation, controllerDesiredOrientation, EPSILON_FOR_DESIREDS);
    }
 
    public static FootstepDataListMessage twoStepsInPlace(SideDependentList<? extends ReferenceFrame> soleFrames)

@@ -17,6 +17,7 @@ import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
@@ -24,6 +25,8 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -34,7 +37,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
+public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SCS2YoGraphicHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -81,9 +84,13 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
    private final boolean hasWristForceSensors;
    private final boolean hasFootForceSensors;
 
-   public ForceSensorStateUpdater(FloatingJointBasics rootJoint, SensorOutputMapReadOnly sensorOutputMapReadOnly,
-                                  ForceSensorDataHolder forceSensorDataHolderToUpdate, StateEstimatorParameters stateEstimatorParameters, double gravity,
-                                  RobotMotionStatusHolder robotMotionStatusHolder, YoGraphicsListRegistry yoGraphicsListRegistry,
+   public ForceSensorStateUpdater(FloatingJointBasics rootJoint,
+                                  SensorOutputMapReadOnly sensorOutputMapReadOnly,
+                                  ForceSensorDataHolder forceSensorDataHolderToUpdate,
+                                  StateEstimatorParameters stateEstimatorParameters,
+                                  double gravity,
+                                  RobotMotionStatusHolder robotMotionStatusHolder,
+                                  YoGraphicsListRegistry yoGraphicsListRegistry,
                                   YoRegistry parentreRegistry)
    {
       this.gravity = Math.abs(gravity);
@@ -227,13 +234,8 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
             double forceVizScaling = 10.0;
             AppearanceDefinition forceAppearance = YoAppearance.DarkRed();
             AppearanceDefinition torqueAppearance = YoAppearance.DarkBlue();
-            wrenchVisualizer = new WrenchVisualizer("ForceSensorData",
-                                                    bodies,
-                                                    forceVizScaling,
-                                                    yoGraphicsListRegistry,
-                                                    registry,
-                                                    forceAppearance,
-                                                    torqueAppearance);
+            wrenchVisualizer = new WrenchVisualizer("ForceSensorData", forceVizScaling, yoGraphicsListRegistry, registry, forceAppearance, torqueAppearance);
+            wrenchVisualizer.registerRigidBodies(bodies);
          }
       }
       else
@@ -460,5 +462,14 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
    public void requestFootForceSensorCalibrationAtomic()
    {
       calibrateFootForceSensorsAtomic.set(true);
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      if (wrenchVisualizer != null)
+         group.addChild(wrenchVisualizer.getSCS2YoGraphics());
+      return group.isEmpty() ? null : group;
    }
 }

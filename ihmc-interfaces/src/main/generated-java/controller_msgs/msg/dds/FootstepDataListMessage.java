@@ -72,16 +72,20 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
    /**
             * Properties for queueing footstep lists.
             */
-   public controller_msgs.msg.dds.QueueableMessage queueing_properties_;
+   public ihmc_common_msgs.msg.dds.QueueableMessage queueing_properties_;
    /**
             * Default step constraints regions
             */
    public controller_msgs.msg.dds.StepConstraintsListMessage default_step_constraints_;
+   /**
+            * If the controller should check and fail if the steps are not reachable
+            */
+   public boolean should_check_for_reachability_;
 
    public FootstepDataListMessage()
    {
       footstep_data_list_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> (50, new controller_msgs.msg.dds.FootstepDataMessagePubSubType());
-      queueing_properties_ = new controller_msgs.msg.dds.QueueableMessage();
+      queueing_properties_ = new ihmc_common_msgs.msg.dds.QueueableMessage();
       default_step_constraints_ = new controller_msgs.msg.dds.StepConstraintsListMessage();
 
    }
@@ -113,8 +117,10 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
 
       offset_footsteps_height_with_execution_error_ = other.offset_footsteps_height_with_execution_error_;
 
-      controller_msgs.msg.dds.QueueableMessagePubSubType.staticCopy(other.queueing_properties_, queueing_properties_);
+      ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.staticCopy(other.queueing_properties_, queueing_properties_);
       controller_msgs.msg.dds.StepConstraintsListMessagePubSubType.staticCopy(other.default_step_constraints_, default_step_constraints_);
+      should_check_for_reachability_ = other.should_check_for_reachability_;
+
    }
 
    /**
@@ -293,7 +299,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
    /**
             * Properties for queueing footstep lists.
             */
-   public controller_msgs.msg.dds.QueueableMessage getQueueingProperties()
+   public ihmc_common_msgs.msg.dds.QueueableMessage getQueueingProperties()
    {
       return queueing_properties_;
    }
@@ -305,6 +311,21 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
    public controller_msgs.msg.dds.StepConstraintsListMessage getDefaultStepConstraints()
    {
       return default_step_constraints_;
+   }
+
+   /**
+            * If the controller should check and fail if the steps are not reachable
+            */
+   public void setShouldCheckForReachability(boolean should_check_for_reachability)
+   {
+      should_check_for_reachability_ = should_check_for_reachability;
+   }
+   /**
+            * If the controller should check and fail if the steps are not reachable
+            */
+   public boolean getShouldCheckForReachability()
+   {
+      return should_check_for_reachability_;
    }
 
 
@@ -352,6 +373,8 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
 
       if (!this.queueing_properties_.epsilonEquals(other.queueing_properties_, epsilon)) return false;
       if (!this.default_step_constraints_.epsilonEquals(other.default_step_constraints_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.should_check_for_reachability_, other.should_check_for_reachability_, epsilon)) return false;
+
 
       return true;
    }
@@ -386,6 +409,8 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
 
       if (!this.queueing_properties_.equals(otherMyClass.queueing_properties_)) return false;
       if (!this.default_step_constraints_.equals(otherMyClass.default_step_constraints_)) return false;
+      if(this.should_check_for_reachability_ != otherMyClass.should_check_for_reachability_) return false;
+
 
       return true;
    }
@@ -419,7 +444,9 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       builder.append("queueing_properties=");
       builder.append(this.queueing_properties_);      builder.append(", ");
       builder.append("default_step_constraints=");
-      builder.append(this.default_step_constraints_);
+      builder.append(this.default_step_constraints_);      builder.append(", ");
+      builder.append("should_check_for_reachability=");
+      builder.append(this.should_check_for_reachability_);
       builder.append("}");
       return builder.toString();
    }

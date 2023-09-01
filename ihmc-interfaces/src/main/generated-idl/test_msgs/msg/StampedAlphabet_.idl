@@ -1,0 +1,22 @@
+#ifndef __test_msgs__msg__StampedAlphabet__idl__
+#define __test_msgs__msg__StampedAlphabet__idl__
+
+#include "ihmc_common_msgs/msg/./InstantMessage_.idl"
+module test_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="test_msgs::msg::dds_::StampedAlphabet_")
+      struct StampedAlphabet
+      {
+        ihmc_common_msgs::msg::dds::InstantMessage last_modified;
+        string alphabet;
+      };
+    };
+  };
+};
+
+#endif

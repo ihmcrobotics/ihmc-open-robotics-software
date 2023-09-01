@@ -19,8 +19,8 @@ import java.util.function.DoubleUnaryOperator;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
-import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
@@ -30,7 +30,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTas
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.jointspace.OneDoFJointFeedbackController;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.nio.FileTools;
@@ -122,8 +121,8 @@ public class EndToEndTestTools
    {
       QuaternionReadOnly desiredOrientation = findFeedbackControllerDesiredOrientation(bodyName, yoVariableHolder);
       Vector3DReadOnly desiredAngularVelocity = findFeedbackControllerDesiredAngularVelocity(bodyName, yoVariableHolder);
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Orientation", expectedOrientation, desiredOrientation, epsilon, FORMAT);
-      EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity", expectedAngularVelocity, desiredAngularVelocity, epsilon, FORMAT);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals("Orientation", expectedOrientation, desiredOrientation, epsilon, FORMAT);
+      EuclidCoreTestTools.assertEquals("Angular Velocity", expectedAngularVelocity, desiredAngularVelocity, epsilon, FORMAT);
    }
 
    public static void assertWaypointInGeneratorMatches(String bodyName,
@@ -135,16 +134,12 @@ public class EndToEndTestTools
       assertTrue(waypointIndexInController < RigidBodyTaskspaceControlState.maxPointsInGenerator, "Index too high: " + waypointIndexInController);
       SO3TrajectoryPoint actualWaypoint = findSO3TrajectoryPoint(bodyName, waypointIndexInController, yoVariableHolder);
       assertEquals(expectedWaypoint.getTime(), actualWaypoint.getTime(), epsilon, "Time");
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Orientation",
-                                                              expectedWaypoint.getOrientation(),
-                                                              actualWaypoint.getOrientationCopy(),
-                                                              epsilon,
-                                                              FORMAT);
-      EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity",
-                                              expectedWaypoint.getAngularVelocity(),
-                                              actualWaypoint.getAngularVelocityCopy(),
-                                              epsilon,
-                                              FORMAT);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals("Orientation",
+                                                                 expectedWaypoint.getOrientation(),
+                                                                 actualWaypoint.getOrientation(),
+                                                                 epsilon,
+                                                                 FORMAT);
+      EuclidCoreTestTools.assertEquals("Angular Velocity", expectedWaypoint.getAngularVelocity(), actualWaypoint.getAngularVelocity(), epsilon, FORMAT);
    }
 
    public static void assertOneDoFJointsFeebackControllerDesireds(String[] jointNames,
@@ -298,7 +293,7 @@ public class EndToEndTestTools
       {
          if (!expectedDesiredPosition.containsNaN())
          {
-            EuclidCoreTestTools.assertTuple3DEquals(expectedDesiredPosition, statusMessage.getDesiredEndEffectorPosition(), epsilon);
+            EuclidCoreTestTools.assertEquals(expectedDesiredPosition, statusMessage.getDesiredEndEffectorPosition(), epsilon);
             assertFalse(statusMessage.getActualEndEffectorPosition().containsNaN());
          }
          else
@@ -355,9 +350,7 @@ public class EndToEndTestTools
 
       if (expectedDesiredOrientation != null)
       {
-         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(new Quaternion(expectedDesiredOrientation),
-                                                                 statusMessage.getDesiredEndEffectorOrientation(),
-                                                                 epsilon);
+         EuclidCoreTestTools.assertEquals(expectedDesiredOrientation, statusMessage.getDesiredEndEffectorOrientation(), epsilon);
          assertFalse(statusMessage.getActualEndEffectorOrientation().containsNaN());
       }
       else
@@ -398,8 +391,9 @@ public class EndToEndTestTools
       String angularVelocityName = bodyName + "AngularVelocity";
       SO3TrajectoryPoint simpleSO3TrajectoryPoint = new SO3TrajectoryPoint();
       simpleSO3TrajectoryPoint.setTime(yoVariableHolder.findVariable(orientationTrajectoryName, timeName + suffix).getValueAsDouble());
-      simpleSO3TrajectoryPoint.setOrientation(findQuaternion(orientationTrajectoryName, orientationName, suffix, yoVariableHolder));
-      simpleSO3TrajectoryPoint.setAngularVelocity(findVector3D(orientationTrajectoryName, angularVelocityName, suffix, yoVariableHolder));
+      simpleSO3TrajectoryPoint.getOrientation()
+                              .set((Orientation3DReadOnly) findQuaternion(orientationTrajectoryName, orientationName, suffix, yoVariableHolder));
+      simpleSO3TrajectoryPoint.getAngularVelocity().set(findVector3D(orientationTrajectoryName, angularVelocityName, suffix, yoVariableHolder));
       return simpleSO3TrajectoryPoint;
    }
 
@@ -418,20 +412,20 @@ public class EndToEndTestTools
 
       SE3TrajectoryPoint simpleSE3TrajectoryPoint = new SE3TrajectoryPoint();
       simpleSE3TrajectoryPoint.setTime(yoVariableHolder.findVariable(positionTrajectoryName, timeName + suffix).getValueAsDouble());
-      simpleSE3TrajectoryPoint.setPosition(findPoint3D(positionTrajectoryName, positionName, suffix, yoVariableHolder));
-      simpleSE3TrajectoryPoint.setOrientation(findQuaternion(orientationTrajectoryName, orientationName, suffix, yoVariableHolder));
-      simpleSE3TrajectoryPoint.setLinearVelocity(findVector3D(positionTrajectoryName, linearVelocityName, suffix, yoVariableHolder));
-      simpleSE3TrajectoryPoint.setAngularVelocity(findVector3D(orientationTrajectoryName, angularVelocityName, suffix, yoVariableHolder));
+      simpleSE3TrajectoryPoint.getPosition().set(findPoint3D(positionTrajectoryName, positionName, suffix, yoVariableHolder));
+      simpleSE3TrajectoryPoint.getOrientation().set(findQuaternion(orientationTrajectoryName, orientationName, suffix, yoVariableHolder));
+      simpleSE3TrajectoryPoint.getLinearVelocity().set(findVector3D(positionTrajectoryName, linearVelocityName, suffix, yoVariableHolder));
+      simpleSE3TrajectoryPoint.getAngularVelocity().set(findVector3D(orientationTrajectoryName, angularVelocityName, suffix, yoVariableHolder));
       return simpleSE3TrajectoryPoint;
    }
 
    public static SE3TrajectoryPoint findFeedbackControllerCurrentDesiredSE3TrajectoryPoint(String bodyName, YoVariableHolder yoVariableHolder)
    {
       SE3TrajectoryPoint simpleSE3TrajectoryPoint = new SE3TrajectoryPoint();
-      simpleSE3TrajectoryPoint.setPosition(findFeedbackControllerDesiredPosition(bodyName, yoVariableHolder));
-      simpleSE3TrajectoryPoint.setOrientation(findFeedbackControllerDesiredOrientation(bodyName, yoVariableHolder));
-      simpleSE3TrajectoryPoint.setLinearVelocity(findFeedbackControllerDesiredLinearVelocity(bodyName, yoVariableHolder));
-      simpleSE3TrajectoryPoint.setAngularVelocity(findFeedbackControllerDesiredAngularVelocity(bodyName, yoVariableHolder));
+      simpleSE3TrajectoryPoint.getPosition().set(findFeedbackControllerDesiredPosition(bodyName, yoVariableHolder));
+      simpleSE3TrajectoryPoint.getOrientation().set((Orientation3DReadOnly) findFeedbackControllerDesiredOrientation(bodyName, yoVariableHolder));
+      simpleSE3TrajectoryPoint.getLinearVelocity().set(findFeedbackControllerDesiredLinearVelocity(bodyName, yoVariableHolder));
+      simpleSE3TrajectoryPoint.getAngularVelocity().set(findFeedbackControllerDesiredAngularVelocity(bodyName, yoVariableHolder));
       return simpleSE3TrajectoryPoint;
    }
 
@@ -521,16 +515,14 @@ public class EndToEndTestTools
 
    public static YoDouble findOneDoFJointFeedbackControllerDesiredPosition(String jointName, YoVariableHolder yoVariableHolder)
    {
-      String namespace = jointName + OneDoFJointFeedbackController.shortName;
       String variable = "q_d_" + jointName;
-      return findYoDouble(namespace, variable, yoVariableHolder);
+      return findYoDouble(FeedbackControllerToolbox.class.getSimpleName(), variable, yoVariableHolder);
    }
 
    public static YoDouble findOneDoFJointFeedbackControllerDesiredVelocity(String jointName, YoVariableHolder yoVariableHolder)
    {
-      String namespace = jointName + OneDoFJointFeedbackController.shortName;
       String variable = "qd_d_" + jointName;
-      return findYoDouble(namespace, variable, yoVariableHolder);
+      return findYoDouble(FeedbackControllerToolbox.class.getSimpleName(), variable, yoVariableHolder);
    }
 
    /**
@@ -879,7 +871,7 @@ public class EndToEndTestTools
          }
       }
 
-      simulationTestHelper.getSimulationSession().getBuffer()
+      simulationTestHelper.getSimulationConstructionSet().getBuffer()
                           .exportDataMatlab(destination, var -> jointStateVariables.contains(var), reg -> reg == robot.getRegistry());
    }
 
@@ -891,15 +883,15 @@ public class EndToEndTestTools
    // Pattern-matched from TorqueSpeedDataExporter
    public static void exportTorqueSpeedCurves(SCS2AvatarTestingSimulation simulationTestHelper, File dataParentFolder, String dataNameSuffix, String info)
    {
-      YoDouble time = simulationTestHelper.getSimulationSession().getTime();
-      YoSharedBuffer buffer = simulationTestHelper.getSimulationSession().getBuffer();
+      YoDouble time = simulationTestHelper.getSimulationConstructionSet().getTime();
+      YoSharedBuffer buffer = simulationTestHelper.getSimulationConstructionSet().getBuffer();
       us.ihmc.scs2.simulation.robot.Robot robot = simulationTestHelper.getRobot();
       TorqueSpeedDataExporterGraphCreator graphCreator = new TorqueSpeedDataExporterGraphCreator(time, robot, buffer);
       DataExporterExcelWorkbookCreator excelWorkbookCreator = new DataExporterExcelWorkbookCreator(time, robot, buffer);
 
       // Stop the sim and disable the GUI:
-      simulationTestHelper.getSimulationSession().stopSessionThread();
-      simulationTestHelper.getSessionVisualizerControls().disableUserControls();
+      simulationTestHelper.getSimulationConstructionSet().stopSimulationThread();
+      simulationTestHelper.getSimulationConstructionSet().disableGUIControls();
 
       // Crop the Buffer to In/Out. This is important because of how we use the DataBuffer later and we assume that in point is at index=0:
       simulationTestHelper.cropBuffer();
@@ -925,7 +917,7 @@ public class EndToEndTestTools
       try
       {
          LogTools.info("Saving data");
-         simulationTestHelper.getSimulationSession().getBuffer().exportDataMatlab(new File(dataFolder, tagName + ".mat"));
+         simulationTestHelper.getSimulationConstructionSet().getBuffer().exportDataMatlab(new File(dataFolder, tagName + ".mat"));
          LogTools.info("Done Saving Data");
       }
       catch (IOException e)
@@ -969,7 +961,7 @@ public class EndToEndTestTools
       simulationTestHelper.exportVideo(new File(dataFolder, tagName + "_Video.mov"));
       LogTools.info("done creating video");
 
-      simulationTestHelper.getSessionVisualizerControls().enableUserControls();
+      simulationTestHelper.getSimulationConstructionSet().enableGUIControls();
    }
 
    private static void writeReadme(File readmeFile, String info)

@@ -64,6 +64,11 @@ public class ThreadTimer
       tick.set(-1);
    }
 
+   public void reset()
+   {
+      tick.set(-1);
+   }
+
    public void start()
    {
       long startTime = System.nanoTime();

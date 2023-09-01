@@ -33,7 +33,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
     * this command.
     * 
     * @param controllerCoreMode desired controller core mode. Choose between Inverse Dynamics, Inverse
-    *           Kinematics, or Virtual Model Control.
+    *                           Kinematics, or Virtual Model Control.
     */
    public ControllerCoreCommand(WholeBodyControllerCoreMode controllerCoreMode)
    {
@@ -64,6 +64,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
       inverseDynamicsCommandList.clear();
       feedbackControlCommandList.clear();
       inverseKinematicsCommandList.clear();
+      virtualModelControlCommandList.clear();
       lowLevelOneDoFJointDesiredDataHolder.clear();
       reinitialize = false;
    }
@@ -142,7 +143,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
     * Used to set the desired controller core mode.
     * 
     * @param controllerCoreMode Desired controller core mode. Choose from Inverse Dynamics, Inverse
-    *           Kinematics, and Virtual Model Control.
+    *                           Kinematics, and Virtual Model Control.
     */
    public void setControllerCoreMode(WholeBodyControllerCoreMode controllerCoreMode)
    {
@@ -211,13 +212,23 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
     */
    public void set(ControllerCoreCommand other)
    {
-      controllerCoreMode = other.controllerCoreMode;
-      inverseDynamicsCommandList.set(other.inverseDynamicsCommandList);
-      feedbackControlCommandList.set(other.feedbackControlCommandList);
-      inverseKinematicsCommandList.set(other.inverseKinematicsCommandList);
-      virtualModelControlCommandList.set(other.virtualModelControlCommandList);
-      lowLevelOneDoFJointDesiredDataHolder.set(other.lowLevelOneDoFJointDesiredDataHolder);
-      reinitialize = other.reinitialize;
+      set((ControllerCoreCommandInterface) other);
+   }
+
+   /**
+    * Set the controller core command data from an existing command.
+    * 
+    * @param other other controller core command to overwrite the current command.
+    */
+   public void set(ControllerCoreCommandInterface other)
+   {
+      controllerCoreMode = other.getControllerCoreMode();
+      inverseDynamicsCommandList.set(other.getInverseDynamicsCommandList());
+      feedbackControlCommandList.set(other.getFeedbackControlCommandList());
+      inverseKinematicsCommandList.set(other.getInverseKinematicsCommandList());
+      virtualModelControlCommandList.set(other.getVirtualModelControlCommandList());
+      lowLevelOneDoFJointDesiredDataHolder.overwriteWith(other.getLowLevelOneDoFJointDesiredDataHolder());
+      reinitialize = other.isReinitializationRequested();
    }
 
    /**

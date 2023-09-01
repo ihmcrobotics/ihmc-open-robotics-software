@@ -62,7 +62,7 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.setZ(-1.0);
       expectedProjectedPoint.changeFrame(worldFrame);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+      EuclidCoreTestTools.assertEquals(expectedProjectedPoint, projectedPoint, 1e-10);
 
       // test point a little above the plane
       pointToProject = new FramePoint3D(centerOfMassFrame, 0.15, 0.15, -0.9);
@@ -78,7 +78,7 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.setZ(-1.0);
       expectedProjectedPoint.changeFrame(worldFrame);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+      EuclidCoreTestTools.assertEquals(expectedProjectedPoint, projectedPoint, 1e-10);
 
       // test point on the plane
       pointToProject = new FramePoint3D(centerOfMassFrame, 0.15, 0.15, -1.0);
@@ -94,7 +94,7 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.setZ(-1.0);
       expectedProjectedPoint.changeFrame(worldFrame);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+      EuclidCoreTestTools.assertEquals(expectedProjectedPoint, projectedPoint, 1e-10);
 
       // test point slightly above the plane
       pointToProject = new FramePoint3D(centerOfMassFrame, 0.15, 0.15, -0.95);
@@ -110,7 +110,7 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.setZ(-1.0);
       expectedProjectedPoint.changeFrame(worldFrame);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+      EuclidCoreTestTools.assertEquals(expectedProjectedPoint, projectedPoint, 1e-10);
 
       // test point slightly below the plane
       pointToProject = new FramePoint3D(centerOfMassFrame, 0.15, 0.15, -1.05);
@@ -126,7 +126,7 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.setZ(-1.0);
       expectedProjectedPoint.changeFrame(worldFrame);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+      EuclidCoreTestTools.assertEquals(expectedProjectedPoint, projectedPoint, 1e-10);
 
       // test point barely above the plane
       pointToProject = new FramePoint3D(centerOfMassFrame, 0.15, 0.15, -0.99);
@@ -142,7 +142,7 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.setZ(-1.0);
       expectedProjectedPoint.changeFrame(worldFrame);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+      EuclidCoreTestTools.assertEquals(expectedProjectedPoint, projectedPoint, 1e-10);
 
       // test point barely below the plane
       pointToProject = new FramePoint3D(centerOfMassFrame, 0.15, 0.15, -1.01);
@@ -158,7 +158,7 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.setZ(-1.0);
       expectedProjectedPoint.changeFrame(worldFrame);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+      EuclidCoreTestTools.assertEquals(expectedProjectedPoint, projectedPoint, 1e-10);
 
       // test point far below the plane
       pointToProject = new FramePoint3D(centerOfMassFrame, 0.15, 0.15, -2.0);
@@ -174,7 +174,7 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.setZ(-1.0);
       expectedProjectedPoint.changeFrame(worldFrame);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+      EuclidCoreTestTools.assertEquals(expectedProjectedPoint, projectedPoint, 1e-10);
 
       // test point far above the plane
       pointToProject = new FramePoint3D(centerOfMassFrame, 0.15, 0.15, -0.05);
@@ -190,7 +190,7 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.setZ(-1.0);
       expectedProjectedPoint.changeFrame(worldFrame);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+      EuclidCoreTestTools.assertEquals(expectedProjectedPoint, projectedPoint, 1e-10);
 
       // test handling point slightly above the CoM
       pointToProject = new FramePoint3D(centerOfMassFrame, 0.15, 0.15, 0.05);
@@ -206,7 +206,7 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.setZ(-1.0);
       expectedProjectedPoint.changeFrame(worldFrame);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+      EuclidCoreTestTools.assertEquals(expectedProjectedPoint, projectedPoint, 1e-10);
 
       // test handling point well above the CoM
       pointToProject = new FramePoint3D(centerOfMassFrame, 0.15, 0.15, 0.5);
@@ -222,7 +222,7 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.setZ(-1.0);
       expectedProjectedPoint.changeFrame(worldFrame);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+      EuclidCoreTestTools.assertEquals(expectedProjectedPoint, projectedPoint, 1e-10);
    }
 
    /**
@@ -312,7 +312,7 @@ public class ICPControlPlaneTest
          expectedProjectedPoint.setZ(planeHeightInCoMFrame);
          expectedProjectedPoint.changeFrame(worldFrame);
 
-         EuclidCoreTestTools.assertTuple3DEquals("iteration " + iter, expectedProjectedPoint, projectedPoint, 1e-10);
+         EuclidCoreTestTools.assertEquals("iteration " + iter, expectedProjectedPoint, projectedPoint, 1e-10);
       }
    }
 
@@ -346,7 +346,7 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.changeFrame(worldFrame);
       expectedProjectedPoint.setZ(-0.1);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+      EuclidCoreTestTools.assertEquals(expectedProjectedPoint, projectedPoint, 1e-10);
 
       // test point a little above the plane
       pointToProject = new FramePoint2D(centerOfMassFrame, 0.15, 0.15);
@@ -362,7 +362,7 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.changeFrame(worldFrame);
       expectedProjectedPoint.setZ(0.1);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+      EuclidCoreTestTools.assertEquals(expectedProjectedPoint, projectedPoint, 1e-10);
 
       // test point on the plane
       pointToProject = new FramePoint2D(centerOfMassFrame, 0.15, 0.15);
@@ -378,7 +378,7 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.setZ(-1.0);
       expectedProjectedPoint.changeFrame(worldFrame);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+      EuclidCoreTestTools.assertEquals(expectedProjectedPoint, projectedPoint, 1e-10);
 
       // test point slightly above the plane
       pointToProject = new FramePoint2D(centerOfMassFrame, 0.15, 0.15);
@@ -394,7 +394,7 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.changeFrame(worldFrame);
       expectedProjectedPoint.setZ(0.05);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+      EuclidCoreTestTools.assertEquals(expectedProjectedPoint, projectedPoint, 1e-10);
 
 
       // test point slightly below the plane
@@ -411,7 +411,7 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.changeFrame(worldFrame);
       expectedProjectedPoint.setZ(-0.05);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+      EuclidCoreTestTools.assertEquals(expectedProjectedPoint, projectedPoint, 1e-10);
 
       // test point barely above the plane
       pointToProject = new FramePoint2D(centerOfMassFrame, 0.15, 0.15);
@@ -427,7 +427,7 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.changeFrame(worldFrame);
       expectedProjectedPoint.setZ(0.01);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+      EuclidCoreTestTools.assertEquals(expectedProjectedPoint, projectedPoint, 1e-10);
 
       // test point barely below the plane
       pointToProject = new FramePoint2D(centerOfMassFrame, 0.15, 0.15);
@@ -443,7 +443,7 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.changeFrame(worldFrame);
       expectedProjectedPoint.setZ(-0.01);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+      EuclidCoreTestTools.assertEquals(expectedProjectedPoint, projectedPoint, 1e-10);
 
       // test point far below the plane
       pointToProject = new FramePoint2D(centerOfMassFrame, 0.15, 0.15);
@@ -459,7 +459,7 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.changeFrame(worldFrame);
       expectedProjectedPoint.setZ(-1.0);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+      EuclidCoreTestTools.assertEquals(expectedProjectedPoint, projectedPoint, 1e-10);
 
       // test point far above the plane
       pointToProject = new FramePoint2D(centerOfMassFrame, 0.15, 0.15);
@@ -475,7 +475,7 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.changeFrame(worldFrame);
       expectedProjectedPoint.setZ(0.95);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+      EuclidCoreTestTools.assertEquals(expectedProjectedPoint, projectedPoint, 1e-10);
 
       // test handling point slightly above the CoM
       pointToProject = new FramePoint2D(centerOfMassFrame, 0.15, 0.15);
@@ -491,7 +491,7 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.changeFrame(worldFrame);
       expectedProjectedPoint.setZ(1.05);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+      EuclidCoreTestTools.assertEquals(expectedProjectedPoint, projectedPoint, 1e-10);
 
       // test handling point well above the CoM
       pointToProject = new FramePoint2D(centerOfMassFrame, 0.15, 0.15);
@@ -507,7 +507,7 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.changeFrame(worldFrame);
       expectedProjectedPoint.setZ(1.5);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+      EuclidCoreTestTools.assertEquals(expectedProjectedPoint, projectedPoint, 1e-10);
    }
 
    @Test
@@ -550,7 +550,7 @@ public class ICPControlPlaneTest
          expectedProjectedPoint.changeFrame(worldFrame);
          expectedProjectedPoint.setZ(zSurfacePosition);
 
-         EuclidCoreTestTools.assertTuple3DEquals("iteration " + iter, expectedProjectedPoint, projectedPoint, 1e-10);
+         EuclidCoreTestTools.assertEquals("iteration " + iter, expectedProjectedPoint, projectedPoint, 1e-10);
       }
    }
 
@@ -601,10 +601,10 @@ public class ICPControlPlaneTest
       predictedProjectPoint4.scale(1.0 / 0.9);
 
 
-      EuclidCoreTestTools.assertTuple2DEquals(predictedProjectPoint1, projectedConvexPolygon.getVertex(0), 1e-10);
-      EuclidCoreTestTools.assertTuple2DEquals(predictedProjectPoint2, projectedConvexPolygon.getVertex(1), 1e-10);
-      EuclidCoreTestTools.assertTuple2DEquals(predictedProjectPoint3, projectedConvexPolygon.getVertex(2), 1e-10);
-      EuclidCoreTestTools.assertTuple2DEquals(predictedProjectPoint4, projectedConvexPolygon.getVertex(3), 1e-10);
+      EuclidCoreTestTools.assertEquals(predictedProjectPoint1, projectedConvexPolygon.getVertex(0), 1e-10);
+      EuclidCoreTestTools.assertEquals(predictedProjectPoint2, projectedConvexPolygon.getVertex(1), 1e-10);
+      EuclidCoreTestTools.assertEquals(predictedProjectPoint3, projectedConvexPolygon.getVertex(2), 1e-10);
+      EuclidCoreTestTools.assertEquals(predictedProjectPoint4, projectedConvexPolygon.getVertex(3), 1e-10);
    }
 
    @Test
@@ -663,10 +663,10 @@ public class ICPControlPlaneTest
       predictedProjectPoint3.add(0.1, 0.1);
       predictedProjectPoint4.add(0.1, 0.1);
 
-      EuclidCoreTestTools.assertTuple2DEquals(predictedProjectPoint1, projectedConvexPolygon.getVertex(0), 1e-10);
-      EuclidCoreTestTools.assertTuple2DEquals(predictedProjectPoint2, projectedConvexPolygon.getVertex(1), 1e-10);
-      EuclidCoreTestTools.assertTuple2DEquals(predictedProjectPoint3, projectedConvexPolygon.getVertex(2), 1e-10);
-      EuclidCoreTestTools.assertTuple2DEquals(predictedProjectPoint4, projectedConvexPolygon.getVertex(3), 1e-10);
+      EuclidCoreTestTools.assertEquals(predictedProjectPoint1, projectedConvexPolygon.getVertex(0), 1e-10);
+      EuclidCoreTestTools.assertEquals(predictedProjectPoint2, projectedConvexPolygon.getVertex(1), 1e-10);
+      EuclidCoreTestTools.assertEquals(predictedProjectPoint3, projectedConvexPolygon.getVertex(2), 1e-10);
+      EuclidCoreTestTools.assertEquals(predictedProjectPoint4, projectedConvexPolygon.getVertex(3), 1e-10);
    }
 
    private static ReferenceFrame createCenterOfMassFrame(double x, double y, double z)

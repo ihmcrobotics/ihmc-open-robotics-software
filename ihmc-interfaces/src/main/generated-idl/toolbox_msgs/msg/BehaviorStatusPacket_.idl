@@ -1,0 +1,47 @@
+#ifndef __toolbox_msgs__msg__BehaviorStatusPacket__idl__
+#define __toolbox_msgs__msg__BehaviorStatusPacket__idl__
+
+module toolbox_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet NO_BEHAVIOR_RUNNING =
+      0;
+
+      const octet BEHAVIOR_RUNNING =
+      1;
+
+      const octet BEHAVIOR_PAUSED =
+      2;
+
+      const octet BEHAVIOR_FINISHED_FAILED =
+      3;
+
+      const octet BEHAVIOR_FINISHED_SUCCESS =
+      4;
+
+
+      /**
+       * This message is part of the IHMC humanoid behavior module.
+       */
+      @TypeCode(type="toolbox_msgs::msg::dds_::BehaviorStatusPacket_")
+      struct BehaviorStatusPacket
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        @defaultValue(value=255)
+        octet current_behavior_status;
+        /**
+         * Field default value 255
+         */
+        octet humanoid_behavior_type;
+      };
+    };
+  };
+};
+
+#endif

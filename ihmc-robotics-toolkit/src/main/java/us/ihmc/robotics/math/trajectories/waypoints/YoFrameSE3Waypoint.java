@@ -1,104 +1,99 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
+import us.ihmc.euclid.tools.EuclidHashCodeTools;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FixedFrameEuclideanWaypointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FixedFrameSO3WaypointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSE3WaypointBasics;
-import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSE3WaypointReadOnly;
+import us.ihmc.yoVariables.euclid.referenceFrame.interfaces.FrameIndexMap;
+import us.ihmc.yoVariables.euclid.referenceFrame.interfaces.YoMutableFrameObject;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
+import us.ihmc.yoVariables.variable.YoLong;
 
-public class YoFrameSE3Waypoint implements FrameSE3WaypointBasics
+public class YoFrameSE3Waypoint implements FrameSE3WaypointBasics, YoMutableFrameObject
 {
+   private final YoLong frameId;
+   private final FrameIndexMap frameIndexMap;
    private final YoFrameEuclideanWaypoint euclideanWaypoint;
    private final YoFrameSO3Waypoint so3Waypoint;
 
    public YoFrameSE3Waypoint(String namePrefix, String nameSuffix, YoRegistry registry)
    {
-      euclideanWaypoint = new YoFrameEuclideanWaypoint(namePrefix, nameSuffix, registry);
-      so3Waypoint = new YoFrameSO3Waypoint(namePrefix, nameSuffix, registry);
+      this(namePrefix,
+           nameSuffix,
+           new YoLong(YoGeometryNameTools.assembleName(namePrefix, "frame", nameSuffix), registry),
+           new FrameIndexMap.FrameIndexHashMap(),
+           registry);
+   }
+
+   public YoFrameSE3Waypoint(String namePrefix, String nameSuffix, YoLong frameIndex, FrameIndexMap frameIndexMap, YoRegistry registry)
+   {
+      this.frameId = frameIndex;
+      this.frameIndexMap = frameIndexMap;
+
+      euclideanWaypoint = new YoFrameEuclideanWaypoint(namePrefix, nameSuffix, frameId, frameIndexMap, registry);
+      so3Waypoint = new YoFrameSO3Waypoint(namePrefix, nameSuffix, frameId, frameIndexMap, registry);
    }
 
    @Override
-   public FramePoint3DReadOnly getPosition()
+   public FixedFrameEuclideanWaypointBasics getEuclideanWaypoint()
    {
-      return euclideanWaypoint.getPosition();
+      return euclideanWaypoint;
    }
 
    @Override
-   public FrameVector3DReadOnly getLinearVelocity()
+   public FixedFrameSO3WaypointBasics getSO3Waypoint()
    {
-      return euclideanWaypoint.getLinearVelocity();
-   }
-
-   @Override
-   public void setPosition(double x, double y, double z)
-   {
-      euclideanWaypoint.setPosition(x, y, z);
-   }
-
-   @Override
-   public void setLinearVelocity(double x, double y, double z)
-   {
-      euclideanWaypoint.setLinearVelocity(x, y, z);
-   }
-
-   @Override
-   public void applyTransform(Transform transform)
-   {
-      euclideanWaypoint.applyTransform(transform);
-      so3Waypoint.applyTransform(transform);
-   }
-
-   @Override
-   public void applyInverseTransform(Transform transform)
-   {
-      euclideanWaypoint.applyInverseTransform(transform);
-      so3Waypoint.applyInverseTransform(transform);
-   }
-
-   @Override
-   public void setReferenceFrame(ReferenceFrame referenceFrame)
-   {
-      euclideanWaypoint.setReferenceFrame(referenceFrame);
-      so3Waypoint.setReferenceFrame(referenceFrame);
+      return so3Waypoint;
    }
 
    @Override
    public ReferenceFrame getReferenceFrame()
    {
-      euclideanWaypoint.checkReferenceFrameMatch(so3Waypoint);
-      return euclideanWaypoint.getReferenceFrame();
+      return YoMutableFrameObject.super.getReferenceFrame();
    }
 
    @Override
-   public FrameQuaternionReadOnly getOrientation()
+   public YoLong getYoFrameIndex()
    {
-      return so3Waypoint.getOrientation();
+      return frameId;
    }
 
    @Override
-   public FrameVector3DReadOnly getAngularVelocity()
+   public FrameIndexMap getFrameIndexMap()
    {
-      return so3Waypoint.getAngularVelocity();
+      return frameIndexMap;
    }
 
    @Override
-   public void setOrientation(double x, double y, double z, double s)
+   public void setReferenceFrame(ReferenceFrame referenceFrame)
    {
-      so3Waypoint.setOrientation(x, y, z, s);
+      YoMutableFrameObject.super.setReferenceFrame(referenceFrame);
    }
 
    @Override
-   public void setAngularVelocity(double x, double y, double z)
+   public int hashCode()
    {
-      so3Waypoint.setAngularVelocity(x, y, z);
+      return EuclidHashCodeTools.toIntHashCode(getEuclideanWaypoint(), getSO3Waypoint());
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+         return true;
+      else if (object instanceof FrameSE3WaypointReadOnly)
+         return equals((FrameSE3WaypointReadOnly) object);
+      else
+         return false;
    }
 
    @Override
    public String toString()
    {
-      return WaypointToStringTools.waypointToString(this);
+      return toString(EuclidCoreIOTools.DEFAULT_FORMAT);
    }
 }

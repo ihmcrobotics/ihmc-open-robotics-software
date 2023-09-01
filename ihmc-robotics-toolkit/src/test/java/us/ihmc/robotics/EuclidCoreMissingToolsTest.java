@@ -1,6 +1,8 @@
 package us.ihmc.robotics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -10,6 +12,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -17,6 +20,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 
@@ -40,10 +44,10 @@ public class EuclidCoreMissingToolsTest
       Vector3D roundedVector = new Vector3D(preciseVector);
 
       EuclidCoreMissingTools.floorToGivenPrecision(roundedVector, 1e-7);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.1234567, 100.1234567, 1000.1234567), roundedVector, 1e-12);
+      EuclidCoreTestTools.assertEquals(new Vector3D(0.1234567, 100.1234567, 1000.1234567), roundedVector, 1e-12);
 
       EuclidCoreMissingTools.floorToGivenPrecision(roundedVector, 1e-3);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.123, 100.123, 1000.123), roundedVector, 1e-14);
+      EuclidCoreTestTools.assertEquals(new Vector3D(0.123, 100.123, 1000.123), roundedVector, 1e-14);
    }
 
    @Test
@@ -68,7 +72,7 @@ public class EuclidCoreMissingToolsTest
          // From the combined rotation and the original axis back out the rotation around the original axis.
          fullRotation.multiply(orthogonalRotation, expectedRotation);
          EuclidCoreMissingTools.projectRotationOnAxis(fullRotation, axis, actualRotation);
-         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(expectedRotation, actualRotation, 1.0e-10);
+         EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(expectedRotation, actualRotation, 1.0e-10);
       }
    }
 
@@ -89,7 +93,7 @@ public class EuclidCoreMissingToolsTest
          EuclidCoreMissingTools.rotationMatrix3DFromFirstToSecondVector3D(firstVector, secondVector, actualRotationMatrix);
          actualAxisAngle.set(actualRotationMatrix);
          EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(firstVector, secondVector, expectedAxisAngle);
-         EuclidCoreTestTools.assertAxisAngleGeometricallyEquals(expectedAxisAngle, actualAxisAngle, 1.0e-7);
+         EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(expectedAxisAngle, actualAxisAngle, 1.0e-7);
       }
    }
 
@@ -305,12 +309,12 @@ public class EuclidCoreMissingToolsTest
 
          Vector3D actualNormalPart = new Vector3D();
          EuclidCoreMissingTools.extractNormalPart(input, normalAxis, actualNormalPart);
-         EuclidCoreTestTools.assertTuple3DEquals(normalPart, actualNormalPart, EPSILON);
+         EuclidCoreTestTools.assertEquals(normalPart, actualNormalPart, EPSILON);
 
          // Randomize the axis
          normalAxis.scale(EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0));
          EuclidCoreMissingTools.extractNormalPart(input, normalAxis, actualNormalPart);
-         EuclidCoreTestTools.assertTuple3DEquals(normalPart, actualNormalPart, EPSILON);
+         EuclidCoreTestTools.assertEquals(normalPart, actualNormalPart, EPSILON);
       }
    }
 
@@ -337,7 +341,7 @@ public class EuclidCoreMissingToolsTest
 
          Vector3D actualTangentialPart = new Vector3D();
          EuclidCoreMissingTools.extractTangentialPart(input, normalAxis, actualTangentialPart);
-         EuclidCoreTestTools.assertTuple3DEquals("Iteration: " + i, tangentialPart, actualTangentialPart, EPSILON);
+         EuclidCoreTestTools.assertEquals("Iteration: " + i, tangentialPart, actualTangentialPart, EPSILON);
       }
 
       for (int i = 0; i < iters; i++)
@@ -357,13 +361,35 @@ public class EuclidCoreMissingToolsTest
 
          Vector3D actualTangentialPart = new Vector3D();
          EuclidCoreMissingTools.extractTangentialPart(input, normalAxis, actualTangentialPart);
-         EuclidCoreTestTools.assertTuple3DEquals(tangentialPart, actualTangentialPart, EPSILON);
+         EuclidCoreTestTools.assertEquals(tangentialPart, actualTangentialPart, EPSILON);
 
          // Randomize the axis
          normalAxis.scale(EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0));
          EuclidCoreMissingTools.extractTangentialPart(input, normalAxis, actualTangentialPart);
-         EuclidCoreTestTools.assertTuple3DEquals(tangentialPart, actualTangentialPart, EPSILON);
+         EuclidCoreTestTools.assertEquals(tangentialPart, actualTangentialPart, EPSILON);
       }
+   }
+
+   @Test
+   public void testIntersectionBetweenRay2DAndLine2D()
+   {
+      Point2D rayOrigin = new Point2D(8.689, 0.5687);
+      Point2D pointOnRay = new Point2D(8.6432, 0.4951);
+      Vector2D rayDirection = new Vector2D();
+      rayDirection.sub(pointOnRay, rayOrigin);
+
+      Point2D lineStart = new Point2D(8.4521, 0.4323);
+      Point2D lineEnd = new Point2D(8.776, 0.5267);
+      Vector2D lineDirection = new Vector2D();
+      lineDirection.sub(lineEnd, lineStart);
+
+      Point2D intersectionToPac = new Point2D();
+      assertTrue(EuclidCoreMissingTools.intersectionBetweenRay2DAndLine2D(rayOrigin, rayDirection, lineStart, lineDirection, intersectionToPac));
+
+      Point2D intersectionExpected = new Point2D();
+      EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(rayOrigin, rayDirection, lineStart, lineEnd, intersectionExpected);
+
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(intersectionExpected, intersectionToPac, 1e-5);
    }
 
    @Test
@@ -393,7 +419,7 @@ public class EuclidCoreMissingToolsTest
          expected.add(normalPart, tangentialPart);
 
          EuclidCoreMissingTools.setNormalPart(input, normalAxis, tupleToModify);
-         EuclidCoreTestTools.assertTuple3DEquals(expected, tupleToModify, EPSILON);
+         EuclidCoreTestTools.assertEquals(expected, tupleToModify, EPSILON);
       }
 
       for (int i = 0; i < iters; i++)
@@ -417,12 +443,37 @@ public class EuclidCoreMissingToolsTest
          expected.add(normalPart, tangentialPart);
 
          EuclidCoreMissingTools.setNormalPart(input, normalAxis, tupleToModify);
-         EuclidCoreTestTools.assertTuple3DEquals(expected, tupleToModify, EPSILON);
+         EuclidCoreTestTools.assertEquals(expected, tupleToModify, EPSILON);
 
          // Randomize the axis
          normalAxis.scale(EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0));
          EuclidCoreMissingTools.setNormalPart(input, normalAxis, tupleToModify);
-         EuclidCoreTestTools.assertTuple3DEquals(expected, tupleToModify, EPSILON);
+         EuclidCoreTestTools.assertEquals(expected, tupleToModify, EPSILON);
+      }
+   }
+
+   @Test
+   public void testDifferentiateOrientation()
+   {
+      Random random = new Random(23423);
+
+      for (int i = 0; i < iters; i++)
+      {
+         Quaternion qStart = EuclidCoreRandomTools.nextQuaternion(random);
+         double duration = EuclidCoreRandomTools.nextDouble(random, 0.0, 1.0e-2);
+         double angle = EuclidCoreRandomTools.nextDouble(random, 0.0, Math.PI);
+         UnitVector3D velocityAxis = EuclidCoreRandomTools.nextUnitVector3D(random);
+         Vector3D expectedAngularVelocity = new Vector3D();
+         expectedAngularVelocity.setAndScale(angle / duration, velocityAxis);
+
+         Quaternion qEnd = new Quaternion();
+         qEnd.setRotationVector(velocityAxis.getX() * angle, velocityAxis.getY() * angle, velocityAxis.getZ() * angle);
+         qEnd.prepend(qStart);
+
+         Vector3D actualAngularVelocity = new Vector3D();
+         EuclidCoreMissingTools.differentiateOrientation(qStart, qEnd, duration, actualAngularVelocity);
+
+         EuclidCoreTestTools.assertEquals(expectedAngularVelocity, actualAngularVelocity, EPSILON * Math.max(1.0, expectedAngularVelocity.norm()));
       }
    }
 
@@ -461,4 +512,58 @@ public class EuclidCoreMissingToolsTest
       return minValue + random.nextDouble() * (maxValue - minValue);
    }
 
+   @Test
+   public void testNextPositiveDefiniteMatrix3D() throws Exception
+   {
+      Random random = new Random(23452);
+
+      for (int i = 0; i < iters; i++) { // Test nextPositiveDefiniteMatrix3D(Random random)
+         Matrix3D matrix3D = EuclidCoreMissingTools.nextPositiveDefiniteMatrix3D(random);
+
+         for (int row = 0; row < 3; row++) {
+            for (int column = 0; column < 3; column++) {
+               assertTrue(matrix3D.getElement(row, column) <= 1.0);
+               assertTrue(matrix3D.getElement(row, column) >= -1.0);
+               assertTrue(Double.isFinite(matrix3D.getElement(row, column)));
+            }
+         }
+
+         // Using Sylvester's criterion of all the leading principal minors having positive determinant to verify that matrix is positive definite
+         double firstPrincipalMinorDeterminant = matrix3D.getM00();
+         double secondPrincipalMinorDeterminant = matrix3D.getM00() * matrix3D.getM11() - matrix3D.getM01() * matrix3D.getM10();
+         double thirdPrincipalMinorDeterminant = matrix3D.determinant();
+         assertTrue(firstPrincipalMinorDeterminant > 0.0);
+         assertTrue(secondPrincipalMinorDeterminant > 0.0);
+         assertTrue(thirdPrincipalMinorDeterminant > 0.0);
+      }
+
+      for (int i = 0; i < iters; i++) { // Test nextPositiveDefiniteMatrix3D(Random random, double minMaxValue)
+         double minMaxValue = EuclidCoreRandomTools.nextDouble(random, 0.0, 100.0);
+         Matrix3D matrix3D = EuclidCoreMissingTools.nextPositiveDefiniteMatrix3D(random, minMaxValue);
+
+         for (int row = 0; row < 3; row++) {
+            for (int column = 0; column < 3; column++) {
+               assertTrue(matrix3D.getElement(row, column) <= minMaxValue);
+               assertTrue(matrix3D.getElement(row, column) >= -minMaxValue);
+               assertTrue(Double.isFinite(matrix3D.getElement(row, column)));
+            }
+         }
+
+         // Using Sylvester's criterion of all the leading principal minors having positive determinant to verify that matrix is positive definite
+         double firstPrincipalMinorDeterminant = matrix3D.getM00();
+         double secondPrincipalMinorDeterminant = matrix3D.getM00() * matrix3D.getM11() - matrix3D.getM01() * matrix3D.getM10();
+         double thirdPrincipalMinorDeterminant = matrix3D.determinant();
+         assertTrue(firstPrincipalMinorDeterminant > 0.0);
+         assertTrue(secondPrincipalMinorDeterminant > 0.0);
+         assertTrue(thirdPrincipalMinorDeterminant > 0.0);
+      }
+
+      // Test exceptions:
+      try {
+         EuclidCoreMissingTools.nextPositiveDefiniteMatrix3D(random, -0.1);
+         fail("Should have thrown an exception.");
+      } catch (RuntimeException e) {
+         // Good
+      }
+   }
 }

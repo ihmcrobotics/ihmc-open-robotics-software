@@ -1,5 +1,6 @@
 package us.ihmc.tools.thread;
 
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -7,6 +8,11 @@ import java.util.function.Supplier;
  * then swap and vice versa.
  *
  * Also called a double buffer, but didn't want to confuse with the data type.
+ *
+ * Typical usage is to operations on one instance, using a synchronized block
+ * using this object to synchronize over. The swap method in this class is
+ * also synchronized over this object, so it will be atomic. You may access
+ * the other instance without a synchronized block freely.
  */
 public class SwapReference<T>
 {
@@ -26,6 +32,12 @@ public class SwapReference<T>
       this.b = b;
       forThreadOne = a;
       forThreadTwo = b;
+   }
+
+   public void initializeBoth(Consumer<T> consumer)
+   {
+      consumer.accept(a);
+      consumer.accept(b);
    }
 
    public T getA()
@@ -53,7 +65,10 @@ public class SwapReference<T>
       return forThreadOne == a;
    }
 
-   public void swap()
+   /**
+    * Performs the swap operation atomically.
+    */
+   public synchronized void swap()
    {
       T temp = forThreadOne;
       forThreadOne = forThreadTwo;

@@ -19,6 +19,8 @@ public class FootstepSnapData implements FootstepSnapDataReadOnly
    private double rmsErrorHeightMap = Double.NaN;
    private double heightMapSnapArea = Double.NaN;
    private boolean snappedFootstepTransformIncludesWiggleTransform = false;
+   private boolean snappedToPlanarRegions = false;
+   private boolean snappedToHeightMap = false;
 
    public FootstepSnapData()
    {
@@ -117,6 +119,28 @@ public class FootstepSnapData implements FootstepSnapDataReadOnly
       return heightMapSnapArea;
    }
 
+   public void setSnappedToPlanarRegions(boolean snappedToPlanarRegions)
+   {
+      this.snappedToPlanarRegions = snappedToPlanarRegions;
+   }
+
+   public void setSnappedToHeightMap(boolean snappedToHeightMap)
+   {
+      this.snappedToHeightMap = snappedToHeightMap;
+   }
+
+   @Override
+   public boolean getSnappedToPlanarRegions()
+   {
+      return snappedToPlanarRegions;
+   }
+
+   @Override
+   public boolean getSnappedToHeightMap()
+   {
+      return snappedToHeightMap;
+   }
+
    @Override
    public double getRMSErrorHeightMap()
    {
@@ -161,6 +185,8 @@ public class FootstepSnapData implements FootstepSnapDataReadOnly
       this.achievedInsideDelta = Double.NaN;
       this.snappedFootstepTransformIncludesWiggleTransform = false;
       rmsErrorHeightMap = Double.NaN;
+      snappedToPlanarRegions = false;
+      snappedToHeightMap = false;
    }
 
    private static final FootstepSnapData EMPTY_SNAP_DATA;

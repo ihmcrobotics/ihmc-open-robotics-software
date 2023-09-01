@@ -1,0 +1,50 @@
+#ifndef __perception_msgs__msg__SteppableRegionMessage__idl__
+#define __perception_msgs__msg__SteppableRegionMessage__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Quaternion_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
+#include "ihmc_common_msgs/msg/./InstantMessage_.idl"
+#include "perception_msgs/msg/./HeightMapMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const long NO_REGION_ID =
+      -1;
+
+
+      /**
+       * This message is part of the IHMC robot environment awareness module.
+       * This message contains a single planar region.
+       * It is defined by an origin, a normal, and a concave hull.
+       * For easier processing, a set of convex polygons approximating the concave hull are also provided.
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::SteppableRegionMessage_")
+      struct SteppableRegionMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Approximate last update time
+         */
+        ihmc_common_msgs::msg::dds::InstantMessage last_updated;
+        @defaultValue(value=-1)
+        long region_id;
+        double foot_yaw;
+        geometry_msgs::msg::dds::Point region_origin;
+        geometry_msgs::msg::dds::Quaternion region_orientation;
+        geometry_msgs::msg::dds::Vector3 region_normal;
+        sequence<geometry_msgs::msg::dds::Point, 1000> vertex_buffer;
+        long concave_hull_size;
+        perception_msgs::msg::dds::HeightMapMessage local_height_map;
+      };
+    };
+  };
+};
+
+#endif

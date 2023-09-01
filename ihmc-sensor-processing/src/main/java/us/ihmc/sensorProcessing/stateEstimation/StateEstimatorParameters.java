@@ -132,7 +132,7 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
     */
    public double getPelvisPositionNewFusingFilterKp()
    {
-      return 0.1;
+      return 0.05;
    }
 
    /**
@@ -143,7 +143,7 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
     */
    public double getPelvisPositionNewFusingFilterKi()
    {
-      return 1.0e-3;
+      return 1.0e-4;
    }
 
    /**
@@ -154,7 +154,7 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
     */
    public double getPelvisLinearVelocityNewFusingFilterKp()
    {
-      return 0.1;
+      return 0.025;
    }
 
    /**
@@ -165,7 +165,7 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
     */
    public double getPelvisLinearVelocityNewFusingFilterKi()
    {
-      return 1.0e-3;
+      return 1.0e-4;
    }
 
    /** The smaller the value, the more it trusts the IMU **/
@@ -193,6 +193,12 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
    }
 
    public abstract FootSwitchFactory getFootSwitchFactory();
+
+   public SideDependentList<FootSwitchFactory> getFootSwitchFactories()
+   {
+      FootSwitchFactory footSwitchFactory = getFootSwitchFactory();
+      return new SideDependentList<>(footSwitchFactory, footSwitchFactory);
+   }
 
    public abstract boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact();
 

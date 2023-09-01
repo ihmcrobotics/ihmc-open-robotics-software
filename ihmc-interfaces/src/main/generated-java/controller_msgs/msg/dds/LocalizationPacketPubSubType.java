@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class LocalizationPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.LocalizationPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::LocalizationPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "23d4a52236a81539788631534eca87fa8bf461f550c898c4794683939ad1255b";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

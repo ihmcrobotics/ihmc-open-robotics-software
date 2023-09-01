@@ -1,0 +1,27 @@
+#ifndef __ihmc_common_msgs__msg__ConvexPolytope3DMessage__idl__
+#define __ihmc_common_msgs__msg__ConvexPolytope3DMessage__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+module ihmc_common_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This is part of the IHMC Common message package.
+       */
+      @TypeCode(type="ihmc_common_msgs::msg::dds_::ConvexPolytope3DMessage_")
+      struct ConvexPolytope3DMessage
+      {
+        /**
+         * Vertices of the polytope, see ConvexPolytope3D.
+         */
+        sequence<geometry_msgs::msg::dds::Point, 50> vertices;
+      };
+    };
+  };
+};
+
+#endif

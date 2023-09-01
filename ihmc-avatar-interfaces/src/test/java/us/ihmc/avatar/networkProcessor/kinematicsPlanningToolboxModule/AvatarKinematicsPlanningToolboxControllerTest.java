@@ -2,7 +2,6 @@ package us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,18 +10,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage;
-import controller_msgs.msg.dds.KinematicsPlanningToolboxInputMessage;
-import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
+import toolbox_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage;
+import toolbox_msgs.msg.dds.KinematicsPlanningToolboxInputMessage;
+import toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.factory.RobotDefinitionTools;
-import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
@@ -35,26 +31,26 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxMessageFactory;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.scs2.SimulationConstructionSet2;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
+import us.ihmc.scs2.definition.geometry.Sphere3DDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
-import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
-import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.scs2.definition.visual.VisualDefinition;
+import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -69,7 +65,6 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
    private static final boolean visualize = simulationTestingParameters.getCreateGUI();
    static
    {
-      simulationTestingParameters.setKeepSCSUp(false);
       simulationTestingParameters.setDataBufferSize(1 << 16);
    }
 
@@ -81,12 +76,11 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
    private YoBoolean initializationSucceeded;
    private YoInteger numberOfIterations;
 
-   private SimulationConstructionSet scs;
-   private BlockingSimulationRunner blockingSimulationRunner;
+   private SimulationConstructionSet2 scs;
 
-   private HumanoidFloatingRootJointRobot robot;
-   private HumanoidFloatingRootJointRobot ghost;
-   private RobotController toolboxUpdater;
+   private Robot robot;
+   private Robot ghost;
+   private Controller toolboxUpdater;
 
    /**
     * Returns a separate instance of the robot model that will be modified in this test to create a
@@ -106,7 +100,6 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       FullHumanoidRobotModel desiredFullRobotModel = robotModel.createFullRobotModel();
       commandInputManager = new CommandInputManager(KinematicsPlanningToolboxModule.supportedCommands());
-      commandInputManager.registerConversionHelper(new KinematicsPlanningToolboxCommandConverter(desiredFullRobotModel));
 
       StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsPlanningToolboxModule.supportedStatus());
 
@@ -116,48 +109,51 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
                                                                   statusOutputManager,
                                                                   yoGraphicsListRegistry,
                                                                   mainRegistry);
+      commandInputManager.registerConversionHelper(new KinematicsPlanningToolboxCommandConverter(desiredFullRobotModel, toolboxController.getDesiredReferenceFrames()));
 
-      robot = robotModel.createHumanoidFloatingRootJointRobot(false);
+      RobotDefinition robotDefinition = robotModel.getRobotDefinition();
+      robotDefinition.ignoreAllJoints();
+      robot = new Robot(robotDefinition, SimulationConstructionSet2.inertialFrame);
       toolboxUpdater = createToolboxUpdater();
-      robot.setController(toolboxUpdater);
-      robot.setDynamic(false);
-      robot.setGravity(0);
+      robot.addController(toolboxUpdater);
 
       DRCRobotModel ghostRobotModel = getGhostRobotModel();
-      RobotDefinition robotDefinition = ghostRobotModel.getRobotDefinition();
-      robotDefinition.setName("Ghost");
-      RobotDefinitionTools.setRobotDefinitionMaterial(robotDefinition, ghostMaterial);
-      ghost = ghostRobotModel.createHumanoidFloatingRootJointRobot(false);
-      ghost.setDynamic(false);
-      ghost.setGravity(0);
+      RobotDefinition ghostRobotDefinition = ghostRobotModel.getRobotDefinition();
+      ghostRobotDefinition.ignoreAllJoints();
+      ghostRobotDefinition.setName("Ghost");
+      RobotDefinitionTools.setRobotDefinitionMaterial(ghostRobotDefinition, ghostMaterial);
+      ghost = new Robot(ghostRobotDefinition, SimulationConstructionSet2.inertialFrame);
       hideGhost();
 
       if (visualize)
       {
-         scs = new SimulationConstructionSet(new Robot[] {robot, ghost}, simulationTestingParameters);
-         scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, true);
-         scs.setCameraFix(0.0, 0.0, 1.0);
+         scs = new SimulationConstructionSet2();
+         scs.addRobot(robot);
+         scs.addRobot(ghost);
+         scs.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
+         scs.start(true, true, true);
+         scs.setCameraFocusPosition(0.0, 0.0, 1.0);
          scs.setCameraPosition(8.0, 0.0, 3.0);
-         scs.startOnAThread();
-         blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
       }
    }
 
    private void hideGhost()
    {
-      ghost.setPositionInWorld(new Point3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY));
+      ghost.getFloatingRootJoint().getJointPose().getPosition().setX(Double.POSITIVE_INFINITY);
+      ghost.updateFrames();
    }
 
    private void snapGhostToFullRobotModel(FullHumanoidRobotModel fullHumanoidRobotModel)
    {
-      new JointAnglesWriter(ghost, fullHumanoidRobotModel).updateRobotConfigurationBasedOnFullRobotModel();
+      MultiBodySystemTools.copyJointsState(fullHumanoidRobotModel.getRootJoint().subtreeList(), ghost.getAllJoints(), JointStateType.CONFIGURATION);
+      ghost.updateFrames();
    }
 
    @AfterEach
    public void tearDown()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-         ThreadTools.sleepForever();
+      if (visualize)
+         scs.waitUntilVisualizerDown();
 
       if (mainRegistry != null)
       {
@@ -175,11 +171,10 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       robot = null;
       toolboxUpdater = null;
-      blockingSimulationRunner = null;
 
       if (scs != null)
       {
-         scs.closeAndDispose();
+         scs.shutdownSession();
          scs = null;
       }
 
@@ -187,7 +182,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
    }
 
    @Test
-   public void testDualHandTrajectory() throws Exception, UnreasonableAccelerationException
+   public void testDualHandTrajectory()
    {
       FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
       snapGhostToFullRobotModel(initialFullRobotModel);
@@ -214,7 +209,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
          keyFramePoses.add(pose);
          desiredCOMPoints.add(new Point3D());
          if (visualize)
-            scs.addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(pose));
+            scs.addStaticVisual(createEndEffectorKeyFrameVisualization(pose));
       }
 
       KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
@@ -251,7 +246,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
    }
 
    @Test
-   public void testLinearInterpolatedTrajectory() throws Exception, UnreasonableAccelerationException
+   public void testLinearInterpolatedTrajectory()
    {
       FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
       snapGhostToFullRobotModel(initialFullRobotModel);
@@ -278,7 +273,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
          keyFramePoses.add(pose);
          desiredCOMPoints.add(new Point3D());
          if (visualize)
-            scs.addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(pose));
+            scs.addStaticVisual(createEndEffectorKeyFrameVisualization(pose));
       }
 
       KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
@@ -315,7 +310,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
    }
 
    @Test
-   public void testReachToAPoint() throws Exception, UnreasonableAccelerationException
+   public void testReachToAPoint()
    {
       FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
       snapGhostToFullRobotModel(initialFullRobotModel);
@@ -336,7 +331,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       Pose3D pose = new Pose3D(desiredPose);
       keyFramePoses.add(pose);
       if (visualize)
-         scs.addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(pose));
+         scs.addStaticVisual(createEndEffectorKeyFrameVisualization(pose));
 
       KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
                                                                                                                                           keyFrameTimes,
@@ -360,7 +355,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
    }
 
    @Test
-   public void testDifferentDistanceBetweenKeyFrames() throws Exception, UnreasonableAccelerationException
+   public void testDifferentDistanceBetweenKeyFrames()
    {
       FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
       snapGhostToFullRobotModel(initialFullRobotModel);
@@ -392,7 +387,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       for (int i = 0; i < keyFramePoses.size(); i++)
          if (visualize)
-            scs.addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(keyFramePoses.get(i)));
+            scs.addStaticVisual(createEndEffectorKeyFrameVisualization(keyFramePoses.get(i)));
 
       KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
                                                                                                                                           keyFrameTimes,
@@ -416,7 +411,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
    }
 
    @Test
-   public void testLastKeyFrameBadPositionPlanning() throws SimulationExceededMaximumTimeException, IOException, UnreasonableAccelerationException
+   public void testLastKeyFrameBadPositionPlanning()
    {
       FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
       snapGhostToFullRobotModel(initialFullRobotModel);
@@ -457,7 +452,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       for (int i = 0; i < desiredPoses.size(); i++)
          if (visualize)
-            scs.addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(desiredPoses.get(i)));
+            scs.addStaticVisual(createEndEffectorKeyFrameVisualization(desiredPoses.get(i)));
 
       KinematicsPlanningToolboxRigidBodyMessage endEffectorMessage = HumanoidMessageTools.createKinematicsPlanningToolboxRigidBodyMessage(endEffector,
                                                                                                                                           keyFrameTimes,
@@ -480,13 +475,11 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       runKinematicsPlanningToolboxController(numberOfIterations, KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_UNREACHABLE_KEYFRAME);
    }
 
-   private static Graphics3DObject createEndEffectorKeyFrameVisualization(Pose3DReadOnly pose)
+   private static VisualDefinition createEndEffectorKeyFrameVisualization(Pose3DReadOnly pose)
    {
-      Graphics3DObject object = new Graphics3DObject();
-      object.transform(new RigidBodyTransform(pose.getOrientation(), pose.getPosition()));
-      object.addSphere(0.01);
-
-      return object;
+      return new VisualDefinition(new RigidBodyTransform(pose.getOrientation(), pose.getPosition()),
+                                  new Sphere3DDefinition(0.01),
+                                  new MaterialDefinition(ColorDefinitions.Black()));
    }
 
    private void trackSolution(int expectedResult)
@@ -495,7 +488,6 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
    }
 
    private void runKinematicsPlanningToolboxController(int numberOfIterations, int expectedResult)
-         throws SimulationExceededMaximumTimeException, UnreasonableAccelerationException
    {
       initializationSucceeded.set(false);
       this.numberOfIterations.set(0);
@@ -503,8 +495,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       if (visualize)
       {
          for (int i = 0; !toolboxController.isDone() && i < numberOfIterations; i++)
-            if (visualize)
-               scs.simulateOneTimeStep();
+            scs.simulateNow(1);
       }
       else
       {
@@ -520,21 +511,16 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
    {
       DRCRobotModel robotModel = getRobotModel();
       FullHumanoidRobotModel initialFullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-      robotModel.getDefaultRobotInitialSetup(0.0, 0.0).initializeRobot(robot);
-      DRCPerfectSensorReaderFactory drcPerfectSensorReaderFactory = new DRCPerfectSensorReaderFactory(robot, 0);
-      drcPerfectSensorReaderFactory.build(initialFullRobotModel.getRootJoint(), null, null, null, null);
-      SensorDataContext sensorDataContext = new SensorDataContext();
-      long timestamp = drcPerfectSensorReaderFactory.getSensorReader().read(sensorDataContext);
-      drcPerfectSensorReaderFactory.getSensorReader().compute(timestamp, sensorDataContext);
+      robotModel.getDefaultRobotInitialSetup(0.0, 0.0).initializeFullRobotModel(initialFullRobotModel);
+      initialFullRobotModel.updateFrames();
       return initialFullRobotModel;
    }
 
-   private RobotController createToolboxUpdater()
+   private Controller createToolboxUpdater()
    {
-      return new RobotController()
+      return new Controller()
       {
-         private final JointAnglesWriter jointAnglesWriter = new JointAnglesWriter(robot, toolboxController.getDesiredFullRobotModel());
+         private final List<? extends JointBasics> allToolboxJoints = toolboxController.getDesiredFullRobotModel().getRootJoint().subtreeList();
 
          @Override
          public void doControl()
@@ -552,7 +538,9 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
                {
                   e.printStackTrace();
                }
-               jointAnglesWriter.updateRobotConfigurationBasedOnFullRobotModel();
+               MultiBodySystemTools.copyJointsState(allToolboxJoints, robot.getAllJoints(), JointStateType.CONFIGURATION);
+               robot.updateFrames();
+
                numberOfIterations.increment();
             }
          }
@@ -572,12 +560,6 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
          public String getName()
          {
             return mainRegistry.getName();
-         }
-
-         @Override
-         public String getDescription()
-         {
-            return null;
          }
       };
    }

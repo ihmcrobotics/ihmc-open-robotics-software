@@ -1,6 +1,5 @@
 package us.ihmc.atlas;
 
-import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.scs2.SCS2BulletSimulationTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -23,6 +22,8 @@ import us.ihmc.scs2.definition.visual.*;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
+import us.ihmc.simulationToolkit.RobotDefinitionTools;
+
 import java.util.Set;
 
 public class AtlasFallingOnGroundSCS2Bullet

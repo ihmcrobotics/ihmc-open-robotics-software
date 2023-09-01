@@ -55,7 +55,10 @@ public class VirtualModelController
 
    private List<RigidBodyBasics> allBodies = new ArrayList<>();
 
-   public VirtualModelController(RigidBodyBasics defaultRootBody, ReferenceFrame centerOfMassFrame, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public VirtualModelController(RigidBodyBasics defaultRootBody,
+                                 ReferenceFrame centerOfMassFrame,
+                                 YoRegistry parentRegistry,
+                                 YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.defaultRootBody = defaultRootBody;
       this.centerOfMassFrame = centerOfMassFrame;
@@ -70,8 +73,8 @@ public class VirtualModelController
          this.allBodies = Arrays.asList(allBodies);
          for (int i = 0; i < allBodies.length; i++)
             gravityWrenchMap.put(allBodies[i], new Wrench(allBodies[i].getBodyFixedFrame(), ReferenceFrame.getWorldFrame()));
-         gravityWrenchVisualizer = new WrenchVisualizer("GravityWrenches", this.allBodies, 10.0, yoGraphicsListRegistry, registry, YoAppearance.Blue(),
-                                                        YoAppearance.Blue());
+         gravityWrenchVisualizer = new WrenchVisualizer("GravityWrenches", 10.0, yoGraphicsListRegistry, registry, YoAppearance.Blue(), YoAppearance.Blue());
+         gravityWrenchVisualizer.registerRigidBodies(this.allBodies);
       }
       else
       {
@@ -219,8 +222,14 @@ public class VirtualModelController
                      CommonOps_DDRM.extract(matrixToCopy, 0, matrixToCopy.getNumRows(), 0, matrixToCopy.getNumCols(), fullJTMatrix, 0, 0);
                      for (int jointID = 0; jointID < numberOfJoints; jointID++)
                      {
-                        CommonOps_DDRM.extract(tmpJTMatrix, jointID, jointID + 1, 0, taskSize, fullJTMatrix,
-                                          vmcDataHandler.indexOfInTree(controlledBody, chainID, jointID), previousSize);
+                        CommonOps_DDRM.extract(tmpJTMatrix,
+                                               jointID,
+                                               jointID + 1,
+                                               0,
+                                               taskSize,
+                                               fullJTMatrix,
+                                               vmcDataHandler.indexOfInTree(controlledBody, chainID, jointID),
+                                               previousSize);
                      }
                   }
                }

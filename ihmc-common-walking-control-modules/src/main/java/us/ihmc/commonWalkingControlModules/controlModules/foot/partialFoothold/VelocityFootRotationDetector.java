@@ -28,7 +28,7 @@ public class VelocityFootRotationDetector implements FootRotationDetector
 
    public VelocityFootRotationDetector(RobotSide side,
                                        MovingReferenceFrame soleFrame,
-                                       FootholdRotationParameters parameters,
+                                       YoPartialFootholdModuleParameters parameters,
                                        double dt,
                                        YoRegistry parentRegistry)
    {

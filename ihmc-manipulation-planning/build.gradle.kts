@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.6"
-   id("us.ihmc.ihmc-cd") version "1.23"
+   id("us.ihmc.ihmc-ci") version "8.3"
+   id("us.ihmc.ihmc-cd") version "1.26"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
@@ -20,8 +20,7 @@ mainDependencies {
    api("org.georegression:georegression:0.22")
    api("org.boofcv:boofcv-geo:0.36")
 
-   api("us.ihmc:ihmc-graphics-description:0.19.4")
-   api("us.ihmc:simulation-construction-set:0.21.16")
+   api("us.ihmc:simulation-construction-set:0.24.2")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-communication:source")

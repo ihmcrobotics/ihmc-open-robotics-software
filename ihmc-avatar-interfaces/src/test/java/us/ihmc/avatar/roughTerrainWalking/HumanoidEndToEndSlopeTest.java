@@ -38,7 +38,7 @@ import us.ihmc.tools.MemoryTools;
 
 public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterface
 {
-   private static final boolean EXPORT_TORQUE_SPEED_DATA = true;
+   private static final boolean EXPORT_TORQUE_SPEED_DATA = false;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private SCS2AvatarTestingSimulation simulationTestHelper;
@@ -62,6 +62,23 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
    }
 
    public void testSlope(TestInfo testInfo,
+                        boolean up,
+                        boolean useSideSteps,
+                        double swingDuration,
+                        double transferDuration,
+                        double maxStepLength,
+                        double heightOffset,
+                        double torsoPitch,
+                        boolean useExperimentalPhysicsEngine,
+                        boolean disableToeOff)
+        throws Exception
+   {
+      double slopeAngle = Math.toRadians(30.0);
+      testSlope(testInfo, up, useSideSteps, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, useExperimentalPhysicsEngine, disableToeOff, slopeAngle);
+   }
+
+
+   public void testSlope(TestInfo testInfo,
                          boolean up,
                          boolean useSideSteps,
                          double swingDuration,
@@ -70,13 +87,13 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
                          double heightOffset,
                          double torsoPitch,
                          boolean useExperimentalPhysicsEngine,
-                         boolean disableToeOff)
+                         boolean disableToeOff,
+                         double slopeAngle)
          throws Exception
    {
       DRCRobotModel robotModel = getRobotModel();
       double footLength = robotModel.getWalkingControllerParameters().getSteppingParameters().getActualFootLength();
       double footWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getActualFootWidth();
-      double slopeAngle = Math.toRadians(30.0);
       double slopeLength = 3.0;
       double topZ = Math.tan(slopeAngle) * slopeLength;
       double startX = (up ? 0.0 : 1.2 + slopeLength) + 0.3;
@@ -103,7 +120,7 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
 
       if (disableToeOff)
       {
-         simulationTestHelper.findVariable("ToeOffManager", "doToeOffIfPossibleInDoubleSupport").setValueFromDouble(0);
+         simulationTestHelper.findVariable("GeometricToeOffManager", "doToeOffIfPossibleInDoubleSupport").setValueFromDouble(0);
          simulationTestHelper.findVariable("LegJointLimitsInspector", "doToeOffWhenHittingAnkleLimit").setValueFromDouble(0);
       }
 

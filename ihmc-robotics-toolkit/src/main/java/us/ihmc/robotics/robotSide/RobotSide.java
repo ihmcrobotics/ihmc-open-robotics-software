@@ -81,6 +81,11 @@ public enum RobotSide implements RobotSegment<RobotSide>
          return "left";
    }
 
+   public String getUpperCaseName()
+   {
+      return getSideNameInAllCaps();
+   }
+
    public String getSideNameInAllCaps()
    {
       if (this == RIGHT)

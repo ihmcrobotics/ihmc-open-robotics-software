@@ -144,8 +144,8 @@ public class PelvisRotationalStateUpdaterTest
       rotationEstimated.set(rootJoint.getJointPose().getOrientation());
       twistEstimated.setIncludingFrame(rootJoint.getJointTwist());
       
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(rotationExpected, rotationEstimated, EPS);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(twistExpected.getAngularPart()), new Vector3D(twistEstimated.getAngularPart()), EPS);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(rotationExpected, rotationEstimated, EPS);
+      EuclidCoreTestTools.assertEquals(new Vector3D(twistExpected.getAngularPart()), new Vector3D(twistEstimated.getAngularPart()), EPS);
       
       for (int i = 0; i < 1000; i++)
       {
@@ -165,8 +165,8 @@ public class PelvisRotationalStateUpdaterTest
          rotationEstimated.set(rootJoint.getJointPose().getOrientation());
          twistEstimated.setIncludingFrame(rootJoint.getJointTwist());
          
-         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(rotationExpected, rotationEstimated, EPS);
-         EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(twistExpected.getAngularPart()), new Vector3D(twistEstimated.getAngularPart()), EPS);
+         EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(rotationExpected, rotationEstimated, EPS);
+         EuclidCoreTestTools.assertEquals(new Vector3D(twistExpected.getAngularPart()), new Vector3D(twistEstimated.getAngularPart()), EPS);
       }
    }
 

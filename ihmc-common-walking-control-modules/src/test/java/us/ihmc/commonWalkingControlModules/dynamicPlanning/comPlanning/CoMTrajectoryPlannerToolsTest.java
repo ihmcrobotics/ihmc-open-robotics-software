@@ -231,16 +231,16 @@ public class CoMTrajectoryPlannerToolsTest
          CapturePointTools.computeCentroidalMomentumPivot(desiredDCMPosition, desiredDCMVelocity, omega, desiredVRPPosition);
          CapturePointTools.computeCentroidalMomentumPivot(desiredDCMPositionExpected, desiredDCMVelocityExpected, omega, desiredVRPPositionExpected2);
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredCoMPositionExpected, desiredCoMPosition, epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(desiredCoMVelocityExpected, desiredCoMVelocity, epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(desiredCoMAccelerationExpected, desiredCoMAcceleration, epsilon);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredDCMPositionExpected, desiredDCMPosition, epsilon);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredDCMPositionExpected, desiredDCMPosition2, epsilon);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredDCMPositionExpected2, desiredDCMPosition, epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(desiredDCMVelocityExpected, desiredDCMVelocity, epsilon);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredVRPPositionExpected2, desiredVRPPosition, epsilon);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredVRPPositionExpected2, desiredVRPPositionExpected, epsilon);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredVRPPositionExpected2, desiredVRPPosition2, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(desiredCoMPositionExpected, desiredCoMPosition, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(desiredCoMVelocityExpected, desiredCoMVelocity, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(desiredCoMAccelerationExpected, desiredCoMAcceleration, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(desiredDCMPositionExpected, desiredDCMPosition, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(desiredDCMPositionExpected, desiredDCMPosition2, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(desiredDCMPositionExpected2, desiredDCMPosition, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(desiredDCMVelocityExpected, desiredDCMVelocity, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(desiredVRPPositionExpected2, desiredVRPPosition, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(desiredVRPPositionExpected2, desiredVRPPositionExpected, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(desiredVRPPositionExpected2, desiredVRPPosition2, epsilon);
       }
    }
 
@@ -891,16 +891,16 @@ public class CoMTrajectoryPlannerToolsTest
          finalDCM.addZ(CoMTrajectoryPlannerTools.getDCMPositionCoefficientTimeFunction(i, omega, thirdDuration) * zSolution.get(i + 12));
       }
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startCoM, com00, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(com01, com10, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(com11, com20, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(startCoM, com00, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(com01, com10, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(com11, com20, 1e-4);
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(initialVRP, vrp00, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(initialVRP, vrp01, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(initialVRP, vrp10, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalVRP, vrp11, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalVRP, vrp20, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalVRP, vrp21, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(initialVRP, vrp00, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(initialVRP, vrp01, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(initialVRP, vrp10, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(finalVRP, vrp11, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(finalVRP, vrp20, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(finalVRP, vrp21, 1e-4);
    }
 
    @Test
@@ -975,11 +975,11 @@ public class CoMTrajectoryPlannerToolsTest
          finalDCM.addZ(CoMTrajectoryPlannerTools.getDCMPositionCoefficientTimeFunction(i, omega, duration) * zSolution.get(i));
       }
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startCoM, com00, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(startCoM, com00, 1e-4);
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(vrp, vrp00, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(vrp, vrp01, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(vrp, finalDCM, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(vrp, vrp00, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(vrp, vrp01, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(vrp, finalDCM, 1e-4);
    }
 
    @Test
@@ -1096,14 +1096,14 @@ public class CoMTrajectoryPlannerToolsTest
          finalDCM.addZ(CoMTrajectoryPlannerTools.getDCMPositionCoefficientTimeFunction(i, omega, secondDuration) * zSolution.get(i + 6));
       }
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startCoM, com00, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(com01, com10, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(startCoM, com00, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(com01, com10, 1e-4);
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(initialVRP, vrp00, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalVRP, vrp01, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalVRP, vrp10, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalVRP, vrp11, 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalVRP, finalDCM, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(initialVRP, vrp00, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(finalVRP, vrp01, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(finalVRP, vrp10, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(finalVRP, vrp11, 1e-4);
+      EuclidFrameTestTools.assertGeometricallyEquals(finalVRP, finalDCM, 1e-4);
    }
 
    private static void solveProblem(DMatrixRMaj hessian, DMatrixRMaj gradient, DMatrixRMaj coefficientSolutionToPack)

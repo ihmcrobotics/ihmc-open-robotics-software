@@ -1,0 +1,24 @@
+{
+  "panels" : [ {
+    "name" : "Statistics",
+    "plots" : [ {
+      "variables" : [ {
+        "variableName" : "root.time[sec]"
+      } ]
+    }, {
+      "variables" : [ {
+        "variableName" : "root.SessionInternalRegistry.runStatistics.runRealtimeRate"
+      } ]
+    }, {
+      "variables" : [ {
+        "variableName" : "root.SessionInternalRegistry.BulletPhysicsEngine.SimulationEnergyStatistics.sphereOrbitalEnergy"
+      } ]
+    }, {
+      "variables" : [ {
+        "variableName" : "root.sphere.q_sphere_z"
+      }, {
+        "variableName" : "root.expectedSpherePositionZ"
+      } ]
+    } ]
+  } ]
+}

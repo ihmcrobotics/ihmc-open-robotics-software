@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.externalForceEstimationToolboxAPI;
 
-import controller_msgs.msg.dds.ExternalForceEstimationConfigurationMessage;
+import toolbox_msgs.msg.dds.ExternalForceEstimationConfigurationMessage;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;

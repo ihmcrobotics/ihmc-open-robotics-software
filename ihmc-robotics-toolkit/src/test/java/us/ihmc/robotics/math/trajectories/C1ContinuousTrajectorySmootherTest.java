@@ -97,9 +97,9 @@ public class C1ContinuousTrajectorySmootherTest
 
          String failure = " Failed at time " + time;
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("position" + failure, trajectory.getPosition(), smoothedTrajectory.getPosition(), epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("velocity" + failure, trajectory.getVelocity(), smoothedTrajectory.getVelocity(), epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("acceleration" + failure, trajectory.getAcceleration(), smoothedTrajectory.getAcceleration(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals("position" + failure, trajectory.getPosition(), smoothedTrajectory.getPosition(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals("velocity" + failure, trajectory.getVelocity(), smoothedTrajectory.getVelocity(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals("acceleration" + failure, trajectory.getAcceleration(), smoothedTrajectory.getAcceleration(), epsilon);
       }
    }
 
@@ -140,9 +140,9 @@ public class C1ContinuousTrajectorySmootherTest
 
          String failure = " Failed at time " + time;
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("position" + failure, trajectory.getPosition(), smoothedTrajectory.getPosition(), epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("velocity" + failure, trajectory.getVelocity(), smoothedTrajectory.getVelocity(), epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("acceleration" + failure, trajectory.getAcceleration(), smoothedTrajectory.getAcceleration(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals("position" + failure, trajectory.getPosition(), smoothedTrajectory.getPosition(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals("velocity" + failure, trajectory.getVelocity(), smoothedTrajectory.getVelocity(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals("acceleration" + failure, trajectory.getAcceleration(), smoothedTrajectory.getAcceleration(), epsilon);
       }
       LogTools.info("updating the trajectory");
 
@@ -178,20 +178,20 @@ public class C1ContinuousTrajectorySmootherTest
          FrameVector3D positionError = new FrameVector3D();
          positionError.sub(smoothedTrajectory.getPosition(), trajectory.getPosition());
 
-         EuclidFrameTestTools.assertFrameTuple3DEquals(failure, positionError, smoothedTrajectory.getReferencePositionError(), 1e-5);
+         EuclidFrameTestTools.assertEquals(failure, positionError, smoothedTrajectory.getReferencePositionError(), 1e-5);
          assertTrue(failure + ", error should decrease from " + positionErrorWhenChanged.length() + ", but increased to " + positionError.length(),
                     positionError.length() < positionErrorWhenChanged.length() + 1e-3);
-//         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("position" + failure, trajectory.getPosition(), smoothedTrajectory.getPosition(), epsilon);
-//         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("velocity" + failure, trajectory.getVelocity(), smoothedTrajectory.getVelocity(), epsilon);
-//         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("acceleration" + failure, trajectory.getAcceleration(), smoothedTrajectory.getAcceleration(), epsilon);
+//         EuclidFrameTestTools.assertGeometricallyEquals("position" + failure, trajectory.getPosition(), smoothedTrajectory.getPosition(), epsilon);
+//         EuclidFrameTestTools.assertGeometricallyEquals("velocity" + failure, trajectory.getVelocity(), smoothedTrajectory.getVelocity(), epsilon);
+//         EuclidFrameTestTools.assertGeometricallyEquals("acceleration" + failure, trajectory.getAcceleration(), smoothedTrajectory.getAcceleration(), epsilon);
       }
 
       trajectory.compute(duration);
       smoothedTrajectory.compute(duration);
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("Final position", trajectory.getPosition(), smoothedTrajectory.getPosition(), epsilon);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Final velocity", trajectory.getVelocity(), smoothedTrajectory.getVelocity(), epsilon);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Final acceleration", trajectory.getAcceleration(), smoothedTrajectory.getAcceleration(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals("Final position", trajectory.getPosition(), smoothedTrajectory.getPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals("Final velocity", trajectory.getVelocity(), smoothedTrajectory.getVelocity(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals("Final acceleration", trajectory.getAcceleration(), smoothedTrajectory.getAcceleration(), epsilon);
 
    }
 

@@ -116,6 +116,13 @@ public class TunableJointAccelerationIntegrationParameters implements JointAccel
             + VELOCITY_RESET_MODE_NAME, registry, JointVelocityIntegratorResetMode.class, true, velocityResetMode);
    }
 
+   @Override
+   public boolean getDisableAccelerationIntegration()
+   {
+      // TODO Didn't create a parameter for this one as it is typically false and it add quite a bunch of YoVariables.
+      return false;
+   }
+
    /** {@inheritDoc} */
    @Override
    public double getPositionBreakFrequency()

@@ -1,14 +1,10 @@
 package us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieKinematicsPlanningToolboxControllerTest extends AvatarKinematicsPlanningToolboxControllerTest
@@ -36,35 +32,35 @@ public class ValkyrieKinematicsPlanningToolboxControllerTest extends AvatarKinem
 
    @Tag("humanoid-toolbox")
    @Test
-   public void testDualHandTrajectory() throws Exception, UnreasonableAccelerationException
+   public void testDualHandTrajectory()
    {
       super.testDualHandTrajectory();
    }
 
    @Tag("humanoid-toolbox")
    @Test
-   public void testLinearInterpolatedTrajectory() throws Exception, UnreasonableAccelerationException
+   public void testLinearInterpolatedTrajectory()
    {
       super.testLinearInterpolatedTrajectory();
    }
 
    @Tag("humanoid-toolbox")
    @Test
-   public void testReachToAPoint() throws Exception, UnreasonableAccelerationException
+   public void testReachToAPoint()
    {
       super.testReachToAPoint();
    }
 
    @Tag("humanoid-toolbox")
    @Test
-   public void testDifferentDistanceBetweenKeyFrames() throws Exception, UnreasonableAccelerationException
+   public void testDifferentDistanceBetweenKeyFrames()
    {
       super.testDifferentDistanceBetweenKeyFrames();
    }
 
    @Tag("humanoid-toolbox")
    @Test
-   public void testLastKeyFrameBadPositionPlanning() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException, IOException
+   public void testLastKeyFrameBadPositionPlanning()
    {
       super.testLastKeyFrameBadPositionPlanning();
    }

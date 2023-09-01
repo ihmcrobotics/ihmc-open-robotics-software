@@ -2,8 +2,11 @@ package us.ihmc.behaviors.tools.footstepPlanner;
 
 import java.util.ArrayList;
 
+import behavior_msgs.msg.dds.MinimalFootstepListMessage;
+import behavior_msgs.msg.dds.MinimalFootstepMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
+import ihmc_common_msgs.msg.dds.Point2DMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -108,6 +111,47 @@ public class MinimalFootstep
       return minimalFootsteps;
    }
 
+   public static MinimalFootstepListMessage convertToMinimalFootstepListMessage(FootstepDataListMessage footstepDataListMessage, String description)
+   {
+      MinimalFootstepListMessage minimalFootsteps = new MinimalFootstepListMessage();
+      int size = footstepDataListMessage.getFootstepDataList().size();
+      for (int i = 0; i < size; i++)
+      {
+         FootstepDataMessage footstep = footstepDataListMessage.getFootstepDataList().get(i);
+         MinimalFootstepMessage minimalFootstep = minimalFootsteps.getMinimalFootsteps().add();
+         for (Point3D contactPoint : footstep.getPredictedContactPoints2d())
+         {
+            Point2DMessage vertex = minimalFootstep.getSupportPolygon().add();
+            vertex.setX(contactPoint.getX());
+            vertex.setY(contactPoint.getY());
+         }
+         minimalFootstep.setRobotSide(footstep.getRobotSide());
+         minimalFootstep.getPosition().set(footstep.getLocation());
+         minimalFootstep.getOrientation().set(footstep.getOrientation());
+         minimalFootstep.setDescription( i == size - 1 ? description : "");
+      }
+      return minimalFootsteps;
+   }
+
+   public static ArrayList<MinimalFootstep> convertMinimalFootstepListMessage(MinimalFootstepListMessage minimalFootstepListMessage)
+   {
+      ArrayList<MinimalFootstep> minimalFootsteps = new ArrayList<>();
+      int size = minimalFootstepListMessage.getMinimalFootsteps().size();
+      for (int i = 0; i < size; i++)
+      {
+         MinimalFootstepMessage footstep = minimalFootstepListMessage.getMinimalFootsteps().get(i);
+         ConvexPolygon2D foothold = new ConvexPolygon2D();
+         for (Point2DMessage contactPoint : footstep.getSupportPolygon())
+         {
+            foothold.addVertex(contactPoint.getX(), contactPoint.getY());
+         }
+         foothold.update();
+         Pose3D pose = new Pose3D(footstep.getPosition(), footstep.getOrientation());
+         minimalFootsteps.add(new MinimalFootstep(RobotSide.fromByte(footstep.getRobotSide()), pose, foothold, footstep.getDescriptionAsString()));
+      }
+      return minimalFootsteps;
+   }
+
    public static ArrayList<MinimalFootstep> reduceFootstepsForUIMessager(SideDependentList<PlannedFootstepReadOnly> footsteps, String description)
    {
       ArrayList<MinimalFootstep> footstepLocations = new ArrayList<>();
@@ -140,5 +184,37 @@ public class MinimalFootstep
                                                    i == footstepPlan.getNumberOfSteps() - 1 ? description : ""));
       }
       return footstepLocations;
+   }
+
+   public static MinimalFootstepListMessage reduceFootstepPlanForUIROS2(FootstepPlan footstepPlan, String description)
+   {
+      MinimalFootstepListMessage footstepLocations = new MinimalFootstepListMessage();
+      for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)  // this code makes the message smaller to send over the network, TODO investigate
+      {
+         FramePose3D soleFramePoseToPack = new FramePose3D();
+         PlannedFootstep footstep = footstepPlan.getFootstep(i);
+         footstep.getFootstepPose(soleFramePoseToPack);
+         soleFramePoseToPack.changeFrame(ReferenceFrame.getWorldFrame());
+
+         MinimalFootstepMessage minimalFootstepMessage = footstepLocations.getMinimalFootsteps().add();
+         minimalFootstepMessage.setRobotSide(footstep.getRobotSide().toByte());
+         minimalFootstepMessage.setDescription(i == footstepPlan.getNumberOfSteps() - 1 ? description : "");
+         minimalFootstepMessage.getPosition().set(soleFramePoseToPack.getPosition());
+         minimalFootstepMessage.getOrientation().set(soleFramePoseToPack.getOrientation());
+
+         packFootholdToMessage(footstep.getFoothold(), minimalFootstepMessage);
+      }
+      return footstepLocations;
+   }
+
+   public static void packFootholdToMessage(ConvexPolygon2DReadOnly foothold, MinimalFootstepMessage minimalFootstepMessage)
+   {
+      minimalFootstepMessage.getSupportPolygon().clear();
+      for (int i = 0; i < foothold.getNumberOfVertices(); i++)
+      {
+         Point2DMessage point2DMessage = minimalFootstepMessage.getSupportPolygon().add();
+         point2DMessage.setX(foothold.getVertex(i).getX());
+         point2DMessage.setY(foothold.getVertex(i).getY());
+      }
    }
 }

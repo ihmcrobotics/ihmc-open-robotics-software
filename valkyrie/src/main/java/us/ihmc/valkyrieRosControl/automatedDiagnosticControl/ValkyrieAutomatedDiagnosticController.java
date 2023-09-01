@@ -1,7 +1,5 @@
 package us.ihmc.valkyrieRosControl.automatedDiagnosticControl;
 
-import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.forceTorqueSensorModelNames;
-import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.readForceTorqueSensors;
 import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.readIMUs;
 
 import java.util.Arrays;
@@ -107,6 +105,8 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
    {
       long maxMemory = Runtime.getRuntime().maxMemory();
 
+      ValkyrieSensorInformation sensorInformation = robotModel.getSensorInformation();
+
       System.out.println("Partying hard with max memory of: " + maxMemory);
       /*
        * Create joints
@@ -125,19 +125,14 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       }
 
       HashMap<String, ForceTorqueSensorHandle> forceTorqueSensorHandles = new HashMap<>();
-      for (int i = 0; i < readForceTorqueSensors.length; i++)
+      for (String ftSensorName : sensorInformation.getForceSensorNames())
       {
-
-         String forceTorqueSensor = readForceTorqueSensors[i];
-         String modelName = forceTorqueSensorModelNames[i];
-         forceTorqueSensorHandles.put(modelName, createForceTorqueSensorHandle(forceTorqueSensor));
+         forceTorqueSensorHandles.put(ftSensorName, createForceTorqueSensorHandle(ftSensorName));
       }
 
       /*
        * Create registries
        */
-
-      ValkyrieSensorInformation sensorInformation = robotModel.getSensorInformation();
 
       /*
        * Create network servers/clients
@@ -275,7 +270,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       Map<RigidBodyBasics, FootSwitchInterface> footSwitchMap = new LinkedHashMap<RigidBodyBasics, FootSwitchInterface>();
       Map<RigidBodyBasics, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBodyBasics, ContactablePlaneBody>();
 
-      FootSwitchFactory footSwitchFactory = stateEstimatorParameters.getFootSwitchFactory();
+      SideDependentList<FootSwitchFactory> footSwitchFactories = stateEstimatorParameters.getFootSwitchFactories();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -287,9 +282,11 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
          ForceSensorDataReadOnly footForceSensorForEstimator = forceSensorDataHolderToUpdate.getByName(footForceSensorName);
          String namePrefix = bipedFeet.get(robotSide).getName() + "StateEstimator";
 
+         FootSwitchFactory footSwitchFactory = footSwitchFactories.get(robotSide);
          FootSwitchInterface footSwitchInterface = footSwitchFactory.newFootSwitch(namePrefix,
                                                                                    contactablePlaneBody,
                                                                                    Collections.singleton(bipedFeet.get(robotSide.getOppositeSide())),
+                                                                                   fullRobotModel.getRootBody(),
                                                                                    footForceSensorForEstimator,
                                                                                    totalRobotWeight,
                                                                                    null,

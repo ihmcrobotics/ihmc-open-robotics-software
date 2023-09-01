@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class ManipulationAbortedStatusPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ManipulationAbortedStatus>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::ManipulationAbortedStatus_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "64ca64742197173a2beef7159444ef006b6b74616ea35a91c558860cd7077978";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

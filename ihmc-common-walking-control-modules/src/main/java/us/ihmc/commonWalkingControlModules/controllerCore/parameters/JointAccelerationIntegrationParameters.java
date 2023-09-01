@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.parameters;
 
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointAccelerationIntegrationCalculator;
 import us.ihmc.euclid.interfaces.Settable;
 
 public class JointAccelerationIntegrationParameters implements JointAccelerationIntegrationParametersReadOnly, Settable<JointAccelerationIntegrationParameters>
 {
+   private boolean disableAccelerationIntegration;
    private double positionBreakFrequency;
    private double velocityBreakFrequency;
    private double maxPositionError;
@@ -31,6 +31,7 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
     */
    public void reset()
    {
+      disableAccelerationIntegration = false;
       resetAlphas();
       resetMaxima();
       velocityResetMode = null;
@@ -45,7 +46,7 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
    {
       positionBreakFrequency = Double.NaN;
       velocityBreakFrequency = Double.NaN;
-      velocityReferenceAlpha = 0.0;
+      velocityReferenceAlpha = Double.NaN;
    }
 
    /**
@@ -76,12 +77,24 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
     */
    public void set(JointAccelerationIntegrationParametersReadOnly other)
    {
+      disableAccelerationIntegration = other.getDisableAccelerationIntegration();
       positionBreakFrequency = other.getPositionBreakFrequency();
       velocityBreakFrequency = other.getVelocityBreakFrequency();
       maxPositionError = other.getMaxPositionError();
       maxVelocityError = other.getMaxVelocityError();
       velocityReferenceAlpha = other.getVelocityReferenceAlpha();
       velocityResetMode = other.getVelocityResetMode();
+   }
+
+   /**
+    * Sets whether to disable acceleration integration for this joint.
+    * 
+    * @param disableAccelerationIntegration {@code true} to disable acceleration for this joint.
+    *                                       Default value {@code false}.
+    */
+   public void setDisableAccelerationIntegration(boolean disableAccelerationIntegration)
+   {
+      this.disableAccelerationIntegration = disableAccelerationIntegration;
    }
 
    /**
@@ -194,6 +207,12 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
    }
 
    @Override
+   public boolean getDisableAccelerationIntegration()
+   {
+      return disableAccelerationIntegration;
+   }
+
+   @Override
    public JointVelocityIntegratorResetMode getVelocityResetMode()
    {
       return velocityResetMode;
@@ -255,6 +274,8 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
          if (velocityReferenceAlpha != other.getVelocityReferenceAlpha())
             return false;
          if (velocityResetMode != other.getVelocityResetMode())
+            return false;
+         if (disableAccelerationIntegration != other.getDisableAccelerationIntegration())
             return false;
          return true;
       }

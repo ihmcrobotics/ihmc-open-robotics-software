@@ -1,22 +1,16 @@
 package us.ihmc.humanoidRobotics.frames;
 
-import java.util.EnumMap;
-
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
-import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
+import us.ihmc.mecano.frames.MovingCenterOfMassReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.partNames.LimbName;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.partNames.RobotSpecificJointNames;
-import us.ihmc.robotics.partNames.SpineJointName;
+import us.ihmc.robotics.partNames.*;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingMidFootZUpGroundFrame;
@@ -26,6 +20,8 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.containers.ContainerTools;
+
+import java.util.EnumMap;
 
 public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 {
@@ -58,7 +54,8 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    private ReferenceFrame headCameraFrame;
    private ReferenceFrame steppingCameraFrame;
    private ReferenceFrame objectDetectionCameraFrame;
-   private ReferenceFrame headZED2CameraFrame;
+   private SideDependentList<ReferenceFrame> situationalAwarenessCameraFrame = new SideDependentList<>();
+   private ReferenceFrame experimentalCameraFrame;
    private ReferenceFrame ousterLidarFrame;
 
    public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel)
@@ -68,19 +65,25 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 
    public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel, HumanoidRobotSensorInformation sensorInformation)
    {
-      this(fullRobotModel, new CenterOfMassReferenceFrame("centerOfMass", worldFrame, fullRobotModel.getElevator()), sensorInformation);
+      this(fullRobotModel, new MovingCenterOfMassReferenceFrame("centerOfMass", fullRobotModel.getElevatorFrame(), fullRobotModel.getElevator()), sensorInformation);
    }
 
    public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel,
                                   CenterOfMassStateProvider centerOfMassStateProvider,
                                   HumanoidRobotSensorInformation sensorInformation)
    {
-      this(fullRobotModel, new ReferenceFrame("centerOfMassFrame", worldFrame)
+      this(fullRobotModel, new MovingReferenceFrame("centerOfMassFrame", fullRobotModel.getElevatorFrame(), true)
       {
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             transformToParent.getTranslation().set(centerOfMassStateProvider.getCenterOfMassPosition());
+         }
+
+         @Override
+         protected void updateTwistRelativeToParent(Twist twistRelativeToParentToPack)
+         {
+            twistRelativeToParentToPack.getLinearPart().setMatchingFrame(centerOfMassStateProvider.getCenterOfMassVelocity());
          }
       }, sensorInformation);
    }
@@ -106,7 +109,9 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       {
          chestFrame = null;
       }
-      pelvisZUpFrame = new MovingZUpFrame(pelvisFrame, "pelvisZUpFrame");
+
+      ReferenceFrame modelStationaryFrame = fullRobotModel.getModelStationaryFrame();
+      pelvisZUpFrame = new MovingZUpFrame(pelvisFrame, modelStationaryFrame, "pelvisZUpFrame");
 
       RobotSpecificJointNames robotJointNames = fullRobotModel.getRobotSpecificJointNames();
 
@@ -182,29 +187,30 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          MovingReferenceFrame footFrame = getFootFrame(robotSide);
          footReferenceFrames.put(robotSide, footFrame);
 
-         MovingZUpFrame ankleZUpFrame = new MovingZUpFrame(footFrame, robotSide.getCamelCaseNameForStartOfExpression() + "AnkleZUp");
+         MovingZUpFrame ankleZUpFrame = new MovingZUpFrame(footFrame, modelStationaryFrame, robotSide.getCamelCaseNameForStartOfExpression() + "AnkleZUp");
          ankleZUpFrames.put(robotSide, ankleZUpFrame);
 
          MovingReferenceFrame handFrame = getHandFrame(robotSide);
          if (handFrame != null)
          {
-            MovingZUpFrame handZUpFrame = new MovingZUpFrame(handFrame, robotSide.getCamelCaseNameForStartOfExpression() + "HandZUp");
+            MovingZUpFrame handZUpFrame = new MovingZUpFrame(handFrame, modelStationaryFrame, robotSide.getCamelCaseNameForStartOfExpression() + "HandZUp");
             handZUpFrames.put(robotSide, handZUpFrame);
          }
          MovingReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
          soleFrames.put(robotSide, soleFrame);
 
-         MovingZUpFrame soleZUpFrame = new MovingZUpFrame(soleFrame, soleFrame.getName() + "ZUp");
+         MovingZUpFrame soleZUpFrame = new MovingZUpFrame(soleFrame, modelStationaryFrame, soleFrame.getName() + "ZUp");
          localSoleZUpFrames.put(robotSide, soleZUpFrame);
          soleZUpFrames.put(robotSide, soleZUpFrame);
       }
 
-      midFeetZUpFrame = new MovingMidFrameZUpFrame("midFeetZUp", getSoleFrame(RobotSide.LEFT), getSoleFrame(RobotSide.RIGHT));
+      midFeetZUpFrame = new MovingMidFrameZUpFrame("midFeetZUp", getSoleFrame(RobotSide.LEFT), getSoleFrame(RobotSide.RIGHT), modelStationaryFrame);
       midFootZUpGroundFrame = new MovingMidFootZUpGroundFrame("midFeetZUpAverageYaw",
                                                               localSoleZUpFrames.get(RobotSide.LEFT),
-                                                              localSoleZUpFrames.get(RobotSide.RIGHT));
+                                                              localSoleZUpFrames.get(RobotSide.RIGHT),
+                                                              modelStationaryFrame);
 
-      midFeetUnderPelvisWalkDirectionFrame = new MovingWalkingReferenceFrame("walkingFrame", pelvisFrame, midFootZUpGroundFrame);
+      midFeetUnderPelvisWalkDirectionFrame = new MovingWalkingReferenceFrame("walkingFrame", pelvisFrame, midFootZUpGroundFrame, modelStationaryFrame);
 
       // set default CommonHumanoidReferenceFrameIds for certain frames used commonly for control
       addDefaultIDToReferenceFrame(CommonReferenceFrameIds.MIDFEET_ZUP_FRAME, getMidFeetZUpFrame());
@@ -223,7 +229,9 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       {
          steppingCameraFrame = sensorInformation.getSteppingCameraFrame(this);
          objectDetectionCameraFrame = sensorInformation.getObjectDetectionCameraFrame(this);
-         headZED2CameraFrame = sensorInformation.getHeadZED2CameraFrame(this);
+         situationalAwarenessCameraFrame.set(RobotSide.LEFT, sensorInformation.getSituationalAwarenessCameraFrame(RobotSide.LEFT, this));
+         situationalAwarenessCameraFrame.set(RobotSide.RIGHT, sensorInformation.getSituationalAwarenessCameraFrame(RobotSide.RIGHT, this));
+         experimentalCameraFrame = sensorInformation.getExperimentalCameraFrame(this);
          ousterLidarFrame = sensorInformation.getOusterLidarFrame(this);
       }
    }
@@ -387,12 +395,18 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       if (lidarSensorFrame != null)
          lidarSensorFrame.update();
       if (steppingCameraFrame != null)
-      {
          steppingCameraFrame.update();
+      if (objectDetectionCameraFrame != null)
          objectDetectionCameraFrame.update();
-         headZED2CameraFrame.update();
+      situationalAwarenessCameraFrame.forEach((side, frame) ->
+      {
+         if (frame != null)
+            frame.update();
+      });
+      if (experimentalCameraFrame != null)
+         experimentalCameraFrame.update();
+      if (ousterLidarFrame != null)
          ousterLidarFrame.update();
-      }
    }
 
    @Override
@@ -463,9 +477,14 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       return objectDetectionCameraFrame;
    }
 
-   public ReferenceFrame getHeadZED2CameraFrame()
+   public ReferenceFrame getSituationalAwarenessCameraFrame(RobotSide side)
    {
-      return headZED2CameraFrame;
+      return situationalAwarenessCameraFrame.get(side);
+   }
+
+   public ReferenceFrame getExperimentalCameraFrame()
+   {
+      return experimentalCameraFrame;
    }
 
    public ReferenceFrame getOusterLidarFrame()

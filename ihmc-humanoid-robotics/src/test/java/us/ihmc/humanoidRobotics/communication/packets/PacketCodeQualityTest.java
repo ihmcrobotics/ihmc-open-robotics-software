@@ -11,6 +11,10 @@ import java.util.Map.Entry;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import exoskeleton_msgs.msg.dds.ExoskeletonBehaviorStatePacket;
+import ihmc_common_msgs.msg.dds.FrameInformation;
+import perception_msgs.msg.dds.VideoPacket;
+import toolbox_msgs.msg.dds.FootstepPlannerStatusMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
@@ -21,6 +25,7 @@ import com.google.common.base.CaseFormat;
 
 import controller_msgs.msg.dds.*;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import quadruped_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.Packet;
@@ -55,8 +60,8 @@ public class PacketCodeQualityTest
    {
       FrameInformation frameInformation = new FrameInformation();
       assertEquals(EuclidHashCodeTools.DEFAULT_HASHCODE, frameInformation.getDataReferenceFrameId());
-      assertEquals(ReferenceFrame.getWorldFrame().hashCode(), frameInformation.getTrajectoryReferenceFrameId());
-      assertEquals(ReferenceFrame.getWorldFrame().hashCode(), FrameInformation.WORLD_FRAME);
+      assertEquals(ReferenceFrame.getWorldFrame().getFrameNameHashCode(), frameInformation.getTrajectoryReferenceFrameId());
+      assertEquals(ReferenceFrame.getWorldFrame().getFrameNameHashCode(), FrameInformation.WORLD_FRAME);
    }
 
    @SuppressWarnings("rawtypes")

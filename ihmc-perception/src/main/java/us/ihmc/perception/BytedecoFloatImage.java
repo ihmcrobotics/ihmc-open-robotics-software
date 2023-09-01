@@ -4,6 +4,7 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencl._cl_mem;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.perception.opencl.OpenCLManager;
 
 import java.nio.FloatBuffer;
 

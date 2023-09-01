@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class ContinuousStepGeneratorInputMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ContinuousStepGeneratorInputMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::ContinuousStepGeneratorInputMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "9b769610caee25d78da0240df2032f7cc0ebe07f190f740564d1897cf1f1ead1";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

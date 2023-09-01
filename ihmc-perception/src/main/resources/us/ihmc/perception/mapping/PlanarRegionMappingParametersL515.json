@@ -1,0 +1,23 @@
+{
+  "title" : "PlanarRegionMappingParameters",
+  "Update Alpha towards match" : 0.01,
+  "Similarity threshold between normals" : 0.9,
+  "Orthogonal distance threshold" : 0.4,
+  "Max Inter Region Distance" : 0.05,
+  "Minimum overlap threshold" : 0.4,
+  "Minimum planar region area" : 0.4,
+  "Minimum bounding box size" : 0.3,
+  "Plane noise variance" : 0.04,
+  "Odometry noise variance" : 0.0000001,
+  "State estimator noise variance" : 0.0000001,
+  "Best match angular threshold": 0.8,
+  "Best match distance threshold": 0.5,
+  "Best minimum overlap threshold" : 0.5,
+  "Keyframe distance threshold" : 0.05,
+  "Keyframe angular threshold" : 0.05,
+  "ICP max iterations" : 50,
+  "ICP min matches" : 3,
+  "ICP termination ratio" : 0.000001,
+  "ICP error cutoff" : 0.03,
+  "Minimum number of times matched" : 3
+}

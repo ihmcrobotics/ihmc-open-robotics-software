@@ -1,6 +1,10 @@
 package us.ihmc.quadrupedFootstepPlanning.ui;
 
-import controller_msgs.msg.dds.*;
+import ihmc_common_msgs.msg.dds.TimeIntervalMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import toolbox_msgs.msg.dds.*;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import quadruped_msgs.msg.dds.*;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -184,9 +188,9 @@ public class RemoteUIMessageConverter
 //      walkingPreviewToolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, controllerPreviewInputTopic);
 //      walkingPreviewRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, WalkingControllerPreviewInputMessage.class, controllerPreviewInputTopic);
 
-      messager.registerTopicListener(PawStepPlannerMessagerAPI.ComputePathTopic, request -> requestNewPlan());
-      messager.registerTopicListener(PawStepPlannerMessagerAPI.AbortPlanningTopic, request -> requestAbortPlanning());
-      messager.registerTopicListener(PawStepPlannerMessagerAPI.FootstepDataListTopic, footstepDataListPublisher::publish);
+      messager.addTopicListener(PawStepPlannerMessagerAPI.ComputePathTopic, request -> requestNewPlan());
+      messager.addTopicListener(PawStepPlannerMessagerAPI.AbortPlanningTopic, request -> requestAbortPlanning());
+      messager.addTopicListener(PawStepPlannerMessagerAPI.FootstepDataListTopic, footstepDataListPublisher::publish);
       /*
       messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestWalkingPreview, request ->
       {

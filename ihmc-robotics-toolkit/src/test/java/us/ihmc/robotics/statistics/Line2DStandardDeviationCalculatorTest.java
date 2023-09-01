@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.Line2D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
@@ -38,7 +38,7 @@ public class Line2DStandardDeviationCalculatorTest
          calculator.update();
       }
 
-      EuclidGeometryTestTools.assertLine2DGeometricallyEquals(valueProvider, calculator.getLineMean(), epsilon);
+      EuclidCoreTestTools.assertGeometricallyEquals(valueProvider, calculator.getLineMean(), epsilon);
       assertEquals(0.0, calculator.getDirectionStandardDeviation(), epsilon);
       assertEquals(0.0, calculator.getPositionStandardDeviation(), epsilon);
       assertEquals(0.0, calculator.getDirectionVariance(), epsilon);
@@ -66,7 +66,7 @@ public class Line2DStandardDeviationCalculatorTest
          calculator.update();
       }
 
-      EuclidGeometryTestTools.assertLine2DGeometricallyEquals(valueProvider, calculator.getLineMean(), epsilon);
+      EuclidCoreTestTools.assertGeometricallyEquals(valueProvider, calculator.getLineMean(), epsilon);
       assertEquals(0.0, calculator.getDirectionStandardDeviation(), epsilon);
       assertEquals(0.0, calculator.getPositionStandardDeviation(), epsilon);
       assertEquals(0.0, calculator.getDirectionVariance(), epsilon);
@@ -103,7 +103,7 @@ public class Line2DStandardDeviationCalculatorTest
          calculator.update();
       }
 
-      EuclidGeometryTestTools.assertLine2DGeometricallyEquals(originalValue, calculator.getLineMean(), epsilon);
+      EuclidCoreTestTools.assertGeometricallyEquals(originalValue, calculator.getLineMean(), epsilon);
       assertEquals(0.0, calculator.getPositionVariance(), epsilon);
       assertEquals(0.0, calculator.getDirectionVariance(), epsilon);
       assertEquals(0.0, calculator.getDirectionStandardDeviation(), epsilon);

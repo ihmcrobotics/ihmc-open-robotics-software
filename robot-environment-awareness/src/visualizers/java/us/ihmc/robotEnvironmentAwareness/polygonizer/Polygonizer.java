@@ -64,7 +64,7 @@ public class Polygonizer
       this.executorService = executorService;
       parameters = messager.createInput(PolygonizerParameters, new ConcaveHullFactoryParameters());
       postProcessor = messager.createInput(PolygonizerPostProcessor, null);
-      messager.registerTopicListener(PolygonizerInput, this::processAndPublishLater);
+      messager.addTopicListener(PolygonizerInput, this::processAndPublishLater);
    }
 
    private void processAndPublishLater(Collection<Input> inputs)

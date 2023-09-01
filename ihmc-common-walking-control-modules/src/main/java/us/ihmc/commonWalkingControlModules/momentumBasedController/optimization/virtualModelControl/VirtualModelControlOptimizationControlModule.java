@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.QPObjectiveCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ExternalWrenchHandler;
@@ -31,12 +32,15 @@ import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class VirtualModelControlOptimizationControlModule
+public class VirtualModelControlOptimizationControlModule implements SCS2YoGraphicHolder
 {
    private static final boolean VISUALIZE_RHO_BASIS_VECTORS = false;
    private static final boolean SETUP_RHO_TASKS = true;
@@ -77,6 +81,9 @@ public class VirtualModelControlOptimizationControlModule
 
    private final DMatrixRMaj zeroObjective = new DMatrixRMaj(0, 0);
 
+   private final int numberOfDoFs;
+   private final DMatrixRMaj tempTaskJacobian = new DMatrixRMaj(0, 0);
+
    public VirtualModelControlOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoRegistry parentRegistry)
    {
       this.wrenchMatrixCalculator = toolbox.getWrenchMatrixCalculator();
@@ -85,6 +92,8 @@ public class VirtualModelControlOptimizationControlModule
       ControllerCoreOptimizationSettings optimizationSettings = toolbox.getOptimizationSettings();
       int rhoSize = optimizationSettings.getRhoSize();
       momentumQPInput = new QPInputTypeA(SpatialForce.SIZE);
+
+      numberOfDoFs = toolbox.getJointIndexHandler().getNumberOfDoFs();
 
       if (VISUALIZE_RHO_BASIS_VECTORS)
          basisVectorVisualizer = new BasisVectorVisualizer("ContactBasisVectors", rhoSize, 1.0, toolbox.getYoGraphicsListRegistry(), registry);
@@ -99,7 +108,9 @@ public class VirtualModelControlOptimizationControlModule
       qpSolver.setUseWarmStart(optimizationSettings.useWarmStartInSolver());
       qpSolver.setMaxNumberOfIterations(optimizationSettings.getMaxNumberOfSolverIterations());
 
-      externalWrenchHandler = new ExternalWrenchHandler(toolbox.getGravityZ(), centerOfMassFrame, toolbox.getTotalRobotMass(),
+      externalWrenchHandler = new ExternalWrenchHandler(toolbox.getGravityZ(),
+                                                        centerOfMassFrame,
+                                                        toolbox.getTotalRobotMass(),
                                                         toolbox.getContactablePlaneBodies());
 
       useWarmStart.set(optimizationSettings.useWarmStartInSolver());
@@ -119,7 +130,7 @@ public class VirtualModelControlOptimizationControlModule
 
    public VirtualModelControlSolution compute() throws VirtualModelControlModuleException
    {
-      wrenchMatrixCalculator.computeMatrices();
+      wrenchMatrixCalculator.computeMatrices(null);
       if (VISUALIZE_RHO_BASIS_VECTORS)
          basisVectorVisualizer.visualize(wrenchMatrixCalculator.getBasisVectors(), wrenchMatrixCalculator.getBasisVectorsOrigin());
       qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getRhoWeightMatrix());
@@ -180,6 +191,13 @@ public class VirtualModelControlOptimizationControlModule
       return virtualModelControlSolution;
    }
 
+   public void submitQPObjectiveCommand(QPObjectiveCommand command)
+   {
+      boolean success = convertQPObjectiveCommand(command, momentumQPInput);
+      if (success)
+         qpSolver.addMomentumInput(momentumQPInput);
+   }
+
    public void submitMomentumRateCommand(MomentumRateCommand command)
    {
       boolean success = convertMomentumRateCommand(command, momentumQPInput);
@@ -223,6 +241,43 @@ public class VirtualModelControlOptimizationControlModule
          qpSolver.setMomentumRateRegularization(command.getMomentumRateWeight());
       if (command.hasMomentumAccelerationWeight())
          qpSolver.setMomentumAccelerationRegularization(command.getMomentumAccelerationWeight());
+   }
+
+   public boolean convertQPObjectiveCommand(QPObjectiveCommand commandToConvert, QPInputTypeA qpInputToPack)
+   {
+      DMatrixRMaj jacobian = commandToConvert.getJacobian();
+      DMatrixRMaj objective = commandToConvert.getObjective();
+      DMatrixRMaj selectionMatrix = commandToConvert.getSelectionMatrix();
+      DMatrixRMaj weightMatrix = commandToConvert.getWeightMatrix();
+
+      int taskSize = selectionMatrix.getNumRows();
+
+      if (taskSize == 0)
+         return false;
+
+      if (jacobian.getNumCols() != numberOfDoFs)
+      {
+         LogTools.error("Jacobian is not of the right size: {}, expected: {}", jacobian.getNumCols(), numberOfDoFs);
+         return false;
+      }
+      if (commandToConvert.isNullspaceProjected())
+      {
+         throw new RuntimeException("You cannot project a QP Objective Command into the nullspace of the virtual model control module.");
+      }
+
+      qpInputToPack.reshape(taskSize);
+      qpInputToPack.setConstraintType(ConstraintType.OBJECTIVE);
+
+      qpInputToPack.setUseWeightScalar(false);
+      CommonOps_DDRM.mult(selectionMatrix, weightMatrix, tempTaskWeightSubspace);
+      CommonOps_DDRM.multTransB(tempTaskWeightSubspace, selectionMatrix, qpInputToPack.taskWeightMatrix);
+
+      CommonOps_DDRM.mult(selectionMatrix, objective, qpInputToPack.taskObjective);
+
+      tempTaskJacobian.reshape(taskSize, numberOfDoFs);
+      CommonOps_DDRM.mult(selectionMatrix, jacobian, tempTaskJacobian);
+
+      return true;
    }
 
    /**
@@ -300,5 +355,14 @@ public class VirtualModelControlOptimizationControlModule
       DMatrixRMaj copRateRegularizationWeight = wrenchMatrixCalculator.getCoPRateRegularizationWeight();
       DMatrixRMaj copRateRegularizationJacobian = wrenchMatrixCalculator.getCoPRateRegularizationJacobian();
       qpSolver.addRhoTask(copRateRegularizationJacobian, zeroObjective, copRateRegularizationWeight);
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      if (VISUALIZE_RHO_BASIS_VECTORS)
+         group.addChild(basisVectorVisualizer.getSCS2YoGraphics());
+      return group;
    }
 }

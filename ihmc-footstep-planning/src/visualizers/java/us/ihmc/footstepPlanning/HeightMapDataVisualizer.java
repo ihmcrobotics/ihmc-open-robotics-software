@@ -1,9 +1,5 @@
 package us.ihmc.footstepPlanning;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import controller_msgs.msg.dds.HeightMapMessage;
-import controller_msgs.msg.dds.HeightMapMessagePubSubType;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
@@ -13,29 +9,23 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
-import us.ihmc.footstepPlanning.bodyPath.HeightMapLeastSquaresNormalCalculator;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.footstepPlanning.bodyPath.HeightMapRANSACNormalCalculator;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.idl.serializers.extra.JSONSerializer;
-import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.HeightMapDataSetName;
-import us.ihmc.robotics.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapPlanarRegionCalculator;
-import us.ihmc.robotics.heightMap.HeightMapTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.function.IntFunction;
 
 public class HeightMapDataVisualizer
@@ -138,7 +128,7 @@ public class HeightMapDataVisualizer
    }
 
    private static Graphics3DObject buildHeightMapGraphics(HeightMapData heightMapData,
-                                                          IntFunction<UnitVector3DBasics> surfaceNormalCalculator,
+                                                          IntFunction<UnitVector3DReadOnly> surfaceNormalCalculator,
                                                           HeightMapPlanarRegionCalculator planarRegionCalculator)
    {
       Graphics3DObject graphics3DObject = new Graphics3DObject();
@@ -193,7 +183,7 @@ public class HeightMapDataVisualizer
             if (SHOW_NORMALS)
             {
                graphics3DObject.translate(0.0, 0.0, 0.5 * renderedHeight + 0.01);
-               UnitVector3DBasics surfaceNormal = surfaceNormalCalculator.apply(key);
+               UnitVector3DReadOnly surfaceNormal = surfaceNormalCalculator.apply(key);
 
                if (!surfaceNormal.epsilonEquals(Axis3D.Z, 1e-4))
                {

@@ -1,6 +1,7 @@
 package us.ihmc.tools.thread;
 
 import us.ihmc.commons.RunnableThatThrows;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -21,6 +22,9 @@ public class MissingThreadTools
       return newSingleThreadExecutor(prefix, false);
    }
 
+   /**
+    * Creates a single thread executor with no limit on the queue size.
+    */
    public static ResettableExceptionHandlingExecutorService newSingleThreadExecutor(String prefix, boolean daemon)
    {
       return newSingleThreadExecutor(prefix, daemon, -1);
@@ -45,6 +49,19 @@ public class MissingThreadTools
    public static Thread startAsDaemon(String threadName, ExceptionHandler exceptionHandler, RunnableThatThrows runnable)
    {
       return ThreadTools.startAsDaemon(() -> ExceptionTools.handle(runnable, exceptionHandler), threadName);
+
+   }
+   public static Thread startAsDaemon(String threadName, double period, RunnableThatThrows runnable)
+   {
+      Throttler throttler = new Throttler();
+      return startAsDaemon(threadName, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
+      {
+         while (true)
+         {
+            throttler.waitAndRun(period);
+            runnable.run();
+         }
+      });
    }
 
    public static Thread startAThread(String threadName, ExceptionHandler exceptionHandler, RunnableThatThrows runnable)

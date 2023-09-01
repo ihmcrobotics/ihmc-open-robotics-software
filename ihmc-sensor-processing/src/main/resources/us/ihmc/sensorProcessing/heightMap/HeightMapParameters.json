@@ -1,0 +1,13 @@
+{
+  "title" : "HeightMapParameters",
+  "Grid resolution XY" : [ 0.03, "Resolution of the height map grid" ],
+  "Grid size XY" : [ 5.0, "Length of the side of the square height map grid" ],
+  "Max Z" : [ 0.6, "Max z relative to robot mid foot z. Points above this threshold are ignored." ],
+  "Nominal standard deviation" : [ 0.017992, "When calibrated on flat ground, this is the average standard deviation observed for a grid cell." ],
+  "Max points per cell" : 20,
+  "Mahalanobis scale" : [ 2.0, "If a grid cell is at height h, points below (h - s * m) are ignored, and points above (h + s * m) will cause the cell to throw out old data and reset. where s is getNominalStandardDeviation() and m is this value." ],
+  "Variance added when translating" : [ 0.1, "This is the variance added to all past measurements when a cell is translated" ],
+  "Sensor variance when standing" : [ 0.01, "This is the measurement variance when the robot is standing" ],
+  "Sensor variance when moving" : [ 0.1, "This is the measurement variance when the robot is moving" ],
+  "Estimate height with kalman filter" : true
+}

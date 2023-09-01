@@ -2,6 +2,12 @@ package us.ihmc.quadrupedCommunication.teleop;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import quadruped_msgs.msg.dds.*;
+import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2Topic;

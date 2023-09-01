@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
@@ -10,7 +9,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class ICPCoPConstraintHandler
 {
-   private final BipedSupportPolygons bipedSupportPolygons;
    private final ICPControlPolygons icpControlPolygons;
 
    private final boolean hasICPControlPolygons;
@@ -22,13 +20,11 @@ public class ICPCoPConstraintHandler
    private int numberOfVertices = 0;
    private boolean hasSupportPolygonChanged;
 
-   public ICPCoPConstraintHandler(BipedSupportPolygons bipedSupportPolygons,
-                                  ICPControlPolygons icpControlPolygons,
+   public ICPCoPConstraintHandler(ICPControlPolygons icpControlPolygons,
                                   BooleanProvider useICPControlPolygons,
                                   boolean hasICPControlPolygons,
                                   YoRegistry parentRegistry)
    {
-      this.bipedSupportPolygons = bipedSupportPolygons;
       this.icpControlPolygons = icpControlPolygons;
       this.useICPControlPolygons = useICPControlPolygons;
       this.hasICPControlPolygons = hasICPControlPolygons;
@@ -50,7 +46,7 @@ public class ICPCoPConstraintHandler
     *    this method!
     * </p>
     */
-   public FrameConvexPolygon2DReadOnly updateCoPConstraint()
+   public FrameConvexPolygon2DReadOnly updateCoPConstraint(FrameConvexPolygon2DReadOnly supportPolygonInWorld)
    {
       if (keepCoPInsideSupportPolygon.getBooleanValue())
       {
@@ -58,7 +54,7 @@ public class ICPCoPConstraintHandler
          if (useICPControlPolygons.getValue() && icpControlPolygons != null && hasICPControlPolygons)
             supportPolygon = icpControlPolygons.getControlPolygonInWorldFrame();
          else
-            supportPolygon = bipedSupportPolygons.getSupportPolygonInWorld();
+            supportPolygon = supportPolygonInWorld;
 
          // this is a really simplistic way of checking if the support polygon has changed.
          if (supportPolygon.getNumberOfVertices() != numberOfVertices)

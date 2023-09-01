@@ -32,15 +32,18 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class WholeBodyVirtualModelControlSolver
+public class WholeBodyVirtualModelControlSolver implements SCS2YoGraphicHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -122,7 +125,7 @@ public class WholeBodyVirtualModelControlSolver
       planeContactWrenchProcessor = toolbox.getPlaneContactWrenchProcessor();
       wrenchVisualizer = toolbox.getWrenchVisualizer();
 
-      jointAccelerationIntegrationCalculator = new JointAccelerationIntegrationCalculator(toolbox.getControlDT(), registry);
+      jointAccelerationIntegrationCalculator = new JointAccelerationIntegrationCalculator(toolbox.getRootBody(), toolbox.getControlDT(), registry);
       forwardDynamicsCalculator = new ForwardDynamicsCalculator(toolbox.getRootBody());
       forwardDynamicsCalculator.setGravitionalAcceleration(-Math.abs(toolbox.getGravityZ()));
 
@@ -137,6 +140,7 @@ public class WholeBodyVirtualModelControlSolver
       optimizationControlModule.initialize();
       virtualModelController.reset();
 
+      jointAccelerationIntegrationCalculator.resetJointParameters();
       forwardDynamicsCalculator.setExternalWrenchesToZero();
 
       yoDesiredMomentumRateLinear.setToZero();
@@ -242,6 +246,9 @@ public class WholeBodyVirtualModelControlSolver
          VirtualModelControlCommand<?> command = virtualModelControlCommandList.pollCommand();
          switch (command.getCommandType())
          {
+            case QP_INPUT:
+               optimizationControlModule.submitQPObjectiveCommand((QPObjectiveCommand) command);
+               break;
             case MOMENTUM:
                optimizationControlModule.submitMomentumRateCommand((MomentumRateCommand) command);
                recordMomentumRate((MomentumRateCommand) command);
@@ -384,9 +391,17 @@ public class WholeBodyVirtualModelControlSolver
    {
       return achievedMomentumRateLinear;
    }
-   
+
    public FrameVector3DReadOnly getAchievedMomentumRateAngular()
    {
       return achievedMomentumRateAngular;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(optimizationControlModule.getSCS2YoGraphics());
+      return group;
    }
 }

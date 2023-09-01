@@ -1,7 +1,8 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.DoorLocationPacket;
+import perception_msgs.msg.dds.DoorLocationPacket;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -12,8 +13,6 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavi
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.ROS2Node;
@@ -54,7 +53,7 @@ public class SearchForDoorBehavior extends StateMachineBehavior<SearchForDoorBeh
    {
       super(robotName, "SearchForDoorBehavior", SearchForDoorBehaviorState.class, yoTime, ros2Node);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
-      createSubscriber(DoorLocationPacket.class, ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput(), doorLocationQueue::put);
+      createSubscriber(DoorLocationPacket.class, PerceptionAPI.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput(), doorLocationQueue::put);
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
       this.referenceFrames = referenceFrames;
 

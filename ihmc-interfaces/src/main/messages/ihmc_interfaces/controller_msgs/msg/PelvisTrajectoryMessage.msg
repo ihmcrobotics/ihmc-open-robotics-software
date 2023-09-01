@@ -18,4 +18,4 @@ bool enable_user_pelvis_control false
 # If this is false the manager will switch back to controller mode when walking.
 bool enable_user_pelvis_control_during_walking false
 # The position/orientation trajectory information.
-SE3TrajectoryMessage se3_trajectory
+ihmc_common_msgs/SE3TrajectoryMessage se3_trajectory

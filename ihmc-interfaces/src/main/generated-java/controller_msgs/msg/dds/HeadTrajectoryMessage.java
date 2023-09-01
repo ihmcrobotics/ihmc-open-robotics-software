@@ -21,11 +21,11 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage> impleme
    /**
             * The orientation trajectory information.
             */
-   public controller_msgs.msg.dds.SO3TrajectoryMessage so3_trajectory_;
+   public ihmc_common_msgs.msg.dds.SO3TrajectoryMessage so3_trajectory_;
 
    public HeadTrajectoryMessage()
    {
-      so3_trajectory_ = new controller_msgs.msg.dds.SO3TrajectoryMessage();
+      so3_trajectory_ = new ihmc_common_msgs.msg.dds.SO3TrajectoryMessage();
    }
 
    public HeadTrajectoryMessage(HeadTrajectoryMessage other)
@@ -38,7 +38,7 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage> impleme
    {
       sequence_id_ = other.sequence_id_;
 
-      controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.staticCopy(other.so3_trajectory_, so3_trajectory_);
+      ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType.staticCopy(other.so3_trajectory_, so3_trajectory_);
    }
 
    /**
@@ -60,7 +60,7 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage> impleme
    /**
             * The orientation trajectory information.
             */
-   public controller_msgs.msg.dds.SO3TrajectoryMessage getSo3Trajectory()
+   public ihmc_common_msgs.msg.dds.SO3TrajectoryMessage getSo3Trajectory()
    {
       return so3_trajectory_;
    }

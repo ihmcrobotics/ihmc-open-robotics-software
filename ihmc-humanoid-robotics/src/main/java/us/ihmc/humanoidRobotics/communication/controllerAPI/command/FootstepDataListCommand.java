@@ -29,6 +29,8 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
    /** If {@code true} the controller will adjust the z coordinate of the upcoming footsteps with the location error of previous steps. */
    private boolean offsetFootstepsHeightWithExecutionError = false;
 
+   private boolean shouldCheckForReachability = false;
+
    public FootstepDataListCommand()
    {
       clear();
@@ -44,6 +46,7 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       footsteps.clear();
       defaultStepConstraints.clear();
       clearQueuableCommandVariables();
+      shouldCheckForReachability = false;
    }
 
    @Override
@@ -60,6 +63,7 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       areFootstepsAdjustable = message.getAreFootstepsAdjustable();
       offsetFootstepsWithExecutionError = message.getOffsetFootstepsWithExecutionError();
       offsetFootstepsHeightWithExecutionError = message.getOffsetFootstepsHeightWithExecutionError();
+      shouldCheckForReachability = message.getShouldCheckForReachability();
       List<FootstepDataMessage> dataList = message.getFootstepDataList();
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       if (dataList != null)
@@ -90,6 +94,7 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       areFootstepsAdjustable = other.areFootstepsAdjustable;
       offsetFootstepsWithExecutionError = other.offsetFootstepsWithExecutionError;
       offsetFootstepsHeightWithExecutionError = other.offsetFootstepsHeightWithExecutionError;
+      shouldCheckForReachability = other.shouldCheckForReachability;
       RecyclingArrayList<FootstepDataCommand> otherFootsteps = other.getFootsteps();
       if (otherFootsteps != null)
       {
@@ -165,6 +170,11 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       return footsteps.size();
    }
 
+   public boolean getShouldCheckForReachability()
+   {
+      return shouldCheckForReachability;
+   }
+
    @Override
    public Class<FootstepDataListMessage> getMessageClass()
    {
@@ -180,6 +190,11 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
    public boolean isTrustHeightOfFootsteps()
    {
       return trustHeightOfFootsteps;
+   }
+
+   public void setAreFootstepsAdjustable(boolean areFootstepsAdjustable)
+   {
+      this.areFootstepsAdjustable= areFootstepsAdjustable ;
    }
 
    public boolean areFootstepsAdjustable()
@@ -205,6 +220,11 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
    public boolean isOffsetFootstepsHeightWithExecutionError()
    {
       return offsetFootstepsHeightWithExecutionError;
+   }
+
+   public void setShouldCheckForReachability(boolean shouldCheckForReachability)
+   {
+      this.shouldCheckForReachability = shouldCheckForReachability;
    }
 
    @Override

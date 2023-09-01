@@ -1,5 +1,7 @@
 package us.ihmc.behaviors.tools.behaviorTree;
 
+import java.time.Instant;
+
 /**
  * The core interface of a Behavior Tree: the node that can be ticked.
  */
@@ -22,19 +24,32 @@ public interface BehaviorTreeNodeBasics
    public default BehaviorTreeNodeStatus tick()
    {
       setPreviousStatus(tickInternal());
-      setLastTickMillis(System.currentTimeMillis());
+      setLastTickInstant(Instant.now());
       return getPreviousStatus();
    }
 
    public abstract BehaviorTreeNodeStatus tickInternal();
 
+   /**
+    * @return The node's status from the last time it was ticked.
+    *         This will be null if the node hasn't been ticked yet.
+    */
    public abstract BehaviorTreeNodeStatus getPreviousStatus();
 
    public abstract void setPreviousStatus(BehaviorTreeNodeStatus status);
 
-   public abstract long getLastTickMillis();
+   public default boolean hasBeenTicked()
+   {
+      return getLastTickInstant() != null;
+   }
 
-   public abstract void setLastTickMillis(long lastTickMillis);
+   /**
+    * @return The Instant at which this node was last ticked.
+    *         This will be null if the node has never been ticked.
+    */
+   public abstract Instant getLastTickInstant();
+
+   public abstract void setLastTickInstant(Instant lastTickInstant);
 
    public abstract String getName();
 

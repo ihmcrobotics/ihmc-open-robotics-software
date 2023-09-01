@@ -77,6 +77,7 @@ public class DynamicPlanningFootstep extends YoSaveableModuleState
       if (!footstep.hasPredictedContactPoints())
          return;
 
+      predictedContactPoints.clear();
       for (int i = 0; i < Math.min(footstep.getPredictedContactPoints().size(), predictedContactPoints.capacity()); i++)
          predictedContactPoints.add().set(footstep.getPredictedContactPoints().get(i));
    }

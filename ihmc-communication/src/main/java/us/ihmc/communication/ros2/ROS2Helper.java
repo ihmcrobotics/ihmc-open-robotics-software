@@ -1,12 +1,15 @@
 package us.ihmc.communication.ros2;
 
+import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Callback;
-import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -19,50 +22,78 @@ import java.util.function.Consumer;
  */
 public class ROS2Helper implements ROS2PublishSubscribeAPI
 {
-   protected final ManagedROS2Node managedROS2Node;
+   protected final ROS2NodeInterface ros2NodeInterface;
    protected final ROS2PublisherMap ros2PublisherMap;
+
+   public ROS2Helper(PubSubImplementation pubSubImplementation, String nodeName)
+   {
+      this(ROS2Tools.createROS2Node(pubSubImplementation, nodeName));
+   }
 
    public ROS2Helper(ROS2NodeInterface ros2Node)
    {
-      managedROS2Node = new ManagedROS2Node(ros2Node);
-      ros2PublisherMap = new ROS2PublisherMap(managedROS2Node);
-   }
-
-   public void setCommunicationCallbacksEnabled(boolean enabled)
-   {
-      managedROS2Node.setEnabled(enabled);
+      this.ros2NodeInterface = ros2Node;
+      ros2PublisherMap = new ROS2PublisherMap(ros2Node);
    }
 
    @Override
    public <T> void subscribeViaCallback(ROS2Topic<T> topic, Consumer<T> callback)
    {
-      ROS2Tools.createCallbackSubscription2(managedROS2Node, topic, callback);
+      ROS2Tools.createCallbackSubscription2(ros2NodeInterface, topic, callback);
    }
 
    @Override
    public void subscribeViaCallback(ROS2Topic<Empty> topic, Runnable callback)
    {
-      ROS2Tools.createCallbackSubscription2(managedROS2Node, topic, message -> callback.run());
+      ROS2Tools.createCallbackSubscription2(ros2NodeInterface, topic, message -> callback.run());
    }
 
    @Override
    public <T> IHMCROS2Input<T> subscribe(ROS2Topic<T> topic)
    {
-      return new IHMCROS2Input<>(managedROS2Node, topic.getType(), topic);
+      return new IHMCROS2Input<>(ros2NodeInterface, topic.getType(), topic);
+   }
+
+   @Override
+   public <T> IHMCROS2Input<T> subscribe(ROS2Topic<T> topic, IHMCROS2Input.MessageFilter<T> messageFilter)
+   {
+      return new IHMCROS2Input<>(ros2NodeInterface, topic.getType(), topic, messageFilter);
    }
 
    @Override
    public ROS2TypelessInput subscribeTypeless(ROS2Topic<Empty> topic)
    {
-      return new ROS2TypelessInput(managedROS2Node, topic);
+      return new ROS2TypelessInput(ros2NodeInterface, topic);
    }
 
    @Override
    public Notification subscribeViaNotification(ROS2Topic<Empty> topic)
    {
       Notification notification = new Notification();
-      new ROS2Callback<>(managedROS2Node, Empty.class, topic, message -> notification.set());
+      new ROS2Callback<>(ros2NodeInterface, Empty.class, topic, message -> notification.set());
       return notification;
+   }
+
+   @Override
+   public <T> TypedNotification<T> subscribeViaTypedNotification(ROS2Topic<T> topic)
+   {
+      TypedNotification<T> typedNotification = new TypedNotification<>();
+      ROS2Tools.createCallbackSubscription2(ros2NodeInterface, topic, typedNotification::set);
+      return typedNotification;
+   }
+
+   @Override
+   public TypedNotification<Boolean> subscribeViaBooleanNotification(ROS2Topic<Bool> topic)
+   {
+      TypedNotification<Boolean> typedNotification = new TypedNotification<>();
+      ROS2Tools.createCallbackSubscription2(ros2NodeInterface, topic, message -> typedNotification.set(message.getData()));
+      return typedNotification;
+   }
+
+   @Override
+   public <T> void createPublisher(ROS2Topic<T> topic)
+   {
+      ros2PublisherMap.getOrCreatePublisher(topic);
    }
 
    @Override
@@ -91,8 +122,14 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
       ros2PublisherMap.publish(topic);
    }
 
+   @Override
+   public void publish(ROS2Topic<Bool> topic, boolean message)
+   {
+      ros2PublisherMap.publish(topic, message);
+   }
+
    public ROS2NodeInterface getROS2NodeInterface()
    {
-      return managedROS2Node;
+      return ros2NodeInterface;
    }
 }

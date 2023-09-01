@@ -84,7 +84,6 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    private final DMatrixRMaj vrpYWaypoints = new DMatrixRMaj(0, 1);
    private final DMatrixRMaj vrpZWaypoints = new DMatrixRMaj(0, 1);
 
-   // FIXME fill reducing?
    private final LinearSolverSparse<DMatrixSparseCSC, DMatrixRMaj> sparseSolver = LinearSolverFactory_DSCC.lu(FillReducing.NONE);
 
    final DMatrixRMaj xCoefficientVector = new DMatrixRMaj(0, 1);
@@ -270,10 +269,10 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
       trajectoryHandler.setCoefficientsFromSolution(omega.getValue(), contactSequence, xCoefficientVector, yCoefficientVector, zCoefficientVector);
 
-      updateCornerPoints(contactSequence);
-
       if (viewer != null)
       {
+         updateCornerPoints(contactSequence);
+
          viewer.updateDCMCornerPoints(dcmCornerPoints);
          viewer.updateCoMCornerPoints(comCornerPoints);
          viewer.updateVRPWaypoints(vrpSegments);

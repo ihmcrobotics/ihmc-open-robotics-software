@@ -1,7 +1,7 @@
 {
   "ambientLight" : 0.4,
   "objects" : [ {
-    "type" : "GDXSmallCinderBlockRoughed",
+    "type" : "RDXSmallCinderBlockRoughed",
     "x" : -0.09169199023263275,
     "y" : 3.26862820489273,
     "z" : 0.0,
@@ -10,7 +10,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXMediumCinderBlockRoughed",
+    "type" : "RDXMediumCinderBlockRoughed",
     "x" : 1.7549938323058516,
     "y" : 1.145957752606579,
     "z" : 0.0,
@@ -19,7 +19,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXLargeCinderBlockRoughed",
+    "type" : "RDXLargeCinderBlockRoughed",
     "x" : -1.146485870835587,
     "y" : 0.4145992698677965,
     "z" : 0.0,
@@ -28,7 +28,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXLargeCinderBlockRoughed",
+    "type" : "RDXLargeCinderBlockRoughed",
     "x" : 0.4533163048236153,
     "y" : -0.6204189037990346,
     "z" : 0.0,
@@ -37,7 +37,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXLabFloorObject",
+    "type" : "RDXLabFloorObject",
     "x" : -1.4750582835206014,
     "y" : -0.10283195874304507,
     "z" : -0.4732180156745018,
@@ -46,7 +46,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXPalletObject",
+    "type" : "RDXPalletObject",
     "x" : -0.4102422439971152,
     "y" : 1.7074666714305025,
     "z" : 0.0,
@@ -55,7 +55,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXStairsObject",
+    "type" : "RDXStairsObject",
     "x" : 2.994393560497688,
     "y" : 2.6093291704474453,
     "z" : 0.0,
@@ -64,7 +64,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXDoorFrameObject",
+    "type" : "RDXDoorFrameObject",
     "x" : -0.9807546674634242,
     "y" : 3.963584505589864,
     "z" : 0.23337343800812957,
@@ -73,7 +73,7 @@
     "qz" : -3.047580108322215E-17,
     "qs" : 0.9999898615058064
   }, {
-    "type" : "GDXDoorPanelObject",
+    "type" : "RDXDoorPanelObject",
     "x" : -1.0012999298657652,
     "y" : -2.0117093355104867,
     "z" : 1.285857109562951,
@@ -82,7 +82,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXDoorLeverHandleObject",
+    "type" : "RDXDoorLeverHandleObject",
     "x" : 1.3278950694093012,
     "y" : -2.6871944040574283,
     "z" : 0.0,
@@ -91,7 +91,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXPointLightObject",
+    "type" : "RDXPointLightObject",
     "x" : 5.636288590842845,
     "y" : 2.978071073650675,
     "z" : 11.195632031629735,
@@ -100,7 +100,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXDirectionalLightObject",
+    "type" : "RDXDirectionalLightObject",
     "x" : -2.4393651110990504,
     "y" : 5.7565122720625155,
     "z" : 0.0,
@@ -109,7 +109,7 @@
     "qz" : 2.8023519178383216E-17,
     "qs" : 0.8891279005270043
   }, {
-    "type" : "GDXL515SensorObject",
+    "type" : "RDXL515SensorObject",
     "x" : -2.1989216856105758,
     "y" : 0.11213354145758458,
     "z" : 8.881784197001252E-16,
@@ -118,7 +118,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXPointLightObject",
+    "type" : "RDXPointLightObject",
     "x" : 1.165188068930929,
     "y" : 3.380945388495185,
     "z" : 1.9290008513333767,
@@ -127,7 +127,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXPointLightObject",
+    "type" : "RDXPointLightObject",
     "x" : -6.692241056999141,
     "y" : -1.3088207516575707,
     "z" : 2.5900446670025725,
@@ -136,7 +136,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXDoorObject",
+    "type" : "RDXDoorObject",
     "x" : 3.4573270183583906,
     "y" : -0.27763775545538083,
     "z" : -0.21283704647556045,

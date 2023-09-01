@@ -1,26 +1,35 @@
 package us.ihmc.behaviors.lookAndStep;
 
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehavior.State.BODY_PATH_PLANNING;
-import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.BodyPathPlanForUI;
-import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.PlanarRegionsForUI;
+import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import ihmc_common_msgs.msg.dds.PoseListMessage;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.tools.BehaviorHelper;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.communication.property.ROS2StoredPropertySet;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.footstepPlanning.FootstepPlannerRequest;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PathTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -38,11 +47,11 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParamete
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class LookAndStepBodyPathPlanningTask
 {
@@ -52,19 +61,32 @@ public class LookAndStepBodyPathPlanningTask
    protected VisibilityGraphsParametersReadOnly visibilityGraphParameters;
    protected LookAndStepBehaviorParametersReadOnly lookAndStepParameters;
    protected Supplier<Boolean> operatorReviewEnabled;
+   protected FootstepPlanningModule footstepPlanningModule;
+   protected final FramePose3D startFramePose = new FramePose3D();
+   protected final FramePose3D goalFramePose = new FramePose3D();
 
    protected final LookAndStepReview<List<? extends Pose3DReadOnly>> review = new LookAndStepReview<>();
    protected Consumer<List<? extends Pose3DReadOnly>> output;
 
    protected final Timer planningFailedTimer = new Timer();
-   protected final Stopwatch planningStopwatch = new Stopwatch();
+   protected YoDouble bodyPathPlanningDuration;
+
+   protected PlanarRegionsList mapRegions;
+   protected HeightMapData heightMap;
+   protected Pose3DReadOnly goal;
+   protected ROS2SyncedRobotModel syncedRobot;
+   protected boolean doBodyPathPlan;
+   protected RigidBodyTransform goalToWorld = new RigidBodyTransform();
+   protected ReferenceFrame goalFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), goalToWorld);
 
    public static class LookAndStepBodyPathPlanning extends LookAndStepBodyPathPlanningTask
    {
       private ResettableExceptionHandlingExecutorService executor;
       private final TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
+      private final TypedInput<HeightMapData> heightMapInput = new TypedInput<>();
       private final TypedInput<Pose3DReadOnly> goalInput = new TypedInput<>();
       private final Timer mapRegionsExpirationTimer = new Timer();
+      private final Timer heightMapExpirationTimer = new Timer();
       private TimerSnapshotWithExpiration mapRegionsReceptionTimerSnapshot;
       private Supplier<LookAndStepBehavior.State> behaviorStateReference;
       private BehaviorTaskSuppressor suppressor;
@@ -74,6 +96,7 @@ public class LookAndStepBodyPathPlanningTask
       private TimerSnapshotWithExpiration robotDataReceptionTimerSnaphot;
       private TimerSnapshotWithExpiration planningFailureTimerSnapshot;
       private LookAndStepBehavior.State behaviorState;
+      private ROS2StoredPropertySet<LookAndStepBehaviorParametersBasics> ros2LookAndStepParameters;
 
       public void initialize(LookAndStepBehavior lookAndStep)
       {
@@ -81,12 +104,15 @@ public class LookAndStepBodyPathPlanningTask
          helper = lookAndStep.helper;
          uiPublisher = lookAndStep.helper::publish;
          visibilityGraphParameters = lookAndStep.visibilityGraphParameters;
-         lookAndStepParameters = lookAndStep.lookAndStepParameters;
+         ros2LookAndStepParameters = lookAndStep.ros2LookAndStepParameters;
+         lookAndStepParameters = ros2LookAndStepParameters.getStoredPropertySet();
          operatorReviewEnabled = lookAndStep.operatorReviewEnabledInput::get;
          syncedRobot = lookAndStep.robotInterface.newSyncedRobot();
          behaviorStateReference = lookAndStep.behaviorStateReference::get;
          output = lookAndStep::bodyPathPlanInput;
          ControllerStatusTracker controllerStatusTracker = lookAndStep.controllerStatusTracker;
+         footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
+         bodyPathPlanningDuration = new YoDouble("bodyPathPlanningDuration", lookAndStep.yoRegistry);
 
          Consumer<Double> commandPitchHeadWithRespectToChest = lookAndStep.robotInterface::pitchHeadWithRespectToChest;
          RobotTarget robotTarget = lookAndStep.helper.getRobotModel().getTarget();
@@ -97,6 +123,7 @@ public class LookAndStepBodyPathPlanningTask
          executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
          mapRegionsInput.addCallback(data -> run());
+         heightMapInput.addCallback(data -> run());
          goalInput.addCallback(data -> run());
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Body path planning");
@@ -117,7 +144,11 @@ public class LookAndStepBodyPathPlanningTask
 //         }
          suppressor.addCondition("No goal specified",
                                  () -> !(goal != null && !goal.containsNaN()),
-                                 () -> uiPublisher.publishToUI(PlanarRegionsForUI, mapRegions));
+                                 () ->
+                                 {
+                                    if (mapRegions != null)
+                                       helper.publish(PLANAR_REGIONS_FOR_UI, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(mapRegions));
+                                 });
 //         suppressor.addCondition(() -> "Regions expired. haveReceivedAny: " + mapRegionsReceptionTimerSnapshot.hasBeenSet()
 //                                       + " timeSinceLastUpdate: " + mapRegionsReceptionTimerSnapshot.getTimePassedSinceReset(),
 //                                 () -> mapRegionsReceptionTimerSnapshot.isExpired());
@@ -136,6 +167,12 @@ public class LookAndStepBodyPathPlanningTask
       {
          mapRegionsInput.set(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
          mapRegionsExpirationTimer.reset();
+      }
+
+      public void acceptHeightMap(HeightMapMessage heightMapMessage)
+      {
+         heightMapInput.set(HeightMapMessageTools.unpackMessage(heightMapMessage));
+         heightMapExpirationTimer.reset();
       }
 
       public void acceptGoal(Pose3DReadOnly goal)
@@ -170,7 +207,9 @@ public class LookAndStepBodyPathPlanningTask
 
       private void evaluateAndRun()
       {
+         ros2LookAndStepParameters.update();
          mapRegions = mapRegionsInput.getLatest();
+         heightMap = heightMapInput.getLatest();
          goal = goalInput.getLatest();
          syncedRobot.update();
          robotDataReceptionTimerSnaphot = syncedRobot.getDataReceptionTimerSnapshot()
@@ -179,8 +218,9 @@ public class LookAndStepBodyPathPlanningTask
          planningFailureTimerSnapshot = planningFailedTimer.createSnapshot(lookAndStepParameters.getWaitTimeAfterPlanFailed());
          behaviorState = behaviorStateReference.get();
          neckTrajectoryTimerSnapshot = neckTrajectoryTimer.createSnapshot(1.0);
+         doBodyPathPlan = !lookAndStepParameters.getFlatGroundBodyPathPlan();
 
-         neckPitch = syncedRobot.getFramePoseReadOnly(frames -> frames.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH)).getOrientation().getPitch();
+         // neckPitch = syncedRobot.getFramePoseReadOnly(frames -> frames.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH)).getOrientation().getPitch();
 
          if (suppressor.evaulateShouldAccept())
          {
@@ -194,30 +234,50 @@ public class LookAndStepBodyPathPlanningTask
       }
    }
 
-   protected PlanarRegionsList mapRegions;
-   protected Pose3DReadOnly goal;
-   protected ROS2SyncedRobotModel syncedRobot;
+   protected final Stopwatch planningStopwatch = new Stopwatch();
 
    protected void performTask()
    {
       statusLogger.info("Body path planning...");
-      // TODO: Add robot standing still for 20s for real robot?
-      uiPublisher.publishToUI(PlanarRegionsForUI, mapRegions);
-
-      // calculate and send body path plan
+      planningStopwatch.reset();
       final ArrayList<Pose3D> bodyPathPlanForReview = new ArrayList<>(); // TODO Review making this final
-      Pair<BodyPathPlanningResult, List<Pose3DReadOnly>> result
-            = lookAndStepParameters.getFlatGroundBodyPathPlan() ? performTaskWithFlatGround() : performTaskWithVisibilityGraphPlanner();
+      Pair<BodyPathPlanningResult, List<? extends Pose3DReadOnly>> result;
+      if (doBodyPathPlan && (mapRegions != null || heightMap != null))
+      {
+         if (mapRegions != null)
+         {
+            helper.publish(PLANAR_REGIONS_FOR_UI, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(mapRegions));
+            result = performTaskWithVisibilityGraphPlanner();
+         }
+         else
+         {
+            result = performTaskWithHeightMapPlanner();
+         }
+      }
+      else // flat ground body path
+      {
+         result = performTaskWithFlatGround();
+      }
 
-      statusLogger.info("Body path plan completed with {}, {} waypoint(s)", result.getLeft(), result.getRight().size());
+      double duration = planningStopwatch.lap();
+      bodyPathPlanningDuration.set(duration);
+
+      double pathLength = BodyPathPlannerTools.calculatePlanLength(result.getRight());
+      statusLogger.info(StringTools.format("Body path plan completed with {}, {} waypoint(s), length: {}, planning duration: {} s",
+                                           result.getLeft(),
+                                           result.getRight().size(),
+                                           FormattingTools.getFormattedDecimal2D(pathLength),
+                                           duration));
 
       if (result.getRight() != null)
       {
+         PoseListMessage bodyPathPlanForReviewMessage = new PoseListMessage();
          for (Pose3DReadOnly poseWaypoint : result.getRight())
          {
             bodyPathPlanForReview.add(new Pose3D(poseWaypoint));
+            bodyPathPlanForReviewMessage.getPoses().add().set(poseWaypoint);
          }
-         uiPublisher.publishToUI(BodyPathPlanForUI, bodyPathPlanForReview);
+         helper.publish(BODY_PATH_PLAN_FOR_UI, bodyPathPlanForReviewMessage);
       }
 
       if (bodyPathPlanForReview.size() >= 2)
@@ -239,7 +299,7 @@ public class LookAndStepBodyPathPlanningTask
       }
    }
 
-   private Pair<BodyPathPlanningResult, List<Pose3DReadOnly>> performTaskWithVisibilityGraphPlanner()
+   private Pair<BodyPathPlanningResult, List<? extends Pose3DReadOnly>> performTaskWithVisibilityGraphPlanner()
    {
       // calculate and send body path plan
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
@@ -248,12 +308,16 @@ public class LookAndStepBodyPathPlanningTask
       bodyPathPlanner.setGoal(goal);
       bodyPathPlanner.setPlanarRegionsList(mapRegions);
       bodyPathPlanner.setStanceFootPoses(syncedRobot.getReferenceFrames());
-      planningStopwatch.start();
       BodyPathPlanningResult result = bodyPathPlanner.planWaypoints();
       return new MutablePair<>(result, bodyPathPlanner.getWaypoints());// takes about 0.1s
    }
 
-   private Pair<BodyPathPlanningResult, List<Pose3DReadOnly>> performTaskWithFlatGround()
+//   private Pair<BodyPathPlanningResult, List<Pose3DReadOnly>> performTaskWithHeightMapPlanner()
+//   {
+//
+//   }
+
+   private Pair<BodyPathPlanningResult, List<? extends Pose3DReadOnly>> performTaskWithFlatGround()
    {
       double proximityForTurning = 0.25;
 
@@ -297,4 +361,42 @@ public class LookAndStepBodyPathPlanningTask
       return new MutablePair<>(BodyPathPlanningResult.FOUND_SOLUTION, waypoints);
    }
 
+   private Pair<BodyPathPlanningResult, List<? extends Pose3DReadOnly>> performTaskWithHeightMapPlanner()
+   {
+      goalToWorld.set(goal);
+      goalFrame.update();
+
+      FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
+      footstepPlannerRequest.setPlanFootsteps(false);
+
+      startFramePose.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
+      startFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      footstepPlannerRequest.getStartFootPoses().put(RobotSide.LEFT, new Pose3D(startFramePose));
+      startFramePose.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT));
+      startFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      footstepPlannerRequest.getStartFootPoses().put(RobotSide.RIGHT, new Pose3D(startFramePose));
+      goalFramePose.setToZero(goalFrame);
+      goalFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      LogTools.info(StringTools.tupleString(goalFramePose.getPosition()));
+      LogTools.info("Yaw: {}", goalFramePose.getOrientation().getYaw());
+      goalFramePose.setToZero(goalFrame);
+      goalFramePose.getPosition().setY(0.2);
+      goalFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      footstepPlannerRequest.getGoalFootPoses().put(RobotSide.LEFT, new Pose3D(goalFramePose));
+      goalFramePose.setToZero(goalFrame);
+      goalFramePose.getPosition().setY(-0.2);
+      goalFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      footstepPlannerRequest.getGoalFootPoses().put(RobotSide.RIGHT, new Pose3D(goalFramePose));
+      footstepPlannerRequest.setTimeout(10.0);
+
+//      heightMapMessage.setEstimatedGroundHeight(-1.0);
+      footstepPlannerRequest.setHeightMapData(heightMap);
+      footstepPlannerRequest.setPlanBodyPath(true);
+      footstepPlannerRequest.setPlanFootsteps(false);
+      footstepPlanningModule.handleRequest(footstepPlannerRequest);
+      FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
+      footstepPlannerLogger.logSession();
+
+      return new MutablePair<>(footstepPlanningModule.getOutput().getBodyPathPlanningResult(), footstepPlanningModule.getOutput().getBodyPath());
+   }
 }

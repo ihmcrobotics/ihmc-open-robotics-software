@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.RobotConfigurationData>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::RobotConfigurationData_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "06d7040905e6dccb1fbc39f344d9b71096e35cc8faa6f66edce02b780c376aaa";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
@@ -56,7 +68,7 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (50 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -120,7 +132,7 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
       current_alignment += (data.getJointTorques().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getRootTranslation(), current_alignment);
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getRootPosition(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getRootOrientation(), current_alignment);
 
@@ -180,7 +192,7 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
       cdr.write_type_e(data.getJointTorques());else
           throw new RuntimeException("joint_torques field exceeds the maximum length");
 
-      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRootTranslation(), cdr);
+      geometry_msgs.msg.dds.PointPubSubType.write(data.getRootPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getRootOrientation(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getPelvisLinearVelocity(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getPelvisAngularVelocity(), cdr);
@@ -218,7 +230,7 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
       cdr.read_type_e(data.getJointAngles());	
       cdr.read_type_e(data.getJointVelocities());	
       cdr.read_type_e(data.getJointTorques());	
-      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getRootTranslation(), cdr);	
+      geometry_msgs.msg.dds.PointPubSubType.read(data.getRootPosition(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getRootOrientation(), cdr);	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getPelvisLinearVelocity(), cdr);	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getPelvisAngularVelocity(), cdr);	
@@ -247,7 +259,7 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
       ser.write_type_e("joint_angles", data.getJointAngles());
       ser.write_type_e("joint_velocities", data.getJointVelocities());
       ser.write_type_e("joint_torques", data.getJointTorques());
-      ser.write_type_a("root_translation", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getRootTranslation());
+      ser.write_type_a("root_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getRootPosition());
 
       ser.write_type_a("root_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRootOrientation());
 
@@ -276,7 +288,7 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
       ser.read_type_e("joint_angles", data.getJointAngles());
       ser.read_type_e("joint_velocities", data.getJointVelocities());
       ser.read_type_e("joint_torques", data.getJointTorques());
-      ser.read_type_a("root_translation", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getRootTranslation());
+      ser.read_type_a("root_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getRootPosition());
 
       ser.read_type_a("root_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRootOrientation());
 

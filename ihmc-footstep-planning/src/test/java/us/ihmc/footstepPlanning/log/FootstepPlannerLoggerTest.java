@@ -1,9 +1,12 @@
 package us.ihmc.footstepPlanning.log;
 
-import controller_msgs.msg.dds.*;
+import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
+import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
+import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import toolbox_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
@@ -74,7 +77,6 @@ public class FootstepPlannerLoggerTest
 
       Assertions.assertTrue(expectedRequestPacket.epsilonEquals(log.getRequestPacket(), 1e-5));
       Assertions.assertTrue(expectedFootstepParameters.epsilonEquals(log.getFootstepParametersPacket(), 1e-5));
-      Assertions.assertTrue(expectedBodyPathParameters.epsilonEquals(log.getBodyPathParametersPacket(), 1e-5));
       Assertions.assertTrue(expectedOutputStatusPacket.epsilonEquals(log.getStatusPacket(), 1e-5));
    }
 }

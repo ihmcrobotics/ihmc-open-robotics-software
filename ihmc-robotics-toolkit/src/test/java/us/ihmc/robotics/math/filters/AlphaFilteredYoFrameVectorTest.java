@@ -51,7 +51,7 @@ public class AlphaFilteredYoFrameVectorTest
             yFiltered.update(unfilteredVector.getY());
             zFiltered.update(unfilteredVector.getZ());
 
-            EuclidCoreTestTools.assertTuple3DEquals(new Point3D(xFiltered.getValue(), yFiltered.getValue(), zFiltered.getValue()), filteredVector, EPSILON);
+            EuclidCoreTestTools.assertEquals(new Point3D(xFiltered.getValue(), yFiltered.getValue(), zFiltered.getValue()), filteredVector, EPSILON);
          }
       }
    }

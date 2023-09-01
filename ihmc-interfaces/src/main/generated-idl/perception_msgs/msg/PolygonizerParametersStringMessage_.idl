@@ -1,0 +1,24 @@
+#ifndef __perception_msgs__msg__PolygonizerParametersStringMessage__idl__
+#define __perception_msgs__msg__PolygonizerParametersStringMessage__idl__
+
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * String serialized polygonizer parameters
+       * Might be kinda long, so give it some space
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::PolygonizerParametersStringMessage_")
+      struct PolygonizerParametersStringMessage
+      {
+        sequence<string, 2056> parameters;
+      };
+    };
+  };
+};
+
+#endif

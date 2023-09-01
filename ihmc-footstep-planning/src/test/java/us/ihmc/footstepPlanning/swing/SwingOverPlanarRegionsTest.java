@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.*;
@@ -32,10 +31,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlannerRequest;
-import us.ihmc.footstepPlanning.FootstepPlanningModule;
-import us.ihmc.footstepPlanning.PlannedFootstep;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -55,6 +51,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.LittleWallsWithIncreasingHeightPlanarRegionEnvironment;
 import us.ihmc.simulationconstructionset.Robot;
@@ -298,6 +295,7 @@ public class SwingOverPlanarRegionsTest
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(side -> getFootPolygon());
       FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName(),
                                                                          new DefaultVisibilityGraphParameters(),
+                                                                         new AStarBodyPathPlannerParameters(),
                                                                          new DefaultFootstepPlannerParameters(),
                                                                          swingPlannerParameters,
                                                                          walkingControllerParameters,
@@ -361,7 +359,11 @@ public class SwingOverPlanarRegionsTest
          scs.addStaticLinkGraphics(environment.getTerrainObject3D().getLinkGraphics());
       }
 
-      planningModule.getSwingPlanningModule().computeSwingWaypoints(request.getPlanarRegionsList(), footstepPlan, request.getStartFootPoses(), SwingPlannerType.TWO_WAYPOINT_POSITION);
+      planningModule.getSwingPlanningModule().computeSwingWaypoints(request.getPlanarRegionsList(),
+                                                                    request.getHeightMapData(),
+                                                                    footstepPlan,
+                                                                    request.getStartFootPoses(),
+                                                                    SwingPlannerType.TWO_WAYPOINT_POSITION);
 
       boolean wasAdjusted = expander.wereWaypointsAdjusted();
       if (wasAdjusted)
@@ -680,12 +682,6 @@ public class SwingOverPlanarRegionsTest
          }
 
          @Override
-         public double defaultOffsetHeightAboveAnkle()
-         {
-            return 0;
-         }
-
-         @Override
          public SteppingParameters getSteppingParameters()
          {
             return getTestSteppingParameters();
@@ -734,12 +730,6 @@ public class SwingOverPlanarRegionsTest
          }
 
          @Override
-         public double getDesiredStepForward()
-         {
-            return 0.5; // 0.35;
-         }
-
-         @Override
          public double getMaxStepLength()
          {
             return 0.6; // 0.5; //0.35;
@@ -755,12 +745,6 @@ public class SwingOverPlanarRegionsTest
          public double getMaxStepWidth()
          {
             return 0.6; // 0.4;
-         }
-
-         @Override
-         public double getStepPitch()
-         {
-            return 0.0;
          }
 
          @Override
@@ -801,18 +785,6 @@ public class SwingOverPlanarRegionsTest
          public double getTurningStepWidth()
          {
             return 0.25;
-         }
-
-         @Override
-         public double getMinAreaPercentForValidFootstep()
-         {
-            return 0.5;
-         }
-
-         @Override
-         public double getDangerAreaPercentForValidFootstep()
-         {
-            return 0.75;
          }
 
          @Override
@@ -867,13 +839,6 @@ public class SwingOverPlanarRegionsTest
          public double getDesiredTouchdownAcceleration()
          {
             return -1.0;
-         }
-
-         /** {@inheritDoc} */
-         @Override
-         public double getSwingFootVelocityAdjustmentDamping()
-         {
-            return 0.8;
          }
 
          /** {@inheritDoc} */

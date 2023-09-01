@@ -363,7 +363,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       hasMinimumTimePassed.set(hasMinimumTimePassed(timeInState));
       if (hasMinimumTimePassed.getBooleanValue())
       {
-         touchdownTrigger.update(footSwitch.hasFootHitGround());
+         touchdownTrigger.update(footSwitch.hasFootHitGroundFiltered());
       }
 
       double currentTime = timestamp.getValue();

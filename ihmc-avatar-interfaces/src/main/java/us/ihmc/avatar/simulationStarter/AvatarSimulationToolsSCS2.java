@@ -186,8 +186,8 @@ public class AvatarSimulationToolsSCS2
          if (networkProcessor != null)
          {
             networkProcessor.start();
-            if (avatarSimulation.getSessionVisualizerControls() != null)
-               avatarSimulation.getSessionVisualizerControls().addVisualizerShutdownListener(() -> networkProcessor.closeAndDispose());
+            if (avatarSimulation.getSimulationConstructionSet() != null)
+               avatarSimulation.getSimulationConstructionSet().addVisualizerShutdownListener(() -> networkProcessor.closeAndDispose());
          }
       }
 

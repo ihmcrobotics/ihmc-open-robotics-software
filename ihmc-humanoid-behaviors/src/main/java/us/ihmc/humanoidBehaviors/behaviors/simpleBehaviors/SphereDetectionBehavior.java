@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import controller_msgs.msg.dds.DetectedObjectPacket;
-import controller_msgs.msg.dds.PointCloudWorldPacket;
+import perception_msgs.msg.dds.DetectedObjectPacket;
+import perception_msgs.msg.dds.PointCloudWorldPacket;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
 import us.ihmc.commons.PrintTools;

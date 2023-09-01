@@ -1,14 +1,17 @@
 package us.ihmc.robotics.math.trajectories.trajectorypoints;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
+import us.ihmc.euclid.tools.EuclidHashCodeTools;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3TrajectoryPointBasics;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3TrajectoryPointReadOnly;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointReadOnly;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3Waypoint;
-import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FixedFrameEuclideanWaypointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FixedFrameSO3WaypointBasics;
 
 public class FrameSE3TrajectoryPoint implements FrameSE3TrajectoryPointBasics
 {
@@ -24,7 +27,10 @@ public class FrameSE3TrajectoryPoint implements FrameSE3TrajectoryPointBasics
       setToZero(referenceFrame);
    }
 
-   public FrameSE3TrajectoryPoint(double time, FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation, FrameVector3DReadOnly linearVelocity,
+   public FrameSE3TrajectoryPoint(double time,
+                                  FramePoint3DReadOnly position,
+                                  FrameOrientation3DReadOnly orientation,
+                                  FrameVector3DReadOnly linearVelocity,
                                   FrameVector3DReadOnly angularVelocity)
    {
       setIncludingFrame(time, position, orientation, linearVelocity, angularVelocity);
@@ -35,69 +41,21 @@ public class FrameSE3TrajectoryPoint implements FrameSE3TrajectoryPointBasics
       setIncludingFrame(other);
    }
 
-   public FrameSE3TrajectoryPoint(ReferenceFrame referenceFrame, SE3TrajectoryPointBasics other)
+   public FrameSE3TrajectoryPoint(ReferenceFrame referenceFrame, SE3TrajectoryPointReadOnly other)
    {
       setIncludingFrame(referenceFrame, other);
    }
 
    @Override
-   public FramePoint3DReadOnly getPosition()
+   public FixedFrameEuclideanWaypointBasics getEuclideanWaypoint()
    {
-      return se3Waypoint.getPosition();
+      return se3Waypoint.getEuclideanWaypoint();
    }
 
    @Override
-   public void setPosition(double x, double y, double z)
+   public FixedFrameSO3WaypointBasics getSO3Waypoint()
    {
-      se3Waypoint.setPosition(x, y, z);
-   }
-
-   @Override
-   public FrameVector3DReadOnly getLinearVelocity()
-   {
-      return se3Waypoint.getLinearVelocity();
-   }
-
-   @Override
-   public void setLinearVelocity(double x, double y, double z)
-   {
-      se3Waypoint.setLinearVelocity(x, y, z);
-   }
-
-   @Override
-   public void applyTransform(Transform transform)
-   {
-      se3Waypoint.applyTransform(transform);
-   }
-
-   @Override
-   public void applyInverseTransform(Transform transform)
-   {
-      se3Waypoint.applyInverseTransform(transform);
-   }
-
-   @Override
-   public FrameQuaternionReadOnly getOrientation()
-   {
-      return se3Waypoint.getOrientation();
-   }
-
-   @Override
-   public void setOrientation(double x, double y, double z, double s)
-   {
-      se3Waypoint.setOrientation(x, y, z, s);
-   }
-
-   @Override
-   public FrameVector3DReadOnly getAngularVelocity()
-   {
-      return se3Waypoint.getAngularVelocity();
-   }
-
-   @Override
-   public void setAngularVelocity(double x, double y, double z)
-   {
-      se3Waypoint.setAngularVelocity(x, y, z);
+      return se3Waypoint.getSO3Waypoint();
    }
 
    @Override
@@ -125,8 +83,25 @@ public class FrameSE3TrajectoryPoint implements FrameSE3TrajectoryPointBasics
    }
 
    @Override
+   public int hashCode()
+   {
+      return EuclidHashCodeTools.toIntHashCode(getTime(), getEuclideanWaypoint(), getSO3Waypoint());
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+         return true;
+      else if (object instanceof FrameSE3TrajectoryPointReadOnly)
+         return equals((FrameSE3TrajectoryPointReadOnly) object);
+      else
+         return false;
+   }
+
+   @Override
    public String toString()
    {
-      return "SE3 trajectory point: (time = " + WaypointToStringTools.format(getTime()) + ", " + WaypointToStringTools.waypointToString(se3Waypoint) + ")";
+      return toString(EuclidCoreIOTools.DEFAULT_FORMAT);
    }
 }

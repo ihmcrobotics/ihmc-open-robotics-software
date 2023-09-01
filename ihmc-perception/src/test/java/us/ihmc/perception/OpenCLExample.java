@@ -46,7 +46,7 @@ public class OpenCLExample
       context = clCreateContext(null, 1, device_id, null, null, ret_pointer);
 
       /* Create Command Queue */
-      IntPointer properties = new IntPointer(new int[] {0});
+      LongPointer properties = new LongPointer(new long[] {0});
       command_queue = clCreateCommandQueueWithProperties(context, device_id, properties, ret_pointer);
 
       /* Create memory buffer*/

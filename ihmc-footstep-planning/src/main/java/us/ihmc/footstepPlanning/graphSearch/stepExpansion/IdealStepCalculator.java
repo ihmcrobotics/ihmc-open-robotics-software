@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.footstepPlanning.FootstepPlanHeading;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepCheckerInterface;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
@@ -39,10 +40,10 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
    private final HashMap<DiscreteFootstep, DiscreteFootstep> idealStepMap = new HashMap<>();
    private final FootstepPlannerParametersReadOnly parameters;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
+   private final FootstepPlannerEnvironmentHandler environmentHandler;
    private final FootstepCheckerInterface nodeChecker;
 
    private SideDependentList<DiscreteFootstep> goalSteps;
-   private PlanarRegionsList planarRegionsList;
    private final YoDouble desiredRelativeHeading;
 
    private final SideDependentList<YoDouble> idealStepLengths = new SideDependentList<>();
@@ -65,11 +66,13 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
    public IdealStepCalculator(FootstepPlannerParametersReadOnly parameters,
                               FootstepCheckerInterface nodeChecker,
                               WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder,
+                              FootstepPlannerEnvironmentHandler environmentHandler,
                               YoRegistry registry)
    {
       this.parameters = parameters;
       this.nodeChecker = nodeChecker;
       this.bodyPathPlanHolder = bodyPathPlanHolder;
+      this.environmentHandler = environmentHandler;
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -175,27 +178,17 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
       }
    }
 
-   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
-   {
-      this.planarRegionsList = planarRegionsList;
-   }
-
    @Override
    public DiscreteFootstep computeIdealStep(DiscreteFootstep stanceStep, DiscreteFootstep startOfSwing)
    {
       return idealStepMap.computeIfAbsent(stanceStep, this::computeIdealStanceInternal);
    }
 
-   private boolean flatGroundMode()
-   {
-      return planarRegionsList == null || planarRegionsList.isEmpty();
-   }
-
    private DiscreteFootstep computeIdealStanceInternal(DiscreteFootstep stanceStep)
    {
       // If goal node is reachable, it's the ideal step
       DiscreteFootstep goalStep = goalSteps.get(stanceStep.getRobotSide().getOppositeSide());
-      if (!flatGroundMode() && nodeChecker.isStepValid(goalStep, stanceStep, null))
+      if (!environmentHandler.flatGroundMode() && nodeChecker.isStepValid(goalStep, stanceStep, null))
       {
          return goalStep;
       }

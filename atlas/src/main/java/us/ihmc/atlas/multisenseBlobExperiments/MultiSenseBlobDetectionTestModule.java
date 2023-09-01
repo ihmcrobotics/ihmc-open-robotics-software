@@ -4,26 +4,17 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
-import org.opencv.core.Point;
 import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
 
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.graphicsDescription.color.HSVValue;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.ihmcPerception.OpenCVTools;
-import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
-import us.ihmc.ihmcPerception.vision.shapes.HoughCircleResult;
-import us.ihmc.ihmcPerception.vision.shapes.OpenCVColoredCircularBlobDetector;
-import us.ihmc.ihmcPerception.vision.shapes.OpenCVColoredCircularBlobDetectorFactory;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosCompressedImageSubscriber;
@@ -57,20 +48,20 @@ public class MultiSenseBlobDetectionTestModule
       {
          public void run()
          {
-            OpenCVColoredCircularBlobDetectorFactory factory = new OpenCVColoredCircularBlobDetectorFactory();
-
-            factory.setCaptureSource(OpenCVColoredCircularBlobDetector.CaptureSource.JAVA_BUFFERED_IMAGES);
-            OpenCVColoredCircularBlobDetector openCVColoredCircularBlobDetector = factory.buildBlobDetector();
-
-            HSVRange greenRange = new HSVRange(new HSVValue(55, 80, 80), new HSVValue(139, 255, 255));
+//            OpenCVColoredCircularBlobDetectorFactory factory = new OpenCVColoredCircularBlobDetectorFactory();
+//
+//            factory.setCaptureSource(OpenCVColoredCircularBlobDetector.CaptureSource.JAVA_BUFFERED_IMAGES);
+//            OpenCVColoredCircularBlobDetector openCVColoredCircularBlobDetector = factory.buildBlobDetector();
+//
+//            HSVRange greenRange = new HSVRange(new HSVValue(55, 80, 80), new HSVValue(139, 255, 255));
 //            HSVRange brightRedRange = new HSVRange(new HSVValue(120, 80, 80), new HSVValue(179, 255, 255));
 //            HSVRange dullRedRange = new HSVRange(new HSVValue(3, 80, 80), new HSVValue(10, 255, 255));
-            HSVRange yellowRange = new HSVRange(new HSVValue(25, 100, 100), new HSVValue(40, 255, 255));
-
-            openCVColoredCircularBlobDetector.addHSVRange(greenRange);
+//            HSVRange yellowRange = new HSVRange(new HSVValue(25, 100, 100), new HSVValue(40, 255, 255));
+//
+//            openCVColoredCircularBlobDetector.addHSVRange(greenRange);
 //            openCVColoredCircularBlobDetector.addHSVRange(brightRedRange);
 //            openCVColoredCircularBlobDetector.addHSVRange(dullRedRange);
-            openCVColoredCircularBlobDetector.addHSVRange(yellowRange);
+//            openCVColoredCircularBlobDetector.addHSVRange(yellowRange);
 
             while (latestBufferedImage == null)
                ThreadTools.sleep(10);
@@ -87,19 +78,19 @@ public class MultiSenseBlobDetectionTestModule
                   break;
                }
 
-               openCVColoredCircularBlobDetector.updateFromBufferedImage(latestBufferedImage);
+//               openCVColoredCircularBlobDetector.updateFromBufferedImage(latestBufferedImage);
+//
+//               ArrayList<HoughCircleResult> circles = openCVColoredCircularBlobDetector.getCircles();
+//
+//               for (HoughCircleResult circle : circles)
+//               {
+//                  Point openCVPoint = new Point(circle.getCenter().getX(), circle.getCenter().getY());
+//                  Imgproc.circle(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR(), openCVPoint, (int) circle.getRadius(), circleColor, 1);
+//               }
 
-               ArrayList<HoughCircleResult> circles = openCVColoredCircularBlobDetector.getCircles();
-
-               for (HoughCircleResult circle : circles)
-               {
-                  Point openCVPoint = new Point(circle.getCenter().getX(), circle.getCenter().getY());
-                  Imgproc.circle(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR(), openCVPoint, (int) circle.getRadius(), circleColor, 1);
-               }
-
-               BufferedImage unconvertedImageToDisplay = OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR());
-               convertedImageToDisplay.getGraphics().drawImage(unconvertedImageToDisplay, 0, 0, null);
-               imagePanel.setImageUI(convertedImageToDisplay);
+//               BufferedImage unconvertedImageToDisplay = OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR());
+//               convertedImageToDisplay.getGraphics().drawImage(unconvertedImageToDisplay, 0, 0, null);
+//               imagePanel.setImageUI(convertedImageToDisplay);
             }
          }
       };

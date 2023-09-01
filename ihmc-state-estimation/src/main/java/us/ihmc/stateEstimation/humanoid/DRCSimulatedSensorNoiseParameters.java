@@ -189,7 +189,7 @@ public class DRCSimulatedSensorNoiseParameters
       Vector3D ret = new Vector3D();
       for (Axis3D axis : Axis3D.values())
       {
-         Axis3D.set(ret, axis, computeGazeboBias(mean, standardDeviation, random));
+         ret.setElement(axis, computeGazeboBias(mean, standardDeviation, random));
       }
 
       return ret;
