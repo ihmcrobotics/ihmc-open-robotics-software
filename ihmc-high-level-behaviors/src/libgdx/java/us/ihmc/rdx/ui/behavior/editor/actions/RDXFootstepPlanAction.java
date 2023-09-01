@@ -13,6 +13,7 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -23,7 +24,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RDXFootstepPlanAction extends RDXBehaviorAction
 {
-   private final RDXBaseUI baseUI;
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final FootstepPlanActionData actionData = new FootstepPlanActionData();
@@ -32,13 +32,18 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final TypedNotification<RobotSide> userAddedFootstep = new TypedNotification<>();
    private final Notification userRemovedFootstep = new Notification();
+   private final ImDoubleWrapper swingDurationWidget = new ImDoubleWrapper(actionData::getSwingDuration,
+                                                                           actionData::setSwingDuration,
+                                                                           imDouble -> ImGui.inputDouble(labels.get("Swing duration"), imDouble));
+   private final ImDoubleWrapper transferDurationWidget = new ImDoubleWrapper(actionData::getTransferDuration,
+                                                                              actionData::setTransferDuration,
+                                                                              imDouble -> ImGui.inputDouble(labels.get("Transfer duration"), imDouble));
 
    public RDXFootstepPlanAction(RDXBaseUI baseUI,
                                 DRCRobotModel robotModel,
                                 ROS2SyncedRobotModel syncedRobot,
                                 ReferenceFrameLibrary referenceFrameLibrary)
    {
-      this.baseUI = baseUI;
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
 
@@ -133,6 +138,11 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
          actionData.changeParentFrameWithoutMoving(referenceFrameLibraryCombo.getSelectedReferenceFrame().get());
          update();
       }
+
+      ImGui.pushItemWidth(80.0f);
+      swingDurationWidget.renderImGuiWidget();
+      transferDurationWidget.renderImGuiWidget();
+      ImGui.popItemWidth();
 
       ImGui.text("Number of footsteps: %d".formatted(footsteps.size()));
       ImGui.text("Add:");

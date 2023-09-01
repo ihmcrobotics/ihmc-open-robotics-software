@@ -31,6 +31,14 @@ module behavior_msgs
          * The footsteps, with a maximum of 50
          */
         sequence<behavior_msgs::msg::dds::FootstepActionMessage, 50> footsteps;
+        /**
+         * Swing duration
+         */
+        double swing_duration;
+        /**
+         * Transfer duration
+         */
+        double transfer_duration;
       };
     };
   };

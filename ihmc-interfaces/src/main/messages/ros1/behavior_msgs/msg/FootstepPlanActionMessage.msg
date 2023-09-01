@@ -12,4 +12,10 @@ controller_msgs/RigidBodyTransformMessage transform_to_parent
 # The footsteps, with a maximum of 50
 behavior_msgs/FootstepActionMessage[] footsteps
 
+# Swing duration
+float64 swing_duration
+
+# Transfer duration
+float64 transfer_duration
+
 

@@ -22,6 +22,8 @@ public class FootstepPlanActionData implements BehaviorActionData
    private ReferenceFrameLibrary referenceFrameLibrary;
    private final ModifiableReferenceFrame modifiableReferenceFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
    private final RecyclingArrayList<FootstepActionData> footsteps = new RecyclingArrayList<>(FootstepActionData::new);
+   private double swingDuration = 1.2;
+   private double transferDuration = 0.8;
 
    @Override
    public void setReferenceFrameLibrary(ReferenceFrameLibrary referenceFrameLibrary)
@@ -34,6 +36,8 @@ public class FootstepPlanActionData implements BehaviorActionData
    {
       jsonNode.put("description", description);
       jsonNode.put("parentFrame", modifiableReferenceFrame.getReferenceFrame().getParent().getName());
+      jsonNode.put("swingDuration", swingDuration);
+      jsonNode.put("transferDuration", transferDuration);
 
       ArrayNode foostepsArrayNode = jsonNode.putArray("footsteps");
       for (FootstepActionData footstep : footsteps)
@@ -48,6 +52,8 @@ public class FootstepPlanActionData implements BehaviorActionData
    {
       description = jsonNode.get("description").textValue();
       modifiableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(jsonNode.get("parentFrame").asText()).get());
+      swingDuration = jsonNode.get("swingDuration").asDouble();
+      transferDuration = jsonNode.get("transferDuration").asDouble();
 
       footsteps.clear();
       JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> footsteps.add().loadFromFile(footstepNode));
@@ -58,6 +64,8 @@ public class FootstepPlanActionData implements BehaviorActionData
       message.getParentFrame().resetQuick();
       message.getParentFrame().add(getParentReferenceFrame().getName());
       MessageTools.toMessage(modifiableReferenceFrame.getTransformToParent(), message.getTransformToParent());
+      message.setSwingDuration(swingDuration);
+      message.setTransferDuration(transferDuration);
 
       message.getFootsteps().clear();
       for (FootstepActionData footstep : footsteps)
@@ -70,6 +78,8 @@ public class FootstepPlanActionData implements BehaviorActionData
    {
       modifiableReferenceFrame.changeParentFrame(referenceFrameLibrary.findFrameByName(message.getParentFrame().getString(0)).get());
       modifiableReferenceFrame.update(transformToParent -> MessageTools.toEuclid(message.getTransformToParent(), transformToParent));
+      swingDuration = message.getSwingDuration();
+      transferDuration = message.getTransferDuration();
 
       footsteps.clear();
       for (FootstepActionMessage footstep : message.getFootsteps())
@@ -111,6 +121,26 @@ public class FootstepPlanActionData implements BehaviorActionData
    public RecyclingArrayList<FootstepActionData> getFootsteps()
    {
       return footsteps;
+   }
+
+   public double getSwingDuration()
+   {
+      return swingDuration;
+   }
+
+   public void setSwingDuration(double swingDuration)
+   {
+      this.swingDuration = swingDuration;
+   }
+
+   public double getTransferDuration()
+   {
+      return transferDuration;
+   }
+
+   public void setTransferDuration(double transferDuration)
+   {
+      this.transferDuration = transferDuration;
    }
 
    @Override
