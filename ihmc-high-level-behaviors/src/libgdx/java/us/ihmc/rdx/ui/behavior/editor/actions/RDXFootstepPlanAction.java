@@ -9,6 +9,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.actions.FootstepActionData;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionData;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -30,6 +31,7 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
    private final RecyclingArrayList<RDXFootstepAction> footsteps;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final TypedNotification<RobotSide> userAddedFootstep = new TypedNotification<>();
+   private final Notification userRemovedFootstep = new Notification();
 
    public RDXFootstepPlanAction(RDXBaseUI baseUI,
                                 DRCRobotModel robotModel,
@@ -92,6 +94,9 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
          addedFootstep.getSolePose().set(newFootstepPose);
       }
 
+      if (userRemovedFootstep.poll())
+         actionData.getFootsteps().remove(actionData.getFootsteps().size() - 1);
+
       // Synchronizes the RDX footsteps to the action data
       footsteps.clear();
       while (footsteps.size() < actionData.getFootsteps().size())
@@ -136,6 +141,13 @@ public class RDXFootstepPlanAction extends RDXBehaviorAction
          ImGui.sameLine();
          if (ImGui.button(labels.get(side.getPascalCaseName())))
             userAddedFootstep.set(side);
+      }
+      ImGui.sameLine();
+      ImGui.text("Remove:");
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Last")))
+      {
+         userRemovedFootstep.set();
       }
    }
 
