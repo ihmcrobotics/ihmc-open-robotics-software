@@ -187,7 +187,6 @@ public class SCS2SensorReader implements SensorReader
          addWrenchSensors(forceSensorDataHolder);
          sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, registry);
          simJointList.remove(0);
-         controllerJointList.remove(0);
          controllerIMUSensors = null;
          controllerWrenchSensors = null;
          timestamp = null;
