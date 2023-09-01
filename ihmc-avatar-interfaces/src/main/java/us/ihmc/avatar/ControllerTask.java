@@ -21,7 +21,7 @@ public class ControllerTask extends HumanoidRobotControlTask
    private final ThreadTimer timer;
    private final YoLong ticksBehindScheduled;
 
-   protected final List<Runnable> taskThreadRunnables = new ArrayList<>();
+   protected final List<Runnable> postControllerCallbacks = new ArrayList<>();
    protected final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
 
    public ControllerTask(String prefix, AvatarControllerThreadInterface controllerThread, long divisor, double schedulerDt, FullHumanoidRobotModel masterFullRobotModel)
@@ -54,7 +54,7 @@ public class ControllerTask extends HumanoidRobotControlTask
       long schedulerTick = controllerThread.getHumanoidRobotContextData().getSchedulerTick();
       ticksBehindScheduled.set(schedulerTick - timer.getTickCount() * divisor);
       controllerThread.run();
-      runAll(taskThreadRunnables);
+      runAll(postControllerCallbacks);
       timer.stop();
    }
 
@@ -73,9 +73,9 @@ public class ControllerTask extends HumanoidRobotControlTask
    }
 
    @Override
-   public void addRunnableOnTaskThread(Runnable runnable)
+   public void addCallbackPostTask(Runnable runnable)
    {
-      taskThreadRunnables.add(runnable);
+      postControllerCallbacks.add(runnable);
    }
 
    @Override
