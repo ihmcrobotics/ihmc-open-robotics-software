@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.naturalPosture.NaturalPostureManager;
+import us.ihmc.commonWalkingControlModules.controlModules.naturalPosture.NaturalPosturePrivilegedManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
@@ -68,6 +69,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
    private FeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
    private NaturalPostureManager naturalPostureManager;
+   private NaturalPosturePrivilegedManager naturalPosturePrivilegedManager;
 
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
 
@@ -374,16 +376,31 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
                                                                                                             registry,
                                                                                                             controllerToolbox.getYoGraphicsListRegistry());
 
-//      /* create humanoid robot natural posture*/
-//      boolean useURDFJointNumbering = false;
-//      HumanoidRobotNaturalPosture naturalPostureMeasurement = NadiaNaturalPosture(controllerToolbox.getFullRobotModel(), useURDFJointNumbering, registry, controllerToolbox.getYoGraphicsListRegistry());
-      
+      //      /* create humanoid robot natural posture*/
+      //      boolean useURDFJointNumbering = false;
+      //      HumanoidRobotNaturalPosture naturalPostureMeasurement = NadiaNaturalPosture(controllerToolbox.getFullRobotModel(), useURDFJointNumbering, registry, controllerToolbox.getYoGraphicsListRegistry());
+
       naturalPostureManager = new NaturalPostureManager(naturalPostureMeasurement,
                                                         walkingControllerParameters.getNaturalPostureParameters(),
                                                         controllerToolbox,
                                                         registry);
 
       return naturalPostureManager;
+   }
+
+   public NaturalPosturePrivilegedManager getOrCreateNaturalPosturePrivilegedManager()
+   {
+      if (naturalPosturePrivilegedManager != null)
+         return naturalPosturePrivilegedManager;
+
+      if (!hasHighLevelHumanoidControllerToolbox(NaturalPosturePrivilegedManager.class))
+         return null;
+      if (!hasWalkingControllerParameters(NaturalPosturePrivilegedManager.class))
+         return null;
+
+      naturalPosturePrivilegedManager = new NaturalPosturePrivilegedManager(controllerToolbox.getFullRobotModel(), registry);
+
+      return naturalPosturePrivilegedManager;
    }
 
    private boolean hasHighLevelHumanoidControllerToolbox(Class<?> managerClass)
