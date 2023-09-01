@@ -162,7 +162,7 @@ public abstract class AvatarLongPushRecoveryWalkingTest implements MultiRobotTes
       simulationTestHelper.start();
       ((YoBoolean) simulationTestHelper.findVariable("controllerAllowStepAdjustment")).set(true);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationSession().getTime(), simulationTestHelper.getRobot(), fullRobotModel);
+      pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationConstructionSet().getTime(), simulationTestHelper.getRobot(), fullRobotModel);
       simulationTestHelper.addYoGraphicDefinition(pushRobotController.getForceVizDefinition());
       simulationTestHelper.setCamera(new Point3D(0.6, 0.0, 0.6), new Point3D(10.0, 3.0, 3.0));
 

@@ -5,41 +5,69 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 
+import java.util.HashMap;
+
 public class ReferenceFrameMissingTools
 {
-   public static ThreadLocal<MutableInt> INDEX = ThreadLocal.withInitial(MutableInt::new);
-
-   public static String getCallingClassName()
-   {
-      StackTraceElement callerStackElement = new Throwable().getStackTrace()[2];
-      return callerStackElement.getClassName();
-   }
+   private static final ThreadLocal<HashMap<String, MutableInt>> INDEX = ThreadLocal.withInitial(HashMap::new);
 
    public static ReferenceFrame constructFrameWithUnchangingTransformFromParent(ReferenceFrame parentFrame, RigidBodyTransform transformFromParent)
    {
-      return ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent(getCallingClassName() + INDEX.get(),
+      return ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent(computeFrameName(getCallingClassName()),
                                                                                  parentFrame,
                                                                                  transformFromParent);
    }
 
    public static ReferenceFrame constructFrameWithUnchangingTransformToParent(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
    {
-      return ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(getCallingClassName() + INDEX.get(),
+      return ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(computeFrameName(getCallingClassName()),
                                                                                parentFrame,
                                                                                transformToParent);
    }
 
    public static ReferenceFrame constructFrameWithChangingTransformFromParent(ReferenceFrame parentFrame, RigidBodyTransform transformFromParent)
    {
-      return ReferenceFrameTools.constructFrameWithChangingTransformFromParent(getCallingClassName() + INDEX.get(),
+      return ReferenceFrameTools.constructFrameWithChangingTransformFromParent(computeFrameName(getCallingClassName()),
                                                                                parentFrame,
                                                                                transformFromParent);
    }
 
    public static ReferenceFrame constructFrameWithChangingTransformToParent(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
    {
-      return ReferenceFrameTools.constructFrameWithChangingTransformToParent(getCallingClassName() + INDEX.get(),
+      return ReferenceFrameTools.constructFrameWithChangingTransformToParent(computeFrameName(getCallingClassName()),
                                                                              parentFrame,
                                                                              transformToParent);
+   }
+
+   public static ReferenceFrame constructARootFrame()
+   {
+      return ReferenceFrameTools.constructARootFrame(computeFrameName(getCallingClassName()));
+   }
+
+   /**
+    * To be used externally. Remember {@link #getCallingClassName()}
+    * depends on the stacktrace, so don't try and call this from the
+    * constructor to reduce code duplication.
+    */
+   public static String computeFrameName()
+   {
+      return computeFrameName(getCallingClassName());
+   }
+
+   private static String computeFrameName(String callingClassName)
+   {
+      HashMap<String, MutableInt> threadLocalHashMap = INDEX.get();
+      threadLocalHashMap.computeIfAbsent(callingClassName, key -> new MutableInt());
+      int frameID = threadLocalHashMap.get(callingClassName).getAndIncrement();
+      return callingClassName + frameID;
+   }
+
+   /**
+    * Gets the calling class name by creating a Throwable.
+    */
+   private static String getCallingClassName()
+   {
+      StackTraceElement callerStackElement = new Throwable().getStackTrace()[2];
+      return callerStackElement.getClassName();
    }
 }

@@ -37,7 +37,7 @@ public class AtlasSDFViewer
    private static final boolean SHOW_COORDINATES_AT_JOINT_ORIGIN = false;
    private static final boolean SHOW_IMU_FRAMES = false;
    private static final boolean SHOW_KINEMATICS_COLLISIONS = false;
-   private static final boolean SHOW_SIM_COLLISIONS = true;
+   private static final boolean SHOW_SIM_COLLISIONS = false;
 
    public static void main(String[] args)
    {

@@ -17,11 +17,7 @@ public class ExploreAreaBehaviorParameters extends StoredPropertySet
 
    public ExploreAreaBehaviorParameters()
    {
-      super(keys,
-            ExploreAreaBehaviorParameters.class,
-            "ihmc-open-robotics-software",
-            "ihmc-high-level-behaviors/src/main/resources");
-
+      super(keys, ExploreAreaBehaviorParameters.class);
       load();
    }
 

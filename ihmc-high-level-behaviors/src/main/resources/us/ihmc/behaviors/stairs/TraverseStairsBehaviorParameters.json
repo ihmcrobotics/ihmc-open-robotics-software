@@ -1,0 +1,12 @@
+{
+  "title" : "TraverseStairsBehaviorParameters",
+  "Pause time" : 10.0,
+  "Number Of Stairs Per Execution" : 3,
+  "Planning timeout" : 10.0,
+  "Trajectory Time" : 3.0,
+  "Chest Pitch" : 0.17453292519943295,
+  "Neck Pitch" : 0.8377580409572782,
+  "Amount to lower first step down" : 0.01,
+  "Height to consider step down" : 0.07,
+  "XY Proximity For Completion" : 0.8
+}

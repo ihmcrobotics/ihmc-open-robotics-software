@@ -3,22 +3,20 @@ package us.ihmc.atlas.jfxvisualizer;
 import java.io.IOException;
 
 import javafx.animation.AnimationTimer;
-import javafx.application.Application;
 import javafx.scene.AmbientLight;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotModelFactory;
-import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.javaFXToolkit.node.JavaFXGraphics3DNode;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 
-public class AtlasJavaFxRobotVisualizer extends Application
+public class AtlasJavaFxRobotVisualizer extends ApplicationNoModule
 {
    private HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot;
    private GraphicsRobot graphicsRobot;

@@ -1,15 +1,16 @@
 package us.ihmc.robotics.geometry.concaveHull;
 
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
-import us.ihmc.euclid.tools.EuclidCoreTestTools;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;
+import static us.ihmc.euclid.tools.EuclidCoreIOTools.getTuple2DString;
 
 import java.util.List;
 
-import static us.ihmc.euclid.geometry.tools.EuclidGeometryIOTools.getConvexPolygon2DString;
-import static us.ihmc.euclid.tools.EuclidCoreIOTools.getTuple2DString;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.interfaces.EuclidGeometry;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;
 
 public class GeometryPolygonTestTools
 {
@@ -34,10 +35,41 @@ public class GeometryPolygonTestTools
       if (!(expected != null && actual != null))
          throwNotEqualAssertionError(messagePrefix, expected, actual, format);
 
-      if (!expected.epsilonEquals(actual, epsilon))
+      if (!geometricallyEquals(expected, actual, epsilon))
       {
          throwNotEqualAssertionError(messagePrefix, expected, actual, format);
       }
+   }
+
+   private static boolean geometricallyEquals(ConcavePolygon2DReadOnly expected, ConcavePolygon2DReadOnly actual, double epsilon)
+   {
+      if (actual == expected)
+         return true;
+      if (actual == null || expected == null)
+         return false;
+
+
+      Vertex2DSupplier other = (Vertex2DSupplier) actual;
+
+      if (expected.getNumberOfVertices() != other.getNumberOfVertices())
+         return false;
+
+      for (int i = 0; i < expected.getNumberOfVertices(); i++)
+      {
+         boolean oneEquals = false;
+         for (int j = 0; j < actual.getNumberOfVertices(); j++)
+         {
+            if (!expected.getVertex(i).geometricallyEquals(other.getVertex(j), epsilon))
+            {
+               oneEquals = true;
+               break;
+            }
+         }
+         if (!oneEquals)
+            return false;
+      }
+
+      return true;
    }
 
    private static void throwNotEqualAssertionError(String messagePrefix, ConcavePolygon2DReadOnly expected, ConcavePolygon2DReadOnly actual, String format)

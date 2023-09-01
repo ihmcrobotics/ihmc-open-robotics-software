@@ -1,19 +1,19 @@
 package us.ihmc.robotEnvironmentAwareness;
 
-import javafx.application.Application;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.messager.Messager;
+import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.ui.PlanarSegmentationUI;
 import us.ihmc.robotEnvironmentAwareness.updaters.PlanarSegmentationModule;
 import us.ihmc.tools.io.WorkspacePathTools;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-public class PlanarSegmentationStandaloneLauncher extends Application
+public class PlanarSegmentationStandaloneLauncher extends ApplicationNoModule
 {
    private static final String SEGMENTATION_CONFIGURATION_FILE_NAME = "atlasSLAMSegmentationModuleConfiguration.txt";
 

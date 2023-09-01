@@ -1,0 +1,9 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : false,
+    "GPU planar region extraction parameters" : true,
+    "VR Settings" : false,
+    "VR Thread Debugger" : false
+  }
+}

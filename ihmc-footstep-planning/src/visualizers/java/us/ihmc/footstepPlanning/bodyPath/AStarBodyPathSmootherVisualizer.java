@@ -1,15 +1,12 @@
 package us.ihmc.footstepPlanning.bodyPath;
 
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.HeightMapMessage;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import us.ihmc.commons.ContinuousIntegrationTools;
+import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
@@ -22,9 +19,9 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.HeightMapDataSetName;
-import us.ihmc.robotics.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
-import us.ihmc.robotics.heightMap.HeightMapTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -44,7 +41,7 @@ public class AStarBodyPathSmootherVisualizer
    {
       scs = new SimulationConstructionSet(new Robot("Dummy"));
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      smoother = new AStarBodyPathSmoother(scs, graphicsListRegistry, scs.getRootRegistry());
+      smoother = new AStarBodyPathSmoother(new AStarBodyPathPlannerParameters(), scs, graphicsListRegistry, scs.getRootRegistry());
 
       if (heightMapData != null)
       {
@@ -277,8 +274,8 @@ public class AStarBodyPathSmootherVisualizer
       HeightMapData[] heightMapData = new HeightMapData[datasets.length];
       FootstepPlannerOutput output = new FootstepPlannerOutput();
 
-      AStarBodyPathPlanner planner = new AStarBodyPathPlanner(new DefaultFootstepPlannerParameters(), PlannerTools.createDefaultFootPolygons());
-      AStarBodyPathSmoother smoother = new AStarBodyPathSmoother();
+      AStarBodyPathPlanner planner = new AStarBodyPathPlanner(new DefaultFootstepPlannerParameters(), new AStarBodyPathPlannerParameters(), PlannerTools.createDefaultFootPolygons());
+      AStarBodyPathSmoother smoother = new AStarBodyPathSmoother(new AStarBodyPathPlannerParameters());
 
       for (int i = 0; i < datasets.length; i++)
       {

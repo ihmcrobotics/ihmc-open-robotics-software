@@ -1,0 +1,35 @@
+#ifndef __toolbox_msgs__msg__WalkingControllerPreviewOutputMessage__idl__
+#define __toolbox_msgs__msg__WalkingControllerPreviewOutputMessage__idl__
+
+#include "toolbox_msgs/msg/./KinematicsToolboxOutputStatus_.idl"
+module toolbox_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC walking controller preview module: WalkingControllerPreviewToolbox.
+       */
+      @TypeCode(type="toolbox_msgs::msg::dds_::WalkingControllerPreviewOutputMessage_")
+      struct WalkingControllerPreviewOutputMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Interval in time between two frames.
+         */
+        double frame_dt;
+        /**
+         * List of configurations for each key frames.
+         */
+        sequence<toolbox_msgs::msg::dds::KinematicsToolboxOutputStatus, 1000> robot_configurations;
+      };
+    };
+  };
+};
+
+#endif

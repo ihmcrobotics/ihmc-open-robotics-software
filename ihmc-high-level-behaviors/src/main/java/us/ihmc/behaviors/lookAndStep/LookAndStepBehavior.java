@@ -3,15 +3,14 @@ package us.ihmc.behaviors.lookAndStep;
 import controller_msgs.msg.dds.*;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.property.StoredPropertySetMessageTools;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorInterface;
-import us.ihmc.avatar.sensors.realsense.DelayFixedPlanarRegionsSubscription;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBodyPathPlanningTask.LookAndStepBodyPathPlanning;
 import us.ihmc.behaviors.lookAndStep.LookAndStepFootstepPlanningTask.LookAndStepFootstepPlanning;
 import us.ihmc.behaviors.lookAndStep.LookAndStepLocalizationTask.LookAndStepBodyPathLocalization;
@@ -20,14 +19,15 @@ import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -36,7 +36,7 @@ import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
 public class LookAndStepBehavior extends ResettingNode implements BehaviorInterface
 {
-   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Look and Step", LookAndStepBehavior::new, create());
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Look and Step", LookAndStepBehavior::new);
 
    final BehaviorHelper helper;
    final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
@@ -49,16 +49,15 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
    final LookAndStepStepping stepping = new LookAndStepStepping();
    final LookAndStepReset reset = new LookAndStepReset();
    final BehaviorStateReference<State> behaviorStateReference;
-   final LookAndStepBehaviorParameters lookAndStepParameters;
-   final FootstepPlannerParametersBasics footstepPlannerParameters;
-   final SwingPlannerParametersBasics swingPlannerParameters;
+   final ROS2StoredPropertySet<LookAndStepBehaviorParametersBasics> ros2LookAndStepParameters;
+   final ROS2StoredPropertySet<FootstepPlannerParametersBasics> ros2FootstepPlannerParameters;
+   final ROS2StoredPropertySet<SwingPlannerParametersBasics> ros2SwingPlannerParameters;
    final VisibilityGraphsParametersBasics visibilityGraphParameters;
    final AtomicBoolean isBeingReset = new AtomicBoolean();
    final AtomicReference<Boolean> operatorReviewEnabledInput;
    final LookAndStepImminentStanceTracker imminentStanceTracker;
    final ControllerStatusTracker controllerStatusTracker;
    final TypedNotification<Boolean> approvalNotification;
-   private DelayFixedPlanarRegionsSubscription delayFixedPlanarRegionsSubscription;
 
    /**
     * At any time the behavior will be executing on one of this tasks
@@ -95,64 +94,55 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
       visibilityGraphParameters = helper.getRobotModel().getVisibilityGraphsParameters();
       visibilityGraphParameters.setTooHighToStepDistance(0.2);
 
-      lookAndStepParameters = new LookAndStepBehaviorParameters();
-      footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("ForLookAndStep");
-      swingPlannerParameters = helper.getRobotModel().getSwingPlannerParameters("ForLookAndStep");
-
-      helper.subscribeViaCallback(LOOK_AND_STEP_PARAMETERS, parameters ->
+      ros2LookAndStepParameters = new ROS2StoredPropertySet<>(helper, PARAMETERS, helper.getRobotModel().getLookAndStepParameters());
+      ros2FootstepPlannerParameters = new ROS2StoredPropertySet<>(helper, FOOTSTEP_PLANNING_PARAMETERS,
+                                                                  helper.getRobotModel().getFootstepPlannerParameters("ForLookAndStep"));
+      ros2SwingPlannerParameters = new ROS2StoredPropertySet<>(helper, SWING_PLANNER_PARAMETERS,
+                                                               helper.getRobotModel().getSwingPlannerParameters("ForLookAndStep"));
+      MissingThreadTools.startAsDaemon("PropertyStatusPublisher", ROS2StoredPropertySet.STATUS_PERIOD, () ->
       {
-         StoredPropertySetMessageTools.copyToStoredPropertySet(parameters,
-                                                               lookAndStepParameters,
-                                                               () -> statusLogger.info("Accepting new look and step parameters"));
-      });
-      helper.subscribeViaCallback(FootstepPlannerParameters, parameters ->
-      {
-         statusLogger.info("Accepting new footstep planner parameters");
-         footstepPlannerParameters.setAllFromStrings(parameters);
-      });
-      helper.subscribeViaCallback(SwingPlannerParameters, parameters ->
-      {
-         statusLogger.info("Accepting new swing planner parameters");
-         swingPlannerParameters.setAllFromStrings(parameters);
+         ros2LookAndStepParameters.updateAndPublishStatus();
+         ros2FootstepPlannerParameters.updateAndPublishStatus();
+         ros2SwingPlannerParameters.updateAndPublishStatus();
       });
 
       operatorReviewEnabledInput = new AtomicReference<>();
-      helper.subscribeViaCallback(OperatorReviewEnabled, enabled ->
+      helper.subscribeViaCallback(OPERATOR_REVIEW_ENABLED_COMMAND, enabled ->
       {
-         LogTools.info("Received operator review enabled toggle message: {}", enabled);
-         operatorReviewEnabledInput.set(enabled);
-         helper.publish(OperatorReviewEnabledToUI, enabled);
+         LogTools.info("Received operator review enabled toggle message: {}", enabled.getData());
+         operatorReviewEnabledInput.set(enabled.getData());
+         helper.publish(OPERATOR_REVIEW_ENABLED_STATUS, enabled.getData());
       });
-      approvalNotification = helper.subscribeViaNotification(ReviewApproval);
+      approvalNotification = helper.subscribeViaBooleanNotification(REVIEW_APPROVAL);
 
       // Trying to hold a lot of the state here? TODO: In general, where to put what state?
       imminentStanceTracker = new LookAndStepImminentStanceTracker(helper);
-      behaviorStateReference = new BehaviorStateReference<>(State.BODY_PATH_PLANNING, statusLogger, helper::publish);
+      behaviorStateReference = new BehaviorStateReference<>(State.BODY_PATH_PLANNING, statusLogger, helper);
       controllerStatusTracker = helper.getOrCreateControllerStatusTracker();
       reset.initialize(this);
       helper.subscribeViaCallback(RESET, reset::queueReset);
       helper.subscribeToControllerViaCallback(WalkingControllerFailureStatusMessage.class, message -> reset.queueReset());
 
       bodyPathPlanning.initialize(this);
-      helper.subscribeViaCallback(ROS2Tools.LIDAR_REA_REGIONS, planarRegionsListMessage ->
+      helper.subscribeViaCallback(PerceptionAPI.LIDAR_REA_REGIONS, planarRegionsListMessage ->
       {
          bodyPathPlanning.acceptMapRegions(planarRegionsListMessage);
          footstepPlanning.acceptLidarREARegions(planarRegionsListMessage);
       });
-      helper.subscribeViaCallback(GOAL_INPUT, this::acceptGoal);
+      helper.subscribeViaCallback(GOAL_COMMAND, this::acceptGoal);
+      // TODO add height map to footstep planner
+      helper.subscribeViaCallback(ROS2_HEIGHT_MAP, bodyPathPlanning::acceptHeightMap);
 
       bodyPathLocalization.initialize(this);
       helper.subscribeToControllerViaCallback(CapturabilityBasedStatus.class, imminentStanceTracker::acceptCapturabilityBasedStatus);
-      helper.subscribeViaCallback(BodyPathInput, this::bodyPathPlanInput);
+      helper.subscribeViaCallback(BODY_PATH_INPUT, message -> bodyPathPlanInput(MessageTools.unpackPoseListMessage(message)));
 
       footstepPlanning.initialize(this);
-      if (helper.getROS1Helper() != null)
+      helper.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_OUTPUT, heightMapMessage ->
       {
-         delayFixedPlanarRegionsSubscription = helper.subscribeToPlanarRegionsViaCallback(REGIONS_FOR_FOOTSTEP_PLANNING, regions -> footstepPlanning.acceptPlanarRegions(regions.getRight()));
-         delayFixedPlanarRegionsSubscription.subscribe(helper.getROS1Helper());
-         delayFixedPlanarRegionsSubscription.setEnabled(true);
-         delayFixedPlanarRegionsSubscription.setPosePublisherEnabled(true);
-      }
+         bodyPathPlanning.acceptHeightMap(heightMapMessage);
+         footstepPlanning.acceptHeightMap(heightMapMessage);
+      });
       helper.subscribeViaCallback(ROS2_REGIONS_FOR_FOOTSTEP_PLANNING, footstepPlanning::acceptPlanarRegions);
       helper.subscribeViaCallback(ROS2Tools.getRobotConfigurationDataTopic(helper.getRobotModel().getSimpleRobotName()),
                                   footstepPlanning::acceptRobotConfigurationData);
@@ -186,7 +176,7 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
    public void acceptGoal(Pose3DReadOnly goal)
    {
       behaviorStateReference.broadcast();
-      helper.publish(GoalForUI, new Pose3D(goal));
+      helper.publish(GOAL_STATUS, new Pose3D(goal));
       bodyPathLocalization.acceptNewGoalSubmitted();
       bodyPathPlanning.acceptGoal(goal);
    }
@@ -210,8 +200,6 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
 
    public void destroy()
    {
-      if (delayFixedPlanarRegionsSubscription != null)
-         delayFixedPlanarRegionsSubscription.destroy();
       bodyPathPlanning.destroy();
       footstepPlanning.destroy();
       reset.destroy();

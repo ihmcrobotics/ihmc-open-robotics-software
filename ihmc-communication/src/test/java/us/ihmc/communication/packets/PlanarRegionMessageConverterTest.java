@@ -10,8 +10,8 @@ import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.PlanarRegionMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;

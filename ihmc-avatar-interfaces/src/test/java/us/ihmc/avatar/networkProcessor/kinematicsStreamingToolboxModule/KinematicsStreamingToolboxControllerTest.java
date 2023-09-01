@@ -20,14 +20,13 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.ToolboxStateMessage;
+import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
@@ -65,6 +64,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.controller.interfaces.ControllerOutputBasics;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -76,6 +76,7 @@ import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
+import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
@@ -226,19 +227,15 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
       if (visualize)
       {
-         SimulationSession session = new SimulationSession();
-         session.addRobot(robot);
+         SimulationConstructionSet2 scs = new SimulationConstructionSet2();
+         scs.addRobot(robot);
          if (ghost != null)
-            session.addRobot(ghost);
-         session.getRootRegistry().addChild(toolboxRegistry);
-         session.setSessionDTSeconds(toolboxControllerPeriod);
-         session.initializeBufferRecordTickPeriod(1);
+            scs.addRobot(ghost);
+         scs.getRootRegistry().addChild(toolboxRegistry);
+         scs.setDT(toolboxControllerPeriod);
+         scs.initializeBufferRecordTickPeriod(1);
 
-         simulationTestHelper = new SCS2AvatarTestingSimulation(session,
-                                                                robotModel,
-                                                                desiredFullRobotModel,
-                                                                yoGraphicsListRegistry,
-                                                                simulationTestingParameters);
+         simulationTestHelper = new SCS2AvatarTestingSimulation(scs, robotModel, desiredFullRobotModel, yoGraphicsListRegistry, simulationTestingParameters);
          simulationTestHelper.setKeepSCSUp(simulationTestingParameters.getKeepSCSUp());
          simulationTestHelper.start(false);
          simulationTestHelper.setCamera(new Point3D(0, 0, 1), new Point3D(6, 0, 1));

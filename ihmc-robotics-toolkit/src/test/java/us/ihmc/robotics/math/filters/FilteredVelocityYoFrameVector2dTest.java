@@ -49,7 +49,7 @@ public class FilteredVelocityYoFrameVector2dTest
             xFiltered.update(unfilteredPoint.getX());
             yFiltered.update(unfilteredPoint.getY());
 
-            EuclidCoreTestTools.assertTuple2DEquals(new Point2D(xFiltered.getValue(), yFiltered.getValue()), filteredPoint, EPSILON);
+            EuclidCoreTestTools.assertEquals(new Point2D(xFiltered.getValue(), yFiltered.getValue()), filteredPoint, EPSILON);
          }
       }
    }

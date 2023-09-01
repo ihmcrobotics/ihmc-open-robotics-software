@@ -16,7 +16,7 @@ import us.ihmc.avatar.roughTerrainWalking.HumanoidEndToEndStairsTest;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
-import us.ihmc.valkyrie.simulation.ValkyrieFlatGroundFastWalkingTest;
+import us.ihmc.valkyrie.simulation.ValkyrieFlatGroundQuickWalkingTest;
 
 public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
 {
@@ -35,7 +35,7 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
          {
             if (useCustomDownstairsParameters)
             {
-               InputStream resourceAsStream = ValkyrieFlatGroundFastWalkingTest.class.getResourceAsStream(OSHA_DOWNSTAIRS_PARAMETERS_XML);
+               InputStream resourceAsStream = ValkyrieFlatGroundQuickWalkingTest.class.getResourceAsStream(OSHA_DOWNSTAIRS_PARAMETERS_XML);
                Objects.requireNonNull(resourceAsStream);
                return resourceAsStream;
             }

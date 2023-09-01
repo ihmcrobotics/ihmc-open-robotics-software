@@ -3,7 +3,7 @@ package us.ihmc.avatar;
 import java.util.Arrays;
 import java.util.List;
 
-import controller_msgs.msg.dds.SimulatedLidarScanPacket;
+import perception_msgs.msg.dds.SimulatedLidarScanPacket;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.net.ObjectCommunicator;
@@ -19,7 +19,6 @@ import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
 import us.ihmc.tools.TimestampProvider;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class DRCLidar
 {

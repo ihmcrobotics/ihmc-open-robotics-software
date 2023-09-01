@@ -199,10 +199,10 @@ public class VirtualModelControllerTestHelper
             currentForce.set(armController.getCurrentForce(i));
             currentTorque.set(armController.getCurrentTorque(i));
 
-            EuclidCoreTestTools.assertTuple3DEquals("", currentPosition, desiredPositions.get(i), 0.25);
-            EuclidCoreTestTools.assertQuaternionEquals(currentOrientation, desiredOrientations.get(i), 0.25);
-            EuclidCoreTestTools.assertTuple3DEquals("", desiredForces.get(i), currentForce, 0.5);
-            EuclidCoreTestTools.assertTuple3DEquals("", desiredTorques.get(i), currentTorque, 0.5);
+            EuclidCoreTestTools.assertEquals("", currentPosition, desiredPositions.get(i), 0.25);
+            EuclidCoreTestTools.assertEquals(currentOrientation, desiredOrientations.get(i), 0.25);
+            EuclidCoreTestTools.assertEquals("", desiredForces.get(i), currentForce, 0.5);
+            EuclidCoreTestTools.assertEquals("", desiredTorques.get(i), currentTorque, 0.5);
          }
       }
 
@@ -570,8 +570,8 @@ public class VirtualModelControllerTestHelper
       inputWrench.getReferenceFrame().checkReferenceFrameMatch(outputWrench.getReferenceFrame());
 
       double epsilon = 1e-4;
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(inputWrench.getAngularPart()), new Vector3D(outputWrench.getAngularPart()), epsilon);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(inputWrench.getLinearPart()), new Vector3D(outputWrench.getLinearPart()), epsilon);
+      EuclidCoreTestTools.assertEquals(new Vector3D(inputWrench.getAngularPart()), new Vector3D(outputWrench.getAngularPart()), epsilon);
+      EuclidCoreTestTools.assertEquals(new Vector3D(inputWrench.getLinearPart()), new Vector3D(outputWrench.getLinearPart()), epsilon);
    }
 
    public static RobotArm createRobotArm()

@@ -1,10 +1,10 @@
 package us.ihmc.robotics.kinematics;
 
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 
 public interface InverseKinematicsCalculator
 {
-   public abstract boolean solve(RigidBodyTransform desiredTransform);
+   public abstract boolean solve(RigidBodyTransformReadOnly desiredTransform);
    
    public abstract double getErrorScalar();
    

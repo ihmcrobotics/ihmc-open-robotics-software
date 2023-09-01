@@ -57,6 +57,7 @@ import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobo
 import us.ihmc.stateEstimation.ekf.HumanoidRobotEKFWithSimpleJoints;
 import us.ihmc.stateEstimation.ekf.LeggedRobotEKF;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
+import us.ihmc.stateEstimation.humanoid.StateEstimatorControllerFactory;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.KinematicsBasedStateEstimatorFactory;
 import us.ihmc.tools.UnitConversions;
@@ -89,6 +90,7 @@ public class AvatarEstimatorThreadFactory
    private final OptionalFactoryField<YoGraphicsListRegistry> yoGraphicsListRegistryField = new OptionalFactoryField<>("yoGraphicsListRegistry");
    private final OptionalFactoryField<StateEstimatorController> mainStateEstimatorField = new OptionalFactoryField<>("mainEstimatorController");
    private final OptionalFactoryField<PairList<BooleanSupplier, StateEstimatorController>> secondaryStateEstimatorsField = new OptionalFactoryField<>("secondaryEstimatorControllers");
+   private final OptionalFactoryField<List<StateEstimatorControllerFactory>> secondaryStateEstimatorFactoriesField = new OptionalFactoryField<>("secondaryEstimatorControllerFactories");
 
    private final OptionalFactoryField<RobotConfigurationDataPublisher> robotConfigurationDataPublisherField = new OptionalFactoryField<>("robotConfigurationDataPublisher");
 
@@ -377,6 +379,17 @@ public class AvatarEstimatorThreadFactory
       addSecondaryStateEstimators(() -> false, secondaryStateEstimator);
    }
 
+
+   /**
+    * Optional: adds a secondary state estimator factory to run in parallel to the main state estimator.
+    *
+    * @param secondaryStateEstimator the secondary state estimator.
+    */
+   public void addSecondaryStateEstimatorFactory(StateEstimatorControllerFactory secondaryStateEstimator)
+   {
+      getSecondaryStateEstimatorFactories().add(secondaryStateEstimator);
+   }
+
    /**
     * Optional: adds a secondary state estimator to run in parallel to the main state estimator.
     *
@@ -423,6 +436,11 @@ public class AvatarEstimatorThreadFactory
          jointDesiredOutputWriterField.get().setJointDesiredOutputList(getDesiredJointDataHolder());
          getEstimatorRegistry().addChild(jointDesiredOutputWriterField.get().getYoVariableRegistry());
       }
+      if (secondaryStateEstimatorFactoriesField.hasValue())
+      {
+         for (StateEstimatorControllerFactory stateEstimatorControllerFactory : secondaryStateEstimatorFactoriesField.get())
+            addSecondaryStateEstimator(stateEstimatorControllerFactory.createStateEstimator(getEstimatorFullRobotModel(), getSensorReader()));
+      }
 
       AvatarEstimatorThread avatarEstimatorThread = new AvatarEstimatorThread(getSensorReader(),
                                                                               getEstimatorFullRobotModel(),
@@ -435,7 +453,11 @@ public class AvatarEstimatorThreadFactory
                                                                               getYoGraphicsListRegistry());
 
       avatarEstimatorThread.addRobotController(new RobotJointLimitWatcher(getEstimatorFullRobotModel().getOneDoFJoints(), getRawSensorOutputMap()));
-      avatarEstimatorThread.setRawOutputWriter(getRobotConfigurationDataPublisher());
+      RobotConfigurationDataPublisher robotConfigurationDataPublisher = getRobotConfigurationDataPublisher();
+      if(robotConfigurationDataPublisher != null)
+      {
+         avatarEstimatorThread.setRawOutputWriter(robotConfigurationDataPublisher);
+      }
       ParameterLoaderHelper.loadParameters(this, getControllerParameters(), getEstimatorRegistry());
 
       FactoryTools.disposeFactory(this);
@@ -773,6 +795,13 @@ public class AvatarEstimatorThreadFactory
       if (!secondaryStateEstimatorsField.hasValue())
          secondaryStateEstimatorsField.set(new PairList<>());
       return secondaryStateEstimatorsField.get();
+   }
+
+   public List<StateEstimatorControllerFactory> getSecondaryStateEstimatorFactories()
+   {
+      if (!secondaryStateEstimatorFactoriesField.hasValue())
+         secondaryStateEstimatorFactoriesField.set(new ArrayList<>());
+      return secondaryStateEstimatorFactoriesField.get();
    }
 
    public RobotConfigurationDataPublisher getRobotConfigurationDataPublisher()

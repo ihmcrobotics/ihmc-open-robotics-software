@@ -1,10 +1,9 @@
 package us.ihmc.quadrupedBasics.gait;
 
-import controller_msgs.msg.dds.QuadrupedStepMessage;
+import quadruped_msgs.msg.dds.QuadrupedStepMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;

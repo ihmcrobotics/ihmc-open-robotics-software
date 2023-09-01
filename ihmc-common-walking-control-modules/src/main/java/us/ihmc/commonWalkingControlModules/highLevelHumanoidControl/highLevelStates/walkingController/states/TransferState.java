@@ -38,7 +38,6 @@ public abstract class TransferState extends WalkingState
 
    private final FramePoint2D capturePoint2d = new FramePoint2D();
 
-   private final FramePoint2D filteredDesiredCoP = new FramePoint2D();
    private final FramePoint2D desiredCoP = new FramePoint2D();
 
    private final FootstepTiming stepTiming = new FootstepTiming();
@@ -141,7 +140,7 @@ public abstract class TransferState extends WalkingState
          boolean isICPInsideNextSupportPolygon = nextPolygonInWorld.isPointInside(capturePoint2d);
 
          // if you're outside at all, but taking the next step will recover, go ahead and do it.
-         if ((distanceToSupport > 0.0 && isICPInsideNextSupportPolygon))
+         if (distanceToSupport > 0.0 && (isICPInsideNextSupportPolygon || nextFootstep.getIsAdjustable()))
             return true;
          // if you're done, and your error is low, trigger the next step
          else if (balanceManager.getNormalizedEllipticICPError() < 1.0)
@@ -166,29 +165,23 @@ public abstract class TransferState extends WalkingState
       {
          capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
 
-         controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(trailingLeg), filteredDesiredCoP);
          controllerToolbox.getDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(trailingLeg), desiredCoP);
 
          FramePoint3DReadOnly trailingFootExitCMP = balanceManager.getFirstExitCMPForToeOff(true);
          feetManager.updateToeOffStatusDoubleSupport(trailingLeg,
-                                                     nextFootstep,
-                                                     null,
                                                      trailingFootExitCMP,
                                                      balanceManager.getDesiredCMP(),
-                                                     desiredCoP,
                                                      balanceManager.getDesiredICP(),
-                                                     capturePoint2d,
-                                                     balanceManager.getFinalDesiredICP(),
-                                                     balanceManager.getPerfectCoP());
+                                                     capturePoint2d);
 
-         if (feetManager.okForPointToeOff())
+         if (feetManager.okForPointToeOff(false))
          {
-            feetManager.requestPointToeOff(trailingLeg, trailingFootExitCMP, filteredDesiredCoP);
+            feetManager.requestPointToeOff(trailingLeg, trailingFootExitCMP, desiredCoP);
             return true;
          }
-         else if (feetManager.okForLineToeOff())
+         else if (feetManager.okForLineToeOff(false))
          {
-            feetManager.requestLineToeOff(trailingLeg, trailingFootExitCMP, filteredDesiredCoP);
+            feetManager.requestLineToeOff(trailingLeg, trailingFootExitCMP, desiredCoP);
             return true;
          }
       }
@@ -196,8 +189,8 @@ public abstract class TransferState extends WalkingState
       else if (!feetManager.isUsingPointContactInToeOff(trailingLeg) && !feetManager.useToeLineContactInTransfer())
       {
          FramePoint3DReadOnly trailingFootExitCMP = balanceManager.getFirstExitCMPForToeOff(true);
-         controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(trailingLeg), filteredDesiredCoP);
-         feetManager.requestPointToeOff(trailingLeg, trailingFootExitCMP, filteredDesiredCoP);
+         controllerToolbox.getDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(trailingLeg), desiredCoP);
+         feetManager.requestPointToeOff(trailingLeg, trailingFootExitCMP, desiredCoP);
          return true;
       }
       return false;
@@ -219,8 +212,9 @@ public abstract class TransferState extends WalkingState
       }
 
       double extraToeOffHeight = 0.0;
-      if (feetManager.canDoDoubleSupportToeOff(null, transferToSide)) // FIXME should this be swing side?
-         extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
+
+      if (feetManager.canDoDoubleSupportToeOff(transferToSide)) // FIXME should this be swing side?
+         extraToeOffHeight = feetManager.getExtraCoMMaxHeightWithToes();
 
       TransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(transferToSide);
       transferToAndNextFootstepsData.setComAtEndOfState(balanceManager.getFinalDesiredCoMPosition());

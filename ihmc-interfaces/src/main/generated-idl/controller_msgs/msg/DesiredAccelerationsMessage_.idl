@@ -1,7 +1,7 @@
 #ifndef __controller_msgs__msg__DesiredAccelerationsMessage__idl__
 #define __controller_msgs__msg__DesiredAccelerationsMessage__idl__
 
-#include "controller_msgs/msg/./QueueableMessage_.idl"
+#include "ihmc_common_msgs/msg/./QueueableMessage_.idl"
 module controller_msgs
 {
   module msg
@@ -28,7 +28,7 @@ module controller_msgs
         /**
          * Properties for queueing commands.
          */
-        controller_msgs::msg::dds::QueueableMessage queueing_properties;
+        ihmc_common_msgs::msg::dds::QueueableMessage queueing_properties;
       };
     };
   };

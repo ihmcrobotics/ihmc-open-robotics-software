@@ -40,7 +40,7 @@ public class SmallAngleRotationDerivativeTest
       for (Axis3D axis : Axis3D.values())
       {
          Vector3D perturbationRotationVector = new Vector3D();
-         Axis3D.set(perturbationRotationVector, axis, perturbationMagnitude);
+         perturbationRotationVector.setElement(axis, perturbationMagnitude);
 
          // expected
          Vector3D expected = new Vector3D(perturbationRotationVector);
@@ -60,7 +60,7 @@ public class SmallAngleRotationDerivativeTest
          actual.sub(transformedVector);
 
          // compare
-         EuclidCoreTestTools.assertTuple3DEquals(expected, actual, delta);
+         EuclidCoreTestTools.assertEquals(expected, actual, delta);
       }
    }
 }

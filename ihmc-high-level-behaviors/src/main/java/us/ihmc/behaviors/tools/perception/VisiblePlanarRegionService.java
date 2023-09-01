@@ -1,7 +1,8 @@
 package us.ihmc.behaviors.tools.perception;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
@@ -25,7 +26,7 @@ public class VisiblePlanarRegionService
 
    public VisiblePlanarRegionService(ROS2NodeInterface ros2Node, Supplier<PlanarRegionsList>... planarRegionSuppliers)
    {
-      this(ros2Node, ROS2Tools.LIDAR_REA_REGIONS.getName(), planarRegionSuppliers);
+      this(ros2Node, PerceptionAPI.LIDAR_REA_REGIONS.getName(), planarRegionSuppliers);
    }
 
    public VisiblePlanarRegionService(ROS2NodeInterface ros2Node, String topicName, Supplier<PlanarRegionsList>... planarRegionSuppliers)

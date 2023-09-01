@@ -12,4 +12,4 @@ uint32 sequence_id
 # Specifies which foot will execute the trajectory.
 byte robot_side 255
 # The position/orientation trajectory information.
-SE3TrajectoryMessage se3_trajectory
+ihmc_common_msgs/SE3TrajectoryMessage se3_trajectory

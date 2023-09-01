@@ -2,16 +2,27 @@ package us.ihmc.footstepPlanning.graphSearch.stepChecking;
 
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -19,6 +30,9 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class FootstepPoseHeuristicChecker
 {
@@ -52,6 +66,11 @@ public class FootstepPoseHeuristicChecker
    private final YoDouble minZFromPitchContraint = new YoDouble("minZFromPitchContraint", registry);
    private final YoDouble maxXFromPitchContraint = new YoDouble("maxXFromPitchContraint", registry);
 
+   public FootstepPoseHeuristicChecker(FootstepPlannerParametersReadOnly parameters, YoRegistry parentRegistry)
+   {
+      this(parameters, null, parentRegistry);
+   }
+
    public FootstepPoseHeuristicChecker(FootstepPlannerParametersReadOnly parameters, FootstepSnapAndWiggler snapper, YoRegistry parentRegistry)
    {
       this.parameters = parameters;
@@ -59,17 +78,35 @@ public class FootstepPoseHeuristicChecker
       parentRegistry.addChild(registry);
    }
 
-   public BipedalFootstepPlannerNodeRejectionReason checkStepValidity(DiscreteFootstep candidateStep,
-                                                                      DiscreteFootstep stanceStep,
-                                                                      DiscreteFootstep startOfSwingStep)
+   public BipedalFootstepPlannerNodeRejectionReason snapAndCheckValidity(DiscreteFootstep candidateStep,
+                                                                         DiscreteFootstep stanceStep,
+                                                                         DiscreteFootstep startOfSwingStep)
    {
       RobotSide stepSide = candidateStep.getRobotSide();
 
       FootstepSnapData candidateStepSnapData = snapper.snapFootstep(candidateStep);
       FootstepSnapData stanceStepSnapData = snapper.snapFootstep(stanceStep);
 
-      candidateFootFrame.setTransformAndUpdate(candidateStepSnapData.getSnappedStepTransform(candidateStep));
-      stanceFootFrame.setTransformAndUpdate(stanceStepSnapData.getSnappedStepTransform(stanceStep));
+      RigidBodyTransform candidateStepTransform = candidateStepSnapData.getSnappedStepTransform(candidateStep);
+      RigidBodyTransform stanceStepTransform = stanceStepSnapData.getSnappedStepTransform(stanceStep);
+      RigidBodyTransform startOfSwingTransform = null;
+
+      if (startOfSwingStep != null)
+      {
+         FootstepSnapData startOfSwingSnapData = snapper.snapFootstep(startOfSwingStep);
+         startOfSwingTransform = startOfSwingSnapData.getSnappedStepTransform(startOfSwingStep);
+      }
+
+      return checkValidity(stepSide, candidateStepTransform, stanceStepTransform, startOfSwingTransform);
+   }
+
+   public BipedalFootstepPlannerNodeRejectionReason checkValidity(RobotSide stepSide,
+                                                                  RigidBodyTransformReadOnly candidateStepTransform,
+                                                                  RigidBodyTransformReadOnly stanceStepTransform,
+                                                                  RigidBodyTransformReadOnly startOfSwingTransform)
+   {
+      candidateFootFrame.setTransformAndUpdate(candidateStepTransform);
+      stanceFootFrame.setTransformAndUpdate(stanceStepTransform);
       stanceFootZUpFrame.update();
 
       candidateFootPose.setToZero(candidateFootFrame);
@@ -86,7 +123,14 @@ public class FootstepPoseHeuristicChecker
       stepHeight.set(candidateFootPose.getZ());
       double maximumStepZ = parameters.getMaxStepZ();
 
-      if (stepWidth.getValue() < parameters.getMinimumStepWidth())
+      Vector3D zAxis = new Vector3D(Axis3D.Z);
+      candidateStepTransform.transform(zAxis);
+      double minimumSurfaceNormalZ = Math.cos(parameters.getMinimumSurfaceInclineRadians());
+      if (zAxis.getZ() < minimumSurfaceNormalZ)
+      {
+         return BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP;
+      }
+      else if (stepWidth.getValue() < parameters.getMinimumStepWidth())
       {
          return BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_WIDE_ENOUGH;
       }
@@ -161,19 +205,18 @@ public class FootstepPoseHeuristicChecker
                                                            maxInterpolationFactor);
       double minYaw = InterpolationTools.linearInterpolate(parameters.getMinimumStepYaw(), (1.0 - parameters.getStepYawReductionFactorAtMaxReach()) * parameters.getMinimumStepYaw(),
                                                            maxInterpolationFactor);
-      double yawDelta = AngleTools.computeAngleDifferenceMinusPiToPi(candidateStep.getYaw(), stanceStep.getYaw());
+      double yawDelta = AngleTools.computeAngleDifferenceMinusPiToPi(candidateStepTransform.getRotation().getYaw(), stanceFootPose.getRotation().getYaw());
       if (!MathTools.intervalContains(stepSide.negateIfRightSide(yawDelta), minYaw, maxYaw))
       {
          return BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH;
       }
 
-      if (startOfSwingStep == null)
+      if (startOfSwingTransform == null)
       {
          return null;
       }
 
-      FootstepSnapData startOfSwingSnapData = snapper.snapFootstep(startOfSwingStep);
-      startOfSwingFrame.setTransformAndUpdate(startOfSwingSnapData.getSnappedStepTransform(startOfSwingStep));
+      startOfSwingFrame.setTransformAndUpdate(startOfSwingTransform);
       startOfSwingZUpFrame.update();
       candidateFootPose.changeFrame(startOfSwingZUpFrame);
       swingHeight.set(candidateFootPose.getZ());
@@ -228,5 +271,42 @@ public class FootstepPoseHeuristicChecker
       stepTooForward.set(false);
       minZFromPitchContraint.setToNaN();
       maxXFromPitchContraint.setToNaN();
+   }
+
+   public static void main(String[] args)
+   {
+      double originalYaw = LatticePoint.gridSizeYaw * 2.0;
+      System.out.println(originalYaw);
+      DiscreteFootstep footstep = new DiscreteFootstep(0.0, 0.0, originalYaw, RobotSide.LEFT);
+
+      ConvexPolygon2D footPolygon = new ConvexPolygon2D();
+      footPolygon.addVertex(0.1, 0.1);
+      footPolygon.addVertex(-0.1, 0.1);
+      footPolygon.addVertex(0.1, -0.1);
+      footPolygon.addVertex(-0.1, -0.1);
+      footPolygon.update();
+
+      ConvexPolygon2D regionPolygon = new ConvexPolygon2D();
+      regionPolygon.addVertex(1.0, 1.0);
+      regionPolygon.addVertex(-1.0, 1.0);
+      regionPolygon.addVertex(1.0, -1.0);
+      regionPolygon.addVertex(-1.0, -1.0);
+      regionPolygon.update();
+
+      RigidBodyTransformGenerator generator = new RigidBodyTransformGenerator();
+      generator.rotate(0.4, Axis3D.X);
+      generator.rotate(0.4, Axis3D.Y);
+      RigidBodyTransform regionTransform = generator.getRigidBodyTransformCopy();
+
+      PlanarRegion region = new PlanarRegion(regionTransform, List.of(regionPolygon));
+
+      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon,
+                                                                                                    new PlanarRegionsList(region),
+                                                                                                    Double.MAX_VALUE);
+
+      RigidBodyTransform snappedStepTransform = new RigidBodyTransform();
+      DiscreteFootstepTools.getSnappedStepTransform(footstep, snapTransform, snappedStepTransform);
+
+      System.out.println(snappedStepTransform.getRotation().getYaw());
    }
 }

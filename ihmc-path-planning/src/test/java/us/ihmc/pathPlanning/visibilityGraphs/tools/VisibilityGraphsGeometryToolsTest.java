@@ -361,7 +361,7 @@ public class VisibilityGraphsGeometryToolsTest
          int actualNumberOfIntersections = intersectionBetweenRay2DAndCircle2D(rayOrigin, rayDirection, circleCenter, circleRadius, actualFirstIntersection,
                                                                                actualSecondIntersection);
          assertEquals(expectedNumberOfIntersections, actualNumberOfIntersections);
-         EuclidCoreTestTools.assertTuple2DEquals(expectedIntersection, actualFirstIntersection, EPSILON);
+         EuclidCoreTestTools.assertEquals(expectedIntersection, actualFirstIntersection, EPSILON);
          EuclidCoreTestTools.assertTuple2DContainsOnlyNaN(actualSecondIntersection);
       }
 
@@ -393,8 +393,8 @@ public class VisibilityGraphsGeometryToolsTest
          int actualNumberOfIntersections = intersectionBetweenRay2DAndCircle2D(rayOrigin, rayDirection, circleCenter, circleRadius, actualFirstIntersection,
                                                                                actualSecondIntersection);
          assertEquals("Iteration: " + i, expectedNumberOfIntersections, actualNumberOfIntersections);
-         EuclidCoreTestTools.assertTuple2DEquals("Iteration: " + i, expectedFirstIntersection, actualFirstIntersection, LARGE_EPSILON);
-         EuclidCoreTestTools.assertTuple2DEquals("Iteration: " + i, expectedSecondIntersection, actualSecondIntersection, LARGE_EPSILON);
+         EuclidCoreTestTools.assertEquals("Iteration: " + i, expectedFirstIntersection, actualFirstIntersection, LARGE_EPSILON);
+         EuclidCoreTestTools.assertEquals("Iteration: " + i, expectedSecondIntersection, actualSecondIntersection, LARGE_EPSILON);
       }
    }
 
@@ -640,23 +640,23 @@ public class VisibilityGraphsGeometryToolsTest
          expectedIntersection.set(front1);
          success = VisibilityGraphsGeometryTools.intersectionBetweenRay2DAndLineSegment2D(rayOrigin, rayDirection, front1, front2, actualIntersection);
          assertTrue(success);
-         EuclidCoreTestTools.assertTuple2DEquals(expectedIntersection, actualIntersection, EPSILON);
+         EuclidCoreTestTools.assertEquals(expectedIntersection, actualIntersection, EPSILON);
 
          expectedIntersection.set(front2);
          success = VisibilityGraphsGeometryTools.intersectionBetweenRay2DAndLineSegment2D(rayOrigin, rayDirection, front2, front1, actualIntersection);
          assertTrue(success);
-         EuclidCoreTestTools.assertTuple2DEquals(expectedIntersection, actualIntersection, EPSILON);
+         EuclidCoreTestTools.assertEquals(expectedIntersection, actualIntersection, EPSILON);
 
          // Line segment partially in front of ray
          expectedIntersection.set(front1);
          success = VisibilityGraphsGeometryTools.intersectionBetweenRay2DAndLineSegment2D(rayOrigin, rayDirection, back1, front1, actualIntersection);
          assertTrue(success);
-         EuclidCoreTestTools.assertTuple2DEquals(expectedIntersection, actualIntersection, EPSILON);
+         EuclidCoreTestTools.assertEquals(expectedIntersection, actualIntersection, EPSILON);
 
          expectedIntersection.set(front2);
          success = VisibilityGraphsGeometryTools.intersectionBetweenRay2DAndLineSegment2D(rayOrigin, rayDirection, front2, back1, actualIntersection);
          assertTrue(success);
-         EuclidCoreTestTools.assertTuple2DEquals(expectedIntersection, actualIntersection, EPSILON);
+         EuclidCoreTestTools.assertEquals(expectedIntersection, actualIntersection, EPSILON);
       }
    }
 
@@ -700,15 +700,15 @@ public class VisibilityGraphsGeometryToolsTest
 
       success = VisibilityGraphsGeometryTools.intersectionBetweenRay2DAndLineSegment2D(rayOrigin, rayDirection, lss2, lse2, actualIntersection);
       assertTrue(success);
-      EuclidCoreTestTools.assertTuple2DEquals(expectedIntersection, actualIntersection, epsilon);
+      EuclidCoreTestTools.assertEquals(expectedIntersection, actualIntersection, epsilon);
       success = VisibilityGraphsGeometryTools.intersectionBetweenRay2DAndLineSegment2D(rayOrigin, rayDirection, lse2, lss2, actualIntersection);
       assertTrue(success);
-      EuclidCoreTestTools.assertTuple2DEquals(expectedIntersection, actualIntersection, epsilon);
+      EuclidCoreTestTools.assertEquals(expectedIntersection, actualIntersection, epsilon);
 
       actualIntersection = VisibilityGraphsGeometryTools.intersectionBetweenRay2DAndLineSegment2D(rayOrigin, rayDirection, lss2, lse2);
-      EuclidCoreTestTools.assertTuple2DEquals(expectedIntersection, actualIntersection, epsilon);
+      EuclidCoreTestTools.assertEquals(expectedIntersection, actualIntersection, epsilon);
       actualIntersection = VisibilityGraphsGeometryTools.intersectionBetweenRay2DAndLineSegment2D(rayOrigin, rayDirection, lse2, lss2);
-      EuclidCoreTestTools.assertTuple2DEquals(expectedIntersection, actualIntersection, epsilon);
+      EuclidCoreTestTools.assertEquals(expectedIntersection, actualIntersection, epsilon);
    }
 
 }

@@ -1,9 +1,10 @@
 package us.ihmc.behaviors.tools.perception;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -50,10 +51,10 @@ public class SimulatedREAModule
    {
       this.map = map;
 
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, ROS2Tools.REA_NODE_NAME);
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, PerceptionAPI.REA_NODE_NAME);
 
-      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.withOutput());
-      realsenseSLAMPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MODULE.withOutput());
+      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, PerceptionAPI.REA.withOutput());
+      realsenseSLAMPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, PerceptionAPI.REALSENSE_SLAM_MODULE.withOutput());
 
       mode = robotModel == null ? REPUBLISH_FULL_MAP : REDUCE_TO_VIEWABLE_AREA;
 
@@ -66,7 +67,7 @@ public class SimulatedREAModule
          simulatedDepthCamera = new SimulatedDepthCamera(verticalFOV, horizontalFOV, Double.POSITIVE_INFINITY, neckFrame);
       }
 
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA_SUPPORT_REGIONS.withInput(), this::acceptSupportRegionsList);
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, PerceptionAPI.REA_SUPPORT_REGIONS.withInput(), this::acceptSupportRegionsList);
 
       thread = new PausablePeriodicThread(getClass().getSimpleName(), 0.5, this::process);
    }

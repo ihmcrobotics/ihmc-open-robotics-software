@@ -76,11 +76,6 @@ public class AtlasPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapTest
                {
                   return new AtlasSwingTrajectoryParameters(getTarget(), 1.0)
                   {
-                     @Override
-                     public double getSwingFootVelocityAdjustmentDamping()
-                     {
-                        return 0.8;
-                     }
                   };
                }
 

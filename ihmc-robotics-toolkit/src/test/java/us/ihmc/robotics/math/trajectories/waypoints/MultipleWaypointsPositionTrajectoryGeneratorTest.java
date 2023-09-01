@@ -136,9 +136,9 @@ public class MultipleWaypointsPositionTrajectoryGeneratorTest
          for (int iter = 0; iter < itersPerTick; iter++)
          {
             trajectory.compute(time);
-            EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startPosition, trajectory.getPosition(), EPSILON);
-            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(new FrameVector3D(), trajectory.getVelocity(), EPSILON);
-            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(new FrameVector3D(), trajectory.getAcceleration(), EPSILON);
+            EuclidFrameTestTools.assertGeometricallyEquals(startPosition, trajectory.getPosition(), EPSILON);
+            EuclidFrameTestTools.assertGeometricallyEquals(new FrameVector3D(), trajectory.getVelocity(), EPSILON);
+            EuclidFrameTestTools.assertGeometricallyEquals(new FrameVector3D(), trajectory.getAcceleration(), EPSILON);
          }
       }
 
@@ -163,9 +163,9 @@ public class MultipleWaypointsPositionTrajectoryGeneratorTest
          {
             trajectory.compute(time);
             assertEquals(firstWaypointIdx, trajectory.getCurrentWaypointIndex());
-            EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(polynomial.getPosition(), trajectory.getPosition(), EPSILON);
-            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(polynomial.getVelocity(), trajectory.getVelocity(), EPSILON);
-            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(polynomial.getAcceleration(), trajectory.getAcceleration(), EPSILON);
+            EuclidFrameTestTools.assertGeometricallyEquals(polynomial.getPosition(), trajectory.getPosition(), EPSILON);
+            EuclidFrameTestTools.assertGeometricallyEquals(polynomial.getVelocity(), trajectory.getVelocity(), EPSILON);
+            EuclidFrameTestTools.assertGeometricallyEquals(polynomial.getAcceleration(), trajectory.getAcceleration(), EPSILON);
          }
       }
 
@@ -190,9 +190,9 @@ public class MultipleWaypointsPositionTrajectoryGeneratorTest
          {
             trajectory.compute(time);
             assertEquals(firstWaypointIdx, trajectory.getCurrentWaypointIndex());
-            EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(polynomial.getPosition(), trajectory.getPosition(), EPSILON);
-            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(polynomial.getVelocity(), trajectory.getVelocity(), EPSILON);
-            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(polynomial.getAcceleration(), trajectory.getAcceleration(), EPSILON);
+            EuclidFrameTestTools.assertGeometricallyEquals(polynomial.getPosition(), trajectory.getPosition(), EPSILON);
+            EuclidFrameTestTools.assertGeometricallyEquals(polynomial.getVelocity(), trajectory.getVelocity(), EPSILON);
+            EuclidFrameTestTools.assertGeometricallyEquals(polynomial.getAcceleration(), trajectory.getAcceleration(), EPSILON);
          }
       }
 
@@ -201,9 +201,9 @@ public class MultipleWaypointsPositionTrajectoryGeneratorTest
          for (int iter = 0; iter < itersPerTick; iter++)
          {
             trajectory.compute(time);
-            EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(lastPosition, trajectory.getPosition(), EPSILON);
-            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(new FrameVector3D(), trajectory.getVelocity(), EPSILON);
-            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(new FrameVector3D(), trajectory.getAcceleration(), EPSILON);
+            EuclidFrameTestTools.assertGeometricallyEquals(lastPosition, trajectory.getPosition(), EPSILON);
+            EuclidFrameTestTools.assertGeometricallyEquals(new FrameVector3D(), trajectory.getVelocity(), EPSILON);
+            EuclidFrameTestTools.assertGeometricallyEquals(new FrameVector3D(), trajectory.getAcceleration(), EPSILON);
          }
       }
    }
@@ -292,9 +292,9 @@ public class MultipleWaypointsPositionTrajectoryGeneratorTest
 
       public void assertEpsilonEquals(PositionTrajectoryState other, double epsilon)
       {
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(position, other.position, epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(linearVelocity, other.linearVelocity, epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(linearAcceleration, other.linearAcceleration, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(position, other.position, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(linearVelocity, other.linearVelocity, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(linearAcceleration, other.linearAcceleration, epsilon);
       }
    }
 

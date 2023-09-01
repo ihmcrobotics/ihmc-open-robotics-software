@@ -11,18 +11,21 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.math.trajectories.FixedFramePolynomialEstimator3D;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.TimeIntervalProvider;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class AngularMomentumHandler<T extends ContactStateBasics<T>>
+public class AngularMomentumHandler<T extends ContactStateBasics<T>> implements SCS2YoGraphicHolder
 {
    private final ECMPTrajectoryCalculator<T> ecmpTrajectoryCalculator;
    private final ThreePotatoAngularMomentumCalculator angularMomentumCalculator;
@@ -71,9 +74,7 @@ public class AngularMomentumHandler<T extends ContactStateBasics<T>>
    public void computeAngularMomentum(double time)
    {
       angularMomentumCalculator.computeAngularMomentum(time);
-      FrameVector3DReadOnly desiredAngularMomentumRate = angularMomentumCalculator.useHeightScaledAngularMomentum() ?
-            angularMomentumCalculator.getDesiredHeightScaledAngularMomentumRate() :
-            angularMomentumCalculator.getDesiredAngularMomentumRate();
+      FrameVector3DReadOnly desiredAngularMomentumRate = angularMomentumCalculator.getDesiredAngularMomentumRate();
       ecmpTrajectoryCalculator.computeECMPOffset(desiredAngularMomentumRate, desiredECMPOffset);
    }
 
@@ -87,9 +88,7 @@ public class AngularMomentumHandler<T extends ContactStateBasics<T>>
 
    public List<T> computeECMPTrajectory(List<T> copTrajectories)
    {
-      MultipleSegmentPositionTrajectoryGenerator<FixedFramePolynomialEstimator3D> trajectory = angularMomentumCalculator.useHeightScaledAngularMomentum() ?
-            angularMomentumCalculator.getHeightScaledAngularMomentumTrajectories() :
-            angularMomentumCalculator.getAngularMomentumTrajectories();
+      MultipleSegmentPositionTrajectoryGenerator<FixedFramePolynomialEstimator3D> trajectory = angularMomentumCalculator.getAngularMomentumTrajectories();
 
       return ecmpTrajectoryCalculator.computeECMPTrajectory(copTrajectories, trajectory);
    }
@@ -106,19 +105,9 @@ public class AngularMomentumHandler<T extends ContactStateBasics<T>>
       return angularMomentumCalculator.getAngularMomentumTrajectories();
    }
 
-   public MultipleSegmentPositionTrajectoryGenerator<FixedFramePolynomialEstimator3D> getHeightScaledAngularMomentumTrajectories()
-   {
-      return angularMomentumCalculator.getHeightScaledAngularMomentumTrajectories();
-   }
-
    public FrameVector3DReadOnly getDesiredAngularMomentum()
    {
       return angularMomentumCalculator.getDesiredAngularMomentum();
-   }
-
-   public FrameVector3DReadOnly getHeightScaledDesiredAngularMomentum()
-   {
-      return angularMomentumCalculator.getDesiredHeightScaledAngularMomentum();
    }
 
    public FrameVector3DReadOnly getDesiredAngularMomentumRate()
@@ -126,8 +115,11 @@ public class AngularMomentumHandler<T extends ContactStateBasics<T>>
       return angularMomentumCalculator.getDesiredAngularMomentumRate();
    }
 
-   public FrameVector3DReadOnly getDesiredHeightScaledAngularMomentumRate()
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
    {
-      return angularMomentumCalculator.getDesiredHeightScaledAngularMomentumRate();
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(angularMomentumCalculator.getSCS2YoGraphics());
+      return group.isEmpty() ? null : group;
    }
 }

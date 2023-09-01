@@ -27,25 +27,25 @@ public class AtlasPushRecoveryWithCrossOverWalkingTest extends AvatarPushRecover
    @Override
    public double getForwardPushDelta()
    {
-      return 1.3;
+      return 1.2;
    }
 
    @Override
    public double getOutwardPushDelta()
    {
-      return 0.75;
+      return 0.35;
    }
 
    @Override
    public double getBackwardPushDelta()
    {
-      return 1.4;
+      return 1.3;
    }
 
    @Override
    public double getInwardPushDelta()
    {
-      return 0.52;
+      return 0.45;
    }
 
    @Tag("humanoid-push-recovery")

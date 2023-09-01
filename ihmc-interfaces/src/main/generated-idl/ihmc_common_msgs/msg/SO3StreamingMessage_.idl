@@ -1,0 +1,45 @@
+#ifndef __ihmc_common_msgs__msg__SO3StreamingMessage__idl__
+#define __ihmc_common_msgs__msg__SO3StreamingMessage__idl__
+
+#include "geometry_msgs/msg/./Pose_.idl"
+#include "geometry_msgs/msg/./Quaternion_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
+#include "ihmc_common_msgs/msg/./FrameInformation_.idl"
+module ihmc_common_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This is part of the IHMC Common message package.
+       * It is a lightweight version of SO3TrajectoryMessage designed for streaming.
+       */
+      @TypeCode(type="ihmc_common_msgs::msg::dds_::SO3StreamingMessage_")
+      struct SO3StreamingMessage
+      {
+        ihmc_common_msgs::msg::dds::FrameInformation frame_information;
+        /**
+         * Flag that tells the controller whether the use of a custom control frame is requested.
+         */
+        boolean use_custom_control_frame;
+        /**
+         * Pose of custom control frame expressed in the end-effector frame.
+         * This is the frame attached to the rigid body that the taskspace trajectory is defined for.
+         */
+        geometry_msgs::msg::dds::Pose control_frame_pose;
+        /**
+         * Define the desired 3D orientation to be reached.
+         */
+        geometry_msgs::msg::dds::Quaternion orientation;
+        /**
+         * Define the desired 3D angular velocity to be reached.
+         */
+        geometry_msgs::msg::dds::Vector3 angular_velocity;
+      };
+    };
+  };
+};
+
+#endif

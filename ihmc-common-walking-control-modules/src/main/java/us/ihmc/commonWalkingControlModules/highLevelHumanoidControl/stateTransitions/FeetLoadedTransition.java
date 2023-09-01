@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -61,6 +62,7 @@ public class FeetLoadedTransition implements StateTransitionCondition
          SimpleMovingAverageFilteredYoVariable prepFootFzAverage = prepFootFzAverages.get(robotSide);
 
          footSensors.get(robotSide).getWrench(temporaryFootWrench);
+         temporaryFootWrench.changeFrame(ReferenceFrame.getWorldFrame());
          prepFootFz.set(temporaryFootWrench.getLinearPartZ());
          prepFootFzAverage.update();
 

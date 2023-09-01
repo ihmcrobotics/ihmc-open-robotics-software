@@ -1,16 +1,12 @@
 package us.ihmc.avatar.heightMap;
 
-import controller_msgs.msg.dds.HeightMapMessage;
-import org.apache.commons.lang3.tuple.Pair;
-import sensor_msgs.PointCloud2;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Point2D;
+import perception_msgs.msg.dds.HeightMapMessage;
+import us.ihmc.perception.heightMap.HeightMapInputData;
 import us.ihmc.messager.MessagerAPIFactory;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.sensorProcessing.heightMap.HeightMapFilterParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
-class HeightMapMessagerAPI
+public class HeightMapMessagerAPI
 {
    private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
    private static final MessagerAPIFactory.Category Root = apiFactory.createRootCategory("HeightMapRoot");
@@ -23,9 +19,10 @@ class HeightMapMessagerAPI
    public static final MessagerAPIFactory.Topic<Double> yPosition = topic("yPosition");
    public static final MessagerAPIFactory.Topic<Double> zPosition = topic("zPosition");
 
-   public static final MessagerAPIFactory.Topic<Pair<PointCloud2, FramePose3D>> PointCloudData = topic("PointCloudData");
+   public static final MessagerAPIFactory.Topic<HeightMapInputData> PointCloudData = topic("PointCloudData");
    public static final MessagerAPIFactory.Topic<HeightMapMessage> HeightMapData = topic("HeightMapData");
    public static final MessagerAPIFactory.Topic<HeightMapParameters> parameters = topic("Parameters");
+   public static final MessagerAPIFactory.Topic<HeightMapFilterParameters> filterParameters = topic("FilterParameters");
    public static final MessagerAPIFactory.Topic<Double> GridCenterX = topic("GridCenterX");
    public static final MessagerAPIFactory.Topic<Double> GridCenterY = topic("GridCenterY");
    public static final MessagerAPIFactory.Topic<Integer> PublishFrequency = topic("PublishRate");

@@ -1,6 +1,7 @@
 package us.ihmc.avatar.testTools;
 
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.heightPlanning.HeightOffsetHandler;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -129,7 +130,7 @@ public class AvatarCommonAsserts
    {
       FrameQuaternion currentBodyOrientation = new FrameQuaternion(body.getBodyFixedFrame());
       currentBodyOrientation.changeFrame(expected.getReferenceFrame());
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(expected, currentBodyOrientation, epsilon);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(expected, currentBodyOrientation, epsilon);
    }
 
    public static void assertBodyPosition(FramePoint3DReadOnly expected, RigidBodyBasics body, double epsilon)
@@ -153,7 +154,7 @@ public class AvatarCommonAsserts
    {
       FrameQuaternion controllerDesiredOrientation = findDesiredOrientation(scs, body);
       controllerDesiredOrientation.changeFrame(expected.getReferenceFrame());
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(expected, controllerDesiredOrientation, epsilon);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(expected, controllerDesiredOrientation, epsilon);
    }
 
    public static void assertDesiredChestAngularVelocityZero(FullHumanoidRobotModel robot, YoVariableHolder scs, double epsilon)
@@ -176,7 +177,7 @@ public class AvatarCommonAsserts
    {
       String namespace = PelvisICPBasedTranslationManager.class.getSimpleName();
       Tuple2DReadOnly desiredICPOffset = findTuple2d(namespace, "desiredICPOffset", scs);
-      EuclidCoreTestTools.assertTuple2DEquals(new Vector2D(), desiredICPOffset, epsilon);
+      EuclidCoreTestTools.assertEquals(new Vector2D(), desiredICPOffset, epsilon);
    }
 
    public static void assertDesiredPelvisHeightOffsetZero(YoVariableHolder scs, double epsilon)
@@ -189,7 +190,7 @@ public class AvatarCommonAsserts
    private static double findJointDesiredPosition(YoVariableHolder scs, OneDoFJointBasics joint)
    {
       String jointName = joint.getName();
-      String namespace = jointName + "PDController";
+      String namespace = FeedbackControllerToolbox.class.getSimpleName();
       String variable = "q_d_" + jointName;
       return getDoubleYoVariable(scs, variable, namespace).getValue();
    }
@@ -197,20 +198,20 @@ public class AvatarCommonAsserts
    private static double findJointDesiredVelocity(YoVariableHolder scs, OneDoFJointBasics joint)
    {
       String jointName = joint.getName();
-      String namespace = jointName + "PDController";
+      String namespace = FeedbackControllerToolbox.class.getSimpleName();
       String variable = "qd_d_" + jointName;
       return getDoubleYoVariable(scs, variable, namespace).getValue();
    }
 
    private static FrameQuaternion findDesiredOrientation(YoVariableHolder scs, RigidBodyBasics body)
    {
-      Quaternion desiredOrientation = findQuat4d("FeedbackControllerToolbox", body.getName() + "DesiredOrientation", scs);
+      Quaternion desiredOrientation = findQuat4d(FeedbackControllerToolbox.class.getSimpleName(), body.getName() + "DesiredOrientation", scs);
       return new FrameQuaternion(ReferenceFrame.getWorldFrame(), desiredOrientation);
    }
 
    private static FrameVector3D findDesiredAngularVelocity(YoVariableHolder scs, RigidBodyBasics body)
    {
-      Tuple3DBasics desiredAngularVelocity = findTuple3d("FeedbackControllerToolbox", body.getName() + "DesiredAngularVelocity", scs);
+      Tuple3DBasics desiredAngularVelocity = findTuple3d(FeedbackControllerToolbox.class.getSimpleName(), body.getName() + "DesiredAngularVelocity", scs);
       return new FrameVector3D(ReferenceFrame.getWorldFrame(), desiredAngularVelocity);
    }
 

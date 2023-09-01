@@ -8,9 +8,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import controller_msgs.msg.dds.BehaviorControlModePacket;
+import toolbox_msgs.msg.dds.BehaviorControlModePacket;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.HumanoidBehaviorTypePacket;
+import toolbox_msgs.msg.dds.HumanoidBehaviorTypePacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
@@ -83,12 +83,12 @@ public class SCS2BehaviorTestHelper implements YoVariableHolder
    public SCS2BehaviorTestHelper(SCS2AvatarTestingSimulation avatarTestingSimulation)
    {
       this.avatarTestingSimulation = avatarTestingSimulation;
-      yoTimeRobot = avatarTestingSimulation.getSimulationSession().getTime();
+      yoTimeRobot = avatarTestingSimulation.getSimulationConstructionSet().getTime();
       yoTimeBehaviorDispatcher = new YoDouble("yoTimeBehaviorDispatcher", registry);
 
       this.drcRobotModel = avatarTestingSimulation.getRobotModel();
       robotName = drcRobotModel.getSimpleRobotName();
-      this.fullRobotModel = drcRobotModel.createFullRobotModel();
+      this.fullRobotModel = drcRobotModel.createFullRobotModel(false);
       yoTimeLastFullRobotModelUpdate = new YoDouble("yoTimeRobotModelUpdate", registry);
 
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));

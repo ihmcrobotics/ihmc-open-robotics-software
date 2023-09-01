@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class OneDoFJointTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.OneDoFJointTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::OneDoFJointTrajectoryMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "906a241c529d5f4d4e0a47ba01e65d50152118ec79f67fca45823b510a60e2d8";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
@@ -44,7 +56,7 @@ public class OneDoFJointTrajectoryMessagePubSubType implements us.ihmc.pubsub.To
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
-          current_alignment += controller_msgs.msg.dds.TrajectoryPoint1DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -66,7 +78,7 @@ public class OneDoFJointTrajectoryMessagePubSubType implements us.ihmc.pubsub.To
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getTrajectoryPoints().size(); ++i0)
       {
-          current_alignment += controller_msgs.msg.dds.TrajectoryPoint1DMessagePubSubType.getCdrSerializedSize(data.getTrajectoryPoints().get(i0), current_alignment);}
+          current_alignment += ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessagePubSubType.getCdrSerializedSize(data.getTrajectoryPoints().get(i0), current_alignment);}
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 

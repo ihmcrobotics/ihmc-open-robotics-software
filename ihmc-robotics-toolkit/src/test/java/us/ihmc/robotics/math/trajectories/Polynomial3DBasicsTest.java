@@ -207,7 +207,7 @@ public abstract class Polynomial3DBasicsTest
             EuclidCoreTestTools.assertVector3DGeometricallyEquals(new Vector3D(), trajectory.getAcceleration(), SMALL_EPSILON);
 
             derivative.compute(t);
-            EuclidCoreTestTools.assertTuple3DEquals(derivative.getPosition(), trajectory.getVelocity(), SMALL_EPSILON);
+            EuclidCoreTestTools.assertEquals(derivative.getPosition(), trajectory.getVelocity(), SMALL_EPSILON);
             EuclidCoreTestTools.assertVector3DGeometricallyEquals(derivative.getVelocity(), trajectory.getAcceleration(), SMALL_EPSILON);
          }
 
@@ -236,7 +236,7 @@ public abstract class Polynomial3DBasicsTest
             EuclidCoreTestTools.assertVector3DGeometricallyEquals(new Vector3D(), trajectory.getAcceleration(), SMALL_EPSILON);
 
             derivative.compute(t);
-            EuclidCoreTestTools.assertTuple3DEquals(derivative.getPosition(), trajectory.getVelocity(), SMALL_EPSILON);
+            EuclidCoreTestTools.assertEquals(derivative.getPosition(), trajectory.getVelocity(), SMALL_EPSILON);
             EuclidCoreTestTools.assertVector3DGeometricallyEquals(derivative.getVelocity(), trajectory.getAcceleration(), SMALL_EPSILON);
          }
       }
@@ -286,7 +286,7 @@ public abstract class Polynomial3DBasicsTest
             trajectory.compute(t);
             derivative.compute(t);
 
-            EuclidCoreTestTools.assertTuple3DEquals(derivative.getPosition(), trajectory.getVelocity(), SMALL_EPSILON);
+            EuclidCoreTestTools.assertEquals(derivative.getPosition(), trajectory.getVelocity(), SMALL_EPSILON);
             EuclidCoreTestTools.assertVector3DGeometricallyEquals(derivative.getVelocity(), trajectory.getAcceleration(), SMALL_EPSILON);
 
             trajectory.compute(t + dt);
@@ -338,7 +338,7 @@ public abstract class Polynomial3DBasicsTest
          derivative.setQuadratic(t0, tf, new Point3D(zd0), trajectory.getAcceleration(), new Point3D(zdf));
 
          trajectory.compute(tf);
-         EuclidCoreTestTools.assertTuple3DEquals(zf, trajectory.getPosition(), SMALL_EPSILON);
+         EuclidCoreTestTools.assertEquals(zf, trajectory.getPosition(), SMALL_EPSILON);
 
          double dt = 1.0e-8;
 
@@ -347,7 +347,7 @@ public abstract class Polynomial3DBasicsTest
             trajectory.compute(t);
             derivative.compute(t);
 
-            EuclidCoreTestTools.assertTuple3DEquals(derivative.getPosition(), trajectory.getVelocity(), SMALL_EPSILON);
+            EuclidCoreTestTools.assertEquals(derivative.getPosition(), trajectory.getVelocity(), SMALL_EPSILON);
             EuclidCoreTestTools.assertVector3DGeometricallyEquals(derivative.getVelocity(), trajectory.getAcceleration(), SMALL_EPSILON);
 
             trajectory.compute(t + dt);

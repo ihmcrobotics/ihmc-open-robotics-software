@@ -5,5 +5,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public interface FullHumanoidRobotModelFactory extends FullLeggedRobotModelFactory<RobotSide>
 {
    @Override
-   FullHumanoidRobotModel createFullRobotModel();
+   default FullHumanoidRobotModel createFullRobotModel()
+   {
+      return createFullRobotModel(true);
+   }
+
+   @Override
+   FullHumanoidRobotModel createFullRobotModel(boolean enforceUniqueReferenceFrames);
 }

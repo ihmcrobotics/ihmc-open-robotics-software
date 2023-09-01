@@ -2,11 +2,13 @@ package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTestRobots.UpperBodyWithTwoManipulators;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
@@ -15,12 +17,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -33,24 +33,29 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameTwist;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
-import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
-import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.RobotFromDescription;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.scs2.SimulationConstructionSet2;
+import us.ihmc.scs2.definition.geometry.Sphere3DDefinition;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.MaterialDefinition;
+import us.ihmc.scs2.definition.visual.VisualDefinition;
+import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
@@ -69,6 +74,7 @@ public class RelativeEndEffectorControlTest
    private static final double controlDT = 1.0e-4;
    static
    {
+      simulationTestingParameters.setKeepSCSUp(true);
       simulationTestingParameters.setDataBufferSize(1 << 16);
    }
 
@@ -79,31 +85,30 @@ public class RelativeEndEffectorControlTest
    private RigidBodyBasics rootBody;
    private Pair<FloatingJointBasics, OneDoFJointBasics[]> desiredFullRobotModel;
 
-   private SimulationConstructionSet scs;
+   private SimulationConstructionSet2 scs;
 
-   public void setup(RobotDescription robotDescription)
+   public void setup(RobotDefinition robotDefinition)
    {
       if (mainRegistry == null)
          mainRegistry = new YoRegistry("main");
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       if (desiredFullRobotModel == null)
-         desiredFullRobotModel = KinematicsToolboxControllerTestRobots.createInverseDynamicsRobot(robotDescription);
+         desiredFullRobotModel = KinematicsToolboxControllerTestRobots.createInverseDynamicsRobot(robotDefinition);
       if (rootBody == null)
          rootBody = MultiBodySystemTools.getRootBody(desiredFullRobotModel.getRight()[0].getPredecessor());
 
-      robot = new RobotFromDescription(robotDescription);
-      robot.setDynamic(false);
-      robot.setGravity(0);
-      robot.addYoRegistry(mainRegistry);
+      robot = new Robot(robotDefinition, SimulationConstructionSet2.inertialFrame);
+      robot.getRegistry().addChild(mainRegistry);
 
       if (visualize)
       {
-         scs = new SimulationConstructionSet(robot, simulationTestingParameters);
-         scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, true);
-         scs.setCameraFix(0.0, 0.0, 1.0);
+         scs = new SimulationConstructionSet2(SimulationConstructionSet2.doNothingPhysicsEngine());
+         scs.addRobot(robot);
+         scs.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
+         scs.start(true, true, true);
+         scs.setCameraFocusPosition(0.0, 0.0, 1.0);
          scs.setCameraPosition(8.0, 0.0, 3.0);
-         scs.startOnAThread();
       }
    }
 
@@ -127,26 +132,23 @@ public class RelativeEndEffectorControlTest
       controllerCoreToolbox.setupForInverseKinematicsSolver();
       controllerCoreToolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
 
-      FeedbackControlCommandList commandTemplate = rootBody.subtreeStream().map(RelativeEndEffectorControlTest::toFeedbackControlCommand)
-                                                           .collect(FeedbackControlCommandList::new,
-                                                                    FeedbackControlCommandList::addCommand,
-                                                                    FeedbackControlCommandList::addCommandList);
-      controllerCore = new WholeBodyControllerCore(controllerCoreToolbox, new FeedbackControllerTemplate(commandTemplate), mainRegistry);
+      FeedbackControllerTemplate template = new FeedbackControllerTemplate();
+      for (RigidBodyBasics rigidBody : rootBody.subtreeIterable())
+      {
+         template.enableSpatialFeedbackController(rigidBody);
+      }
+      controllerCore = new WholeBodyControllerCore(controllerCoreToolbox, template, mainRegistry);
       controllerCore.compute();
-   }
-
-   private static SpatialFeedbackControlCommand toFeedbackControlCommand(RigidBodyBasics endEffector)
-   {
-      SpatialFeedbackControlCommand command = new SpatialFeedbackControlCommand();
-      command.set(MultiBodySystemTools.getRootBody(endEffector), endEffector);
-      return command;
    }
 
    @AfterEach
    public void tearDown()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-         ThreadTools.sleepForever();
+      if (visualize && simulationTestingParameters.getKeepSCSUp())
+      {
+         scs.pause();
+         scs.waitUntilVisualizerDown();
+      }
 
       if (mainRegistry != null)
       {
@@ -164,7 +166,7 @@ public class RelativeEndEffectorControlTest
 
       if (scs != null)
       {
-         scs.closeAndDispose();
+         scs.shutdownSession();
          scs = null;
       }
    }
@@ -173,12 +175,12 @@ public class RelativeEndEffectorControlTest
    public void testControlEndEffectorRelativeToOtherEndEffector()
    {
       mainRegistry = new YoRegistry("main");
-      UpperBodyWithTwoManipulators robotDescription = new UpperBodyWithTwoManipulators();
-      desiredFullRobotModel = KinematicsToolboxControllerTestRobots.createInverseDynamicsRobot(robotDescription);
+      UpperBodyWithTwoManipulators robotDefinition = new UpperBodyWithTwoManipulators();
+      desiredFullRobotModel = KinematicsToolboxControllerTestRobots.createInverseDynamicsRobot(robotDefinition);
       rootBody = MultiBodySystemTools.getRootBody(desiredFullRobotModel.getRight()[0].getPredecessor());
 
-      RigidBodyBasics lHand = rootBody.subtreeStream().filter(body -> body.getName().equals("leftHandLink")).findFirst().get();
-      RigidBodyBasics rHand = rootBody.subtreeStream().filter(body -> body.getName().equals("rightHandLink")).findFirst().get();
+      RigidBodyBasics lHand = MultiBodySystemTools.findRigidBody(rootBody, "leftHandLink");
+      RigidBodyBasics rHand = MultiBodySystemTools.findRigidBody(rootBody, "rightHandLink");
 
       MovingReferenceFrame lHandFrame = lHand.getBodyFixedFrame();
       MovingReferenceFrame rHandFrame = rHand.getBodyFixedFrame();
@@ -187,7 +189,7 @@ public class RelativeEndEffectorControlTest
       YoFramePose3D leftRelativePose = new YoFramePose3D("leftRelativePose", rHandFrame, mainRegistry);
       YoFramePose3D rightRelativePose = new YoFramePose3D("rightRelativePose", rHandFrame, mainRegistry);
 
-      setup(robotDescription);
+      setup(robotDefinition);
       createControllerCore();
 
       // Set to the same values as in the KinematicsToolboxController
@@ -205,7 +207,7 @@ public class RelativeEndEffectorControlTest
 
       PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_MID_RANGE);
-      JointAnglesWriter writer = new JointAnglesWriter(robot, desiredFullRobotModel.getLeft(), desiredFullRobotModel.getRight());
+      List<? extends JointBasics> allDesiredJoints = SubtreeStreams.fromChildren(rootBody).collect(Collectors.toList());
 
       FramePoint3D leftInitialPosition = new FramePoint3D(worldFrame);
       leftInitialPosition.set(leftHandCircleCenter);
@@ -235,14 +237,14 @@ public class RelativeEndEffectorControlTest
          controllerCoreCommand.addFeedbackControlCommand(leftHandCommand);
          controllerCoreCommand.addFeedbackControlCommand(rightHandCommand);
          controllerCoreCommand.addInverseKinematicsCommand(privilegedConfigurationCommand);
-         controllerCore.submitControllerCoreCommand(controllerCoreCommand);
-         controllerCore.compute();
+         controllerCore.compute(controllerCoreCommand);
          KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCore.getControllerCoreOutput(),
                                                                        desiredFullRobotModel.getLeft(),
                                                                        desiredFullRobotModel.getRight());
-         writer.updateRobotConfigurationBasedOnFullRobotModel();
+         MultiBodySystemTools.copyJointsState(allDesiredJoints, robot.getAllJoints(), JointStateType.CONFIGURATION);
+
          if (visualize)
-            scs.tickAndUpdate();
+            scs.simulateNow(1);
       }
 
       for (double t = 0.0; t < 2.0; t += controlDT)
@@ -274,7 +276,7 @@ public class RelativeEndEffectorControlTest
          KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCore.getControllerCoreOutput(),
                                                                        desiredFullRobotModel.getLeft(),
                                                                        desiredFullRobotModel.getRight());
-         writer.updateRobotConfigurationBasedOnFullRobotModel();
+         MultiBodySystemTools.copyJointsState(allDesiredJoints, robot.getAllJoints(), JointStateType.CONFIGURATION);
 
          Twist twist = new Twist();
          rHandFrame.getTwistRelativeToOther(lHandFrame, twist);
@@ -284,7 +286,7 @@ public class RelativeEndEffectorControlTest
          leftRelativePose.setFromReferenceFrame(rHandFrame);
          rightRelativePose.setFromReferenceFrame(lHandFrame);
          if (visualize)
-            scs.tickAndUpdate();
+            scs.simulateNow(1);
          assertTrue(leftRelativeTwist.getAngularPart().length() < 0.01);
          assertTrue(leftRelativeTwist.getLinearPart().length() < 0.01);
       }
@@ -294,8 +296,8 @@ public class RelativeEndEffectorControlTest
    public void testInequalityEndEffector()
    {
       mainRegistry = new YoRegistry("main");
-      UpperBodyWithTwoManipulators robotDescription = new UpperBodyWithTwoManipulators();
-      desiredFullRobotModel = KinematicsToolboxControllerTestRobots.createInverseDynamicsRobot(robotDescription);
+      UpperBodyWithTwoManipulators robotDefinition = new UpperBodyWithTwoManipulators();
+      desiredFullRobotModel = KinematicsToolboxControllerTestRobots.createInverseDynamicsRobot(robotDefinition);
       rootBody = MultiBodySystemTools.getRootBody(desiredFullRobotModel.getRight()[0].getPredecessor());
 
       RigidBodyBasics lHand = rootBody.subtreeStream().filter(body -> body.getName().equals("leftHandLink")).findFirst().get();
@@ -321,13 +323,13 @@ public class RelativeEndEffectorControlTest
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         LinkGraphicsDescription handGraphics = robotDescription.getLinkDescription(robotSide.getCamelCaseName() + "WristYaw").getLinkGraphics();
-         handGraphics.identity();
-         handGraphics.translate(0.0, 0.0, 0.15);
-         handGraphics.addSphere(0.01, YoAppearance.Orange());
+         List<VisualDefinition> handGraphics = robotDefinition.getRigidBodyDefinition(robotSide.getCamelCaseName() + "HandLink").getVisualDefinitions();
+         handGraphics.add(new VisualDefinition(new Point3D(0, 0, 0.2), new Sphere3DDefinition(0.01), new MaterialDefinition(ColorDefinitions.Orange())));
       }
 
-      setup(robotDescription);
+      setup(robotDefinition);
+      if (visualize)
+         scs.stopSimulationThread();
       createControllerCore();
 
       // Set to the same values as in the KinematicsToolboxController
@@ -346,7 +348,7 @@ public class RelativeEndEffectorControlTest
 
       PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_MID_RANGE);
-      JointAnglesWriter writer = new JointAnglesWriter(robot, desiredFullRobotModel.getLeft(), desiredFullRobotModel.getRight());
+      List<? extends JointBasics> allDesiredJoints = SubtreeStreams.fromChildren(rootBody).collect(Collectors.toList());
 
       for (double t = 0.0; t < 0.2; t += controlDT)
       {
@@ -366,14 +368,15 @@ public class RelativeEndEffectorControlTest
          }
 
          controllerCoreCommand.addInverseKinematicsCommand(privilegedConfigurationCommand);
-         controllerCore.submitControllerCoreCommand(controllerCoreCommand);
-         controllerCore.compute();
+         controllerCore.compute(controllerCoreCommand);
          KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCore.getControllerCoreOutput(),
                                                                        desiredFullRobotModel.getLeft(),
                                                                        desiredFullRobotModel.getRight());
-         writer.updateRobotConfigurationBasedOnFullRobotModel();
+
+         MultiBodySystemTools.copyJointsState(allDesiredJoints, robot.getAllJoints(), JointStateType.CONFIGURATION);
+
          if (visualize)
-            scs.tickAndUpdate();
+            scs.simulateNow(1);
       }
 
       for (double t = 0.0; t < 2.0; t += controlDT)
@@ -423,7 +426,7 @@ public class RelativeEndEffectorControlTest
          KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCore.getControllerCoreOutput(),
                                                                        desiredFullRobotModel.getLeft(),
                                                                        desiredFullRobotModel.getRight());
-         writer.updateRobotConfigurationBasedOnFullRobotModel();
+         MultiBodySystemTools.copyJointsState(allDesiredJoints, robot.getAllJoints(), JointStateType.CONFIGURATION);
 
          Twist twist = new Twist();
          rHandFrame.getTwistRelativeToOther(lHandFrame, twist);
@@ -433,7 +436,7 @@ public class RelativeEndEffectorControlTest
          leftRelativePose.setFromReferenceFrame(rHandFrame);
          rightRelativePose.setFromReferenceFrame(lHandFrame);
          if (visualize)
-            scs.tickAndUpdate();
+            scs.simulateNow(1);
 
          assertTrue(yDistance.getValue() > -1.0e-3);
       }

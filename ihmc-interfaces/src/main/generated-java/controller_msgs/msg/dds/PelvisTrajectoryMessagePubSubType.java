@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class PelvisTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.PelvisTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::PelvisTrajectoryMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "7e3f2fa5c3b282d8d987bd15525fed38cf20f4e129027d033c0f6235e524916c";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
@@ -48,7 +60,7 @@ public class PelvisTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -75,7 +87,7 @@ public class PelvisTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getCdrSerializedSize(data.getSe3Trajectory(), current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getCdrSerializedSize(data.getSe3Trajectory(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -91,7 +103,7 @@ public class PelvisTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       cdr.write_type_7(data.getEnableUserPelvisControlDuringWalking());
 
-      controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.write(data.getSe3Trajectory(), cdr);
+      ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType.write(data.getSe3Trajectory(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.PelvisTrajectoryMessage data, us.ihmc.idl.CDR cdr)
@@ -104,7 +116,7 @@ public class PelvisTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
       	
       data.setEnableUserPelvisControlDuringWalking(cdr.read_type_7());
       	
-      controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.read(data.getSe3Trajectory(), cdr);	
+      ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType.read(data.getSe3Trajectory(), cdr);	
 
    }
 
@@ -115,7 +127,7 @@ public class PelvisTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
       ser.write_type_7("force_execution", data.getForceExecution());
       ser.write_type_7("enable_user_pelvis_control", data.getEnableUserPelvisControl());
       ser.write_type_7("enable_user_pelvis_control_during_walking", data.getEnableUserPelvisControlDuringWalking());
-      ser.write_type_a("se3_trajectory", new controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getSe3Trajectory());
+      ser.write_type_a("se3_trajectory", new ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getSe3Trajectory());
 
    }
 
@@ -126,7 +138,7 @@ public class PelvisTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
       data.setForceExecution(ser.read_type_7("force_execution"));
       data.setEnableUserPelvisControl(ser.read_type_7("enable_user_pelvis_control"));
       data.setEnableUserPelvisControlDuringWalking(ser.read_type_7("enable_user_pelvis_control_during_walking"));
-      ser.read_type_a("se3_trajectory", new controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getSe3Trajectory());
+      ser.read_type_a("se3_trajectory", new ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getSe3Trajectory());
 
    }
 

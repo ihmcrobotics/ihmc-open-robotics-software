@@ -76,7 +76,7 @@ public abstract class SingleSupportState extends WalkingState
       if (!hasMinimumTimePassed.getBooleanValue())
          return false;
 
-      return hasMinimumTimePassed.getBooleanValue() && footSwitches.get(swingSide).hasFootHitGround();
+      return hasMinimumTimePassed.getBooleanValue() && footSwitches.get(swingSide).hasFootHitGroundFiltered();
    }
 
    protected abstract boolean hasMinimumTimePassed(double timeInState);

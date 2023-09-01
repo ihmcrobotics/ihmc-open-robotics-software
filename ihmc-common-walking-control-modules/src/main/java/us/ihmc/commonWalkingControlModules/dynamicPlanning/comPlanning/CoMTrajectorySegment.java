@@ -8,19 +8,23 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
 import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.robotics.time.TimeIntervalProvider;
 
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLarge;
+
 public class CoMTrajectorySegment implements FixedFramePositionTrajectoryGenerator, TimeIntervalProvider, Settable<CoMTrajectorySegment>
 {
-   private final FramePoint3D firstCoefficient = new FramePoint3D();
-   private final FramePoint3D secondCoefficient = new FramePoint3D();
-   private final FramePoint3D thirdCoefficient = new FramePoint3D();
-   private final FramePoint3D fourthCoefficient = new FramePoint3D();
-   private final FramePoint3D fifthCoefficient = new FramePoint3D();
-   private final FramePoint3D sixthCoefficient = new FramePoint3D();
+   private final Point3D firstCoefficient = new Point3D();
+   private final Point3D secondCoefficient = new Point3D();
+   private final Point3D thirdCoefficient = new Point3D();
+   private final Point3D fourthCoefficient = new Point3D();
+   private final Point3D fifthCoefficient = new Point3D();
+   private final Point3D sixthCoefficient = new Point3D();
 
    private final FramePoint3D comPosition = new FramePoint3D();
    private final FrameVector3D comVelocity = new FrameVector3D();
@@ -79,12 +83,12 @@ public class CoMTrajectorySegment implements FixedFramePositionTrajectoryGenerat
 
    public void setCoefficients(DMatrixRMaj coefficients, int startRow)
    {
-      setFirstCoefficient(ReferenceFrame.getWorldFrame(), coefficients.get(startRow, 0), coefficients.get(startRow, 1), coefficients.get(startRow, 2));
-      setSecondCoefficient(ReferenceFrame.getWorldFrame(), coefficients.get(startRow + 1, 0), coefficients.get(startRow + 1, 1), coefficients.get(startRow + 1, 2));
-      setThirdCoefficient(ReferenceFrame.getWorldFrame(), coefficients.get(startRow + 2, 0), coefficients.get(startRow + 2, 1), coefficients.get(startRow + 2, 2));
-      setFourthCoefficient(ReferenceFrame.getWorldFrame(), coefficients.get(startRow + 3, 0), coefficients.get(startRow + 3, 1), coefficients.get(startRow + 3, 2));
-      setFifthCoefficient(ReferenceFrame.getWorldFrame(), coefficients.get(startRow + 4, 0), coefficients.get(startRow + 4, 1), coefficients.get(startRow + 4, 2));
-      setSixthCoefficient(ReferenceFrame.getWorldFrame(), coefficients.get(startRow + 5, 0), coefficients.get(startRow + 5, 1), coefficients.get(startRow + 5, 2));
+      setFirstCoefficient(coefficients.get(startRow, 0), coefficients.get(startRow, 1), coefficients.get(startRow, 2));
+      setSecondCoefficient(coefficients.get(startRow + 1, 0), coefficients.get(startRow + 1, 1), coefficients.get(startRow + 1, 2));
+      setThirdCoefficient(coefficients.get(startRow + 2, 0), coefficients.get(startRow + 2, 1), coefficients.get(startRow + 2, 2));
+      setFourthCoefficient(coefficients.get(startRow + 3, 0), coefficients.get(startRow + 3, 1), coefficients.get(startRow + 3, 2));
+      setFifthCoefficient(coefficients.get(startRow + 4, 0), coefficients.get(startRow + 4, 1), coefficients.get(startRow + 4, 2));
+      setSixthCoefficient(coefficients.get(startRow + 5, 0), coefficients.get(startRow + 5, 1), coefficients.get(startRow + 5, 2));
    }
 
    public void setCoefficients(CoMTrajectorySegment other)
@@ -97,12 +101,12 @@ public class CoMTrajectorySegment implements FixedFramePositionTrajectoryGenerat
                       other.sixthCoefficient);
    }
 
-   public void setCoefficients(FramePoint3DReadOnly firstCoefficient,
-                               FramePoint3DReadOnly secondCoefficient,
-                               FramePoint3DReadOnly thirdCoefficient,
-                               FramePoint3DReadOnly fourthCoefficient,
-                               FramePoint3DReadOnly fifthCoefficient,
-                               FramePoint3DReadOnly sixthCoefficient)
+   public void setCoefficients(Point3DReadOnly firstCoefficient,
+                               Point3DReadOnly secondCoefficient,
+                               Point3DReadOnly thirdCoefficient,
+                               Point3DReadOnly fourthCoefficient,
+                               Point3DReadOnly fifthCoefficient,
+                               Point3DReadOnly sixthCoefficient)
    {
       setFirstCoefficient(firstCoefficient);
       setSecondCoefficient(secondCoefficient);
@@ -112,64 +116,64 @@ public class CoMTrajectorySegment implements FixedFramePositionTrajectoryGenerat
       setSixthCoefficient(sixthCoefficient);
    }
 
-   public void setFirstCoefficient(FramePoint3DReadOnly firstCoefficient)
+   public void setFirstCoefficient(Point3DReadOnly firstCoefficient)
    {
-      setFirstCoefficient(firstCoefficient.getReferenceFrame(), firstCoefficient.getX(), firstCoefficient.getY(), firstCoefficient.getZ());
+      setFirstCoefficient(firstCoefficient.getX(), firstCoefficient.getY(), firstCoefficient.getZ());
    }
 
-   public void setFirstCoefficient(ReferenceFrame frame, double x, double y, double z)
+   public void setFirstCoefficient(double x, double y, double z)
    {
-      firstCoefficient.set(frame, x, y, z);
+      firstCoefficient.set(x, y, z);
    }
 
-   public void setSecondCoefficient(FramePoint3DReadOnly secondCoefficient)
+   public void setSecondCoefficient(Point3DReadOnly secondCoefficient)
    {
       this.secondCoefficient.set(secondCoefficient);
    }
 
-   public void setSecondCoefficient(ReferenceFrame frame, double x, double y, double z)
+   public void setSecondCoefficient(double x, double y, double z)
    {
-      secondCoefficient.set(frame, x, y, z);
+      secondCoefficient.set(x, y, z);
    }
 
-   public void setThirdCoefficient(FramePoint3DReadOnly thirdCoefficient)
+   public void setThirdCoefficient(Point3DReadOnly thirdCoefficient)
    {
       this.thirdCoefficient.set(thirdCoefficient);
    }
 
-   public void setThirdCoefficient(ReferenceFrame frame, double x, double y, double z)
+   public void setThirdCoefficient(double x, double y, double z)
    {
-      thirdCoefficient.set(frame, x, y, z);
+      thirdCoefficient.set(x, y, z);
    }
 
-   public void setFourthCoefficient(FramePoint3DReadOnly fourthCoefficient)
+   public void setFourthCoefficient(Point3DReadOnly fourthCoefficient)
    {
       this.fourthCoefficient.set(fourthCoefficient);
    }
 
-   public void setFourthCoefficient(ReferenceFrame frame, double x, double y, double z)
+   public void setFourthCoefficient(double x, double y, double z)
    {
-      fourthCoefficient.set(frame, x, y, z);
+      fourthCoefficient.set(x, y, z);
    }
 
-   public void setFifthCoefficient(FramePoint3DReadOnly fifthCoefficient)
+   public void setFifthCoefficient(Point3DReadOnly fifthCoefficient)
    {
       this.fifthCoefficient.set(fifthCoefficient);
    }
 
-   public void setFifthCoefficient(ReferenceFrame frame, double x, double y, double z)
+   public void setFifthCoefficient(double x, double y, double z)
    {
-      fifthCoefficient.set(frame, x, y, z);
+      fifthCoefficient.set(x, y, z);
    }
 
-   public void setSixthCoefficient(FramePoint3DReadOnly sixthCoefficient)
+   public void setSixthCoefficient(Point3DReadOnly sixthCoefficient)
    {
       this.sixthCoefficient.set(sixthCoefficient);
    }
 
-   public void setSixthCoefficient(ReferenceFrame frame, double x, double y, double z)
+   public void setSixthCoefficient(double x, double y, double z)
    {
-      sixthCoefficient.set(frame, x, y, z);
+      sixthCoefficient.set(x, y, z);
    }
 
    private final FramePoint3D modifiedFourthCoefficient = new FramePoint3D();
@@ -276,16 +280,44 @@ public class CoMTrajectorySegment implements FixedFramePositionTrajectoryGenerat
                        FixedFramePoint3DBasics dcmPositionToPack,
                        FixedFrameVector3DBasics dcmVelocityToPack,
                        FixedFramePoint3DBasics vrpPositionToPack,
-                       FixedFrameVector3DBasics vrpVelocityTPack)
+                       FixedFrameVector3DBasics vrpVelocityToPack)
    {
       currentTime = time;
-      computeCoMPosition(time, comPositionToPack);
-      computeCoMVelocity(time, comVelocityToPack);
-      computeCoMAcceleration(time, comAccelerationToPack);
 
-      CoMTrajectoryPlannerTools.constructDesiredVRPVelocity(vrpVelocityTPack, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, fifthCoefficient,
-                                                            sixthCoefficient, time, omega);
+      double exponential = Math.min(sufficientlyLarge, Math.exp(omega * time));
+      double negativeExponential = 1.0 / exponential;
+      double t = Math.min(sufficientlyLarge, time);
+      double t2 = Math.min(sufficientlyLarge, time * time);
+      double t3 = Math.min(sufficientlyLarge, time * t2);
 
+      double omega2 = omega * omega;
+
+      comPositionToPack.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      comPositionToPack.setAndScale(exponential, firstCoefficient);
+      comPositionToPack.scaleAdd(negativeExponential, secondCoefficient, comPositionToPack);
+      comPositionToPack.scaleAdd(t3, thirdCoefficient, comPositionToPack);
+      comPositionToPack.scaleAdd(t2, fourthCoefficient, comPositionToPack);
+      comPositionToPack.scaleAdd(t, fifthCoefficient, comPositionToPack);
+      comPositionToPack.add(sixthCoefficient);
+
+      comVelocityToPack.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      comVelocityToPack.setAndScale(omega * exponential, firstCoefficient);
+      comVelocityToPack.scaleAdd(-omega * negativeExponential, secondCoefficient, comVelocityToPack);
+      comVelocityToPack.scaleAdd(3.0 * t2, thirdCoefficient, comVelocityToPack);
+      comVelocityToPack.scaleAdd(2.0 * t, fourthCoefficient, comVelocityToPack);
+      comVelocityToPack.add(fifthCoefficient);
+
+      comAccelerationToPack.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      comAccelerationToPack.setAndScale(omega2 * exponential, firstCoefficient);
+      comAccelerationToPack.scaleAdd(omega2 * negativeExponential, secondCoefficient, comAccelerationToPack);
+      comAccelerationToPack.scaleAdd(6.0 * t, thirdCoefficient, comAccelerationToPack);
+      comAccelerationToPack.scaleAdd(2.0, fourthCoefficient, comAccelerationToPack);
+
+      vrpVelocityToPack.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      vrpVelocityToPack.setAndScale(t3 - 6.0 * t / omega2, thirdCoefficient);
+      vrpVelocityToPack.scaleAdd(t2 - 2.0 / omega2, fourthCoefficient, vrpVelocityToPack);
+      vrpVelocityToPack.scaleAdd(t, fifthCoefficient, vrpVelocityToPack);
+      vrpVelocityToPack.add(sixthCoefficient);
 
       CapturePointTools.computeCapturePointPosition(comPositionToPack, comVelocityToPack, omega, dcmPositionToPack);
       CapturePointTools.computeCapturePointVelocity(comVelocityToPack, comAccelerationToPack, omega, dcmVelocityToPack);
@@ -330,32 +362,32 @@ public class CoMTrajectorySegment implements FixedFramePositionTrajectoryGenerat
       return vrpVelocity;
    }
 
-   public FramePoint3DReadOnly getFirstCoefficient()
+   public Point3DReadOnly getFirstCoefficient()
    {
       return firstCoefficient;
    }
 
-   public FramePoint3DReadOnly getSecondCoefficient()
+   public Point3DReadOnly getSecondCoefficient()
    {
       return secondCoefficient;
    }
 
-   public FramePoint3DReadOnly getThirdCoefficient()
+   public Point3DReadOnly getThirdCoefficient()
    {
       return thirdCoefficient;
    }
 
-   public FramePoint3DReadOnly getFourthCoefficient()
+   public Point3DReadOnly getFourthCoefficient()
    {
       return fourthCoefficient;
    }
 
-   public FramePoint3DReadOnly getFifthCoefficient()
+   public Point3DReadOnly getFifthCoefficient()
    {
       return fifthCoefficient;
    }
 
-   public FramePoint3DReadOnly getSixthCoefficient()
+   public Point3DReadOnly getSixthCoefficient()
    {
       return sixthCoefficient;
    }

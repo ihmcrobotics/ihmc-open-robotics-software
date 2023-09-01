@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class PelvisHeightTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.PelvisHeightTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::PelvisHeightTrajectoryMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "a3556820a1dab29433957adff61c8b6d05b8f65dd7c3733f3ec4f6f49d690851";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
@@ -46,7 +58,7 @@ public class PelvisHeightTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -70,7 +82,7 @@ public class PelvisHeightTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getCdrSerializedSize(data.getEuclideanTrajectory(), current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getCdrSerializedSize(data.getEuclideanTrajectory(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -84,7 +96,7 @@ public class PelvisHeightTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_7(data.getEnableUserPelvisControlDuringWalking());
 
-      controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.write(data.getEuclideanTrajectory(), cdr);
+      ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.write(data.getEuclideanTrajectory(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.PelvisHeightTrajectoryMessage data, us.ihmc.idl.CDR cdr)
@@ -95,7 +107,7 @@ public class PelvisHeightTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
       	
       data.setEnableUserPelvisControlDuringWalking(cdr.read_type_7());
       	
-      controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.read(data.getEuclideanTrajectory(), cdr);	
+      ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.read(data.getEuclideanTrajectory(), cdr);	
 
    }
 
@@ -105,7 +117,7 @@ public class PelvisHeightTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_7("enable_user_pelvis_control", data.getEnableUserPelvisControl());
       ser.write_type_7("enable_user_pelvis_control_during_walking", data.getEnableUserPelvisControlDuringWalking());
-      ser.write_type_a("euclidean_trajectory", new controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getEuclideanTrajectory());
+      ser.write_type_a("euclidean_trajectory", new ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getEuclideanTrajectory());
 
    }
 
@@ -115,7 +127,7 @@ public class PelvisHeightTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setEnableUserPelvisControl(ser.read_type_7("enable_user_pelvis_control"));
       data.setEnableUserPelvisControlDuringWalking(ser.read_type_7("enable_user_pelvis_control_during_walking"));
-      ser.read_type_a("euclidean_trajectory", new controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getEuclideanTrajectory());
+      ser.read_type_a("euclidean_trajectory", new ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getEuclideanTrajectory());
 
    }
 

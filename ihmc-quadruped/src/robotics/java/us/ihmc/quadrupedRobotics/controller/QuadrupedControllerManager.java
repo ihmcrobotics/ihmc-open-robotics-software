@@ -14,7 +14,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandPrepControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandReadyControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions.ControllerFailedTransition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions.QuadrupedFeetLoadedToWalkingStandTransition;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -29,8 +28,10 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controller.states.QuadrupedExitWalkingControllerState;
+import us.ihmc.quadrupedRobotics.controller.states.QuadrupedFeetLoadedToWalkingStandTransition;
 import us.ihmc.quadrupedRobotics.controller.states.QuadrupedSitDownControllerState;
 import us.ihmc.quadrupedRobotics.controller.states.QuadrupedWalkingControllerState;
+import us.ihmc.quadrupedRobotics.estimator.footSwitch.QuadrupedFootSwitchInterface;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.output.JointIntegratorComponent;
@@ -41,7 +42,6 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -185,9 +185,9 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
    @Override
    public void doControl()
    {
-      QuadrantDependentList<FootSwitchInterface> footSwitches = controllerToolbox.getRuntimeEnvironment().getFootSwitches();
+      QuadrantDependentList<QuadrupedFootSwitchInterface> footSwitches = controllerToolbox.getRuntimeEnvironment().getFootSwitches();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         footSwitches.get(robotQuadrant).updateMeasurement();
+         footSwitches.get(robotQuadrant).update();
 
       if (commandInputManager.isNewCommandAvailable(HighLevelControllerStateCommand.class))
       {
@@ -325,11 +325,13 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
                                                                                                  standReadyState,
                                                                                                  walkingState,
                                                                                                  controlledJoints,
-                                                                                                 highLevelControllerParameters);
+                                                                                                 highLevelControllerParameters,
+                                                                                                 commandInputManager);
       SmoothTransitionControllerState exitWalkingState = new QuadrupedExitWalkingControllerState(walkingState,
                                                                                                  freezeState,
                                                                                                  controlledJoints,
-                                                                                                 highLevelControllerParameters);
+                                                                                                 highLevelControllerParameters,
+                                                                                                 commandInputManager);
 
       QuadrupedSitDownControllerState sitDownState = new QuadrupedSitDownControllerState(sitDownStateName,
                                                                                          controlledJoints,

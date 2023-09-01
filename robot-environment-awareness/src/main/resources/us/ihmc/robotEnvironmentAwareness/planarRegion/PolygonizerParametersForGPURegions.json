@@ -1,0 +1,34 @@
+{
+  "title" : "Polygonizer parameters for GPU regions",
+  "Concave hull threshold" : {
+    "value" : 0.15,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.0
+  },
+  "Min number of nodes" : {
+    "value" : 10,
+    "lowerBound" : 0,
+    "upperBound" : 100
+  },
+  "Shallow angle threshold" : {
+    "value" : 0.0174533,
+    "lowerBound" : 0.0,
+    "upperBound" : 6.2831853
+  },
+  "Peak angle threshold" : {
+    "value" : 2.96706,
+    "lowerBound" : 0.0,
+    "upperBound" : 6.2831853
+  },
+  "Length threshold" : {
+    "value" : 0.08,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.0
+  },
+  "Depth threshold" : {
+    "value" : 0.1,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.0
+  },
+  "Cut narrow passage" : false
+}

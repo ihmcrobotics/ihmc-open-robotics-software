@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import controller_msgs.msg.dds.ManipulationAbortedStatus;
@@ -15,8 +16,47 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AutomaticManipulationAbortCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestHybridJointspaceTaskspaceTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationsCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootLoadBearingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandHybridJointspaceTaskspaceTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandLoadBearingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandWrenchTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadHybridJointspaceTaskspaceTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LegTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LoadBearingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckDesiredAccelerationsCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PrepareForLocomotionCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineDesiredAccelerationsCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StepConstraintRegionCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StepConstraintsListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WrenchTrajectoryControllerCommand;
+import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
+import us.ihmc.humanoidRobotics.communication.fastWalkingAPI.FastWalkingGaitParametersCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -37,6 +77,8 @@ public class WalkingCommandConsumer
    private final YoDouble timeOfLastManipulationAbortRequest = new YoDouble("timeOfLastManipulationAbortRequest", registry);
    private final YoDouble manipulationIgnoreInputsDurationAfterAbort = new YoDouble("manipulationIgnoreInputsDurationAfterAbort", registry);
    private final YoDouble allowManipulationAbortAfterThisTime = new YoDouble("allowManipulationAbortAfterThisTime", registry);
+
+   private final YoBoolean commandConsumerHasFootsteps = new YoBoolean("commandConsumerHasFootsteps", registry);
 
    private final YoDouble yoTime;
    private final WalkingMessageHandler walkingMessageHandler;
@@ -62,8 +104,15 @@ public class WalkingCommandConsumer
                                  WalkingControllerParameters walkingControllerParameters,
                                  YoRegistry parentRegistry)
    {
-      this(commandInputManager, statusMessageOutputManager, controllerToolbox.getWalkingMessageHandler(), controllerToolbox.getYoTime(),
-           controllerToolbox.getFullRobotModel(), controllerToolbox.getPelvisZUpFrame(), managerFactory, walkingControllerParameters, parentRegistry);
+      this(commandInputManager,
+           statusMessageOutputManager,
+           controllerToolbox.getWalkingMessageHandler(),
+           controllerToolbox.getYoTime(),
+           controllerToolbox.getFullRobotModel(),
+           controllerToolbox.getPelvisZUpFrame(),
+           managerFactory,
+           walkingControllerParameters,
+           parentRegistry);
    }
 
    public WalkingCommandConsumer(CommandInputManager commandInputManager,
@@ -78,9 +127,42 @@ public class WalkingCommandConsumer
    {
       this.walkingMessageHandler = walkingMessageHandler;
       this.yoTime = yoTime;
-
-      this.commandConsumerWithDelayBuffers = new CommandConsumerWithDelayBuffers(commandInputManager, yoTime);
       this.statusMessageOutputManager = statusMessageOutputManager;
+
+      List<Class<? extends Command<?, ?>>> commandsToRegister = new ArrayList<>();
+      commandsToRegister.add(HeadTrajectoryCommand.class);
+      commandsToRegister.add(NeckTrajectoryCommand.class);
+      commandsToRegister.add(NeckDesiredAccelerationsCommand.class);
+      commandsToRegister.add(HeadHybridJointspaceTaskspaceTrajectoryCommand.class);
+      commandsToRegister.add(ChestTrajectoryCommand.class);
+      commandsToRegister.add(SpineTrajectoryCommand.class);
+      commandsToRegister.add(SpineDesiredAccelerationsCommand.class);
+      commandsToRegister.add(ChestHybridJointspaceTaskspaceTrajectoryCommand.class);
+      commandsToRegister.add(PelvisHeightTrajectoryCommand.class);
+      commandsToRegister.add(GoHomeCommand.class);
+      commandsToRegister.add(PelvisOrientationTrajectoryCommand.class);
+      commandsToRegister.add(PelvisTrajectoryCommand.class);
+      commandsToRegister.add(HandTrajectoryCommand.class);
+      commandsToRegister.add(HandWrenchTrajectoryCommand.class);
+      commandsToRegister.add(ArmTrajectoryCommand.class);
+      commandsToRegister.add(ArmDesiredAccelerationsCommand.class);
+      commandsToRegister.add(HandHybridJointspaceTaskspaceTrajectoryCommand.class);
+      commandsToRegister.add(AutomaticManipulationAbortCommand.class);
+      commandsToRegister.add(FootLoadBearingCommand.class);
+      commandsToRegister.add(HandLoadBearingCommand.class);
+      commandsToRegister.add(StopAllTrajectoryCommand.class);
+      commandsToRegister.add(LegTrajectoryCommand.class);
+      commandsToRegister.add(FootTrajectoryCommand.class);
+      commandsToRegister.add(FootstepDataListCommand.class);
+      commandsToRegister.add(PauseWalkingCommand.class);
+      commandsToRegister.add(MomentumTrajectoryCommand.class);
+      commandsToRegister.add(CenterOfMassTrajectoryCommand.class);
+      commandsToRegister.add(AbortWalkingCommand.class);
+      commandsToRegister.add(PrepareForLocomotionCommand.class);
+      commandsToRegister.add(DirectionalControlInputCommand.class);
+      commandsToRegister.add(FastWalkingGaitParametersCommand.class);
+
+      commandConsumerWithDelayBuffers = new CommandConsumerWithDelayBuffers(commandInputManager, commandsToRegister, yoTime);
 
       RigidBodyBasics head = fullRobotModel.getHead();
       RigidBodyBasics chest = fullRobotModel.getChest();
@@ -140,8 +222,16 @@ public class WalkingCommandConsumer
       allowManipulationAbortAfterThisTime.set(yoTime.getDoubleValue() + durationToAvoidAbort);
    }
 
+   public void clearAllCommands()
+   {
+      commandConsumerWithDelayBuffers.clearAllCommands();
+   }
+
    public void update()
    {
+      // check to see if there are any footsteps available.
+      commandConsumerHasFootsteps.set(commandConsumerWithDelayBuffers.isNewCommandAvailable(FootstepDataListCommand.class));
+
       commandConsumerWithDelayBuffers.update();
    }
 
@@ -340,6 +430,11 @@ public class WalkingCommandConsumer
             JointspaceTrajectoryCommand jointspaceTrajectory = command.getJointspaceTrajectory();
             jointspaceTrajectory.setSequenceId(command.getSequenceId());
             handManager.handleJointspaceTrajectoryCommand(jointspaceTrajectory);
+
+            if (command.getRequestedMode() == ArmTrajectoryCommand.RequestedMode.POSITION_CONTROL)
+               handManager.setEnableDirectJointPositionControl(true);
+            if (command.getRequestedMode() == ArmTrajectoryCommand.RequestedMode.TORQUE_CONTROL)
+               handManager.setEnableDirectJointPositionControl(false);
          }
       }
 
@@ -483,9 +578,9 @@ public class WalkingCommandConsumer
          walkingMessageHandler.handleFootTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewCommands(FootTrajectoryCommand.class));
       }
 
-      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PauseWalkingCommand.class))
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(LegTrajectoryCommand.class))
       {
-         walkingMessageHandler.handlePauseWalkingCommand(commandConsumerWithDelayBuffers.pollNewestCommand(PauseWalkingCommand.class));
+         walkingMessageHandler.handleLegTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewCommands(LegTrajectoryCommand.class));
       }
 
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(FootstepDataListCommand.class))
@@ -493,9 +588,9 @@ public class WalkingCommandConsumer
          walkingMessageHandler.handleFootstepDataListCommand(commandConsumerWithDelayBuffers.pollNewestCommand(FootstepDataListCommand.class));
       }
 
-      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(AdjustFootstepCommand.class))
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PauseWalkingCommand.class))
       {
-         walkingMessageHandler.handleAdjustFootstepCommand(commandConsumerWithDelayBuffers.pollNewestCommand(AdjustFootstepCommand.class));
+         walkingMessageHandler.handlePauseWalkingCommand(commandConsumerWithDelayBuffers.pollNewestCommand(PauseWalkingCommand.class));
       }
 
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(MomentumTrajectoryCommand.class))
@@ -507,6 +602,10 @@ public class WalkingCommandConsumer
       {
          walkingMessageHandler.handleComTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(CenterOfMassTrajectoryCommand.class));
       }
+
+      // clear the velocity commands since they aren't used anymore.
+      commandConsumerWithDelayBuffers.clearCommands(DirectionalControlInputCommand.class);
+      commandConsumerWithDelayBuffers.clearCommands(FastWalkingGaitParametersCommand.class);
    }
 
    public void consumeAbortWalkingCommands(YoBoolean abortWalkingRequested)
@@ -516,37 +615,6 @@ public class WalkingCommandConsumer
       abortWalkingRequested.set(commandConsumerWithDelayBuffers.pollNewestCommand(AbortWalkingCommand.class).isAbortWalkingRequested());
    }
 
-   public void consumeEnvironmentalModelingCommands()
-   {
-      consumePlanarRegionsListCommand();
-      consumePlanarRegionStepConstraintCommand();
-      consumePlanarRegionStepConstraintsListCommand();
-
-   }
-   public void consumePlanarRegionsListCommand()
-   {
-      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PlanarRegionsListCommand.class))
-      {
-         walkingMessageHandler.handlePlanarRegionsListCommand(commandConsumerWithDelayBuffers.pollNewestCommand(PlanarRegionsListCommand.class));
-      }
-   }
-
-   public void consumePlanarRegionStepConstraintCommand()
-   {
-      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(StepConstraintRegionCommand.class))
-      {
-         walkingMessageHandler.handleStepConstraintRegionCommand(commandConsumerWithDelayBuffers.pollNewestCommand(StepConstraintRegionCommand.class));
-      }
-   }
-
-   public void consumePlanarRegionStepConstraintsListCommand()
-   {
-      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(StepConstraintsListCommand.class))
-      {
-         walkingMessageHandler.handleStepConstraintsListCommand(commandConsumerWithDelayBuffers.pollNewestCommand(StepConstraintsListCommand.class));
-      }
-   }
-   
    public void consumePrepareForLocomotionCommands()
    {
       if (!commandConsumerWithDelayBuffers.isNewCommandAvailable(PrepareForLocomotionCommand.class))

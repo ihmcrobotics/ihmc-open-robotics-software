@@ -86,29 +86,35 @@ public class ProcessTools
       return spawnString;
    }
 
-   public static String execSimpleCommand(String command)
+   public static String execSimpleCommand(String command) throws IOException, InterruptedException
    {
       Runtime runtime = Runtime.getRuntime();
+      Process process = runtime.exec(command);
+      BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+      StringBuilder output = new StringBuilder();
+      int read;
+      while ((read = bufferedReader.read()) > -1)
+      {
+         output.append((char) read);
+      }
+
+      process.waitFor();
+
+      return output.toString();
+   }
+
+   public static String execSimpleCommandSafe(String command)
+   {
       try
       {
-         Process process = runtime.exec(command);
-         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-         StringBuilder output = new StringBuilder();
-         int read;
-         while ((read = bufferedReader.read()) > -1)
-         {
-            output.append((char) read);
-         }
-
-         process.waitFor();
-
-         return output.toString();
+         return execSimpleCommand(command);
       }
-      catch (IOException |InterruptedException e)
+      catch (IOException | InterruptedException e)
       {
          e.printStackTrace();
       }
+
       return null;
    }
 

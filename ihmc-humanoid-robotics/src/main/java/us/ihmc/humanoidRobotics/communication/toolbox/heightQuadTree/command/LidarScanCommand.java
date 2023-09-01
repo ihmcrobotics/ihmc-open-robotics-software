@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command;
 
-import controller_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;

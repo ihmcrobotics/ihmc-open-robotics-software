@@ -63,6 +63,7 @@ import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.robotEnvironmentAwareness.geometry.SimpleConcaveHullFactory.ConcaveHullFactoryResult;
 import us.ihmc.robotEnvironmentAwareness.geometry.SimpleConcaveHullFactory.ConcaveHullVariables;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.IntersectionEstimationParameters;
@@ -74,7 +75,7 @@ import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationRawDataImporter;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 
-public class PolygonizerVisualizer extends Application
+public class PolygonizerVisualizer extends ApplicationNoModule
 {
    private static final boolean VISUALIZE_POINT_CLOUD = true;
    private static final boolean VISUALIZE_DELAUNAY_TRIANGULATION = true;

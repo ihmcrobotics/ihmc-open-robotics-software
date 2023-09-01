@@ -5,8 +5,10 @@ import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands
 import controller_msgs.msg.dds.*;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import toolbox_msgs.msg.dds.ExternalForceEstimationOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.contact.particleFilter.ContactParticleFilter;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
@@ -374,7 +376,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
          oneDoFJoints[i].setQd(newJointVelocities.get(i));
       }
 
-      rootJoint.setJointConfiguration(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootTranslation());
+      rootJoint.setJointConfiguration(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootPosition());
       rootJoint.setJointLinearVelocity(robotConfigurationData.getPelvisLinearVelocity());
       rootJoint.setJointAngularVelocity(robotConfigurationData.getPelvisAngularVelocity());
 

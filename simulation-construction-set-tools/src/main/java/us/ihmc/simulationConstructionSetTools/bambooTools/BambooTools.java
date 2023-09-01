@@ -26,13 +26,16 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.simulationConstructionSetTools.util.gui.GUIMessageFrame;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class BambooTools
 {
-   private final static String[] possibleRootDirectoriesForBambooDataAndVideos = new String[] {"C:/videos/", "D:/BambooDataAndVideos/",
-         "../BambooDataAndVideos/", "~/.ihmc/bamboo-logs"};
+   private final static String[] possibleRootDirectoriesForBambooDataAndVideos = new String[] {"C:/videos/",
+                                                                                               "D:/BambooDataAndVideos/",
+                                                                                               "../BambooDataAndVideos/",
+                                                                                               "~/.ihmc/bamboo-logs"};
 
    private final static String eraseableBambooDataAndVideosDirectoryLinux = "~/.ihmc/bamboo-logs";
    private final static String eraseableBambooDataAndVideosDirectoryWindows = "C:/videos/";
@@ -96,6 +99,16 @@ public class BambooTools
    }
 
    public static void createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(String simplifiedRobotModelName,
+                                                                                         SimulationConstructionSet2 scs,
+                                                                                         int additionalStackDepthForRelevantCallingMethod)
+   {
+      createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(simplifiedRobotModelName,
+                                                                         fromSCS2(scs),
+                                                                         additionalStackDepthForRelevantCallingMethod,
+                                                                         false);
+   }
+
+   public static void createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(String simplifiedRobotModelName,
                                                                                          VideoAndDataExporter scs,
                                                                                          int additionalStackDepthForRelevantCallingMethod,
                                                                                          boolean showWindows)
@@ -119,6 +132,11 @@ public class BambooTools
    public static void createVideoWithDateTimeAndStoreInDefaultDirectory(SimulationConstructionSet scs, String videoName)
    {
       createVideoWithDateTimeAndStoreInDefaultDirectory(fromSCS(scs), videoName, scs.getSimulationConstructionSetParameters().getShowWindows());
+   }
+
+   public static void createVideoWithDateTimeAndStoreInDefaultDirectory(SimulationConstructionSet2 scs, String videoName)
+   {
+      createVideoWithDateTimeAndStoreInDefaultDirectory(fromSCS2(scs), videoName, false);
    }
 
    public static void createVideoWithDateTimeAndStoreInDefaultDirectory(VideoAndDataExporter scs, String videoName, boolean showWindows)
@@ -710,6 +728,31 @@ public class BambooTools
          public File createVideo(String string)
          {
             return scs.createVideo(string);
+         }
+      };
+   }
+
+   private static VideoAndDataExporter fromSCS2(SimulationConstructionSet2 scs)
+   {
+      return new VideoAndDataExporter()
+      {
+         @Override
+         public void writeData(File dataFile)
+         {
+         }
+
+         @Override
+         public void gotoOutPointNow()
+         {
+            scs.gotoBufferOutPoint();
+         }
+
+         @Override
+         public File createVideo(String string)
+         {
+            File videoFile = new File(string);
+            scs.exportVideo(videoFile);
+            return videoFile;
          }
       };
    }

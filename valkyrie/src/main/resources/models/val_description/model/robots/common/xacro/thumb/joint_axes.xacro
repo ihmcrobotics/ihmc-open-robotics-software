@@ -1,9 +1,0 @@
-<?xml version="1.0" ?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="thumb_joint_rotation_axes">
-
-<xacro:property name="ThumbRollRotationAxis" value="0 1 0"/>
-<xacro:property name="ThumbPitch1RotationAxis" value="1 0 0"/>
-<xacro:property name="ThumbPitch2RotationAxis" value="1 0 0"/>
-<xacro:property name="ThumbPitch3RotationAxis" value="1 0 0"/>
-
-</robot>

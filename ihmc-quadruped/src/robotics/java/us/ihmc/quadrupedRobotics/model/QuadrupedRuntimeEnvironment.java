@@ -1,8 +1,11 @@
 package us.ihmc.quadrupedRobotics.model;
 
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.quadrupedRobotics.estimator.footSwitch.QuadrupedFootSwitchInterface;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedFallDetectionParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedPrivilegedConfigurationParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedSitDownParameters;
@@ -12,13 +15,10 @@ import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
-import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.List;
 
 public class QuadrupedRuntimeEnvironment
 {
@@ -42,20 +42,30 @@ public class QuadrupedRuntimeEnvironment
    private final QuadrantDependentList<ContactablePlaneBody> contactableFeet;
    private final List<ContactablePlaneBody> contactablePlaneBodies;
    // TODO: These are used to provide feedback from the controllers to the state estimator. Can they be moved somewhere else?
-   private final QuadrantDependentList<FootSwitchInterface> footSwitches;
-   private final QuadrantDependentList<FootSwitchInterface> estimatorFootSwitches;
+   private final QuadrantDependentList<QuadrupedFootSwitchInterface> footSwitches;
+   private final QuadrantDependentList<QuadrupedFootSwitchInterface> estimatorFootSwitches;
 
    private DCMPlannerInterface comTrajectoryPlanner = null;
 
-   public QuadrupedRuntimeEnvironment(double controlDT, YoDouble robotTimestamp, FullQuadrupedRobotModel fullRobotModel,
-                                      ControllerCoreOptimizationSettings controllerCoreOptimizationSettings, JointDesiredOutputList jointDesiredOutputList,
-                                      YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
-                                      QuadrantDependentList<ContactablePlaneBody> contactableFeet, List<ContactablePlaneBody> contactablePlaneBodies,
-                                      CenterOfMassDataHolderReadOnly centerOfMassDataHolder, QuadrantDependentList<FootSwitchInterface> footSwitches,
-                                      QuadrantDependentList<FootSwitchInterface> estimatorFootSwitches,
-                                      double gravity, HighLevelControllerParameters highLevelControllerParameters, DCMPlannerParameters dcmPlannerParameters,
-                                      QuadrupedSitDownParameters sitDownParameters, QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters,
-                                      QuadrupedFallDetectionParameters fallDetectionParameters, RobotMotionStatusHolder robotMotionStatusHolder)
+   public QuadrupedRuntimeEnvironment(double controlDT,
+                                      YoDouble robotTimestamp,
+                                      FullQuadrupedRobotModel fullRobotModel,
+                                      ControllerCoreOptimizationSettings controllerCoreOptimizationSettings,
+                                      JointDesiredOutputList jointDesiredOutputList,
+                                      YoRegistry parentRegistry,
+                                      YoGraphicsListRegistry graphicsListRegistry,
+                                      QuadrantDependentList<ContactablePlaneBody> contactableFeet,
+                                      List<ContactablePlaneBody> contactablePlaneBodies,
+                                      CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
+                                      QuadrantDependentList<QuadrupedFootSwitchInterface> footSwitches,
+                                      QuadrantDependentList<QuadrupedFootSwitchInterface> estimatorFootSwitches,
+                                      double gravity,
+                                      HighLevelControllerParameters highLevelControllerParameters,
+                                      DCMPlannerParameters dcmPlannerParameters,
+                                      QuadrupedSitDownParameters sitDownParameters,
+                                      QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters,
+                                      QuadrupedFallDetectionParameters fallDetectionParameters,
+                                      RobotMotionStatusHolder robotMotionStatusHolder)
    {
       this.controlDT = controlDT;
       this.robotTimestamp = robotTimestamp;
@@ -118,12 +128,12 @@ public class QuadrupedRuntimeEnvironment
       return controllerCoreOptimizationSettings;
    }
 
-   public QuadrantDependentList<FootSwitchInterface> getFootSwitches()
+   public QuadrantDependentList<QuadrupedFootSwitchInterface> getFootSwitches()
    {
       return footSwitches;
    }
 
-   public QuadrantDependentList<FootSwitchInterface> getEstimatorFootSwitches()
+   public QuadrantDependentList<QuadrupedFootSwitchInterface> getEstimatorFootSwitches()
    {
       return estimatorFootSwitches;
    }

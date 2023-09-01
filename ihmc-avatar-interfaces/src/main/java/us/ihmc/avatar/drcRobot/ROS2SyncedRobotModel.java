@@ -24,7 +24,7 @@ public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
 
    public ROS2SyncedRobotModel(DRCRobotModel robotModel, ROS2NodeInterface ros2Node, FullHumanoidRobotModel fullRobotModel)
    {
-      super(fullRobotModel, robotModel.getHandModels(), robotModel.getSensorInformation());
+      super(robotModel, fullRobotModel, robotModel.getHandModels(), robotModel.getSensorInformation());
 
       robotConfigurationDataInput = new ROS2Input<>(ros2Node,
                                                     RobotConfigurationData.class,
@@ -40,10 +40,10 @@ public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
       for (RobotSide robotSide : RobotSide.values)
       {
          handJointAnglePacketInputs.set(robotSide, new ROS2Input<>(ros2Node,
-                                                     HandJointAnglePacket.class,
-                                                     ROS2Tools.getHandJointAnglePacketTopic(robotModel.getSimpleRobotName()),
-                                                     null,
-                                                     message -> robotSide.toByte() == message.getRobotSide()));
+                                                                   HandJointAnglePacket.class,
+                                                                   ROS2Tools.getHandJointAnglePacketTopic(robotModel.getSimpleRobotName()),
+                                                                   null,
+                                                                   message -> robotSide.toByte() == message.getRobotSide()));
       }
    }
 
@@ -72,5 +72,10 @@ public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
    public void addRobotConfigurationDataReceivedCallback(Consumer<RobotConfigurationData> callback)
    {
       robotConfigurationDataInput.addCallback(callback);
+   }
+
+   public void destroy()
+   {
+      robotConfigurationDataInput.destroy();
    }
 }

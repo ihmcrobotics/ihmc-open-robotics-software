@@ -12,18 +12,20 @@ import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPoi
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.avatar.sensors.multisense.MultiSenseSensorManager;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.ihmcPerception.camera.CameraDataReceiver;
-import us.ihmc.ihmcPerception.camera.SCSCameraDataReceiver;
-import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.perception.ros1.camera.CameraDataReceiver;
+import us.ihmc.perception.ros1.camera.SCSCameraDataReceiver;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
@@ -56,16 +58,25 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    private boolean enableLidarScanPublisher = true;
    private boolean enableStereoVisionPointCloudPublisher = true;
 
-   public ValkyrieSensorSuiteManager(String robotName, FullHumanoidRobotModelFactory fullRobotModelFactory, CollisionBoxProvider collisionBoxProvider,
-                                     RobotROSClockCalculator rosClockCalculator, HumanoidRobotSensorInformation sensorInformation, ValkyrieJointMap jointMap,
+   public ValkyrieSensorSuiteManager(String robotName,
+                                     FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                     CollisionBoxProvider collisionBoxProvider,
+                                     RobotROSClockCalculator rosClockCalculator,
+                                     HumanoidRobotSensorInformation sensorInformation,
+                                     ValkyrieJointMap jointMap,
                                      RobotTarget target)
    {
       this(robotName, fullRobotModelFactory, collisionBoxProvider, rosClockCalculator, sensorInformation, jointMap, target, null);
    }
 
-   public ValkyrieSensorSuiteManager(String robotName, FullHumanoidRobotModelFactory fullRobotModelFactory, CollisionBoxProvider collisionBoxProvider,
-                                     RobotROSClockCalculator rosClockCalculator, HumanoidRobotSensorInformation sensorInformation, ValkyrieJointMap jointMap,
-                                     RobotTarget target, ROS2NodeInterface ros2Node)
+   public ValkyrieSensorSuiteManager(String robotName,
+                                     FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                     CollisionBoxProvider collisionBoxProvider,
+                                     RobotROSClockCalculator rosClockCalculator,
+                                     HumanoidRobotSensorInformation sensorInformation,
+                                     ValkyrieJointMap jointMap,
+                                     RobotTarget target,
+                                     ROS2NodeInterface ros2Node)
    {
       this.robotName = robotName;
       this.collisionBoxProvider = collisionBoxProvider;
@@ -108,6 +119,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
                                                         robotConfigurationDataBuffer,
                                                         scsSensorsCommunicator,
                                                         ros2Node,
+                                                        ROS2QosProfile.BEST_EFFORT(),
                                                         rosClockCalculator::computeRobotMonotonicTime);
       }
 
@@ -145,6 +157,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
                                                                robotConfigurationDataBuffer,
                                                                rosMainNode,
                                                                ros2Node,
+                                                               ROS2QosProfile.BEST_EFFORT(),
                                                                rosClockCalculator,
                                                                multisenseLeftEyeCameraParameters,
                                                                multisenseLidarParameters,
@@ -194,7 +207,10 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
 
    private StereoVisionPointCloudPublisher createStereoPointCloudPublisher()
    {
-      StereoVisionPointCloudPublisher publisher = new StereoVisionPointCloudPublisher(fullRobotModelFactory, ros2Node, ROS2Tools.MULTISENSE_STEREO_POINT_CLOUD);
+      StereoVisionPointCloudPublisher publisher = new StereoVisionPointCloudPublisher(fullRobotModelFactory,
+                                                                                      ros2Node,
+                                                                                      PerceptionAPI.MULTISENSE_STEREO_POINT_CLOUD,
+                                                                                      ROS2QosProfile.BEST_EFFORT());
       publisher.setROSClockCalculator(rosClockCalculator);
       publisher.setCustomStereoVisionTransformer(createCustomStereoTransformCalculator());
       return publisher;
@@ -204,7 +220,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    {
       AvatarRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(ValkyrieSensorInformation.MULTISENSE_LIDAR_ID);
       String sensorName = multisenseLidarParameters.getSensorNameInSdf();
-      LidarScanPublisher publisher = new LidarScanPublisher(sensorName, fullRobotModelFactory, ros2Node);
+      LidarScanPublisher publisher = new LidarScanPublisher(sensorName, fullRobotModelFactory, ros2Node, ROS2QosProfile.BEST_EFFORT());
       publisher.setROSClockCalculator(rosClockCalculator);
       publisher.setShadowFilter();
       publisher.setSelfCollisionFilter(collisionBoxProvider);

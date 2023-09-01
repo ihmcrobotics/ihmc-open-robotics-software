@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.swing;
 
-import controller_msgs.msg.dds.SwingPlannerParametersPacket;
+import toolbox_msgs.msg.dds.SwingPlannerParametersPacket;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 

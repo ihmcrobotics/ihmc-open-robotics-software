@@ -8,8 +8,6 @@ import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
@@ -29,6 +27,7 @@ import java.util.function.Function;
 
 public abstract class CommunicationsSyncedRobotModel
 {
+   private DRCRobotModel robotModel;
    private final FullHumanoidRobotModel fullRobotModel;
    private final SideDependentList<HandModel> handModels;
    private final Timer dataReceptionTimer;
@@ -41,8 +40,12 @@ public abstract class CommunicationsSyncedRobotModel
    private final FramePose3D temporaryPoseForQuickReading = new FramePose3D();
    private final ArrayList<SpatialVectorMessage> forceSensorData = new ArrayList<>();
 
-   public CommunicationsSyncedRobotModel(FullHumanoidRobotModel fullRobotModel, SideDependentList<HandModel> handModels, HumanoidRobotSensorInformation sensorInformation)
+   public CommunicationsSyncedRobotModel(DRCRobotModel robotModel,
+                                         FullHumanoidRobotModel fullRobotModel,
+                                         SideDependentList<HandModel> handModels,
+                                         HumanoidRobotSensorInformation sensorInformation)
    {
+      this.robotModel = robotModel;
       this.fullRobotModel = fullRobotModel;
       this.handModels = handModels;
       robotConfigurationData = new RobotConfigurationData();
@@ -57,6 +60,12 @@ public abstract class CommunicationsSyncedRobotModel
                                                                            fullRobotModel.getIMUDefinitions());
 
       dataReceptionTimer = new Timer();
+   }
+
+   public void initializeToDefaultRobotInitialSetup(double groundHeight, double initialYaw, double x, double y)
+   {
+      robotModel.getDefaultRobotInitialSetup(groundHeight, initialYaw, x, y).initializeFullRobotModel(fullRobotModel);
+      updateFramesForFullRobotModel();
    }
 
    public abstract RobotConfigurationData getLatestRobotConfigurationData();
@@ -85,11 +94,13 @@ public abstract class CommunicationsSyncedRobotModel
    protected void updateInternal()
    {
       fullRobotModel.getRootJoint().setJointOrientation(robotConfigurationData.getRootOrientation());
-      fullRobotModel.getRootJoint().setJointPosition(robotConfigurationData.getRootTranslation());
+      fullRobotModel.getRootJoint().setJointPosition(robotConfigurationData.getRootPosition());
 
       for (int i = 0; i < robotConfigurationData.getJointAngles().size(); i++)
       {
          allJoints[i].setQ(robotConfigurationData.getJointAngles().get(i));
+         allJoints[i].setQd(robotConfigurationData.getJointVelocities().get(i));
+         allJoints[i].setTau(robotConfigurationData.getJointTorques().get(i));
       }
 
       forceSensorData.clear();
@@ -104,10 +115,14 @@ public abstract class CommunicationsSyncedRobotModel
          HandModelUtils.copyHandJointAnglesFromMessagesToOneDoFJoints(handModels, handJoints, handJointAnglePackets);
       }
 
-      fullRobotModel.getElevator().updateFramesRecursively();
+      updateFramesForFullRobotModel();
+   }
 
+   private void updateFramesForFullRobotModel()
+   {
       try
       {
+         fullRobotModel.getElevator().updateFramesRecursively();
          referenceFrames.updateFrames();
       }
       catch (NotARotationMatrixException e)
@@ -150,5 +165,10 @@ public abstract class CommunicationsSyncedRobotModel
    public synchronized TimerSnapshot getDataReceptionTimerSnapshot()
    {
       return dataReceptionTimer.createSnapshot();
+   }
+
+   public DRCRobotModel getRobotModel()
+   {
+      return robotModel;
    }
 }

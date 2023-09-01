@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.PlanarRegionMessage;
+import perception_msgs.msg.dds.PlanarRegionMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -40,6 +40,8 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
       fromLocalToWorldTransform.setToZero();
       fromWorldToLocalTransform.setToZero();
       concaveHullsVertices.clear();
+      for (int i = 0; i < convexPolygons.size(); i++)
+         convexPolygons.get(i).clear();
       convexPolygons.clear();
    }
 
@@ -104,6 +106,22 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
    }
 
+   public void setRegionProperties(int id, RigidBodyTransform transform)
+   {
+      regionId = id;
+      regionOrigin.set(transform.getTranslation());
+      regionNormal.set(transform.getM02(), transform.getM12(), transform.getM22());
+      regionOrientation.get(transform.getRotation());
+
+      fromLocalToWorldTransform.set(transform);
+      fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
+   }
+
+   public void setPlanarRegionId(int id)
+   {
+      regionId = id;
+   }
+
    public Point2D addConcaveHullVertex()
    {
       return concaveHullsVertices.add();
@@ -153,12 +171,33 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
 
    public void getPlanarRegion(PlanarRegion planarRegionToPack)
    {
-      planarRegionToPack.set(fromLocalToWorldTransform, convexPolygons, regionId);
+      planarRegionToPack.set(fromLocalToWorldTransform, convexPolygons, concaveHullsVertices, regionId);
    }
 
    @Override
    public long getSequenceId()
    {
       return sequenceId;
+   }
+
+   @Override
+   public String toString()
+   {
+      StringBuffer buffer = new StringBuffer();
+
+      buffer.append("transformToWorld:\n" + fromLocalToWorldTransform + "\n");
+      buffer.append("number of polygons: " + convexPolygons.size() + "\n");
+
+      int maxNumberOfPolygonsToPrint = 5;
+      for (int i = 0; i < Math.min(maxNumberOfPolygonsToPrint, convexPolygons.size()); i++)
+      {
+         buffer.append(convexPolygons.get(i) + "\n");
+      }
+      if (convexPolygons.size() > maxNumberOfPolygonsToPrint)
+      {
+         buffer.append("...\n");
+      }
+
+      return buffer.toString();
    }
 }

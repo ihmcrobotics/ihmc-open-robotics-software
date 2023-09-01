@@ -1,0 +1,41 @@
+#ifndef __behavior_msgs__msg__ActionSequenceUpdateMessage__idl__
+#define __behavior_msgs__msg__ActionSequenceUpdateMessage__idl__
+
+#include "behavior_msgs/msg/./ArmJointAnglesActionMessage_.idl"
+#include "behavior_msgs/msg/./ChestOrientationActionMessage_.idl"
+#include "behavior_msgs/msg/./FootstepActionMessage_.idl"
+#include "behavior_msgs/msg/./HandConfigurationActionMessage_.idl"
+#include "behavior_msgs/msg/./HandPoseActionMessage_.idl"
+#include "behavior_msgs/msg/./HandWrenchActionMessage_.idl"
+#include "behavior_msgs/msg/./PelvisHeightActionMessage_.idl"
+#include "behavior_msgs/msg/./WaitDurationActionMessage_.idl"
+#include "behavior_msgs/msg/./WalkActionMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::ActionSequenceUpdateMessage_")
+      struct ActionSequenceUpdateMessage
+      {
+        /**
+         * Number of actions within the sequence
+         */
+        unsigned short sequence_size;
+        sequence<behavior_msgs::msg::dds::ArmJointAnglesActionMessage, 200> arm_joint_angles_actions;
+        sequence<behavior_msgs::msg::dds::ChestOrientationActionMessage, 200> chest_orientation_actions;
+        sequence<behavior_msgs::msg::dds::FootstepActionMessage, 200> footstep_actions;
+        sequence<behavior_msgs::msg::dds::HandConfigurationActionMessage, 200> hand_configuration_actions;
+        sequence<behavior_msgs::msg::dds::HandPoseActionMessage, 200> hand_pose_actions;
+        sequence<behavior_msgs::msg::dds::HandWrenchActionMessage, 200> hand_wrench_actions;
+        sequence<behavior_msgs::msg::dds::PelvisHeightActionMessage, 200> pelvis_height_actions;
+        sequence<behavior_msgs::msg::dds::WaitDurationActionMessage, 200> wait_duration_actions;
+        sequence<behavior_msgs::msg::dds::WalkActionMessage, 200> walk_actions;
+      };
+    };
+  };
+};
+
+#endif

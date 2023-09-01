@@ -10,10 +10,8 @@ import java.util.stream.Collectors;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
+import us.ihmc.graphicsDescription.conversion.VisualsConversionTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.graphics.VisualDefinitionConverter;
 import us.ihmc.robotics.robotDescription.CameraSensorDescription;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.robotics.robotDescription.ExternalForcePointDescription;
@@ -33,7 +31,6 @@ import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
-import us.ihmc.scs2.definition.geometry.GeometryDefinition;
 import us.ihmc.scs2.definition.robot.CameraSensorDefinition;
 import us.ihmc.scs2.definition.robot.CrossFourBarJointDefinition;
 import us.ihmc.scs2.definition.robot.ExternalWrenchPointDefinition;
@@ -50,7 +47,6 @@ import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.robot.SixDoFJointDefinition;
 import us.ihmc.scs2.definition.robot.WrenchSensorDefinition;
-import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 
 public class RobotDefinitionConverter
@@ -301,28 +297,8 @@ public class RobotDefinitionConverter
    public static LinkGraphicsDescription toLinkGraphicsDescription(Collection<? extends VisualDefinition> source)
    {
       LinkGraphicsDescription output = new LinkGraphicsDescription();
-      output.combine(VisualDefinitionConverter.toGraphics3DObject(source));
+      output.combine(VisualsConversionTools.toGraphics3DObject(source));
       return output;
-   }
-
-   public static Graphics3DObject toGraphics3DObject(Collection<? extends VisualDefinition> source)
-   {
-      return VisualDefinitionConverter.toGraphics3DObject(source);
-   }
-
-   public static Graphics3DObject toGraphics3DObject(VisualDefinition source)
-   {
-      return VisualDefinitionConverter.toGraphics3DObject(source);
-   }
-
-   public static List<Graphics3DPrimitiveInstruction> toGraphics3DPrimitiveInstruction(GeometryDefinition source)
-   {
-      return VisualDefinitionConverter.toGraphics3DPrimitiveInstruction(source);
-   }
-
-   public static AppearanceDefinition toAppearanceDefinition(MaterialDefinition source)
-   {
-      return VisualDefinitionConverter.toAppearanceDefinition(source);
    }
 
    public static List<CollisionMeshDescription> toCollisionMeshDescriptions(Collection<? extends CollisionShapeDefinition> source)

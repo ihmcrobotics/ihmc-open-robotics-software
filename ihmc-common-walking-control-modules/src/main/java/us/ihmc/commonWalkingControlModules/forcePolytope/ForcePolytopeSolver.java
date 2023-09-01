@@ -32,6 +32,6 @@ public interface ForcePolytopeSolver
    /**
     * For implementations using SVD, this is the cutoff for singular vectors
     */
-   double singularValueThreshold = 0.05;
+   double singularValueThreshold = 0.025;
 
 }

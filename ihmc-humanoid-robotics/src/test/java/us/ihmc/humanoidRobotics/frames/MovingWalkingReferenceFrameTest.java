@@ -93,7 +93,7 @@ public class MovingWalkingReferenceFrameTest
 
    private static void assertFrameTwistEquals(MovingReferenceFrame expected, MovingReferenceFrame actual, double epsilon)
    {
-      EuclidCoreTestTools.assertRigidBodyTransformEquals(expected.getTransformToRoot(), actual.getTransformToRoot(), 1.0e-12);
+      EuclidCoreTestTools.assertEquals(expected.getTransformToRoot(), actual.getTransformToRoot(), 1.0e-12);
 
       Twist actualTwist = new Twist();
       Twist expectedTwist = new Twist();

@@ -13,7 +13,10 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.sensorProcessing.parameters.*;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotPointCloudParameters;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 
 public class AtlasSensorInformation implements HumanoidRobotSensorInformation
 {
@@ -409,29 +412,6 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
       return pointCloudParameters[sensorId];
    }
 
-   private void sensorFramesToTrack(AvatarRobotSensorParameters[] sensorParams, ArrayList<String> holder)
-   {
-      for (int i = 0; i < sensorParams.length; i++)
-      {
-         if (sensorParams[i].getPoseFrameForSdf() != null)
-         {
-            holder.add(sensorParams[i].getPoseFrameForSdf());
-         }
-      }
-   }
-
-   @Override
-   public String[] getSensorFramesToTrack()
-   {
-      ArrayList<String> sensorFramesToTrack = new ArrayList<String>();
-      sensorFramesToTrack(cameraParameters, sensorFramesToTrack);
-      sensorFramesToTrack(lidarParameters, sensorFramesToTrack);
-      sensorFramesToTrack(pointCloudParameters, sensorFramesToTrack);
-      String[] sensorFramesToTrackAsPrimitive = new String[sensorFramesToTrack.size()];
-      sensorFramesToTrack.toArray(sensorFramesToTrackAsPrimitive);
-      return sensorFramesToTrackAsPrimitive;
-   }
-
    @Override
    public boolean setupROSLocationService()
    {
@@ -448,12 +428,6 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    public boolean isMultisenseHead()
    {
       return isMultisenseHead;
-   }
-
-   @Override
-   public SideDependentList<String> getFeetContactSensorNames()
-   {
-      return new SideDependentList<String>();
    }
 
    @Override
@@ -487,7 +461,7 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    }
 
    @Override
-   public RigidBodyTransform getHeadZED2CameraTransform()
+   public RigidBodyTransform getExperimentalCameraTransform()
    {
       return transformChestToZED2;
    }

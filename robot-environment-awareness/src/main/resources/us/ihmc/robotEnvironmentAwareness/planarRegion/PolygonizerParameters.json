@@ -1,0 +1,10 @@
+{
+  "title" : "PolygonizerParameters",
+  "Concave hull threshold" : [ 0.5700000000000001, "Threshold used when creating a new concave hull with {@link us.ihmc.robotEnvironmentAwareness.geometry.SimpleConcaveHullFactory}. Uses the Duckham and al. (2008) algorithm defined in the paper entitled \"Efficient generation of simple polygons for characterizing the shape of a set of points in the plane\"." ],
+  "Min number of nodes" : [ 80, "The minimum number of nodes required for a {@link us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationNodeData} to be polygonized." ],
+  "Shallow angle threshold" : [ 0.0174533, "Filter parameter on the concave hull of a region. Used to removed vertices describing shallow angle." ],
+  "Peak angle threshold" : [ 2.96706, "Filter parameter on the concave hull of a region. Used to removed vertices that create peaks." ],
+  "Length threshold" : [ 0.38000000000000017, "Filter parameter on the concave hull of a region. Used to removed short edges." ],
+  "Depth threshold" : [ 0.1, "Threshold used for decomposing the concave hull into convex polygons. Describes the maximum depth of a concavity before the concave hull gets split in 2." ],
+  "Cut narrow passage" : [ true, "Filter for splitting concave hulls at any narrow passage which width is less than 2 * lengthThreshold." ]
+}

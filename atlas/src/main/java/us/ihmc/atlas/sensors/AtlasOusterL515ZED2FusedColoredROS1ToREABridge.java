@@ -1,9 +1,8 @@
 package us.ihmc.atlas.sensors;
 
-import controller_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencv.opencv_core.Point3fVector;
 import org.jboss.netty.buffer.ChannelBuffer;
 import sensor_msgs.Image;
 import sensor_msgs.PointCloud2;
@@ -11,7 +10,8 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
+import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.perception.depthData.PointCloudData;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
@@ -125,7 +125,7 @@ public class AtlasOusterL515ZED2FusedColoredROS1ToREABridge
                         lidarScanMessage.getLidarPosition().set(ousterPose.getPosition());
                         lidarScanMessage.getLidarOrientation().set(ousterPose.getOrientation());
                         lidarScanMessage.setSensorPoseConfidence(1.0);
-                        ros2Helper.publish(ROS2Tools.MULTISENSE_LIDAR_SCAN, lidarScanMessage);
+                        ros2Helper.publish(PerceptionAPI.MULTISENSE_LIDAR_SCAN, lidarScanMessage);
                      }
 
                      // TODO: Publish partial compositions if certain things are not available

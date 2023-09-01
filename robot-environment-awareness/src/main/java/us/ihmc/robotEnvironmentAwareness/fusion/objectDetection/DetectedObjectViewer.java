@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.DoorParameterPacket;
+import perception_msgs.msg.dds.DoorParameterPacket;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.Node;

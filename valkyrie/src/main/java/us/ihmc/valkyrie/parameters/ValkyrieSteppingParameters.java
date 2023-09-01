@@ -42,12 +42,6 @@ public class ValkyrieSteppingParameters implements SteppingParameters
    }
 
    @Override
-   public double getDesiredStepForward()
-   {
-      return 0.5 * physicalProperties.getModelSizeScale();
-   }
-
-   @Override
    public double getMaxStepLength()
    {
       if (target == RobotTarget.SCS)
@@ -72,12 +66,6 @@ public class ValkyrieSteppingParameters implements SteppingParameters
    public double getMaxStepWidth()
    {
       return 0.4 * physicalProperties.getModelSizeScale();
-   }
-
-   @Override
-   public double getStepPitch()
-   {
-      return 0.0;
    }
 
    @Override
@@ -123,18 +111,6 @@ public class ValkyrieSteppingParameters implements SteppingParameters
    public double getMaxAngleTurnInwards()
    {
       return -Math.toRadians(30.0);
-   }
-
-   @Override
-   public double getMinAreaPercentForValidFootstep()
-   {
-      return 0.5;
-   }
-
-   @Override
-   public double getDangerAreaPercentForValidFootstep()
-   {
-      return 0.75;
    }
 
    @Override

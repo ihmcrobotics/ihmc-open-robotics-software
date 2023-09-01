@@ -34,6 +34,8 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
    private final boolean groundProfileVisible;
    private final boolean drawPlaneAtZ0;
    private boolean showOverheadView = SHOW_OVERHEAD_VIEW;
+   private String torqueSpeedExportDirectory = null;
+   private TorqueSpeedDataExporter dataExporter;
 
    public DRCGuiInitialSetup(boolean groundProfileVisible, boolean drawPlaneAtZeroHeight,
                              SimulationConstructionSetParameters simulationConstructionSetParameters)
@@ -112,10 +114,14 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       if (SHOW_EXPORT_TORQUE_AND_SPEED)
       {
          JButton exportTorqueAndSpeedButton = new JButton("Export Torque And Speed");
-         TorqueSpeedDataExporter dataExporter = new TorqueSpeedDataExporter(scs, robot);
+         dataExporter = new TorqueSpeedDataExporter(scs, robot);
          dataExporter.setRootDirectory("C:/DataAndVideos/");
          dataExporter.setRootDirectory("D:/DataAndVideos/");
          dataExporter.setRootDirectory("E:/DataAndVideos/");
+         if (torqueSpeedExportDirectory != null)
+         {
+            dataExporter.setRootDirectory(torqueSpeedExportDirectory);
+         }
          exportTorqueAndSpeedButton.addActionListener(dataExporter);
          scs.addButton(exportTorqueAndSpeedButton);
       }
@@ -127,6 +133,17 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       {
          new WalkControllerSliderBoard(scs, scs.getRootRegistry(), null);
       }
+   }
+
+   public void setTorqueSpeedExportDirectory(String dir)
+   {
+      torqueSpeedExportDirectory = dir;
+   }
+
+   // Only works after initializeGui is called
+   public TorqueSpeedDataExporter getTorqueSpeedDataExporter()
+   {
+      return dataExporter;
    }
 
    public boolean isGuiShown()

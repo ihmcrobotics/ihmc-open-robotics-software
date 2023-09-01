@@ -2,6 +2,7 @@ package us.ihmc.robotics.screwTheory;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
@@ -25,6 +26,19 @@ public class MovingMidFootZUpGroundFrame extends MovingReferenceFrame
       if (frameOne == frameTwo)
          throw new IllegalArgumentException("The frames have to be different.");
       frameOne.verifySameRoots(frameTwo);
+
+      this.frameOne = frameOne;
+      this.frameTwo = frameTwo;
+   }
+
+   public MovingMidFootZUpGroundFrame(String name, MovingZUpFrame frameOne, MovingZUpFrame frameTwo, ReferenceFrame stationaryParentFrame)
+   {
+      super(name, stationaryParentFrame, true);
+
+      if (frameOne == frameTwo)
+         throw new IllegalArgumentException("The frames have to be different.");
+      frameOne.verifyIsAncestor(stationaryParentFrame);
+      frameTwo.verifyIsAncestor(stationaryParentFrame);
 
       this.frameOne = frameOne;
       this.frameTwo = frameTwo;

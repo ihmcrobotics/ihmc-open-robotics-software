@@ -75,7 +75,7 @@ public class TransferToStandingState extends WalkingState
       comHeightManager.setSupportLeg(RobotSide.LEFT);
    }
 
-   private final FramePoint2D filteredDesiredCoP = new FramePoint2D();
+   private final FramePoint2D desiredCoP = new FramePoint2D();
 
    public void switchToPointToeOffIfAlreadyInLine()
    {
@@ -89,8 +89,8 @@ public class TransferToStandingState extends WalkingState
             && !feetManager.useToeLineContactInTransfer())
       {
          FramePoint3DReadOnly trailingFootExitCMP = balanceManager.getFirstExitCMPForToeOff(true);
-         controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(sideOnToes), filteredDesiredCoP);
-         feetManager.requestPointToeOff(sideOnToes, trailingFootExitCMP, filteredDesiredCoP);
+         controllerToolbox.getDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(sideOnToes), desiredCoP);
+         feetManager.requestPointToeOff(sideOnToes, trailingFootExitCMP, desiredCoP);
       }
    }
 
@@ -183,7 +183,7 @@ public class TransferToStandingState extends WalkingState
 
       double extraToeOffHeight = 0.0;
       if (feetManager.getCurrentConstraintType(supportingSide.getOppositeSide()) == FootControlModule.ConstraintType.TOES)
-         extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
+         extraToeOffHeight = feetManager.getExtraCoMMaxHeightWithToes();
 
       TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(supportingSide);
       comHeightManager.setSupportLeg(supportingSide);

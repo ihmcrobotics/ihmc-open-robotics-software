@@ -63,16 +63,6 @@ public interface SDFDescriptionMutator
    }
 
    /**
-    * Tweak the properties of a contact sensor belonging to the model given in the input argument.
-    * 
-    * @param model         The model to which this sensor belongs
-    * @param contactSensor The sensor to be modified
-    */
-   default void mutateContactSensorForModel(GeneralizedSDFRobotModel model, SDFContactSensor contactSensor)
-   {
-   }
-
-   /**
     * Perform a generic mutation on the given model. Can be used to add sensors/elements not described
     * in the .SDF file
     *

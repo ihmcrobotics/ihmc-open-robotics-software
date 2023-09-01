@@ -1,15 +1,24 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.*;
+import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.computeCenterOfMassAcceleration;
+import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.computeCenterOfMassVelocity;
+import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.computeCentroidalMomentumPivot;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Black;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.BlueViolet;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint2D;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic.CIRCLE;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic.CIRCLE_CROSS;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic.DIAMOND;
 
 import us.ihmc.commonWalkingControlModules.messageHandlers.CenterOfMassTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
@@ -21,8 +30,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.math.filters.AlphaFilteredTuple2D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -31,7 +44,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class PrecomputedICPPlanner
+public class PrecomputedICPPlanner implements SCS2YoGraphicHolder
 {
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
@@ -74,14 +87,19 @@ public class PrecomputedICPPlanner
    private final FramePoint2D tempICPPosition = new FramePoint2D();
    private final FramePoint2D tempCoPPosition = new FramePoint2D();
 
-   public PrecomputedICPPlanner(CenterOfMassTrajectoryHandler centerOfMassTrajectoryHandler, MomentumTrajectoryHandler momentumTrajectoryHandler,
-                                YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public PrecomputedICPPlanner(CenterOfMassTrajectoryHandler centerOfMassTrajectoryHandler,
+                                MomentumTrajectoryHandler momentumTrajectoryHandler,
+                                YoRegistry parentRegistry,
+                                YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(Double.NaN, centerOfMassTrajectoryHandler, momentumTrajectoryHandler, parentRegistry, yoGraphicsListRegistry);
    }
 
-   public PrecomputedICPPlanner(double dt, CenterOfMassTrajectoryHandler centerOfMassTrajectoryHandler, MomentumTrajectoryHandler momentumTrajectoryHandler,
-                                YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public PrecomputedICPPlanner(double dt,
+                                CenterOfMassTrajectoryHandler centerOfMassTrajectoryHandler,
+                                MomentumTrajectoryHandler momentumTrajectoryHandler,
+                                YoRegistry parentRegistry,
+                                YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.centerOfMassTrajectoryHandler = centerOfMassTrajectoryHandler;
       this.momentumTrajectoryHandler = momentumTrajectoryHandler;
@@ -111,25 +129,34 @@ public class PrecomputedICPPlanner
       {
          YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
          ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
-         
-         YoGraphicPosition desiredICPPositionGraphic = new YoGraphicPosition("Desired ICP Precomputed", yoDesiredICPPosition, 0.005, Yellow(),
+
+         YoGraphicPosition desiredICPPositionGraphic = new YoGraphicPosition("Desired ICP Precomputed",
+                                                                             yoDesiredICPPosition,
+                                                                             0.005,
+                                                                             Yellow(),
                                                                              GraphicType.BALL_WITH_ROTATED_CROSS);
          yoGraphicsList.add(desiredICPPositionGraphic);
          artifactList.add(desiredICPPositionGraphic.createArtifact());
-         
-         YoGraphicPosition desiredCenterOfMassPositionViz = new YoGraphicPosition("Desired CoM Precomputed", yoDesiredCoMPosition, 0.003, Black(),
+
+         YoGraphicPosition desiredCenterOfMassPositionViz = new YoGraphicPosition("Desired CoM Precomputed",
+                                                                                  yoDesiredCoMPosition,
+                                                                                  0.003,
+                                                                                  Black(),
                                                                                   GraphicType.BALL_WITH_ROTATED_CROSS);
          yoGraphicsList.add(desiredCenterOfMassPositionViz);
          artifactList.add(desiredCenterOfMassPositionViz.createArtifact());
-         
-         YoGraphicPosition desiredCoPPositionViz = new YoGraphicPosition("Perfect CoP Precomputed", yoDesiredCoPPosition, 0.005, BlueViolet(),
+
+         YoGraphicPosition desiredCoPPositionViz = new YoGraphicPosition("Perfect CoP Precomputed",
+                                                                         yoDesiredCoPPosition,
+                                                                         0.005,
+                                                                         BlueViolet(),
                                                                          GraphicType.DIAMOND);
          YoGraphicPosition desiredCMPPositionViz = new YoGraphicPosition("Perfect CMP Precomputed", yoDesiredCMPPosition, 0.005, BlueViolet());
-         
+
          artifactList.add(desiredCoPPositionViz.createArtifact());
          yoGraphicsList.add(desiredCMPPositionViz);
          artifactList.add(desiredCMPPositionViz.createArtifact());
-         
+
          yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
          yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
@@ -152,7 +179,8 @@ public class PrecomputedICPPlanner
 
       desiredCoPPosition.set(desiredCMPPosition);
       // Can compute CoP if we have a momentum rate of change otherwise set it to match the CMP.
-      if (momentumTrajectoryHandler != null && momentumTrajectoryHandler.packDesiredAngularMomentumAtTime(time, desiredAngularMomentum, desiredAngularMomentumRate))
+      if (momentumTrajectoryHandler != null
+          && momentumTrajectoryHandler.packDesiredAngularMomentumAtTime(time, desiredAngularMomentum, desiredAngularMomentumRate))
       {
          double fZ = WrenchDistributorTools.computeFz(mass, gravity, comZAcceleration);
          desiredCoPPosition.addX(-desiredAngularMomentumRate.getY() / fZ);
@@ -188,7 +216,9 @@ public class PrecomputedICPPlanner
       momentumTrajectoryHandler.clearPointsInPast();
    }
 
-   public void computeAndBlend(double time, FixedFramePoint2DBasics desiredCapturePoint2dToPack, FixedFrameVector2DBasics desiredCapturePointVelocity2dToPack,
+   public void computeAndBlend(double time,
+                               FixedFramePoint2DBasics desiredCapturePoint2dToPack,
+                               FixedFrameVector2DBasics desiredCapturePointVelocity2dToPack,
                                FixedFramePoint2DBasics desiredCenterOfPressure2dToPack)
    {
       desiredCapturePoint2dToPack.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
@@ -235,8 +265,8 @@ public class PrecomputedICPPlanner
     * Intrinsic robot parameter.
     * <p>
     * Correspond the natural frequency response of the robot when modeled as an inverted pendulum:
-    * {@code omega0 = Math.sqrt(g / z0)}, where {@code g} is equal to the magnitude of the gravity,
-    * and {@code z0} is the constant center of mass height of the robot with respect to is feet.
+    * {@code omega0 = Math.sqrt(g / z0)}, where {@code g} is equal to the magnitude of the gravity, and
+    * {@code z0} is the constant center of mass height of the robot with respect to is feet.
     * </p>
     *
     * @param omega0 the robot's natural frequency.
@@ -262,5 +292,16 @@ public class PrecomputedICPPlanner
       yoDesiredICPVelocity.setToNaN();
       yoDesiredCoMPosition.setToNaN();
       yoDesiredCMPPosition.setToNaN();
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(newYoGraphicPoint2D("Desired ICP Precomputed", yoDesiredICPPosition, 0.010, ColorDefinitions.Yellow(), CIRCLE_CROSS));
+      group.addChild(newYoGraphicPoint2D("Desired CoM Precomputed", yoDesiredCoMPosition, 0.006, ColorDefinitions.Black(), CIRCLE_CROSS));
+      group.addChild(newYoGraphicPoint2D("Desired CoP Precomputed", yoDesiredCoPPosition, 0.010, ColorDefinitions.BlueViolet(), DIAMOND));
+      group.addChild(newYoGraphicPoint2D("Desired CMP Precomputed", yoDesiredCMPPosition, 0.010, ColorDefinitions.BlueViolet(), CIRCLE));
+      return group;
    }
 }

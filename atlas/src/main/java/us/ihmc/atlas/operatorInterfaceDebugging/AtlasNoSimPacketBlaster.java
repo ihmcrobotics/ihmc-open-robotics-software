@@ -8,7 +8,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import controller_msgs.msg.dds.HandJointAnglePacket;
-import controller_msgs.msg.dds.PointCloudWorldPacket;
+import perception_msgs.msg.dds.PointCloudWorldPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SpatialVectorMessage;
 import us.ihmc.atlas.AtlasRobotModel;
@@ -122,7 +122,7 @@ public class AtlasNoSimPacketBlaster implements Runnable
       }
 
       //      robotConfigurationData.setRootTranslation(RandomTools.generateRandomVector(random, random.nextDouble() * 1000.0));
-      robotConfigurationData.getRootTranslation().set(new Vector3D(random.nextDouble(), random.nextDouble(), 1.0 * random.nextDouble()));
+      robotConfigurationData.getRootPosition().set(new Vector3D(random.nextDouble(), random.nextDouble(), 1.0 * random.nextDouble()));
       //      robotConfigurationData.setRootTranslation(new Vector3d(0.0, 0.0, 1.0));
       robotConfigurationData.getRootOrientation().set(RandomGeometry.nextQuaternion(random));
 

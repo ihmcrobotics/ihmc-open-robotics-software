@@ -6,14 +6,14 @@ import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
-import controller_msgs.msg.dds.SE3TrajectoryMessage;
-import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
-import controller_msgs.msg.dds.SO3TrajectoryMessage;
-import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
-import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
+import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
@@ -163,8 +163,8 @@ public class KinematicsToolboxOutputConverter
       handTrajectoryMessage.setRobotSide(robotSide.toByte());
       SE3TrajectoryMessage se3TrajectoryMessage = handTrajectoryMessage.getSe3Trajectory();
       packCustomControlFrame(fullRobotModel.getHand(robotSide).getBodyFixedFrame(), handControlFrame, se3TrajectoryMessage);
-      se3TrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.hashCode());
-      se3TrajectoryMessage.getFrameInformation().setDataReferenceFrameId(worldFrame.hashCode());
+      se3TrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.getFrameNameHashCode());
+      se3TrajectoryMessage.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
 
       Object<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = se3TrajectoryMessage.getTaskspaceTrajectoryPoints();
       taskspaceTrajectoryPoints.clear();
@@ -206,7 +206,7 @@ public class KinematicsToolboxOutputConverter
 
       HeadTrajectoryMessage headTrajectoryMessage = output.getHeadTrajectoryMessage();
       SO3TrajectoryMessage so3Trajectory = headTrajectoryMessage.getSo3Trajectory();
-      so3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
+      so3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.getFrameNameHashCode());
 
       Object<SO3TrajectoryPointMessage> taskspaceTrajectoryPoints = so3Trajectory.getTaskspaceTrajectoryPoints();
       taskspaceTrajectoryPoints.clear();
@@ -229,8 +229,8 @@ public class KinematicsToolboxOutputConverter
 
       ChestTrajectoryMessage chestTrajectoryMessage = output.getChestTrajectoryMessage();
       SO3TrajectoryMessage so3Trajectory = chestTrajectoryMessage.getSo3Trajectory();
-      so3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.hashCode());
-      so3Trajectory.getFrameInformation().setDataReferenceFrameId(worldFrame.hashCode());
+      so3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.getFrameNameHashCode());
+      so3Trajectory.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
 
       Object<SO3TrajectoryPointMessage> taskspaceTrajectoryPoints = so3Trajectory.getTaskspaceTrajectoryPoints();
       taskspaceTrajectoryPoints.clear();
@@ -253,8 +253,8 @@ public class KinematicsToolboxOutputConverter
 
       PelvisTrajectoryMessage pelvisTrajectoryMessage = output.getPelvisTrajectoryMessage();
       SE3TrajectoryMessage se3Trajectory = pelvisTrajectoryMessage.getSe3Trajectory();
-      se3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.hashCode());
-      se3Trajectory.getFrameInformation().setDataReferenceFrameId(worldFrame.hashCode());
+      se3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.getFrameNameHashCode());
+      se3Trajectory.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
 
       Object<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = se3Trajectory.getTaskspaceTrajectoryPoints();
       taskspaceTrajectoryPoints.clear();
@@ -278,7 +278,7 @@ public class KinematicsToolboxOutputConverter
 
       FootTrajectoryMessage footTrajectoryMessage = select(robotSide, output.getLeftFootTrajectoryMessage(), output.getRightFootTrajectoryMessage());
       SE3TrajectoryMessage se3Trajectory = footTrajectoryMessage.getSe3Trajectory();
-      se3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
+      se3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.getFrameNameHashCode());
 
       Object<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = se3Trajectory.getTaskspaceTrajectoryPoints();
       taskspaceTrajectoryPoints.clear();

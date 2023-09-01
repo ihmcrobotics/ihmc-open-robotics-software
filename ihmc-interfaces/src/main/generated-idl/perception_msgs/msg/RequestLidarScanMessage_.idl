@@ -1,0 +1,30 @@
+#ifndef __perception_msgs__msg__RequestLidarScanMessage__idl__
+#define __perception_msgs__msg__RequestLidarScanMessage__idl__
+
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Message used to request a new LIDAR scan, and also enable some filters.
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::RequestLidarScanMessage_")
+      struct RequestLidarScanMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        @defaultValue(value=True)
+        boolean remove_shadows;
+        @defaultValue(value=True)
+        boolean remove_self_collisions;
+      };
+    };
+  };
+};
+
+#endif

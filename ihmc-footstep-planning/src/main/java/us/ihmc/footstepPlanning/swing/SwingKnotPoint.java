@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameBox3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
@@ -23,6 +24,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -120,23 +122,32 @@ public class SwingKnotPoint
    // call once per footstep plan
    public void initializeBoxParameters()
    {
+      initializeBoxParameters(walkingControllerParameters, swingPlannerParameters, percentage, collisionBox, boxCenterInSoleFrame);
+   }
+
+   public static void initializeBoxParameters(WalkingControllerParameters walkingControllerParameters,
+                                              SwingPlannerParametersReadOnly swingPlannerParameters,
+                                              double percentage,
+                                              FrameBox3DBasics collisionBoxToPack,
+                                              Vector3DBasics boxCenterInSoleFrameToPack)
+   {
       // set default size
       double footForwardOffset = walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
       double footBackwardOffset = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset();
       double boxSizeX = footForwardOffset + footBackwardOffset;
       double boxSizeY = walkingControllerParameters.getSteppingParameters().getFootWidth();
       double boxSizeZ = collisionBoxHeight;
-      collisionBox.getSize().set(boxSizeX, boxSizeY, boxSizeZ);
+      collisionBoxToPack.getSize().set(boxSizeX, boxSizeY, boxSizeZ);
 
       // add extra size
       for (int i = 0; i < 3; i++)
       {
-         double extraSize = computeExtraSize(percentage, i);
-         collisionBox.getSize().setElement(i, collisionBox.getSize().getElement(i) + extraSize);
+         double extraSize = computeExtraSize(swingPlannerParameters, percentage, i);
+         collisionBoxToPack.getSize().setElement(i, collisionBoxToPack.getSize().getElement(i) + extraSize);
       }
 
       double boxBaseInSoleFrameX = 0.5 * (footForwardOffset - footBackwardOffset);
-      boxCenterInSoleFrame.set(boxBaseInSoleFrameX, 0.0, 0.5 * collisionBoxHeight);
+      boxCenterInSoleFrameToPack.set(boxBaseInSoleFrameX, 0.0, 0.5 * collisionBoxHeight);
    }
 
    private final Vector3D adjustmentFrameX = new Vector3D();
@@ -267,23 +278,34 @@ public class SwingKnotPoint
       return percentage;
    }
 
-   public boolean doCollisionCheck(ExpandingPolytopeAlgorithm collisionDetector, PlanarRegionsList planarRegionsList)
+   public boolean doCollisionCheck(ExpandingPolytopeAlgorithm collisionDetector, PlanarRegionsList planarRegionsList, HeightMapData heightMapData)
    {
       this.collisionResult.setToZero();
       this.collisionResult.setSignedDistance(Double.POSITIVE_INFINITY);
 
-      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
+      if (planarRegionsList != null)
       {
-         PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
-         if (planarRegion.getBoundingBox3dInWorld().intersectsExclusive(collisionBox.getBoundingBox()))
+         for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
          {
-            EuclidShape3DCollisionResult collisionResult = new EuclidShape3DCollisionResult();
-            collisionDetector.evaluateCollision(collisionBox, planarRegion, collisionResult);
-
-            if (collisionResult.getSignedDistance() < this.collisionResult.getSignedDistance())
+            PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
+            if (planarRegion.getBoundingBox3dInWorld().intersectsExclusive(collisionBox.getBoundingBox()))
             {
-               this.collisionResult.set(collisionResult);
+               EuclidShape3DCollisionResult collisionResult = collisionDetector.evaluateCollision(collisionBox, planarRegion);
+
+               if (collisionResult.getSignedDistance() < this.collisionResult.getSignedDistance())
+               {
+                  this.collisionResult.set(collisionResult);
+               }
             }
+         }
+      }
+      if (heightMapData != null && !heightMapData.isEmpty())
+      {
+         EuclidShape3DCollisionResult collisionResult = HeightMapCollisionDetector.evaluateCollision(collisionBox, heightMapData);
+
+         if (collisionResult.getSignedDistance() < this.collisionResult.getSignedDistance())
+         {
+            this.collisionResult.set(collisionResult);
          }
       }
 
@@ -300,6 +322,15 @@ public class SwingKnotPoint
     * To avoid this amount to expand is smoothly interpolated.
     */
    private double computeExtraSize(double percentage, int axisIndex)
+   {
+      return computeExtraSize(swingPlannerParameters, percentage, axisIndex);
+   }
+
+   /**
+    * Extruding the collision box outward is tricky since it can easily collide with the ground at the start/end.
+    * To avoid this amount to expand is smoothly interpolated.
+    */
+   private static double computeExtraSize(SwingPlannerParametersReadOnly swingPlannerParameters, double percentage, int axisIndex)
    {
       Axis3D axis = Axis3D.values()[axisIndex];
       double percentageLow = swingPlannerParameters.getExtraSizePercentageLow(axis);

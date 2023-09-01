@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.genericQuadruped;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
-import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
@@ -18,9 +17,9 @@ import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedSi
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedStateEstimatorParameters;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedXGaitSettings;
 import us.ihmc.exampleSimulations.genericQuadruped.simulation.GenericQuadrupedGroundContactParameters;
+import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
@@ -44,11 +43,12 @@ import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.OutputWriter;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.scs2.SimulationConstructionSet2;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -65,12 +65,10 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private static final double SIMULATION_GRAVITY = -9.81;
    private static final int RECORD_FREQUENCY = (int) (0.01 / SIMULATION_DT);
    private static final boolean USE_STATE_ESTIMATOR = true;
-   private static final boolean SHOW_PLOTTER = true;
    private static final boolean USE_TRACK_AND_DOLLY = false;
 
    private final OptionalFactoryField<Boolean> useStateEstimator = new OptionalFactoryField<>("useStateEstimator");
    private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
-   private final OptionalFactoryField<GroundProfile3D> providedGroundProfile3D = new OptionalFactoryField<>("providedGroundProfile3D");
    private final OptionalFactoryField<TerrainObject3D> providedTerrainObject3D = new OptionalFactoryField<>("providedTerrainObject3D");
    private final OptionalFactoryField<Boolean> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
    private final OptionalFactoryField<QuadrupedInitialPositionParameters> initialPosition = new OptionalFactoryField<>("initialPosition");
@@ -86,7 +84,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
    public GenericQuadrupedTestFactory()
    {
-      simulationTestingParameters.setKeepSCSUp(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+      simulationTestingParameters.setKeepSCSUp(false);
    }
 
    @Override
@@ -112,12 +110,14 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters = new GenericQuadrupedPrivilegedConfigurationParameters();
       QuadrupedFallDetectionParameters fallDetectionParameters = new GenericQuadrupedFallDetectionParameters();
 
-      fullRobotModel = modelFactory.createFullRobotModel();
-      FloatingRootJointRobot sdfRobot = new FloatingRootJointRobot(modelFactory.getRobotDefinition());
+      fullRobotModel = modelFactory.createFullRobotModel(false);
+      RobotDefinition robotDefinition = modelFactory.getRobotDefinition();
+      initialPositionParameters.offsetInitialConfiguration(initialOffset.get());
+      QuadrupedSimulationFactory.setRobotDefinitionInitialJointStates(initialPositionParameters, modelFactory.getQuadrupedJointNames(), modelFactory::getSDFNameForJointName, robotDefinition);
+      Robot sdfRobot = new Robot(robotDefinition, SimulationConstructionSet2.inertialFrame);
       ControllerCoreOptimizationSettings controllerCoreOptimizationSettings = new GenericQuadrupedControllerCoreOptimizationSettings(fullRobotModel.getTotalMass());
       robotName = sdfRobot.getName();
 
-      SensorTimestampHolder timestampProvider = new GenericQuadrupedTimestampProvider(sdfRobot);
 
       JointDesiredOutputList jointDesiredOutputList = new JointDesiredOutputList(fullRobotModel.getOneDoFJoints());
       QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel);
@@ -139,16 +139,12 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       else
          simulationFactory.setSCSParameters(simulationTestingParameters);
       simulationFactory.setOutputWriter(outputWriter);
-      simulationFactory.setShowPlotter(SHOW_PLOTTER);
       simulationFactory.setUseTrackAndDolly(USE_TRACK_AND_DOLLY);
-      simulationFactory.setInitialPositionParameters(initialPositionParameters);
-      simulationFactory.setInitialOffset(initialOffset.get());
       simulationFactory.setFullRobotModel(fullRobotModel);
       simulationFactory.setKneeTorqueTouchdownDetectionThreshold(kneeTorqueTouchdownDetectionThreshold);
       simulationFactory.setKneeTorqueTouchdownForSureDetectionThreshold(kneeTorqueTouchdownForSureDetectionThreshold);
       simulationFactory.setControllerCoreOptimizationSettings(controllerCoreOptimizationSettings);
       simulationFactory.setPhysicalProperties(physicalProperties);
-      simulationFactory.setTimestampHolder(timestampProvider);
       simulationFactory.setUseStateEstimator(useStateEstimator.get());
       simulationFactory.setStateEstimatorParameters(stateEstimatorParameters);
       simulationFactory.setSensorInformation(sensorInformation);
@@ -168,18 +164,11 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       }
       if (providedTerrainObject3D.hasValue())
       {
-         if (providedGroundProfile3D.hasValue())
-            throw new RuntimeException("You can only have one of these!");
-
          simulationFactory.setTerrainObject3D(providedTerrainObject3D.get());
-      }
-      if (providedGroundProfile3D.hasValue())
-      {
-         simulationFactory.setGroundProfile3D(providedGroundProfile3D.get());
       }
 
       YoRegistry teleopRegistry = new YoRegistry("TeleopRegistry");
-      sdfRobot.getRobotsYoRegistry().addChild(teleopRegistry);
+      sdfRobot.getRegistry().addChild(teleopRegistry);
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.INTRAPROCESS, "quadruped_teleop_manager");
 
@@ -210,7 +199,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
       simulationFactory.setUsePushRobotController(usePushRobotController.get());
       GoalOrientedTestConductor goalOrientedTestConductor = new GoalOrientedTestConductor(simulationFactory.createSimulation(), simulationTestingParameters);
-      goalOrientedTestConductor.getScs().addYoGraphicsListRegistry(graphicsListRegistry);
+      goalOrientedTestConductor.getScs().addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(graphicsListRegistry));
 
       FactoryTools.disposeFactory(this);
 
@@ -227,12 +216,6 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    public void setUseStateEstimator(boolean useStateEstimator)
    {
       this.useStateEstimator.set(useStateEstimator);
-   }
-
-   @Override
-   public void setGroundProfile3D(GroundProfile3D groundProfile3D)
-   {
-      providedGroundProfile3D.set(groundProfile3D);
    }
 
    @Override

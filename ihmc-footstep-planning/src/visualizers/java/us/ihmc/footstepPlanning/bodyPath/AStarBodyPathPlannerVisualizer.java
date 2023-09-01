@@ -2,8 +2,8 @@ package us.ihmc.footstepPlanning.bodyPath;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import controller_msgs.msg.dds.HeightMapMessage;
-import controller_msgs.msg.dds.HeightMapMessagePubSubType;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.HeightMapMessagePubSubType;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -11,6 +11,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
@@ -22,7 +23,7 @@ import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -94,7 +95,7 @@ public class AStarBodyPathPlannerVisualizer
       SideDependentList<ConvexPolygon2D> footPolygon = PlannerTools.createDefaultFootPolygons();
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
 
-      AStarBodyPathPlanner bodyPathPlanner = new AStarBodyPathPlanner(parameters, footPolygon);
+      AStarBodyPathPlanner bodyPathPlanner = new AStarBodyPathPlanner(parameters, new AStarBodyPathPlannerParameters(), footPolygon);
       bodyPathPlanner.setHeightMapData(heightMapData);
 
       FootstepPlannerRequest request = new FootstepPlannerRequest();
@@ -105,6 +106,7 @@ public class AStarBodyPathPlannerVisualizer
          request.getStartFootPoses().get(robotSide).appendTranslation(0.0, robotSide.negateIfRightSide(0.1), 0.0);
          request.getGoalFootPoses().get(robotSide).appendTranslation(0.0, robotSide.negateIfRightSide(0.1), 0.0);
       }
+      request.setHeightMapData(heightMapData);
 
       FootstepPlannerOutput output = new FootstepPlannerOutput();
 

@@ -31,6 +31,8 @@ public class JavaFXRobotVisualizer
    private final FullHumanoidRobotModel fullRobotModel;
    private final OneDoFJointBasics[] allJoints;
    private final int jointNameHash;
+   private final boolean checkJointNameHash;
+   private final int numberOfJoints;
    private final AtomicReference<Configuration> newConfigurationReference = new AtomicReference<>(null);
 
    private Runnable robotLoadedCallback;
@@ -42,11 +44,18 @@ public class JavaFXRobotVisualizer
 
    public JavaFXRobotVisualizer(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {
-      fullRobotModel = fullRobotModelFactory.createFullRobotModel();
+      this(fullRobotModelFactory, true);
+   }
+
+   public JavaFXRobotVisualizer(FullHumanoidRobotModelFactory fullRobotModelFactory, boolean checkJointNameHash)
+   {
+      fullRobotModel = fullRobotModelFactory.createFullRobotModel(false);
 
       allJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
 
       jointNameHash = calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(), fullRobotModel.getIMUDefinitions());
+      this.checkJointNameHash = checkJointNameHash;
+      this.numberOfJoints = allJoints.length;
 
       new Thread(() -> loadRobotModelAndGraphics(fullRobotModelFactory), "RobotVisualizerLoading").start();
 
@@ -136,8 +145,10 @@ public class JavaFXRobotVisualizer
 
    public void submitNewConfiguration(RobotConfigurationData robotConfigurationData)
    {
-      if (robotConfigurationData.getJointNameHash() != jointNameHash)
+      if (checkJointNameHash && robotConfigurationData.getJointNameHash() != jointNameHash)
          throw new RuntimeException("Joint names do not match for RobotConfigurationData");
+      else if (numberOfJoints != robotConfigurationData.getJointAngles().size())
+         throw new RuntimeException("Inconsistent number of joints");
 
       newConfigurationReference.set(new Configuration(robotConfigurationData));
    }
@@ -179,7 +190,7 @@ public class JavaFXRobotVisualizer
 
       public Configuration(RobotConfigurationData robotConfigurationData)
       {
-         rootJointPose = new RigidBodyTransform(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootTranslation());
+         rootJointPose = new RigidBodyTransform(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootPosition());
          jointAngles = robotConfigurationData.getJointAngles().toArray();
       }
 

@@ -7,9 +7,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -62,7 +65,7 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
                                                     RobotConfigurationData.class,
                                                     ROS2Tools.getControllerOutputTopic(robotName),
                                                     subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
-      regionPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.BIPEDAL_SUPPORT_REGIONS);
+      regionPublisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.BIPEDAL_SUPPORT_REGIONS);
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            BipedalSupportPlanarRegionParametersMessage.class,
                                            getTopic(robotName),
@@ -136,6 +139,6 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
 
    public static ROS2Topic<BipedalSupportPlanarRegionParametersMessage> getTopic(String robotName)
    {
-      return ROS2Tools.getBipedalSupportRegionParametersTopic(robotName);
+      return PerceptionAPI.getBipedalSupportRegionParametersTopic(robotName);
    }
 }

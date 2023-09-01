@@ -17,7 +17,7 @@ import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
-import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
+import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
@@ -952,7 +952,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
       createSimulationTestHelper();
       simulationTestHelper.start();
-      simulationTestHelper.getSimulationSession().getRootRegistry().addChild(testRegistry);
+      simulationTestHelper.getSimulationConstructionSet().getRootRegistry().addChild(testRegistry);
 
       ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(1.5);
@@ -1250,7 +1250,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       return armTrajectoryMessage;
    }
 
-   private static double[] generateRandomJointPositions(Random random, OneDoFJointBasics[] armJoints)
+   static double[] generateRandomJointPositions(Random random, OneDoFJointBasics[] armJoints)
    {
       double[] desiredJointPositions = new double[armJoints.length];
       for (int i = 0; i < armJoints.length; i++)

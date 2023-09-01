@@ -145,7 +145,7 @@ public class StartGoalPawPositionViewer extends AnimationTimer
 
    public void setXGaitSettingsTopic(Topic<QuadrupedXGaitSettingsReadOnly> xGaitSettingsTopic)
    {
-      messager.registerTopicListener(xGaitSettingsTopic, this::handleXGaitSettings);
+      messager.addTopicListener(xGaitSettingsTopic, this::handleXGaitSettings);
    }
 
    private void handleXGaitSettings(QuadrupedXGaitSettingsReadOnly xGaitSettings)

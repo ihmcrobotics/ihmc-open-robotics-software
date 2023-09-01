@@ -11,6 +11,7 @@ public class OccupancyGridTools
 {
    public static void computeConvexHullOfOccupancyGrid(OccupancyGrid occupancyGrid, FrameConvexPolygon2D convexHullToPack)
    {
+      // FIXME This approach needs to be optimized. It can result in computing the hull of several hundreds of points which is very time consuming.
       convexHullToPack.clear(occupancyGrid.getGridFrame());
 
       List<OccupancyGridCell> activeCells = occupancyGrid.getAllActiveCells();

@@ -1,27 +1,19 @@
 package us.ihmc.robotEnvironmentAwareness;
 
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
-
-import java.nio.file.Paths;
-
-import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.messager.Messager;
+import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.communication.LiveMapModuleAPI;
-import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
-import us.ihmc.robotEnvironmentAwareness.perceptionSuite.RealSenseREANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.ui.LiveMapUI;
-import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.LiveMapModule;
-import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.ros2.ROS2Node;
 
-public class LiveMapStandaloneLauncher extends Application
+public class LiveMapStandaloneLauncher extends ApplicationNoModule
 {
    private static final String MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultLiveMapModuleConfiguration.txt";
 
@@ -51,7 +43,7 @@ public class LiveMapStandaloneLauncher extends Application
       messager = new SharedMemoryJavaFXMessager(LiveMapModuleAPI.API);
       messager.startMessager();
       
-      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, ROS2Tools.REA_NODE_NAME);
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, PerceptionAPI.REA_NODE_NAME);
 
       if (launchUI)
          ui = LiveMapUI.createIntraprocessUI(messager, primaryStage);

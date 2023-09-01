@@ -37,9 +37,11 @@
                   <parameter name="SpinePitchJointspaceWeight" type="DoubleParameter" min="0.0" max="1.0" value="45.0" />
                   <parameter name="SpineRollJointspaceWeight" type="DoubleParameter" min="0.0" max="1.0" value="45.0" />
                   <parameter name="ArmsJointspaceWeight" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="LegsJointspaceWeight" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NeckJointspaceWeight" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="SpineUserModeWeight" type="DoubleParameter" min="0.0" max="1.0" value="200.0" />
                   <parameter name="ArmsUserModeWeight" type="DoubleParameter" min="0.0" max="1.0" value="50.0" />
+                  <parameter name="LegsUserModeWeight" type="DoubleParameter" min="0.0" max="1.0" value="50.0" />
                   <parameter name="NeckUserModeWeight" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="ChestAngularWeightX" type="DoubleParameter" min="0.0" max="1.0" value="15.0" />
                   <parameter name="ChestAngularWeightY" type="DoubleParameter" min="0.0" max="1.0" value="10.0" />
@@ -97,6 +99,14 @@
                   <parameter name="kiArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
                   <parameter name="maxIntegralErrorArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
                   <parameter name="integralLeakRatioArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="kpLegJoints" type="DoubleParameter" min="0.0" max="1.0" value="80.0" />
+                  <parameter name="zetaLegJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.6" />
+                  <parameter name="maximumFeedbackLegJoints" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+                  <parameter name="maximumFeedbackRateLegJoints" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+                  <parameter name="positionDeadbandLegJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="kiLegJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="maxIntegralErrorLegJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="integralLeakRatioLegJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
                </registry>
                <registry name="RigidBodyGains">
                   <parameter name="kpXYChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="40.0" />
@@ -211,10 +221,16 @@
                         <parameter name="omegaThresholdForEstimation" type="DoubleParameter" min="0.0" max="1.0" value="1.5" />
                         <parameter name="rotationThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.05" />
                      </registry>
-                     <registry name="ToeOffManager">
-                        <parameter name="lookAtTwoStepCapturabilityForToeOff" type="BooleanParameter" value="true" />
-                        <parameter name="ankleLowerLimitToTriggerToeOff" type="DoubleParameter" min="0.0" max="1.0" value="-0.94"/>
-                        <parameter name="forceToeOffAtJointLimit" type="BooleanParameter" value="true"/>
+                     <registry name="GeometricToeOffManager">
+                        <registry name="LegJointLimitsInspector">
+                           <parameter name="ankleLowerLimitToTriggerToeOff" type="DoubleParameter" min="0.0" max="1.0" value="-0.94"/>
+                        </registry>
+                     </registry>
+                     <registry name="DynamicStateInspectorParameters">
+                        <parameter name="maxNormErrorNeededForControl" type="DoubleParameter" min="0.0" max="1.0" value="2.0"/>
+                        <parameter name="minDistAlongErrorFromOutEdge" type="DoubleParameter" min="0.0" max="1.0" value="-0.045"/>
+                        <parameter name="minOrthoDistFromOutEdge" type="DoubleParameter" min="0.0" max="1.0" value="-0.03"/>
+                        <parameter name="minNormDistFromInEdge" type="DoubleParameter" min="0.0" max="1.0" value="0.75"/>
                      </registry>
                      <parameter name="Verification_PerpendicularCoPErrorThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.005" />
                      <parameter name="Verification_DistanceFromLineToComputeDesiredCoPOccupancy" type="DoubleParameter" min="0.0" max="1.0" value="0.005" />

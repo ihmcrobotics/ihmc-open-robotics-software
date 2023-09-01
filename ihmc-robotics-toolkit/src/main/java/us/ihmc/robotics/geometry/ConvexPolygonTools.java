@@ -29,6 +29,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.EuclidCoreMissingTools;
+import us.ihmc.robotics.EuclidGeometryPolygonMissingTools;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -212,6 +213,31 @@ public class ConvexPolygonTools
       connectingEdge2ToPack.set(polygon2.getVertex(verticesIndices[1][1]), polygon1.getVertex(verticesIndices[0][1]));
    }
 
+   /**
+    * Returns the distance between two polygons. If they intersect, the distance is 0.0
+    * @return distance in meters between the polygons. If they intersect, the distance is 0.0
+    */
+   public double distanceBetweenTwoConvexPolygon2Ds(ConvexPolygon2DReadOnly polygonA, ConvexPolygon2DReadOnly polygonB)
+   {
+      if (doPolygonsIntersect(polygonA, polygonB))
+         return 0.0;
+
+      double minDistance = Double.POSITIVE_INFINITY;
+      for (int indexA = 0; indexA < polygonA.getNumberOfVertices(); indexA++)
+      {
+         for (int indexB = 0; indexB < polygonB.getNumberOfVertices(); indexB++)
+         {
+            double distance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(polygonA.getVertex(indexA),
+                                                               polygonA.getNextVertex(indexA),
+                                                               polygonB.getVertex(indexB),
+                                                               polygonB.getNextVertex(indexB));
+            minDistance = Math.min(minDistance, distance);
+         }
+      }
+
+      return minDistance;
+   }
+
    private transient final Vector2D caliperForPolygonP = new Vector2D();
    private transient final Vector2D caliperForPolygonQ = new Vector2D();
    private transient final Point2D lineStart = new Point2D();
@@ -229,7 +255,8 @@ public class ConvexPolygonTools
     *
     * @param polygonP ConvexPolygon2d
     * @param polygonQ ConvexPolygon2d
-    * @return ConvexPolygon2d Intersection of polygonP and polygonQ
+    * @param intersectingPolygonToPack intersecting polygon to pack. May be null.
+    * @return ConvexPolygon2d Intersection of polygonP and polygonQ.
     */
    public boolean computeIntersectionOfPolygons(ConvexPolygon2DReadOnly polygonP, ConvexPolygon2DReadOnly polygonQ,
                                                 ConvexPolygon2DBasics intersectingPolygonToPack)
@@ -424,6 +451,9 @@ public class ConvexPolygonTools
       // If no bridges, then check if the polygons are contained in each other.
       if (bridgeCount == 0)
       {
+         if (intersectingPolygonToPack == null)
+            return true;
+
          // check to see if a polygons is contained in another.
          if (polygonP.isPointInside(polygonQ.getVertex(0)))
          {
@@ -440,7 +470,8 @@ public class ConvexPolygonTools
          boolean success = buildCommonPolygonFromBridges(bridgeIndicesP, bridgeIndicesQ, bridgeWasOnLeft, polygonP, polygonQ, intersectingPolygonToPack);
          if (!success)
          {
-            intersectingPolygonToPack.clearAndUpdate();
+            if (intersectingPolygonToPack != null)
+               intersectingPolygonToPack.clearAndUpdate();
             return false;
          }
       }
@@ -449,10 +480,218 @@ public class ConvexPolygonTools
       return true;
    }
 
+   /**
+    * Computes the intersection of two convex polygons. For references see:
+    * http://www.iro.umontreal.ca/~plante/compGeom/algorithm.html Returns null if the polygons do
+    * not intersect Returns the inside polygon if the two polygons are inside one another.
+    *
+    * @param polygonP ConvexPolygon2d
+    * @param polygonQ ConvexPolygon2d
+    * @param intersectingPolygonToPack intersecting polygon to pack. May be null.
+    * @return ConvexPolygon2d Intersection of polygonP and polygonQ.
+    */
+   public boolean doPolygonsIntersect(ConvexPolygon2DReadOnly polygonP, ConvexPolygon2DReadOnly polygonQ)
+   {
+      // return false if either polygon null
+      if (polygonP == null || polygonP.isEmpty())
+         return false;
+      if (polygonQ == null || polygonQ.isEmpty())
+         return false;
+
+      if (polygonP.getNumberOfVertices() == 2 && polygonQ.getNumberOfVertices() >= 2)
+      {
+         return computeIfPolygonsIntersectIfOnePolygonHasExactlyTwoVerticesAndTheOtherHasAtLeastTwoVertices(polygonP, polygonQ);
+      }
+
+      else if (polygonQ.getNumberOfVertices() == 2)
+      {
+         return computeIfPolygonsIntersectIfOnePolygonHasExactlyTwoVerticesAndTheOtherHasAtLeastTwoVertices(polygonQ, polygonP);
+      }
+
+      if (polygonP.getNumberOfVertices() == 1 && !polygonQ.isEmpty() || polygonQ.getNumberOfVertices() == 1)
+      {
+         return false;
+      }
+
+      // Find left most point on polygon1
+      int currentPPolygonPointIndex = EuclidGeometryPolygonTools.findVertexIndex(polygonP, true, Bound.MIN, Bound.MIN);
+      int initialPolygonPIndex = currentPPolygonPointIndex;
+      Point2DReadOnly currentPolygonPPoint = polygonP.getVertex(currentPPolygonPointIndex);
+
+      // Find left most point on polygon2
+      int currentQPolygonPointIndex = EuclidGeometryPolygonTools.findVertexIndex(polygonQ, true, Bound.MIN, Bound.MIN);
+      int initialPolygonQIndex = currentQPolygonPointIndex;
+      Point2DReadOnly currentPolygonQPoint = polygonQ.getVertex(currentQPolygonPointIndex);
+
+      // At each of those two vertices, place a vertical line passing through it. Associate that line to the polygon to which the vertex belongs.
+      caliperForPolygonP.set(0.0, 1.0);
+      caliperForPolygonQ.set(0.0, 1.0);
+
+      // determine which side polygon2's caliper line is on relative to polygon1's caliper line
+      lineStart.set(currentPolygonPPoint);
+      lineEnd.set(currentPolygonPPoint);
+      lineEnd.add(caliperForPolygonP);
+      boolean isOnLeft = EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D(currentPolygonQPoint, lineStart, lineEnd);
+      boolean wasOnLeft = isOnLeft;
+
+      //    System.out.println("wasOnLeft = " + wasOnLeft);
+
+      boolean gotAroundPOnce = false;
+      boolean gotAroundQOnce = false;
+      boolean DONE = false;
+
+      int bridgeCount = 0;
+      bridgeIndicesP.reset();
+      bridgeIndicesQ.reset();
+      bridgeWasOnLeft.reset();
+
+      do
+      {
+         if (gotAroundPOnce && gotAroundQOnce)
+         {
+            DONE = true;
+         }
+
+         // Rotate these two lines (called calipers) by the smallest angle between a caliper and the segment following the vertex it passes
+         // through (in clockwise order). The rotation is done about the vertex through which the line passes on the associated polygon.
+         // If the line passes through more than one vertex of the assciated polygon, the farthest (in clockwise order) is taken.
+
+         // find angle from current to next point for polygon1
+         vectorToNextPointOnPolygonP.set(polygonP.getNextVertex(currentPPolygonPointIndex));
+         vectorToNextPointOnPolygonP.sub(polygonP.getVertex(currentPPolygonPointIndex));
+         vectorToNextPointOnPolygonP.normalize();
+
+         // +++JEP: Don't actually compute the angle! Just look at the dot products!
+         //       double angleToNextPointOnPolygonP = caliperForPolygonP.angle(vectorToNextPointOnPolygonP); //Math.acos(vectorToNextPointOnPolygon1.getY());
+         double dotProductToNextPointOnPolygonP = caliperForPolygonP.dot(vectorToNextPointOnPolygonP); // Math.acos(vectorToNextPointOnPolygon1.getY());
+
+         // find angle from current to next point for polygon2
+         vectorToNextPointOnPolygonQ.set(polygonQ.getNextVertex(currentQPolygonPointIndex));
+         vectorToNextPointOnPolygonQ.sub(polygonQ.getVertex(currentQPolygonPointIndex));
+         vectorToNextPointOnPolygonQ.normalize();
+
+         //       double angleToNextPointOnPolygonQ = caliperForPolygonQ.angle(vectorToNextPointOnPolygonQ); //Math.acos(vectorToNextPointOnPolygon2.getY());
+         double dotProductToNextPointOnPolygonQ = caliperForPolygonQ.dot(vectorToNextPointOnPolygonQ); // Math.acos(vectorToNextPointOnPolygon2.getY());
+
+         // determine the smallest angle and rotate both calipers by this amount
+         boolean moveCaliperP = false;
+         boolean moveCaliperQ = false;
+
+         //       if (angleToNextPointOnPolygonP == angleToNextPointOnPolygonQ)
+         if (dotProductToNextPointOnPolygonP == dotProductToNextPointOnPolygonQ)
+         {
+            caliperForPolygonP.set(vectorToNextPointOnPolygonP);
+            caliperForPolygonQ.set(caliperForPolygonP);
+
+            moveCaliperP = true;
+            moveCaliperQ = true;
+         }
+
+         //       else if (angleToNextPointOnPolygonP < angleToNextPointOnPolygonQ)
+         else if (dotProductToNextPointOnPolygonP > dotProductToNextPointOnPolygonQ)
+         {
+            caliperForPolygonP.set(vectorToNextPointOnPolygonP);
+            caliperForPolygonQ.set(caliperForPolygonP);
+            moveCaliperP = true;
+         }
+         else
+         {
+            caliperForPolygonQ.set(vectorToNextPointOnPolygonQ);
+            caliperForPolygonP.set(caliperForPolygonQ);
+
+            moveCaliperQ = true;
+         }
+
+         // Whenever the order of the two calipers change, a pocket has been found. To detect this, a direction is associated with one of
+         // the lines (for example the green one, associated to P). Then all points of the red line (associated to Q) are either to the
+         // left or to the right of the green line. When a rotation makes them change from one side to the other of the green line, then
+         // the order of the two lines has changed.
+
+         // detemine which side polygon Q's caliper line is on relative to polygon P's caliper lline
+         lineStart.set(currentPolygonPPoint);
+         lineEnd.set(currentPolygonPPoint);
+         lineEnd.add(caliperForPolygonP);
+         isOnLeft = EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D(currentPolygonQPoint, lineStart, lineEnd);
+
+         //       System.out.println("new isOnLeft = " + isOnLeft);
+
+         if (wasOnLeft != isOnLeft)
+         {
+            // find all of the bridges
+            //          System.out.println("Found bridge. wasOnLeft = " + wasOnLeft + ", isOnLeft = " + isOnLeft);
+
+            // Some weird fence post thing here. Sometime you want to consider the start ones at the end, sometimes you don't.
+            // So that's why DONE is computed at the top and checked on the bottom...
+
+            boolean addThisOne = true;
+            if ((DONE) && (!bridgeIndicesP.isEmpty()))
+            {
+               if ((bridgeIndicesP.get(0) == currentPPolygonPointIndex) && (bridgeIndicesQ.get(0) == currentQPolygonPointIndex))
+               {
+                  addThisOne = false;
+               }
+            }
+
+            if (addThisOne)
+            {
+               bridgeIndicesP.add(currentPPolygonPointIndex);
+               bridgeIndicesQ.add(currentQPolygonPointIndex);
+               bridgeWasOnLeft.add(wasOnLeft ? 1 : 0);
+
+               // bridgeIndices1[bridgeCount] = currentPPolygonPointIndex;
+               // bridgeIndices2[bridgeCount] = currentQPolygonPointIndex;
+               // bridgeWasOnLeft[bridgeCount] = wasOnLeft;
+
+               bridgeCount++;
+
+               // update current caliper relationship
+               wasOnLeft = isOnLeft;
+            }
+         }
+
+         // The algorithm terminates once it has gone around both polygons
+         if (moveCaliperP)
+         {
+            currentPPolygonPointIndex = polygonP.getNextVertexIndex(currentPPolygonPointIndex);
+            currentPolygonPPoint = polygonP.getVertex(currentPPolygonPointIndex);
+
+            if (currentPPolygonPointIndex == (initialPolygonPIndex) % polygonP.getNumberOfVertices())
+            {
+               gotAroundPOnce = true;
+            }
+         }
+
+         if (moveCaliperQ)
+         {
+            currentQPolygonPointIndex = polygonQ.getNextVertexIndex(currentQPolygonPointIndex);
+            currentPolygonQPoint = polygonQ.getVertex(currentQPolygonPointIndex);
+
+            if (currentQPolygonPointIndex == (initialPolygonQIndex) % polygonQ.getNumberOfVertices())
+            {
+               gotAroundQOnce = true;
+            }
+         }
+      }
+      while (!DONE);
+
+      // If no bridges, then check if the polygons are contained in each other.
+      if (bridgeCount == 0)
+      {
+         return true;
+      }
+      else
+      {
+         return doPolygonsIntersectFromBridges(bridgeIndicesP, bridgeIndicesQ, bridgeWasOnLeft, polygonP, polygonQ);
+      }
+   }
+
    private static boolean computeIntersectionOfPolygonsIfOnePolygonHasExactlyOneVertex(ConvexPolygon2DReadOnly polygonWithExactlyOneVertex,
                                                                                        ConvexPolygon2DReadOnly otherPolygon,
                                                                                        ConvexPolygon2DBasics intersectingPolygon)
    {
+      if (intersectingPolygon == null)
+         return false;
+
       if (otherPolygon.pointIsOnPerimeter(polygonWithExactlyOneVertex.getVertex(0)))
       {
          intersectingPolygon.set(polygonWithExactlyOneVertex);
@@ -478,24 +717,47 @@ public class ConvexPolygonTools
 
       if (intersections == 0)
       {
-         intersectingPolygon.clearAndUpdate();
+         if (intersectingPolygon != null)
+            intersectingPolygon.clearAndUpdate();
          return false;
       }
       else if (intersections == 1)
       {
-         intersectingPolygon.clear();
-         intersectingPolygon.addVertex(intersection1);
-         intersectingPolygon.update();
+         if (intersectingPolygon != null)
+         {
+            intersectingPolygon.clear();
+            intersectingPolygon.addVertex(intersection1);
+
+            // check if one end of the line segment is inside the other polygon
+            if (polygonWithAtLeastTwoVertices.isPointInside(polygonWithExactlyTwoVertices.getVertex(0)))
+               intersectingPolygon.addVertex(polygonWithExactlyTwoVertices.getVertex(0));
+            else if (polygonWithAtLeastTwoVertices.isPointInside(polygonWithExactlyTwoVertices.getVertex(1)))
+               intersectingPolygon.addVertex(polygonWithExactlyTwoVertices.getVertex(1));
+
+            intersectingPolygon.update();
+         }
          return true;
       }
       else
       {
-         intersectingPolygon.clear();
-         intersectingPolygon.addVertex(intersection1);
-         intersectingPolygon.addVertex(intersection2);
-         intersectingPolygon.update();
+         if (intersectingPolygon != null)
+         {
+            intersectingPolygon.clear();
+            intersectingPolygon.addVertex(intersection1);
+            intersectingPolygon.addVertex(intersection2);
+            intersectingPolygon.update();
+         }
          return true;
       }
+   }
+
+   private static boolean computeIfPolygonsIntersectIfOnePolygonHasExactlyTwoVerticesAndTheOtherHasAtLeastTwoVertices(ConvexPolygon2DReadOnly polygonWithExactlyTwoVertices,
+                                                                                                                      ConvexPolygon2DReadOnly polygonWithAtLeastTwoVertices)
+   {
+      return EuclidGeometryPolygonMissingTools.doLineSegment2DAndConvexPolygon2DIntersect(polygonWithExactlyTwoVertices.getVertex(0),
+                                                                                          polygonWithExactlyTwoVertices.getVertex(1),
+                                                                                          polygonWithAtLeastTwoVertices.getPolygonVerticesView(),
+                                                                                          polygonWithAtLeastTwoVertices.getNumberOfVertices());
    }
 
    private static boolean findCrossingIndices(boolean decrementP, int bridgeIndexForPolygonP, int bridgeIndexForPolygonQ, ConvexPolygon2DReadOnly polygonP,
@@ -604,7 +866,8 @@ public class ConvexPolygonTools
          throw new RuntimeException("Neither P1, nor P2 increment!!!");
       }
 
-      intersectingPolygonToPack.clear();
+      if (intersectingPolygonToPack != null)
+         intersectingPolygonToPack.clear();
 
       // Start at the first intersection. Add it. Then march to the next intersection. Then continue.
       for (int i = 0; i < crossingIndices.size(); i++)
@@ -631,12 +894,16 @@ public class ConvexPolygonTools
                PrintTools.error("Returning null polygon");
             }
 
-            intersectingPolygonToPack.clear();
-            intersectingPolygonToPack.update();
+            if (intersectingPolygonToPack != null)
+            {
+               intersectingPolygonToPack.clear();
+               intersectingPolygonToPack.update();
+            }
             return false;
          }
 
-         intersectingPolygonToPack.addVertex(intersection);
+         if (intersectingPolygonToPack != null)
+            intersectingPolygonToPack.addVertex(intersection);
 
          if (incrementPNext)
          {
@@ -647,7 +914,8 @@ public class ConvexPolygonTools
 
             while (indexP != indexPNext)
             {
-               intersectingPolygonToPack.addVertex(polygonP.getVertex(indexP));
+               if (intersectingPolygonToPack != null)
+                  intersectingPolygonToPack.addVertex(polygonP.getVertex(indexP));
                indexP = polygonP.getNextVertexIndex(indexP);
             }
          }
@@ -660,7 +928,8 @@ public class ConvexPolygonTools
 
             while (indexQ != indexQNext)
             {
-               intersectingPolygonToPack.addVertex(polygonQ.getVertex(indexQ));
+               if (intersectingPolygonToPack != null)
+                  intersectingPolygonToPack.addVertex(polygonQ.getVertex(indexQ));
                indexQ = polygonQ.getNextVertexIndex(indexQ);
             }
          }
@@ -668,10 +937,13 @@ public class ConvexPolygonTools
          incrementPNext = !incrementPNext;
       }
 
-      intersectingPolygonToPack.update();
+      if (intersectingPolygonToPack != null)
+      {
+         intersectingPolygonToPack.update();
 
-      if (intersectingPolygonToPack.isEmpty())
-         return false;
+         if (intersectingPolygonToPack.isEmpty())
+            return false;
+      }
 
       return true;
    }
@@ -695,15 +967,35 @@ public class ConvexPolygonTools
 
          if (!success)
          {
-            intersectingPolygonToPack.clearAndUpdate();
+            if (intersectingPolygonToPack != null)
+               intersectingPolygonToPack.clearAndUpdate();
             return false; // No intersection.
          }
       }
 
-      PriorityQueue p;
+      return constructPolygonForIntersection(crossingIndices, polygonP, polygonQ, intersectingPolygonToPack);
+   }
 
-      boolean success = constructPolygonForIntersection(crossingIndices, polygonP, polygonQ, intersectingPolygonToPack);
-      return success;
+   private boolean doPolygonsIntersectFromBridges(TIntArrayList bridgeIndicesP, TIntArrayList bridgeIndicesQ, TIntArrayList bridgeWasOnLeft,
+                                                 ConvexPolygon2DReadOnly polygonP, ConvexPolygon2DReadOnly polygonQ)
+   {
+      crossingIndices.clear();
+      for (int i = 0; i < bridgeIndicesP.size(); i++)
+      {
+         // find intersection for bridge
+         int bridgeIndexForPolygonP = bridgeIndicesP.get(i);
+         int bridgeIndexForPolygonQ = bridgeIndicesQ.get(i);
+
+         // for each bridge, compute the intersection points
+         TIntArrayList indices = crossingIndices.add();
+
+         if (!findCrossingIndices(bridgeWasOnLeft.get(i) == 1, bridgeIndexForPolygonP, bridgeIndexForPolygonQ, polygonP, polygonQ, indices))
+         {
+            return false; // No intersection.
+         }
+      }
+
+      return true;
    }
 
    private transient final Point2D referencePointInPCopy = new Point2D();
@@ -1055,7 +1347,7 @@ public class ConvexPolygonTools
          double scale = 1.0e-7 / length;
          xNew += dx * scale;
          yNew += dy * scale;
-         
+
          polygon.addVertex(xNew, yNew);
          polygon.update();
 
@@ -1334,7 +1626,7 @@ public class ConvexPolygonTools
          }
          else if ((v2End - v2Start + numberOfVertices2) % numberOfVertices2 == 1)
          {
-            binaryEliminationCase2(angle2A, angle2B, angle1A, angle1B, v2End, v2MedianIndex, v2Start, v1End, v1MedianIndex, v1Start, polygon1, polygon2,
+            binaryEliminationCase2(angle2A, angle2B, angle1A, angle1B, v2End, v2MedianIndex, v2Start, v1End, v1MedianIndex, v1Start, polygon2, polygon1,
                                    updatedIndicesInBinaryElimination);
             v2End = updatedIndicesInBinaryElimination[0];
             v2Start = updatedIndicesInBinaryElimination[1];

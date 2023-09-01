@@ -3,12 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelC
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
 import us.ihmc.commons.lists.RecyclingArrayList;
 
 /**
@@ -34,6 +29,7 @@ public class VirtualModelControlCommandBuffer extends VirtualModelControlCommand
    private final RecyclingArrayList<VirtualForceCommand> virtualForceCommandBuffer = new RecyclingArrayList<>(VirtualForceCommand.class);
    private final RecyclingArrayList<VirtualTorqueCommand> virtualTorqueCommandBuffer = new RecyclingArrayList<>(VirtualTorqueCommand.class);
    private final RecyclingArrayList<VirtualWrenchCommand> virtualWrenchCommandBuffer = new RecyclingArrayList<>(VirtualWrenchCommand.class);
+   private final RecyclingArrayList<QPObjectiveCommand> qPObjectiveCommandBuffer = new RecyclingArrayList<>(QPObjectiveCommand.class);
    private final RecyclingArrayList<VirtualModelControlOptimizationSettingsCommand> virtualModelControlOptimizationSettingsCommandBuffer = new RecyclingArrayList<>(VirtualModelControlOptimizationSettingsCommand.class);
 
    public VirtualModelControlCommandBuffer()
@@ -60,6 +56,7 @@ public class VirtualModelControlCommandBuffer extends VirtualModelControlCommand
       virtualTorqueCommandBuffer.clear();
       virtualWrenchCommandBuffer.clear();
       virtualModelControlOptimizationSettingsCommandBuffer.clear();
+      qPObjectiveCommandBuffer.clear();
    }
 
    /**
@@ -226,6 +223,18 @@ public class VirtualModelControlCommandBuffer extends VirtualModelControlCommand
    public VirtualWrenchCommand addVirtualWrenchCommand()
    {
       VirtualWrenchCommand command = virtualWrenchCommandBuffer.add();
+      super.addCommand(command);
+      return command;
+   }
+
+   /**
+    * Gets an available {@link QPObjectiveCommand} and registers it to this list.
+    *
+    * @return the available command ready to be set.
+    */
+   public QPObjectiveCommand addQPObjectiveCommand()
+   {
+      QPObjectiveCommand command = qPObjectiveCommandBuffer.add();
       super.addCommand(command);
       return command;
    }

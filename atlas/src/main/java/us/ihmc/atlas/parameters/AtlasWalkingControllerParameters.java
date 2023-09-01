@@ -8,12 +8,10 @@ import java.util.Map;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
-import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
@@ -67,7 +65,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private ICPControllerParameters icpOptimizationParameters;
    private StepAdjustmentParameters stepAdjustmentParameters;
    private AtlasSteppingParameters steppingParameters;
-   private LeapOfFaithParameters leapOfFaithParameters;
 
    private final OneDoFJointPrivilegedConfigurationParameters kneePrivilegedConfigurationParameters;
 
@@ -83,9 +80,9 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       momentumOptimizationSettings = new AtlasMomentumOptimizationSettings(jointMap, contactPointParameters.getNumberOfContactableBodies());
 
-      minimumHeightAboveGround = jointMap.getModelScale() * (0.625 + 0.08);
-      nominalHeightAboveGround = jointMap.getModelScale() * (0.705 + 0.08);
-      maximumHeightAboveGround = jointMap.getModelScale() * (0.736 + 0.08);
+      minimumHeightAboveGround = jointMap.getModelScale() * (0.625 + 0.08) + 0.084;
+      nominalHeightAboveGround = jointMap.getModelScale() * (0.705 + 0.08) + 0.084;
+      maximumHeightAboveGround = jointMap.getModelScale() * (0.736 + 0.08) + 0.084;
 
       runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
@@ -93,7 +90,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       toeOffParameters = new AtlasToeOffParameters(jointMap);
       swingTrajectoryParameters = new AtlasSwingTrajectoryParameters(target, jointMap.getModelScale());
       steppingParameters = new AtlasSteppingParameters(jointMap);
-      leapOfFaithParameters = new AtlasLeapOfFaithParameters(runningOnRealRobot);
 
       icpOptimizationParameters = new AtlasICPControllerParameters(runningOnRealRobot);
       stepAdjustmentParameters = new AtlasStepAdjustmentParameters();
@@ -245,18 +241,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    @Override
-   public double defaultOffsetHeightAboveAnkle()
-   {
-      double defaultOffset = runningOnRealRobot ? 0.035 : 0.0;
-      return defaultOffset * jointMap.getModelScale();
-   }
-
-   public void setNominalHeightAboveAnkle(double nominalHeightAboveAnkle)
-   {
-      this.nominalHeightAboveGround = nominalHeightAboveAnkle;
-   }
-
-   @Override
    public double getMaximumLegLengthForSingularityAvoidance()
    {
       return jointMap.getPhysicalProperties().getShinLength() + jointMap.getPhysicalProperties().getThighLength();
@@ -282,12 +266,13 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public List<GroupParameter<PIDGainsReadOnly>> getJointSpaceControlGains()
+   public List<GroupParameter<PIDGainsReadOnly>> getHighLevelJointSpaceControlGains()
    {
       List<GroupParameter<PIDGainsReadOnly>> jointspaceGains = new ArrayList<>();
       jointspaceGains.add(new GroupParameter<>("SpineJoints", jointMap.getSpineJointNamesAsStrings()));
       jointspaceGains.add(new GroupParameter<>("NeckJoints", jointMap.getNeckJointNamesAsStrings()));
       jointspaceGains.add(new GroupParameter<>("ArmJoints", jointMap.getArmJointNamesAsStrings()));
+      jointspaceGains.add(new GroupParameter<>("LegJoints", jointMap.getLegJointNamesAsStrings()));
       return jointspaceGains;
    }
 
@@ -590,13 +575,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return steppingParameters;
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public LeapOfFaithParameters getLeapOfFaithParameters()
-   {
-      return leapOfFaithParameters;
-   }
-
    @Override
    public double getMinSwingTrajectoryClearanceFromStanceFoot()
    {
@@ -628,11 +606,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public void setSteppingParameters(AtlasSteppingParameters steppingParameters)
    {
       this.steppingParameters = steppingParameters;
-   }
-
-   public void setLeapOfFaithParameters(LeapOfFaithParameters leapOfFaithParameters)
-   {
-      this.leapOfFaithParameters = leapOfFaithParameters;
    }
 
    /**

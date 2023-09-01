@@ -15,6 +15,7 @@ public class FeetLoadedToWalkingStandTransition extends FeetLoadedTransition
    private final YoEnum<HighLevelControllerName> requestedState;
 
    private final YoBoolean waitForRequest;
+   private final YoDouble lastTimeFeetWereUnloaded;
 
    private final YoDouble minimumTimeInState;
 
@@ -28,6 +29,7 @@ public class FeetLoadedToWalkingStandTransition extends FeetLoadedTransition
       this.nextStateEnum = nextStateEnum;
       this.requestedState = requestedState;
 
+      lastTimeFeetWereUnloaded = new YoDouble("lastTimeFeetWereUnloaded", registry);
       minimumTimeInState = new YoDouble("minimumTimeLoadingFeet", registry);
       minimumTimeInState.set(highLevelControllerParameters.getMinimumTimeInStandReady());
 
@@ -39,9 +41,14 @@ public class FeetLoadedToWalkingStandTransition extends FeetLoadedTransition
    public boolean testCondition(double timeInState)
    {
       if (!super.testCondition(timeInState))
+      {
+         lastTimeFeetWereUnloaded.set(timeInState);
          return false;
+      }
 
-      if (timeInState < minimumTimeInState.getDoubleValue())
+      lastTimeFeetWereUnloaded.set(Math.min(lastTimeFeetWereUnloaded.getDoubleValue(), timeInState));
+
+      if (timeInState - lastTimeFeetWereUnloaded.getDoubleValue() < minimumTimeInState.getDoubleValue())
          return false;
 
       boolean transitionRequested = nextStateEnum.equals(requestedState.getEnumValue());

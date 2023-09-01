@@ -1,0 +1,532 @@
+package us.ihmc.rdx.ui.teleoperation.locomotion;
+
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.AbortWalkingMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.PauseWalkingMessage;
+import imgui.ImGui;
+import imgui.type.ImBoolean;
+import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.tools.CommunicationHelper;
+import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
+import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
+import us.ihmc.footstepPlanning.FootstepPlannerOutput;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.log.LogTools;
+import us.ihmc.rdx.imgui.RDXPanel;
+import us.ihmc.rdx.imgui.ImGuiTextOverlay;
+import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.ui.*;
+import us.ihmc.rdx.ui.affordances.*;
+import us.ihmc.rdx.ui.footstepPlanner.RDXFootstepPlanning;
+import us.ihmc.rdx.ui.graphics.RDXBodyPathPlanGraphic;
+import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
+import us.ihmc.rdx.ui.teleoperation.RDXLegControlMode;
+import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.Timer;
+
+/**
+ * This class provides easy access to everything that involves mobility for the robot's legs.
+ * Everything with walking and moving the legs are contained in this class.
+ * This allows the features to all be grouped together in the UI making the robot easier to operate.
+ */
+public class RDXLocomotionManager
+{
+   private RDXBaseUI baseUI;
+   private final DRCRobotModel robotModel;
+   private final ROS2SyncedRobotModel syncedRobot;
+   private final CommunicationHelper communicationHelper;
+   private final RDXLocomotionParameters locomotionParameters;
+   private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final AStarBodyPathPlannerParametersBasics bodyPathPlannerParameters;
+   private final SwingPlannerParametersBasics swingFootPlannerParameters;
+   private final RDXStoredPropertySetTuner locomotionParametersTuner = new RDXStoredPropertySetTuner("Locomotion Parameters");
+   private final RDXStoredPropertySetTuner footstepPlanningParametersTuner = new RDXStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
+   private final RDXStoredPropertySetTuner bodyPathPlanningParametersTuner = new RDXStoredPropertySetTuner("Body Path Planner Parameters (Teleoperation)");
+   private final RDXStoredPropertySetTuner swingFootPlanningParametersTuner = new RDXStoredPropertySetTuner("Swing Foot Planning Parameters (Teleoperation)");
+   private ImGuiStoredPropertySetBooleanWidget areFootstepsAdjustableCheckbox;
+   private ImGuiStoredPropertySetBooleanWidget assumeFlatGroundCheckbox;
+   private ImGuiStoredPropertySetBooleanWidget planSwingTrajectoriesCheckbox;
+   private ImGuiStoredPropertySetBooleanWidget replanSwingTrajectoriesOnChangeCheckbox;
+   private ImGuiStoredPropertySetDoubleWidget swingTimeSlider;
+   private ImGuiStoredPropertySetDoubleWidget transferTimeSlider;
+
+   private final RDXFootstepPlanGraphic footstepsSentToControllerGraphic;
+   private final RDXBodyPathPlanGraphic bodyPathPlanGraphic = new RDXBodyPathPlanGraphic();
+
+   private final SideDependentList<RDXInteractableFoot> interactableFeet = new SideDependentList<>();
+   private final RDXBallAndArrowGoalFootstepPlacement ballAndArrowMidFeetPosePlacement = new RDXBallAndArrowGoalFootstepPlacement();
+   private final RDXInteractableFootstepPlan interactableFootstepPlan = new RDXInteractableFootstepPlan();
+   private final RDXFootstepPlanning footstepPlanning;
+   private final RDXManualFootstepPlacement manualFootstepPlacement = new RDXManualFootstepPlacement();
+   private final RDXWalkPathControlRing walkPathControlRing = new RDXWalkPathControlRing();
+   private RDXLegControlMode legControlMode = RDXLegControlMode.DISABLED;
+
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImBoolean collapsedHeader = new ImBoolean(true);
+   private boolean isPlacingFootstep = false;
+   private final PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
+   private final AbortWalkingMessage abortWalkingMessage = new AbortWalkingMessage();
+   private final ControllerStatusTracker controllerStatusTracker;
+   private final Notification abortedNotification = new Notification();
+   private boolean lastAssumeFlatGroundState = false;
+   private final Timer footstepPlanningCompleteTimer = new Timer();
+   private final ImGuiTextOverlay statusOverlay = new ImGuiTextOverlay();
+
+   private RDXFootstepPlanning.InitialStanceSide startStanceSide = RDXFootstepPlanning.InitialStanceSide.AUTO;
+
+   public RDXLocomotionManager(DRCRobotModel robotModel,
+                               CommunicationHelper communicationHelper,
+                               ROS2SyncedRobotModel syncedRobot,
+                               ROS2ControllerHelper ros2Helper,
+                               ControllerStatusTracker controllerStatusTracker,
+                               RDXPanel teleoperationPanel)
+   {
+      this.robotModel = robotModel;
+      this.communicationHelper = communicationHelper;
+      this.syncedRobot = syncedRobot;
+      this.controllerStatusTracker = controllerStatusTracker;
+
+      locomotionParameters = new RDXLocomotionParameters(robotModel.getSimpleRobotName());
+      locomotionParameters.load();
+      footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+      bodyPathPlannerParameters = robotModel.getAStarBodyPathPlannerParameters();
+      swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
+
+      teleoperationPanel.addChild(locomotionParametersTuner);
+      teleoperationPanel.addChild(footstepPlanningParametersTuner);
+      teleoperationPanel.addChild(bodyPathPlanningParametersTuner);
+      teleoperationPanel.addChild(swingFootPlanningParametersTuner);
+
+      footstepPlanning = new RDXFootstepPlanning(robotModel,
+                                                 syncedRobot,
+                                                 locomotionParameters,
+                                                 footstepPlannerParameters,
+                                                 bodyPathPlannerParameters,
+                                                 swingFootPlannerParameters);
+
+      // TODO remove ros from this module, and have it call from the higher level.
+      ros2Helper.subscribeViaCallback(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, regions ->
+      {
+         PlanarRegionsList planarRegionsList = getPlanarRegionListInWorld(regions);
+         footstepPlanning.setPlanarRegionsList(planarRegionsList);
+         interactableFootstepPlan.setPlanarRegionsList(planarRegionsList);
+      });
+      ros2Helper.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_OUTPUT, heightMap ->
+      {
+         footstepPlanning.setHeightMapData(heightMap);
+         interactableFootstepPlan.setHeightMapMessage(heightMap);
+      });
+
+      footstepsSentToControllerGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
+      communicationHelper.subscribeToControllerViaCallback(FootstepDataListMessage.class, footsteps ->
+            footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps,
+                                                                                                                "Teleoperation Panel Controller Spy")));
+   }
+
+   private PlanarRegionsList getPlanarRegionListInWorld(FramePlanarRegionsListMessage message)
+   {
+      FramePlanarRegionsList framePlanarRegionsList = PlanarRegionMessageConverter.convertToFramePlanarRegionsList(message);
+      PlanarRegionsList planarRegionsList = framePlanarRegionsList.getPlanarRegionsList().copy();
+      planarRegionsList.applyTransform(framePlanarRegionsList.getSensorToWorldFrameTransform());
+
+      return planarRegionsList;
+   }
+
+   public void create(RDXBaseUI baseUI)
+   {
+      this.baseUI = baseUI;
+
+      controllerStatusTracker.registerAbortedListener(abortedNotification);
+
+      locomotionParametersTuner.create(locomotionParameters);
+      footstepPlanningParametersTuner.create(footstepPlannerParameters, false);
+      bodyPathPlanningParametersTuner.create(bodyPathPlannerParameters, false);
+      swingFootPlanningParametersTuner.create(swingFootPlannerParameters, false);
+
+      assumeFlatGroundCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.assumeFlatGround);
+      areFootstepsAdjustableCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.areFootstepsAdjustable);
+      planSwingTrajectoriesCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.planSwingTrajectories);
+      replanSwingTrajectoriesOnChangeCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.replanSwingTrajectoriesOnChange);
+      swingTimeSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.swingTime, 0.3, 1.5);
+      transferTimeSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.transferTime, 0.3, 1.5);
+
+      ballAndArrowMidFeetPosePlacement.create(Color.YELLOW, syncedRobot);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
+
+      interactableFootstepPlan.create(baseUI, communicationHelper, syncedRobot, locomotionParameters, footstepPlannerParameters, swingFootPlannerParameters);
+      baseUI.getVRManager().getContext().addVRPickCalculator(interactableFootstepPlan::calculateVRPick);
+      baseUI.getVRManager().getContext().addVRInputProcessor(interactableFootstepPlan::processVRInput);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(interactableFootstepPlan::processImGui3DViewInput);
+      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(interactableFootstepPlan::calculate3DViewPick);
+
+      manualFootstepPlacement.create(syncedRobot, baseUI, interactableFootstepPlan, footstepPlannerParameters);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(manualFootstepPlacement::processImGui3DViewInput);
+      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(manualFootstepPlacement::calculate3DViewPick);
+
+      walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, footstepPlannerParameters);
+
+      baseUI.getPrimary3DPanel().addImGuiOverlayAddition(() -> renderOverlayElements(baseUI.getPrimary3DPanel()));
+   }
+
+   public void update()
+   {
+      controllerStatusTracker.checkControllerIsRunning();
+
+      if (abortedNotification.poll())
+      {
+         deleteAll();
+      }
+
+      swingFootPlannerParameters.setMinimumSwingTime(locomotionParameters.getSwingTime());
+
+      if (ballAndArrowMidFeetPosePlacement.getPlacedNotification().poll() || (lastAssumeFlatGroundState != locomotionParameters.getAssumeFlatGround()
+                                                                              && ballAndArrowMidFeetPosePlacement.isPlaced()))
+      {
+         footstepPlanning.queueAsynchronousPlanning(ballAndArrowMidFeetPosePlacement.getGoalPose());
+      }
+
+      if (walkPathControlRing.getGoalUpdatedNotification().poll() || (lastAssumeFlatGroundState != locomotionParameters.getAssumeFlatGround()
+                                                                    && walkPathControlRing.isSelected()))
+      {
+         footstepPlanning.queueAsynchronousPlanning(walkPathControlRing.getGoalPose());
+      }
+
+      footstepPlanning.update();
+
+      if (footstepPlanning.getPlannerOutputNotification().poll())
+      {
+         FootstepPlannerOutput output = footstepPlanning.getPlannerOutputNotification().read();
+         interactableFootstepPlan.updateFromPlan(output.getFootstepPlan(), output.getSwingTrajectories());
+         if (output.getBodyPath().size() > 0)
+            bodyPathPlanGraphic.generateMeshesAsync(output.getBodyPath());
+         else
+            bodyPathPlanGraphic.clear();
+      }
+
+      if (walkPathControlRing.getBecomesModifiedNotification().poll())
+      {
+         legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
+      }
+
+      if (manualFootstepPlacement.pollIsModeNewlyActivated())
+      {
+         legControlMode = RDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT;
+      }
+
+      if (legControlMode != RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING)
+      {
+         for (RobotSide side : interactableFeet.sides())
+         {
+            interactableFeet.get(side).delete();
+         }
+      }
+
+      if (legControlMode != RDXLegControlMode.PATH_CONTROL_RING)
+      {
+         walkPathControlRing.delete();
+      }
+
+      if (legControlMode != RDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT)
+      {
+         manualFootstepPlacement.exitPlacement();
+      }
+
+      if (legControlMode == RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING || legControlMode == RDXLegControlMode.DISABLED)
+      {
+         interactableFootstepPlan.clear();
+         bodyPathPlanGraphic.clear();
+      }
+
+      manualFootstepPlacement.update();
+      bodyPathPlanGraphic.update();
+      interactableFootstepPlan.update();
+
+      footstepPlanning.setInitialStanceSide(startStanceSide);
+
+      if (interactableFootstepPlan.getNumberOfFootsteps() > 0)
+      {
+         footstepsSentToControllerGraphic.clear();
+      }
+
+      footstepsSentToControllerGraphic.update();
+
+      boolean isCurrentlyPlacingFootstep =
+            getManualFootstepPlacement().isPlacingFootstep() || ballAndArrowMidFeetPosePlacement.isPlacingGoal() || walkPathControlRing.isSelected();
+      if (isPlacingFootstep != isCurrentlyPlacingFootstep)
+         baseUI.setModelSceneMouseCollisionEnabled(isCurrentlyPlacingFootstep);
+      isPlacingFootstep = isCurrentlyPlacingFootstep;
+
+      if (locomotionParameters.getAssumeFlatGround() != lastAssumeFlatGroundState)
+      {
+         footstepPlannerParameters.setEnableExpansionMask(locomotionParameters.getAssumeFlatGround());
+      }
+
+      lastAssumeFlatGroundState = locomotionParameters.getAssumeFlatGround();
+   }
+
+   public void renderImGuiWidgets()
+   {
+      // Used to calculate whether the Walking Options buttons are active or disabled.
+      // This ensures that when the spacebar key is pressed it executes the correct action.
+      boolean pauseAvailable = controllerStatusTracker.isWalking();
+      boolean continueAvailable = !pauseAvailable && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0;
+      boolean walkAvailable = !continueAvailable && interactableFootstepPlan.getNumberOfFootsteps() > 0;
+
+      ImGui.text("Queued footsteps: " + controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps());
+
+      if (ImGui.button(labels.get("Disable Leg Mode")))
+      {
+         legControlMode = RDXLegControlMode.DISABLED;
+      }
+
+      ImGui.sameLine();
+      ImGui.text("Leg Mode: " + legControlMode.name());
+
+      swingTimeSlider.renderImGuiWidget();
+      transferTimeSlider.renderImGuiWidget();
+
+      ImGui.separator();
+      ImGui.text("Walking Options:");
+      ImGui.sameLine();
+
+      if (ImGui.button(labels.get("Abort")))
+      {
+         sendAbortWalkingMessage();
+      }
+      ImGui.sameLine();
+
+      ImGui.beginDisabled(!walkAvailable);
+      if (ImGui.button(labels.get("Walk")))
+      { // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
+         interactableFootstepPlan.walkFromSteps();
+      }
+      ImGuiTools.previousWidgetTooltip("Keybind: Space");
+      ImGui.sameLine();
+      ImGui.endDisabled();
+
+      ImGui.beginDisabled(!pauseAvailable);
+      if (ImGui.button(labels.get("Pause")))
+      {
+         setPauseWalkingAndPublish(true);
+      }
+      ImGuiTools.previousWidgetTooltip("Keybind: Space");
+      ImGui.sameLine();
+      ImGui.endDisabled();
+
+      ImGui.beginDisabled(!continueAvailable);
+      if (ImGui.button(labels.get("Continue")))
+      {
+         setPauseWalkingAndPublish(false);
+      }
+      ImGuiTools.previousWidgetTooltip("Keybind: Space");
+      ImGui.endDisabled();
+
+      manualFootstepPlacement.renderImGuiWidgets();
+
+      if (ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton())
+         legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
+
+      ImGui.separator();
+      walkPathControlRing.renderImGuiWidgets();
+
+      ImGui.text("First stance side for planner:");
+      ImGui.sameLine();
+
+      if (ImGui.radioButton(labels.get("Auto"), startStanceSide == RDXFootstepPlanning.InitialStanceSide.AUTO))
+      {
+         startStanceSide = RDXFootstepPlanning.InitialStanceSide.AUTO;
+      }
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Left"), startStanceSide == RDXFootstepPlanning.InitialStanceSide.LEFT))
+      {
+         startStanceSide = RDXFootstepPlanning.InitialStanceSide.LEFT;
+      }
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Right"), startStanceSide == RDXFootstepPlanning.InitialStanceSide.RIGHT))
+      {
+         startStanceSide = RDXFootstepPlanning.InitialStanceSide.RIGHT;
+      }
+
+      if (ImGui.collapsingHeader(labels.get("Footstep Planning Options"), collapsedHeader))
+      {
+         ImGui.indent();
+         assumeFlatGroundCheckbox.renderImGuiWidget();
+         areFootstepsAdjustableCheckbox.renderImGuiWidget();
+         planSwingTrajectoriesCheckbox.renderImGuiWidget();
+         replanSwingTrajectoriesOnChangeCheckbox.renderImGuiWidget();
+         ImGui.unindent();
+      }
+
+      // Handles all shortcuts for when the spacebar key is pressed
+      if (ImGui.isKeyReleased(ImGuiTools.getSpaceKey()))
+      {
+         if (walkAvailable)
+         {
+            interactableFootstepPlan.walkFromSteps();
+         }
+         else if (pauseAvailable)
+         {
+            setPauseWalkingAndPublish(true);
+         }
+         else if (continueAvailable)
+         {
+            setPauseWalkingAndPublish(false);
+         }
+      }
+   }
+
+   public void updateWalkPathControlRing()
+   {
+      walkPathControlRing.update();
+   }
+   
+   public void calculateWalkPathControlRingVRPick(RDXVRContext vrContext)
+   {
+      if (!manualFootstepPlacement.isPlacingFootstep())
+         walkPathControlRing.calculateVRPick(vrContext);
+   }
+
+   public void processWalkPathControlRingVRInput(RDXVRContext vrContext)
+   {
+      if (!manualFootstepPlacement.isPlacingFootstep())
+      {
+         if (walkPathControlRing.getFootstepPlannerGoalGizmo().getPathControlRingGizmo().getIsGizmoHoveredVR().get(RobotSide.RIGHT))
+         {
+            vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
+            {
+               controller.setBButtonText("Delete all");
+               if (controller.getBButtonActionData().bChanged() && controller.getBButtonActionData().bState())
+               {
+                  deleteAll();
+               }
+               controller.setAButtonText("Walk");
+               if (controller.getAButtonActionData().bChanged() && controller.getAButtonActionData().bState())
+               {
+                  interactableFootstepPlan.walkFromSteps();
+               }
+            });
+         }
+
+         walkPathControlRing.processVRInput(vrContext);
+      }
+   }
+
+   public void calculateWalkPathControlRing3DViewPick(ImGui3DViewInput input)
+   {
+      if (!manualFootstepPlacement.isPlacingFootstep())
+         walkPathControlRing.calculate3DViewPick(input);
+   }
+
+   public void processWalkPathControlRing3dViewInput(ImGui3DViewInput input)
+   {
+      if (!manualFootstepPlacement.isPlacingFootstep())
+         walkPathControlRing.process3DViewInput(input);
+   }
+
+   public void destroy()
+   {
+      footstepPlanning.destroy();
+      footstepsSentToControllerGraphic.destroy();
+      bodyPathPlanGraphic.destroy();
+      interactableFootstepPlan.destroy();
+   }
+
+   public void deleteAll()
+   {
+      footstepsSentToControllerGraphic.clear();
+      ballAndArrowMidFeetPosePlacement.clear();
+      manualFootstepPlacement.exitPlacement();
+      interactableFootstepPlan.clear();
+      bodyPathPlanGraphic.clear();
+      walkPathControlRing.delete();
+
+      legControlMode = RDXLegControlMode.DISABLED;
+   }
+
+   public void setLegControlModeToSingleSupportFootPosing()
+   {
+      legControlMode = RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING;
+   }
+
+   public void sendAbortWalkingMessage()
+   {
+      communicationHelper.publishToController(abortWalkingMessage);
+   }
+
+   public void setPauseWalkingAndPublish(boolean pauseWalking)
+   {
+      pauseWalkingMessage.setPause(pauseWalking);
+      communicationHelper.publishToController(pauseWalkingMessage);
+
+      if (pauseWalking)
+         LogTools.info("Commanding Pause Walking...");
+      else
+         LogTools.info("Commanding Continue Walking...");
+   }
+
+   public RDXManualFootstepPlacement getManualFootstepPlacement()
+   {
+      return manualFootstepPlacement;
+   }
+
+   public void getWalkPathControlRingVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      walkPathControlRing.getVirtualRenderables(renderables, pool);
+   }
+
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      footstepsSentToControllerGraphic.getRenderables(renderables, pool);
+      ballAndArrowMidFeetPosePlacement.getRenderables(renderables, pool);
+      manualFootstepPlacement.getRenderables(renderables, pool);
+      interactableFootstepPlan.getRenderables(renderables, pool);
+      // Only render when planning with body path
+      if (locomotionParameters.getPlanWithBodyPath())
+         bodyPathPlanGraphic.getRenderables(renderables, pool);
+   }
+
+   public void renderOverlayElements(RDX3DPanel panel3D)
+   {
+      boolean isPlanning = footstepPlanning.isPlanning();
+      boolean hasPlannedRecently = footstepPlanningCompleteTimer.isRunning(2.0);
+      if (isPlanning || hasPlannedRecently)
+      {
+         ImGui.pushFont(ImGuiTools.getMediumFont());
+         String text;
+         if (isPlanning)
+         {
+            footstepPlanningCompleteTimer.reset();
+            text = "Planning footsteps...";
+         }
+         else
+         {
+            text = "Footstep planning completed.";
+         }
+         statusOverlay.render(text, panel3D.getWindowDrawMinX(), panel3D.getWindowDrawMinY(), 20.0f, 20.0f);
+         ImGui.popFont();
+      }
+   }
+
+   public RDXLocomotionParameters getLocomotionParameters()
+   {
+      return locomotionParameters;
+   }
+}

@@ -3,17 +3,17 @@ package us.ihmc.parameterTuner.guiElements.main;
 import java.util.List;
 
 import javafx.animation.AnimationTimer;
-import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.parameterTuner.JavaFXExceptionTools;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 import us.ihmc.parameterTuner.guiElements.GuiRegistry;
 
-public abstract class ParameterTuningApplication extends Application
+public abstract class ParameterTuningApplication extends ApplicationNoModule
 {
    private static final String FXML_FILE = "/gui.fxml";
 

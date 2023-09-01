@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
-import static us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer.createWrenchVisualizerWithContactableBodies;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -9,6 +7,7 @@ import java.util.stream.Stream;
 
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.DesiredExternalWrenchHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerBoundCalculator;
@@ -16,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ContactWrenchMatrixCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointTorqueMinimizationWeightCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
@@ -28,20 +28,25 @@ import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
 import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
+import us.ihmc.mecano.algorithms.MultiBodyGravityGradientCalculator;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.KinematicLoopFunction;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class WholeBodyControlCoreToolbox
+public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -58,6 +63,7 @@ public class WholeBodyControlCoreToolbox
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final JointIndexHandler jointIndexHandler;
+   private final List<OneDoFJointBasics> inactiveOneDoFJoints = new ArrayList<>();
    private final double totalRobotMass;
    private CentroidalMomentumCalculator centroidalMomentumCalculator;
    private CentroidalMomentumRateCalculator centroidalMomentumRateCalculator;
@@ -65,6 +71,11 @@ public class WholeBodyControlCoreToolbox
    private CompositeRigidBodyMassMatrixCalculator massMatrixCalculator;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
    private final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
+   private JointTorqueMinimizationWeightCalculator jointTorqueMinimizationWeightCalculator;
+   /**
+    * Calculator used to formulate minimization of the joint torques due to gravity compensation.
+    */
+   private MultiBodyGravityGradientCalculator gravityGradientCalculator;
    /**
     * Calculator used to formulate the torque minimization objective. Allows to evaluate the joint
     * efforts due to: gravity, Coriolis, and centrifugal accelerations and external wrenches that are
@@ -143,9 +154,14 @@ public class WholeBodyControlCoreToolbox
     * @param parentRegistry                     registry to which this toolbox will attach its own
     *                                           registry.
     */
-   public WholeBodyControlCoreToolbox(double controlDT, double gravityZ, FloatingJointBasics rootJoint, JointBasics[] controlledJoints,
-                                      ReferenceFrame centerOfMassFrame, ControllerCoreOptimizationSettings controllerCoreOptimizationSettings,
-                                      YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
+   public WholeBodyControlCoreToolbox(double controlDT,
+                                      double gravityZ,
+                                      FloatingJointBasics rootJoint,
+                                      JointBasics[] controlledJoints,
+                                      ReferenceFrame centerOfMassFrame,
+                                      ControllerCoreOptimizationSettings controllerCoreOptimizationSettings,
+                                      YoGraphicsListRegistry yoGraphicsListRegistry,
+                                      YoRegistry parentRegistry)
    {
       this.controlDT = controlDT;
       this.gravityZ = gravityZ;
@@ -183,6 +199,21 @@ public class WholeBodyControlCoreToolbox
    public void addKinematicLoopFunction(KinematicLoopFunction function)
    {
       kinematicLoopFunctions.add(function);
+   }
+
+   /**
+    * Registers a joint as inactive, i.e. it cannot be controlled but should still be considered.
+    * <p>
+    * The list of inactive joints can be modified at runtime via
+    * {@link InverseDynamicsOptimizationSettingsCommand}.
+    * </p>
+    * 
+    * @param inactiveJoint the joint to be registered as inactive.
+    */
+   public void addInactiveJoint(OneDoFJointBasics inactiveJoint)
+   {
+      if (!inactiveOneDoFJoints.contains(inactiveJoint))
+         inactiveOneDoFJoints.add(inactiveJoint);
    }
 
    /**
@@ -246,10 +277,28 @@ public class WholeBodyControlCoreToolbox
     */
    public void setupForInverseKinematicsSolver()
    {
+      setupForInverseKinematicsSolver(null);
+   }
+
+   /**
+    * Notices the {@link WholeBodyControllerCore} at construction time that the inverse kinematics
+    * module has to be created.
+    * <p>
+    * WARNING: This method has be to called BEFORE creating the {@link WholeBodyControllerCore}.
+    * </p>
+    */
+   public void setupForInverseKinematicsSolver(JointTorqueMinimizationWeightCalculator calculator)
+   {
       enableInverseKinematicsModule = true;
       // TODO add tools specific to the inverse kinematics module here.
       if (centroidalMomentumRateCalculator == null)
          centroidalMomentumCalculator = new CentroidalMomentumCalculator(multiBodySystemInput, centerOfMassFrame);
+      if (calculator != null)
+      {
+         jointTorqueMinimizationWeightCalculator = calculator;
+         if (calculator.getRegistry() != null)
+            registry.addChild(calculator.getRegistry());
+      }
    }
 
    /**
@@ -325,6 +374,7 @@ public class WholeBodyControlCoreToolbox
          {
             motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame,
                                                                   centroidalMomentumRateCalculator,
+                                                                  getGravityGradientCalculator(),
                                                                   jointIndexHandler,
                                                                   jointPrivilegedConfigurationParameters,
                                                                   registry);
@@ -335,6 +385,7 @@ public class WholeBodyControlCoreToolbox
 
             motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame,
                                                                   centroidalMomentumCalculator,
+                                                                  getGravityGradientCalculator(),
                                                                   jointIndexHandler,
                                                                   jointPrivilegedConfigurationParameters,
                                                                   registry);
@@ -385,6 +436,11 @@ public class WholeBodyControlCoreToolbox
       return inverseDynamicsCalculator;
    }
 
+   public JointTorqueMinimizationWeightCalculator getJointTorqueMinimizationWeightCalculator()
+   {
+      return jointTorqueMinimizationWeightCalculator;
+   }
+
    public GravityCoriolisExternalWrenchMatrixCalculator getGravityCoriolisExternalWrenchMatrixCalculator()
    {
       if (gravityCoriolisExternalWrenchMatrixCalculator == null)
@@ -393,6 +449,16 @@ public class WholeBodyControlCoreToolbox
          gravityCoriolisExternalWrenchMatrixCalculator.setGravitionalAcceleration(-Math.abs(gravityZ));
       }
       return gravityCoriolisExternalWrenchMatrixCalculator;
+   }
+
+   public MultiBodyGravityGradientCalculator getGravityGradientCalculator()
+   {
+      if (gravityGradientCalculator == null)
+      {
+         gravityGradientCalculator = new MultiBodyGravityGradientCalculator(multiBodySystemInput);
+         gravityGradientCalculator.setGravitionalAcceleration(-Math.abs(gravityZ));
+      }
+      return gravityGradientCalculator;
    }
 
    public ContactWrenchMatrixCalculator getContactWrenchMatrixCalculator()
@@ -489,7 +555,7 @@ public class WholeBodyControlCoreToolbox
    {
       return getPlaneContactWrenchProcessor().getDesiredCenterOfPressureDataHolder();
    }
-   
+
    public DesiredExternalWrenchHolder getDesiredExternalWrenchHolder()
    {
       return getPlaneContactWrenchProcessor().getDesiredExternalWrenchHolder();
@@ -500,7 +566,10 @@ public class WholeBodyControlCoreToolbox
       if (yoGraphicsListRegistry == null)
          return null;
       if (wrenchVisualizer == null)
-         wrenchVisualizer = createWrenchVisualizerWithContactableBodies("DesiredExternalWrench", contactablePlaneBodies, 1.0, yoGraphicsListRegistry, registry);
+      {
+         wrenchVisualizer = new WrenchVisualizer("DesiredExternalWrench", 1.0, yoGraphicsListRegistry, registry);
+         wrenchVisualizer.registerContactablePlaneBodies(contactablePlaneBodies);
+      }
       return wrenchVisualizer;
    }
 
@@ -602,5 +671,23 @@ public class WholeBodyControlCoreToolbox
    public boolean getDeactiveRhoWhenNotInContact()
    {
       return optimizationSettings.getDeactivateRhoWhenNotInContact();
+   }
+
+   public List<OneDoFJointBasics> getInactiveOneDoFJoints()
+   {
+      return inactiveOneDoFJoints;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      if (planeContactWrenchProcessor != null)
+         group.addChild(planeContactWrenchProcessor.getSCS2YoGraphics());
+      if (wrenchVisualizer != null)
+         group.addChild(wrenchVisualizer.getSCS2YoGraphics());
+      if (wrenchMatrixCalculator != null)
+         group.addChild(wrenchMatrixCalculator.getSCS2YoGraphics());
+      return group;
    }
 }

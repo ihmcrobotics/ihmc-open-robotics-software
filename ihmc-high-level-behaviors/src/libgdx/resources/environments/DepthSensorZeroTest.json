@@ -1,7 +1,7 @@
 {
   "ambientLight" : 0.914,
   "objects" : [ {
-    "type" : "GDXPointLightObject",
+    "type" : "RDXPointLightObject",
     "x" : 10.0,
     "y" : 10.0,
     "z" : 10.0,
@@ -10,7 +10,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXPointLightObject",
+    "type" : "RDXPointLightObject",
     "x" : -10.0,
     "y" : 10.0,
     "z" : 10.0,
@@ -19,7 +19,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXPointLightObject",
+    "type" : "RDXPointLightObject",
     "x" : -10.0,
     "y" : -10.0,
     "z" : 10.0,
@@ -28,7 +28,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXPointLightObject",
+    "type" : "RDXPointLightObject",
     "x" : 10.0,
     "y" : -10.0,
     "z" : 10.0,
@@ -37,7 +37,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXLabFloorObject",
+    "type" : "RDXLabFloorObject",
     "x" : 0.8372015159724591,
     "y" : -0.0129333198774646,
     "z" : 0.0,
@@ -46,7 +46,7 @@
     "qz" : -0.008818602371663478,
     "qs" : 0.7056042649251802
   }, {
-    "type" : "GDXMediumCinderBlockRoughed",
+    "type" : "RDXMediumCinderBlockRoughed",
     "x" : 0.6843137475329988,
     "y" : 0.09492850852574551,
     "z" : 0.09029217947825491,
@@ -55,7 +55,7 @@
     "qz" : 0.10074005494287402,
     "qs" : 0.7538388096879136
   }, {
-    "type" : "GDXMediumCinderBlockRoughed",
+    "type" : "RDXMediumCinderBlockRoughed",
     "x" : 0.9275636425872786,
     "y" : -0.4958193725837714,
     "z" : 0.12804003571254097,

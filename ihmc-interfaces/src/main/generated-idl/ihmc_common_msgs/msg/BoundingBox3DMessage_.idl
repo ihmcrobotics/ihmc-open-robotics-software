@@ -1,0 +1,26 @@
+#ifndef __ihmc_common_msgs__msg__BoundingBox3DMessage__idl__
+#define __ihmc_common_msgs__msg__BoundingBox3DMessage__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+module ihmc_common_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="ihmc_common_msgs::msg::dds_::BoundingBox3DMessage_")
+      struct BoundingBox3DMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        geometry_msgs::msg::dds::Point min_point;
+        geometry_msgs::msg::dds::Point max_point;
+      };
+    };
+  };
+};
+
+#endif

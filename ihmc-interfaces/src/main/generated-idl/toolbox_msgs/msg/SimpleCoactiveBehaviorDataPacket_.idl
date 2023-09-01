@@ -1,0 +1,28 @@
+#ifndef __toolbox_msgs__msg__SimpleCoactiveBehaviorDataPacket__idl__
+#define __toolbox_msgs__msg__SimpleCoactiveBehaviorDataPacket__idl__
+
+module toolbox_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC humanoid behavior module.
+       */
+      @TypeCode(type="toolbox_msgs::msg::dds_::SimpleCoactiveBehaviorDataPacket_")
+      struct SimpleCoactiveBehaviorDataPacket
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        string key;
+        double value;
+      };
+    };
+  };
+};
+
+#endif

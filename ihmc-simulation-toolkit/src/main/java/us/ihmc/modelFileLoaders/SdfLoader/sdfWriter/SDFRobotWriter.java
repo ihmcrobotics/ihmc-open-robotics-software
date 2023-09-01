@@ -243,9 +243,6 @@ public abstract class SDFRobotWriter
 
    private List<SDFVisual> createSDFVisual(Link scsLink)
    {
-      if (scsLink.getName().contains("body"))
-         System.out.println();
-      
       List<SDFVisual> sdfVisuals = new ArrayList<>();
 
       List<Graphics3DPrimitiveInstruction> graphics3dInstructions = scsLink.getLinkGraphics().getGraphics3DInstructions();
