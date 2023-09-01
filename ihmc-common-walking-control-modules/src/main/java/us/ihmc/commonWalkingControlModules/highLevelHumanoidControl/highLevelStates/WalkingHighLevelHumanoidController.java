@@ -189,7 +189,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       this.pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       this.naturalPostureManager = managerFactory.getOrCreateNaturalPostureManager();
-      naturalPosturePrivilegedManager = new NaturalPosturePrivilegedManager(fullRobotModel, registry);
+      this.naturalPosturePrivilegedManager = managerFactory.getOrCreateNaturalPosturePrivilegedManager();
       this.feetManager = managerFactory.getOrCreateFeetManager();
 
       RigidBodyBasics head = fullRobotModel.getHead();
