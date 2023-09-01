@@ -19,18 +19,20 @@ public class RDXHumanoidPerceptionUI
    private RDXRapidRegionsUI rapidRegionsUI;
    private RDXActiveMappingUI activeMappingUI;
    private RDXROS2PlanarRegionsVisualizer rapidRegionsMapVisualizer;
-   private RDXROS2FramePlanarRegionsVisualizer rapidRegionsVisualizer;
+   private RDXROS2FramePlanarRegionsVisualizer perspectiveRegionsVisualizer;
+   private RDXROS2PlanarRegionsVisualizer sphericalRegionsVisualizer;
    private RDXHeightMapRenderer heightMapRenderer;
    private RDXRemoteHeightMapPanel heightMapUI;
 
    public RDXHumanoidPerceptionUI(HumanoidPerceptionModule humanoidPerception, ROS2Helper ros2Helper)
    {
-      this.humanoidPerception = humanoidPerception;
       this.remotePerceptionUI = new RDXRemotePerceptionUI(ros2Helper);
 
-      this.activeMappingUI = new RDXActiveMappingUI("Active Mapping", ros2Helper);
-
-      this.humanoidPerception.setPerceptionConfigurationParameters(remotePerceptionUI.getPerceptionConfigurationParameters());
+      if (humanoidPerception != null)
+      {
+         this.humanoidPerception = humanoidPerception;
+         this.humanoidPerception.setPerceptionConfigurationParameters(remotePerceptionUI.getPerceptionConfigurationParameters());
+      }
    }
 
    public void initializeHeightMapRenderer(HumanoidPerceptionModule humanoidPerception)
@@ -75,9 +77,16 @@ public class RDXHumanoidPerceptionUI
 
    public void initializePerspectiveRegionsVisualizer(ROS2Node ros2Node, RDXGlobalVisualizersPanel globalVisualizersUI, boolean render)
    {
-      rapidRegionsVisualizer = new RDXROS2FramePlanarRegionsVisualizer("Rapid Regions", ros2Node, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS);
-      rapidRegionsVisualizer.setActive(render);
-      globalVisualizersUI.addVisualizer(rapidRegionsVisualizer);
+      perspectiveRegionsVisualizer = new RDXROS2FramePlanarRegionsVisualizer("Rapid Regions", ros2Node, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS);
+      perspectiveRegionsVisualizer.setActive(render);
+      globalVisualizersUI.addVisualizer(perspectiveRegionsVisualizer);
+   }
+
+   public void initializeSphericalRegionsVisualizer(ROS2Node ros2Node, RDXGlobalVisualizersPanel globalVisualizersUI, boolean render)
+   {
+      sphericalRegionsVisualizer = new RDXROS2PlanarRegionsVisualizer("Structural Rapid Regions", ros2Node, PerceptionAPI.SPHERICAL_RAPID_REGIONS);
+      sphericalRegionsVisualizer.setActive(render);
+      globalVisualizersUI.addVisualizer(sphericalRegionsVisualizer);
    }
 
    public void initializeHeightMapVisualizer(ROS2Helper ros2Helper, RDXGlobalVisualizersPanel globalVisualizersUI, boolean render)
@@ -106,8 +115,11 @@ public class RDXHumanoidPerceptionUI
       if (heightMapUI != null)
          heightMapUI.destroy();
 
-      if (rapidRegionsVisualizer != null)
-         rapidRegionsVisualizer.destroy();
+      if (perspectiveRegionsVisualizer != null)
+         perspectiveRegionsVisualizer.destroy();
+
+      if (sphericalRegionsVisualizer != null)
+         sphericalRegionsVisualizer.destroy();
 
       if (rapidRegionsMapVisualizer != null)
          rapidRegionsMapVisualizer.destroy();
@@ -146,5 +158,10 @@ public class RDXHumanoidPerceptionUI
    public float getThresholdHeight()
    {
       return remotePerceptionUI.getThresholdHeight();
+   }
+
+   public RDXRemoteHeightMapPanel getHeightMapUI()
+   {
+      return heightMapUI;
    }
 }

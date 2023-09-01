@@ -5,12 +5,17 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
+import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.log.LogTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.rdx.RDXHeightMapRenderer;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
@@ -19,6 +24,7 @@ import us.ihmc.rdx.visualizers.RDXGridMapGraphic;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
+import java.nio.ByteBuffer;
 import java.util.Set;
 
 public class RDXHeightMapVisualizer extends RDXVisualizer
@@ -31,6 +37,11 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    private final ImBoolean renderGroundPlane = new ImBoolean(false);
    private final ImBoolean renderGroundCells = new ImBoolean(false);
    private final ImBoolean heightMapActive = new ImBoolean(false);
+
+   private Mat heightMapImage;
+   private Mat compressedBytesMat;
+   private ByteBuffer incomingCompressedImageBuffer;
+   private BytePointer incomingCompressedImageBytePointer;
    
    private ROS2Heartbeat activeHeartbeat;
 
@@ -83,11 +94,34 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
       {
          executorService.clearQueueAndExecute(() ->
          {
-            LogTools.info("Received image message with size: " + imageMessage.getData().size());
+            int numberOfBytes = imageMessage.getData().size();
 
-            // TODO: Decompress and render
+            if (heightMapImage == null)
+            {
+               heightMapImage = new Mat(imageMessage.getImageHeight(), imageMessage.getImageWidth(), opencv_core.CV_16UC1);
+               compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
+               incomingCompressedImageBuffer = NativeMemoryTools.allocate(numberOfBytes);
+               incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
+            }
+
+            incomingCompressedImageBuffer.rewind();
+            incomingCompressedImageBuffer.limit(numberOfBytes);
+            for (int i = 0; i < numberOfBytes; i++)
+            {
+               incomingCompressedImageBuffer.put(imageMessage.getData().get(i));
+            }
+            incomingCompressedImageBuffer.flip();
+
+            compressedBytesMat.cols(numberOfBytes);
+            compressedBytesMat.data(incomingCompressedImageBytePointer);
+
             // Decompress the height map image
+            opencv_imgcodecs.imdecode(compressedBytesMat, opencv_imgcodecs.IMREAD_UNCHANGED, heightMapImage);
+
+            RigidBodyTransform transform = new RigidBodyTransform(imageMessage.getOrientation(), imageMessage.getPosition());
+
             // Update the height map renderer with the new image
+            heightMapRenderer.update(transform, heightMapImage.getPointer(), heightMapImage.rows() / 2 + 1, 0.02f);
          });
       }
    }
