@@ -273,7 +273,7 @@ public class SCS2SensorReader implements SensorReader
 
       for (ForceSensorDefinition definition : forceSensorDataHolderToUpdate.getForceSensorDefinitions())
       {
-         addWrenchSensor(definition, forceSensorDataHolderToUpdate.get(definition));
+         addWrenchSensor(definition, forceSensorDataHolderToUpdate.getData(definition));
       }
       forceSensorOutputs = forceSensorDataHolderToUpdate;
    }
