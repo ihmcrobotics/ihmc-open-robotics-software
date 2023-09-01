@@ -14,6 +14,7 @@ import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -105,8 +106,9 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       {
          handNames.put(side, syncedFullRobotModel.getHand(side).getName());
 
-         RigidBodyTransform graphicToControlFrameTransform = new RigidBodyTransform();
-         HandTransformTools.getHandGraphicToControlFrameTransform(syncedFullRobotModel, robotModel.getUIParameters(), side, graphicToControlFrameTransform);
+         RigidBodyTransformReadOnly graphicToControlFrameTransform = HandTransformTools.getHandGraphicToControlFrameTransform(syncedFullRobotModel,
+                                                                                                                              robotModel.getUIParameters(),
+                                                                                                                              side);
          graphicFrame.update(transformToParent -> transformToParent.set(graphicToControlFrameTransform));
 
          String handBodyName = handNames.get(side);
@@ -116,8 +118,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          MultiBodySystemBasics handOnlySystem = MultiBodySystemMissingTools.createSingleBodySystem(syncedFullRobotModel.getHand(side));
          List<Collidable> handCollidables = selectionCollisionModel.getRobotCollidables(handOnlySystem);
 
-         RigidBodyTransform linkToControlFrameTransform = new RigidBodyTransform();
-         HandTransformTools.getHandLinkToControlFrameTransform(syncedFullRobotModel, side, linkToControlFrameTransform);
+         RigidBodyTransformReadOnly linkToControlFrameTransform = HandTransformTools.getHandLinkToControlFrameTransform(syncedFullRobotModel, side);
          collisionShapeFrame.update(transformToParent -> transformToParent.set(linkToControlFrameTransform));
 
          for (Collidable handCollidable : handCollidables)
