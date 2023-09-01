@@ -325,6 +325,7 @@ public class TerrainPerceptionProcessWithDriver
 
          if (parameters.getHeightMapEnabled())
          {
+            LogTools.info("Height map extraction");
             humanoidPerception.updateTerrain(ros2Helper, depth16UC1Image, cameraFrame,
                                              cameraZUpFrame, false, false, true, false);
          }

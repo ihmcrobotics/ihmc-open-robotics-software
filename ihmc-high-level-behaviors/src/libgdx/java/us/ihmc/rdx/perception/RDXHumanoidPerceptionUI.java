@@ -84,6 +84,7 @@ public class RDXHumanoidPerceptionUI
    {
       RDXHeightMapVisualizer heightMapVisualizer = new RDXHeightMapVisualizer();
       heightMapVisualizer.setupForHeightMapMessage(ros2Helper);
+      heightMapVisualizer.setupForImageMessage(ros2Helper);
       heightMapVisualizer.setActive(render);
       globalVisualizersUI.addVisualizer(heightMapVisualizer);
    }
