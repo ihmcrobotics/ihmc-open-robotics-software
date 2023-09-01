@@ -792,7 +792,7 @@ public class AvatarEstimatorThreadFactory
       if (!robotConfigurationDataPublisherField.hasValue())
       {
          ForceSensorDataHolderReadOnly forceSensorDataHolderToSend = getForceSensorDataHolder();
-         if (getMainStateEstimator().getForceSensorOutputWithGravityCancelled() != null)
+         if (getMainStateEstimator() != null && getMainStateEstimator().getForceSensorOutputWithGravityCancelled() != null)
             forceSensorDataHolderToSend = getMainStateEstimator().getForceSensorOutputWithGravityCancelled();
 
          RobotConfigurationDataPublisherFactory factory = new RobotConfigurationDataPublisherFactory();
