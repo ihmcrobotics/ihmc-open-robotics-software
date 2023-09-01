@@ -6,16 +6,17 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
+import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
 import us.ihmc.rdx.imgui.ImGuiInputText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObjectBuilder;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
+import us.ihmc.rdx.ui.tools.ImGuiDirectory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
@@ -41,6 +42,7 @@ public class RDXAffordanceTemplateEditorUI
    private final SideDependentList<RigidBodyTransform> handTransformsToWorld = new SideDependentList<>();
    private final SideDependentList<FramePose3D> handPoses = new SideDependentList<>();
    private RDXInteractableObjectBuilder objectBuilder;
+   private String currentObjectName = "";
    private String previousObjectName = "";
    private final float[] gripperClosure = new float[1];
 
@@ -56,8 +58,8 @@ public class RDXAffordanceTemplateEditorUI
    private RDXActiveAffordanceMenu[] activeMenu;
    private boolean playing = false;
 
-   private final ImGuiInputText textInput = new ImGuiInputText("Enter file name to save/load");
-   private String fileName = "";
+   private final ImGuiInputText textInput = new ImGuiInputText("(optional) Enter additional description");
+   private final ImGuiDirectory fileManagerDirectory;
 
    public RDXAffordanceTemplateEditorUI(RDXBaseUI baseUI)
    {
@@ -122,26 +124,42 @@ public class RDXAffordanceTemplateEditorUI
       }
       baseUI.getPrimaryScene().addRenderableProvider(objectBuilder.getSelectedObject());
       baseUI.getPrimaryScene().addRenderableProvider(RDXAffordanceTemplateEditorUI.this::getRenderables);
-      baseUI.getImGuiPanelManager().addPanel("Affordance Panel", RDXAffordanceTemplateEditorUI.this::renderImGuiWidgets);
+      baseUI.getImGuiPanelManager().addPanel("Affordance Template Panel", RDXAffordanceTemplateEditorUI.this::renderImGuiWidgets);
 
       mirror = new RDXAffordanceTemplateMirror(interactableHands, handTransformsToWorld, handPoses, activeSide);
       locker = new RDXAffordanceTemplateLocker(handTransformsToWorld, handPoses, activeSide, activeMenu);
       fileManager = new RDXAffordanceTemplateFileManager(handPoses.keySet(), preGraspFrames, graspFrame, postGraspFrames, objectBuilder);
+
+      fileManagerDirectory = new ImGuiDirectory(fileManager.getConfigurationDirectory(),
+                                                fileName -> !currentObjectName.isEmpty() && fileName.contains(currentObjectName),
+                                                pathEntry -> pathEntry.type() == BasicPathVisitor.PathType.FILE
+                                                             && pathEntry.path().getFileName().toString().contains(currentObjectName)
+                                                             && pathEntry.path().getFileName().toString().endsWith(".json")
+                                                             && !pathEntry.path().getFileName().toString().contains("Frames")
+                                                             && !pathEntry.path().getFileName().toString().contains("Extra"),
+                                                fileManager::setLoadingFile);
    }
 
    public void update()
    {
       if (objectBuilder.isAnyObjectSelected())
       {
-         if (!objectBuilder.getSelectedObjectName().equals(previousObjectName))
-         {
-            reset();
-            objectBuilder.resetPose();
-         }
-         previousObjectName = objectBuilder.getSelectedObjectName();
          FramePose3D objectPose = new FramePose3D(ReferenceFrame.getWorldFrame(), objectBuilder.getSelectedObject().getTransformToWorld());
          // when editing post grasp poses, we want to move the object frame and the hand together
          locker.update(objectPose);
+      }
+      currentObjectName = objectBuilder.getSelectedObjectName();
+      if (!currentObjectName.equals(previousObjectName))
+      {
+         currentObjectName = objectBuilder.getSelectedObjectName();
+         if (!currentObjectName.equals(previousObjectName))
+         {
+            reset();
+            objectBuilder.resetPose();
+            fileManagerDirectory.reindexDirectory();
+            fileManager.setLoadingFile("");
+         }
+         previousObjectName = currentObjectName;
       }
 
       for (RobotSide side : handPoses.keySet())
@@ -367,23 +385,26 @@ public class RDXAffordanceTemplateEditorUI
          ImGui.sameLine();
          if (ImGui.button(labels.get("Play")))
             playing = true;
-         ImGui.separator();
 
          if (ImGui.button("Reset"))
          {
             objectBuilder.getSelectedObject().resetToInitialPose();
             reset();
          }
-         if (textInput.render())
-            fileName = textInput.getString();
+         ImGui.separator();
+
+         ImGui.text("Name of selected object automatically used for file saving");
+         textInput.render();
          if (ImGui.button("Save"))
-            fileManager.saveToFile(fileName);
-         ImGui.sameLine();
+            fileManager.saveToFile(textInput.getString() + currentObjectName);
+         ImGui.separator();
+
+         fileManagerDirectory.renderImGuiWidgets();
+         ImGui.text("Click on radio button and then on Load");
          if (ImGui.button(labels.get("Load")))
          {
-            objectBuilder.reset();
             reset();
-            fileManager.loadFromFile(fileName);
+            fileManager.load();
          }
       }
       else
