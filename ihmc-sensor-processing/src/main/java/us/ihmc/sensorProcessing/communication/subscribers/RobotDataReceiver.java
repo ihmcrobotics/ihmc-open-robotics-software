@@ -34,17 +34,17 @@ public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
    {
       this(fullRobotModel, fullRobotModel.getOneDoFJoints(), forceSensorDataHolder);
    }
-   
+
    protected RobotDataReceiver(FullRobotModel fullRobotModel, OneDoFJointBasics[] allJoints, ForceSensorDataHolder forceSensorDataHolder)
    {
-      this.allJoints = allJoints; 
-      jointNameHash = RobotConfigurationDataFactory.calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(), fullRobotModel.getIMUDefinitions());
+      this.allJoints = allJoints;
+      jointNameHash = RobotConfigurationDataFactory.calculateJointNameHash(allJoints,
+                                                                           fullRobotModel.getForceSensorDefinitions(),
+                                                                           fullRobotModel.getIMUDefinitions());
 
       rootJoint = fullRobotModel.getRootJoint();
       this.forceSensorDataHolder = forceSensorDataHolder;
    }
-
-
 
    public ForceSensorDataHolder getForceSensorDataHolder()
    {
@@ -87,17 +87,16 @@ public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
          Quaternion orientation = robotConfigurationData.getRootOrientation();
          rootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
          rootJoint.getPredecessor().updateFramesRecursively();
-         
+
          updateFrames();
-         
 
          if (forceSensorDataHolder != null)
          {
             for (int i = 0; i < forceSensorDataHolder.getForceSensorDefinitions().size(); i++)
             {
                SpatialVectorMessage momentAndForceVectorForSensor = robotConfigurationData.getForceSensorData().get(i);
-               forceSensorDataHolder.get(forceSensorDataHolder.getForceSensorDefinitions().get(i)).setWrench(momentAndForceVectorForSensor.getAngularPart(),
-                                                                                                             momentAndForceVectorForSensor.getLinearPart());
+               forceSensorDataHolder.getData(forceSensorDataHolder.getForceSensorDefinitions().get(i))
+                                    .setWrench(momentAndForceVectorForSensor.getAngularPart(), momentAndForceVectorForSensor.getLinearPart());
             }
          }
          for (GraphicsUpdatable graphicsUpdatable : graphicsToUpdate)
@@ -113,10 +112,8 @@ public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
 
    protected void updateFrames()
    {
-      
+
    }
-
-
 
    public long getSimTimestamp()
    {
