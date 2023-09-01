@@ -2,7 +2,9 @@ package us.ihmc.commonWalkingControlModules.inertialParameterEstimation;
 
 import org.ejml.dense.row.MatrixFeatures_DDRM;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
-import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialInertiaBasisOption;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
@@ -12,11 +14,10 @@ import us.ihmc.mecano.yoVariables.multiBodySystem.inertial.YoSpatialInertia;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class InertialParameterEstimator
@@ -30,11 +31,10 @@ public class InertialParameterEstimator
    private final FullHumanoidRobotModel actualRobotModel;
    private final FullHumanoidRobotModel estimateRobotModel;
    private final YoMultiBodySystem yoEstimateRobotModel;
-   private final HashMap<RigidBodyReadOnly, YoSpatialInertia> actualSpatialInertiaHashMap = new LinkedHashMap<>();
-   private final HashMap<RigidBodyReadOnly, YoSpatialInertia> estimatedSpatialInertiaHashMap = new LinkedHashMap<>();
-   private final HashMap<RigidBodyReadOnly, EnumSet<SpatialInertiaBasisOption>> parametersToEstimateMap = new LinkedHashMap<>();
+   private final Map<RigidBodyReadOnly, YoSpatialInertia> actualSpatialInertiaMap = new LinkedHashMap<>();
+   private final Map<RigidBodyReadOnly, YoSpatialInertia> estimatedSpatialInertiaMap = new LinkedHashMap<>();
+   private final Map<RigidBodyReadOnly, EnumSet<SpatialInertiaBasisOption>> parametersToEstimateMap = new LinkedHashMap<>();
    private final JointTorqueRegressorCalculator jointTorqueRegressorCalculator;
-   private final HashMap<JointReadOnly, YoDouble> jointVelocities = new LinkedHashMap<>();
 
    public InertialParameterEstimator(FullHumanoidRobotModel fullRobotModel, double controlDT, double gravity, YoRegistry parentRegistry)
    {
@@ -50,15 +50,10 @@ public class InertialParameterEstimator
       for (RigidBodyReadOnly body : actualRobotModel.getRootBody()
                                                     .subtreeArray())  // TODO: might somehow need getElevator here, but that throws NullPointerException for spatial inertia (expectedly)
       {
-         actualSpatialInertiaHashMap.put(body, new YoSpatialInertia(body.getInertia(), "actual", registry));
-         estimatedSpatialInertiaHashMap.put(body, new YoSpatialInertia(body.getInertia(), "estimated", registry));
+         actualSpatialInertiaMap.put(body, new YoSpatialInertia(body.getInertia(), "actual", registry));
+         estimatedSpatialInertiaMap.put(body, new YoSpatialInertia(body.getInertia(), "estimated", registry));
          parametersToEstimateMap.put(body, SpatialInertiaBasisOption.generateRandomBasisSetForLink(random));
       }
-
-      for (OneDoFJointReadOnly oneDoFJointReadOnly : estimateRobotModel.getOneDoFJoints())
-         jointVelocities.put(oneDoFJointReadOnly, new YoDouble(oneDoFJointReadOnly.getName(), registry));
-
-      parentRegistry.addChild(registry);
 
       if (DEBUG)
          yoEstimateRobotModel = new YoMultiBodySystem(MultiBodySystemReadOnly.toMultiBodySystemInput(estimateRobotModel.getElevator()),
@@ -66,6 +61,8 @@ public class InertialParameterEstimator
                                                       registry);
       else
          yoEstimateRobotModel = null;
+
+      parentRegistry.addChild(registry);
    }
 
    public void update()
