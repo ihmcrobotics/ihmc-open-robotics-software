@@ -57,14 +57,17 @@ public class RDXFootstepAction
          getGizmo().changeParentFrameWithoutMoving(updatedParentFrame);
       }
 
-      if (getGizmo().getGizmoModifiedByUser().poll())
-         actionData.getSolePose().set(getGizmo().getPose()); // Update action data based on user input
-      else
-         getGizmo().getTransformToParent().set(actionData.getSolePose()); // Update gizmo in case action data changes
+      getGizmo().update();
 
+      if (getGizmo().getGizmoModifiedByUser().poll())
+         actionData.getSolePose().set(getGizmo().getTransformToParent()); // Update action data based on user input
+      else
+      {
+         getGizmo().getTransformToParent().set(actionData.getSolePose()); // Update gizmo in case action data changes
+         getGizmo().update();
+      }
 
       interactableFootstep.update();
-      getFootstepFrame().update();
 
       flatFootstepGraphic.setPose(getGizmo().getPose());
    }
