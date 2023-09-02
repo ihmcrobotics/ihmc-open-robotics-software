@@ -12,6 +12,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.PlanarRegionMappingHandler;
+import us.ihmc.perception.mapping.PlanarRegionMapStatistics;
 import us.ihmc.perception.tools.PlaneRegistrationTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiPlot;
@@ -68,10 +69,11 @@ public class RDXPlanarRegionMappingUI implements RenderableProvider
       {
          if (ImGui.beginTabItem("Map"))
          {
-            wholeAlgorithmDurationPlot.render(mappingManager.getPlanarRegionMap().getWholeAlgorithmDurationStopwatch().averageLap());
-            quaternionAveragingDurationPlot.render(mappingManager.getPlanarRegionMap().getQuaternionAveragingStopwatch().averageLap());
-            factorGraphDurationPlot.render(mappingManager.getPlanarRegionMap().getFactorGraphStopwatch().averageLap());
-            regionMergingDurationPlot.render(mappingManager.getPlanarRegionMap().getRegionMergingStopwatch().averageLap());
+            PlanarRegionMapStatistics statistics = mappingManager.getPlanarRegionMap().getStatistics();
+            quaternionAveragingDurationPlot.render(statistics.getRegistrationTime());
+            factorGraphDurationPlot.render(statistics.getOptimizationTime());
+            regionMergingDurationPlot.render(statistics.getMergingTime());
+            wholeAlgorithmDurationPlot.render(statistics.getTotalProcessingTime());
 
             if (ImGui.button("Load Next Set"))
                mappingManager.nextButtonCallback();

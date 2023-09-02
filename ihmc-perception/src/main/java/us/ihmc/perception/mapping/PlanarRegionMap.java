@@ -1,7 +1,6 @@
 package us.ihmc.perception.mapping;
 
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -71,7 +70,7 @@ public class PlanarRegionMap
    private final RigidBodyTransform estimatedTransformToPrevious = new RigidBodyTransform();
    private final PlanarLandmarkList mapLandmarks = new PlanarLandmarkList();
 
-   private PlanarRegionMapStatistics mapStatistics;
+   private PlanarRegionMapStatistics statistics;
 
    private MergingMode merger;
    private MatchingMode matcher;
@@ -113,6 +112,7 @@ public class PlanarRegionMap
       parameters = new PlanarRegionMappingParameters(version);
       finalMap = new PlanarRegionsList();
       processedMap = new PlanarRegionsList();
+      statistics = new PlanarRegionMapStatistics();
    }
 
    /**
@@ -194,8 +194,6 @@ public class PlanarRegionMap
       }
       else
       {
-         //         PerceptionPrintTools.printRegionIDs("Map", finalMap);
-
          PlanarRegionSLAMTools.findPlanarRegionMatches(finalMap,
                                                        priorRegionsInWorld,
                                                        incomingToMapMatches,
@@ -203,8 +201,6 @@ public class PlanarRegionMap
                                                        (float) parameters.getSimilarityThresholdBetweenNormals(),
                                                        (float) parameters.getOrthogonalDistanceThreshold(),
                                                        (float) parameters.getMinimumBoundingBoxSize());
-
-         //         PerceptionPrintTools.printMatches("Cross Matches", finalMap, priorRegionsInWorld, incomingToMapMatches);
 
          if (merger == MergingMode.SMOOTHING)
          {
@@ -720,10 +716,14 @@ public class PlanarRegionMap
 
          LogTools.debug("Computing ICP transform [{} <- {}]", keyframes.get(keyframes.size() - 1).getTimeIndex(), currentTimeIndex);
 
+         statistics.startRegistrationTime();
+
          boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(previousLandmarks,
                                                                                                      landmarks.copy(),
                                                                                                      transformToPrevious,
                                                                                                      parameters);
+
+         statistics.stopRegistrationTime();
 
          if (!valid)
          {
@@ -782,7 +782,7 @@ public class PlanarRegionMap
 
          LogTools.debug("Transform to previous: {}", transformToPrevious);
 
-         //quaternionAveragingStopwatch.suspend();
+         statistics.startOptimizationTime();
 
          applyFactorGraphBasedSmoothing(finalMap,
                                         graphRegions,
@@ -791,6 +791,8 @@ public class PlanarRegionMap
                                         estimatedTransformToPrevious,
                                         incomingToMapMatches,
                                         sensorPoseIndex);
+
+         statistics.stopOptimizationTime();
 
          // Extract the optimal transform from the factor graph
          double[] transformArray = new double[16];
@@ -806,7 +808,10 @@ public class PlanarRegionMap
                                                           posteriorRegionsInWorld.addPlanarRegion(region);
                                                        });
 
+         statistics.startMergingTime();
          finalMap = crossReduceRegionsIteratively(finalMap, graphRegions);
+         statistics.stopMergingTime();
+
          processUniqueRegions(finalMap);
 
          // TODO: Improve the intersection based chopping tool before enabling this.
@@ -875,6 +880,21 @@ public class PlanarRegionMap
       LogTools.debug("+++++++++ --------- +++++++++ Done (Processing Unique Region IDs) +++++++++ --------- +++++++++");
    }
 
+   public void destroy()
+   {
+      if (factorGraph != null)
+      {
+         factorGraph.clearISAM2();
+      }
+   }
+
+   public Vector4D getOptimalLandmarkById(int landmarkId)
+   {
+      double[] landmark = new double[4];
+      factorGraph.getPlanarLandmarkById(landmarkId, landmark);
+      return new Vector4D(landmark);
+   }
+
    public PlanarRegionsList getMapRegions()
    {
       return finalMap;
@@ -900,24 +920,9 @@ public class PlanarRegionMap
       return parameters;
    }
 
-   public void destroy()
-   {
-      if (factorGraph != null)
-      {
-         factorGraph.clearISAM2();
-      }
-   }
-
    public RigidBodyTransform getOptimalSensorToWorldTransform()
    {
       return sensorToWorldTransformPosterior;
-   }
-
-   public Vector4D getOptimalLandmarkById(int landmarkId)
-   {
-      double[] landmark = new double[4];
-      factorGraph.getPlanarLandmarkById(landmarkId, landmark);
-      return new Vector4D(landmark);
    }
 
    public void setInitialSensorPose(RigidBodyTransform transformToWorld)
@@ -933,6 +938,11 @@ public class PlanarRegionMap
    public void setInitialSupportSquareEnabled(boolean supportSquareEnabled)
    {
       initialSupportSquareEnabled = supportSquareEnabled;
+   }
+
+   public PlanarRegionMapStatistics getStatistics()
+   {
+      return statistics;
    }
 }
 

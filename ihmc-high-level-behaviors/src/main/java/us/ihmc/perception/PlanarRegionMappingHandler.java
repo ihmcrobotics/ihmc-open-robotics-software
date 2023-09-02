@@ -120,7 +120,6 @@ public class PlanarRegionMappingHandler
    private final RapidPatchesBasedICP rapidPatchesBasedICP = new RapidPatchesBasedICP();
 
    private PerceptionDataLoader perceptionDataLoader;
-   private PlanarRegionMapStatistics planarRegionMapStatistics;
 
    public PlanarRegionMappingHandler()
    {
@@ -170,8 +169,6 @@ public class PlanarRegionMappingHandler
 
       //createOuster(128, 1024, smoothing);
       createTerrain(720, 1280, false);
-
-      planarRegionMapStatistics = new PlanarRegionMapStatistics(planarRegionMap, rapidRegionsExtractor);
    }
 
    private void createTerrain(int depthHeight, int depthWidth, boolean simulation)
@@ -280,9 +277,9 @@ public class PlanarRegionMappingHandler
          LogTools.debug("Transform: {}", framePlanarRegionsList.getSensorToWorldFrameTransform());
 
          updateMapWithNewRegions(framePlanarRegionsList);
-         planarRegionMapStatistics.computeStatistics();
 
-         LogTools.info("Statistics: {}", planarRegionMapStatistics);
+         planarRegionMap.getStatistics().computeStatistics(planarRegionMap, rapidRegionsExtractor);
+         LogTools.info("Statistics: {}", planarRegionMap.getStatistics());
 
          planarRegionListIndex++;
       }
@@ -318,8 +315,8 @@ public class PlanarRegionMappingHandler
             planarRegionMap.setModified(true);
             updateMapWithNewRegions(framePlanarRegionsList);
 
-            planarRegionMapStatistics.computeStatistics();
-            LogTools.info("Statistics: {}", planarRegionMapStatistics);
+            planarRegionMap.getStatistics().computeStatistics(planarRegionMap, rapidRegionsExtractor);
+            LogTools.info("Statistics: {}", planarRegionMap.getStatistics());
          }
 
          perceptionLogIndex += 1;
