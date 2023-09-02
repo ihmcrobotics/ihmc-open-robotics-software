@@ -1,6 +1,7 @@
 package us.ihmc.rdx.vr;
 
 import static org.lwjgl.openvr.VR.VR_ShutdownInternal;
+import static org.lwjgl.openvr.VRSystem.VRSystem_GetStringTrackedDeviceProperty;
 
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
@@ -35,6 +36,16 @@ import us.ihmc.tools.io.*;
  */
 public class RDXVRContext
 {
+   // TODO. remove body segments names and serial number once integrated openxr. Use tracker role instead
+   private static final Map<String, String> TRACKER_SERIAL_MAP = new HashMap<String, String>()
+   {
+      {
+         put("LHR-6680BD50", "chest");
+         put("LHR-743512BE", "leftForeArm");
+         put("LHR-41A915A6", "rightForeArm");
+      }
+   }; // must use serial number, tracker role is not supported in org.lwjgl.openvr.VR
+
    // couple of scratch buffers
    private final IntBuffer errorPointer = BufferUtils.newIntBuffer(1);
    private final IntBuffer widthPointer = BufferUtils.newIntBuffer(1);
@@ -86,7 +97,8 @@ public class RDXVRContext
    private final RDXVRHeadset headset = new RDXVRHeadset(vrPlayAreaYUpZBackFrame);
    private final SideDependentList<RDXVRController> controllers = new SideDependentList<>(new RDXVRController(RobotSide.LEFT, vrPlayAreaYUpZBackFrame),
                                                                                           new RDXVRController(RobotSide.RIGHT, vrPlayAreaYUpZBackFrame));
-   private final HashMap<Integer, RDXVRBaseStation> baseStations = new HashMap<>();
+   private final Map<Integer, RDXVRBaseStation> baseStations = new HashMap<>();
+   private final Map<String, RDXVRTracker> trackers = new HashMap<>();
 
    public void initSystem()
    {
@@ -134,6 +146,17 @@ public class RDXVRContext
          controllers.get(side).initSystem();
       }
       // TODO: Bindings for /user/gamepad
+      int[] deviceIndices = new int[TRACKER_SERIAL_MAP.size()];
+      IntBuffer trackerIndices = IntBuffer.wrap(deviceIndices);
+      int numberOfTrackers = VRSystem.VRSystem_GetSortedTrackedDeviceIndicesOfClass(
+            VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker, trackerIndices, -1);
+      for (int i = 0; i < numberOfTrackers; i++) {
+         int deviceIndex = trackerIndices.get(i);
+         if (!trackers.containsKey(getTrackedBodySegment(getSerialNumber(deviceIndex))))
+         {
+            trackers.put(getTrackedBodySegment(getSerialNumber(deviceIndex)), new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex));
+         }
+      }
 
       activeActionSets = VRActiveActionSet.create(1);
       activeActionSets.ulActionSet(mainActionSetHandle.get(0));
@@ -186,22 +209,19 @@ public class RDXVRContext
       while (VRSystem.VRSystem_PollNextEvent(event))
       {
          int deviceIndex = event.trackedDeviceIndex();
-         if (event.eventType() == VR.EVREventType_VREvent_TrackedDeviceActivated)
+         if (!trackers.containsKey(getTrackedBodySegment(getSerialNumber(deviceIndex))))
          {
             int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
-            if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_TrackingReference)
+            if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker)
             {
-               baseStations.put(deviceIndex, new RDXVRBaseStation(vrPlayAreaYUpZBackFrame, deviceIndex));
+               trackers.put(getTrackedBodySegment(getSerialNumber(deviceIndex)), new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex));
             }
          }
-         else if (event.eventType() == VR.EVREventType_VREvent_TrackedDeviceDeactivated)
-         {
-            int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
-            if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_TrackingReference)
-            {
-               baseStations.remove(deviceIndex);
-            }
-         }
+      }
+
+      for (Map.Entry<String, RDXVRTracker> entryTracker : trackers.entrySet())
+      {
+         entryTracker.getValue().update(trackedDevicePoses);
       }
 
       for (Consumer<RDXVRContext> vrPickCalculator : vrPickCalculators)
@@ -216,6 +236,17 @@ public class RDXVRContext
       {
          vrInputProcessor.accept(this);
       }
+   }
+
+   private String getSerialNumber(int index)
+   {
+      String serialNumber = VRSystem_GetStringTrackedDeviceProperty(index, VR.ETrackedDeviceProperty_Prop_SerialNumber_String, null);
+      return serialNumber;
+   }
+
+   private String getTrackedBodySegment(String serialNumber)
+   {
+      return TRACKER_SERIAL_MAP.get(serialNumber);
    }
 
    /**
@@ -286,6 +317,18 @@ public class RDXVRContext
       }
    }
 
+   public void getTrackerRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      for (RDXVRTracker tracker : trackers.values())
+      {
+         ModelInstance modelInstance = tracker.getModelInstance();
+         if (modelInstance != null)
+         {
+            modelInstance.getRenderables(renderables, pool);
+         }
+      }
+   }
+
    public void getBaseStationRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       for (RDXVRBaseStation baseStation : baseStations.values())
@@ -306,6 +349,16 @@ public class RDXVRContext
    public RDXVRHeadset getHeadset()
    {
       return headset;
+   }
+
+   public RDXVRTracker getTracker(String bodySegment)
+   {
+      return trackers.get(bodySegment);
+   }
+
+   public Set<String> getBodySegmentsWithTrackers()
+   {
+      return trackers.keySet();
    }
 
    public Collection<RDXVRBaseStation> getBaseStations()

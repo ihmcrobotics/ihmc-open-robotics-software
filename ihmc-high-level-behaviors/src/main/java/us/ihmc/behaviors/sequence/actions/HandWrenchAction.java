@@ -13,6 +13,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class HandWrenchAction extends HandWrenchActionData implements BehaviorAction
 {
    private final ROS2ControllerHelper ros2ControllerHelper;
+   private int actionIndex;
 
    public HandWrenchAction(ROS2ControllerHelper ros2ControllerHelper)
    {
@@ -20,7 +21,13 @@ public class HandWrenchAction extends HandWrenchActionData implements BehaviorAc
    }
 
    @Override
-   public void executeAction()
+   public void update(int actionIndex, int nextExecutionIndex)
+   {
+      this.actionIndex = actionIndex;
+   }
+
+   @Override
+   public void triggerActionExecution()
    {
       HandWrenchTrajectoryMessage handWrenchTrajectoryMessage = new HandWrenchTrajectoryMessage();
       handWrenchTrajectoryMessage.setRobotSide(getSide().toByte());

@@ -274,8 +274,9 @@ public class PlannerTools
       for (int i = 0; i < numberOfSteps; i++)
       {
          PlannedFootstep footstep = footstepPlan.getFootstep(i);
-
-         if (footstep.getTransferDuration() < 0.0)
+         double transferDuration = footstep.getTransferDuration();
+         double swingDuration = footstep.getSwingDuration();
+         if (transferDuration < 0.0)
          {
             if (i == 0)
             {
@@ -292,16 +293,16 @@ public class PlannerTools
          }
          else
          {
-            planExecutionTime += footstep.getTransferDuration();
+            planExecutionTime += transferDuration;
          }
 
-         if (footstep.getSwingDuration() < 0.0)
+         if (swingDuration < 0.0)
          {
             planExecutionTime += defaultSwingDuration;
          }
          else
          {
-            planExecutionTime += footstep.getSwingDuration();
+            planExecutionTime += swingDuration;
          }
       }
       return planExecutionTime;

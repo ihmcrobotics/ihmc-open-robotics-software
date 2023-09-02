@@ -11,6 +11,7 @@ import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.HandWrenchCalculator;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -36,6 +37,19 @@ import us.ihmc.tools.thread.MissingThreadTools;
  */
 public class RDXArmManager
 {
+   /* Sake hand's fingers do not extend much outward from the hand at 15 degrees apart, i.e. they are nearly parallel
+      kinda look like this:
+      15 degrees apart  |  0 degrees apart
+
+        /\    /\                 /||\
+       | |    | | <- fingers -> / /\ \
+       | |    | |              / /  \ \
+       |  ----  |             |  ----  |
+       |        | <-  palm -> |        |
+       |________|             |________|
+    */
+   private final static double SAKE_HAND_SAFEE_FINGER_ANGLE = 15.0;
+
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final CommunicationHelper communicationHelper;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -47,6 +61,7 @@ public class RDXArmManager
    private final ArmJointName[] armJointNames;
    private RDXArmControlMode armControlMode = RDXArmControlMode.JOINT_ANGLES;
    private final SideDependentList<double[]> armsWide = new SideDependentList<>();
+   private final SideDependentList<double[]> armsUpForWalking = new SideDependentList<>();
    private final SideDependentList<double[]> doorAvoidanceArms = new SideDependentList<>();
    /** Nadia's arm positions where it's holding a shield in front of the chest. */
    private final SideDependentList<double[]> shieldHoldingArms = new SideDependentList<>();
@@ -61,6 +76,8 @@ public class RDXArmManager
    private final HandWrenchCalculator handWrenchCalculator;
    private final ImBoolean indicateWrenchOnScreen = new ImBoolean(false);
    private RDX3DPanelHandWrenchIndicator panelHandWrenchIndicator;
+
+   private final TypedNotification<RobotSide> showWarningNotification = new TypedNotification<>();
 
    public RDXArmManager(CommunicationHelper communicationHelper,
                         DRCRobotModel robotModel,
@@ -86,7 +103,16 @@ public class RDXArmManager
                                     side.negateIfRightSide(-0.6),
                                     0.000,
                                     side.negateIfLeftSide(0.0)});
+         armsUpForWalking.put(side,
+                              new double[] {0.6,
+                                    side.negateIfRightSide(0.0),
+                                    side.negateIfRightSide(-0.5),
+                                    -1.6,
+                                    side.negateIfRightSide(0.0),
+                                    0.000,
+                                    side.negateIfLeftSide(0.0)});
       }
+
       doorAvoidanceArms.put(RobotSide.LEFT, new double[] {-0.121, -0.124, -0.971, -1.513, -0.935, -0.873, 0.245});
       doorAvoidanceArms.put(RobotSide.RIGHT, new double[] {-0.523, -0.328, 0.586, -2.192, 0.828, 1.009, -0.281});
       shieldHoldingArms.put(RobotSide.LEFT, new double[] {-1.01951, 0.72311, -1.29244, -1.26355, -0.51712, -0.04580, -0.00659});
@@ -218,6 +244,18 @@ public class RDXArmManager
             communicationHelper.publishToController(armTrajectoryMessage);
          }
       }
+      ImGui.text("Walking Arms:");
+      for (RobotSide side : RobotSide.values)
+      {
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Walking " + side.getPascalCaseName())))
+         {
+            ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
+                                                                                                        teleoperationParameters.getTrajectoryTime(),
+                                                                                                        armsUpForWalking.get(side));
+            communicationHelper.publishToController(armTrajectoryMessage);
+         }
+      }
       ImGui.text("Door avoidance arms:");
       for (RobotSide side : RobotSide.values)
       {
@@ -257,6 +295,35 @@ public class RDXArmManager
       }
 
       ImGui.checkbox(labels.get("Hand wrench magnitudes on 3D View"), indicateWrenchOnScreen);
+
+      // Pop up warning if notification is set
+      if (showWarningNotification.peekHasValue() && showWarningNotification.poll())
+      {
+         ImGui.openPopup(labels.get("Warning"));
+      }
+
+      if (ImGui.beginPopupModal(labels.get("Warning")))
+      {
+         ImGui.text("""
+                          The hand is currently open.
+                                                    
+                          Continuing to door avoidance
+                          may cause the hand to collide
+                          with the body of the robot.""");
+
+         ImGui.separator();
+         if (ImGui.button("Continue"))
+         {
+            executeArmAngles(showWarningNotification.read(), doorAvoidanceArms, teleoperationParameters.getTrajectoryTime());
+            ImGui.closeCurrentPopup();
+         }
+         ImGui.sameLine();
+         if (ImGui.button("Cancel"))
+         {
+            ImGui.closeCurrentPopup();
+         }
+         ImGui.endPopup();
+      }
    }
 
    public void executeArmHome(RobotSide side)
@@ -275,7 +342,17 @@ public class RDXArmManager
 
    public void executeDoorAvoidanceArmAngles(RobotSide side)
    {
-      executeArmAngles(side, doorAvoidanceArms, teleoperationParameters.getTrajectoryTime());
+      // Warning pops up if fingers are more than 15 degrees from "zero" (zero = when fingertips are parallel)
+      // i.e. when the fingers are more than 30 degrees apart from each other
+      // This is an arbitrary value
+      if (syncedRobot.getLatestHandJointAnglePacket(side).getJointAngles().get(0) > Math.toRadians(SAKE_HAND_SAFEE_FINGER_ANGLE))
+      {
+         showWarningNotification.set(side);
+      }
+      else
+      {
+         executeArmAngles(side, doorAvoidanceArms, teleoperationParameters.getTrajectoryTime());
+      }
    }
 
    public void executeShieldHoldingArmAngles(RobotSide side)
