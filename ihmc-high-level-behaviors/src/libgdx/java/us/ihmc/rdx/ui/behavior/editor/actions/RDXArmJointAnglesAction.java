@@ -47,6 +47,9 @@ public class RDXArmJointAnglesAction extends RDXBehaviorAction
    {
       PresetArmConfiguration preset = actionData.getPreset();
       currentConfiguration.set(preset == null ? 0 : preset.ordinal() + 1);
+
+      // Copy the preset values into the custom data fields so they can be tweaked
+      // relatively when switching to custom angles.
       if (preset != null)
          robotModel.getPresetArmConfiguration(actionData.getSide(), preset, actionData.getJointAngles());
    }
