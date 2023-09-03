@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.behavior.editor.actions;
 import imgui.ImGui;
 import imgui.type.ImInt;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.actions.ArmJointAnglesAction;
 import us.ihmc.behaviors.sequence.actions.ArmJointAnglesActionData;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
@@ -12,6 +13,7 @@ import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
 
 public class RDXArmJointAnglesAction extends RDXBehaviorAction
 {
+   private final DRCRobotModel robotModel;
    private final ArmJointAnglesActionData actionData = new ArmJointAnglesActionData();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImIntegerWrapper sideWidget = new ImIntegerWrapper(actionData::getSide, actionData::setSide, labels.get("Side"));
@@ -21,8 +23,9 @@ public class RDXArmJointAnglesAction extends RDXBehaviorAction
    private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(actionData::getTrajectoryDuration,
                                                                                 actionData::setTrajectoryDuration,
                                                                                 imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
-   public RDXArmJointAnglesAction()
+   public RDXArmJointAnglesAction(DRCRobotModel robotModel)
    {
+      this.robotModel = robotModel;
       int c = 0;
       configurations[c++] = ArmJointAnglesAction.CUSTOM_ANGLES_NAME;
       for (PresetArmConfiguration preset : PresetArmConfiguration.values())
@@ -42,7 +45,10 @@ public class RDXArmJointAnglesAction extends RDXBehaviorAction
    @Override
    public void update()
    {
-      currentConfiguration.set(actionData.getPreset() == null ? 0 : actionData.getPreset().ordinal() + 1);
+      PresetArmConfiguration preset = actionData.getPreset();
+      currentConfiguration.set(preset == null ? 0 : preset.ordinal() + 1);
+      if (preset != null)
+         robotModel.getPresetArmConfiguration(actionData.getSide(), preset, actionData.getJointAngles());
    }
 
    @Override
