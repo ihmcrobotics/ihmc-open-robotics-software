@@ -15,7 +15,7 @@ public class ArmJointAnglesActionData implements BehaviorActionData
    public static final String CUSTOM_ANGLES_NAME = "CUSTOM_ANGLES";
 
    private String description = "Arm joint angles";
-   @Nullable
+   @Nullable // Preset is null when using explicitly specified custom joint angles
    private PresetArmConfiguration preset = PresetArmConfiguration.HOME;
    private final double[] jointAngles = new double[NUMBER_OF_JOINTS];
    private RobotSide side = RobotSide.LEFT;
