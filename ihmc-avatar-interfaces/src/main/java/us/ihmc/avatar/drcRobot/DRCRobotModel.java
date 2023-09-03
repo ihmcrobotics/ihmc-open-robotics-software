@@ -93,6 +93,11 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       throw new RuntimeException("Not implemented");
    }
 
+   public default void getPresetArmConfiguration(RobotSide side, PresetArmConfiguration presetArmConfiguration, double[] jointAnglesToPack)
+   {
+      throw new RuntimeException("Not implemented");
+   }
+
    public abstract HandModel getHandModel(RobotSide side);
 
    public default SideDependentList<HandModel> getHandModels()
