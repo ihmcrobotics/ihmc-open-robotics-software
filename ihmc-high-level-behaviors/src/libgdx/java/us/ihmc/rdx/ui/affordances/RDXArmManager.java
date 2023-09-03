@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
@@ -52,6 +53,7 @@ public class RDXArmManager
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final CommunicationHelper communicationHelper;
+   private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final RDXDesiredRobot desiredRobot;
 
@@ -60,11 +62,6 @@ public class RDXArmManager
 
    private final ArmJointName[] armJointNames;
    private RDXArmControlMode armControlMode = RDXArmControlMode.JOINT_ANGLES;
-   private final SideDependentList<double[]> armsWide = new SideDependentList<>();
-   private final SideDependentList<double[]> armsUpForWalking = new SideDependentList<>();
-   private final SideDependentList<double[]> doorAvoidanceArms = new SideDependentList<>();
-   /** Nadia's arm positions where it's holding a shield in front of the chest. */
-   private final SideDependentList<double[]> shieldHoldingArms = new SideDependentList<>();
    private final RDXHandConfigurationManager handManager;
 
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
@@ -87,41 +84,12 @@ public class RDXArmManager
                         SideDependentList<RDXInteractableHand> interactableHands)
    {
       this.communicationHelper = communicationHelper;
+      this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.desiredRobot = desiredRobot;
       this.teleoperationParameters = teleoperationParameters;
       this.interactableHands = interactableHands;
       armJointNames = robotModel.getJointMap().getArmJointNames();
-
-      for (RobotSide side : RobotSide.values)
-      {
-         armsWide.put(side,
-                      new double[] {0.6,
-                                    side.negateIfRightSide(0.3),
-                                    side.negateIfRightSide(-0.5),
-                                    -1.0,
-                                    side.negateIfRightSide(-0.6),
-                                    0.000,
-                                    side.negateIfLeftSide(0.0)});
-         armsUpForWalking.put(side,
-                              new double[] {0.6,
-                                    side.negateIfRightSide(0.0),
-                                    side.negateIfRightSide(-0.5),
-                                    -1.6,
-                                    side.negateIfRightSide(0.0),
-                                    0.000,
-                                    side.negateIfLeftSide(0.0)});
-      }
-
-      doorAvoidanceArms.put(RobotSide.LEFT, new double[] {-0.121, -0.124, -0.971, -1.513, -0.935, -0.873, 0.245});
-      doorAvoidanceArms.put(RobotSide.RIGHT, new double[] {-0.523, -0.328, 0.586, -2.192, 0.828, 1.009, -0.281});
-      shieldHoldingArms.put(RobotSide.LEFT, new double[] {-1.01951, 0.72311, -1.29244, -1.26355, -0.51712, -0.04580, -0.00659});
-      shieldHoldingArms.put(RobotSide.RIGHT, new double[7]);
-      boolean[] invert = new boolean[] {false, true, true, false, true, false, false};
-      for (int i = 0; i < shieldHoldingArms.get(RobotSide.LEFT).length; i++)
-      {
-         shieldHoldingArms.get(RobotSide.RIGHT)[i] = (invert[i] ? -1.0 : 1.0) * shieldHoldingArms.get(RobotSide.LEFT)[i];
-      }
 
       handWrenchCalculator = new HandWrenchCalculator(syncedRobot);
 
@@ -238,10 +206,7 @@ public class RDXArmManager
          ImGui.sameLine();
          if (ImGui.button(labels.get("Wide " + side.getPascalCaseName())))
          {
-            ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
-                                                                                                        teleoperationParameters.getTrajectoryTime(),
-                                                                                                        armsWide.get(side));
-            communicationHelper.publishToController(armTrajectoryMessage);
+            executeArmAngles(side, PresetArmConfiguration.HOME_WIDE, teleoperationParameters.getTrajectoryTime());
          }
       }
       ImGui.text("Walking Arms:");
@@ -250,10 +215,7 @@ public class RDXArmManager
          ImGui.sameLine();
          if (ImGui.button(labels.get("Walking " + side.getPascalCaseName())))
          {
-            ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
-                                                                                                        teleoperationParameters.getTrajectoryTime(),
-                                                                                                        armsUpForWalking.get(side));
-            communicationHelper.publishToController(armTrajectoryMessage);
+            executeArmAngles(side, PresetArmConfiguration.HOME_UP_FOR_WALKING, teleoperationParameters.getTrajectoryTime());
          }
       }
       ImGui.text("Door avoidance arms:");
@@ -314,7 +276,7 @@ public class RDXArmManager
          ImGui.separator();
          if (ImGui.button("Continue"))
          {
-            executeArmAngles(showWarningNotification.read(), doorAvoidanceArms, teleoperationParameters.getTrajectoryTime());
+            executeArmAngles(showWarningNotification.read(), PresetArmConfiguration.DOOR_AVOIDANCE, teleoperationParameters.getTrajectoryTime());
             ImGui.closeCurrentPopup();
          }
          ImGui.sameLine();
@@ -351,20 +313,21 @@ public class RDXArmManager
       }
       else
       {
-         executeArmAngles(side, doorAvoidanceArms, teleoperationParameters.getTrajectoryTime());
+         executeArmAngles(side, PresetArmConfiguration.DOOR_AVOIDANCE, teleoperationParameters.getTrajectoryTime());
       }
    }
 
    public void executeShieldHoldingArmAngles(RobotSide side)
    {
-      executeArmAngles(side, shieldHoldingArms, 3.0);
+      executeArmAngles(side, PresetArmConfiguration.SHIELD_HOLDING, 3.0);
    }
 
-   public void executeArmAngles(RobotSide side, SideDependentList<double[]> jointAngles, double trajectoryTime)
+   public void executeArmAngles(RobotSide side, PresetArmConfiguration presetArmConfiguration, double trajectoryTime)
    {
+      double[] jointAngles = robotModel.getPresetArmConfiguration(side, presetArmConfiguration);
       ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
                                                                                                   trajectoryTime,
-                                                                                                  jointAngles.get(side));
+                                                                                                  jointAngles);
       communicationHelper.publishToController(armTrajectoryMessage);
    }
 
