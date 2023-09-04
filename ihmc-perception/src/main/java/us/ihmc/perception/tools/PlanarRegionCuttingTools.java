@@ -134,7 +134,7 @@ public class PlanarRegionCuttingTools
          {
             PlanarRegion regionB = planarRegions.getPlanarRegion(j);
 
-            if (PlanarRegionSLAMTools.checkRegionsForIntersection(regionA, regionB))
+            if (PlaneRegistrationTools.checkRegionsForIntersection(regionA, regionB))
             {
                List<PlanarRegion> resultRegions = PlanarRegionCuttingTools.chopOffExtraPartsAtIntersection(regionA, regionB);
 

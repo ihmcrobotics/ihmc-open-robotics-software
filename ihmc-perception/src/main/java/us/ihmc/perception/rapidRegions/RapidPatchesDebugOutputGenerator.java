@@ -247,7 +247,7 @@ public class RapidPatchesDebugOutputGenerator
 //                                   patchFeatureGrid.getNyImage(), patchFeatureGrid.getNzImage());
 
       //PerceptionDebugTools.displayDepth("Depth", inputDepthImage, 1);
-      //showDebugImage(1);
+      showDebugImage(1);
    }
 
    public void displayInputDepth(Mat depth, int delay)

@@ -529,36 +529,6 @@ public class PlanarRegionSLAMTools
       return newDataCollisions;
    }
 
-   public static void findPlanarRegionMatches(PlanarRegionsList map,
-                                              PlanarRegionsList incoming,
-                                              HashMap<Integer, TIntArrayList> matches,
-                                              float overlapThreshold,
-                                              float normalThreshold,
-                                              float distanceThreshold,
-                                              float minBoxSize)
-   {
-      matches.clear();
-      List<PlanarRegion> newRegions = incoming.getPlanarRegionsAsList();
-      List<PlanarRegion> mapRegions = map.getPlanarRegionsAsList();
-
-      for (int i = 0; i < newRegions.size(); i++)
-      {
-         matches.put(i, new TIntArrayList());
-
-         PlanarRegion newRegion = newRegions.get(i);
-
-         for (int j = 0; j < mapRegions.size(); j++)
-         {
-            PlanarRegion mapRegion = mapRegions.get(j);
-
-            if (checkRegionsForOverlap(newRegion, mapRegion, overlapThreshold, normalThreshold, distanceThreshold, minBoxSize, false))
-            {
-               matches.get(i).add(j);
-            }
-         }
-      }
-   }
-
    public static boolean boxesIn3DIntersect(PlanarRegion a, PlanarRegion b, double boxHeight)
    {
       Box3D boxA = PlanarRegionTools.getLocalBoundingBox3DInWorld(a, boxHeight);
@@ -571,21 +541,7 @@ public class PlanarRegionSLAMTools
       return collisionResult.areShapesColliding();
    }
 
-   public static double computeBoundingBoxOverlapScore(PlanarRegion a, PlanarRegion b, double minSize, boolean useIntersectionOverUnion)
-   {
-      BoundingBox3D boxA = PlanarRegionTools.getWorldBoundingBox3DWithMargin(a, minSize);
-      BoundingBox3D boxB = PlanarRegionTools.getWorldBoundingBox3DWithMargin(b, minSize);
 
-      if(useIntersectionOverUnion)
-      {
-         return GeometryTools.computeIntersectionOverUnionOfTwoBoundingBoxes(boxA, boxB);
-      }
-      else
-      {
-         return GeometryTools.computeIntersectionOverSmallerOfTwoBoundingBoxes(boxA, boxB);
-      }
-
-   }
 
    public static boolean boundingBoxesIntersect(PlanarRegion a, PlanarRegion b)
    {
@@ -698,86 +654,5 @@ public class PlanarRegionSLAMTools
       transform.appendTranslation(translationToFutureRegion);
 
       regionToModify.applyTransform(transform);
-   }
-
-   public static boolean checkRegionsForOverlap(PlanarRegion regionA,
-                                                PlanarRegion regionB,
-                                                float normalThreshold,
-                                                float normalDistanceThreshold,
-                                                float overlapThreshold,
-                                                float minBoxSize,
-                                                boolean useIntersectionOverUnion)
-   {
-      Point3D newOrigin = new Point3D();
-      regionA.getOrigin(newOrigin);
-
-      Point3D mapOrigin = new Point3D();
-      regionB.getOrigin(mapOrigin);
-
-      Vector3D originVector = new Vector3D();
-      originVector.sub(newOrigin, mapOrigin);
-
-      double normalDistance = 0;
-      boolean intersects = false;
-      double overlapScore = 0;
-      double normalSimilarity = regionB.getNormal().dot(regionA.getNormal());
-
-      // check to make sure the angles are similar enough
-      boolean wasMatched = normalSimilarity > normalThreshold;
-      if (wasMatched)
-      {
-         // check that the regions aren't too far out of plane with one another. TODO should check this normal distance measure. That's likely a problem
-         normalDistance = Math.abs(originVector.dot(regionA.getNormal()));
-         wasMatched &= normalDistance < normalDistanceThreshold;
-
-         // TODO Check the logic for this minimum distance computation. In cases of vertical planar regions it generates incorrect distances.
-         //         if(wasMatched)
-         //         {
-         //            closestDistance = planarRegionTools.getDistanceBetweenPlanarRegions(regionA, regionB);
-         //            wasMatched &= closestDistance <= distanceThreshold;
-         //         }
-
-         // Check to make sure there is sufficient overlap in planar region world frame bounding boxes by computing Intersection-over-Smaller (IoS) score
-         if (wasMatched)
-         {
-            overlapScore = computeBoundingBoxOverlapScore(regionA, regionB, minBoxSize, useIntersectionOverUnion);
-            intersects = overlapScore > overlapThreshold;
-            wasMatched &= intersects;
-         }
-      }
-
-      //LogTools.info("Match Metrics for [{}, {}]: " + String.format("Angular: %.2f [%.2f], Distance: %.2f [%.2f], Overlap: %.2f [%.2f]", normalSimilarity,
-      //                  normalThreshold, normalDistance, normalDistanceThreshold, overlapScore, overlapThreshold), regionA.getRegionId(), regionB.getRegionId());
-
-      return wasMatched;
-   }
-
-   /**
-    * Checks to see if the two regions intersect. This is done by checking if the normals are close to orthogonal and if the bounding boxes overlap.
-    * @param regionA
-    * @param regionB
-    * @return true if the regions intersect, false otherwise
-    */
-   public static boolean checkRegionsForIntersection(PlanarRegion regionA,
-                                                      PlanarRegion regionB)
-   {
-      // Get normal from region one
-      Vector3D normalA = new Vector3D();
-      regionA.getNormal(normalA);
-
-      // Get normal from region two
-      Vector3D normalB = new Vector3D();
-      regionB.getNormal(normalB);
-
-      // Find bounding box overlap score for the two regions
-      double overlapScore = computeBoundingBoxOverlapScore(regionA, regionB, 0.01, true);
-
-      // Check if normals are close to orthogonal
-      if (Math.abs(normalA.dot(normalB)) < 0.2 && overlapScore > 0.02)
-      {
-         return true;
-      }
-
-      return false;
    }
 }
