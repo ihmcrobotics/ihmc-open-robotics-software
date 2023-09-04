@@ -41,21 +41,20 @@ public class BehaviorModule
    private ROS2Node ros2Node;
    public static final double YO_VARIABLE_SERVER_UPDATE_PERIOD = UnitConversions.hertzToSeconds(100.0);
    private final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
-   private YoVariableServer yoVariableServer;
    private final YoDouble yoTime = new YoDouble("time", yoRegistry);
    private final YoBoolean enabled = new YoBoolean("enabled", yoRegistry);
+   private final BehaviorTreeControlFlowNode rootNode;
+   private final BehaviorRegistry behaviorRegistry;
+   private final DRCRobotModel robotModel;
+   private final BehaviorDefinition highestLevelBehaviorDefinition;
+   private final BehaviorTreeMessage behaviorTreeMessage = new BehaviorTreeMessage();
+   private final ROS2Heartbeat heartbeat;
+   private YoVariableServer yoVariableServer;
    private PausablePeriodicThread yoServerUpdateThread;
    private StatusLogger statusLogger;
-   private BehaviorTreeControlFlowNode rootNode;
    private BehaviorInterface highestLevelNode;
    private PausablePeriodicThread behaviorTreeTickThread;
-   private BehaviorRegistry behaviorRegistry;
-   private DRCRobotModel robotModel;
-   private final CommunicationMode ros2CommunicationMode;
-   private BehaviorDefinition highestLevelBehaviorDefinition;
    private BehaviorHelper helper;
-   private ROS2Heartbeat heartbeat;
-   private final BehaviorTreeMessage behaviorTreeMessage = new BehaviorTreeMessage();
 
    public static BehaviorModule createInterprocess(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel)
    {
@@ -73,7 +72,6 @@ public class BehaviorModule
    {
       this.behaviorRegistry = behaviorRegistry;
       this.robotModel = robotModel;
-      this.ros2CommunicationMode = ros2CommunicationMode;
 
       rootNode = new BehaviorTreeControlFlowNode()
       {
@@ -89,6 +87,12 @@ public class BehaviorModule
       rootNode.setName("Behavior Module");
 
       highestLevelBehaviorDefinition = behaviorRegistry.getHighestLevelNode();
+
+      LogTools.info("Starting behavior module in ROS 2: {} mode", ros2CommunicationMode.name());
+      ros2Node = ROS2Tools.createROS2Node(ros2CommunicationMode.getPubSubImplementation(), "behavior_module");
+      heartbeat = new ROS2Heartbeat(ros2Node, API.HEARTBEAT);
+      heartbeat.setAlive(true);
+
       setupHighLevelBehavior(highestLevelBehaviorDefinition);
    }
 
@@ -96,16 +100,9 @@ public class BehaviorModule
    {
       if (highestLevelNode != null)
       {
-         helper.destroy();
-         ros2Node.destroy();
-         behaviorTreeTickThread.destroy();
-         yoVariableServer.close();
-         highestLevelNode.destroy();
+         destroyHighLevelNode();
       }
 
-      LogTools.info("Starting behavior module in ROS 2: {} mode", ros2CommunicationMode.name());
-      ros2Node = ROS2Tools.createROS2Node(ros2CommunicationMode.getPubSubImplementation(), "behavior_module");
-      heartbeat = new ROS2Heartbeat(ros2Node, API.HEARTBEAT);
       helper = new BehaviorHelper(highestLevelNodeDefinition.getName(), robotModel, ros2Node);
       highestLevelNode = highestLevelNodeDefinition.getBehaviorSupplier().build(helper);
       if (highestLevelNode.getYoRegistry() != null)
@@ -176,17 +173,24 @@ public class BehaviorModule
             setupHighLevelBehavior(candidateHighestLevelNodeDefinition);
          }
       });
-      heartbeat.setAlive(true);
+   }
+
+   private void destroyHighLevelNode()
+   {
+      statusLogger.info("Shutting down...");
+      yoServerUpdateThread.destroy();
+      behaviorTreeTickThread.destroy();
+      helper.destroy();
+      yoVariableServer.close();
+      highestLevelNode.destroy();
    }
 
    public void destroy()
    {
-      statusLogger.info("Shutting down...");
-      behaviorTreeTickThread.destroy();
-      yoVariableServer.close();
-      helper.destroy();
+      destroyHighLevelNode();
+
+      heartbeat.destroy();
       ros2Node.destroy();
-      highestLevelNode.destroy();
    }
 
    // API created here from build

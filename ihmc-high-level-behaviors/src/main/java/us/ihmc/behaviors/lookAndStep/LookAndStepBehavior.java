@@ -26,6 +26,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.List;
@@ -52,6 +53,7 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
    final ROS2StoredPropertySet<LookAndStepBehaviorParametersBasics> ros2LookAndStepParameters;
    final ROS2StoredPropertySet<FootstepPlannerParametersBasics> ros2FootstepPlannerParameters;
    final ROS2StoredPropertySet<SwingPlannerParametersBasics> ros2SwingPlannerParameters;
+   final PausablePeriodicThread propertyStatusThread;
    final VisibilityGraphsParametersBasics visibilityGraphParameters;
    final AtomicBoolean isBeingReset = new AtomicBoolean();
    final AtomicReference<Boolean> operatorReviewEnabledInput;
@@ -99,12 +101,13 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
                                                                   helper.getRobotModel().getFootstepPlannerParameters("ForLookAndStep"));
       ros2SwingPlannerParameters = new ROS2StoredPropertySet<>(helper, SWING_PLANNER_PARAMETERS,
                                                                helper.getRobotModel().getSwingPlannerParameters("ForLookAndStep"));
-      MissingThreadTools.startAsDaemon("PropertyStatusPublisher", ROS2StoredPropertySet.STATUS_PERIOD, () ->
+      propertyStatusThread = new PausablePeriodicThread("PropertyStatusPublisher", ROS2StoredPropertySet.STATUS_PERIOD, () ->
       {
          ros2LookAndStepParameters.updateAndPublishStatus();
          ros2FootstepPlannerParameters.updateAndPublishStatus();
          ros2SwingPlannerParameters.updateAndPublishStatus();
       });
+      propertyStatusThread.start();
 
       operatorReviewEnabledInput = new AtomicReference<>();
       helper.subscribeViaCallback(OPERATOR_REVIEW_ENABLED_COMMAND, enabled ->
@@ -200,6 +203,7 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
 
    public void destroy()
    {
+      propertyStatusThread.destroy();
       bodyPathPlanning.destroy();
       footstepPlanning.destroy();
       reset.destroy();
