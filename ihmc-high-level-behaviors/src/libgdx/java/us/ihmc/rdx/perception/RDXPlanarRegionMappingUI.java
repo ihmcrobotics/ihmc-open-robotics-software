@@ -44,13 +44,15 @@ public class RDXPlanarRegionMappingUI implements RenderableProvider
    private RDXLineGraphic lineMeshModel = new RDXLineGraphic(0.02f, Color.WHITE);
    private RDXPlanarRegionsGraphic previousRegionsGraphic = new RDXPlanarRegionsGraphic();
    private RDXPlanarRegionsGraphic currentRegionsGraphic = new RDXPlanarRegionsGraphic();
+   private RDXPlanarRegionsGraphic mapRegionsGraphic;
 
    private ImBoolean renderPointCloud = new ImBoolean(false);
    private ImInt icpPreviousIndex = new ImInt(10);
    private ImInt icpCurrentIndex = new ImInt(14);
 
-   public RDXPlanarRegionMappingUI(String name, PlanarRegionMappingHandler mappingManager)
+   public RDXPlanarRegionMappingUI(String name, PlanarRegionMappingHandler mappingManager, RDXPlanarRegionsGraphic mapGraphic)
    {
+      this.mapRegionsGraphic = mapGraphic;
       this.mappingManager = mappingManager;
       panel = new RDXPanel(name, this::renderImGuiWidgets);
       mappingParametersTuner = new RDXStoredPropertySetTuner(mappingManager.getParameters().getTitle());
@@ -75,6 +77,7 @@ public class RDXPlanarRegionMappingUI implements RenderableProvider
             regionMergingDurationPlot.render(statistics.getMergingTime());
             wholeAlgorithmDurationPlot.render(statistics.getTotalProcessingTime());
 
+            ImGui.checkbox("Render live mode", renderEnabled);
             if (ImGui.button("Load Next Set"))
                mappingManager.nextButtonCallback();
             ImGui.sameLine();
@@ -87,11 +90,18 @@ public class RDXPlanarRegionMappingUI implements RenderableProvider
                mappingManager.pauseButtonCallback();
             if (ImGui.checkbox("Enable Live Mode", liveModeEnabled))
                mappingManager.setEnableLiveMode(liveModeEnabled.get());
-            ImGui.checkbox("Render live mode", renderEnabled);
             if (ImGui.button("Reset map"))
+            {
+               mapRegionsGraphic.clear();
+               mapRegionsGraphic.update();
                mappingManager.resetMap();
+            }
             if (ImGui.button("Hard reset map"))
+            {
+               mapRegionsGraphic.clear();
+               mapRegionsGraphic.update();
                mappingManager.hardResetTheMap();
+            }
 
             ImGui.checkbox("Render Bounding Box", renderBoundingBoxEnabled);
 

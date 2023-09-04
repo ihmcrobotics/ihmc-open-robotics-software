@@ -77,7 +77,7 @@ public class RDXPlanarRegionMappingDemo
             mapPlanarRegionsGraphic.update();
             mapPlanarRegionsGraphic.setupTooltip(baseUI.getPrimary3DPanel(), "");
 
-            mappingUI = new RDXPlanarRegionMappingUI("Filtered Map", mappingManager);
+            mappingUI = new RDXPlanarRegionMappingUI("Filtered Map", mappingManager, mapPlanarRegionsGraphic);
             baseUI.getImGuiPanelManager().addPanel(mappingUI.getImGuiPanel());
 
             baseUI.getPrimaryScene().addRenderableProvider(mappingUI, RDXSceneLevel.VIRTUAL);
