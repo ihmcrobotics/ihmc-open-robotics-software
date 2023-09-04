@@ -7,7 +7,6 @@ import us.ihmc.behaviors.navigation.NavigationBehavior;
 import us.ihmc.behaviors.patrol.PatrolBehavior;
 import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
 
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 
 /**
@@ -30,8 +29,6 @@ public class BehaviorRegistry
       ARCHIVED_BEHAVIORS.register(ExploreAreaBehavior.DEFINITION);
       ARCHIVED_BEHAVIORS.register(NavigationBehavior.DEFINITION);
    }
-
-   private static volatile BehaviorRegistry ACTIVE_REGISTRY;
 
    private BehaviorDefinition highestLevelNode;
    private final LinkedHashSet<BehaviorDefinition> definitionEntries = new LinkedHashSet<>();
@@ -59,18 +56,6 @@ public class BehaviorRegistry
    public LinkedHashSet<BehaviorDefinition> getDefinitionEntries()
    {
       return definitionEntries;
-   }
-
-   public boolean containsSameSetOfBehaviors(BehaviorRegistry otherBehaviorRegistry)
-   {
-      HashSet<BehaviorDefinition> theseBehaviors = new HashSet<>(definitionEntries);
-      HashSet<BehaviorDefinition> thoseBehaviors = new HashSet<>(otherBehaviorRegistry.definitionEntries);
-      return theseBehaviors.equals(thoseBehaviors);
-   }
-
-   public static BehaviorRegistry getActiveRegistry()
-   {
-      return ACTIVE_REGISTRY;
    }
 
    public BehaviorDefinition getHighestLevelNode()
