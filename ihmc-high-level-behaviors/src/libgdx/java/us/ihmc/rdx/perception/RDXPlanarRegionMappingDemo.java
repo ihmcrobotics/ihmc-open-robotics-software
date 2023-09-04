@@ -149,15 +149,6 @@ public class RDXPlanarRegionMappingDemo
 
                graphicsInitialized = true;
 
-               if (mappingUI.isCaptured())
-               {
-                  LogTools.info("Filtered Map Panel Captured: {}", mappingUI.isCaptured());
-                  mappingManager.setCaptured(true);
-                  mappingUI.setCaptured(false);
-               }
-
-               //rapidRegionsUIPanel.renderImGuiWidgets();
-
                renderPlanarRegions();
             }
 

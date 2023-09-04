@@ -5,9 +5,6 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class PlanarRegionMapStatistics
 {
-   private double previousTime = 0;
-   private double currentTime = 0;
-
    private double extractionTime = 0.0f;
    private double mergingTime = 0.0f;
    private double registrationTime = 0.0f;
@@ -27,6 +24,8 @@ public class PlanarRegionMapStatistics
    {
       totalNumberOfRegions = map.getMapRegions().getNumberOfPlanarRegions();
 
+      totalNumberOfVertices = 0;
+      totalSurfaceAreaOnMap = 0.0f;
       for (PlanarRegion region : map.getMapRegions().getPlanarRegionsAsList())
       {
          totalNumberOfVertices += region.getConcaveHullSize();

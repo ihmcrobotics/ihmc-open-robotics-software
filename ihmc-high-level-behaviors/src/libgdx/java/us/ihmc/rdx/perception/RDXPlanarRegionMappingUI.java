@@ -39,7 +39,6 @@ public class RDXPlanarRegionMappingUI implements RenderableProvider
    private final ImBoolean liveModeEnabled = new ImBoolean(true);
    private final ImBoolean renderEnabled = new ImBoolean(true);
    private final ImBoolean renderBoundingBoxEnabled = new ImBoolean(false);
-   private boolean captured = false;
 
    private RDXLineGraphic lineMeshModel = new RDXLineGraphic(0.02f, Color.WHITE);
    private RDXPlanarRegionsGraphic previousRegionsGraphic = new RDXPlanarRegionsGraphic();
@@ -160,7 +159,7 @@ public class RDXPlanarRegionMappingUI implements RenderableProvider
 
       if (ImGui.button("Capture"))
       {
-         mappingManager.setCaptured(true);
+         mappingManager.logMapRegions();
       }
 
       ImGui.checkbox("Show Parameter Tuners", mappingParametersTuner.getIsShowing());
@@ -187,16 +186,6 @@ public class RDXPlanarRegionMappingUI implements RenderableProvider
       }
       lineMeshModel.generateMeshForMatchLines(matchEndPoints);
       lineMeshModel.update();
-   }
-
-   public void setCaptured(boolean captured)
-   {
-      this.captured = captured;
-   }
-
-   public boolean isCaptured()
-   {
-      return captured;
    }
 
    public RDXPanel getImGuiPanel()

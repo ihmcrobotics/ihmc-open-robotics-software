@@ -74,7 +74,6 @@ public class PlanarRegionMappingHandler
    private final AtomicReference<PlanarRegionsList> latestPlanarRegionsForPublishing = new AtomicReference<>(null);
    private final AtomicReference<RigidBodyTransform> latestKeyframePoseForRendering = new AtomicReference<>(new RigidBodyTransform());
 
-   private boolean enableCapture = false;
    private boolean enableLiveMode = true;
 
    private static final File logDirectory = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator);
@@ -225,21 +224,14 @@ public class PlanarRegionMappingHandler
       }
    }
 
-   public void planarRegionCallback(FramePlanarRegionsListMessage framePlanarRegionsListMessage)
+   public void logMapRegions()
    {
-      if (enableCapture)
+      if (planarRegionsListLogger == null)
       {
-         if (planarRegionsListLogger == null)
-         {
-            planarRegionsListLogger = new PlanarRegionsListLogger("planar-region-logger", 1);
-            planarRegionsListLogger.start();
-         }
-         framePlanarRegionsList = PlanarRegionMessageConverter.convertToFramePlanarRegionsList(framePlanarRegionsListMessage);
-         LogTools.debug("Regions Captured: {}", framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions());
-
-         planarRegionsListLogger.update(System.currentTimeMillis(), framePlanarRegionsList);
-         enableCapture = false;
+         planarRegionsListLogger = new PlanarRegionsListLogger("planar-region-logger", 1);
+         planarRegionsListLogger.start();
       }
+      planarRegionsListLogger.update(System.currentTimeMillis(), planarRegionMap.getMapRegions());
    }
 
    private void launchMapper()
@@ -444,16 +436,6 @@ public class PlanarRegionMappingHandler
    public boolean hasPlanarRegionsToRender()
    {
       return latestPlanarRegionsForRendering.get() != null;
-   }
-
-   public boolean isCaptured()
-   {
-      return enableCapture;
-   }
-
-   public void setCaptured(boolean enableCapture)
-   {
-      this.enableCapture = enableCapture;
    }
 
    public boolean isEnabled()
