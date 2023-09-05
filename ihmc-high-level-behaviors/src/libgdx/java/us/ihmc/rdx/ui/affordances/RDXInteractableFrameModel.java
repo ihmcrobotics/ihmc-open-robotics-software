@@ -206,4 +206,9 @@ public class RDXInteractableFrameModel
    {
       this.showing = showing;
    }
+
+   public boolean isShowing()
+   {
+      return showing;
+   }
 }

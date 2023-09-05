@@ -208,7 +208,7 @@ public class RDXInteractableSakeGripper implements RenderableProvider
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (showing)
+      if (interactableHandFrameModel.isShowing())
          for (int i = 0; i < NUMBER_OF_FINGERS; i++)
             fingersModelInstances[i].getRenderables(renderables, pool);
    }
